@@ -41,13 +41,17 @@ function wait(time) {
   return new Promise(resolve => setTimeout(resolve, time));
 }
 
-export async function runHandler<T extends Handlers[keyof Handlers]>( 
+export async function runHandler<T extends Handlers[keyof Handlers]>(
   handler: T,
   args?: Parameters<T>[0],
   // `mutatorContext` is the application-specific context (e.g., the 'initial' object)
   // that will be made available to mutators via `getMutatorContext`.
   // It's typed as `object` here to keep this core infrastructure file generic.
-  { undoTag, name, mutatorContext }: { undoTag?: unknown; name?: string; mutatorContext?: object } = {},
+  {
+    undoTag,
+    name,
+    mutatorContext,
+  }: { undoTag?: unknown; name?: string; mutatorContext?: object } = {},
 ): Promise<ReturnType<T>> {
   // For debug reasons, track the latest handlers that have been
   // called
