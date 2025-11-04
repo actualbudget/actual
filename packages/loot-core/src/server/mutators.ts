@@ -5,7 +5,10 @@ import { type HandlerFunctions, type Handlers } from '../types/handlers';
 
 const runningMethods = new Set();
 
-let currentContext = null;
+// `currentContext` will hold the application-specific context object
+// (e.g., the 'initial' object with undo/redo methods) provided by the caller
+// of `runHandler`, potentially augmented by `withMutatorContext`.
+let currentContext: object | null = null;
 const mutatingMethods = new WeakMap();
 let globalMutationsEnabled = false;
 
@@ -38,10 +41,13 @@ function wait(time) {
   return new Promise(resolve => setTimeout(resolve, time));
 }
 
-export async function runHandler<T extends Handlers[keyof Handlers]>(
+export async function runHandler<T extends Handlers[keyof Handlers]>( 
   handler: T,
   args?: Parameters<T>[0],
-  { undoTag, name }: { undoTag?; name? } = {},
+  // `mutatorContext` is the application-specific context (e.g., the 'initial' object)
+  // that will be made available to mutators via `getMutatorContext`.
+  // It's typed as `object` here to keep this core infrastructure file generic.
+  { undoTag, name, mutatorContext }: { undoTag?: unknown; name?: string; mutatorContext?: object } = {},
 ): Promise<ReturnType<T>> {
   // For debug reasons, track the latest handlers that have been
   // called
@@ -51,9 +57,13 @@ export async function runHandler<T extends Handlers[keyof Handlers]>(
   }
 
   if (mutatingMethods.has(handler)) {
-    return runMutator(() => handler(args), { undoTag }) as Promise<
-      ReturnType<T>
-    >;
+    // For mutators, we need to set up the `currentContext` with the provided
+    // `mutatorContext` and also layer on `undoTag` using `withMutatorContext`.
+    return runMutator(
+      () => withMutatorContext({ undoTag }, () => handler(args)),
+      // This is the base context for the mutator's execution.
+      mutatorContext || {},
+    ) as Promise<ReturnType<T>>;
   }
 
   // When closing a file, it clears out all global state for the file. That
@@ -87,7 +97,7 @@ export function disableGlobalMutations() {
 
 function _runMutator<T extends () => Promise<unknown>>(
   func: T,
-  initialContext = {},
+  initialContext: object = {}, // This is the base context for the mutator's execution
 ): Promise<Awaited<ReturnType<T>>> {
   currentContext = initialContext;
   return func().finally(() => {
@@ -97,8 +107,10 @@ function _runMutator<T extends () => Promise<unknown>>(
 // Type cast needed as TS looses types over nested generic returns
 export const runMutator = sequential(_runMutator) as typeof _runMutator;
 
+// `context` here refers to additional properties to layer onto `currentContext`
+// for the duration of `func`. E.g., `{ undoListening: true, undoTag: 'some-tag' }`
 export function withMutatorContext<T>(
-  context: { undoListening: boolean; undoTag?: unknown },
+  context: { undoListening?: boolean; undoTag?: unknown }, // Type of specific temporary context to merge
   func: () => Promise<T>,
 ): Promise<T> {
   if (currentContext == null && !globalMutationsEnabled) {
@@ -111,28 +123,30 @@ export function withMutatorContext<T>(
   }
 
   const prevContext = currentContext;
+  // Merge the new context properties with the existing currentContext
   currentContext = { ...currentContext, ...context };
   return func().finally(() => {
     currentContext = prevContext;
   });
 }
 
-export function getMutatorContext() {
+// Returns the currently active mutator context, which includes the application-specific
+// context (e.g., 'initial' object) and any temporary context layered via `withMutatorContext`.
+export function getMutatorContext(): object {
   if (currentContext == null) {
-    captureBreadcrumb({
-      category: 'server',
-      message: 'Recent methods: ' + _latestHandlerNames.join(', '),
-    });
-    // captureException(new Error('getMutatorContext: mutator not running'));
-
+    // If no context is active and global mutations are not enabled (i.e., not in a test-like environment),
+    // then it's an unexpected state, so we log it.
+    if (!globalMutationsEnabled) {
+      captureBreadcrumb({
+        category: 'server',
+        message: 'Recent methods: ' + _latestHandlerNames.join(', '),
+      });
+      // captureException(new Error('getMutatorContext: mutator not running'));
+    }
     // For now, this is a non-fatal error. It will be in the future,
     // but this is relatively non-critical (undo just won't work) so
     // return an empty context. When we have more confidence that
     // everything is running inside a mutator, throw an error.
-    return {};
-  }
-
-  if (currentContext == null && globalMutationsEnabled) {
     return {};
   }
   return currentContext;
