@@ -12,7 +12,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { createSpreadsheet as sankeySpreadsheet } from '@desktop-client/components/reports/spreadsheets/sankey-spreadsheet';
 import * as d from 'date-fns';
 import { type SankeyData } from 'recharts/types/chart/Sankey';
 
@@ -35,6 +34,7 @@ import {
 import { SankeyGraph } from '@desktop-client/components/reports/graphs/SankeyGraph';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ModeButton } from '@desktop-client/components/reports/ModeButton';
+import { createSpreadsheet as sankeySpreadsheet } from '@desktop-client/components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { useCategories } from '@desktop-client/hooks/useCategories';
