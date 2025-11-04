@@ -4,6 +4,7 @@ import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgQuestion } from '@actual-app/components/icons/v1';
 import { SvgViewHide, SvgViewShow } from '@actual-app/components/icons/v2';
 import { Input } from '@actual-app/components/input';
 import { Paragraph } from '@actual-app/components/paragraph';
@@ -11,6 +12,7 @@ import { Select } from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
@@ -22,6 +24,7 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
+import { Link } from '@desktop-client/components/common/Link';
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
@@ -399,7 +402,46 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
           >
             <View style={{ flexShrink: 0 }}>
               <div style={{ fontWeight: 600, marginBottom: 8 }}>
-                <Trans>Expenses categories</Trans>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Text>
+                    <Trans>Expenses categories</Trans>
+                  </Text>
+                  <Tooltip
+                    content={
+                      <View style={{ maxWidth: 300 }}>
+                        <Text>
+                          <Trans>
+                            Used to estimate your future expenses.
+                            <br />
+                            <br />
+                            Select the budget categories that reflect your
+                            living expenses in retirment.
+                            <br />
+                            Ex: Food, Utilities, Entertainment, Medical
+                            <br />
+                            <br />
+                            Exclude categories that will not continue in
+                            retirement.
+                            <br />
+                            Ex: Retirement Savings
+                          </Trans>
+                        </Text>
+                      </View>
+                    }
+                    placement="right top"
+                    style={{
+                      ...styles.tooltip,
+                    }}
+                  >
+                    <SvgQuestion height={12} width={12} cursor="pointer" />
+                  </Tooltip>
+                </View>
               </div>
               <View
                 style={{
@@ -468,7 +510,45 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
               </div>
 
               <div style={{ fontWeight: 600, marginBottom: 8 }}>
-                <Trans>Income accounts</Trans>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Text>
+                    <Trans>Income accounts</Trans>
+                  </Text>
+                  <Tooltip
+                    content={
+                      <View style={{ maxWidth: 300 }}>
+                        <Text>
+                          <Trans>
+                            Used to estimate your future income.
+                            <br />
+                            <br />
+                            Select the accounts that will be used to fund your
+                            retirement.
+                            <br />
+                            Ex: Retirement Accounts, Savings Accounts
+                            <br />
+                            <br />
+                            Exclude accounts that will not.
+                            <br />
+                            Ex: Mortgage Accounts, Child Education Accounts
+                          </Trans>
+                        </Text>
+                      </View>
+                    }
+                    placement="right top"
+                    style={{
+                      ...styles.tooltip,
+                    }}
+                  >
+                    <SvgQuestion height={12} width={12} cursor="pointer" />
+                  </Tooltip>
+                </View>
               </div>
               <div
                 style={{ maxHeight: 220, overflowY: 'auto', marginBottom: 12 }}
@@ -482,7 +562,40 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
               <View style={{ marginBottom: 12 }}>
                 <div style={{ fontWeight: 600, marginBottom: 8 }}>
-                  {t('Safe withdrawal rate (annual %)')}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <Text>{t('Safe withdrawal rate (%)')}</Text>
+                    <Tooltip
+                      content={
+                        <View style={{ maxWidth: 300 }}>
+                          <Text>
+                            <Trans>
+                              The amount you plan to withdraw from your Income
+                              Accounts each year to fund your living expenses.
+                              <br />
+                              <Link
+                                variant="external"
+                                to="https://en.wikipedia.org/wiki/Retirement_spend-down#Withdrawal_rate"
+                              >
+                                More info.
+                              </Link>
+                            </Trans>
+                          </Text>
+                        </View>
+                      }
+                      placement="right top"
+                      style={{
+                        ...styles.tooltip,
+                      }}
+                    >
+                      <SvgQuestion height={12} width={12} cursor="pointer" />
+                    </Tooltip>
+                  </View>
                 </div>
                 <Input
                   type="number"
@@ -503,7 +616,40 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
               <View style={{ marginBottom: 12 }}>
                 <div style={{ fontWeight: 600, marginBottom: 8 }}>
-                  {t('Expense Projection Type')}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <Text>{t('Expense Projection Type')}</Text>
+                    <Tooltip
+                      content={
+                        <View style={{ maxWidth: 300 }}>
+                          <Text>
+                            <Trans>
+                              How past expenses are projected into the future.
+                              <br />
+                              <br />
+                              Linear Trend: Projects expenses using a linear
+                              regression of historical data.
+                              <br />
+                              <br />
+                              Hampel Filtered Median: Filters out outliers
+                              before calculating the median expense.
+                            </Trans>
+                          </Text>
+                        </View>
+                      }
+                      placement="right top"
+                      style={{
+                        ...styles.tooltip,
+                      }}
+                    >
+                      <SvgQuestion height={12} width={12} cursor="pointer" />
+                    </Tooltip>
+                  </View>
                 </div>
                 <Select
                   value={projectionType}
@@ -520,7 +666,40 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
               <View style={{ marginBottom: 12 }}>
                 <div style={{ fontWeight: 600, marginBottom: 8 }}>
-                  {t('Estimated return (annual %, optional)')}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <Text>{t('Estimated return (annual %, optional)')}</Text>
+                    <Tooltip
+                      content={
+                        <View style={{ maxWidth: 300 }}>
+                          <Text>
+                            <Trans>
+                              The expected annual return rate for your
+                              investments, used to project growth of Income
+                              Accounts. If not specified, the historical return
+                              from your Income Accounts will be used instead.
+                              <br />
+                              <br />
+                              Note: Historical return calculation includes
+                              contributions and may not reflect actual
+                              investment performance.
+                            </Trans>
+                          </Text>
+                        </View>
+                      }
+                      placement="right top"
+                      style={{
+                        ...styles.tooltip,
+                      }}
+                    >
+                      <SvgQuestion height={12} width={12} cursor="pointer" />
+                    </Tooltip>
+                  </View>
                 </div>
                 <Input
                   type="number"
