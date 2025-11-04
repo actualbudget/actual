@@ -112,6 +112,14 @@ export function getMenu() {
         },
       ],
     },
+    {
+      role: 'window',
+      submenu: [
+        {
+          role: 'minimize',
+        },
+      ],
+    },
   ];
 
   if (process.platform === 'darwin') {
