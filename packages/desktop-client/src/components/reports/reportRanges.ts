@@ -180,7 +180,7 @@ export function calculateTimeRange(
   const start =
     timeFrame?.start ??
     defaultTimeFrame?.start ??
-    monthUtils.subMonths(monthUtils.currentMonth(), 5);
+    monthUtils.subMonths(monthUtils.currentMonth(), 0);
   const end =
     timeFrame?.end ?? defaultTimeFrame?.end ?? monthUtils.currentMonth();
   const mode = timeFrame?.mode ?? defaultTimeFrame?.mode ?? 'sliding-window';

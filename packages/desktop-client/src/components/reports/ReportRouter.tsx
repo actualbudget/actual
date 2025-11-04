@@ -7,6 +7,7 @@ import { CashFlow } from './reports/CashFlow';
 import { CustomReport } from './reports/CustomReport';
 import { Formula } from './reports/Formula';
 import { NetWorth } from './reports/NetWorth';
+import { Sankey } from './reports/Sankey';
 import { Spending } from './reports/Spending';
 import { Summary } from './reports/Summary';
 
@@ -28,6 +29,8 @@ export function ReportRouter() {
       <Route path="/calendar/:id" element={<Calendar />} />
       <Route path="/formula" element={<Formula />} />
       <Route path="/formula/:id" element={<Formula />} />
+      <Route path="/sankey" element={<Sankey />} />
+      <Route path="/sankey/:id" element={<Sankey />} />
     </Routes>
   );
 }
