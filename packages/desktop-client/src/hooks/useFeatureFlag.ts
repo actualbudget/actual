@@ -3,12 +3,12 @@ import type { FeatureFlag } from 'loot-core/types/prefs';
 import { useSyncedPref } from './useSyncedPref';
 
 const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
-  goalTemplatesEnabled: true,
-  goalTemplatesUIEnabled: true,
-  actionTemplating: true,
-  formulaMode: true,
-  currency: true,
-  plugins: true,
+  goalTemplatesEnabled: false,
+  goalTemplatesUIEnabled: false,
+  actionTemplating: false,
+  formulaMode: false,
+  currency: false,
+  plugins: false,
   sankeyReport: true,
 };
 
