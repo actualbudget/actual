@@ -424,7 +424,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                             <br />
                             <br />
                             Select the budget categories that reflect your
-                            living expenses in retirment.
+                            living expenses in retirement.
                             <br />
                             Ex: Food, Utilities, Entertainment, Medical
                             <br />
