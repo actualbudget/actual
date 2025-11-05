@@ -15,7 +15,6 @@
   },
   "main": "build/desktop-electron/index.js",
   "build": {
-    "asar": false,
     "appId": "com.actualbudget.actual",
     "files": [
       "build",
@@ -65,8 +64,7 @@
       "extraResources": [
         "extra-resources/linux"
       ],
-      "executableName": "actual",
-      "icon": "icons/512x512.png"
+      "executableName": "actual"
     },
     "flatpak": {
       "runtimeVersion": "24.08",
