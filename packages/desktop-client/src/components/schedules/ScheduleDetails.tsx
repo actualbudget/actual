@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -616,7 +616,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
             }
             rightContent={<ModalCloseButton onPress={close} />}
           />
-          <Stack direction="row" style={{ marginTop: 10 }}>
+          <SpaceBetween style={{ marginTop: 10 }}>
             <FormField style={{ flex: 1 }}>
               <FormLabel title={t('Schedule Name')} htmlFor="name-field" />
               <InitialFocus>
@@ -632,8 +632,8 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
                 />
               </InitialFocus>
             </FormField>
-          </Stack>
-          <Stack direction="row" style={{ marginTop: 20 }}>
+          </SpaceBetween>
+          <SpaceBetween style={{ marginTop: 20 }}>
             <FormField style={{ flex: 1 }}>
               <FormLabel
                 title={t('Payee')}
@@ -668,7 +668,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
             </FormField>
 
             <FormField style={{ flex: 1 }}>
-              <Stack direction="row" align="center" style={{ marginBottom: 3 }}>
+              <SpaceBetween style={{ marginBottom: 3, alignItems: 'center' }}>
                 <FormLabel
                   title={t('Amount')}
                   htmlFor="amount-field"
@@ -704,7 +704,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
                     })
                   }
                 />
-              </Stack>
+              </SpaceBetween>
               {state.fields.amountOp === 'isbetween' ? (
                 <BetweenAmountInput
                   // @ts-expect-error fix me
@@ -732,13 +732,18 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
                 />
               )}
             </FormField>
-          </Stack>
+          </SpaceBetween>
 
           <View style={{ marginTop: 20 }}>
             <FormLabel title={t('Date')} />
           </View>
 
-          <Stack direction="row" align="flex-start" justify="space-between">
+          <SpaceBetween
+            style={{
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+            }}
+          >
             <View style={{ width: '13.44rem' }}>
               {repeats ? (
                 <RecurringSchedulePicker
@@ -764,17 +769,21 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
                   <Text style={{ color: theme.pageTextLight, fontWeight: 600 }}>
                     <Trans>Upcoming dates</Trans>
                   </Text>
-                  <Stack
-                    direction="column"
-                    spacing={1}
-                    style={{ marginTop: 10, color: theme.pageTextLight }}
+                  <SpaceBetween
+                    direction="vertical"
+                    gap={5}
+                    style={{
+                      marginTop: 10,
+                      color: theme.pageTextLight,
+                      alignItems: 'flex-start',
+                    }}
                   >
                     {state.upcomingDates.map(date => (
                       <View key={date}>
                         {monthUtils.format(date, `${dateFormat} EEEE`, locale)}
                       </View>
                     ))}
-                  </Stack>
+                  </SpaceBetween>
                 </View>
               )}
             </View>
@@ -799,7 +808,10 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
               </label>
             </View>
 
-            <Stack align="flex-end">
+            <SpaceBetween
+              direction="vertical"
+              style={{ alignItems: 'flex-end' }}
+            >
               <View
                 style={{
                   marginTop: 5,
@@ -845,7 +857,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
               </Text>
 
               {!adding && schedule.rule && (
-                <Stack direction="row" align="center" style={{ marginTop: 20 }}>
+                <SpaceBetween style={{ marginTop: 20, alignItems: 'center' }}>
                   {state.isCustom && (
                     <Text
                       style={{
@@ -866,10 +878,10 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
                   >
                     <Trans>Edit as rule</Trans>
                   </Button>
-                </Stack>
+                </SpaceBetween>
               )}
-            </Stack>
-          </Stack>
+            </SpaceBetween>
+          </SpaceBetween>
 
           <View style={{ marginTop: 30, flex: 1 }}>
             <SelectedProvider instance={selectedInst}>
@@ -956,11 +968,12 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
             </SelectedProvider>
           </View>
 
-          <Stack
-            direction="row"
-            justify="flex-end"
-            align="center"
-            style={{ marginTop: 20 }}
+          <SpaceBetween
+            style={{
+              marginTop: 20,
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+            }}
           >
             {state.error && (
               <Text style={{ color: theme.errorText }}>{state.error}</Text>
@@ -976,7 +989,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
             >
               {adding ? t('Add') : t('Save')}
             </Button>
-          </Stack>
+          </SpaceBetween>
         </>
       )}
     </Modal>
