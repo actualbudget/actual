@@ -87,13 +87,18 @@ export function CrossoverCard({
       if (!isMounted) return;
 
       const currentMonth = monthUtils.currentMonth();
-      const earliestMonth = trans
+      const startMonth = trans
         ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
         : currentMonth;
 
+      const previousMonth = monthUtils.subMonths(currentMonth, 1);
+      const endMonth = monthUtils.isBefore(startMonth, previousMonth)
+        ? previousMonth
+        : startMonth;
+
       // Use saved timeFrame from meta or default range
-      setStart(earliestMonth);
-      setEnd(monthUtils.subMonths(currentMonth, 1)); // Exclude current month by default
+      setStart(startMonth);
+      setEnd(endMonth);
     }
     calculateDateRange();
     return () => {

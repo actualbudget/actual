@@ -167,10 +167,13 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
       const earliestMonth = trans
         ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
         : currentMonth;
+      const latestMonth = monthUtils.subMonths(currentMonth, 1);
 
       // Initialize date range from widget meta or use default range
       let startMonth = earliestMonth;
-      let endMonth = monthUtils.subMonths(currentMonth, 1); // Exclude current month by default
+      let endMonth = monthUtils.isBefore(startMonth, latestMonth)
+        ? latestMonth
+        : startMonth;
       let timeMode: TimeFrame['mode'] = 'static';
 
       if (widget?.meta?.timeFrame?.start && widget?.meta?.timeFrame?.end) {
@@ -185,7 +188,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
       setEarliestTransactionDate(earliestMonth);
 
       const months = monthUtils
-        .rangeInclusive(earliestMonth, monthUtils.subMonths(currentMonth, 1))
+        .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
           pretty: monthUtils.format(month, 'MMMM, yyyy'),
