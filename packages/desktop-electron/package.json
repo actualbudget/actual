@@ -15,6 +15,7 @@
   },
   "main": "build/desktop-electron/index.js",
   "build": {
+    "asar": false,
     "appId": "com.actualbudget.actual",
     "files": [
       "build",
@@ -47,12 +48,6 @@
     "linux": {
       "target": [
         {
-          "target": "flatpak",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
           "target": "AppImage",
           "arch": [
             "x64",
@@ -64,7 +59,8 @@
       "extraResources": [
         "extra-resources/linux"
       ],
-      "executableName": "actual"
+      "executableName": "actual",
+      "icon": "icons/512x512.png"
     },
     "flatpak": {
       "runtimeVersion": "24.08",
@@ -89,7 +85,7 @@
           ]
         }
       ],
-      "icon": "icons/icon.png",
+      "icon": "icons/512x512.png",
       "artifactName": "${productName}-windows-${arch}.${ext}"
     },
     "appx": {
