@@ -100,9 +100,11 @@ app.post(
       }
 
       let currentBalance = convertToCents(account.balance.current);
-      let availableBalance = convertToCents(account.balance.available);
+      const availableBalance = convertToCents(account.balance.available);
 
-      if ([ACCOUNT_TYPES.CREDIT_CARD, ACCOUNT_TYPES.LOAN].includes(account.type)) {
+      if (
+        [ACCOUNT_TYPES.CREDIT_CARD, ACCOUNT_TYPES.LOAN].includes(account.type)
+      ) {
         currentBalance = -currentBalance;
       }
 
@@ -240,12 +242,18 @@ function flattenObject(obj, prefix = '') {
 
 function normalizeNotes(trans) {
   if (trans.description.match(TRANSFER_PATTERNS.TO)) {
-    const note = extractRegexMatch(trans.description, TRANSFER_REGEX.TO_DESCRIPTION);
+    const note = extractRegexMatch(
+      trans.description,
+      TRANSFER_REGEX.TO_DESCRIPTION,
+    );
     if (note) return note;
   }
 
   if (trans.description.match(TRANSFER_PATTERNS.FROM)) {
-    const note = extractRegexMatch(trans.description, TRANSFER_REGEX.FROM_DESCRIPTION);
+    const note = extractRegexMatch(
+      trans.description,
+      TRANSFER_REGEX.FROM_DESCRIPTION,
+    );
     if (note) return note;
   }
 
@@ -267,7 +275,10 @@ function getPayeeName(trans) {
   }
 
   if (trans.description.match(TRANSFER_PATTERNS.FROM)) {
-    const payee = extractRegexMatch(trans.description, TRANSFER_REGEX.FROM_PAYEE);
+    const payee = extractRegexMatch(
+      trans.description,
+      TRANSFER_REGEX.FROM_PAYEE,
+    );
     if (payee) return payee;
   }
 
@@ -276,7 +287,7 @@ function getPayeeName(trans) {
 
 function processTransaction(trans, account, isBooked = true) {
   const transactionDate = new Date(trans.date);
-  
+
   const newTrans = {
     booked: isBooked,
     date: getDate(transactionDate),
