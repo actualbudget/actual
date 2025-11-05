@@ -20,7 +20,6 @@ export function OpButton({ op, isSelected, style, onPress }: OpButtonProps) {
       style={style}
       className={css({
         backgroundColor: theme.pillBackground,
-        marginBottom: 5,
         ...(isSelected && {
           color: theme.buttonNormalSelectedText,
           '&,:hover,:active': {

@@ -3,7 +3,7 @@
   "author": "Actual",
   "productName": "Actual",
   "description": "A simple and powerful personal finance system",
-  "version": "25.10.0",
+  "version": "25.11.0",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
@@ -63,7 +63,8 @@
       "artifactName": "${productName}-linux-${arch}.${ext}",
       "extraResources": [
         "extra-resources/linux"
-      ]
+      ],
+      "executableName": "actual"
     },
     "flatpak": {
       "runtimeVersion": "24.08",
@@ -88,7 +89,7 @@
           ]
         }
       ],
-      "icon": "icons/icon.ico",
+      "icon": "icons/icon.png",
       "artifactName": "${productName}-windows-${arch}.${ext}"
     },
     "appx": {
@@ -108,7 +109,7 @@
   "devDependencies": {
     "@electron/notarize": "3.1.0",
     "@electron/rebuild": "4.0.1",
-    "@playwright/test": "1.56.0",
+    "@playwright/test": "1.56.1",
     "@types/copyfiles": "^2",
     "@types/fs-extra": "^11",
     "copyfiles": "^2.4.1",

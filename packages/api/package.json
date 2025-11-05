@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/api",
-  "version": "25.10.0",
+  "version": "25.11.0",
   "license": "MIT",
   "description": "An API for Actual",
   "engines": {
@@ -19,7 +19,7 @@
     "build:migrations": "cp migrations/*.sql dist/migrations",
     "build:default-db": "cp default-db.sqlite dist/",
     "build": "yarn run clean && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
-    "test": "yarn run build:app && yarn run build:crdt && vitest",
+    "test": "yarn run build:app && yarn run build:crdt && vitest --run",
     "clean": "rm -rf dist @types"
   },
   "dependencies": {

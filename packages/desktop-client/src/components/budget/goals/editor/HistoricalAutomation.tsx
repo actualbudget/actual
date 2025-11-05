@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 
 import type {
   CopyTemplate,
@@ -27,12 +27,7 @@ export const HistoricalAutomation = ({
   const { t } = useTranslation();
 
   return (
-    <Stack
-      direction="row"
-      align="center"
-      spacing={10}
-      style={{ marginTop: 10 }}
-    >
+    <SpaceBetween gap={50} style={{ marginTop: 10 }}>
       <FormField style={{ flex: 1 }}>
         <FormLabel title={t('Mode')} htmlFor="mode-field" />
         <Select
@@ -69,6 +64,6 @@ export const HistoricalAutomation = ({
           }
         />
       </FormField>
-    </Stack>
+    </SpaceBetween>
   );
 };

@@ -89,6 +89,7 @@ export const AccountRow = memo(
                 textDecorationColor: theme.pageTextSubdued,
                 textUnderlineOffset: '4px',
               }}
+              data-vrt-mask
             >
               {lastSyncString}
             </Cell>
