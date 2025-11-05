@@ -7,7 +7,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { ResponsiveInput } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Select } from '@actual-app/components/select';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -130,7 +130,10 @@ export function OpenIdForm({
         onProviderChange={handleProviderChange}
         defaultValue={providerName}
       />
-      <Stack direction="column" style={{ marginTop: 5 }}>
+      <SpaceBetween
+        direction="vertical"
+        style={{ marginTop: 5, alignItems: 'stretch' }}
+      >
         <FormField style={{ flex: 1 }}>
           {!submitButtonDisabled && (
             <View>
@@ -144,7 +147,7 @@ export function OpenIdForm({
             </View>
           )}
         </FormField>
-      </Stack>
+      </SpaceBetween>
       <label
         htmlFor="issuer-field"
         style={{
@@ -166,7 +169,7 @@ export function OpenIdForm({
           {tip}
         </Text>
       </label>{' '}
-      <Stack>
+      <SpaceBetween direction="vertical" style={{ alignItems: 'stretch' }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title={t('Client ID')} htmlFor="clientid-field" />
           <ResponsiveInput
@@ -211,7 +214,7 @@ export function OpenIdForm({
           </label>
         </FormField>
 
-        <Stack direction="row" justify="flex-end" align="center">
+        <SpaceBetween style={{ justifyContent: 'flex-end' }}>
           {otherButtons}
           <ButtonWithLoading
             variant="primary"
@@ -220,10 +223,10 @@ export function OpenIdForm({
             isDisabled={submitButtonDisabled}
             style={isNarrowWidth ? { padding: 10 } : undefined}
           >
-            OK
+            <Trans>OK</Trans>
           </ButtonWithLoading>
-        </Stack>
-      </Stack>
+        </SpaceBetween>
+      </SpaceBetween>
     </>
   );
 }

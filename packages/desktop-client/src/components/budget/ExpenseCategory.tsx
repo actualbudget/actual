@@ -27,15 +27,15 @@ type ExpenseCategoryProps = {
   cat: CategoryEntity;
   categoryGroup?: CategoryGroupEntity;
   editingCell: { id: string; cell: string } | null;
-  dragState: DragState<CategoryEntity>;
+  dragState: DragState<CategoryEntity> | DragState<CategoryGroupEntity> | null;
   MonthComponent: ComponentProps<typeof RenderMonths>['component'];
   onEditName?: ComponentProps<typeof SidebarCategory>['onEditName'];
-  onEditMonth?: (id: string, month: string) => void;
+  onEditMonth?: (id: CategoryEntity['id'], month: string) => void;
   onSave?: ComponentProps<typeof SidebarCategory>['onSave'];
   onDelete?: ComponentProps<typeof SidebarCategory>['onDelete'];
   onDragChange: OnDragChangeCallback<CategoryEntity>;
-  onBudgetAction: (month: number, action: string, arg: unknown) => void;
-  onShowActivity: (id: string, month: string) => void;
+  onBudgetAction: (month: string, action: string, arg: unknown) => void;
+  onShowActivity: (id: CategoryEntity['id'], month: string) => void;
   onReorder: OnDropCallback;
 };
 
