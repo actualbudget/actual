@@ -220,12 +220,7 @@ export default defineConfig(async ({ mode }) => {
         // print only console.error
         return type === 'stderr';
       },
-      poolOptions: {
-        threads: {
-          maxThreads: 2,
-          minThreads: 1,
-        },
-      },
+      maxWorkers: 2,
     },
   };
 });
