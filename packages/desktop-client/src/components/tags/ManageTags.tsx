@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
 import { SvgSearchAlternate } from '@actual-app/components/icons/v2';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -69,12 +69,7 @@ export function ManageTags() {
             <Trans>User defined tags with color and description.</Trans>
           </View>
         </View>
-        <Stack
-          spacing={2}
-          direction="row"
-          align="center"
-          style={{ marginTop: 12 }}
-        >
+        <SpaceBetween gap={10} style={{ marginTop: 12, alignItems: 'center' }}>
           <Button variant="bare" onPress={() => setCreate(true)}>
             <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
             <Trans>Add New</Trans>
@@ -93,7 +88,7 @@ export function ManageTags() {
             value={filter}
             onChange={setFilter}
           />
-        </Stack>
+        </SpaceBetween>
         <View style={{ flex: 1, marginTop: 12 }}>
           <TagsHeader />
           {create && (
@@ -127,7 +122,10 @@ export function ManageTags() {
             flexShrink: 0,
           }}
         >
-          <Stack direction="row" align="center" justify="flex-end" spacing={2}>
+          <SpaceBetween
+            gap={10}
+            style={{ alignItems: 'center', justifyContent: 'flex-end' }}
+          >
             {selectedInst.items.size > 0 && (
               <Button onPress={onDeleteSelected}>
                 <Trans count={selectedInst.items.size}>
@@ -135,7 +133,7 @@ export function ManageTags() {
                 </Trans>
               </Button>
             )}
-          </Stack>
+          </SpaceBetween>
         </View>
       </View>
     </SelectedProvider>
