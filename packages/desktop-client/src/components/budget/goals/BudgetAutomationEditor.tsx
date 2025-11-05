@@ -3,7 +3,7 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Select } from '@actual-app/components/select';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -122,9 +122,9 @@ export function BudgetAutomationEditor({
   }
 
   return (
-    <Stack
-      direction="column"
-      spacing={2}
+    <SpaceBetween
+      direction="vertical"
+      gap={10}
       style={{
         flex: 1,
         ...styles.editorPill,
@@ -134,7 +134,7 @@ export function BudgetAutomationEditor({
         minHeight: 'fit-content',
       }}
     >
-      <Stack direction="row" align="flex-start" spacing={4}>
+      <SpaceBetween gap={20} style={{ alignItems: 'flex-start' }}>
         <FormField style={{ flexShrink: 0 }}>
           <FormLabel title={t('Type')} htmlFor="type-field" />
           <InitialFocus>
@@ -156,8 +156,8 @@ export function BudgetAutomationEditor({
             )}
           </Text>
         </FormField>
-      </Stack>
+      </SpaceBetween>
       {automationEditor}
-    </Stack>
+    </SpaceBetween>
   );
 }

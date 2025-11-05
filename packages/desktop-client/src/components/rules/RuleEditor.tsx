@@ -23,7 +23,6 @@ import {
 import { Menu } from '@actual-app/components/menu';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -263,9 +262,9 @@ function FieldError({ type }) {
 function Editor({ error, style, children }) {
   return (
     <View style={style} data-testid="editor-row">
-      <Stack direction="row" align="center" spacing={1}>
+      <SpaceBetween gap={5} style={{ alignItems: 'center' }}>
         {children}
-      </Stack>
+      </SpaceBetween>
       {error && <FieldError type={error} />}
     </View>
   );
@@ -347,12 +346,12 @@ function ConditionEditor({
 
       <View style={{ flex: 1, minWidth: 80 }}>{valueEditor}</View>
 
-      <Stack direction="row">
+      <SpaceBetween direction="horizontal" gap={0}>
         <EditorButtons
           onAdd={onAdd}
           onDelete={isSchedule && field === 'date' ? null : onDelete}
         />
-      </Stack>
+      </SpaceBetween>
     </Editor>
   );
 }
@@ -703,7 +702,7 @@ function ActionEditor({
       ) : null}
 
       {op !== 'delete-transaction' && (
-        <Stack direction="row" style={{ flexShrink: 0 }}>
+        <SpaceBetween gap={0} style={{ flexShrink: 0 }}>
           <EditorButtons
             onAdd={onAdd}
             onDelete={
@@ -713,7 +712,7 @@ function ActionEditor({
               onDelete
             }
           />
-        </Stack>
+        </SpaceBetween>
       )}
     </Editor>
   );
@@ -928,7 +927,7 @@ function ConditionsList({
       <Trans>Add condition</Trans>
     </Button>
   ) : (
-    <Stack spacing={2} data-testid="condition-list">
+    <SpaceBetween direction="vertical" gap={10} data-testid="condition-list">
       {conditions.map((cond, i) => {
         let ops = getValidOps(cond.field);
 
@@ -944,7 +943,7 @@ function ConditionsList({
         }
 
         return (
-          <View key={i}>
+          <View key={i} style={{ width: '100%' }}>
             <ConditionEditor
               editorStyle={editorStyle}
               ops={ops}
@@ -959,7 +958,7 @@ function ConditionsList({
           </View>
         );
       })}
-    </Stack>
+    </SpaceBetween>
   );
 }
 
@@ -1305,7 +1304,7 @@ export function RuleEditor({
           <Trans>Stage of rule:</Trans>
         </Text>
 
-        <Stack direction="row" align="center" spacing={1}>
+        <SpaceBetween gap={5} style={{ alignItems: 'center' }}>
           <StageButton
             selected={stage === 'pre'}
             onSelect={() => onChangeStage('pre')}
@@ -1326,7 +1325,7 @@ export function RuleEditor({
           </StageButton>
 
           <StageInfo />
-        </Stack>
+        </SpaceBetween>
       </View>
 
       <View
@@ -1379,10 +1378,15 @@ export function RuleEditor({
                 <Trans>Add action</Trans>
               </Button>
             )}
-            <Stack spacing={2} data-testid="action-split-list">
+            <SpaceBetween
+              direction="vertical"
+              gap={10}
+              data-testid="action-split-list"
+            >
               {actionSplits.map(({ id, actions }, splitIndex) => (
                 <View
                   key={id}
+                  style={{ width: '100%' }}
                   nativeStyle={
                     actionSplits.length > 1
                       ? {
@@ -1395,7 +1399,10 @@ export function RuleEditor({
                   }
                 >
                   {actionSplits.length > 1 && (
-                    <Stack direction="row" justify="space-between" spacing={1}>
+                    <SpaceBetween
+                      gap={5}
+                      style={{ justifyContent: 'space-between' }}
+                    >
                       <Text
                         style={{
                           ...styles.smallText,
@@ -1425,11 +1432,15 @@ export function RuleEditor({
                           />
                         </Button>
                       )}
-                    </Stack>
+                    </SpaceBetween>
                   )}
-                  <Stack spacing={2} data-testid="action-list">
+                  <SpaceBetween
+                    direction="vertical"
+                    gap={10}
+                    data-testid="action-list"
+                  >
                     {actions.map((action, actionIndex) => (
-                      <View key={actionIndex}>
+                      <View key={actionIndex} style={{ width: '100%' }}>
                         <ActionEditor
                           action={action}
                           editorStyle={styles.editorPill}
@@ -1443,7 +1454,7 @@ export function RuleEditor({
                         />
                       </View>
                     ))}
-                  </Stack>
+                  </SpaceBetween>
 
                   {actions.length === 0 && (
                     <Button
@@ -1455,7 +1466,7 @@ export function RuleEditor({
                   )}
                 </View>
               ))}
-            </Stack>
+            </SpaceBetween>
             {showSplitButton && (
               <Button
                 style={{ alignSelf: 'flex-start', marginTop: 15 }}
@@ -1476,7 +1487,6 @@ export function RuleEditor({
       <SelectedProvider instance={selectedInst}>
         <View style={{ padding: '20px', flex: 1 }}>
           <SpaceBetween
-            direction="horizontal"
             gap={5}
             style={{
               flexDirection: 'row',

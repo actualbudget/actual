@@ -40,7 +40,6 @@
     "./popover": "./src/Popover.tsx",
     "./select": "./src/Select.tsx",
     "./space-between": "./src/SpaceBetween.tsx",
-    "./stack": "./src/Stack.tsx",
     "./styles": "./src/styles.ts",
     "./text": "./src/Text.tsx",
     "./text-one-line": "./src/TextOneLine.tsx",

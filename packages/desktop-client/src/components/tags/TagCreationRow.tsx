@@ -10,7 +10,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { ColorPicker } from '@actual-app/components/color-picker';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -181,12 +181,13 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
             #{tag}
           </Button>
         </ColorPicker>
-        <Stack
-          direction="row"
-          align="center"
-          justify="flex-end"
-          style={{ marginLeft: 'auto' }}
-          spacing={2}
+        <SpaceBetween
+          gap={10}
+          style={{
+            marginLeft: 'auto',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+          }}
         >
           <Button
             variant="normal"
@@ -207,7 +208,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           >
             <Trans>Add</Trans>
           </Button>
-        </Stack>
+        </SpaceBetween>
       </Row>
     </View>
   );
