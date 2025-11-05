@@ -5,6 +5,23 @@ import { handleError } from '../app-gocardless/util/handle-error.js';
 import { SecretName, secretsService } from '../services/secrets-service.js';
 import { requestLoggerMiddleware } from '../util/middlewares.js';
 
+const ACCOUNT_TYPES = Object.freeze({
+  CREDIT_CARD: 'CREDITCARD',
+  LOAN: 'LOAN',
+});
+
+const TRANSFER_PATTERNS = Object.freeze({
+  TO: / TFR TO /,
+  FROM: / TFR FROM /,
+});
+
+const TRANSFER_REGEX = Object.freeze({
+  TO_DESCRIPTION: /(.+) TFR TO .+/,
+  FROM_DESCRIPTION: /(.+) TFR FROM .+/,
+  TO_PAYEE: /.+ TFR TO (.+)/,
+  FROM_PAYEE: /.+ TFR FROM (.+)/,
+});
+
 const app = express();
 export { app as handlers };
 app.use(express.json());
@@ -44,7 +61,7 @@ app.post(
       });
     } catch (error) {
       res.send({
-        status: 'ok',
+        status: 'error',
         data: {
           error: error.message,
         },
@@ -58,19 +75,35 @@ app.post(
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
 
+    if (!accountId || !startDate) {
+      return res.send({
+        status: 'error',
+        data: {
+          error: 'accountId and startDate are required',
+        },
+      });
+    }
+
     try {
       const userToken = secretsService.get(SecretName.akahu_userToken);
       const appToken = secretsService.get(SecretName.akahu_appToken);
       const akahu = new AkahuClient({ appToken });
 
       const account = await akahu.accounts.get(userToken, accountId);
+      if (!account) {
+        return res.send({
+          status: 'error',
+          data: {
+            error: 'Account not found',
+          },
+        });
+      }
 
-      let startingBalance = parseInt(
-        Math.round(account.balance.current * 100).toString(),
-      );
+      let currentBalance = convertToCents(account.balance.current);
+      let availableBalance = convertToCents(account.balance.available);
 
-      if (['CREDITCARD', 'LOAN'].includes(account.type)) {
-        startingBalance = -startingBalance;
+      if ([ACCOUNT_TYPES.CREDIT_CARD, ACCOUNT_TYPES.LOAN].includes(account.type)) {
+        currentBalance = -currentBalance;
       }
 
       const now = new Date();
@@ -80,9 +113,9 @@ app.post(
         1,
       ).toISOString();
 
+      // Fetch all transactions using pagination
       const transactions = [];
       let cursor = undefined;
-
       do {
         const { items, cursor: nextCursor } =
           await akahu.accounts.listTransactions(userToken, accountId, {
@@ -105,96 +138,46 @@ app.post(
       const balances = [
         {
           balanceAmount: {
-            amount: startingBalance,
+            amount: currentBalance,
             currency: account.balance.currency,
           },
           balanceType: 'expected',
           referenceDate: date,
         },
+        {
+          balanceAmount: {
+            amount: availableBalance,
+            currency: account.balance.currency,
+          },
+          balanceType: 'interimAvailable',
+          referenceDate: date,
+        },
       ];
 
+      const startDateObj = new Date(startDate);
       const all = [];
       const booked = [];
       const pending = [];
 
+      // Process booked transactions
       for (const trans of transactions) {
-        const newTrans = {};
-
-        newTrans.booked = true;
-
-        const transactionDate = new Date(trans.date);
-
-        if (transactionDate < startDate) {
-          continue;
+        if (new Date(trans.date) >= startDateObj) {
+          const processedTrans = processTransaction(trans, account, true);
+          booked.push(processedTrans);
+          all.push(processedTrans);
         }
-
-        newTrans.date = getDate(transactionDate);
-        newTrans.payeeName = getPayeeName(trans);
-        newTrans.notes = normalizeNotes(trans);
-
-        if (['CREDITCARD', 'LOAN'].includes(account.type)) {
-          trans.amount *= -1;
-        }
-
-        let amount = trans.amount;
-        amount = Math.round(amount * 100) / 100;
-
-        newTrans.transactionAmount = {
-          amount,
-          currency: account.balance.currency,
-        };
-
-        newTrans.transactionId = trans._id;
-        newTrans.sortOrder = transactionDate.getTime();
-
-        delete trans.amount;
-
-        const finalTrans = { ...flattenObject(trans), ...newTrans };
-
-        booked.push(finalTrans);
-        all.push(finalTrans);
       }
 
+      // Process pending transactions
       for (const trans of pendingTransactions) {
-        const newTrans = {};
-
-        newTrans.booked = false;
-
-        const transactionDate = new Date(trans.date);
-
-        if (transactionDate < startDate) {
-          continue;
+        if (new Date(trans.date) >= startDateObj) {
+          const processedTrans = processTransaction(trans, account, false);
+          pending.push(processedTrans);
+          all.push(processedTrans);
         }
-
-        newTrans.date = getDate(transactionDate);
-        newTrans.payeeName = getPayeeName(trans);
-        newTrans.notes = normalizeNotes(trans);
-
-        if (['CREDITCARD', 'LOAN'].includes(account.type)) {
-          trans.amount *= -1;
-        }
-
-        let amount = trans.amount;
-        amount = Math.round(amount * 100) / 100;
-
-        newTrans.transactionAmount = {
-          amount,
-          currency: account.balance.currency,
-        };
-
-        newTrans.transactionId = trans._id;
-        newTrans.sortOrder = transactionDate.getTime();
-
-        delete trans.amount;
-
-        const finalTrans = { ...flattenObject(trans), ...newTrans };
-
-        pending.push(finalTrans);
-        all.push(finalTrans);
       }
 
       const sortFunction = (a, b) => b.sortOrder - a.sortOrder;
-
       const bookedSorted = booked.sort(sortFunction);
       const pendingSorted = pending.sort(sortFunction);
       const allSorted = all.sort(sortFunction);
@@ -203,7 +186,7 @@ app.post(
         status: 'ok',
         data: {
           balances,
-          startingBalance,
+          startingBalance: currentBalance,
           transactions: {
             all: allSorted,
             booked: bookedSorted,
@@ -213,9 +196,9 @@ app.post(
       });
     } catch (error) {
       res.send({
-        status: 'ok',
+        status: 'error',
         data: {
-          error: error.message,
+          error: 'Failed to fetch transactions: ' + error.message,
         },
       });
     }
@@ -224,6 +207,15 @@ app.post(
 
 function getDate(date) {
   return date.toISOString().split('T')[0];
+}
+
+function convertToCents(amount) {
+  return parseInt(Math.round(amount * 100).toString());
+}
+
+function extractRegexMatch(text, regex) {
+  const matches = text.match(regex);
+  return matches && matches.length > 1 ? matches[1] : null;
 }
 
 function flattenObject(obj, prefix = '') {
@@ -247,51 +239,63 @@ function flattenObject(obj, prefix = '') {
 }
 
 function normalizeNotes(trans) {
-  if (trans.description.includes(' TFR TO ')) {
-    const regex = /(.+) TFR TO .+/;
-    const matches = trans.description.match(regex);
-    if (matches && matches.length > 1 && matches[1]) {
-      return matches[1];
-    }
+  if (trans.description.match(TRANSFER_PATTERNS.TO)) {
+    const note = extractRegexMatch(trans.description, TRANSFER_REGEX.TO_DESCRIPTION);
+    if (note) return note;
   }
 
-  if (trans.description.includes(' TFR FROM ')) {
-    const regex = /(.+) TFR FROM .+/;
-    const matches = trans.description.match(regex);
-    if (matches && matches.length > 1 && matches[1]) {
-      return matches[1];
-    }
+  if (trans.description.match(TRANSFER_PATTERNS.FROM)) {
+    const note = extractRegexMatch(trans.description, TRANSFER_REGEX.FROM_DESCRIPTION);
+    if (note) return note;
   }
 
   return trans.description;
 }
 
 function getPayeeName(trans) {
-  if (trans.merchant && trans.merchant.name) {
-    return trans.merchant.name || '';
+  if (trans.merchant?.name) {
+    return trans.merchant.name;
   }
 
-  if (trans.meta) {
-    if (trans.meta.other_account) {
-      return trans.meta.other_account || '';
-    }
+  if (trans.meta?.other_account) {
+    return trans.meta.other_account;
   }
 
-  if (trans.description.includes(' TFR TO ')) {
-    const regex = /.+ TFR TO (.+)/;
-    const matches = trans.description.match(regex);
-    if (matches && matches.length > 1 && matches[1]) {
-      return matches[1];
-    }
+  if (trans.description.match(TRANSFER_PATTERNS.TO)) {
+    const payee = extractRegexMatch(trans.description, TRANSFER_REGEX.TO_PAYEE);
+    if (payee) return payee;
   }
 
-  if (trans.description.includes(' TFR FROM ')) {
-    const regex = /.+ TFR FROM (.+)/;
-    const matches = trans.description.match(regex);
-    if (matches && matches.length > 1 && matches[1]) {
-      return matches[1];
-    }
+  if (trans.description.match(TRANSFER_PATTERNS.FROM)) {
+    const payee = extractRegexMatch(trans.description, TRANSFER_REGEX.FROM_PAYEE);
+    if (payee) return payee;
   }
 
   return '';
+}
+
+function processTransaction(trans, account, isBooked = true) {
+  const transactionDate = new Date(trans.date);
+  
+  const newTrans = {
+    booked: isBooked,
+    date: getDate(transactionDate),
+    payeeName: getPayeeName(trans),
+    notes: normalizeNotes(trans),
+    transactionId: trans._id,
+    sortOrder: transactionDate.getTime(),
+  };
+
+  let amount = trans.amount;
+  if ([ACCOUNT_TYPES.CREDIT_CARD, ACCOUNT_TYPES.LOAN].includes(account.type)) {
+    amount *= -1;
+  }
+
+  newTrans.transactionAmount = {
+    amount: Math.round(amount * 100) / 100,
+    currency: account.balance.currency,
+  };
+
+  delete trans.amount;
+  return { ...flattenObject(trans), ...newTrans };
 }
