@@ -3,7 +3,7 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgQuestion } from '@actual-app/components/icons/v1';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -30,11 +30,8 @@ function CheckboxOption({
 }: CheckboxOptionProps) {
   if (helpMode === 'mobile') {
     return (
-      <Stack
-        direction="row"
-        align="center"
-        justify="space-between"
-        style={{ marginBottom: 5 }}
+      <SpaceBetween
+        style={{ marginBottom: 5, justifyContent: 'space-between' }}
       >
         <Text>{children}</Text>
         <ToggleField
@@ -43,7 +40,7 @@ function CheckboxOption({
           onToggle={onChange}
           isDisabled={disabled}
         />
-      </Stack>
+      </SpaceBetween>
     );
   }
 
@@ -90,19 +87,19 @@ function CheckboxOptionWithHelp({
         disabled={disabled}
       >
         <Tooltip content={helpText}>
-          <Stack direction="row" align="center" spacing={1}>
+          <SpaceBetween gap={5}>
             <Text>{children}</Text>
             <SvgQuestion height={12} width={12} cursor="pointer" />
-          </Stack>
+          </SpaceBetween>
         </Tooltip>
       </LabeledCheckbox>
     );
   }
 
   return (
-    <Stack direction="column" spacing={1} style={{ marginBottom: 5 }}>
-      <Stack direction="row" align="center" justify="space-between">
-        <Stack direction="row" align="center" spacing={1}>
+    <SpaceBetween direction="vertical" gap={5} style={{ marginBottom: 5 }}>
+      <SpaceBetween style={{ justifyContent: 'space-between' }}>
+        <SpaceBetween gap={5}>
           <Text>{children}</Text>
           <Button
             variant="bare"
@@ -116,14 +113,14 @@ function CheckboxOptionWithHelp({
           >
             <SvgQuestion height={12} width={12} />
           </Button>
-        </Stack>
+        </SpaceBetween>
         <ToggleField
           id={id}
           isOn={checked}
           onToggle={onChange}
           isDisabled={disabled}
         />
-      </Stack>
+      </SpaceBetween>
       {showHelp && (
         <Text
           style={{
@@ -134,7 +131,7 @@ function CheckboxOptionWithHelp({
           {helpText}
         </Text>
       )}
-    </Stack>
+    </SpaceBetween>
   );
 }
 

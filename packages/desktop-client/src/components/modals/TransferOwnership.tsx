@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Select } from '@actual-app/components/select';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -112,7 +112,7 @@ export function TransferOwnership({
             title={t('Transfer ownership')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
-          <Stack direction="row" style={{ marginTop: 10 }}>
+          <SpaceBetween style={{ marginTop: 10 }}>
             <FormField style={{ flex: 1 }}>
               <FormLabel title={t('User')} htmlFor="user-field" />
               {availableUsers.length > 0 && (
@@ -171,13 +171,14 @@ export function TransferOwnership({
                 </Text>
               )}
             </FormField>
-          </Stack>
+          </SpaceBetween>
 
-          <Stack
-            direction="row"
-            justify="flex-end"
-            align="center"
-            style={{ marginTop: 20 }}
+          <SpaceBetween
+            style={{
+              marginTop: 20,
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+            }}
           >
             {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
             <Button
@@ -219,7 +220,7 @@ export function TransferOwnership({
             >
               {isTransferring ? t('Transferring...') : t('Transfer ownership')}
             </Button>
-          </Stack>
+          </SpaceBetween>
         </>
       )}
     </Modal>
