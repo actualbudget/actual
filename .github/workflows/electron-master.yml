@@ -29,7 +29,7 @@ jobs:
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - if: ${{ startsWith(matrix.os, 'windows') }}
         run: pip.exe install setuptools
       - if: ${{ ! startsWith(matrix.os, 'windows') }}
@@ -62,7 +62,7 @@ jobs:
         if: ${{ ! startsWith(matrix.os, 'macos') }}
         run: ./bin/package-electron
       - name: Upload Build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: actual-electron-${{ matrix.os }}
           path: |
@@ -73,7 +73,7 @@ jobs:
             packages/desktop-electron/dist/*.flatpak
       - name: Upload Windows Store Build
         if: ${{ startsWith(matrix.os, 'windows') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: actual-electron-${{ matrix.os }}-appx
           path: |
@@ -113,7 +113,7 @@ jobs:
           Install-Module -Name StoreBroker -AcceptLicense -Force -Scope CurrentUser -Verbose
 
       - name: Download Microsoft Store artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: actual-electron-windows-latest-appx
 
