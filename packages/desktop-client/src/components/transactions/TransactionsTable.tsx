@@ -1768,6 +1768,7 @@ type NewTransactionProps = {
   focusedField: string;
   hideFraction: boolean;
   onAdd: () => void;
+  onAddAndClose: () => void;
   onAddSplit: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onClose: () => void;
@@ -1816,6 +1817,7 @@ function NewTransaction({
   onDelete,
   onSave,
   onAdd,
+  onAddAndClose,
   onAddSplit,
   onDistributeRemainder,
   onManagePayees,
@@ -1838,6 +1840,14 @@ function NewTransaction({
   useProperFocus(addButtonRef, focusedField === 'add');
   const cancelButtonRef = useRef(null);
   useProperFocus(cancelButtonRef, focusedField === 'cancel');
+
+  const handleAddClick = (e: { ctrlKey?: boolean; metaKey?: boolean }) => {
+    if (e.ctrlKey || e.metaKey) {
+      onAddAndClose();
+    } else {
+      onAdd();
+    }
+  };
 
   return (
     <View
@@ -1921,7 +1931,7 @@ function NewTransaction({
           <Button
             variant="primary"
             style={{ padding: '4px 10px' }}
-            onPress={onAdd}
+            onPress={handleAddClick}
             data-testid="add-button"
             ref={addButtonRef}
           >
@@ -2001,6 +2011,7 @@ type TransactionTableInnerProps = {
   onCheckNewEnter: (e: KeyboardEvent) => void;
   onCheckEnter: (e: KeyboardEvent) => void;
   onAddTemporary: (id?: TransactionEntity['id']) => void;
+  onAddAndCloseTemporary: () => void;
   onDistributeRemainder: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onManagePayees: (id?: PayeeEntity['id']) => void;
@@ -2232,6 +2243,7 @@ function TransactionTableInner({
               hideFraction={props.hideFraction}
               onClose={props.onCloseAddTransaction}
               onAdd={props.onAddTemporary}
+              onAddAndClose={props.onAddAndCloseTemporary}
               onAddSplit={props.onAddSplit}
               onToggleSplit={props.onToggleSplit}
               onSplit={props.onSplit}
@@ -2470,6 +2482,7 @@ export const TransactionTable = forwardRef(
       getFieldsTableTransaction,
     );
     const shouldAdd = useRef(false);
+    const shouldAddAndClose = useRef(false);
     const latestState = useRef<TableState>({
       newTransactions: newTransactions ?? [],
       newNavigator,
@@ -2501,7 +2514,7 @@ export const TransactionTable = forwardRef(
       setPrevIsAdding(props.isAdding);
     }
 
-    if (shouldAdd.current) {
+    if (shouldAdd.current || shouldAddAndClose.current) {
       if (newTransactions?.[0] && newTransactions[0].account == null) {
         dispatch(
           addNotification({
@@ -2514,18 +2527,26 @@ export const TransactionTable = forwardRef(
         newNavigator.onEdit('temp', 'account');
       } else {
         const transactions = latestState.current.newTransactions;
-        const lastDate = transactions.length > 0 ? transactions[0].date : null;
-        setNewTransactions(
-          makeTemporaryTransactions(
-            props.currentAccountId,
-            props.currentCategoryId,
-            lastDate,
-          ),
-        );
-        newNavigator.onEdit('temp', 'date');
-        props.onAdd(transactions);
+
+        if (shouldAddAndClose.current) {
+          props.onAdd(transactions);
+          props.onCloseAddTransaction();
+        } else {
+          const lastDate =
+            transactions.length > 0 ? transactions[0].date : null;
+          setNewTransactions(
+            makeTemporaryTransactions(
+              props.currentAccountId,
+              props.currentCategoryId,
+              lastDate,
+            ),
+          );
+          newNavigator.onEdit('temp', 'date');
+          props.onAdd(transactions);
+        }
       }
       shouldAdd.current = false;
+      shouldAddAndClose.current = false;
     }
 
     useEffect(() => {
@@ -2602,9 +2623,11 @@ export const TransactionTable = forwardRef(
 
     function onCheckNewEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {
-        if (e.metaKey) {
+        if (e.metaKey || e.ctrlKey) {
+          e.preventDefault();
           e.stopPropagation();
-          onAddTemporary();
+          shouldAddAndClose.current = true;
+          forceRerender({});
         } else if (!e.shiftKey) {
           function getLastTransaction(state: RefObject<TableState>) {
             const { newTransactions } = state.current;
@@ -2671,6 +2694,11 @@ export const TransactionTable = forwardRef(
       // A little hacky - this forces a rerender which will cause the
       // effect we want to run. We have to wait for all updates to be
       // committed (the input could still be saving a value).
+      forceRerender({});
+    }, []);
+
+    const onAddAndCloseTemporary = useCallback(() => {
+      shouldAddAndClose.current = true;
       forceRerender({});
     }, []);
 
@@ -2970,6 +2998,7 @@ export const TransactionTable = forwardRef(
         onCheckNewEnter={onCheckNewEnter}
         onCheckEnter={onCheckEnter}
         onAddTemporary={onAddTemporary}
+        onAddAndCloseTemporary={onAddAndCloseTemporary}
         onAddSplit={onAddSplit}
         onDistributeRemainder={onDistributeRemainder}
         onCloseAddTransaction={onCloseAddTransaction}
