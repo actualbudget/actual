@@ -25,7 +25,7 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -336,12 +336,7 @@ export function AccountHeader({
             }}
           />
         </View>
-        <Stack
-          spacing={2}
-          direction="row"
-          align="center"
-          style={{ marginTop: 12 }}
-        >
+        <SpaceBetween gap={10} style={{ marginTop: 12 }}>
           {canSync && (
             <Button
               variant="bare"
@@ -383,14 +378,12 @@ export function AccountHeader({
             <FilterButton onApply={onApplyFilter} />
           </View>
           <View style={{ flex: 1 }} />
+
           <Search
             placeholder={t('Search')}
             value={search}
             onChange={onSearch}
-            inputRef={searchInput}
-            // Remove marginRight magically being added by Stack...
-            // We need to refactor the Stack component
-            style={{ marginRight: 0 }}
+            ref={searchInput}
           />
           {workingHard ? (
             <View>
@@ -415,7 +408,7 @@ export function AccountHeader({
               onMergeTransactions={onMergeTransactions}
             />
           )}
-          <View style={{ flex: '0 0 auto', marginLeft: 10 }}>
+          <View style={{ flex: '0 0 auto' }}>
             {account && (
               <Tooltip
                 style={{
@@ -569,7 +562,7 @@ export function AccountHeader({
               </DialogTrigger>
             </View>
           )}
-        </Stack>
+        </SpaceBetween>
         {filterConditions?.length > 0 && (
           <FiltersStack
             conditions={filterConditions}

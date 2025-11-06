@@ -2,7 +2,9 @@ import { type Locator, type Page } from '@playwright/test';
 
 import { MobileAccountPage } from './mobile-account-page';
 import { MobileAccountsPage } from './mobile-accounts-page';
+import { MobileBankSyncPage } from './mobile-bank-sync-page';
 import { MobileBudgetPage } from './mobile-budget-page';
+import { MobilePayeesPage } from './mobile-payees-page';
 import { MobileReportsPage } from './mobile-reports-page';
 import { MobileRulesPage } from './mobile-rules-page';
 import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
@@ -14,6 +16,7 @@ const NAV_LINKS_HIDDEN_BY_DEFAULT = [
   'Schedules',
   'Payees',
   'Rules',
+  'Bank Sync',
   'Settings',
 ];
 const ROUTES_BY_PAGE = {
@@ -21,7 +24,9 @@ const ROUTES_BY_PAGE = {
   Accounts: '/accounts',
   Transaction: '/transactions/new',
   Reports: '/reports',
+  Payees: '/payees',
   Rules: '/rules',
+  'Bank Sync': '/bank-sync',
   Settings: '/settings',
 };
 
@@ -166,10 +171,24 @@ export class MobileNavigation {
     );
   }
 
+  async goToPayeesPage() {
+    return await this.navigateToPage(
+      'Payees',
+      () => new MobilePayeesPage(this.page),
+    );
+  }
+
   async goToRulesPage() {
     return await this.navigateToPage(
       'Rules',
       () => new MobileRulesPage(this.page),
+    );
+  }
+
+  async goToBankSyncPage() {
+    return await this.navigateToPage(
+      'Bank Sync',
+      () => new MobileBankSyncPage(this.page),
     );
   }
 

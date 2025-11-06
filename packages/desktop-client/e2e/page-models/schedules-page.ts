@@ -1,10 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 
-type ScheduleEntry = {
-  payee?: string;
-  account?: string;
-  amount?: number;
-};
+import { ScheduleEditModal } from './schedule-edit-modal';
 
 export class SchedulesPage {
   readonly page: Page;
@@ -21,14 +17,12 @@ export class SchedulesPage {
   }
 
   /**
-   * Add a new schedule
+   * Open the schedule edit modal.
    */
-  async addNewSchedule(data: ScheduleEntry) {
+  async addNewSchedule() {
     await this.addNewScheduleButton.click();
 
-    await this._fillScheduleFields(data);
-
-    await this.page.getByRole('button', { name: 'Add' }).click();
+    return new ScheduleEditModal(this.page.getByTestId('schedule-edit-modal'));
   }
 
   /**
@@ -79,27 +73,5 @@ export class SchedulesPage {
 
     await actions.getByRole('button').click();
     await this.page.getByRole('button', { name: actionName }).click();
-  }
-
-  async _fillScheduleFields(data: ScheduleEntry) {
-    if (data.payee) {
-      await this.page.getByRole('textbox', { name: 'Payee' }).fill(data.payee);
-      await this.page.keyboard.press('Enter');
-    }
-
-    if (data.account) {
-      await this.page
-        .getByRole('textbox', { name: 'Account' })
-        .fill(data.account);
-      await this.page.keyboard.press('Enter');
-    }
-
-    if (data.amount) {
-      await this.page.getByLabel('Amount').fill(String(data.amount));
-      // For some readon, the input field does not trigger the change event on tests
-      // but it works on the browser. We can revisit this once migration to
-      // react aria components is complete.
-      await this.page.keyboard.press('Enter');
-    }
   }
 }

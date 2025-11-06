@@ -141,7 +141,8 @@ export type RuleActionEntity =
   | SetSplitAmountRuleActionEntity
   | LinkScheduleRuleActionEntity
   | PrependNoteRuleActionEntity
-  | AppendNoteRuleActionEntity;
+  | AppendNoteRuleActionEntity
+  | DeleteTransactionRuleActionEntity;
 
 export interface SetRuleActionEntity {
   field: string;
@@ -149,6 +150,7 @@ export interface SetRuleActionEntity {
   value: unknown;
   options?: {
     template?: string;
+    formula?: string;
     splitIndex?: number;
   };
   type?: string;
@@ -175,5 +177,10 @@ export interface PrependNoteRuleActionEntity {
 
 export interface AppendNoteRuleActionEntity {
   op: 'append-notes';
+  value: string;
+}
+
+export interface DeleteTransactionRuleActionEntity {
+  op: 'delete-transaction';
   value: string;
 }

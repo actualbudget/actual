@@ -273,11 +273,16 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
             parseISO(fromDateRepr(earliestTransaction.date)),
           )
         : currentMonth;
-      const latestMonth = latestTransaction
+      const latestTransactionMonth = latestTransaction
         ? monthUtils.monthFromDate(
             parseISO(fromDateRepr(latestTransaction.date)),
           )
         : currentMonth;
+
+      const latestMonth =
+        latestTransactionMonth > currentMonth
+          ? latestTransactionMonth
+          : currentMonth;
 
       // Make sure the month selects are at least populates with a
       // year's worth of months. We can undo this when we have fancier
@@ -731,7 +736,11 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     )}
                   </Button>
                   <View
-                    style={{ height: '100%', width: '100%', overflow: 'auto' }}
+                    style={{
+                      height: '100%',
+                      width: '100%',
+                      overflow: 'auto',
+                    }}
                   >
                     <TransactionListMobile
                       isLoading={false}

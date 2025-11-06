@@ -136,10 +136,6 @@ function AppInner() {
   }, [dispatch, showErrorBoundary]);
 
   useEffect(() => {
-    global.Actual.updateAppMenu(budgetId);
-  }, [budgetId]);
-
-  useEffect(() => {
     if (userData?.tokenExpired) {
       dispatch(
         addNotification({
@@ -215,7 +211,7 @@ export function App() {
   return (
     <BrowserRouter>
       <ExposeNavigate />
-      <HotkeysProvider initiallyActiveScopes={['*']}>
+      <HotkeysProvider initiallyActiveScopes={['app']}>
         <SpreadsheetProvider>
           <SidebarProvider>
             <BudgetMonthCountProvider>

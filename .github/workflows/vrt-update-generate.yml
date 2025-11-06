@@ -1,0 +1,105 @@
+name: VRT Update - Generate
+# SECURITY: This workflow runs in untrusted fork context with no write permissions.
+# It only generates VRT patch artifacts that are later applied by vrt-update-apply.yml
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'packages/**'
+      - '.github/workflows/vrt-update-generate.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  generate-vrt-updates:
+    name: Generate VRT Updates
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-jammy
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+
+      - name: Run VRT Tests on Desktop app
+        continue-on-error: true
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" -- yarn e2e:desktop --update-snapshots
+
+      - name: Wait for Netlify build to finish
+        id: netlify
+        env:
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./.github/actions/netlify-wait-for-build
+
+      - name: Run VRT Tests on Netlify URL
+        continue-on-error: true
+        run: yarn vrt --update-snapshots
+        env:
+          E2E_START_URL: ${{ steps.netlify.outputs.url }}
+
+      - name: Create patch with PNG changes only
+        id: create-patch
+        run: |
+          # Trust the repository directory (required for container environments)
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Stage only PNG files
+          git add "**/*.png"
+
+          # Check if there are any changes
+          if git diff --staged --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No VRT changes to commit"
+            exit 0
+          fi
+
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+          # Create commit and patch
+          git commit -m "Update VRT screenshots"
+          git format-patch -1 HEAD --stdout > vrt-update.patch
+
+          # Validate patch only contains PNG files
+          if grep -E '^(\+\+\+|---) [ab]/' vrt-update.patch | grep -v '\.png$'; then
+            echo "ERROR: Patch contains non-PNG files!"
+            exit 1
+          fi
+
+          echo "Patch created successfully with PNG changes only"
+
+      - name: Upload patch artifact
+        if: steps.create-patch.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v5
+        with:
+          name: vrt-patch-${{ github.event.pull_request.number }}
+          path: vrt-update.patch
+          retention-days: 5
+
+      - name: Save PR metadata
+        if: steps.create-patch.outputs.has_changes == 'true'
+        run: |
+          mkdir -p pr-metadata
+          echo "${{ github.event.pull_request.number }}" > pr-metadata/pr-number.txt
+          echo "${{ github.event.pull_request.head.ref }}" > pr-metadata/head-ref.txt
+          echo "${{ github.event.pull_request.head.repo.full_name }}" > pr-metadata/head-repo.txt
+
+      - name: Upload PR metadata
+        if: steps.create-patch.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v5
+        with:
+          name: vrt-metadata-${{ github.event.pull_request.number }}
+          path: pr-metadata/
+          retention-days: 5

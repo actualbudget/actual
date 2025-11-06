@@ -2,7 +2,9 @@ export type FeatureFlag =
   | 'goalTemplatesEnabled'
   | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
-  | 'currency';
+  | 'formulaMode'
+  | 'currency'
+  | 'plugins';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -19,6 +21,7 @@ export type SyncedPrefs = Partial<
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
     | 'defaultCurrencyCode'
+    | 'plugins'
     | `show-account-${string}-net-worth-chart`
     | `side-nav.show-balance-history-${string}`
     | `show-balances-${string}`
@@ -29,7 +32,8 @@ export type SyncedPrefs = Partial<
     | `parse-date-${string}-${'csv' | 'qif'}`
     | `csv-mappings-${string}`
     | `csv-delimiter-${string}`
-    | `csv-skip-lines-${string}`
+    | `csv-skip-start-lines-${string}`
+    | `csv-skip-end-lines-${string}`
     | `csv-in-out-mode-${string}`
     | `csv-out-value-${string}`
     | `csv-has-header-${string}`
@@ -81,7 +85,13 @@ export type LocalPrefs = Partial<{
   'mobile.showSpentColumn': boolean;
 }>;
 
-export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
+export type Theme =
+  | 'light'
+  | 'dark'
+  | 'auto'
+  | 'midnight'
+  | 'development'
+  | string;
 export type DarkTheme = 'dark' | 'midnight';
 
 // GlobalPrefs are the parsed global-store.json values
@@ -93,6 +103,17 @@ export type GlobalPrefs = Partial<{
   language: string;
   theme: Theme;
   preferredDarkTheme: DarkTheme;
+  plugins: boolean;
+  pluginThemes: Record<
+    string,
+    {
+      id: string;
+      displayName: string;
+      description?: string;
+      baseTheme?: 'light' | 'dark' | 'midnight';
+      colors: Record<string, string>;
+    }
+  >; // Complete plugin theme metadata
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
   syncServerConfig?: {
@@ -121,6 +142,8 @@ export type GlobalPrefsJson = Partial<{
   language?: GlobalPrefs['language'];
   theme?: GlobalPrefs['theme'];
   'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
+  plugins?: string; // "true" or "false"
+  'plugin-theme'?: string; // JSON string of complete plugin theme (current selected plugin theme)
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
   syncServerConfig?: GlobalPrefs['syncServerConfig'];
   notifyWhenUpdateIsAvailable?: GlobalPrefs['notifyWhenUpdateIsAvailable'];

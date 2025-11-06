@@ -30,6 +30,8 @@ type BackupTableProps = {
 };
 
 function BackupTable({ backups, onSelect }: BackupTableProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={{ flex: 1, maxHeight: 200, overflow: 'auto' }}>
       {backups.map((backup, idx) => (
@@ -41,7 +43,7 @@ function BackupTable({ backups, onSelect }: BackupTableProps) {
         >
           <Cell
             width="flex"
-            value={backup.date ? backup.date : 'Revert to Latest'}
+            value={backup.date ? backup.date : t('Revert to Latest')}
             valueStyle={{ paddingLeft: 20 }}
           />
         </Row>

@@ -14,25 +14,31 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
       - name: Lint
         run: yarn lint
   typecheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
       - name: Typecheck
         run: yarn typecheck
   validate-cli:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
       - name: Build Web
         run: yarn build:server
       - name: Check that the built CLI works
@@ -40,9 +46,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
       - name: Test
         run: yarn test
 
@@ -50,9 +58,9 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
       - name: Check migrations
         run: node ./.github/actions/check-migrations.js

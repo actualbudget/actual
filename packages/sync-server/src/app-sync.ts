@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import { Buffer } from 'node:buffer';
 import fs from 'node:fs/promises';
+import { resolve } from 'node:path';
 
 import { SyncProtoBuf } from '@actual-app/crdt';
 import express from 'express';
@@ -306,8 +307,16 @@ app.get('/download-user-file', async (req, res) => {
     return;
   }
 
+  const path = getPathForUserFile(fileId);
+
+  if (!path.startsWith(resolve(config.get('userFiles')))) {
+    //Ensure the user doesn't try to access files outside of the user files directory
+    res.status(403).send('Access denied');
+    return;
+  }
+
   res.setHeader('Content-Disposition', `attachment;filename=${fileId}`);
-  res.sendFile(getPathForUserFile(fileId));
+  res.sendFile(path, { dotfiles: 'allow' });
 });
 
 app.post('/update-user-filename', (req, res) => {

@@ -97,12 +97,12 @@ describe('utility functions', () => {
   test('number formatting works with space-comma format', () => {
     setNumberFormat({ format: 'space-comma', hideFraction: false });
     let formatter = getNumberFormat().formatter;
-    // grouping separator space char is a non-breaking space, or UTF-16 \xa0
-    expect(formatter.format(Number('1234.56'))).toBe('1\xa0234,56');
+    // grouping separator space char is a narrow non-breaking space (U+202F)
+    expect(formatter.format(Number('1234.56'))).toBe('1\u202F234,56');
 
     setNumberFormat({ format: 'space-comma', hideFraction: true });
     formatter = getNumberFormat().formatter;
-    expect(formatter.format(Number('1234.56'))).toBe('1\xa0235');
+    expect(formatter.format(Number('1234.56'))).toBe('1\u202F235');
   });
 
   test('number formatting works with apostrophe-dot format', () => {

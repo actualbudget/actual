@@ -42,13 +42,15 @@ function validateRule(rule: Partial<RuleEntity>) {
   );
 
   const actionErrors = runValidation(rule.actions, action =>
-    action.op === 'set-split-amount'
-      ? new Action(action.op, null, action.value, action.options)
-      : action.op === 'link-schedule'
-        ? new Action(action.op, null, action.value, null)
-        : action.op === 'prepend-notes' || action.op === 'append-notes'
+    action.op === 'delete-transaction'
+      ? new Action(action.op, null, null, null)
+      : action.op === 'set-split-amount'
+        ? new Action(action.op, null, action.value, action.options)
+        : action.op === 'link-schedule'
           ? new Action(action.op, null, action.value, null)
-          : new Action(action.op, action.field, action.value, action.options),
+          : action.op === 'prepend-notes' || action.op === 'append-notes'
+            ? new Action(action.op, null, action.value, null)
+            : new Action(action.op, action.field, action.value, action.options),
   );
 
   if (conditionErrors || actionErrors) {
@@ -84,9 +86,9 @@ export const app = createApp<RulesHandlers>();
 
 app.method('rule-validate', ruleValidate);
 app.method('rule-add', mutator(addRule));
-app.method('rule-update', mutator(updateRule));
-app.method('rule-delete', mutator(deleteRule));
-app.method('rule-delete-all', mutator(deleteAllRules));
+app.method('rule-update', mutator(undoable(updateRule)));
+app.method('rule-delete', mutator(undoable(deleteRule)));
+app.method('rule-delete-all', mutator(undoable(deleteAllRules)));
 app.method('rule-apply-actions', mutator(undoable(applyRuleActions)));
 app.method('rule-add-payee-rename', mutator(addRulePayeeRename));
 app.method('rules-get', getRules);
@@ -112,9 +114,9 @@ async function addRule(
   return { id, ...rule };
 }
 
-async function updateRule<
-  PartialRule extends Partial<Omit<RuleEntity, 'id'>> & Pick<RuleEntity, 'id'>,
->(rule: PartialRule): Promise<{ error: ValidationError } | PartialRule> {
+async function updateRule(
+  rule: RuleEntity,
+): Promise<{ error: ValidationError } | RuleEntity> {
   const error = validateRule(rule);
   if (error) {
     return { error };
@@ -151,7 +153,11 @@ async function applyRuleActions({
 }: {
   transactions: TransactionEntity[];
   actions: Array<Action | RuleActionEntity>;
-}): Promise<null | { added: TransactionEntity[]; updated: unknown[] }> {
+}): Promise<null | {
+  added: TransactionEntity[];
+  updated: unknown[];
+  errors: string[];
+}> {
   return rules.applyActions(transactions, actions);
 }
 

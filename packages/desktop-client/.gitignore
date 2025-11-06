@@ -14,6 +14,9 @@ build-electron
 build-stats
 stats.json
 
+# generated service worker
+service-worker/
+
 # misc
 .DS_Store
 .env
@@ -28,3 +31,6 @@ public/*.wasm
 
 # translations
 locale/
+
+# service worker build output
+dev-dist

@@ -256,6 +256,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const [showUncategorized, setShowUncategorized] = useState(
     loadReport.showUncategorized,
   );
+  const [trimIntervals, setTrimIntervals] = useState(loadReport.trimIntervals);
   const [graphType, setGraphType] = useState(loadReport.graphType);
 
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
@@ -340,16 +341,28 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
               ),
             );
 
+      const currentInterval =
+        interval === 'Weekly'
+          ? monthUtils.currentWeek(firstDayOfWeekIdx)
+          : interval === 'Daily'
+            ? monthUtils.currentDay()
+            : interval === 'Yearly'
+              ? monthUtils.currentYear()
+              : monthUtils.currentMonth();
+
+      const maxInterval =
+        latestInterval > currentInterval ? latestInterval : currentInterval;
+
       const allIntervals =
         interval === 'Weekly'
           ? monthUtils.weekRangeInclusive(
               earliestInterval,
-              latestInterval,
+              maxInterval,
               firstDayOfWeekIdx,
             )
           : monthUtils[
               ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
-            ](earliestInterval, latestInterval);
+            ](earliestInterval, maxInterval);
 
       const allIntervalsMap = allIntervals
         .map((inter: string) => ({
@@ -435,6 +448,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       showOffBudget,
       showHiddenCategories,
       showUncategorized,
+      trimIntervals,
       balanceTypeOp,
       sortByOp,
       firstDayOfWeekIdx,
@@ -451,6 +465,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     showOffBudget,
     showHiddenCategories,
     showUncategorized,
+    trimIntervals,
     sortByOp,
     firstDayOfWeekIdx,
   ]);
@@ -469,6 +484,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       showOffBudget,
       showHiddenCategories,
       showUncategorized,
+      trimIntervals,
       groupBy,
       balanceTypeOp,
       sortByOp,
@@ -493,6 +509,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     showOffBudget,
     showHiddenCategories,
     showUncategorized,
+    trimIntervals,
     sortByOp,
     graphType,
     firstDayOfWeekIdx,
@@ -519,6 +536,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     showHiddenCategories,
     includeCurrentInterval,
     showUncategorized,
+    trimIntervals,
     graphType,
     conditions,
     conditionsOp,
@@ -664,6 +682,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     setShowHiddenCategories(input.showHiddenCategories);
     setIncludeCurrentInterval(input.includeCurrentInterval);
     setShowUncategorized(input.showUncategorized);
+    setTrimIntervals(input.trimIntervals);
     setGraphType(input.graphType);
     onApplyFilter(null);
     (input.conditions || []).forEach(condition => onApplyFilter(condition));
@@ -804,6 +823,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
             setShowHiddenCategories={setShowHiddenCategories}
             setIncludeCurrentInterval={setIncludeCurrentInterval}
             setShowUncategorized={setShowUncategorized}
+            setTrimIntervals={setTrimIntervals}
             setSelectedCategories={setSelectedCategories}
             onChangeDates={onChangeDates}
             onReportChange={onReportChange}

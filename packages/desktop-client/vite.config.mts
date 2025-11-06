@@ -9,7 +9,6 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv, Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
-import reactCompiler from 'babel-plugin-react-compiler';
 
 const addWatchers = (): Plugin => ({
   name: 'add-watchers',
@@ -160,18 +159,42 @@ export default defineConfig(async ({ mode }) => {
         ? undefined
         : VitePWA({
             registerType: 'prompt',
+            // TODO:  The plugin worker build is currently disabled due to issues with offline support. Fix this
+            // strategies: 'injectManifest',
+            // srcDir: 'service-worker',
+            // filename: 'plugin-sw.js',
+            // manifest: {
+            //   name: 'Actual',
+            //   short_name: 'Actual',
+            //   description: 'A local-first personal finance tool',
+            //   theme_color: '#8812E1',
+            //   background_color: '#8812E1',
+            //   display: 'standalone',
+            //   start_url: './',
+            // },
+            // injectManifest: {
+            //   maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
+            //   swSrc: `service-worker/plugin-sw.js`,
+            // },
+            devOptions: {
+              enabled: true, // We need service worker in dev mode to work with plugins
+              type: 'module',
+            },
             workbox: {
               globPatterns: [
                 '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
               ],
               ignoreURLParametersMatching: [/^v$/],
               navigateFallback: '/index.html',
-              maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+              maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
               navigateFallbackDenylist: [
                 /^\/account\/.*$/,
                 /^\/admin\/.*$/,
                 /^\/secret\/.*$/,
                 /^\/openid\/.*$/,
+                /^\/plugins\/.*$/,
+                /^\/kcab\/.*$/,
+                /^\/plugin-data\/.*$/,
               ],
             },
           }),
@@ -179,7 +202,8 @@ export default defineConfig(async ({ mode }) => {
       addWatchers(),
       react({
         babel: {
-          plugins: [reactCompiler],
+          // n.b. Must be a string to ensure plugin resolution order. See https://github.com/actualbudget/actual/pull/5853
+          plugins: ['babel-plugin-react-compiler'],
         },
       }),
       viteTsconfigPaths({ root: '../..' }),
@@ -191,10 +215,12 @@ export default defineConfig(async ({ mode }) => {
       environment: 'jsdom',
       globals: true,
       setupFiles: './src/setupTests.js',
+      testTimeout: 10000,
       onConsoleLog(log: string, type: 'stdout' | 'stderr'): boolean | void {
         // print only console.error
         return type === 'stderr';
       },
+      maxWorkers: 2,
     },
   };
 });

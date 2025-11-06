@@ -317,6 +317,12 @@ export function KeyboardShortcutModal() {
             description: t('Add a new transaction'),
           },
           {
+            id: 'add-transaction-and-close',
+            shortcut: 'Enter',
+            meta: ctrl,
+            description: t('Add transaction and close form'),
+          },
+          {
             id: 'filter-transactions',
             shortcut: 'F',
             description: t('Filter transactions'),
@@ -446,28 +452,25 @@ export function KeyboardShortcutModal() {
               padding: '0 16px 16px 16px',
             }}
           >
-            <InitialFocus<HTMLInputElement>>
-              {ref => (
-                <Search
-                  inputRef={ref}
-                  value={searchText}
-                  isInModal
-                  onChange={text => {
-                    setSearchText(text);
-                    // Clear category selection when searching to search all shortcuts
-                    if (text && selectedCategoryId) {
-                      setSelectedCategoryId(null);
-                    }
-                  }}
-                  placeholder={t('Search shortcuts')}
-                  width="100%"
-                  style={{
-                    backgroundColor: theme.tableBackground,
-                    borderColor: theme.formInputBorder,
-                    marginBottom: 10,
-                  }}
-                />
-              )}
+            <InitialFocus>
+              <Search
+                value={searchText}
+                isInModal
+                onChange={text => {
+                  setSearchText(text);
+                  // Clear category selection when searching to search all shortcuts
+                  if (text && selectedCategoryId) {
+                    setSelectedCategoryId(null);
+                  }
+                }}
+                placeholder={t('Search shortcuts')}
+                width="100%"
+                style={{
+                  backgroundColor: theme.tableBackground,
+                  borderColor: theme.formInputBorder,
+                  marginBottom: 10,
+                }}
+              />
             </InitialFocus>
             <View
               style={{

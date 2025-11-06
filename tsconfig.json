@@ -52,7 +52,8 @@
     "**/dist/*",
     "**/lib-dist/*",
     "**/test-results/*",
-    "**/playwright-report/*"
+    "**/playwright-report/*",
+    "**/service-worker/*"
   ],
   "ts-node": {
     "compilerOptions": {

@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/api",
-  "version": "25.10.0",
+  "version": "25.11.0",
   "license": "MIT",
   "description": "An API for Actual",
   "engines": {
@@ -19,19 +19,19 @@
     "build:migrations": "cp migrations/*.sql dist/migrations",
     "build:default-db": "cp default-db.sqlite dist/",
     "build": "yarn run clean && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
-    "test": "yarn run build:app && yarn run build:crdt && vitest",
+    "test": "yarn run build:app && yarn run build:crdt && vitest --run",
     "clean": "rm -rf dist @types"
   },
   "dependencies": {
     "@actual-app/crdt": "workspace:^",
-    "better-sqlite3": "^12.2.0",
+    "better-sqlite3": "^12.4.1",
     "compare-versions": "^6.1.1",
     "node-fetch": "^3.3.2",
-    "uuid": "^11.1.0"
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "tsc-alias": "^1.8.16",
-    "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.6"
   }
 }

@@ -46,6 +46,7 @@ export const reportModel = {
       showOffBudget: row.show_offbudget === 1,
       showHiddenCategories: row.show_hidden === 1,
       showUncategorized: row.show_uncategorized === 1,
+      trimIntervals: row.trim_intervals === 1,
       includeCurrentInterval: row.include_current === 1,
       graphType: row.graph_type,
       conditions: row.conditions,
@@ -53,7 +54,7 @@ export const reportModel = {
     };
   },
 
-  fromJS(report: CustomReportEntity) {
+  fromJS(report: CustomReportEntity): CustomReportData {
     return {
       id: report.id,
       name: report.name,
@@ -63,13 +64,14 @@ export const reportModel = {
       date_range: report.dateRange,
       mode: report.mode,
       group_by: report.groupBy,
-      sort_by: report.sortBy,
+      sort_by: report.sortBy ?? 'desc',
       interval: report.interval,
       balance_type: report.balanceType,
       show_empty: report.showEmpty ? 1 : 0,
       show_offbudget: report.showOffBudget ? 1 : 0,
       show_hidden: report.showHiddenCategories ? 1 : 0,
       show_uncategorized: report.showUncategorized ? 1 : 0,
+      trim_intervals: report.trimIntervals ? 1 : 0,
       include_current: report.includeCurrentInterval ? 1 : 0,
       graph_type: report.graphType,
       conditions: report.conditions,

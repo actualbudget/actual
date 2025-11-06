@@ -51,6 +51,7 @@ type ReportSidebarProps = {
   setShowOffBudget: (value: boolean) => void;
   setShowHiddenCategories: (value: boolean) => void;
   setShowUncategorized: (value: boolean) => void;
+  setTrimIntervals: (value: boolean) => void;
   setIncludeCurrentInterval: (value: boolean) => void;
   setSelectedCategories: (value: CategoryEntity[]) => void;
   onChangeDates: (
@@ -87,6 +88,7 @@ export function ReportSidebar({
   setShowHiddenCategories,
   setIncludeCurrentInterval,
   setShowUncategorized,
+  setTrimIntervals,
   setSelectedCategories,
   onChangeDates,
   onReportChange,
@@ -407,6 +409,12 @@ export function ReportSidebar({
                     !customReportItems.showUncategorized,
                   );
                   setShowUncategorized(!customReportItems.showUncategorized);
+                } else if (type === 'trim-intervals') {
+                  setSessionReport(
+                    'trimIntervals',
+                    !customReportItems.trimIntervals,
+                  );
+                  setTrimIntervals(!customReportItems.trimIntervals);
                 }
               }}
               items={[
@@ -444,6 +452,14 @@ export function ReportSidebar({
                   text: t('Show uncategorized'),
                   tooltip: t('Show uncategorized transactions'),
                   toggle: customReportItems.showUncategorized,
+                },
+                {
+                  name: 'trim-intervals',
+                  text: t('Trim intervals'),
+                  tooltip: t(
+                    'Trim empty intervals at the start and end of the report',
+                  ),
+                  toggle: customReportItems.trimIntervals,
                 },
               ]}
             />

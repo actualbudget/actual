@@ -5,7 +5,7 @@ import { currentDay } from 'loot-core/shared/months';
 import {
   amountToInteger,
   type CurrencyAmount,
-  integerToCurrency,
+  integerToCurrencyWithDecimal,
 } from 'loot-core/shared/util';
 import {
   type AccountEntity,
@@ -58,11 +58,12 @@ export function serializeTransaction(
     date = null as unknown as string;
   }
 
+  // Convert with decimals here so the value doesn't lose decimals and formatter will show or hide them.
   return {
     ...transaction,
     date,
-    debit: debit != null ? integerToCurrency(debit) : '',
-    credit: credit != null ? integerToCurrency(credit) : '',
+    debit: debit != null ? integerToCurrencyWithDecimal(debit) : '',
+    credit: credit != null ? integerToCurrencyWithDecimal(credit) : '',
   };
 }
 

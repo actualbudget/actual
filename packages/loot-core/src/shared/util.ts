@@ -264,7 +264,7 @@ const NUMBER_FORMATS = [
   'comma-dot-in',
 ] as const;
 
-type NumberFormats = (typeof NUMBER_FORMATS)[number];
+export type NumberFormats = (typeof NUMBER_FORMATS)[number];
 
 function isNumberFormat(input: string = ''): input is NumberFormats {
   return (NUMBER_FORMATS as readonly string[]).includes(input);
@@ -277,7 +277,11 @@ export const numberFormats: Array<{
 }> = [
   { value: 'comma-dot', label: '1,000.33', labelNoFraction: '1,000' },
   { value: 'dot-comma', label: '1.000,33', labelNoFraction: '1.000' },
-  { value: 'space-comma', label: '1\xa0000,33', labelNoFraction: '1\xa0000' },
+  {
+    value: 'space-comma',
+    label: '1\u202F000,33',
+    labelNoFraction: '1\u202F000',
+  },
   { value: 'apostrophe-dot', label: '1’000.33', labelNoFraction: '1’000' },
   { value: 'comma-dot-in', label: '1,00,000.33', labelNoFraction: '1,00,000' },
 ];
@@ -326,8 +330,8 @@ export function getNumberFormat({
 
   switch (format) {
     case 'space-comma':
-      locale = 'en-SE';
-      thousandsSeparator = '\xa0';
+      locale = 'fr-FR';
+      thousandsSeparator = '\u202F';
       decimalSeparator = ',';
       break;
     case 'dot-comma':
@@ -428,6 +432,21 @@ export function integerToCurrency(
   const amount = safeNumber(integerAmount) / divisor;
 
   return formatter.format(amount);
+}
+
+export function integerToCurrencyWithDecimal(integerAmount: IntegerAmount) {
+  // If decimal digits exist, keep them. Otherwise format them as usual.
+  if (integerAmount % 100 !== 0) {
+    return integerToCurrency(
+      integerAmount,
+      getNumberFormat({
+        ...numberFormatConfig,
+        hideFraction: false,
+      }).formatter,
+    );
+  }
+
+  return integerToCurrency(integerAmount);
 }
 
 export function amountToCurrency(amount: Amount): CurrencyAmount {

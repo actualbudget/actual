@@ -590,7 +590,7 @@ export function CreateAccountModal({
                         </Trans>{' '}
                         {[
                           isGoCardlessSetupComplete ? '' : 'GoCardless',
-                          isSimpleFinSetupComplete ? '' : 'SimpleFin',
+                          isSimpleFinSetupComplete ? '' : 'SimpleFIN',
                           isPluggyAiSetupComplete ? '' : 'Pluggy.ai',
                         ]
                           .filter(Boolean)

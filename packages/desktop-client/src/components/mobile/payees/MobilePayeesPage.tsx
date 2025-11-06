@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -14,15 +14,20 @@ import { PayeesList } from './PayeesList';
 import { Search } from '@desktop-client/components/common/Search';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { usePayeeRuleCounts } from '@desktop-client/hooks/usePayeeRuleCounts';
 import { usePayees } from '@desktop-client/hooks/usePayees';
-import { useSelector } from '@desktop-client/redux';
+import { useUndo } from '@desktop-client/hooks/useUndo';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 export function MobilePayeesPage() {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const payees = usePayees();
+  const { showUndoNotification } = useUndo();
   const [filter, setFilter] = useState('');
-  const [ruleCounts, setRuleCounts] = useState(new Map<string, number>());
+  const { ruleCounts, isLoading: isRuleCountsLoading } = usePayeeRuleCounts();
   const isLoading = useSelector(
     s => s.payees.isPayeesLoading || s.payees.isCommonPayeesLoading,
   );
@@ -33,21 +38,18 @@ export function MobilePayeesPage() {
     return payees.filter(p => getNormalisedString(p.name).includes(norm));
   }, [payees, filter]);
 
-  const refetchRuleCounts = useCallback(async () => {
-    const counts = await send('payees-get-rule-counts');
-    const countsMap = new Map(Object.entries(counts));
-    setRuleCounts(countsMap);
-  }, []);
-
-  useEffect(() => {
-    refetchRuleCounts();
-  }, [refetchRuleCounts]);
-
   const onSearchChange = useCallback((value: string) => {
     setFilter(value);
   }, []);
 
   const handlePayeePress = useCallback(
+    (payee: PayeeEntity) => {
+      navigate(`/payees/${payee.id}`);
+    },
+    [navigate],
+  );
+
+  const handlePayeeRuleAction = useCallback(
     async (payee: PayeeEntity) => {
       // View associated rules for the payee
       if ((ruleCounts.get(payee.id) ?? 0) > 0) {
@@ -85,6 +87,30 @@ export function MobilePayeesPage() {
     [navigate, ruleCounts],
   );
 
+  const handlePayeeDelete = useCallback(
+    async (payee: PayeeEntity) => {
+      try {
+        await send('payees-batch-change', { deleted: [{ id: payee.id }] });
+        showUndoNotification({
+          message: t('Payee “{{name}}” deleted successfully', {
+            name: payee.name,
+          }),
+        });
+      } catch (error) {
+        console.error('Failed to delete payee:', error);
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: t('Failed to delete payee. Please try again.'),
+            },
+          }),
+        );
+      }
+    },
+    [dispatch, showUndoNotification, t],
+  );
+
   return (
     <Page header={<MobilePageHeader title={t('Payees')} />} padding={0}>
       <View
@@ -114,8 +140,11 @@ export function MobilePayeesPage() {
       <PayeesList
         payees={filteredPayees}
         ruleCounts={ruleCounts}
+        isRuleCountsLoading={isRuleCountsLoading}
         isLoading={isLoading}
         onPayeePress={handlePayeePress}
+        onPayeeDelete={handlePayeeDelete}
+        onPayeeRuleAction={handlePayeeRuleAction}
       />
     </Page>
   );

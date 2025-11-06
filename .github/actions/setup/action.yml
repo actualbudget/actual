@@ -15,9 +15,9 @@ runs:
   using: composite
   steps:
     - name: Install node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
-        node-version: 20
+        node-version: 22
     - name: Install yarn
       run: npm install -g yarn
       shell: bash
@@ -32,13 +32,23 @@ runs:
       with:
         path: ${{ format('{0}/**/node_modules', inputs.working-directory) }}
         key: yarn-v1-${{ runner.os }}-${{ steps.get-node.outputs.version }}-${{ hashFiles(format('{0}/**/yarn.lock', inputs.working-directory)) }}
+    - name: Ensure Lage cache directory exists
+      run: mkdir -p ${{ format('{0}/.lage', inputs.working-directory) }}
+      shell: bash
+    - name: Cache Lage
+      uses: actions/cache@v4
+      with:
+        path: ${{ format('{0}/.lage', inputs.working-directory) }}
+        key: lage-${{ runner.os }}-${{ github.sha }}
+        restore-keys: |
+          lage-${{ runner.os }}-
     - name: Install
       working-directory: ${{ inputs.working-directory }}
       run: yarn --immutable
       shell: bash
       if: steps.cache.outputs.cache-hit != 'true'
     - name: Download translations
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: actualbudget/translations
         path: ${{ inputs.working-directory }}/packages/desktop-client/locale

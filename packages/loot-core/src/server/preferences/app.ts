@@ -47,7 +47,10 @@ async function saveSyncedPrefs({
     return;
   }
 
-  await db.update('preferences', { id, value });
+  await db.update('preferences', {
+    id,
+    value,
+  });
 }
 
 async function getSyncedPrefs(): Promise<SyncedPrefs> {

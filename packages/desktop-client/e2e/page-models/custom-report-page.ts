@@ -29,10 +29,14 @@ export class CustomReportPage {
   async selectMode(mode: 'total' | 'time') {
     switch (mode) {
       case 'total':
-        await this.pageContent.getByRole('button', { name: 'Total' }).click();
+        await this.pageContent
+          .getByRole('button', { name: 'Total', exact: true })
+          .click();
         break;
       case 'time':
-        await this.pageContent.getByRole('button', { name: 'Time' }).click();
+        await this.pageContent
+          .getByRole('button', { name: 'Time', exact: true })
+          .click();
         break;
       default:
         throw new Error(`Unrecognized mode: ${mode}`);

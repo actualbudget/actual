@@ -1,5 +1,6 @@
 import globals from 'globals';
 
+import { defineConfig } from 'eslint/config';
 import pluginImport from 'eslint-plugin-import';
 import pluginJSXA11y from 'eslint-plugin-jsx-a11y';
 import pluginReact from 'eslint-plugin-react';
@@ -71,7 +72,7 @@ const confusingBrowserGlobals = [
   'top',
 ];
 
-export default pluginTypescript.config(
+export default defineConfig(
   {
     ignores: [
       'packages/api/app/bundle.api.js',
@@ -83,6 +84,8 @@ export default pluginTypescript.config(
       'packages/component-library/src/icons/**/*',
       'packages/desktop-client/bundle.browser.js',
       'packages/desktop-client/build/',
+      'packages/desktop-client/dev-dist/',
+      'packages/desktop-client/service-worker/*',
       'packages/desktop-client/build-electron/',
       'packages/desktop-client/build-stats/',
       'packages/desktop-client/public/kcab/',
@@ -98,6 +101,9 @@ export default pluginTypescript.config(
       'packages/loot-core/**/lib-dist/*',
       'packages/loot-core/**/proto/*',
       'packages/sync-server/build/',
+      'packages/sync-server/user-files/',
+      'packages/sync-server/server-files/',
+      'packages/plugins-service/dist/',
       '.yarn/*',
       '.github/*',
     ],

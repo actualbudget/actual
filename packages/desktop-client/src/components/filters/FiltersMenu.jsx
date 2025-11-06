@@ -8,7 +8,7 @@ import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Select } from '@actual-app/components/select';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -42,6 +42,7 @@ import { updateFilterReducer } from './updateFilterReducer';
 
 import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
 
 let isDatepickerClick = false;
@@ -68,6 +69,7 @@ function ConfigureField({
   onApply,
 }) {
   const { t } = useTranslation();
+  const format = useFormat();
   const [subfield, setSubfield] = useState(initialSubfield);
   const inputRef = useRef();
   const prevOp = useRef(null);
@@ -103,7 +105,7 @@ function ConfigureField({
   return (
     <FocusScope>
       <View style={{ marginBottom: 10 }}>
-        <Stack direction="row" align="flex-start">
+        <SpaceBetween style={{ alignItems: 'flex-start' }}>
           {field === 'amount' || field === 'date' ? (
             <Select
               options={
@@ -142,9 +144,7 @@ function ConfigureField({
               <View style={{ flexGrow: 1 }}>{titleFirst(mapField(field))}</View>
             </View>
           )}
-
-          <View style={{ flex: 1 }} />
-        </Stack>
+        </SpaceBetween>
       </View>
 
       <View
@@ -156,11 +156,9 @@ function ConfigureField({
         {field === 'saved' && t('Existing filters will be cleared')}
       </View>
 
-      <Stack
-        direction="row"
-        align="flex-start"
-        spacing={1}
-        style={{ flexWrap: 'wrap' }}
+      <SpaceBetween
+        gap={5}
+        style={{ alignItems: 'flex-start', marginBottom: 15 }}
       >
         {type === 'boolean' ? (
           <>
@@ -185,47 +183,56 @@ function ConfigureField({
           </>
         ) : (
           <>
-            <Stack
-              direction="row"
-              align="flex-start"
-              spacing={1}
-              style={{ flexWrap: 'wrap' }}
-            >
-              {ops.slice(0, 3).map(currOp => (
-                <OpButton
-                  key={currOp}
-                  op={currOp}
-                  isSelected={currOp === op}
-                  onPress={() => dispatch({ type: 'set-op', op: currOp })}
-                />
-              ))}
-            </Stack>
-            <Stack
-              direction="row"
-              align="flex-start"
-              spacing={1}
-              style={{ flexWrap: 'wrap' }}
-            >
-              {ops.slice(3, ops.length).map(currOp => (
-                <OpButton
-                  key={currOp}
-                  op={currOp}
-                  isSelected={currOp === op}
-                  onPress={() => dispatch({ type: 'set-op', op: currOp })}
-                />
-              ))}
-            </Stack>
+            {ops.slice(0, 3).map(currOp => (
+              <OpButton
+                key={currOp}
+                op={currOp}
+                isSelected={currOp === op}
+                onPress={() => dispatch({ type: 'set-op', op: currOp })}
+              />
+            ))}
+            {ops.slice(3, ops.length).map(currOp => (
+              <OpButton
+                key={currOp}
+                op={currOp}
+                isSelected={currOp === op}
+                onPress={() => dispatch({ type: 'set-op', op: currOp })}
+              />
+            ))}
           </>
         )}
-      </Stack>
+      </SpaceBetween>
 
       <Form
         onSubmit={e => {
           e.preventDefault();
+
+          let submitValue = value;
+
+          if (field === 'amount' && inputRef.current) {
+            try {
+              if (inputRef.current.getCurrentAmount) {
+                submitValue = inputRef.current.getCurrentAmount();
+              } else {
+                const rawValue = inputRef.current.value || '';
+                const parsed = format.fromEdit(rawValue, null);
+                if (parsed == null) {
+                  submitValue = value; // keep previous if parsing failed
+                } else {
+                  const opts = subfieldToOptions(field, subfield);
+                  submitValue =
+                    opts?.inflow || opts?.outflow ? Math.abs(parsed) : parsed;
+                }
+              }
+            } catch {
+              submitValue = value;
+            }
+          }
+
           onApply({
             field,
             op,
-            value,
+            value: submitValue,
             options: subfieldToOptions(field, subfield),
           });
         }}
@@ -233,8 +240,7 @@ function ConfigureField({
         {type !== 'boolean' && field !== 'payee' && (
           <GenericInput
             ref={inputRef}
-            field={field}
-            subfield={subfield}
+            field={field === 'date' ? subfield : field}
             type={
               type === 'id' &&
               (op === 'contains' ||
@@ -244,9 +250,13 @@ function ConfigureField({
                 ? 'string'
                 : type
             }
-            value={formattedValue}
+            numberFormatType="currency"
+            value={
+              formattedValue ?? (op === 'oneOf' || op === 'notOneOf' ? [] : '')
+            }
             multi={op === 'oneOf' || op === 'notOneOf'}
             op={op}
+            options={subfieldToOptions(field, subfield)}
             style={{ marginTop: 10 }}
             onChange={v => {
               dispatch({ type: 'set-value', value: v });
@@ -262,17 +272,18 @@ function ConfigureField({
           />
         )}
 
-        <Stack
-          direction="row"
-          justify="flex-end"
-          align="center"
-          style={{ marginTop: 15 }}
+        <SpaceBetween
+          style={{
+            marginTop: 15,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}
         >
           <View style={{ flex: 1 }} />
           <Button variant="primary" type="submit">
             <Trans>Apply</Trans>
           </Button>
-        </Stack>
+        </SpaceBetween>
       </Form>
     </FocusScope>
   );

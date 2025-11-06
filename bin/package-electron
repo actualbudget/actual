@@ -41,6 +41,7 @@ packages/desktop-client/bin/remove-untranslated-languages
 
 export NODE_OPTIONS="--max-old-space-size=4096"
 
+yarn workspace plugins-service build
 yarn workspace loot-core build:node
 yarn workspace @actual-app/web build --mode=desktop # electron specific build
 
@@ -61,14 +62,11 @@ yarn workspace desktop-electron update-client
         echo "Skipping exe build"
     else
       if [ "$RELEASE" == "production" ]; then
-          if [ -f ../../.secret-tokens ]; then
-              source ../../.secret-tokens
-          fi
           yarn build
 
           echo "Created release"
       else
-          SKIP_NOTARIZATION=true yarn build
+          yarn build
       fi
     fi
 )

@@ -100,6 +100,19 @@ global.Actual = {
   restartElectronServer: () => {},
 
   openFileDialog: async ({ filters = [] }) => {
+    const FILE_ACCEPT_OVERRIDES = {
+      // Safari on iOS requires explicit MIME/UTType values for some extensions to allow selection.
+      qfx: [
+        'application/vnd.intu.qfx',
+        'application/x-qfx',
+        'application/qfx',
+        'application/ofx',
+        'application/x-ofx',
+        'application/octet-stream',
+        'com.intuit.qfx',
+      ],
+    };
+
     return new Promise(resolve => {
       let createdElement = false;
       // Attempt to reuse an already-created file input.
@@ -117,7 +130,15 @@ global.Actual = {
 
       const filter = filters.find(filter => filter.extensions);
       if (filter) {
-        input.accept = filter.extensions.map(ext => '.' + ext).join(',');
+        input.accept = filter.extensions
+          .flatMap(ext => {
+            const normalizedExt = ext.startsWith('.')
+              ? ext.toLowerCase()
+              : `.${ext.toLowerCase()}`;
+            const overrides = FILE_ACCEPT_OVERRIDES[ext.toLowerCase()] ?? [];
+            return [normalizedExt, ...overrides];
+          })
+          .join(',');
       }
 
       input.style.position = 'absolute';
@@ -178,7 +199,6 @@ global.Actual = {
     // Wait for the app to reload
     await new Promise(() => {});
   },
-  updateAppMenu: () => {},
 
   ipcConnect: () => {},
   getServerSocket: async () => {
@@ -191,35 +211,3 @@ global.Actual = {
 
   moveBudgetDirectory: () => {},
 };
-
-function inputFocused(e) {
-  return (
-    e.target.tagName === 'INPUT' ||
-    e.target.tagName === 'TEXTAREA' ||
-    e.target.isContentEditable
-  );
-}
-
-document.addEventListener('keydown', e => {
-  if (e.metaKey || e.ctrlKey) {
-    // Cmd/Ctrl+o
-    if (e.key === 'o') {
-      e.preventDefault();
-      window.__actionsForMenu.closeBudget();
-    }
-    // Cmd/Ctrl+z
-    else if (e.key.toLowerCase() === 'z') {
-      if (inputFocused(e)) {
-        return;
-      }
-      e.preventDefault();
-      if (e.shiftKey) {
-        // Redo
-        window.__actionsForMenu.redo();
-      } else {
-        // Undo
-        window.__actionsForMenu.undo();
-      }
-    }
-  }
-});

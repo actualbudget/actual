@@ -12,7 +12,7 @@ jobs:
     if: github.repository == 'actualbudget/actual'
     steps:
       - name: Check out main repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: actual
       - name: Set up environment
@@ -44,7 +44,7 @@ jobs:
             push \
             actualbudget/actual
       - name: Check out updated translations
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ssh-key: ${{ secrets.STRING_IMPORT_DEPLOY_KEY }}
           repository: actualbudget/translations

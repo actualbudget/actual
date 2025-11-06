@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
 
@@ -7,12 +7,15 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
+import { q } from 'loot-core/shared/query';
 import { type RuleEntity, type NewRuleEntity } from 'loot-core/types/models';
 
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { RuleEditor } from '@desktop-client/components/rules/RuleEditor';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -23,9 +26,25 @@ export function MobileRuleEditPage() {
   const { id } = useParams<{ id?: string }>();
   const location = useLocation();
   const dispatch = useDispatch();
+  const { showUndoNotification } = useUndo();
 
   const [rule, setRule] = useState<RuleEntity | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { schedules = [] } = useSchedules({
+    query: useMemo(
+      () =>
+        rule?.id
+          ? q('schedules')
+              .filter({ rule: rule.id, completed: false })
+              .select('*')
+          : q('schedules').filter({ id: null }).select('*'), // Return empty result when no rule
+      [rule?.id],
+    ),
+  });
+
+  // Check if the current rule is linked to a schedule
+  const isLinkedToSchedule = schedules.length > 0;
 
   // Load rule by ID if we're in edit mode
   useEffect(() => {
@@ -75,6 +94,11 @@ export function MobileRuleEditPage() {
   };
 
   const handleSave = () => {
+    if (rule?.id) {
+      showUndoNotification({
+        message: t('Rule saved successfully'),
+      });
+    }
     // Navigate back to rules list
     navigate('/rules');
   };
@@ -98,14 +122,9 @@ export function MobileRuleEditPage() {
             onConfirm: async () => {
               try {
                 await send('rule-delete', id);
-                dispatch(
-                  addNotification({
-                    notification: {
-                      type: 'message',
-                      message: t('Rule deleted successfully'),
-                    },
-                  }),
-                );
+                showUndoNotification({
+                  message: t('Rule deleted successfully'),
+                });
                 navigate('/rules');
               } catch (error) {
                 console.error('Failed to delete rule:', error);
@@ -174,7 +193,7 @@ export function MobileRuleEditPage() {
         rule={defaultRule}
         onSave={handleSave}
         onCancel={handleCancel}
-        onDelete={isEditing ? handleDelete : undefined}
+        onDelete={isEditing && !isLinkedToSchedule ? handleDelete : undefined}
         style={{
           paddingTop: 10,
           flex: 1,

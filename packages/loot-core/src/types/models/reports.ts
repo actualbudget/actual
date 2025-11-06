@@ -17,6 +17,7 @@ export interface CustomReportEntity {
   showHiddenCategories: boolean;
   includeCurrentInterval: boolean;
   showUncategorized: boolean;
+  trimIntervals: boolean;
   graphType: string;
   conditions?: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
@@ -132,6 +133,7 @@ export interface CustomReportData {
   show_hidden: number;
   include_current: number;
   show_uncategorized: number;
+  trim_intervals: number;
   graph_type: string;
   conditions?: RuleConditionEntity[];
   conditions_op: 'and' | 'or';

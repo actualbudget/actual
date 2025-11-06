@@ -21,9 +21,6 @@ import * as appSlice from './app/appSlice';
 import { AuthProvider } from './auth/AuthProvider';
 import * as budgetSlice from './budget/budgetSlice';
 import * as budgetfilesSlice from './budgetfiles/budgetfilesSlice';
-// See https://github.com/WICG/focus-visible. Only makes the blue
-// focus outline appear from keyboard events.
-import 'focus-visible';
 import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
 import * as modalsSlice from './modals/modalsSlice';
@@ -65,11 +62,12 @@ async function uploadFile(filename: string, contents: ArrayBuffer) {
   });
 }
 
-function inputFocused() {
+function inputFocused(e: KeyboardEvent) {
+  const target = e.target as HTMLElement | null;
   return (
-    window.document.activeElement.tagName === 'INPUT' ||
-    window.document.activeElement.tagName === 'TEXTAREA' ||
-    (window.document.activeElement as HTMLElement).isContentEditable
+    target?.tagName === 'INPUT' ||
+    target?.tagName === 'TEXTAREA' ||
+    target?.isContentEditable === true
   );
 }
 
@@ -79,7 +77,6 @@ window.__actionsForMenu = {
   undo,
   redo,
   appFocused,
-  inputFocused,
   uploadFile,
 };
 
@@ -107,7 +104,6 @@ declare global {
       undo: typeof undo;
       redo: typeof redo;
       appFocused: typeof appFocused;
-      inputFocused: typeof inputFocused;
       uploadFile: typeof uploadFile;
     };
 
@@ -116,3 +112,27 @@ declare global {
     $q: typeof q;
   }
 }
+
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey) {
+    // Cmd/Ctrl+o
+    if (e.key === 'o') {
+      e.preventDefault();
+      window.__actionsForMenu.closeBudget();
+    }
+    // Cmd/Ctrl+z
+    else if (e.key.toLowerCase() === 'z') {
+      if (inputFocused(e)) {
+        return;
+      }
+      e.preventDefault();
+      if (e.shiftKey) {
+        // Redo
+        window.__actionsForMenu.redo();
+      } else {
+        // Undo
+        window.__actionsForMenu.undo();
+      }
+    }
+  }
+});

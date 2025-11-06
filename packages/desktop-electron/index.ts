@@ -346,6 +346,7 @@ async function createWindow() {
       contextIsolation: true,
       preload: __dirname + '/preload.js',
     },
+    autoHideMenuBar: true, // Alt key shows the menu
   });
 
   win.setBackgroundColor('#E8ECF0');
@@ -368,7 +369,6 @@ async function createWindow() {
 
   win.on('closed', () => {
     clientWin = null;
-    updateMenu();
     unlistenToState();
   });
 
@@ -409,12 +409,7 @@ async function createWindow() {
     }
   });
 
-  if (process.platform === 'win32') {
-    Menu.setApplicationMenu(null);
-    win.setMenu(getMenu(isDev, createWindow));
-  } else {
-    Menu.setApplicationMenu(getMenu(isDev, createWindow));
-  }
+  Menu.setApplicationMenu(getMenu());
 
   clientWin = win;
 
@@ -428,37 +423,6 @@ async function createWindow() {
 
 function isExternalUrl(url: string) {
   return !url.includes('localhost:') && !url.includes('app://');
-}
-
-function updateMenu(budgetId?: string) {
-  const isBudgetOpen = !!budgetId;
-  const menu = getMenu(isDev, createWindow, budgetId);
-  const file = menu.items.filter(item => item.label === 'File')[0];
-  const fileItems = file.submenu?.items || [];
-  fileItems
-    .filter(item => item.label === 'Load Backup...')
-    .forEach(item => {
-      item.enabled = isBudgetOpen;
-    });
-
-  const tools = menu.items.filter(item => item.label === 'Tools')[0];
-  tools.submenu?.items.forEach(item => {
-    item.enabled = isBudgetOpen;
-  });
-
-  const edit = menu.items.filter(item => item.label === 'Edit')[0];
-  const editItems = edit.submenu?.items || [];
-  editItems
-    .filter(item => item.label === 'Undo' || item.label === 'Redo')
-    .map(item => (item.enabled = isBudgetOpen));
-
-  if (process.platform === 'win32') {
-    if (clientWin) {
-      clientWin.setMenu(menu);
-    }
-  } else {
-    Menu.setApplicationMenu(menu);
-  }
 }
 
 app.setAppUserModelId('com.actualbudget.actual');
@@ -649,21 +613,6 @@ ipcMain.on('message', (_event, msg) => {
   }
 
   serverProcess.postMessage(msg.args);
-});
-
-ipcMain.on('screenshot', () => {
-  if (isDev) {
-    const width = 1100;
-
-    // This is for the main screenshot inside the frame
-    if (clientWin) {
-      clientWin.setSize(width, Math.floor(width * (427 / 623)));
-    }
-  }
-});
-
-ipcMain.on('update-menu', (_event, budgetId?: string) => {
-  updateMenu(budgetId);
 });
 
 ipcMain.on('set-theme', (_event, theme: string) => {

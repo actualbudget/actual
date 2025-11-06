@@ -1,31 +1,42 @@
-import {
-  MenuItemConstructorOptions,
-  Menu,
-  ipcMain,
-  app,
-  BrowserWindow,
-} from 'electron';
+import { MenuItemConstructorOptions, Menu, BrowserWindow, app } from 'electron';
 
-export function getMenu(
-  isDev: boolean,
-  createWindow: () => Promise<void>,
-  budgetId: string | undefined = undefined,
-) {
+export function getMenu() {
   const template: MenuItemConstructorOptions[] = [
     {
-      label: 'File',
+      label: 'File', // Kept purely for the keyboard shortcuts in Electron. Some shortcuts only work if they are in a menu (toggle devtools cannot be triggered in pure js).
       submenu: [
         {
-          label: 'Load Backup...',
-          enabled: false,
+          label: 'Exit',
           click(_item, focusedWindow) {
-            if (focusedWindow && budgetId) {
+            if (focusedWindow) {
               const browserWindow = focusedWindow as BrowserWindow;
-              if (browserWindow.webContents.getTitle() === 'Actual') {
-                browserWindow.webContents.executeJavaScript(
-                  `__actionsForMenu.replaceModal({ modal: { name: 'load-backup', options: { budgetId: '${budgetId}' } } })`,
-                );
-              }
+              browserWindow.close();
+            }
+          },
+        },
+      ],
+    },
+    {
+      label: 'View',
+      submenu: [
+        {
+          label: 'Reload',
+          accelerator: 'CmdOrCtrl+R',
+          click(_item, focusedWindow) {
+            if (focusedWindow) {
+              const browserWindow = focusedWindow as BrowserWindow;
+              browserWindow.reload();
+            }
+          },
+        },
+        {
+          label: 'Toggle Developer Tools',
+          accelerator:
+            process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+          click(_item, focusedWindow) {
+            if (focusedWindow) {
+              const browserWindow = focusedWindow as BrowserWindow;
+              browserWindow.webContents.toggleDevTools();
             }
           },
         },
@@ -33,23 +44,19 @@ export function getMenu(
           type: 'separator',
         },
         {
-          label: 'Manage files...',
-          accelerator: 'CmdOrCtrl+O',
-          click(_item, focusedWindow) {
-            if (focusedWindow) {
-              const browserWindow = focusedWindow as BrowserWindow;
-              if (browserWindow.webContents.getTitle() === 'Actual') {
-                browserWindow.webContents.executeJavaScript(
-                  '__actionsForMenu.closeBudget()',
-                );
-              } else {
-                focusedWindow.close();
-              }
-            } else {
-              // The default page is the budget list
-              createWindow();
-            }
-          },
+          role: 'resetZoom',
+        },
+        {
+          role: 'zoomIn',
+        },
+        {
+          role: 'zoomOut',
+        },
+        {
+          type: 'separator',
+        },
+        {
+          role: 'togglefullscreen',
         },
       ],
     },
@@ -63,8 +70,7 @@ export function getMenu(
           click: function (_menuItem, focusedWin) {
             // Undo
             if (focusedWin) {
-              const browserWindow = focusedWin as BrowserWindow;
-              browserWindow.webContents.executeJavaScript(
+              (focusedWin as BrowserWindow).webContents.executeJavaScript(
                 '__actionsForMenu.undo()',
               );
             }
@@ -77,8 +83,7 @@ export function getMenu(
           click: function (_menuItem, focusedWin) {
             // Redo
             if (focusedWin) {
-              const browserWindow = focusedWin as BrowserWindow;
-              browserWindow.webContents.executeJavaScript(
+              (focusedWin as BrowserWindow).webContents.executeJavaScript(
                 '__actionsForMenu.redo()',
               );
             }
@@ -108,69 +113,6 @@ export function getMenu(
       ],
     },
     {
-      label: 'View',
-      submenu: [
-        {
-          label: 'Reload',
-          accelerator: 'CmdOrCtrl+R',
-          click(_item, focusedWindow) {
-            if (focusedWindow) {
-              const browserWindow = focusedWindow as BrowserWindow;
-              browserWindow.reload();
-            }
-          },
-        },
-        {
-          label: 'Toggle Developer Tools',
-          accelerator:
-            process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
-          click(_item, focusedWindow) {
-            if (focusedWindow) {
-              const browserWindow = focusedWindow as BrowserWindow;
-              browserWindow.webContents.toggleDevTools();
-            }
-          },
-        },
-        isDev
-          ? {
-              type: 'separator',
-            }
-          : { label: 'hidden', visible: false },
-        {
-          role: 'resetZoom',
-        },
-        {
-          role: 'zoomIn',
-        },
-        {
-          role: 'zoomOut',
-        },
-        {
-          type: 'separator',
-        },
-        {
-          role: 'togglefullscreen',
-        },
-      ],
-    },
-    {
-      label: 'Tools',
-      submenu: [
-        {
-          label: 'Find schedules',
-          enabled: false,
-          click: function (_menuItem, focusedWin) {
-            if (focusedWin) {
-              const browserWindow = focusedWin as BrowserWindow;
-              browserWindow.webContents.executeJavaScript(
-                'window.__actionsForMenu && window.__actionsForMenu.pushModal({ modal: { name: "schedules-discover" } })',
-              );
-            }
-          },
-        },
-      ],
-    },
-    {
       role: 'window',
       submenu: [
         {
@@ -178,71 +120,14 @@ export function getMenu(
         },
       ],
     },
-    {
-      role: 'help',
-      submenu: [
-        {
-          label: 'Documentation',
-          click(_menuItem, focusedWin) {
-            if (focusedWin) {
-              const browserWindow = focusedWin as BrowserWindow;
-              browserWindow.webContents.executeJavaScript(
-                'window.open("https://actualbudget.org/docs", "_blank")',
-              );
-            }
-          },
-        },
-        {
-          label: 'Community Support (Discord)',
-          click(_menuItem, focusedWin) {
-            if (focusedWin) {
-              const browserWindow = focusedWin as BrowserWindow;
-              browserWindow.webContents.executeJavaScript(
-                'window.open("https://discord.gg/pRYNYr4W5A", "_blank")',
-              );
-            }
-          },
-        },
-        {
-          label: 'Keyboard Shortcuts',
-          accelerator: '?',
-          enabled: !!budgetId,
-          click: function (_menuItem, focusedWin) {
-            if (focusedWin) {
-              const browserWindow = focusedWin as BrowserWindow;
-              browserWindow.webContents.executeJavaScript(
-                'window.__actionsForMenu && !window.__actionsForMenu.inputFocused() && window.__actionsForMenu.pushModal({ modal: { name: "keyboard-shortcuts" } })',
-              );
-            }
-          },
-        },
-      ],
-    },
   ];
 
   if (process.platform === 'darwin') {
+    // Mac specific menu
     const name = app.getName();
     template.unshift({
       label: name,
       submenu: [
-        isDev
-          ? {
-              label: 'Screenshot',
-              click() {
-                ipcMain.emit('screenshot');
-              },
-            }
-          : { label: 'hidden', visible: false },
-        {
-          type: 'separator',
-        },
-        {
-          role: 'services',
-          submenu: [],
-        },
-        {
-          type: 'separator',
-        },
         {
           role: 'hide',
         },
@@ -260,25 +145,8 @@ export function getMenu(
         },
       ],
     });
-    // Edit menu.
-    const editIdx = template.findIndex(t => t.label === 'Edit');
-    (template[editIdx].submenu as MenuItemConstructorOptions[]).push(
-      {
-        type: 'separator',
-      },
-      {
-        label: 'Speech',
-        submenu: [
-          {
-            role: 'startSpeaking',
-          },
-          {
-            role: 'stopSpeaking',
-          },
-        ],
-      },
-    );
-    // Window menu.
+
+    // Window menu
     const windowIdx = template.findIndex(t => t.role === 'window');
     template[windowIdx].submenu = [
       {

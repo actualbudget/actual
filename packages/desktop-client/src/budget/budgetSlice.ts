@@ -3,6 +3,7 @@ import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
 import { send } from 'loot-core/platform/client/fetch';
+import { type IntegerAmount } from 'loot-core/shared/util';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
@@ -212,10 +213,28 @@ export const moveCategoryGroup = createAppAsyncThunk(
   },
 );
 
+function translateCategories(
+  categories: CategoryEntity[] | undefined,
+): CategoryEntity[] | undefined {
+  return categories?.map(cat => ({
+    ...cat,
+    name:
+      cat.name?.toLowerCase() === 'starting balances'
+        ? t('Starting Balances')
+        : cat.name,
+  }));
+}
+
 export const getCategories = createAppAsyncThunk(
   `${sliceName}/getCategories`,
   async () => {
     const categories: CategoryViews = await send('get-categories');
+    categories.list = translateCategories(categories.list) as CategoryEntity[];
+    categories.grouped.forEach(group => {
+      group.categories = translateCategories(
+        group.categories,
+      ) as CategoryEntity[];
+    });
     return categories;
   },
   {
@@ -233,6 +252,12 @@ export const reloadCategories = createAppAsyncThunk(
   `${sliceName}/reloadCategories`,
   async () => {
     const categories: CategoryViews = await send('get-categories');
+    categories.list = translateCategories(categories.list) as CategoryEntity[];
+    categories.grouped.forEach(group => {
+      group.categories = translateCategories(
+        group.categories,
+      ) as CategoryEntity[];
+    });
     return categories;
   },
 );
@@ -309,6 +334,7 @@ type ApplyBudgetActionPayload =
       args: {
         to: CategoryEntity['id'];
         from: CategoryEntity['id'];
+        amount?: IntegerAmount;
       };
     }
   | {
@@ -324,6 +350,7 @@ type ApplyBudgetActionPayload =
       month: string;
       args: {
         category: CategoryEntity['id'];
+        amount?: IntegerAmount;
       };
     }
   | {
@@ -471,6 +498,7 @@ export const applyBudgetAction = createAppAsyncThunk(
           month,
           to: args.to,
           from: args.from,
+          amount: args.amount,
         });
         break;
       case 'transfer-available':
@@ -484,6 +512,7 @@ export const applyBudgetAction = createAppAsyncThunk(
         await send('budget/cover-overbudgeted', {
           month,
           category: args.category,
+          amount: args.amount,
         });
         break;
       case 'transfer-category':
@@ -556,6 +585,7 @@ export const getCategoriesById = memoizeOne(
         res[cat.id] = cat;
       });
     });
+
     return res;
   },
 );
@@ -584,6 +614,12 @@ function _loadCategories(
   categories: BudgetState['categories'],
 ) {
   state.categories = categories;
+  categories.list = translateCategories(categories.list) as CategoryEntity[];
+  categories.grouped.forEach(group => {
+    group.categories = translateCategories(
+      group.categories,
+    ) as CategoryEntity[];
+  });
   state.isCategoriesLoading = false;
   state.isCategoriesLoaded = true;
   state.isCategoriesDirty = false;
