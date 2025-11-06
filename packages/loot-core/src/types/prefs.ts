@@ -4,49 +4,52 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
-  | 'plugins';
+  | 'plugins'
+  | 'budgetViews';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
+ * Note: Values are stored as JSON strings in the database and need to be parsed.
  */
 export type SyncedPrefs = Partial<
-  Record<
-    | 'budgetType'
-    | 'upcomingScheduledTransactionLength'
-    | 'firstDayOfWeekIdx'
-    | 'dateFormat'
-    | 'numberFormat'
-    | 'hideFraction'
-    | 'isPrivacyEnabled'
-    | 'currencySymbolPosition'
-    | 'currencySpaceBetweenAmountAndSymbol'
-    | 'defaultCurrencyCode'
-    | 'plugins'
-    | `show-account-${string}-net-worth-chart`
-    | `side-nav.show-balance-history-${string}`
-    | `show-balances-${string}`
-    | `show-extra-balances-${string}`
-    | `hide-cleared-${string}`
-    | `hide-reconciled-${string}`
-    // TODO: pull from src/components/modals/ImportTransactions.js
-    | `parse-date-${string}-${'csv' | 'qif'}`
-    | `csv-mappings-${string}`
-    | `csv-delimiter-${string}`
-    | `csv-skip-lines-${string}`
-    | `csv-in-out-mode-${string}`
-    | `csv-out-value-${string}`
-    | `csv-has-header-${string}`
-    | `custom-sync-mappings-${string}`
-    | `sync-import-pending-${string}`
-    | `sync-reimport-deleted-${string}`
-    | `sync-import-notes-${string}`
-    | `sync-import-transactions-${string}`
-    | `ofx-fallback-missing-payee-${string}`
-    | `flip-amount-${string}-${'csv' | 'qif'}`
-    | `flags.${FeatureFlag}`
-    | `learn-categories`,
-    string
-  >
+  {
+    budgetType?: string;
+    upcomingScheduledTransactionLength?: string;
+    firstDayOfWeekIdx?: string;
+    dateFormat?: string;
+    numberFormat?: string;
+    hideFraction?: string;
+    isPrivacyEnabled?: string;
+    currencySymbolPosition?: string;
+    currencySpaceBetweenAmountAndSymbol?: string;
+    defaultCurrencyCode?: string;
+    plugins?: string;
+    'budget.budgetViewMap'?: string; // JSON string of Record<string, string[]>
+    'budget.customBudgetViews'?: string; // JSON string of Array<{ id: string; name: string }>
+    'learn-categories'?: string;
+  } & Record<`show-account-${string}-net-worth-chart`, string>
+  & Record<`side-nav.show-balance-history-${string}`, string>
+  & Record<`show-balances-${string}`, string>
+  & Record<`show-extra-balances-${string}`, string>
+  & Record<`hide-cleared-${string}`, string>
+  & Record<`hide-reconciled-${string}`, string>
+  & Record<`parse-date-${string}-${'csv' | 'qif'}`, string>
+  & Record<`csv-mappings-${string}`, string>
+  & Record<`csv-delimiter-${string}`, string>
+  & Record<`csv-skip-start-lines-${string}`, string>
+  & Record<`csv-skip-end-lines-${string}`, string>
+  & Record<`csv-in-out-mode-${string}`, string>
+  & Record<`csv-out-value-${string}`, string>
+  & Record<`csv-has-header-${string}`, string>
+  & Record<`custom-sync-mappings-${string}`, string>
+  & Record<`sync-import-pending-${string}`, string>
+  & Record<`sync-reimport-deleted-${string}`, string>
+  & Record<`sync-import-notes-${string}`, string>
+  & Record<`sync-import-transactions-${string}`, string>
+  & Record<`ofx-fallback-missing-payee-${string}`, string>
+  & Record<`flip-amount-${string}-${'csv' | 'qif'}`, string>
+  & Record<`flags.${FeatureFlag}`, string>
+  & Record<string, string>
 >;
 
 /**
