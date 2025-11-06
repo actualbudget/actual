@@ -483,6 +483,16 @@ export type Modal =
       };
     }
   | {
+      name: 'convert-to-schedule';
+      options: {
+        onConfirm: () => void;
+        onCancel?: () => void;
+        isBeyondWindow?: boolean;
+        daysUntilTransaction?: number;
+        upcomingDays?: number;
+      };
+    }
+  | {
       name: 'confirm-delete';
       options: {
         message: string;
