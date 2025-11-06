@@ -96,7 +96,6 @@ __metadata:
     "@types/express-actuator": "npm:^1.8.3"
     "@types/node": "npm:^22.18.11"
     "@types/supertest": "npm:^6.0.3"
-    "@vitest/coverage-v8": "npm:3.2.4"
     akahu: "npm:^2.2.0"
     bcrypt: "npm:^6.0.0"
     better-sqlite3: "npm:^12.4.1"
