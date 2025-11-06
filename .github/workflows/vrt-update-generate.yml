@@ -22,7 +22,7 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-jammy
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
@@ -82,7 +82,7 @@ jobs:
 
       - name: Upload patch artifact
         if: steps.create-patch.outputs.has_changes == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: vrt-patch-${{ github.event.pull_request.number }}
           path: vrt-update.patch
@@ -98,7 +98,7 @@ jobs:
 
       - name: Upload PR metadata
         if: steps.create-patch.outputs.has_changes == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: vrt-metadata-${{ github.event.pull_request.number }}
           path: pr-metadata/

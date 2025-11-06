@@ -12,7 +12,7 @@ jobs:
     name: Build and pack npm packages
     if: github.event.repository.fork == false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up environment
         uses: ./.github/actions/setup
@@ -49,7 +49,7 @@ jobs:
           yarn workspace @actual-app/api pack --filename @actual-app/api.tgz
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: npm-packages
           path: |
@@ -66,12 +66,12 @@ jobs:
       packages: write
     steps:
       - name: Download the artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: npm-packages
 
       - name: Setup node and npm registry
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'

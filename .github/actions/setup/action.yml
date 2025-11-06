@@ -15,7 +15,7 @@ runs:
   using: composite
   steps:
     - name: Install node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: 22
     - name: Install yarn
@@ -48,7 +48,7 @@ runs:
       shell: bash
       if: steps.cache.outputs.cache-hit != 'true'
     - name: Download translations
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: actualbudget/translations
         path: ${{ inputs.working-directory }}/packages/desktop-client/locale
