@@ -3,7 +3,6 @@ import { Form } from 'react-aria-components';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -56,22 +55,23 @@ export function SaveReportChoose({ onApply }: SaveReportChooseProps) {
           onChange={(v: string) => setValue(v)}
         />
 
-        <Stack
-          direction="row"
-          justify="flex-end"
-          align="center"
-          style={{ marginTop: 15 }}
+        <View
+          style={{
+            marginTop: 15,
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}
         >
-          <View style={{ flex: 1 }} />
           <Button variant="primary" type="submit">
             <Trans>Apply</Trans>
           </Button>
-        </Stack>
+        </View>
       </Form>
       {err !== '' ? (
-        <Stack direction="row" align="center" style={{ padding: 10 }}>
+        <View style={{ padding: 10, alignItems: 'center' }}>
           <Text style={{ color: theme.errorText }}>{err}</Text>
-        </Stack>
+        </View>
       ) : (
         <View />
       )}

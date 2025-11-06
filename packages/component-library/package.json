@@ -16,7 +16,7 @@
     "@types/react": "^19.2.2",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.6"
   },
   "exports": {
     "./hooks/*": "./src/hooks/*.ts",
@@ -40,7 +40,6 @@
     "./popover": "./src/Popover.tsx",
     "./select": "./src/Select.tsx",
     "./space-between": "./src/SpaceBetween.tsx",
-    "./stack": "./src/Stack.tsx",
     "./styles": "./src/styles.ts",
     "./text": "./src/Text.tsx",
     "./text-one-line": "./src/TextOneLine.tsx",

@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -109,7 +109,7 @@ export function UnmigrateBudgetAutomationsModal({
       }}
     >
       {({ state: { close } }) => (
-        <Stack direction="column" style={{ height: '100%' }} spacing={3}>
+        <SpaceBetween direction="vertical" style={{ height: '100%' }}>
           <ModalHeader
             title={t('Un-migrate automations: {{category}}', {
               category: category?.name,
@@ -127,7 +127,10 @@ export function UnmigrateBudgetAutomationsModal({
               <AnimatedLoading style={{ width: 20, height: 20 }} />
             </View>
           ) : (
-            <Stack spacing={3} style={{ overflowY: 'auto', flex: 1 }}>
+            <SpaceBetween
+              direction="vertical"
+              style={{ overflowY: 'auto', flex: 1 }}
+            >
               <View style={{ display: 'inline-block', minHeight: 'unset' }}>
                 <Trans>
                   If the automation UI isn&apos;t working for you, you can
@@ -161,9 +164,9 @@ export function UnmigrateBudgetAutomationsModal({
                 })}
                 onChange={setEditedNotes}
               />
-            </Stack>
+            </SpaceBetween>
           )}
-          <Stack direction="row" justify="flex-end" spacing={2}>
+          <SpaceBetween gap={10} style={{ justifyContent: 'flex-end' }}>
             <Button onPress={() => close()}>
               <Trans>Cancel</Trans>
             </Button>
@@ -179,8 +182,8 @@ export function UnmigrateBudgetAutomationsModal({
               )}
               <Trans>Save notes & un-migrate</Trans>
             </Button>
-          </Stack>
-        </Stack>
+          </SpaceBetween>
+        </SpaceBetween>
       )}
     </Modal>
   );

@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "25.10.0",
+  "version": "25.11.0",
   "license": "MIT",
   "files": [
     "build"
@@ -82,7 +82,7 @@
     "vite": "^7.1.11",
     "vite-plugin-pwa": "^1.1.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.6",
     "xml2js": "^0.6.2"
   },
   "scripts": {

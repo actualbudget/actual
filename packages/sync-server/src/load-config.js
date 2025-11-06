@@ -205,8 +205,7 @@ const configSchema = convict({
     },
     issuer: {
       doc: 'OpenID issuer',
-      format: Object,
-      default: {},
+
       name: {
         doc: 'Name of the provider',
         default: '',

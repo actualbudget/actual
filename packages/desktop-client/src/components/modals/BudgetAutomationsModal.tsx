@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import uniqueId from 'lodash/uniqueId';
@@ -73,8 +73,9 @@ function BudgetAutomationList({
   };
 
   return (
-    <Stack
-      spacing={4}
+    <SpaceBetween
+      direction="vertical"
+      gap={20}
       style={{
         overflowY: 'scroll',
         ...style,
@@ -100,7 +101,7 @@ function BudgetAutomationList({
       <Button onPress={onAdd}>
         <Trans>Add new automation</Trans>
       </Button>
-    </Stack>
+    </SpaceBetween>
   );
 }
 
@@ -130,7 +131,7 @@ function BudgetAutomationMigrationWarning({
 
   return (
     <Warning style={style}>
-      <Stack style={{ minHeight: 'unset' }}>
+      <SpaceBetween direction="vertical" style={{ minHeight: 'unset' }}>
         <View>
           <Trans>
             This category uses notes-based automations (formerly “budget
@@ -156,7 +157,7 @@ function BudgetAutomationMigrationWarning({
             </View>
           </Trans>
         </View>
-      </Stack>
+      </SpaceBetween>
     </Warning>
   );
 }
@@ -209,7 +210,7 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
       }}
     >
       {({ state: { close } }) => (
-        <Stack direction="column" style={{ height: '100%' }}>
+        <SpaceBetween direction="vertical" style={{ height: '100%' }}>
           <ModalHeader
             title={t('Budget automations: {{category}}', {
               category: currentCategory?.name,
@@ -231,7 +232,7 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
               <AnimatedLoading style={{ width: 20, height: 20 }} />
             </View>
           ) : (
-            <Stack>
+            <SpaceBetween direction="vertical">
               {needsMigration && (
                 <BudgetAutomationMigrationWarning categoryId={categoryId} />
               )}
@@ -246,14 +247,15 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
                 schedules={schedules}
                 categories={categories}
               />
-            </Stack>
+            </SpaceBetween>
           )}
           <View style={{ flexGrow: 1 }} />
-          <Stack
-            direction="row"
-            justify="flex-end"
-            align="center"
-            style={{ marginTop: 20 }}
+          <SpaceBetween
+            style={{
+              marginTop: 20,
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+            }}
           >
             {!needsMigration && (
               <Link
@@ -280,8 +282,8 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
             <Button variant="primary" onPress={() => onSave(close)}>
               <Trans>Save</Trans>
             </Button>
-          </Stack>
-        </Stack>
+          </SpaceBetween>
+        </SpaceBetween>
       )}
     </Modal>
   );

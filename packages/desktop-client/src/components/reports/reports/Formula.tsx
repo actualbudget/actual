@@ -2,6 +2,7 @@ import {
   useState,
   useRef,
   useCallback,
+  useMemo,
   Suspense,
   lazy,
   type ChangeEvent,
@@ -92,12 +93,8 @@ function FormulaInner({ widget }: FormulaInnerProps) {
     error,
   } = useFormulaExecution(formula, queriesRef.current, queriesVersion);
 
-  // Execute color formula with access to main result via named expression
-  const { result: colorResult, error: colorError } = useFormulaExecution(
-    colorFormula,
-    queriesRef.current,
-    queriesVersion,
-    {
+  const colorVariables = useMemo(
+    () => ({
       RESULT: result ?? 0,
       ...Object.entries(themeColors).reduce(
         (acc, [key, value]) => {
@@ -106,7 +103,14 @@ function FormulaInner({ widget }: FormulaInnerProps) {
         },
         {} as Record<string, string>,
       ),
-    },
+    }),
+    [result, themeColors],
+  );
+  const { result: colorResult, error: colorError } = useFormulaExecution(
+    colorFormula,
+    queriesRef.current,
+    queriesVersion,
+    colorVariables,
   );
 
   const handleQueriesChange = useCallback(
@@ -387,16 +391,7 @@ function FormulaInner({ widget }: FormulaInnerProps) {
               <Suspense fallback={<div style={{ height: 32 }} />}>
                 <FormulaEditor
                   value={colorFormula}
-                  variables={{
-                    RESULT: result ?? 0,
-                    ...Object.entries(themeColors).reduce(
-                      (acc, [key, value]) => {
-                        acc[`theme_${key}`] = value;
-                        return acc;
-                      },
-                      {} as Record<string, string>,
-                    ),
-                  }}
+                  variables={colorVariables}
                   onChange={setColorFormula}
                   mode="query"
                   queries={queriesRef.current}
