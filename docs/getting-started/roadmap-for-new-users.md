@@ -33,14 +33,5 @@ However, if you are adventurous or somewhat technical, please go directly to the
 
 ## I am technical and have no issues running a service on my own.
 
-Then you are in luck. We have guides for the following systems:
-
-* [Docker installation](/docs/install/docker)
-* [Fly.io installation](/docs/install/fly)
-* [Build from source](/docs/install/build-from-source)
-
-There is also an external guide explaining how to install Actual on:
-
-* [Synology NAS](https://mariushosting.com/how-to-install-actual-on-your-synology-nas/) by Mariushosting.
-* [Home Assistant](https://github.com/sztupy/hassio-actualbudget) by Zsolt Sz. Sztupák.
+Check out [Running a Server](/docs/install/#running-a-server) from the Installation guide.
 
