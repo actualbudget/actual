@@ -3,7 +3,7 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -576,15 +576,16 @@ function AccountCard({
   );
 
   return (
-    <Stack
-      direction="column"
-      spacing={2}
+    <SpaceBetween
+      direction="vertical"
+      gap={10}
       style={{
         backgroundColor: theme.tableBackground,
         borderRadius: 8,
         padding: '12px 16px',
         border: `1px solid ${theme.tableBorder}`,
         minHeight: 'fit-content',
+        alignItems: 'stretch',
       }}
     >
       <View
@@ -624,9 +625,9 @@ function AccountCard({
         </PrivacyFilter>
       </View>
 
-      <Stack
-        direction="row"
-        spacing={1}
+      <SpaceBetween
+        direction="horizontal"
+        gap={5}
         style={{
           fontSize: '0.9em',
           color: theme.pageTextSubdued,
@@ -644,7 +645,7 @@ function AccountCard({
             <Trans>Not linked</Trans>
           </Text>
         )}
-      </Stack>
+      </SpaceBetween>
 
       {focusedField === 'account' && (
         <View style={{ marginBottom: 12 }}>
@@ -666,34 +667,34 @@ function AccountCard({
         </View>
       )}
 
-      <View style={{ display: 'flex', justifyContent: 'center' }}>
-        {chosenAccount ? (
-          <Button
-            onPress={() => {
-              onSetLinkedAccount(externalAccount, null);
-            }}
-            style={{
-              padding: '8px 16px',
-              fontSize: '0.9em',
-            }}
-          >
-            <Trans>Remove bank sync</Trans>
-          </Button>
-        ) : (
-          <Button
-            variant="primary"
-            onPress={() => {
-              setFocusedField('account');
-            }}
-            style={{
-              padding: '8px 16px',
-              fontSize: '0.9em',
-            }}
-          >
-            <Trans>Link account</Trans>
-          </Button>
-        )}
-      </View>
-    </Stack>
+      {chosenAccount ? (
+        <Button
+          onPress={() => {
+            onSetLinkedAccount(externalAccount, null);
+          }}
+          style={{
+            padding: '8px 16px',
+            fontSize: '0.9em',
+            width: '100%',
+          }}
+        >
+          <Trans>Remove bank sync</Trans>
+        </Button>
+      ) : (
+        <Button
+          variant="primary"
+          onPress={() => {
+            setFocusedField('account');
+          }}
+          style={{
+            padding: '8px 16px',
+            fontSize: '0.9em',
+            width: '100%',
+          }}
+        >
+          <Trans>Link account</Trans>
+        </Button>
+      )}
+    </SpaceBetween>
   );
 }
