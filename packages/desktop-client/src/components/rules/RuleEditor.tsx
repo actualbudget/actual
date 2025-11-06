@@ -321,12 +321,11 @@ function ConditionEditor({
     );
   } else {
     valueEditor = (
-      // @ts-expect-error fix this
       <GenericInput
         key={inputKey}
         field={field}
         type={type}
-        value={value}
+        value={value ?? ''}
         op={op}
         multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
@@ -535,12 +534,15 @@ function ActionEditor({
                   onChange={v => onChange('formula', v, { formula: true })}
                 />
               ) : (
-                // @ts-expect-error fix this
                 <GenericInput
                   key={inputKey}
+                  // @ts-expect-error fix this
                   field={field}
+                  // @ts-expect-error fix this
                   type={templated ? 'string' : type}
+                  // @ts-expect-error fix this
                   op={op}
+                  // @ts-expect-error fix this
                   value={options?.template ?? value}
                   onChange={v => onChange('value', v)}
                   numberFormatType="currency"
@@ -644,9 +646,9 @@ function ActionEditor({
             }}
           >
             {options.method !== 'remainder' && (
-              // @ts-expect-error fix this
               <GenericInput
                 key={inputKey}
+                // @ts-expect-error fix this
                 field={field}
                 op={op}
                 type="number"
@@ -680,9 +682,9 @@ function ActionEditor({
           />
 
           <View style={{ flex: 1 }}>
-            {/* @ts-expect-error fix this */}
             <GenericInput
               key={inputKey}
+              // @ts-expect-error fix this
               field={field}
               type="string"
               op={op}
