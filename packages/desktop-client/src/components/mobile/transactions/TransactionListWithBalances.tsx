@@ -17,6 +17,7 @@ import {
   CellValue,
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
+import { DisplayPayeeProvider } from '@desktop-client/hooks/useDisplayPayee';
 import {
   SelectedProvider,
   useSelected,
@@ -114,8 +115,8 @@ export function TransactionListWithBalances({
   const selectedInst = useSelected('transactions', [...transactions], []);
 
   return (
-    <SelectedProvider instance={selectedInst}>
-      <>
+    <DisplayPayeeProvider transactions={transactions}>
+      <SelectedProvider instance={selectedInst}>
         <View
           style={{
             flexShrink: 0,
@@ -158,8 +159,8 @@ export function TransactionListWithBalances({
             showMakeTransfer={showMakeTransfer}
           />
         </PullToRefresh>
-      </>
-    </SelectedProvider>
+      </SelectedProvider>
+    </DisplayPayeeProvider>
   );
 }
 

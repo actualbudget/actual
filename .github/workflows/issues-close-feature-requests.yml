@@ -13,12 +13,12 @@ jobs:
         with:
           labels: needs votes
       - name: Add reactions
-        uses: aidan-mundy/react-to-issue@v1.1.1
+        uses: aidan-mundy/react-to-issue@v1
         with:
           issue-number: ${{ github.event.issue.number }}
           reactions: '+1'
       - name: Create comment
-        uses: peter-evans/create-or-update-comment@v3
+        uses: peter-evans/create-or-update-comment@v5
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |

@@ -10,7 +10,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -199,8 +199,11 @@ export function ImportTransactionsModal({
     prefs[`csv-delimiter-${accountId}`] ||
       (filename.endsWith('.tsv') ? '\t' : ','),
   );
-  const [skipLines, setSkipLines] = useState(
-    parseInt(prefs[`csv-skip-lines-${accountId}`], 10) || 0,
+  const [skipStartLines, setSkipStartLines] = useState(
+    parseInt(prefs[`csv-skip-start-lines-${accountId}`], 10) || 0,
+  );
+  const [skipEndLines, setSkipEndLines] = useState(
+    parseInt(prefs[`csv-skip-end-lines-${accountId}`], 10) || 0,
   );
   const [inOutMode, setInOutMode] = useState(
     String(prefs[`csv-in-out-mode-${accountId}`]) === 'true',
@@ -454,7 +457,8 @@ export function ImportTransactionsModal({
     const parseOptions = getParseOptions(fileType, {
       delimiter,
       hasHeaderRow,
-      skipLines,
+      skipStartLines,
+      skipEndLines,
       fallbackMissingPayeeToMemo,
       importNotes,
     });
@@ -464,7 +468,8 @@ export function ImportTransactionsModal({
     originalFileName,
     delimiter,
     hasHeaderRow,
-    skipLines,
+    skipStartLines,
+    skipEndLines,
     fallbackMissingPayeeToMemo,
     importNotes,
     parse,
@@ -510,7 +515,8 @@ export function ImportTransactionsModal({
     const parseOptions = getParseOptions(fileType, {
       delimiter,
       hasHeaderRow,
-      skipLines,
+      skipStartLines,
+      skipEndLines,
       fallbackMissingPayeeToMemo,
       importNotes,
     });
@@ -674,7 +680,10 @@ export function ImportTransactionsModal({
       });
       savePrefs({ [`csv-delimiter-${accountId}`]: delimiter });
       savePrefs({ [`csv-has-header-${accountId}`]: String(hasHeaderRow) });
-      savePrefs({ [`csv-skip-lines-${accountId}`]: String(skipLines) });
+      savePrefs({
+        [`csv-skip-start-lines-${accountId}`]: String(skipStartLines),
+      });
+      savePrefs({ [`csv-skip-end-lines-${accountId}`]: String(skipEndLines) });
       savePrefs({ [`csv-in-out-mode-${accountId}`]: String(inOutMode) });
       savePrefs({ [`csv-out-value-${accountId}`]: String(outValue) });
     }
@@ -939,11 +948,9 @@ export function ImportTransactionsModal({
           {/*Import Options */}
           {(filetype === 'qif' || filetype === 'csv') && (
             <View style={{ marginTop: 10 }}>
-              <Stack
-                direction="row"
-                align="flex-start"
-                spacing={1}
-                style={{ marginTop: 5 }}
+              <SpaceBetween
+                gap={5}
+                style={{ marginTop: 5, alignItems: 'flex-start' }}
               >
                 {/* Date Format */}
                 <View>
@@ -994,13 +1001,34 @@ export function ImportTransactionsModal({
                         alignItems: 'baseline',
                       }}
                     >
-                      <Trans>Skip lines:</Trans>
+                      <Trans>Skip start lines:</Trans>
                       <Input
                         type="number"
-                        value={skipLines}
+                        value={skipStartLines}
                         min="0"
+                        step="1"
                         onChangeValue={value => {
-                          setSkipLines(+value);
+                          setSkipStartLines(Math.abs(parseInt(value, 10) || 0));
+                        }}
+                        style={{ width: 50 }}
+                      />
+                    </label>
+                    <label
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        gap: 5,
+                        alignItems: 'baseline',
+                      }}
+                    >
+                      <Trans>Skip end lines:</Trans>
+                      <Input
+                        type="number"
+                        value={skipEndLines}
+                        min="0"
+                        step="1"
+                        onChangeValue={value => {
+                          setSkipEndLines(Math.abs(parseInt(value, 10) || 0));
                         }}
                         style={{ width: 50 }}
                       />
@@ -1081,7 +1109,7 @@ export function ImportTransactionsModal({
                     </>
                   )}
                 </View>
-              </Stack>
+              </SpaceBetween>
             </View>
           )}
 
@@ -1127,8 +1155,8 @@ export function ImportTransactionsModal({
 
 function getParseOptions(fileType: string, options: ParseFileOptions = {}) {
   if (fileType === 'csv') {
-    const { delimiter, hasHeaderRow, skipLines } = options;
-    return { delimiter, hasHeaderRow, skipLines };
+    const { delimiter, hasHeaderRow, skipStartLines, skipEndLines } = options;
+    return { delimiter, hasHeaderRow, skipStartLines, skipEndLines };
   }
   if (isOfxFile(fileType)) {
     const { fallbackMissingPayeeToMemo, importNotes } = options;

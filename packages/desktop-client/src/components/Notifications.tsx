@@ -14,7 +14,7 @@ import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgDelete } from '@actual-app/components/icons/v0';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -37,7 +37,7 @@ function compileMessage(
   onRemove?: () => void,
 ) {
   return (
-    <Stack spacing={2}>
+    <SpaceBetween direction="vertical" gap={10}>
       {message.split(/\n\n/).map((paragraph, idx) => {
         const parts = paragraph.split(/(\[[^\]]*\]\([^)]*\))/g);
 
@@ -84,7 +84,7 @@ function compileMessage(
           </Text>
         );
       })}
-    </Stack>
+    </SpaceBetween>
   );
 }
 
@@ -180,11 +180,11 @@ function Notification({
       }}
       {...swipeHandlers}
     >
-      <Stack
-        align="center"
-        justify="space-between"
-        direction="row"
+      <SpaceBetween
+        wrap={false}
         style={{
+          alignItems: 'center',
+          justifyContent: 'space-between',
           padding: '14px 14px',
           ...styles.mediumText,
           backgroundColor: positive
@@ -204,7 +204,7 @@ function Notification({
           '& a': { color: 'currentColor' },
         }}
       >
-        <Stack align="flex-start">
+        <SpaceBetween direction="vertical" style={{ alignItems: 'flex-start' }}>
           {title && (
             <View
               style={{
@@ -269,7 +269,7 @@ function Notification({
               {button.title}
             </ButtonWithLoading>
           )}
-        </Stack>
+        </SpaceBetween>
         <Button
           variant="bare"
           aria-label={t('Close')}
@@ -278,7 +278,7 @@ function Notification({
         >
           <SvgDelete style={{ width: 10, height: 10 }} />
         </Button>
-      </Stack>
+      </SpaceBetween>
       {overlayLoading && (
         <View
           style={{
