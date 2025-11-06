@@ -433,7 +433,8 @@ export function SelectLinkedAccountsModal({
 type ExternalAccount =
   | SyncServerGoCardlessAccount
   | SyncServerSimpleFinAccount
-  | SyncServerPluggyAiAccount;
+  | SyncServerPluggyAiAccount
+  | SyncServerAkahuAccount;
 
 type SharedAccountRowProps = {
   externalAccount: ExternalAccount;
