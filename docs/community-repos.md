@@ -21,7 +21,7 @@ The following are implementations of bank syncing using the Actual API. For inst
 * **Lunch Flow: Import transactions from GoCardless, MX, Finicity, Finverse, and more** - https://github.com/lunchflow/actual-flow
 * **MoneyMan an israel banks importer** - https://github.com/daniel-hauser/moneyman
 * **Monobank bank sync** - https://github.com/dnullproject/mono-to-actualbudget
-* **My Edenred Portugal bank sync** - https://github.com/rodriguestiago0/myedenred-actual
+* **My Edenred and Coverfelx Portugal bank sync** - https://github.com/rodriguestiago0/myedenred-actual
 * **Norwegian Trumf Visa PDF invoice to Actual Budget friendly CSV converter** - https://github.com/RubenOlsen/TrumfVisa2ActualBudget
 * **Plaid bank sync** - https://github.com/youngcw/actualplaid
 

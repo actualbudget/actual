@@ -37,6 +37,7 @@ DKB
 dmg
 easybank
 Edenred
+Coverfelx
 emojis
 emoji
 escodegen
