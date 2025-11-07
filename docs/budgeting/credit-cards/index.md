@@ -1,59 +1,56 @@
-# Managing Credit Cards
+# Credit Cards and Actual Budget
 
-Using a credit card in any budgeting software can be confusing, and Actual is no different. Of all the questions that are asked about budgeting, credit card usage is near the top of the list so don't feel bad if you're a little confused.
+Using a credit card in any budgeting software can be confusing, and Actual is no different. Of all the questions that are asked about budgeting, credit card usage is near the top of the list so don't feel bad if you're a little confused. 
 
-On this page we will walk you through how to manage a credit card "within the budget" which is the strategy of using a credit card that we highly recommend that you follow. If you already have a preexisting credit card balance that you haven't budgeted for then we also have you covered, see the [Carrying Debt](./carrying-debt.md) page to find out how to track this debt in a safe and sustainable manner, and try to follow what we describe down below for any future credit card purchases.
+:::note
+Any Revolving Credit Account that has both purchases and payments in any month should be treated as a credit card, not as a loan. Use [Carrying Debt](./carrying-debt.md) if the balance is not paid off every month.
+:::
 
-Using a credit card within the budget means that for every purchase you make on the credit card, the transaction is added to Actual with a category for which money was already set aside. This means that as long as you do not overspend in any category you're not incurring any more debt and are able to pay the credit card bill in full whenever it arrives.
+:::warning
+We recommend that you place all your credit card accounts **On Budget**. You can [close](/docs/accounts/index.md#closing-or-deleting-an-account) an On Budget account when you are through with it (and reopen, if necessary) but you **cannot** change an Off Budget account to On Budget! _Only_ set a credit card account to Off Budget and treat it as a loan if there will be _no_ new purchases and the account will be closed once it's paid off.
+:::
 
+If you pay off your credit card statement every month, then you will want to use the [Paying in Full](./paying-in-full.md) page to understand how Actual helps you work with your credit card to stay _Within the Budget_.
 
-## Scenario
+If you are unable to budget for and pay your credit card outstanding balance **in any month**, then we also have you covered, see the [Carrying Debt](./carrying-debt.md) page for a step-by-step guide on how to set up Actual and track this debt in a safe and sustainable manner. 
 
-Below we're going to describe a scenario showing you how you can safely use a credit card without racking up any debt. There's a lot of text in the following sections but don't worry, actually implementing this strategy is very easy.
+**tl;dr. If you don't budget funds you don't have and don't spend money that is not covered in your budget, you will not incur any new debt and always have enough funds to pay for your new credit card purchases whenever you want!**
 
+Actual treats credit card accounts like any bank account, but with a negative value. These negative account balances are subtracted from your positive deposit account balances to give your available "On Budget" funds. As you make purchases with your credit card, the credit card account balance goes further into the negative, thus reducing your available "On Budget" balance. The same thing happens when you pay a utility bill or make a purchase from a checking account - the available "On Budget" balance decreases. When you categorize these expenditures from a budget category with a positive balance, you determine from what envelope the money comes. Since you only put real money in the envelopes at the start of the month, you know you have enough to cover the expenditures regardless of what account they came from.
 
-### Setup {#scenario-setup}
+When you transfer money from On Budget to On Budget accounts, the On Budget balance stays the same, it doesn't matter what type of account it is. When you make a credit card payment (transfer), you bring the credit card account balance closer to $0.00 and your checking account closer to $0.00 by the exact same amount, but in opposite directions! You will move the same amount of money out of your checking account just as if you made those purchases with your checking debit card, you'll just do it a bit later, when the credit card statement comes. Remember, the purchases are deducted from the budget when you assign them a category.
 
-To start with we're going to be creating two accounts, **Checking** and **Credit Card**, both with a starting balance of 0. We're also going to say that we're receiving 250 in income on the 1st of every month.
+:::note[Here's an example that may help:]
 
-In this scenario we're going to say that we're planning on buying a new laptop for 500. Since we don't have any savings set aside for making this purchase at once we're instead going to create a category called **New Laptop** into which we will budget the money we're saving for this purchase.
+Imagine you have a checking account with $1,000, and Savings with $4,000, so you have a total of $5,000 in the budget.
 
+You spend $50 on a new jacket using your checking debit card, from your funded Clothing category. The money leaves the budget, the checking account balance drops to $950. The total On Budget balance is now $4,950.
 
-### Month 1 {#scenario-month-1}
+If you want to top up the checking back to $1,000 you just make a transfer of $50 from Savings to Checking. You don't need a category, since the On Budget balance doesn't change. You could transfer any amount over, and it wouldn't matter.
 
-It's the first day of the month and we've just received our salary into our checking account, and so we create a transaction depositing 250 into the Income category.
+Now imagine the same scenario, but the Checking balance starts at $0, and Savings is $5,000. You still have the same On Budget balance of $5,000.
 
-Since we don't have any other expenses this month we know that we're able to put aside the full 250 that we have available to budget this month into the **New Laptop** category. Since the category balance is so far only 250 we know that we don't yet have enough money set aside to buy the laptop for 500, and so the purchase will have to wait until another month.
+After the transaction, Checking is -$50, but the On Budget balance is the same $4,950 as above. And just like before, you can transfer any amount over without affecting that total balance, so the transfer doesn't need a category. You could move as much as you want, but it only takes $50 to get the account back to zero.
 
-At the end of the month our budget looks like this:
-- **New Laptop** category has a balance of 250.
-- **Checking** account has a balance of 250.
-- **Credit Card** account has a balance of 0.
+As far as Actual is concerned a credit card account is the same as any other account, you just choose to let the balance go negative.
+:::
 
+We highly recommend you follow the _Within the Budget_ strategy for credit card use. _Every_ time you make a credit card purchase, enter the transaction and select a category with money set aside in the Budgeted column and a positive Budget Balance. 
 
-### Month 2 {#scenario-month-2}
-
-The first of the second month rolls around and we've just received our salary again, and just as last month we create a deposit of 250 into the Income category.
-
-Our expenses are unchanged and we yet again budget 250 into the **New Laptop** category. This means that we finally have a balance of 500 in the **New Laptop** category and are now able to make the purchase we were looking forward to. So we buy the laptop using our credit card and put the transaction in the **New Laptop** category, since that's the category holding the money we set aside for this very purchase.
-
-Our budget now looks like this:
-- **New Laptop** category has a balance of 0 since we just used the whole balance for the purchase.
-- **Checking** account has a balance of 500.
-- **Credit Card** account has a balance of -500.
-
-Later that month when we receive the credit card bill for 500 and since we know that we didn't overspend in any category we know that we have the money for paying the bill in full already set aside and so we can pay the bill in full with no worries.
-
-When we've paid the bill we account for this in Actual by creating a transfer from our **Checking** account to the **Credit Card** account for 500, meaning that our budget now looks like this:
-- **New Laptop** category has a balance of 0.
-- **Checking** account has a balance of 0.
-- **Credit Card** account has a balance of 0.
-
-Since we made sure to only spend money that we already had budgeted we were able to use the credit card to make a large purchase without any worries of incurring more debt!
+### Credit card "rules" to stay _Within the Budget_:
+- Never Over Budget. Only budget funds you actually have!
+- Check your category balance _before_ spending.
+- Enter your new purchase transactions quickly.
+- Cover all overspending.
+- Reconcile your accounts at least monthly.
+- Pay _at least_ your statement New Balance before the due date.
+- A "Credit Limit" is _not_ an invitation to spend it!
 
 
-### Conclusion
+:::note
 
-Hopefully after reading this example scenario you've seen that managing credit card spending safely can be pretty easy with a little bit of planning.
+If you have recently moved to Actual from nYNAB or some other budgeting apps, you may notice that Actual doesn't use specific "credit card" accounts. Read through how Actual treats credit cards above and follow the examples in [Paying in Full](./paying-in-full.md) and in [Carrying Debt](./carrying-debt.md) to learn how Actual handles credit cards.
 
-On the other hand if some emergency comes up where you need to "borrow" some of the money you had set aside for paying the credit card bill then you've overspent your money and are now in debt. This is perfectly okay, but it means that you need to switch over to following the [Carrying Debt](./carrying-debt.md) strategy for managing this debt. Following this scenario you'd substitute the **New Laptop** category for the **Credit Card** category.
+:::
+
+

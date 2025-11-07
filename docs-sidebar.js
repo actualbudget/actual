@@ -137,7 +137,7 @@ const sidebars = {
                 type: 'doc',
                 id: 'budgeting/credit-cards/index',
               },
-              items: ['budgeting/credit-cards/carrying-debt'],
+              items: ['budgeting/credit-cards/paying-in-full', 'budgeting/credit-cards/carrying-debt'],
             },
             'budgeting/multi-currency',
             'budgeting/joint-accounts',
