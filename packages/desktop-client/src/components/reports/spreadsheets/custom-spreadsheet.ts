@@ -19,7 +19,7 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 import { calculateLegend } from './calculateLegend';
 import { filterEmptyRows } from './filterEmptyRows';
 import { filterHiddenItems } from './filterHiddenItems';
-import { makeGroupedQuery, makeQuery } from './makeQuery';
+import { aggregatedAssetsDebts } from './makeQuery';
 import { recalculate } from './recalculate';
 import { sortData } from './sortData';
 import {
@@ -31,13 +31,10 @@ import {
 import {
   categoryLists,
   groupBySelections,
-  type GroupedQueryDataEntity,
-  type QueryDataEntity,
   ReportOptions,
   type UncategorizedEntity,
 } from '@desktop-client/components/reports/ReportOptions';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 export type createCustomSpreadsheetProps = {
   startDate: string;
@@ -102,70 +99,13 @@ export function createCustomSpreadsheet({
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    let groupedAssets: GroupedQueryDataEntity[];
-    let groupedDebts: GroupedQueryDataEntity[];
-
-    [groupedAssets, groupedDebts] = await Promise.all([
-      aqlQuery(
-        makeGroupedQuery(
-          'assets',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters
-        ),
-      ).then(({ data }) => data),
-      aqlQuery(
-        makeGroupedQuery(
-          'debts',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-    ]);
-
-    // Exclude parent if any child transaction matches.
-    // Don't need to exclude children that doesn't match,
-    // since they won't be included in the main query.
-    const excludedDebts = groupedDebts
-      .filter(debt => debt.subtransactions.some(sub => !sub._unmatched))
-      .map(debt => debt.id);
-
-    const excludedAssets = groupedAssets
-      .filter(asset => asset.subtransactions.some(sub => !sub._unmatched))
-      .map(asset => asset.id);
-
-    let assets: QueryDataEntity[];
-    let debts: QueryDataEntity[];
-
-    [assets, debts] = await Promise.all([
-      aqlQuery(
-        makeQuery(
-          'assets',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters,
-          excludedDebts
-        ),
-      ).then(({ data }) => data),
-      aqlQuery(
-        makeQuery(
-          'debts',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters,
-          excludedAssets
-        ),
-      ).then(({ data }) => data),
-    ]);
+    let { assets, debts } = await aggregatedAssetsDebts(
+      startDate,
+      endDate,
+      interval,
+      conditionsOpKey,
+      filters
+    );
 
     if (interval === 'Weekly') {
       debts = debts.map(d => {

@@ -10,7 +10,7 @@ import {
   type SpendingEntity,
 } from 'loot-core/types/models';
 
-import { makeQuery } from './makeQuery';
+import { aggregatedAssetsDebts } from './makeQuery';
 
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
@@ -58,51 +58,22 @@ export function createSpendingSpreadsheet({
 
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    const [assets, debts] = await Promise.all([
-      aqlQuery(
-        makeQuery(
-          'assets',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-      aqlQuery(
-        makeQuery(
-          'debts',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-    ]);
+    const { assets, debts } = await aggregatedAssetsDebts(
+      startDate,
+      endDate,
+      interval,
+      conditionsOpKey,
+      filters
+    );
 
-    const [assetsTo, debtsTo] = await Promise.all([
-      aqlQuery(
-        makeQuery(
-          'assets',
-          startDateTo,
-          endDateTo,
-          interval,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-      aqlQuery(
-        makeQuery(
-          'debts',
-          startDateTo,
-          endDateTo,
-          interval,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-    ]);
+
+    const { assets: assetsTo, debts: debtsTo } = await aggregatedAssetsDebts(
+      startDateTo,
+      endDateTo,
+      interval,
+      conditionsOpKey,
+      filters
+    );
 
     const overlapAssets =
       endDateTo < startDate || startDateTo > endDate ? assetsTo : [];

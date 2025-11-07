@@ -4,7 +4,7 @@ import { type GroupedEntity } from 'loot-core/types/models';
 
 import { type createCustomSpreadsheetProps } from './custom-spreadsheet';
 import { filterEmptyRows } from './filterEmptyRows';
-import { makeQuery } from './makeQuery';
+import { aggregatedAssetsDebts } from './makeQuery';
 import { recalculate } from './recalculate';
 import { sortData } from './sortData';
 import {
@@ -14,11 +14,9 @@ import {
 
 import {
   categoryLists,
-  type QueryDataEntity,
   ReportOptions,
 } from '@desktop-client/components/reports/ReportOptions';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 export function createGroupedSpreadsheet({
   startDate,
@@ -51,30 +49,13 @@ export function createGroupedSpreadsheet({
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    let assets: QueryDataEntity[];
-    let debts: QueryDataEntity[];
-    [assets, debts] = await Promise.all([
-      aqlQuery(
-        makeQuery(
-          'assets',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-      aqlQuery(
-        makeQuery(
-          'debts',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-    ]);
+    let { assets, debts } = await aggregatedAssetsDebts(
+      startDate,
+      endDate,
+      interval,
+      conditionsOpKey,
+      filters
+    );
 
     if (interval === 'Weekly') {
       debts = debts.map(d => {

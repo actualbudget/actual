@@ -1,6 +1,7 @@
 import { q, } from 'loot-core/shared/query';
 
-import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
+import { GroupedQueryDataEntity, QueryDataEntity, ReportOptions } from '@desktop-client/components/reports/ReportOptions';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 function filteredQuery(
   name: string,
@@ -37,7 +38,7 @@ function filteredQuery(
   return query;
 }
 
-export function makeGroupedQuery (
+function makeGroupedQuery (
   name: string,
   startDate: string,
   endDate: string,
@@ -56,7 +57,7 @@ export function makeGroupedQuery (
     .select([{ isParent: 'is_parent' }, { isChild: 'is_child' }]);
 }
 
-export function makeQuery(
+function makeQuery(
   name: string,
   startDate: string,
   endDate: string,
@@ -103,4 +104,79 @@ export function makeQuery(
     { transferAccount: { $id: '$payee.transfer_acct.id' } },
     { amount: { $sum: '$amount' } },
   ]);
+}
+
+export const aggregatedAssetsDebts = async (
+    startDate: string,
+    endDate: string,
+    interval: string,
+    conditionsOpKey: "$or" | "$and",
+    filters: unknown[]
+): Promise<{assets: QueryDataEntity[], debts: QueryDataEntity[]}> => {
+    let groupedAssets: GroupedQueryDataEntity[];
+    let groupedDebts: GroupedQueryDataEntity[];
+
+    [groupedAssets, groupedDebts] = await Promise.all([
+      aqlQuery(
+        makeGroupedQuery(
+          'assets',
+          startDate,
+          endDate,
+          interval,
+          conditionsOpKey,
+          filters
+        ),
+      ).then(({ data }) => data),
+      aqlQuery(
+        makeGroupedQuery(
+          'debts',
+          startDate,
+          endDate,
+          interval,
+          conditionsOpKey,
+          filters,
+        ),
+      ).then(({ data }) => data),
+    ]);
+
+    // Exclude parent if any child transaction matches.
+    // Don't need to exclude children that doesn't match,
+    // since they won't be included in the main query.
+    const excludedDebts = groupedDebts
+      .filter(debt => debt.subtransactions.some(sub => !sub._unmatched))
+      .map(debt => debt.id);
+
+    const excludedAssets = groupedAssets
+      .filter(asset => asset.subtransactions.some(sub => !sub._unmatched))
+      .map(asset => asset.id);
+
+    let assets: QueryDataEntity[];
+    let debts: QueryDataEntity[];
+
+    [assets, debts] = await Promise.all([
+      aqlQuery(
+        makeQuery(
+          'assets',
+          startDate,
+          endDate,
+          interval,
+          conditionsOpKey,
+          filters,
+          excludedDebts
+        ),
+      ).then(({ data }) => data),
+      aqlQuery(
+        makeQuery(
+          'debts',
+          startDate,
+          endDate,
+          interval,
+          conditionsOpKey,
+          filters,
+          excludedAssets
+        ),
+      ).then(({ data }) => data),
+    ]);
+
+    return {assets, debts}
 }

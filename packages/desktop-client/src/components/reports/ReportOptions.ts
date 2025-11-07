@@ -268,6 +268,7 @@ export type QueryDataEntity = {
   date: string;
   category: string;
   categoryHidden: boolean;
+  categoryIncome: number;
   categoryGroup: string;
   categoryGroupHidden: boolean;
   account: string;
