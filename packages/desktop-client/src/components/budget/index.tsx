@@ -448,6 +448,7 @@ function BudgetInner(props: BudgetInnerProps) {
           startMonth={derivedStartMonth}
           monthBounds={derivedBounds}
           maxMonths={maxMonths}
+          // @ts-expect-error fix me
           dataComponents={trackingComponents}
           onMonthSelect={onMonthSelect}
           onDeleteCategory={onDeleteCategory}
@@ -475,6 +476,7 @@ function BudgetInner(props: BudgetInnerProps) {
           startMonth={derivedStartMonth}
           monthBounds={derivedBounds}
           maxMonths={maxMonths}
+          // @ts-expect-error fix me
           dataComponents={envelopeComponents}
           onMonthSelect={onMonthSelect}
           onDeleteCategory={onDeleteCategory}

@@ -2,7 +2,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -243,8 +243,8 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
               <Trans>Unlink account</Trans>
             </Button>
 
-            <Stack direction="row">
-              <Button style={{ marginRight: 10 }} onPress={close}>
+            <SpaceBetween gap={10}>
+              <Button onPress={close}>
                 <Trans>Cancel</Trans>
               </Button>
               <Button
@@ -255,7 +255,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
               >
                 <Trans>Save</Trans>
               </Button>
-            </Stack>
+            </SpaceBetween>
           </View>
         </>
       )}

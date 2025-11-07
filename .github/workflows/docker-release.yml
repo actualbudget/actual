@@ -28,7 +28,7 @@ jobs:
     name: Build Docker image
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -78,7 +78,7 @@ jobs:
         run: yarn build:server
 
       - name: Build and push ubuntu image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
@@ -87,7 +87,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
 
       - name: Build and push alpine image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true

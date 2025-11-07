@@ -19,7 +19,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Download patch artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
@@ -27,7 +27,7 @@ jobs:
           path: /tmp/artifacts
 
       - name: Download metadata artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
@@ -57,7 +57,7 @@ jobs:
 
       - name: Checkout fork branch
         if: steps.metadata.outputs.pr_number != ''
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ steps.metadata.outputs.head_repo }}
           ref: ${{ steps.metadata.outputs.head_ref }}
@@ -132,7 +132,7 @@ jobs:
 
       - name: Comment on PR - Success
         if: steps.apply.outputs.applied == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             await github.rest.issues.createComment({
@@ -144,7 +144,7 @@ jobs:
 
       - name: Comment on PR - Failure
         if: failure() && steps.metadata.outputs.pr_number != ''
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const error = `${{ steps.apply.outputs.error }}` || 'Unknown error occurred';

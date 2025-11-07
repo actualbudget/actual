@@ -159,22 +159,23 @@ export default defineConfig(async ({ mode }) => {
         ? undefined
         : VitePWA({
             registerType: 'prompt',
-            strategies: 'injectManifest',
-            srcDir: 'service-worker',
-            filename: 'plugin-sw.js',
-            manifest: {
-              name: 'Actual',
-              short_name: 'Actual',
-              description: 'A local-first personal finance tool',
-              theme_color: '#8812E1',
-              background_color: '#8812E1',
-              display: 'standalone',
-              start_url: './',
-            },
-            injectManifest: {
-              maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
-              swSrc: `service-worker/plugin-sw.js`,
-            },
+            // TODO:  The plugin worker build is currently disabled due to issues with offline support. Fix this
+            // strategies: 'injectManifest',
+            // srcDir: 'service-worker',
+            // filename: 'plugin-sw.js',
+            // manifest: {
+            //   name: 'Actual',
+            //   short_name: 'Actual',
+            //   description: 'A local-first personal finance tool',
+            //   theme_color: '#8812E1',
+            //   background_color: '#8812E1',
+            //   display: 'standalone',
+            //   start_url: './',
+            // },
+            // injectManifest: {
+            //   maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
+            //   swSrc: `service-worker/plugin-sw.js`,
+            // },
             devOptions: {
               enabled: true, // We need service worker in dev mode to work with plugins
               type: 'module',
@@ -219,12 +220,7 @@ export default defineConfig(async ({ mode }) => {
         // print only console.error
         return type === 'stderr';
       },
-      poolOptions: {
-        threads: {
-          maxThreads: 2,
-          minThreads: 1,
-        },
-      },
+      maxWorkers: 2,
     },
   };
 });
