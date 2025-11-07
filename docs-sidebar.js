@@ -224,6 +224,7 @@ const sidebars = {
             'experimental/monthly-cleanup',
             'experimental/rule-templating',
             'experimental/pluggyai',
+            'experimental/crossover-point-report'
           ],
         },
         'getting-started/tips-tricks',
