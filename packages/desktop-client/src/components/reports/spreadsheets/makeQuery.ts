@@ -113,10 +113,8 @@ export const aggregatedAssetsDebts = async (
     conditionsOpKey: "$or" | "$and",
     filters: unknown[]
 ): Promise<{assets: QueryDataEntity[], debts: QueryDataEntity[]}> => {
-    let groupedAssets: GroupedQueryDataEntity[];
-    let groupedDebts: GroupedQueryDataEntity[];
-
-    [groupedAssets, groupedDebts] = await Promise.all([
+  const [groupedAssets, groupedDebts]: [GroupedQueryDataEntity[], GroupedQueryDataEntity[]] =
+    await Promise.all([
       aqlQuery(
         makeGroupedQuery(
           'assets',
@@ -150,10 +148,7 @@ export const aggregatedAssetsDebts = async (
       .filter(asset => asset.subtransactions.some(sub => !sub._unmatched))
       .map(asset => asset.id);
 
-    let assets: QueryDataEntity[];
-    let debts: QueryDataEntity[];
-
-    [assets, debts] = await Promise.all([
+    const [assets, debts]: [QueryDataEntity[], QueryDataEntity[]] = await Promise.all([
       aqlQuery(
         makeQuery(
           'assets',
