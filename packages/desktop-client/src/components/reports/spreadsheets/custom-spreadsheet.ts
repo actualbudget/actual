@@ -19,7 +19,7 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 import { calculateLegend } from './calculateLegend';
 import { filterEmptyRows } from './filterEmptyRows';
 import { filterHiddenItems } from './filterHiddenItems';
-import { makeGroupedSplitsQuery, makeQuery } from './makeQuery';
+import { makeGroupedQuery, makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
 import { sortData } from './sortData';
 import {
@@ -31,6 +31,7 @@ import {
 import {
   categoryLists,
   groupBySelections,
+  type GroupedQueryDataEntity,
   type QueryDataEntity,
   ReportOptions,
   type UncategorizedEntity,
@@ -101,12 +102,12 @@ export function createCustomSpreadsheet({
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    let groupedAssets: QueryDataEntity[];
-    let groupedDebts: QueryDataEntity[];
+    let groupedAssets: GroupedQueryDataEntity[];
+    let groupedDebts: GroupedQueryDataEntity[];
 
     [groupedAssets, groupedDebts] = await Promise.all([
       aqlQuery(
-        makeGroupedSplitsQuery(
+        makeGroupedQuery(
           'assets',
           startDate,
           endDate,
@@ -116,7 +117,7 @@ export function createCustomSpreadsheet({
         ),
       ).then(({ data }) => data),
       aqlQuery(
-        makeGroupedSplitsQuery(
+        makeGroupedQuery(
           'debts',
           startDate,
           endDate,
@@ -127,7 +128,16 @@ export function createCustomSpreadsheet({
       ).then(({ data }) => data),
     ]);
 
-    console.log('groupedDebts', groupedDebts);
+    // Exclude parent if any child transaction matches.
+    // Don't need to exclude children that doesn't match,
+    // since they won't be included in the main query.
+    const excludedDebts = groupedDebts
+      .filter(debt => debt.subtransactions.some(sub => !sub._unmatched))
+      .map(debt => debt.id);
+
+    const excludedAssets = groupedAssets
+      .filter(asset => asset.subtransactions.some(sub => !sub._unmatched))
+      .map(asset => asset.id);
 
     let assets: QueryDataEntity[];
     let debts: QueryDataEntity[];
@@ -141,7 +151,7 @@ export function createCustomSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
-          []
+          excludedDebts
         ),
       ).then(({ data }) => data),
       aqlQuery(
@@ -152,7 +162,7 @@ export function createCustomSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
-          []
+          excludedAssets
         ),
       ).then(({ data }) => data),
     ]);

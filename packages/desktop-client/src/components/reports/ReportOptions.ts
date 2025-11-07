@@ -277,6 +277,17 @@ export type QueryDataEntity = {
   amount: number;
 };
 
+export type QuerySplitDataEntity = {
+  id: string;
+  isChild: boolean;
+  isParent: boolean;
+};
+
+export type GroupedQueryDataEntity =
+  QuerySplitDataEntity & {
+    subtransactions: QuerySplitDataEntity & { _unmatched?: boolean }[],
+};
+
 type UncategorizedId = 'off_budget' | 'transfer' | 'other' | 'all';
 
 export type UncategorizedEntity = Pick<

@@ -1,4 +1,4 @@
-import { q, Query } from 'loot-core/shared/query';
+import { q, } from 'loot-core/shared/query';
 
 import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 
@@ -37,7 +37,7 @@ function filteredQuery(
   return query;
 }
 
-export function makeGroupedSplitsQuery (
+export function makeGroupedQuery (
   name: string,
   startDate: string,
   endDate: string,
@@ -45,7 +45,13 @@ export function makeGroupedSplitsQuery (
   conditionsOpKey: string,
   filters: unknown[],
 ) {
-  return filteredQuery(name, startDate, endDate, interval, conditionsOpKey, filters)
+  return filteredQuery(name,
+    startDate,
+    endDate,
+    interval,
+    conditionsOpKey,
+    filters
+  )
     .options({ splits: 'grouped' })
     .select([{ isParent: 'is_parent' }, { isChild: 'is_child' }]);
 }
@@ -59,7 +65,16 @@ export function makeQuery(
   filters: unknown[],
   excludedTransactions: string[] = []
 ) {
-  let query = filteredQuery(name, startDate, endDate, interval, conditionsOpKey, filters, excludedTransactions);
+  let query =
+    filteredQuery(name,
+      startDate,
+      endDate,
+      interval,
+      conditionsOpKey,
+      filters,
+      excludedTransactions
+    )
+      .options({ splits: 'all' });
 
   const intervalGroup =
     interval === 'Monthly'
