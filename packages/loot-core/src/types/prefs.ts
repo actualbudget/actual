@@ -4,6 +4,7 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
+  | 'crossoverReport'
   | 'plugins';
 
 /**
