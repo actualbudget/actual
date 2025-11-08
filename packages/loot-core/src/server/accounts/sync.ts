@@ -531,7 +531,7 @@ export async function reconcileTransactions(
         category: existing.category || trans.category || null,
         imported_payee: trans.imported_payee || null,
         notes: existing.notes || trans.notes || null,
-        cleared: trans.cleared ?? existing.cleared,
+        cleared: existing.cleared || trans.cleared || false,
         raw_synced_data:
           existing.raw_synced_data ?? trans.raw_synced_data ?? null,
       };
