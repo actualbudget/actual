@@ -163,7 +163,9 @@ export function createTransactionsSpreadsheet(
           categories.map(async mainCategory => {
             const subcategoryBalances = await Promise.all(
               mainCategory.categories
-                .filter(subcategory => subcategory.is_income !== 1)
+                .filter(
+                  subcategory => !subcategory?.is_income
+                )
                 .map(async subcategory => {
                   const results = await aqlQuery(
                     q('transactions')
@@ -234,7 +236,11 @@ export function createTransactionsSpreadsheet(
       const payeesDict = {};
       resultsArrays.forEach(item => {
         item.data.forEach(innerItem => {
-          payeesDict[innerItem.payee] = innerItem.amount;
+          const key = innerItem.payee;
+          if (!key) {
+            return;
+          }
+          payeesDict[key] = (payeesDict[key] ?? 0) + innerItem.amount;
         });
       });
 

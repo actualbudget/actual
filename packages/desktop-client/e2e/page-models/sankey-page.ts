@@ -30,10 +30,7 @@ export class SankeyPage {
   }
 
   async waitToLoad() {
-    // Wait for the Sankey graph container to be visible
     await this.pageContent.waitFor();
-    // Wait for either a button or the graph to load
-    await this.page.waitForTimeout(500); // Give time for data to load
   }
 
   async selectMode(mode: 'budgeted' | 'spent' | 'difference') {

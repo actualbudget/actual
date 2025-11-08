@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useMemo, type CSSProperties } from 'react';
+import { useMemo, type CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
@@ -16,6 +16,9 @@ import { type SankeyData } from 'recharts/types/chart/Sankey';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+
+const BUDGET_NODE_NAME = 'Available Funds';
 
 type SankeyGraphNode = SankeyData['nodes'][number] & {
   hasChildren?: boolean;
@@ -80,6 +83,7 @@ type SankeyNodeProps = {
   index: number;
   payload: SankeyGraphNode;
   containerWidth: number;
+  currencyCode: string;
 };
 function SankeyNode({
   x,
@@ -89,6 +93,7 @@ function SankeyNode({
   index,
   payload,
   containerWidth,
+  currencyCode,
 }: SankeyNodeProps) {
   const privacyMode = usePrivacyMode();
   const isOut = x + width + 6 > containerWidth;
@@ -108,15 +113,15 @@ function SankeyNode({
   const formattedValue = payload.isNegative
     ? `−${displayValue.toLocaleString('en-US', {
         style: 'currency',
-        currency: 'USD',
+        currency: currencyCode,
       })}`
     : displayValue.toLocaleString('en-US', {
         style: 'currency',
-        currency: 'USD',
+        currency: currencyCode,
       });
 
   // Check if this is the Budget node with unallocated funds
-  const isBudgetNode = payload.name === 'Available Funds';
+  const isBudgetNode = payload.name === BUDGET_NODE_NAME;
   const hasToBudget = isBudgetNode && payload.toBudget && payload.toBudget > 0;
 
   // Calculate the position for "To Budget" label in the unallocated portion
@@ -188,7 +193,7 @@ function SankeyNode({
           >
             {(payload.value - (payload.toBudget || 0)).toLocaleString('en-US', {
               style: 'currency',
-              currency: 'USD',
+              currency: currencyCode,
             })}
           </text>
           <text
@@ -212,7 +217,7 @@ function SankeyNode({
           >
             {payload.toBudget.toLocaleString('en-US', {
               style: 'currency',
-              currency: 'USD',
+              currency: currencyCode,
             })}
           </text>
         </>
@@ -255,7 +260,7 @@ function SankeyNode({
 
 function convertToCondensed(data: SankeyData) {
   const budgetNodeIndex = data.nodes.findIndex(
-    node => node.name === 'Available Funds',
+    node => node.name === BUDGET_NODE_NAME,
   );
 
   // Calculate total income (links going into the "Budget" node)
@@ -271,7 +276,7 @@ function convertToCondensed(data: SankeyData) {
   return {
     nodes: [
       { name: 'Income' },
-      { name: 'Available Funds' },
+      { name: BUDGET_NODE_NAME },
       { name: 'Expenses' },
     ],
     links: [
@@ -295,6 +300,9 @@ export function SankeyGraph({
   showTooltip = true,
   collapsedNodes = [],
 }: SankeyGraphProps) {
+  const [defaultCurrencyCode] = useSyncedPref('defaultCurrencyCode');
+  const currencyCode = defaultCurrencyCode || 'USD';
+  
   const collapsedSet = useMemo(() => new Set(collapsedNodes), [collapsedNodes]);
   const sankeyData = useMemo(() => {
     if (compact) {
@@ -311,7 +319,13 @@ export function SankeyGraph({
         <ResponsiveContainer>
           <Sankey
             data={sankeyData}
-            node={props => <SankeyNode {...props} containerWidth={width} />}
+            node={props => (
+              <SankeyNode
+                {...props}
+                containerWidth={width}
+                currencyCode={currencyCode}
+              />
+            )}
             link={props => <SankeyLink {...props} />}
             sort={false}
             iterations={1000}
@@ -367,7 +381,7 @@ function collapseSankeyBranches(
   const collapsedIndexes = new Set<number>();
   collapsedNodes.forEach(name => {
     const index = nameToIndex.get(name);
-    if (index !== undefined && data.nodes[index]?.name !== 'Available Funds') {
+    if (index !== undefined && data.nodes[index]?.name !== BUDGET_NODE_NAME) {
       collapsedIndexes.add(index);
     }
   });
@@ -405,7 +419,7 @@ function collapseSankeyBranches(
   });
 
   // Always include Available Funds node
-  const budgetIndex = nameToIndex.get('Available Funds');
+  const budgetIndex = nameToIndex.get(BUDGET_NODE_NAME);
   if (budgetIndex !== undefined) {
     usedIndexes.add(budgetIndex);
   }
