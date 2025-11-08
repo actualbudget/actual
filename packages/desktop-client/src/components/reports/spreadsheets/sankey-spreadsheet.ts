@@ -129,7 +129,12 @@ export function createBudgetSpreadsheet(start: string) {
     }
 
     setData(
-      transformToSankeyData(categoryData, incomeData, toBudget, 'Available Funds'),
+      transformToSankeyData(
+        categoryData,
+        incomeData,
+        toBudget,
+        'Available Funds',
+      ),
     );
   };
 }
@@ -437,7 +442,9 @@ export function createDifferenceSpreadsheet(
     }
 
     // convert retrieved data into the proper sankey format
-    setData(transformToSankeyData(groupedData, incomeData, 0, 'Available Funds'));
+    setData(
+      transformToSankeyData(groupedData, incomeData, 0, 'Available Funds'),
+    );
   };
 }
 

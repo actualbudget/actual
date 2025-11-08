@@ -60,4 +60,3 @@ export class SankeyPage {
     await this.page.waitForTimeout(500);
   }
 }
-

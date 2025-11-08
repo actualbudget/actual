@@ -5,7 +5,6 @@ import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
 import { type ReportsPage } from './page-models/reports-page';
 import { type SankeyPage } from './page-models/sankey-page';
-import { SettingsPage } from './page-models/settings-page';
 
 test.describe('Sankey Report', () => {
   let page: Page;
@@ -63,14 +62,14 @@ test.describe('Sankey Report', () => {
 
     // Get the month select and choose a different month
     const monthOptions = await sankeyPage.monthSelect.locator('option').count();
-    
+
     // If there are multiple months available, select the second one
     if (monthOptions > 1) {
       const secondMonthValue = await sankeyPage.monthSelect
         .locator('option')
         .nth(1)
         .getAttribute('value');
-      
+
       if (secondMonthValue) {
         await sankeyPage.selectMonth(secondMonthValue);
         await expect(page).toMatchThemeScreenshots();
@@ -98,4 +97,3 @@ test.describe('Sankey Report', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 });
-

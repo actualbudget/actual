@@ -254,7 +254,9 @@ function SankeyNode({
 }
 
 function convertToCondensed(data: SankeyData) {
-  const budgetNodeIndex = data.nodes.findIndex(node => node.name === 'Available Funds');
+  const budgetNodeIndex = data.nodes.findIndex(
+    node => node.name === 'Available Funds',
+  );
 
   // Calculate total income (links going into the "Budget" node)
   const totalIncome = data.links.reduce((acc, link) => {
@@ -267,7 +269,11 @@ function convertToCondensed(data: SankeyData) {
   }, 0);
 
   return {
-    nodes: [{ name: 'Income' }, { name: 'Available Funds' }, { name: 'Expenses' }],
+    nodes: [
+      { name: 'Income' },
+      { name: 'Available Funds' },
+      { name: 'Expenses' },
+    ],
     links: [
       { source: 0, target: 1, value: totalIncome },
       { source: 1, target: 2, value: totalExpenses },
