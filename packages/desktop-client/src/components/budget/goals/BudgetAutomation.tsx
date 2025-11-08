@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useReducer, useState } from 'react';
+import { useMemo, useReducer, useRef, useState } from 'react';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { type CSSProperties } from '@actual-app/components/styles';
@@ -9,10 +9,11 @@ import {
 } from 'loot-core/types/models';
 import { type Template } from 'loot-core/types/models/templates';
 
-import { type Action } from './actions';
 import { BudgetAutomationEditor } from './BudgetAutomationEditor';
 import { BudgetAutomationReadOnly } from './BudgetAutomationReadOnly';
 import { DEFAULT_PRIORITY, getInitialState, templateReducer } from './reducer';
+
+import { useEffectAfterMount } from '@desktop-client/hooks/useEffectAfterMount';
 
 type BudgetAutomationProps = {
   categories: CategoryGroupEntity[];
@@ -44,17 +45,16 @@ export const BudgetAutomation = ({
 }: BudgetAutomationProps) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  const [state, originalDispatch] = useReducer(
+  const [state, dispatch] = useReducer(
     templateReducer,
     getInitialState(template ?? DEFAULT_TEMPLATE),
   );
-  const dispatch = useCallback(
-    (action: Action) => {
-      originalDispatch(action);
-      onSave?.(templateReducer(state, action).template);
-    },
-    [originalDispatch, onSave, state],
-  );
+
+  const onSaveRef = useRef(onSave);
+  onSaveRef.current = onSave;
+  useEffectAfterMount(() => {
+    onSaveRef.current?.(state.template);
+  }, [state]);
 
   const categoryNameMap = useMemo(() => {
     return categories.reduce(

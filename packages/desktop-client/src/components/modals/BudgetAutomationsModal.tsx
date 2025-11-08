@@ -1,4 +1,4 @@
-import { type CSSProperties, useMemo, useState } from 'react';
+import { type CSSProperties, useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -72,6 +72,17 @@ function BudgetAutomationList({
     ]);
   };
 
+  const onSave = useCallback(
+    (index: number) => (template: Template) => {
+      setAutomations(prev =>
+        prev.map((oldAutomation, mapIndex) =>
+          mapIndex === index ? template : oldAutomation,
+        ),
+      );
+    },
+    [setAutomations],
+  );
+
   return (
     <SpaceBetween
       direction="vertical"
@@ -84,13 +95,7 @@ function BudgetAutomationList({
       {automations.map((automation, index) => (
         <BudgetAutomation
           key={automationIds[index]}
-          onSave={template =>
-            setAutomations(prev =>
-              prev.map((oldAutomation, mapIndex) =>
-                mapIndex === index ? template : oldAutomation,
-              ),
-            )
-          }
+          onSave={onSave(index)}
           onDelete={onDelete(index)}
           template={automation}
           categories={categories}
