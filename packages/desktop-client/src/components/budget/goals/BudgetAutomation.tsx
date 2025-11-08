@@ -12,7 +12,6 @@ import { type Template } from 'loot-core/types/models/templates';
 import { type Action } from './actions';
 import { BudgetAutomationEditor } from './BudgetAutomationEditor';
 import { BudgetAutomationReadOnly } from './BudgetAutomationReadOnly';
-import { type ReducerState } from './constants';
 import { DEFAULT_PRIORITY, getInitialState, templateReducer } from './reducer';
 
 type BudgetAutomationProps = {
@@ -54,7 +53,7 @@ export const BudgetAutomation = ({
       originalDispatch(action);
       onSave?.(templateReducer(state, action).template);
     },
-    [originalDispatch, onSave],
+    [originalDispatch, onSave, state],
   );
 
   const categoryNameMap = useMemo(() => {
