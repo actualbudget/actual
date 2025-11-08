@@ -129,7 +129,7 @@ export function createBudgetSpreadsheet(start: string) {
     }
 
     setData(
-      transformToSankeyData(categoryData, incomeData, toBudget, 'Budget'),
+      transformToSankeyData(categoryData, incomeData, toBudget, 'Available Funds'),
     );
   };
 }
@@ -150,13 +150,6 @@ export function createTransactionsSpreadsheet(
       conditions: conditions.filter(cond => !cond.customName),
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
-
-    // create list of Income subcategories
-    const allIncomeSubcategories = [].concat(
-      ...categories
-        .filter(category => category.is_income)
-        .map(category => category.categories),
-    );
 
     // retrieve sum of subcategory expenses
     async function fetchCategoryData(categories) {
@@ -201,8 +194,15 @@ export function createTransactionsSpreadsheet(
       }
     }
 
+    // create list of Income subcategories
+    const allIncomeSubcategories = [].concat(
+      ...categories
+        .filter(category => category.is_income)
+        .map(category => category.categories),
+    );
+
     // retrieve all income subcategory payees
-    async function _fetchIncomeData() {
+    async function fetchIncomeData() {
       // Map over allIncomeSubcategories and return an array of promises
       const promises = allIncomeSubcategories.map(subcategory => {
         return aqlQuery(
@@ -251,10 +251,12 @@ export function createTransactionsSpreadsheet(
       });
       return payeeNames;
     }
+
+    const incomeData = await fetchIncomeData();
     const categoryData = await fetchCategoryData(categories);
 
     // convert retrieved data into the proper sankey format
-    setData(transformToSankeyData(categoryData, [], 0, 'Spent'));
+    setData(transformToSankeyData(categoryData, incomeData, 0, 'Spent'));
   };
 }
 
@@ -435,7 +437,7 @@ export function createDifferenceSpreadsheet(
     }
 
     // convert retrieved data into the proper sankey format
-    setData(transformToSankeyData(groupedData, incomeData, 0, 'Budget'));
+    setData(transformToSankeyData(groupedData, incomeData, 0, 'Available Funds'));
   };
 }
 
@@ -443,7 +445,7 @@ function transformToSankeyData(
   categoryData,
   incomeData,
   toBudgetAmount = 0,
-  rootNodeName = 'Budget',
+  rootNodeName = 'Available Funds',
 ) {
   const data = { nodes: [], links: [] };
   const nodeNames = new Set();

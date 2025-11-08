@@ -116,7 +116,7 @@ function SankeyNode({
       });
 
   // Check if this is the Budget node with unallocated funds
-  const isBudgetNode = payload.name === 'Budget';
+  const isBudgetNode = payload.name === 'Available Funds';
   const hasToBudget = isBudgetNode && payload.toBudget && payload.toBudget > 0;
 
   // Calculate the position for "To Budget" label in the unallocated portion
@@ -254,7 +254,7 @@ function SankeyNode({
 }
 
 function convertToCondensed(data: SankeyData) {
-  const budgetNodeIndex = data.nodes.findIndex(node => node.name === 'Budget');
+  const budgetNodeIndex = data.nodes.findIndex(node => node.name === 'Available Funds');
 
   // Calculate total income (links going into the "Budget" node)
   const totalIncome = data.links.reduce((acc, link) => {
@@ -267,7 +267,7 @@ function convertToCondensed(data: SankeyData) {
   }, 0);
 
   return {
-    nodes: [{ name: 'Income' }, { name: 'Budget' }, { name: 'Expenses' }],
+    nodes: [{ name: 'Income' }, { name: 'Available Funds' }, { name: 'Expenses' }],
     links: [
       { source: 0, target: 1, value: totalIncome },
       { source: 1, target: 2, value: totalExpenses },
@@ -361,7 +361,7 @@ function collapseSankeyBranches(
   const collapsedIndexes = new Set<number>();
   collapsedNodes.forEach(name => {
     const index = nameToIndex.get(name);
-    if (index !== undefined && data.nodes[index]?.name !== 'Budget') {
+    if (index !== undefined && data.nodes[index]?.name !== 'Available Funds') {
       collapsedIndexes.add(index);
     }
   });
@@ -398,8 +398,8 @@ function collapseSankeyBranches(
     if (targetIndex !== null) usedIndexes.add(targetIndex);
   });
 
-  // Always include Budget node
-  const budgetIndex = nameToIndex.get('Budget');
+  // Always include Available Funds node
+  const budgetIndex = nameToIndex.get('Available Funds');
   if (budgetIndex !== undefined) {
     usedIndexes.add(budgetIndex);
   }
