@@ -990,5 +990,78 @@ describe('Learning categories', () => {
     expect(rule.actions[0].field).toBe('payee');
   });
 
+  test('payee contains rule applies action correctly', async () => {
+    await loadData();
+    await loadRules();
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'contains', field: 'payee', value: 'amazon' }],
+      actions: [{ op: 'set', field: 'category', value: 'food' }],
+    });
+
+    // Create payees with Amazon in the name
+    const amazonPayee1 = await db.insertPayee({
+      name: 'Amazon Store #12345',
+    });
+    const amazonPayee2 = await db.insertPayee({
+      name: 'AMAZON Prime',
+    });
+    const walmartPayee = await db.insertPayee({ name: 'Walmart' });
+
+    const trans1 = await runRules({
+      payee: amazonPayee1,
+      payee_name: 'Amazon Store #12345',
+      category: null,
+    });
+    expect(trans1.category).toBe('food');
+
+    const trans2 = await runRules({
+      payee: amazonPayee2,
+      payee_name: 'AMAZON Prime',
+      category: null,
+    });
+    expect(trans2.category).toBe('food');
+
+    const trans3 = await runRules({
+      payee: walmartPayee,
+      payee_name: 'Walmart',
+      category: null,
+    });
+    expect(trans3.category).toBe(null);
+  });
+
+  test('payee doesNotContain rule excludes matching transactions', async () => {
+    await loadData();
+    await loadRules();
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'doesNotContain', field: 'payee', value: 'amazon' }],
+      actions: [{ op: 'set', field: 'category', value: 'food' }],
+    });
+
+    const amazonPayee = await db.insertPayee({
+      name: 'Amazon Store #12345',
+    });
+    const otherPayee = await db.insertPayee({ name: 'Walmart' });
+
+    const trans1 = await runRules({
+      payee: amazonPayee,
+      payee_name: 'Amazon Store #12345',
+      category: null,
+    });
+    expect(trans1.category).toBe(null);
+
+    const trans2 = await runRules({
+      payee: otherPayee,
+      payee_name: 'Walmart',
+      category: null,
+    });
+    expect(trans2.category).toBe('food');
+  });
+
   // TODO: write tests for split transactions
 });

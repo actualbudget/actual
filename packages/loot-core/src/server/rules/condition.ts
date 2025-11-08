@@ -237,6 +237,14 @@ export class Condition {
     let fieldValue = object[this.field];
     const type = this.type;
 
+    // For payee field with string-based operators, use payee_name instead of ID
+    if (
+      this.field === 'payee' &&
+      ['contains', 'doesNotContain', 'matches'].includes(this.op)
+    ) {
+      fieldValue = object.payee_name ?? '';
+    }
+
     if (type === 'string') {
       fieldValue ??= '';
     }

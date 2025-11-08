@@ -1083,4 +1083,103 @@ describe('RuleIndexer', () => {
       new Set([rule2]),
     );
   });
+
+  describe('Payee contains operator', () => {
+    test('payee contains matches payee_name substring', () => {
+      const cond = new Condition('contains', 'payee', 'amazon', null);
+
+      expect(
+        cond.eval({
+          payee: 'payee-id-123',
+          payee_name: 'Amazon Store #12345',
+        }),
+      ).toBe(true);
+
+      expect(
+        cond.eval({
+          payee: 'payee-id-456',
+          payee_name: 'AMAZON Prime',
+        }),
+      ).toBe(true);
+
+      expect(
+        cond.eval({
+          payee: 'payee-id-789',
+          payee_name: 'Walmart',
+        }),
+      ).toBe(false);
+    });
+
+    test('payee contains is case-insensitive', () => {
+      const cond = new Condition('contains', 'payee', 'kroger', null);
+
+      expect(
+        cond.eval({
+          payee: 'payee-id-1',
+          payee_name: 'KROGER',
+        }),
+      ).toBe(true);
+
+      expect(
+        cond.eval({
+          payee: 'payee-id-2',
+          payee_name: 'Kroger #123',
+        }),
+      ).toBe(true);
+    });
+
+    test('payee doesNotContain excludes matching payee_names', () => {
+      const cond = new Condition('doesNotContain', 'payee', 'test', null);
+
+      expect(
+        cond.eval({
+          payee: 'payee-id-1',
+          payee_name: 'Test Store',
+        }),
+      ).toBe(false);
+
+      expect(
+        cond.eval({
+          payee: 'payee-id-2',
+          payee_name: 'Real Store',
+        }),
+      ).toBe(true);
+    });
+
+    test('payee contains handles null payee_name', () => {
+      const cond = new Condition('contains', 'payee', 'test', null);
+
+      expect(
+        cond.eval({
+          payee: 'payee-id-1',
+          payee_name: null,
+        }),
+      ).toBe(false);
+
+      expect(
+        cond.eval({
+          payee: 'payee-id-2',
+          // payee_name missing
+        }),
+      ).toBe(false);
+    });
+
+    test('payee matches works with payee_name', () => {
+      const cond = new Condition('matches', 'payee', '^amazon.*', null);
+
+      expect(
+        cond.eval({
+          payee: 'payee-id-1',
+          payee_name: 'Amazon Store #12345',
+        }),
+      ).toBe(true);
+
+      expect(
+        cond.eval({
+          payee: 'payee-id-2',
+          payee_name: 'Walmart',
+        }),
+      ).toBe(false);
+    });
+  });
 });

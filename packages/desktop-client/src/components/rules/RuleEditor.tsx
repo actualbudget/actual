@@ -141,6 +141,7 @@ export function FieldSelect<T extends string>({
 type OpSelectProps<T extends string> = {
   ops: T[];
   type?: string;
+  field?: string;
   style?: CSSProperties;
   value: T;
   formatOp?: (op: string, type: string) => string;
@@ -150,6 +151,7 @@ type OpSelectProps<T extends string> = {
 export function OpSelect<T extends string>({
   ops,
   type,
+  field,
   style,
   value,
   formatOp = friendlyOp,
@@ -157,14 +159,19 @@ export function OpSelect<T extends string>({
 }: OpSelectProps<T>) {
   const opOptions = useMemo(() => {
     const options = ops
-      // We don't support the `contains`, `doesNotContain`, `matches` operators
-      // for the id type rules yet
-      // TODO: Add matches op support for payees, accounts, categories.
-      .filter(op =>
-        type === 'id'
-          ? !['contains', 'matches', 'doesNotContain', 'hasTags'].includes(op)
-          : true,
-      )
+      .filter(op => {
+        if (type === 'id') {
+          // Allow contains/doesNotContain for payee field only
+          if (field === 'payee') {
+            return !['matches', 'hasTags'].includes(op);
+          }
+          // For other id fields, keep existing restrictions
+          return !['contains', 'matches', 'doesNotContain', 'hasTags'].includes(
+            op,
+          );
+        }
+        return true;
+      })
       .map(op => [op, formatOp(op, type)]);
 
     if (type === 'string' || type === 'id') {
@@ -173,7 +180,7 @@ export function OpSelect<T extends string>({
     }
 
     return options;
-  }, [formatOp, ops, type]);
+  }, [formatOp, ops, type, field]);
 
   return (
     <View data-testid="op-select">
@@ -320,10 +327,14 @@ function ConditionEditor({
       />
     );
   } else {
+    // For payee contains/doesNotContain, use text input instead of autocomplete
+    const isPayeeContains =
+      originalField === 'payee' && ['contains', 'doesNotContain'].includes(op);
+
     valueEditor = (
       <GenericInput
         key={inputKey}
-        field={field}
+        field={isPayeeContains ? 'imported_payee' : field}
         type={type}
         value={value ?? ''}
         op={op}
@@ -342,7 +353,13 @@ function ConditionEditor({
         value={field}
         onChange={value => onChange('field', value)}
       />
-      <OpSelect ops={ops} value={op} type={type} onChange={onChange} />
+      <OpSelect
+        ops={ops}
+        value={op}
+        type={type}
+        field={originalField}
+        onChange={onChange}
+      />
 
       <View style={{ flex: 1, minWidth: 80 }}>{valueEditor}</View>
 
