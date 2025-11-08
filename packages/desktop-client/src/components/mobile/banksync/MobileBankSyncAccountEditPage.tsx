@@ -3,7 +3,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -172,14 +172,14 @@ export function MobileBankSyncAccountEditPage() {
             <Trans>Unlink account</Trans>
           </Button>
 
-          <Stack direction="row" style={{ gap: 10 }}>
+          <SpaceBetween gap={10}>
             <Button onPress={handleCancel}>
               <Trans>Cancel</Trans>
             </Button>
             <Button variant="primary" onPress={handleSave}>
               <Trans>Save</Trans>
             </Button>
-          </Stack>
+          </SpaceBetween>
         </View>
       </View>
     </Page>

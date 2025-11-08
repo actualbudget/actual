@@ -4,6 +4,11 @@ import React, { type ComponentProps } from 'react';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/types/models';
+
 import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';
 
@@ -22,7 +27,7 @@ type ExpenseGroupProps = {
   group: ComponentProps<typeof SidebarGroup>['group'];
   collapsed: boolean;
   editingCell: { id: string; cell: string } | null;
-  dragState: DragState<ComponentProps<typeof SidebarGroup>['group']>;
+  dragState: DragState<CategoryEntity> | DragState<CategoryGroupEntity> | null;
   MonthComponent: ComponentProps<typeof RenderMonths>['component'];
   onEditName?: ComponentProps<typeof SidebarGroup>['onEdit'];
   onSave?: ComponentProps<typeof SidebarGroup>['onSave'];

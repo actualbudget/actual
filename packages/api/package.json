@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/api",
-  "version": "25.10.0",
+  "version": "25.11.0",
   "license": "MIT",
   "description": "An API for Actual",
   "engines": {
@@ -32,6 +32,6 @@
   "devDependencies": {
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.6"
   }
 }

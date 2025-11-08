@@ -83,7 +83,7 @@ function GlobalFeatureToggle({
   error,
   children,
 }: GlobalFeatureToggleProps) {
-  const [enabled, setEnabled] = useSyncedPref(prefName, { isGlobal: true });
+  const [enabled, setEnabled] = useSyncedPref(prefName);
 
   return (
     <label style={{ display: 'flex' }}>
@@ -169,6 +169,12 @@ export function ExperimentalFeatures() {
               feedbackLink="https://github.com/actualbudget/actual/issues/1919"
             >
               <Trans>Sankey report</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="crossoverReport"
+              feedbackLink="https://github.com/actualbudget/actual/pull/5554"
+            >
+              <Trans>Crossover Report</Trans>
             </FeatureToggle>
             <GlobalFeatureToggle
               prefName="plugins"
