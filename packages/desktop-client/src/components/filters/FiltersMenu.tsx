@@ -46,7 +46,10 @@ import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
 
-type FilterReducerState = Pick<RuleConditionEntity, 'value' | 'op' | 'field'>;
+type FilterReducerState<T extends RuleConditionEntity> = Pick<
+  T,
+  'value' | 'op' | 'field'
+>;
 type FilterReducerAction =
   | { type: 'close' }
   | Parameters<typeof updateFilterReducer>[1];
@@ -66,26 +69,27 @@ const filterFields = [
   'transfer',
 ].map(field => [field, mapField(field)]);
 
-type ConfigureFieldProps = FilterReducerState &
-  Pick<RuleConditionEntity, 'options'> & {
-    initialSubfield?: string;
-    dispatch: (action: FilterReducerAction) => void;
-    onApply: (cond: RuleConditionEntity) => void;
-  };
+type ConfigureFieldProps<T extends RuleConditionEntity> =
+  FilterReducerState<T> &
+    Pick<T, 'options'> & {
+      initialSubfield?: string;
+      dispatch: (action: FilterReducerAction) => void;
+      onApply: (cond: T) => void;
+    };
 
-function ConfigureField({
+function ConfigureField<T extends RuleConditionEntity>({
   field,
   initialSubfield = field,
   op,
   value,
   dispatch,
   onApply,
-}: ConfigureFieldProps) {
+}: ConfigureFieldProps<T>) {
   const { t } = useTranslation();
   const format = useFormat();
   const [subfield, setSubfield] = useState(initialSubfield);
   const inputRef = useRef<HTMLInputElement>(null);
-  const prevOp = useRef<RuleConditionEntity['op'] | null>(null);
+  const prevOp = useRef<T['op'] | null>(null);
 
   useEffect(() => {
     if (prevOp.current !== op && inputRef.current) {
@@ -311,19 +315,19 @@ function ConfigureField({
   );
 }
 
-type FilterButtonProps = {
-  onApply: (cond: RuleConditionEntity) => void;
+type FilterButtonProps<T extends RuleConditionEntity> = {
+  onApply: (cond: T) => void;
   compact: boolean;
   hover: boolean;
   exclude?: string[];
 };
 
-export function FilterButton({
+export function FilterButton<T extends RuleConditionEntity>({
   onApply,
   compact,
   hover,
   exclude,
-}: FilterButtonProps) {
+}: FilterButtonProps<T>) {
   const { t } = useTranslation();
   const filters = useTransactionFilters();
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -344,7 +348,7 @@ export function FilterButton({
   const [state, dispatch] = useReducer(
     // @ts-expect-error - fix me
     (
-      state: FilterReducerState & {
+      state: FilterReducerState<T> & {
         fieldsOpen: boolean;
         condOpen: boolean;
       },
@@ -378,7 +382,7 @@ export function FilterButton({
     { fieldsOpen: false, condOpen: false, field: null, value: null },
   );
 
-  async function onValidateAndApply(cond: RuleConditionEntity) {
+  async function onValidateAndApply(cond: T) {
     // @ts-expect-error - fix me
     cond = unparse({ ...cond, type: FIELD_TYPES.get(cond.field) });
 
@@ -521,25 +525,25 @@ export function FilterButton({
   );
 }
 
-type FilterEditorProps = FilterReducerState &
-  Pick<RuleConditionEntity, 'options'> & {
-    onSave: (cond: RuleConditionEntity) => void;
+type FilterEditorProps<T extends RuleConditionEntity> = FilterReducerState<T> &
+  Pick<T, 'options'> & {
+    onSave: (cond: T) => void;
     onClose: () => void;
   };
 
-export function FilterEditor({
+export function FilterEditor<T extends RuleConditionEntity>({
   field,
   op,
   value,
   options,
   onSave,
   onClose,
-}: FilterEditorProps) {
+}: FilterEditorProps<T>) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
 
   const [state, dispatch] = useReducer(
-    (state: FilterReducerState, action: FilterReducerAction) => {
+    (state: FilterReducerState<T>, action: FilterReducerAction) => {
       switch (action.type) {
         case 'close':
           onClose();
