@@ -76,6 +76,8 @@ function BudgetAutomationList({
     <SpaceBetween
       direction="vertical"
       gap={20}
+      align="stretch"
+      wrap={false}
       style={{
         overflowY: 'scroll',
         ...style,
@@ -210,7 +212,12 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
       }}
     >
       {({ state: { close } }) => (
-        <SpaceBetween direction="vertical" style={{ height: '100%' }}>
+        <SpaceBetween
+          direction="vertical"
+          wrap={false}
+          align="stretch"
+          style={{ height: '100%' }}
+        >
           <ModalHeader
             title={t('Budget automations: {{category}}', {
               category: currentCategory?.name,
@@ -232,7 +239,7 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
               <AnimatedLoading style={{ width: 20, height: 20 }} />
             </View>
           ) : (
-            <SpaceBetween direction="vertical">
+            <SpaceBetween align="stretch" direction="vertical">
               {needsMigration && (
                 <BudgetAutomationMigrationWarning categoryId={categoryId} />
               )}
@@ -254,7 +261,7 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
             style={{
               marginTop: 20,
               justifyContent: 'flex-end',
-              alignItems: 'center',
+              flexShrink: 0,
             }}
           >
             {!needsMigration && (
