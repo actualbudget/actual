@@ -18,18 +18,16 @@ import { Value } from '@desktop-client/components/rules/Value';
 
 let isDatepickerClick = false;
 
-type FilterExpressionProps<T extends RuleConditionEntity> = {
-  field: T['field'];
-  customName: T['customName'];
-  op: T['op'];
-  value: T['value'];
-  options: T['options'];
+type FilterExpressionProps = Pick<
+  RuleConditionEntity,
+  'field' | 'customName' | 'op' | 'value' | 'options'
+> & {
   style?: CSSProperties;
-  onChange: (cond: T) => void;
+  onChange: (cond: RuleConditionEntity) => void;
   onDelete: () => void;
 };
 
-export function FilterExpression<T extends RuleConditionEntity>({
+export function FilterExpression({
   field: originalField,
   customName,
   op,
@@ -38,7 +36,7 @@ export function FilterExpression<T extends RuleConditionEntity>({
   style,
   onChange,
   onDelete,
-}: FilterExpressionProps<T>) {
+}: FilterExpressionProps) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const triggerRef = useRef(null);

@@ -31,6 +31,7 @@ import {
   getValidOps,
 } from 'loot-core/shared/rules';
 import { titleFirst } from 'loot-core/shared/util';
+import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { CompactFiltersButton } from './CompactFiltersButton';
 import { FiltersButton } from './FiltersButton';
@@ -44,6 +45,11 @@ import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
+
+type FilterReducerState = Pick<RuleConditionEntity, 'value' | 'op' | 'field'>;
+type FilterReducerAction =
+  | { type: 'close' }
+  | Parameters<typeof updateFilterReducer>[1];
 
 let isDatepickerClick = false;
 
@@ -60,6 +66,13 @@ const filterFields = [
   'transfer',
 ].map(field => [field, mapField(field)]);
 
+type ConfigureFieldProps = FilterReducerState &
+  Pick<RuleConditionEntity, 'options'> & {
+    initialSubfield?: string;
+    dispatch: (action: FilterReducerAction) => void;
+    onApply: (cond: RuleConditionEntity) => void;
+  };
+
 function ConfigureField({
   field,
   initialSubfield = field,
@@ -67,12 +80,12 @@ function ConfigureField({
   value,
   dispatch,
   onApply,
-}) {
+}: ConfigureFieldProps) {
   const { t } = useTranslation();
   const format = useFormat();
   const [subfield, setSubfield] = useState(initialSubfield);
-  const inputRef = useRef();
-  const prevOp = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const prevOp = useRef<RuleConditionEntity['op'] | null>(null);
 
   useEffect(() => {
     if (prevOp.current !== op && inputRef.current) {
@@ -94,6 +107,7 @@ function ConfigureField({
     if (
       field === 'date' &&
       subfield === 'month' &&
+      typeof value === 'string' &&
       /^\d{4}-\d{2}$/.test(value)
     ) {
       const [year, month] = value.split('-');
@@ -115,13 +129,11 @@ function ConfigureField({
                       ['amount-inflow', t('Amount (inflow)')],
                       ['amount-outflow', t('Amount (outflow)')],
                     ]
-                  : field === 'date'
-                    ? [
-                        ['date', t('Date')],
-                        ['month', t('Month')],
-                        ['year', t('Year')],
-                      ]
-                    : null
+                  : [
+                      ['date', t('Date')],
+                      ['month', t('Month')],
+                      ['year', t('Year')],
+                    ]
               }
               value={subfield}
               onChange={sub => {
@@ -211,7 +223,9 @@ function ConfigureField({
 
           if (field === 'amount' && inputRef.current) {
             try {
+              // @ts-expect-error - fix me
               if (inputRef.current.getCurrentAmount) {
+                // @ts-expect-error - fix me
                 submitValue = inputRef.current.getCurrentAmount();
               } else {
                 const rawValue = inputRef.current.value || '';
@@ -229,6 +243,7 @@ function ConfigureField({
             }
           }
 
+          // @ts-expect-error - fix me
           onApply({
             field,
             op,
@@ -240,7 +255,9 @@ function ConfigureField({
         {type !== 'boolean' && field !== 'payee' && (
           <GenericInput
             ref={inputRef}
+            // @ts-expect-error - fix me
             field={field === 'date' ? subfield : field}
+            // @ts-expect-error - fix me
             type={
               type === 'id' &&
               (op === 'contains' ||
@@ -251,14 +268,17 @@ function ConfigureField({
                 : type
             }
             numberFormatType="currency"
+            // @ts-expect-error - fix me
             value={
               formattedValue ?? (op === 'oneOf' || op === 'notOneOf' ? [] : '')
             }
+            // @ts-expect-error - fix me
             multi={op === 'oneOf' || op === 'notOneOf'}
             op={op}
             options={subfieldToOptions(field, subfield)}
             style={{ marginTop: 10 }}
-            onChange={v => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onChange={(v: any) => {
               dispatch({ type: 'set-value', value: v });
             }}
           />
@@ -266,7 +286,9 @@ function ConfigureField({
 
         {field === 'payee' && (
           <PayeeFilter
+            // @ts-expect-error - fix me
             value={formattedValue}
+            // @ts-expect-error - fix me
             op={op}
             onChange={v => dispatch({ type: 'set-value', value: v })}
           />
@@ -289,11 +311,22 @@ function ConfigureField({
   );
 }
 
-export function FilterButton({ onApply, compact, hover, exclude }) {
+type FilterButtonProps = {
+  onApply: (cond: RuleConditionEntity) => void;
+  compact: boolean;
+  hover: boolean;
+  exclude?: string[];
+};
+
+export function FilterButton({
+  onApply,
+  compact,
+  hover,
+  exclude,
+}: FilterButtonProps) {
   const { t } = useTranslation();
   const filters = useTransactionFilters();
-  const triggerRef = useRef(null);
-
+  const triggerRef = useRef<HTMLDivElement>(null);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   const translatedFilterFields = useMemo(() => {
@@ -309,7 +342,17 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
   }, []);
 
   const [state, dispatch] = useReducer(
-    (state, action) => {
+    // @ts-expect-error - fix me
+    (
+      state: FilterReducerState & {
+        fieldsOpen: boolean;
+        condOpen: boolean;
+      },
+      action:
+        | FilterReducerAction
+        | { type: 'select-field' }
+        | { type: 'configure'; field: string },
+    ) => {
       switch (action.type) {
         case 'select-field':
           return { ...state, fieldsOpen: true, condOpen: false };
@@ -335,12 +378,14 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
     { fieldsOpen: false, condOpen: false, field: null, value: null },
   );
 
-  async function onValidateAndApply(cond) {
+  async function onValidateAndApply(cond: RuleConditionEntity) {
+    // @ts-expect-error - fix me
     cond = unparse({ ...cond, type: FIELD_TYPES.get(cond.field) });
 
     if (cond.type === 'date' && cond.options) {
       if (cond.options.month) {
         const date = parseDate(
+          // @ts-expect-error - fix me
           cond.value,
           getMonthYearFormat(dateFormat),
           new Date(),
@@ -352,6 +397,7 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
           return;
         }
       } else if (cond.options.year) {
+        // @ts-expect-error - fix me
         const date = parseDate(cond.value, 'yyyy', new Date());
         if (isDateValid(date)) {
           cond.value = formatDate(date, 'yyyy');
@@ -363,11 +409,12 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
     }
 
     const { error } =
-      cond.field !== 'saved' &&
-      (await send('rule-validate', {
-        conditions: [cond],
-        actions: [],
-      }));
+      cond.field === 'saved'
+        ? { error: null }
+        : await send('rule-validate', {
+            conditions: [cond],
+            actions: [],
+          });
 
     const saved = filters.find(f => cond.value === f.id);
 
@@ -375,6 +422,7 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
       const field = titleFirst(mapField(cond.field));
       alert(field + ': ' + getFieldError(error.conditionErrors[0]));
     } else {
+      // @ts-expect-error - fix me
       onApply(saved ? saved : cond);
       dispatch({ type: 'close' });
     }
@@ -444,6 +492,7 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
           // Datepicker selections for some reason register 2x clicks
           // We want to keep the popover open after selecting a date.
           // So we ignore the "close" event on selection + the subsequent event.
+          // @ts-expect-error - fix me
           if (element.dataset.pikaYear) {
             isDatepickerClick = true;
             return false;
@@ -472,12 +521,25 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
   );
 }
 
-export function FilterEditor({ field, op, value, options, onSave, onClose }) {
+type FilterEditorProps = FilterReducerState &
+  Pick<RuleConditionEntity, 'options'> & {
+    onSave: (cond: RuleConditionEntity) => void;
+    onClose: () => void;
+  };
+
+export function FilterEditor({
+  field,
+  op,
+  value,
+  options,
+  onSave,
+  onClose,
+}: FilterEditorProps) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
 
   const [state, dispatch] = useReducer(
-    (state, action) => {
+    (state: FilterReducerState, action: FilterReducerAction) => {
       switch (action.type) {
         case 'close':
           onClose();
@@ -486,7 +548,7 @@ export function FilterEditor({ field, op, value, options, onSave, onClose }) {
           return updateFilterReducer(state, action);
       }
     },
-    { field, op, value, options },
+    { field, op, value },
   );
 
   return (
@@ -495,13 +557,18 @@ export function FilterEditor({ field, op, value, options, onSave, onClose }) {
       initialSubfield={subfieldFromFilter({ field, options, value })}
       op={state.op}
       value={state.value}
-      options={state.options}
+      options={options}
       dispatch={dispatch}
       onApply={cond => {
+        // @ts-expect-error - fix me
         cond = unparse({ ...cond, type: FIELD_TYPES.get(cond.field) });
 
         if (cond.type === 'date' && cond.options) {
-          if (cond.options.month && !/\d{4}-\d{2}/.test(cond.value)) {
+          if (
+            cond.options.month &&
+            typeof cond.value === 'string' &&
+            !/\d{4}-\d{2}/.test(cond.value)
+          ) {
             const date = parseDate(
               cond.value,
               getMonthYearFormat(dateFormat),
@@ -514,6 +581,7 @@ export function FilterEditor({ field, op, value, options, onSave, onClose }) {
               return;
             }
           } else if (cond.options.year) {
+            // @ts-expect-error - fix me
             const date = parseDate(cond.value, 'yyyy', new Date());
             if (isDateValid(date)) {
               cond.value = formatDate(date, 'yyyy');
