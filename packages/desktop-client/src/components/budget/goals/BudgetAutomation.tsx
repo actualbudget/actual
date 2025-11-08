@@ -45,18 +45,16 @@ export const BudgetAutomation = ({
 }: BudgetAutomationProps) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  const reducerCallback = useCallback(
-    (state: ReducerState, action: Action) => {
-      const newState = templateReducer(state, action);
-      onSave?.(newState.template);
-      return newState;
-    },
-    [onSave],
-  );
-
-  const [state, dispatch] = useReducer(
-    reducerCallback,
+  const [state, originalDispatch] = useReducer(
+    templateReducer,
     getInitialState(template ?? DEFAULT_TEMPLATE),
+  );
+  const dispatch = useCallback(
+    (action: Action) => {
+      originalDispatch(action);
+      onSave?.(templateReducer(state, action).template);
+    },
+    [originalDispatch, onSave],
   );
 
   const categoryNameMap = useMemo(() => {

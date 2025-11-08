@@ -1,3 +1,5 @@
+import memoizeOne from 'memoize-one';
+
 import { type Template } from 'loot-core/types/models/templates';
 
 import { type Action } from './actions';
@@ -198,24 +200,23 @@ function mapTemplateTypesForUpdate(
   return state;
 }
 
-export const templateReducer = (
-  state: ReducerState,
-  action: Action,
-): ReducerState => {
-  switch (action.type) {
-    case 'set-type':
-      return {
-        ...state,
-        ...changeType(state, action.payload),
-      };
-    case 'set-template':
-      return {
-        ...state,
-        ...getInitialState(action.payload),
-      };
-    case 'update-template':
-      return mapTemplateTypesForUpdate(state, action.payload);
-    default:
-      return state;
-  }
-};
+export const templateReducer = memoizeOne(
+  (state: ReducerState, action: Action): ReducerState => {
+    switch (action.type) {
+      case 'set-type':
+        return {
+          ...state,
+          ...changeType(state, action.payload),
+        };
+      case 'set-template':
+        return {
+          ...state,
+          ...getInitialState(action.payload),
+        };
+      case 'update-template':
+        return mapTemplateTypesForUpdate(state, action.payload);
+      default:
+        return state;
+    }
+  },
+);
