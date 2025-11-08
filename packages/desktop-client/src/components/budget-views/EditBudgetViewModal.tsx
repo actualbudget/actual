@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -63,7 +69,7 @@ export function EditBudgetViewModal({
   );
 
   const toggleCategory = useCallback(
-    (categoryId: string, event?: React.MouseEvent<HTMLElement>) => {
+    (categoryId: string, event?: MouseEvent<HTMLElement>) => {
       const isShiftClick = event?.shiftKey || false;
       const isCtrlClick = event?.ctrlKey || event?.metaKey || false;
 
@@ -173,14 +179,17 @@ export function EditBudgetViewModal({
     );
   };
 
-  const isGroupIndeterminate = (groupId: string) => {
-    const group = categoryGroups.find(g => g.id === groupId);
-    if (!group?.categories || group.categories.length === 0) return false;
-    const selectedCount = group.categories.filter(cat =>
-      selectedCategoryIds.has(cat.id),
-    ).length;
-    return selectedCount > 0 && selectedCount < group.categories.length;
-  };
+  const isGroupIndeterminate = useCallback(
+    (groupId: string) => {
+      const group = categoryGroups.find(g => g.id === groupId);
+      if (!group?.categories || group.categories.length === 0) return false;
+      const selectedCount = group.categories.filter(cat =>
+        selectedCategoryIds.has(cat.id),
+      ).length;
+      return selectedCount > 0 && selectedCount < group.categories.length;
+    },
+    [categoryGroups, selectedCategoryIds],
+  );
 
   // Update indeterminate state for all group checkboxes
   useEffect(() => {
@@ -190,7 +199,7 @@ export function EditBudgetViewModal({
         checkbox.indeterminate = isGroupIndeterminate(group.id);
       }
     });
-  }, [categoryGroups, selectedCategoryIds]);
+  }, [categoryGroups, selectedCategoryIds, isGroupIndeterminate]);
 
   const handleSave = useCallback(() => {
     const newMap = budgetViewMap ? { ...budgetViewMap } : {};

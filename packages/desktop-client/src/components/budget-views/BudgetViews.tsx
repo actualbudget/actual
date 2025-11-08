@@ -183,8 +183,8 @@ export function BudgetViews() {
       }
 
       if (
-        !confirm(
-          t('Delete budget view "{{name}}"?', {
+        !window.confirm(
+          t('Delete budget view “{{name}}”?', {
             name: view.name,
           }),
         )
@@ -309,7 +309,12 @@ export function BudgetViews() {
   );
 
   const onReorder: OnDropCallback = useCallback(
-    (id: string, dropPos: 'top' | 'bottom', targetId: string) => {
+    (id: string, dropPos: 'top' | 'bottom', targetId: unknown) => {
+      // Narrow targetId because the OnDropCallback uses unknown for safety
+      if (typeof targetId !== 'string') {
+        return;
+      }
+
       const viewToMove = views.find(v => v.id === id);
       const targetView = views.find(v => v.id === targetId);
 

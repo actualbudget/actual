@@ -1,3 +1,5 @@
+/* eslint-disable import/no-default-export */
+
 const SYNCED_PREF_KEYS = [
   'firstDayOfWeekIdx',
   'dateFormat',

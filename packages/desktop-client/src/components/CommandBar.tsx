@@ -153,7 +153,7 @@ export function CommandBar() {
         Icon: SvgLibrary,
       },
     ],
-    [t],
+    [t, budgetViewsEnabled],
   );
 
   useEffect(() => {

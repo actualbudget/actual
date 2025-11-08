@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
@@ -44,7 +44,16 @@ type LabelButtonProps = {
   isSelected: boolean;
   onToggle: () => void;
   activeBudgetType: string;
-  format: (value: unknown, type?: 'string' | 'number' | 'percentage' | 'financial' | 'financial-with-sign' | 'financial-no-decimals') => string;
+  format: (
+    value: unknown,
+    type?:
+      | 'string'
+      | 'number'
+      | 'percentage'
+      | 'financial'
+      | 'financial-with-sign'
+      | 'financial-no-decimals',
+  ) => string;
 };
 
 function LabelButton({
@@ -148,7 +157,9 @@ function LabelButton({
             justifyContent: 'space-between',
           }}
         >
-          <Text style={{ color: theme.pageTextLight }}><Trans>Budgeted:</Trans></Text>
+          <Text style={{ color: theme.pageTextLight }}>
+            <Trans>Budgeted:</Trans>
+          </Text>
           <Text style={{ fontWeight: 500 }}>
             {format(stats.budgeted, 'financial')}
           </Text>
@@ -160,7 +171,9 @@ function LabelButton({
             justifyContent: 'space-between',
           }}
         >
-          <Text style={{ color: theme.pageTextLight }}><Trans>Spent:</Trans></Text>
+          <Text style={{ color: theme.pageTextLight }}>
+            <Trans>Spent:</Trans>
+          </Text>
           <Text style={{ fontWeight: 500 }}>
             {format(stats.spent, 'financial')}
           </Text>
@@ -219,13 +232,9 @@ export function CategoryFilterSelector({
   onFilterChange,
 }: CategoryFilterSelectorProps) {
   const budgetViewsEnabled = useFeatureFlag('budgetViews');
-  const { t } = useTranslation();
   const format = useFormat();
   const { type: budgetType } = useContext(MonthsContext);
 
-  if (!budgetViewsEnabled) {
-    return null;
-  }
   const [selectedViews, setSelectedViews] = useState<Set<string>>(new Set());
   const [budgetViewMap = {}, setBudgetViewMapPref] = useSyncedPrefJson<
     'budget.budgetViewMap',
@@ -353,8 +362,8 @@ export function CategoryFilterSelector({
     setBudgetViewMapPref(newMap);
   };
 
-  // Don't show the filter bar if no budget views are created or if none are in use
-  if (views.length === 0) {
+  // Don't show the filter bar if feature disabled or if no budget views are created/in use
+  if (!budgetViewsEnabled || views.length === 0) {
     return null;
   }
 
@@ -386,9 +395,7 @@ export function CategoryFilterSelector({
             isSelected={isSelected}
             onToggle={() => handleViewToggle(view.id)}
             activeBudgetType={activeBudgetType}
-            format={(value: unknown, type) =>
-              format(value, type)
-            }
+            format={(value: unknown, type) => format(value, type)}
           />
         );
       })}
