@@ -4,7 +4,7 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
-  | 'payPeriodsEnabled';
+  | 'payPeriodsEnabled'
   | 'crossoverReport'
   | 'plugins';
 
