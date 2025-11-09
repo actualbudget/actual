@@ -19,7 +19,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  loadPayPeriodConfigFromPrefs({});
+  applyPayPeriodPrefs({});
   global.currentMonth = undefined;
 });
 

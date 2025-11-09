@@ -1,4 +1,3 @@
-
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as fs from '../../platform/server/fs';
 import { logger } from '../../platform/server/log';
