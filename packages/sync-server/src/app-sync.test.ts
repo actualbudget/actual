@@ -876,3 +876,13 @@ async function sendSyncRequest(syncRequest) {
     .send(bufferRequest);
   return res;
 }
+
+afterAll(() => {
+  // Close the account DB to avoid file-locks on Windows during teardown
+  try {
+    const acct = getAccountDb();
+    if (acct && typeof acct.close === 'function') acct.close();
+  } catch (e) {
+    // ignore
+  }
+});

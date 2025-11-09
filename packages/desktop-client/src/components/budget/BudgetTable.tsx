@@ -19,6 +19,7 @@ import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
 import { type MonthBounds, MonthsProvider } from './MonthsContext';
+import { CategoryFilterSelector } from './CategoryFilterSelector';
 import {
   findSortDown,
   findSortUp,
@@ -84,6 +85,9 @@ export function BudgetTable(props: BudgetTableProps) {
   } = props;
 
   const { grouped: categoryGroups = [] } = useCategories();
+  const [filteredCategoryIds, setFilteredCategoryIds] = useState<
+    string[] | null
+  >(null);
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
   const [showHiddenCategories, setShowHiddenCategoriesPef] = useLocalPref(
@@ -231,6 +235,25 @@ export function BudgetTable(props: BudgetTableProps) {
 
   const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
 
+  // If filtering is active, create a filtered view of groups/categories
+  const effectiveCategoryGroups = useMemo(() => {
+    if (!filteredCategoryIds || filteredCategoryIds.length === 0) {
+      return categoryGroups;
+    }
+
+    const set = new Set(filteredCategoryIds);
+
+    return categoryGroups
+      .filter(group => showHiddenCategories || !group.hidden)
+      .map(group => ({
+        ...group,
+        categories: (group.categories || [])
+          .filter(cat => set.has(cat.id))
+          .filter(cat => showHiddenCategories || !cat.hidden),
+      }))
+      .filter(group => (group.categories || []).length > 0);
+  }, [categoryGroups, filteredCategoryIds, showHiddenCategories]);
+
   return (
     <View
       data-testid="budget-table"
@@ -280,6 +303,11 @@ export function BudgetTable(props: BudgetTableProps) {
           expandAllCategories={expandAllCategories}
           collapseAllCategories={collapseAllCategories}
         />
+        {/* Budget Views filter bar */}
+        <CategoryFilterSelector
+          categoryGroups={categoryGroups}
+          onFilterChange={ids => setFilteredCategoryIds(ids)}
+        />
         <View
           style={{
             overflowY: 'scroll',
@@ -298,7 +326,7 @@ export function BudgetTable(props: BudgetTableProps) {
             <SchedulesProvider query={schedulesQuery}>
               <BudgetCategories
                 // @ts-expect-error Fix when migrating BudgetCategories to ts
-                categoryGroups={categoryGroups}
+                categoryGroups={effectiveCategoryGroups}
                 editingCell={editing}
                 dataComponents={dataComponents}
                 onEditMonth={onEditMonth}

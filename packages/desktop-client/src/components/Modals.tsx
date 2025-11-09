@@ -6,6 +6,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';
+import { EditBudgetViewModal } from './budget-views/EditBudgetViewModal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
@@ -110,6 +111,11 @@ export function Modals() {
         case 'category-automations-unmigrate':
           return budgetId ? (
             <UnmigrateBudgetAutomationsModal key={name} {...modal.options} />
+          ) : null;
+
+        case 'edit-budget-view':
+          return budgetId ? (
+            <EditBudgetViewModal key={key} {...modal.options} />
           ) : null;
 
         case 'keyboard-shortcuts':

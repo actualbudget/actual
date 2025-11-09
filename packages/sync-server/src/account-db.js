@@ -18,6 +18,29 @@ export function getAccountDb() {
   return _accountDb;
 }
 
+export function closeAccountDb() {
+  if (_accountDb) {
+    try {
+      _accountDb.close();
+    } catch (e) {
+      // ignore
+    }
+    _accountDb = undefined;
+  }
+}
+
+// Ensure the DB is closed on process exit to avoid lingering file locks
+process.on('beforeExit', () => {
+  try {
+    if (_accountDb) {
+      _accountDb.close();
+      _accountDb = undefined;
+    }
+  } catch (e) {
+    // ignore
+  }
+});
+
 export function needsBootstrap() {
   const accountDb = getAccountDb();
   const rows = accountDb.all('SELECT * FROM auth');

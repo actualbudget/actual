@@ -11,6 +11,7 @@ import * as undo from 'loot-core/platform/client/undo';
 
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { BankSyncStatus } from './BankSyncStatus';
+import { BudgetViewsPage } from './budget-views/BudgetViewsPage';
 import { CommandBar } from './CommandBar';
 import { GlobalKeys } from './GlobalKeys';
 import { MobileBankSyncAccountEditPage } from './mobile/banksync/MobileBankSyncAccountEditPage';
@@ -32,6 +33,7 @@ import { getLatestAppVersion, sync } from '@desktop-client/app/appSlice';
 import { ProtectedRoute } from '@desktop-client/auth/ProtectedRoute';
 import { Permissions } from '@desktop-client/auth/types';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
@@ -86,6 +88,7 @@ export function FinancesApp() {
 
   const accounts = useAccounts();
   const isAccountsLoaded = useSelector(state => state.account.isAccountsLoaded);
+  const budgetViewsEnabled = useFeatureFlag('budgetViews');
 
   const versionInfo = useSelector(state => state.app.versionInfo);
   const [notifyWhenUpdateIsAvailable] = useGlobalPref(
@@ -291,6 +294,16 @@ export function FinancesApp() {
                   }
                 />
                 <Route path="/tags" element={<ManageTagsPage />} />
+                {budgetViewsEnabled && (
+                  <Route
+                    path="/budget-views"
+                    element={
+                      <NarrowNotSupported>
+                        <BudgetViewsPage />
+                      </NarrowNotSupported>
+                    }
+                  />
+                )}
                 <Route path="/settings" element={<Settings />} />
 
                 <Route

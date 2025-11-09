@@ -22,6 +22,30 @@ import * as sheet from './sheet';
 
 vi.mock('./post');
 
+// Utility: remove a directory with retries to handle Windows file-locking
+async function removeDirWithRetry(path: string, attempts = 5) {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      if (await fs.exists(path)) {
+        await fs.removeDirRecursively(path);
+      }
+      return;
+    } catch (e: any) {
+      const msg = String(e && (e.code || e.message || e));
+      // If it's a file-locking / permission related error, retry after a short delay
+      if (msg.includes('EBUSY') || msg.includes('EPERM') || msg.includes('EACCES')) {
+        // small backoff
+        await new Promise(r => setTimeout(r, 100 * (i + 1)));
+        continue;
+      }
+      // rethrow other errors
+      throw e;
+    }
+  }
+  // final attempt
+  if (await fs.exists(path)) await fs.removeDirRecursively(path);
+}
+
 beforeEach(async () => {
   await global.emptyDatabase()();
   disableGlobalMutations();
@@ -38,6 +62,17 @@ async function createTestBudget(name) {
   const templatePath = fs.join(__dirname, '/../mocks/files', name);
   const budgetPath = fs.join(__dirname, '/../mocks/files/budgets/test-budget');
   fs._setDocumentDir(fs.join(budgetPath, '..'));
+  // Make sure any previous test budget is removed before creating a new one
+  if (await fs.exists(budgetPath)) {
+    // Ensure DB handles are closed then try removing with retries (Windows
+    // can keep file handles open briefly which causes EBUSY/EPERM on unlink)
+    try {
+      await db.closeDatabase();
+    } catch (e) {
+      // ignore
+    }
+    await removeDirWithRetry(budgetPath);
+  }
 
   await fs.mkdir(budgetPath);
   await fs.copyFile(
@@ -59,7 +94,12 @@ describe('Budgets', () => {
     );
 
     if (await fs.exists(budgetPath)) {
-      await fs.removeDirRecursively(budgetPath);
+      try {
+        await db.closeDatabase();
+      } catch (e) {
+        // ignore
+      }
+      await removeDirWithRetry(budgetPath);
     }
   });
 
