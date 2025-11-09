@@ -71,6 +71,7 @@ export const BudgetAutomation = ({
   return (
     <SpaceBetween
       direction="vertical"
+      align="stretch"
       gap={inline ? 0 : 5}
       style={{ ...style, minHeight: 'fit-content' }}
     >

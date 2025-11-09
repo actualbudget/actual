@@ -7,6 +7,7 @@ type SpaceBetweenProps = {
   direction?: 'horizontal' | 'vertical';
   gap?: number;
   wrap?: boolean;
+  align?: 'start' | 'center' | 'end' | 'stretch';
   style?: CSSProperties;
   children: ReactNode;
 };
@@ -15,6 +16,7 @@ export const SpaceBetween = ({
   direction = 'horizontal',
   gap = 15,
   wrap = true,
+  align = 'center',
   style,
   children,
   ...props
@@ -24,7 +26,7 @@ export const SpaceBetween = ({
       style={{
         flexWrap: wrap ? 'wrap' : 'nowrap',
         flexDirection: direction === 'horizontal' ? 'row' : 'column',
-        alignItems: 'center',
+        alignItems: align,
         gap,
         ...style,
       }}

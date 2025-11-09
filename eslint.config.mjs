@@ -75,6 +75,9 @@ const confusingBrowserGlobals = [
 export default defineConfig(
   {
     ignores: [
+      //temporary
+      'packages/docs',
+
       'packages/api/app/bundle.api.js',
       'packages/api/app/stats.json',
       'packages/api/dist',
