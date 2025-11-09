@@ -102,7 +102,11 @@ export function ForceReload() {
       } else {
         // For browser, use Actual.reload() which unregisters service worker
         // and forces a fresh load
-        await window.Actual.reload();
+        if (window.Actual?.reload) {
+          await window.Actual.reload();
+        } else {
+          window.location.reload();
+        }
       }
     } catch (error) {
       // If reload fails, fall back to location.reload()
@@ -121,9 +125,9 @@ export function ForceReload() {
       <Text>
         <Trans>
           <strong>Force reload app</strong> will clear the cached version of the
-          app and load a fresh one. This is useful if you're experiencing issues
-          with the app after an update or if cached files are causing problems.
-          The app will reload automatically after clearing the cache.
+          app and load a fresh one. This is useful if you&apos;re experiencing
+          issues with the app after an update or if cached files are causing
+          problems. The app will reload automatically after clearing the cache.
         </Trans>
       </Text>
     </Setting>
