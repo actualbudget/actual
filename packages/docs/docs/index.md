@@ -4,6 +4,8 @@ sidebar_position: 1
 title: 'Introduction'
 ---
 
+# TEST
+
 Welcome to Actual’s documentation! This page provides you a quick introduction to Actual Budget and will help you navigate to the documentation to learn more about Actual.
 
 ## Where to Begin?
