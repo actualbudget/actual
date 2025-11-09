@@ -22,7 +22,7 @@ type SummaryNumberProps = {
   suffix?: string;
   loading?: boolean;
   initialFontSize?: number;
-  fontSizeChanged?: (fontSize: number) => void;
+  // fontSizeChanged?: (fontSize: number) => void;
 };
 
 export function SummaryNumber({
@@ -32,7 +32,7 @@ export function SummaryNumber({
   suffix = '',
   loading = true,
   initialFontSize = 14,
-  fontSizeChanged,
+  // fontSizeChanged,
 }: SummaryNumberProps) {
   const { t } = useTranslation();
   const [fontSize, setFontSize] = useState<number>(initialFontSize);
@@ -60,9 +60,10 @@ export function SummaryNumber({
 
     setFontSize(calculatedFontSize);
 
-    if (calculatedFontSize !== initialFontSize && fontSizeChanged) {
-      fontSizeChanged(calculatedFontSize);
-    }
+    // This causes an infinite loop that triggers dashboard-update-widget
+    // if (calculatedFontSize !== initialFontSize && fontSizeChanged) {
+    //   fontSizeChanged(calculatedFontSize);
+    // }
   }, 100);
 
   const ref = useResizeObserver(handleResize);
