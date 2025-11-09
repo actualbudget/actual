@@ -23,7 +23,7 @@ export function setPayPeriodConfig(config: PayPeriodConfig): void {
   __payPeriodConfig = config;
 }
 
-export function loadPayPeriodConfigFromPrefs(prefs: {
+export function applyPayPeriodPrefs(prefs: {
   showPayPeriods?: string;
   payPeriodFrequency?: string;
   payPeriodStartDate?: string;
@@ -158,12 +158,8 @@ function computePayPeriodByIndex(
     const referenceDay = referenceStart.getDate();
     startDate = new Date(targetYear, 0, referenceDay, 12); // Jan of target year at noon
     startDate = d.addMonths(startDate, periodIndex - 1);
-    endDate = new Date(
-      startDate.getFullYear(),
-      startDate.getMonth() + 1,
-      referenceDay - 1,
-      12,
-    );
+    const nextStart = d.addMonths(startDate, 1);
+    endDate = d.subDays(nextStart, 1);
     label = 'Pay Period ' + String(periodIndex);
   } else {
     // semimonthly: Two periods per month: 1st-15th and 16th-end of month
@@ -392,9 +388,13 @@ export function getCurrentPayPeriod(
 ): string {
   // Find which pay period this date falls into
   const year = date.getFullYear();
-  const periods = generatePayPeriods(year, config);
+  const candidates = [
+    ...generatePayPeriods(year, config),
+    ...generatePayPeriods(year - 1, config),
+    ...generatePayPeriods(year + 1, config),
+  ];
 
-  for (const period of periods) {
+  for (const period of candidates) {
     const startDate = parseDate(period.startDate);
     const endDate = parseDate(period.endDate);
 

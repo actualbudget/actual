@@ -1,3 +1,5 @@
+import { logger } from 'loot-core/platform/server/log';
+
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as fs from '../../platform/server/fs';
 import {
@@ -101,7 +103,11 @@ async function saveSyncedPrefs({
     id === 'payPeriodFrequency' ||
     id === 'payPeriodStartDate'
   ) {
-    await loadPayPeriodConfig();
+    try {
+      await loadPayPeriodConfig();
+    } catch (e) {
+      logger.warn('Failed to load pay period config', e);
+    }
   }
 }
 

@@ -23,7 +23,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { loadPayPeriodConfigFromPrefs } from 'loot-core/shared/pay-periods';
+import { applyPayPeriodPrefs } from 'loot-core/shared/pay-periods';
 import { groupById } from 'loot-core/shared/util';
 
 import { BudgetTable, PILL_STYLE } from './BudgetTable';
@@ -112,7 +112,7 @@ export function BudgetPage() {
     }
 
     // Use the existing validation function that handles type safety
-    loadPayPeriodConfigFromPrefs({
+    applyPayPeriodPrefs({
       showPayPeriods: payPeriodViewEnabled,
       payPeriodFrequency,
       payPeriodStartDate,

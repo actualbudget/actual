@@ -7,7 +7,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { loadPayPeriodConfigFromPrefs } from 'loot-core/shared/pay-periods';
+import { applyPayPeriodPrefs } from 'loot-core/shared/pay-periods';
 
 import { DynamicBudgetTable } from './DynamicBudgetTable';
 import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';
@@ -115,11 +115,16 @@ function BudgetInner(props: BudgetInnerProps) {
   // Wire pay period config from synced prefs into month utils
   useEffect(() => {
     if (!payPeriodFeatureFlagEnabled) {
+      applyPayPeriodPrefs({
+        showPayPeriods: 'false',
+        payPeriodFrequency: 'monthly',
+        payPeriodStartDate: monthUtils.currentMonth(),
+      });
       return;
     }
 
     // Use the existing validation function that handles type safety
-    loadPayPeriodConfigFromPrefs({
+    applyPayPeriodPrefs({
       showPayPeriods: payPeriodViewEnabled,
       payPeriodFrequency,
       payPeriodStartDate,
@@ -134,6 +139,11 @@ function BudgetInner(props: BudgetInnerProps) {
   // Reset view to current month when toggling between pay periods and calendar months
   useEffect(() => {
     if (!payPeriodFeatureFlagEnabled) {
+      applyPayPeriodPrefs({
+        showPayPeriods: 'false',
+        payPeriodFrequency: 'monthly',
+        payPeriodStartDate: monthUtils.currentMonth(),
+      });
       return;
     }
 

@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach } from 'vitest';
 
-import { loadPayPeriodConfigFromPrefs } from 'loot-core/shared/pay-periods';
+import { applyPayPeriodPrefs } from 'loot-core/shared/pay-periods';
 
 import {
   convertPayPeriodToDateRange,
@@ -11,7 +11,7 @@ import {
 beforeEach(() => {
   // Set up pay period configuration for testing
   global.currentMonth = '2024-13';
-  loadPayPeriodConfigFromPrefs({
+  applyPayPeriodPrefs({
     showPayPeriods: 'true',
     payPeriodFrequency: 'biweekly',
     payPeriodStartDate: '2024-01-05',

@@ -5,7 +5,7 @@ import * as d from 'date-fns';
  * to avoid code duplication while maintaining clear separation of concerns.
  */
 
-export function parseDate(value: string | Date): Date {
+export function parseDate(value: string | number | Date): Date {
   if (typeof value === 'string') {
     // Dates are hard. We just want to deal with months in the format
     // 2020-01 and days in the format 2020-01-01, but life is never

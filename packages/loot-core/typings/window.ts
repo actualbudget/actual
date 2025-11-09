@@ -52,5 +52,10 @@ declare global {
 
   var IS_TESTING: boolean;
 
+  /**
+   * Test-only override for currentMonth().
+   * Set this in tests to make date-dependent behavior deterministic.
+   * Always reset to null in afterEach() to prevent test pollution.
+   */
   var currentMonth: string | undefined;
 }
