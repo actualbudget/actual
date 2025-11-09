@@ -6,6 +6,7 @@ import { View } from './View';
 type SpaceBetweenProps = {
   direction?: 'horizontal' | 'vertical';
   gap?: number;
+  wrap?: boolean;
   style?: CSSProperties;
   children: ReactNode;
 };
@@ -13,18 +14,21 @@ type SpaceBetweenProps = {
 export const SpaceBetween = ({
   direction = 'horizontal',
   gap = 15,
+  wrap = true,
   style,
   children,
+  ...props
 }: SpaceBetweenProps) => {
   return (
     <View
       style={{
-        flexWrap: 'wrap',
+        flexWrap: wrap ? 'wrap' : 'nowrap',
         flexDirection: direction === 'horizontal' ? 'row' : 'column',
         alignItems: 'center',
         gap,
         ...style,
       }}
+      {...props}
     >
       {children}
     </View>

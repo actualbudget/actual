@@ -736,7 +736,11 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     )}
                   </Button>
                   <View
-                    style={{ height: '100%', width: '100%', overflow: 'auto' }}
+                    style={{
+                      height: '100%',
+                      width: '100%',
+                      overflow: 'auto',
+                    }}
                   >
                     <TransactionListMobile
                       isLoading={false}

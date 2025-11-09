@@ -80,11 +80,9 @@ export async function loadPayPeriodConfig(): Promise<void> {
 async function saveSyncedPrefs({
   id,
   value,
-  isGlobal,
 }: {
   id: keyof SyncedPrefs;
   value: string | undefined;
-  isGlobal?: boolean;
 }) {
   if (!id) {
     return;
@@ -93,7 +91,6 @@ async function saveSyncedPrefs({
   await db.update('preferences', {
     id,
     value,
-    ...(isGlobal !== undefined && { isGlobal: isGlobal ? 1 : 0 }),
   });
 
   // Reload pay period config when pay period preferences change

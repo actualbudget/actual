@@ -17,7 +17,7 @@ jobs:
     outputs:
       netlify_url: ${{ steps.netlify.outputs.url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Wait for Netlify build to finish
@@ -34,7 +34,7 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-jammy
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Trust the repository directory
@@ -43,7 +43,7 @@ jobs:
         run: yarn e2e
         env:
           E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: desktop-client-test-results
@@ -57,7 +57,7 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-jammy
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Trust the repository directory
@@ -65,7 +65,7 @@ jobs:
       - name: Run Desktop app E2E Tests
         run: |
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" -- yarn e2e:desktop
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: desktop-app-test-results
@@ -80,14 +80,14 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-jammy
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Run VRT Tests on Netlify URL
         run: yarn vrt
         env:
           E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: desktop-client-test-results

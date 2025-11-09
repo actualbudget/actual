@@ -69,7 +69,7 @@
     "vite": "^7.1.11",
     "vite-plugin-node-polyfills": "^0.24.0",
     "vite-plugin-peggy-loader": "^2.0.1",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.6",
     "yargs": "^18.0.0"
   },
   "exports": {

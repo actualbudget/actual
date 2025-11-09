@@ -24,7 +24,7 @@ jobs:
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - if: ${{ startsWith(matrix.os, 'windows') }}
         run: pip.exe install setuptools
       - if: ${{ ! startsWith(matrix.os, 'windows') }}
@@ -47,7 +47,7 @@ jobs:
       - name: Build Electron
         run: ./bin/package-electron
       - name: Upload Build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: actual-electron-${{ matrix.os }}
           path: |
@@ -58,7 +58,7 @@ jobs:
             packages/desktop-electron/dist/*.flatpak
       - name: Upload Windows Store Build
         if: ${{ startsWith(matrix.os, 'windows') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: actual-electron-${{ matrix.os }}-appx
           path: |

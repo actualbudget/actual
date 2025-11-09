@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach } from 'vitest';
+import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 
 import { applyPayPeriodPrefs } from 'loot-core/shared/pay-periods';
 
@@ -16,6 +16,11 @@ beforeEach(() => {
     payPeriodFrequency: 'biweekly',
     payPeriodStartDate: '2024-01-05',
   });
+});
+
+afterEach(() => {
+  loadPayPeriodConfigFromPrefs({});
+  global.currentMonth = undefined;
 });
 
 describe('Pay Period Translation Utilities', () => {

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useReducer, useState } from 'react';
 
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { type CSSProperties } from '@actual-app/components/styles';
 
 import {
@@ -69,9 +69,9 @@ export const BudgetAutomation = ({
   }, [categories]);
 
   return (
-    <Stack
-      direction="column"
-      spacing={inline ? 0 : 1}
+    <SpaceBetween
+      direction="vertical"
+      gap={inline ? 0 : 5}
       style={{ ...style, minHeight: 'fit-content' }}
     >
       <BudgetAutomationReadOnly
@@ -92,6 +92,6 @@ export const BudgetAutomation = ({
           categories={categories}
         />
       )}
-    </Stack>
+    </SpaceBetween>
   );
 };

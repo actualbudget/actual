@@ -36,7 +36,7 @@ jobs:
       matrix:
         os: [ubuntu, alpine]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -76,7 +76,7 @@ jobs:
         run: yarn build:server
 
       - name: Build image for testing
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: false
@@ -93,7 +93,7 @@ jobs:
       # This will use the cache from the earlier build step and not rebuild the image
       # https://docs.docker.com/build/ci/github-actions/test-before-push/
       - name: Build and push images
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
