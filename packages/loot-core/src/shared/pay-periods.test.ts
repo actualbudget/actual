@@ -600,15 +600,15 @@ describe('Pay Period Utilities and Configuration', () => {
       };
 
       const periods = generatePayPeriods(2024, config);
-      
+
       // First period: Jan 1 - Jan 31
       expect(periods[0].startDate).toBe('2024-01-01');
       expect(periods[0].endDate).toBe('2024-01-31');
-      
+
       // Second period: Feb 1 - Feb 29 (2024 is a leap year)
       expect(periods[1].startDate).toBe('2024-02-01');
       expect(periods[1].endDate).toBe('2024-02-29');
-      
+
       // Third period: Mar 1 - Mar 31
       expect(periods[2].startDate).toBe('2024-03-01');
       expect(periods[2].endDate).toBe('2024-03-31');
@@ -624,15 +624,15 @@ describe('Pay Period Utilities and Configuration', () => {
       };
 
       const periods = generatePayPeriods(2024, config);
-      
+
       // First period: Jan 30 - Feb 28 (Feb 29 is next start, so end is Feb 28)
       expect(periods[0].startDate).toBe('2024-01-30');
       expect(periods[0].endDate).toBe('2024-02-28');
-      
+
       // Second period: Feb 29 - Mar 28 (addMonths adjusts Jan 30 + 1 month to Feb 29)
       expect(periods[1].startDate).toBe('2024-02-29');
       expect(periods[1].endDate).toBe('2024-03-28');
-      
+
       // Third period: Mar 30 - Apr 29 (addMonths(Jan 30, 2) = Mar 30)
       expect(periods[2].startDate).toBe('2024-03-30');
       expect(periods[2].endDate).toBe('2024-04-29');
@@ -648,11 +648,11 @@ describe('Pay Period Utilities and Configuration', () => {
       };
 
       const periods = generatePayPeriods(2024, config);
-      
+
       // First period: Jan 31 - Feb 28 (addMonths adjusts Jan 31 + 1 month to Feb 29, end is Feb 28)
       expect(periods[0].startDate).toBe('2024-01-31');
       expect(periods[0].endDate).toBe('2024-02-28');
-      
+
       // Second period: Feb 29 - Mar 28 (addMonths adjusts Feb 29 + 1 month to Mar 29, end is Mar 28)
       expect(periods[1].startDate).toBe('2024-02-29');
       expect(periods[1].endDate).toBe('2024-03-28');
@@ -667,15 +667,15 @@ describe('Pay Period Utilities and Configuration', () => {
       };
 
       const periods = generatePayPeriods(2024, config);
-      
+
       // First period: Jan 15 - Feb 14
       expect(periods[0].startDate).toBe('2024-01-15');
       expect(periods[0].endDate).toBe('2024-02-14');
-      
+
       // Second period: Feb 15 - Mar 14
       expect(periods[1].startDate).toBe('2024-02-15');
       expect(periods[1].endDate).toBe('2024-03-14');
-      
+
       // Third period: Mar 15 - Apr 14
       expect(periods[2].startDate).toBe('2024-03-15');
       expect(periods[2].endDate).toBe('2024-04-14');
@@ -691,11 +691,11 @@ describe('Pay Period Utilities and Configuration', () => {
       };
 
       const periods = generatePayPeriods(2023, config);
-      
+
       // First period: Jan 31 - Feb 27 (addMonths adjusts Jan 31 + 1 month to Feb 28, end is Feb 27)
       expect(periods[0].startDate).toBe('2023-01-31');
       expect(periods[0].endDate).toBe('2023-02-27');
-      
+
       // Second period: Feb 28 - Mar 27 (addMonths adjusts Feb 28 + 1 month to Mar 28, end is Mar 27)
       expect(periods[1].startDate).toBe('2023-02-28');
       expect(periods[1].endDate).toBe('2023-03-27');
@@ -710,15 +710,15 @@ describe('Pay Period Utilities and Configuration', () => {
       };
 
       const periods = generatePayPeriods(2024, config);
-      
+
       for (let i = 0; i < periods.length - 1; i++) {
         const currentEnd = parseDate(periods[i].endDate);
         const nextStart = parseDate(periods[i + 1].startDate);
-        
+
         // Next start should be exactly one day after current end
         const expectedNextStart = d.addDays(currentEnd, 1);
         expect(d.format(nextStart, 'yyyy-MM-dd')).toBe(
-          d.format(expectedNextStart, 'yyyy-MM-dd')
+          d.format(expectedNextStart, 'yyyy-MM-dd'),
         );
       }
     });
