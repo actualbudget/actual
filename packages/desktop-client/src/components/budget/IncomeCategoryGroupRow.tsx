@@ -16,7 +16,7 @@ import { CategoryGroupNameCell } from './CategoryGroupNameCell';
 
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
-type IncomeGroupRowProps = ComponentPropsWithoutRef<
+type IncomeCategoryGroupRowProps = ComponentPropsWithoutRef<
   typeof ReactAriaRow<ColumnDefinition>
 > & {
   item: {
@@ -32,7 +32,8 @@ type IncomeGroupRowProps = ComponentPropsWithoutRef<
   onToggleVisibilty: (categoryGroup: CategoryGroupEntity) => void;
   onApplyBudgetTemplatesInGroup: (categoryGroup: CategoryGroupEntity) => void;
 };
-export function IncomeGroupRow({
+
+export function IncomeCategoryGroupRow({
   item,
   isCollapsed,
   onToggleCollapse,
@@ -43,7 +44,7 @@ export function IncomeGroupRow({
   onApplyBudgetTemplatesInGroup,
   style,
   ...props
-}: IncomeGroupRowProps) {
+}: IncomeCategoryGroupRowProps) {
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
 
   return budgetType === 'rollover' ? (

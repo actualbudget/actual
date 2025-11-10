@@ -35,10 +35,10 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
+import { ExpenseCategoryGroupRow } from './ExpenseCategoryGroupRow';
 import { ExpenseCategoryRow } from './ExpenseCategoryRow';
-import { ExpenseGroupRow } from './ExpenseGroupRow';
+import { IncomeCategoryGroupRow } from './IncomeCategoryGroupRow';
 import { IncomeCategoryRow } from './IncomeCategoryRow';
-import { IncomeGroupRow } from './IncomeGroupRow';
 import { MonthsContext } from './MonthsContext';
 import { separateGroups } from './util';
 
@@ -491,7 +491,7 @@ export function BudgetCategories({
               switch (item.type) {
                 case 'expense-group':
                   return (
-                    <ExpenseGroupRow
+                    <ExpenseCategoryGroupRow
                       id={item.id}
                       columns={columns}
                       item={item}
@@ -548,7 +548,7 @@ export function BudgetCategories({
                   );
                 case 'income-separator':
                   return (
-                    <AddGroupButtonRow
+                    <AddCategoryGroupButtonRow
                       id="add-group-row"
                       columns={columns}
                       onAddGroup={onAddGroup}
@@ -556,7 +556,7 @@ export function BudgetCategories({
                   );
                 case 'income-group':
                   return (
-                    <IncomeGroupRow
+                    <IncomeCategoryGroupRow
                       id={item.id}
                       columns={columns}
                       item={item}
@@ -657,17 +657,17 @@ export function BudgetCategories({
 
 BudgetCategories.displayName = 'BudgetCategories';
 
-type AddGroupButtonRowProps = ComponentPropsWithoutRef<
+type AddCategoryGroupButtonRowProps = ComponentPropsWithoutRef<
   typeof ReactAriaRow<ColumnDefinition>
 > & {
   onAddGroup: () => void;
 };
 
-function AddGroupButtonRow({
+function AddCategoryGroupButtonRow({
   onAddGroup,
   style,
   ...props
-}: AddGroupButtonRowProps) {
+}: AddCategoryGroupButtonRowProps) {
   return (
     <ReactAriaRow
       data-add-group-button-row="true"

@@ -67,7 +67,7 @@ export function CategoryGroupNameCell({
             ...hoverVisibleStyle,
           })}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Button
               variant="bare"
               onPress={() => onToggleCollapse(categoryGroup)}
@@ -103,10 +103,9 @@ export function CategoryGroupNameCell({
                 <DialogTrigger>
                   <Button
                     variant="bare"
-                    className={cx(
-                      { 'hover-visible': !isMenuOpen && !isFocusVisible },
-                      css({ marginLeft: 5 }),
-                    )}
+                    className={cx({
+                      'hover-visible': !isMenuOpen && !isFocusVisible,
+                    })}
                     onPress={() => {
                       // resetPosition();
                       setIsMenuOpen(true);

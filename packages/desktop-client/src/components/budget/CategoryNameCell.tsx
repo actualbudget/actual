@@ -74,15 +74,16 @@ export function CategoryNameCell({
             </View>
           ) : (
             <>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+              >
                 <Text>{category.name}</Text>
                 <DialogTrigger>
                   <Button
                     variant="bare"
-                    className={cx(
-                      { 'hover-visible': !isMenuOpen && !isFocusVisible },
-                      css({ marginLeft: 5 }),
-                    )}
+                    className={cx({
+                      'hover-visible': !isMenuOpen && !isFocusVisible,
+                    })}
                     onPress={() => {
                       // resetPosition();
                       setIsMenuOpen(true);
