@@ -160,7 +160,6 @@ export function Budget() {
           startMonth={startMonth}
           monthBounds={bounds}
           maxMonths={maxMonths}
-          // @ts-expect-error fix me
           dataComponents={trackingComponents}
           onMonthSelect={onMonthSelect}
           onDeleteCategory={onDeleteCategory}
@@ -188,7 +187,6 @@ export function Budget() {
           startMonth={startMonth}
           monthBounds={bounds}
           maxMonths={maxMonths}
-          // @ts-expect-error fix me
           dataComponents={envelopeComponents}
           onMonthSelect={onMonthSelect}
           onDeleteCategory={onDeleteCategory}
