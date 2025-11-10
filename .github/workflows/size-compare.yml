@@ -27,6 +27,14 @@ jobs:
     permissions:
       pull-requests: write
     steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.base_ref }}
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
       - name: Wait for ${{github.base_ref}} build to succeed
         uses: fountainhead/action-wait-for-check@v1.2.0
         id: master-build
@@ -114,6 +122,7 @@ jobs:
       - name: Post combined bundle stats comment
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           node packages/ci-actions/bin/update-bundle-stats-comment.mjs \
