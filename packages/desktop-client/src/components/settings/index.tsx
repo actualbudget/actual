@@ -176,6 +176,7 @@ export function Settings() {
   const [budgetName] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
+  const isForceReloadEnabled = useFeatureFlag('forceReload');
   const [_, setDefaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
 
   const onCloseBudget = () => {
@@ -246,7 +247,7 @@ export function Settings() {
         <ExportBudget />
         <AdvancedToggle>
           <AdvancedAbout />
-          <ForceReload />
+          {isForceReloadEnabled && <ForceReload />}
           <ResetCache />
           <ResetSync />
           <RepairTransactions />
