@@ -224,11 +224,10 @@ export function Settings() {
               flexDirection: 'row',
               alignItems: 'flex-end',
               width: '100%',
-              minWidth: 0,
             }}
           >
             {/* The only spot to close a budget on mobile */}
-            <FormField style={{ flex: 1, minWidth: 0 }}>
+            <FormField style={{ flex: 1 }}>
               <FormLabel title={t('Budget name')} />
               <Input
                 value={budgetName}
