@@ -30,7 +30,7 @@ import {
   FIELD_TYPES,
   getValidOps,
 } from 'loot-core/shared/rules';
-import { titleFirst } from 'loot-core/shared/util';
+import { type IntegerAmount, titleFirst } from 'loot-core/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { CompactFiltersButton } from './CompactFiltersButton';
@@ -53,6 +53,10 @@ type FilterReducerState<T extends RuleConditionEntity> = Pick<
 type FilterReducerAction =
   | { type: 'close' }
   | Parameters<typeof updateFilterReducer>[1];
+
+type AmountInputRef = HTMLInputElement & {
+  getCurrentAmount: () => IntegerAmount;
+};
 
 let isDatepickerClick = false;
 
@@ -88,7 +92,7 @@ function ConfigureField<T extends RuleConditionEntity>({
   const { t } = useTranslation();
   const format = useFormat();
   const [subfield, setSubfield] = useState(initialSubfield);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<AmountInputRef>(null);
   const prevOp = useRef<T['op'] | null>(null);
 
   useEffect(() => {
@@ -227,9 +231,7 @@ function ConfigureField<T extends RuleConditionEntity>({
 
           if (field === 'amount' && inputRef.current) {
             try {
-              // @ts-expect-error - fix me
               if (inputRef.current.getCurrentAmount) {
-                // @ts-expect-error - fix me
                 submitValue = inputRef.current.getCurrentAmount();
               } else {
                 const rawValue = inputRef.current.value || '';
