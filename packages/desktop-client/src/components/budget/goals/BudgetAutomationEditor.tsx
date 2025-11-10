@@ -124,6 +124,7 @@ export function BudgetAutomationEditor({
   return (
     <SpaceBetween
       direction="vertical"
+      align="stretch"
       gap={10}
       style={{
         flex: 1,
