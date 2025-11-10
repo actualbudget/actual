@@ -58,6 +58,15 @@ jobs:
           name: build-stats
           path: base
 
+      - name: Download API stats from ${{github.base_ref}}
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          branch: ${{github.base_ref}}
+          workflow: build.yml
+          workflow_conclusion: ''
+          name: api-build-stats
+          path: base/api-stats
+
       - name: Download build artifact from PR
         uses: dawidd6/action-download-artifact@v11
         with:
@@ -68,6 +77,21 @@ jobs:
           path: head
           allow_forks: true
 
+      - name: Download API stats from PR
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          pr: ${{github.event.pull_request.number}}
+          workflow: build.yml
+          workflow_conclusion: ''
+          name: api-build-stats
+          path: head/api-stats
+          allow_forks: true
+
+      - name: Prepare API stats files
+        run: |
+          cp ./base/api-stats/api-stats.json ./base/api-stats.json
+          cp ./head/api-stats/api-stats.json ./head/api-stats.json
+
       - name: Strip content hashes from stats files
         run: |
           sed -i -E 's/index\.[0-9a-zA-Z_-]{8,}\./index./g' ./head/web-stats.json
@@ -76,16 +100,22 @@ jobs:
           sed -i -E 's/index\.[0-9a-zA-Z_-]{8,}\./index./g' ./base/web-stats.json
           sed -i -E 's/\.[0-9a-zA-Z_-]{8,}\.chunk\././g' ./base/web-stats.json
           sed -i -E 's/\.[0-9a-f]{8,}\././g' ./base/*.json
-      - uses: twk3/rollup-size-compare-action@v1.2.0
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          current-stats-json-path: ./head/web-stats.json
-          base-stats-json-path: ./base/web-stats.json
-          title: desktop-client
+      - name: Generate combined bundle stats comment
+        run: |
+          node packages/ci-actions/bin/bundle-stats-comment.mjs \
+            --web-base ./base/web-stats.json \
+            --web-head ./head/web-stats.json \
+            --loot-base ./base/loot-core-stats.json \
+            --loot-head ./head/loot-core-stats.json \
+            --api-base ./base/api-stats.json \
+            --api-head ./head/api-stats.json \
+            --identifier combined > bundle-stats-comment.md
 
-      - uses: twk3/rollup-size-compare-action@v1.2.0
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          current-stats-json-path: ./head/loot-core-stats.json
-          base-stats-json-path: ./base/loot-core-stats.json
-          title: loot-core
+      - name: Post combined bundle stats comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          node packages/ci-actions/bin/update-bundle-stats-comment.mjs \
+            --comment-file bundle-stats-comment.md \
+            --identifier '<!--- bundlestats-action-comment key:combined --->'
