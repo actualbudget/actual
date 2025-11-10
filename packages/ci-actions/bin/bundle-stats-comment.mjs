@@ -37,7 +37,13 @@ function parseRawArgs(argv) {
       throw new Error(`Missing value for argument "${key}".`);
     }
 
-    args.set(key.slice(2), values);
+    const keyName = key.slice(2);
+    // Accumulate values if the key already exists
+    if (args.has(keyName)) {
+      args.set(keyName, [...args.get(keyName), ...values]);
+    } else {
+      args.set(keyName, values);
+    }
   }
 
   return args;
@@ -175,14 +181,21 @@ async function loadStats(filePath) {
   try {
     const absolutePath = path.resolve(process.cwd(), filePath);
     const fileContents = await readFile(absolutePath, 'utf8');
-    return JSON.parse(fileContents);
+    const parsed = JSON.parse(fileContents);
+
+    // Validate that we got a meaningful stats object
+    if (!parsed || typeof parsed !== 'object') {
+      throw new Error('Stats file does not contain a valid JSON object');
+    }
+
+    return parsed;
   } catch (error) {
     const message =
       error instanceof Error
         ? error.message
         : 'Unknown error while parsing stats file';
-    console.warn(`[bundle-stats] Failed to parse "${filePath}": ${message}`);
-    return {};
+    console.error(`[bundle-stats] Failed to parse "${filePath}": ${message}`);
+    throw new Error(`Failed to load stats file "${filePath}": ${message}`);
   }
 }
 
@@ -605,16 +618,39 @@ function renderSection(title, statsDiff, chunkModuleDiff) {
 async function main() {
   const args = parseArgs(process.argv);
 
+  console.error(
+    `[bundle-stats] Found ${args.sections.length} sections to process`,
+  );
+  args.sections.forEach((section, index) => {
+    console.error(
+      `[bundle-stats] Section ${index + 1}: ${section.name} (base: ${section.basePath}, head: ${section.headPath})`,
+    );
+  });
+
   const sections = [];
 
   for (const section of args.sections) {
+    console.error(`[bundle-stats] Processing section: ${section.name}`);
+    console.error(
+      `[bundle-stats] Loading base stats from: ${section.basePath}`,
+    );
     const baseStats = await loadStats(section.basePath);
+    console.error(
+      `[bundle-stats] Loading head stats from: ${section.headPath}`,
+    );
     const headStats = await loadStats(section.headPath);
+
+    const statsDiff = getStatsDiff(baseStats, headStats);
+    const chunkDiff = getChunkModuleDiff(baseStats, headStats);
+
+    console.error(
+      `[bundle-stats] Section ${section.name}: ${statsDiff.total.name} files, total size ${statsDiff.total.old.size} → ${statsDiff.total.new.size}`,
+    );
 
     sections.push({
       name: section.name,
-      statsDiff: getStatsDiff(baseStats, headStats),
-      chunkDiff: getChunkModuleDiff(baseStats, headStats),
+      statsDiff,
+      chunkDiff,
     });
   }
 

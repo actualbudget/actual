@@ -95,3 +95,98 @@ jobs:
         with:
           name: sync-server
           path: packages/sync-server/build
+
+  compare-sizes:
+    runs-on: ubuntu-latest
+    needs: [api, crdt, web]
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.base_ref }}
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Download build stats from base branch
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          branch: ${{ github.base_ref }}
+          workflow: build.yml
+          workflow_conclusion: ''
+          name: build-stats
+          path: base
+      - name: Download API stats from base branch
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          branch: ${{ github.base_ref }}
+          workflow: build.yml
+          workflow_conclusion: ''
+          name: api-build-stats
+          path: base/api-stats
+      - name: Download build stats from PR
+        uses: actions/download-artifact@v5
+        with:
+          name: build-stats
+          path: head
+      - name: Download API stats from PR
+        uses: actions/download-artifact@v5
+        with:
+          name: api-build-stats
+          path: head/api-stats
+      - name: Prepare stats files
+        run: |
+          cp ./base/api-stats/api-stats.json ./base/api-stats.json
+          cp ./head/api-stats/api-stats.json ./head/api-stats.json
+      - name: Strip content hashes from stats files
+        run: |
+          if [ -f ./head/web-stats.json ]; then
+            sed -i -E 's/index\.[0-9a-zA-Z_-]{8,}\./index./g' ./head/web-stats.json
+            sed -i -E 's/\.[0-9a-zA-Z_-]{8,}\.chunk\././g' ./head/web-stats.json
+          fi
+          if [ -f ./base/web-stats.json ]; then
+            sed -i -E 's/index\.[0-9a-zA-Z_-]{8,}\./index./g' ./base/web-stats.json
+            sed -i -E 's/\.[0-9a-zA-Z_-]{8,}\.chunk\././g' ./base/web-stats.json
+          fi
+          for file in ./head/*.json ./base/*.json; do
+            if [ -f "$file" ]; then
+              sed -i -E 's/\.[0-9a-f]{8,}\././g' "$file"
+            fi
+          done
+      - name: Verify stats files exist
+        run: |
+          echo "=== Base directory structure ==="
+          find ./base -name "*.json" -type f | sort || true
+          echo ""
+          echo "=== Head directory structure ==="
+          find ./head -name "*.json" -type f | sort || true
+          echo ""
+          echo "=== Checking required files ==="
+          test -f ./base/web-stats.json && echo "✓ ./base/web-stats.json exists" || echo "✗ ./base/web-stats.json MISSING"
+          test -f ./base/loot-core-stats.json && echo "✓ ./base/loot-core-stats.json exists" || echo "✗ ./base/loot-core-stats.json MISSING"
+          test -f ./base/api-stats.json && echo "✓ ./base/api-stats.json exists" || echo "✗ ./base/api-stats.json MISSING"
+          test -f ./head/web-stats.json && echo "✓ ./head/web-stats.json exists" || echo "✗ ./head/web-stats.json MISSING"
+          test -f ./head/loot-core-stats.json && echo "✓ ./head/loot-core-stats.json exists" || echo "✗ ./head/loot-core-stats.json MISSING"
+          test -f ./head/api-stats.json && echo "✓ ./head/api-stats.json exists" || echo "✗ ./head/api-stats.json MISSING"
+      - name: Generate combined bundle stats comment
+        run: |
+          node packages/ci-actions/bin/bundle-stats-comment.mjs \
+            --base desktop-client=./base/web-stats.json \
+            --base loot-core=./base/loot-core-stats.json \
+            --base api=./base/api-stats.json \
+            --head desktop-client=./head/web-stats.json \
+            --head loot-core=./head/loot-core-stats.json \
+            --head api=./head/api-stats.json \
+            --identifier combined > bundle-stats-comment.md
+      - name: Post combined bundle stats comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          node packages/ci-actions/bin/update-bundle-stats-comment.mjs \
+            --comment-file bundle-stats-comment.md \
+            --identifier '<!--- bundlestats-action-comment key:combined --->'
