@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import type React from 'react';
 import { useState, useEffect, useCallback, type ChangeEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
