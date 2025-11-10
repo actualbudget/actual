@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router';
+import { useLocation, useParams, useSearchParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { SvgSplit } from '@actual-app/components/icons/v0';
@@ -1271,23 +1271,6 @@ function isTemporary(transaction: TransactionEntity) {
   return transaction.id.indexOf('temp') === 0;
 }
 
-function makeTemporaryTransactions(
-  accountId: AccountEntity['id'],
-  categoryId: CategoryEntity['id'],
-  lastDate?: string,
-) {
-  return [
-    {
-      id: 'temp',
-      date: lastDate || monthUtils.currentDay(),
-      account: accountId,
-      category: categoryId,
-      amount: 0,
-      cleared: false,
-    },
-  ];
-}
-
 type TransactionEditUnconnectedProps = {
   categories: CategoryEntity[];
   accounts: AccountEntity[];
@@ -1305,6 +1288,7 @@ function TransactionEditUnconnected({
 }: TransactionEditUnconnectedProps) {
   const { transactionId } = useParams();
   const { state: locationState } = useLocation();
+  const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
   const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
   const [fetchedTransactions, setFetchedTransactions] = useState<
@@ -1312,6 +1296,19 @@ function TransactionEditUnconnected({
   >([]);
   const isAdding = useRef(false);
   const isDeleted = useRef(false);
+
+  const searchParamCategory = useMemo(
+    () => categories.find(c => c.name === searchParams.get('category'))?.id,
+    [categories, searchParams],
+  );
+  const searchParamAccount = useMemo(
+    () => accounts.find(a => a.name === searchParams.get('account'))?.id,
+    [accounts, searchParams],
+  );
+  const searchParamPayee = useMemo(
+    () => payees.find(p => p.name === searchParams.get('payee'))?.id,
+    [payees, searchParams],
+  );
 
   useEffect(() => {
     let unmounted = false;
@@ -1352,15 +1349,40 @@ function TransactionEditUnconnected({
 
   useEffect(() => {
     if (isAdding.current) {
-      setTransactions(
-        makeTemporaryTransactions(
-          locationState?.accountId || lastTransaction?.account || null,
-          locationState?.categoryId || null,
-          lastTransaction?.date,
-        ),
-      );
+      setTransactions([
+        {
+          id: 'temp',
+          date: (() => {
+            const dateParam = searchParams.get('date') || '';
+            if (!isNaN(Date.parse(dateParam))) {
+              return dateParam;
+            }
+            return lastTransaction?.date || monthUtils.currentDay();
+          })(),
+          payee: searchParamPayee,
+          account:
+            searchParamAccount ||
+            locationState?.accountId ||
+            lastTransaction?.account ||
+            null,
+          category: searchParamCategory || locationState?.categoryId || null,
+          amount: -amountToInteger(
+            parseFloat(searchParams.get('amount') || '') || 0,
+          ),
+          cleared: searchParams.get('cleared') === 'true',
+          notes: searchParams.get('notes') || '',
+        },
+      ]);
     }
-  }, [locationState?.accountId, locationState?.categoryId, lastTransaction]);
+  }, [
+    locationState?.accountId,
+    locationState?.categoryId,
+    lastTransaction,
+    searchParamAccount,
+    searchParamCategory,
+    searchParamPayee,
+    searchParams,
+  ]);
 
   const onUpdate = useCallback(
     async (
