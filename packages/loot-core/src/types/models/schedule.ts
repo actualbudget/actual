@@ -34,7 +34,7 @@ export interface ScheduleEntity {
   _account: AccountEntity['id'];
   _amount: number | { num1: number; num2: number };
   _amountOp: string;
-  _date: RecurConfig;
+  _date: RecurConfig | string;
   _conditions: RuleConditionEntity[];
   _actions: Array<{ op: unknown }>;
 }
