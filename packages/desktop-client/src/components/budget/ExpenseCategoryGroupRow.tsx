@@ -13,7 +13,7 @@ import { CategoryGroupBudgetedCell } from './CategoryGroupBudgetedCell';
 import { CategoryGroupNameCell } from './CategoryGroupNameCell';
 import { CategoryGroupSpentCell } from './CategoryGroupSpentCell';
 
-type ExpenseGroupRowProps = ComponentPropsWithoutRef<
+type ExpenseCategoryGroupRowProps = ComponentPropsWithoutRef<
   typeof ReactAriaRow<ColumnDefinition>
 > & {
   item: {
@@ -29,7 +29,8 @@ type ExpenseGroupRowProps = ComponentPropsWithoutRef<
   onToggleVisibilty: (categoryGroup: CategoryGroupEntity) => void;
   onApplyBudgetTemplatesInGroup: (categoryGroup: CategoryGroupEntity) => void;
 };
-export function ExpenseGroupRow({
+
+export function ExpenseCategoryGroupRow({
   item,
   isCollapsed,
   onToggleCollapse,
@@ -40,7 +41,7 @@ export function ExpenseGroupRow({
   onApplyBudgetTemplatesInGroup,
   style,
   ...props
-}: ExpenseGroupRowProps) {
+}: ExpenseCategoryGroupRowProps) {
   return (
     <ReactAriaRow
       style={{
