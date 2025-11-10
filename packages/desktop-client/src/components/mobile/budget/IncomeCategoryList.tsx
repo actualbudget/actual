@@ -9,7 +9,7 @@ import { type CategoryEntity } from 'loot-core/types/models';
 
 import { IncomeCategoryListItem } from './IncomeCategoryListItem';
 
-import { useCategoryMutations } from '@desktop-client/hooks/useCategoryMutations';
+import { useMoveCategoryMutation } from '@desktop-client/budget';
 
 type IncomeCategoryListProps = {
   categories: CategoryEntity[];
@@ -25,7 +25,7 @@ export function IncomeCategoryList({
   onBudgetAction,
 }: IncomeCategoryListProps) {
   const { t } = useTranslation();
-  const { moveCategory } = useCategoryMutations();
+  const moveCategory = useMoveCategoryMutation();
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: keys =>

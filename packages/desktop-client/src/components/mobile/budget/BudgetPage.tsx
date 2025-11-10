@@ -34,12 +34,18 @@ import { groupById } from 'loot-core/shared/util';
 import { BudgetTable, PILL_STYLE } from './BudgetTable';
 
 import { sync } from '@desktop-client/app/appSlice';
+import {
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
+  useCreateCategoryGroupMutation,
+  useUpdateCategoryGroupMutation,
+  useBudgetActions,
+} from '@desktop-client/budget';
 import { prewarmMonth } from '@desktop-client/components/budget/util';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
-import { useBudgetActions } from '@desktop-client/hooks/useBudgetActions';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useCategoryMutations } from '@desktop-client/hooks/useCategoryMutations';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
@@ -82,14 +88,12 @@ export function BudgetPage() {
   const [hideFraction] = useSyncedPref('hideFraction');
   const dispatch = useDispatch();
   const applyBudgetAction = useBudgetActions();
-  const {
-    createCategory,
-    updateCategory,
-    deleteCategory,
-    createCategoryGroup,
-    updateCategoryGroup,
-    deleteCategoryGroup,
-  } = useCategoryMutations();
+  const createCategory = useCreateCategoryMutation();
+  const updateCategory = useUpdateCategoryMutation();
+  const deleteCategory = useDeleteCategoryMutation();
+  const createCategoryGroup = useCreateCategoryGroupMutation();
+  const updateCategoryGroup = useUpdateCategoryGroupMutation();
+  const deleteCategoryGroup = useDeleteCategoryMutation();
 
   useEffect(() => {
     async function init() {

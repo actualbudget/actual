@@ -12,7 +12,7 @@ import {
 
 import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
 
-import { useCategoryMutations } from '@desktop-client/hooks/useCategoryMutations';
+import { useMoveCategoryMutation } from '@desktop-client/budget';
 
 type ExpenseCategoryListProps = {
   categoryGroup: CategoryGroupEntity;
@@ -36,7 +36,7 @@ export function ExpenseCategoryList({
   shouldHideCategory,
 }: ExpenseCategoryListProps) {
   const { t } = useTranslation();
-  const { moveCategory } = useCategoryMutations();
+  const moveCategory = useMoveCategoryMutation();
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: keys =>

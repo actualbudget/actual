@@ -15,7 +15,7 @@ import {
   ExpenseGroupListItem,
 } from './ExpenseGroupListItem';
 
-import { useCategoryMutations } from '@desktop-client/hooks/useCategoryMutations';
+import { useMoveCategoryGroupMutation } from '@desktop-client/budget';
 
 type ExpenseGroupListProps = {
   categoryGroups: CategoryGroupEntity[];
@@ -43,7 +43,7 @@ export function ExpenseGroupList({
   onToggleCollapse,
 }: ExpenseGroupListProps) {
   const { t } = useTranslation();
-  const { moveCategoryGroup } = useCategoryMutations();
+  const moveCategoryGroup = useMoveCategoryGroupMutation();
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: keys =>
