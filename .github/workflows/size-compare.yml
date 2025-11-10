@@ -103,12 +103,12 @@ jobs:
       - name: Generate combined bundle stats comment
         run: |
           node packages/ci-actions/bin/bundle-stats-comment.mjs \
-            --web-base ./base/web-stats.json \
-            --web-head ./head/web-stats.json \
-            --loot-base ./base/loot-core-stats.json \
-            --loot-head ./head/loot-core-stats.json \
-            --api-base ./base/api-stats.json \
-            --api-head ./head/api-stats.json \
+            --base desktop-client=./base/web-stats.json \
+            --base loot-core=./base/loot-core-stats.json \
+            --base api=./base/api-stats.json \
+            --head desktop-client=./head/web-stats.json \
+            --head loot-core=./head/loot-core-stats.json \
+            --head api=./head/api-stats.json \
             --identifier combined > bundle-stats-comment.md
 
       - name: Post combined bundle stats comment

@@ -10,20 +10,15 @@ import path from 'node:path';
 import process from 'node:process';
 
 const REQUIRED_ARGS = new Map([
-  ['web-base', 'Path to base web stats JSON'],
-  ['web-head', 'Path to head web stats JSON'],
-  ['loot-base', 'Path to base loot-core stats JSON'],
-  ['loot-head', 'Path to head loot-core stats JSON'],
-  ['api-base', 'Path to base API stats JSON'],
-  ['api-head', 'Path to head API stats JSON'],
+  ['base', 'Mapping of bundle names to base stats JSON'],
+  ['head', 'Mapping of bundle names to head stats JSON'],
 ]);
 
-function parseArgs(argv) {
+function parseRawArgs(argv) {
   const args = new Map();
 
-  for (let i = 2; i < argv.length; i += 2) {
-    const key = argv[i];
-    const value = argv[i + 1];
+  for (let index = 2; index < argv.length; index += 1) {
+    const key = argv[index];
 
     if (!key?.startsWith('--')) {
       throw new Error(
@@ -31,27 +26,148 @@ function parseArgs(argv) {
       );
     }
 
-    if (typeof value === 'undefined') {
+    const values = [];
+
+    while (index + 1 < argv.length && !argv[index + 1].startsWith('--')) {
+      values.push(argv[index + 1]);
+      index += 1;
+    }
+
+    if (values.length === 0) {
       throw new Error(`Missing value for argument "${key}".`);
     }
 
-    args.set(key.slice(2), value);
+    args.set(key.slice(2), values);
   }
 
-  for (const [key, description] of REQUIRED_ARGS.entries()) {
-    if (!args.has(key)) {
-      throw new Error(`Missing required argument "--${key}" (${description}).`);
+  return args;
+}
+
+function getSingleValue(args, key) {
+  const values = args.get(key);
+  if (!values) {
+    return undefined;
+  }
+  if (values.length !== 1) {
+    throw new Error(`Argument "--${key}" must have exactly one value.`);
+  }
+  return values[0];
+}
+
+function parseMapping(values, key, description) {
+  if (!values || values.length === 0) {
+    throw new Error(`Missing required argument "--${key}" (${description}).`);
+  }
+
+  if (values.length === 1) {
+    const [rawValue] = values;
+    const trimmed = rawValue.trim();
+
+    if (trimmed.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+          throw new Error('Value must be a JSON object.');
+        }
+
+        return new Map(
+          Object.entries(parsed).map(([name, pathValue]) => {
+            if (typeof pathValue !== 'string') {
+              throw new Error(
+                `Value for "${name}" in "--${key}" must be a string path.`,
+              );
+            }
+            return [name, pathValue];
+          }),
+        );
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : 'Unknown parsing error';
+        throw new Error(
+          `Failed to parse "--${key}" value as JSON object: ${message}`,
+        );
+      }
+    }
+  }
+
+  const entries = new Map();
+
+  for (const value of values) {
+    const [rawName, ...rawPathParts] = value.split('=');
+
+    if (!rawName || rawPathParts.length === 0) {
+      throw new Error(
+        `Argument "--${key}" must be provided as name=path pairs or a JSON object.`,
+      );
+    }
+
+    const name = rawName.trim();
+    const pathValue = rawPathParts.join('=').trim();
+
+    if (!name) {
+      throw new Error(`Argument "--${key}" contains an empty bundle name.`);
+    }
+
+    if (!pathValue) {
+      throw new Error(
+        `Argument "--${key}" for bundle "${name}" must include a non-empty path.`,
+      );
+    }
+
+    entries.set(name, pathValue);
+  }
+
+  if (entries.size === 0) {
+    throw new Error(`Argument "--${key}" must define at least one bundle.`);
+  }
+
+  return entries;
+}
+
+function parseArgs(argv) {
+  const args = parseRawArgs(argv);
+
+  const baseMap = parseMapping(
+    args.get('base'),
+    'base',
+    REQUIRED_ARGS.get('base'),
+  );
+  const headMap = parseMapping(
+    args.get('head'),
+    'head',
+    REQUIRED_ARGS.get('head'),
+  );
+
+  const sections = [];
+
+  for (const [name, basePath] of baseMap.entries()) {
+    const headPath = headMap.get(name);
+
+    if (!headPath) {
+      throw new Error(
+        `Bundle "${name}" is missing a corresponding "--head" entry.`,
+      );
+    }
+
+    sections.push({
+      name,
+      basePath,
+      headPath,
+    });
+  }
+
+  for (const name of headMap.keys()) {
+    if (!baseMap.has(name)) {
+      throw new Error(
+        `Bundle "${name}" is missing a corresponding "--base" entry.`,
+      );
     }
   }
 
   return {
-    webBase: args.get('web-base'),
-    webHead: args.get('web-head'),
-    lootBase: args.get('loot-base'),
-    lootHead: args.get('loot-head'),
-    apiBase: args.get('api-base'),
-    apiHead: args.get('api-head'),
-    identifier: args.get('identifier') ?? 'bundle-stats',
+    sections,
+    identifier: getSingleValue(args, 'identifier') ?? 'bundle-stats',
   };
 }
 
@@ -107,7 +223,7 @@ function assetNameToSizeMap(statAssets = {}) {
         size += nodePart.renderedLength ?? 0;
 
         if (gzipSize !== null) {
-          gzipSize += nodePart.gzipLengh ?? 0;
+          gzipSize += nodePart.gzipLength ?? 0;
         }
       }
 
@@ -131,7 +247,9 @@ function chunkModuleNameToSizeMap(statChunks = {}) {
         id,
         {
           size: modInfo.renderedLength ?? 0,
-          gzipSize: statChunks?.options?.gzip ? (modInfo.gzipLengh ?? 0) : null,
+          gzipSize: statChunks?.options?.gzip
+            ? (modInfo.gzipLength ?? 0)
+            : null,
         },
       ];
     }),
@@ -487,30 +605,18 @@ function renderSection(title, statsDiff, chunkModuleDiff) {
 async function main() {
   const args = parseArgs(process.argv);
 
-  const webBaseStats = await loadStats(args.webBase);
-  const webHeadStats = await loadStats(args.webHead);
-  const lootBaseStats = await loadStats(args.lootBase);
-  const lootHeadStats = await loadStats(args.lootHead);
-  const apiBaseStats = await loadStats(args.apiBase);
-  const apiHeadStats = await loadStats(args.apiHead);
+  const sections = [];
 
-  const sections = [
-    {
-      name: 'desktop-client',
-      statsDiff: getStatsDiff(webBaseStats, webHeadStats),
-      chunkDiff: getChunkModuleDiff(webBaseStats, webHeadStats),
-    },
-    {
-      name: 'loot-core',
-      statsDiff: getStatsDiff(lootBaseStats, lootHeadStats),
-      chunkDiff: getChunkModuleDiff(lootBaseStats, lootHeadStats),
-    },
-    {
-      name: 'api',
-      statsDiff: getStatsDiff(apiBaseStats, apiHeadStats),
-      chunkDiff: getChunkModuleDiff(apiBaseStats, apiHeadStats),
-    },
-  ];
+  for (const section of args.sections) {
+    const baseStats = await loadStats(section.basePath);
+    const headStats = await loadStats(section.headPath);
+
+    sections.push({
+      name: section.name,
+      statsDiff: getStatsDiff(baseStats, headStats),
+      chunkDiff: getChunkModuleDiff(baseStats, headStats),
+    });
+  }
 
   const identifier = `<!--- bundlestats-action-comment key:${args.identifier} --->`;
 
