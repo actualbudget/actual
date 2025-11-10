@@ -42,7 +42,7 @@ For more details on how to contribute, see our [contributing guidelines](/docs/c
 
 ## A Silver Lining
 
-One small silver lining: our "WIP" (Work-In-Progress) workflow — which requires contributors to manually remove the "WIP" prefix before a PR can be reviewed — has proven effective at filtering out AI bots. It's an uninentional captcha we have built. Many of them can't complete that simple step, so their PRs go stale and close automatically.
+One small silver lining: our "WIP" (Work-In-Progress) workflow — which requires contributors to manually remove the "WIP" prefix before a PR can be reviewed — has proven effective at filtering out AI bots. It's an unintentional captcha we have built. Many of them can't complete that simple step, so their PRs go stale and close automatically.
 
 Even so, it would be better not to receive AI slop at all.
 
