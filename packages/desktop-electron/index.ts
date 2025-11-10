@@ -219,7 +219,7 @@ async function startSyncServer() {
 
     const syncServerConfig = {
       port: globalPrefs.syncServerConfig?.port || 5007,
-      hostname: 'localhost',
+      hostname: globalPrefs.syncServerConfig?.hostname || 'localhost',
       ACTUAL_SERVER_DATA_DIR: path.resolve(
         process.env.ACTUAL_DATA_DIR!,
         'actual-server',

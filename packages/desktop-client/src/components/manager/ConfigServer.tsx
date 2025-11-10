@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useState, useEffect, useCallback } from 'react';
+import type React from 'react';
+import { useState, useEffect, useCallback, type ChangeEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -19,6 +20,7 @@ import { Title } from './subscribe/common';
 
 import { createBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { Link } from '@desktop-client/components/common/Link';
+import { LabeledCheckbox } from '@desktop-client/components/forms/LabeledCheckbox';
 import {
   useServerURL,
   useSetServerURL,
@@ -48,6 +50,13 @@ export function ElectronServerConfig({
   const [electronServerPort, setElectronServerPort] = useState(
     syncServerConfig?.port || 5007,
   );
+  const [electronServerHostname, setElectronServerHostname] = useState(
+    syncServerConfig?.hostname || 'localhost',
+  );
+  const [
+    electronServerExposedOnAllNetworkInterfaces,
+    setElectronServerExposedOnAllNetworkInterfaces,
+  ] = useState(syncServerConfig?.hostname === '::' ? true : false);
   const [configError, setConfigError] = useState<string | null>(null);
 
   const canShowExternalServerConfig = !syncServerConfig?.port && !currentUrl;
@@ -79,6 +88,7 @@ export function ElectronServerConfig({
             syncServerConfig: {
               ...syncServerConfig,
               port: electronServerPort,
+              hostname: electronServerHostname,
               autoStart: true,
             },
           },
@@ -89,6 +99,8 @@ export function ElectronServerConfig({
       await window.globalThis.Actual.startSyncServer();
       setStartingSyncServer(false);
       initElectronSyncServerRunningStatus();
+
+      // Expose localhost URL because it is running on that interface
       await setServerUrl(`http://localhost:${electronServerPort}`);
       navigate('/');
     } catch (error) {
@@ -100,6 +112,18 @@ export function ElectronServerConfig({
 
   const [electronSyncServerRunning, setElectronSyncServerRunning] =
     useState(false);
+
+  const exposeOnALlNetworkInterfaces = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    if (event.target.checked) {
+      setElectronServerHostname('::');
+      setElectronServerExposedOnAllNetworkInterfaces(true);
+    } else {
+      setElectronServerHostname('localhost');
+      setElectronServerExposedOnAllNetworkInterfaces(false);
+    }
+  };
 
   const initElectronSyncServerRunningStatus = async () => {
     setElectronSyncServerRunning(
@@ -168,6 +192,14 @@ export function ElectronServerConfig({
           </Text>
         )}
 
+        <LabeledCheckbox
+          id="expose-on-all-interfaces"
+          checked={!!electronServerExposedOnAllNetworkInterfaces}
+          onChange={exposeOnALlNetworkInterfaces}
+        >
+          <Trans>Expose to all network interfaces</Trans>
+        </LabeledCheckbox>
+
         <View
           style={{
             display: 'flex',
@@ -178,7 +210,7 @@ export function ElectronServerConfig({
           <View style={{ flexDirection: 'column', gap: 5, flex: 1 }}>
             <Label title={t('Domain')} style={{ textAlign: 'left' }} />
             <BigInput
-              value="localhost"
+              value="localhost" // Always show localhost here becuase it will always be exposed on that interface
               disabled
               type="text"
               className={css({
