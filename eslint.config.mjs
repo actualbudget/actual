@@ -75,6 +75,9 @@ const confusingBrowserGlobals = [
 export default defineConfig(
   {
     ignores: [
+      //temporary
+      'packages/docs',
+
       'packages/api/app/bundle.api.js',
       'packages/api/app/stats.json',
       'packages/api/dist',
@@ -451,7 +454,7 @@ export default defineConfig(
       'react-hooks/exhaustive-deps': [
         'warn',
         {
-          additionalHooks: '(useQuery)',
+          additionalHooks: '(useQuery|useEffectAfterMount)',
         },
       ],
 

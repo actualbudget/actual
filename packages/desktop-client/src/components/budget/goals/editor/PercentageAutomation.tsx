@@ -33,7 +33,7 @@ export const PercentageAutomation = ({
 
   return (
     <>
-      <SpaceBetween gap={50} style={{ marginTop: 10, alignItems: 'center' }}>
+      <SpaceBetween gap={50} style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title={t('Category')} htmlFor="category-field" />
           <CategoryAutocomplete
@@ -71,7 +71,7 @@ export const PercentageAutomation = ({
           />
         </FormField>
       </SpaceBetween>
-      <SpaceBetween gap={50} style={{ marginTop: 10, alignItems: 'center' }}>
+      <SpaceBetween gap={50}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title={t('Percentage of')} htmlFor="previous-field" />
           <Select
