@@ -1,8 +1,9 @@
 // @ts-strict-ignore
-import { useMemo, type CSSProperties } from 'react';
+import { useState, useMemo, type CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
+import { css } from '@emotion/css';
 import { t } from 'i18next';
 import {
   Sankey,
@@ -14,11 +15,56 @@ import {
 import { type SankeyData } from 'recharts/types/chart/Sankey';
 
 import { Container } from '@desktop-client/components/reports/Container';
-import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 const BUDGET_NODE_NAME = 'Available Funds';
+
+type SankeyTooltipProps = {
+  active?: boolean;
+  payload?: Array<{
+    payload?: {
+      source?: SankeyGraphNode;
+      target?: SankeyGraphNode;
+      value?: number;
+      name?: string;
+    };
+    value?: number;
+    name?: string;
+  }>;
+};
+
+function SankeyCustomTooltip({ active, payload }: SankeyTooltipProps) {
+  const format = useFormat();
+
+  if (!active || !payload || payload.length === 0) {
+    return null;
+  }
+
+  const item = payload[0];
+  const value = item.value ?? item.payload?.value ?? 0;
+  const name = item.name ?? item.payload?.name ?? '';
+
+  return (
+    <div
+      className={css({
+        zIndex: 1000,
+        pointerEvents: 'none',
+        borderRadius: 2,
+        boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+        backgroundColor: theme.menuBackground,
+        color: theme.menuItemText,
+        padding: 10,
+      })}
+    >
+      <div style={{ lineHeight: 1.5 }}>
+        {name && <div style={{ marginBottom: 5 }}>{name}</div>}
+        <div>{format(value, 'financial')}</div>
+      </div>
+    </div>
+  );
+}
 
 type SankeyGraphNode = SankeyData['nodes'][number] & {
   hasChildren?: boolean;
@@ -46,6 +92,9 @@ type SankeyLinkProps = {
     value: number;
     isNegative?: boolean;
   };
+  isHovered: boolean;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
 };
 
 function SankeyLink({
@@ -57,9 +106,16 @@ function SankeyLink({
   targetControlX,
   linkWidth,
   payload,
+  isHovered,
+  onMouseEnter,
+  onMouseLeave,
 }: SankeyLinkProps) {
-  // Use red color for negative differences (overspent), default gray otherwise
+  // Use red color for negative differences (overspent), blue for others
   const linkColor = payload.isNegative ? theme.errorText : theme.reportsGray;
+
+  // Enhanced styling on hover: thicker stroke and full opacity
+  const strokeWidth = isHovered ? linkWidth + 2 : linkWidth;
+  const strokeOpacity = isHovered ? 1 : 0.5;
 
   return (
     <path
@@ -69,8 +125,14 @@ function SankeyLink({
       `}
       fill="none"
       stroke={linkColor}
-      strokeWidth={linkWidth}
-      strokeOpacity={0.5}
+      strokeWidth={strokeWidth}
+      strokeOpacity={strokeOpacity}
+      cursor="default"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      style={{
+        transition: 'stroke-opacity 0.2s ease',
+      }}
     />
   );
 }
@@ -93,11 +155,11 @@ function SankeyNode({
   index,
   payload,
   containerWidth,
-  currencyCode,
 }: SankeyNodeProps) {
   const privacyMode = usePrivacyMode();
   const isOut = x + width + 6 > containerWidth;
   const nodeLabel = payload.name;
+  const format = useFormat();
 
   // Use red color for negative (overspent) categories, blue for others
   const fillColor = payload.isNegative ? theme.errorText : theme.reportsBlue;
@@ -108,17 +170,6 @@ function SankeyNode({
     payload.actualValue !== undefined
       ? Math.abs(payload.actualValue)
       : payload.value;
-
-  // Format value with negative sign for overspent categories
-  const formattedValue = payload.isNegative
-    ? `−${displayValue.toLocaleString('en-US', {
-        style: 'currency',
-        currency: currencyCode,
-      })}`
-    : displayValue.toLocaleString('en-US', {
-        style: 'currency',
-        currency: currencyCode,
-      });
 
   // Check if this is the Budget node with unallocated funds
   const isBudgetNode = payload.name === BUDGET_NODE_NAME;
@@ -189,12 +240,9 @@ function SankeyNode({
             fontSize="11"
             strokeOpacity="0.5"
             fill={theme.pageText}
-            {...(privacyMode && { fontFamily: t('Redacted Script') })}
+            fontFamily={privacyMode ? t('Redacted Script') : undefined}
           >
-            {(payload.value - (payload.toBudget || 0)).toLocaleString('en-US', {
-              style: 'currency',
-              currency: currencyCode,
-            })}
+            {format(payload.value - (payload.toBudget || 0), 'financial')}
           </text>
           <text
             textAnchor={isOut ? 'end' : 'start'}
@@ -212,13 +260,9 @@ function SankeyNode({
             fontSize="11"
             strokeOpacity="1"
             fill={theme.pageText}
-            fontStyle="italic"
-            {...(privacyMode && { fontFamily: t('Redacted Script') })}
+            fontFamily={privacyMode ? t('Redacted Script') : undefined}
           >
-            {payload.toBudget.toLocaleString('en-US', {
-              style: 'currency',
-              currency: currencyCode,
-            })}
+            {format(payload.toBudget, 'financial')}
           </text>
         </>
       ) : (
@@ -248,9 +292,9 @@ function SankeyNode({
             fontSize="11"
             strokeOpacity="0.5"
             fill={theme.pageText}
-            {...(privacyMode && { fontFamily: t('Redacted Script') })}
+            fontFamily={privacyMode ? t('Redacted Script') : undefined}
           >
-            {formattedValue}
+            {format(displayValue, 'financial')}
           </text>
         </>
       )}
@@ -302,7 +346,8 @@ export function SankeyGraph({
 }: SankeyGraphProps) {
   const [defaultCurrencyCode] = useSyncedPref('defaultCurrencyCode');
   const currencyCode = defaultCurrencyCode || 'USD';
-  
+  const [hoveredLinkIndex, setHoveredLinkIndex] = useState<number | null>(null);
+
   const collapsedSet = useMemo(() => new Set(collapsedNodes), [collapsedNodes]);
   const sankeyData = useMemo(() => {
     if (compact) {
@@ -326,7 +371,14 @@ export function SankeyGraph({
                 currencyCode={currencyCode}
               />
             )}
-            link={props => <SankeyLink {...props} />}
+            link={props => (
+              <SankeyLink
+                {...props}
+                isHovered={hoveredLinkIndex === props.index}
+                onMouseEnter={() => setHoveredLinkIndex(props.index)}
+                onMouseLeave={() => setHoveredLinkIndex(null)}
+              />
+            )}
             sort={false}
             iterations={1000}
             nodePadding={23}
@@ -341,9 +393,8 @@ export function SankeyGraph({
           >
             {showTooltip && (
               <Tooltip
-                formatter={numberFormatterTooltip}
+                content={<SankeyCustomTooltip />}
                 isAnimationActive={false}
-                separator=": "
               />
             )}
           </Sankey>

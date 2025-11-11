@@ -417,15 +417,24 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                   }}
                 >
                   <Text style={{ fontSize: 16, textAlign: 'center' }}>
-                    <Trans>
-                      No data available for this month.
-                      {mode === 'budgeted' &&
-                        ' Try budgeting categories or selecting a different month.'}
-                      {mode === 'spent' &&
-                        ' Try adding transactions or selecting a different month.'}
-                      {mode === 'difference' &&
-                        ' Try budgeting or adding transactions, or selecting a different month.'}
-                    </Trans>
+                    {mode === 'budgeted' && (
+                      <Trans>
+                        No data available for this month. Try budgeting
+                        categories or selecting a different month.
+                      </Trans>
+                    )}
+                    {mode === 'spent' && (
+                      <Trans>
+                        No data available for this month. Try adding
+                        transactions or selecting a different month.
+                      </Trans>
+                    )}
+                    {mode === 'difference' && (
+                      <Trans>
+                        No data available for this month. Try budgeting or
+                        adding transactions, or selecting a different month.
+                      </Trans>
+                    )}
                   </Text>
                 </View>
               )}

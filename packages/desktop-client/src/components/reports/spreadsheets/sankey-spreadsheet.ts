@@ -2,7 +2,6 @@
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import { integerToAmount } from 'loot-core/shared/util';
 import {
   type CategoryGroupEntity,
   type RuleConditionEntity,
@@ -10,6 +9,101 @@ import {
 
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+
+type BudgetMonthCategory = {
+  id: string;
+  name: string;
+  received?: number;
+  spent?: number;
+  budgeted?: number;
+  balance?: number;
+};
+
+type BudgetMonthGroup = {
+  id: string;
+  name: string;
+  is_income: boolean;
+  categories: BudgetMonthCategory[];
+};
+
+// Helper function to filter category groups based on conditions
+async function filterCategoryGroups(
+  categoryGroups: BudgetMonthGroup[],
+  conditions: RuleConditionEntity[],
+  conditionsOp: 'and' | 'or',
+  allCategories: CategoryGroupEntity[],
+): Promise<BudgetMonthGroup[]> {
+  // If no conditions, return all groups
+  if (!conditions || conditions.length === 0) {
+    return categoryGroups;
+  }
+
+  // Build a map of category IDs to check against filters
+  const categoryIdToNameMap = new Map<string, string>();
+  const categoryIdToGroupMap = new Map<string, string>();
+
+  allCategories.forEach(group => {
+    group.categories?.forEach(cat => {
+      categoryIdToNameMap.set(cat.id, cat.name);
+      categoryIdToGroupMap.set(cat.id, group.name);
+    });
+  });
+
+  // Extract category-related conditions
+  const categoryConditions = conditions.filter(
+    cond => cond.field === 'category',
+  );
+
+  // If no category conditions, return all groups (other filters will be applied to transactions)
+  if (categoryConditions.length === 0) {
+    return categoryGroups;
+  }
+
+  // Function to check if a category matches the conditions
+  const categoryMatchesConditions = (categoryId: string): boolean => {
+    if (conditionsOp === 'or') {
+      // For OR, category matches if it matches ANY condition
+      return categoryConditions.some(cond => {
+        if (cond.op === 'is') {
+          return categoryId === cond.value;
+        } else if (cond.op === 'isNot') {
+          return categoryId !== cond.value;
+        } else if (cond.op === 'oneOf') {
+          return Array.isArray(cond.value) && cond.value.includes(categoryId);
+        } else if (cond.op === 'notOneOf') {
+          return !Array.isArray(cond.value) || !cond.value.includes(categoryId);
+        }
+        return true;
+      });
+    } else {
+      // For AND, category matches if it matches ALL conditions
+      return categoryConditions.every(cond => {
+        if (cond.op === 'is') {
+          return categoryId === cond.value;
+        } else if (cond.op === 'isNot') {
+          return categoryId !== cond.value;
+        } else if (cond.op === 'oneOf') {
+          return Array.isArray(cond.value) && cond.value.includes(categoryId);
+        } else if (cond.op === 'notOneOf') {
+          return !Array.isArray(cond.value) || !cond.value.includes(categoryId);
+        }
+        return true;
+      });
+    }
+  };
+
+  // Filter category groups and their categories
+  const filteredGroups = categoryGroups
+    .map(group => ({
+      ...group,
+      categories: group.categories.filter(cat =>
+        categoryMatchesConditions(cat.id),
+      ),
+    }))
+    .filter(group => group.categories.length > 0);
+
+  return filteredGroups;
+}
 
 export function createSpreadsheet(
   start: string,
@@ -24,7 +118,12 @@ export function createSpreadsheet(
     setData: (data: ReturnType<typeof transformToSankeyData>) => void,
   ) => {
     if (mode === 'budgeted') {
-      const data = await createBudgetSpreadsheet(start)(spreadsheet, setData);
+      const data = await createBudgetSpreadsheet(
+        start,
+        categories,
+        conditions,
+        conditionsOp,
+      )(spreadsheet, setData);
       return data;
     } else if (mode === 'spent') {
       const data = await createTransactionsSpreadsheet(
@@ -49,25 +148,16 @@ export function createSpreadsheet(
   };
 }
 
-export function createBudgetSpreadsheet(start: string) {
+export function createBudgetSpreadsheet(
+  start: string,
+  categories: CategoryGroupEntity[],
+  conditions: RuleConditionEntity[] = [],
+  conditionsOp: 'and' | 'or' = 'and',
+) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: ReturnType<typeof transformToSankeyData>) => void,
   ) => {
-    type BudgetMonthCategory = {
-      id: string;
-      name: string;
-      received?: number;
-      spent?: number;
-      budgeted?: number;
-      balance?: number;
-    };
-    type BudgetMonthGroup = {
-      id: string;
-      name: string;
-      is_income: boolean;
-      categories: BudgetMonthCategory[];
-    };
     type BudgetMonthResponse = {
       categoryGroups: BudgetMonthGroup[];
       totalIncome: number;
@@ -86,8 +176,16 @@ export function createBudgetSpreadsheet(start: string) {
       month: start,
     })) as unknown as BudgetMonthResponse;
 
+    // Apply filters to category groups
+    const filteredCategoryGroups = await filterCategoryGroups(
+      categoryGroups,
+      conditions,
+      conditionsOp,
+      categories,
+    );
+
     // Build income data from income category groups
-    const incomeGroups = categoryGroups.filter(
+    const incomeGroups = filteredCategoryGroups.filter(
       group => group.is_income === true,
     );
     const incomeData = incomeGroups.reduce<Record<string, number>>(
@@ -105,7 +203,7 @@ export function createBudgetSpreadsheet(start: string) {
     }
 
     // Build expense category data using budgeted amounts from the budget month
-    const expenseGroups = categoryGroups.filter(
+    const expenseGroups = filteredCategoryGroups.filter(
       group => group.is_income !== true,
     );
     const categoryData = expenseGroups.map(group => ({
@@ -163,9 +261,7 @@ export function createTransactionsSpreadsheet(
           categories.map(async mainCategory => {
             const subcategoryBalances = await Promise.all(
               mainCategory.categories
-                .filter(
-                  subcategory => !subcategory?.is_income
-                )
+                .filter(subcategory => !subcategory?.is_income)
                 .map(async subcategory => {
                   const results = await aqlQuery(
                     q('transactions')
@@ -282,20 +378,6 @@ export function createDifferenceSpreadsheet(
     spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: ReturnType<typeof transformToSankeyData>) => void,
   ) => {
-    type BudgetMonthCategory = {
-      id: string;
-      name: string;
-      received?: number;
-      spent?: number;
-      budgeted?: number;
-      balance?: number;
-    };
-    type BudgetMonthGroup = {
-      id: string;
-      name: string;
-      is_income: boolean;
-      categories: BudgetMonthCategory[];
-    };
     type BudgetMonthResponse = {
       categoryGroups: BudgetMonthGroup[];
       totalIncome: number;
@@ -314,10 +396,18 @@ export function createDifferenceSpreadsheet(
       month: start,
     })) as unknown as BudgetMonthResponse;
 
+    // Apply filters to category groups
+    const filteredCategoryGroups = await filterCategoryGroups(
+      categoryGroups,
+      conditions,
+      conditionsOp,
+      categories,
+    );
+
     const budgetedData: Record<string, { budgeted: number; name: string }> = {};
     const categoryGroupMap: Record<string, string> = {};
 
-    categoryGroups.forEach(group => {
+    filteredCategoryGroups.forEach(group => {
       if (!group.is_income) {
         group.categories.forEach(cat => {
           budgetedData[cat.id] = {
@@ -330,17 +420,19 @@ export function createDifferenceSpreadsheet(
     });
 
     // Fetch spent data using transactions
+    const { filters } = await send('make-filters-from-conditions', {
+      conditions: conditions.filter(cond => !cond.customName),
+    });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
-    const filters = conditions.map(f => ({
-      [f.field]: { [f.op]: f.value },
-    }));
 
-    const allExpenseCategories = categories.flatMap(group =>
-      group.categories.filter(cat => !cat.hidden && !cat.is_income),
-    );
+    // Use filtered categories instead of all categories
+    // Only get expense categories (non-income)
+    const filteredExpenseCategories = filteredCategoryGroups
+      .filter(group => !group.is_income)
+      .flatMap(group => group.categories);
 
     async function fetchSpentData() {
-      const promises = allExpenseCategories.map(subcategory => {
+      const promises = filteredExpenseCategories.map(subcategory => {
         return aqlQuery(
           q('transactions')
             .filter({
@@ -360,7 +452,7 @@ export function createDifferenceSpreadsheet(
       const results = await Promise.all(promises);
       const spentData: Record<string, number> = {};
 
-      allExpenseCategories.forEach((subcategory, index) => {
+      filteredExpenseCategories.forEach((subcategory, index) => {
         spentData[subcategory.id] = Math.abs(results[index].data || 0);
       });
 
@@ -432,7 +524,7 @@ export function createDifferenceSpreadsheet(
     });
 
     // Fetch income data for the income side
-    const incomeCategories = categoryGroups
+    const incomeCategories = filteredCategoryGroups
       .filter(group => group.is_income)
       .flatMap(group => group.categories);
 
@@ -466,14 +558,14 @@ function transformToSankeyData(
   // Add the root node first with toBudget metadata
   data.nodes.push({
     name: rootNodeName,
-    toBudget: integerToAmount(toBudgetAmount),
+    toBudget: toBudgetAmount,
     nodeType: 'budget',
   });
   nodeNames.add(rootNodeName);
 
   // Handle the income sources and link them to the Budget node.
   Object.entries(incomeData).forEach(([sourceName, value]) => {
-    if (!nodeNames.has(sourceName) && integerToAmount(value as number) > 0) {
+    if (!nodeNames.has(sourceName) && (value as number) > 0) {
       data.nodes.push({
         name: sourceName,
         nodeType: 'income',
@@ -482,7 +574,7 @@ function transformToSankeyData(
       data.links.push({
         source: sourceName,
         target: rootNodeName,
-        value: integerToAmount(value as number),
+        value,
       });
     }
   });
@@ -509,7 +601,7 @@ function transformToSankeyData(
       data.links.push({
         source: rootNodeName,
         target: mainCategory.name,
-        value: integerToAmount(mainCategorySum as number),
+        value: mainCategorySum,
       });
 
       // add the subcategories of the main category
@@ -525,7 +617,7 @@ function transformToSankeyData(
           data.links.push({
             source: mainCategory.name,
             target: subCategory.subcategory,
-            value: integerToAmount(subCategory.value as number),
+            value: subCategory.value,
             isNegative: subCategory.isNegative,
           });
         }
