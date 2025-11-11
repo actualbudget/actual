@@ -39,7 +39,7 @@ You can specify aggregate functions in `select` for things like sums and counts.
 ```js
 q('transactions')
   .filter({ 'category.name': 'Food' })
-  .select({ total: { $sum: 'amount' } });
+  .select({ total: { $sum: '$amount' } });
 ```
 
 This sums up the amount of all transactions with the `Food` category (usually, you will filter by date too). **Aggregate results must be named**; here we named it `total`. You will get an error if you don't name it. (In the future, we may remove this restriction)
@@ -49,7 +49,7 @@ Since it's so common to select a single aggregate expression, ActualQL provides 
 ```js
 q('transactions')
   .filter({ 'category.name': 'Food' })
-  .calculate({ $sum: 'amount' });
+  .calculate({ $sum: '$amount' });
 ```
 
 Not only did we not have to name the result, `data` in the result will also be the summed value itself. If you use `select`, data will be an array with one element. The difference is that in the above you just use `data`, but if you used `select` you'd have to use `data[0].total`.
