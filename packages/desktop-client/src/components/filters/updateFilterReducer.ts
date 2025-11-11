@@ -1,17 +1,16 @@
 import { makeValue, FIELD_TYPES } from 'loot-core/shared/rules';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
-export function updateFilterReducer(
-  state: Pick<RuleConditionEntity, 'op' | 'field' | 'value'>,
-  action: { type: 'set-op' | 'set-value' } & Pick<
-    RuleConditionEntity,
-    'op' | 'value'
-  >,
+export function updateFilterReducer<T extends RuleConditionEntity>(
+  state: Pick<T, 'op' | 'field'> & { value: T['value'] | null },
+  action:
+    | { type: 'set-op'; op: T['op'] }
+    | { type: 'set-value'; value: T['value'] },
 ) {
   switch (action.type) {
     case 'set-op': {
       const type = FIELD_TYPES.get(state.field);
-      let value: RuleConditionEntity['value'] | null = state.value;
+      let value = state.value;
       if (
         (type === 'id' || type === 'string') &&
         (action.op === 'contains' ||
@@ -36,6 +35,7 @@ export function updateFilterReducer(
       return { ...state, value };
     }
     default:
+      // @ts-expect-error - fix me
       throw new Error(`Unhandled action type: ${action.type}`);
   }
 }
