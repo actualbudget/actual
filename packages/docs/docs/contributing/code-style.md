@@ -181,4 +181,4 @@ Before committing changes, ensure:
 
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [React Documentation](https://react.dev/)
-- [ESLint Configuration](../project-details/architecture.md) - See project structure for ESLint setup
+- [ESLint Configuration](./project-details/architecture.md) - See project structure for ESLint setup
