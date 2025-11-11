@@ -1,15 +1,15 @@
-import globals from 'globals';
-
+import tsParser from '@typescript-eslint/parser';
 import { defineConfig } from 'eslint/config';
 import pluginImport from 'eslint-plugin-import';
 import pluginJSXA11y from 'eslint-plugin-jsx-a11y';
 import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
-import pluginTypescript from 'typescript-eslint';
 import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
-import pluginActual from './packages/eslint-plugin-actual/lib/index.js';
+import globals from 'globals';
+import pluginTypescript from 'typescript-eslint';
 
-import tsParser from '@typescript-eslint/parser';
+// eslint-disable-next-line import/extensions
+import pluginActual from './packages/eslint-plugin-actual/lib/index.js';
 
 const confusingBrowserGlobals = [
   // https://github.com/facebook/create-react-app/tree/main/packages/confusing-browser-globals
@@ -80,35 +80,28 @@ export default defineConfig(
 
       'packages/api/app/bundle.api.js',
       'packages/api/app/stats.json',
-      'packages/api/dist',
       'packages/api/@types',
       'packages/api/migrations',
-      'packages/crdt/dist',
       'packages/component-library/src/icons/**/*',
       'packages/desktop-client/bundle.browser.js',
-      'packages/desktop-client/build/',
       'packages/desktop-client/dev-dist/',
       'packages/desktop-client/service-worker/*',
       'packages/desktop-client/build-electron/',
       'packages/desktop-client/build-stats/',
       'packages/desktop-client/public/kcab/',
       'packages/desktop-client/public/data/',
-      'packages/desktop-client/**/node_modules/*',
-      'packages/desktop-client/node_modules/',
       'packages/desktop-client/test-results/',
       'packages/desktop-client/playwright-report/',
       'packages/desktop-electron/client-build/',
-      'packages/desktop-electron/build/',
-      'packages/desktop-electron/dist/',
-      'packages/loot-core/**/node_modules/*',
       'packages/loot-core/**/lib-dist/*',
       'packages/loot-core/**/proto/*',
-      'packages/sync-server/build/',
       'packages/sync-server/user-files/',
       'packages/sync-server/server-files/',
-      'packages/plugins-service/dist/',
       '.yarn/*',
       '.github/*',
+      '**/build/',
+      '**/dist/',
+      '**/node_modules/',
     ],
   },
   {
@@ -170,7 +163,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['**/*.{js,ts,jsx,tsx}'],
+    files: ['**/*.{js,ts,jsx,tsx,mjs,mts}'],
     plugins: {
       'jsx-a11y': pluginJSXA11y,
       'react-hooks': pluginReactHooks,
@@ -454,7 +447,7 @@ export default defineConfig(
       'react-hooks/exhaustive-deps': [
         'warn',
         {
-          additionalHooks: '(useQuery|useEffectAfterMount)',
+          additionalHooks: '(useQuery)',
         },
       ],
 
@@ -716,14 +709,18 @@ export default defineConfig(
 
   // Allow configuring vitest with default exports (recommended as per vitest docs)
   {
-    files: ['**/vitest.config.ts', '**/vitest.web.config.ts'],
+    files: [
+      '**/vitest.config.{ts,mts}',
+      '**/vitest.web.config.ts',
+      '**/vite.config.{ts,mts}',
+      'eslint.config.mjs',
+    ],
     rules: {
       'import/no-anonymous-default-export': 'off',
       'import/no-default-export': 'off',
     },
   },
 
-  {},
   {
     // TODO: fix the issues in these files
     files: [

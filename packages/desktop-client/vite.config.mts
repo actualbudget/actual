@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import * as path from 'path';
 
 import inject from '@rollup/plugin-inject';
@@ -6,7 +5,7 @@ import basicSsl from '@vitejs/plugin-basic-ssl';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 /// <reference types="vitest" />
-import { defineConfig, loadEnv, Plugin } from 'vite';
+import { defineConfig, loadEnv, Plugin, type UserConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 
@@ -123,7 +122,7 @@ export default defineConfig(async ({ mode }) => {
       rollupOptions: {
         output: {
           assetFileNames: assetInfo => {
-            const info = assetInfo.name.split('.');
+            const info = assetInfo.name?.split('.') ?? [];
             let extType = info[info.length - 1];
             if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
               extType = 'img';
@@ -222,5 +221,6 @@ export default defineConfig(async ({ mode }) => {
       },
       maxWorkers: 2,
     },
-  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } satisfies UserConfig & { test: any };
 });
