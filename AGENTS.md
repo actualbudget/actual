@@ -7,7 +7,7 @@ This guide provides comprehensive information for AI agents (like Cursor) workin
 **Actual Budget** is a local-first personal finance tool written in TypeScript/JavaScript. It's 100% free and open-source with synchronization capabilities across devices.
 
 - **Repository**: https://github.com/actualbudget/actual
-- **Community Docs**: https://github.com/actualbudget/docs or https://actualbudget.org/docs
+- **Community Docs**: Documentation is part of the monorepo at `packages/docs/`. Published at https://actualbudget.org/docs
 - **License**: MIT
 - **Primary Language**: TypeScript (with React)
 - **Build System**: Yarn 4 workspaces (monorepo)
@@ -172,6 +172,19 @@ Custom ESLint rules specific to Actual.
 - `prefer-logger-over-console`: Enforces using logger instead of console
 - `typography`: Typography rules
 - `prefer-if-statement`: Prefers explicit if statements
+
+#### 10. **docs** (`packages/docs/`)
+
+Documentation website built with Docusaurus.
+
+- Documentation is part of the monorepo
+- Built with Docusaurus 3
+- Commands:
+  ```bash
+  yarn workspace docs start
+  yarn workspace docs build
+  yarn start:docs  # From root
+  ```
 
 ## Development Workflow
 
@@ -382,6 +395,7 @@ describe('ComponentName', () => {
 - `/CONTRIBUTING.md` - Points to community docs
 - `/upcoming-release-notes/` - Release notes for next version
 - `/CODEOWNERS` - Code ownership definitions
+- `/packages/docs/` - Documentation website (Docusaurus), now part of the monorepo
 
 ### Build Artifacts (Don't Edit)
 
@@ -403,6 +417,8 @@ describe('ComponentName', () => {
 - `packages/desktop-client/e2e/` - End-to-end tests
 - `packages/component-library/src/` - Reusable components
 - `packages/component-library/src/icons/` - Icon components (auto-generated, don't edit)
+- `packages/docs/docs/` - Documentation source files (Markdown)
+- `packages/docs/docs/contributing/` - Developer documentation
 
 ## Common Development Tasks
 

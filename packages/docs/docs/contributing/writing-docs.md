@@ -12,7 +12,7 @@ A better approach for inexperienced people, as it explains what each step is doi
 1. Stop the server if it's running. You can use the keyboard shortcut <Key mod= "ctrl" k= "c"/> (even on macOS) to stop the server or close the terminal window it's running from.
 2. Run `git pull` from the directory you cloned the project into. This will download the latest server code.
 3. Run `yarn install` from that same directory. This will download the latest web client code and any updated dependencies for the server.
-4. Restart the server by running `yarn start`.
+4. Restart the server by running `yarn start:docs`
 
 </details>
 
