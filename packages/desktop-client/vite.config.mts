@@ -221,6 +221,6 @@ export default defineConfig(async ({ mode }) => {
       },
       maxWorkers: 2,
     },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } satisfies UserConfig & { test: any };
 });
