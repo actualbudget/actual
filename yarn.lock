@@ -2983,7 +2983,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/core@npm:3.9.2, @docusaurus/core@npm:^3.9.1":
+"@docusaurus/core@npm:3.9.2, @docusaurus/core@npm:^3.9.2":
   version: 3.9.2
   resolution: "@docusaurus/core@npm:3.9.2"
   dependencies:
@@ -3109,7 +3109,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/module-type-aliases@npm:3.9.2, @docusaurus/module-type-aliases@npm:^3.9.1":
+"@docusaurus/module-type-aliases@npm:3.9.2, @docusaurus/module-type-aliases@npm:^3.9.2":
   version: 3.9.2
   resolution: "@docusaurus/module-type-aliases@npm:3.9.2"
   dependencies:
@@ -3157,7 +3157,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/plugin-content-docs@npm:3.9.2, @docusaurus/plugin-content-docs@npm:^2 || ^3, @docusaurus/plugin-content-docs@npm:^3.9.1":
+"@docusaurus/plugin-content-docs@npm:3.9.2, @docusaurus/plugin-content-docs@npm:^2 || ^3, @docusaurus/plugin-content-docs@npm:^3.9.2":
   version: 3.9.2
   resolution: "@docusaurus/plugin-content-docs@npm:3.9.2"
   dependencies:
@@ -3281,7 +3281,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/plugin-ideal-image@npm:^3.9.1":
+"@docusaurus/plugin-ideal-image@npm:^3.9.2":
   version: 3.9.2
   resolution: "@docusaurus/plugin-ideal-image@npm:3.9.2"
   dependencies:
@@ -3344,7 +3344,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/preset-classic@npm:^3.9.1":
+"@docusaurus/preset-classic@npm:^3.9.2":
   version: 3.9.2
   resolution: "@docusaurus/preset-classic@npm:3.9.2"
   dependencies:
@@ -3423,7 +3423,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/theme-common@npm:3.9.2, @docusaurus/theme-common@npm:^3.9.1":
+"@docusaurus/theme-common@npm:3.9.2, @docusaurus/theme-common@npm:^3.9.2":
   version: 3.9.2
   resolution: "@docusaurus/theme-common@npm:3.9.2"
   dependencies:
@@ -3447,7 +3447,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/theme-mermaid@npm:^3.9.1":
+"@docusaurus/theme-mermaid@npm:^3.9.2":
   version: 3.9.2
   resolution: "@docusaurus/theme-mermaid@npm:3.9.2"
   dependencies:
@@ -9319,7 +9319,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^19.2.0, @types/react@npm:^19.2.2":
+"@types/react@npm:*, @types/react@npm:^19.2.2":
   version: 19.2.2
   resolution: "@types/react@npm:19.2.2"
   dependencies:
@@ -14260,17 +14260,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "docs@workspace:packages/docs"
   dependencies:
-    "@docusaurus/core": "npm:^3.9.1"
-    "@docusaurus/module-type-aliases": "npm:^3.9.1"
-    "@docusaurus/plugin-content-docs": "npm:^3.9.1"
-    "@docusaurus/plugin-ideal-image": "npm:^3.9.1"
-    "@docusaurus/preset-classic": "npm:^3.9.1"
-    "@docusaurus/theme-common": "npm:^3.9.1"
-    "@docusaurus/theme-mermaid": "npm:^3.9.1"
+    "@docusaurus/core": "npm:^3.9.2"
+    "@docusaurus/module-type-aliases": "npm:^3.9.2"
+    "@docusaurus/plugin-content-docs": "npm:^3.9.2"
+    "@docusaurus/plugin-ideal-image": "npm:^3.9.2"
+    "@docusaurus/preset-classic": "npm:^3.9.2"
+    "@docusaurus/theme-common": "npm:^3.9.2"
+    "@docusaurus/theme-mermaid": "npm:^3.9.2"
     "@easyops-cn/docusaurus-search-local": "npm:^0.52.1"
     "@mdx-js/react": "npm:^3.1.1"
     "@r74tech/docusaurus-plugin-panzoom": "npm:^2.4.0"
-    "@types/react": "npm:^19.2.0"
+    "@types/react": "npm:^19.2.2"
     clsx: "npm:^2.1.1"
     prettier: "npm:^3.6.2"
     prism-react-renderer: "npm:^2.4.1"

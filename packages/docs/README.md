@@ -7,7 +7,7 @@ This repo is the Actual Budget community documentation website, built using [Doc
 ## Welcome
 
 Firstly, thank you for stopping by and giving up some of your time to either check out the documentation we have already produced or pick off
-some of the [issues](https://github.com/actualbudget/docs/issues) and help create some new documentation for our future users. Check out the
+some of the [issues](https://github.com/actualbudget/actual/issues?q=is%3Aissue%20state%3Aopen%20label%3Adocumentation) and help create some new documentation for our future users. Check out the
 [guidelines](https://actualbudget.org/docs/contributing/writing-docs) for more information on how the documentation is structured and tips for consistent formatting.
 
 ### Installation Methods
@@ -21,7 +21,7 @@ Actual Budget can be installed on many different platforms. However, at this tim
 * PikaPods
 * Docker
 
-If you would like to write documentation for another installation variant, please feel free to continue to do this and host it on your own personal blog, Medium, Tumblr, or any other short-form publication service. We will be more than happy to add a link to that from our documentation. Open a [PR](https://github.com/actualbudget/docs/pulls) and add it to the list in the [installation overview](https://actualbudget.org/docs/install/#additional-installation-options).
+If you would like to write documentation for another installation variant, please feel free to continue to do this and host it on your own personal blog, Medium, Tumblr, or any other short-form publication service. We will be more than happy to add a link to that from our documentation. Open a [PR](https://github.com/actualbudget/actual/pulls) and add it to the list in the [installation overview](https://actualbudget.org/docs/install/#additional-installation-options).
 
 However, in doing so, you would become responsible for these instructions. If they become out of date or people want in-depth help with them, we will point them to you for assistance if the community is unable to help. If lots of people report issues with them, we may have to remove the link altogether.
 
@@ -32,7 +32,7 @@ Please review the contributing documentation on our website: https://actualbudge
 
 ### Issues
 
-If you know of a part of Actual that isn't documented and you would like to know more about that part of the software, open an [Issue](https://github.com/actualbudget/docs/issues) and one of the documentation team will get to it. Or have a go at writing it yourself; we could really use all the help we can get.
+If you know of a part of Actual that isn't documented and you would like to know more about that part of the software, open an [Issue](https://github.com/actualbudget/actual/issues/new?template=documentation.yml) and one of the documentation team will get to it. Or have a go at writing it yourself; we could really use all the help we can get.
 
 ### Pull Requests
 

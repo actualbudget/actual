@@ -158,12 +158,6 @@ export let objects = {
     { name: 'id', type: types.id },
     { name: 'name', type: 'string', required: true },
     {
-      name: 'type',
-      type: 'string',
-      required: true,
-      description: 'Must be a valid type. See notes below.',
-    },
-    {
       name: 'offbudget',
       type: 'bool',
       description: (

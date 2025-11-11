@@ -346,7 +346,6 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         onChangeDates={onChangeDates}
-        onApply={dividendFilters.onApply}
         onUpdateFilter={dividendFilters.onUpdate}
         onDeleteFilter={dividendFilters.onDelete}
         conditionsOp={dividendFilters.conditionsOp}
@@ -644,7 +643,6 @@ function SumWithRange({
           compact={false}
           onApply={filterObject.onApply}
           hover={false}
-          exclude={undefined}
         />
       </View>
     </View>
