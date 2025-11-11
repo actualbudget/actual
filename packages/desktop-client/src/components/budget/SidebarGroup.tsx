@@ -3,7 +3,7 @@ import React, { type CSSProperties, type RefCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgExpandArrow } from '@actual-app/components/icons/v0';
+import { SvgAdd, SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
@@ -21,6 +21,7 @@ import { InputCell } from '@desktop-client/components/table';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { css, cx } from '@emotion/css';
 
 type SidebarGroupProps = {
   group: CategoryGroupEntity;
@@ -166,7 +167,30 @@ export function SidebarGroup({
             </Popover>
           </View>
           <View style={{ flex: 1 }} />
-          <View style={{ flexShrink: 0 }}>
+          <View
+            style={{
+              flexShrink: 0,
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
+          >
+            <Button
+              variant="bare"
+              aria-label={t('Add category')}
+              className={cx(
+                css({
+                  color: theme.buttonNormalText,
+                  '&:hover': { opacity: 1 },
+                }),
+                'hover-visible',
+              )}
+              onPress={() => {
+                onShowNewCategory?.(group.id);
+              }}
+            >
+              <SvgAdd style={{ width: 10, height: 10, flexShrink: 0 }} />
+            </Button>
+
             <NotesButton
               id={group.id}
               style={dragPreview && { color: 'currentColor' }}
