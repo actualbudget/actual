@@ -169,13 +169,17 @@ async function countContributorPoints() {
         );
 
         const docsPoints =
-          CONFIG.DOCS_PR_REVIEW_POINT_TIERS.find(
-            t => docsChanges >= t.minChanges,
-          )?.points ?? 0;
+          docsChanges > 0
+            ? (CONFIG.DOCS_PR_REVIEW_POINT_TIERS.find(
+                t => docsChanges >= t.minChanges,
+              )?.points ?? 0)
+            : 0;
         const mainPoints =
-          CONFIG.MAIN_PR_REVIEW_POINT_TIERS.find(
-            t => mainChanges >= t.minChanges,
-          )?.points ?? 0;
+          mainChanges > 0 || docsChanges === 0
+            ? (CONFIG.MAIN_PR_REVIEW_POINT_TIERS.find(
+                t => mainChanges >= t.minChanges,
+              )?.points ?? 0)
+            : 0;
 
         const isReleasePR = pr.title.match(/🔖.*\d+\.\d+\.\d+/);
 
