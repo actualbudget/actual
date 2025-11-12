@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { useSyncedPrefJson } from '@desktop-client/hooks/useSyncedPrefJson';
+import { useSyncedPrefJson } from './useSyncedPrefJson';
 
 export type BudgetView = {
   id: string;
@@ -46,37 +46,44 @@ export function useBudgetViews(): {
     if (!oldView) {
       return;
     }
-    
+
     const newView = { ...oldView, ...updates };
-    
+
     // Update the view in customViews
-    const updatedViews = customViews.map(view => 
-      view.id === viewId ? newView : view
+    const updatedViews = customViews.map(view =>
+      view.id === viewId ? newView : view,
     );
     setCustomViews(updatedViews);
 
     // If name changed, update associated categories as needed
     if (oldView.name && updates.name && oldView.name !== updates.name) {
       // Copy the old view's categories to avoid conflicts
-      const viewCategories = Object.keys(budgetViewMap).reduce((acc, catId) => {
-        if (budgetViewMap[catId].includes(oldView.name)) {
-          acc[catId] = true;
-        }
-        return acc;
-      }, {} as Record<string, boolean>);
+      const viewCategories = Object.keys(budgetViewMap).reduce(
+        (acc, catId) => {
+          if (budgetViewMap[catId].includes(oldView.name)) {
+            acc[catId] = true;
+          }
+          return acc;
+        },
+        {} as Record<string, boolean>,
+      );
 
       // Update the view map references with new name
-      const newMap = Object.keys(budgetViewMap).reduce((acc, catId) => {
-        const views = budgetViewMap[catId]?.filter(name => name !== oldView.name) || [];
-        if (viewCategories[catId]) {
-          views.push(updates.name);
-        }
-        if (views.length > 0) {
-          acc[catId] = views;
-        }
-        return acc;
-      }, {} as Record<string, string[]>);
-      
+      const newMap = Object.keys(budgetViewMap).reduce(
+        (acc, catId) => {
+          const views =
+            budgetViewMap[catId]?.filter(name => name !== oldView.name) || [];
+          if (viewCategories[catId] && updates.name) {
+            views.push(updates.name);
+          }
+          if (views.length > 0) {
+            acc[catId] = views;
+          }
+          return acc;
+        },
+        {} as Record<string, string[]>,
+      );
+
       setBudgetViewMapPref(newMap);
     }
   };
@@ -104,6 +111,6 @@ export function useBudgetViews(): {
     views,
     viewMap: budgetViewMap,
     updateView,
-    removeView
+    removeView,
   };
 }

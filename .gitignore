@@ -65,3 +65,4 @@ build/
 
 # Lage cache
 .lage/
+packages/desktop-client/src/start-all

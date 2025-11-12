@@ -18,8 +18,8 @@ import {
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
-import { type MonthBounds, MonthsProvider } from './MonthsContext';
 import { CategoryFilterSelector } from './CategoryFilterSelector';
+import { type MonthBounds, MonthsProvider } from './MonthsContext';
 import {
   findSortDown,
   findSortUp,

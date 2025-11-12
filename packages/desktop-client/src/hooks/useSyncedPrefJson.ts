@@ -11,10 +11,7 @@ type SetSyncedPrefJsonAction<T> = (value: T) => void;
  * Hook for synced preferences that store JSON data.
  * Handles JSON serialization/deserialization automatically.
  */
-export function useSyncedPrefJson<
-  K extends keyof SyncedPrefs,
-  T = unknown,
->(
+export function useSyncedPrefJson<K extends keyof SyncedPrefs, T = unknown>(
   prefName: K,
   defaultValue: T,
 ): [T, SetSyncedPrefJsonAction<T>] {
@@ -44,4 +41,3 @@ export function useSyncedPrefJson<
 
   return [pref, setPref];
 }
-

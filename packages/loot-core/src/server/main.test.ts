@@ -30,10 +30,14 @@ async function removeDirWithRetry(path: string, attempts = 5) {
         await fs.removeDirRecursively(path);
       }
       return;
-    } catch (e: any) {
+    } catch (e) {
       const msg = String(e && (e.code || e.message || e));
       // If it's a file-locking / permission related error, retry after a short delay
-      if (msg.includes('EBUSY') || msg.includes('EPERM') || msg.includes('EACCES')) {
+      if (
+        msg.includes('EBUSY') ||
+        msg.includes('EPERM') ||
+        msg.includes('EACCES')
+      ) {
         // small backoff
         await new Promise(r => setTimeout(r, 100 * (i + 1)));
         continue;
