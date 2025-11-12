@@ -12,24 +12,7 @@ export interface RuleEntity extends NewRuleEntity {
   id: string;
 }
 
-export type RuleConditionOp =
-  | 'is'
-  | 'isNot'
-  | 'oneOf'
-  | 'notOneOf'
-  | 'isapprox'
-  | 'isbetween'
-  | 'gt'
-  | 'gte'
-  | 'lt'
-  | 'lte'
-  | 'contains'
-  | 'doesNotContain'
-  | 'hasTags'
-  | 'and'
-  | 'matches'
-  | 'onBudget'
-  | 'offBudget';
+export type RuleConditionOp = RuleConditionEntity['op'];
 
 export type FieldValueTypes = {
   account: string;
@@ -150,6 +133,7 @@ export interface SetRuleActionEntity {
   value: unknown;
   options?: {
     template?: string;
+    formula?: string;
     splitIndex?: number;
   };
   type?: string;

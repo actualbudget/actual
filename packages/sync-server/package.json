@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/sync-server",
-  "version": "25.10.0",
+  "version": "25.11.0",
   "license": "MIT",
   "description": "actual syncing server",
   "bin": {
@@ -17,7 +17,7 @@
     "start-monitor": "nodemon --exec 'tsc && node build/app' --ignore './build/**/*' --ext 'ts,js' build/app",
     "build": "tsc && yarn copy-static-assets",
     "copy-static-assets": "rm -rf build/src/sql && cp -r src/sql build/src/sql",
-    "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' vitest",
+    "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' vitest --run",
     "db:migrate": "yarn build && cross-env NODE_ENV=development node build/src/scripts/run-migrations.js up",
     "db:downgrade": "yarn build && cross-env NODE_ENV=development node build/src/scripts/run-migrations.js down",
     "db:test-migrate": "yarn build && cross-env NODE_ENV=test node build/src/scripts/run-migrations.js up",
@@ -57,13 +57,12 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/express-actuator": "^1.8.3",
-    "@types/node": "^22.18.8",
+    "@types/node": "^22.18.11",
     "@types/supertest": "^6.0.3",
-    "@vitest/coverage-v8": "3.2.4",
     "http-proxy-middleware": "^3.0.5",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.6"
   }
 }

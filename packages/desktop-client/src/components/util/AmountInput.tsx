@@ -18,20 +18,25 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
+import { type IntegerAmount } from 'loot-core/shared/util';
+
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 
 type AmountInputProps = {
   id?: string;
-  inputRef?: Ref<HTMLInputElement>;
-  value: number;
+  ref?: Ref<HTMLInputElement>;
+  value: IntegerAmount;
   zeroSign?: '-' | '+';
   sign?: '-' | '+';
   onChangeValue?: (value: string) => void;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
-  onEnter?: (event: KeyboardEvent<HTMLInputElement>, amount?: number) => void;
-  onUpdate?: (amount: number) => void;
+  onEnter?: (
+    event: KeyboardEvent<HTMLInputElement>,
+    amount?: IntegerAmount,
+  ) => void;
+  onUpdate?: (amount: IntegerAmount) => void;
   style?: CSSProperties;
   inputStyle?: CSSProperties;
   inputClassName?: string;
@@ -42,7 +47,7 @@ type AmountInputProps = {
 
 export function AmountInput({
   id,
-  inputRef,
+  ref,
   value: initialValue,
   zeroSign = '-', // + or -
   sign,
@@ -83,13 +88,13 @@ export function AmountInput({
     [initialValue, isFocused, getDisplayValue],
   );
 
-  const buttonRef = useRef(null);
-  const ref = useRef<HTMLInputElement>(null);
-  const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const innerRef = useRef<HTMLInputElement | null>(null);
+  const mergedRef = useMergedRefs<HTMLInputElement>(ref, innerRef);
 
   useEffect(() => {
     if (focused) {
-      ref.current?.focus();
+      innerRef.current?.focus();
     }
   }, [focused]);
 
@@ -105,9 +110,11 @@ export function AmountInput({
   }, [symbol, value, format]);
 
   useEffect(() => {
-    if (ref.current) {
+    if (innerRef.current) {
       (
-        ref.current as HTMLInputElement & { getCurrentAmount?: () => number }
+        innerRef.current as HTMLInputElement & {
+          getCurrentAmount?: () => number;
+        }
       ).getCurrentAmount = () => getAmount();
     }
   }, [getAmount]);
@@ -156,7 +163,7 @@ export function AmountInput({
   }
 
   function onInputAmountBlur(e) {
-    if (!ref.current?.contains(e.relatedTarget)) {
+    if (!innerRef.current?.contains(e.relatedTarget)) {
       const amount = getAmount();
       fireUpdate(amount);
     }

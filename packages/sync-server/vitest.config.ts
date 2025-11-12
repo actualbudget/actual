@@ -4,15 +4,8 @@ export default {
     globalSetup: ['./vitest.globalSetup.js'],
     globals: true,
     coverage: {
-      enabled: true,
-      include: ['**/*.{js,ts,tsx}'],
-      exclude: [
-        '**/node_modules/**',
-        '**/dist/**',
-        '**/build/**',
-        '**/coverage/**',
-      ],
-      reporter: ['html', 'lcov', 'text', 'text-summary'],
+      enabled: false,
     },
+    maxWorkers: 2,
   },
 };

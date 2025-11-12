@@ -63,6 +63,19 @@ export type CustomReportWidget = AbstractWidget<
   'custom-report',
   { id: string }
 >;
+export type CrossoverWidget = AbstractWidget<
+  'crossover-card',
+  {
+    name?: string;
+    expenseCategoryIds?: string[];
+    incomeAccountIds?: string[];
+    timeFrame?: TimeFrame;
+    safeWithdrawalRate?: number; // 0.04 default
+    estimatedReturn?: number | null; // annual
+    projectionType?: 'trend' | 'hampel'; // expense projection method
+    showHiddenCategories?: boolean; // show hidden categories in selector
+  } | null
+>;
 export type MarkdownWidget = AbstractWidget<
   'markdown-card',
   { content: string; text_align?: 'left' | 'right' | 'center' }
@@ -72,9 +85,11 @@ type SpecializedWidget =
   | NetWorthWidget
   | CashFlowWidget
   | SpendingWidget
+  | CrossoverWidget
   | MarkdownWidget
   | SummaryWidget
-  | CalendarWidget;
+  | CalendarWidget
+  | FormulaWidget;
 export type Widget = SpecializedWidget | CustomReportWidget;
 export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
 
@@ -131,5 +146,26 @@ export type CalendarWidget = AbstractWidget<
     conditions?: RuleConditionEntity[];
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
+  } | null
+>;
+
+export type FormulaWidget = AbstractWidget<
+  'formula-card',
+  {
+    name?: string;
+    formula?: string;
+    fontSize?: number;
+    fontSizeMode?: 'dynamic' | 'static';
+    staticFontSize?: number;
+    colorFormula?: string;
+    queriesVersion?: number;
+    queries?: Record<
+      string,
+      {
+        conditions?: RuleConditionEntity[];
+        conditionsOp?: 'and' | 'or';
+        timeFrame?: TimeFrame;
+      }
+    >;
   } | null
 >;

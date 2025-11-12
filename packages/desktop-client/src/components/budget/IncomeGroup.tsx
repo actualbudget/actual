@@ -16,7 +16,7 @@ type IncomeGroupProps = {
   collapsed: boolean;
   MonthComponent: () => JSX.Element;
   onEditName: (id: CategoryGroupEntity['id']) => void;
-  onSave: (group: CategoryGroupEntity) => Promise<void>;
+  onSave: (group: CategoryGroupEntity) => void;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
   onShowNewCategory: (groupId: CategoryGroupEntity['id']) => void;
 };

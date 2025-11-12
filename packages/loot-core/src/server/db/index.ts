@@ -543,6 +543,10 @@ export async function getAccount(id: DbAccount['id']) {
   return first<DbAccount>(`SELECT * FROM accounts WHERE id = ?`, [id]);
 }
 
+export async function getCategory(id: DbCategory['id']) {
+  return first<DbCategory>(`SELECT * FROM categories WHERE id = ?`, [id]);
+}
+
 export async function insertPayee(
   payee: WithRequired<Partial<DbPayee>, 'name'>,
 ) {

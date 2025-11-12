@@ -26,15 +26,6 @@ const addWatchers = (): Plugin => ({
   },
 });
 
-// Get service worker filename from environment variable
-function getServiceWorkerFilename(): string {
-  const hash = process.env.REACT_APP_PLUGIN_SERVICE_WORKER_HASH;
-  if (hash) {
-    return `plugin-sw.${hash}.js`;
-  }
-  return 'plugin-sw.js'; // fallback
-}
-
 // Inject build shims using the inject plugin
 const injectShims = (): Plugin[] => {
   const buildShims = path.resolve('./src/build-shims.js');
@@ -168,22 +159,23 @@ export default defineConfig(async ({ mode }) => {
         ? undefined
         : VitePWA({
             registerType: 'prompt',
-            strategies: 'injectManifest',
-            srcDir: 'service-worker',
-            filename: getServiceWorkerFilename(),
-            manifest: {
-              name: 'Actual',
-              short_name: 'Actual',
-              description: 'A local-first personal finance tool',
-              theme_color: '#8812E1',
-              background_color: '#8812E1',
-              display: 'standalone',
-              start_url: './',
-            },
-            injectManifest: {
-              maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
-              swSrc: `service-worker/${getServiceWorkerFilename()}`,
-            },
+            // TODO:  The plugin worker build is currently disabled due to issues with offline support. Fix this
+            // strategies: 'injectManifest',
+            // srcDir: 'service-worker',
+            // filename: 'plugin-sw.js',
+            // manifest: {
+            //   name: 'Actual',
+            //   short_name: 'Actual',
+            //   description: 'A local-first personal finance tool',
+            //   theme_color: '#8812E1',
+            //   background_color: '#8812E1',
+            //   display: 'standalone',
+            //   start_url: './',
+            // },
+            // injectManifest: {
+            //   maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
+            //   swSrc: `service-worker/plugin-sw.js`,
+            // },
             devOptions: {
               enabled: true, // We need service worker in dev mode to work with plugins
               type: 'module',
@@ -228,6 +220,7 @@ export default defineConfig(async ({ mode }) => {
         // print only console.error
         return type === 'stderr';
       },
+      maxWorkers: 2,
     },
   };
 });

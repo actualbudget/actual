@@ -21,6 +21,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     include: ['src/**/*.web.test.(js|jsx|ts|tsx)'],
+    maxWorkers: 2,
   },
   resolve: {
     alias: [

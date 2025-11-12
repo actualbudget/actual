@@ -1,5 +1,6 @@
-// @ts-strict-ignore
-const tmpl = ({ imports, interfaces, componentName, props, jsx }, { tpl }) => {
+import { type Options } from '@svgr/babel-preset';
+
+const tmpl: Options['template'] = ({ imports, interfaces, componentName, props, jsx }, { tpl }) => {
   return tpl`
 ${imports};
 
