@@ -74,7 +74,7 @@ function parseMapping(values, key, description) {
         const parsed = JSON.parse(trimmed);
 
         if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-          throw new Error('‘‘Value must be a JSON object.’’');
+          throw new Error('Value must be a JSON object.');
         }
 
         return new Map(
@@ -185,7 +185,7 @@ async function loadStats(filePath) {
 
     // Validate that we got a meaningful stats object
     if (!parsed || typeof parsed !== 'object') {
-      throw new Error('‘‘Stats file does not contain a valid JSON object’’');
+      throw new Error('Stats file does not contain a valid JSON object');
     }
 
     return parsed;
