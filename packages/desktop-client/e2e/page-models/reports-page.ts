@@ -1,6 +1,7 @@
 import { type Locator, type Page } from '@playwright/test';
 
 import { CustomReportPage } from './custom-report-page';
+import { SankeyPage } from './sankey-page';
 
 export class ReportsPage {
   readonly page: Page;
@@ -31,6 +32,12 @@ export class ReportsPage {
       .click();
     await this.page.getByRole('button', { name: 'New custom report' }).click();
     return new CustomReportPage(this.page);
+  }
+
+  async goToSankeyPage() {
+    // Navigate directly to the Sankey report URL
+    await this.page.goto('/reports/sankey');
+    return new SankeyPage(this.page);
   }
 
   async getAvailableReportList() {
