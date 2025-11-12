@@ -4,43 +4,32 @@ import pLimit from 'p-limit';
 
 const limit = pLimit(50);
 
-/** Repository-specific configuration for points calculation */
-const REPOSITORY_CONFIG = new Map([
-  [
-    'actual',
-    {
-      POINTS_PER_ISSUE_TRIAGE_ACTION: 1,
-      POINTS_PER_ISSUE_CLOSING_ACTION: 1,
-      POINTS_PER_RELEASE_PR: 0,
-      PR_REVIEW_POINT_TIERS: [
-        { minChanges: 500, points: 8 },
-        { minChanges: 100, points: 6 },
-        { minChanges: 10, points: 2 },
-        { minChanges: 0, points: 1 },
-      ],
-      EXCLUDED_FILES: [
-        'yarn.lock',
-        '.yarn/**/*',
-        'packages/component-library/src/icons/**/*',
-        'release-notes/**/*',
-      ],
-    },
+const CONFIG = {
+  POINTS_PER_ISSUE_TRIAGE_ACTION: 1,
+  POINTS_PER_ISSUE_CLOSING_ACTION: 1,
+  POINTS_PER_RELEASE_PR: 4, // Awarded to whoever merges the release PR
+  // Point tiers for main repo changes (non-docs)
+  MAIN_PR_REVIEW_POINT_TIERS: [
+    { minChanges: 500, points: 8 },
+    { minChanges: 100, points: 6 },
+    { minChanges: 10, points: 2 },
+    { minChanges: 0, points: 1 },
   ],
-  [
-    'docs',
-    {
-      POINTS_PER_ISSUE_TRIAGE_ACTION: 1,
-      POINTS_PER_ISSUE_CLOSING_ACTION: 1,
-      POINTS_PER_RELEASE_PR: 4,
-      PR_REVIEW_POINT_TIERS: [
-        { minChanges: 2000, points: 6 },
-        { minChanges: 200, points: 4 },
-        { minChanges: 0, points: 2 },
-      ],
-      EXCLUDED_FILES: ['yarn.lock', '.yarn/**/*'],
-    },
+  // Point tiers for docs changes (packages/docs/**)
+  DOCS_PR_REVIEW_POINT_TIERS: [
+    { minChanges: 2000, points: 6 },
+    { minChanges: 200, points: 4 },
+    { minChanges: 0, points: 2 },
   ],
-]);
+  EXCLUDED_FILES: [
+    'yarn.lock',
+    '.yarn/**/*',
+    'packages/component-library/src/icons/**/*',
+    'release-notes/**/*',
+    'upcoming-release-notes/**/*',
+  ],
+  DOCS_FILES_PATTERN: 'packages/docs/**/*',
+};
 
 /**
  * Get the start and end dates for the last month.
@@ -76,15 +65,14 @@ function getLastMonthDates() {
 /**
  * Used for calculating the monthly points each core contributor has earned.
  * These are used for payouts depending.
- * @param {string} repo - The repository to analyze ('actual' or 'docs')
- * @returns {number} The total points earned for the repository
+ * @returns {Map} A map of contributor logins to their total points earned
  */
-async function countContributorPoints(repo) {
+async function countContributorPoints() {
   const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN,
   });
   const owner = 'actualbudget';
-  const config = REPOSITORY_CONFIG.get(repo);
+  const repo = 'actual';
 
   const { since, until } = getLastMonthDates();
 
@@ -99,7 +87,8 @@ async function countContributorPoints(repo) {
     Array.from(orgMemberLogins).map(login => [
       login,
       {
-        reviews: [], // Will store objects with PR number and points
+        mainReviews: [], // Will store objects with PR number and points for main repo changes
+        docsReviews: [], // Will store objects with PR number and points for docs changes
         labelRemovals: [],
         issueClosings: [],
         points: 0,
@@ -156,29 +145,56 @@ async function countContributorPoints(repo) {
           ),
         ]);
 
-        const totalChanges = modifiedFiles
-          .filter(
-            file =>
-              !config.EXCLUDED_FILES.some(pattern =>
-                minimatch(file.filename, pattern),
-              ),
-          )
-          .reduce((sum, file) => sum + file.additions + file.deletions, 0);
+        const filteredFiles = modifiedFiles.filter(
+          file =>
+            !CONFIG.EXCLUDED_FILES.some(pattern =>
+              minimatch(file.filename, pattern),
+            ),
+        );
+
+        const docsFiles = filteredFiles.filter(file =>
+          minimatch(file.filename, CONFIG.DOCS_FILES_PATTERN),
+        );
+        const mainFiles = filteredFiles.filter(
+          file => !minimatch(file.filename, CONFIG.DOCS_FILES_PATTERN),
+        );
+
+        const docsChanges = docsFiles.reduce(
+          (sum, file) => sum + file.additions + file.deletions,
+          0,
+        );
+        const mainChanges = mainFiles.reduce(
+          (sum, file) => sum + file.additions + file.deletions,
+          0,
+        );
+
+        const docsPoints =
+          CONFIG.DOCS_PR_REVIEW_POINT_TIERS.find(
+            t => docsChanges >= t.minChanges,
+          )?.points ?? 0;
+        const mainPoints =
+          CONFIG.MAIN_PR_REVIEW_POINT_TIERS.find(
+            t => mainChanges >= t.minChanges,
+          )?.points ?? 0;
 
         const isReleasePR = pr.title.match(/🔖.*\d+\.\d+\.\d+/);
-        const prPoints =
-          config.PR_REVIEW_POINT_TIERS.find(t => totalChanges >= t.minChanges)
-            ?.points ?? 0;
 
         if (isReleasePR) {
-          if (stats.has(pr.user.login)) {
-            const creatorStats = stats.get(pr.user.login);
-            creatorStats.reviews.push({
+          // release PRs are created by the github-actions bot so we attribute points to the merger
+          const { data: prDetails } = await octokit.pulls.get({
+            owner,
+            repo,
+            pull_number: pr.number,
+          });
+
+          if (prDetails.merged_by && stats.has(prDetails.merged_by.login)) {
+            const mergerStats = stats.get(prDetails.merged_by.login);
+            mergerStats.mainReviews.push({
               pr: pr.number.toString(),
-              points: config.POINTS_PER_RELEASE_PR,
-              isReleaseCreator: true,
+              points: CONFIG.POINTS_PER_RELEASE_PR,
+              isReleaseMerger: true,
             });
-            creatorStats.points += config.POINTS_PER_RELEASE_PR;
+            mergerStats.points += CONFIG.POINTS_PER_RELEASE_PR;
           }
         } else {
           const uniqueReviewers = new Set();
@@ -192,11 +208,22 @@ async function countContributorPoints(repo) {
             .forEach(({ user: { login: reviewer } }) => {
               uniqueReviewers.add(reviewer);
               const userStats = stats.get(reviewer);
-              userStats.reviews.push({
-                pr: pr.number.toString(),
-                points: prPoints,
-              });
-              userStats.points += prPoints;
+
+              if (docsPoints > 0) {
+                userStats.docsReviews.push({
+                  pr: pr.number.toString(),
+                  points: docsPoints,
+                });
+                userStats.points += docsPoints;
+              }
+
+              if (mainPoints > 0) {
+                userStats.mainReviews.push({
+                  pr: pr.number.toString(),
+                  points: mainPoints,
+                });
+                userStats.points += mainPoints;
+              }
             });
         }
       }),
@@ -241,7 +268,7 @@ async function countContributorPoints(repo) {
               const remover = event.actor.login;
               const userStats = stats.get(remover);
               userStats.labelRemovals.push(issue.number.toString());
-              userStats.points += config.POINTS_PER_ISSUE_TRIAGE_ACTION;
+              userStats.points += CONFIG.POINTS_PER_ISSUE_TRIAGE_ACTION;
             }
 
             if (
@@ -251,7 +278,7 @@ async function countContributorPoints(repo) {
               const closer = event.actor.login;
               const userStats = stats.get(closer);
               userStats.issueClosings.push(issue.number.toString());
-              userStats.points += config.POINTS_PER_ISSUE_CLOSING_ACTION;
+              userStats.points += CONFIG.POINTS_PER_ISSUE_CLOSING_ACTION;
             }
           });
       }),
@@ -260,27 +287,39 @@ async function countContributorPoints(repo) {
 
   // Print all statistics
   printStats(
-    `PR Review Statistics (${repo})`,
-    stats => stats.reviews.length,
+    'Main Repo PR Review Statistics',
+    stats => stats.mainReviews.length,
     (user, count) =>
       `${user}: ${count} (PRs: ${stats
         .get(user)
-        .reviews.map(r => {
-          if (r.isReleaseCreator) {
-            return `#${r.pr} (${r.points}pts - Release Creator)`;
+        .mainReviews.map(r => {
+          if (r.isReleaseMerger) {
+            return `#${r.pr} (${r.points}pts - Release Merger)`;
           }
           return `#${r.pr} (${r.points}pts)`;
         })
         .join(', ')})`,
   );
+
   printStats(
-    `"Needs Triage" Label Removal Statistics (${repo})`,
+    'Docs PR Review Statistics',
+    stats => stats.docsReviews.length,
+    (user, count) =>
+      `${user}: ${count} (PRs: ${stats
+        .get(user)
+        .docsReviews.map(r => `#${r.pr} (${r.points}pts)`)
+        .join(', ')})`,
+  );
+
+  printStats(
+    '"Needs Triage" Label Removal Statistics',
     stats => stats.labelRemovals.length,
     (user, count) =>
       `${user}: ${count} (Issues: ${stats.get(user).labelRemovals.join(', ')})`,
   );
+
   printStats(
-    `Issue Closing Statistics (${repo})`,
+    'Issue Closing Statistics',
     stats => stats.issueClosings.length,
     (user, count) =>
       `${user}: ${count} (Issues: ${stats.get(user).issueClosings.join(', ')})`,
@@ -288,7 +327,7 @@ async function countContributorPoints(repo) {
 
   // Print points summary
   printStats(
-    `Points Summary (${repo})`,
+    'Points Summary',
     stats => stats.points,
     (user, userPoints) => `${user}: ${userPoints}`,
   );
@@ -298,7 +337,7 @@ async function countContributorPoints(repo) {
     (sum, userStats) => sum + userStats.points,
     0,
   );
-  console.log(`\nTotal points earned for ${repo}: ${totalPoints}`);
+  console.log(`\nTotal points earned: ${totalPoints}`);
 
   // Return the points
   return new Map(
@@ -309,55 +348,5 @@ async function countContributorPoints(repo) {
   );
 }
 
-/**
- * Calculate the points for both repositories and print cumulative results
- */
-async function calculateCumulativePoints() {
-  // Get stats for each repository
-  const repoPointsResults = await Promise.all(
-    Array.from(REPOSITORY_CONFIG.keys()).map(countContributorPoints),
-  );
-
-  // Calculate cumulative stats
-  const cumulativeStats = new Map(repoPointsResults[0]);
-
-  // Combine stats from all repositories
-  for (let i = 1; i < repoPointsResults.length; i++) {
-    for (const [login, points] of repoPointsResults[i].entries()) {
-      if (!cumulativeStats.has(login)) {
-        cumulativeStats.set(login, 0);
-      }
-
-      cumulativeStats.set(login, cumulativeStats.get(login) + points);
-    }
-  }
-
-  // Print cumulative statistics
-  console.log('\n\nCUMULATIVE STATISTICS ACROSS ALL REPOSITORIES');
-  console.log('='.repeat(50));
-
-  console.log('\nCumulative Points Summary:');
-  console.log('='.repeat('Cumulative Points Summary'.length + 1));
-
-  const entries = Array.from(cumulativeStats.entries())
-    .filter(([, count]) => count > 0)
-    .sort((a, b) => b[1] - a[1]);
-
-  if (entries.length === 0) {
-    console.log('No cumulative points summary found.');
-  } else {
-    entries.forEach(([user, points]) => {
-      console.log(`${user}: ${points}`);
-    });
-  }
-
-  // Calculate and print total cumulative points
-  const totalCumulativePoints = Array.from(cumulativeStats.values()).reduce(
-    (sum, points) => sum + points,
-    0,
-  );
-  console.log('\nTotal cumulative points earned: ' + totalCumulativePoints);
-}
-
 // Run the calculations
-calculateCumulativePoints().catch(console.error);
+countContributorPoints().catch(console.error);
