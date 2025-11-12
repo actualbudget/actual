@@ -39,14 +39,6 @@ export function createBudgetAnalysisSpreadsheet({
   interval = 'Monthly',
   firstDayOfWeekIdx = '0',
 }: createBudgetAnalysisSpreadsheetProps) {
-export function createBudgetAnalysisSpreadsheet({
-  conditions = [],
-  conditionsOp,
-  startDate,
-  endDate,
-  interval = 'Monthly',
-  firstDayOfWeekIdx = '0',
-}: createBudgetAnalysisSpreadsheetProps) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: BudgetAnalysisData) => void,
