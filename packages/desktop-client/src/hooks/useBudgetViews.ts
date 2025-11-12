@@ -136,6 +136,23 @@ export function useBudgetViews(): {
 
   // Set category order for a specific view
   const setViewCategoryOrder = (viewId: string, categoryIds: string[]) => {
+    if (!categoryIds || categoryIds.length === 0) {
+      if (viewCategoryOrder[viewId]) {
+        const { [viewId]: _, ...rest } = viewCategoryOrder;
+        setViewCategoryOrderPref(rest);
+      }
+      return;
+    }
+
+    const existingOrder = viewCategoryOrder[viewId];
+    if (
+      existingOrder &&
+      existingOrder.length === categoryIds.length &&
+      existingOrder.every((id, index) => id === categoryIds[index])
+    ) {
+      return;
+    }
+
     setViewCategoryOrderPref({
       ...viewCategoryOrder,
       [viewId]: categoryIds,
@@ -143,6 +160,23 @@ export function useBudgetViews(): {
   };
 
   const setViewGroupOrder = (viewId: string, groupIds: string[]) => {
+    if (!groupIds || groupIds.length === 0) {
+      if (viewGroupOrder[viewId]) {
+        const { [viewId]: _, ...rest } = viewGroupOrder;
+        setViewGroupOrderPref(rest);
+      }
+      return;
+    }
+
+    const existingOrder = viewGroupOrder[viewId];
+    if (
+      existingOrder &&
+      existingOrder.length === groupIds.length &&
+      existingOrder.every((id, index) => id === groupIds[index])
+    ) {
+      return;
+    }
+
     setViewGroupOrderPref({
       ...viewGroupOrder,
       [viewId]: groupIds,

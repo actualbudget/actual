@@ -3,13 +3,15 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgDelete } from '@actual-app/components/icons/v0';
-import { SvgAdd, SvgEditPencil, SvgPencilWrite } from '@actual-app/components/icons/v1';
+import {
+  SvgAdd,
+  SvgEditPencil,
+  SvgPencilWrite,
+} from '@actual-app/components/icons/v1';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { type CategoryEntity } from 'loot-core/types/models';
 
 import {
   useDraggable,
@@ -19,6 +21,7 @@ import {
   type OnDropCallback,
   type DragState,
 } from '@desktop-client/components/sort';
+import { useBudgetViews } from '@desktop-client/hooks/useBudgetViews';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
 import { useSyncedPrefJson } from '@desktop-client/hooks/useSyncedPrefJson';
@@ -123,7 +126,8 @@ function BudgetViewItem({
 export function BudgetViews() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { list: categories, grouped: categoryGroups = [] } = useCategories();
+  const { list: categories } = useCategories();
+  const { setViewCategoryOrder, setViewGroupOrder } = useBudgetViews();
   const [budgetViewMap = {}, setBudgetViewMapPref] = useSyncedPrefJson<
     'budget.budgetViewMap',
     Record<string, string[]>
@@ -207,6 +211,8 @@ export function BudgetViews() {
       if (Array.isArray(customViews)) {
         setCustomViews(customViews.filter((v: BudgetView) => v.id !== viewId));
       }
+      setViewCategoryOrder(viewId, []);
+      setViewGroupOrder(viewId, []);
     },
     [
       budgetViewMap,
@@ -214,6 +220,8 @@ export function BudgetViews() {
       views,
       setBudgetViewMapPref,
       setCustomViews,
+      setViewCategoryOrder,
+      setViewGroupOrder,
       t,
     ],
   );

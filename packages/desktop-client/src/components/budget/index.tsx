@@ -95,6 +95,9 @@ function BudgetInner(props: BudgetInnerProps) {
     string[] | null
   >(null);
   const {
+    views = [],
+    viewCategoryOrder = {},
+    viewGroupOrder = {},
     setViewCategoryOrder,
     setViewGroupOrder,
     viewMap = {},
@@ -127,6 +130,76 @@ function BudgetInner(props: BudgetInnerProps) {
       }
     });
   }, [props.accountId]);
+
+  useEffect(() => {
+    if (!categoryGroups || categoryGroups.length === 0) {
+      return;
+    }
+
+    const validGroupIds = new Set(categoryGroups.map(group => group.id));
+
+    Object.entries(viewGroupOrder).forEach(([viewId, order]) => {
+      if (!Array.isArray(order) || order.length === 0) {
+        return;
+      }
+
+      const filtered = order.filter(groupId => validGroupIds.has(groupId));
+
+      if (filtered.length !== order.length) {
+        setViewGroupOrder(viewId, filtered);
+      }
+    });
+  }, [categoryGroups, viewGroupOrder, setViewGroupOrder]);
+
+  useEffect(() => {
+    if (!categoryGroups || categoryGroups.length === 0) {
+      return;
+    }
+
+    const globalCategoryOrder = categoryGroups.flatMap(group =>
+      (group.categories || []).map(category => category.id),
+    );
+
+    const getCategoriesForView = (viewId: string) =>
+      globalCategoryOrder.filter(catId =>
+        Array.isArray(viewMap[catId]) ? viewMap[catId].includes(viewId) : false,
+      );
+
+    const getGroupsForView = (viewId: string) =>
+      categoryGroups
+        .filter(group =>
+          (group.categories || []).some(category =>
+            Array.isArray(viewMap[category.id])
+              ? viewMap[category.id].includes(viewId)
+              : false,
+          ),
+        )
+        .map(group => group.id);
+
+    views.forEach(view => {
+      if (!viewCategoryOrder[view.id]) {
+        const categoryIds = getCategoriesForView(view.id);
+        if (categoryIds.length > 0) {
+          setViewCategoryOrder(view.id, categoryIds);
+        }
+      }
+
+      if (!viewGroupOrder[view.id]) {
+        const groupIds = getGroupsForView(view.id);
+        if (groupIds.length > 0) {
+          setViewGroupOrder(view.id, groupIds);
+        }
+      }
+    });
+  }, [
+    categoryGroups,
+    views,
+    viewMap,
+    viewCategoryOrder,
+    viewGroupOrder,
+    setViewCategoryOrder,
+    setViewGroupOrder,
+  ]);
 
   const onMonthSelect = async (month, numDisplayed) => {
     setStartMonthPref(month);
