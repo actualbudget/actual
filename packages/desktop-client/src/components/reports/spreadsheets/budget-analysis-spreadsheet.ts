@@ -149,7 +149,7 @@ export function createBudgetAnalysisSpreadsheet({
 
         // Amortize across the month
         if (interval === 'Daily') {
-          budgeted = monthlyBudget / daysInMonth;
+          budgeted = Math.round(monthlyBudget / daysInMonth);
         } else {
           // Weekly - calculate days in this week that are in this month
           const weekDays = monthUtils.dayRangeInclusive(
@@ -159,7 +159,7 @@ export function createBudgetAnalysisSpreadsheet({
           const daysInThisMonth = weekDays.filter(
             day => monthUtils.getMonth(day) === monthUtils.getMonth(intervalStart),
           ).length;
-          budgeted = (monthlyBudget / daysInMonth) * daysInThisMonth;
+          budgeted = Math.round((monthlyBudget / daysInMonth) * daysInThisMonth);
         }
       } else if (interval === 'Yearly') {
         // For yearly, sum all months in that year

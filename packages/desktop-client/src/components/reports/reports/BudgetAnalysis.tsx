@@ -7,6 +7,7 @@ import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Paragraph } from '@actual-app/components/paragraph';
+import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -298,22 +299,17 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
             <Button variant="bare" onPress={() => setShowBalance(!showBalance)}>
               {showBalance ? t('Hide balance') : t('Show balance')}
             </Button>
-            <Button
-              variant="bare"
-              onPress={() => {
-                const intervals: Array<'Daily' | 'Weekly' | 'Monthly' | 'Yearly'> = [
-                  'Daily',
-                  'Weekly',
-                  'Monthly',
-                  'Yearly',
-                ];
-                const currentIndex = intervals.indexOf(interval);
-                const nextIndex = (currentIndex + 1) % intervals.length;
-                setInterval(intervals[nextIndex]);
-              }}
-            >
-              {t('Interval: {{interval}}', { interval })}
-            </Button>
+            <Select
+              value={interval}
+              onChange={setInterval}
+              options={[
+                ['Daily', t('Daily')],
+                ['Weekly', t('Weekly')],
+                ['Monthly', t('Monthly')],
+                ['Yearly', t('Yearly')],
+              ]}
+              style={{ width: 100 }}
+            />
             {widget && (
               <Button variant="primary" onPress={onSaveWidget}>
                 <Trans>Save</Trans>
