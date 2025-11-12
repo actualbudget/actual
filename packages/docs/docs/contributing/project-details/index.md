@@ -2,10 +2,7 @@
 
 Actual is made up of lots of different _packages_. This article covers how they all fit together to form the project you know as Actual Budget.
 
-All of the repositories can be found in the [Actual Budget](https://github.com/actualbudget) organization on GitHub, within that organization you will then find the following repositories
-
-- [Actual & Actual Server](https://github.com/actualbudget/actual)
-- [docs](https://github.com/actualbudget/docs)
+All of our repositories can be found in the [Actual Budget](https://github.com/actualbudget) organization on GitHub, within that organization you will then find the repository containing the code for [Actual, Actual Server and the Docs](https://github.com/actualbudget/actual).
 
 ## Actual
 
