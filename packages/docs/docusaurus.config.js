@@ -4,7 +4,7 @@
 const { themes } = require('prism-react-renderer');
 
 const defaultOptions = {
-  editUrl: 'https://github.com/actualbudget/docs/tree/master/',
+  editUrl: 'https://github.com/actualbudget/actual/tree/master/packages/docs',
   beforeDefaultRemarkPlugins: [require('./src/remark/mentions')],
 };
 
@@ -132,7 +132,7 @@ module.exports = {
           },
           {
             label: 'Website Source',
-            href: 'https://github.com/actualbudget/docs',
+            href: 'https://github.com/actualbudget/actual/tree/master/packages/docs',
           },
           {
             label: 'Privacy Policy',

@@ -24,7 +24,7 @@ import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
 import { PayPeriodSettings } from './PayPeriodSettings';
 import { RepairTransactions } from './RepairTransactions';
-import { ResetCache, ResetSync } from './Reset';
+import { ForceReload, ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
@@ -177,6 +177,7 @@ export function Settings() {
   const [budgetName] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
+  const isForceReloadEnabled = useFeatureFlag('forceReload');
   const isPayPeriodsEnabled = useFeatureFlag('payPeriodsEnabled');
   const [_, setDefaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
 
@@ -249,6 +250,7 @@ export function Settings() {
         <ExportBudget />
         <AdvancedToggle>
           <AdvancedAbout />
+          {isForceReloadEnabled && <ForceReload />}
           <ResetCache />
           <ResetSync />
           <RepairTransactions />

@@ -6,7 +6,8 @@ export type FeatureFlag =
   | 'currency'
   | 'payPeriodsEnabled'
   | 'crossoverReport'
-  | 'plugins';
+  | 'plugins'
+  | 'forceReload';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.

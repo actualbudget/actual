@@ -985,6 +985,7 @@ export function ImportTransactionsModal({
                           [';', ';'],
                           ['|', '|'],
                           ['\t', 'tab'],
+                          ['~', '~'],
                         ]}
                         value={delimiter}
                         onChange={value => {

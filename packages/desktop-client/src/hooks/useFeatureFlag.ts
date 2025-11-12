@@ -10,6 +10,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   currency: false,
   crossoverReport: false,
   plugins: false,
+  forceReload: false,
   payPeriodsEnabled: false,
 };
 
