@@ -12,6 +12,7 @@ jobs:
       - uses: actions-ecosystem/action-add-labels@bd52874380e3909a1ac983768df6976535ece7f8 # v1.1.0
         with:
           labels: needs votes
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Add reactions
         uses: aidan-mundy/react-to-issue@109392cac5159c2df6c47c8ab3b5d6b708852fe5 # v1.1.2
         with:
