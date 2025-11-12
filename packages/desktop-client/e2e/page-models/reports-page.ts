@@ -35,8 +35,7 @@ export class ReportsPage {
   }
 
   async goToSankeyPage() {
-    // Navigate directly to the Sankey report URL
-    await this.page.goto('/reports/sankey');
+    await this.pageContent.getByRole('button', { name: /^Sankey/ }).click();
     return new SankeyPage(this.page);
   }
 
