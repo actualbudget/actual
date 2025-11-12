@@ -8,12 +8,15 @@ export type BudgetView = {
 };
 
 export type BudgetViewMap = Record<string, string[]>;
+export type ViewCategoryOrder = Record<string, string[]>; // viewId -> categoryIds[]
 
 export function useBudgetViews(): {
   views: BudgetView[];
   viewMap: BudgetViewMap;
+  viewCategoryOrder: ViewCategoryOrder;
   updateView: (viewId: string, updates: Partial<BudgetView>) => void;
   removeView: (viewId: string) => void;
+  setViewCategoryOrder: (viewId: string, categoryIds: string[]) => void;
 } {
   // Get all custom budget views
   const [customViews = [], setCustomViews] = useSyncedPrefJson<
@@ -26,6 +29,13 @@ export function useBudgetViews(): {
     'budget.budgetViewMap',
     BudgetViewMap
   >('budget.budgetViewMap', {});
+
+  // Get per-view category ordering
+  const [viewCategoryOrder = {}, setViewCategoryOrderPref] =
+    useSyncedPrefJson<'budget.viewCategoryOrder', ViewCategoryOrder>(
+      'budget.viewCategoryOrder',
+      {},
+    );
 
   // Get deduplicated list of views
   const views = useMemo(() => {
@@ -105,12 +115,27 @@ export function useBudgetViews(): {
       }
     });
     setBudgetViewMapPref(newMap);
+
+    // Remove from category ordering
+    const newOrder = { ...viewCategoryOrder };
+    delete newOrder[viewId];
+    setViewCategoryOrderPref(newOrder);
+  };
+
+  // Set category order for a specific view
+  const setViewCategoryOrder = (viewId: string, categoryIds: string[]) => {
+    setViewCategoryOrderPref({
+      ...viewCategoryOrder,
+      [viewId]: categoryIds,
+    });
   };
 
   return {
     views,
     viewMap: budgetViewMap,
+    viewCategoryOrder,
     updateView,
     removeView,
+    setViewCategoryOrder,
   };
 }
