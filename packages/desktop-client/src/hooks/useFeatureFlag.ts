@@ -10,7 +10,8 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   currency: false,
   crossoverReport: false,
   plugins: false,
-  sankeyReport: true,
+  forceReload: false,
+  sankeyReport: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

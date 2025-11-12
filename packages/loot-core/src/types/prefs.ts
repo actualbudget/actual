@@ -5,8 +5,10 @@ export type FeatureFlag =
   | 'formulaMode'
   | 'currency'
   | 'plugins'
-  | 'sankeyReport'
-  | 'crossoverReport';
+  | 'crossoverReport'
+  | 'plugins'
+  | 'forceReload'
+  | 'sankeyReport';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.

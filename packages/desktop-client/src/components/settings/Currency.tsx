@@ -37,7 +37,7 @@ export function CurrencySettings() {
         ['HKD', t('Hong Kong Dollar')],
         ['INR', t('Indian Rupee')],
         ['JMD', t('Jamaican Dollar')],
-        // ['JPY', t('Japanese Yen')],
+        ['JPY', t('Japanese Yen')],
         ['LKR', t('Sri Lankan Rupee')],
         ['MDL', t('Moldovan Leu')],
         ['PHP', t('Philippine Peso')],

@@ -176,6 +176,9 @@ export function ExperimentalFeatures() {
             >
               <Trans>Crossover Report</Trans>
             </FeatureToggle>
+            <FeatureToggle flag="forceReload">
+              <Trans>Force reload app button</Trans>
+            </FeatureToggle>
             <GlobalFeatureToggle
               prefName="plugins"
               disableToggle={true}
