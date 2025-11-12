@@ -52,9 +52,12 @@ export function createSpreadsheet(
         endDate = today;
       }
     } else if (interval === 'Weekly') {
-      const currentWeekStart = monthUtils.currentWeek(firstDayOfWeekIdx);
-      if (monthUtils.isAfter(endDate, currentWeekStart)) {
-        endDate = currentWeekStart;
+      // Include the ongoing (current) week up to today instead of clamping to the
+      // start of the current week. This ensures the current week appears in the
+      // report even if the week hasn't finished yet.
+      const today = monthUtils.currentDay();
+      if (monthUtils.isAfter(endDate, today)) {
+        endDate = today;
       }
     }
 

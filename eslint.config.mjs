@@ -75,6 +75,9 @@ const confusingBrowserGlobals = [
 export default defineConfig(
   {
     ignores: [
+      //temporary
+      'packages/docs',
+
       'packages/api/app/bundle.api.js',
       'packages/api/app/stats.json',
       'packages/api/dist',
@@ -84,6 +87,7 @@ export default defineConfig(
       'packages/component-library/src/icons/**/*',
       'packages/desktop-client/bundle.browser.js',
       'packages/desktop-client/build/',
+      'packages/desktop-client/dev-dist/',
       'packages/desktop-client/service-worker/*',
       'packages/desktop-client/build-electron/',
       'packages/desktop-client/build-stats/',
@@ -100,6 +104,8 @@ export default defineConfig(
       'packages/loot-core/**/lib-dist/*',
       'packages/loot-core/**/proto/*',
       'packages/sync-server/build/',
+      'packages/sync-server/user-files/',
+      'packages/sync-server/server-files/',
       'packages/plugins-service/dist/',
       '.yarn/*',
       '.github/*',
@@ -448,7 +454,7 @@ export default defineConfig(
       'react-hooks/exhaustive-deps': [
         'warn',
         {
-          additionalHooks: '(useQuery)',
+          additionalHooks: '(useQuery|useEffectAfterMount)',
         },
       ],
 

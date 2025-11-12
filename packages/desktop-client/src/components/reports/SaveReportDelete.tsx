@@ -2,7 +2,7 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -34,11 +34,12 @@ export function SaveReportDelete({
         </Text>
       </View>
 
-      <Stack
-        direction="row"
-        justify="flex-end"
-        align="center"
-        style={{ marginTop: 15 }}
+      <SpaceBetween
+        style={{
+          marginTop: 15,
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+        }}
       >
         <View style={{ flex: 1 }} />
         <Button variant="primary" autoFocus onPress={onDelete}>
@@ -47,7 +48,7 @@ export function SaveReportDelete({
         <Button variant="primary" onPress={onClose}>
           <Trans>No</Trans>
         </Button>
-      </Stack>
+      </SpaceBetween>
     </>
   );
 }
