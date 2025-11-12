@@ -62,9 +62,9 @@ export function BudgetAnalysisCard({
       conditionsOp: meta?.conditionsOp,
       startDate,
       endDate,
-      interval: meta?.interval || 'Monthly',
+      interval: 'Monthly', // Always use Monthly for the card display
     });
-  }, [meta?.conditions, meta?.conditionsOp, meta?.interval, startDate, endDate]);
+  }, [meta?.conditions, meta?.conditionsOp, startDate, endDate]);
 
   const data = useReport('default', getGraphData);
 
@@ -146,7 +146,7 @@ export function BudgetAnalysisCard({
             compact={true}
             data={data}
             graphType={meta?.graphType || 'Line'}
-            interval={meta?.interval || 'Monthly'}
+            interval="Monthly"
             showBalance={meta?.showBalance ?? true}
           />
         ) : (
