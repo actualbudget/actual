@@ -9,14 +9,17 @@ export type BudgetView = {
 
 export type BudgetViewMap = Record<string, string[]>;
 export type ViewCategoryOrder = Record<string, string[]>; // viewId -> categoryIds[]
+export type ViewGroupOrder = Record<string, string[]>; // viewId -> groupIds[]
 
 export function useBudgetViews(): {
   views: BudgetView[];
   viewMap: BudgetViewMap;
   viewCategoryOrder: ViewCategoryOrder;
+  viewGroupOrder: ViewGroupOrder;
   updateView: (viewId: string, updates: Partial<BudgetView>) => void;
   removeView: (viewId: string) => void;
   setViewCategoryOrder: (viewId: string, categoryIds: string[]) => void;
+  setViewGroupOrder: (viewId: string, groupIds: string[]) => void;
 } {
   // Get all custom budget views
   const [customViews = [], setCustomViews] = useSyncedPrefJson<
@@ -31,11 +34,16 @@ export function useBudgetViews(): {
   >('budget.budgetViewMap', {});
 
   // Get per-view category ordering
-  const [viewCategoryOrder = {}, setViewCategoryOrderPref] =
-    useSyncedPrefJson<'budget.viewCategoryOrder', ViewCategoryOrder>(
-      'budget.viewCategoryOrder',
-      {},
-    );
+  const [viewCategoryOrder = {}, setViewCategoryOrderPref] = useSyncedPrefJson<
+    'budget.viewCategoryOrder',
+    ViewCategoryOrder
+  >('budget.viewCategoryOrder', {});
+
+  // Get per-view main-group ordering
+  const [viewGroupOrder = {}, setViewGroupOrderPref] = useSyncedPrefJson<
+    'budget.viewGroupOrder',
+    ViewGroupOrder
+  >('budget.viewGroupOrder', {});
 
   // Get deduplicated list of views
   const views = useMemo(() => {
@@ -120,6 +128,10 @@ export function useBudgetViews(): {
     const newOrder = { ...viewCategoryOrder };
     delete newOrder[viewId];
     setViewCategoryOrderPref(newOrder);
+    // Remove from group ordering as well
+    const newGroupOrder = { ...viewGroupOrder };
+    delete newGroupOrder[viewId];
+    setViewGroupOrderPref(newGroupOrder);
   };
 
   // Set category order for a specific view
@@ -130,12 +142,21 @@ export function useBudgetViews(): {
     });
   };
 
+  const setViewGroupOrder = (viewId: string, groupIds: string[]) => {
+    setViewGroupOrderPref({
+      ...viewGroupOrder,
+      [viewId]: groupIds,
+    });
+  };
+
   return {
     views,
     viewMap: budgetViewMap,
     viewCategoryOrder,
+    viewGroupOrder,
     updateView,
     removeView,
     setViewCategoryOrder,
+    setViewGroupOrder,
   };
 }

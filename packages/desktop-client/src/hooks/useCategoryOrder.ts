@@ -33,11 +33,28 @@ export function useCategoryOrder(
  * Sorts an array of categories by the given order.
  * Categories not in the order are appended at the end.
  */
-export function sortCategoriesByOrder<
-  T extends { id: string },
->(categories: T[], order: string[]): T[] {
+export function sortCategoriesByOrder<T extends { id: string }>(
+  categories: T[],
+  order: string[],
+): T[] {
   const orderMap = new Map(order.map((id, idx) => [id, idx]));
   return [...categories].sort((a, b) => {
+    const aIndex = orderMap.get(a.id) ?? order.length;
+    const bIndex = orderMap.get(b.id) ?? order.length;
+    return aIndex - bIndex;
+  });
+}
+
+/**
+ * Sorts an array of groups (objects with `id`) by the given order of ids.
+ * Groups not in the order are appended at the end.
+ */
+export function sortGroupsByOrder<T extends { id: string }>(
+  groups: T[],
+  order: string[],
+): T[] {
+  const orderMap = new Map(order.map((id, idx) => [id, idx]));
+  return [...groups].sort((a, b) => {
     const aIndex = orderMap.get(a.id) ?? order.length;
     const bIndex = orderMap.get(b.id) ?? order.length;
     return aIndex - bIndex;

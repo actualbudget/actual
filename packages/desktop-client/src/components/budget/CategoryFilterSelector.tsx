@@ -31,6 +31,7 @@ type CategoryFilterSelectorProps = {
     categories?: CategoryEntity[];
   }>;
   onFilterChange: (filteredCategoryIds: string[] | null) => void;
+  onViewSelectionChange?: (selectedViews: string[] | null) => void;
 };
 
 type BudgetView = {
@@ -230,6 +231,7 @@ function LabelButton({
 export function CategoryFilterSelector({
   categoryGroups,
   onFilterChange,
+  onViewSelectionChange,
 }: CategoryFilterSelectorProps) {
   const budgetViewsEnabled = useFeatureFlag('budgetViews');
   const format = useFormat();
@@ -296,6 +298,11 @@ export function CategoryFilterSelector({
       newSelected.add(viewId);
     }
     setSelectedViews(newSelected);
+
+    // Inform parent about the currently selected view ids
+    onViewSelectionChange?.(
+      newSelected.size === 0 ? null : Array.from(newSelected),
+    );
 
     // Find all categories that belong to the selected views
     if (newSelected.size === 0) {

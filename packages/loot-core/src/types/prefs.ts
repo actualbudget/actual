@@ -27,6 +27,7 @@ export type SyncedPrefs = Partial<
     'budget.budgetViewMap'?: string; // JSON string of Record<string, string[]>
     'budget.customBudgetViews'?: string; // JSON string of Array<{ id: string; name: string }>
     'budget.viewCategoryOrder'?: string; // JSON string of Record<viewId, string[]> - per-view category ordering
+    'budget.viewGroupOrder'?: string; // JSON string of Record<viewId, string[]> - per-view main-group ordering
     'learn-categories'?: string;
   } & Record<`show-account-${string}-net-worth-chart`, string> &
     Record<`side-nav.show-balance-history-${string}`, string> &

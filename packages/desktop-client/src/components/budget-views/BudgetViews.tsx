@@ -7,11 +7,14 @@ import {
   SvgAdd,
   SvgEditPencil,
   SvgPencilWrite,
+  SvgRefresh,
 } from '@actual-app/components/icons/v1';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+
+import { type CategoryEntity } from 'loot-core/types/models';
 
 import {
   useDraggable,
@@ -21,6 +24,7 @@ import {
   type OnDropCallback,
   type DragState,
 } from '@desktop-client/components/sort';
+import { useBudgetViews } from '@desktop-client/hooks/useBudgetViews';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
 import { useSyncedPrefJson } from '@desktop-client/hooks/useSyncedPrefJson';
@@ -41,6 +45,7 @@ type BudgetViewItemProps = {
   onRename: (viewId: string) => void;
   onEdit: (viewId: string) => void;
   onDelete: (viewId: string) => void;
+  onReset: (viewId: string) => void;
   t: (key: string) => string;
 };
 
@@ -53,6 +58,7 @@ function BudgetViewItem({
   onRename,
   onEdit,
   onDelete,
+  onReset,
   t,
 }: BudgetViewItemProps) {
   const dragging = dragState && dragState.item?.id === view.id;
@@ -112,6 +118,14 @@ function BudgetViewItem({
         </Button>
         <Button
           variant="bare"
+          onPress={() => onReset(view.id)}
+          aria-label={t('Reset order')}
+          style={{ padding: 8 }}
+        >
+          <SvgRefresh width={14} height={14} />
+        </Button>
+        <Button
+          variant="bare"
           onPress={() => onDelete(view.id)}
           aria-label={t('Delete')}
         >
@@ -125,7 +139,7 @@ function BudgetViewItem({
 export function BudgetViews() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { list: categories } = useCategories();
+  const { list: categories, grouped: categoryGroups = [] } = useCategories();
   const [budgetViewMap = {}, setBudgetViewMapPref] = useSyncedPrefJson<
     'budget.budgetViewMap',
     Record<string, string[]>
@@ -291,6 +305,57 @@ export function BudgetViews() {
     [budgetViewMap],
   );
 
+  const { setViewCategoryOrder, setViewGroupOrder } = useBudgetViews();
+
+  const handleReset = useCallback(
+    (viewId: string) => {
+      const view = views.find(v => v.id === viewId);
+      if (
+        !window.confirm(
+          t('Reset ordering for view “{{name}}”?', {
+            name: view?.name || viewId,
+          }),
+        )
+      ) {
+        return;
+      }
+      // global category order (flat list order) filtered to this view
+      const globalCategoryOrder = (categories || [])
+        .map(c => c.id)
+        .filter(id =>
+          Array.isArray(budgetViewMap[id])
+            ? budgetViewMap[id].includes(viewId)
+            : false,
+        );
+
+      // global group order filtered to groups that contain categories in this view
+      const groupOrder = (categoryGroups || [])
+        .map(g => g.id)
+        .filter(gid => {
+          const g = (categoryGroups || []).find(x => x.id === gid);
+          return (
+            (g?.categories || []).filter((c: CategoryEntity) =>
+              Array.isArray(budgetViewMap[c.id])
+                ? budgetViewMap[c.id].includes(viewId)
+                : false,
+            ).length > 0
+          );
+        });
+
+      setViewCategoryOrder(viewId, globalCategoryOrder);
+      setViewGroupOrder(viewId, groupOrder);
+    },
+    [
+      budgetViewMap,
+      categories,
+      categoryGroups,
+      setViewCategoryOrder,
+      setViewGroupOrder,
+      views,
+      t,
+    ],
+  );
+
   const onDragChange: OnDragChangeCallback<BudgetView> = useCallback(
     newDragState => {
       const { state } = newDragState;
@@ -401,6 +466,7 @@ export function BudgetViews() {
                 onRename={handleRename}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onReset={handleReset}
                 t={t}
               />
             ))}

@@ -28,8 +28,10 @@ import {
 } from './util';
 
 import { type DropPosition } from '@desktop-client/components/sort';
+import { useBudgetViews } from '@desktop-client/hooks/useBudgetViews';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { sortCategoriesByOrder } from '@desktop-client/hooks/useCategoryOrder';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 
@@ -63,6 +65,8 @@ type BudgetTableProps = {
   }) => void;
   onShowActivity: (id: CategoryEntity['id'], month?: string) => void;
   onBudgetAction: (month: string, type: string, args: unknown) => void;
+  onViewSelectionChange?: (selectedViews: string[] | null) => void;
+  activeSelectedViews?: string[] | null;
 };
 
 export function BudgetTable(props: BudgetTableProps) {
@@ -82,7 +86,11 @@ export function BudgetTable(props: BudgetTableProps) {
     onReorderGroup,
     onShowActivity,
     onBudgetAction,
+    onViewSelectionChange,
+    activeSelectedViews,
   } = props;
+
+  const { viewCategoryOrder = {}, viewGroupOrder = {} } = useBudgetViews();
 
   const { grouped: categoryGroups = [] } = useCategories();
   const [filteredCategoryIds, setFilteredCategoryIds] = useState<
@@ -112,6 +120,8 @@ export function BudgetTable(props: BudgetTableProps) {
     dropPos: DropPosition,
     targetId: string,
   ) => {
+    // Always use global groups to find positions/groups
+    // The view-scoped logic is handled in onReorderCategory (in the parent)
     const isGroup = !!categoryGroups.find(g => g.id === targetId);
 
     if (isGroup) {
@@ -254,6 +264,45 @@ export function BudgetTable(props: BudgetTableProps) {
       .filter(group => (group.categories || []).length > 0);
   }, [categoryGroups, filteredCategoryIds, showHiddenCategories]);
 
+  // If a single view is active, apply its custom ordering for displayed categories
+  const displayedCategoryGroups = useMemo(() => {
+    if (!activeSelectedViews || activeSelectedViews.length !== 1) {
+      return effectiveCategoryGroups;
+    }
+
+    const viewId = activeSelectedViews[0];
+    // Apply group ordering first when present for this view
+    const groupOrder = viewGroupOrder[viewId] || [];
+    const groupsById = new Map(effectiveCategoryGroups.map(g => [g.id, g]));
+
+    // If a view has a specific group order, reorder groups accordingly, appending any missing groups
+    let orderedGroups: typeof effectiveCategoryGroups = [];
+    if (groupOrder.length > 0) {
+      for (const gid of groupOrder) {
+        const g = groupsById.get(gid);
+        if (g) orderedGroups.push(g);
+      }
+      for (const g of effectiveCategoryGroups) {
+        if (!groupOrder.includes(g.id)) orderedGroups.push(g);
+      }
+    } else {
+      orderedGroups = effectiveCategoryGroups;
+    }
+
+    return orderedGroups.map(group => ({
+      ...group,
+      categories: sortCategoriesByOrder(
+        group.categories || [],
+        viewCategoryOrder[viewId] || [],
+      ),
+    }));
+  }, [
+    effectiveCategoryGroups,
+    activeSelectedViews,
+    viewCategoryOrder,
+    viewGroupOrder,
+  ]);
+
   return (
     <View
       data-testid="budget-table"
@@ -307,6 +356,7 @@ export function BudgetTable(props: BudgetTableProps) {
         <CategoryFilterSelector
           categoryGroups={categoryGroups}
           onFilterChange={ids => setFilteredCategoryIds(ids)}
+          onViewSelectionChange={onViewSelectionChange}
         />
         <View
           style={{
@@ -326,7 +376,7 @@ export function BudgetTable(props: BudgetTableProps) {
             <SchedulesProvider query={schedulesQuery}>
               <BudgetCategories
                 // @ts-expect-error Fix when migrating BudgetCategories to ts
-                categoryGroups={effectiveCategoryGroups}
+                categoryGroups={displayedCategoryGroups}
                 editingCell={editing}
                 dataComponents={dataComponents}
                 onEditMonth={onEditMonth}
