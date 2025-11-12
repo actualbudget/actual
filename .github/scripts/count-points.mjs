@@ -203,14 +203,13 @@ async function countContributorPoints() {
           }
         } else {
           const uniqueReviewers = new Set();
-          reviews.data
-            .filter(
-              review =>
-                stats.has(review.user?.login) &&
-                review.state === 'APPROVED' &&
-                !uniqueReviewers.has(review.user?.login),
-            )
-            .forEach(({ user: { login: reviewer } }) => {
+          reviews.data.forEach(review => {
+            if (
+              review.state === 'APPROVED' &&
+              stats.has(review.user?.login) &&
+              !uniqueReviewers.has(review.user?.login)
+            ) {
+              const reviewer = review.user.login;
               uniqueReviewers.add(reviewer);
               const userStats = stats.get(reviewer);
 
@@ -229,7 +228,8 @@ async function countContributorPoints() {
                 });
                 userStats.points += mainPoints;
               }
-            });
+            }
+          });
         }
       }),
     ),
