@@ -59,6 +59,15 @@ export type SpendingWidget = AbstractWidget<
     mode?: 'single-month' | 'budget' | 'average';
   } | null
 >;
+export type BudgetAnalysisWidget = AbstractWidget<
+  'budget-analysis-card',
+  {
+    name?: string;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+  } | null
+>;
 export type CustomReportWidget = AbstractWidget<
   'custom-report',
   { id: string }
@@ -85,6 +94,7 @@ type SpecializedWidget =
   | NetWorthWidget
   | CashFlowWidget
   | SpendingWidget
+  | BudgetAnalysisWidget
   | CrossoverWidget
   | MarkdownWidget
   | SummaryWidget
