@@ -37,17 +37,14 @@ jobs:
       - name: Extract metadata
         id: metadata
         run: |
-          # Find the metadata directory (will be vrt-metadata-{PR_NUMBER})
-          METADATA_DIR=$(find /tmp/metadata -mindepth 1 -maxdepth 1 -type d | head -n 1)
-
-          if [ -z "$METADATA_DIR" ]; then
+          if [ ! -f "/tmp/metadata/pr-number.txt" ]; then
             echo "No metadata found, skipping..."
             exit 0
           fi
 
-          PR_NUMBER=$(cat "$METADATA_DIR/pr-number.txt")
-          HEAD_REF=$(cat "$METADATA_DIR/head-ref.txt")
-          HEAD_REPO=$(cat "$METADATA_DIR/head-repo.txt")
+          PR_NUMBER=$(cat "/tmp/metadata/pr-number.txt")
+          HEAD_REF=$(cat "/tmp/metadata/head-ref.txt")
+          HEAD_REPO=$(cat "/tmp/metadata/head-repo.txt")
 
           echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
           echo "head_ref=$HEAD_REF" >> "$GITHUB_OUTPUT"
@@ -68,9 +65,7 @@ jobs:
         if: steps.metadata.outputs.pr_number != ''
         id: apply
         run: |
-          # Find the patch file
-          PATCH_DIR=$(find /tmp/artifacts -mindepth 1 -maxdepth 1 -type d | head -n 1)
-          PATCH_FILE="$PATCH_DIR/vrt-update.patch"
+          PATCH_FILE="/tmp/artifacts/vrt-update.patch"
 
           if [ ! -f "$PATCH_FILE" ]; then
             echo "No patch file found"
