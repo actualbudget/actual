@@ -3,12 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgDelete } from '@actual-app/components/icons/v0';
-import {
-  SvgAdd,
-  SvgEditPencil,
-  SvgPencilWrite,
-  SvgRefresh,
-} from '@actual-app/components/icons/v1';
+import { SvgAdd, SvgEditPencil, SvgPencilWrite } from '@actual-app/components/icons/v1';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -24,7 +19,6 @@ import {
   type OnDropCallback,
   type DragState,
 } from '@desktop-client/components/sort';
-import { useBudgetViews } from '@desktop-client/hooks/useBudgetViews';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
 import { useSyncedPrefJson } from '@desktop-client/hooks/useSyncedPrefJson';
@@ -45,7 +39,6 @@ type BudgetViewItemProps = {
   onRename: (viewId: string) => void;
   onEdit: (viewId: string) => void;
   onDelete: (viewId: string) => void;
-  onReset: (viewId: string) => void;
   t: (key: string) => string;
 };
 
@@ -58,7 +51,6 @@ function BudgetViewItem({
   onRename,
   onEdit,
   onDelete,
-  onReset,
   t,
 }: BudgetViewItemProps) {
   const dragging = dragState && dragState.item?.id === view.id;
@@ -115,14 +107,6 @@ function BudgetViewItem({
           aria-label={t('Edit categories')}
         >
           <SvgEditPencil width={14} height={14} />
-        </Button>
-        <Button
-          variant="bare"
-          onPress={() => onReset(view.id)}
-          aria-label={t('Reset order')}
-          style={{ padding: 8 }}
-        >
-          <SvgRefresh width={14} height={14} />
         </Button>
         <Button
           variant="bare"
@@ -305,57 +289,6 @@ export function BudgetViews() {
     [budgetViewMap],
   );
 
-  const { setViewCategoryOrder, setViewGroupOrder } = useBudgetViews();
-
-  const handleReset = useCallback(
-    (viewId: string) => {
-      const view = views.find(v => v.id === viewId);
-      if (
-        !window.confirm(
-          t('Reset ordering for view “{{name}}”?', {
-            name: view?.name || viewId,
-          }),
-        )
-      ) {
-        return;
-      }
-      // global category order (flat list order) filtered to this view
-      const globalCategoryOrder = (categories || [])
-        .map(c => c.id)
-        .filter(id =>
-          Array.isArray(budgetViewMap[id])
-            ? budgetViewMap[id].includes(viewId)
-            : false,
-        );
-
-      // global group order filtered to groups that contain categories in this view
-      const groupOrder = (categoryGroups || [])
-        .map(g => g.id)
-        .filter(gid => {
-          const g = (categoryGroups || []).find(x => x.id === gid);
-          return (
-            (g?.categories || []).filter((c: CategoryEntity) =>
-              Array.isArray(budgetViewMap[c.id])
-                ? budgetViewMap[c.id].includes(viewId)
-                : false,
-            ).length > 0
-          );
-        });
-
-      setViewCategoryOrder(viewId, globalCategoryOrder);
-      setViewGroupOrder(viewId, groupOrder);
-    },
-    [
-      budgetViewMap,
-      categories,
-      categoryGroups,
-      setViewCategoryOrder,
-      setViewGroupOrder,
-      views,
-      t,
-    ],
-  );
-
   const onDragChange: OnDragChangeCallback<BudgetView> = useCallback(
     newDragState => {
       const { state } = newDragState;
@@ -466,7 +399,6 @@ export function BudgetViews() {
                 onRename={handleRename}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                onReset={handleReset}
                 t={t}
               />
             ))}
