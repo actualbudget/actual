@@ -314,7 +314,7 @@ export async function loginWithOpenIdFinalize(body) {
       expiration =
         Math.floor(Date.now() / 1000) + config.get('token_expiration');
     } else {
-      expiration = Math.floor(Date.now() / 1000) + 600; // Default to 10 minutes
+      expiration = Math.floor(Date.now() / 1000) + 10 * 60; // Default to 10 minutes
     }
 
     accountDb.mutate(
