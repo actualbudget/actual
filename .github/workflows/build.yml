@@ -38,7 +38,7 @@ jobs:
           name: actual-api
           path: packages/api/actual-api.tgz
       - name: Upload API bundle stats
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: api-build-stats
           path: api-stats.json
