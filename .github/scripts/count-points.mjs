@@ -148,15 +148,16 @@ async function countContributorPoints() {
         const filteredFiles = modifiedFiles.filter(
           file =>
             !CONFIG.EXCLUDED_FILES.some(pattern =>
-              minimatch(file.filename, pattern),
+              minimatch(file.filename, pattern, { dot: true }),
             ),
         );
 
         const docsFiles = filteredFiles.filter(file =>
-          minimatch(file.filename, CONFIG.DOCS_FILES_PATTERN),
+          minimatch(file.filename, CONFIG.DOCS_FILES_PATTERN, { dot: true }),
         );
         const mainFiles = filteredFiles.filter(
-          file => !minimatch(file.filename, CONFIG.DOCS_FILES_PATTERN),
+          file =>
+            !minimatch(file.filename, CONFIG.DOCS_FILES_PATTERN, { dot: true }),
         );
 
         const docsChanges = docsFiles.reduce(
