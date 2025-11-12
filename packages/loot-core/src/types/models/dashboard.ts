@@ -66,6 +66,9 @@ export type BudgetAnalysisWidget = AbstractWidget<
     conditions?: RuleConditionEntity[];
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
+    interval?: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
+    graphType?: 'Line' | 'Bar';
+    showBalance?: boolean;
   } | null
 >;
 export type CustomReportWidget = AbstractWidget<

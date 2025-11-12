@@ -7,11 +7,8 @@ import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Paragraph } from '@actual-app/components/paragraph';
-import { Select } from '@actual-app/components/select';
-import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
@@ -20,11 +17,10 @@ import * as monthUtils from 'loot-core/shared/months';
 import {
   type BudgetAnalysisWidget,
   type RuleConditionEntity,
+  type TimeFrame,
 } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
-import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
-import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,
@@ -33,8 +29,11 @@ import {
 } from '@desktop-client/components/Page';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { BudgetAnalysisGraph } from '@desktop-client/components/reports/graphs/BudgetAnalysisGraph';
+import { Header } from '@desktop-client/components/reports/Header';
 import { LegendItem } from '@desktop-client/components/reports/LegendItem';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { ReportSidebar } from '@desktop-client/components/reports/ReportSidebar';
+import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createBudgetAnalysisSpreadsheet } from '@desktop-client/components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
@@ -42,6 +41,7 @@ import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useWidget } from '@desktop-client/hooks/useWidget';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -82,22 +82,35 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
     widget?.meta?.conditionsOp,
   );
 
-  const emptyIntervals: { name: string; pretty: string }[] = [];
-  const [allIntervals, setAllIntervals] = useState(emptyIntervals);
+  const [allMonths, setAllMonths] = useState<Array<{
+    name: string;
+    pretty: string;
+  }> | null>(null);
 
-  const timeFrame = widget?.meta?.timeFrame ?? {
-    start: monthUtils.subMonths(monthUtils.currentMonth(), 5),
-    end: monthUtils.currentMonth(),
-    mode: 'sliding-window' as const,
-  };
+  const [start, setStart] = useState(monthUtils.currentMonth());
+  const [end, setEnd] = useState(monthUtils.currentMonth());
+  const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
+  const [interval, setInterval] = useState(
+    widget?.meta?.interval || 'Monthly',
+  );
+  const [graphType, setGraphType] = useState<'Line' | 'Bar'>(
+    widget?.meta?.graphType || 'Line',
+  );
+  const [showBalance, setShowBalance] = useState(
+    widget?.meta?.showBalance ?? true,
+  );
+  const [latestTransaction, setLatestTransaction] = useState('');
 
-  const [startMonth, setStartMonth] = useState(timeFrame.start);
-  const [endMonth, setEndMonth] = useState(timeFrame.end);
+  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   useEffect(() => {
     async function run() {
       const earliestTrans = await send('get-earliest-transaction');
       const latestTrans = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTrans ? fromDateRepr(latestTrans.date) : monthUtils.currentDay(),
+      );
 
       const currentMonth = monthUtils.currentMonth();
       let earliestMonth = earliestTrans
@@ -117,7 +130,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         earliestMonth = yearAgo;
       }
 
-      const allMonths = monthUtils
+      const allMonthsData = monthUtils
         .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
@@ -125,13 +138,30 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         }))
         .reverse();
 
-      setAllIntervals(allMonths);
+      setAllMonths(allMonthsData);
+
+      if (widget?.meta?.timeFrame) {
+        const [calculatedStart, calculatedEnd] = calculateTimeRange(
+          widget.meta.timeFrame,
+        );
+        setStart(calculatedStart);
+        setEnd(calculatedEnd);
+        setMode(widget.meta.timeFrame.mode);
+      } else {
+        const [liveStart, liveEnd] = calculateTimeRange({
+          start: monthUtils.subMonths(currentMonth, 5),
+          end: currentMonth,
+          mode: 'sliding-window',
+        });
+        setStart(liveStart);
+        setEnd(liveEnd);
+      }
     }
     run();
-  }, [locale]);
+  }, [locale, widget?.meta?.timeFrame]);
 
-  const startDate = startMonth + '-01';
-  const endDate = monthUtils.getMonthEnd(endMonth + '-01');
+  const startDate = start + '-01';
+  const endDate = monthUtils.getMonthEnd(end + '-01');
 
   const getGraphData = useMemo(
     () =>
@@ -140,13 +170,25 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         conditionsOp,
         startDate,
         endDate,
+        interval,
+        firstDayOfWeekIdx,
       }),
-    [conditions, conditionsOp, startDate, endDate],
+    [conditions, conditionsOp, startDate, endDate, interval, firstDayOfWeekIdx],
   );
 
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
+
+  const onChangeDates = (
+    newStart: string,
+    newEnd: string,
+    newMode: TimeFrame['mode'],
+  ) => {
+    setStart(newStart);
+    setEnd(newEnd);
+    setMode(newMode);
+  };
 
   async function onSaveWidget() {
     if (!widget) {
@@ -160,10 +202,13 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         conditions,
         conditionsOp,
         timeFrame: {
-          start: startMonth,
-          end: endMonth,
-          mode: 'static' as const,
+          start,
+          end,
+          mode,
         },
+        interval,
+        graphType,
+        showBalance,
       },
     });
     dispatch(
@@ -176,11 +221,11 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
     );
   }
 
-  if (!data) {
-    return null;
+  if (!data || !allMonths) {
+    return <LoadingIndicator />;
   }
 
-  const latestMonth = data.monthData[data.monthData.length - 1];
+  const latestInterval = data.intervalData[data.intervalData.length - 1];
 
   const title = widget?.meta?.name || t('Budget Analysis');
   const onSaveWidgetName = async (newName: string) => {
@@ -225,116 +270,58 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
       }
       padding={0}
     >
-      <View
-        style={{
-          paddingLeft: 20,
-          paddingRight: 20,
-          paddingTop: 15,
-          paddingBottom: 20,
-          flexShrink: 0,
-        }}
-      >
-        {!isNarrowWidth && (
-          <SpaceBetween gap={0}>
-            <SpaceBetween gap={5}>
-              <Text>
-                <Trans>From</Trans>
-              </Text>
-              <Select
-                value={startMonth}
-                onChange={setStartMonth}
-                options={allIntervals.map(
-                  ({ name, pretty }) => [name, pretty] as const,
-                )}
-                style={{ width: 150 }}
-                popoverStyle={{ width: 150 }}
-              />
-              <Text>
-                <Trans>to</Trans>
-              </Text>
-              <Select
-                value={endMonth}
-                onChange={setEndMonth}
-                options={allIntervals.map(
-                  ({ name, pretty }) => [name, pretty] as const,
-                )}
-                style={{ width: 150 }}
-                popoverStyle={{ width: 150 }}
-              />
-            </SpaceBetween>
-
-            <View
-              style={{
-                width: 1,
-                height: 28,
-                backgroundColor: theme.pillBorderDark,
-                marginRight: 10,
-              }}
-            />
-
-            <View
-              style={{
-                alignItems: 'center',
-                flexDirection: 'row',
-                flex: 1,
+      <Header
+        start={start}
+        end={end}
+        mode={mode}
+        allMonths={allMonths}
+        earliestTransaction={allMonths[allMonths.length - 1].name}
+        latestTransaction={latestTransaction}
+        firstDayOfWeekIdx={firstDayOfWeekIdx}
+        onChangeDates={onChangeDates}
+        filters={conditions}
+        conditionsOp={conditionsOp}
+        onApply={onApplyFilter}
+        onUpdateFilter={onUpdateFilter}
+        onDeleteFilter={onDeleteFilter}
+        onConditionsOpChange={onConditionsOpChange}
+        inlineContent={
+          <>
+            <Button
+              variant="bare"
+              onPress={() =>
+                setGraphType(graphType === 'Line' ? 'Bar' : 'Line')
+              }
+            >
+              {graphType === 'Line' ? t('Bar chart') : t('Line chart')}
+            </Button>
+            <Button variant="bare" onPress={() => setShowBalance(!showBalance)}>
+              {showBalance ? t('Hide balance') : t('Show balance')}
+            </Button>
+            <Button
+              variant="bare"
+              onPress={() => {
+                const intervals: Array<'Daily' | 'Weekly' | 'Monthly' | 'Yearly'> = [
+                  'Daily',
+                  'Weekly',
+                  'Monthly',
+                  'Yearly',
+                ];
+                const currentIndex = intervals.indexOf(interval);
+                const nextIndex = (currentIndex + 1) % intervals.length;
+                setInterval(intervals[nextIndex]);
               }}
             >
-              <FilterButton
-                onApply={onApplyFilter}
-                compact={isNarrowWidth}
-                hover={false}
-                exclude={['date']}
-              />
-              <View style={{ flex: 1 }} />
-
-              {widget && (
-                <Tooltip
-                  placement="top end"
-                  content={
-                    <Text>
-                      <Trans>Save date range and filter options</Trans>
-                    </Text>
-                  }
-                  style={{
-                    lineHeight: 1.5,
-                    padding: '6px 10px',
-                    marginLeft: 10,
-                  }}
-                >
-                  <Button
-                    variant="primary"
-                    style={{
-                      marginLeft: 10,
-                    }}
-                    onPress={onSaveWidget}
-                  >
-                    <Trans>Save</Trans>
-                  </Button>
-                </Tooltip>
-              )}
-            </View>
-          </SpaceBetween>
-        )}
-
-        {conditions && conditions.length > 0 && (
-          <View
-            style={{
-              marginTop: 5,
-              flexShrink: 0,
-              flexDirection: 'row',
-              spacing: 2,
-            }}
-          >
-            <AppliedFilters
-              conditions={conditions}
-              onUpdate={onUpdateFilter}
-              onDelete={onDeleteFilter}
-              conditionsOp={conditionsOp}
-              onConditionsOpChange={onConditionsOpChange}
-            />
-          </View>
-        )}
-      </View>
+              {t('Interval: {{interval}}', { interval })}
+            </Button>
+            {widget && (
+              <Button variant="primary" onPress={onSaveWidget}>
+                <Trans>Save</Trans>
+              </Button>
+            )}
+          </>
+        }
+      />
       <View
         style={{
           display: 'flex',
@@ -382,11 +369,13 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                     label={t('Spent')}
                     style={{ padding: 0, paddingBottom: 10 }}
                   />
-                  <LegendItem
-                    color={theme.reportsBlue}
-                    label={t('Balance')}
-                    style={{ padding: 0, paddingBottom: 10 }}
-                  />
+                  {showBalance && (
+                    <LegendItem
+                      color={theme.reportsBlue}
+                      label={t('Balance')}
+                      style={{ padding: 0, paddingBottom: 10 }}
+                    />
+                  )}
                 </View>
                 <View style={{ flex: 1 }} />
                 <View
@@ -396,29 +385,19 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                   }}
                 >
                   <View>
-                    {latestMonth && (
+                    {latestInterval && (
                       <>
                         <AlignedText
                           style={{ marginBottom: 5, minWidth: 210 }}
                           left={
                             <Block>
-                              <Trans>
-                                Budgeted (
-                                {{
-                                  month: monthUtils.format(
-                                    latestMonth.month,
-                                    'MMM yyyy',
-                                    locale,
-                                  ),
-                                }}
-                                ):
-                              </Trans>
+                              <Trans>Budgeted:</Trans>
                             </Block>
                           }
                           right={
                             <Text style={{ fontWeight: 600 }}>
                               <PrivacyFilter>
-                                {format(latestMonth.budgeted, 'financial')}
+                                {format(latestInterval.budgeted, 'financial')}
                               </PrivacyFilter>
                             </Text>
                           }
@@ -427,52 +406,34 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                           style={{ marginBottom: 5, minWidth: 210 }}
                           left={
                             <Block>
-                              <Trans>
-                                Spent (
-                                {{
-                                  month: monthUtils.format(
-                                    latestMonth.month,
-                                    'MMM yyyy',
-                                    locale,
-                                  ),
-                                }}
-                                ):
-                              </Trans>
+                              <Trans>Spent:</Trans>
                             </Block>
                           }
                           right={
                             <Text style={{ fontWeight: 600 }}>
                               <PrivacyFilter>
-                                {format(latestMonth.spent, 'financial')}
+                                {format(latestInterval.spent, 'financial')}
                               </PrivacyFilter>
                             </Text>
                           }
                         />
-                        <AlignedText
-                          style={{ marginBottom: 5, minWidth: 210 }}
-                          left={
-                            <Block>
-                              <Trans>
-                                Balance (
-                                {{
-                                  month: monthUtils.format(
-                                    latestMonth.month,
-                                    'MMM yyyy',
-                                    locale,
-                                  ),
-                                }}
-                                ):
-                              </Trans>
-                            </Block>
-                          }
-                          right={
-                            <Text style={{ fontWeight: 600 }}>
-                              <PrivacyFilter>
-                                {format(latestMonth.balance, 'financial')}
-                              </PrivacyFilter>
-                            </Text>
-                          }
-                        />
+                        {showBalance && (
+                          <AlignedText
+                            style={{ marginBottom: 5, minWidth: 210 }}
+                            left={
+                              <Block>
+                                <Trans>Balance:</Trans>
+                              </Block>
+                            }
+                            right={
+                              <Text style={{ fontWeight: 600 }}>
+                                <PrivacyFilter>
+                                  {format(latestInterval.balance, 'financial')}
+                                </PrivacyFilter>
+                              </Text>
+                            }
+                          />
+                        )}
                       </>
                     )}
                   </View>
@@ -483,6 +444,9 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                   style={{ flexGrow: 1 }}
                   compact={false}
                   data={data}
+                  graphType={graphType}
+                  interval={interval}
+                  showBalance={showBalance}
                 />
               ) : (
                 <LoadingIndicator message={t('Loading report...')} />
@@ -493,11 +457,11 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                     <strong>How is the Budget Balance calculated?</strong>
                   </Paragraph>
                   <Paragraph>
-                    The balance tracks your budget performance month-to-month.
-                    It starts with the previous month&apos;s balance, adds the
-                    budgeted amount for the current month, and subtracts actual
-                    spending. A positive balance indicates under-spending, while
-                    a negative balance shows over-spending.
+                    The balance tracks your budget performance over time. It
+                    starts with the previous interval&apos;s balance, adds the
+                    budgeted amount for the current interval, and subtracts
+                    actual spending. A positive balance indicates under-spending
+                    while a negative balance shows over-spending.
                   </Paragraph>
                 </Trans>
               </View>

@@ -62,13 +62,14 @@ export function BudgetAnalysisCard({
       conditionsOp: meta?.conditionsOp,
       startDate,
       endDate,
+      interval: meta?.interval || 'Monthly',
     });
-  }, [meta?.conditions, meta?.conditionsOp, startDate, endDate]);
+  }, [meta?.conditions, meta?.conditionsOp, meta?.interval, startDate, endDate]);
 
   const data = useReport('default', getGraphData);
 
-  const latestMonth = data?.monthData?.[data.monthData.length - 1];
-  const balance = latestMonth?.balance ?? 0;
+  const latestInterval = data?.intervalData?.[data.intervalData.length - 1];
+  const balance = latestInterval?.balance ?? 0;
 
   return (
     <ReportCard
@@ -140,7 +141,14 @@ export function BudgetAnalysisCard({
           )}
         </View>
         {data ? (
-          <BudgetAnalysisGraph style={{ flex: 1 }} compact={true} data={data} />
+          <BudgetAnalysisGraph
+            style={{ flex: 1 }}
+            compact={true}
+            data={data}
+            graphType={meta?.graphType || 'Line'}
+            interval={meta?.interval || 'Monthly'}
+            showBalance={meta?.showBalance ?? true}
+          />
         ) : (
           <LoadingIndicator />
         )}
