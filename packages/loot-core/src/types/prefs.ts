@@ -26,30 +26,32 @@ export type SyncedPrefs = Partial<
     plugins?: string;
     'budget.budgetViewMap'?: string; // JSON string of Record<string, string[]>
     'budget.customBudgetViews'?: string; // JSON string of Array<{ id: string; name: string }>
+    'budget.viewCategoryOrder'?: string; // JSON string of Record<viewId, string[]> - per-view category ordering
+    'budget.viewGroupOrder'?: string; // JSON string of Record<viewId, string[]> - per-view main-group ordering
     'learn-categories'?: string;
-  } & Record<`show-account-${string}-net-worth-chart`, string>
-  & Record<`side-nav.show-balance-history-${string}`, string>
-  & Record<`show-balances-${string}`, string>
-  & Record<`show-extra-balances-${string}`, string>
-  & Record<`hide-cleared-${string}`, string>
-  & Record<`hide-reconciled-${string}`, string>
-  & Record<`parse-date-${string}-${'csv' | 'qif'}`, string>
-  & Record<`csv-mappings-${string}`, string>
-  & Record<`csv-delimiter-${string}`, string>
-  & Record<`csv-skip-start-lines-${string}`, string>
-  & Record<`csv-skip-end-lines-${string}`, string>
-  & Record<`csv-in-out-mode-${string}`, string>
-  & Record<`csv-out-value-${string}`, string>
-  & Record<`csv-has-header-${string}`, string>
-  & Record<`custom-sync-mappings-${string}`, string>
-  & Record<`sync-import-pending-${string}`, string>
-  & Record<`sync-reimport-deleted-${string}`, string>
-  & Record<`sync-import-notes-${string}`, string>
-  & Record<`sync-import-transactions-${string}`, string>
-  & Record<`ofx-fallback-missing-payee-${string}`, string>
-  & Record<`flip-amount-${string}-${'csv' | 'qif'}`, string>
-  & Record<`flags.${FeatureFlag}`, string>
-  & Record<string, string>
+  } & Record<`show-account-${string}-net-worth-chart`, string> &
+    Record<`side-nav.show-balance-history-${string}`, string> &
+    Record<`show-balances-${string}`, string> &
+    Record<`show-extra-balances-${string}`, string> &
+    Record<`hide-cleared-${string}`, string> &
+    Record<`hide-reconciled-${string}`, string> &
+    Record<`parse-date-${string}-${'csv' | 'qif'}`, string> &
+    Record<`csv-mappings-${string}`, string> &
+    Record<`csv-delimiter-${string}`, string> &
+    Record<`csv-skip-start-lines-${string}`, string> &
+    Record<`csv-skip-end-lines-${string}`, string> &
+    Record<`csv-in-out-mode-${string}`, string> &
+    Record<`csv-out-value-${string}`, string> &
+    Record<`csv-has-header-${string}`, string> &
+    Record<`custom-sync-mappings-${string}`, string> &
+    Record<`sync-import-pending-${string}`, string> &
+    Record<`sync-reimport-deleted-${string}`, string> &
+    Record<`sync-import-notes-${string}`, string> &
+    Record<`sync-import-transactions-${string}`, string> &
+    Record<`ofx-fallback-missing-payee-${string}`, string> &
+    Record<`flip-amount-${string}-${'csv' | 'qif'}`, string> &
+    Record<`flags.${FeatureFlag}`, string> &
+    Record<string, string>
 >;
 
 /**

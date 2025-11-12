@@ -84,6 +84,7 @@ export default defineConfig(
       'packages/component-library/src/icons/**/*',
       'packages/desktop-client/bundle.browser.js',
       'packages/desktop-client/build/',
+      'packages/desktop-client/dev-dist/**',
       'packages/desktop-client/service-worker/*',
       'packages/desktop-client/build-electron/',
       'packages/desktop-client/build-stats/',

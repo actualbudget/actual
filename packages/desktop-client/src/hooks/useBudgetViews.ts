@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { useSyncedPrefJson } from '@desktop-client/hooks/useSyncedPrefJson';
+import { useSyncedPrefJson } from './useSyncedPrefJson';
 
 export type BudgetView = {
   id: string;
@@ -8,12 +8,18 @@ export type BudgetView = {
 };
 
 export type BudgetViewMap = Record<string, string[]>;
+export type ViewCategoryOrder = Record<string, string[]>; // viewId -> categoryIds[]
+export type ViewGroupOrder = Record<string, string[]>; // viewId -> groupIds[]
 
 export function useBudgetViews(): {
   views: BudgetView[];
   viewMap: BudgetViewMap;
+  viewCategoryOrder: ViewCategoryOrder;
+  viewGroupOrder: ViewGroupOrder;
   updateView: (viewId: string, updates: Partial<BudgetView>) => void;
   removeView: (viewId: string) => void;
+  setViewCategoryOrder: (viewId: string, categoryIds: string[]) => void;
+  setViewGroupOrder: (viewId: string, groupIds: string[]) => void;
 } {
   // Get all custom budget views
   const [customViews = [], setCustomViews] = useSyncedPrefJson<
@@ -26,6 +32,18 @@ export function useBudgetViews(): {
     'budget.budgetViewMap',
     BudgetViewMap
   >('budget.budgetViewMap', {});
+
+  // Get per-view category ordering
+  const [viewCategoryOrder = {}, setViewCategoryOrderPref] = useSyncedPrefJson<
+    'budget.viewCategoryOrder',
+    ViewCategoryOrder
+  >('budget.viewCategoryOrder', {});
+
+  // Get per-view main-group ordering
+  const [viewGroupOrder = {}, setViewGroupOrderPref] = useSyncedPrefJson<
+    'budget.viewGroupOrder',
+    ViewGroupOrder
+  >('budget.viewGroupOrder', {});
 
   // Get deduplicated list of views
   const views = useMemo(() => {
@@ -46,37 +64,44 @@ export function useBudgetViews(): {
     if (!oldView) {
       return;
     }
-    
+
     const newView = { ...oldView, ...updates };
-    
+
     // Update the view in customViews
-    const updatedViews = customViews.map(view => 
-      view.id === viewId ? newView : view
+    const updatedViews = customViews.map(view =>
+      view.id === viewId ? newView : view,
     );
     setCustomViews(updatedViews);
 
     // If name changed, update associated categories as needed
     if (oldView.name && updates.name && oldView.name !== updates.name) {
       // Copy the old view's categories to avoid conflicts
-      const viewCategories = Object.keys(budgetViewMap).reduce((acc, catId) => {
-        if (budgetViewMap[catId].includes(oldView.name)) {
-          acc[catId] = true;
-        }
-        return acc;
-      }, {} as Record<string, boolean>);
+      const viewCategories = Object.keys(budgetViewMap).reduce(
+        (acc, catId) => {
+          if (budgetViewMap[catId].includes(oldView.name)) {
+            acc[catId] = true;
+          }
+          return acc;
+        },
+        {} as Record<string, boolean>,
+      );
 
       // Update the view map references with new name
-      const newMap = Object.keys(budgetViewMap).reduce((acc, catId) => {
-        const views = budgetViewMap[catId]?.filter(name => name !== oldView.name) || [];
-        if (viewCategories[catId]) {
-          views.push(updates.name);
-        }
-        if (views.length > 0) {
-          acc[catId] = views;
-        }
-        return acc;
-      }, {} as Record<string, string[]>);
-      
+      const newMap = Object.keys(budgetViewMap).reduce(
+        (acc, catId) => {
+          const views =
+            budgetViewMap[catId]?.filter(name => name !== oldView.name) || [];
+          if (viewCategories[catId] && updates.name) {
+            views.push(updates.name);
+          }
+          if (views.length > 0) {
+            acc[catId] = views;
+          }
+          return acc;
+        },
+        {} as Record<string, string[]>,
+      );
+
       setBudgetViewMapPref(newMap);
     }
   };
@@ -98,12 +123,40 @@ export function useBudgetViews(): {
       }
     });
     setBudgetViewMapPref(newMap);
+
+    // Remove from category ordering
+    const newOrder = { ...viewCategoryOrder };
+    delete newOrder[viewId];
+    setViewCategoryOrderPref(newOrder);
+    // Remove from group ordering as well
+    const newGroupOrder = { ...viewGroupOrder };
+    delete newGroupOrder[viewId];
+    setViewGroupOrderPref(newGroupOrder);
+  };
+
+  // Set category order for a specific view
+  const setViewCategoryOrder = (viewId: string, categoryIds: string[]) => {
+    setViewCategoryOrderPref({
+      ...viewCategoryOrder,
+      [viewId]: categoryIds,
+    });
+  };
+
+  const setViewGroupOrder = (viewId: string, groupIds: string[]) => {
+    setViewGroupOrderPref({
+      ...viewGroupOrder,
+      [viewId]: groupIds,
+    });
   };
 
   return {
     views,
     viewMap: budgetViewMap,
+    viewCategoryOrder,
+    viewGroupOrder,
     updateView,
-    removeView
+    removeView,
+    setViewCategoryOrder,
+    setViewGroupOrder,
   };
 }

@@ -7,6 +7,10 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/types/models';
 
 import { DynamicBudgetTable } from './DynamicBudgetTable';
 import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';
@@ -27,6 +31,7 @@ import {
   updateCategory,
   updateCategoryGroup,
 } from '@desktop-client/budget/budgetSlice';
+import { useBudgetViews } from '@desktop-client/hooks/useBudgetViews';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
@@ -37,6 +42,8 @@ import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+
+type GroupWithCats = CategoryGroupEntity & { categories: CategoryEntity[] };
 
 type TrackingReportComponents = {
   SummaryComponent: typeof trackingBudget.BudgetSummary;
@@ -84,6 +91,14 @@ function BudgetInner(props: BudgetInnerProps) {
   const maxMonths = maxMonthsPref || 1;
   const [initialized, setInitialized] = useState(false);
   const { grouped: categoryGroups } = useCategories();
+  const [activeSelectedViews, setActiveSelectedViews] = useState<
+    string[] | null
+  >(null);
+  const {
+    setViewCategoryOrder,
+    setViewGroupOrder,
+    viewMap = {},
+  } = useBudgetViews();
 
   useEffect(() => {
     async function run() {
@@ -145,7 +160,7 @@ function BudgetInner(props: BudgetInnerProps) {
     }
   };
 
-  const categoryNameAlreadyExistsNotification = name => {
+  const categoryNameAlreadyExistsNotification = (name: string) => {
     dispatch(
       addNotification({
         notification: {
@@ -293,6 +308,58 @@ function BudgetInner(props: BudgetInnerProps) {
 
   const onReorderCategory = async sortInfo => {
     const cats = await send('get-categories');
+    // If exactly one budget view is selected, persist the reorder as a
+    // view-scoped ordering preference instead of changing the global DB order.
+    if (activeSelectedViews && activeSelectedViews.length === 1) {
+      const viewId = activeSelectedViews[0];
+
+      // Make a shallow copy of grouped categories so we can mutate locally
+      const groups = (cats.grouped || []).map(g => ({
+        ...g,
+        categories: Array.isArray(g.categories) ? [...g.categories] : [],
+      }));
+
+      // Remove the moved category from its original group
+      for (const g of groups) {
+        const idx = g.categories.findIndex(c => c.id === sortInfo.id);
+        if (idx !== -1) {
+          g.categories.splice(idx, 1);
+          break;
+        }
+      }
+
+      // Insert into the target group at position before targetId, or at start
+      const targetGroup = groups.find(g => g.id === sortInfo.groupId);
+      if (targetGroup) {
+        if (sortInfo.targetId) {
+          const tIdx = targetGroup.categories.findIndex(
+            c => c.id === sortInfo.targetId,
+          );
+          const insertIdx = tIdx === -1 ? 0 : tIdx;
+          // Find the moved candidate from the full list to preserve object shape
+          const moved = cats.list.find(c => c.id === sortInfo.id);
+          if (moved) {
+            targetGroup.categories.splice(insertIdx, 0, moved);
+          }
+        } else {
+          const moved = cats.list.find(c => c.id === sortInfo.id);
+          if (moved) {
+            targetGroup.categories.splice(0, 0, moved);
+          }
+        }
+      }
+
+      // Build flattened order and filter to only categories that belong to this view
+      const flattened = groups.flatMap(g =>
+        (g.categories || []).map(c => c.id),
+      );
+      const newOrder = flattened.filter(id =>
+        Array.isArray(viewMap[id]) ? viewMap[id].includes(viewId) : false,
+      );
+
+      setViewCategoryOrder(viewId, newOrder);
+      return;
+    }
     const moveCandidate = cats.list.filter(c => c.id === sortInfo.id)[0];
     const exists =
       cats.grouped
@@ -317,6 +384,55 @@ function BudgetInner(props: BudgetInnerProps) {
   };
 
   const onReorderGroup = async sortInfo => {
+    // If exactly one budget view is selected, persist group ordering to the
+    // view-scoped preference instead of changing the global DB order.
+    if (activeSelectedViews && activeSelectedViews.length === 1) {
+      const viewId = activeSelectedViews[0];
+
+      const cats = await send('get-categories');
+
+      // Make a shallow copy of grouped categories so we can mutate locally
+      const groups: GroupWithCats[] = (cats.grouped || []).map(g => ({
+        ...(g as CategoryGroupEntity),
+        categories: Array.isArray(g.categories) ? [...g.categories] : [],
+      }));
+
+      // Remove the moved group from its original position
+      const removeIdx = groups.findIndex(g => g.id === sortInfo.id);
+      let moved: GroupWithCats | null = null;
+      if (removeIdx !== -1) {
+        moved = groups.splice(removeIdx, 1)[0];
+      }
+
+      // Insert into the target position: before targetId when provided, else at start
+      if (moved) {
+        if (sortInfo.targetId) {
+          const tIdx = groups.findIndex(g => g.id === sortInfo.targetId);
+          const insertIdx = tIdx === -1 ? 0 : tIdx;
+          groups.splice(insertIdx, 0, moved);
+        } else {
+          groups.splice(0, 0, moved);
+        }
+      }
+
+      // Build flattened group order and filter to groups that contain categories
+      // belonging to this view
+      const flattened = groups.map(g => g.id);
+      const newOrder = flattened.filter(gid => {
+        const g = groups.find(x => x.id === gid);
+        return (
+          g!.categories.filter(c =>
+            Array.isArray(viewMap[c.id])
+              ? viewMap[c.id].includes(viewId)
+              : false,
+          ).length > 0
+        );
+      });
+
+      setViewGroupOrder(viewId, newOrder);
+      return;
+    }
+
     dispatch(
       moveCategoryGroup({ id: sortInfo.id, targetId: sortInfo.targetId }),
     );
@@ -356,6 +472,8 @@ function BudgetInner(props: BudgetInnerProps) {
           onShowActivity={onShowActivity}
           onReorderCategory={onReorderCategory}
           onReorderGroup={onReorderGroup}
+          onViewSelectionChange={setActiveSelectedViews}
+          activeSelectedViews={activeSelectedViews}
           onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
         />
       </TrackingBudgetProvider>
@@ -383,6 +501,8 @@ function BudgetInner(props: BudgetInnerProps) {
           onShowActivity={onShowActivity}
           onReorderCategory={onReorderCategory}
           onReorderGroup={onReorderGroup}
+          onViewSelectionChange={setActiveSelectedViews}
+          activeSelectedViews={activeSelectedViews}
           onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
         />
       </EnvelopeBudgetProvider>
