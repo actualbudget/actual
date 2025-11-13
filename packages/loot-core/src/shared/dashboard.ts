@@ -133,7 +133,7 @@ export const DEFAULT_DASHBOARD_STATE: NewWidget[] = [
   // Second row: Net worth and cash flow side by side
   {
     type: 'net-worth-card',
-    width: 6,
+    width: 4,
     height: 2,
     x: 0,
     y: 2,
@@ -141,10 +141,19 @@ export const DEFAULT_DASHBOARD_STATE: NewWidget[] = [
   },
   {
     type: 'cash-flow-card',
-    width: 6,
+    width: 4,
     height: 2,
-    x: 6,
+    x: 4,
     y: 2,
+    meta: null,
+  },
+  // New: Budget analysis card to showcase the report in demo by default
+  {
+    type: 'budget-analysis-card',
+    width: 4,
+    height: 2,
+    x: 8,
+    y: 4,
     meta: null,
   },
   // Third row: Spending comparisons
