@@ -458,5 +458,3 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
     </Page>
   );
 }
-
-// (Interval is always Monthly for Budget Analysis)
