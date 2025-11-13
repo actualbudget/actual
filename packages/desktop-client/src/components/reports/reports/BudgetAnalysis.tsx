@@ -7,7 +7,7 @@ import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Paragraph } from '@actual-app/components/paragraph';
-import { SvgCalendar } from '@actual-app/components/icons/v1';
+import { SvgCalendar, SvgChartBar, SvgChart } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
@@ -297,7 +297,14 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                 setGraphType(graphType === 'Line' ? 'Bar' : 'Line')
               }
             >
-              {graphType === 'Line' ? t('Bar chart') : t('Line chart')}
+              {graphType === 'Line' ? (
+                <SvgChartBar style={{ width: 12, height: 12 }} />
+              ) : (
+                <SvgChart style={{ width: 12, height: 12 }} />
+              )}
+              <span style={{ marginLeft: 6 }}>
+                {graphType === 'Line' ? t('Bar chart') : t('Line chart')}
+              </span>
             </Button>
             <IntervalSelector interval={interval} onChange={setInterval} />
           </>
