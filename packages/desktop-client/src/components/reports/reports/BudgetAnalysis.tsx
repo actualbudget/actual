@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -7,7 +7,9 @@ import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Paragraph } from '@actual-app/components/paragraph';
-import { Select } from '@actual-app/components/select';
+import { SvgCalendar } from '@actual-app/components/icons/v1';
+import { Menu } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -32,6 +34,7 @@ import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { BudgetAnalysisGraph } from '@desktop-client/components/reports/graphs/BudgetAnalysisGraph';
 import { Header } from '@desktop-client/components/reports/Header';
 import { LegendItem } from '@desktop-client/components/reports/LegendItem';
+import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ReportSidebar } from '@desktop-client/components/reports/ReportSidebar';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
@@ -296,28 +299,22 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
             >
               {graphType === 'Line' ? t('Bar chart') : t('Line chart')}
             </Button>
-            <Button variant="bare" onPress={() => setShowBalance(!showBalance)}>
-              {showBalance ? t('Hide balance') : t('Show balance')}
-            </Button>
-            <Select
-              value={interval}
-              onChange={setInterval}
-              options={[
-                ['Daily', t('Daily')],
-                ['Weekly', t('Weekly')],
-                ['Monthly', t('Monthly')],
-                ['Yearly', t('Yearly')],
-              ]}
-              style={{ width: 100 }}
-            />
-            {widget && (
-              <Button variant="primary" onPress={onSaveWidget}>
-                <Trans>Save</Trans>
-              </Button>
-            )}
+            <IntervalSelector interval={interval} onChange={setInterval} />
           </>
         }
-      />
+      >
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          <Button onPress={() => setShowBalance(state => !state)}>
+            {showBalance ? t('Hide balance') : t('Show balance')}
+          </Button>
+
+          {widget && (
+            <Button variant="primary" onPress={onSaveWidget}>
+              <Trans>Save widget</Trans>
+            </Button>
+          )}
+        </View>
+  </Header>
       <View
         style={{
           display: 'flex',
@@ -466,5 +463,54 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         </View>
       </View>
     </Page>
+  );
+}
+
+// Interval selector component matching Net Worth style (icon + popover menu)
+function IntervalSelector({
+  interval,
+  onChange,
+}: {
+  interval: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
+  onChange: (val: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly') => void;
+}) {
+  const { t } = useTranslation();
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const currentLabel =
+    ReportOptions.interval.find(opt => opt.key === interval)?.description ??
+    interval;
+
+  return (
+    <>
+      <Button
+        ref={triggerRef}
+        variant="bare"
+        onPress={() => setIsOpen(true)}
+        aria-label={t('Change interval')}
+      >
+        <SvgCalendar style={{ width: 12, height: 12 }} />
+        <span style={{ marginLeft: 5 }}>{currentLabel}</span>
+      </Button>
+
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={isOpen}
+        onOpenChange={() => setIsOpen(false)}
+      >
+        <Menu
+          onMenuSelect={item => {
+            onChange(item as 'Daily' | 'Weekly' | 'Monthly' | 'Yearly');
+            setIsOpen(false);
+          }}
+          items={ReportOptions.interval.map(({ key, description }) => ({
+            name: key as 'Daily' | 'Weekly' | 'Monthly' | 'Yearly',
+            text: description,
+          }))}
+        />
+      </Popover>
+    </>
   );
 }

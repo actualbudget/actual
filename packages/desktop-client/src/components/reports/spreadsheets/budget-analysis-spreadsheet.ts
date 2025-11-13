@@ -100,7 +100,7 @@ export function createBudgetAnalysisSpreadsheet({
         );
       } else if (interval === 'Weekly') {
         intervalStart = intervalItem;
-        intervalEnd = monthUtils.weekEndDate(intervalItem, firstDayOfWeekIdx);
+  intervalEnd = monthUtils.getWeekEnd(intervalItem, firstDayOfWeekIdx);
         budgetMonth = parseInt(
           monthUtils.getMonth(intervalStart).replace('-', ''),
         );
