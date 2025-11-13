@@ -6,13 +6,13 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { Paragraph } from '@actual-app/components/paragraph';
 import {
   SvgCalendar,
   SvgChartBar,
   SvgChart,
 } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
+import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -38,8 +38,8 @@ import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { BudgetAnalysisGraph } from '@desktop-client/components/reports/graphs/BudgetAnalysisGraph';
 import { Header } from '@desktop-client/components/reports/Header';
 import { LegendItem } from '@desktop-client/components/reports/LegendItem';
-import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createBudgetAnalysisSpreadsheet } from '@desktop-client/components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
