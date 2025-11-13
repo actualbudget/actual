@@ -120,7 +120,7 @@ export function BudgetAnalysisGraph({
                 stroke={theme.reportsBlue}
                 strokeWidth={2}
                 name="Balance"
-                        dot={false}
+                dot={false}
                 animationDuration={1000}
               />
             )}
@@ -156,7 +156,7 @@ export function BudgetAnalysisGraph({
               stroke={theme.reportsGreen}
               strokeWidth={2}
               name="Budgeted"
-                      dot={false}
+              dot={false}
               animationDuration={1000}
             />
             <Line
@@ -165,7 +165,7 @@ export function BudgetAnalysisGraph({
               stroke={theme.reportsRed}
               strokeWidth={2}
               name="Spent"
-                      dot={false}
+              dot={false}
               animationDuration={1000}
             />
             {showBalance && (
@@ -175,7 +175,7 @@ export function BudgetAnalysisGraph({
                 stroke={theme.reportsBlue}
                 strokeWidth={2}
                 name="Balance"
-                        dot={false}
+                dot={false}
                 animationDuration={1000}
               />
             )}
@@ -185,4 +185,3 @@ export function BudgetAnalysisGraph({
     </Container>
   );
 }
-

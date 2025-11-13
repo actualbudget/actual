@@ -7,7 +7,11 @@ import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Paragraph } from '@actual-app/components/paragraph';
-import { SvgCalendar, SvgChartBar, SvgChart } from '@actual-app/components/icons/v1';
+import {
+  SvgCalendar,
+  SvgChartBar,
+  SvgChart,
+} from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
@@ -93,9 +97,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const [start, setStart] = useState(monthUtils.currentMonth());
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
-  const [interval, setInterval] = useState(
-    widget?.meta?.interval || 'Monthly',
-  );
+  const [interval, setInterval] = useState(widget?.meta?.interval || 'Monthly');
   const [graphType, setGraphType] = useState<'Line' | 'Bar'>(
     widget?.meta?.graphType || 'Line',
   );
@@ -321,7 +323,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
             </Button>
           )}
         </View>
-  </Header>
+      </Header>
       <View
         style={{
           display: 'flex',

@@ -100,7 +100,7 @@ export function createBudgetAnalysisSpreadsheet({
         );
       } else if (interval === 'Weekly') {
         intervalStart = intervalItem;
-  intervalEnd = monthUtils.getWeekEnd(intervalItem, firstDayOfWeekIdx);
+        intervalEnd = monthUtils.getWeekEnd(intervalItem, firstDayOfWeekIdx);
         budgetMonth = parseInt(
           monthUtils.getMonth(intervalStart).replace('-', ''),
         );
@@ -121,9 +121,10 @@ export function createBudgetAnalysisSpreadsheet({
         // For daily/weekly, we need to amortize the monthly budget
         const monthStart = monthUtils.getMonth(intervalStart) + '-01';
         const monthEnd = monthUtils.getMonthEnd(monthStart);
-        const daysInMonth = monthUtils
-          .dayRangeInclusive(monthStart, monthEnd)
-          .length;
+        const daysInMonth = monthUtils.dayRangeInclusive(
+          monthStart,
+          monthEnd,
+        ).length;
 
         const [budgets] = await Promise.all([
           aqlQuery(
@@ -157,9 +158,12 @@ export function createBudgetAnalysisSpreadsheet({
             intervalEnd,
           );
           const daysInThisMonth = weekDays.filter(
-            day => monthUtils.getMonth(day) === monthUtils.getMonth(intervalStart),
+            day =>
+              monthUtils.getMonth(day) === monthUtils.getMonth(intervalStart),
           ).length;
-          budgeted = Math.round((monthlyBudget / daysInMonth) * daysInThisMonth);
+          budgeted = Math.round(
+            (monthlyBudget / daysInMonth) * daysInThisMonth,
+          );
         }
       } else if (interval === 'Yearly') {
         // For yearly, sum all months in that year
