@@ -16,6 +16,7 @@ import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 
 export function ReportRouter() {
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
+  const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
 
   return (
     <Routes>
@@ -34,8 +35,12 @@ export function ReportRouter() {
       <Route path="/custom/:id" element={<CustomReport />} />
       <Route path="/spending" element={<Spending />} />
       <Route path="/spending/:id" element={<Spending />} />
-      <Route path="/budget-analysis" element={<BudgetAnalysis />} />
-      <Route path="/budget-analysis/:id" element={<BudgetAnalysis />} />
+      {budgetAnalysisReportEnabled && (
+        <>
+          <Route path="/budget-analysis" element={<BudgetAnalysis />} />
+          <Route path="/budget-analysis/:id" element={<BudgetAnalysis />} />
+        </>
+      )}
       <Route path="/summary" element={<Summary />} />
       <Route path="/summary/:id" element={<Summary />} />
       <Route path="/calendar" element={<Calendar />} />

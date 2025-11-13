@@ -66,6 +66,7 @@ export function Overview() {
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
+  const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
 
   const formulaMode = useFeatureFlag('formulaMode');
 
@@ -435,10 +436,14 @@ export function Overview() {
                               name: 'spending-card' as const,
                               text: t('Spending analysis'),
                             },
-                            {
-                              name: 'budget-analysis-card' as const,
-                              text: t('Budget analysis'),
-                            },
+                            ...(budgetAnalysisReportEnabled
+                              ? [
+                                  {
+                                    name: 'budget-analysis-card' as const,
+                                    text: t('Budget analysis'),
+                                  },
+                                ]
+                              : []),
                             {
                               name: 'markdown-card' as const,
                               text: t('Text widget'),
@@ -605,7 +610,8 @@ export function Overview() {
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
                     />
-                  ) : item.type === 'budget-analysis-card' ? (
+                  ) : item.type === 'budget-analysis-card' &&
+                    budgetAnalysisReportEnabled ? (
                     <BudgetAnalysisCard
                       widgetId={item.i}
                       isEditing={isEditing}
