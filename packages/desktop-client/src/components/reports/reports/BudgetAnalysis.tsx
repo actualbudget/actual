@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -6,14 +6,8 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import {
-  SvgCalendar,
-  SvgChartBar,
-  SvgChart,
-} from '@actual-app/components/icons/v1';
-import { Menu } from '@actual-app/components/menu';
+import { SvgChartBar, SvgChart } from '@actual-app/components/icons/v1';
 import { Paragraph } from '@actual-app/components/paragraph';
-import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -39,7 +33,6 @@ import { BudgetAnalysisGraph } from '@desktop-client/components/reports/graphs/B
 import { Header } from '@desktop-client/components/reports/Header';
 import { LegendItem } from '@desktop-client/components/reports/LegendItem';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createBudgetAnalysisSpreadsheet } from '@desktop-client/components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
@@ -97,7 +90,6 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const [start, setStart] = useState(monthUtils.currentMonth());
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
-  const [interval, setInterval] = useState(widget?.meta?.interval || 'Monthly');
   const [graphType, setGraphType] = useState<'Line' | 'Bar'>(
     widget?.meta?.graphType || 'Line',
   );
@@ -175,10 +167,10 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         conditionsOp,
         startDate,
         endDate,
-        interval,
+        interval: 'Monthly',
         firstDayOfWeekIdx,
       }),
-    [conditions, conditionsOp, startDate, endDate, interval, firstDayOfWeekIdx],
+    [conditions, conditionsOp, startDate, endDate, firstDayOfWeekIdx],
   );
 
   const data = useReport('default', getGraphData);
@@ -211,7 +203,6 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
           end,
           mode,
         },
-        interval,
         graphType,
         showBalance,
       },
@@ -279,7 +270,6 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         start={start}
         end={end}
         mode={mode}
-        show1Month
         allMonths={allMonths}
         earliestTransaction={allMonths[allMonths.length - 1].name}
         latestTransaction={latestTransaction}
@@ -308,7 +298,6 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                 {graphType === 'Line' ? t('Bar chart') : t('Line chart')}
               </span>
             </Button>
-            <IntervalSelector interval={interval} onChange={setInterval} />
           </>
         }
       >
@@ -446,7 +435,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                   style={{ flexGrow: 1 }}
                   data={data}
                   graphType={graphType}
-                  interval={interval}
+                  interval="Monthly"
                   showBalance={showBalance}
                 />
               ) : (
@@ -474,51 +463,4 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   );
 }
 
-// Interval selector component matching Net Worth style (icon + popover menu)
-function IntervalSelector({
-  interval,
-  onChange,
-}: {
-  interval: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
-  onChange: (val: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly') => void;
-}) {
-  const { t } = useTranslation();
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
-
-  const currentLabel =
-    ReportOptions.interval.find(opt => opt.key === interval)?.description ??
-    interval;
-
-  return (
-    <>
-      <Button
-        ref={triggerRef}
-        variant="bare"
-        onPress={() => setIsOpen(true)}
-        aria-label={t('Change interval')}
-      >
-        <SvgCalendar style={{ width: 12, height: 12 }} />
-        <span style={{ marginLeft: 5 }}>{currentLabel}</span>
-      </Button>
-
-      <Popover
-        triggerRef={triggerRef}
-        placement="bottom start"
-        isOpen={isOpen}
-        onOpenChange={() => setIsOpen(false)}
-      >
-        <Menu
-          onMenuSelect={item => {
-            onChange(item as 'Daily' | 'Weekly' | 'Monthly' | 'Yearly');
-            setIsOpen(false);
-          }}
-          items={ReportOptions.interval.map(({ key, description }) => ({
-            name: key as 'Daily' | 'Weekly' | 'Monthly' | 'Yearly',
-            text: description,
-          }))}
-        />
-      </Popover>
-    </>
-  );
-}
+// (Interval is always Monthly for Budget Analysis)
