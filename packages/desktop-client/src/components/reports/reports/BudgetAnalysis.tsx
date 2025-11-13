@@ -283,20 +283,18 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         onConditionsOpChange={onConditionsOpChange}
         inlineContent={
           <Button
-              variant="bare"
-              onPress={() =>
-                setGraphType(graphType === 'Line' ? 'Bar' : 'Line')
-              }
-            >
-              {graphType === 'Line' ? (
-                <SvgChartBar style={{ width: 12, height: 12 }} />
-              ) : (
-                <SvgChart style={{ width: 12, height: 12 }} />
-              )}
-              <span style={{ marginLeft: 6 }}>
-                {graphType === 'Line' ? t('Bar chart') : t('Line chart')}
-              </span>
-            </Button>
+            variant="bare"
+            onPress={() => setGraphType(graphType === 'Line' ? 'Bar' : 'Line')}
+          >
+            {graphType === 'Line' ? (
+              <SvgChartBar style={{ width: 12, height: 12 }} />
+            ) : (
+              <SvgChart style={{ width: 12, height: 12 }} />
+            )}
+            <span style={{ marginLeft: 6 }}>
+              {graphType === 'Line' ? t('Bar chart') : t('Line chart')}
+            </span>
+          </Button>
         }
       >
         <View style={{ flexDirection: 'row', gap: 10 }}>
