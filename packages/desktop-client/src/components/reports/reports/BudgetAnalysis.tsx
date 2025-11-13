@@ -282,8 +282,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         onDeleteFilter={onDeleteFilter}
         onConditionsOpChange={onConditionsOpChange}
         inlineContent={
-          <>
-            <Button
+          <Button
               variant="bare"
               onPress={() =>
                 setGraphType(graphType === 'Line' ? 'Bar' : 'Line')
@@ -298,7 +297,6 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                 {graphType === 'Line' ? t('Bar chart') : t('Line chart')}
               </span>
             </Button>
-          </>
         }
       >
         <View style={{ flexDirection: 'row', gap: 10 }}>
