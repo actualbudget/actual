@@ -8,8 +8,8 @@ const CONFIG = {
   POINTS_PER_ISSUE_TRIAGE_ACTION: 1,
   POINTS_PER_ISSUE_CLOSING_ACTION: 1,
   POINTS_PER_RELEASE_PR: 4, // Awarded to whoever merges the release PR
-  // Point tiers for main repo changes (non-docs)
-  MAIN_PR_REVIEW_POINT_TIERS: [
+  // Point tiers for code changes (non-docs)
+  CODE_PR_REVIEW_POINT_TIERS: [
     { minChanges: 500, points: 8 },
     { minChanges: 100, points: 6 },
     { minChanges: 10, points: 2 },
@@ -87,7 +87,7 @@ async function countContributorPoints() {
     Array.from(orgMemberLogins).map(login => [
       login,
       {
-        mainReviews: [], // Will store objects with PR number and points for main repo changes
+        codeReviews: [], // Will store objects with PR number and points for main repo changes
         docsReviews: [], // Will store objects with PR number and points for docs changes
         labelRemovals: [],
         issueClosings: [],
@@ -155,7 +155,7 @@ async function countContributorPoints() {
         const docsFiles = filteredFiles.filter(file =>
           minimatch(file.filename, CONFIG.DOCS_FILES_PATTERN, { dot: true }),
         );
-        const mainFiles = filteredFiles.filter(
+        const codeFiles = filteredFiles.filter(
           file =>
             !minimatch(file.filename, CONFIG.DOCS_FILES_PATTERN, { dot: true }),
         );
@@ -164,7 +164,7 @@ async function countContributorPoints() {
           (sum, file) => sum + file.additions + file.deletions,
           0,
         );
-        const mainChanges = mainFiles.reduce(
+        const codeChanges = codeFiles.reduce(
           (sum, file) => sum + file.additions + file.deletions,
           0,
         );
@@ -175,10 +175,10 @@ async function countContributorPoints() {
                 t => docsChanges >= t.minChanges,
               )?.points ?? 0)
             : 0;
-        const mainPoints =
-          mainChanges > 0 || docsChanges === 0
-            ? (CONFIG.MAIN_PR_REVIEW_POINT_TIERS.find(
-                t => mainChanges >= t.minChanges,
+        const codePoints =
+          codeChanges > 0 || docsChanges === 0
+            ? (CONFIG.CODE_PR_REVIEW_POINT_TIERS.find(
+                t => codeChanges >= t.minChanges,
               )?.points ?? 0)
             : 0;
 
@@ -194,7 +194,7 @@ async function countContributorPoints() {
 
           if (prDetails.merged_by && stats.has(prDetails.merged_by.login)) {
             const mergerStats = stats.get(prDetails.merged_by.login);
-            mergerStats.mainReviews.push({
+            mergerStats.codeReviews.push({
               pr: pr.number.toString(),
               points: CONFIG.POINTS_PER_RELEASE_PR,
               isReleaseMerger: true,
@@ -221,12 +221,12 @@ async function countContributorPoints() {
                 userStats.points += docsPoints;
               }
 
-              if (mainPoints > 0) {
-                userStats.mainReviews.push({
+              if (codePoints > 0) {
+                userStats.codeReviews.push({
                   pr: pr.number.toString(),
-                  points: mainPoints,
+                  points: codePoints,
                 });
-                userStats.points += mainPoints;
+                userStats.points += codePoints;
               }
             }
           });
@@ -292,12 +292,12 @@ async function countContributorPoints() {
 
   // Print all statistics
   printStats(
-    'Main Repo PR Review Statistics',
-    stats => stats.mainReviews.length,
+    'Code Review Statistics',
+    stats => stats.codeReviews.length,
     (user, count) =>
       `${user}: ${count} (PRs: ${stats
         .get(user)
-        .mainReviews.map(r => {
+        .codeReviews.map(r => {
           if (r.isReleaseMerger) {
             return `#${r.pr} (${r.points}pts - Release Merger)`;
           }
@@ -307,7 +307,7 @@ async function countContributorPoints() {
   );
 
   printStats(
-    'Docs PR Review Statistics',
+    'Docs Review Statistics',
     stats => stats.docsReviews.length,
     (user, count) =>
       `${user}: ${count} (PRs: ${stats
