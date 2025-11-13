@@ -278,6 +278,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         start={start}
         end={end}
         mode={mode}
+        show1Month
         allMonths={allMonths}
         earliestTransaction={allMonths[allMonths.length - 1].name}
         latestTransaction={latestTransaction}
