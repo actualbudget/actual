@@ -104,7 +104,7 @@ export function createCustomSpreadsheet({
       endDate,
       interval,
       conditionsOpKey,
-      filters
+      filters,
     );
 
     if (interval === 'Weekly') {

@@ -63,16 +63,15 @@ export function createSpendingSpreadsheet({
       endDate,
       interval,
       conditionsOpKey,
-      filters
+      filters,
     );
-
 
     const { assets: assetsTo, debts: debtsTo } = await aggregatedAssetsDebts(
       startDateTo,
       endDateTo,
       interval,
       conditionsOpKey,
-      filters
+      filters,
     );
 
     const overlapAssets =

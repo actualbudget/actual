@@ -284,9 +284,8 @@ export type QuerySplitDataEntity = {
   isParent: boolean;
 };
 
-export type GroupedQueryDataEntity =
-  QuerySplitDataEntity & {
-    subtransactions: QuerySplitDataEntity & { _unmatched?: boolean }[],
+export type GroupedQueryDataEntity = QuerySplitDataEntity & {
+  subtransactions: QuerySplitDataEntity & { _unmatched?: boolean }[];
 };
 
 type UncategorizedId = 'off_budget' | 'transfer' | 'other' | 'all';

@@ -54,7 +54,7 @@ export function createGroupedSpreadsheet({
       endDate,
       interval,
       conditionsOpKey,
-      filters
+      filters,
     );
 
     if (interval === 'Weekly') {
