@@ -40,6 +40,7 @@ test.describe.parallel('Reports', () => {
       'Avg Per Transaction',
       'Net Worth',
       'Cash Flow',
+      'Budget Analysis',
       'This Month',
       'Budget Overview',
       '3-Month Average',
