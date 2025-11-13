@@ -143,7 +143,6 @@ export function BudgetAnalysisCard({
         {data ? (
           <BudgetAnalysisGraph
             style={{ flex: 1 }}
-            compact={true}
             data={data}
             graphType={meta?.graphType || 'Line'}
             interval="Monthly"

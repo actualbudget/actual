@@ -39,7 +39,6 @@ type BudgetAnalysisGraphProps = {
 export function BudgetAnalysisGraph({
   style,
   data,
-  compact,
   graphType = 'Line',
   interval = 'Monthly',
   showBalance = true,

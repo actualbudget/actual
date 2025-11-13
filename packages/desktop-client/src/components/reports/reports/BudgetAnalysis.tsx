@@ -36,7 +36,6 @@ import { Header } from '@desktop-client/components/reports/Header';
 import { LegendItem } from '@desktop-client/components/reports/LegendItem';
 import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ReportSidebar } from '@desktop-client/components/reports/ReportSidebar';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createBudgetAnalysisSpreadsheet } from '@desktop-client/components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
@@ -443,7 +442,6 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
               {data ? (
                 <BudgetAnalysisGraph
                   style={{ flexGrow: 1 }}
-                  compact={false}
                   data={data}
                   graphType={graphType}
                   interval={interval}
