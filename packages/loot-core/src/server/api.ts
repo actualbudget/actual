@@ -570,8 +570,7 @@ handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
 
 handlers['api/accounts-get'] = async function () {
   checkFileOpen();
-  // TODO: Force cast to AccountEntity. This should be updated to an AQL query.
-  const accounts = (await db.getAccounts()) as AccountEntity[];
+  const accounts: AccountEntity[] = await handlers['accounts-get']();
   return accounts.map(account => accountModel.toExternal(account));
 };
 

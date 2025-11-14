@@ -2,11 +2,14 @@ import React from 'react';
 import { Provider } from 'react-redux';
 
 import { theme } from '@actual-app/components/theme';
+import { QueryClient } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 
 import { Change } from './Change';
 
-import { store } from '@desktop-client/redux/store';
+import { configureAppStore } from '@desktop-client/redux/store';
+
+const store = configureAppStore({ queryClient: new QueryClient() });
 
 describe('Change', () => {
   it('renders a positive amount with a plus sign and positive color', () => {

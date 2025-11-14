@@ -17,7 +17,7 @@ import { integerToCurrency } from 'loot-core/shared/util';
 import type { AccountEntity } from 'loot-core/types/models';
 import type { TransObjectLiteral } from 'loot-core/types/util';
 
-import { closeAccount } from '@desktop-client/accounts/accountsSlice';
+import { useCloseAccountMutation } from '@desktop-client/accounts';
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import { Link } from '@desktop-client/components/common/Link';
@@ -91,6 +91,8 @@ export function CloseAccountModal({
       }
     : {};
 
+  const closeAccount = useCloseAccountMutation();
+
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -107,13 +109,12 @@ export function CloseAccountModal({
 
     setLoading(true);
 
-    dispatch(
-      closeAccount({
-        id: account.id,
-        transferAccountId: transferAccountId || null,
-        categoryId: categoryId || null,
-      }),
-    );
+    closeAccount.mutate({
+      id: account.id,
+      transferAccountId: transferAccountId || null,
+      categoryId: categoryId || null,
+    });
+
     return true;
   };
 
@@ -275,12 +276,10 @@ export function CloseAccountModal({
                         variant="text"
                         onClick={() => {
                           setLoading(true);
-                          dispatch(
-                            closeAccount({
-                              id: account.id,
-                              forced: true,
-                            }),
-                          );
+                          closeAccount.mutate({
+                            id: account.id,
+                            forced: true,
+                          });
                           close();
                         }}
                         style={{ color: theme.errorText }}

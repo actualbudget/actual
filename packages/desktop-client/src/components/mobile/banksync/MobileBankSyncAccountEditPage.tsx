@@ -8,7 +8,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
+import { useUnlinkAccountMutation } from '@desktop-client/accounts';
 import { BankSyncCheckboxOptions } from '@desktop-client/components/banksync/BankSyncCheckboxOptions';
 import { FieldMapping } from '@desktop-client/components/banksync/FieldMapping';
 import { useBankSyncAccountSettings } from '@desktop-client/components/banksync/useBankSyncAccountSettings';
@@ -54,6 +54,7 @@ export function MobileBankSyncAccountEditPage() {
     navigate('/bank-sync');
   };
 
+  const unlinkAccount = useUnlinkAccountMutation();
   const handleUnlink = () => {
     dispatch(
       pushModal({
@@ -64,8 +65,12 @@ export function MobileBankSyncAccountEditPage() {
             isViewBankSyncSettings: true,
             onUnlink: () => {
               if (accountId) {
-                dispatch(unlinkAccount({ id: accountId }));
-                navigate('/bank-sync');
+                unlinkAccount.mutate(
+                  { id: accountId },
+                  {
+                    onSuccess: () => navigate('/bank-sync'),
+                  },
+                );
               }
             },
           },
