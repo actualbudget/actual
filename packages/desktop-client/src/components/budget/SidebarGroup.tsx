@@ -9,7 +9,9 @@ import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { css, cx } from '@emotion/css';
 
 import {
   type CategoryEntity,
@@ -21,7 +23,6 @@ import { InputCell } from '@desktop-client/components/table';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { css, cx } from '@emotion/css';
 
 type SidebarGroupProps = {
   group: CategoryGroupEntity;
@@ -133,8 +134,6 @@ export function SidebarGroup({
                 onMenuSelect={type => {
                   if (type === 'rename') {
                     onEdit(group.id);
-                  } else if (type === 'add-category') {
-                    onShowNewCategory(group.id);
                   } else if (type === 'delete') {
                     onDelete(group.id);
                   } else if (type === 'toggle-visibility') {
@@ -147,7 +146,6 @@ export function SidebarGroup({
                   setMenuOpen(false);
                 }}
                 items={[
-                  { name: 'add-category', text: t('Add category') },
                   { name: 'rename', text: t('Rename') },
                   !group.is_income && {
                     name: 'toggle-visibility',
@@ -174,22 +172,23 @@ export function SidebarGroup({
               alignItems: 'center',
             }}
           >
-            <Button
-              variant="bare"
-              aria-label={t('Add category')}
-              className={cx(
-                css({
-                  color: theme.buttonNormalText,
-                  '&:hover': { opacity: 1 },
-                }),
-                'hover-visible',
-              )}
-              onPress={() => {
-                onShowNewCategory?.(group.id);
-              }}
-            >
-              <SvgAdd style={{ width: 10, height: 10, flexShrink: 0 }} />
-            </Button>
+            <Tooltip content={t('Add category')} disablePointerEvents>
+              <Button
+                variant="bare"
+                aria-label={t('Add category')}
+                className={cx(
+                  css({
+                    color: theme.pageTextLight,
+                  }),
+                  'hover-visible',
+                )}
+                onPress={() => {
+                  onShowNewCategory?.(group.id);
+                }}
+              >
+                <SvgAdd style={{ width: 10, height: 10, flexShrink: 0 }} />
+              </Button>
+            </Tooltip>
 
             <NotesButton
               id={group.id}
