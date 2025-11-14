@@ -29,8 +29,10 @@ import { css } from '@emotion/css';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { moveAccount } from '@desktop-client/accounts/accountsSlice';
-import { syncAndDownload } from '@desktop-client/app/appSlice';
+import {
+  useMoveAccountMutation,
+  useSyncAndDownloadMutation,
+} from '@desktop-client/accounts';
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
 import { PullToRefresh } from '@desktop-client/components/mobile/PullToRefresh';
@@ -187,26 +189,23 @@ function AccountListItem({
               flexDirection: 'row',
             }}
           >
-            {
-              /* TODO: Should bankId be part of the AccountEntity type? */
-              'bankId' in account && account.bankId ? (
-                <View
-                  style={{
-                    backgroundColor: isPending
-                      ? theme.sidebarItemBackgroundPending
-                      : isFailed
-                        ? theme.sidebarItemBackgroundFailed
-                        : theme.sidebarItemBackgroundPositive,
-                    marginRight: '8px',
-                    width: 8,
-                    flexShrink: 0,
-                    height: 8,
-                    borderRadius: 8,
-                    opacity: isConnected ? 1 : 0,
-                  }}
-                />
-              ) : null
-            }
+            {account.bankId ? (
+              <View
+                style={{
+                  backgroundColor: isPending
+                    ? theme.sidebarItemBackgroundPending
+                    : isFailed
+                      ? theme.sidebarItemBackgroundFailed
+                      : theme.sidebarItemBackgroundPositive,
+                  marginRight: '8px',
+                  width: 8,
+                  flexShrink: 0,
+                  height: 8,
+                  borderRadius: 8,
+                  opacity: isConnected ? 1 : 0,
+                }}
+              />
+            ) : null}
             <TextOneLine
               style={{
                 ...styles.text,
@@ -415,7 +414,8 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
       state => state.account.accountsSyncing,
     );
     const updatedAccounts = useSelector(state => state.account.updatedAccounts);
-    const dispatch = useDispatch();
+
+    const moveAccount = useMoveAccountMutation();
 
     const { dragAndDropHooks } = useDragAndDrop({
       getItems: keys =>
@@ -446,12 +446,10 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
         const targetAccountId = e.target.key as AccountEntity['id'];
 
         if (e.target.dropPosition === 'before') {
-          dispatch(
-            moveAccount({
-              id: accountIdToMove,
-              targetId: targetAccountId,
-            }),
-          );
+          moveAccount.mutate({
+            id: accountIdToMove,
+            targetId: targetAccountId,
+          });
         } else if (e.target.dropPosition === 'after') {
           const targetAccountIndex = accounts.findIndex(
             account => account.id === e.target.key,
@@ -464,17 +462,15 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
 
           const nextToTargetAccount = accounts[targetAccountIndex + 1];
 
-          dispatch(
-            moveAccount({
-              id: accountIdToMove,
-              // Due to the way `moveAccount` works, we use the account next to the
-              // actual target account here because `moveAccount` always shoves the
-              // account *before* the target account.
-              // On the other hand, using `null` as `targetId`moves the account
-              // to the end of the list.
-              targetId: nextToTargetAccount?.id || null,
-            }),
-          );
+          moveAccount.mutate({
+            id: accountIdToMove,
+            // Due to the way `moveAccount` works, we use the account next to the
+            // actual target account here because `moveAccount` always shoves the
+            // account *before* the target account.
+            // On the other hand, using `null` as `targetId`moves the account
+            // to the end of the list.
+            targetId: nextToTargetAccount?.id || null,
+          });
         }
       },
     });
@@ -533,9 +529,10 @@ export function AccountsPage() {
     dispatch(replaceModal({ modal: { name: 'add-account', options: {} } }));
   }, [dispatch]);
 
+  const syncAndDownload = useSyncAndDownloadMutation();
   const onSync = useCallback(async () => {
-    dispatch(syncAndDownload({}));
-  }, [dispatch]);
+    syncAndDownload.mutate({});
+  }, [syncAndDownload]);
 
   return (
     <View style={{ flex: 1 }}>

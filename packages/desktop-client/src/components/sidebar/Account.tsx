@@ -23,9 +23,9 @@ import { css, cx } from '@emotion/css';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import {
-  reopenAccount,
-  updateAccount,
-} from '@desktop-client/accounts/accountsSlice';
+  useReopenAccountMutation,
+  useUpdateAccountMutation,
+} from '@desktop-client/accounts';
 import { BalanceHistoryGraph } from '@desktop-client/components/accounts/BalanceHistoryGraph';
 import { Link } from '@desktop-client/components/common/Link';
 import { Notes } from '@desktop-client/components/Notes';
@@ -133,6 +133,8 @@ export function Account<FieldName extends SheetFields<'account'>>({
     window.matchMedia('(hover: none)').matches ||
     window.matchMedia('(pointer: coarse)').matches;
   const needsTooltip = !!account?.id && !isTouchDevice;
+  const reopenAccount = useReopenAccountMutation();
+  const updateAccount = useUpdateAccountMutation();
 
   const accountRow = (
     <View
@@ -219,14 +221,12 @@ export function Account<FieldName extends SheetFields<'account'>>({
                       onBlur={() => setIsEditing(false)}
                       onEnter={newAccountName => {
                         if (newAccountName.trim() !== '') {
-                          dispatch(
-                            updateAccount({
-                              account: {
-                                ...account,
-                                name: newAccountName,
-                              },
-                            }),
-                          );
+                          updateAccount.mutate({
+                            account: {
+                              ...account,
+                              name: newAccountName,
+                            },
+                          });
                         }
                         setIsEditing(false);
                       }}
@@ -261,7 +261,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                       break;
                     }
                     case 'reopen': {
-                      dispatch(reopenAccount({ id: account.id }));
+                      reopenAccount.mutate({ id: account.id });
                       break;
                     }
                     case 'rename': {

@@ -19,6 +19,7 @@ import {
 } from 'loot-core/types/models';
 import { type Template } from 'loot-core/types/models/templates';
 
+import { accountQueries } from '@desktop-client/accounts';
 import { resetApp, setAppState } from '@desktop-client/app/appSlice';
 import { type SelectLinkedAccountsModalProps } from '@desktop-client/components/modals/SelectLinkedAccountsModal';
 import { createAppAsyncThunk } from '@desktop-client/redux';
@@ -590,10 +591,7 @@ type OpenAccountCloseModalPayload = {
 
 export const openAccountCloseModal = createAppAsyncThunk(
   `${sliceName}/openAccountCloseModal`,
-  async (
-    { accountId }: OpenAccountCloseModalPayload,
-    { dispatch, getState },
-  ) => {
+  async ({ accountId }: OpenAccountCloseModalPayload, { dispatch, extra }) => {
     const {
       balance,
       numTransactions,
@@ -603,9 +601,10 @@ export const openAccountCloseModal = createAppAsyncThunk(
         id: accountId,
       },
     );
-    const account = getState().account.accounts.find(
-      acct => acct.id === accountId,
-    );
+    const queryClient = extra.queryClient;
+    const accounts =
+      queryClient.getQueryData(accountQueries.list().queryKey) ?? [];
+    const account = accounts.find(acct => acct.id === accountId);
 
     if (!account) {
       throw new Error(`Account with ID ${accountId} does not exist.`);

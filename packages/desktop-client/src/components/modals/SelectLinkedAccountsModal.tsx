@@ -21,11 +21,11 @@ import {
 } from 'loot-core/types/models';
 
 import {
-  linkAccount,
-  linkAccountPluggyAi,
-  linkAccountSimpleFin,
-  unlinkAccount,
-} from '@desktop-client/accounts/accountsSlice';
+  useLinkAccountMutation,
+  useLinkAccountPluggyAiMutation,
+  useLinkAccountSimpleFinMutation,
+  useUnlinkAccountMutation,
+} from '@desktop-client/accounts';
 import {
   Autocomplete,
   type AutocompleteItem,
@@ -156,6 +156,11 @@ export function SelectLinkedAccountsModal({
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
 
+  const linkAccount = useLinkAccountMutation();
+  const unlinkAccount = useUnlinkAccountMutation();
+  const linkAccountSimpleFin = useLinkAccountSimpleFinMutation();
+  const linkAccountPluggyAi = useLinkAccountPluggyAiMutation();
+
   async function onNext() {
     const chosenLocalAccountIds = Object.values(chosenAccounts);
 
@@ -164,7 +169,7 @@ export function SelectLinkedAccountsModal({
     localAccounts
       .filter(acc => acc.account_id)
       .filter(acc => !chosenLocalAccountIds.includes(acc.id))
-      .forEach(acc => dispatch(unlinkAccount({ id: acc.id })));
+      .forEach(acc => unlinkAccount.mutate({ id: acc.id }));
 
     // Link new accounts
     Object.entries(chosenAccounts).forEach(
@@ -191,57 +196,51 @@ export function SelectLinkedAccountsModal({
           customSettings?.amount != null ? customSettings.amount : undefined;
 
         if (propsWithSortedExternalAccounts.syncSource === 'simpleFin') {
-          dispatch(
-            linkAccountSimpleFin({
-              externalAccount:
-                propsWithSortedExternalAccounts.externalAccounts[
-                  externalAccountIndex
-                ],
-              upgradingId:
-                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
-                chosenLocalAccountId !== addOffBudgetAccountOption.id
-                  ? chosenLocalAccountId
-                  : undefined,
-              offBudget,
-              startingDate,
-              startingBalance,
-            }),
-          );
+          linkAccountSimpleFin.mutate({
+            externalAccount:
+              propsWithSortedExternalAccounts.externalAccounts[
+                externalAccountIndex
+              ],
+            upgradingId:
+              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              chosenLocalAccountId !== addOffBudgetAccountOption.id
+                ? chosenLocalAccountId
+                : undefined,
+            offBudget,
+            startingDate,
+            startingBalance,
+          });
         } else if (propsWithSortedExternalAccounts.syncSource === 'pluggyai') {
-          dispatch(
-            linkAccountPluggyAi({
-              externalAccount:
-                propsWithSortedExternalAccounts.externalAccounts[
-                  externalAccountIndex
-                ],
-              upgradingId:
-                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
-                chosenLocalAccountId !== addOffBudgetAccountOption.id
-                  ? chosenLocalAccountId
-                  : undefined,
-              offBudget,
-              startingDate,
-              startingBalance,
-            }),
-          );
+          linkAccountPluggyAi.mutate({
+            externalAccount:
+              propsWithSortedExternalAccounts.externalAccounts[
+                externalAccountIndex
+              ],
+            upgradingId:
+              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              chosenLocalAccountId !== addOffBudgetAccountOption.id
+                ? chosenLocalAccountId
+                : undefined,
+            offBudget,
+            startingDate,
+            startingBalance,
+          });
         } else {
-          dispatch(
-            linkAccount({
-              requisitionId: propsWithSortedExternalAccounts.requisitionId,
-              account:
-                propsWithSortedExternalAccounts.externalAccounts[
-                  externalAccountIndex
-                ],
-              upgradingId:
-                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
-                chosenLocalAccountId !== addOffBudgetAccountOption.id
-                  ? chosenLocalAccountId
-                  : undefined,
-              offBudget,
-              startingDate,
-              startingBalance,
-            }),
-          );
+          linkAccount.mutate({
+            requisitionId: propsWithSortedExternalAccounts.requisitionId,
+            account:
+              propsWithSortedExternalAccounts.externalAccounts[
+                externalAccountIndex
+              ],
+            upgradingId:
+              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              chosenLocalAccountId !== addOffBudgetAccountOption.id
+                ? chosenLocalAccountId
+                : undefined,
+            offBudget,
+            startingDate,
+            startingBalance,
+          });
         }
       },
     );

@@ -17,9 +17,9 @@ import { OffBudgetAccountTransactions } from './OffBudgetAccountTransactions';
 import { OnBudgetAccountTransactions } from './OnBudgetAccountTransactions';
 
 import {
-  reopenAccount,
-  updateAccount,
-} from '@desktop-client/accounts/accountsSlice';
+  useReopenAccountMutation,
+  useUpdateAccountMutation,
+} from '@desktop-client/accounts';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { AddTransactionButton } from '@desktop-client/components/mobile/transactions/AddTransactionButton';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
@@ -108,12 +108,13 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   );
 
   const dispatch = useDispatch();
+  const updateAccount = useUpdateAccountMutation();
 
   const onSave = useCallback(
     (account: AccountEntity) => {
-      dispatch(updateAccount({ account }));
+      updateAccount.mutate({ account });
     },
-    [dispatch],
+    [updateAccount],
   );
 
   const onSaveNotes = useCallback(async (id: string, notes: string) => {
@@ -142,9 +143,11 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     dispatch(openAccountCloseModal({ accountId: account.id }));
   }, [account.id, dispatch]);
 
+  const reopenAccount = useReopenAccountMutation();
+
   const onReopenAccount = useCallback(() => {
-    dispatch(reopenAccount({ id: account.id }));
-  }, [account.id, dispatch]);
+    reopenAccount.mutate({ id: account.id });
+  }, [account.id, reopenAccount]);
 
   const [showRunningBalances, setShowRunningBalances] = useSyncedPref(
     `show-balances-${account.id}`,
