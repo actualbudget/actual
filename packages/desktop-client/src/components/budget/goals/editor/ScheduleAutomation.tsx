@@ -28,7 +28,7 @@ export const ScheduleAutomation = ({
   const { t } = useTranslation();
 
   return schedules.length ? (
-    <SpaceBetween gap={50} style={{ marginTop: 10, alignItems: 'center' }}>
+    <SpaceBetween gap={50} style={{ marginTop: 10 }}>
       <FormField style={{ flex: 1 }}>
         <FormLabel title={t('Schedule')} htmlFor="schedule-field" />
         <Select

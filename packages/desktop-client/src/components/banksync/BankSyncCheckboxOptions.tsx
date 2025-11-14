@@ -31,7 +31,11 @@ function CheckboxOption({
   if (helpMode === 'mobile') {
     return (
       <SpaceBetween
-        style={{ marginBottom: 5, justifyContent: 'space-between' }}
+        style={{
+          marginBottom: 5,
+          justifyContent: 'space-between',
+          width: '100%',
+        }}
       >
         <Text>{children}</Text>
         <ToggleField
@@ -97,8 +101,12 @@ function CheckboxOptionWithHelp({
   }
 
   return (
-    <SpaceBetween direction="vertical" gap={5} style={{ marginBottom: 5 }}>
-      <SpaceBetween style={{ justifyContent: 'space-between' }}>
+    <SpaceBetween
+      direction="vertical"
+      gap={5}
+      style={{ marginBottom: 5, width: '100%' }}
+    >
+      <SpaceBetween style={{ justifyContent: 'space-between', width: '100%' }}>
         <SpaceBetween gap={5}>
           <Text>{children}</Text>
           <Button
