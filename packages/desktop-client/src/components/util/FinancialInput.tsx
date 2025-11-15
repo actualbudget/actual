@@ -1,9 +1,7 @@
 import {
-  forwardRef,
   useState,
   useEffect,
   useRef,
-  type ForwardedRef,
   type FocusEvent,
 } from 'react';
 
@@ -23,18 +21,16 @@ type FinancialInputProps = Omit<
   onEnter?: (value: IntegerAmount) => void;
 };
 
-export const FinancialInput = forwardRef<HTMLInputElement, FinancialInputProps>(
-  function FinancialInput(
-    {
-      value: integerValue,
-      onUpdate,
-      onChangeValue,
-      onBlur,
-      onEnter,
-      ...restProps
-    },
-    ref: ForwardedRef<HTMLInputElement>,
-  ) {
+export function FinancialInput({
+  ref,
+  value: integerValue,
+  onUpdate,
+  onChangeValue,
+  onBlur,
+  onFocus,
+  onEnter,
+  ...restProps
+}: FinancialInputProps) {
     const format = useFormat();
     const inputRef = useRef<HTMLInputElement>(null);
     const [internalValue, setInternalValue] = useState(() =>
@@ -48,12 +44,13 @@ export const FinancialInput = forwardRef<HTMLInputElement, FinancialInputProps>(
       }
     }, [integerValue, format, isFocused]);
 
-    const handleFocus = () => {
+    const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
       setIsFocused(true);
       setInternalValue(format.forEdit(integerValue));
       setTimeout(() => {
         inputRef.current?.select();
       }, 0);
+      onFocus?.(e);
     };
 
     const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
@@ -79,7 +76,7 @@ export const FinancialInput = forwardRef<HTMLInputElement, FinancialInputProps>(
       }
     };
 
-    const setInputRef = (node: HTMLInputElement) => {
+    const setInputRef = (node: HTMLInputElement | null) => {
       inputRef.current = node;
 
       if (typeof ref === 'function') {
@@ -100,5 +97,4 @@ export const FinancialInput = forwardRef<HTMLInputElement, FinancialInputProps>(
         onEnter={handleEnter}
       />
     );
-  },
-);
+}
