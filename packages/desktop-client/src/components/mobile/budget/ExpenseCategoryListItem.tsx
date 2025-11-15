@@ -358,7 +358,7 @@ export function ExpenseCategoryListItem({
     showUndoNotification,
     t,
     categoriesById,
-    format.currency.code,
+    format,
   ]);
 
   const onOpenBalanceMenu = useCallback(() => {

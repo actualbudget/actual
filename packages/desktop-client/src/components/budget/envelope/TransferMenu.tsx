@@ -46,7 +46,7 @@ export function TransferMenu({
   }, [originalCategoryGroups, categoryId, showToBeBudgeted]);
 
   const [amount, setAmount] = useState<IntegerAmount>(
-    Math.max(initialAmount, 0),
+    Math.max(initialAmount ?? 0, 0),
   );
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
 
