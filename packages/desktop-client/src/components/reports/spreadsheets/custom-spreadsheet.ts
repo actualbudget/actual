@@ -19,7 +19,7 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 import { calculateLegend } from './calculateLegend';
 import { filterEmptyRows } from './filterEmptyRows';
 import { filterHiddenItems } from './filterHiddenItems';
-import { makeQuery } from './makeQuery';
+import { aggregatedAssetsDebts } from './makeQuery';
 import { recalculate } from './recalculate';
 import { sortData } from './sortData';
 import {
@@ -31,12 +31,10 @@ import {
 import {
   categoryLists,
   groupBySelections,
-  type QueryDataEntity,
   ReportOptions,
   type UncategorizedEntity,
 } from '@desktop-client/components/reports/ReportOptions';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 export type createCustomSpreadsheetProps = {
   startDate: string;
@@ -101,30 +99,13 @@ export function createCustomSpreadsheet({
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    let assets: QueryDataEntity[];
-    let debts: QueryDataEntity[];
-    [assets, debts] = await Promise.all([
-      aqlQuery(
-        makeQuery(
-          'assets',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-      aqlQuery(
-        makeQuery(
-          'debts',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-    ]);
+    let { assets, debts } = await aggregatedAssetsDebts(
+      startDate,
+      endDate,
+      interval,
+      conditionsOpKey,
+      filters,
+    );
 
     if (interval === 'Weekly') {
       debts = debts.map(d => {
