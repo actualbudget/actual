@@ -159,7 +159,7 @@ an array of sub-transactions in the `subtransactions` field.
 Subtransactions can specify the following fields, and `amount` is the only required field:
 
 - `amount`
-- `category_id`
+- `category`
 - `notes`
 
 If the amounts of the sub-transactions do not equal the total amount
@@ -237,7 +237,7 @@ await importTransactions(accountId, [
     date: '2019-08-20',
     amount: 1200,
     payee_name: 'Kroger',
-    category_id: 'c179c3f4-28a6-4fbd-a54d-195cced07a80',
+    category: 'c179c3f4-28a6-4fbd-a54d-195cced07a80',
   },
 ]);
 ```
@@ -254,7 +254,7 @@ await getTransactions(accountId, '2019-08-01', '2019-08-31');
 
 let categories = await getCategories();
 let foodCategory = category.find(cat => cat.name === 'Food');
-await updateTransaction(id, { category_id: foodCategory.id });
+await updateTransaction(id, { category: foodCategory.id });
 ```
 
 ## Accounts

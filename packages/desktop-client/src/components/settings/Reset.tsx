@@ -97,13 +97,10 @@ export function ForceReload() {
     setReloading(true);
     try {
       if (isElectron()) {
-        // For Electron, use location.reload()
         window.location.reload();
       } else {
-        // For browser, use Actual.reload() which unregisters service worker
-        // and forces a fresh load
-        if (window.Actual?.reload) {
-          await window.Actual.reload();
+        if (window.Actual?.applyAppUpdate) {
+          await window.Actual.applyAppUpdate();
         } else {
           window.location.reload();
         }
