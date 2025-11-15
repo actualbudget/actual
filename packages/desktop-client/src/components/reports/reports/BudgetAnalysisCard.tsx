@@ -68,9 +68,11 @@ export function BudgetAnalysisCard({
 
   const data = useReport('default', getGraphData);
 
-  const latestInterval = data?.intervalData?.[data.intervalData.length - 1];
+  const latestInterval =
+    data && data.intervalData.length > 0
+      ? data.intervalData[data.intervalData.length - 1]
+      : undefined;
   const balance = latestInterval?.balance ?? 0;
-
   return (
     <ReportCard
       isEditing={isEditing}
