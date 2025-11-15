@@ -4,15 +4,9 @@ import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
-import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
 
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import {
-  integerToCurrency,
-  amountToInteger,
-  type IntegerAmount,
-} from 'loot-core/shared/util';
+import { type IntegerAmount } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
@@ -20,6 +14,7 @@ import {
   addToBeBudgetedGroup,
   removeCategoriesFromGroups,
 } from '@desktop-client/components/budget/util';
+import { FinancialInput } from '@desktop-client/components/util/FinancialInput';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 
 type TransferMenuProps = {
@@ -50,16 +45,15 @@ export function TransferMenu({
       : categoryGroups;
   }, [originalCategoryGroups, categoryId, showToBeBudgeted]);
 
-  const _initialAmount = integerToCurrency(initialAmount ?? 0);
-  const [amount, setAmount] = useState<string | null>(null);
+  const [amount, setAmount] = useState<IntegerAmount>(
+    Math.max(initialAmount ?? 0, 0),
+  );
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
 
   const _onSubmit = () => {
-    const parsedAmount = evalArithmetic(amount || '');
-    if (parsedAmount && toCategoryId) {
-      onSubmit(amountToInteger(parsedAmount), toCategoryId);
+    if (amount != null && amount > 0 && toCategoryId) {
+      onSubmit(amount, toCategoryId);
     }
-
     onClose();
   };
 
@@ -76,7 +70,7 @@ export function TransferMenu({
         </View>
         <View>
           <InitialFocus>
-            <Input defaultValue={_initialAmount} onUpdate={setAmount} />
+            <FinancialInput value={amount} onUpdate={setAmount} />
           </InitialFocus>
         </View>
         <View style={{ margin: '10px 0 5px 0' }}>
@@ -103,6 +97,7 @@ export function TransferMenu({
           <Button
             type="submit"
             variant="primary"
+            isDisabled={!toCategoryId || amount <= 0}
             style={{
               fontSize: 12,
               paddingTop: 3,
