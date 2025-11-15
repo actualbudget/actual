@@ -16,6 +16,7 @@ import { type batchUpdateTransactions } from '../server/transactions';
 import type {
   ImportTransactionEntity,
   NewRuleEntity,
+  PayeeLocationEntity,
   RuleEntity,
   TransactionEntity,
   ScheduleEntity,
@@ -180,6 +181,24 @@ export interface ApiHandlers {
     targetId: string;
     mergeIds: string[];
   }) => Promise<void>;
+
+  'api/payee-location-create': (arg: {
+    payee_id: string;
+    latitude: number;
+    longitude: number;
+  }) => Promise<string>;
+
+  'api/payee-locations-get': (arg: {
+    payee_id: string;
+  }) => Promise<PayeeLocationEntity[]>;
+
+  'api/payee-location-delete': (arg: { id: string }) => Promise<void>;
+
+  'api/payees-get-nearby': (arg: {
+    latitude: number;
+    longitude: number;
+    maxDistance?: number;
+  }) => Promise<Array<APIPayeeEntity>>;
 
   'api/rules-get': () => Promise<RuleEntity[]>;
 
