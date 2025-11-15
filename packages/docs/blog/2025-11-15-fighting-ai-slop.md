@@ -14,7 +14,7 @@ Actual has started receiving what can only be described as *AI slop* — pull re
 
 ## The Problem
 
-To be clear: AI is a useful tool. We use it ourselves to draft code, fix bugs, and build features. Heck - even this article was written with the assistance of AI. But the difference is that a human is always in charge. We review, test, and take responsibility for what we merge. What we are seeing now is the opposite — unreviewed output blindly pushed upstream (i.e. opened as PRs or issues - [sample](https://github.com/actualbudget/actual/pull/6075)). That is not contribution; it's pollution.
+To be clear: AI is a useful tool. We use it ourselves to draft code, fix bugs, and build features. Heck - even this article was written with the assistance of AI. But the difference is that a human is always in charge. We review, test, and take responsibility for what we merge. What we are seeing now is the opposite — unreviewed output blindly pushed upstream (i.e. opened as PRs or issues). That is not contribution; it's pollution.
 
 ## Our Policy
 
