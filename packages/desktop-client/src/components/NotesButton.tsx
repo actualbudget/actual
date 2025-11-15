@@ -80,6 +80,7 @@ export function NotesButton({
             css({
               color: defaultColor,
               ...style,
+              padding: 4,
               ...(showPlaceholder && {
                 opacity: hasNotes || isOpen ? 1 : 0.3,
               }),
