@@ -395,7 +395,7 @@ describe('ComponentName', () => {
 - `/CONTRIBUTING.md` - Points to community docs
 - `/upcoming-release-notes/` - Release notes for next version
 - `/CODEOWNERS` - Code ownership definitions
-- `/packages/docs/` - Documentation website (Docusaurus), now part of the monorepo
+- `/packages/docs/` - Documentation website (Docusaurus)
 
 ### Build Artifacts (Don't Edit)
 

@@ -75,37 +75,6 @@ Use custom hooks from `src/hooks` instead of importing directly from react-route
 - **Concise syntax**: Use concise syntax for simple statements
 - **Explicit expressions**: Prefer explicit expressions (`condition && <Component />`)
 
-## Import Organization
-
-Imports are automatically organized by ESLint with the following order:
-
-1. React imports (first)
-2. Built-in Node.js modules
-3. External packages
-4. Actual packages (`loot-core`, `@actual-app/components` - legacy pattern `loot-design` may appear in old code)
-5. Parent imports
-6. Sibling imports
-7. Index imports
-
-Always maintain newlines between import groups.
-
-### Example
-
-```typescript
-import { useState, useEffect } from 'react';
-
-import fs from 'fs';
-import path from 'path';
-
-import { someExternalLib } from 'external-package';
-
-import { someFunction } from 'loot-core';
-import { Button } from '@actual-app/components';
-
-import { helperFunction } from '../utils';
-import { localHelper } from './helpers';
-```
-
 ## Platform-Specific Code
 
 - **Don't directly reference platform-specific imports**: Avoid importing `.api`, `.web`, or `.electron` directly
@@ -116,7 +85,6 @@ import { localHelper } from './helpers';
 
 ### Never Use
 
-- **`console.*`**: Use logger instead (enforced by ESLint)
 - **`uuid` without destructuring**: Use `import { v4 as uuidv4 } from 'uuid'`
 - **Direct color imports**: Use theme instead of importing colors directly
 - **`@actual-app/web/*` imports in `loot-core`**: Don't import from web package in core
@@ -169,13 +137,8 @@ Before committing changes, ensure:
 - [ ] `yarn typecheck` passes
 - [ ] `yarn lint:fix` has been run
 - [ ] Relevant tests pass
-- [ ] No new `console.*` usage (use logger)
 - [ ] User-facing strings are translated
-- [ ] Prefer `type` over `interface`
-- [ ] Named exports used (not default exports)
-- [ ] Imports are properly ordered
-- [ ] Platform-specific code uses proper exports
-- [ ] No unnecessary type assertions
+- [ ] Prefer `type` over `interface`ways maintain newlines between import groups.
 
 ## Additional Resources
 

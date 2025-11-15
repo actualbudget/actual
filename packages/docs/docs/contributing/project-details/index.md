@@ -145,7 +145,6 @@ Documentation website built with Docusaurus.
 
 - **Purpose**: The Actual documentation website
 - **Technology**: Docusaurus 3 for static site generation
-- **Location**: Now part of the monorepo (previously a separate repository)
 - **Commands**:
   ```bash
   yarn workspace docs start
