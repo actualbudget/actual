@@ -1,4 +1,5 @@
 import { AccountEntity } from './account';
+import { PayeeLocationEntity } from './payee-location';
 
 export interface PayeeEntity {
   id: string;
@@ -7,4 +8,5 @@ export interface PayeeEntity {
   favorite?: boolean;
   learn_categories?: boolean;
   tombstone?: boolean;
+  location?: PayeeLocationEntity;
 }

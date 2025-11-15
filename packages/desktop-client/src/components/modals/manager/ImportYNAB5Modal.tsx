@@ -24,16 +24,17 @@ export function ImportYNAB5Modal() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [error, setError] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
 
   function getErrorMessage(error: string): string {
     switch (error) {
       case 'parse-error':
         return t(
-          'Unable to parse file. Please select a JSON file exported from nYNAB.',
+          'Unable to parse file. Please select a JSON file or ZIP file exported from nYNAB.',
         );
       case 'not-ynab5':
         return t(
-          'This file is not valid. Please select a JSON file exported from nYNAB.',
+          'This file is not valid. Please select a JSON file or ZIP file exported from nYNAB.',
         );
       default:
         return t(
@@ -42,12 +43,10 @@ export function ImportYNAB5Modal() {
     }
   }
 
-  const [importing, setImporting] = useState(false);
-
   async function onImport() {
     const res = await window.Actual.openFileDialog({
       properties: ['openFile'],
-      filters: [{ name: 'ynab', extensions: ['json'] }],
+      filters: [{ name: 'ynab', extensions: ['json', 'zip'] }],
     });
     if (res) {
       setImporting(true);
@@ -95,6 +94,15 @@ export function ImportYNAB5Modal() {
                   for instructions on how to migrate your data from YNAB. You
                   need to export your data as JSON, and that page explains how
                   to do that.
+                </Trans>
+              </Paragraph>
+              <Paragraph>
+                <Trans>
+                  You can select either a JSON file exported from YNAB, or a ZIP
+                  file containing your budget.json and optionally
+                  payee_locations.json files. If you provide a ZIP file with
+                  both files, payee location data will be imported
+                  automatically.
                 </Trans>
               </Paragraph>
               <Paragraph>

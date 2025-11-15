@@ -8,6 +8,13 @@ export interface Budget {
   transactions: Transaction[];
   subtransactions: Subtransaction[];
   months: Month[];
+  payee_locations?: PayeeLocationsData;
+}
+
+export interface PayeeLocationsData {
+  data: {
+    payee_locations: PayeeLocation[];
+  };
 }
 
 export interface Account {
@@ -23,6 +30,14 @@ export interface Payee {
   name: string;
   deleted: boolean;
   transfer_acct?: string;
+}
+
+export interface PayeeLocation {
+  id: string;
+  payee_id: string;
+  latitude: string;
+  longitude: string;
+  deleted: boolean;
 }
 
 export interface CategoryGroup {
