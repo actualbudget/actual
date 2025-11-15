@@ -6,6 +6,8 @@ import { type CategoryEntity } from 'loot-core/types/models';
 import { RenderMonths } from './RenderMonths';
 import { SidebarCategory } from './SidebarCategory';
 
+import { type BudgetComponents } from '.';
+
 import {
   useDraggable,
   useDroppable,
@@ -20,7 +22,7 @@ type IncomeCategoryProps = {
   cat: CategoryEntity;
   isLast?: boolean;
   editingCell: { id: CategoryEntity['id']; cell: string } | null;
-  MonthComponent: ComponentProps<typeof RenderMonths>['component'];
+  MonthComponent: BudgetComponents['IncomeCategoryComponent'];
   onEditName: ComponentProps<typeof SidebarCategory>['onEditName'];
   onEditMonth?: (id: CategoryEntity['id'], month: string) => void;
   onSave: ComponentProps<typeof SidebarCategory>['onSave'];
@@ -83,18 +85,22 @@ export function IncomeCategory({
         onDelete={onDelete}
       />
       <RenderMonths
-        component={MonthComponent}
         editingMonth={
           editingCell && editingCell.id === cat.id && editingCell.cell
         }
-        args={{
-          category: cat,
-          onEdit: onEditMonth,
-          isLast,
-          onShowActivity,
-          onBudgetAction,
-        }}
-      />
+      >
+        {({ month, editing }) => (
+          <MonthComponent
+            month={month}
+            editing={editing}
+            category={cat}
+            isLast={isLast}
+            onEdit={onEditMonth}
+            onBudgetAction={onBudgetAction}
+            onShowActivity={onShowActivity}
+          />
+        )}
+      </RenderMonths>
     </Row>
   );
 }

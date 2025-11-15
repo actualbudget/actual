@@ -27,7 +27,6 @@ type CoverMenuProps = {
   initialAmount?: IntegerAmount | null;
   categoryId?: CategoryEntity['id'];
   onSubmit: (amount: IntegerAmount, categoryId: CategoryEntity['id']) => void;
-  onClose: () => void;
 };
 
 export function CoverMenu({
@@ -35,7 +34,6 @@ export function CoverMenu({
   initialAmount = 0,
   categoryId,
   onSubmit,
-  onClose,
 }: CoverMenuProps) {
   const { t } = useTranslation();
 
@@ -61,7 +59,6 @@ export function CoverMenu({
     if (parsedAmount && fromCategoryId) {
       onSubmit(amountToInteger(parsedAmount), fromCategoryId);
     }
-    onClose();
   }
 
   return (
