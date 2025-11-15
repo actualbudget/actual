@@ -3,6 +3,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
@@ -16,8 +17,6 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
-import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
 import {
   FormField,
   FormLabel,
@@ -123,6 +122,7 @@ export function ScheduleEditForm({
   const locale = useLocale();
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const { isNarrowWidth } = useResponsive();
 
   return (
     <>
@@ -140,18 +140,24 @@ export function ScheduleEditForm({
           </InitialFocus>
         </FormField>
       </SpaceBetween>
-      <SpaceBetween style={{ marginTop: 20 }}>
+      <SpaceBetween
+        style={{
+          marginTop: 20,
+          display: isNarrowWidth ? 'grid' : 'flex',
+          gridTemplateColumns: '1fr 1fr',
+        }}
+      >
         <FormField style={{ flex: 1 }}>
           <FormLabel
             title={t('Payee')}
             id="payee-label"
             htmlFor="payee-field"
           />
-          <PayeeAutocomplete
-            value={fields.payee}
-            labelProps={{ id: 'payee-label' }}
-            inputProps={{ id: 'payee-field', placeholder: t('(none)') }}
-            onSelect={id =>
+          <GenericInput
+            type="id"
+            field="payee"
+            value={fields.payee || ''}
+            onChange={id =>
               dispatch({ type: 'set-field', field: 'payee', value: id })
             }
           />
@@ -163,18 +169,17 @@ export function ScheduleEditForm({
             id="account-label"
             htmlFor="account-field"
           />
-          <AccountAutocomplete
-            includeClosedAccounts={false}
-            value={fields.account}
-            labelProps={{ id: 'account-label' }}
-            inputProps={{ id: 'account-field', placeholder: t('(none)') }}
-            onSelect={id =>
+          <GenericInput
+            type="id"
+            field="account"
+            value={fields.account || ''}
+            onChange={id =>
               dispatch({ type: 'set-field', field: 'account', value: id })
             }
           />
         </FormField>
 
-        <FormField style={{ flex: 1 }}>
+        <FormField style={{ flex: 1, gridColumn: '1 / -1' }}>
           <SpaceBetween style={{ marginBottom: 3, alignItems: 'center' }}>
             <FormLabel
               title={t('Amount')}
@@ -313,7 +318,11 @@ export function ScheduleEditForm({
           </label>
         </View>
 
-        <SpaceBetween direction="vertical" style={{ alignItems: 'flex-end' }}>
+        <SpaceBetween
+          gap={5}
+          direction="vertical"
+          style={{ alignItems: 'flex-end' }}
+        >
           <View
             style={{
               marginTop: 5,
@@ -347,7 +356,6 @@ export function ScheduleEditForm({
               width: 350,
               textAlign: 'right',
               color: theme.pageTextLight,
-              marginTop: 10,
               fontSize: 13,
               lineHeight: '1.4em',
             }}
@@ -460,6 +468,7 @@ export function ScheduleEditForm({
               overflow: 'hidden',
               marginTop: 5,
               maxHeight: 200,
+              minHeight: 100,
             }}
           />
         </SelectedProvider>
@@ -473,7 +482,7 @@ export function ScheduleEditForm({
         }}
       >
         {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
-        <Button style={{ marginRight: 10 }} onPress={onCancel}>
+        <Button onPress={onCancel}>
           <Trans>Cancel</Trans>
         </Button>
         <Button variant="primary" onPress={onSave}>

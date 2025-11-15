@@ -259,10 +259,14 @@ export function FinancesApp() {
 
                 <Route
                   path="/schedules"
+                  element={<NarrowAlternate name="Schedules" />}
+                />
+                <Route
+                  path="/schedules/:id"
                   element={
-                    <NarrowNotSupported>
-                      <WideComponent name="Schedules" />
-                    </NarrowNotSupported>
+                    <WideNotSupported>
+                      <NarrowAlternate name="ScheduleEdit" />
+                    </WideNotSupported>
                   }
                 />
 
@@ -369,6 +373,7 @@ export function FinancesApp() {
               <Route path="/bank-sync" element={<MobileNavTabs />} />
               <Route path="/rules" element={<MobileNavTabs />} />
               <Route path="/payees" element={<MobileNavTabs />} />
+              <Route path="/schedules" element={<MobileNavTabs />} />
               <Route path="*" element={null} />
             </Routes>
           </ScrollProvider>
