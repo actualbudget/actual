@@ -3,6 +3,7 @@ import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
 import { send } from 'loot-core/platform/client/fetch';
+import { locationService } from 'loot-core/shared/location';
 import { groupById } from 'loot-core/shared/util';
 import { type AccountEntity, type PayeeEntity } from 'loot-core/types/models';
 
@@ -21,6 +22,10 @@ type PayeesState = {
   isPayeesLoading: boolean;
   isPayeesLoaded: boolean;
   isPayeesDirty: boolean;
+  nearbyPayees: PayeeEntity[];
+  isNearbyPayeesLoading: boolean;
+  isNearbyPayeesLoaded: boolean;
+  isNearbyPayeesDirty: boolean;
 };
 
 const initialState: PayeesState = {
@@ -32,6 +37,10 @@ const initialState: PayeesState = {
   isPayeesLoading: false,
   isPayeesLoaded: false,
   isPayeesDirty: false,
+  nearbyPayees: [],
+  isNearbyPayeesLoading: false,
+  isNearbyPayeesLoaded: false,
+  isNearbyPayeesDirty: false,
 };
 
 const payeesSlice = createSlice({
@@ -45,7 +54,26 @@ const payeesSlice = createSlice({
   extraReducers: builder => {
     builder.addCase(resetApp, () => initialState);
 
-    builder.addCase(createPayee.fulfilled, _markPayeesDirty);
+    builder.addCase(createPayee.fulfilled, (state, action) => {
+      _markPayeesDirty(state);
+      if (action.payload) {
+        state.isNearbyPayeesDirty = true;
+      }
+    });
+
+    builder.addCase(updatePayeeLocationIfNeeded.fulfilled, (state, action) => {
+      // If location was successfully saved, mark nearby payees as dirty to trigger reload
+      if (action.payload.locationSaved) {
+        state.isNearbyPayeesDirty = true;
+      }
+    });
+
+    builder.addCase(deletePayeeLocation.fulfilled, (state, action) => {
+      // If location was successfully deleted, mark nearby payees as dirty to trigger reload
+      if (action.payload.success) {
+        state.isNearbyPayeesDirty = true;
+      }
+    });
 
     builder.addCase(reloadCommonPayees.fulfilled, (state, action) => {
       _loadCommonPayees(state, action.payload);
@@ -94,11 +122,36 @@ const payeesSlice = createSlice({
     builder.addCase(getPayees.pending, state => {
       state.isPayeesLoading = true;
     });
+
+    builder.addCase(getNearbyPayees.fulfilled, (state, action) => {
+      _loadNearbyPayees(state, action.payload);
+    });
+
+    builder.addCase(getNearbyPayees.rejected, state => {
+      state.isNearbyPayeesLoading = false;
+    });
+
+    builder.addCase(getNearbyPayees.pending, state => {
+      state.isNearbyPayeesLoading = true;
+    });
+
+    builder.addCase(reloadNearbyPayees.fulfilled, (state, action) => {
+      _loadNearbyPayees(state, action.payload);
+    });
+
+    builder.addCase(reloadNearbyPayees.rejected, state => {
+      state.isNearbyPayeesLoading = false;
+    });
+
+    builder.addCase(reloadNearbyPayees.pending, state => {
+      state.isNearbyPayeesLoading = true;
+    });
   },
 });
 
 type CreatePayeePayload = {
   name: PayeeEntity['name'];
+  locationAccess?: boolean;
 };
 
 function translatePayees(
@@ -115,11 +168,50 @@ function translatePayees(
 
 export const createPayee = createAppAsyncThunk(
   `${sliceName}/createPayee`,
-  async ({ name }: CreatePayeePayload) => {
+  async ({ name, locationAccess }: CreatePayeePayload) => {
     const id: PayeeEntity['id'] = await send('payee-create', {
       name: name.trim(),
     });
+
+    // If locationAccess is enabled and we're on mobile (narrow width),
+    // attempt to save the current location for this payee
+    if (locationAccess) {
+      try {
+        await locationService.savePayeeLocationIfNeeded(id);
+      } catch (error) {
+        // Silently handle location errors - don't block payee creation
+        console.log('Could not save location for new payee:', error);
+      }
+    }
+
     return id;
+  },
+);
+
+export const updatePayeeLocationIfNeeded = createAppAsyncThunk(
+  `${sliceName}/updatePayeeLocationIfNeeded`,
+  async (payeeId: PayeeEntity['id']) => {
+    try {
+      const saved = await locationService.savePayeeLocationIfNeeded(payeeId);
+      return { payeeId, locationSaved: saved };
+    } catch (error) {
+      console.log('Could not save location for existing payee:', error);
+    }
+
+    return { payeeId, locationSaved: false };
+  },
+);
+
+export const deletePayeeLocation = createAppAsyncThunk(
+  `${sliceName}/deletePayeeLocation`,
+  async (locationId: string) => {
+    try {
+      await locationService.deletePayeeLocation(locationId);
+      return { locationId, success: true };
+    } catch (error) {
+      console.log('Could not delete payee location:', error);
+      return { locationId, success: false };
+    }
   },
 );
 
@@ -145,6 +237,53 @@ export const reloadCommonPayees = createAppAsyncThunk(
   async () => {
     const payees: PayeeEntity[] = await send('common-payees-get');
     return translatePayees(payees) as PayeeEntity[];
+  },
+);
+
+export const reloadNearbyPayees = createAppAsyncThunk(
+  `${sliceName}/reloadNearbyPayees`,
+  async (locationParams?: {
+    latitude: number;
+    longitude: number;
+    maxDistance?: number;
+  }) => {
+    if (!locationParams?.latitude || !locationParams?.longitude) {
+      // Return empty array if no location is provided
+      return [];
+    }
+    const payees: PayeeEntity[] = await send(
+      'api/payees-get-nearby',
+      locationParams,
+    );
+    return payees;
+  },
+);
+
+export const getNearbyPayees = createAppAsyncThunk(
+  `${sliceName}/getNearbyPayees`,
+  async (locationParams?: {
+    latitude: number;
+    longitude: number;
+    maxDistance?: number;
+  }) => {
+    if (!locationParams?.latitude || !locationParams?.longitude) {
+      // Return empty array if no location is provided
+      return [];
+    }
+    const payees: PayeeEntity[] = await send(
+      'api/payees-get-nearby',
+      locationParams,
+    );
+    return payees;
+  },
+  {
+    condition: (_, { getState }) => {
+      const { payees } = getState();
+      return (
+        !payees.isNearbyPayeesLoading &&
+        (payees.isNearbyPayeesDirty || !payees.isNearbyPayeesLoaded)
+      );
+    },
   },
 );
 
@@ -203,6 +342,10 @@ export const actions = {
   reloadCommonPayees,
   getPayees,
   reloadPayees,
+  getNearbyPayees,
+  reloadNearbyPayees,
+  updatePayeeLocationIfNeeded,
+  deletePayeeLocation,
 };
 
 export const { markPayeesDirty } = payeesSlice.actions;
@@ -217,6 +360,16 @@ function _loadCommonPayees(
   state.isCommonPayeesDirty = false;
 }
 
+function _loadNearbyPayees(
+  state: PayeesState,
+  nearbyPayees: PayeesState['nearbyPayees'],
+) {
+  state.nearbyPayees = nearbyPayees;
+  state.isNearbyPayeesLoading = false;
+  state.isNearbyPayeesLoaded = true;
+  state.isNearbyPayeesDirty = false;
+}
+
 function _loadPayees(state: PayeesState, payees: PayeesState['payees']) {
   state.payees = translatePayees(payees) as PayeeEntity[];
   state.isPayeesLoading = false;
@@ -227,4 +380,5 @@ function _loadPayees(state: PayeesState, payees: PayeesState['payees']) {
 function _markPayeesDirty(state: PayeesState) {
   state.isCommonPayeesDirty = true;
   state.isPayeesDirty = true;
+  state.isNearbyPayeesDirty = true;
 }
