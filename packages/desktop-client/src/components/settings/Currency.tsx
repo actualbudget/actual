@@ -28,6 +28,7 @@ export function CurrencySettings() {
         ['CAD', t('Canadian Dollar')],
         ['CHF', t('Swiss Franc')],
         ['CNY', t('Yuan Renminbi')],
+        ['COP', t('Colombian Peso')],
         ['CRC', t('Costa Rican Colón')],
         ['DKK', t('Danish Krone')],
         ['EGP', t('Egyptian Pound')],
