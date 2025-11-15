@@ -13,7 +13,7 @@ import { BankSyncCheckboxOptions } from './BankSyncCheckboxOptions';
 import { FieldMapping } from './FieldMapping';
 import { useBankSyncAccountSettings } from './useBankSyncAccountSettings';
 
-import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
+import { useUnlinkAccountMutation } from '@desktop-client/accounts';
 import {
   Modal,
   ModalCloseButton,
@@ -159,6 +159,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     close();
   };
 
+  const unlinkAccount = useUnlinkAccountMutation();
   const onUnlink = async (close: () => void) => {
     dispatch(
       pushModal({
@@ -168,8 +169,12 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             accountName: account.name,
             isViewBankSyncSettings: true,
             onUnlink: () => {
-              dispatch(unlinkAccount({ id: account.id }));
-              close();
+              unlinkAccount.mutate(
+                { id: account.id },
+                {
+                  onSuccess: close,
+                },
+              );
             },
           },
         },
