@@ -51,4 +51,6 @@ declare global {
   var Actual: Actual;
 
   var IS_TESTING: boolean;
+
+  var currentMonth: string | null;
 }
