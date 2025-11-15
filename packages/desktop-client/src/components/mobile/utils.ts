@@ -8,9 +8,9 @@ import {
 
 type GetPrettyPayeeProps = {
   t: ReturnType<typeof useTranslation>['t'];
-  transaction?: TransactionEntity;
-  payee?: PayeeEntity;
-  transferAccount?: AccountEntity;
+  transaction?: TransactionEntity | null;
+  payee?: PayeeEntity | null;
+  transferAccount?: AccountEntity | null;
 };
 
 export function getPrettyPayee({

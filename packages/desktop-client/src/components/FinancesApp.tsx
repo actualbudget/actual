@@ -16,6 +16,7 @@ import { GlobalKeys } from './GlobalKeys';
 import { MobileBankSyncAccountEditPage } from './mobile/banksync/MobileBankSyncAccountEditPage';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
+import { TransactionFormPage } from './mobile/transactions/TransactionFormPage';
 import { Notifications } from './Notifications';
 import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
@@ -324,7 +325,8 @@ export function FinancesApp() {
                   path="/transactions/:transactionId"
                   element={
                     <WideNotSupported>
-                      <TransactionEdit />
+                      {/* <TransactionEdit /> */}
+                      <TransactionFormPage />
                     </WideNotSupported>
                   }
                 />
