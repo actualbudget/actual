@@ -35,7 +35,9 @@ export function getBudgetRange(start: string, end: string) {
   start = monthUtils.subMonths(start, 3);
   end = monthUtils.addMonths(end, 12);
 
-  return { start, end, range: monthUtils.rangeInclusive(start, end) };
+  const range = monthUtils.rangeInclusive(start, end);
+
+  return { start, end, range };
 }
 
 export function createCategory(cat, sheetName, prevSheetName, start, end) {
@@ -52,8 +54,7 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
         true,
       );
       const row = rows[0];
-      const amount = row ? row.amount : 0;
-      return amount || 0;
+      return row ? row.amount || 0 : 0;
     },
   });
 
@@ -247,7 +248,6 @@ export async function createBudget(months) {
       const { start, end } = monthUtils.bounds(month);
       const sheetName = monthUtils.sheetForMonth(month);
       const prevSheetName = monthUtils.sheetForMonth(prevMonth);
-
       categories.forEach(cat => {
         createCategory(cat, sheetName, prevSheetName, start, end);
       });
