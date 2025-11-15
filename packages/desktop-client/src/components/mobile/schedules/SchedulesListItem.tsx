@@ -90,80 +90,38 @@ export function SchedulesListItem({
           </Text>
 
           {/* Payee and Account */}
-          <SpaceBetween gap={8} style={{ flexWrap: 'wrap' }}>
-            <View
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
-            >
-              <Text
-                style={{
-                  fontSize: 13,
-                  color: theme.pageTextSubdued,
-                }}
-              >
+          <SpaceBetween gap={4} style={{ flexWrap: 'wrap' }}>
+            <SpaceBetween gap={4} direction="horizontal">
+              <Text style={{ color: theme.pageTextSubdued }}>
                 <Trans>Payee:</Trans>
               </Text>
               <DisplayId type="payees" id={schedule._payee} />
-            </View>
-            <View
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
-            >
-              <Text
-                style={{
-                  fontSize: 13,
-                  color: theme.pageTextSubdued,
-                }}
-              >
+            </SpaceBetween>
+            <SpaceBetween gap={4} direction="horizontal">
+              <Text style={{ color: theme.pageTextSubdued }}>
                 <Trans>Account:</Trans>
               </Text>
               <DisplayId type="accounts" id={schedule._account} />
-            </View>
+            </SpaceBetween>
           </SpaceBetween>
 
           {/* Amount and Date */}
           <SpaceBetween gap={8} style={{ flexWrap: 'wrap' }}>
-            <View
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
-            >
-              <Text
-                style={{
-                  fontSize: 13,
-                  color: theme.pageTextSubdued,
-                }}
-              >
+            <SpaceBetween gap={4} direction="horizontal">
+              <Text style={{ color: theme.pageTextSubdued }}>
                 <Trans>Amount:</Trans>
               </Text>
-              <Text
-                style={{
-                  fontSize: 13,
-                  fontWeight: 500,
-                  color: theme.pageText,
-                }}
-              >
-                {amountStr}
-              </Text>
-            </View>
+              <Text style={{ color: theme.pageText }}>{amountStr}</Text>
+            </SpaceBetween>
             {schedule.next_date && (
-              <View
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
-              >
-                <Text
-                  style={{
-                    fontSize: 13,
-                    color: theme.pageTextSubdued,
-                  }}
-                >
+              <SpaceBetween gap={4} direction="horizontal">
+                <Text style={{ color: theme.pageTextSubdued }}>
                   <Trans>Next:</Trans>
                 </Text>
-                <Text
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: theme.pageText,
-                  }}
-                >
+                <Text style={{ color: theme.pageText }}>
                   {monthUtilFormat(schedule.next_date, dateFormat)}
                 </Text>
-              </View>
+              </SpaceBetween>
             )}
           </SpaceBetween>
         </View>

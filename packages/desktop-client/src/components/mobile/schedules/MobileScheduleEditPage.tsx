@@ -31,7 +31,6 @@ import {
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSelected } from '@desktop-client/hooks/useSelected';
 import { useUndo } from '@desktop-client/hooks/useUndo';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { liveQuery } from '@desktop-client/queries/liveQuery';
@@ -505,26 +504,7 @@ export function MobileScheduleEditPage() {
   }
 
   async function onEditRule(ruleId: string) {
-    const rule = await send('rule-get', { id: ruleId });
-
-    if (!rule) {
-      return;
-    }
-
-    dispatch(
-      pushModal({
-        modal: {
-          name: 'edit-rule',
-          options: {
-            rule,
-            onSave: async () => {
-              const schedule = await loadSchedule();
-              formDispatch({ type: 'set-schedule', schedule });
-            },
-          },
-        },
-      }),
-    );
+    navigate(`/rules/${ruleId}`);
   }
 
   async function onLinkTransactions(ids: string[], scheduleId?: string) {
@@ -599,35 +579,30 @@ export function MobileScheduleEditPage() {
           leftContent={<MobileBackButton onPress={() => navigate(-1)} />}
         />
       }
-      padding={0}
     >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: theme.mobilePageBackground,
-          overflow: 'auto',
-        }}
-      >
-        <ScheduleEditForm
-          fields={state.fields}
-          dispatch={formDispatch}
-          upcomingDates={state.upcomingDates}
-          repeats={repeats}
-          schedule={schedule}
-          adding={adding}
-          isCustom={state.isCustom ?? false}
-          onEditRule={onEditRule}
-          transactions={state.transactions}
-          transactionsMode={state.transactionsMode}
-          error={state.error}
-          selectedInst={selectedInst}
-          onSwitchTransactions={onSwitchTransactions}
-          onLinkTransactions={onLinkTransactions}
-          onUnlinkTransactions={onUnlinkTransactions}
-          onSave={onSave}
-          onCancel={() => navigate(-1)}
-        />
-      </View>
+      <div>
+        <View style={{ paddingBottom: 20 }}>
+          <ScheduleEditForm
+            fields={state.fields}
+            dispatch={formDispatch}
+            upcomingDates={state.upcomingDates}
+            repeats={repeats}
+            schedule={schedule}
+            adding={adding}
+            isCustom={state.isCustom ?? false}
+            onEditRule={onEditRule}
+            transactions={state.transactions}
+            transactionsMode={state.transactionsMode}
+            error={state.error}
+            selectedInst={selectedInst}
+            onSwitchTransactions={onSwitchTransactions}
+            onLinkTransactions={onLinkTransactions}
+            onUnlinkTransactions={onUnlinkTransactions}
+            onSave={onSave}
+            onCancel={() => navigate(-1)}
+          />
+        </View>
+      </div>
     </Page>
   );
 }
