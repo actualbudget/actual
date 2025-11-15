@@ -77,6 +77,7 @@ const exportModel = {
           'cash-flow-card',
           'spending-card',
           'crossover-card',
+          'budget-analysis-card',
           'custom-report',
           'markdown-card',
           'summary-card',
