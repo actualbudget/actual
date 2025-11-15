@@ -441,7 +441,6 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                   style={{ flexGrow: 1 }}
                   data={data}
                   graphType={graphType}
-                  interval="Monthly"
                   showBalance={showBalance}
                 />
               ) : (

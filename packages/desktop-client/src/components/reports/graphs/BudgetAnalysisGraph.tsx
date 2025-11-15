@@ -30,9 +30,7 @@ type BudgetAnalysisGraphProps = {
   data: {
     intervalData: BudgetAnalysisIntervalData[];
   };
-  compact?: boolean;
   graphType?: 'Line' | 'Bar';
-  interval?: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
   showBalance?: boolean;
 };
 
@@ -40,7 +38,6 @@ export function BudgetAnalysisGraph({
   style,
   data,
   graphType = 'Line',
-  interval = 'Monthly',
   showBalance = true,
 }: BudgetAnalysisGraphProps) {
   const format = useFormat();
@@ -54,13 +51,6 @@ export function BudgetAnalysisGraph({
   }));
 
   const formatDate = (date: string) => {
-    if (interval === 'Yearly') {
-      return date;
-    } else if (interval === 'Weekly') {
-      return monthUtils.format(date, 'MMM d', locale);
-    } else if (interval === 'Daily') {
-      return monthUtils.format(date, 'MMM d', locale);
-    }
     return monthUtils.format(date, 'MMM', locale);
   };
 
