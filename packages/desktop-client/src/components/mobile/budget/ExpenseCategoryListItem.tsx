@@ -284,7 +284,14 @@ export function ExpenseCategoryListItem({
               });
               dispatch(collapseModals({ rootModalName: balanceMenuModalName }));
               showUndoNotification({
-                message: `Transferred ${format(amount, 'financial')} from ${category.name} to ${categoriesById[toCategoryId].name}.`,
+                message: t(
+                  'Transferred {{amount}} from {{fromCategoryName}} to {{toCategoryName}}.',
+                  {
+                    amount: format(amount, 'financial'),
+                    fromCategoryName: category.name,
+                    toCategoryName: categoriesById[toCategoryId].name,
+                  },
+                ),
               });
             },
             showToBeBudgeted: true,
@@ -302,6 +309,7 @@ export function ExpenseCategoryListItem({
     showUndoNotification,
     categoriesById,
     format,
+    t,
   ]);
 
   const onCover = useCallback(() => {
