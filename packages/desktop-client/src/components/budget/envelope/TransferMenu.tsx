@@ -51,8 +51,8 @@ export function TransferMenu({
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
 
   const _onSubmit = () => {
-    if (amount != null && amount > 0 && categoryId) {
-      onSubmit(amount, categoryId);
+    if (amount != null && amount > 0 && toCategoryId) {
+      onSubmit(amount, toCategoryId);
     }
     onClose();
   };
