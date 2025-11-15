@@ -20,6 +20,7 @@
     "@rollup/plugin-inject": "^5.0.5",
     "@swc/core": "^1.13.5",
     "@swc/helpers": "^0.5.17",
+    "@tanstack/react-query": "^5.90.5",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "16.3.0",
