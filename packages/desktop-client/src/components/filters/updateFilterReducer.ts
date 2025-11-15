@@ -13,6 +13,7 @@ export function updateFilterReducer<T extends RuleConditionEntity>(
       let value = state.value;
       if (
         (type === 'id' || type === 'string') &&
+        state.field !== 'notes' &&
         (action.op === 'contains' ||
           action.op === 'matches' ||
           action.op === 'is' ||
