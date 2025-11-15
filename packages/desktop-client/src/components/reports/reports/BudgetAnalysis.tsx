@@ -10,6 +10,7 @@ import { SvgChartBar, SvgChart } from '@actual-app/components/icons/v1';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
@@ -282,19 +283,28 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         onDeleteFilter={onDeleteFilter}
         onConditionsOpChange={onConditionsOpChange}
         inlineContent={
-          <Button
-            variant="bare"
-            onPress={() => setGraphType(graphType === 'Line' ? 'Bar' : 'Line')}
-          >
-            {graphType === 'Line' ? (
-              <SvgChartBar style={{ width: 12, height: 12 }} />
-            ) : (
-              <SvgChart style={{ width: 12, height: 12 }} />
-            )}
-            <span style={{ marginLeft: 6 }}>
-              {graphType === 'Line' ? t('Bar chart') : t('Line chart')}
-            </span>
-          </Button>
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <Tooltip
+              content={
+                graphType === 'Line'
+                  ? t('Switch to bar chart')
+                  : t('Switch to line chart')
+              }
+            >
+              <Button
+                variant="bare"
+                onPress={() =>
+                  setGraphType(graphType === 'Line' ? 'Bar' : 'Line')
+                }
+              >
+                {graphType === 'Line' ? (
+                  <SvgChartBar style={{ width: 12, height: 12 }} />
+                ) : (
+                  <SvgChart style={{ width: 12, height: 12 }} />
+                )}
+              </Button>
+            </Tooltip>
+          </View>
         }
       >
         <View style={{ flexDirection: 'row', gap: 10 }}>
