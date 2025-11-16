@@ -187,6 +187,16 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                       ),
                     });
                   }}
+                  onSetBudgetsToSpent={() => {
+                    onBudgetAction(month, 'set-to-spent');
+                    onMenuClose();
+                    showUndoNotification({
+                      message: t(
+                        '{{displayMonth}} budgets have all been set equal to amount spent.',
+                        { displayMonth },
+                      ),
+                    });
+                  }}
                   onSetMonthsAverage={numberOfMonths => {
                     onBudgetAction(month, `set-${numberOfMonths}-avg`);
                     onMenuClose();
