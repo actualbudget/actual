@@ -1,8 +1,7 @@
 # Netlify configuration for actualbudget-website (docs) deployment
 [build]
-  base = "../.."
-  command = "yarn workspace docs build"
-  publish = "packages/docs/build"
+  command = "cd ../.. && yarn workspace docs build"
+  publish = "build"
   ignore = "git diff --quiet HEAD^ HEAD -- packages/docs/"
 
 [build.environment]
