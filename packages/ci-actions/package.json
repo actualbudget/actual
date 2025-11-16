@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "vitest": "^4.0.6"
+    "vitest": "^4.0.9"
   },
   "scripts": {
     "test": "vitest --run"
