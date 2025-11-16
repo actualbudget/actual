@@ -3,6 +3,8 @@ import React, { useEffect, useReducer, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { useParams } from 'react-router';
 
+import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -579,9 +581,30 @@ export function MobileScheduleEditPage() {
           leftContent={<MobileBackButton onPress={() => navigate(-1)} />}
         />
       }
+      footer={
+        <View
+          style={{
+            paddingLeft: styles.mobileEditingPadding,
+            paddingRight: styles.mobileEditingPadding,
+            paddingTop: 10,
+            paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
+            backgroundColor: theme.tableHeaderBackground,
+            borderTopWidth: 1,
+            borderColor: theme.tableBorder,
+          }}
+        >
+          <Button
+            variant="primary"
+            onPress={onSave}
+            style={{ height: styles.mobileMinHeight }}
+          >
+            <Trans>Save</Trans>
+          </Button>
+        </View>
+      }
     >
       <div>
-        <View style={{ paddingBottom: 20 }}>
+        <View style={{ paddingBottom: 10 }}>
           <ScheduleEditForm
             fields={state.fields}
             dispatch={formDispatch}
@@ -598,8 +621,6 @@ export function MobileScheduleEditPage() {
             onSwitchTransactions={onSwitchTransactions}
             onLinkTransactions={onLinkTransactions}
             onUnlinkTransactions={onUnlinkTransactions}
-            onSave={onSave}
-            onCancel={() => navigate(-1)}
           />
         </View>
       </div>

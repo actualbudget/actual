@@ -96,8 +96,8 @@ type ScheduleEditFormProps = {
   onSwitchTransactions: (mode: 'linked' | 'matched') => void;
   onLinkTransactions: (ids: string[], scheduleId?: string) => Promise<void>;
   onUnlinkTransactions: (ids: string[]) => Promise<void>;
-  onSave: () => Promise<void>;
-  onCancel: () => void;
+  onSave?: () => Promise<void>;
+  onCancel?: () => void;
 };
 
 export function ScheduleEditForm({
@@ -474,21 +474,28 @@ export function ScheduleEditForm({
         </SelectedProvider>
       </View>
 
-      <SpaceBetween
-        style={{
-          marginTop: 20,
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-        }}
-      >
-        {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
-        <Button onPress={onCancel}>
-          <Trans>Cancel</Trans>
-        </Button>
-        <Button variant="primary" onPress={onSave}>
-          {adding ? t('Add') : t('Save')}
-        </Button>
-      </SpaceBetween>
+      {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
+
+      {(onSave || onCancel) && (
+        <SpaceBetween
+          style={{
+            marginTop: 20,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}
+        >
+          {onCancel && (
+            <Button onPress={onCancel}>
+              <Trans>Cancel</Trans>
+            </Button>
+          )}
+          {onSave && (
+            <Button variant="primary" onPress={onSave}>
+              {adding ? t('Add') : t('Save')}
+            </Button>
+          )}
+        </SpaceBetween>
+      )}
     </>
   );
 }
