@@ -1,0 +1,12 @@
+# Netlify configuration for actualbudget web deployment
+[build]
+  command = "yarn build:browser"
+  publish = "packages/desktop-client/build"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NODE_OPTIONS = "--max-old-space-size=4096"
+
+# Redirects are handled by _redirects file in the build directory
+# Headers are handled by _headers file in the build directory
+

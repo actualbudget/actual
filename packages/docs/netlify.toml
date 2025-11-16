@@ -1,0 +1,12 @@
+# Netlify configuration for actualbudget-website (docs) deployment
+[build]
+  base = "../.."
+  command = "yarn workspace docs build"
+  publish = "packages/docs/build"
+  ignore = "git diff --quiet HEAD^ HEAD -- packages/docs/"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Docusaurus handles routing internally, so we don't need explicit redirects
+
