@@ -12,7 +12,8 @@ import {
   YAxis,
   Tooltip,
   LabelList,
- type LabelProps } from 'recharts';
+  type LabelProps,
+} from 'recharts';
 
 import {
   type balanceTypeOpType,
