@@ -96,8 +96,6 @@ type ScheduleEditFormProps = {
   onSwitchTransactions: (mode: 'linked' | 'matched') => void;
   onLinkTransactions: (ids: string[], scheduleId?: string) => Promise<void>;
   onUnlinkTransactions: (ids: string[]) => Promise<void>;
-  onSave?: () => Promise<void>;
-  onCancel?: () => void;
 };
 
 export function ScheduleEditForm({
@@ -116,8 +114,6 @@ export function ScheduleEditForm({
   onSwitchTransactions,
   onLinkTransactions,
   onUnlinkTransactions,
-  onSave,
-  onCancel,
 }: ScheduleEditFormProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -126,269 +122,279 @@ export function ScheduleEditForm({
 
   return (
     <>
-      <SpaceBetween style={{ marginTop: 10 }}>
-        <FormField style={{ flex: 1 }}>
-          <FormLabel title={t('Schedule Name')} htmlFor="name-field" />
-          <InitialFocus>
-            <GenericInput
-              type="string"
-              value={fields.name}
-              onChange={e => {
-                dispatch({ type: 'set-field', field: 'name', value: e });
-              }}
-            />
-          </InitialFocus>
-        </FormField>
-      </SpaceBetween>
-      <SpaceBetween
-        style={{
-          marginTop: 20,
-          display: isNarrowWidth ? 'grid' : 'flex',
-          gridTemplateColumns: '1fr 1fr',
-        }}
-      >
-        <FormField style={{ flex: 1 }}>
-          <FormLabel
-            title={t('Payee')}
-            id="payee-label"
-            htmlFor="payee-field"
-          />
-          <GenericInput
-            type="id"
-            field="payee"
-            value={fields.payee || ''}
-            onChange={id =>
-              dispatch({ type: 'set-field', field: 'payee', value: id })
-            }
-          />
-        </FormField>
-
-        <FormField style={{ flex: 1 }}>
-          <FormLabel
-            title={t('Account')}
-            id="account-label"
-            htmlFor="account-field"
-          />
-          <GenericInput
-            type="id"
-            field="account"
-            value={fields.account || ''}
-            onChange={id =>
-              dispatch({ type: 'set-field', field: 'account', value: id })
-            }
-          />
-        </FormField>
-
-        <FormField style={{ flex: 1, gridColumn: '1 / -1' }}>
-          <SpaceBetween style={{ marginBottom: 3, alignItems: 'center' }}>
-            <FormLabel
-              title={t('Amount')}
-              htmlFor="amount-field"
-              style={{ margin: 0, flex: 1 }}
-            />
-            <OpSelect
-              ops={['isapprox', 'is', 'isbetween']}
-              value={fields.amountOp as 'isapprox' | 'is' | 'isbetween'}
-              formatOp={op => {
-                switch (op) {
-                  case 'is':
-                    return t('is exactly');
-                  case 'isapprox':
-                    return t('is approximately');
-                  case 'isbetween':
-                    return t('is between');
-                  default:
-                    throw new Error('Invalid op for select: ' + op);
-                }
-              }}
-              style={{
-                padding: '0 10px',
-                color: theme.pageTextLight,
-                fontSize: 12,
-              }}
-              onChange={(_, op) =>
-                dispatch({
-                  type: 'set-field',
-                  field: 'amountOp',
-                  value: op,
-                })
-              }
-            />
-          </SpaceBetween>
-          {fields.amountOp === 'isbetween' ? (
-            <BetweenAmountInput
-              // @ts-expect-error fix me
-              defaultValue={fields.amount}
-              onChange={value =>
-                dispatch({
-                  type: 'set-field',
-                  field: 'amount',
-                  value,
-                })
-              }
-            />
-          ) : (
-            <AmountInput
-              id="amount-field"
-              // @ts-expect-error fix me
-              value={fields.amount}
-              onUpdate={value =>
-                dispatch({
-                  type: 'set-field',
-                  field: 'amount',
-                  value,
-                })
-              }
-            />
-          )}
-        </FormField>
-      </SpaceBetween>
-
-      <View style={{ marginTop: 20 }}>
-        <FormLabel title={t('Date')} />
-      </View>
-
-      <SpaceBetween
-        style={{
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-        }}
-      >
-        <View style={{ width: '13.44rem' }}>
-          {repeats ? (
-            <RecurringSchedulePicker
-              // @ts-expect-error fix me
-              value={fields.date}
-              onChange={value =>
-                dispatch({ type: 'set-field', field: 'date', value })
-              }
-            />
-          ) : (
-            <DateSelect
-              // @ts-expect-error fix me
-              value={fields.date}
-              onSelect={date =>
-                dispatch({ type: 'set-field', field: 'date', value: date })
-              }
-              dateFormat={dateFormat}
-            />
-          )}
-
-          {upcomingDates && (
-            <View style={{ fontSize: 13, marginTop: 20 }}>
-              <Text style={{ color: theme.pageTextLight, fontWeight: 600 }}>
-                <Trans>Upcoming dates</Trans>
-              </Text>
-              <SpaceBetween
-                direction="vertical"
-                gap={5}
-                style={{
-                  marginTop: 10,
-                  color: theme.pageTextLight,
-                  alignItems: 'flex-start',
+      <View style={{ display: 'block', overflow: 'scroll', padding: 10 }}>
+        <SpaceBetween style={{ marginTop: 10 }}>
+          <FormField style={{ flex: 1 }}>
+            <FormLabel title={t('Schedule Name')} htmlFor="name-field" />
+            <InitialFocus>
+              <GenericInput
+                type="string"
+                value={fields.name}
+                onChange={e => {
+                  dispatch({ type: 'set-field', field: 'name', value: e });
                 }}
-              >
-                {upcomingDates.map(date => (
-                  <View key={date}>
-                    {monthUtils.format(date, `${dateFormat} EEEE`, locale)}
-                  </View>
-                ))}
-              </SpaceBetween>
-            </View>
-          )}
-        </View>
-
-        <View
+              />
+            </InitialFocus>
+          </FormField>
+        </SpaceBetween>
+        <SpaceBetween
           style={{
-            marginTop: 5,
-            flexDirection: 'row',
-            alignItems: 'center',
-            userSelect: 'none',
+            marginTop: 20,
+            display: isNarrowWidth ? 'grid' : 'flex',
+            gridTemplateColumns: '1fr 1fr',
           }}
         >
-          <Checkbox
-            id="form_repeats"
-            checked={repeats}
-            onChange={e => {
-              dispatch({ type: 'set-repeats', repeats: e.target.checked });
-            }}
-          />
-          <label htmlFor="form_repeats" style={{ userSelect: 'none' }}>
-            <Trans>Repeats</Trans>
-          </label>
+          <FormField style={{ flex: 1 }}>
+            <FormLabel
+              title={t('Payee')}
+              id="payee-label"
+              htmlFor="payee-field"
+            />
+            <GenericInput
+              type="id"
+              field="payee"
+              value={fields.payee || ''}
+              onChange={id =>
+                dispatch({ type: 'set-field', field: 'payee', value: id })
+              }
+            />
+          </FormField>
+
+          <FormField style={{ flex: 1 }}>
+            <FormLabel
+              title={t('Account')}
+              id="account-label"
+              htmlFor="account-field"
+            />
+            <GenericInput
+              type="id"
+              field="account"
+              value={fields.account || ''}
+              onChange={id =>
+                dispatch({ type: 'set-field', field: 'account', value: id })
+              }
+            />
+          </FormField>
+
+          <FormField style={{ flex: 1, gridColumn: '1 / -1' }}>
+            <SpaceBetween style={{ marginBottom: 3, alignItems: 'center' }}>
+              <FormLabel
+                title={t('Amount')}
+                htmlFor="amount-field"
+                style={{ margin: 0, flex: 1 }}
+              />
+              <OpSelect
+                ops={['isapprox', 'is', 'isbetween']}
+                value={fields.amountOp as 'isapprox' | 'is' | 'isbetween'}
+                formatOp={op => {
+                  switch (op) {
+                    case 'is':
+                      return t('is exactly');
+                    case 'isapprox':
+                      return t('is approximately');
+                    case 'isbetween':
+                      return t('is between');
+                    default:
+                      throw new Error('Invalid op for select: ' + op);
+                  }
+                }}
+                style={{
+                  padding: '0 10px',
+                  color: theme.pageTextLight,
+                  fontSize: 12,
+                }}
+                onChange={(_, op) =>
+                  dispatch({
+                    type: 'set-field',
+                    field: 'amountOp',
+                    value: op,
+                  })
+                }
+              />
+            </SpaceBetween>
+            {fields.amountOp === 'isbetween' ? (
+              <BetweenAmountInput
+                // @ts-expect-error fix me
+                defaultValue={fields.amount}
+                onChange={value =>
+                  dispatch({
+                    type: 'set-field',
+                    field: 'amount',
+                    value,
+                  })
+                }
+              />
+            ) : (
+              <AmountInput
+                id="amount-field"
+                // @ts-expect-error fix me
+                value={fields.amount}
+                onUpdate={value =>
+                  dispatch({
+                    type: 'set-field',
+                    field: 'amount',
+                    value,
+                  })
+                }
+              />
+            )}
+          </FormField>
+        </SpaceBetween>
+
+        <View style={{ marginTop: 20 }}>
+          <FormLabel title={t('Date')} />
         </View>
 
         <SpaceBetween
-          gap={5}
-          direction="vertical"
-          style={{ alignItems: 'flex-end' }}
+          style={{
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+          }}
         >
+          <View style={{ width: '13.44rem' }}>
+            {repeats ? (
+              <RecurringSchedulePicker
+                // @ts-expect-error fix me
+                value={fields.date}
+                onChange={value =>
+                  dispatch({ type: 'set-field', field: 'date', value })
+                }
+              />
+            ) : (
+              <DateSelect
+                // @ts-expect-error fix me
+                value={fields.date}
+                onSelect={date =>
+                  dispatch({ type: 'set-field', field: 'date', value: date })
+                }
+                dateFormat={dateFormat}
+              />
+            )}
+
+            {upcomingDates && (
+              <View style={{ fontSize: 13, marginTop: 20 }}>
+                <Text style={{ color: theme.pageTextLight, fontWeight: 600 }}>
+                  <Trans>Upcoming dates</Trans>
+                </Text>
+                <SpaceBetween
+                  direction="vertical"
+                  gap={5}
+                  style={{
+                    marginTop: 10,
+                    color: theme.pageTextLight,
+                    alignItems: 'flex-start',
+                  }}
+                >
+                  {upcomingDates.map(date => (
+                    <View key={date}>
+                      {monthUtils.format(date, `${dateFormat} EEEE`, locale)}
+                    </View>
+                  ))}
+                </SpaceBetween>
+              </View>
+            )}
+          </View>
+
           <View
             style={{
               marginTop: 5,
               flexDirection: 'row',
               alignItems: 'center',
               userSelect: 'none',
-              justifyContent: 'flex-end',
             }}
           >
             <Checkbox
-              id="form_posts_transaction"
-              checked={fields.posts_transaction}
+              id="form_repeats"
+              checked={repeats}
               onChange={e => {
-                dispatch({
-                  type: 'set-field',
-                  field: 'posts_transaction',
-                  value: e.target.checked,
-                });
+                dispatch({ type: 'set-repeats', repeats: e.target.checked });
               }}
             />
-            <label
-              htmlFor="form_posts_transaction"
-              style={{ userSelect: 'none' }}
-            >
-              <Trans>Automatically add transaction</Trans>
+            <label htmlFor="form_repeats" style={{ userSelect: 'none' }}>
+              <Trans>Repeats</Trans>
             </label>
           </View>
 
-          <Text
-            style={{
-              width: 350,
-              textAlign: 'right',
-              color: theme.pageTextLight,
-              fontSize: 13,
-              lineHeight: '1.4em',
-            }}
+          <SpaceBetween
+            gap={5}
+            direction="vertical"
+            style={{ alignItems: 'flex-end' }}
           >
-            <Trans>
-              If checked, the schedule will automatically create transactions
-              for you in the specified account
-            </Trans>
-          </Text>
+            <View
+              style={{
+                marginTop: 5,
+                flexDirection: 'row',
+                alignItems: 'center',
+                userSelect: 'none',
+                justifyContent: 'flex-end',
+              }}
+            >
+              <Checkbox
+                id="form_posts_transaction"
+                checked={fields.posts_transaction}
+                onChange={e => {
+                  dispatch({
+                    type: 'set-field',
+                    field: 'posts_transaction',
+                    value: e.target.checked,
+                  });
+                }}
+              />
+              <label
+                htmlFor="form_posts_transaction"
+                style={{ userSelect: 'none' }}
+              >
+                <Trans>Automatically add transaction</Trans>
+              </label>
+            </View>
 
-          {!adding && schedule.rule && (
-            <SpaceBetween style={{ marginTop: 20, alignItems: 'center' }}>
-              {isCustom && (
-                <Text
-                  style={{
-                    color: theme.pageTextLight,
-                    fontSize: 13,
-                    textAlign: 'right',
-                    width: 350,
-                  }}
-                >
-                  <Trans>This schedule has custom conditions and actions</Trans>
-                </Text>
-              )}
-              <Button onPress={() => onEditRule(schedule.rule)}>
-                <Trans>Edit as rule</Trans>
-              </Button>
-            </SpaceBetween>
-          )}
+            <Text
+              style={{
+                width: 350,
+                textAlign: 'right',
+                color: theme.pageTextLight,
+                fontSize: 13,
+                lineHeight: '1.4em',
+              }}
+            >
+              <Trans>
+                If checked, the schedule will automatically create transactions
+                for you in the specified account
+              </Trans>
+            </Text>
+
+            {!adding && schedule.rule && (
+              <SpaceBetween style={{ marginTop: 20, alignItems: 'center' }}>
+                {isCustom && (
+                  <Text
+                    style={{
+                      color: theme.pageTextLight,
+                      fontSize: 13,
+                      textAlign: 'right',
+                      width: 350,
+                    }}
+                  >
+                    <Trans>
+                      This schedule has custom conditions and actions
+                    </Trans>
+                  </Text>
+                )}
+                <Button onPress={() => onEditRule(schedule.rule)}>
+                  <Trans>Edit as rule</Trans>
+                </Button>
+              </SpaceBetween>
+            )}
+          </SpaceBetween>
         </SpaceBetween>
-      </SpaceBetween>
+      </View>
 
-      <View style={{ marginTop: 30, flex: 1 }}>
+      <View
+        style={{
+          padding: 10,
+          minHeight: 150,
+          borderTop: `1px solid ${theme.tableBorder}`,
+        }}
+      >
         <SelectedProvider instance={selectedInst}>
           {adding ? (
             <View style={{ flexDirection: 'row', padding: '5px 0' }}>
@@ -468,7 +474,6 @@ export function ScheduleEditForm({
               overflow: 'hidden',
               marginTop: 5,
               maxHeight: 200,
-              minHeight: 100,
             }}
           />
         </SelectedProvider>
@@ -476,27 +481,6 @@ export function ScheduleEditForm({
 
       {error && (
         <Text style={{ color: theme.errorText, marginTop: 10 }}>{error}</Text>
-      )}
-
-      {(onSave || onCancel) && (
-        <SpaceBetween
-          style={{
-            marginTop: 20,
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-          }}
-        >
-          {onCancel && (
-            <Button onPress={onCancel}>
-              <Trans>Cancel</Trans>
-            </Button>
-          )}
-          {onSave && (
-            <Button variant="primary" onPress={onSave}>
-              {adding ? t('Add') : t('Save')}
-            </Button>
-          )}
-        </SpaceBetween>
       )}
     </>
   );

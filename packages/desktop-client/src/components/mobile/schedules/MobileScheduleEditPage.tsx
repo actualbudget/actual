@@ -602,28 +602,25 @@ export function MobileScheduleEditPage() {
           </Button>
         </View>
       }
+      padding={0}
     >
-      <div>
-        <View style={{ paddingBottom: 10 }}>
-          <ScheduleEditForm
-            fields={state.fields}
-            dispatch={formDispatch}
-            upcomingDates={state.upcomingDates}
-            repeats={repeats}
-            schedule={schedule}
-            adding={adding}
-            isCustom={state.isCustom ?? false}
-            onEditRule={onEditRule}
-            transactions={state.transactions}
-            transactionsMode={state.transactionsMode}
-            error={state.error}
-            selectedInst={selectedInst}
-            onSwitchTransactions={onSwitchTransactions}
-            onLinkTransactions={onLinkTransactions}
-            onUnlinkTransactions={onUnlinkTransactions}
-          />
-        </View>
-      </div>
+      <ScheduleEditForm
+        fields={state.fields}
+        dispatch={formDispatch}
+        upcomingDates={state.upcomingDates}
+        repeats={repeats}
+        schedule={schedule}
+        adding={adding}
+        isCustom={state.isCustom ?? false}
+        onEditRule={onEditRule}
+        transactions={state.transactions}
+        transactionsMode={state.transactionsMode}
+        error={state.error}
+        selectedInst={selectedInst}
+        onSwitchTransactions={onSwitchTransactions}
+        onLinkTransactions={onLinkTransactions}
+        onUnlinkTransactions={onUnlinkTransactions}
+      />
     </Page>
   );
 }
