@@ -2,7 +2,6 @@
 import React, { useEffect, useReducer } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
-
 import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { t } from 'i18next';
