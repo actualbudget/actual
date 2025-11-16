@@ -474,7 +474,9 @@ export function ScheduleEditForm({
         </SelectedProvider>
       </View>
 
-      {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
+      {error && (
+        <Text style={{ color: theme.errorText, marginTop: 10 }}>{error}</Text>
+      )}
 
       {(onSave || onCancel) && (
         <SpaceBetween
