@@ -38,14 +38,7 @@ export function getKeys(trie: TrieNode): NumberTrieNodeKey[] {
  * numeric keys ('0', '1', '2') first in order, then 'hash' last.
  * This ensures consistent serialization for snapshots.
  */
-function createTrieNode(
-  props: {
-    '0'?: TrieNode;
-    '1'?: TrieNode;
-    '2'?: TrieNode;
-    hash?: number;
-  } = {},
-): TrieNode {
+function createTrieNode(props: TrieNode = {}): TrieNode {
   const result: TrieNode = {};
 
   // Add numeric keys in sorted order
