@@ -132,7 +132,6 @@ function CategoryList({
           overflowY: 'auto',
           willChange: 'transform',
           padding: '5px 0',
-          ...(!embedded && { maxHeight: 175 }),
         }}
       >
         {splitTransaction &&
