@@ -12,7 +12,7 @@ import {
   YAxis,
   Tooltip,
   LabelList,
-} from 'recharts';
+ type LabelProps } from 'recharts';
 
 import {
   type balanceTypeOpType,
@@ -113,21 +113,13 @@ const CustomTooltip = ({
   return <div />;
 };
 
-type PropsItem = {
-  index?: number;
-  x?: string | number;
-  y?: string | number;
-  value?: string | number;
-  width?: string | number;
-};
-
 const customLabel = ({
   props,
   width,
   end,
   format,
 }: {
-  props: PropsItem;
+  props: LabelProps;
   width: number;
   end: number;
   format: (value: unknown, type: FormatType) => string;
@@ -142,8 +134,8 @@ const customLabel = ({
   const textAnchor: SVGAttributes<SVGTextElement>['textAnchor'] =
     props.index === 0 ? 'start' : 'middle';
   const display =
-    typeof props.value !== 'string' && props.value !== 0
-      ? `${format(props.value || 0, 'financial-no-decimals')}`
+    typeof props.value === 'number' && props.value !== 0
+      ? `${format(props.value, 'financial-no-decimals')}`
       : '';
   const textSize = adjustTextSize({ sized: width, type: 'area' });
 
