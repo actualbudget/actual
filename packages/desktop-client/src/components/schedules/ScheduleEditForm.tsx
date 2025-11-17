@@ -49,7 +49,7 @@ export type ScheduleFormFields = {
   name: null | string;
 };
 
-type ScheduleEditFormDispatch =
+export type ScheduleEditFormDispatch =
   | {
       type: 'set-field';
       field: 'name' | 'account' | 'payee';
