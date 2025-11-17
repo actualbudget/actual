@@ -19,6 +19,7 @@ import { ConfirmCategoryDeleteModal } from './modals/ConfirmCategoryDeleteModal'
 import { ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
 import { ConfirmTransactionEditModal } from './modals/ConfirmTransactionEditModal';
 import { ConfirmUnlinkAccountModal } from './modals/ConfirmUnlinkAccountModal';
+import { ConvertToScheduleModal } from './modals/ConvertToScheduleModal';
 import { CoverModal } from './modals/CoverModal';
 import { CreateAccountModal } from './modals/CreateAccountModal';
 import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
@@ -72,7 +73,7 @@ import { UnmigrateBudgetAutomationsModal } from './modals/UnmigrateBudgetAutomat
 import { CategoryLearning } from './payees/CategoryLearning';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
-import { ScheduleDetails } from './schedules/ScheduleDetails';
+import { ScheduleEditModal } from './schedules/ScheduleEditModal';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { UpcomingLength } from './schedules/UpcomingLength';
 
@@ -139,6 +140,9 @@ export function Modals() {
 
         case 'confirm-transaction-edit':
           return <ConfirmTransactionEditModal key={key} {...modal.options} />;
+
+        case 'convert-to-schedule':
+          return <ConvertToScheduleModal key={key} {...modal.options} />;
 
         case 'confirm-delete':
           return <ConfirmDeleteModal key={key} {...modal.options} />;
@@ -224,7 +228,7 @@ export function Modals() {
           return <TrackingBudgetSummaryModal key={key} {...modal.options} />;
 
         case 'schedule-edit':
-          return <ScheduleDetails key={key} {...modal.options} />;
+          return <ScheduleEditModal key={key} {...modal.options} />;
 
         case 'schedule-link':
           return <ScheduleLink key={key} {...modal.options} />;

@@ -34,18 +34,22 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
-import { groupById, integerToCurrency } from 'loot-core/shared/util';
+import {
+  groupById,
+  type IntegerAmount,
+  integerToCurrency,
+} from 'loot-core/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
 
 import { ROW_HEIGHT, TransactionListItem } from './TransactionListItem';
 
 import { FloatingActionBar } from '@desktop-client/components/mobile/FloatingActionBar';
-import { useScrollListener } from '@desktop-client/components/ScrollProvider';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useScrollListener } from '@desktop-client/hooks/useScrollListener';
 import {
   useSelectedDispatch,
   useSelectedItems,
@@ -83,6 +87,8 @@ function Loading({ style, 'aria-label': ariaLabel }: LoadingProps) {
 type TransactionListProps = {
   isLoading: boolean;
   transactions: readonly TransactionEntity[];
+  showRunningBalances?: boolean;
+  runningBalances?: Map<TransactionEntity['id'], IntegerAmount>;
   onOpenTransaction?: (transaction: TransactionEntity) => void;
   isLoadingMore: boolean;
   onLoadMore: () => void;
@@ -92,6 +98,8 @@ type TransactionListProps = {
 export function TransactionList({
   isLoading,
   transactions,
+  showRunningBalances,
+  runningBalances,
   onOpenTransaction,
   isLoadingMore,
   onLoadMore,
@@ -174,7 +182,14 @@ export function TransactionList({
               selectedTransactions.size > 0 ? 'multiple' : 'single'
             }
             selectedKeys={selectedTransactions}
-            dependencies={[selectedTransactions]}
+            dependencies={[
+              selectedTransactions,
+              locale,
+              onTransactionPress,
+              runningBalances,
+              showRunningBalances,
+              t,
+            ]}
             renderEmptyState={() =>
               !isLoading && (
                 <View
@@ -219,6 +234,8 @@ export function TransactionList({
                   {transaction => (
                     <TransactionListItem
                       key={transaction.id}
+                      showRunningBalance={showRunningBalances}
+                      runningBalance={runningBalances?.get(transaction.id)}
                       value={transaction}
                       onPress={trans => onTransactionPress(trans)}
                       onLongPress={trans => onTransactionPress(trans, true)}

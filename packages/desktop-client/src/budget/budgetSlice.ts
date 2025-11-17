@@ -3,6 +3,7 @@ import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
 import { send } from 'loot-core/platform/client/fetch';
+import { type IntegerAmount } from 'loot-core/shared/util';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
@@ -338,6 +339,7 @@ type ApplyBudgetActionPayload =
       args: {
         to: CategoryEntity['id'];
         from: CategoryEntity['id'];
+        amount?: IntegerAmount;
       };
     }
   | {
@@ -353,6 +355,7 @@ type ApplyBudgetActionPayload =
       month: string;
       args: {
         category: CategoryEntity['id'];
+        amount?: IntegerAmount;
       };
     }
   | {
@@ -510,6 +513,7 @@ export const applyBudgetAction = createAppAsyncThunk(
           month,
           to: args.to,
           from: args.from,
+          amount: args.amount,
         });
         break;
       case 'transfer-available':
@@ -523,6 +527,7 @@ export const applyBudgetAction = createAppAsyncThunk(
         await send('budget/cover-overbudgeted', {
           month,
           category: args.category,
+          amount: args.amount,
         });
         break;
       case 'transfer-category':
