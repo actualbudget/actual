@@ -4,7 +4,11 @@ import * as d from 'date-fns';
 import { Locale } from 'date-fns';
 import { t } from 'i18next';
 
-import { type PayeeEntity, type ScheduleEntity } from 'loot-core/types/models';
+import {
+  type PayeeEntity,
+  type RecurConfig,
+  type ScheduleEntity,
+} from 'loot-core/types/models';
 
 import { Condition } from '../server/rules';
 
@@ -96,7 +100,11 @@ function prettyDayName(day) {
   return days[day];
 }
 
-export function getRecurringDescription(config, dateFormat, locale: Locale) {
+export function getRecurringDescription(
+  config: RecurConfig,
+  dateFormat: string,
+  locale: Locale,
+) {
   const interval = config.interval || 1;
 
   let endModeSuffix = '';
@@ -456,4 +464,10 @@ export function scheduleIsRecurring(dateCond: Condition | null) {
   const value = cond.getValue();
 
   return value.type === 'recur';
+}
+
+export function isRecurConfig(
+  value: string | RecurConfig,
+): value is RecurConfig {
+  return typeof value === 'object' && value !== null && 'frequency' in value;
 }
