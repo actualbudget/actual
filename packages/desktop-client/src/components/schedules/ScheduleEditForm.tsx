@@ -10,7 +10,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { isRecurConfig } from 'loot-core/shared/schedules';
 import {
   type RecurConfig,
   type ScheduleEntity,
@@ -251,8 +250,9 @@ export function ScheduleEditForm({
         }}
       >
         <View style={{ width: '13.44rem' }}>
-          {isRecurConfig(fields.date) ? (
+          {repeats ? (
             <RecurringSchedulePicker
+              // @ts-expect-error fix me
               value={fields.date}
               onChange={value =>
                 dispatch({ type: 'set-field', field: 'date', value })
@@ -260,6 +260,7 @@ export function ScheduleEditForm({
             />
           ) : (
             <DateSelect
+              // @ts-expect-error fix me
               value={fields.date}
               onSelect={date =>
                 dispatch({ type: 'set-field', field: 'date', value: date })

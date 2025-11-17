@@ -465,9 +465,3 @@ export function scheduleIsRecurring(dateCond: Condition | null) {
 
   return value.type === 'recur';
 }
-
-export function isRecurConfig(
-  value: string | RecurConfig,
-): value is RecurConfig {
-  return typeof value === 'object' && value !== null && 'frequency' in value;
-}
