@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -244,6 +244,7 @@ export function useScheduleEdit({
 }: UseScheduleEditOptions) {
   const reducer = createScheduleEditReducer(useGetScheduledAmount);
 
+  const [isLoading, setIsLoading] = useState(false);
   const [state, dispatch] = useReducer(reducer, {
     schedule: null,
     upcomingDates: null,
@@ -265,9 +266,13 @@ export function useScheduleEdit({
     if (!scheduleId) {
       return null;
     }
+
+    setIsLoading(true);
     const { data } = await aqlQuery(
       q('schedules').filter({ id: scheduleId }).select('*'),
     );
+    setIsLoading(false);
+
     return data[0];
   }
 
@@ -419,5 +424,6 @@ export function useScheduleEdit({
     dispatch: internalDispatch,
     formDispatch,
     loadSchedule,
+    isLoading,
   };
 }

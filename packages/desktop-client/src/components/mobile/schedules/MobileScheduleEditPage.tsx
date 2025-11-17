@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -29,7 +29,6 @@ export function MobileScheduleEditPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
   const { showUndoNotification } = useUndo();
-  const [isLoading, setIsLoading] = useState(false);
 
   const adding = !id || id === 'new';
 
@@ -56,29 +55,12 @@ export function MobileScheduleEditPage() {
       })()
     : undefined;
 
-  const { state, formDispatch } = useScheduleEdit({
+  const { state, formDispatch, isLoading } = useScheduleEdit({
     scheduleId: id,
     adding,
     initialSchedule,
     useGetScheduledAmount: true,
   });
-
-  // Handle loading state - the hook loads the schedule, we just track UI state
-  useEffect(() => {
-    if (!adding && !state.schedule) {
-      setIsLoading(true);
-    } else {
-      setIsLoading(false);
-    }
-  }, [adding, state.schedule]);
-
-  // Handle error case when schedule is not found
-  useEffect(() => {
-    if (!adding && state.schedule === null && !isLoading) {
-      // Schedule not found after loading completed
-      navigate('/schedules');
-    }
-  }, [adding, state.schedule, isLoading, navigate]);
 
   const selectedInst = useSelected('transactions', state.transactions, []);
 
@@ -170,10 +152,6 @@ export function MobileScheduleEditPage() {
 
   const { schedule } = state;
 
-  if (schedule == null && !isLoading) {
-    return null;
-  }
-
   function onSwitchTransactions(mode: 'linked' | 'matched') {
     formDispatch({ type: 'switch-transactions', mode });
     selectedInst.dispatch({ type: 'select-none' });
@@ -188,7 +166,7 @@ export function MobileScheduleEditPage() {
   const pageTitle = adding ? t('Create Schedule') : t('Edit Schedule');
 
   // Show loading state while fetching schedule
-  if (isLoading || schedule == null) {
+  if (isLoading) {
     return (
       <Page
         header={
@@ -209,6 +187,35 @@ export function MobileScheduleEditPage() {
         >
           <Text>
             <Trans>Loading schedule...</Trans>
+          </Text>
+        </View>
+      </Page>
+    );
+  }
+
+  if (!schedule) {
+    return (
+      <Page
+        header={
+          <MobilePageHeader
+            title={t('Schedule not found')}
+            leftContent={
+              <MobileBackButton onPress={() => navigate('/schedules')} />
+            }
+          />
+        }
+        padding={0}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: theme.mobilePageBackground,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Text>
+            <Trans>Schedule not found</Trans>
           </Text>
         </View>
       </Page>
