@@ -28,6 +28,7 @@ export const currencies: Currency[] = [
   { code: 'CAD', name: 'Canadian Dollar', symbol: 'CA$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'CHF', name: 'Swiss Franc', symbol: 'Fr.', decimalPlaces: 2, numberFormat: 'apostrophe-dot', symbolFirst: true },
   { code: 'CNY', name: 'Yuan Renminbi', symbol: '¥', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'COP', name: 'Colombian Peso', symbol: 'Col$', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'CRC', name: 'Costa Rican Colón', symbol: '₡', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: true },
   { code: 'DKK', name: 'Danish Krone', symbol: 'kr', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
   { code: 'EGP', name: 'Egyptian Pound', symbol: 'ج.م', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: false },

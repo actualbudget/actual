@@ -172,7 +172,7 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             <FeatureToggle
               flag="crossoverReport"
-              feedbackLink="https://github.com/actualbudget/actual/pull/5554"
+              feedbackLink="https://github.com/actualbudget/actual/issues/6134"
             >
               <Trans>Crossover Report</Trans>
             </FeatureToggle>
