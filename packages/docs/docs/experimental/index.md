@@ -13,9 +13,9 @@ The current list of experimental features are:
 - [Rule action templating](/docs/experimental/rule-templating)
 - Excel formula mode
 - Currency Support
-- [Crossover Report](/docs/experimetnal/crossover-point-report)
-- [Pluggy.ai](/docs/experimetnal/pluggyai)
-- [End of Month Cleanup](/docs/experimetnal/montly-cleanup)
+- [Crossover Report](/docs/experimental/crossover-point-report)
+- [Pluggy.ai](/docs/experimental/pluggyai)
+- [End of Month Cleanup](/docs/experimental/monthly-cleanup)
 
 ## View and enable experimental features
 
