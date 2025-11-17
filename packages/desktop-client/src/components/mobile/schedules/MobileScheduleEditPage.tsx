@@ -16,8 +16,8 @@ import { type RecurConfig, type ScheduleEntity } from 'loot-core/types/models';
 
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { ScheduleEditForm } from '@desktop-client/components/schedules/ScheduleEditForm';
 import { updateScheduleConditions } from '@desktop-client/components/schedules/schedule-edit-utils';
+import { ScheduleEditForm } from '@desktop-client/components/schedules/ScheduleEditForm';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useScheduleEdit } from '@desktop-client/hooks/useScheduleEdit';
 import { useSelected } from '@desktop-client/hooks/useSelected';

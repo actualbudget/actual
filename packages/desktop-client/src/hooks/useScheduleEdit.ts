@@ -14,11 +14,11 @@ import {
   type RecurConfig,
 } from 'loot-core/types/models';
 
+import { updateScheduleConditions } from '@desktop-client/components/schedules/schedule-edit-utils';
 import {
   type ScheduleFormFields,
   type ScheduleEditFormDispatch,
 } from '@desktop-client/components/schedules/ScheduleEditForm';
-import { updateScheduleConditions } from '@desktop-client/components/schedules/schedule-edit-utils';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { liveQuery } from '@desktop-client/queries/liveQuery';
 

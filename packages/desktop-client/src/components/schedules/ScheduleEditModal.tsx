@@ -10,8 +10,8 @@ import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { type ScheduleEntity, type RecurConfig } from 'loot-core/types/models';
 
-import { ScheduleEditForm } from './ScheduleEditForm';
 import { updateScheduleConditions } from './schedule-edit-utils';
+import { ScheduleEditForm } from './ScheduleEditForm';
 
 import {
   Modal,
