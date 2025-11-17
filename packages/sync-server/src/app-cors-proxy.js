@@ -2,9 +2,9 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import ipaddr from 'ipaddr.js';
 
-import { config } from './load-config.js';
-import { requestLoggerMiddleware } from './util/middlewares.js';
-import { validateSession } from './util/validate-user.js';
+import { config } from './load-config';
+import { requestLoggerMiddleware } from './util/middlewares';
+import { validateSession } from './util/validate-user';
 
 const app = express();
 

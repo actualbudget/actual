@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import IntegrationBank from './banks/integration-bank.js';
+import IntegrationBank from './banks/integration-bank';
 
 const dirname = path.resolve(fileURLToPath(import.meta.url), '..');
 const banksDir = path.resolve(dirname, 'banks');
@@ -10,7 +10,7 @@ const banksDir = path.resolve(dirname, 'banks');
 async function loadBanks() {
   const bankHandlers = fs
     .readdirSync(banksDir)
-    .filter(filename => filename.includes('_') && filename.endsWith('.js'));
+    .filter(filename => filename.includes('_') && filename.endsWith(''));
 
   const imports = await Promise.all(
     bankHandlers.map(file => {

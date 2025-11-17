@@ -1,11 +1,11 @@
 import * as d from 'date-fns';
 
-import { formatPayeeName } from '../../util/payee-name.js';
+import { formatPayeeName } from '../../util/payee-name';
 import {
   amountToInteger,
   printIban,
   sortByBookingDateOrValueDate,
-} from '../utils.js';
+} from '../utils';
 
 const SORTED_BALANCE_TYPE_LIST = [
   'closingBooked',
@@ -17,7 +17,7 @@ const SORTED_BALANCE_TYPE_LIST = [
   'openingBooked',
 ];
 
-/** @type {import('./bank.interface.js').IBank} */
+/** @type {import('./bank.interface').IBank} */
 export default {
   institutionIds: ['IntegrationBank'],
 
