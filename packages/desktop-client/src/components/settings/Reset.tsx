@@ -96,17 +96,19 @@ export function ForceReload() {
   async function onForceReload() {
     setReloading(true);
     try {
-      if (isElectron()) {
-        window.location.reload();
-      } else {
-        if (window.Actual?.applyAppUpdate) {
-          await window.Actual.applyAppUpdate();
-        } else {
-          window.location.reload();
+      if (!isElectron()) {
+        const registration =
+          await window.navigator.serviceWorker.getRegistration('/');
+        if (registration) {
+          await registration.update();
+          if (registration.waiting) {
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
         }
       }
     } catch (error) {
-      // If reload fails, fall back to location.reload()
+      // Do nothing
+    } finally {
       window.location.reload();
     }
   }

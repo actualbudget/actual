@@ -20,10 +20,10 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@types/google-protobuf": "^3.15.12",
-    "protoc-gen-js": "^3.21.4-4",
-    "ts-protoc-gen": "^0.15.0",
+    "@types/google-protobuf": "3.15.12",
+    "protoc-gen-js": "3.21.4-4",
+    "ts-protoc-gen": "0.15.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.6"
+    "vitest": "^4.0.9"
   }
 }
