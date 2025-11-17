@@ -56,7 +56,7 @@ export function getStatusLabel(status: string) {
 
 export function getHasTransactionsQuery(schedules) {
   const filters = schedules.map(schedule => {
-    const dateCond = schedule._conditions.find(c => c.field === 'date');
+    const dateCond = schedule._conditions?.find(c => c.field === 'date');
     return {
       $and: {
         schedule: schedule.id,
