@@ -57,4 +57,3 @@ export function updateScheduleConditions(
     ].filter(val => !!val),
   };
 }
-
