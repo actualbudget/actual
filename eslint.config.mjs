@@ -811,4 +811,19 @@ export default defineConfig(
       'import/no-default-export': 'off',
     },
   },
+  {
+    files: [
+      'packages/sync-server/**/*.test.{js,jsx}',
+      'packages/sync-server/**/*.spec.{js,jsx}',
+      'packages/sync-server/vitest.globalSetup.js',
+    ],
+    rules: {
+      'import/no-unresolved': [
+        'error',
+        {
+          ignore: ['^\\.\\.?/build/'],
+        },
+      ],
+    },
+  },
 );
