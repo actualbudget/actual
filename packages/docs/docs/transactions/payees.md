@@ -4,7 +4,7 @@ A payee is a description of the source of a transaction. Actual provides a power
 
 When importing transactions, by default Actual will create new payees based on the imported name. Often this ends up with some ugly names like `Target Debit Crd Ach Tran Co Id:Xxxxx15170`. With payee management, you can clean these names up, set rules for how payees are resolved, and even set a default category to use.
 
-:::Info[Payee Management]
+:::info[Payee Management]
 
 To manage payees, either select the **More >  Payees** from the sidebar or click the **Manage Payees** button when editing a transaction's payee.
 
@@ -20,7 +20,7 @@ Otherwise, it will look for payees with rules that match. These rules specify wh
 
 When a payee is matched, if it has a **default category** the transaction will automatically be assigned to it.
 
-:::Tip[Category Learning]
+:::tip[Category Learning]
 
 Actual defaults with Category Learning enabled. You can find this setting in the bottom right corner of the Payees page. A more in depth discussion of Payee Rules and Category Learning can be found in the [Rules](docs/budgeting/rules/index.md) documentation. You can turn this off for one, several or all Payees. [Learn more](docs/budgeting/rules/index.md#managing-rules)
 
