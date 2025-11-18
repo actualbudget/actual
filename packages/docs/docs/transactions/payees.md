@@ -22,7 +22,7 @@ When a payee is matched, if it has a **default category** the transaction will a
 
 :::Tip[Category Learning]
 
-Actual defaults with Category Learning enabled. You can find this setting in the bottom right corner of the Payees page. A more in depth discussion of Payee Rules and Cateogry Learning can be found in the [Rules](docs/budgeting/rules/index.md) documentation. You can turn this off for one, several or all Payees. [Learn more](docs/budgeting/rules/index.md#managing-rules)
+Actual defaults with Category Learning enabled. You can find this setting in the bottom right corner of the Payees page. A more in depth discussion of Payee Rules and Category Learning can be found in the [Rules](docs/budgeting/rules/index.md) documentation. You can turn this off for one, several or all Payees. [Learn more](docs/budgeting/rules/index.md#managing-rules)
 
 :::
 
