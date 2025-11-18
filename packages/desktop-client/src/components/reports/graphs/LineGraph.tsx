@@ -22,6 +22,7 @@ import {
 
 import { showActivity } from './showActivity';
 
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
@@ -147,6 +148,7 @@ export function LineGraph({
   showTooltip = true,
   interval,
 }: LineGraphProps) {
+  const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
   const categories = useCategories();
   const accounts = useAccounts();
@@ -241,6 +243,7 @@ export function LineGraph({
                     type="monotone"
                     dataKey={entry.name}
                     stroke={entry.color}
+                    {...animationProps}
                     activeDot={{
                       r: entry.name === tooltip && !compact ? 8 : 3,
                       onMouseEnter: () => {

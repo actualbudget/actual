@@ -27,6 +27,7 @@ import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
@@ -173,6 +174,7 @@ export function BarGraph({
   showOffBudget,
   showTooltip = true,
 }: BarGraphProps) {
+  const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
   const categories = useCategories();
   const accounts = useAccounts();
@@ -270,6 +272,7 @@ export function BarGraph({
               <Bar
                 dataKey={val => getVal(val)}
                 stackId="a"
+                {...animationProps}
                 onMouseLeave={() => setPointer('')}
                 onMouseEnter={() =>
                   !['Group', 'Interval'].includes(groupBy) &&

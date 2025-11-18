@@ -1,6 +1,6 @@
-import { type Options } from '@svgr/babel-preset';
+import { type Config } from '@svgr/core';
 
-const tmpl: Options['template'] = ({ imports, interfaces, componentName, props, jsx }, { tpl }) => {
+const tmpl: Config['template'] = ({ imports, interfaces, componentName, props, jsx }, { tpl }) => {
   return tpl`
 ${imports};
 

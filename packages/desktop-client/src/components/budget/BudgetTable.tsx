@@ -1,10 +1,4 @@
-import React, {
-  type ComponentPropsWithoutRef,
-  type ComponentProps,
-  type KeyboardEvent,
-  useMemo,
-  useState,
-} from 'react';
+import React, { type KeyboardEvent, useMemo, useState } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -39,19 +33,13 @@ type BudgetTableProps = {
   startMonth: string;
   numMonths: number;
   monthBounds: MonthBounds;
-  dataComponents: {
-    SummaryComponent: ComponentPropsWithoutRef<
-      typeof BudgetSummaries
-    >['SummaryComponent'];
-    BudgetTotalsComponent: ComponentPropsWithoutRef<
-      typeof BudgetTotals
-    >['MonthComponent'];
-  } & ComponentProps<typeof BudgetCategories>['dataComponents'];
   onSaveCategory: (category: CategoryEntity) => void;
   onDeleteCategory: (id: CategoryEntity['id']) => void;
   onSaveGroup: (group: CategoryGroupEntity) => void;
   onDeleteGroup: (id: CategoryGroupEntity['id']) => void;
-  onApplyBudgetTemplatesInGroup: (categoryIds: CategoryEntity['id'][]) => void;
+  onApplyBudgetTemplatesInGroup: (
+    categoryIds: Array<CategoryEntity['id']>,
+  ) => void;
   onReorderCategory: (params: {
     id: CategoryEntity['id'];
     groupId?: CategoryGroupEntity['id'];
@@ -72,7 +60,6 @@ export function BudgetTable(props: BudgetTableProps) {
     startMonth,
     numMonths,
     monthBounds,
-    dataComponents,
     onSaveCategory,
     onDeleteCategory,
     onSaveGroup,
@@ -265,7 +252,7 @@ export function BudgetTable(props: BudgetTableProps) {
           monthBounds={monthBounds}
           type={type}
         >
-          <BudgetSummaries SummaryComponent={dataComponents.SummaryComponent} />
+          <BudgetSummaries />
         </MonthsProvider>
       </View>
 
@@ -276,7 +263,6 @@ export function BudgetTable(props: BudgetTableProps) {
         type={type}
       >
         <BudgetTotals
-          MonthComponent={dataComponents.BudgetTotalsComponent}
           toggleHiddenCategories={toggleHiddenCategories}
           expandAllCategories={expandAllCategories}
           collapseAllCategories={collapseAllCategories}
@@ -300,7 +286,6 @@ export function BudgetTable(props: BudgetTableProps) {
               <BudgetCategories
                 categoryGroups={categoryGroups}
                 editingCell={editing}
-                dataComponents={dataComponents}
                 onEditMonth={onEditMonth}
                 onEditName={onEditName}
                 onSaveCategory={onSaveCategory}

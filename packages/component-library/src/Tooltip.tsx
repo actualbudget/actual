@@ -15,12 +15,14 @@ type TooltipProps = Partial<ComponentProps<typeof AriaTooltip>> & {
   children: ReactNode;
   content: ReactNode;
   triggerProps?: Partial<ComponentProps<typeof TooltipTrigger>>;
+  disablePointerEvents?: boolean;
 };
 
 export const Tooltip = ({
   children,
   content,
   triggerProps = {},
+  disablePointerEvents = false,
   ...props
 }: TooltipProps) => {
   const triggerRef = useRef(null);
@@ -69,7 +71,14 @@ export const Tooltip = ({
       >
         {children}
 
-        <AriaTooltip triggerRef={triggerRef} style={styles.tooltip} {...props}>
+        <AriaTooltip
+          triggerRef={triggerRef}
+          style={{
+            ...styles.tooltip,
+            ...(disablePointerEvents && { pointerEvents: 'none' }),
+          }}
+          {...props}
+        >
           {content}
         </AriaTooltip>
       </TooltipTrigger>

@@ -18,6 +18,7 @@ import {
 
 import { computePadding } from './util/computePadding';
 
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -55,6 +56,7 @@ export function NetWorthGraph({
   const privacyMode = usePrivacyMode();
   const id = useId();
   const format = useFormat();
+  const animationProps = useRechartsAnimation({ isAnimationActive: false });
 
   // Use more aggressive smoothening for high-frequency data
   const interpolationType =
@@ -227,7 +229,7 @@ export function NetWorthGraph({
                 type={interpolationType}
                 dot={false}
                 activeDot={false}
-                animationDuration={0}
+                {...animationProps}
                 dataKey="y"
                 stroke={theme.reportsBlue}
                 strokeWidth={2}

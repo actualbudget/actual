@@ -589,7 +589,7 @@ function printChunkModulesTable(statsDiff) {
   const summarySuffix =
     changedModules.length > 100 ? ' (largest 100 files by percent change)' : '';
 
-  return `<details>\n<summary>Changeset${summarySuffix}</summary>\n${CHUNK_TABLE_HEADERS}\n${rows}\n</details>`;
+  return `<details>\n<summary>Changeset${summarySuffix}</summary>\n\n${CHUNK_TABLE_HEADERS}\n${rows}\n</details>`;
 }
 
 function printTotalAssetTable(statsDiff) {
@@ -607,7 +607,7 @@ function renderSection(title, statsDiff, chunkModuleDiff) {
 
   parts.push(
     '',
-    `<details>\n<summary>View detailed bundle breakdown</summary>\n<div>\n${printAssetTablesByGroup(
+    `<details>\n<summary>View detailed bundle breakdown</summary>\n<div>\n\n${printAssetTablesByGroup(
       groups,
     )}\n</div>\n</details>`,
   );

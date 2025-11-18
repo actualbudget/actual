@@ -107,7 +107,7 @@
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
-    "@electron/notarize": "3.1.0",
+    "@electron/notarize": "3.1.1",
     "@electron/rebuild": "4.0.1",
     "@playwright/test": "1.56.1",
     "@types/copyfiles": "^2",
