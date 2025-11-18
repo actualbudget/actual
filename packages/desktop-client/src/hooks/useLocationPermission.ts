@@ -19,6 +19,7 @@ export function useLocationPermission(): boolean {
     }
 
     let permissionStatus: PermissionStatus | null = null;
+    let handleChange: (() => void) | null = null;
 
     navigator.permissions
       .query({ name: 'geolocation' })
@@ -29,7 +30,7 @@ export function useLocationPermission(): boolean {
         setLocationAccess(status.state === 'granted');
 
         // Listen for permission changes
-        const handleChange = () => {
+        handleChange = () => {
           setLocationAccess(status.state === 'granted');
         };
 
@@ -46,10 +47,8 @@ export function useLocationPermission(): boolean {
 
     // Cleanup function
     return () => {
-      if (permissionStatus) {
-        permissionStatus.removeEventListener('change', () => {
-          setLocationAccess(permissionStatus!.state === 'granted');
-        });
+      if (permissionStatus && handleChange) {
+        permissionStatus.removeEventListener('change', handleChange);
       }
     };
   }, [isNarrowWidth]);

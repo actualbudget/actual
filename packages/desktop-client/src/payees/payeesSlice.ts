@@ -247,10 +247,15 @@ export const reloadNearbyPayees = createAppAsyncThunk(
     longitude: number;
     maxDistance?: number;
   }) => {
-    if (!locationParams?.latitude || !locationParams?.longitude) {
+    if (
+      !locationParams ||
+      locationParams.latitude == null ||
+      locationParams.longitude == null
+    ) {
       // Return empty array if no location is provided
       return [];
     }
+
     const payees: PayeeEntity[] = await send(
       'api/payees-get-nearby',
       locationParams,
@@ -266,10 +271,15 @@ export const getNearbyPayees = createAppAsyncThunk(
     longitude: number;
     maxDistance?: number;
   }) => {
-    if (!locationParams?.latitude || !locationParams?.longitude) {
+    if (
+      !locationParams ||
+      locationParams.latitude == null ||
+      locationParams.longitude == null
+    ) {
       // Return empty array if no location is provided
       return [];
     }
+
     const payees: PayeeEntity[] = await send(
       'api/payees-get-nearby',
       locationParams,

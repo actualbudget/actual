@@ -639,13 +639,6 @@ export function getBudgetName(_filepath: string, data: YNAB5.Budget) {
   return data.budget_name || data.name;
 }
 
-export function parsePayeeLocationsFile(
-  buffer: Buffer,
-): YNAB5.PayeeLocationsData {
-  const data = JSON.parse(buffer.toString());
-  return data;
-}
-
 function equalsIgnoreCase(stringa: string, stringb: string): boolean {
   return (
     stringa.localeCompare(stringb, undefined, {

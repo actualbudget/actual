@@ -36,6 +36,7 @@ export function useNearbyPayees(locationAccess: boolean = false) {
   );
 
   useEffect(() => {
+    let isCancelled = false;
     const fetchNearbyPayees = async () => {
       // Skip fetching nearby payees if we shouldn't be accessing location
       if (!locationAccess) {
@@ -44,6 +45,10 @@ export function useNearbyPayees(locationAccess: boolean = false) {
 
       try {
         const location = await locationService.getCurrentPosition();
+        if (isCancelled) {
+          return;
+        }
+
         dispatch(
           getNearbyPayees({
             latitude: location.latitude,
@@ -58,6 +63,10 @@ export function useNearbyPayees(locationAccess: boolean = false) {
     if (isInitialMount || isNearbyPayeesDirty) {
       fetchNearbyPayees();
     }
+
+    return () => {
+      isCancelled = true;
+    };
   }, [dispatch, isInitialMount, isNearbyPayeesDirty, locationAccess]);
 
   return useSelector(state => state.payees.nearbyPayees);

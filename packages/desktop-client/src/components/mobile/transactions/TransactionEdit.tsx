@@ -1660,10 +1660,12 @@ function TransactionEditUnconnected({
   // Automatically select the nearest payee if available and unset
   useEffect(() => {
     const transaction = transactions[0];
-    if (nearestPayee && !transaction?.payee) {
-      transaction.payee = nearestPayee.id;
-      onUpdate(transaction, 'payee');
+    if (!nearestPayee || !transaction || transaction.payee) {
+      return;
     }
+
+    const updated = { ...transaction, payee: nearestPayee.id };
+    onUpdate(updated, 'payee');
   }, [transactions, nearestPayee, onUpdate]);
 
   if (
