@@ -9,7 +9,6 @@ import type { Query } from 'loot-core/shared/query';
 import type { Handlers } from 'loot-core/types/handlers';
 import type {
   ImportTransactionEntity,
-  NewRuleEntity,
   RuleEntity,
   TransactionEntity,
 } from 'loot-core/types/models';
@@ -25,7 +24,10 @@ function send<K extends keyof Handlers, T extends Handlers[K]>(
   return injected.send(name, args);
 }
 
-export async function runImport(budgetName: APIFileEntity['name'], func: () => Promise<void>) {
+export async function runImport(
+  budgetName: APIFileEntity['name'],
+  func: () => Promise<void>,
+) {
   await send('api/start-import', { budgetName });
   try {
     await func();
@@ -286,7 +288,7 @@ export function getPayeeRules(id: RuleEntity['id']) {
   return send('api/payee-rules-get', { id });
 }
 
-export function createRule(rule: NewRuleEntity) {
+export function createRule(rule: Omit<RuleEntity, 'id'>) {
   return send('api/rule-create', { rule });
 }
 
