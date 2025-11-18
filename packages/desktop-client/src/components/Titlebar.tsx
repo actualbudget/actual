@@ -35,6 +35,7 @@ import { ThemeSelector } from './ThemeSelector';
 
 import { sync } from '@desktop-client/app/appSlice';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
@@ -276,6 +277,7 @@ export function Titlebar({ style }: TitlebarProps) {
   const { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
+  const isTestEnv = useIsTestEnv();
 
   return isNarrowWidth ? null : (
     <View
@@ -343,9 +345,7 @@ export function Titlebar({ style }: TitlebarProps) {
       <View style={{ flex: 1 }} />
       <SpaceBetween gap={10}>
         <UncategorizedButton />
-        {isDevelopmentEnvironment() && !Platform.isPlaywright && (
-          <ThemeSelector />
-        )}
+        {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
         <PrivacyButton />
         {serverURL ? <SyncButton /> : null}
         <LoggedInUser />
