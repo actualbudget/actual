@@ -39,7 +39,7 @@ export function BalanceHistoryGraph({
   ref,
 }: BalanceHistoryGraphProps) {
   const locale = useLocale();
-  const animationProps = useRechartsAnimation({ animationDuration: 0 });
+  const animationProps = useRechartsAnimation({ isAnimationActive: false });
   const [balanceData, setBalanceData] = useState<
     Array<{ date: string; balance: number }>
   >([]);

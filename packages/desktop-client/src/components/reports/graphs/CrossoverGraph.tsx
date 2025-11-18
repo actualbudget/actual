@@ -46,7 +46,7 @@ export function CrossoverGraph({
   const { t } = useTranslation();
   const privacyMode = usePrivacyMode();
   const format = useFormat();
-  const animationProps = useRechartsAnimation({ animationDuration: 0 });
+  const animationProps = useRechartsAnimation({ isAnimationActive: false });
 
   const tickFormatter = (tick: number) => {
     if (privacyMode) {

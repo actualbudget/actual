@@ -56,7 +56,7 @@ export function NetWorthGraph({
   const privacyMode = usePrivacyMode();
   const id = useId();
   const format = useFormat();
-  const animationProps = useRechartsAnimation({ animationDuration: 0 });
+  const animationProps = useRechartsAnimation({ isAnimationActive: false });
 
   // Use more aggressive smoothening for high-frequency data
   const interpolationType =
