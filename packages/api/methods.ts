@@ -39,7 +39,7 @@ export async function runImport(
   await send('api/finish-import');
 }
 
-export async function loadBudget(budgetId: APIFileEntity['id']) {
+export async function loadBudget(budgetId: string) {
   return send('api/load-budget', { id: budgetId });
 }
 
