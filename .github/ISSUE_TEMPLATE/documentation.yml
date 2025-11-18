@@ -1,6 +1,6 @@
 name: 'Documentation'
 description: Report documentation issues, request new documentation, or suggest improvements to existing docs.
-title: '[DOCS] - <title>'
+title: '[Docs] - <title>'
 labels: ['documentation']
 body:
   - type: dropdown
