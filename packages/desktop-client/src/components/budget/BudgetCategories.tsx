@@ -1,9 +1,4 @@
-import React, {
-  memo,
-  useState,
-  useMemo,
-  type ComponentPropsWithoutRef,
-} from 'react';
+import React, { memo, useState, useMemo } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -52,32 +47,15 @@ type LocalDragState =
 type BudgetCategoriesProps = {
   categoryGroups: CategoryGroupEntity[];
   editingCell: { id: string; cell: string } | null;
-  dataComponents: {
-    ExpenseGroupComponent: ComponentPropsWithoutRef<
-      typeof ExpenseGroup
-    >['MonthComponent'];
-    ExpenseCategoryComponent: ComponentPropsWithoutRef<
-      typeof ExpenseCategory
-    >['MonthComponent'];
-    IncomeHeaderComponent: ComponentPropsWithoutRef<
-      typeof IncomeHeader
-    >['MonthComponent'];
-    IncomeGroupComponent: ComponentPropsWithoutRef<
-      typeof IncomeGroup
-    >['MonthComponent'];
-    IncomeCategoryComponent: ComponentPropsWithoutRef<
-      typeof IncomeCategory
-    >['MonthComponent'];
-  };
   onBudgetAction: (month: string, action: string, arg: unknown) => void;
   onShowActivity: (id: CategoryEntity['id'], month?: string) => void;
-  onEditName?: (id: CategoryEntity['id']) => void;
-  onEditMonth?: (id: CategoryEntity['id'], month: string) => void;
-  onSaveCategory?: (category: CategoryEntity) => void;
-  onSaveGroup?: (group: CategoryGroupEntity) => void;
+  onEditName: (id: CategoryEntity['id']) => void;
+  onEditMonth: (id: CategoryEntity['id'], month: string) => void;
+  onSaveCategory: (category: CategoryEntity) => void;
+  onSaveGroup: (group: CategoryGroupEntity) => void;
   onDeleteCategory: (id: CategoryEntity['id']) => void;
-  onDeleteGroup?: (id: CategoryGroupEntity['id']) => void;
-  onApplyBudgetTemplatesInGroup?: (categoryIds: CategoryEntity['id'][]) => void;
+  onDeleteGroup: (id: CategoryGroupEntity['id']) => void;
+  onApplyBudgetTemplatesInGroup: (categoryIds: CategoryEntity['id'][]) => void;
   onReorderCategory: OnDropCallback;
   onReorderGroup: OnDropCallback;
 };
@@ -86,7 +64,6 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
   ({
     categoryGroups,
     editingCell,
-    dataComponents,
     onBudgetAction,
     onShowActivity,
     onEditName,
@@ -319,7 +296,6 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   group={item.value}
                   editingCell={editingCell}
                   collapsed={collapsedGroupIds.includes(item.value.id)}
-                  MonthComponent={dataComponents.ExpenseGroupComponent}
                   dragState={dragState}
                   onEditName={onEditName}
                   onSave={_onSaveGroup}
@@ -339,7 +315,6 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   cat={item.value}
                   categoryGroup={item.group}
                   editingCell={editingCell}
-                  MonthComponent={dataComponents.ExpenseCategoryComponent}
                   dragState={dragState}
                   onEditName={onEditName}
                   onEditMonth={onEditMonth}
@@ -360,10 +335,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                     backgroundColor: theme.tableBackground,
                   }}
                 >
-                  <IncomeHeader
-                    MonthComponent={dataComponents.IncomeHeaderComponent}
-                    onShowNewGroup={onShowNewGroup}
-                  />
+                  <IncomeHeader onShowNewGroup={onShowNewGroup} />
                 </View>
               );
               break;
@@ -372,7 +344,6 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                 <IncomeGroup
                   group={item.value}
                   editingCell={editingCell}
-                  MonthComponent={dataComponents.IncomeGroupComponent}
                   collapsed={collapsedGroupIds.includes(item.value.id)}
                   onEditName={onEditName!}
                   onSave={_onSaveGroup}
@@ -387,8 +358,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   cat={item.value}
                   editingCell={editingCell}
                   isLast={idx === items.length - 1}
-                  MonthComponent={dataComponents.IncomeCategoryComponent}
-                  onEditName={onEditName!}
+                  onEditName={onEditName}
                   onEditMonth={onEditMonth}
                   onSave={_onSaveCategory}
                   onDelete={onDeleteCategory}
