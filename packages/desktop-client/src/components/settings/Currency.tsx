@@ -36,6 +36,7 @@ export function CurrencySettings() {
         ['GBP', t('Pound Sterling')],
         ['GTQ', t('Guatemalan Quetzal')],
         ['HKD', t('Hong Kong Dollar')],
+        ['IDR', t('Indonesian Rupiah')],
         ['INR', t('Indian Rupee')],
         ['JMD', t('Jamaican Dollar')],
         ['JPY', t('Japanese Yen')],
