@@ -25,7 +25,7 @@ function send<K extends keyof Handlers, T extends Handlers[K]>(
   return injected.send(name, args);
 }
 
-export async function runImport(budgetName: string, func: () => Promise<void>) {
+export async function runImport(budgetName: APIFileEntity['name'], func: () => Promise<void>) {
   await send('api/start-import', { budgetName });
   try {
     await func();
@@ -36,7 +36,7 @@ export async function runImport(budgetName: string, func: () => Promise<void>) {
   await send('api/finish-import');
 }
 
-export async function loadBudget(budgetId: string) {
+export async function loadBudget(budgetId: APIFileEntity['id']) {
   return send('api/load-budget', { id: budgetId });
 }
 
