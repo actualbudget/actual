@@ -15,7 +15,6 @@ import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
-import * as Platform from 'loot-core/shared/platform';
 
 import { AppBackground } from './AppBackground';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
@@ -33,6 +32,7 @@ import {
   loadBudget,
 } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { handleGlobalEvents } from '@desktop-client/global-events';
+import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
 import { setI18NextLanguage } from '@desktop-client/i18n';
@@ -171,6 +171,7 @@ function ErrorFallback({ error }: FallbackProps) {
 
 export function App() {
   const store = useStore();
+  const isTestEnv = useIsTestEnv();
 
   useEffect(() => handleGlobalEvents(store), [store]);
 
@@ -233,8 +234,9 @@ export function App() {
                     }}
                   >
                     <ErrorBoundary FallbackComponent={ErrorFallback}>
-                      {process.env.REACT_APP_REVIEW_ID &&
-                        !Platform.isPlaywright && <DevelopmentTopBar />}
+                      {process.env.REACT_APP_REVIEW_ID && !isTestEnv && (
+                        <DevelopmentTopBar />
+                      )}
                       <AppInner />
                     </ErrorBoundary>
                     <ThemeStyle />
