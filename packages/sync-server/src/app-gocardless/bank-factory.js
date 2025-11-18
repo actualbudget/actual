@@ -10,7 +10,7 @@ const banksDir = path.resolve(dirname, 'banks');
 async function loadBanks() {
   const bankHandlers = fs
     .readdirSync(banksDir)
-    .filter(filename => filename.includes('_') && filename.endsWith(''));
+    .filter(filename => filename.includes('_') && filename.endsWith('.js'));
 
   const imports = await Promise.all(
     bankHandlers.map(file => {
