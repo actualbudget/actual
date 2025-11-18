@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 import React, {
+  type ReactNode,
   useContext,
   type CSSProperties,
-  type ComponentType,
   type JSX,
 } from 'react';
 
@@ -16,16 +16,16 @@ import { MonthsContext } from './MonthsContext';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 
 type RenderMonthsProps = {
-  component?: ComponentType<{ month: string; editing: boolean }>;
+  children?:
+    | ReactNode
+    | (({ month, editing }: { month: string; editing: boolean }) => ReactNode);
   editingMonth?: string;
-  args?: object;
   style?: CSSProperties;
 };
 
 export function RenderMonths({
-  component: Component,
+  children,
   editingMonth,
-  args,
   style,
 }: RenderMonthsProps) {
   const { months } = useContext(MonthsContext);
@@ -42,7 +42,9 @@ export function RenderMonths({
             ...style,
           }}
         >
-          <Component month={month} editing={editing} {...args} />
+          {typeof children === 'function'
+            ? children({ month, editing })
+            : children}
         </View>
       </SheetNameProvider>
     );

@@ -174,6 +174,12 @@ export function ExperimentalFeatures() {
             <FeatureToggle flag="forceReload">
               <Trans>Force reload app button</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="budgetTableV2"
+              feedbackLink="https://github.com/actualbudget/actual/pull/CHANGEME"
+            >
+              <Trans>Rewrite of desktop budget table</Trans>
+            </FeatureToggle>
             <GlobalFeatureToggle
               prefName="plugins"
               disableToggle={true}
