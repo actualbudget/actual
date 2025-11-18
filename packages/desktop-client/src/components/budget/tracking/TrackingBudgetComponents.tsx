@@ -24,10 +24,8 @@ import { css } from '@emotion/css';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import * as monthUtils from 'loot-core/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
-} from 'loot-core/types/models';
+
+import { type CategoryGroupMonthProps, type CategoryMonthProps } from '..';
 
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
@@ -149,14 +147,10 @@ export function IncomeHeaderMonth() {
   );
 }
 
-type GroupMonthProps = {
-  month: string;
-  group: CategoryGroupEntity;
-};
 export const GroupMonth = memo(function GroupMonth({
   month,
   group,
-}: GroupMonthProps) {
+}: CategoryGroupMonthProps) {
   const { id } = group;
 
   return (
@@ -209,14 +203,6 @@ export const GroupMonth = memo(function GroupMonth({
   );
 });
 
-type CategoryMonthProps = {
-  month: string;
-  category: CategoryEntity;
-  editing: boolean;
-  onEdit: (id: CategoryEntity['id'] | null, month?: string) => void;
-  onBudgetAction: (month: string, action: string, arg: unknown) => void;
-  onShowActivity: (id: CategoryEntity['id'], month: string) => void;
-};
 export const CategoryMonth = memo(function CategoryMonth({
   month,
   category,
