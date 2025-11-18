@@ -1,5 +1,7 @@
 import { theme } from '@actual-app/components/theme';
 
+import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
+
 const colorFades = {
   blueFadeStart: 'rgba(229, 245, 255, 1)',
   blueFadeEnd: 'rgba(229, 245, 255, 0)',
@@ -134,4 +136,23 @@ export function getColorScale(name: string): string[] {
     green: ['#354722', '#466631', '#649146', '#8AB25C', '#A9C97E'],
   };
   return name ? scales[name] : scales.grayscale;
+}
+
+export function useRechartsAnimation(defaults?: {
+  animationDuration?: number;
+  isAnimationActive?: boolean;
+}) {
+  const isTestEnv = useIsTestEnv();
+
+  if (isTestEnv) {
+    return {
+      isAnimationActive: false,
+      animationDuration: 0,
+    };
+  }
+
+  return {
+    isAnimationActive: defaults?.isAnimationActive ?? true,
+    animationDuration: defaults?.animationDuration,
+  };
 }
