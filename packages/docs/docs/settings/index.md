@@ -4,9 +4,9 @@ The Settings screen in Actual provides you with a number of options for managing
 
 You can access the Settings screen by clicking the down arrow by your budget name or going to the sidebar and clicking More > Settings.
 
-![Image of Settings top pf page](/img/using-actual/actual-settings.png)
-
 There is an option to "Display a notification when updates are available" here.
+
+![Image of Settings top pf page](/img/using-actual/actual-settings.png)
 
 ### Themes
 
@@ -32,7 +32,7 @@ The language choice alters the display language of all text. If you encounter a 
 
 ### Authentication Method
 
-OpenID can be enabled here. [Authenticating With an OpenID Provider](/docs/config/oauth-auth)
+OpenID can be enabled here. [Learn more](/docs/config/oauth-auth)
 
 ![Image of OpenID setting](/img/using-actual/actual-openid.png)
 
