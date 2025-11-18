@@ -2,6 +2,7 @@ import type {
   APIAccountEntity,
   APICategoryEntity,
   APICategoryGroupEntity,
+  APIFileEntity,
   APIPayeeEntity,
   APIScheduleEntity,
 } from 'loot-core/server/api-models';
