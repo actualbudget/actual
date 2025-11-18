@@ -44,9 +44,13 @@ End-to-end encryption allows you to encrypt the data on your remote server with 
 
 ### Budgeting Method
 
-You can choose either [Envelope](/docs/getting-started/envelope-budgeting) or [Tracking](/docs/getting-started/tracking-budget) Budgeting methods here. 
-Envelope Budgeting is recommended and most of the documentation refers to this method.
+Either Envelope or Tracking Budgeting methods are available in Actual. Envelope Budgeting is recommended and most of the documentation refers to this method.
 
+[Learn more about Envelope Budgeting](/docs/getting-started/envelope-budgeting)
+<br />
+[Learn more about Tracking Budgeting](/docs/getting-started/tracking-budget)
+<br />
+<br />
 ![Image of budgeting methods setting](/img/using-actual/actual-budget-method.png)
 
 ### Export
