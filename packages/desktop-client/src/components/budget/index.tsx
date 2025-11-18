@@ -16,17 +16,16 @@ import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
 import { prewarmAllMonths, prewarmMonth } from './util';
 
 import {
-  applyBudgetAction,
-  createCategory,
-  createCategoryGroup,
-  deleteCategory,
-  deleteCategoryGroup,
-  getCategories,
-  moveCategory,
-  moveCategoryGroup,
-  updateCategory,
-  updateCategoryGroup,
-} from '@desktop-client/budget/budgetSlice';
+  useBudgetActions,
+  useCreateCategoryGroupMutation,
+  useCreateCategoryMutation,
+  useDeleteCategoryGroupMutation,
+  useDeleteCategoryMutation,
+  useMoveCategoryGroupMutation,
+  useMoveCategoryMutation,
+  useUpdateCategoryGroupMutation,
+  useUpdateCategoryMutation,
+} from '@desktop-client/budget';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
@@ -69,6 +68,15 @@ function BudgetInner(props: BudgetInnerProps) {
   const currentMonth = monthUtils.currentMonth();
   const spreadsheet = useSpreadsheet();
   const dispatch = useDispatch();
+  const applyBudgetAction = useBudgetActions();
+  const createCategory = useCreateCategoryMutation();
+  const updateCategory = useUpdateCategoryMutation();
+  const deleteCategory = useDeleteCategoryMutation();
+  const moveCategory = useMoveCategoryMutation();
+  const createCategoryGroup = useCreateCategoryGroupMutation();
+  const updateCategoryGroup = useUpdateCategoryGroupMutation();
+  const deleteCategoryGroup = useDeleteCategoryGroupMutation();
+  const moveCategoryGroup = useMoveCategoryGroupMutation();
   const navigate = useNavigate();
   const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
     'budget.summaryCollapsed',
@@ -87,8 +95,6 @@ function BudgetInner(props: BudgetInnerProps) {
 
   useEffect(() => {
     async function run() {
-      await dispatch(getCategories());
-
       const { start, end } = await send('get-budget-bounds');
       setBounds({ start, end });
 
@@ -176,16 +182,14 @@ function BudgetInner(props: BudgetInnerProps) {
     }
 
     if (category.id === 'new') {
-      dispatch(
-        createCategory({
-          name: category.name,
-          groupId: category.group,
-          isIncome: category.is_income,
-          isHidden: category.hidden,
-        }),
-      );
+      createCategory.mutate({
+        name: category.name,
+        groupId: category.group,
+        isIncome: category.is_income,
+        isHidden: category.hidden,
+      });
     } else {
-      dispatch(updateCategory({ category }));
+      updateCategory.mutate({ category });
     }
   };
 
@@ -201,9 +205,7 @@ function BudgetInner(props: BudgetInnerProps) {
               category: id,
               onDelete: transferCategory => {
                 if (id !== transferCategory) {
-                  dispatch(
-                    deleteCategory({ id, transferId: transferCategory }),
-                  );
+                  deleteCategory.mutate({ id, transferId: transferCategory });
                 }
               },
             },
@@ -211,15 +213,15 @@ function BudgetInner(props: BudgetInnerProps) {
         }),
       );
     } else {
-      dispatch(deleteCategory({ id }));
+      deleteCategory.mutate({ id });
     }
   };
 
   const onSaveGroup = group => {
     if (group.id === 'new') {
-      dispatch(createCategoryGroup({ name: group.name }));
+      createCategoryGroup.mutate({ name: group.name });
     } else {
-      dispatch(updateCategoryGroup({ group }));
+      updateCategoryGroup.mutate({ group });
     }
   };
 
@@ -242,33 +244,32 @@ function BudgetInner(props: BudgetInnerProps) {
             options: {
               group: id,
               onDelete: transferCategory => {
-                dispatch(
-                  deleteCategoryGroup({ id, transferId: transferCategory }),
-                );
+                deleteCategoryGroup.mutate({
+                  id,
+                  transferId: transferCategory,
+                });
               },
             },
           },
         }),
       );
     } else {
-      dispatch(deleteCategoryGroup({ id }));
+      deleteCategoryGroup.mutate({ id });
     }
   };
 
   const onApplyBudgetTemplatesInGroup = async categories => {
-    dispatch(
-      applyBudgetAction({
-        month: startMonth,
-        type: 'apply-multiple-templates',
-        args: {
-          categories,
-        },
-      }),
-    );
+    applyBudgetAction.mutate({
+      month: startMonth,
+      type: 'apply-multiple-templates',
+      args: {
+        categories,
+      },
+    });
   };
 
   const onBudgetAction = (month, type, args) => {
-    dispatch(applyBudgetAction({ month, type, args }));
+    applyBudgetAction.mutate({ month, type, args });
   };
 
   const onShowActivity = (categoryId, month) => {
@@ -307,19 +308,15 @@ function BudgetInner(props: BudgetInnerProps) {
       return;
     }
 
-    dispatch(
-      moveCategory({
-        id: sortInfo.id,
-        groupId: sortInfo.groupId,
-        targetId: sortInfo.targetId,
-      }),
-    );
+    moveCategory.mutate({
+      id: sortInfo.id,
+      groupId: sortInfo.groupId,
+      targetId: sortInfo.targetId,
+    });
   };
 
   const onReorderGroup = async sortInfo => {
-    dispatch(
-      moveCategoryGroup({ id: sortInfo.id, targetId: sortInfo.targetId }),
-    );
+    moveCategoryGroup.mutate({ id: sortInfo.id, targetId: sortInfo.targetId });
   };
 
   const onToggleCollapse = () => {
