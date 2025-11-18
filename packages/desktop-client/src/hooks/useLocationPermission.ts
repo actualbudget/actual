@@ -20,10 +20,15 @@ export function useLocationPermission(): boolean {
 
     let permissionStatus: PermissionStatus | null = null;
     let handleChange: (() => void) | null = null;
+    let isMounted = true;
 
     navigator.permissions
       .query({ name: 'geolocation' })
       .then(status => {
+        if (!isMounted) {
+          return;
+        }
+
         permissionStatus = status;
 
         // Set initial state
@@ -41,12 +46,16 @@ export function useLocationPermission(): boolean {
         }
       })
       .catch(() => {
+        if (!isMounted) {
+          return;
+        }
         // Permission API not supported, assume no access
         setLocationAccess(false);
       });
 
     // Cleanup function
     return () => {
+      isMounted = false;
       if (permissionStatus && handleChange) {
         permissionStatus.removeEventListener('change', handleChange);
       }

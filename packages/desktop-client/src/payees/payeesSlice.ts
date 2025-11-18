@@ -256,10 +256,14 @@ export const reloadNearbyPayees = createAppAsyncThunk(
       return [];
     }
 
-    const payees: PayeeEntity[] = await send(
-      'api/payees-get-nearby',
-      locationParams,
+    const payees = await locationService.getNearbyPayees(
+      {
+        latitude: locationParams.latitude,
+        longitude: locationParams.longitude,
+      },
+      locationParams.maxDistance,
     );
+
     return payees;
   },
 );
@@ -280,10 +284,14 @@ export const getNearbyPayees = createAppAsyncThunk(
       return [];
     }
 
-    const payees: PayeeEntity[] = await send(
-      'api/payees-get-nearby',
-      locationParams,
+    const payees = await locationService.getNearbyPayees(
+      {
+        latitude: locationParams.latitude,
+        longitude: locationParams.longitude,
+      },
+      locationParams.maxDistance,
     );
+
     return payees;
   },
   {
