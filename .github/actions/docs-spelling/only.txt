@@ -1,0 +1,3 @@
+# Only check files in the packages/docs directory
+^packages/docs/
+

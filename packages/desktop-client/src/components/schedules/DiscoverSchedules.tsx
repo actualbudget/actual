@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -233,13 +233,12 @@ export function DiscoverSchedules() {
             <DiscoverSchedulesTable loading={isLoading} schedules={schedules} />
           </SelectedProvider>
 
-          <Stack
-            direction="row"
-            align="center"
-            justify="flex-end"
+          <SpaceBetween
             style={{
               paddingTop: 20,
               paddingBottom: 0,
+              alignItems: 'center',
+              justifyContent: 'flex-end',
             }}
           >
             <ButtonWithLoading
@@ -253,7 +252,7 @@ export function DiscoverSchedules() {
             >
               <Trans>Create schedules</Trans>
             </ButtonWithLoading>
-          </Stack>
+          </SpaceBetween>
         </>
       )}
     </Modal>

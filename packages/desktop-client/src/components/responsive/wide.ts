@@ -10,6 +10,8 @@ export { Account } from '../accounts/Account';
 export { ManageRulesPage as Rules } from '../ManageRulesPage';
 export { ManageRulesPage as RuleEdit } from '../ManageRulesPage';
 export { ManagePayeesPage as Payees } from '../payees/ManagePayeesPage';
+export { ManagePayeesPage as PayeeEdit } from '../payees/ManagePayeesPage';
+
 export { BankSync } from '../banksync';
 
 export { UserDirectoryPage } from '../admin/UserDirectory/UserDirectoryPage';

@@ -31,3 +31,6 @@ public/*.wasm
 
 # translations
 locale/
+
+# service worker build output
+dev-dist

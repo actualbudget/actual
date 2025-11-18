@@ -2,7 +2,7 @@ import React, { type ComponentProps, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SvgDownAndRightArrow } from '@actual-app/components/icons/v2';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -190,12 +190,12 @@ export function Transaction({
       <Field width={200}>
         {transaction.isMatchedTransaction ? (
           <View>
-            <Stack direction="row" align="flex-start">
+            <SpaceBetween style={{ alignItems: 'flex-start' }}>
               <View>
                 <SvgDownAndRightArrow width={16} height={16} />
               </View>
               <View>{formatDate(transaction.date ?? null, dateFormat)}</View>
-            </Stack>
+            </SpaceBetween>
           </View>
         ) : showParsed ? (
           <ParsedDate

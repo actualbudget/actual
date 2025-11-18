@@ -62,7 +62,7 @@ test.describe('Mobile Payees', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('clicking on a payee opens rule creation form', async () => {
+  test('clicking on a payee opens payee edit page', async () => {
     await payeesPage.waitForLoadingToComplete();
 
     const payeeCount = await payeesPage.getPayeeCount();
@@ -70,8 +70,16 @@ test.describe('Mobile Payees', () => {
 
     await payeesPage.clickPayee(0);
 
-    // Should navigate to rules page for creating a new rule
-    await expect(page).toHaveURL(/\/rules/);
+    // Should navigate to payee edit page
+    await expect(page).toHaveURL(/\/payees\/.+/);
+
+    // Check that the edit page elements are visible
+    await expect(
+      page.getByRole('heading', { name: 'Edit Payee' }),
+    ).toBeVisible();
+    await expect(page.getByPlaceholder('Payee name')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Save' })).toBeVisible();
+
     await expect(page).toMatchThemeScreenshots();
   });
 

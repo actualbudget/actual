@@ -17,6 +17,7 @@ import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -238,6 +239,7 @@ export function DonutGraph({
   showTooltip = true,
 }: DonutGraphProps) {
   const format = useFormat();
+  const animationProps = useRechartsAnimation({ isAnimationActive: false });
 
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
   const splitData = groupBy === 'Interval' ? 'intervalData' : 'data';
@@ -289,7 +291,7 @@ export function DonutGraph({
                   }
                   dataKey={val => getVal(val)}
                   nameKey={yAxis}
-                  isAnimationActive={false}
+                  {...animationProps}
                   data={
                     data[splitData]?.map(item => ({
                       ...item,

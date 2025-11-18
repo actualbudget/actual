@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -210,7 +210,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
 
   return (
     <>
-      <Stack direction="row" style={{ marginTop: 10 }}>
+      <SpaceBetween style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title={t('Username')} htmlFor="name-field" />
           <Input
@@ -252,7 +252,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
             <Trans>Enabled</Trans>
           </label>
         </View>
-      </Stack>
+      </SpaceBetween>
       {isOwner && (
         <label
           style={{
@@ -266,7 +266,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
           </Trans>
         </label>
       )}
-      <Stack direction="row" style={{ marginTop: 10 }}>
+      <SpaceBetween style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title={t('Display Name')} htmlFor="displayname-field" />
           <Input
@@ -302,8 +302,8 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
             </Trans>
           </View>
         </FormField>
-      </Stack>
-      <Stack direction="row" style={{ marginTop: 10, width: '100px' }}>
+      </SpaceBetween>
+      <SpaceBetween style={{ marginTop: 10, width: '100px' }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title={t('Role')} htmlFor="role-field" />
           <Select
@@ -317,27 +317,24 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
             }}
           />
         </FormField>
-      </Stack>
+      </SpaceBetween>
       <RoleDescription />
 
-      <Stack
-        direction="row"
-        justify="flex-end"
-        align="center"
-        style={{ marginTop: 20 }}
+      <SpaceBetween
+        gap={10}
+        style={{
+          marginTop: 20,
+          justifyContent: 'flex-end',
+        }}
       >
         {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
-        <Button
-          variant="bare"
-          style={{ marginRight: 10 }}
-          onPress={() => dispatch(popModal())}
-        >
+        <Button variant="bare" onPress={() => dispatch(popModal())}>
           <Trans>Cancel</Trans>
         </Button>
         <Button variant="primary" onPress={onSave}>
           {isExistingUser ? t('Save') : t('Add')}
         </Button>
-      </Stack>
+      </SpaceBetween>
     </>
   );
 }

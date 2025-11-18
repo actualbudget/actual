@@ -1,4 +1,4 @@
-import { MenuItemConstructorOptions, Menu, BrowserWindow } from 'electron';
+import { MenuItemConstructorOptions, Menu, BrowserWindow, app } from 'electron';
 
 export function getMenu() {
   const template: MenuItemConstructorOptions[] = [
@@ -60,7 +60,118 @@ export function getMenu() {
         },
       ],
     },
+    {
+      label: 'Edit',
+      submenu: [
+        {
+          label: 'Undo',
+          enabled: false,
+          accelerator: 'CmdOrCtrl+Z',
+          click: function (_menuItem, focusedWin) {
+            // Undo
+            if (focusedWin) {
+              (focusedWin as BrowserWindow).webContents.executeJavaScript(
+                '__actionsForMenu.undo()',
+              );
+            }
+          },
+        },
+        {
+          label: 'Redo',
+          enabled: false,
+          accelerator: 'Shift+CmdOrCtrl+Z',
+          click: function (_menuItem, focusedWin) {
+            // Redo
+            if (focusedWin) {
+              (focusedWin as BrowserWindow).webContents.executeJavaScript(
+                '__actionsForMenu.redo()',
+              );
+            }
+          },
+        },
+        {
+          type: 'separator',
+        },
+        {
+          role: 'cut',
+        },
+        {
+          role: 'copy',
+        },
+        {
+          role: 'paste',
+        },
+        {
+          role: 'pasteAndMatchStyle',
+        },
+        {
+          role: 'delete',
+        },
+        {
+          role: 'selectAll',
+        },
+      ],
+    },
+    {
+      role: 'window',
+      submenu: [
+        {
+          role: 'minimize',
+        },
+      ],
+    },
   ];
+
+  if (process.platform === 'darwin') {
+    // Mac specific menu
+    const name = app.getName();
+    template.unshift({
+      label: name,
+      submenu: [
+        {
+          role: 'hide',
+        },
+        {
+          role: 'hideOthers',
+        },
+        {
+          role: 'unhide',
+        },
+        {
+          type: 'separator',
+        },
+        {
+          role: 'quit',
+        },
+      ],
+    });
+
+    // Window menu
+    const windowIdx = template.findIndex(t => t.role === 'window');
+    template[windowIdx].submenu = [
+      {
+        label: 'Close',
+        accelerator: 'CmdOrCtrl+W',
+        role: 'close',
+      },
+      {
+        label: 'Minimize',
+        accelerator: 'CmdOrCtrl+M',
+        role: 'minimize',
+      },
+      {
+        label: 'Zoom',
+        role: 'zoom',
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Bring All to Front',
+        role: 'front',
+      },
+    ];
+  }
 
   return Menu.buildFromTemplate(template);
 }

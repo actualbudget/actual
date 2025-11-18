@@ -12,17 +12,13 @@ import { css } from '@emotion/css';
 
 import { addMonths, subMonths } from 'loot-core/shared/months';
 
-import { type BudgetSummary as EnvelopeBudgetSummary } from './envelope/budgetsummary/BudgetSummary';
 import { MonthsContext } from './MonthsContext';
-import { type BudgetSummary as TrackingBudgetSummary } from './tracking/budgetsummary/BudgetSummary';
+
+import { useBudgetComponents } from '.';
 
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
-type BudgetSummariesProps = {
-  SummaryComponent: typeof TrackingBudgetSummary | typeof EnvelopeBudgetSummary;
-};
-
-export function BudgetSummaries({ SummaryComponent }: BudgetSummariesProps) {
+export function BudgetSummaries() {
   const { months } = useContext(MonthsContext);
 
   const [widthState, setWidthState] = useState(0);
@@ -64,6 +60,8 @@ export function BudgetSummaries({ SummaryComponent }: BudgetSummariesProps) {
   useLayoutEffect(() => {
     spring.start({ from: { x: -monthWidth }, to: { x: -monthWidth } });
   }, [monthWidth]);
+
+  const { SummaryComponent } = useBudgetComponents();
 
   return (
     <div

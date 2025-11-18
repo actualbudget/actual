@@ -9,7 +9,7 @@ import { useDrag } from '@use-gesture/react';
 import { type WithRequired } from 'loot-core/types/util';
 
 type ActionableGridListItemProps<T> = {
-  actions?: ReactNode;
+  actions?: ReactNode | ((params: { close: () => void }) => ReactNode);
   actionsBackgroundColor?: string;
   actionsWidth?: number;
   children?: ReactNode;
@@ -131,7 +131,18 @@ export function ActionableGridListItem<T extends object>({
               minWidth: actionsWidth,
             }}
           >
-            {actions}
+            {typeof actions === 'function'
+              ? actions({
+                  close: () => {
+                    api.start({
+                      x: 0,
+                      onRest: () => {
+                        setIsRevealed(false);
+                      },
+                    });
+                  },
+                })
+              : actions}
           </div>
         )}
       </animated.div>

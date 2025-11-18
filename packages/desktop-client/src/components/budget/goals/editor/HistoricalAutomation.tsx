@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 
 import type {
   CopyTemplate,
@@ -27,12 +27,7 @@ export const HistoricalAutomation = ({
   const { t } = useTranslation();
 
   return (
-    <Stack
-      direction="row"
-      align="center"
-      spacing={10}
-      style={{ marginTop: 10 }}
-    >
+    <SpaceBetween gap={50} style={{ marginTop: 10 }}>
       <FormField style={{ flex: 1 }}>
         <FormLabel title={t('Mode')} htmlFor="mode-field" />
         <Select
@@ -51,14 +46,13 @@ export const HistoricalAutomation = ({
           title={t('Number of months back')}
           htmlFor="look-back-field"
         />
-        {/* @ts-expect-error should be auto-patched once GenericInput is converted to TS */}
         <GenericInput
           key="look-back-input"
           type="number"
           value={
             template.type === 'average' ? template.numMonths : template.lookBack
           }
-          onChange={(value: number) =>
+          onChange={value =>
             dispatch(
               updateTemplate(
                 template.type === 'average'
@@ -69,6 +63,6 @@ export const HistoricalAutomation = ({
           }
         />
       </FormField>
-    </Stack>
+    </SpaceBetween>
   );
 };

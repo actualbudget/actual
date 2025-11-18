@@ -852,7 +852,6 @@ function QueryItem({
             compact={false}
             onApply={filters.onApply}
             hover={false}
-            exclude={undefined}
           />
         </View>
       </View>

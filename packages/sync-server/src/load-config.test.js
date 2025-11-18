@@ -110,3 +110,32 @@ describe('tokenExpiration format', () => {
     );
   });
 });
+
+describe('config schema', () => {
+  it('should parse nested object from environment variables correctly', () => {
+    const authorizationEndpoint =
+      'https://testprovider.com/.well-known/openid-configuration';
+    process.env.TEST_OPENID_AUTHORIZATION_ENDPOINT = authorizationEndpoint;
+
+    const testSchema = convict({
+      openId: {
+        doc: 'OpenID authentication settings.',
+
+        issuer: {
+          doc: 'OpenID issuer',
+
+          authorization_endpoint: {
+            doc: 'Authorization endpoint',
+            default: '',
+            format: String,
+            env: 'TEST_OPENID_AUTHORIZATION_ENDPOINT',
+          },
+        },
+      },
+    });
+    expect(() => testSchema.validate()).not.toThrow();
+    expect(testSchema.get('openId.issuer.authorization_endpoint')).toBe(
+      authorizationEndpoint,
+    );
+  });
+});

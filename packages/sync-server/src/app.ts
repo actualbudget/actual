@@ -177,7 +177,6 @@ export async function run() {
   const openIdConfig = config?.getProperties()?.openId;
   if (
     openIdConfig?.discoveryURL ||
-    // @ts-expect-error FIXME no types for config yet
     openIdConfig?.issuer?.authorization_endpoint
   ) {
     console.log('OpenID configuration found. Preparing server to use it');

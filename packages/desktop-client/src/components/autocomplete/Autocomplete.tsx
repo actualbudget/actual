@@ -86,7 +86,7 @@ function getItemName<T extends AutocompleteItem>(
   return item.name || '';
 }
 
-function getItemId<T extends AutocompleteItem>(item: T | T['id']) {
+function getItemId<T extends AutocompleteItem>(item: T | NonNullable<T['id']>) {
   if (typeof item === 'string') {
     return item;
   }
@@ -680,8 +680,8 @@ const defaultMultiAutocompleteInputClassName = css({
 type MultiAutocompleteProps<T extends AutocompleteItem> =
   CommonAutocompleteProps<T> & {
     type: 'multi';
-    onSelect: (ids: T['id'][], id?: T['id']) => void;
-    value: null | T[] | T['id'][];
+    onSelect: (ids: NonNullable<T['id']>[], id?: NonNullable<T['id']>) => void;
+    value: null | T[] | NonNullable<T['id']>[];
   };
 
 function MultiAutocomplete<T extends AutocompleteItem>({

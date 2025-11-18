@@ -1,0 +1,79 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@300..700&display=swap');
+
+h1,
+.serif-header {
+  font-family:
+    Libre Baskerville,
+    serif;
+  text-wrap: balance;
+}
+h1 {
+  font-size: 2.5rem;
+}
+.serif-header {
+  font-weight: normal;
+}
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #6b46c1;
+  --ifm-color-primary-dark: var(--ifm-color-primary);
+  --ifm-color-primary-darker: var(--ifm-color-primary);
+  --ifm-color-primary-darkest: var(--ifm-color-primary);
+  --ifm-color-primary-light: var(--ifm-color-primary);
+  --ifm-color-primary-lighter: var(--ifm-color-primary);
+  --ifm-color-primary-lightest: var(--ifm-color-primary);
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #967bd3;
+  --ifm-color-primary-dark: var(--ifm-color-primary);
+  --ifm-color-primary-darker: var(--ifm-color-primary);
+  --ifm-color-primary-darkest: var(--ifm-color-primary);
+  --ifm-color-primary-light: var(--ifm-color-primary);
+  --ifm-color-primary-lighter: var(--ifm-color-primary);
+  --ifm-color-primary-lightest: var(--ifm-color-primary);
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+.footer,
+.footer--dark {
+  --ifm-footer-background-color: #2e346b;
+  --ifm-footer-link-hover-color: #ccc;
+}
+
+.menu__link--unavailable {
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.no-indent > .menu__list {
+  padding-left: 0;
+}
+
+.menu__list-item-collapsible > .menu__link:not([href]) {
+  pointer-events: none;
+  user-select: none;
+  text-transform: uppercase;
+  font-size: 0.8em;
+  padding-top: 16px;
+  padding-bottom: 3px;
+}
+
+.menu__list-item-collapsible:has(> .menu__link:not([href])):hover {
+  background: initial;
+}
+
+img {
+  height: auto;
+}

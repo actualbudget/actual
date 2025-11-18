@@ -317,6 +317,12 @@ export function KeyboardShortcutModal() {
             description: t('Add a new transaction'),
           },
           {
+            id: 'add-transaction-and-close',
+            shortcut: 'Enter',
+            meta: ctrl,
+            description: t('Add transaction and close form'),
+          },
+          {
             id: 'filter-transactions',
             shortcut: 'F',
             description: t('Filter transactions'),

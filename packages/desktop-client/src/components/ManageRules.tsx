@@ -10,7 +10,7 @@ import React, {
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -366,7 +366,7 @@ export function ManageRules({
             flexShrink: 0,
           }}
         >
-          <Stack direction="row" align="center" justify="flex-end" spacing={2}>
+          <SpaceBetween gap={10} style={{ justifyContent: 'flex-end' }}>
             {selectedInst.items.size > 0 && (
               <Button onPress={onDeleteSelected}>
                 <Trans count={selectedInst.items.size}>
@@ -377,7 +377,7 @@ export function ManageRules({
             <Button variant="primary" onPress={onCreateRule}>
               <Trans>Create new rule</Trans>
             </Button>
-          </Stack>
+          </SpaceBetween>
         </View>
       </View>
     </SelectedProvider>

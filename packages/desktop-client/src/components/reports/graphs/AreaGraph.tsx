@@ -12,6 +12,7 @@ import {
   YAxis,
   Tooltip,
   LabelList,
+  type LabelProps,
 } from 'recharts';
 
 import {
@@ -22,6 +23,7 @@ import {
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
@@ -113,21 +115,13 @@ const CustomTooltip = ({
   return <div />;
 };
 
-type PropsItem = {
-  index?: number;
-  x?: string | number;
-  y?: string | number;
-  value?: string | number;
-  width?: string | number;
-};
-
 const customLabel = ({
   props,
   width,
   end,
   format,
 }: {
-  props: PropsItem;
+  props: LabelProps;
   width: number;
   end: number;
   format: (value: unknown, type: FormatType) => string;
@@ -142,8 +136,8 @@ const customLabel = ({
   const textAnchor: SVGAttributes<SVGTextElement>['textAnchor'] =
     props.index === 0 ? 'start' : 'middle';
   const display =
-    typeof props.value !== 'string' && props.value !== 0
-      ? `${format(props.value || 0, 'financial-no-decimals')}`
+    typeof props.value === 'number' && props.value !== 0
+      ? `${format(props.value, 'financial-no-decimals')}`
       : '';
   const textSize = adjustTextSize({ sized: width, type: 'area' });
 
@@ -168,6 +162,7 @@ export function AreaGraph({
   showTooltip = true,
 }: AreaGraphProps) {
   const format = useFormat();
+  const animationProps = useRechartsAnimation({ isAnimationActive: false });
 
   const privacyMode = usePrivacyMode();
   const dataMax = Math.max(...data.intervalData.map(i => i[balanceTypeOp]));
@@ -310,7 +305,7 @@ export function AreaGraph({
                 type="linear"
                 dot={false}
                 activeDot={false}
-                animationDuration={0}
+                {...animationProps}
                 dataKey={balanceTypeOp}
                 stroke={`url(#stroke${balanceTypeOp})`}
                 fill={`url(#fill${balanceTypeOp})`}

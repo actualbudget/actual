@@ -6,6 +6,8 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
+import { type IntegerAmount } from 'loot-core/shared/util';
+
 import {
   addToBeBudgetedGroup,
   removeCategoriesFromGroups,
@@ -19,6 +21,7 @@ import {
   FieldLabel,
   TapField,
 } from '@desktop-client/components/mobile/MobileForms';
+import { AmountInput } from '@desktop-client/components/util/AmountInput';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import {
@@ -31,6 +34,7 @@ type CoverModalProps = Extract<ModalType, { name: 'cover' }>['options'];
 
 export function CoverModal({
   title,
+  amount: initialAmount,
   categoryId,
   month,
   showToBeBudgeted = true,
@@ -73,13 +77,16 @@ export function CoverModal({
     );
   }, [categoryGroups, dispatch, month]);
 
-  const _onSubmit = (categoryId: string | null) => {
-    if (categoryId) {
-      onSubmit?.(categoryId);
+  const fromCategory = categories.find(c => c.id === fromCategoryId);
+  const [amount, setAmount] = useState<IntegerAmount>(
+    Math.abs(initialAmount ?? 0),
+  );
+
+  const _onSubmit = () => {
+    if (amount && fromCategoryId) {
+      onSubmit(amount, fromCategoryId);
     }
   };
-
-  const fromCategory = categories.find(c => c.id === fromCategoryId);
 
   const isInitialMount = useInitialMount();
   useEffect(() => {
@@ -97,14 +104,31 @@ export function CoverModal({
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View>
-            <FieldLabel title={t('Cover from a category:')} />
+            <FieldLabel title={t('Cover this amount:')} />
             <InitialFocus>
-              <TapField
-                autoFocus
-                value={fromCategory?.name}
-                onPress={openCategoryModal}
+              <AmountInput
+                value={amount}
+                autoDecimals={true}
+                style={{
+                  marginLeft: styles.mobileEditingPadding,
+                  marginRight: styles.mobileEditingPadding,
+                }}
+                inputStyle={{
+                  height: styles.mobileMinHeight,
+                }}
+                onUpdate={setAmount}
+                onEnter={() => {
+                  if (!fromCategoryId) {
+                    openCategoryModal();
+                  }
+                }}
               />
             </InitialFocus>
+          </View>
+
+          <View>
+            <FieldLabel title={t('From:')} />
+            <TapField value={fromCategory?.name} onPress={openCategoryModal} />
           </View>
 
           <View
@@ -122,7 +146,7 @@ export function CoverModal({
                 marginRight: styles.mobileEditingPadding,
               }}
               onPress={() => {
-                _onSubmit(fromCategoryId);
+                _onSubmit();
                 close();
               }}
             >

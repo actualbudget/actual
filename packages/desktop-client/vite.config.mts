@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import * as path from 'path';
 
 import inject from '@rollup/plugin-inject';
@@ -6,7 +5,7 @@ import basicSsl from '@vitejs/plugin-basic-ssl';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 /// <reference types="vitest" />
-import { defineConfig, loadEnv, Plugin } from 'vite';
+import { defineConfig, loadEnv, Plugin, type UserConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 
@@ -123,7 +122,7 @@ export default defineConfig(async ({ mode }) => {
       rollupOptions: {
         output: {
           assetFileNames: assetInfo => {
-            const info = assetInfo.name.split('.');
+            const info = assetInfo.name?.split('.') ?? [];
             let extType = info[info.length - 1];
             if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
               extType = 'img';
@@ -159,22 +158,23 @@ export default defineConfig(async ({ mode }) => {
         ? undefined
         : VitePWA({
             registerType: 'prompt',
-            strategies: 'injectManifest',
-            srcDir: 'service-worker',
-            filename: 'plugin-sw.js',
-            manifest: {
-              name: 'Actual',
-              short_name: 'Actual',
-              description: 'A local-first personal finance tool',
-              theme_color: '#8812E1',
-              background_color: '#8812E1',
-              display: 'standalone',
-              start_url: './',
-            },
-            injectManifest: {
-              maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
-              swSrc: `service-worker/plugin-sw.js`,
-            },
+            // TODO:  The plugin worker build is currently disabled due to issues with offline support. Fix this
+            // strategies: 'injectManifest',
+            // srcDir: 'service-worker',
+            // filename: 'plugin-sw.js',
+            // manifest: {
+            //   name: 'Actual',
+            //   short_name: 'Actual',
+            //   description: 'A local-first personal finance tool',
+            //   theme_color: '#8812E1',
+            //   background_color: '#8812E1',
+            //   display: 'standalone',
+            //   start_url: './',
+            // },
+            // injectManifest: {
+            //   maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
+            //   swSrc: `service-worker/plugin-sw.js`,
+            // },
             devOptions: {
               enabled: true, // We need service worker in dev mode to work with plugins
               type: 'module',
@@ -219,12 +219,8 @@ export default defineConfig(async ({ mode }) => {
         // print only console.error
         return type === 'stderr';
       },
-      poolOptions: {
-        threads: {
-          maxThreads: 2,
-          minThreads: 1,
-        },
-      },
+      maxWorkers: 2,
     },
-  };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } satisfies UserConfig & { test: any };
 });

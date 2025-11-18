@@ -19,6 +19,7 @@ import * as monthUtils from 'loot-core/shared/months';
 import { integerToCurrency } from 'loot-core/shared/util';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import * as query from '@desktop-client/queries';
@@ -38,6 +39,7 @@ export function BalanceHistoryGraph({
   ref,
 }: BalanceHistoryGraphProps) {
   const locale = useLocale();
+  const animationProps = useRechartsAnimation({ isAnimationActive: false });
   const [balanceData, setBalanceData] = useState<
     Array<{ date: string; balance: number }>
   >([]);
@@ -281,7 +283,7 @@ export function BalanceHistoryGraph({
                     dataKey="balance"
                     stroke={color}
                     strokeWidth={2}
-                    animationDuration={0}
+                    {...animationProps}
                     fill={
                       color === theme.noticeTextLight
                         ? 'url(#fillLight)'

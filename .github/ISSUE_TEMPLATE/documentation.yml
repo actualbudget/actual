@@ -1,0 +1,69 @@
+name: 'Documentation'
+description: Report documentation issues, request new documentation, or suggest improvements to existing docs.
+title: '[Docs] - <title>'
+labels: ['documentation']
+body:
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: 'Issue Type'
+      description: What type of documentation issue is this?
+      options:
+        - New Documentation Request
+        - Documentation Improvement
+        - Documentation Bug/Error
+        - Documentation Change Request
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: 'Description'
+      description: Please describe the documentation issue, request, or improvement
+      placeholder: Provide a clear and detailed description...
+    validations:
+      required: true
+  - type: input
+    id: doc-url
+    attributes:
+      label: 'Documentation URL'
+      description: If this relates to existing documentation, please provide the URL
+      placeholder: ex. https://actualbudget.org/docs/budgeting/categories or https://github.com/actualbudget/actual/blob/master/packages/docs/...
+    validations:
+      required: false
+  - type: dropdown
+    id: category
+    attributes:
+      label: 'Documentation Category'
+      description: What category does this relate to?
+      multiple: true
+      options:
+        - Accounts
+        - Backup & Restore
+        - Budgeting
+        - Development
+        - Installation & Configuration
+        - Overview
+        - Reports
+        - Troubleshooting
+        - Other
+    validations:
+      required: false
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: 'Expected/Desired Content'
+      description: If applicable, describe what you expect to see or what should be documented
+      placeholder: What should the documentation say or include?
+    validations:
+      required: false
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: 'Screenshots or Examples'
+      description: If applicable, add screenshots or examples to help explain your request
+      value: |
+        ![DESCRIPTION](LINK.png)
+      render: bash
+    validations:
+      required: false

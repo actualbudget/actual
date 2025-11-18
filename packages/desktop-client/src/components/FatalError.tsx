@@ -4,7 +4,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -81,7 +81,8 @@ function RenderSimple({ error }: RenderSimpleProps) {
   }
 
   return (
-    <Stack
+    <SpaceBetween
+      direction="vertical"
       style={{
         paddingBottom: 15,
         lineHeight: '1.5em',
@@ -102,13 +103,14 @@ function RenderSimple({ error }: RenderSimpleProps) {
           for support
         </Trans>
       </Text>
-    </Stack>
+    </SpaceBetween>
   );
 }
 
 function RenderLazyLoadError() {
   return (
-    <Stack
+    <SpaceBetween
+      direction="vertical"
       style={{
         paddingBottom: 15,
         lineHeight: '1.5em',
@@ -123,7 +125,7 @@ function RenderLazyLoadError() {
           server where the app is hosted.
         </Trans>
       </Text>
-    </Stack>
+    </SpaceBetween>
   );
 }
 

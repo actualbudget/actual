@@ -18,6 +18,7 @@ import { type SpendingEntity } from 'loot-core/types/models';
 
 import { computePadding } from './util/computePadding';
 
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
@@ -148,6 +149,7 @@ export function SpendingGraph({
   compareTo,
 }: SpendingGraphProps) {
   const privacyMode = usePrivacyMode();
+  const animationProps = useRechartsAnimation({ isAnimationActive: false });
   const balanceTypeOp = 'cumulative';
   const format = useFormat();
 
@@ -302,7 +304,7 @@ export function SpendingGraph({
                   fillOpacity: 1,
                   r: 10,
                 }}
-                animationDuration={0}
+                {...animationProps}
                 dataKey={val => getVal(val, compare)}
                 stroke={`url(#stroke${balanceTypeOp})`}
                 strokeWidth={3}
@@ -313,7 +315,7 @@ export function SpendingGraph({
                 type="linear"
                 dot={false}
                 activeDot={false}
-                animationDuration={0}
+                {...animationProps}
                 dataKey={val => getVal(val, selection)}
                 stroke={theme.reportsGray}
                 strokeDasharray="10 10"

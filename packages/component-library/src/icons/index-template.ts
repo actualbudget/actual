@@ -1,7 +1,6 @@
-// @ts-strict-ignore
 import path from 'path';
 
-function indexTemplate(filePaths) {
+function indexTemplate(filePaths: { path: string }[]) {
   const exportEntries = filePaths.map(({ path: filePath }) => {
     const basename = path.basename(filePath, path.extname(filePath));
     const exportName = `Svg${basename}`;

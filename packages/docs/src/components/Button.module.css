@@ -1,0 +1,42 @@
+.button {
+  border: 1px solid currentColor;
+
+  padding: 6px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  flex: 1;
+  text-decoration: none;
+  margin: 3px;
+  transition-property: color, background-color, filter;
+  transition-duration: 0.15s;
+  display: inline-block;
+}
+
+.button:hover,
+.button:focus {
+  text-decoration: none;
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.button:not(.primary):is(:hover, :focus) {
+  background: rgba(0, 0, 0, 0.1);
+}
+[data-theme='dark'] .button:not(.primary):is(:hover, :focus) {
+  background: hsla(0, 0%, 50%, 0.2);
+}
+
+.primary {
+  color: #ffffff;
+  background-color: var(--ifm-link-color);
+  border: none;
+  padding: 7px 16px;
+}
+.primary:hover,
+.primary:focus {
+  color: #ffffff;
+  border: none;
+  filter: brightness(0.8);
+}

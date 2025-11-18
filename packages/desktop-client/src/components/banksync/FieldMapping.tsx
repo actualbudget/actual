@@ -38,7 +38,6 @@ type FieldMappingProps = {
   fields: MappableFieldWithExample[];
   mapping: Map<string, string>;
   setMapping: (field: string, value: string) => void;
-  selectMinWidth?: number;
   isMobile?: boolean;
 };
 
@@ -48,7 +47,6 @@ export function FieldMapping({
   fields,
   mapping,
   setMapping,
-  selectMinWidth = 50,
   isMobile = false,
 }: FieldMappingProps) {
   const { t } = useTranslation();
@@ -61,7 +59,6 @@ export function FieldMapping({
   const equalsIconWidth = 12;
 
   const calculatedSelectWidth = Math.max(
-    selectMinWidth,
     ...fields.flatMap(field =>
       field.syncFields.map(({ field }) => field.length * 8 + 30),
     ),
@@ -76,6 +73,11 @@ export function FieldMapping({
 
   const commonCellStyle = { height: '100%', border: 0 };
   const iconCellStyle = { ...commonCellStyle };
+
+  const selectStyle = {
+    minWidth: isMobile ? '10ch' : '30ch',
+    maxWidth: isMobile ? '15ch' : '50ch',
+  };
 
   return (
     <>
@@ -118,7 +120,7 @@ export function FieldMapping({
             <Cell
               value={t('Bank field')}
               width={calculatedSelectWidth}
-              style={{ paddingLeft: 0 }}
+              style={{ paddingLeft: 0, ...selectStyle }}
             />
             <Cell value="" width={equalsCellWidth} style={{ padding: 0 }} />
             <Cell
@@ -170,7 +172,11 @@ export function FieldMapping({
                   </View>
                 </Cell>
 
-                <Cell width={calculatedSelectWidth} style={iconCellStyle} plain>
+                <Cell
+                  width={calculatedSelectWidth}
+                  style={{ ...iconCellStyle, ...selectStyle }}
+                  plain
+                >
                   <Select
                     aria-label={t('Synced field to map to {{field}}', {
                       field: field.actualField,
@@ -181,7 +187,7 @@ export function FieldMapping({
                     ])}
                     value={mapping.get(field.actualField)}
                     style={{
-                      width: calculatedSelectWidth,
+                      width: '100%',
                     }}
                     onChange={newValue => {
                       if (newValue) setMapping(field.actualField, newValue);

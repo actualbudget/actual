@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
@@ -42,12 +42,8 @@ export function FormulaCard({
     meta?.queriesVersion,
   );
 
-  // Execute color formula with access to main result via named expression
-  const { result: colorResult, error: colorError } = useFormulaExecution(
-    colorFormula,
-    meta?.queries || {},
-    meta?.queriesVersion,
-    {
+  const colorVariables = useMemo(
+    () => ({
       RESULT: result ?? 0,
       ...Object.entries(themeColors).reduce(
         (acc, [key, value]) => {
@@ -56,7 +52,14 @@ export function FormulaCard({
         },
         {} as Record<string, string>,
       ),
-    },
+    }),
+    [result, themeColors],
+  );
+  const { result: colorResult, error: colorError } = useFormulaExecution(
+    colorFormula,
+    meta?.queries || {},
+    meta?.queriesVersion,
+    colorVariables,
   );
 
   // Determine the custom color from color formula result

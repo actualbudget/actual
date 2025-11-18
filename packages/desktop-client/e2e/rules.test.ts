@@ -35,7 +35,8 @@ test.describe('Rules', () => {
 
   test('creates a rule and makes sure it is applied when creating a transaction', async () => {
     await rulesPage.searchFor('Fast Internet');
-    await rulesPage.createRule({
+    const editRuleModal = await rulesPage.createNewRule();
+    await editRuleModal.fill({
       conditions: [
         {
           field: 'payee',
@@ -50,6 +51,7 @@ test.describe('Rules', () => {
         },
       ],
     });
+    await editRuleModal.save();
 
     const rule = rulesPage.getNthRule(0);
     await expect(rule.conditions).toHaveText(['payee is Fast Internet']);
@@ -73,7 +75,8 @@ test.describe('Rules', () => {
   test('creates a split transaction rule and makes sure it is applied when creating a transaction', async () => {
     rulesPage = await navigation.goToRulesPage();
 
-    await rulesPage.createRule({
+    const editRuleModal = await rulesPage.createNewRule();
+    await editRuleModal.fill({
       conditions: [
         {
           field: 'payee',
@@ -110,6 +113,7 @@ test.describe('Rules', () => {
         ],
       ],
     });
+    await editRuleModal.save();
 
     const accountPage = await navigation.goToAccountPage(
       'Capital One Checking',

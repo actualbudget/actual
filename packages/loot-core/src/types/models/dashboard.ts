@@ -63,6 +63,19 @@ export type CustomReportWidget = AbstractWidget<
   'custom-report',
   { id: string }
 >;
+export type CrossoverWidget = AbstractWidget<
+  'crossover-card',
+  {
+    name?: string;
+    expenseCategoryIds?: string[];
+    incomeAccountIds?: string[];
+    timeFrame?: TimeFrame;
+    safeWithdrawalRate?: number; // 0.04 default
+    estimatedReturn?: number | null; // annual
+    projectionType?: 'trend' | 'hampel'; // expense projection method
+    showHiddenCategories?: boolean; // show hidden categories in selector
+  } | null
+>;
 export type MarkdownWidget = AbstractWidget<
   'markdown-card',
   { content: string; text_align?: 'left' | 'right' | 'center' }
@@ -72,6 +85,7 @@ type SpecializedWidget =
   | NetWorthWidget
   | CashFlowWidget
   | SpendingWidget
+  | CrossoverWidget
   | MarkdownWidget
   | SummaryWidget
   | CalendarWidget

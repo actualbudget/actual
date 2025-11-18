@@ -6,11 +6,6 @@ export default {
     coverage: {
       enabled: false,
     },
-    poolOptions: {
-      threads: {
-        maxThreads: 2,
-        minThreads: 1,
-      },
-    },
+    maxWorkers: 2,
   },
 };

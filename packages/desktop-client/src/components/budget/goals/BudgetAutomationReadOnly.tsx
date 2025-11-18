@@ -7,7 +7,7 @@ import {
   SvgCheveronDown,
   SvgCheveronUp,
 } from '@actual-app/components/icons/v1';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -79,7 +79,7 @@ export function BudgetAutomationReadOnly({
   }
 
   return (
-    <Stack direction="row" align="center" spacing={2} style={style}>
+    <SpaceBetween gap={10} style={{ alignItems: 'center', ...style }}>
       {inline && (
         <View
           style={{
@@ -114,6 +114,6 @@ export function BudgetAutomationReadOnly({
       >
         <SvgDelete style={{ width: 8, height: 8, color: 'inherit' }} />
       </Button>
-    </Stack>
+    </SpaceBetween>
   );
 }

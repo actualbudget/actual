@@ -6,7 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgRightArrow2 } from '@actual-app/components/icons/v0';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -136,7 +136,7 @@ export const RuleRow = memo(
         </Cell>
 
         <Field width="flex" style={{ padding: '15px 0' }} truncate={false}>
-          <Stack direction="row" align="center">
+          <SpaceBetween style={{ alignItems: 'center' }}>
             <View
               style={{ flex: 1, alignItems: 'flex-start' }}
               data-testid="conditions"
@@ -207,7 +207,7 @@ export const RuleRow = memo(
                     />
                   ))}
             </View>
-          </Stack>
+          </SpaceBetween>
         </Field>
 
         <Cell name="edit" plain style={{ padding: '0 15px', paddingLeft: 5 }}>
