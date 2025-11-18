@@ -12,7 +12,7 @@ export type _SyncFields<T> = {
   account_id: T extends true ? string : null;
   bank: T extends true ? string : null;
   bankName: T extends true ? string : null;
-  bankId: T extends true ? number : null;
+  bankId: T extends true ? string : null;
   mask: T extends true ? string : null; // end of bank account number
   official_name: T extends true ? string : null;
   balance_current: T extends true ? number : null;

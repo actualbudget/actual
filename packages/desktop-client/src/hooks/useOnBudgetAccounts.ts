@@ -1,14 +1,8 @@
-import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { useAccounts } from './useAccounts';
+import { accountQueries } from '@desktop-client/accounts';
 
 export function useOnBudgetAccounts() {
-  const accounts = useAccounts();
-  return useMemo(
-    () =>
-      accounts.filter(
-        account => account.closed === 0 && account.offbudget === 0,
-      ),
-    [accounts],
-  );
+  const query = useQuery(accountQueries.listOnBudget());
+  return query.data ?? [];
 }
