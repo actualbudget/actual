@@ -268,6 +268,7 @@ export type QueryDataEntity = {
   date: string;
   category: string;
   categoryHidden: boolean;
+  categoryIncome: number;
   categoryGroup: string;
   categoryGroupHidden: boolean;
   account: string;
@@ -275,6 +276,16 @@ export type QueryDataEntity = {
   payee: string;
   transferAccount: string;
   amount: number;
+};
+
+export type QuerySplitDataEntity = {
+  id: string;
+  isChild: boolean;
+  isParent: boolean;
+};
+
+export type GroupedQueryDataEntity = QuerySplitDataEntity & {
+  subtransactions: QuerySplitDataEntity & { _unmatched?: boolean }[];
 };
 
 type UncategorizedId = 'off_budget' | 'transfer' | 'other' | 'all';
