@@ -138,7 +138,7 @@ Before committing changes, ensure:
 - [ ] `yarn lint:fix` has been run
 - [ ] Relevant tests pass
 - [ ] User-facing strings are translated
-- [ ] Prefer `type` over `interface`ways maintain newlines between import groups.
+- [ ] Prefer `type` over `interface`
 
 ## Additional Resources
 

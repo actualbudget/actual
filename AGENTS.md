@@ -214,9 +214,6 @@ yarn test:debug
 
 # Run tests for a specific package
 yarn workspace loot-core run test
-
-# Run a specific test file (watch mode)
-yarn workspace loot-core run test path/to/test.test.ts
 ```
 
 **E2E Tests (Playwright)**
@@ -427,9 +424,6 @@ describe('ComponentName', () => {
 ```bash
 # Run all tests across all packages (recommended)
 yarn test
-
-# Unit test for a specific file in loot-core (watch mode)
-yarn workspace loot-core run test src/path/to/file.test.ts
 
 # E2E test for a specific file
 yarn workspace @actual-app/web run playwright test accounts.test.ts --browser=chromium

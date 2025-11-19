@@ -105,20 +105,7 @@ yarn build:server
 
 ## Workspace Structure
 
-Actual uses Yarn workspaces to manage a monorepo with multiple packages. The main packages are:
-
-- `loot-core` - Core application logic
-- `desktop-client` (aliased as `@actual-app/web`) - React-based UI
-- `desktop-electron` - Electron wrapper for desktop app
-- `api` (aliased as `@actual-app/api`) - Public API package
-- `sync-server` (aliased as `@actual-app/sync-server`) - Synchronization server
-- `component-library` (aliased as `@actual-app/components`) - Reusable UI components
-- `crdt` (aliased as `@actual-app/crdt`) - CRDT implementation for sync
-- `plugins-service` - Service for handling plugins
-- `eslint-plugin-actual` - Custom ESLint rules
-- `docs` - Documentation website
-
-For detailed information about each package, see the [Project Structure](./project-details/index.md) documentation.
+Actual uses Yarn workspaces to manage a monorepo with multiple packages. For detailed information about each package, see the [Project Structure](./project-details/index.md) documentation.
 
 ## Running Workspace-Specific Commands
 
@@ -145,16 +132,7 @@ yarn workspace @actual-app/api build
 
 ### Running Specific Tests
 
-```bash
-# Run all tests (recommended)
-yarn test
-
-# Run tests for a specific package
-yarn workspace loot-core run test
-
-# Run a specific test file (watch mode)
-yarn workspace loot-core run test src/path/to/file.test.ts
-```
+See [Testing Guide](./testing.md).
 
 ### Debugging
 

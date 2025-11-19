@@ -29,7 +29,6 @@ The `yarn test` command uses Lage to run tests in parallel across all workspaces
 - **Parallel execution**: Tests run simultaneously across packages for faster feedback
 - **Smart caching**: Test results are cached in `.lage/` directory to skip unchanged packages
 - **Dependency awareness**: Understands workspace dependencies and execution order
-- **Continues on error**: Uses `--continue` flag to run all packages even if one fails
 
 ### Running Tests for a Specific Package
 
@@ -47,11 +46,8 @@ yarn workspace @actual-app/web run test
 ### Running a Specific Test File
 
 ```bash
-# Run a specific test file (watch mode)
-yarn workspace loot-core run test src/path/to/file.test.ts
-
 # Run E2E test for a specific file
-yarn workspace @actual-app/web run playwright test accounts.test.ts --browser=chromium
+yarn workspace @actual-app/web run playwright test accounts.test.ts
 ```
 
 ## Unit Tests (Vitest)
@@ -125,16 +121,9 @@ yarn vrt
 yarn vrt:docker
 ```
 
-Visual regression snapshots are stored per test file in `*-snapshots/` directories. Use Docker for consistent environments when running VRT.
+Visual regression snapshots are stored per test file in `*-snapshots/` directories. Use Docker for consistent environments when running VRT. They will be automatically generated and run on pull requests to catch unexpected visual changes.
 
 ## Debugging Test Failures
-
-### Common Issues
-
-1. **Check test environment**: Ensure the test is running in the correct environment (node vs web)
-2. **Vitest configuration**: Check `vitest.config.ts` or `vitest.web.config.ts` for environment-specific settings
-3. **Playwright configuration**: Check `playwright.config.ts` for E2E test settings
-4. **Mock minimization**: Ensure you're using real implementations when possible, not excessive mocks
 
 ### Lage Cache Issues
 
@@ -184,7 +173,6 @@ Before submitting a pull request:
 - [ ] New functionality has appropriate test coverage
 - [ ] Tests follow best practices (minimize mocking, descriptive names)
 - [ ] E2E tests pass if UI changes were made
-- [ ] Visual regression tests pass if visual changes were made
 
 ## Additional Resources
 
