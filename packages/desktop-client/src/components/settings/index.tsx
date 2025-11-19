@@ -215,16 +215,22 @@ export function Settings() {
           marginTop: 10,
           flexShrink: 0,
           maxWidth: 530,
+          width: '100%',
           gap: 30,
           paddingBottom: MOBILE_NAV_HEIGHT,
         }}
       >
         {isNarrowWidth && (
           <View
-            style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
+            style={{
+              gap: 10,
+              flexDirection: 'row',
+              alignItems: 'flex-end',
+              width: '100%',
+            }}
           >
             {/* The only spot to close a budget on mobile */}
-            <FormField>
+            <FormField style={{ flex: 1 }}>
               <FormLabel title={t('Budget name')} />
               <Input
                 value={budgetName}
@@ -232,7 +238,7 @@ export function Settings() {
                 style={{ color: theme.buttonNormalDisabledText }}
               />
             </FormField>
-            <Button onPress={onCloseBudget}>
+            <Button onPress={onCloseBudget} style={{ flexShrink: 0 }}>
               <Trans>Switch file</Trans>
             </Button>
           </View>

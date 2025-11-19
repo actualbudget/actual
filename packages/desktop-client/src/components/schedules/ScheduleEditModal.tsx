@@ -1,13 +1,7 @@
 // @ts-strict-ignore
 import React, { useEffect, useReducer } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
-import { InitialFocus } from '@actual-app/components/initial-focus';
-import { SpaceBetween } from '@actual-app/components/space-between';
-import { Text } from '@actual-app/components/text';
-import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
@@ -21,35 +15,15 @@ import {
   type RecurConfig,
 } from 'loot-core/types/models';
 
-import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
-import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
+import { ScheduleEditForm, type ScheduleFormFields } from './ScheduleEditForm';
+
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import {
-  FormField,
-  FormLabel,
-  Checkbox,
-} from '@desktop-client/components/forms';
-import { OpSelect } from '@desktop-client/components/rules/RuleEditor';
-import { DateSelect } from '@desktop-client/components/select/DateSelect';
-import { RecurringSchedulePicker } from '@desktop-client/components/select/RecurringSchedulePicker';
-import { SelectedItemsButton } from '@desktop-client/components/table';
-import { SimpleTransactionsTable } from '@desktop-client/components/transactions/SimpleTransactionsTable';
-import {
-  AmountInput,
-  BetweenAmountInput,
-} from '@desktop-client/components/util/AmountInput';
-import { GenericInput } from '@desktop-client/components/util/GenericInput';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
 import { usePayees } from '@desktop-client/hooks/usePayees';
-import {
-  useSelected,
-  SelectedProvider,
-} from '@desktop-client/hooks/useSelected';
+import { useSelected } from '@desktop-client/hooks/useSelected';
 import {
   type Modal as ModalType,
   pushModal,
@@ -59,15 +33,7 @@ import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { liveQuery } from '@desktop-client/queries/liveQuery';
 import { useDispatch } from '@desktop-client/redux';
 
-type Fields = {
-  payee: null | string;
-  account: null | string;
-  amount: null | number | { num1: number; num2: number };
-  amountOp: null | string;
-  date: null | string | RecurConfig;
-  posts_transaction: boolean;
-  name: null | string;
-};
+type Fields = ScheduleFormFields;
 
 function updateScheduleConditions(
   schedule: Partial<ScheduleEntity>,
@@ -125,14 +91,12 @@ type ScheduleEditModalProps = Extract<
 >['options'];
 
 export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
-  const locale = useLocale();
   const { t } = useTranslation();
 
   const adding = id == null;
   const fromTrans = transaction != null;
   const payees = getPayeesById(usePayees());
   const globalDispatch = useDispatch();
-  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   const [state, dispatch] = useReducer(
     (
@@ -492,13 +456,17 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
     transaction ? [transaction.id] : [],
   );
 
-  async function onSave(close: () => void, schedule: Partial<ScheduleEntity>) {
+  async function onSave(close: () => void) {
     dispatch({ type: 'form-error', error: null });
+    if (!state.schedule) {
+      return;
+    }
+
     if (state.fields.name) {
       const { data: sameName } = await aqlQuery(
         q('schedules').filter({ name: state.fields.name }).select('id'),
       );
-      if (sameName.length > 0 && sameName[0].id !== schedule.id) {
+      if (sameName.length > 0 && sameName[0].id !== state.schedule.id) {
         dispatch({
           type: 'form-error',
           error: t('There is already a schedule with this name'),
@@ -508,7 +476,7 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
     }
 
     const { error, conditions } = updateScheduleConditions(
-      schedule,
+      state.schedule,
       state.fields,
     );
 
@@ -521,7 +489,7 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
       adding ? 'schedule/create' : 'schedule/update',
       {
         schedule: {
-          id: schedule.id,
+          id: state.schedule.id,
           posts_transaction: state.fields.posts_transaction,
           name: state.fields.name,
         },
@@ -616,408 +584,27 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
             }
             rightContent={<ModalCloseButton onPress={close} />}
           />
-          <SpaceBetween style={{ marginTop: 10 }}>
-            <FormField style={{ flex: 1 }}>
-              <FormLabel title={t('Schedule Name')} htmlFor="name-field" />
-              <InitialFocus>
-                <GenericInput
-                  type="string"
-                  value={state.fields.name}
-                  onChange={e => {
-                    dispatch({ type: 'set-field', field: 'name', value: e });
-                  }}
-                />
-              </InitialFocus>
-            </FormField>
-          </SpaceBetween>
-          <SpaceBetween style={{ marginTop: 20 }}>
-            <FormField style={{ flex: 1 }}>
-              <FormLabel
-                title={t('Payee')}
-                id="payee-label"
-                htmlFor="payee-field"
-              />
-              <PayeeAutocomplete
-                value={state.fields.payee}
-                labelProps={{ id: 'payee-label' }}
-                inputProps={{ id: 'payee-field', placeholder: t('(none)') }}
-                onSelect={id =>
-                  dispatch({ type: 'set-field', field: 'payee', value: id })
-                }
-              />
-            </FormField>
-
-            <FormField style={{ flex: 1 }}>
-              <FormLabel
-                title={t('Account')}
-                id="account-label"
-                htmlFor="account-field"
-              />
-              <AccountAutocomplete
-                includeClosedAccounts={false}
-                value={state.fields.account}
-                labelProps={{ id: 'account-label' }}
-                inputProps={{ id: 'account-field', placeholder: t('(none)') }}
-                onSelect={id =>
-                  dispatch({ type: 'set-field', field: 'account', value: id })
-                }
-              />
-            </FormField>
-
-            <FormField style={{ flex: 1 }}>
-              <SpaceBetween style={{ marginBottom: 3, alignItems: 'center' }}>
-                <FormLabel
-                  title={t('Amount')}
-                  htmlFor="amount-field"
-                  style={{ margin: 0, flex: 1 }}
-                />
-                <OpSelect
-                  ops={['isapprox', 'is', 'isbetween']}
-                  value={
-                    state.fields.amountOp as 'isapprox' | 'is' | 'isbetween'
-                  }
-                  formatOp={op => {
-                    switch (op) {
-                      case 'is':
-                        return t('is exactly');
-                      case 'isapprox':
-                        return t('is approximately');
-                      case 'isbetween':
-                        return t('is between');
-                      default:
-                        throw new Error('Invalid op for select: ' + op);
-                    }
-                  }}
-                  style={{
-                    padding: '0 10px',
-                    color: theme.pageTextLight,
-                    fontSize: 12,
-                  }}
-                  onChange={(_, op) =>
-                    dispatch({
-                      type: 'set-field',
-                      field: 'amountOp',
-                      value: op,
-                    })
-                  }
-                />
-              </SpaceBetween>
-              {state.fields.amountOp === 'isbetween' ? (
-                <BetweenAmountInput
-                  // @ts-expect-error fix me
-                  defaultValue={state.fields.amount}
-                  onChange={value =>
-                    dispatch({
-                      type: 'set-field',
-                      field: 'amount',
-                      value,
-                    })
-                  }
-                />
-              ) : (
-                <AmountInput
-                  id="amount-field"
-                  // @ts-expect-error fix me
-                  value={state.fields.amount}
-                  onUpdate={value =>
-                    dispatch({
-                      type: 'set-field',
-                      field: 'amount',
-                      value,
-                    })
-                  }
-                />
-              )}
-            </FormField>
-          </SpaceBetween>
-
-          <View style={{ marginTop: 20 }}>
-            <FormLabel title={t('Date')} />
-          </View>
-
-          <SpaceBetween
-            style={{
-              alignItems: 'flex-start',
-              justifyContent: 'space-between',
-            }}
-          >
-            <View style={{ width: '13.44rem' }}>
-              {repeats ? (
-                <RecurringSchedulePicker
-                  // @ts-expect-error fix me
-                  value={state.fields.date}
-                  onChange={value =>
-                    dispatch({ type: 'set-field', field: 'date', value })
-                  }
-                />
-              ) : (
-                <DateSelect
-                  // @ts-expect-error fix me
-                  value={state.fields.date}
-                  onSelect={date =>
-                    dispatch({ type: 'set-field', field: 'date', value: date })
-                  }
-                  dateFormat={dateFormat}
-                />
-              )}
-
-              {state.upcomingDates && (
-                <View style={{ fontSize: 13, marginTop: 20 }}>
-                  <Text style={{ color: theme.pageTextLight, fontWeight: 600 }}>
-                    <Trans>Upcoming dates</Trans>
-                  </Text>
-                  <SpaceBetween
-                    direction="vertical"
-                    gap={5}
-                    style={{
-                      marginTop: 10,
-                      color: theme.pageTextLight,
-                      alignItems: 'flex-start',
-                    }}
-                  >
-                    {state.upcomingDates.map(date => (
-                      <View key={date}>
-                        {monthUtils.format(date, `${dateFormat} EEEE`, locale)}
-                      </View>
-                    ))}
-                  </SpaceBetween>
-                </View>
-              )}
-            </View>
-
-            <View
-              style={{
-                marginTop: 5,
-                flexDirection: 'row',
-                alignItems: 'center',
-                userSelect: 'none',
-              }}
-            >
-              <Checkbox
-                id="form_repeats"
-                checked={repeats}
-                onChange={e => {
-                  dispatch({ type: 'set-repeats', repeats: e.target.checked });
-                }}
-              />
-              <label htmlFor="form_repeats" style={{ userSelect: 'none' }}>
-                <Trans>Repeats</Trans>
-              </label>
-            </View>
-
-            <SpaceBetween
-              direction="vertical"
-              style={{ alignItems: 'flex-end' }}
-            >
-              <View
-                style={{
-                  marginTop: 5,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  userSelect: 'none',
-                  justifyContent: 'flex-end',
-                }}
-              >
-                <Checkbox
-                  id="form_posts_transaction"
-                  checked={state.fields.posts_transaction}
-                  onChange={e => {
-                    dispatch({
-                      type: 'set-field',
-                      field: 'posts_transaction',
-                      value: e.target.checked,
-                    });
-                  }}
-                />
-                <label
-                  htmlFor="form_posts_transaction"
-                  style={{ userSelect: 'none' }}
-                >
-                  <Trans>Automatically add transaction</Trans>
-                </label>
-              </View>
-
-              <Text
-                style={{
-                  width: 350,
-                  textAlign: 'right',
-                  color: theme.pageTextLight,
-                  marginTop: 10,
-                  fontSize: 13,
-                  lineHeight: '1.4em',
-                }}
-              >
-                <Trans>
-                  If checked, the schedule will automatically create
-                  transactions for you in the specified account
-                </Trans>
-              </Text>
-
-              {!adding && schedule.rule && (
-                <SpaceBetween style={{ marginTop: 20, alignItems: 'center' }}>
-                  {state.isCustom && (
-                    <Text
-                      style={{
-                        color: theme.pageTextLight,
-                        fontSize: 13,
-                        textAlign: 'right',
-                        width: 350,
-                      }}
-                    >
-                      <Trans>
-                        This schedule has custom conditions and actions
-                      </Trans>
-                    </Text>
-                  )}
-                  <Button
-                    onPress={() => onEditRule(schedule.rule)}
-                    isDisabled={adding}
-                  >
-                    <Trans>Edit as rule</Trans>
-                  </Button>
-                </SpaceBetween>
-              )}
-            </SpaceBetween>
-          </SpaceBetween>
-
-          <View style={{ marginTop: 30, flex: 1 }}>
-            <SelectedProvider instance={selectedInst}>
-              {adding ? (
-                <View style={{ flexDirection: 'row', padding: '5px 0' }}>
-                  <Text style={{ color: theme.pageTextLight }}>
-                    <Trans>These transactions match this schedule:</Trans>
-                  </Text>
-                  <View style={{ flex: 1 }} />
-                  <Text style={{ color: theme.pageTextLight }}>
-                    <Trans>Select transactions to link on save</Trans>
-                  </Text>
-                </View>
-              ) : (
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Button
-                    variant="bare"
-                    style={{
-                      color:
-                        state.transactionsMode === 'linked'
-                          ? theme.pageTextLink
-                          : theme.pageTextSubdued,
-                      marginRight: 10,
-                      fontSize: 14,
-                    }}
-                    onPress={() => onSwitchTransactions('linked')}
-                  >
-                    <Trans>Linked transactions</Trans>
-                  </Button>{' '}
-                  <Button
-                    variant="bare"
-                    style={{
-                      color:
-                        state.transactionsMode === 'matched'
-                          ? theme.pageTextLink
-                          : theme.pageTextSubdued,
-                      fontSize: 14,
-                    }}
-                    onPress={() => onSwitchTransactions('matched')}
-                  >
-                    <Trans>Find matching transactions</Trans>
-                  </Button>
-                  <View style={{ flex: 1 }} />
-                  <SelectedItemsButton
-                    id="transactions"
-                    name={count => t('{{count}} transactions', { count })}
-                    items={
-                      state.transactionsMode === 'linked'
-                        ? [{ name: 'unlink', text: t('Unlink from schedule') }]
-                        : [{ name: 'link', text: t('Link to schedule') }]
-                    }
-                    onSelect={(name, ids) => {
-                      switch (name) {
-                        case 'link':
-                          onLinkTransactions(ids, schedule.id);
-                          break;
-                        case 'unlink':
-                          onUnlinkTransactions(ids);
-                          break;
-                        default:
-                      }
-                    }}
-                  />
-                </View>
-              )}
-
-              <SimpleTransactionsTable
-                renderEmpty={
-                  <NoTransactionsMessage
-                    error={state.error}
-                    transactionsMode={state.transactionsMode}
-                  />
-                }
-                transactions={state.transactions}
-                fields={['date', 'payee', 'notes', 'amount']}
-                style={{
-                  border: '1px solid ' + theme.tableBorder,
-                  borderRadius: 4,
-                  overflow: 'hidden',
-                  marginTop: 5,
-                  maxHeight: 200,
-                }}
-              />
-            </SelectedProvider>
-          </View>
-
-          <SpaceBetween
-            style={{
-              marginTop: 20,
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-            }}
-          >
-            {state.error && (
-              <Text style={{ color: theme.errorText }}>{state.error}</Text>
-            )}
-            <Button style={{ marginRight: 10 }} onPress={close}>
-              <Trans>Cancel</Trans>
-            </Button>
-            <Button
-              variant="primary"
-              onPress={() => {
-                onSave(close, schedule);
-              }}
-            >
-              {adding ? t('Add') : t('Save')}
-            </Button>
-          </SpaceBetween>
+          <ScheduleEditForm
+            fields={state.fields}
+            dispatch={dispatch}
+            upcomingDates={state.upcomingDates}
+            repeats={repeats}
+            schedule={schedule}
+            adding={adding}
+            isCustom={state.isCustom ?? false}
+            onEditRule={onEditRule}
+            transactions={state.transactions}
+            transactionsMode={state.transactionsMode}
+            error={state.error}
+            selectedInst={selectedInst}
+            onSwitchTransactions={onSwitchTransactions}
+            onLinkTransactions={onLinkTransactions}
+            onUnlinkTransactions={onUnlinkTransactions}
+            onSave={() => onSave(close)}
+            onCancel={close}
+          />
         </>
       )}
     </Modal>
-  );
-}
-
-type NoTransactionsMessageProps = {
-  error: string | null;
-  transactionsMode: 'matched' | 'linked';
-};
-
-function NoTransactionsMessage(props: NoTransactionsMessageProps) {
-  const { t } = useTranslation();
-
-  return (
-    <View
-      style={{
-        padding: 20,
-        color: theme.pageTextLight,
-        textAlign: 'center',
-      }}
-    >
-      {props.error ? (
-        <Text style={{ color: theme.errorText }}>
-          <Trans>Could not search: {{ errorReason: props.error }}</Trans>
-        </Text>
-      ) : props.transactionsMode === 'matched' ? (
-        t('No matching transactions')
-      ) : (
-        t('No linked transactions')
-      )}
-    </View>
   );
 }
