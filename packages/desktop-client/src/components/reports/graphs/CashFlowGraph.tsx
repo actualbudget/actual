@@ -22,6 +22,7 @@ import {
 } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -133,8 +134,10 @@ export function CashFlowGraph({
   const privacyMode = usePrivacyMode();
   const [yAxisIsHovered, setYAxisIsHovered] = useState(false);
   const format = useFormat();
+  const isTestEnv = useIsTestEnv();
   const animationProps = useRechartsAnimation({
     animationDuration: ANIMATION_DURATION,
+    isAnimationActive: !isTestEnv,
   });
 
   const data = graphData.expenses.map((row, idx) => ({
