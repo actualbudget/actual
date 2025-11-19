@@ -46,6 +46,7 @@ through the list of available commands. You can also quickly move to any of the 
 - <Key k="f" /> Show only selected transactions.
 - <Key k="d" /> Delete selected transactions.
 - <Key k="u" /> Duplicate selected transactions.
+- <Key k="g" /> Merge selected transactions
 - <Key k="t" /> Set date for selected transactions.
 - <Key k="a" /> Set account for selected transactions.
 - <Key k="p" /> set payee for selected transactions.
@@ -131,6 +132,6 @@ By using emojis on the accounts, you can have grouping of accounts by type, such
 
 ## Math Operators
 
-When entering amounts for transactions, math operators can be used to calculate a final value. 
+When entering amounts for transactions, math operators can be used to calculate a final value.
 
 For example when splitting a transaction, you can input `16.99*1.1` in the subcategory's payment field to apply a 10% tax rate to the amount, which would display `$18.69` once entered.

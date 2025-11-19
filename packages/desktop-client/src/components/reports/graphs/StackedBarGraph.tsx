@@ -24,6 +24,7 @@ import {
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
@@ -178,6 +179,7 @@ export function StackedBarGraph({
   showTooltip = true,
   interval,
 }: StackedBarGraphProps) {
+  const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
   const categories = useCategories();
   const accounts = useAccounts();
@@ -257,6 +259,7 @@ export function StackedBarGraph({
                     dataKey={entry.name}
                     stackId="a"
                     fill={entry.color}
+                    {...animationProps}
                     onMouseLeave={() => {
                       setPointer('');
                       setTooltip('');
