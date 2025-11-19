@@ -37,7 +37,6 @@ export function convertPayPeriodToDateRange(month: string): DateRange {
 }
 
 /**
- * Creates filter conditions for transaction filtering
  * Automatically detects pay periods and creates appropriate filters
  * @param month Month string (calendar month like '2024-01' or pay period like '2024-13')
  * @param categoryId Category ID to filter by
@@ -75,12 +74,12 @@ export function createTransactionFilterConditions(
 }
 
 /**
- * Creates AQL-style filter for mobile components
- * @param month Month string (calendar month or pay period)
+ * Creates a month-aware date filter that works with both calendar months and pay periods
+ * @param month Month string (calendar month like '2024-01' or pay period like '2024-13')
  * @param categoryId Category ID to filter by
- * @returns AQL filter object
+ * @returns AQL filter object with category and date filters
  */
-export function createAQLTransactionFilter(month: string, categoryId: string) {
+export function createMonthDateFilter(month: string, categoryId: string) {
   if (isPayPeriod(month)) {
     // For pay periods, use date range filtering instead of $month transform
     const dateRange = convertPayPeriodToDateRange(month);

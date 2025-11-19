@@ -6,11 +6,11 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
+import { applyPayPeriodPrefs } from 'loot-core/shared/pay-periods';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
-import { applyPayPeriodPrefs } from 'loot-core/shared/pay-periods';
 
 import { AutoSizingBudgetTable } from './DynamicBudgetTable';
 import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';
@@ -28,7 +28,6 @@ import { useCategoryActions } from '@desktop-client/hooks/useCategoryActions';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { createTransactionFilterConditions } from '@desktop-client/hooks/usePayPeriodTranslation';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
@@ -223,51 +222,6 @@ export function Budget() {
 
   const onBudgetAction = (month, type, args) => {
     dispatch(applyBudgetAction({ month, type, args }));
-  };
-
-  const onShowActivity = (categoryId, month) => {
-    const filterConditions = createTransactionFilterConditions(
-      month,
-      categoryId,
-    );
-    navigate('/accounts', {
-      state: {
-        goBack: true,
-        filterConditions,
-        categoryId,
-      },
-    });
-  };
-
-  const onReorderCategory = async sortInfo => {
-    const cats = await send('get-categories');
-    const moveCandidate = cats.list.filter(c => c.id === sortInfo.id)[0];
-    const exists =
-      cats.grouped
-        .filter(g => g.id === sortInfo.groupId)[0]
-        .categories.filter(
-          c => c.name.toUpperCase() === moveCandidate.name.toUpperCase(),
-        )
-        .filter(c => c.id !== moveCandidate.id).length > 0;
-
-    if (exists) {
-      categoryNameAlreadyExistsNotification(moveCandidate.name);
-      return;
-    }
-
-    dispatch(
-      moveCategory({
-        id: sortInfo.id,
-        groupId: sortInfo.groupId,
-        targetId: sortInfo.targetId,
-      }),
-    );
-  };
-
-  const onReorderGroup = async sortInfo => {
-    dispatch(
-      moveCategoryGroup({ id: sortInfo.id, targetId: sortInfo.targetId }),
-    );
   };
 
   const onToggleCollapse = () => {

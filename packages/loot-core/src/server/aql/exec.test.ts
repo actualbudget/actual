@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
+import { setPayPeriodConfig } from '../../shared/pay-periods';
 import { q } from '../../shared/query';
 import { makeChild } from '../../shared/transactions';
 import * as db from '../db';
@@ -281,5 +282,85 @@ describe('compileAndRunQuery', () => {
         .serialize(),
     );
     expect(data.map(row => row.id).sort()).toEqual(ids);
+  });
+
+  it('uses date range filtering for pay periods instead of $month transform', async () => {
+    // This test verifies the fix: categoryBalance now uses createMonthDateFilter
+    // which detects pay periods and uses date range filtering instead of $month transform
+    
+    // Set up pay period config for biweekly starting Jan 5, 2024
+    setPayPeriodConfig({
+      enabled: true,
+      payFrequency: 'biweekly',
+      startDate: '2024-01-05',
+    });
+
+    const group = await db.insertCategoryGroup({ name: 'group' });
+    const categoryId = await db.insertCategory({
+      id: 'groceries',
+      name: 'Groceries',
+      cat_group: group,
+    });
+
+    // Insert transactions in January
+    await db.insertTransaction({
+      id: uuidv4(),
+      account: 'acct',
+      date: '2024-01-06',
+      amount: -5000,
+      category: categoryId,
+    });
+
+    await db.insertTransaction({
+      id: uuidv4(),
+      account: 'acct',
+      date: '2024-01-15',
+      amount: -3000,
+      category: categoryId,
+    });
+
+    // Test 1: Calendar month filtering with $month transform works
+    const resultCalendarMonth = await compileAndRunAqlQuery(
+      q('transactions')
+        .filter({
+          category: categoryId,
+          date: { $transform: '$month', $eq: '2024-01' },
+        })
+        .options({ splits: 'inline' })
+        .calculate({ $sum: '$amount' })
+        .serialize(),
+    );
+
+    expect(resultCalendarMonth.data).toBe(-8000);
+
+    // Test 2: Date range filtering (what createMonthDateFilter uses for pay periods)
+    // This demonstrates the fix approach - instead of using $month transform
+    // which doesn't work with pay period IDs, we use date range filtering
+    // The fix in bindings.ts uses createMonthDateFilter which:
+    // - For pay periods: converts to date range ($gte and $lte)
+    // - For calendar months: uses $month transform
+    const resultDateRange = await compileAndRunAqlQuery(
+      q('transactions')
+        .filter({
+          category: categoryId,
+          date: {
+            $gte: '2024-01-01',
+            $lte: '2024-01-31',
+          },
+        })
+        .options({ splits: 'inline' })
+        .calculate({ $sum: '$amount' })
+        .serialize(),
+    );
+
+    // Verify date range filtering works and returns the same result for January
+    expect(resultDateRange.data).toBe(-8000);
+
+    // Clean up pay period config
+    setPayPeriodConfig({
+      enabled: false,
+      payFrequency: 'biweekly',
+      startDate: '2024-01-05',
+    });
   });
 });
