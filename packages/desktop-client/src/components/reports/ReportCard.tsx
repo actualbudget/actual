@@ -1,5 +1,7 @@
 import React, {
+  useEffect,
   useRef,
+  useState,
   type ComponentProps,
   type ReactNode,
   type CSSProperties,
@@ -43,11 +45,18 @@ export function ReportCard({
 }: ReportCardProps) {
   const ref = useRef(null);
   const isInViewport = useIsInViewport(ref);
+  const [hasRendered, setHasRendered] = useState(false);
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
   const containerProps = {
     flex: isNarrowWidth ? '1 1' : `0 0 calc(${size * 100}% / 3 - 20px)`,
   };
+
+  useEffect(() => {
+    if (isInViewport && !hasRendered) {
+      setHasRendered(true);
+    }
+  }, [isInViewport, hasRendered]);
 
   const layoutProps = {
     isEditing,
@@ -91,7 +100,7 @@ export function ReportCard({
       {/* we render the content only if it is in the viewport
       this reduces the amount of concurrent server api calls and thus
       has a better performance */}
-      {isInViewport ? children : null}
+      {isInViewport || hasRendered ? children : null}
     </View>
   );
 
