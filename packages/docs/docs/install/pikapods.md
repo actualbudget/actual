@@ -12,10 +12,16 @@ share some of its revenues with Actual for customers using their Actual Budget p
 You get a $ 5.00 credit when you sign up, which means that you should be able to run Actual for
 over 3 months before your credit runs out.
 
-For web clients, PikaPods will automatically update anywhere from a couple of days to a week after the latest monthly release is deployed. This is because PikaPods tests each new release before deploying it.
+For web clients, PikaPods will automatically update about a week or so after the latest monthly release is deployed. PikaPods tests each new release before deploying it. If you have the Notification setting in Actual checked, you will get a popup in Actual notifying you that the server has been updated.
 
 For desktop clients, you will need to reinstall the desktop client to update to the latest version.
 We suggest first checking on the web client if PikaPods has updated, then reinstalling the desktop client.
+
+:::note[Using Actual on Pikapods]
+
+We suggest [using a PWA](#using-a-pwa)) desktop client with Pikapods so you don't run into version issues.
+
+:::
 
 ## Deploying Actual on PikaPods
 
@@ -27,7 +33,6 @@ _Actual does almost all of its computation in your browser, so purchasing more r
 
 After you have set up your Pod, head over to our  [Starting Fresh](/docs/getting-started/starting-fresh) guide to get started with
 Actual Budget.
-
 
 ## A step by step guide to setting up Actual Budget with PikaPods
 
@@ -121,6 +126,14 @@ be able to retrieve your budget.
 
 
 ![](/img/a-tour-of-actual/server-connecting-first-time.png)
+
+## Using a PWA
+
+It's easy to set up a PWA. Here's some help with a few common browsers.
+
+
+
+
 
 
 ## Getting started with using Actual Budget
