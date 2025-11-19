@@ -4,8 +4,7 @@ import { applyPayPeriodPrefs } from 'loot-core/shared/pay-periods';
 
 import {
   convertPayPeriodToDateRange,
-  createTransactionFilterConditions,
-  createAQLTransactionFilter,
+  createTransactionFilterConditions
 } from './usePayPeriodTranslation';
 
 beforeEach(() => {
@@ -69,7 +68,7 @@ describe('Pay Period Translation Utilities', () => {
   });
 
   test('createAQLTransactionFilter creates date range filters for pay periods', () => {
-    const filter = createAQLTransactionFilter('2024-13', 'test-category');
+    const filter = createTransactionFilterConditions('2024-13', 'test-category');
 
     expect(filter).toEqual({
       category: 'test-category',
@@ -81,7 +80,7 @@ describe('Pay Period Translation Utilities', () => {
   });
 
   test('createAQLTransactionFilter creates month transform filters for calendar months', () => {
-    const filter = createAQLTransactionFilter('2024-01', 'test-category');
+    const filter = createTransactionFilterConditions('2024-01', 'test-category');
 
     expect(filter).toEqual({
       category: 'test-category',
