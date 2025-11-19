@@ -1,5 +1,10 @@
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as fs from '../../platform/server/fs';
+import { logger } from '../../platform/server/log';
+import {
+  type PayPeriodConfig,
+  setPayPeriodConfig,
+} from '../../shared/pay-periods';
 import { stringToInteger } from '../../shared/util';
 import {
   GlobalPrefs,
@@ -36,6 +41,41 @@ app.method('load-global-prefs', loadGlobalPrefs);
 app.method('save-prefs', saveMetadataPrefs);
 app.method('load-prefs', loadMetadataPrefs);
 
+/**
+ * Loads pay period configuration from synced preferences and updates the shared config.
+ * This function handles validation and provides sensible defaults for invalid values.
+ */
+export async function loadPayPeriodConfig(): Promise<void> {
+  const prefs = await getSyncedPrefs();
+
+  const config: PayPeriodConfig = {
+    enabled: prefs.showPayPeriods === 'true',
+    payFrequency:
+      (prefs.payPeriodFrequency as PayPeriodConfig['payFrequency']) ||
+      'monthly',
+    startDate:
+      prefs.payPeriodStartDate || new Date().toISOString().slice(0, 10),
+  };
+
+  // Validate frequency is one of the allowed values
+  const validFrequencies: PayPeriodConfig['payFrequency'][] = [
+    'weekly',
+    'biweekly',
+    'semimonthly',
+    'monthly',
+  ];
+  if (!validFrequencies.includes(config.payFrequency)) {
+    config.payFrequency = 'monthly';
+  }
+
+  // Validate startDate is a valid ISO date string
+  if (config.startDate && isNaN(Date.parse(config.startDate))) {
+    config.startDate = new Date().toISOString().slice(0, 10);
+  }
+
+  setPayPeriodConfig(config);
+}
+
 async function saveSyncedPrefs({
   id,
   value,
@@ -51,6 +91,20 @@ async function saveSyncedPrefs({
     id,
     value,
   });
+
+  // Reload pay period config when pay period preferences change
+  // This ensures backend config stays in sync with frontend changes
+  if (
+    id === 'showPayPeriods' ||
+    id === 'payPeriodFrequency' ||
+    id === 'payPeriodStartDate'
+  ) {
+    try {
+      await loadPayPeriodConfig();
+    } catch (e) {
+      logger.warn('Failed to load pay period config', e);
+    }
+  }
 }
 
 async function getSyncedPrefs(): Promise<SyncedPrefs> {

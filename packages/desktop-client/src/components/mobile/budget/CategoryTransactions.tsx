@@ -13,6 +13,7 @@ import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategoryPreviewTransactions } from '@desktop-client/hooks/useCategoryPreviewTransactions';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { createAQLTransactionFilter } from '@desktop-client/hooks/usePayPeriodTranslation';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
 import { useDispatch } from '@desktop-client/redux';
@@ -141,8 +142,5 @@ function TransactionListWithPreviews({
 }
 
 function getCategoryMonthFilter(category: CategoryEntity, month: string) {
-  return {
-    category: category.id,
-    date: { $transform: '$month', $eq: month },
-  };
+  return createAQLTransactionFilter(month, category.id);
 }

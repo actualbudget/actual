@@ -5,80 +5,54 @@ import memoizeOne from 'memoize-one';
 
 import { type SyncedPrefs } from '../types/prefs';
 
+import { parseDate as sharedParseDate } from './date-utils';
+import {
+  type PayPeriodConfig,
+  getPayPeriodConfig,
+  setPayPeriodConfig,
+  isPayPeriod as _isPayPeriod,
+  getPayPeriodStartDate,
+  getPayPeriodEndDate,
+  getPayPeriodLabel,
+  generatePayPeriods,
+  nextPayPeriod,
+  prevPayPeriod,
+  addPayPeriods,
+  differenceInPayPeriods,
+  getCurrentPayPeriod,
+  getPayPeriodFromDate,
+  generatePayPeriodRange,
+  getPayPeriodNumberInMonth,
+} from './pay-periods';
 import * as Platform from './platform';
 
 type DateLike = string | Date;
 type Day = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
+/**
+ * Parse a date string or Date object into a Date.
+ *
+ * Supports multiple input formats:
+ * - Full dates: "2025-10-15" → Oct 15, 2025
+ * - Calendar months: "2025-10" → Oct 1, 2025
+ * - Pay period IDs: "2025-32" → Start date of pay period 32 (auto-converted)
+ * - Years: "2025" → Jan 1, 2025
+ *
+ * @param value - Date string or Date object
+ * @returns Date object set to noon (12:00) to avoid DST issues
+ */
 export function _parse(value: DateLike): Date {
-  if (typeof value === 'string') {
-    // Dates are hard. We just want to deal with months in the format
-    // 2020-01 and days in the format 2020-01-01, but life is never
-    // simple. We want to rely on native dates for date logic because
-    // days are complicated (leap years, etc). But relying on native
-    // dates mean we're exposed to craziness.
-    //
-    // The biggest problem is that JS dates work with local time by
-    // default. We could try to only work with UTC, but there's not an
-    // easy way to make `format` avoid local time, and not sure if we
-    // want that anyway (`currentMonth` should surely print the local
-    // time). We need to embrace local time, and as long as inputs to
-    // date logic and outputs from format are local time, it should
-    // work.
-    //
-    // To make sure we're in local time, always give Date integer
-    // values. If you pass in a string to parse, different string
-    // formats produce different results.
-    //
-    // A big problem is daylight savings, however. Usually, when
-    // giving the time to the Date constructor, you get back a date
-    // specifically for that time in your local timezone. However, if
-    // daylight savings occurs on that exact time, you will get back
-    // something different:
-    //
-    // This is fine:
-    // > new Date(2017, 2, 12, 1).toString()
-    // > 'Sun Mar 12 2017 01:00:00 GMT-0500 (Eastern Standard Time)'
-    //
-    // But wait, we got back a different time (3AM instead of 2AM):
-    // > new Date(2017, 2, 12, 2).toString()
-    // > 'Sun Mar 12 2017 03:00:00 GMT-0400 (Eastern Daylight Time)'
-    //
-    // The time is "correctly" adjusted via DST, but we _really_
-    // wanted 2AM. The problem is that time simply doesn't exist.
-    //
-    // Why is this a problem? Well, consider a case where the DST
-    // shift happens *at midnight* and it goes back an hour. You think
-    // you have a date object for the next day, but when formatted it
-    // actually shows the previous day. A more likely scenario: buggy
-    // timezone data makes JS dates do this shift when it shouldn't,
-    // so using midnight at the time for date logic gives back the
-    // last day. See the time range of Sep 30 15:00 - Oct 1 1:00 for
-    // the AEST timezone when nodejs-mobile incorrectly gives you back
-    // a time an hour *before* you specified. Since this happens on
-    // Oct 1, doing `addMonths(September, 1)` still gives you back
-    // September. Issue here:
-    // https://github.com/JaneaSystems/nodejs-mobile/issues/251
-    //
-    // The fix is simple once you understand this. Always use the 12th
-    // hour of the day. That's it. There is no DST that shifts more
-    // than 12 hours (god let's hope not) so no matter how far DST has
-    // shifted backwards or forwards, doing date logic will stay
-    // within the day we want.
-
-    const [year, month, day] = value.split('-');
-    if (day != null) {
-      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 12);
-    } else if (month != null) {
-      return new Date(parseInt(year), parseInt(month) - 1, 1, 12);
-    } else {
-      return new Date(parseInt(year), 0, 1, 12);
+  // Auto-convert pay period IDs to their start date
+  if (typeof value === 'string' && value.length === 7) {
+    const monthNum = parseInt(value.split('-')[1]);
+    if (monthNum > 12) {
+      // Presence Rule: If pay period ID exists, convert it to start date
+      return getMonthStartDate(value);
     }
   }
-  if (typeof value === 'number') {
-    return new Date(value);
-  }
-  return value;
+
+  // Use shared date parsing utility for all other cases
+  return sharedParseDate(value);
 }
 
 export const parseDate = _parse;
@@ -88,6 +62,11 @@ export function yearFromDate(date: DateLike): string {
 }
 
 export function monthFromDate(date: DateLike): string {
+  const config = getPayPeriodConfig();
+  if (config?.enabled) {
+    return getPayPeriodFromDate(_parse(date), config);
+  }
+
   return d.format(_parse(date), 'yyyy-MM');
 }
 
@@ -117,9 +96,14 @@ export function dayFromDate(date: DateLike): string {
 export function currentMonth(): string {
   if (global.IS_TESTING || Platform.isPlaywright) {
     return global.currentMonth || '2017-01';
-  } else {
-    return d.format(new Date(), 'yyyy-MM');
   }
+
+  const config = getPayPeriodConfig();
+  if (config?.enabled) {
+    return getCurrentPayPeriod(new Date(), config);
+  }
+
+  return d.format(new Date(), 'yyyy-MM');
 }
 
 export function currentWeek(
@@ -161,6 +145,13 @@ export function currentDay(): string {
 }
 
 export function nextMonth(month: DateLike): string {
+  const monthStr =
+    typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+
+  if (isPayPeriod(monthStr)) {
+    return nextPayPeriod(monthStr);
+  }
+
   return d.format(d.addMonths(_parse(month), 1), 'yyyy-MM');
 }
 
@@ -169,6 +160,13 @@ export function prevYear(month: DateLike, format = 'yyyy-MM'): string {
 }
 
 export function prevMonth(month: DateLike): string {
+  const monthStr =
+    typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+
+  if (isPayPeriod(monthStr)) {
+    return prevPayPeriod(monthStr);
+  }
+
   return d.format(d.subMonths(_parse(month), 1), 'yyyy-MM');
 }
 
@@ -177,10 +175,27 @@ export function addYears(year: DateLike, n: number): string {
 }
 
 export function addMonths(month: DateLike, n: number): string {
+  const monthStr =
+    typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+
+  if (isPayPeriod(monthStr)) {
+    return addPayPeriods(monthStr, n);
+  }
+
   return d.format(d.addMonths(_parse(month), n), 'yyyy-MM');
 }
 
 export function addWeeks(date: DateLike, n: number): string {
+  // Convert pay period to its start date before performing week arithmetic
+  const dateStr =
+    typeof date === 'string' ? date : d.format(_parse(date), 'yyyy-MM-dd');
+
+  if (isPayPeriod(dateStr)) {
+    const config = getPayPeriodConfig();
+    const startDate = getMonthStartDate(dateStr, config);
+    return d.format(d.addWeeks(startDate, n), 'yyyy-MM-dd');
+  }
+
   return d.format(d.addWeeks(_parse(date), n), 'yyyy-MM-dd');
 }
 
@@ -188,6 +203,15 @@ export function differenceInCalendarMonths(
   month1: DateLike,
   month2: DateLike,
 ): number {
+  const str1 =
+    typeof month1 === 'string' ? month1 : d.format(_parse(month1), 'yyyy-MM');
+  const str2 =
+    typeof month2 === 'string' ? month2 : d.format(_parse(month2), 'yyyy-MM');
+
+  if (isPayPeriod(str1) || isPayPeriod(str2)) {
+    return differenceInPayPeriods(str1, str2);
+  }
+
   return d.differenceInCalendarMonths(_parse(month1), _parse(month2));
 }
 
@@ -195,14 +219,52 @@ export function differenceInCalendarDays(
   month1: DateLike,
   month2: DateLike,
 ): number {
+  const str1 =
+    typeof month1 === 'string'
+      ? month1
+      : d.format(_parse(month1), 'yyyy-MM-dd');
+  const str2 =
+    typeof month2 === 'string'
+      ? month2
+      : d.format(_parse(month2), 'yyyy-MM-dd');
+
+  // If either is a pay period, convert to actual start dates
+  if (isPayPeriod(str1) || isPayPeriod(str2)) {
+    const config = getPayPeriodConfig();
+    const date1 = isPayPeriod(str1)
+      ? getMonthStartDate(str1, config)
+      : _parse(month1);
+    const date2 = isPayPeriod(str2)
+      ? getMonthStartDate(str2, config)
+      : _parse(month2);
+    return d.differenceInCalendarDays(date1, date2);
+  }
+
   return d.differenceInCalendarDays(_parse(month1), _parse(month2));
 }
 
 export function subMonths(month: string | Date, n: number) {
+  const monthStr =
+    typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+
+  if (isPayPeriod(monthStr)) {
+    return addPayPeriods(monthStr, -n);
+  }
+
   return d.format(d.subMonths(_parse(month), n), 'yyyy-MM');
 }
 
 export function subWeeks(date: DateLike, n: number): string {
+  // Convert pay period to its start date before performing week arithmetic
+  const dateStr =
+    typeof date === 'string' ? date : d.format(_parse(date), 'yyyy-MM-dd');
+
+  if (isPayPeriod(dateStr)) {
+    const config = getPayPeriodConfig();
+    const startDate = getMonthStartDate(dateStr, config);
+    return d.format(d.subWeeks(startDate, n), 'yyyy-MM-dd');
+  }
+
   return d.format(d.subWeeks(_parse(date), n), 'yyyy-MM-dd');
 }
 
@@ -211,23 +273,73 @@ export function subYears(year: string | Date, n: number) {
 }
 
 export function addDays(day: DateLike, n: number): string {
+  // Convert pay period to its start date before performing day arithmetic
+  const dateStr =
+    typeof day === 'string' ? day : d.format(_parse(day), 'yyyy-MM-dd');
+
+  if (isPayPeriod(dateStr)) {
+    const config = getPayPeriodConfig();
+    const startDate = getMonthStartDate(dateStr, config);
+    return d.format(d.addDays(startDate, n), 'yyyy-MM-dd');
+  }
+
   return d.format(d.addDays(_parse(day), n), 'yyyy-MM-dd');
 }
 
 export function subDays(day: DateLike, n: number): string {
+  // Convert pay period to its start date before performing day arithmetic
+  const dateStr =
+    typeof day === 'string' ? day : d.format(_parse(day), 'yyyy-MM-dd');
+
+  if (isPayPeriod(dateStr)) {
+    const config = getPayPeriodConfig();
+    const startDate = getMonthStartDate(dateStr, config);
+    return d.format(d.subDays(startDate, n), 'yyyy-MM-dd');
+  }
+
   return d.format(d.subDays(_parse(day), n), 'yyyy-MM-dd');
 }
 
 export function isBefore(month1: DateLike, month2: DateLike): boolean {
+  const str1 =
+    typeof month1 === 'string' ? month1 : d.format(_parse(month1), 'yyyy-MM');
+  const str2 =
+    typeof month2 === 'string' ? month2 : d.format(_parse(month2), 'yyyy-MM');
+
+  const isPP1 = isPayPeriod(str1);
+  const isPP2 = isPayPeriod(str2);
+
+  // Both pay periods or both calendar months: use string comparison
+  if (isPP1 || isPP2) {
+    return str1 < str2;
+  }
+
+  // Calendar months: use date parsing
   return d.isBefore(_parse(month1), _parse(month2));
 }
 
 export function isAfter(month1: DateLike, month2: DateLike): boolean {
+  const str1 =
+    typeof month1 === 'string' ? month1 : d.format(_parse(month1), 'yyyy-MM');
+  const str2 =
+    typeof month2 === 'string' ? month2 : d.format(_parse(month2), 'yyyy-MM');
+
+  const isPP1 = isPayPeriod(str1);
+  const isPP2 = isPayPeriod(str2);
+
+  // Both pay periods or both calendar months: use string comparison
+  if (isPP1 || isPP2) {
+    return str1 > str2;
+  }
+
+  // Calendar months: use date parsing
   return d.isAfter(_parse(month1), _parse(month2));
 }
 
 export function isCurrentMonth(month: DateLike): boolean {
-  return month === currentMonth();
+  const monthStr =
+    typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+  return monthStr === currentMonth();
 }
 
 export function isCurrentDay(day: DateLike): boolean {
@@ -237,6 +349,25 @@ export function isCurrentDay(day: DateLike): boolean {
 // TODO: This doesn't really fit in this module anymore, should
 // probably live elsewhere
 export function bounds(month: DateLike): { start: number; end: number } {
+  const monthStr =
+    typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+
+  // Check if this is a pay period month
+  if (isPayPeriod(monthStr)) {
+    const config = getPayPeriodConfig();
+    const year = parseInt(monthStr.slice(0, 4));
+    const periods = generatePayPeriods(year, config!);
+    const period = periods.find(p => p.monthId === monthStr);
+
+    if (period) {
+      return {
+        start: parseInt(period.startDate.replace(/-/g, '')),
+        end: parseInt(period.endDate.replace(/-/g, '')),
+      };
+    }
+  }
+
+  // Original calendar month logic
   return {
     start: parseInt(d.format(d.startOfMonth(_parse(month)), 'yyyyMMdd')),
     end: parseInt(d.format(d.endOfMonth(_parse(month)), 'yyyyMMdd')),
@@ -301,6 +432,20 @@ export function _range(
   end: DateLike,
   inclusive = false,
 ): string[] {
+  const startStr =
+    typeof start === 'string' ? start : d.format(_parse(start), 'yyyy-MM');
+  const endStr =
+    typeof end === 'string' ? end : d.format(_parse(end), 'yyyy-MM');
+
+  // Check if we're dealing with pay periods
+  const startIsPayPeriod = isPayPeriod(startStr);
+  const endIsPayPeriod = isPayPeriod(endStr);
+
+  if (startIsPayPeriod || endIsPayPeriod) {
+    return generatePayPeriodRange(startStr, endStr, inclusive);
+  }
+
+  // Original calendar month logic
   const months: string[] = [];
   let month = monthFromDate(start);
   const endMonth = monthFromDate(end);
@@ -483,3 +628,125 @@ export const getShortYearRegex = memoizeOne((format: string) => {
     .replace(/y+/g, '\\d{2}');
   return new RegExp('^' + regex + '$');
 });
+
+export function isPayPeriod(monthId: string): boolean {
+  return _isPayPeriod(monthId);
+}
+
+function getCalendarMonthStartDate(monthId: string): Date {
+  return d.startOfMonth(_parse(monthId));
+}
+
+function getCalendarMonthEndDate(monthId: string): Date {
+  return d.endOfMonth(_parse(monthId));
+}
+
+function getCalendarMonthLabel(monthId: string): string {
+  return d.format(_parse(monthId), 'MMMM yyyy');
+}
+
+// pay period helpers are implemented in './pay-periods'
+
+export function getMonthStartDate(
+  monthId: string,
+  config?: PayPeriodConfig,
+): Date {
+  if (isPayPeriod(monthId)) {
+    const activeConfig = config || getPayPeriodConfig();
+    return getPayPeriodStartDate(monthId, activeConfig!);
+  }
+  return getCalendarMonthStartDate(monthId);
+}
+
+export function getMonthEndDate(
+  monthId: string,
+  config?: PayPeriodConfig,
+): Date {
+  if (isPayPeriod(monthId)) {
+    const activeConfig = config || getPayPeriodConfig();
+    return getPayPeriodEndDate(monthId, activeConfig!);
+  }
+  return getCalendarMonthEndDate(monthId);
+}
+
+export function getMonthLabel(
+  monthId: string,
+  config?: PayPeriodConfig,
+): string {
+  if (isPayPeriod(monthId)) {
+    // The presence of pay period ID IS proof that pay periods are enabled
+    const activeConfig = config || getPayPeriodConfig();
+    if (activeConfig) {
+      return getPayPeriodLabel(monthId, activeConfig);
+    }
+    // Fallback if config truly unavailable
+    const mm = parseInt(monthId.slice(5, 7));
+    return 'Period ' + String(mm - 12);
+  }
+  return getCalendarMonthLabel(monthId);
+}
+
+// New function to get display name for MonthPicker (Jan-1, Jan-2 format)
+export function getMonthDisplayName(
+  monthId: string,
+  config?: PayPeriodConfig | null,
+  locale?: Locale,
+): string {
+  if (isPayPeriod(monthId)) {
+    // The presence of pay period ID IS proof that pay periods are enabled
+    const activeConfig = config || getPayPeriodConfig();
+    if (activeConfig) {
+      const periodNumber = getPayPeriodNumberInMonth(monthId, activeConfig);
+      const startDate = getMonthStartDate(monthId, activeConfig);
+      const monthName = d.format(startDate, 'MMM', { locale });
+      return `${monthName}-${periodNumber}`;
+    }
+    // Fallback if config truly unavailable
+    const mm = parseInt(monthId.slice(5, 7));
+    return 'P' + String(mm - 12);
+  }
+
+  return d.format(_parse(monthId), 'MMM', { locale });
+}
+
+// New function to get date range display for BudgetSummary
+export function getMonthDateRange(
+  monthId: string,
+  config?: PayPeriodConfig | null,
+  locale?: Locale,
+): string {
+  if (isPayPeriod(monthId)) {
+    // The presence of pay period ID IS proof that pay periods are enabled
+    const activeConfig = config || getPayPeriodConfig();
+    if (activeConfig) {
+      const startDate = getMonthStartDate(monthId, activeConfig);
+      const endDate = getMonthEndDate(monthId, activeConfig);
+      const startLabel = d.format(startDate, 'MMM d', { locale });
+      const endLabel = d.format(endDate, 'MMM d', { locale });
+      return `${startLabel} - ${endLabel}`;
+    }
+    // Fallback
+    return getMonthLabel(monthId, activeConfig);
+  }
+
+  // For calendar months, return just the month name (e.g., "January")
+  // This is used by desktop BudgetSummary. Mobile uses getMonthTextWithYear() for the 'yy format.
+  return d.format(_parse(monthId), 'MMMM', { locale });
+}
+
+// Function to get month text with year for mobile UI components
+export function getMonthTextWithYear(
+  monthId: string,
+  config?: PayPeriodConfig | null,
+  locale?: Locale,
+): string {
+  if (isPayPeriod(monthId)) {
+    // For pay periods, show the date range (e.g., "Jan 5 - Jan 18")
+    return getMonthDateRange(monthId, config, locale);
+  }
+
+  // For calendar months, return month with abbreviated year (e.g., "January '17")
+  return nameForMonth(monthId, locale);
+}
+
+export { getPayPeriodConfig, setPayPeriodConfig, generatePayPeriods };

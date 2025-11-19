@@ -23,6 +23,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
+import { applyPayPeriodPrefs } from 'loot-core/shared/pay-periods';
 import { groupById } from 'loot-core/shared/util';
 
 import { BudgetTable, PILL_STYLE } from './BudgetTable';
@@ -41,6 +42,7 @@ import { prewarmMonth } from '@desktop-client/components/budget/util';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
@@ -68,8 +70,15 @@ export function BudgetPage() {
   const [budgetTypePref] = useSyncedPref('budgetType');
   const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'envelope';
   const spreadsheet = useSpreadsheet();
+  const payPeriodFeatureFlagEnabled = useFeatureFlag('payPeriodsEnabled');
+  const [payPeriodFrequency] = useSyncedPref('payPeriodFrequency');
+  const [payPeriodStartDate] = useSyncedPref('payPeriodStartDate');
+  const [payPeriodViewEnabled] = useSyncedPref('showPayPeriods');
 
+  // Calculate current month/pay period
+  // The useEffect below (lines 111-141) handles updating when pay period settings change
   const currMonth = monthUtils.currentMonth();
+
   const [startMonth = currMonth, setStartMonthPref] =
     useLocalPref('budget.startMonth');
   const [monthBounds, setMonthBounds] = useState({
@@ -95,6 +104,39 @@ export function BudgetPage() {
 
     init();
   }, [budgetType, startMonth, dispatch, spreadsheet]);
+
+  // Wire pay period config from synced prefs into month utils
+  useEffect(() => {
+    if (!payPeriodFeatureFlagEnabled || !initialized) {
+      return;
+    }
+
+    // Use the existing validation function that handles type safety
+    applyPayPeriodPrefs({
+      showPayPeriods: payPeriodViewEnabled,
+      payPeriodFrequency,
+      payPeriodStartDate,
+    });
+
+    // After loading config, reset to current month/pay period
+    // This ensures we use the correct month type (calendar vs pay period)
+    const currentMonthOrPeriod = monthUtils.currentMonth();
+    setStartMonthPref(currentMonthOrPeriod);
+
+    // Refresh budget bounds to get pay period bounds if enabled
+    if (payPeriodViewEnabled === 'true') {
+      send('get-budget-bounds').then(({ start, end }) => {
+        setMonthBounds({ start, end });
+      });
+    }
+  }, [
+    payPeriodFeatureFlagEnabled,
+    payPeriodViewEnabled,
+    payPeriodFrequency,
+    payPeriodStartDate,
+    initialized,
+    setStartMonthPref,
+  ]);
 
   const onBudgetAction = useCallback(
     async (month, type, args) => {
@@ -323,10 +365,11 @@ export function BudgetPage() {
   }, [budgetType, setStartMonthPref, spreadsheet, startMonth]);
 
   const onCurrentMonth = useCallback(async () => {
-    await prewarmMonth(budgetType, spreadsheet, currMonth);
-    setStartMonthPref(currMonth);
+    const currentMonthOrPeriod = monthUtils.currentMonth();
+    await prewarmMonth(budgetType, spreadsheet, currentMonthOrPeriod);
+    setStartMonthPref(currentMonthOrPeriod);
     setInitialized(true);
-  }, [budgetType, setStartMonthPref, spreadsheet, currMonth]);
+  }, [budgetType, setStartMonthPref, spreadsheet]);
 
   // const onOpenMonthActionMenu = () => {
   //   const options = [
@@ -969,6 +1012,12 @@ function MonthSelector({
   onOpenMonthMenu,
   onPrevMonth,
   onNextMonth,
+}: {
+  month: string;
+  monthBounds: { start: string; end: string };
+  onOpenMonthMenu?: (month: string) => void;
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
 }) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -1011,7 +1060,7 @@ function MonthSelector({
         data-month={month}
       >
         <Text style={styles.underlinedText}>
-          {monthUtils.format(month, 'MMMM ‘yy', locale)}
+          {monthUtils.getMonthTextWithYear(month, undefined, locale)}
         </Text>
       </Button>
       <Button
