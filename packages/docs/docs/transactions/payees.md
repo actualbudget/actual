@@ -14,15 +14,13 @@ To manage payees, either select the **More >  Payees** from the sidebar or click
 
 When importing transactions from a file, Actual tries to automatically match the imported names to existing payees. It does this by running through **rules** that you can edit. If no existing payee is found, it will create one.
 
-If a payee is found with an exact match as the imported name, it will always use that payee.
-
-Otherwise, it will look for payees with rules that match. These rules specify whether it should match a string exactly, or if it should contain a string. For example, a **Target** payee might have a rule that says "if a name contains 'Target', use this payee", and the ugly payee above would be resolved to the **Target** payee.
+If a payee is found with an exact match as the imported name, it will always use that payee. Otherwise, it will look for payees with rules that match. These rules specify whether it should match a string exactly, or if it should contain a string. For example, a **Target** payee might have a rule that says "if a name contains 'Target', use this payee", and the ugly payee above would be resolved to the **Target** payee.
 
 When a payee is matched, if it has a **default category** the transaction will automatically be assigned to it.
 
 :::tip[Category Learning]
 
-Actual defaults with Category Learning enabled. You can find this setting in the bottom right corner of the Payees page. A more in depth discussion of Payee Rules and Category Learning can be found in the [Rules](docs/budgeting/rules/index.md) documentation. You can turn this off for one, several or all Payees. [Learn more](docs/budgeting/rules/index.md#managing-rules)
+Actual defaults with Category Learning enabled. You can find this setting in the bottom left corner of the Payees page. A more in depth discussion of Payee Rules and Category Learning can be found in the [Rules](docs/budgeting/rules/index.md) documentation. You can turn this off for one, several or all Payees. [Learn more](docs/budgeting/rules/index.md#managing-rules)
 
 :::
 
@@ -62,3 +60,5 @@ You can individually select payees and merge them if you like, but filtering & m
 ## Transfer Payees
 
 [Transfers](./transfers.md) are just special payees that indicate which account to transfer to/from. Since they are payees, you can create rules like normal which will automatically create transfers. You will find them at the bottom of the **Payees** page if you want to create custom rules.
+
+![Image of Payee Page with transfers](/img/payees/payee-transfers.png)
