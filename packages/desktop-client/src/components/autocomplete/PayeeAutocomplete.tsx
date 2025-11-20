@@ -347,6 +347,8 @@ export function PayeeAutocomplete({
   payees,
   ...props
 }: PayeeAutocompleteProps) {
+  const { t } = useTranslation();
+
   const commonPayees = useCommonPayees();
   const retrievedPayees = usePayees();
   if (!payees) {
@@ -474,6 +476,7 @@ export function PayeeAutocomplete({
           setRawPayee('');
           setPayeeFieldFocused(false);
         },
+        'aria-label': t('Payee'),
         onFocus: () => setPayeeFieldFocused(true),
         onChangeValue: setRawPayee,
       }}

@@ -1,7 +1,9 @@
 // @ts-strict-ignore
 import React, { useEffect, useReducer } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { t } from 'i18next';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
@@ -600,9 +602,22 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
             onSwitchTransactions={onSwitchTransactions}
             onLinkTransactions={onLinkTransactions}
             onUnlinkTransactions={onUnlinkTransactions}
-            onSave={() => onSave(close)}
-            onCancel={close}
           />
+
+          <SpaceBetween
+            style={{
+              marginTop: 20,
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+            }}
+          >
+            <Button onPress={close}>
+              <Trans>Cancel</Trans>
+            </Button>
+            <Button variant="primary" onPress={() => onSave(close)}>
+              {adding ? t('Add') : t('Save')}
+            </Button>
+          </SpaceBetween>
         </>
       )}
     </Modal>

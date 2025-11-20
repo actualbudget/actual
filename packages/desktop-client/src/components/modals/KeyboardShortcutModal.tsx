@@ -265,6 +265,16 @@ export function KeyboardShortcutModal() {
             description: t('Delete the selected transactions'),
           },
           {
+            id: 'duplicate-selected-transactions',
+            shortcut: 'U',
+            description: t('Duplicate the selected transactions'),
+          },
+          {
+            id: 'merge-selected-transactions',
+            shortcut: 'G',
+            description: t('Merge the selected transactions'),
+          },
+          {
             id: 'set-account-for-selected-transactions',
             shortcut: 'A',
             description: t('Set account for selected transactions'),
@@ -283,6 +293,11 @@ export function KeyboardShortcutModal() {
             id: 'set-category-for-selected-transactions',
             shortcut: 'C',
             description: t('Set category for selected transactions'),
+          },
+          {
+            id: 'set-amount-for-selected-transactions',
+            shortcut: 'M',
+            description: t('Set amount for selected transactions'),
           },
           {
             id: 'toggle-cleared-for-selected-transactions',
