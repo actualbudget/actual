@@ -57,7 +57,7 @@ describe('ReconcilingMessage math & UI', () => {
     ).not.toBeInTheDocument();
 
     // Done button triggers callback
-    await userEvent.click(screen.getByText('Done reconciling'));
+    await userEvent.click(screen.getByText('Complete Reconciling'));
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 
