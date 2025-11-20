@@ -4,13 +4,12 @@ title: 'PikaPods'
 
 
 [PikaPods](https://www.pikapods.com/) offers one click "instant open source app hosting", allowing
-you to run Actual for less than $ 1.50 per month (as of July 2024).
+you to run Actual for about $ 1.50 per month (as of November 2025).
 
 Using PikaPods is also a simple way to support the development of Actual Budget, as PikaPods will
 share some of its revenues with Actual for customers using their Actual Budget pods.
 
-You get a $ 5.00 credit when you sign up, which means that you should be able to run Actual for
-over 3 months before your credit runs out.
+You get a $ 5.00 credit when you sign up, which means that you should be able to run Actual for 3 months before your credit runs out.
 
 For web clients, PikaPods will automatically update about a week or so after the latest monthly release is deployed. PikaPods tests each new release before deploying it. If you have the Notification setting in Actual checked, you will get a popup in Actual notifying you that the server has been updated.
 
@@ -19,7 +18,7 @@ We suggest first checking on the web client if PikaPods has updated, then reinst
 
 :::note[Using Actual on Pikapods]
 
-We suggest [using a PWA](#using-a-pwa)) desktop client with Pikapods so you don't run into version issues.
+We suggest [using a PWA](#using-a-pwa) desktop client with Pikapods so you don't run into version issues.
 
 :::
 
@@ -41,7 +40,7 @@ Actual Budget.
 
 You will be greeted with the following screen.
 
-![](/img/pikapods-setup/pikapods-1-register-login.png)
+![image pikapods register](/img/pikapods-setup/pikapods-1-register-login.png)
 
 Click on the **register** link inside the blue banner, which will take you to the user registration screen.
 
@@ -52,7 +51,7 @@ This screen is self-explanatory, but a kind reminder is to use a password only y
 You will need to use a working email address, as you will receive an email with a link you need
 to click on to complete the signup process.
 
-![](/img/pikapods-setup/pikapods-2-register-name.png)
+![Image pikapods email](/img/pikapods-setup/pikapods-2-register-name.png)
 
 
 ## Verification email
@@ -60,14 +59,14 @@ to click on to complete the signup process.
 By clicking the green button saying **Activate and Login**, you are now registered as
 a PikaPods customer. You will be returned to the login screen.
 
-![](/img/pikapods-setup/pikapods-4-email-activation.png)
+![Image pikapods email registration](/img/pikapods-setup/pikapods-4-email-activation.png)
 
 
 ## Login screen
 
 Enter the email address and password you registered yourself with.
 
-![](/img/pikapods-setup/pikapods-5-login-screen.png)
+![Image pikapods login](/img/pikapods-setup/pikapods-5-login-screen.png)
 
 
 ## Naming your Pod
@@ -87,7 +86,7 @@ Pod.
 :::
 
 
-![](/img/pikapods-setup/pikapods-6-add-pod-basics.png)
+![Image pikapods basic](/img/pikapods-setup/pikapods-6-add-pod-basics.png)
 
 
 ## Assigning storage to your Pod
@@ -101,7 +100,7 @@ it takes around 33 megabytes of storage. 10 gigabytes equals 10,000 megabytes, e
 
 Your Pod will be created when you click on the green **ADD POD* button. This step takes less than one minute.
 
-![](/img/pikapods-setup/pikapods-7-add-pod-resoruces.png)
+![Image pikapods add resources](/img/pikapods-setup/pikapods-7-add-pod-resoruces.png)
 
 
 
@@ -113,7 +112,7 @@ The address for your Actual Budget is found in the Domain field. In the screensh
 `https://berserk-bullmastiff.pikapod.net/budget/`. Yours will be something completely different.
 
 
-![](/img/pikapods-setup/pikapods-8-running-pod.png)
+![Image pikapod pod url](/img/pikapods-setup/pikapods-8-running-pod.png)
 
 
 ## Setting a password for your Actual Budget
@@ -125,16 +124,29 @@ Keep this password safe, as it cannot be retrieved. If you forget your server pa
 be able to retrieve your budget.
 
 
-![](/img/a-tour-of-actual/server-connecting-first-time.png)
+![Image connecting to Actual](/img/a-tour-of-actual/server-connecting-first-time.png)
 
-## Using a PWA
+## Using a PWA (Progressive Web App) {#using-a-pwa}
 
-It's easy to set up a PWA. Here's some help with a few common browsers.
+When using Actual Server, we suggest using a PWA web client. It's easy to set up a PWA from your browser of choice after you have logged in and have opened Actual Budget.
 
+Here's some help with a few common desktop browsers.
 
+:::warning
 
+Browser version and OS combination may affect how to install a PWA. Please refer to your browsers documentation for definitive guidance.
 
+:::
 
+Chrome: There may be an "app available" icon on the right side of the URL or use the browser menu. See [Chrome's documentation](https://support.google.com/chrome/answer/9658361?hl=en&co=GENIE.Platform%3DDesktop).
+
+Firefox: In supported OS, there should be an "add tab to Taskbar" icon on the right side of the URL. You may need to add a PWA extension as described in [Mozilla's documentation](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Installing).
+
+Safari: There should be a share icon in the Safari toolbar or use the browser menu. See [Safari's documentation](https://support.apple.com/en-mide/104996).
+
+For other browsers or browser/OS combinations, most search engines or the browser's documentation will describe how to install a PWA. PC MAgazine had an [article in March 2025](https://www.pcmag.com/explainers/how-to-use-progessive-web-apps) with some good information.
+<br />
+<br />
 
 ## Getting started with using Actual Budget
 
