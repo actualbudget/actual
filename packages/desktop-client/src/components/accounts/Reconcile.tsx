@@ -108,7 +108,7 @@ export function ReconcilingMessage({
         )}
         <View style={{ marginLeft: 15 }}>
           <Button variant="primary" onPress={onDone}>
-            <Trans>Exit Reconciling</Trans>
+            <Trans>Exit reconciling</Trans>
           </Button>
         </View>
         {targetDiff !== 0 && (
