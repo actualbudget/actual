@@ -28,9 +28,9 @@ If you are technically inclined, just [Click here to create an account and run A
 
 You can leave the resources at their lowest setting (although you will need a non-zero amount of storage for your budget files).
 
-_Actual does almost all of its computation in your browser, so purchasing more resources for the server won’t necessarily result in a better experience_
+_Your browser does most of Actual's computation, so purchasing more resources for the server won’t necessarily result in a better experience_
 
-After you have set up your Pod, head over to our  [Starting Fresh](/docs/getting-started/starting-fresh) guide to get started with
+After setting up your Pod, head over to our [Starting Fresh](/docs/getting-started/starting-fresh) guide to get started with
 Actual Budget.
 
 ## A step by step guide to setting up Actual Budget with PikaPods
@@ -47,8 +47,8 @@ Click on the **register** link inside the blue banner, which will take you to th
 
 ## The user registration screen
 
-This screen is self-explanatory, but a kind reminder is to use a password only you know.
-You will need to use a working email address, as you will receive an email with a link you need
+This screen is self-explanatory, but please use a password only you know.
+A working email address is required, as Pikapods will send an email with a link you need
 to click on to complete the signup process.
 
 ![Image pikapods email](/img/pikapods-setup/pikapods-2-register-name.png)
@@ -56,7 +56,7 @@ to click on to complete the signup process.
 
 ## Verification email
 
-By clicking the green button saying **Activate and Login**, you are now registered as
+Click the green button **"Activate and Login"**. You are now registered as
 a PikaPods customer. You will be returned to the login screen.
 
 ![Image pikapods email registration](/img/pikapods-setup/pikapods-4-email-activation.png)
@@ -64,24 +64,23 @@ a PikaPods customer. You will be returned to the login screen.
 
 ## Login screen
 
-Enter the email address and password you registered yourself with.
+Enter _your_ registration email address and password.
 
 ![Image pikapods login](/img/pikapods-setup/pikapods-5-login-screen.png)
 
 
 ## Naming your Pod
 
-A simplistic explanation of a Pod in layperson's terms is that *a Pod is a very tiny computer running in the cloud*.
-Typically, a Pod only runs one application - like Actual Budget.
+Simply put, *a Pod is a very tiny computer running in the cloud*. Typically, a Pod only runs one application - like Actual Budget Server.
 
 In 1), you enter a name for your Pod. This name really does not matter unless you plan to run several different Pods.
 In 2), you decide which region your Pod should run - choose the most suitable region.
 
 :::info
 
-One Pod running Actual can have multiple budgets available at the same time. You do not need to set up a new Pod
-for each budget you want to set up. The number of budgets is only limited by the storage capacity you assign to your
-Pod.
+Multiple budgets can reside in One Pod running Actual. You do not need to set up a new Pod for each budget you create. The number of budgets is limited only by the storage capacity you assign to your Pod.
+
+If you [connect to your bank](/docs/advanced/bank-sync.md), note that all budgets in the same pod share a single bank sync key.
 
 :::
 
@@ -95,8 +94,7 @@ Pod.
 The minimum storage you can assign to your Pod is 10 GB (gigabytes). We promise you
 that this is more than enough for your budget purposes.
 
-Example: With around 1,200 transactions, 18 months of budgeting, and approximately 200 rules and payees,
-it takes around 33 megabytes of storage. 10 gigabytes equals 10,000 megabytes, equivalent to 303 18-month budgets.
+Example: It takes about 33 megabytes of storage for about 1,200 transactions, 18 months of budgeting, and approximately 200 rules and payees. 10 gigabytes equals 10,000 megabytes, equivalent to 303 18-month budgets.
 
 Your Pod will be created when you click on the green **ADD POD* button. This step takes less than one minute.
 
@@ -106,7 +104,7 @@ Your Pod will be created when you click on the green **ADD POD* button. This ste
 
 ## Your pod is now ready to be used
 
-When you click on the green **OPEN POD** button you will be taken to your Pod.
+Click on the green **OPEN POD** button to be taken to your Pod.
 
 The address for your Actual Budget is found in the Domain field. In the screenshot example, this is
 `https://berserk-bullmastiff.pikapod.net/budget/`. Yours will be something completely different.
@@ -117,24 +115,26 @@ The address for your Actual Budget is found in the Domain field. In the screensh
 
 ## Setting a password for your Actual Budget
 
-Before you can start using Actual, you need to set a password for your server. This password is used
-next time you log into your server - and should never be the same as your PikaPods account password.
+Before you can start using Actual, you need to set a password for your server. This password is used the next time you log into your server - and should never be the same as your PikaPods account password.
 
-Keep this password safe, as it cannot be retrieved. If you forget your server password, you will not
-be able to retrieve your budget.
+:::warning
+
+Keep your Actual Budget password safe, as it cannot be retrieved. If you forget your server password, you will not be able to retrieve your budget.
+
+:::
 
 
 ![Image connecting to Actual](/img/a-tour-of-actual/server-connecting-first-time.png)
 
 ## Using a PWA (Progressive Web App) {#using-a-pwa}
 
-When using Actual Server, we suggest using a PWA web client. It's easy to set up a PWA from your browser of choice after you have logged in and have opened Actual Budget.
+When using Actual Server over the internet, we suggest using a PWA web client. After you login and open Actual Budget, it's easy to set up a PWA from your browser of choice.
 
 Here's some help with a few common desktop browsers.
 
-:::warning
+:::note
 
-Browser version and OS combination may affect how to install a PWA. Please refer to your browsers documentation for definitive guidance.
+Browser version and OS/browser combination may affect how to install a PWA. Please refer to your browsers documentation for definitive guidance.
 
 :::
 
@@ -144,11 +144,11 @@ Firefox: In supported OS, there should be an "add tab to Taskbar" icon on the ri
 
 Safari: There should be a share icon in the Safari toolbar or use the browser menu. See [Safari's documentation](https://support.apple.com/en-mide/104996).
 
-For other browsers or browser/OS combinations, most search engines or the browser's documentation will describe how to install a PWA. PC MAgazine had an [article in March 2025](https://www.pcmag.com/explainers/how-to-use-progessive-web-apps) with some good information.
+For other browsers or browser/OS combinations, most search engines or the browser's documentation will describe how to install a PWA. PC Magazine had an [article in March 2025](https://www.pcmag.com/explainers/how-to-use-progessive-web-apps) with some good information.
 <br />
 <br />
 
-## Getting started with using Actual Budget
+## Getting started with Actual Budget
 
 Go to our [Starting Fresh](/docs/getting-started/starting-fresh) guide to get started with
 Actual Budget.
