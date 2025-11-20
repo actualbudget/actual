@@ -17,6 +17,7 @@ if (!token || !repo || !prNumber || !userLogin) {
 
 const [owner, repoName] = repo.split('/');
 const octokit = new Octokit({ auth: token });
+console.log('token', token.substring(0, 3));
 const orgName = 'actualbudget';
 
 async function assignMaintainer() {
