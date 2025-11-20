@@ -82,7 +82,7 @@ If you [connect to your bank](/docs/advanced/bank-sync.md), note that all budget
 :::
 
 In 1), you enter a name for your Pod. This name really does not matter unless you plan to run several different Pods.
-<br />
+
 In 2), you decide which region your Pod should run - choose the most suitable region.
 
 ![Image pikapods basic](/img/pikapods-setup/pikapods-6-add-pod-basics.png)
