@@ -28,7 +28,7 @@ If you are technically inclined, just [Click here to create an account and run A
 
 You can leave the resources at their lowest setting (although you will need a non-zero amount of storage for your budget files).
 
-_Your browser does most of Actual's computation, so purchasing more resources for the server won’t necessarily result in a better experience_
+_Your browser does most of Actual's computation,_ so purchasing more resources for the server won’t necessarily result in a better experience.
 
 After setting up your Pod, head over to our [Starting Fresh](/docs/getting-started/starting-fresh) guide to get started with
 Actual Budget.
@@ -73,9 +73,6 @@ Enter _your_ registration email address and password.
 
 Simply put, *a Pod is a very tiny computer running in the cloud*. Typically, a Pod only runs one application - like Actual Budget Server.
 
-In 1), you enter a name for your Pod. This name really does not matter unless you plan to run several different Pods.
-In 2), you decide which region your Pod should run - choose the most suitable region.
-
 :::info
 
 Multiple budgets can reside in One Pod running Actual. You do not need to set up a new Pod for each budget you create. The number of budgets is limited only by the storage capacity you assign to your Pod.
@@ -84,6 +81,9 @@ If you [connect to your bank](/docs/advanced/bank-sync.md), note that all budget
 
 :::
 
+In 1), you enter a name for your Pod. This name really does not matter unless you plan to run several different Pods.
+<br />
+In 2), you decide which region your Pod should run - choose the most suitable region.
 
 ![Image pikapods basic](/img/pikapods-setup/pikapods-6-add-pod-basics.png)
 
@@ -125,6 +125,8 @@ Keep your Actual Budget password safe, as it cannot be retrieved. If you forget 
 
 
 ![Image connecting to Actual](/img/a-tour-of-actual/server-connecting-first-time.png)
+<br />
+<br />
 
 ## Using a PWA (Progressive Web App) {#using-a-pwa}
 
