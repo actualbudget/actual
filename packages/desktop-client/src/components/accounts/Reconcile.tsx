@@ -85,7 +85,10 @@ export function ReconcilingMessage({
                 marginRight: 3,
               }}
             />
-            <Trans>All reconciled!</Trans>
+            <Trans>
+              All reconciled!
+              <br />Exit to lock cleared transactions
+            </Trans>
           </View>
         ) : (
           <View style={{ color: theme.tableText }}>
@@ -105,7 +108,7 @@ export function ReconcilingMessage({
         )}
         <View style={{ marginLeft: 15 }}>
           <Button variant="primary" onPress={onDone}>
-            <Trans>Complete Reconciliation</Trans>
+            <Trans>Exit Reconciling</Trans>
           </Button>
         </View>
         {targetDiff !== 0 && (
