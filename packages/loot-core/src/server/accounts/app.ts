@@ -120,11 +120,15 @@ async function linkGoCardlessAccount({
   account,
   upgradingId,
   offBudget = false,
+  startingDate,
+  startingBalance,
 }: {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
   upgradingId?: AccountEntity['id'] | undefined;
   offBudget?: boolean | undefined;
+  startingDate?: string | undefined;
+  startingBalance?: number | undefined;
 }) {
   let id;
   const bank = await link.findOrCreateBank(account.institution, requisitionId);
@@ -170,6 +174,8 @@ async function linkGoCardlessAccount({
     id,
     account.account_id,
     bank.bank_id,
+    startingDate,
+    startingBalance,
   );
 
   connection.send('sync-event', {
@@ -184,10 +190,14 @@ async function linkSimpleFinAccount({
   externalAccount,
   upgradingId,
   offBudget = false,
+  startingDate,
+  startingBalance,
 }: {
   externalAccount: SyncServerSimpleFinAccount;
   upgradingId?: AccountEntity['id'] | undefined;
   offBudget?: boolean | undefined;
+  startingDate?: string | undefined;
+  startingBalance?: number | undefined;
 }) {
   let id;
 
@@ -240,6 +250,8 @@ async function linkSimpleFinAccount({
     id,
     externalAccount.account_id,
     bank.bank_id,
+    startingDate,
+    startingBalance,
   );
 
   await connection.send('sync-event', {
@@ -254,10 +266,14 @@ async function linkPluggyAiAccount({
   externalAccount,
   upgradingId,
   offBudget = false,
+  startingDate,
+  startingBalance,
 }: {
   externalAccount: SyncServerPluggyAiAccount;
   upgradingId?: AccountEntity['id'] | undefined;
   offBudget?: boolean | undefined;
+  startingDate?: string | undefined;
+  startingBalance?: number | undefined;
 }) {
   let id;
 
@@ -310,6 +326,8 @@ async function linkPluggyAiAccount({
     id,
     externalAccount.account_id,
     bank.bank_id,
+    startingDate,
+    startingBalance,
   );
 
   await connection.send('sync-event', {
