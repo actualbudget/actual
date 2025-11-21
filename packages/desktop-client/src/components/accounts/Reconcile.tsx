@@ -87,8 +87,6 @@ export function ReconcilingMessage({
             />
             <Trans>
               All reconciled!
-              <br />
-              Exit to lock cleared transactions
             </Trans>
           </View>
         ) : (
