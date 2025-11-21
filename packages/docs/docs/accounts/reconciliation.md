@@ -28,7 +28,7 @@ The tool will tell you exactly what the difference is between the bank statement
 
 ![Image of tool with nonmatching balance](/img/reconcile/reconcile-4-2025.png)
 
-When the cleared amount of the Actual account ledger and the value entered into the Reconciliation tool are the same, the tool will let you know that you are _All reconciled!_ Click on the **Lock transactions** button to complete the reconciliation and lock the cleared transactions.
+When the cleared amount of the Actual account ledger and the value entered into the Reconciliation tool are the same, the tool will let you know that you are _All reconciled!_ Click on the **Lock transactions** button to complete the reconciliation and lock the cleared transactions. If you want to leave reconciling for a later time, click **Exit reconciliation** to cancel.
 
 :::warning
 
