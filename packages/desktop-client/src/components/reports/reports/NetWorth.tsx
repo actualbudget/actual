@@ -68,6 +68,23 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
+  const getDefaultIntervalForMode = (mode: TimeFrame['mode']): 'Daily' | 'Weekly' | 'Monthly' | 'Yearly' => {
+    switch (mode) {
+      case 'lastMonth':
+        return 'Weekly';
+      case 'yearToDate':
+      case 'lastYear':
+      case 'priorYearToDate':
+        return 'Monthly';
+      case 'full':
+        return 'Monthly';
+      case 'sliding-window':
+      case 'static':
+      default:
+        return 'Monthly';
+    }
+  };
+
   const accounts = useAccounts();
   const {
     conditions,
@@ -89,7 +106,16 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [start, setStart] = useState(monthUtils.currentMonth());
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
-  const [interval, setInterval] = useState(widget?.meta?.interval || 'Monthly');
+  const [interval, setInterval] = useState(
+    widget?.meta?.interval || getDefaultIntervalForMode(mode)
+  );
+
+ // Update interval when mode changes if no interval is set in widget meta
+  useEffect(() => {
+    if (!widget?.meta?.interval) {
+      setInterval(getDefaultIntervalForMode(mode));
+    }
+  }, [mode, widget?.meta?.interval]);
   const [latestTransaction, setLatestTransaction] = useState('');
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
