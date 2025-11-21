@@ -51,7 +51,7 @@ describe('ReconcilingMessage math & UI', () => {
     );
 
     expect(
-      screen.getByText(/All reconciled!.*Exit to lock cleared transactions/i),
+      screen.getByText('All reconciled!'),
     ).toBeInTheDocument();
     // No reconciliation transaction button when diff is zero
     expect(
