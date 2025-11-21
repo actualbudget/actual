@@ -85,9 +85,7 @@ export function ReconcilingMessage({
                 marginRight: 3,
               }}
             />
-            <Trans>
-              All reconciled!
-            </Trans>
+            <Trans>All reconciled!</Trans>
           </View>
         ) : (
           <View style={{ color: theme.tableText }}>
