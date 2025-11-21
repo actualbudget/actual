@@ -312,9 +312,9 @@ export async function loginWithOpenIdFinalize(body) {
       expiration = TOKEN_EXPIRATION_NEVER;
     } else if (typeof config.get('token_expiration') === 'number') {
       expiration =
-        Math.floor(Date.now() / 1000) + config.get('token_expiration') * 60;
+        Math.floor(Date.now() / 1000) + config.get('token_expiration');
     } else {
-      expiration = Math.floor(Date.now() / 1000) + 10 * 60;
+      expiration = Math.floor(Date.now() / 1000) + 10 * 60; // Default to 10 minutes
     }
 
     accountDb.mutate(

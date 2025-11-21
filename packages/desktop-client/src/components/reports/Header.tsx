@@ -41,9 +41,7 @@ type HeaderProps = {
     end: TimeFrame['end'],
     mode: TimeFrame['mode'],
   ) => void;
-  filters?: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
-  onApply?: (conditions: RuleConditionEntity) => void;
   onUpdateFilter: ComponentProps<typeof AppliedFilters>['onUpdate'];
   onDeleteFilter: ComponentProps<typeof AppliedFilters>['onDelete'];
   onConditionsOpChange: ComponentProps<
@@ -51,7 +49,16 @@ type HeaderProps = {
   >['onConditionsOpChange'];
   children?: ReactNode;
   inlineContent?: ReactNode;
-};
+} & (
+  | {
+      filters: RuleConditionEntity[];
+      onApply: (conditions: RuleConditionEntity) => void;
+    }
+  | {
+      filters?: never;
+      onApply?: never;
+    }
+);
 
 export function Header({
   start,
@@ -282,7 +289,6 @@ export function Header({
                 compact={isNarrowWidth}
                 onApply={onApply}
                 hover={false}
-                exclude={undefined}
               />
             )}
           </SpaceBetween>

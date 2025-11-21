@@ -15,7 +15,7 @@ runs:
   using: composite
   steps:
     - name: Install node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
       with:
         node-version: 22
     - name: Install yarn
@@ -27,7 +27,7 @@ runs:
       run: echo "version=$(node -v)" >> "$GITHUB_OUTPUT"
       shell: bash
     - name: Cache
-      uses: actions/cache@v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       id: cache
       with:
         path: ${{ format('{0}/**/node_modules', inputs.working-directory) }}
@@ -36,7 +36,7 @@ runs:
       run: mkdir -p ${{ format('{0}/.lage', inputs.working-directory) }}
       shell: bash
     - name: Cache Lage
-      uses: actions/cache@v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
         path: ${{ format('{0}/.lage', inputs.working-directory) }}
         key: lage-${{ runner.os }}-${{ github.sha }}
@@ -48,7 +48,7 @@ runs:
       shell: bash
       if: steps.cache.outputs.cache-hit != 'true'
     - name: Download translations
-      uses: actions/checkout@v4
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       with:
         repository: actualbudget/translations
         path: ${{ inputs.working-directory }}/packages/desktop-client/locale

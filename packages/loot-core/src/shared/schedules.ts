@@ -4,7 +4,11 @@ import * as d from 'date-fns';
 import { Locale } from 'date-fns';
 import { t } from 'i18next';
 
-import { type PayeeEntity, type ScheduleEntity } from 'loot-core/types/models';
+import {
+  type PayeeEntity,
+  type RecurConfig,
+  type ScheduleEntity,
+} from 'loot-core/types/models';
 
 import { Condition } from '../server/rules';
 
@@ -56,7 +60,7 @@ export function getStatusLabel(status: string) {
 
 export function getHasTransactionsQuery(schedules) {
   const filters = schedules.map(schedule => {
-    const dateCond = schedule._conditions.find(c => c.field === 'date');
+    const dateCond = schedule._conditions?.find(c => c.field === 'date');
     return {
       $and: {
         schedule: schedule.id,
@@ -96,7 +100,11 @@ function prettyDayName(day) {
   return days[day];
 }
 
-export function getRecurringDescription(config, dateFormat, locale: Locale) {
+export function getRecurringDescription(
+  config: RecurConfig,
+  dateFormat: string,
+  locale: Locale,
+) {
   const interval = config.interval || 1;
 
   let endModeSuffix = '';
