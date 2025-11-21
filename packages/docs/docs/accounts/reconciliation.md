@@ -49,7 +49,7 @@ If you ever need to change a locked transaction. Click on the lock of any transa
 
 Off budget accounts can easily be used to track values of assets such as vehicles, real estate, retirement accounts, or other investment accounts or property. The reconciliation tool is useful to update these values using the **Create reconciliation transaction** button. 
 
-For example, on 10-Nov-2025, my house was valued at 231,100 then some houses sold in my neighborhood and a few days later it was valued at 234,600. Go to the ledger for the house, choose the reconciliation tool, and enter 234600 as the new value into the tool.
+For example, on 10-Nov-2025, my house was valued at 231,100 then some houses sold in my neighborhood and a few days later it was valued at 234,600. Go to the House Asset account, choose the reconciliation tool, and enter 234600 as the new value into the tool.
 
 ![Image of asset reconcile box](/img/reconcile/reconcile-8.png)
 
