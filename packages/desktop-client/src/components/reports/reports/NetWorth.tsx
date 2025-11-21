@@ -68,7 +68,9 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
-  const getDefaultIntervalForMode = (mode: TimeFrame['mode']): 'Daily' | 'Weekly' | 'Monthly' | 'Yearly' => {
+  const getDefaultIntervalForMode = (
+    mode: TimeFrame['mode'],
+  ): 'Daily' | 'Weekly' | 'Monthly' | 'Yearly' => {
     switch (mode) {
       case 'lastMonth':
         return 'Weekly';
@@ -107,10 +109,10 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
   const [interval, setInterval] = useState(
-    widget?.meta?.interval || getDefaultIntervalForMode(mode)
+    widget?.meta?.interval || getDefaultIntervalForMode(mode),
   );
 
- // Update interval when mode changes if no interval is set in widget meta
+  // Update interval when mode changes if no interval is set in widget meta
   useEffect(() => {
     if (!widget?.meta?.interval) {
       setInterval(getDefaultIntervalForMode(mode));

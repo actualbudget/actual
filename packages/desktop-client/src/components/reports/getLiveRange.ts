@@ -25,10 +25,7 @@ export function getLiveRange(
       );
       break;
     case 'lastMonth':
-      const prevMonth = monthUtils.subMonths(
-        monthUtils.currentMonth(),
-        1,
-      );
+      const prevMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
       [dateStart, dateEnd] = validateRange(
         earliestTransaction,
         latestTransaction,
