@@ -24,7 +24,7 @@ Or, if you use bank sync, the last synced balance will be shown. You can use tha
 
 ![Image of reconcile box with bank sync](/img/reconcile/reconcile-3a-2025.png)
 
-The tool will tell you exactly what the difference is between the bank statement and your Actual ledger. Click the gray circles as you match each Actual transaction to the bank ledger and watch the difference come closer to 0 as you change the status of each transaction to green (cleared). In the example, the cleared transactions need to add up to 324.82. This is much easier if you look at the Actual ledger and bank statement side by side to match the transactions.
+The tool will tell you exactly what the difference is between the bank statement and your Actual ledger. Click the gray circles as you match each Actual transaction to the bank ledger and watch the difference come closer to 0 as you change the status of each transaction to green (cleared). In the example, the cleared transactions need to add up to -82.60 This is much easier if you look at the Actual ledger and bank statement side by side to match the transactions.
 
 ![Image of tool with nonmatching balance](/img/reconcile/reconcile-4-2025.png)
 
