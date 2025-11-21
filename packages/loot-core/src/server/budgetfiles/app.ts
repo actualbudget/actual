@@ -17,6 +17,7 @@ import * as mappings from '../db/mappings';
 import { handleBudgetImport, ImportableBudgetType } from '../importers';
 import { app as mainApp } from '../main-app';
 import { mutator } from '../mutators';
+import { loadPayPeriodConfig } from '../preferences/app';
 import * as prefs from '../prefs';
 import { getServer } from '../server-config';
 import * as sheet from '../sheet';
@@ -591,13 +592,20 @@ async function _loadBudget(id: Budget['id']): Promise<{
     return { error: 'opening-budget' };
   }
 
-  // This is a bit leaky, but we need to set the initial budget type
-  const { value: budgetType = 'envelope' } =
-    (await db.first<Pick<db.DbPreference, 'value'>>(
-      'SELECT value from preferences WHERE id = ?',
-      ['budgetType'],
-    )) ?? {};
+  // Load budget type from preferences
+  const budgetTypeResult = await db.first<Pick<db.DbPreference, 'value'>>(
+    'SELECT value from preferences WHERE id = ?',
+    ['budgetType'],
+  );
+
+  // Set budget type
+  const { value: budgetType = 'envelope' } = budgetTypeResult ?? {};
   sheet.get().meta().budgetType = budgetType as prefs.BudgetType;
+
+  // Load pay period configuration before budget creation
+  // This must happen before budget.createAllBudgets() since budget operations
+  // may invoke months.ts functions that check pay period config
+  await loadPayPeriodConfig();
   await budget.createAllBudgets();
 
   // Load all the in-memory state

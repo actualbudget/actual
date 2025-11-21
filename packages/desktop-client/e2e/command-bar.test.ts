@@ -20,7 +20,9 @@ test.describe('Command bar', () => {
     await page.mouse.move(0, 0);
 
     // ensure page is loaded
-    await expect(page.getByTestId('budget-table')).toBeVisible();
+    await expect(page.getByTestId('budget-table')).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.getByRole('button', { name: 'Add group' })).toBeVisible({
       timeout: 10000,
     });

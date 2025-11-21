@@ -121,7 +121,7 @@ async function createScheduleList(
                 ),
               )
             : nextBaseDate;
-          while (nextDate < nextMonth) {
+          while (monthUtils._parse(nextDate) < monthUtils._parse(nextMonth)) {
             monthlyTarget += -target;
             const currentDate = nextBaseDate;
             const oneDayLater = monthUtils.addDays(nextBaseDate, 1);
