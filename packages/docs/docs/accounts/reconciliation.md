@@ -4,31 +4,40 @@ Keeping your Actual account ledgers consistent with your bank ledgers is importa
 
 ## Work Flow
 
-When you reconcile, you will be comparing your bank statement, print or online, against Actual's ledger for that account. If you have made transactions against the budget that have not been verified against your account the **cleared** flag will be shown in gray. If the transaction has been moved out of the pending section of your (online) bank statement, click the gray circle to turn it green. This is a visual indication that the transaction is in both your budget and in your account statement, and they match.
+When you reconcile, you compare your bank statement, print or online, against Actual's ledger for that account. If you have made transactions in Actual that have not been verified against your bank account the **cleared** flag will be shown in gray (pending). If the transaction is finalized (cleared) on your bank statement, click the gray circle to turn it green. This is a visual indication that the transaction is in both your budget and in your account statement, and they match.
 
-By clicking on the green balance in the header of the account view, two more category balances will come into view. The **cleared total** only includes transactions that have been cleared while the **uncleared total** will represent the transactions you have entered but may not have entered the bank statement yet.
+Click on the green balance in the header of the account view to bring two more category balances into view. The **cleared total** only includes transactions that have cleared the bank while the **uncleared total** will represent the transactions you have entered but aren't yet matched to the bank statement.
 
-![](/img/reconcile/reconcile-1.png)
+![Image of all totals in account header](/img/reconcile/reconcile-1.png)
 
 ## Starting the Reconciliation Tool
 
-Click the 🔒 lock icon in the top right-hand corner of the account ledger.
+Click the 🔒 lock icon in the top right-hand corner of the account ledger. Notice that the last time the account was reconciled is shown on hover.
 
-![](/img/reconcile/reconcile-2.png)
+![Image of lock icon](/img/reconcile/reconcile-2.png)
 
-Let's imagine that we have just checked our account balance for our Ally Savings account and the current balance is 3012.13. We enter the balance we want to match into the Reconciliation tool and press **Reconcile**.
+Let's imagine that we have just checked our account balance for our Chase Amazon account and the current balance is 310.80. We enter the balance we want to match into the Reconciliation tool and press **Reconcile**, or
 
-![](/img/reconcile/reconcile-3.png)
+If we use bank sync, the last synced balance will be shown. We can use that balance by clicking the **use last synced total** button.
 
-The tool will tell us exactly how much is different than the budget ledger. Now we can check the Actual ledger against the bank ledger and watch the difference come closer to 0 as you change the cleared status of transactions. In this case, we're looking for transactions that add up to 324.82. This is much easier by looking at the Actual ledger and bank statement side by side to match the transactions.
+![Image of reconcile box with no bank sync](/img/reconcile/reconcile-3.png)
+
+![Image of reconcile box with bank sync](/img/reconcile/reconcile-3a.png)
+
+The tool will tell us exactly what the difference is between the bank statement and our Actual ledger. Now we can check off the gray circles as we match the Actual ledger against the bank ledger and watch the difference come closer to 0 as we change the cleared status of each transaction. In this case, we're looking for transactions that add up to 324.82. This is much easier by looking at the Actual ledger and bank statement side by side to match the transactions.
 
 ![](/img/reconcile/reconcile-4.png)
 
-When the cleared amount of the Actual account ledger and the value you entered into the Reconciliation tool are the same, the tool will let you know that you are reconciled and you can press done.
+When the cleared amount of the Actual account ledger and the value you entered into the Reconciliation tool are the same, the tool will let you know that you are reconciled. Click on the **Exit reconciling** button to complete the reconciliation and lock the cleared transactions.
+
+:::warning
+
+If you fail to click the **Exit reconciling** button after the "All reconciled!" message appears, you will not change the status of the cleared transactions to locked.
+
+:::
 
 ![](/img/reconcile/reconcile-5.png)
 
-Upon pressing done, all cleared transactions will receive a lock icon. This represents the fact that they were included in a reconciliation and makes it harder to accidentally change.
 
 ![](/img/reconcile/reconcile-6.png)
 
