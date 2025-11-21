@@ -14,19 +14,19 @@ Click on the green balance in the header of the account view to bring two more c
 
 Click the 🔒 lock icon in the top right-hand corner of the account ledger. Notice that the last date the account was reconciled is shown on hover.
 
-![Image of lock icon](/img/reconcile/reconcile-2.png)
+![Image of lock icon](/img/reconcile/reconcile-2-2025.png)
 
 Let's imagine that you checked your account balance for Chase Amazon and the current balance is 310.80. The tool will default to the **Cleared total**. Enter the balance you want to match into the Reconciliation tool and click **Reconcile**.
 
-![Image of reconcile box with no bank sync](/img/reconcile/reconcile-3.png)
+![Image of reconcile box with no bank sync](/img/reconcile/reconcile-3-2025.png)
 
 Or, if you use bank sync, the last synced balance will be shown. You can use that balance by clicking the **Use last synced total** button.
 
-![Image of reconcile box with bank sync](/img/reconcile/reconcile-3a.png)
+![Image of reconcile box with bank sync](/img/reconcile/reconcile-3a-2025.png)
 
 The tool will tell you exactly what the difference is between the bank statement and your Actual ledger. Click the gray circles as you match each Actual transaction to the bank ledger and watch the difference come closer to 0 as you change the status of each transaction to green (cleared). In the example, the cleared transactions need to add up to 324.82. This is much easier if you look at the Actual ledger and bank statement side by side to match the transactions.
 
-![Image of tool with nonmatching balance](/img/reconcile/reconcile-4.png)
+![Image of tool with nonmatching balance](/img/reconcile/reconcile-4-2025.png)
 
 When the cleared amount of the Actual account ledger and the value entered into the Reconciliation tool are the same, the tool will let you know that you are _All reconciled!_ Click on the **Lock transactions** button to complete the reconciliation and lock the cleared transactions.
 
@@ -36,10 +36,10 @@ If you fail to click the **Lock transactions** button after the _All reconciled!
 
 :::
 
-![Image of All reconciled](/img/reconcile/reconcile-5.png)
+![Image of All reconciled](/img/reconcile/reconcile-5-2025.png)
 
 
-![Image of newly locked transactions](/img/reconcile/reconcile-6.png)
+![Image of newly locked transactions](/img/reconcile/reconcile-6-2025.png)
 
 If you ever need to change a locked transaction. Click on the lock of any transaction to open a dialog to unlock it.
 
@@ -51,17 +51,17 @@ Off budget accounts can easily be used to track values of assets such as vehicle
 
 For example, on 10-Nov-2025, my house was valued at 231,100 then some houses sold in my neighborhood and a few days later it was valued at 234,600. Go to the House Asset account, choose the reconciliation tool, and enter 234600 as the new value into the tool.
 
-![Image of asset reconcile box](/img/reconcile/reconcile-8.png)
+![Image of asset reconcile box](/img/reconcile/reconcile-8-2025.png)
 
 The tool tells us that we have a gain of 3,500.
 
-![Image of Create transaction](/img/reconcile/reconcile-9.png)
+![Image of Create transaction](/img/reconcile/reconcile-9-2025.png)
 
 Click on the **Create reconciliation transaction** button to easily create a new transaction that automatically brings the value of the asset in line with the new valuation.  Now the reconciliation tool reports that it is _All reconciled!_ Click the **Lock transactions** button to complete the task.
 
-![Image of created transaction All reconciled](/img/reconcile/reconcile-10.png)
+![Image of created transaction All reconciled](/img/reconcile/reconcile-10-2025.png)
 
-![Image of created transaction locked](/img/reconcile/reconcile-11.png)
+![Image of created transaction locked](/img/reconcile/reconcile-11-2025.png)
 
 
 
