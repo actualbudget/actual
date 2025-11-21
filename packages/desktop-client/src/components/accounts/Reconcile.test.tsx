@@ -50,7 +50,9 @@ describe('ReconcilingMessage math & UI', () => {
       </TestProvider>,
     );
 
-    expect(screen.getByText(/All reconciled!.*Exit to lock cleared transactions/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/All reconciled!.*Exit to lock cleared transactions/i),
+    ).toBeInTheDocument();
     // No reconciliation transaction button when diff is zero
     expect(
       screen.queryByText('Create reconciliation transaction'),
