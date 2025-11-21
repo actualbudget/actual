@@ -16,7 +16,13 @@ Click the 🔒 lock icon in the top right-hand corner of the account ledger. Not
 
 ![Image of lock icon](/img/reconcile/reconcile-2-2025.png)
 
-Let's imagine that you checked your account balance for Chase Amazon and the current balance is 310.80. The tool will default to the **Cleared total**. Enter the balance you want to match into the Reconciliation tool and click **Reconcile**.
+Let's imagine that you checked your account balance for Chase Amazon and the current balance is -310.80. The tool will default to the **Cleared total**. Enter the balance you want to match into the Reconciliation tool and click **Reconcile**.
+
+:::tip
+
+Remember to use a negative number for the balance on credit or loan accounts
+
+:::
 
 ![Image of reconcile box with no bank sync](/img/reconcile/reconcile-3-2025.png)
 
