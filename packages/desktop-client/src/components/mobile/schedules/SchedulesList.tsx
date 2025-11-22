@@ -60,6 +60,8 @@ export function SchedulesList({
             fontSize: 16,
             color: theme.pageTextSubdued,
             textAlign: 'center',
+            paddingLeft: 10,
+            paddingRight: 10,
           }}
         >
           {t('No schedules found. Create your first schedule to get started!')}
