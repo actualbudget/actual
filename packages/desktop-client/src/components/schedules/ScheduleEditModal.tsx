@@ -96,7 +96,7 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
           })()
         : undefined;
 
-  const { state, dispatch, formDispatch, loadSchedule } = useScheduleEdit({
+  const { state, dispatch, loadSchedule } = useScheduleEdit({
     scheduleId: id,
     adding,
     initialSchedule,
@@ -110,7 +110,7 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
   );
 
   async function onSave(close: () => void) {
-    formDispatch({ type: 'form-error', error: null });
+    dispatch({ type: 'form-error', error: null });
     if (!state.schedule) {
       return;
     }
@@ -120,7 +120,7 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
         q('schedules').filter({ name: state.fields.name }).select('id'),
       );
       if (sameName.length > 0 && sameName[0].id !== state.schedule.id) {
-        formDispatch({
+        dispatch({
           type: 'form-error',
           error: t('There is already a schedule with this name'),
         });
@@ -134,7 +134,7 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
     );
 
     if (error) {
-      formDispatch({ type: 'form-error', error });
+      dispatch({ type: 'form-error', error });
       return;
     }
 
@@ -151,7 +151,7 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
     );
 
     if (res.error) {
-      formDispatch({
+      dispatch({
         type: 'form-error',
         error: t(
           'An error occurred while saving. Please visit https://actualbudget.org/contact/ for support.',
@@ -167,8 +167,8 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
     close();
   }
 
-  async function onEditRule(ruleId: string) {
-    const rule = await send('rule-get', { id: ruleId });
+  async function onEditRule(id: string) {
+    const rule = await send('rule-get', { id });
 
     if (!rule) {
       return;
@@ -183,8 +183,10 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
             onSave: async () => {
               const schedule = await loadSchedule();
               if (schedule) {
-                dispatch({ type: 'set-schedule', schedule });
+                throw new Error('Schedule found');
               }
+
+              dispatch({ type: 'set-schedule', schedule });
             },
           },
         },
@@ -216,7 +218,7 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
   }
 
   function onSwitchTransactions(mode: 'linked' | 'matched') {
-    formDispatch({ type: 'switch-transactions', mode });
+    dispatch({ type: 'switch-transactions', mode });
     selectedInst.dispatch({ type: 'select-none' });
   }
 
@@ -241,7 +243,7 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
           />
           <ScheduleEditForm
             fields={state.fields}
-            dispatch={formDispatch}
+            dispatch={dispatch}
             upcomingDates={state.upcomingDates}
             repeats={repeats}
             schedule={schedule}

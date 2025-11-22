@@ -55,7 +55,7 @@ export function MobileScheduleEditPage() {
       })()
     : undefined;
 
-  const { state, formDispatch, isLoading } = useScheduleEdit({
+  const { state, dispatch, isLoading } = useScheduleEdit({
     scheduleId: id,
     adding,
     initialSchedule,
@@ -65,7 +65,7 @@ export function MobileScheduleEditPage() {
   const selectedInst = useSelected('transactions', state.transactions, []);
 
   async function onSave() {
-    formDispatch({ type: 'form-error', error: null });
+    dispatch({ type: 'form-error', error: null });
     if (!state.schedule) {
       return;
     }
@@ -75,7 +75,7 @@ export function MobileScheduleEditPage() {
         q('schedules').filter({ name: state.fields.name }).select('id'),
       );
       if (sameName.length > 0 && sameName[0].id !== state.schedule.id) {
-        formDispatch({
+        dispatch({
           type: 'form-error',
           error: t('There is already a schedule with this name'),
         });
@@ -89,7 +89,7 @@ export function MobileScheduleEditPage() {
     );
 
     if (error) {
-      formDispatch({ type: 'form-error', error });
+      dispatch({ type: 'form-error', error });
       return;
     }
 
@@ -106,7 +106,7 @@ export function MobileScheduleEditPage() {
     );
 
     if (res.error) {
-      formDispatch({
+      dispatch({
         type: 'form-error',
         error: t(
           'An error occurred while saving. Please visit https://actualbudget.org/contact/ for support.',
@@ -153,7 +153,7 @@ export function MobileScheduleEditPage() {
   const { schedule } = state;
 
   function onSwitchTransactions(mode: 'linked' | 'matched') {
-    formDispatch({ type: 'switch-transactions', mode });
+    dispatch({ type: 'switch-transactions', mode });
     selectedInst.dispatch({ type: 'select-none' });
   }
 
@@ -255,7 +255,7 @@ export function MobileScheduleEditPage() {
     >
       <ScheduleEditForm
         fields={state.fields}
-        dispatch={formDispatch}
+        dispatch={dispatch}
         upcomingDates={state.upcomingDates}
         repeats={repeats}
         schedule={schedule}

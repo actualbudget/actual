@@ -15,10 +15,7 @@ import {
 } from 'loot-core/types/models';
 
 import { updateScheduleConditions } from '@desktop-client/components/schedules/schedule-edit-utils';
-import {
-  type ScheduleFormFields,
-  type ScheduleEditFormDispatch,
-} from '@desktop-client/components/schedules/ScheduleEditForm';
+import { type ScheduleFormFields } from '@desktop-client/components/schedules/ScheduleEditForm';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { liveQuery } from '@desktop-client/queries/liveQuery';
 
@@ -406,23 +403,9 @@ export function useScheduleEdit({
     };
   }, [state.schedule, state.transactionsMode, state.fields, transactionId]);
 
-  // Wrapper dispatch that accepts both form actions and internal actions
-  const formDispatch = (
-    action:
-      | ScheduleEditFormDispatch
-      | { type: 'form-error'; error: null | string }
-      | { type: 'switch-transactions'; mode: 'matched' | 'linked' },
-  ) => {
-    dispatch(action as ScheduleEditAction);
-  };
-
-  // Internal dispatch for all actions
-  const internalDispatch = dispatch;
-
   return {
     state,
-    dispatch: internalDispatch,
-    formDispatch,
+    dispatch,
     loadSchedule,
     isLoading,
   };
