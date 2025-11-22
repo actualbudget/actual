@@ -197,7 +197,7 @@ async function linkSimpleFinAccount({
 
   const bank = await link.findOrCreateBank(
     institution,
-    externalAccount.orgDomain ?? externalAccount.orgId,
+    externalAccount.orgId ?? externalAccount.orgDomain,
   );
 
   if (upgradingId) {
