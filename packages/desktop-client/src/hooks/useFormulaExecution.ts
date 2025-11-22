@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -35,6 +35,11 @@ export function useFormulaExecution(
   const [result, setResult] = useState<number | string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const queriesRef = useRef(queries);
+
+  useEffect(() => {
+    queriesRef.current = queries;
+  }, [queries]);
 
   useEffect(() => {
     let cancelled = false;
@@ -63,7 +68,7 @@ export function useFormulaExecution(
 
         for (const match of queryMatches) {
           const queryName = match[1];
-          const queryConfig = queries[queryName];
+          const queryConfig = queriesRef.current[queryName];
 
           if (!queryConfig) {
             console.warn(`Query “${queryName}” not found in queries config`);
@@ -159,7 +164,7 @@ export function useFormulaExecution(
     return () => {
       cancelled = true;
     };
-  }, [formula, queriesVersion, locale, queries, namedExpressions]);
+  }, [formula, queriesVersion, locale, namedExpressions]);
 
   return { result, isLoading, error };
 }
