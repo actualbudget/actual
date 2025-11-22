@@ -16,6 +16,7 @@ import {
   SvgAdd,
   SvgPiggyBank,
   SvgTrash,
+  SvgLocationCurrent,
 } from '@actual-app/components/icons/v1';
 import { SvgPencilWriteAlternate } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
@@ -31,6 +32,9 @@ import {
 } from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
+import { DEFAULT_MAX_DISTANCE } from 'loot-core/shared/constants';
+import { locationService } from 'loot-core/shared/location';
+import { calculateDistance } from 'loot-core/shared/location-utils';
 import * as monthUtils from 'loot-core/shared/months';
 import * as Platform from 'loot-core/shared/platform';
 import { q } from 'loot-core/shared/query';
@@ -78,6 +82,7 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useLocationPermission } from '@desktop-client/hooks/useLocationPermission';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
@@ -87,6 +92,7 @@ import {
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { deletePayeeLocation } from '@desktop-client/payees/payeesSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 import { setLastTransaction } from '@desktop-client/transactions/transactionsSlice';
@@ -551,6 +557,9 @@ type TransactionEditInnerProps = {
   onDelete: (id: TransactionEntity['id']) => void;
   onSplit: (id: TransactionEntity['id']) => void;
   onAddSplit: (id: TransactionEntity['id']) => void;
+  locationAccess: boolean;
+  shouldShowForgetLocation?: boolean;
+  onForgetLocation?: () => void;
 };
 
 const TransactionEditInner = memo<TransactionEditInnerProps>(
@@ -566,6 +575,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     onDelete,
     onSplit,
     onAddSplit,
+    shouldShowForgetLocation,
+    onForgetLocation,
+    locationAccess,
   }) {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -871,6 +883,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                       onClose: () => {
                         onClearActiveEdit();
                       },
+                      locationAccess,
                     },
                   },
                 }),
@@ -907,6 +920,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         transactions,
         unserializedTransactions,
         showHiddenCategories,
+        locationAccess,
       ],
     );
 
@@ -1074,6 +1088,36 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               onPress={() => onEditFieldInner(transaction.id, 'payee')}
               data-testid="payee-field"
             />
+            {shouldShowForgetLocation && (
+              <Button
+                variant="bare"
+                onPress={onForgetLocation}
+                style={{
+                  position: 'absolute',
+                  top: '75%',
+                  right: '20px',
+                  transform: 'translateY(-50%)',
+                  background: '#dc3545',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '11px',
+                  padding: '4px 8px',
+                  borderRadius: 3,
+                  height: 'auto',
+                  minHeight: 'auto',
+                  zIndex: 10,
+                }}
+              >
+                <Text style={{ color: 'white', fontSize: '11px' }}>
+                  <Trans>forget</Trans>
+                  <SvgLocationCurrent
+                    width={10}
+                    height={10}
+                    style={{ marginLeft: 4 }}
+                  />
+                </Text>
+              </Button>
+            )}
           </View>
 
           {!transaction.is_parent && (
@@ -1314,6 +1358,14 @@ function TransactionEditUnconnected({
     [payees, searchParams],
   );
 
+  const locationAccess = useLocationPermission();
+  const [shouldShowForgetLocation, setShouldShowForgetLocation] =
+    useState(false);
+  const [nearestPayee, setNearestPayee] = useState<PayeeEntity | null>(null);
+  const [autoSelectedPayeeId, setAutoSelectedPayeeId] = useState<string | null>(
+    null,
+  );
+
   useEffect(() => {
     let unmounted = false;
 
@@ -1350,6 +1402,34 @@ function TransactionEditUnconnected({
       unmounted = true;
     };
   }, [transactionId]);
+
+  useEffect(() => {
+    if (!locationAccess) {
+      return;
+    }
+
+    async function findNearbyPayee() {
+      try {
+        const currentLocation = await locationService.getCurrentPosition();
+        const nearbyPayees =
+          await locationService.getNearbyPayees(currentLocation);
+
+        if (nearbyPayees.length > 0) {
+          setNearestPayee(nearbyPayees[0]);
+          setAutoSelectedPayeeId(nearbyPayees[0].id);
+          setShouldShowForgetLocation(false);
+        }
+      } catch (error) {
+        // Don't block transaction creation
+        console.log(
+          'Could not auto-select nearest payee:',
+          (error as Error).message,
+        );
+      }
+    }
+
+    findNearbyPayee();
+  }, [locationAccess]);
 
   useEffect(() => {
     if (isAdding.current) {
@@ -1445,8 +1525,23 @@ function TransactionEditUnconnected({
         newTransaction,
       );
       setTransactions(newTransactions);
+
+      // Show forget location button when payee is manually changed (not auto-selected)
+      if (
+        updatedField === 'payee' &&
+        newTransaction.payee &&
+        newTransaction.payee !== autoSelectedPayeeId
+      ) {
+        setShouldShowForgetLocation(locationAccess);
+      }
     },
-    [dateFormat, transactions],
+    [
+      dateFormat,
+      transactions,
+      autoSelectedPayeeId,
+      setShouldShowForgetLocation,
+      locationAccess,
+    ],
   );
 
   const onSave = useCallback(
@@ -1526,6 +1621,53 @@ function TransactionEditUnconnected({
     [transactions],
   );
 
+  const onForgetLocation = useCallback(async () => {
+    try {
+      const [transaction] = transactions;
+      if (transaction.payee) {
+        // Get current location to find and delete the location that was just saved for this payee
+        const currentLocation = await locationService.getCurrentPosition();
+        const payeeLocations = await locationService.getPayeeLocations(
+          transaction.payee,
+        );
+
+        // Find the most recently created location (likely the one that was just auto-saved)
+        const mostRecentLocation = payeeLocations.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        )[0];
+
+        if (mostRecentLocation) {
+          // Check if this recent location is near the current location
+          const distance = calculateDistance(currentLocation, {
+            latitude: mostRecentLocation.latitude,
+            longitude: mostRecentLocation.longitude,
+          });
+
+          // If it's within a reasonable distance (indicating it was auto-saved for this session)
+          if (distance <= DEFAULT_MAX_DISTANCE) {
+            await dispatch(deletePayeeLocation(mostRecentLocation.id)).unwrap();
+          }
+        }
+
+        setShouldShowForgetLocation(false);
+      }
+    } catch (error) {
+      console.error('Failed to forget location:', error);
+    }
+  }, [transactions, dispatch, setShouldShowForgetLocation]);
+
+  // Automatically select the nearest payee if available and unset
+  useEffect(() => {
+    const transaction = transactions[0];
+    if (!nearestPayee || !transaction || transaction.payee) {
+      return;
+    }
+
+    const updated = { ...transaction, payee: nearestPayee.id };
+    onUpdate(updated, 'payee');
+  }, [transactions, nearestPayee, onUpdate]);
+
   if (
     categories.length === 0 ||
     accounts.length === 0 ||
@@ -1553,6 +1695,9 @@ function TransactionEditUnconnected({
         onDelete={onDelete}
         onSplit={onSplit}
         onAddSplit={onAddSplit}
+        shouldShowForgetLocation={shouldShowForgetLocation}
+        onForgetLocation={onForgetLocation}
+        locationAccess={locationAccess}
       />
     </View>
   );
