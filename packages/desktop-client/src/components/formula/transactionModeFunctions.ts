@@ -45,6 +45,19 @@ export const transactionModeFunctions: Record<string, FunctionDef> = {
       { name: 'num_chars', description: 'Number' },
     ],
   },
+  INTEGER_TO_AMOUNT: {
+    name: 'INTEGER_TO_AMOUNT',
+    description: t(
+      'Converts integer amount to decimal amount (e.g., 1234 -> 12.34).',
+    ),
+    parameters: [
+      { name: 'integer_amount', description: 'Integer amount in cents' },
+      {
+        name: 'decimal_places',
+        description: 'Number of decimal places (default: 2)',
+      },
+    ],
+  },
   MID: {
     name: 'MID',
     description: t('Returns substring from specified position.'),
