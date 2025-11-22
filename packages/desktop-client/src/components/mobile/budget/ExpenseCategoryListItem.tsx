@@ -11,7 +11,7 @@ import { View } from '@actual-app/components/view';
 
 import { type BudgetType } from 'loot-core/server/prefs';
 import * as monthUtils from 'loot-core/shared/months';
-import { groupById, integerToCurrency } from 'loot-core/shared/util';
+import { groupById } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { BalanceCell } from './BalanceCell';
@@ -20,6 +20,7 @@ import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { SpentCell } from './SpentCell';
 
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
@@ -229,6 +230,7 @@ export function ExpenseCategoryListItem({
 
   const { t } = useTranslation();
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+  const format = useFormat();
 
   const balanceMenuModalName =
     `${budgetType as BudgetType}-balance-menu` as const;
@@ -278,10 +280,18 @@ export function ExpenseCategoryListItem({
                 amount,
                 from: category.id,
                 to: toCategoryId,
+                currencyCode: format.currency.code,
               });
               dispatch(collapseModals({ rootModalName: balanceMenuModalName }));
               showUndoNotification({
-                message: `Transferred ${integerToCurrency(amount)} from ${category.name} to ${categoriesById[toCategoryId].name}.`,
+                message: t(
+                  'Transferred {{amount}} from {{fromCategoryName}} to {{toCategoryName}}.',
+                  {
+                    amount: format(amount, 'financial'),
+                    fromCategoryName: category.name,
+                    toCategoryName: categoriesById[toCategoryId].name,
+                  },
+                ),
               });
             },
             showToBeBudgeted: true,
@@ -298,6 +308,8 @@ export function ExpenseCategoryListItem({
     balanceMenuModalName,
     showUndoNotification,
     categoriesById,
+    format,
+    t,
   ]);
 
   const onCover = useCallback(() => {
@@ -318,13 +330,14 @@ export function ExpenseCategoryListItem({
                 to: category.id,
                 from: fromCategoryId,
                 amount,
+                currencyCode: format.currency.code,
               });
               dispatch(collapseModals({ rootModalName: balanceMenuModalName }));
               showUndoNotification({
                 message: t(
                   `Covered {{amount}} {{toCategoryName}} overspending from {{fromCategoryName}}.`,
                   {
-                    amount: integerToCurrency(amount),
+                    amount: format(amount, 'financial'),
                     toCategoryName: category.name,
                     fromCategoryName: categoriesById[fromCategoryId].name,
                   },
@@ -345,6 +358,7 @@ export function ExpenseCategoryListItem({
     showUndoNotification,
     t,
     categoriesById,
+    format,
   ]);
 
   const onOpenBalanceMenu = useCallback(() => {
