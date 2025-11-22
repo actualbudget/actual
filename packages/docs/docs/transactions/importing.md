@@ -2,9 +2,9 @@
 
 There are various ways to get transactions into the system. 
 
-## Automatic Bank Import
+## Linked Bank Import
 
-Actual Budget supports [linking your bank accounts](/docs/advanced/bank-sync.md) using SimpleFIN or GoCardless.
+Actual Budget supports [linking your bank accounts](/docs/advanced/bank-sync.md) using SimpleFIN or GoCardless to sync with your bank accounts.
 
 There are also [community projects](/docs/community-repos.md) that implement bank syncing. 
 
