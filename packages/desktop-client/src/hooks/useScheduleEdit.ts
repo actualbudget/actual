@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useEffectEvent, useReducer, useState } from 'react';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -273,24 +273,24 @@ export function useScheduleEdit({
     return data[0];
   }
 
-  // Load schedule on mount
-  useEffect(() => {
-    async function run() {
-      if (adding) {
-        if (initialSchedule) {
-          dispatch({ type: 'set-schedule', schedule: initialSchedule });
-        }
-      } else {
-        const schedule = await loadSchedule();
-        if (schedule && state.schedule == null) {
-          dispatch({ type: 'set-schedule', schedule });
-        }
+  const setSchedule = useEffectEvent(async () => {
+    if (adding) {
+      if (initialSchedule) {
+        dispatch({ type: 'set-schedule', schedule: initialSchedule });
       }
+      return;
     }
 
-    run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adding, initialSchedule]);
+    const schedule = await loadSchedule();
+    if (schedule && state.schedule == null) {
+      dispatch({ type: 'set-schedule', schedule });
+    }
+  });
+
+  // Load schedule on mount
+  useEffect(() => {
+    setSchedule();
+  }, []);
 
   // Update upcoming dates when date changes
   useEffect(() => {

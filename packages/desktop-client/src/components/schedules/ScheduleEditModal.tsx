@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -43,58 +43,46 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
   const globalDispatch = useDispatch();
 
   // Create initial schedule if adding from transaction
-  const initialSchedule =
-    adding && fromTrans
-      ? (() => {
-          const date = {
-            start: monthUtils.currentDay(),
+  const initialSchedule = useMemo(() => {
+    if (!adding) {
+      return undefined;
+    }
+
+    const date = {
+      start: monthUtils.currentDay(),
+      frequency: 'monthly',
+      patterns: [],
+      skipWeekend: false,
+      weekendSolveMode: 'after',
+      endMode: 'never',
+      endOccurrences: 1,
+      endDate: monthUtils.currentDay(),
+    } satisfies RecurConfig;
+
+    const transFields = fromTrans
+      ? ({
+          _account: transaction.account,
+          _amount: transaction.amount,
+          _amountOp: 'is',
+          name: transaction.payee ? payees[transaction.payee].name : '',
+          _payee: transaction.payee ? transaction.payee : '',
+          _date: {
+            ...date,
             frequency: 'monthly',
+            start: transaction.date,
             patterns: [],
-            skipWeekend: false,
-            weekendSolveMode: 'after',
-            endMode: 'never',
-            endOccurrences: 1,
-            endDate: monthUtils.currentDay(),
-          } satisfies RecurConfig;
+          },
+        } satisfies Partial<ScheduleEntity>)
+      : {};
 
-          return {
-            posts_transaction: false,
-            _conditions: [{ op: 'isapprox', field: 'date', value: date }],
-            _actions: [],
-            _account: transaction.account,
-            _amount: transaction.amount,
-            _amountOp: 'is',
-            name: transaction.payee ? payees[transaction.payee].name : '',
-            _payee: transaction.payee ? transaction.payee : '',
-            _date: {
-              ...date,
-              frequency: 'monthly',
-              start: transaction.date,
-              patterns: [],
-            },
-          } satisfies Partial<ScheduleEntity>;
-        })()
-      : adding
-        ? (() => {
-            const date = {
-              start: monthUtils.currentDay(),
-              frequency: 'monthly',
-              patterns: [],
-              skipWeekend: false,
-              weekendSolveMode: 'after',
-              endMode: 'never',
-              endOccurrences: 1,
-              endDate: monthUtils.currentDay(),
-            } satisfies RecurConfig;
-
-            return {
-              posts_transaction: false,
-              _date: date,
-              _conditions: [{ op: 'isapprox', field: 'date', value: date }],
-              _actions: [],
-            } satisfies Partial<ScheduleEntity>;
-          })()
-        : undefined;
+    return {
+      posts_transaction: false,
+      _date: date,
+      _conditions: [{ op: 'isapprox', field: 'date', value: date }],
+      _actions: [],
+      ...transFields,
+    } satisfies Partial<ScheduleEntity>;
+  }, [adding, fromTrans, payees, transaction]);
 
   const { state, dispatch, loadSchedule } = useScheduleEdit({
     scheduleId: id,
