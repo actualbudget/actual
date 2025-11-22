@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -88,6 +89,7 @@ export function BarLineGraph({
   showTooltip = true,
 }: BarLineGraphProps) {
   const format = useFormat();
+  const animationProps = useRechartsAnimation();
   const tickFormatter = tick => {
     return `${format(Math.round(tick), 'financial')}`; // Formats the tick values as strings with commas
   };
@@ -120,8 +122,18 @@ export function BarLineGraph({
               {!compact && <CartesianGrid strokeDasharray="3 3" />}
               {!compact && <XAxis dataKey="x" />}
               {!compact && <YAxis dataKey="y" tickFormatter={tickFormatter} />}
-              <Bar type="monotone" dataKey="y" fill="#8884d8" />
-              <Line type="monotone" dataKey="y" stroke="#8884d8" />
+              <Bar
+                type="monotone"
+                dataKey="y"
+                fill="#8884d8"
+                {...animationProps}
+              />
+              <Line
+                type="monotone"
+                dataKey="y"
+                stroke="#8884d8"
+                {...animationProps}
+              />
             </ComposedChart>
           </div>
         )

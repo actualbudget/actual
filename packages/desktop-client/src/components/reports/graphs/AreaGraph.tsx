@@ -23,6 +23,7 @@ import {
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
@@ -161,6 +162,7 @@ export function AreaGraph({
   showTooltip = true,
 }: AreaGraphProps) {
   const format = useFormat();
+  const animationProps = useRechartsAnimation({ isAnimationActive: false });
 
   const privacyMode = usePrivacyMode();
   const dataMax = Math.max(...data.intervalData.map(i => i[balanceTypeOp]));
@@ -303,7 +305,7 @@ export function AreaGraph({
                 type="linear"
                 dot={false}
                 activeDot={false}
-                animationDuration={0}
+                {...animationProps}
                 dataKey={balanceTypeOp}
                 stroke={`url(#stroke${balanceTypeOp})`}
                 fill={`url(#fill${balanceTypeOp})`}

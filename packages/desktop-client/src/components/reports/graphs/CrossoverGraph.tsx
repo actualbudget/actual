@@ -15,6 +15,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
@@ -45,6 +46,7 @@ export function CrossoverGraph({
   const { t } = useTranslation();
   const privacyMode = usePrivacyMode();
   const format = useFormat();
+  const animationProps = useRechartsAnimation({ isAnimationActive: false });
 
   const tickFormatter = (tick: number) => {
     if (privacyMode) {
@@ -176,7 +178,7 @@ export function CrossoverGraph({
                 dot={false}
                 stroke={theme.reportsBlue}
                 strokeWidth={2}
-                animationDuration={0}
+                {...animationProps}
               />
               <Line
                 type="monotone"
@@ -184,7 +186,7 @@ export function CrossoverGraph({
                 dot={false}
                 stroke={theme.reportsRed}
                 strokeWidth={2}
-                animationDuration={0}
+                {...animationProps}
               />
             </LineChart>
           </div>

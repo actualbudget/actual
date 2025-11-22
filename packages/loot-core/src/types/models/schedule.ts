@@ -13,7 +13,7 @@ export interface RecurConfig {
   patterns?: RecurPattern[];
   skipWeekend?: boolean;
   start: string;
-  endMode: 'never' | 'after_n_occurrences' | 'on_date';
+  endMode?: 'never' | 'after_n_occurrences' | 'on_date';
   endOccurrences?: number;
   endDate?: string;
   weekendSolveMode?: 'before' | 'after';

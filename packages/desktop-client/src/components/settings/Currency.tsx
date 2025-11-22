@@ -42,6 +42,7 @@ export function CurrencySettings() {
         ['JPY', t('Japanese Yen')],
         ['LKR', t('Sri Lankan Rupee')],
         ['MDL', t('Moldovan Leu')],
+        ['MYR', t('Malaysian Ringgit')],
         ['PHP', t('Philippine Peso')],
         ['PLN', t('Polish Złoty')],
         ['QAR', t('Qatari Riyal')],

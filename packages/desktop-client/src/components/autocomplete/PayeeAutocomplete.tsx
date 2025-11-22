@@ -398,6 +398,8 @@ export function PayeeAutocomplete({
   locationAccess = false,
   ...props
 }: PayeeAutocompleteProps) {
+  const { t } = useTranslation();
+
   const commonPayees = useCommonPayees();
   const retrievedPayees = usePayees();
   const retrievedNearbyPayees = useNearbyPayees(locationAccess) || [];
@@ -575,6 +577,7 @@ export function PayeeAutocomplete({
           setRawPayee('');
           setPayeeFieldFocused(false);
         },
+        'aria-label': t('Payee'),
         onFocus: () => setPayeeFieldFocused(true),
         onChangeValue: setRawPayee,
       }}
