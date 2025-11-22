@@ -771,7 +771,11 @@ function PayeeIcons({
     return null;
   }
 
-  const recurring = schedule && schedule._date && !!schedule._date.frequency;
+  const recurring =
+    schedule &&
+    schedule._date &&
+    typeof schedule._date === 'object' &&
+    !!schedule._date.frequency;
   const isDeposit = transaction.amount > 0;
 
   return (

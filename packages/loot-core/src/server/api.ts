@@ -784,10 +784,10 @@ handlers['api/schedules-get'] = async function () {
 };
 
 handlers['api/schedule-create'] = withMutation(async function (
-  schedule: APIScheduleEntity,
+  schedule: Omit<APIScheduleEntity, 'id'>,
 ) {
   checkFileOpen();
-  const internalSchedule = scheduleModel.fromExternal(schedule);
+  const internalSchedule = scheduleModel.fromExternal({ ...schedule, id: '' });
   const partialSchedule = {
     name: internalSchedule.name,
     posts_transaction: internalSchedule.posts_transaction,
