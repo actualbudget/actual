@@ -105,7 +105,9 @@ export function ReconcilingMessage({
         )}
         <View style={{ marginLeft: 15 }}>
           <Button variant="primary" onPress={onDone}>
-            <Trans>Done reconciling</Trans>
+            {targetDiff === 0
+              ? t('Lock transactions')
+              : t('Exit reconciliation')}
           </Button>
         </View>
         {targetDiff !== 0 && (
