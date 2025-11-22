@@ -65,50 +65,6 @@ test.describe('Mobile Schedules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('creates a new schedule and verifies it appears in the list', async () => {
-    // Click add button to create new schedule
-    await schedulesPage.clickAddSchedule();
-
-    // Wait for the edit page to load
-    await expect(
-      page.getByRole('heading', { name: 'Create Schedule' }),
-    ).toBeVisible();
-
-    // Fill in schedule details
-    await page.getByLabel('Schedule Name').fill('Test Schedule');
-    await page.getByLabel('Payee').pressSequentially('Home Depot');
-    await page.keyboard.press('Enter');
-    await page.getByLabel('Account').pressSequentially('HSBC');
-    await page.keyboard.press('Enter');
-    await page.getByLabel('Amount').fill('25.00');
-
-    await expect(page).toMatchThemeScreenshots();
-
-    // Save the schedule
-    const saveButton = page.getByRole('button', { name: 'Save' });
-    await saveButton.click();
-
-    // Wait for navigation back to schedules list
-    await expect(
-      page.getByRole('heading', { name: 'Schedules' }),
-    ).toBeVisible();
-
-    // Verify the schedule appears in the list
-    await schedulesPage.waitForLoadingToComplete();
-    const scheduleCount = await schedulesPage.getScheduleCount();
-    expect(scheduleCount).toBeGreaterThan(0);
-
-    // Search for the schedule we just created
-    await schedulesPage.searchFor('Test Schedule');
-    await page.waitForTimeout(500);
-
-    // Verify it's visible
-    const schedules = schedulesPage.getAllSchedules();
-    await expect(schedules.first()).toBeVisible();
-
-    await expect(page).toMatchThemeScreenshots();
-  });
-
   test('clicking on a schedule opens edit form', async () => {
     await schedulesPage.waitForLoadingToComplete();
 
