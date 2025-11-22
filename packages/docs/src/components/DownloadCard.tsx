@@ -17,7 +17,7 @@ export function DownloadCard({ icon, platform, links }: DownloadCardProps) {
       style={{
         textAlign: 'center',
         padding: '1.5rem',
-        border: '1px solid #474748',
+        border: '1px solid var(--ifm-color-emphasis-500)',
         borderRadius: '8px',
       }}
     >
