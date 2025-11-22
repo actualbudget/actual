@@ -8,6 +8,7 @@ export type TimeFrame = {
     | 'sliding-window'
     | 'static'
     | 'full'
+    | 'lastMonth'
     | 'lastYear'
     | 'yearToDate'
     | 'priorYearToDate';
