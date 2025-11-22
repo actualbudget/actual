@@ -5,12 +5,13 @@ import { Octokit } from '@octokit/rest';
 const token = process.env.GITHUB_TOKEN;
 const repo = process.env.GITHUB_REPOSITORY;
 const prNumber = process.env.PR_NUMBER;
-const userLogin = process.env.USER_LOGIN;
+const inputUserLogin = process.env.USER_LOGIN;
 
-if (!token || !repo || !prNumber || !userLogin) {
+if (!token || !repo || !prNumber) {
   console.log('Missing required environment variables');
+  console.log('Required: GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER');
   console.log(
-    'Required: GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, USER_LOGIN',
+    'Optional: USER_LOGIN (will fetch from recent review/comment if not provided)',
   );
   process.exit(1);
 }
@@ -19,18 +20,83 @@ const [owner, repoName] = repo.split('/');
 const octokit = new Octokit({ auth: token });
 const orgName = 'actualbudget';
 
+async function getRecentReviewerOrCommenter() {
+  // Fetch the most recent review
+  try {
+    const { data: reviews } = await octokit.rest.pulls.listReviews({
+      owner,
+      repo: repoName,
+      pull_number: prNumber,
+    });
+
+    // Get the most recent non-author review
+    const recentReview = reviews
+      .filter(review => review.state !== 'PENDING')
+      .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))[0];
+
+    if (recentReview) {
+      console.log(
+        `Found recent review by ${recentReview.user.login} at ${recentReview.submitted_at}`,
+      );
+      return recentReview.user.login;
+    }
+  } catch (error) {
+    console.log('Could not fetch reviews:', error.message);
+  }
+
+  // If no review, try fetching the most recent comment
+  try {
+    const { data: comments } = await octokit.rest.issues.listComments({
+      owner,
+      repo: repoName,
+      issue_number: prNumber,
+    });
+
+    // Filter out bot comments and get the most recent
+    const recentComment = comments
+      .filter(comment => !comment.user.type || comment.user.type !== 'Bot')
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+
+    if (recentComment) {
+      console.log(
+        `Found recent comment by ${recentComment.user.login} at ${recentComment.created_at}`,
+      );
+      return recentComment.user.login;
+    }
+  } catch (error) {
+    console.log('Could not fetch comments:', error.message);
+  }
+
+  return null;
+}
+
 async function assignMaintainer() {
   try {
-    console.log(
-      `Checking if ${userLogin} should be assigned to PR #${prNumber}...`,
-    );
-
     // Get PR details to check if user is the author
     const { data: pr } = await octokit.rest.pulls.get({
       owner,
       repo: repoName,
       pull_number: prNumber,
     });
+
+    // If USER_LOGIN is not provided, try to get it from recent review/comment
+    let userLogin = inputUserLogin;
+    if (!userLogin) {
+      console.log(
+        `USER_LOGIN not provided, fetching from recent review/comment for PR #${prNumber}...`,
+      );
+      userLogin = await getRecentReviewerOrCommenter();
+      if (!userLogin) {
+        console.log(
+          `No recent review or comment found for PR #${prNumber}, skipping assignment`,
+        );
+        return;
+      }
+    }
+
+    console.log(
+      `Checking if ${userLogin} should be assigned to PR #${prNumber}...`,
+    );
 
     // Skip if user is the PR author
     if (pr.user.login === userLogin) {

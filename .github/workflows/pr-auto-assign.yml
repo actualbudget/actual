@@ -1,28 +1,93 @@
 name: PR Auto-Assign Maintainers
 
+##########################################################################################
+# WARNING! This workflow uses the 'pull_request_target' event for fork PRs. This means   #
+# it runs in the context of the base repo, giving it write permissions. We only use      #
+# trusted code from the base repo (the assign-maintainer.js script) and never checkout   #
+# untrusted fork code. The script only makes API calls, so it's safe.                    #
+##########################################################################################
+# See: https://securitylab.github.com/research/github-actions-preventing-pwn-requests    #
+##########################################################################################
+
 on:
-  pull_request_review:
-    types: [submitted]
+  # Use pull_request_target for fork PRs (runs in base repo context with write perms)
+  # Note: pull_request_target doesn't support review/comment events, so we trigger
+  # on PR events and the script will check for recent reviews/comments
+  pull_request_target:
+    types: [opened, synchronize, ready_for_review]
+  # Keep issue_comment for non-fork PRs (works for non-forks, fails gracefully for forks)
   issue_comment:
     types: [created]
+  # Keep pull_request_review for non-fork PRs (works for non-forks, fails gracefully for forks)
+  pull_request_review:
+    types: [submitted]
 
 jobs:
-  assign-maintainer:
+  assign-maintainer-from-comment:
     # Only run on PRs, not issues
-    if: github.event.issue.pull_request || github.event.pull_request
+    if: github.event_name == 'issue_comment' && github.event.issue.pull_request
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      contents: read
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
           download-translations: 'false'
-      - name: Assign maintainer
+      - name: Assign maintainer from comment
         run: node .github/actions/pr-auto-assign/assign-maintainer.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
-          USER_LOGIN: ${{ github.event.review.user.login || github.event.comment.user.login }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          USER_LOGIN: ${{ github.event.comment.user.login }}
+
+  assign-maintainer-from-review:
+    # Only run on PRs from non-forks (fork PRs will use pull_request_target job)
+    if: github.event_name == 'pull_request_review' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Assign maintainer from review
+        run: node .github/actions/pr-auto-assign/assign-maintainer.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          USER_LOGIN: ${{ github.event.review.user.login }}
+
+  assign-maintainer-from-pr-event:
+    # This job handles fork PRs and checks for recent reviews/comments
+    # It runs in base repo context, so it has write permissions
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    steps:
+      # SECURITY: Only checkout base repo code, never fork code
+      # The assign-maintainer.js script is trusted code from the base repo
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          # Explicitly checkout base ref to avoid security issues
+          ref: ${{ github.event.pull_request.base.ref }}
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Assign maintainer from recent activity
+        run: node .github/actions/pr-auto-assign/assign-maintainer.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          # USER_LOGIN not provided - script will fetch from recent review/comment
