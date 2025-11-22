@@ -151,14 +151,6 @@ export function SummaryCard({
               suffix={content.type === 'percentage' ? '%' : ''}
               loading={!data}
               initialFontSize={content.fontSize}
-              // This causes an infinite loop that triggers dashboard-update-widget
-              // fontSizeChanged={newSize => {
-              //   const newContent = { ...content, fontSize: newSize };
-              //   onMetaChange({
-              //     ...meta,
-              //     content: JSON.stringify(newContent),
-              //   });
-              // }}
               animate={isEditing ?? false}
             />
           ) : (
