@@ -1,4 +1,4 @@
-import AbnamroAbnanl2a from '../abnamro_abnanl2a.js';
+import AbnamroAbnanl2a from '../abnamro_abnanl2a';
 
 describe('AbnamroAbnanl2a', () => {
   describe('#normalizeTransaction', () => {

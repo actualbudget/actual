@@ -1,4 +1,4 @@
-import SskDusseldorfDussdeddxxx from '../ssk_dusseldorf_dussdeddxxx.js';
+import SskDusseldorfDussdeddxxx from '../ssk_dusseldorf_dussdeddxxx';
 
 describe('ssk_dusseldorf_dussdeddxxx', () => {
   let consoleSpy;

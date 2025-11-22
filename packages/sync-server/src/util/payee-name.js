@@ -1,4 +1,4 @@
-import { title } from './title/index.js';
+import { title } from './title/index';
 
 function formatPayeeIban(iban) {
   return '(' + iban.slice(0, 4) + ' XXX ' + iban.slice(-4) + ')';

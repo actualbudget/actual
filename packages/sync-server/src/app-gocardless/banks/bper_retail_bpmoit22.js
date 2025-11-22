@@ -3,7 +3,7 @@
  * while keeping the raw description in the notes field.
  */
 
-import Fallback from './integration-bank.js';
+import Fallback from './integration-bank';
 
 const CARD_PAYMENT_PREFIX = 'PAGAMENTO SU CIRCUITO INTERNAZIONALE';
 const CARD_PAYMENT_SUFFIX = 'Operazione carta';
@@ -54,7 +54,7 @@ function setPayee(editedTransaction, payee) {
   editedTransaction.debtorName = payee;
 }
 
-/** @type {import('./bank.interface.js').IBank} */
+/** @type {import('./bank.interface').IBank} */
 const BperRetailBank = {
   ...Fallback,
 

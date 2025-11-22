@@ -1,5 +1,5 @@
-import { mockTransactionAmount } from '../services/tests/fixtures.js';
-import { sortByBookingDateOrValueDate } from '../utils.js';
+import { mockTransactionAmount } from '../services/tests/fixtures';
+import { sortByBookingDateOrValueDate } from '../utils';
 
 describe('utils', () => {
   describe('#sortByBookingDate', () => {

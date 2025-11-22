@@ -1,5 +1,5 @@
-import { mockTransactionAmount } from '../../services/tests/fixtures.js';
-import Virgin from '../virgin_nrnbgb22.js';
+import { mockTransactionAmount } from '../../services/tests/fixtures';
+import Virgin from '../virgin_nrnbgb22';
 
 describe('Virgin', () => {
   describe('#normalizeTransaction', () => {

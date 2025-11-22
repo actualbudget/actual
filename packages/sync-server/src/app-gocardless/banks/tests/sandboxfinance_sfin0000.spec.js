@@ -1,8 +1,8 @@
-import SandboxfinanceSfin0000 from '../sandboxfinance_sfin0000.js';
+import SandboxfinanceSfin0000 from '../sandboxfinance_sfin0000';
 
 describe('SandboxfinanceSfin0000', () => {
   describe('#normalizeAccount', () => {
-    /** @type {import('../../gocardless.types.js').DetailedAccountWithInstitution} */
+    /** @type {import('../../gocardless.types').DetailedAccountWithInstitution} */
     const accountRaw = {
       resourceId: '01F3NS5ASCNMVCTEJDT0G215YE',
       iban: 'GL0865354374424724',
@@ -74,7 +74,7 @@ describe('SandboxfinanceSfin0000', () => {
   });
 
   describe('#countStartingBalance', () => {
-    /** @type {import('../../gocardless-node.types.js').Balance[]} */
+    /** @type {import('../../gocardless-node.types').Balance[]} */
     const balances = [
       {
         balanceAmount: { amount: '1000.00', currency: 'PLN' },
@@ -115,7 +115,7 @@ describe('SandboxfinanceSfin0000', () => {
     });
 
     it('returns the balance minus the available transactions', () => {
-      /** @type {import('../../gocardless-node.types.js').Transaction[]} */
+      /** @type {import('../../gocardless-node.types').Transaction[]} */
       const transactions = [
         {
           transactionAmount: { amount: '200.00', currency: 'PLN' },

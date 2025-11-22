@@ -1,4 +1,4 @@
-import { run } from '../migrations.js';
+import { run } from '../migrations';
 
 const direction = process.argv[2] || 'up';
 

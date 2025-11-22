@@ -1,9 +1,9 @@
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 
-import { clearExpiredSessions, getAccountDb } from '../account-db.js';
-import { config } from '../load-config.js';
-import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
+import { clearExpiredSessions, getAccountDb } from '../account-db';
+import { config } from '../load-config';
+import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user';
 
 function isValidPassword(password) {
   return password != null && password !== '';

@@ -10,12 +10,12 @@ import {
   RequisitionNotLinked,
   ServiceError,
   UnknownError,
-} from '../../errors.js';
+} from '../../errors';
 import {
   goCardlessService,
   handleGoCardlessError,
   client,
-} from '../gocardless-service.js';
+} from '../gocardless-service';
 
 import {
   mockedBalances,
@@ -31,7 +31,7 @@ import {
   mockDetailedAccountExample1,
   mockDetailedAccountExample2,
   mockExtendAccountsAboutInstitutions,
-} from './fixtures.js';
+} from './fixtures';
 
 describe('goCardlessService', () => {
   const accountId = mockAccountMetaData.id;
