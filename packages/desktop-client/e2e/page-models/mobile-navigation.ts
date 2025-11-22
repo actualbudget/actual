@@ -181,7 +181,7 @@ export class MobileNavigation {
   }
 
   async goToSchedulesPage() {
-    return await this.navigateToPage(
+    return this.navigateToPage(
       'Schedules',
       () => new MobileSchedulesPage(this.page),
     );
