@@ -43,7 +43,7 @@ export type DiscoverScheduleEntity = {
   id: ScheduleEntity['id'];
   account: AccountEntity['id'];
   payee: PayeeEntity['id'];
-  date: ScheduleEntity['_date'];
+  date: RecurConfig;
   amount: ScheduleEntity['_amount'];
   _conditions: ScheduleEntity['_conditions'];
 };
