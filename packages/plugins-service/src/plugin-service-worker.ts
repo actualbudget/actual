@@ -1,5 +1,9 @@
 /// <reference lib="WebWorker" />
-import { precacheAndRoute } from 'workbox-precaching';
+import {
+  precacheAndRoute,
+  createHandlerBoundToURL,
+} from 'workbox-precaching';
+import { NavigationRoute, registerRoute } from 'workbox-routing';
 
 // Service Worker Global Types
 declare const self: ServiceWorkerGlobalScope & {
@@ -22,6 +26,22 @@ self.__WB_DISABLE_DEV_LOGS = true;
 
 // Injected by VitePWA
 precacheAndRoute(self.__WB_MANIFEST);
+
+const appShellHandler = createHandlerBoundToURL('/index.html');
+
+const navigationRoute = new NavigationRoute(appShellHandler, {
+  denylist: [
+    /^\/account\/.*$/,
+    /^\/admin\/.*$/,
+    /^\/secret\/.*$/,
+    /^\/openid\/.*$/,
+    /^\/plugins\/.*$/,
+    /^\/kcab\/.*$/,
+    /^\/plugin-data\/.*$/,
+  ],
+});
+
+registerRoute(navigationRoute);
 
 const fileList = new Map<string, string>();
 
@@ -63,8 +83,6 @@ self.addEventListener('fetch', (event: FetchEvent) => {
         ? pathSegments[slugIndex + 1].split('?')[0]
         : '';
     event.respondWith(handlePlugin(slug, fileName.replace('?import', '')));
-  } else {
-    event.respondWith(fetch(event.request));
   }
 });
 
