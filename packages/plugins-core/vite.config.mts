@@ -2,14 +2,9 @@ import { resolve } from 'path';
 
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
-
 export default defineConfig({
   resolve: {
-    alias: {
-      '@actual-app/shared-types': resolve(__dirname, '../shared-types/src'),
-      '@actual-app/query': resolve(__dirname, '../query/src'),
-      '@actual-app/components': resolve(__dirname, '../component-library/src'),
-    },
+    alias: {},
   },
   build: {
     outDir: 'build',

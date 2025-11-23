@@ -9,9 +9,6 @@ export {
 // Client-side middleware
 export { initializePlugin } from './middleware';
 
-// Icons, styles, theme (client-side only)
-export * from '@actual-app/components';
-
 // Client-side hooks (React hooks)
 export { useReport } from './utils';
 
@@ -25,11 +22,8 @@ export * from '@actual-app/shared-types/spreadsheet';
 export type {
   ActualPlugin,
   ActualPluginInitialized,
-  ThemeColorTypes,
   HostContext,
 } from './types/actualPlugin';
-
-export type * from '@actual-app/components/props/modalProps';
 
 export type {
   ActualPluginToolkit,

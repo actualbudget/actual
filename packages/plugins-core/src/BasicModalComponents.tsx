@@ -1,16 +1,18 @@
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, {
+  CSSProperties,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  Button,
-  CSSProperties,
-  Input,
-  styles,
-  SvgLogo,
-  View,
-} from '@actual-app/components';
 import { SvgDelete } from '@actual-app/components/icons/v0';
-
+import { View } from '@actual-app/components/view';
+import { Button } from '@actual-app/components/button';
+import { Input } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
+import { SvgLogo } from '@actual-app/components/icons/logo';
 type ModalButtonsProps = {
   style?: CSSProperties;
   leftContent?: ReactNode;

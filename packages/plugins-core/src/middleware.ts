@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { initReactI18next } from 'react-i18next';
 
-import type { BasicModalProps } from '@actual-app/components';
+import type { BasicModalProps } from '@actual-app/components/modal';
 import ReactDOM from 'react-dom/client';
 
 import {
@@ -87,9 +87,6 @@ export function initializePlugin(
             options,
           );
         },
-
-        // Theme methods - passed through from host context
-        registerTheme: context.registerTheme,
 
         // Report and spreadsheet utilities - passed through from host context
         createSpreadsheet: context.createSpreadsheet,

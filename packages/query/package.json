@@ -7,22 +7,10 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "development": "./src/index.ts"
-    },
-    "./database": {
-      "types": "./src/database.ts",
-      "development": "./src/database.ts"
-    },
-    "./aql-result": {
-      "types": "./src/aql-result.ts",
-      "development": "./src/aql-result.ts"
-    },
-    "./spreadsheet": {
-      "types": "./src/spreadsheet.ts",
-      "development": "./src/spreadsheet.ts"
-    }
+    ".": "./src/index.ts",
+    "./database": "./src/database.ts",
+    "./aql-result": "./src/aql-result.ts",
+    "./spreadsheet": "./src/spreadsheet.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

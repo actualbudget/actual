@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 
-import type { BasicModalProps } from '@actual-app/components';
+import type { BasicModalProps } from '@actual-app/components/modal';
 import type { Query, QueryBuilder } from '@actual-app/query';
 import type {
   AccountEntity,
@@ -10,7 +10,6 @@ import type {
   ScheduleEntity,
 } from '@actual-app/shared-types';
 import type { i18n } from 'i18next';
-
 export type SlotLocations =
   | 'sidebar-main-menu'
   | 'sidebar-more-menu'
@@ -40,256 +39,6 @@ export type PluginFilterResult = {
 };
 
 // Simple color mapping type for theme methods
-export type ThemeColorTypes = {
-  // Page colors
-  pageBackground?: string;
-  pageBackgroundModalActive?: string;
-  pageBackgroundTopLeft?: string;
-  pageBackgroundBottomRight?: string;
-  pageBackgroundLineTop?: string;
-  pageBackgroundLineMid?: string;
-  pageBackgroundLineBottom?: string;
-  pageText?: string;
-  pageTextLight?: string;
-  pageTextSubdued?: string;
-  pageTextDark?: string;
-  pageTextPositive?: string;
-  pageTextLink?: string;
-  pageTextLinkLight?: string;
-
-  // Card colors
-  cardBackground?: string;
-  cardBorder?: string;
-  cardShadow?: string;
-
-  // Table colors
-  tableBackground?: string;
-  tableRowBackgroundHover?: string;
-  tableText?: string;
-  tableTextLight?: string;
-  tableTextSubdued?: string;
-  tableTextSelected?: string;
-  tableTextHover?: string;
-  tableTextInactive?: string;
-  tableHeaderText?: string;
-  tableHeaderBackground?: string;
-  tableBorder?: string;
-  tableBorderSelected?: string;
-  tableBorderHover?: string;
-  tableBorderSeparator?: string;
-  tableRowBackgroundHighlight?: string;
-  tableRowBackgroundHighlightText?: string;
-  tableRowHeaderBackground?: string;
-  tableRowHeaderText?: string;
-
-  // Sidebar colors
-  sidebarBackground?: string;
-  sidebarItemBackgroundPending?: string;
-  sidebarItemBackgroundPositive?: string;
-  sidebarItemBackgroundFailed?: string;
-  sidebarItemBackgroundHover?: string;
-  sidebarItemAccentSelected?: string;
-  sidebarItemText?: string;
-  sidebarItemTextSelected?: string;
-
-  // Menu colors
-  menuBackground?: string;
-  menuItemBackground?: string;
-  menuItemBackgroundHover?: string;
-  menuItemText?: string;
-  menuItemTextHover?: string;
-  menuItemTextSelected?: string;
-  menuItemTextHeader?: string;
-  menuBorder?: string;
-  menuBorderHover?: string;
-  menuKeybindingText?: string;
-  menuAutoCompleteBackground?: string;
-  menuAutoCompleteBackgroundHover?: string;
-  menuAutoCompleteText?: string;
-  menuAutoCompleteTextHover?: string;
-  menuAutoCompleteTextHeader?: string;
-  menuAutoCompleteItemTextHover?: string;
-  menuAutoCompleteItemText?: string;
-
-  // Modal colors
-  modalBackground?: string;
-  modalBorder?: string;
-
-  // Mobile colors
-  mobileHeaderBackground?: string;
-  mobileHeaderText?: string;
-  mobileHeaderTextSubdued?: string;
-  mobileHeaderTextHover?: string;
-  mobilePageBackground?: string;
-  mobileNavBackground?: string;
-  mobileNavItem?: string;
-  mobileNavItemSelected?: string;
-  mobileAccountShadow?: string;
-  mobileAccountText?: string;
-  mobileTransactionSelected?: string;
-  mobileViewTheme?: string;
-  mobileConfigServerViewTheme?: string;
-
-  // Markdown colors
-  markdownNormal?: string;
-  markdownDark?: string;
-  markdownLight?: string;
-
-  // Button colors - Menu buttons
-  buttonMenuText?: string;
-  buttonMenuTextHover?: string;
-  buttonMenuBackground?: string;
-  buttonMenuBackgroundHover?: string;
-  buttonMenuBorder?: string;
-  buttonMenuSelectedText?: string;
-  buttonMenuSelectedTextHover?: string;
-  buttonMenuSelectedBackground?: string;
-  buttonMenuSelectedBackgroundHover?: string;
-  buttonMenuSelectedBorder?: string;
-
-  // Button colors - Primary buttons
-  buttonPrimaryText?: string;
-  buttonPrimaryTextHover?: string;
-  buttonPrimaryBackground?: string;
-  buttonPrimaryBackgroundHover?: string;
-  buttonPrimaryBorder?: string;
-  buttonPrimaryShadow?: string;
-  buttonPrimaryDisabledText?: string;
-  buttonPrimaryDisabledBackground?: string;
-  buttonPrimaryDisabledBorder?: string;
-
-  // Button colors - Normal buttons
-  buttonNormalText?: string;
-  buttonNormalTextHover?: string;
-  buttonNormalBackground?: string;
-  buttonNormalBackgroundHover?: string;
-  buttonNormalBorder?: string;
-  buttonNormalShadow?: string;
-  buttonNormalSelectedText?: string;
-  buttonNormalSelectedBackground?: string;
-  buttonNormalDisabledText?: string;
-  buttonNormalDisabledBackground?: string;
-  buttonNormalDisabledBorder?: string;
-
-  // Button colors - Bare buttons
-  buttonBareText?: string;
-  buttonBareTextHover?: string;
-  buttonBareBackground?: string;
-  buttonBareBackgroundHover?: string;
-  buttonBareBackgroundActive?: string;
-  buttonBareDisabledText?: string;
-  buttonBareDisabledBackground?: string;
-
-  // Calendar colors
-  calendarText?: string;
-  calendarBackground?: string;
-  calendarItemText?: string;
-  calendarItemBackground?: string;
-  calendarSelectedBackground?: string;
-  calendarCellBackground?: string;
-
-  // Status colors - Notice
-  noticeBackground?: string;
-  noticeBackgroundLight?: string;
-  noticeBackgroundDark?: string;
-  noticeText?: string;
-  noticeTextLight?: string;
-  noticeTextDark?: string;
-  noticeTextMenu?: string;
-  noticeTextMenuHover?: string;
-  noticeBorder?: string;
-
-  // Status colors - Warning
-  warningBackground?: string;
-  warningText?: string;
-  warningTextLight?: string;
-  warningTextDark?: string;
-  warningBorder?: string;
-
-  // Status colors - Error
-  errorBackground?: string;
-  errorText?: string;
-  errorTextDark?: string;
-  errorTextDarker?: string;
-  errorTextMenu?: string;
-  errorBorder?: string;
-
-  // Status colors - Upcoming
-  upcomingBackground?: string;
-  upcomingText?: string;
-  upcomingBorder?: string;
-
-  // Form colors
-  formLabelText?: string;
-  formLabelBackground?: string;
-  formInputBackground?: string;
-  formInputBackgroundSelected?: string;
-  formInputBackgroundSelection?: string;
-  formInputBorder?: string;
-  formInputTextReadOnlySelection?: string;
-  formInputBorderSelected?: string;
-  formInputText?: string;
-  formInputTextSelected?: string;
-  formInputTextPlaceholder?: string;
-  formInputTextPlaceholderSelected?: string;
-  formInputTextSelection?: string;
-  formInputShadowSelected?: string;
-  formInputTextHighlight?: string;
-
-  // Checkbox colors
-  checkboxText?: string;
-  checkboxBackgroundSelected?: string;
-  checkboxBorderSelected?: string;
-  checkboxShadowSelected?: string;
-  checkboxToggleBackground?: string;
-  checkboxToggleBackgroundSelected?: string;
-  checkboxToggleDisabled?: string;
-
-  // Pill colors
-  pillBackground?: string;
-  pillBackgroundLight?: string;
-  pillText?: string;
-  pillTextHighlighted?: string;
-  pillBorder?: string;
-  pillBorderDark?: string;
-  pillBackgroundSelected?: string;
-  pillTextSelected?: string;
-  pillBorderSelected?: string;
-  pillTextSubdued?: string;
-
-  // Reports colors
-  reportsRed?: string;
-  reportsBlue?: string;
-  reportsGreen?: string;
-  reportsGray?: string;
-  reportsLabel?: string;
-  reportsInnerLabel?: string;
-
-  // Note tag colors
-  noteTagBackground?: string;
-  noteTagBackgroundHover?: string;
-  noteTagText?: string;
-
-  // Budget colors
-  budgetCurrentMonth?: string;
-  budgetOtherMonth?: string;
-  budgetHeaderCurrentMonth?: string;
-  budgetHeaderOtherMonth?: string;
-
-  // Floating action bar colors
-  floatingActionBarBackground?: string;
-  floatingActionBarBorder?: string;
-  floatingActionBarText?: string;
-
-  // Tooltip colors
-  tooltipText?: string;
-  tooltipBackground?: string;
-  tooltipBorder?: string;
-
-  // Custom colors (plugin-specific)
-  [customColor: `custom-${string}`]: string;
-};
-
 export interface PluginDatabase {
   runQuery<T = unknown>(
     sql: string,
@@ -404,17 +153,6 @@ export type PluginContext = Omit<
     },
   ) => () => void;
 
-  // Theme methods - simple and direct
-  registerTheme: (
-    themeId: string,
-    displayName: string,
-    colorOverrides: ThemeColorTypes,
-    options?: {
-      baseTheme?: 'light' | 'dark' | 'midnight';
-      description?: string;
-    },
-  ) => () => void;
-
   db?: PluginDatabase;
   q: QueryBuilder;
 
@@ -486,17 +224,6 @@ export interface HostContext {
       defaultHeight?: number;
       minWidth?: number;
       minHeight?: number;
-    },
-  ) => () => void;
-
-  // Theme methods
-  registerTheme: (
-    themeId: string,
-    displayName: string,
-    colorOverrides: ThemeColorTypes,
-    options?: {
-      baseTheme?: 'light' | 'dark' | 'midnight';
-      description?: string;
     },
   ) => () => void;
 

@@ -5,12 +5,7 @@
     "noEmit": false,
     "declaration": true,
     "outDir": "dist",
-    "declarationDir": "@types",
-    "paths": {
-      "@actual-app/shared-types": ["../shared-types/src/index.ts"],
-      "@actual-app/shared-types/*": ["../shared-types/src/*"],
-      "@actual-app/shared-types/models": ["../shared-types/src/models/index.ts"]
-    }
+    "declarationDir": "@types"
   },
   "include": ["."],
   "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts"]

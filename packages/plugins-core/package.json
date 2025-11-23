@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "description": "Core plugin system for Actual Budget",
-  "main": "src/client.ts",
+  "main": "build/client.js",
   "types": "src/client.ts",
   "scripts": {
     "dev": "vite",
@@ -22,6 +22,12 @@
     "vite-plugin-dts": "^4.5.3"
   },
   "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "development": "./src/index.ts",
+      "import": "./build/client.js",
+      "require": "./build/client.cjs"
+    },
     "./server": {
       "types": "./src/server.ts",
       "development": "./src/server.ts",

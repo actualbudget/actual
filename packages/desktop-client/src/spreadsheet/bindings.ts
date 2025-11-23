@@ -1,12 +1,11 @@
+import { q } from 'loot-core/shared/query';
+import type { AccountEntity, CategoryEntity } from 'loot-core/types/models';
 import {
   parametrizedField,
   type SheetFields,
   type Binding,
   type SheetNames,
-} from '@actual-app/plugins-core';
-
-import { q } from 'loot-core/shared/query';
-import type { AccountEntity, CategoryEntity } from 'loot-core/types/models';
+} from '@actual-app/shared-types/spreadsheet';
 
 import { uncategorizedTransactions } from '@desktop-client/queries';
 
