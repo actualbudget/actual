@@ -25,7 +25,7 @@ const globalSyncedPrefsSlice = createSlice({
   },
   extraReducers: builder => {
     builder.addCase(getUserData.fulfilled, (state, action) => {
-       if (!action.payload || typeof action.payload !== 'object') {
+      if (!action.payload || typeof action.payload !== 'object') {
         return state;
       }
 
@@ -65,4 +65,3 @@ export const actions = {
 };
 
 export const { mergeGlobalSyncedPrefs } = actions;
-
