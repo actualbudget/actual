@@ -1,8 +1,5 @@
 /// <reference lib="WebWorker" />
-import {
-  precacheAndRoute,
-  createHandlerBoundToURL,
-} from 'workbox-precaching';
+import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
 import { NavigationRoute, registerRoute } from 'workbox-routing';
 
 // Service Worker Global Types
