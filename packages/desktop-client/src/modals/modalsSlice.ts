@@ -301,6 +301,7 @@ export type Modal =
         month: string;
         onUpdateBudget: (amount: number) => void;
         onCopyLastMonthAverage: () => void;
+        onSetToSpent: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
         onApplyBudgetTemplate: () => void;
       };
@@ -312,6 +313,7 @@ export type Modal =
         month: string;
         onUpdateBudget: (amount: number) => void;
         onCopyLastMonthAverage: () => void;
+        onSetToSpent: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
         onApplyBudgetTemplate: () => void;
       };
