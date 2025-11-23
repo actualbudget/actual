@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useReducer, useState } from 'react';
+import { useMemo, useReducer, useRef, useState } from 'react';
 
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { type CSSProperties } from '@actual-app/components/styles';
 
 import {
@@ -9,16 +9,17 @@ import {
 } from 'loot-core/types/models';
 import { type Template } from 'loot-core/types/models/templates';
 
-import { type Action } from './actions';
 import { BudgetAutomationEditor } from './BudgetAutomationEditor';
 import { BudgetAutomationReadOnly } from './BudgetAutomationReadOnly';
 import { DEFAULT_PRIORITY, getInitialState, templateReducer } from './reducer';
+
+import { useEffectAfterMount } from '@desktop-client/hooks/useEffectAfterMount';
 
 type BudgetAutomationProps = {
   categories: CategoryGroupEntity[];
   schedules: readonly ScheduleEntity[];
   template?: Template;
-  onSave?: () => void;
+  onSave?: (template: Template) => void;
   onDelete?: () => void;
   style?: CSSProperties;
   readOnlyStyle?: CSSProperties;
@@ -44,17 +45,16 @@ export const BudgetAutomation = ({
 }: BudgetAutomationProps) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  const [state, originalDispatch] = useReducer(
+  const [state, dispatch] = useReducer(
     templateReducer,
     getInitialState(template ?? DEFAULT_TEMPLATE),
   );
-  const dispatch = useCallback(
-    (action: Action) => {
-      originalDispatch(action);
-      onSave?.();
-    },
-    [originalDispatch, onSave],
-  );
+
+  const onSaveRef = useRef(onSave);
+  onSaveRef.current = onSave;
+  useEffectAfterMount(() => {
+    onSaveRef.current?.(state.template);
+  }, [state]);
 
   const categoryNameMap = useMemo(() => {
     return categories.reduce(
@@ -69,9 +69,10 @@ export const BudgetAutomation = ({
   }, [categories]);
 
   return (
-    <Stack
-      direction="column"
-      spacing={inline ? 0 : 1}
+    <SpaceBetween
+      direction="vertical"
+      align="stretch"
+      gap={inline ? 0 : 5}
       style={{ ...style, minHeight: 'fit-content' }}
     >
       <BudgetAutomationReadOnly
@@ -92,6 +93,6 @@ export const BudgetAutomation = ({
           categories={categories}
         />
       )}
-    </Stack>
+    </SpaceBetween>
   );
 };

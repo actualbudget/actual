@@ -4,8 +4,15 @@ import React, { type ComponentProps } from 'react';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/types/models';
+
 import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';
+
+import { useBudgetComponents } from '.';
 
 import {
   useDraggable,
@@ -22,8 +29,7 @@ type ExpenseGroupProps = {
   group: ComponentProps<typeof SidebarGroup>['group'];
   collapsed: boolean;
   editingCell: { id: string; cell: string } | null;
-  dragState: DragState<ComponentProps<typeof SidebarGroup>['group']>;
-  MonthComponent: ComponentProps<typeof RenderMonths>['component'];
+  dragState: DragState<CategoryEntity> | DragState<CategoryGroupEntity> | null;
   onEditName?: ComponentProps<typeof SidebarGroup>['onEdit'];
   onSave?: ComponentProps<typeof SidebarGroup>['onSave'];
   onDelete?: ComponentProps<typeof SidebarGroup>['onDelete'];
@@ -44,7 +50,6 @@ export function ExpenseGroup({
   collapsed,
   editingCell,
   dragState,
-  MonthComponent,
   onEditName,
   onSave,
   onDelete,
@@ -81,6 +86,8 @@ export function ExpenseGroup({
       }
     },
   });
+
+  const { ExpenseGroupComponent: MonthComponent } = useBudgetComponents();
 
   return (
     <Row
@@ -135,7 +142,9 @@ export function ExpenseGroup({
           onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
           onShowNewCategory={onShowNewCategory}
         />
-        <RenderMonths component={MonthComponent} args={{ group }} />
+        <RenderMonths>
+          {({ month }) => <MonthComponent month={month} group={group} />}
+        </RenderMonths>
       </View>
     </Row>
   );

@@ -25,6 +25,7 @@ import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { LoadingIndicator } from './LoadingIndicator';
 import { CalendarCard } from './reports/CalendarCard';
 import { CashFlowCard } from './reports/CashFlowCard';
+import { CrossoverCard } from './reports/CrossoverCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
 import { FormulaCard } from './reports/FormulaCard';
 import { MarkdownCard } from './reports/MarkdownCard';
@@ -63,6 +64,7 @@ export function Overview() {
   const dispatch = useDispatch();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const crossoverReportEnabled = useFeatureFlag('crossoverReport');
 
   const formulaMode = useFeatureFlag('formulaMode');
 
@@ -420,6 +422,14 @@ export function Overview() {
                               name: 'net-worth-card' as const,
                               text: t('Net worth graph'),
                             },
+                            ...(crossoverReportEnabled
+                              ? [
+                                  {
+                                    name: 'crossover-card' as const,
+                                    text: t('Crossover point'),
+                                  },
+                                ]
+                              : []),
                             {
                               name: 'spending-card' as const,
                               text: t('Spending analysis'),
@@ -557,6 +567,16 @@ export function Overview() {
                 <div key={item.i}>
                   {item.type === 'net-worth-card' ? (
                     <NetWorthCard
+                      widgetId={item.i}
+                      isEditing={isEditing}
+                      accounts={accounts}
+                      meta={item.meta}
+                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                      onRemove={() => onRemoveWidget(item.i)}
+                    />
+                  ) : item.type === 'crossover-card' &&
+                    crossoverReportEnabled ? (
+                    <CrossoverCard
                       widgetId={item.i}
                       isEditing={isEditing}
                       accounts={accounts}

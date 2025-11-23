@@ -22,10 +22,8 @@ import { css } from '@emotion/css';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import * as monthUtils from 'loot-core/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
-import {
-  type CategoryGroupEntity,
-  type CategoryEntity,
-} from 'loot-core/types/models';
+
+import { type CategoryGroupMonthProps, type CategoryMonthProps } from '..';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
@@ -152,14 +150,10 @@ export function IncomeHeaderMonth() {
   );
 }
 
-type ExpenseGroupMonthProps = {
-  month: string;
-  group: CategoryGroupEntity;
-};
 export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   month,
   group,
-}: ExpenseGroupMonthProps) {
+}: CategoryGroupMonthProps) {
   const { id } = group;
 
   return (
@@ -210,14 +204,6 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   );
 });
 
-type ExpenseCategoryMonthProps = {
-  month: string;
-  category: CategoryEntity;
-  editing: boolean;
-  onEdit: (id: CategoryEntity['id'] | null, month?: string) => void;
-  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-  onShowActivity: (id: CategoryEntity['id'], month: string) => void;
-};
 export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   month,
   category,
@@ -225,7 +211,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   onEdit,
   onBudgetAction,
   onShowActivity,
-}: ExpenseCategoryMonthProps) {
+}: CategoryMonthProps) {
   const { t } = useTranslation();
 
   const budgetMenuTriggerRef = useRef(null);
@@ -550,20 +536,13 @@ export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
   );
 }
 
-type IncomeCategoryMonthProps = {
-  category: CategoryEntity;
-  isLast: boolean;
-  month: string;
-  onShowActivity: (id: CategoryEntity['id'], month: string) => void;
-  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-};
 export function IncomeCategoryMonth({
   category,
   isLast,
   month,
   onShowActivity,
   onBudgetAction,
-}: IncomeCategoryMonthProps) {
+}: CategoryMonthProps) {
   const incomeMenuTriggerRef = useRef(null);
   const {
     setMenuOpen: setIncomeMenuOpen,

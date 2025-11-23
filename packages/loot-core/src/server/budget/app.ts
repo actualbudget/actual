@@ -297,7 +297,7 @@ async function createCategory({
 
 async function updateCategory(
   category: CategoryEntity,
-): Promise<{ error?: { type: 'category-exists' } }> {
+): Promise<{ error: { type: 'category-exists' } } | object> {
   try {
     await db.updateCategory(
       categoryModel.toDb({
