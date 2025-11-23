@@ -207,7 +207,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
       setEnd(initialEnd);
       setModeAndInterval(initialMode);
     }
-  }, [latestTransaction, widget?.meta?.timeFrame]);
+  }, [latestTransaction, widget?.meta?.timeFrame, setModeAndInterval]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
