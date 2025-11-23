@@ -461,6 +461,8 @@ export function amountToCurrencyNoDecimal(amount: Amount): CurrencyAmount {
 }
 
 export function currencyToAmount(currencyAmount: string): Amount | null {
+  currencyAmount = currencyAmount.replace(/\u2212/g, '-');
+
   let integer, fraction;
 
   // match the last dot or comma in the string
@@ -490,7 +492,7 @@ export function currencyToInteger(
 }
 
 export function stringToInteger(str: string): number | null {
-  const amount = parseInt(str.replace(/[^-0-9.,]/g, ''));
+  const amount = parseInt(str.replace(/\u2212/g, '-').replace(/[^-0-9.,]/g, ''));
   if (!isNaN(amount)) {
     return amount;
   }
@@ -518,6 +520,8 @@ export function integerToAmount(
 // number format, because the user could be importing from many
 // currencies. We extract out the numbers and just ignore separators.
 export function looselyParseAmount(amount: string) {
+  amount = amount.replace(/\u2212/g, '-');
+
   function safeNumber(v: number): null | number {
     if (isNaN(v)) {
       return null;
