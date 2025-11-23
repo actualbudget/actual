@@ -22,6 +22,10 @@ import {
   reducer as budgetfilesSliceReducer,
 } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import {
+  name as globalSyncedPrefsSliceName,
+  reducer as globalSyncedPrefsSliceReducer,
+} from '@desktop-client/globalSyncedPrefs/globalSyncedPrefsSlice';
+import {
   name as modalsSliceName,
   reducer as modalsSliceReducer,
 } from '@desktop-client/modals/modalsSlice';
@@ -59,6 +63,7 @@ const appReducer = combineReducers({
   [notificationsSliceName]: notificationsSliceReducer,
   [payeesSliceName]: payeesSliceReducer,
   [prefsSliceName]: prefsSliceReducer,
+  [globalSyncedPrefsSliceName]: globalSyncedPrefsSliceReducer,
   [transactionsSliceName]: transactionsSliceReducer,
   [tagsSliceName]: tagsSliceReducer,
   [usersSliceName]: usersSliceReducer,
