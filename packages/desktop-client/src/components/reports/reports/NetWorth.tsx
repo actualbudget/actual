@@ -68,24 +68,15 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
-  const getDefaultIntervalForMode = (
-    mode: TimeFrame['mode'],
-  ): 'Daily' | 'Weekly' | 'Monthly' | 'Yearly' => {
-    switch (mode) {
-      case 'lastMonth':
-        return 'Weekly';
-      case 'yearToDate':
-      case 'lastYear':
-      case 'priorYearToDate':
-        return 'Monthly';
-      case 'full':
-        return 'Monthly';
-      case 'sliding-window':
-      case 'static':
-      default:
-        return 'Monthly';
-    }
-  };
+  const getDefaultIntervalForMode = useCallback(
+    (mode: TimeFrame['mode']): 'Daily' | 'Weekly' | 'Monthly' | 'Yearly' => {
+      if (mode === 'lastMonth') {
+        return 'Weekly'; // Last month is edge case where monthly interval not wanted
+      }
+      return 'Monthly';
+    },
+    [],
+  );
 
   const accounts = useAccounts();
   const {
