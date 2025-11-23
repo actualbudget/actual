@@ -5,13 +5,14 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import type { FeatureFlag, SyncedPrefs } from 'loot-core/types/prefs';
+import type { FeatureFlag, GlobalSyncedPrefs } from 'loot-core/types/prefs';
 
 import { Setting } from './UI';
 
 import { Link } from '@desktop-client/components/common/Link';
 import { Checkbox } from '@desktop-client/components/forms';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useGlobalSyncedPref } from '@desktop-client/hooks/useGlobalSyncedPref';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type FeatureToggleProps = {
@@ -69,7 +70,7 @@ function FeatureToggle({
 }
 
 type GlobalFeatureToggleProps = {
-  prefName: keyof SyncedPrefs;
+  prefName: keyof GlobalSyncedPrefs;
   disableToggle?: boolean;
   error?: ReactNode;
   children: ReactNode;
@@ -83,7 +84,7 @@ function GlobalFeatureToggle({
   error,
   children,
 }: GlobalFeatureToggleProps) {
-  const [enabled, setEnabled] = useSyncedPref(prefName);
+  const [enabled, setEnabled] = useGlobalSyncedPref(prefName);
 
   return (
     <label style={{ display: 'flex' }}>
