@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -112,7 +112,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     widget?.meta?.interval || getDefaultIntervalForMode(mode),
   );
   // Combined setter: set mode and update interval (unless interval was set in widget meta)
-  const setModeAndInterval = React.useCallback(
+  const setModeAndInterval = useCallback(
     (newMode: TimeFrame['mode']) => {
       setMode(newMode);
       if (!widget?.meta?.interval) {
