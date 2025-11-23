@@ -111,13 +111,17 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [interval, setInterval] = useState(
     widget?.meta?.interval || getDefaultIntervalForMode(mode),
   );
+  // Combined setter: set mode and update interval (unless interval was set in widget meta)
+  const setModeAndInterval = React.useCallback(
+    (newMode: TimeFrame['mode']) => {
+      setMode(newMode);
+      if (!widget?.meta?.interval) {
+        setInterval(getDefaultIntervalForMode(newMode));
+      }
+    },
+    [widget?.meta?.interval, getDefaultIntervalForMode],
+  );
 
-  // Update interval when mode changes if no interval is set in widget meta
-  useEffect(() => {
-    if (!widget?.meta?.interval) {
-      setInterval(getDefaultIntervalForMode(mode));
-    }
-  }, [mode, widget?.meta?.interval]);
   const [latestTransaction, setLatestTransaction] = useState('');
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
@@ -210,14 +214,14 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
       );
       setStart(initialStart);
       setEnd(initialEnd);
-      setMode(initialMode);
+      setModeAndInterval(initialMode);
     }
   }, [latestTransaction, widget?.meta?.timeFrame]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
     setEnd(end);
-    setMode(mode);
+    setModeAndInterval(mode);
   }
 
   async function onSaveWidget() {
