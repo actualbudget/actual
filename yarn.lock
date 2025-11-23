@@ -22163,6 +22163,7 @@ __metadata:
     typescript: "npm:^5.9.3"
     vite: "npm:^7.2.2"
     workbox-precaching: "npm:^7.3.0"
+    workbox-routing: "npm:^7.3.0"
   languageName: unknown
   linkType: soft
 
@@ -28752,6 +28753,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"workbox-core@npm:7.4.0":
+  version: 7.4.0
+  resolution: "workbox-core@npm:7.4.0"
+  checksum: 10/160bfbd8957fa59e72b7202caa111e7a099fb405719f7ba2fb489c7dbac0bddfc99fab10122a7b6053821dd89974dc9f9ddb19af574606634d392f89b1d8735f
+  languageName: node
+  linkType: hard
+
 "workbox-expiration@npm:7.3.0":
   version: 7.3.0
   resolution: "workbox-expiration@npm:7.3.0"
@@ -28823,6 +28831,15 @@ __metadata:
   dependencies:
     workbox-core: "npm:7.3.0"
   checksum: 10/0d729f9c5cfc5754404ac1f7b729c7740ddc806203792701ac642151fbec939b4aa0fb289eab2295e49180e8154ad9bb1380effb7e0f0362163b79db4291dba7
+  languageName: node
+  linkType: hard
+
+"workbox-routing@npm:^7.3.0":
+  version: 7.4.0
+  resolution: "workbox-routing@npm:7.4.0"
+  dependencies:
+    workbox-core: "npm:7.4.0"
+  checksum: 10/4adb156d902953b59988a55d8d92c57141c4cecdc042e6157208b5384ed3f9c453e90e57bc819582f8aa56706f01d5a171d4c8a4406bdef1d5db9d757516903e
   languageName: node
   linkType: hard
 

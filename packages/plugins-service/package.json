@@ -11,7 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "workbox-precaching": "^7.3.0"
+    "workbox-precaching": "^7.3.0",
+    "workbox-routing": "^7.3.0"
   },
   "devDependencies": {
     "@types/node": "^22.19.1",
