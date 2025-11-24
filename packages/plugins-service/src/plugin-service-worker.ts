@@ -48,6 +48,26 @@ registerRoute(navigationRoute);
 
 const fileList = new Map<string, string>();
 
+// Register a Workbox route for plugin-data requests
+// This ensures Workbox's router handles all requests, including plugin-data
+const pluginDataMatch = ({ url }: { url: URL }) => {
+  const pathSegments = url.pathname.split('/').filter(Boolean);
+  const pluginsIndex = pathSegments.indexOf('plugin-data');
+  return pluginsIndex !== -1 && pathSegments[pluginsIndex + 1] !== undefined;
+};
+
+registerRoute(pluginDataMatch, async ({ request, url }) => {
+  const pathSegments = url.pathname.split('/').filter(Boolean);
+  const pluginsIndex = pathSegments.indexOf('plugin-data');
+  const slugIndex = pluginsIndex + 1;
+  const slug = pathSegments[slugIndex];
+  const fileName =
+    pathSegments.length > slugIndex + 1
+      ? pathSegments[slugIndex + 1].split('?')[0]
+      : '';
+  return handlePlugin(slug, fileName.replace('?import', ''));
+});
+
 // Log installation event
 self.addEventListener('install', (_event: ExtendableEvent) => {
   console.log('Plugins Worker installing...');
@@ -70,22 +90,6 @@ self.addEventListener('activate', (_event: ExtendableEvent) => {
 self.addEventListener('message', (event: ExtendableMessageEvent) => {
   if (event.data && (event.data as PluginMessage).type === 'SKIP_WAITING') {
     self.skipWaiting();
-  }
-});
-
-self.addEventListener('fetch', (event: FetchEvent) => {
-  const url = new URL(event.request.url);
-  const pathSegments = url.pathname.split('/').filter(Boolean); // Split and remove empty segments
-
-  const pluginsIndex = pathSegments.indexOf('plugin-data');
-  const slugIndex = pluginsIndex + 1;
-  if (pluginsIndex !== -1 && pathSegments[slugIndex]) {
-    const slug = pathSegments[slugIndex];
-    const fileName =
-      pathSegments.length > slugIndex + 1
-        ? pathSegments[slugIndex + 1].split('?')[0]
-        : '';
-    event.respondWith(handlePlugin(slug, fileName.replace('?import', '')));
   }
 });
 
