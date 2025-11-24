@@ -21,8 +21,14 @@ type PluginMessage = {
 
 self.__WB_DISABLE_DEV_LOGS = true;
 
+// Keep in sync with `workbox.ignoreURLParametersMatching` in
+// `packages/desktop-client/vite.config.mts`
+const PRECACHE_OPTIONS = {
+  ignoreURLParametersMatching: [/^v$/] as RegExp[],
+};
+
 // Injected by VitePWA
-precacheAndRoute(self.__WB_MANIFEST);
+precacheAndRoute(self.__WB_MANIFEST, PRECACHE_OPTIONS);
 
 const appShellHandler = createHandlerBoundToURL('/index.html');
 
