@@ -77,7 +77,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const getDefaultIntervalForMode = useCallback(
     (mode: TimeFrame['mode']): 'Daily' | 'Weekly' | 'Monthly' | 'Yearly' => {
       if (mode === 'lastMonth') {
-        return 'Weekly'; // Last month is edge case where monthly interval not wanted
+        return 'Weekly'; // For a single month, weekly interval provides better granularity than a single monthly data point
       }
       return 'Monthly';
     },
