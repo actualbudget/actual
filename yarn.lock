@@ -22405,6 +22405,7 @@ __metadata:
     typescript: "npm:^5.9.3"
     vite: "npm:^7.2.2"
     workbox-cacheable-response: "npm:^7.3.0"
+    workbox-core: "npm:^7.3.0"
     workbox-expiration: "npm:^7.3.0"
     workbox-precaching: "npm:^7.3.0"
     workbox-routing: "npm:^7.3.0"
@@ -29039,7 +29040,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"workbox-core@npm:7.4.0":
+"workbox-core@npm:7.4.0, workbox-core@npm:^7.3.0":
   version: 7.4.0
   resolution: "workbox-core@npm:7.4.0"
   checksum: 10/160bfbd8957fa59e72b7202caa111e7a099fb405719f7ba2fb489c7dbac0bddfc99fab10122a7b6053821dd89974dc9f9ddb19af574606634d392f89b1d8735f
