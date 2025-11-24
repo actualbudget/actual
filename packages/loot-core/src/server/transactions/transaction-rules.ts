@@ -8,6 +8,7 @@ import {
   parseDate,
   dayFromDate,
 } from '../../shared/months';
+import { q } from '../../shared/query';
 import { sortNumbers, getApproxNumberThreshold } from '../../shared/rules';
 import { ungroupTransaction } from '../../shared/transactions';
 import { partitionByField, fastSetMerge } from '../../shared/util';
@@ -16,9 +17,15 @@ import {
   type RuleActionEntity,
   type RuleEntity,
 } from '../../types/models';
-import { schemaConfig } from '../aql';
+import { aqlQuery, schemaConfig } from '../aql';
 import * as db from '../db';
-import { getPayee, getPayeeByName, insertPayee, getAccount } from '../db';
+import {
+  getPayee,
+  getPayeeByName,
+  insertPayee,
+  getAccount,
+  getCategory,
+} from '../db';
 import { getMappings } from '../db/mappings';
 import { RuleError } from '../errors';
 import { requiredFields, toDateRepr } from '../models';
@@ -665,6 +672,8 @@ export async function applyActions(
           action.op === 'append-notes'
         ) {
           return new Action(action.op, null, action.value, null);
+        } else if (action.op === 'delete-transaction') {
+          return new Action(action.op, null, null, null);
         }
 
         return new Action(
@@ -923,6 +932,9 @@ export async function updateCategoryRules(transactions) {
 export type TransactionForRules = TransactionEntity & {
   payee_name?: string;
   _account?: db.DbAccount;
+  balance?: number;
+  _category_name?: string;
+  _account_name?: string;
 };
 
 export async function prepareTransactionForRules(
@@ -937,11 +949,59 @@ export async function prepareTransactionForRules(
     }
   }
 
+  r.balance = 0;
+
   if (trans.account) {
     if (accounts !== null && accounts.has(trans.account)) {
       r._account = accounts.get(trans.account);
+      r._account_name = r._account?.name || '';
     } else {
       r._account = await getAccount(trans.account);
+      r._account_name = r._account?.name || '';
+    }
+
+    const dateBoundary = trans.date ?? currentDay();
+    let query = q('transactions')
+      .filter({ account: trans.account, is_parent: false })
+      .options({ splits: 'inline' });
+
+    if (trans.id) {
+      query = query.filter({ id: { $ne: trans.id } });
+    }
+
+    const sameDayFilter =
+      trans.sort_order != null
+        ? {
+            $and: [
+              { date: dateBoundary },
+              { sort_order: { $lt: trans.sort_order } },
+            ],
+          }
+        : {
+            $and: [
+              { date: dateBoundary },
+              {
+                $or: [
+                  { sort_order: { $ne: null } }, // ordered items come before null sort_order
+                  ...(trans.id ? [{ id: { $lt: trans.id } }] : []), // among nulls, tie-break by id
+                ],
+              },
+            ],
+          };
+
+    const { data: balance } = await aqlQuery(
+      query
+        .filter({ $or: [{ date: { $lt: dateBoundary } }, sameDayFilter] })
+        .calculate({ $sum: '$amount' }),
+    );
+
+    r.balance = balance ?? 0;
+  }
+
+  if (trans.category) {
+    const category = await getCategory(trans.category);
+    if (category) {
+      r._category_name = category.name;
     }
   }
 
@@ -966,6 +1026,10 @@ export async function finalizeTransactionForRules(
     }
 
     delete trans.payee_name;
+  }
+
+  if ('balance' in trans) {
+    delete trans.balance;
   }
 
   return trans;

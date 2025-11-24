@@ -19,6 +19,7 @@ import { View } from '@actual-app/components/view';
 import { Item } from './Item';
 import { SecondaryItem } from './SecondaryItem';
 
+import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 export function PrimaryButtons() {
@@ -28,7 +29,8 @@ export function PrimaryButtons() {
   const location = useLocation();
 
   const syncServerStatus = useSyncServerStatus();
-  const isUsingServer = syncServerStatus !== 'no-server';
+  const isTestEnv = useIsTestEnv();
+  const isUsingServer = syncServerStatus !== 'no-server' || isTestEnv;
 
   const isActive = [
     '/payees',

@@ -280,19 +280,14 @@ export function useTransactionBatchActions() {
       const transactions = data as TransactionEntity[];
 
       const changes = {
-        added: transactions
-          .reduce(
-            (
-              newTransactions: TransactionEntity[],
-              trans: TransactionEntity,
-            ) => {
-              return newTransactions.concat(
-                realizeTempTransactions(ungroupTransaction(trans)),
-              );
-            },
-            [],
-          )
-          .map(({ sort_order, ...trans }: TransactionEntity) => ({ ...trans })),
+        added: transactions.reduce(
+          (newTransactions: TransactionEntity[], trans: TransactionEntity) => {
+            return newTransactions.concat(
+              realizeTempTransactions(ungroupTransaction(trans)),
+            );
+          },
+          [],
+        ),
       };
 
       await send('transactions-batch-update', changes);

@@ -34,7 +34,7 @@ type SidebarCategoryProps = {
   isLast?: boolean;
   onEditName: (id: CategoryEntity['id']) => void;
   onSave: (category: CategoryEntity) => void;
-  onDelete: (id: CategoryEntity['id']) => Promise<void>;
+  onDelete: (id: CategoryEntity['id']) => void;
   onHideNewCategory?: () => void;
 };
 

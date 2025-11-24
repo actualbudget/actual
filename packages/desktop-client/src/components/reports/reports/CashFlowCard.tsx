@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
+import { Bar, BarChart, LabelList } from 'recharts';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -19,7 +19,10 @@ import { defaultTimeFrame } from './CashFlow';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { Change } from '@desktop-client/components/reports/Change';
-import { chartTheme } from '@desktop-client/components/reports/chart-theme';
+import {
+  chartTheme,
+  useRechartsAnimation,
+} from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
@@ -111,6 +114,7 @@ export function CashFlowCard({
   onRemove,
 }: CashFlowCardProps) {
   const { t } = useTranslation();
+  const animationProps = useRechartsAnimation();
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
@@ -205,46 +209,47 @@ export function CashFlowCard({
         {data ? (
           <Container style={{ height: 'auto', flex: 1 }}>
             {(width, height) => (
-              <ResponsiveContainer>
-                <BarChart
-                  width={width}
-                  height={height}
-                  data={[
-                    {
-                      income,
-                      expenses,
-                    },
-                  ]}
-                  margin={{
-                    top: 10,
-                    bottom: 0,
-                  }}
+              <BarChart
+                responsive
+                width={width}
+                height={height}
+                data={[
+                  {
+                    income,
+                    expenses,
+                  },
+                ]}
+                margin={{
+                  top: 10,
+                  bottom: 0,
+                }}
+              >
+                <Bar
+                  dataKey="income"
+                  fill={chartTheme.colors.blue}
+                  barSize={14}
+                  {...animationProps}
                 >
-                  <Bar
+                  <LabelList
                     dataKey="income"
-                    fill={chartTheme.colors.blue}
-                    barSize={14}
-                  >
-                    <LabelList
-                      dataKey="income"
-                      position="left"
-                      content={<CustomLabel name={t('Income')} />}
-                    />
-                  </Bar>
+                    position="left"
+                    content={<CustomLabel name={t('Income')} />}
+                  />
+                </Bar>
 
-                  <Bar
+                <Bar
+                  dataKey="expenses"
+                  fill={chartTheme.colors.red}
+                  barSize={14}
+                  {...animationProps}
+                >
+                  <LabelList
                     dataKey="expenses"
-                    fill={chartTheme.colors.red}
-                    barSize={14}
-                  >
-                    <LabelList
-                      dataKey="expenses"
-                      position="right"
-                      content={<CustomLabel name={t('Expenses')} />}
-                    />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+                    position="right"
+                    content={<CustomLabel name={t('Expenses')} />}
+                  />
+                </Bar>
+              </BarChart>
             )}
           </Container>
         ) : (

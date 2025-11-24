@@ -12,7 +12,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer,
 } from 'recharts';
 
 import {
@@ -23,6 +22,7 @@ import {
 
 import { showActivity } from './showActivity';
 
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
@@ -148,6 +148,7 @@ export function LineGraph({
   showTooltip = true,
   interval,
 }: LineGraphProps) {
+  const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
   const categories = useCategories();
   const accounts = useAccounts();
@@ -190,81 +191,81 @@ export function LineGraph({
     >
       {(width, height) =>
         data && (
-          <ResponsiveContainer>
-            <div>
-              {!compact && <div style={{ marginTop: '15px' }} />}
-              <LineChart
-                width={width}
-                height={height}
-                data={data.intervalData}
-                margin={{ top: 10, right: 10, left: leftMargin, bottom: 10 }}
-                style={{ cursor: pointer }}
-              >
-                {showTooltip && (
-                  <Tooltip
-                    content={
-                      <CustomTooltip
-                        compact={compact}
-                        tooltip={tooltip}
-                        format={format}
-                      />
-                    }
-                    formatter={numberFormatterTooltip}
-                    isAnimationActive={false}
-                  />
-                )}
-                {!compact && <CartesianGrid strokeDasharray="3 3" />}
-                {!compact && (
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                  />
-                )}
-                {!compact && (
-                  <YAxis
-                    tickFormatter={value =>
-                      getCustomTick(
-                        format(value, 'financial-no-decimals'),
-                        privacyMode,
-                      )
-                    }
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                    tickSize={0}
-                  />
-                )}
-                {data.legend.map((entry, index) => {
-                  return (
-                    <Line
-                      key={index}
-                      strokeWidth={2}
-                      type="monotone"
-                      dataKey={entry.name}
-                      stroke={entry.color}
-                      activeDot={{
-                        r: entry.name === tooltip && !compact ? 8 : 3,
-                        onMouseEnter: () => {
-                          setTooltip(entry.name);
-                          if (!['Group', 'Interval'].includes(groupBy)) {
-                            setPointer('pointer');
-                          }
-                        },
-                        onMouseLeave: () => {
-                          setPointer('');
-                          setTooltip('');
-                        },
-                        onClick: (e, payload) =>
-                          ((compact && showTooltip) || !compact) &&
-                          !['Group', 'Interval'].includes(groupBy) &&
-                          onShowActivity(e, entry.id, payload),
-                      }}
+          <div>
+            {!compact && <div style={{ marginTop: '15px' }} />}
+            <LineChart
+              responsive
+              width={width}
+              height={height}
+              data={data.intervalData}
+              margin={{ top: 10, right: 10, left: leftMargin, bottom: 10 }}
+              style={{ cursor: pointer }}
+            >
+              {showTooltip && (
+                <Tooltip
+                  content={
+                    <CustomTooltip
+                      compact={compact}
+                      tooltip={tooltip}
+                      format={format}
                     />
-                  );
-                })}
-              </LineChart>
-            </div>
-          </ResponsiveContainer>
+                  }
+                  formatter={numberFormatterTooltip}
+                  isAnimationActive={false}
+                />
+              )}
+              {!compact && <CartesianGrid strokeDasharray="3 3" />}
+              {!compact && (
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: theme.pageText }}
+                  tickLine={{ stroke: theme.pageText }}
+                />
+              )}
+              {!compact && (
+                <YAxis
+                  tickFormatter={value =>
+                    getCustomTick(
+                      format(value, 'financial-no-decimals'),
+                      privacyMode,
+                    )
+                  }
+                  tick={{ fill: theme.pageText }}
+                  tickLine={{ stroke: theme.pageText }}
+                  tickSize={0}
+                />
+              )}
+              {data.legend.map((entry, index) => {
+                return (
+                  <Line
+                    key={index}
+                    strokeWidth={2}
+                    type="monotone"
+                    dataKey={entry.name}
+                    stroke={entry.color}
+                    {...animationProps}
+                    activeDot={{
+                      r: entry.name === tooltip && !compact ? 8 : 3,
+                      onMouseEnter: () => {
+                        setTooltip(entry.name);
+                        if (!['Group', 'Interval'].includes(groupBy)) {
+                          setPointer('pointer');
+                        }
+                      },
+                      onMouseLeave: () => {
+                        setPointer('');
+                        setTooltip('');
+                      },
+                      onClick: (e, payload) =>
+                        ((compact && showTooltip) || !compact) &&
+                        !['Group', 'Interval'].includes(groupBy) &&
+                        onShowActivity(e, entry.id, payload),
+                    }}
+                  />
+                );
+              })}
+            </LineChart>
+          </div>
         )
       }
     </Container>

@@ -26,64 +26,120 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      contents: read
     steps:
-      - name: Wait for ${{github.base_ref}} build to succeed
-        uses: fountainhead/action-wait-for-check@v1.2.0
-        id: master-build
+      - name: Checkout base branch
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          ref: ${{ github.base_ref }}
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+
+      - name: Wait for ${{github.base_ref}} web build to succeed
+        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
+        id: master-web-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: web
           ref: ${{github.base_ref}}
+      - name: Wait for ${{github.base_ref}} API build to succeed
+        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
+        id: master-api-build
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: api
+          ref: ${{github.base_ref}}
 
       - name: Wait for PR build to succeed
-        uses: fountainhead/action-wait-for-check@v1.2.0
-        id: wait-for-build
+        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
+        id: wait-for-web-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: web
           ref: ${{github.event.pull_request.head.sha}}
+      - name: Wait for API PR build to succeed
+        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
+        id: wait-for-api-build
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: api
+          ref: ${{github.event.pull_request.head.sha}}
 
       - name: Report build failure
-        if: steps.wait-for-build.outputs.conclusion == 'failure'
+        if: steps.wait-for-web-build.outputs.conclusion == 'failure' || steps.wait-for-api-build.outputs.conclusion == 'failure'
         run: |
           echo "Build failed on PR branch or ${{github.base_ref}}"
           exit 1
-      - name: Download build artifact from ${{github.base_ref}}
-        uses: dawidd6/action-download-artifact@v6
-        id: pr-build
+
+      - name: Download web build artifact from ${{github.base_ref}}
+        uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
+        id: pr-web-build
         with:
           branch: ${{github.base_ref}}
           workflow: build.yml
+          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
           name: build-stats
           path: base
-
-      - name: Download build artifact from PR
-        uses: dawidd6/action-download-artifact@v6
+      - name: Download API build artifact from ${{github.base_ref}}
+        uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
+        id: pr-api-build
+        with:
+          branch: ${{github.base_ref}}
+          workflow: build.yml
+          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
+          name: api-build-stats
+          path: base
+      - name: Download build stats from PR
+        uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
         with:
           pr: ${{github.event.pull_request.number}}
           workflow: build.yml
+          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
           name: build-stats
           path: head
           allow_forks: true
-
+      - name: Download API stats from PR
+        uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
+        with:
+          pr: ${{github.event.pull_request.number}}
+          workflow: build.yml
+          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
+          name: api-build-stats
+          path: head
+          allow_forks: true
       - name: Strip content hashes from stats files
         run: |
-          sed -i -E 's/index\.[0-9a-zA-Z_-]{8,}\./index./g' ./head/web-stats.json
-          sed -i -E 's/\.[0-9a-zA-Z_-]{8,}\.chunk\././g' ./head/web-stats.json
-          sed -i -E 's/\.[0-9a-f]{8,}\././g' ./head/*.json
-          sed -i -E 's/index\.[0-9a-zA-Z_-]{8,}\./index./g' ./base/web-stats.json
-          sed -i -E 's/\.[0-9a-zA-Z_-]{8,}\.chunk\././g' ./base/web-stats.json
-          sed -i -E 's/\.[0-9a-f]{8,}\././g' ./base/*.json
-      - uses: twk3/rollup-size-compare-action@v1.1.1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          current-stats-json-path: ./head/web-stats.json
-          base-stats-json-path: ./base/web-stats.json
-          title: desktop-client
-
-      - uses: twk3/rollup-size-compare-action@v1.1.1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          current-stats-json-path: ./head/loot-core-stats.json
-          base-stats-json-path: ./base/loot-core-stats.json
-          title: loot-core
+          if [ -f ./head/web-stats.json ]; then
+            sed -i -E 's/index\.[0-9a-zA-Z_-]{8,}\./index./g' ./head/web-stats.json
+            sed -i -E 's/\.[0-9a-zA-Z_-]{8,}\.chunk\././g' ./head/web-stats.json
+          fi
+          if [ -f ./base/web-stats.json ]; then
+            sed -i -E 's/index\.[0-9a-zA-Z_-]{8,}\./index./g' ./base/web-stats.json
+            sed -i -E 's/\.[0-9a-zA-Z_-]{8,}\.chunk\././g' ./base/web-stats.json
+          fi
+          for file in ./head/*.json ./base/*.json; do
+            if [ -f "$file" ]; then
+              sed -i -E 's/\.[0-9a-f]{8,}\././g' "$file"
+            fi
+          done
+      - name: Generate combined bundle stats comment
+        run: |
+          node packages/ci-actions/bin/bundle-stats-comment.mjs \
+            --base desktop-client=./base/web-stats.json \
+            --base loot-core=./base/loot-core-stats.json \
+            --base api=./base/api-stats.json \
+            --head desktop-client=./head/web-stats.json \
+            --head loot-core=./head/loot-core-stats.json \
+            --head api=./head/api-stats.json \
+            --identifier combined > bundle-stats-comment.md
+      - name: Post combined bundle stats comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          node packages/ci-actions/bin/update-bundle-stats-comment.mjs \
+            --comment-file bundle-stats-comment.md \
+            --identifier '<!--- bundlestats-action-comment key:combined --->'

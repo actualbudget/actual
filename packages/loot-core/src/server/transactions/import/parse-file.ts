@@ -45,13 +45,18 @@ function parseOfxAmount(amount: string): number | null {
   return isNaN(parsed) ? null : parsed;
 }
 
-type Transaction = {
+type StructuredTransaction = {
   amount: number;
   date: string;
   payee_name: string;
   imported_payee: string;
   notes: string;
 };
+
+// CSV files return raw data that are not guaranteed to be StructuredTransactions
+type CsvTransaction = Record<string, string> | string[];
+
+type Transaction = StructuredTransaction | CsvTransaction;
 
 type ParseError = { message: string; internal: string };
 export type ParseFileResult = {
@@ -63,7 +68,8 @@ export type ParseFileOptions = {
   hasHeaderRow?: boolean;
   delimiter?: string;
   fallbackMissingPayeeToMemo?: boolean;
-  skipLines?: number;
+  skipStartLines?: number;
+  skipEndLines?: number;
   importNotes?: boolean;
 };
 
@@ -106,9 +112,23 @@ async function parseCSV(
   const errors = Array<ParseError>();
   let contents = await fs.readFile(filepath);
 
-  if (options.skipLines > 0) {
+  const skipStart = Math.max(0, options.skipStartLines || 0);
+  const skipEnd = Math.max(0, options.skipEndLines || 0);
+
+  if (skipStart > 0 || skipEnd > 0) {
     const lines = contents.split(/\r?\n/);
-    contents = lines.slice(options.skipLines).join('\r\n');
+
+    if (skipStart + skipEnd >= lines.length) {
+      errors.push({
+        message: 'Cannot skip more lines than exist in the file',
+        internal: `Attempted to skip ${skipStart} start + ${skipEnd} end lines from ${lines.length} total lines`,
+      });
+      return { errors, transactions: [] };
+    }
+
+    const startLine = skipStart;
+    const endLine = skipEnd > 0 ? lines.length - skipEnd : lines.length;
+    contents = lines.slice(startLine, endLine).join('\r\n');
   }
 
   let data: ReturnType<typeof csv2json>;

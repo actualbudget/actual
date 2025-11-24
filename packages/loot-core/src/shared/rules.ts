@@ -56,7 +56,7 @@ type FieldInfoConstraint = Record<
   {
     type: keyof typeof TYPE_INFO;
     disallowedOps?: Set<RuleConditionOp>;
-    internalOps?: Set<RuleConditionOp>;
+    internalOps?: Set<RuleConditionOp | 'and'>;
   }
 >;
 
@@ -103,7 +103,7 @@ export function isValidOp(field: keyof FieldValueTypes, op: RuleConditionOp) {
   );
 }
 
-export function getValidOps(field: keyof FieldValueTypes) {
+export function getValidOps(field: keyof FieldValueTypes): RuleConditionOp[] {
   const type = FIELD_TYPES.get(field);
   if (!type) {
     return [];
@@ -227,6 +227,8 @@ export function friendlyOp(op, type?) {
       return t('is on budget');
     case 'offBudget':
       return t('is off budget');
+    case 'delete-transaction':
+      return 'delete transaction';
     default:
       return '';
   }

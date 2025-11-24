@@ -24,6 +24,7 @@ export default defineConfig({
       // print only console.error
       return type === 'stderr';
     },
+    maxWorkers: 2,
   },
   resolve: {
     alias: [

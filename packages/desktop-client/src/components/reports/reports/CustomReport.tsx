@@ -341,16 +341,28 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
               ),
             );
 
+      const currentInterval =
+        interval === 'Weekly'
+          ? monthUtils.currentWeek(firstDayOfWeekIdx)
+          : interval === 'Daily'
+            ? monthUtils.currentDay()
+            : interval === 'Yearly'
+              ? monthUtils.currentYear()
+              : monthUtils.currentMonth();
+
+      const maxInterval =
+        latestInterval > currentInterval ? latestInterval : currentInterval;
+
       const allIntervals =
         interval === 'Weekly'
           ? monthUtils.weekRangeInclusive(
               earliestInterval,
-              latestInterval,
+              maxInterval,
               firstDayOfWeekIdx,
             )
           : monthUtils[
               ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
-            ](earliestInterval, latestInterval);
+            ](earliestInterval, maxInterval);
 
       const allIntervalsMap = allIntervals
         .map((inter: string) => ({

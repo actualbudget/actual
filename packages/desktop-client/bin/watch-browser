@@ -6,6 +6,5 @@ cd "$ROOT/.."
 export IS_GENERIC_BROWSER=1
 export PORT=3001
 export REACT_APP_BACKEND_WORKER_HASH="dev"
-export REACT_APP_PLUGIN_SERVICE_WORKER_HASH="dev"
 
 yarn start

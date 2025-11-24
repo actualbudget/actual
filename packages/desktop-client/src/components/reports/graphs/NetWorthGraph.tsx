@@ -14,11 +14,11 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer,
 } from 'recharts';
 
 import { computePadding } from './util/computePadding';
 
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -56,6 +56,7 @@ export function NetWorthGraph({
   const privacyMode = usePrivacyMode();
   const id = useId();
   const format = useFormat();
+  const animationProps = useRechartsAnimation({ isAnimationActive: false });
 
   // Use more aggressive smoothening for high-frequency data
   const interpolationType =
@@ -166,79 +167,78 @@ export function NetWorthGraph({
     >
       {(width, height) =>
         graphData && (
-          <ResponsiveContainer>
-            <div style={{ ...(!compact && { marginTop: '15px' }) }}>
-              <AreaChart
-                width={width}
-                height={height}
-                data={graphData.data}
-                margin={{
-                  top: 0,
-                  right: 0,
-                  left: compact
-                    ? 0
-                    : computePadding(
-                        graphData.data.map(item => item.y),
-                        value => format(value, 'financial-no-decimals'),
-                      ),
-                  bottom: 0,
-                }}
-              >
-                {compact ? null : (
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                )}
-                <XAxis
-                  dataKey="x"
-                  hide={compact}
-                  tick={{ fill: theme.pageText }}
-                  tickLine={{ stroke: theme.pageText }}
-                  ticks={weeklyTicks}
+          <div style={{ ...(!compact && { marginTop: '15px' }) }}>
+            <AreaChart
+              responsive
+              width={width}
+              height={height}
+              data={graphData.data}
+              margin={{
+                top: 0,
+                right: 0,
+                left: compact
+                  ? 0
+                  : computePadding(
+                      graphData.data.map(item => item.y),
+                      value => format(value, 'financial-no-decimals'),
+                    ),
+                bottom: 0,
+              }}
+            >
+              {compact ? null : (
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              )}
+              <XAxis
+                dataKey="x"
+                hide={compact}
+                tick={{ fill: theme.pageText }}
+                tickLine={{ stroke: theme.pageText }}
+                ticks={weeklyTicks}
+              />
+              <YAxis
+                dataKey="y"
+                domain={['auto', 'auto']}
+                hide={compact}
+                tickFormatter={tickFormatter}
+                tick={{ fill: theme.pageText }}
+                tickLine={{ stroke: theme.pageText }}
+              />
+              {showTooltip && (
+                <Tooltip
+                  content={<CustomTooltip />}
+                  formatter={numberFormatterTooltip}
+                  isAnimationActive={false}
                 />
-                <YAxis
-                  dataKey="y"
-                  domain={['auto', 'auto']}
-                  hide={compact}
-                  tickFormatter={tickFormatter}
-                  tick={{ fill: theme.pageText }}
-                  tickLine={{ stroke: theme.pageText }}
-                />
-                {showTooltip && (
-                  <Tooltip
-                    content={<CustomTooltip />}
-                    formatter={numberFormatterTooltip}
-                    isAnimationActive={false}
+              )}
+              <defs>
+                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset={off}
+                    stopColor={theme.reportsBlue}
+                    stopOpacity={0.2}
                   />
-                )}
-                <defs>
-                  <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset={off}
-                      stopColor={theme.reportsBlue}
-                      stopOpacity={0.2}
-                    />
-                    <stop
-                      offset={off}
-                      stopColor={theme.reportsRed}
-                      stopOpacity={0.2}
-                    />
-                  </linearGradient>
-                </defs>
+                  <stop
+                    offset={off}
+                    stopColor={theme.reportsRed}
+                    stopOpacity={0.2}
+                  />
+                </linearGradient>
+              </defs>
 
-                <Area
-                  type={interpolationType}
-                  dot={false}
-                  activeDot={false}
-                  animationDuration={0}
-                  dataKey="y"
-                  stroke={theme.reportsBlue}
-                  strokeWidth={2}
-                  fill={`url(#${gradientId})`}
-                  fillOpacity={1}
-                  connectNulls={true}
-                />
-              </AreaChart>
-            </div>
-          </ResponsiveContainer>
+              <Area
+                type={interpolationType}
+                dot={false}
+                activeDot={false}
+                {...animationProps}
+                dataKey="y"
+                stroke={theme.reportsBlue}
+                strokeWidth={2}
+                fill={`url(#${gradientId})`}
+                fillOpacity={1}
+                connectNulls={true}
+              />
+            </AreaChart>
+          </div>
         )
       }
     </Container>

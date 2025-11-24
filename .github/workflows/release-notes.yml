@@ -12,9 +12,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+      - name: Get changed files
+        id: changed-files
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          NON_DOCS_FILES=$(echo "$CHANGED_FILES" | grep -v -e "^packages/docs/" -e "^\.github/actions/docs-spelling/" || true)
+
+          if [ -z "$NON_DOCS_FILES" ] && [ -n "$CHANGED_FILES" ]; then
+            echo "only_docs=true" >> $GITHUB_OUTPUT
+            echo "only documentation files changed, skipping release notes check"
+          else
+            echo "only_docs=false" >> $GITHUB_OUTPUT
+          fi
       - name: Check release notes
-        if: startsWith(github.head_ref, 'release/') == false
+        if: startsWith(github.head_ref, 'release/') == false && steps.changed-files.outputs.only_docs != 'true'
         uses: actualbudget/actions/release-notes/check@main
       - name: Generate release notes
         if: startsWith(github.head_ref, 'release/') == true

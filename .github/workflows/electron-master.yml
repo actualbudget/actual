@@ -29,7 +29,7 @@ jobs:
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - if: ${{ startsWith(matrix.os, 'windows') }}
         run: pip.exe install setuptools
       - if: ${{ ! startsWith(matrix.os, 'windows') }}
@@ -44,9 +44,9 @@ jobs:
           sudo apt-get install flatpak -y
           sudo apt-get install flatpak-builder -y
           sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          sudo flatpak install org.freedesktop.Sdk/x86_64/23.08 -y
-          sudo flatpak install org.freedesktop.Platform/x86_64/23.08 -y
-          sudo flatpak install org.electronjs.Electron2.BaseApp/x86_64/23.08 -y
+          sudo flatpak install org.freedesktop.Sdk//24.08 -y
+          sudo flatpak install org.freedesktop.Platform//24.08 -y
+          sudo flatpak install org.electronjs.Electron2.BaseApp//24.08 -y
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Electron for Mac
@@ -57,11 +57,12 @@ jobs:
           CSC_LINK: ${{ secrets.CSC_LINK }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       - name: Build Electron
         if: ${{ ! startsWith(matrix.os, 'macos') }}
         run: ./bin/package-electron
       - name: Upload Build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: actual-electron-${{ matrix.os }}
           path: |
@@ -72,7 +73,7 @@ jobs:
             packages/desktop-electron/dist/*.flatpak
       - name: Upload Windows Store Build
         if: ${{ startsWith(matrix.os, 'windows') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: actual-electron-${{ matrix.os }}-appx
           path: |
@@ -82,7 +83,7 @@ jobs:
         run: |
           echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
       - name: Add to new release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
         with:
           draft: true
           body: |
@@ -112,7 +113,7 @@ jobs:
           Install-Module -Name StoreBroker -AcceptLicense -Force -Scope CurrentUser -Verbose
 
       - name: Download Microsoft Store artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: actual-electron-windows-latest-appx
 

@@ -477,6 +477,7 @@ export type ReconcileTransactionsResult = {
     transaction: TransactionEntity;
     existing?: TransactionEntity;
     ignored?: boolean;
+    tombstone?: boolean;
   }>;
 };
 
@@ -530,7 +531,7 @@ export async function reconcileTransactions(
         category: existing.category || trans.category || null,
         imported_payee: trans.imported_payee || null,
         notes: existing.notes || trans.notes || null,
-        cleared: trans.cleared ?? existing.cleared,
+        cleared: existing.cleared || trans.cleared || false,
         raw_synced_data:
           existing.raw_synced_data ?? trans.raw_synced_data ?? null,
       };
@@ -565,6 +566,14 @@ export async function reconcileTransactions(
         for (const child of children) {
           updated.push({ id: child.id, cleared: updates.cleared });
         }
+      }
+    } else if (trans.tombstone) {
+      if (isPreview) {
+        updatedPreview.push({
+          transaction: trans,
+          existing: false,
+          tombstone: true,
+        });
       }
     } else {
       // Insert a new transaction
