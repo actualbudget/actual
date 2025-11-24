@@ -3,11 +3,9 @@ title: 'PikaPods'
 ---
 
 
-[PikaPods](https://www.pikapods.com/) offers one click "instant open source app hosting", allowing
-you to run Actual for about $ 1.50 per month (as of November 2025).
+[PikaPods](https://www.pikapods.com/) offers one click "instant open source app hosting", allowing you to run Actual for about $ 1.50 per month (as of November 2025).
 
-Using PikaPods is also a simple way to support the development of Actual Budget, as PikaPods will
-share some of its revenues with Actual for customers using their Actual Budget pods.
+Using PikaPods is also a simple way to support the development of Actual Budget, as PikaPods will share some of its revenues with Actual for customers using their Actual Budget pods.
 
 You get a $ 5.00 credit when you sign up, which means that you should be able to run Actual for 3 months before your credit runs out.
 
@@ -48,16 +46,14 @@ Click on the **register** link inside the blue banner, which will take you to th
 ## The user registration screen
 
 This screen is self-explanatory, but please use a password only you know.
-A working email address is required, as Pikapods will send an email with a link you need
-to click on to complete the signup process.
+A working email address is required, as Pikapods will send an email with a link you need to click on to complete the signup process.
 
 ![Image Pikapods email](/img/pikapods-setup/pikapods-2-register-name.png)
 
 
 ## Verification email
 
-Click the green button **"Activate and Login"**. You are now registered as
-a PikaPods customer. You will be returned to the login screen.
+Click the green button **"Activate and Login"**. You are now registered as a PikaPods customer. You will be returned to the login screen.
 
 ![Image pikapods email registration](/img/pikapods-setup/pikapods-4-email-activation.png)
 
@@ -105,8 +101,7 @@ Your Pod will be created when you click on the green **ADD POD* button. This ste
 
 Click on the green **OPEN POD** button to be taken to your Pod.
 
-The address for your Actual Budget is found in the Domain field. In the screenshot example, this is
-`https://berserk-bullmastiff.pikapod.net/budget/`. Yours will be something completely different.
+The address for your Actual Budget is found in the Domain field. In the screenshot example, this is `https://berserk-bullmastiff.pikapod.net/budget/`. Yours will be something completely different.
 
 
 ![Image pikapod pod url](/img/pikapods-setup/pikapods-8-running-pod.png)
@@ -146,11 +141,9 @@ Firefox: In supported OS, there should be an "add tab to taskbar" icon on the ri
 Safari: There should be a share icon in the Safari toolbar or use the browser menu. See [Safari's documentation](https://support.apple.com/en-mide/104996).
 
 For other browsers or browser/OS combinations, most search engines or the browser's documentation will describe how to install a PWA. PC Magazine had an [article in March 2025](https://www.pcmag.com/explainers/how-to-use-progessive-web-apps) with some good information.
-<br />
-<br />
+
 
 ## Getting started with Actual Budget
 
-Go to our [Starting Fresh](/docs/getting-started/starting-fresh) guide to get started with
-Actual Budget.
+Go to our [Starting Fresh](/docs/getting-started/starting-fresh) guide to get started with Actual Budget.
 
