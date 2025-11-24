@@ -228,27 +228,61 @@ async function _removeFile(filepath: string) {
 
 // Load files from the server that should exist by default
 async function populateDefaultFilesystem() {
-  const index = await (
-    await fetch(process.env.PUBLIC_URL + 'data-file-index.txt')
-  ).text();
-  const files = index
-    .split('\n')
-    .map(name => name.trim())
-    .filter(name => name !== '');
-  const fetchFile = url => fetch(url).then(res => res.arrayBuffer());
+  try {
+    const indexResponse = await fetch(
+      process.env.PUBLIC_URL + 'data-file-index.txt',
+    );
+    if (!indexResponse.ok) {
+      console.warn(
+        'Could not fetch data-file-index.txt, possibly offline. Skipping default filesystem population.',
+      );
+      return;
+    }
 
-  // This is hardcoded. We know we must create the migrations
-  // directory, it's not worth complicating the index to support
-  // creating arbitrary folders.
-  await mkdir('/migrations');
-  await mkdir('/demo-budget');
+    const index = await indexResponse.text();
+    const files = index
+      .split('\n')
+      .map(name => name.trim())
+      .filter(name => name !== '');
+    const fetchFile = async url => {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+      }
+      return response.arrayBuffer();
+    };
 
-  await Promise.all(
-    files.map(async file => {
-      const contents = await fetchFile(process.env.PUBLIC_URL + 'data/' + file);
-      _writeFile('/' + file, contents);
-    }),
-  );
+    // This is hardcoded. We know we must create the migrations
+    // directory, it's not worth complicating the index to support
+    // creating arbitrary folders.
+    await mkdir('/migrations');
+    await mkdir('/demo-budget');
+
+    await Promise.all(
+      files.map(async file => {
+        try {
+          const contents = await fetchFile(
+            process.env.PUBLIC_URL + 'data/' + file,
+          );
+          _writeFile('/' + file, contents);
+        } catch (err) {
+          console.warn(`Could not fetch data file ${file}:`, err);
+        }
+      }),
+    );
+  } catch (err) {
+    console.warn(
+      'Could not populate default filesystem, possibly offline:',
+      err,
+    );
+    // Create the required directories even if we can't fetch files
+    try {
+      await mkdir('/migrations');
+      await mkdir('/demo-budget');
+    } catch (dirErr) {
+      // Directories might already exist, ignore error
+    }
+  }
 }
 
 export const populateFileHeirarchy = async function () {

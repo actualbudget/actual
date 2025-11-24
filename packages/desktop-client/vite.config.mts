@@ -173,27 +173,15 @@ export default defineConfig(async ({ mode }) => {
             injectManifest: {
               maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
               swSrc: `service-worker/plugin-sw.js`,
+              globPatterns: [
+                '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
+              ],
+              globDirectory: 'build',
+              injectionPoint: undefined,
             },
             devOptions: {
               enabled: true, // We need service worker in dev mode to work with plugins
               type: 'module',
-            },
-            workbox: {
-              globPatterns: [
-                '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
-              ],
-              ignoreURLParametersMatching: [/^v$/],
-              navigateFallback: '/index.html',
-              maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
-              navigateFallbackDenylist: [
-                /^\/account\/.*$/,
-                /^\/admin\/.*$/,
-                /^\/secret\/.*$/,
-                /^\/openid\/.*$/,
-                /^\/plugins\/.*$/,
-                /^\/kcab\/.*$/,
-                /^\/plugin-data\/.*$/,
-              ],
             },
           }),
       injectShims(),

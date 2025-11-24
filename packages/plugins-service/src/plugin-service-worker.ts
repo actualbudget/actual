@@ -1,6 +1,9 @@
 /// <reference lib="WebWorker" />
 import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
 import { NavigationRoute, registerRoute } from 'workbox-routing';
+import { CacheFirst, NetworkFirst } from 'workbox-strategies';
+import { CacheableResponsePlugin } from 'workbox-cacheable-response';
+import { ExpirationPlugin } from 'workbox-expiration';
 
 // Service Worker Global Types
 declare const self: ServiceWorkerGlobalScope & {
@@ -43,6 +46,63 @@ const navigationRoute = new NavigationRoute(appShellHandler, {
 });
 
 registerRoute(navigationRoute);
+
+// Cache fonts with CacheFirst strategy
+registerRoute(
+  ({ request }) => request.destination === 'font',
+  new CacheFirst({
+    cacheName: 'fonts-cache',
+    plugins: [
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+      new ExpirationPlugin({
+        maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+        maxEntries: 30,
+      }),
+    ],
+  }),
+);
+
+// Cache static assets (images, icons, manifests) with CacheFirst strategy
+registerRoute(
+  ({ request }) =>
+    request.destination === 'image' ||
+    request.url.endsWith('.webmanifest') ||
+    request.url.endsWith('.ico') ||
+    request.url.endsWith('.png'),
+  new CacheFirst({
+    cacheName: 'static-assets-cache',
+    plugins: [
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+      new ExpirationPlugin({
+        maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+        maxEntries: 60,
+      }),
+    ],
+  }),
+);
+
+// Cache data files with NetworkFirst strategy (fallback to cache when offline)
+registerRoute(
+  ({ url }) =>
+    url.pathname.includes('/data/') ||
+    url.pathname.endsWith('data-file-index.txt'),
+  new NetworkFirst({
+    cacheName: 'data-files-cache',
+    plugins: [
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+      new ExpirationPlugin({
+        maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+        maxEntries: 100,
+      }),
+    ],
+  }),
+);
 
 const fileList = new Map<string, string>();
 
