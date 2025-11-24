@@ -331,7 +331,7 @@ describe('Merging success', () => {
     expect(keptId).toBe(imported);
 
     // Check that the kept transaction is now a parent
-    const keptTransaction = await db.first<TransactionEntity>(imported);
+    const keptTransaction = await db.getTransaction(imported);
     expect(keptTransaction?.is_parent).toBe(1);
     expect(keptTransaction?.category).toBeNull();
     expect(keptTransaction?.imported_id).toBe('imported_1');
