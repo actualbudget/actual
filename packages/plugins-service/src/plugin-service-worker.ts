@@ -62,9 +62,7 @@ const loggingPlugin: WorkboxPlugin = {
   },
   cachedResponseWillBeUsed: async ({ cacheName, request, cachedResponse }) => {
     if (cachedResponse) {
-      console.log(
-        `[SW Cache HIT] Retrieved from ${cacheName}: ${request.url}`,
-      );
+      console.log(`[SW Cache HIT] Retrieved from ${cacheName}: ${request.url}`);
     } else {
       console.log(`[SW Cache MISS] Not in ${cacheName}: ${request.url}`);
     }
