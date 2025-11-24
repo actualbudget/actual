@@ -4,6 +4,7 @@ import { NavigationRoute, registerRoute } from 'workbox-routing';
 import { CacheFirst, NetworkFirst } from 'workbox-strategies';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 import { ExpirationPlugin } from 'workbox-expiration';
+import type { WorkboxPlugin } from 'workbox-core';
 
 // Service Worker Global Types
 declare const self: ServiceWorkerGlobalScope & {
@@ -33,7 +34,9 @@ const PRECACHE_OPTIONS = {
 
 // Injected by VitePWA
 // Use empty array as fallback if __WB_MANIFEST is not injected
-precacheAndRoute(self.__WB_MANIFEST || [], PRECACHE_OPTIONS);
+const manifest = self.__WB_MANIFEST || [];
+console.log(`[SW Precache] Precaching ${manifest.length} assets:`, manifest);
+precacheAndRoute(manifest, PRECACHE_OPTIONS);
 
 const appShellHandler = createHandlerBoundToURL('/index.html');
 
@@ -49,12 +52,50 @@ const navigationRoute = new NavigationRoute(appShellHandler, {
 
 registerRoute(navigationRoute);
 
+// Custom logging plugin for Workbox
+const loggingPlugin: WorkboxPlugin = {
+  cacheWillUpdate: async ({ response, request }) => {
+    console.log(
+      `[SW Cache] Storing in cache: ${request.url} (status: ${response.status})`,
+    );
+    return response;
+  },
+  cachedResponseWillBeUsed: async ({ cacheName, request, cachedResponse }) => {
+    if (cachedResponse) {
+      console.log(
+        `[SW Cache HIT] Retrieved from ${cacheName}: ${request.url}`,
+      );
+    } else {
+      console.log(`[SW Cache MISS] Not in ${cacheName}: ${request.url}`);
+    }
+    return cachedResponse ?? null;
+  },
+  fetchDidSucceed: async ({ request, response }) => {
+    console.log(
+      `[SW Network] Fetched successfully: ${request.url} (status: ${response.status})`,
+    );
+    return response;
+  },
+  fetchDidFail: async ({ request, error }) => {
+    console.error(`[SW Network FAIL] Failed to fetch: ${request.url}`, error);
+    throw error;
+  },
+  handlerDidError: async ({ request, error }) => {
+    console.error(`[SW Handler ERROR] ${request.url}`, error);
+    return new Response('Offline fallback', {
+      status: 503,
+      statusText: 'Service Unavailable',
+    });
+  },
+};
+
 // Cache fonts with CacheFirst strategy
 registerRoute(
   ({ request }) => request.destination === 'font',
   new CacheFirst({
     cacheName: 'fonts-cache',
     plugins: [
+      loggingPlugin,
       new CacheableResponsePlugin({
         statuses: [0, 200],
       }),
@@ -76,6 +117,7 @@ registerRoute(
   new CacheFirst({
     cacheName: 'static-assets-cache',
     plugins: [
+      loggingPlugin,
       new CacheableResponsePlugin({
         statuses: [0, 200],
       }),
@@ -95,6 +137,7 @@ registerRoute(
   new NetworkFirst({
     cacheName: 'data-files-cache',
     plugins: [
+      loggingPlugin,
       new CacheableResponsePlugin({
         statuses: [0, 200],
       }),
@@ -125,19 +168,27 @@ registerRoute(pluginDataMatch, async ({ request, url }) => {
     pathSegments.length > slugIndex + 1
       ? pathSegments[slugIndex + 1].split('?')[0]
       : '';
-  return handlePlugin(slug, fileName.replace('?import', ''));
+  console.log(`[SW Plugin] Handling plugin request: ${url.pathname}`);
+  const response = await handlePlugin(slug, fileName.replace('?import', ''));
+  console.log(
+    `[SW Plugin] Response for ${url.pathname}: ${response.status} ${response.statusText}`,
+  );
+  return response;
 });
 
 // Log installation event
 self.addEventListener('install', (_event: ExtendableEvent) => {
-  console.log('Plugins Worker installing...');
+  console.log('[SW Lifecycle] Service Worker installing...');
+  console.log('[SW Lifecycle] Version:', new Date().toISOString());
 });
 
 // Log activation event
 self.addEventListener('activate', (_event: ExtendableEvent) => {
+  console.log('[SW Lifecycle] Service Worker activated and claiming clients');
   self.clients.claim();
 
   self.clients.matchAll().then(clients => {
+    console.log(`[SW Lifecycle] Notifying ${clients.length} client(s)`);
     clients.forEach(client => {
       client.postMessage({
         type: 'service-worker-ready',
@@ -154,9 +205,12 @@ self.addEventListener('message', (event: ExtendableMessageEvent) => {
 });
 
 async function handlePlugin(slug: string, fileName: string): Promise<Response> {
+  console.log(`[SW Plugin] Looking for plugin file: ${slug}/${fileName}`);
+
   for (const key of fileList.keys()) {
     if (key.startsWith(`${slug}/`)) {
       if (key.endsWith(`/${fileName}`)) {
+        console.log(`[SW Plugin Cache HIT] Found in memory: ${key}`);
         const content = fileList.get(key);
         const contentType = getContentType(fileName);
         return new Response(content, {
@@ -166,8 +220,10 @@ async function handlePlugin(slug: string, fileName: string): Promise<Response> {
     }
   }
 
+  console.log(`[SW Plugin] Not in memory cache, requesting from client`);
   const clientsList = await self.clients.matchAll();
   if (clientsList.length === 0) {
+    console.warn('[SW Plugin] No active clients available');
     return new Response(
       JSON.stringify({ error: 'No active clients to process' }),
       {
@@ -178,20 +234,37 @@ async function handlePlugin(slug: string, fileName: string): Promise<Response> {
   }
 
   const client = clientsList[0];
+  console.log(`[SW Plugin] Requesting plugin files from client for: ${slug}`);
+
   return new Promise<Response>(resolve => {
     const channel = new MessageChannel();
     channel.port1.onmessage = (messageEvent: MessageEvent<PluginFile[]>) => {
       const responseData = messageEvent.data as PluginFile[];
 
       if (responseData && Array.isArray(responseData)) {
+        console.log(
+          `[SW Plugin] Received ${responseData.length} files from client for ${slug}`,
+        );
         responseData.forEach(({ name, content }) => {
-          fileList.set(`${slug}/${encodeURIComponent(name)}`, content);
+          const key = `${slug}/${encodeURIComponent(name)}`;
+          fileList.set(key, content);
+          console.log(
+            `[SW Plugin] Stored in memory: ${key} (${content.length} bytes)`,
+          );
         });
+      } else {
+        console.warn(
+          `[SW Plugin] Received invalid response data for ${slug}`,
+          responseData,
+        );
       }
 
       const fileToCheck = fileName.length > 0 ? fileName : 'mf-manifest.json';
 
       if (fileList.has(`${slug}/${fileToCheck}`)) {
+        console.log(
+          `[SW Plugin] Successfully found requested file: ${slug}/${fileToCheck}`,
+        );
         let content = fileList.get(`${slug}/${fileToCheck}`)!;
         const contentType = getContentType(fileToCheck);
         const headers: Record<string, string> = { 'Content-Type': contentType };
@@ -202,10 +275,13 @@ async function handlePlugin(slug: string, fileName: string): Promise<Response> {
             if (manifest.metaData?.publicPath) {
               manifest.metaData.publicPath = `/plugin-data/${slug}/`;
               content = JSON.stringify(manifest);
+              console.log(
+                `[SW Plugin] Rewrote publicPath in manifest for ${slug}`,
+              );
             }
           } catch (error) {
             console.error(
-              'Failed to parse manifest for publicPath rewrite:',
+              `[SW Plugin] Failed to parse manifest for publicPath rewrite:`,
               error,
             );
           }
@@ -217,6 +293,13 @@ async function handlePlugin(slug: string, fileName: string): Promise<Response> {
 
         resolve(new Response(content, { headers }));
       } else {
+        console.warn(
+          `[SW Plugin] File not found after client response: ${slug}/${fileToCheck}`,
+        );
+        console.log(
+          `[SW Plugin] Available files:`,
+          Array.from(fileList.keys()).filter(k => k.startsWith(`${slug}/`)),
+        );
         resolve(new Response('File not found', { status: 404 }));
       }
     };
