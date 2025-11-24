@@ -133,6 +133,7 @@ SWEDNOKK
 Synology
 systemctl
 tada
+taskbar
 templating
 THB
 touchscreen
