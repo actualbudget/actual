@@ -22404,8 +22404,11 @@ __metadata:
     cross-env: "npm:^10.1.0"
     typescript: "npm:^5.9.3"
     vite: "npm:^7.2.2"
+    workbox-cacheable-response: "npm:^7.3.0"
+    workbox-expiration: "npm:^7.3.0"
     workbox-precaching: "npm:^7.3.0"
     workbox-routing: "npm:^7.3.0"
+    workbox-strategies: "npm:^7.3.0"
   languageName: unknown
   linkType: soft
 
@@ -29027,7 +29030,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"workbox-cacheable-response@npm:7.4.0":
+"workbox-cacheable-response@npm:7.4.0, workbox-cacheable-response@npm:^7.3.0":
   version: 7.4.0
   resolution: "workbox-cacheable-response@npm:7.4.0"
   dependencies:
@@ -29043,7 +29046,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"workbox-expiration@npm:7.4.0":
+"workbox-expiration@npm:7.4.0, workbox-expiration@npm:^7.3.0":
   version: 7.4.0
   resolution: "workbox-expiration@npm:7.4.0"
   dependencies:
@@ -29117,7 +29120,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"workbox-strategies@npm:7.4.0":
+"workbox-strategies@npm:7.4.0, workbox-strategies@npm:^7.3.0":
   version: 7.4.0
   resolution: "workbox-strategies@npm:7.4.0"
   dependencies:
