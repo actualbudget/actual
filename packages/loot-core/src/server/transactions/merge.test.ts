@@ -332,7 +332,7 @@ describe('Merging success', () => {
 
     // Check that the kept transaction is now a parent
     const keptTransaction = await db.getTransaction(imported);
-    expect(keptTransaction?.is_parent).toBe(1);
+    expect(keptTransaction?.is_parent).toBe(true);
     expect(keptTransaction?.category).toBeNull();
     expect(keptTransaction?.imported_id).toBe('imported_1');
 
