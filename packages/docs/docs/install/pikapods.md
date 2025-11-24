@@ -46,7 +46,7 @@ Click on the **register** link inside the blue banner, which will take you to th
 ## The user registration screen
 
 This screen is self-explanatory, but please use a password only you know.
-A working email address is required, as Pikapods will send an email with a link you need to click on to complete the signup process.
+A working email address is required, as PikaPods will send an email with a link you need to click on to complete the signup process.
 
 ![Image Pikapods email](/img/pikapods-setup/pikapods-2-register-name.png)
 
