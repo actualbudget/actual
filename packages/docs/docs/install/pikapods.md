@@ -12,7 +12,7 @@ You get a $ 5.00 credit when you sign up, which means that you should be able to
 For web clients, PikaPods will automatically update about a week or so after the latest monthly release is deployed. PikaPods tests each new release before deploying it. If you have the Notification setting in PikaPods checked, you will get an email notifying you that the server has been updated.
 
 For desktop clients, you will need to reinstall the desktop client to update to the latest version.
-We suggest first checking on the web client if PikaPods has updated, then reinstalling the desktop client.
+First check on the web client to see if PikaPods has updated, then reinstall the desktop client.
 
 :::note[Using Actual on Pikapods]
 
