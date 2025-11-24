@@ -8,6 +8,7 @@ import { ExpirationPlugin } from 'workbox-expiration';
 // Service Worker Global Types
 declare const self: ServiceWorkerGlobalScope & {
   __WB_DISABLE_DEV_LOGS: boolean;
+  __WB_MANIFEST: Array<{ url: string; revision: string | null }>;
 };
 
 type PluginFile = {
@@ -31,7 +32,8 @@ const PRECACHE_OPTIONS = {
 };
 
 // Injected by VitePWA
-precacheAndRoute(self.__WB_MANIFEST, PRECACHE_OPTIONS);
+// Use empty array as fallback if __WB_MANIFEST is not injected
+precacheAndRoute(self.__WB_MANIFEST || [], PRECACHE_OPTIONS);
 
 const appShellHandler = createHandlerBoundToURL('/index.html');
 

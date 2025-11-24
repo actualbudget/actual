@@ -176,8 +176,6 @@ export default defineConfig(async ({ mode }) => {
               globPatterns: [
                 '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
               ],
-              globDirectory: 'build',
-              injectionPoint: undefined,
             },
             devOptions: {
               enabled: true, // We need service worker in dev mode to work with plugins
