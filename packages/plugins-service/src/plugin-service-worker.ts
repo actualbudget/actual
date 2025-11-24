@@ -39,8 +39,6 @@ const navigationRoute = new NavigationRoute(appShellHandler, {
     /^\/secret\/.*$/,
     /^\/openid\/.*$/,
     /^\/plugins\/.*$/,
-    /^\/kcab\/.*$/,
-    /^\/plugin-data\/.*$/,
   ],
 });
 
