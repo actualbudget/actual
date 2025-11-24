@@ -331,13 +331,10 @@ describe('Merging success', () => {
     expect(keptId).toBe(imported);
 
     // Check that the kept transaction is now a parent
-    const keptTransaction = await db.getTransaction(imported);
-    expect(keptTransaction).toMatchObject({
-      id: imported,
-      is_parent: true, // Database stores as 1, but is converted to boolean
-      category: null, // Parent with splits should not have category
-      imported_id: 'imported_1',
-    });
+    const keptTransaction = await db.first<TransactionEntity>(imported);
+    expect(keptTransaction?.is_parent).toBe(1);
+    expect(keptTransaction?.category).toBeNull();
+    expect(keptTransaction?.imported_id).toBe('imported_1');
 
     // Check that subtransactions were transferred and still exist
     const allTransactions = await getAllTransactions();
