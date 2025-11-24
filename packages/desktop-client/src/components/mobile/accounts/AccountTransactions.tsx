@@ -96,7 +96,9 @@ function TransactionListWithPreviews({
   } = useTransactions({
     query: transactionsQuery,
     options: {
-      calculateRunningBalances: calculateRunningBalancesTopDown,
+      calculateRunningBalances: shouldCalculateRunningBalances
+        ? calculateRunningBalancesTopDown
+        : shouldCalculateRunningBalances,
       startingBalance: accountBalanceValue || 0,
     },
   });
