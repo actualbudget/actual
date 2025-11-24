@@ -73,3 +73,4 @@ ignore$
 (?:^|/)(?i)docusaurus.config.js
 (?:^|/)(?i)README.md
 ^\static/
+\.tsx$

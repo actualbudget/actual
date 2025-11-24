@@ -170,8 +170,11 @@ export function AccountAutocomplete({
   renderAccountItem,
   closeOnBlur,
   hiddenAccounts,
+  inputProps,
   ...props
 }: AccountAutocompleteProps) {
+  const { t } = useTranslation();
+
   const accounts = useAccounts() || [];
 
   //remove closed accounts if needed
@@ -197,6 +200,10 @@ export function AccountAutocomplete({
       embedded={embedded}
       closeOnBlur={closeOnBlur}
       suggestions={accountSuggestions}
+      inputProps={{
+        ...inputProps,
+        'aria-label': t('Account'),
+      }}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <AccountList
           items={items}

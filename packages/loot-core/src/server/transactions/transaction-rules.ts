@@ -959,13 +959,6 @@ export async function prepareTransactionForRules(
       r._account = await getAccount(trans.account);
       r._account_name = r._account?.name || '';
     }
-  }
-
-  if (trans.category) {
-    const category = await getCategory(trans.category);
-    if (category) {
-      r._category_name = category.name;
-    }
 
     const dateBoundary = trans.date ?? currentDay();
     let query = q('transactions')
@@ -1003,6 +996,13 @@ export async function prepareTransactionForRules(
     );
 
     r.balance = balance ?? 0;
+  }
+
+  if (trans.category) {
+    const category = await getCategory(trans.category);
+    if (category) {
+      r._category_name = category.name;
+    }
   }
 
   return r;
