@@ -70,7 +70,7 @@ Simply put, *a Pod is a very tiny computer running in the cloud*. Typically, a P
 
 :::info
 
-Multiple budgets can reside in One Pod running Actual. You do not need to set up a new Pod for each budget you create. The number of budgets is limited only by the storage capacity you assign to your Pod.
+Multiple budgets can reside in one Pod running Actual. You do not need to set up a new Pod for each budget you create. The number of budgets is limited only by the storage capacity you assign to your Pod.
 
 If you [connect to your bank](/docs/advanced/bank-sync.md), note that all budgets in the same Pod share a single bank sync key.
 
