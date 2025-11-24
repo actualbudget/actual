@@ -5,7 +5,7 @@ title: 'PikaPods'
 
 [PikaPods](https://www.pikapods.com/) offers one click "instant open source app hosting", allowing you to run Actual for about $ 1.50 per month (as of November 2025).
 
-Using PikaPods is also a simple way to support the development of Actual Budget, as PikaPods will share some of its revenues with Actual for customers using their Actual Budget pods.
+Using PikaPods is also a simple way to support the development of Actual Budget, as PikaPods will share some of its revenues with Actual for customers using their Actual Budget Pods.
 
 You get a $ 5.00 credit when you sign up, which means that you should be able to run Actual for 3 months before your credit runs out.
 
@@ -16,7 +16,7 @@ First check on the web client to see if PikaPods has updated, then reinstall the
 
 :::note[Using Actual on Pikapods]
 
-We suggest [using a PWA](#using-a-PWA) desktop client with Pikapods so you don't run into version issues.
+We suggest [using a PWA](#using-a-PWA) desktop client with PikaPods so you don't run into version issues.
 
 :::
 
@@ -38,14 +38,13 @@ Actual Budget.
 
 You will be greeted with the following screen.
 
-![image Pikapods register](/img/pikapods-setup/pikapods-1-register-login.png)
+![image PikaPods register](/img/pikapods-setup/pikapods-1-register-login.png)
 
 Click on the **register** link inside the blue banner, which will take you to the user registration screen.
 
 
 ## The user registration screen
 
-This screen is self-explanatory, but please use a password only you know.
 A working email address is required, as PikaPods will send an email with a link you need to click on to complete the signup process.
 
 ![Image Pikapods email](/img/pikapods-setup/pikapods-2-register-name.png)
@@ -55,14 +54,14 @@ A working email address is required, as PikaPods will send an email with a link 
 
 Click the green button **"Activate and Login"**. You are now registered as a PikaPods customer. You will be returned to the login screen.
 
-![Image pikapods email registration](/img/pikapods-setup/pikapods-4-email-activation.png)
+![Image Pikapods email registration](/img/pikapods-setup/pikapods-4-email-activation.png)
 
 
 ## Login screen
 
 Enter _your_ registration email address and password.
 
-![Image pikapods login](/img/pikapods-setup/pikapods-5-login-screen.png)
+![Image Pikapods login](/img/pikapods-setup/pikapods-5-login-screen.png)
 
 
 ## Naming your Pod
@@ -73,7 +72,7 @@ Simply put, *a Pod is a very tiny computer running in the cloud*. Typically, a P
 
 Multiple budgets can reside in One Pod running Actual. You do not need to set up a new Pod for each budget you create. The number of budgets is limited only by the storage capacity you assign to your Pod.
 
-If you [connect to your bank](/docs/advanced/bank-sync.md), note that all budgets in the same pod share a single bank sync key.
+If you [connect to your bank](/docs/advanced/bank-sync.md), note that all budgets in the same Pod share a single bank sync key.
 
 :::
 
@@ -97,7 +96,7 @@ Your Pod will be created when you click on the green **ADD POD* button. This ste
 
 
 
-## Your pod is now ready to be used
+## Your Pod is now ready to be used
 
 Click on the green **OPEN POD** button to be taken to your Pod.
 
