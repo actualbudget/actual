@@ -18,7 +18,7 @@ We suggest first checking on the web client if PikaPods has updated, then reinst
 
 :::note[Using Actual on Pikapods]
 
-We suggest [using a PWA](#using-a-pwa) desktop client with Pikapods so you don't run into version issues.
+We suggest [using a PWA](#using-a-PWA) desktop client with Pikapods so you don't run into version issues.
 
 :::
 
@@ -40,7 +40,7 @@ Actual Budget.
 
 You will be greeted with the following screen.
 
-![image pikapods register](/img/pikapods-setup/pikapods-1-register-login.png)
+![image Pikapods register](/img/pikapods-setup/pikapods-1-register-login.png)
 
 Click on the **register** link inside the blue banner, which will take you to the user registration screen.
 
@@ -51,7 +51,7 @@ This screen is self-explanatory, but please use a password only you know.
 A working email address is required, as Pikapods will send an email with a link you need
 to click on to complete the signup process.
 
-![Image pikapods email](/img/pikapods-setup/pikapods-2-register-name.png)
+![Image Pikapods email](/img/pikapods-setup/pikapods-2-register-name.png)
 
 
 ## Verification email
@@ -91,8 +91,7 @@ In 2), you decide which region your Pod should run - choose the most suitable re
 ## Assigning storage to your Pod
 
 
-The minimum storage you can assign to your Pod is 10 GB (gigabytes). We promise you
-that this is more than enough for your budget purposes.
+The minimum storage you can assign to your Pod is 10 GB (gigabytes). We promise you that this is more than enough for your budget purposes.
 
 Example: It takes about 33 megabytes of storage for about 1,200 transactions, 18 months of budgeting, and approximately 200 rules and payees. 10 gigabytes equals 10,000 megabytes, equivalent to 303 18-month budgets.
 
@@ -128,7 +127,7 @@ Keep your Actual Budget password safe, as it cannot be retrieved. If you forget 
 <br />
 <br />
 
-## Using a PWA (Progressive Web App) {#using-a-pwa}
+## Using a PWA (Progressive Web App) {#using-a-PWA}
 
 When using Actual Server over the internet, we suggest using a PWA web client. After you login and open Actual Budget, it's easy to set up a PWA from your browser of choice.
 
@@ -142,7 +141,7 @@ Browser version and OS/browser combination may affect how to install a PWA. Plea
 
 Chrome: There may be an "app available" icon on the right side of the URL or use the browser menu. See [Chrome's documentation](https://support.google.com/chrome/answer/9658361?hl=en&co=GENIE.Platform%3DDesktop).
 
-Firefox: In supported OS, there should be an "add tab to Taskbar" icon on the right side of the URL. You may need to add a PWA extension as described in [Mozilla's documentation](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Installing).
+Firefox: In supported OS, there should be an "add tab to taskbar" icon on the right side of the URL. You may need to add a PWA extension as described in [Mozilla's documentation](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Installing).
 
 Safari: There should be a share icon in the Safari toolbar or use the browser menu. See [Safari's documentation](https://support.apple.com/en-mide/104996).
 
