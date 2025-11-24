@@ -11,7 +11,7 @@ share some of its revenues with Actual for customers using their Actual Budget p
 
 You get a $ 5.00 credit when you sign up, which means that you should be able to run Actual for 3 months before your credit runs out.
 
-For web clients, PikaPods will automatically update about a week or so after the latest monthly release is deployed. PikaPods tests each new release before deploying it. If you have the Notification setting in Pikapods checked, you will get an email notifying you that the server has been updated.
+For web clients, PikaPods will automatically update about a week or so after the latest monthly release is deployed. PikaPods tests each new release before deploying it. If you have the Notification setting in PikaPods checked, you will get an email notifying you that the server has been updated.
 
 For desktop clients, you will need to reinstall the desktop client to update to the latest version.
 We suggest first checking on the web client if PikaPods has updated, then reinstalling the desktop client.
