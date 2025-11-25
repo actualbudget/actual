@@ -32,7 +32,6 @@ import {
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { BudgetAnalysisGraph } from '@desktop-client/components/reports/graphs/BudgetAnalysisGraph';
 import { Header } from '@desktop-client/components/reports/Header';
-import { LegendItem } from '@desktop-client/components/reports/LegendItem';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createBudgetAnalysisSpreadsheet } from '@desktop-client/components/reports/spreadsheets/budget-analysis-spreadsheet';
@@ -98,6 +97,10 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
     widget?.meta?.showBalance ?? true,
   );
   const [latestTransaction, setLatestTransaction] = useState('');
+  const [isConcise, setIsConcise] = useState(() => {
+    // Default to concise (monthly) view until we load the actual date range
+    return true;
+  });
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
@@ -145,6 +148,13 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         setStart(calculatedStart);
         setEnd(calculatedEnd);
         setMode(widget.meta.timeFrame.mode);
+
+        // Calculate isConcise based on date range
+        const numDays = d.differenceInCalendarDays(
+          d.parseISO(calculatedEnd + '-01'),
+          d.parseISO(calculatedStart + '-01'),
+        );
+        setIsConcise(numDays > 31 * 3);
       } else {
         const [liveStart, liveEnd] = calculateTimeRange({
           start: monthUtils.subMonths(currentMonth, 5),
@@ -153,6 +163,13 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         });
         setStart(liveStart);
         setEnd(liveEnd);
+
+        // Calculate isConcise based on date range
+        const numDays = d.differenceInCalendarDays(
+          d.parseISO(liveEnd + '-01'),
+          d.parseISO(liveStart + '-01'),
+        );
+        setIsConcise(numDays > 31 * 3);
       }
     }
     run();
@@ -168,10 +185,17 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         conditionsOp,
         startDate,
         endDate,
-        interval: 'Monthly',
+        interval: isConcise ? 'Monthly' : 'Daily',
         firstDayOfWeekIdx,
       }),
-    [conditions, conditionsOp, startDate, endDate, firstDayOfWeekIdx],
+    [
+      conditions,
+      conditionsOp,
+      startDate,
+      endDate,
+      isConcise,
+      firstDayOfWeekIdx,
+    ],
   );
 
   const data = useReport('default', getGraphData);
@@ -186,6 +210,13 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
     setStart(newStart);
     setEnd(newEnd);
     setMode(newMode);
+
+    // Recalculate isConcise based on new date range
+    const numDays = d.differenceInCalendarDays(
+      d.parseISO(newEnd + '-01'),
+      d.parseISO(newStart + '-01'),
+    );
+    setIsConcise(numDays > 31 * 3);
   };
 
   async function onSaveWidget() {
@@ -271,6 +302,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         start={start}
         end={end}
         mode={mode}
+        show1Month
         allMonths={allMonths}
         earliestTransaction={allMonths[allMonths.length - 1].name}
         latestTransaction={latestTransaction}
@@ -351,29 +383,10 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
             >
               <View
                 style={{
-                  alignItems: 'center',
+                  alignItems: 'flex-end',
                   flexDirection: 'row',
                 }}
               >
-                <View>
-                  <LegendItem
-                    color={theme.reportsGreen}
-                    label={t('Budgeted')}
-                    style={{ padding: 0, paddingBottom: 10 }}
-                  />
-                  <LegendItem
-                    color={theme.reportsRed}
-                    label={t('Spent')}
-                    style={{ padding: 0, paddingBottom: 10 }}
-                  />
-                  {showBalance && (
-                    <LegendItem
-                      color={theme.reportsBlue}
-                      label={t('Balance')}
-                      style={{ padding: 0, paddingBottom: 10 }}
-                    />
-                  )}
-                </View>
                 <View style={{ flex: 1 }} />
                 <View
                   style={{
@@ -442,6 +455,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                   data={data}
                   graphType={graphType}
                   showBalance={showBalance}
+                  isConcise={isConcise}
                 />
               ) : (
                 <LoadingIndicator message={t('Loading report...')} />

@@ -32,6 +32,7 @@ type BudgetAnalysisGraphProps = {
   };
   graphType?: 'Line' | 'Bar';
   showBalance?: boolean;
+  isConcise?: boolean;
 };
 
 export function BudgetAnalysisGraph({
@@ -39,6 +40,7 @@ export function BudgetAnalysisGraph({
   data,
   graphType = 'Line',
   showBalance = true,
+  isConcise = true,
 }: BudgetAnalysisGraphProps) {
   const format = useFormat();
   const locale = useLocale();
@@ -51,7 +53,12 @@ export function BudgetAnalysisGraph({
   }));
 
   const formatDate = (date: string) => {
-    return monthUtils.format(date, 'MMM', locale);
+    if (isConcise) {
+      // Monthly format
+      return monthUtils.format(date, 'MMM', locale);
+    }
+    // Daily format
+    return monthUtils.format(date, 'MMM d', locale);
   };
 
   const commonProps = {
@@ -93,7 +100,7 @@ export function BudgetAnalysisGraph({
             />
             <Bar
               dataKey="budgeted"
-              fill={theme.reportsGreen}
+              fill={theme.reportsBlue}
               name="Budgeted"
               animationDuration={1000}
             />
@@ -107,7 +114,7 @@ export function BudgetAnalysisGraph({
               <Line
                 type="monotone"
                 dataKey="balance"
-                stroke={theme.reportsBlue}
+                stroke={theme.pageTextLight}
                 strokeWidth={2}
                 name="Balance"
                 dot={false}
@@ -143,7 +150,7 @@ export function BudgetAnalysisGraph({
             <Line
               type="monotone"
               dataKey="budgeted"
-              stroke={theme.reportsGreen}
+              stroke={theme.reportsBlue}
               strokeWidth={2}
               name="Budgeted"
               dot={false}
@@ -162,7 +169,7 @@ export function BudgetAnalysisGraph({
               <Line
                 type="monotone"
                 dataKey="balance"
-                stroke={theme.reportsBlue}
+                stroke={theme.pageTextLight}
                 strokeWidth={2}
                 name="Balance"
                 dot={false}
