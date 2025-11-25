@@ -18,7 +18,6 @@ export type Currency = {
 // References:
 // https://www.localeplanet.com/icu/decimal-symbols.html
 // https://www.localeplanet.com/api/auto/currencymap.html
-// prettier-ignore
 export const currencies: Currency[] = [
   {
     code: '',

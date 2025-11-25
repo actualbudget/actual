@@ -155,7 +155,6 @@ This template also has a few variations making it likely the most used template 
 Below is an example of how it works.
 The template budgets just what you ask, no matter how much the respective category has in its balance.
 
-<!-- prettier-ignore -->
 |Syntax|Budgeted Amount|
 |---|:---:|
 |`#template 50`| $ 50 |
@@ -164,7 +163,6 @@ There is also a useful variation of a simple template.
 This variation will put a **limit** on how much the balance of a category can be that month.
 Here are some examples of how this is used
 
-<!-- prettier-ignore -->
 |Syntax| Previous Balance | Budgeted Amount | New Balance |
 |---|:---:| :---: |:---:|
 |`#template 50 up to 100`| $ 80 | $ 20 | $ 100 |
@@ -178,7 +176,6 @@ The last variation of the simple template is sometimes referred to as a "refill"
 With this style the template budgets whatever it takes to hit a "full" amount.
 Here is how it works:
 
-<!-- prettier-ignore -->
 |Syntax| Previous Balance | Budgeted Amount | New Balance |
 |---|:---:| :---: |:---:|
 |`#template up to 150`| $ 10 | $ 140  | $ 150 |
@@ -202,7 +199,6 @@ You can also modify the limit to not ever remove funds over your limit.
 This can be useful if you get refunds or reimbursements that you would like to have remain inside a category even if over your limit.
 Below is examples of these different variations of simple templates.
 
-<!-- prettier-ignore -->
 |Syntax|Description|Example Application|
 |---|---|---|
 |`#template 50`|Budget 50 each month|Regular monthly bills, such as internet|
@@ -218,7 +214,6 @@ The **By** type of template is for saving up funds _by_ a certain month.
 For example, it is January and you are trying to save for a new car by the end of the year.
 If the new car will cost $ 10,000 and you plan to buy it in December, you will use something like the following:
 
-<!-- prettier-ignore -->
 |Syntax| Budgeted Amount |
 |---|:---:|
 |`#template 10000 by 2025-12` | $ 833.33 |
@@ -228,7 +223,6 @@ The by template is smarter than just 10000/12.
 Lets say the example is the same, but you already have $ 1,500 saved.
 In that case you get this.
 
-<!-- prettier-ignore -->
 |Syntax| Previous Balance | Budgeted Amount | New Balance |
 |---|:---:| :---: |:---:|
 |`#template 10000 by 2025-12` |$ 1,500 | $ 708.33 | $ 2,208.33 |
@@ -246,7 +240,6 @@ The By template can also repeat if your savings is cyclical, such as yearly taxe
 The repeat period can be both a number of months or number of years.
 If you need to repeat based on a number of weeks, use the Week template.
 In that case use the following variation:
-<!-- prettier-ignore -->
 |Syntax| Budgeted Amount | Note |
 |---|:---:| --- |
 |`#template 500 by 2025-03 repeat every year` | $ 166.66  | Assuming starting in January 2025 |
@@ -257,7 +250,6 @@ The By template can be extended to allow some of the funds to be spent along the
 This is most commonly used for holiday savings where you will spend some of the money in the months leading up to the holiday.
 An example of this is buying Christmas gifts in November and December.
 The table below shows how this works.
-<!-- prettier-ignore -->
 |Syntax| Budgeted Amount | Spent so far| New Balance| Note |
 |---|:---:| :---: | --- | --- |
 |`#template 500 by 2025-12 spend from 2025-11`| $ 41.66  | 0 | previous + $ 41.66| Assuming starting in January 2025, all months before December |
@@ -266,7 +258,6 @@ The table below shows how this works.
 #### Available Variations
 Below is a table of the variations of the By template.
 
-<!-- prettier-ignore -->
 |Syntax|Description|Example Application|
 |---|---|---|
 |`#template 500 by 2027-03`|Break down large, less-frequent expenses into manageable monthly expenses|Saving for a replacement car in a few years
@@ -284,7 +275,6 @@ You set a period and the start date, and every period, starting from your start 
 Periods can be set for any number of days, weeks, months, or years.
 See the table below for examples.
 
-<!-- prettier-ignore -->
 |Syntax| Budgeted Amount | Note |
 |---|:---:| :---: |
 |`#template 10 repeat every week starting 2025-01-06` | $ 50 | When budgeting in March 2025 |
@@ -295,14 +285,12 @@ As you can see, the template will be budgeted based on the defined period.
 
 The Periodic template also supports limits the same way the simple template does.
 For example, if you budget in January with a limited template:
-<!-- prettier-ignore -->
 |Syntax| Previous Balance | Budgeted Amount | New Balance |
 |---|:---:| :---: |:---:|
 |`#template 10 repeat every week starting 2025-01-06 up to 55` | $ 20 | $ 35 | $ 55 |
 
 #### Available Variations
 Below is a table of the variations of the Week template.
-<!-- prettier-ignore -->
 |Syntax|Description|Example Application|
 |---|---|---|
 |`#template 10 repeat every day starting 2025-01-01` | Budget 10 per day | Budget for lunches |
@@ -331,7 +319,6 @@ All the examples assume the following amounts of income in the listed income cat
 * Dividends - $ 100
 * To Budget - $ 1500
 
-<!-- prettier-ignore -->
 |Syntax| Budgeted Amount | Note |
 |---|:---:| :---: |
 |`#template 10% of all income` | $ 200 | Use the total of your income categories in the calculation |
@@ -342,7 +329,6 @@ All the examples assume the following amounts of income in the listed income cat
 The percent template can also be pointed to the previous month's income if you are using a month ahead budgeting strategy.
 Below is an example of how to do that.
 
-<!-- prettier-ignore -->
 |Syntax| Budgeted Amount | Note |
 |---|:---:| :---: |
 |`#template 10% of previous all income` | $ 200 | Use the total of your income categories from the previous month |
@@ -367,7 +353,6 @@ This includes sub-monthly, month, extra-monthly schedules.
 This is the most common template outside of the Simple template.
 Below is an example of the syntax for a $ 100 per month schedule called "Internet", and a $ 2,400 per year schedule called "Taxes".
 
-<!-- prettier-ignore -->
 |Syntax| Budgeted Amount | Note |
 |---|:---:| :---: |
 |`#template schedule Internet` | $ 100 | Budget for the "Internet" schedule |
@@ -385,7 +370,6 @@ This is useful for small schedules that you don't need to build up over time sin
 This can also help make stacking Schedule templates easier to track.
 Below is an example of using the "Full" flag assuming a once per year schedule for $15 called "Simplefin" due in May.
 
-<!-- prettier-ignore -->
 |Syntax| Budgeted Amount | Note |
 |---|:---:| :---: |
 |`#template schedule full Simplefin` | $ 0 | Budget in all months except May |
@@ -409,7 +393,6 @@ As an example, assuming the amount Scheduled for 'Insurance' the prior year was 
 
 #### Available Variations
 Below is a table of the variations of the Schedule template.
-<!-- prettier-ignore -->
 |Syntax|Description|Example Application|
 |---|---|---|
 |`#template schedule {SCHEDULE NAME}`|Fund upcoming scheduled transactions over time|Monthly schedules, or larger non-monthly scheduled transactions|
@@ -420,7 +403,6 @@ Below is a table of the variations of the Schedule template.
 The Average template allows you to budget the average amount spend over a number of months.
 This is the same function provided by the menu in the budget table but it can be used in a single category automatically where the menu option must be applied to the whole budget or a single category.
 The table below shows how to use the Average template.
-<!-- prettier-ignore -->
 |Syntax|Description|Example Application|
 |---|---|---|
 |`#template average 6 months` | Budget the average amount spent over the last 6 months. Can set the number to any number > 0. Matches the existing option on the budget page but with flexible month ranges | Try to budget only what you need to spend based on the last 6 months of spending data |
@@ -430,7 +412,6 @@ The Copy template will copy the budget amount from some number of months prior.
 This is useful if your spending is inconsistent per month, but cyclical over a period of months.
 The table below shows how to use the Copy template.
 
-<!-- prettier-ignore -->
 |Syntax|Description|Example Application|
 |---|---|---|
 |`#template copy from 12 months ago` | Budget the same amount as was budgeted 12 months ago. Number of months is adjustable | Your power bill fluctuates throughout the year, but is about the same in equivalent months between years. |
