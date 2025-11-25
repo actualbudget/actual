@@ -463,7 +463,7 @@ describe('Account sync', () => {
       cleared: true,
     };
 
-    // Add transaction to represent existing transaction with imoprted_id
+    // Add transaction to represent existing transaction with imported_id
     await reconcileTransactions(id, [existingTx]);
 
     payees = await getAllPayees();
@@ -508,7 +508,7 @@ describe('Account sync', () => {
       cleared: true,
     };
 
-    // Add transaction to represent existing transaction with imoprted_id
+    // Add transaction to represent existing transaction with imported_id
     await reconcileTransactions(id, [existingTx]);
 
     payees = await getAllPayees();
