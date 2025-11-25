@@ -71,9 +71,9 @@ function getTagCSSColors(theme: Theme, color?: string | null) {
 
   if (theme === 'light') {
     return [
-      `${color} !important`,
-      `color-mix(in srgb, ${color} 15%, white)`,
-      `color-mix(in srgb, ${color} 25%, white)`,
+      getContrastedColor(color),
+      color,
+      `color-mix(in srgb, ${color} 85%, white)`,
     ];
   } else {
     return [
