@@ -19,6 +19,11 @@ import { Container } from '@desktop-client/components/reports/Container';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
+/**
+ * Interval data for the Budget Analysis graph.
+ * @property date - A date string in format 'YYYY-MM' for monthly intervals
+ *                  or 'YYYY-MM-DD' for daily intervals, compatible with monthUtils.format
+ */
 type BudgetAnalysisIntervalData = {
   date: string;
   budgeted: number;
@@ -46,6 +51,11 @@ export function BudgetAnalysisGraph({
   const { t } = useTranslation();
   const format = useFormat();
   const locale = useLocale();
+
+  // Centralize translated labels to avoid repetition
+  const budgetedLabel = t('Budgeted');
+  const spentLabel = t('Spent');
+  const balanceLabel = t('Balance');
 
   const graphData = data.intervalData;
 
@@ -100,13 +110,13 @@ export function BudgetAnalysisGraph({
             <Bar
               dataKey="budgeted"
               fill={theme.reportsBlue}
-              name={t('Budgeted')}
+              name={budgetedLabel}
               animationDuration={1000}
             />
             <Bar
               dataKey="spent"
               fill={theme.reportsRed}
-              name={t('Spent')}
+              name={spentLabel}
               animationDuration={1000}
             />
             {showBalance && (
@@ -115,7 +125,7 @@ export function BudgetAnalysisGraph({
                 dataKey="balance"
                 stroke={theme.pageTextLight}
                 strokeWidth={2}
-                name={t('Balance')}
+                name={balanceLabel}
                 dot={false}
                 animationDuration={1000}
               />
@@ -144,7 +154,7 @@ export function BudgetAnalysisGraph({
               dataKey="budgeted"
               stroke={theme.reportsBlue}
               strokeWidth={2}
-              name={t('Budgeted')}
+              name={budgetedLabel}
               dot={false}
               animationDuration={1000}
             />
@@ -153,7 +163,7 @@ export function BudgetAnalysisGraph({
               dataKey="spent"
               stroke={theme.reportsRed}
               strokeWidth={2}
-              name={t('Spent')}
+              name={spentLabel}
               dot={false}
               animationDuration={1000}
             />
@@ -163,7 +173,7 @@ export function BudgetAnalysisGraph({
                 dataKey="balance"
                 stroke={theme.pageTextLight}
                 strokeWidth={2}
-                name={t('Balance')}
+                name={balanceLabel}
                 dot={false}
                 animationDuration={1000}
               />
