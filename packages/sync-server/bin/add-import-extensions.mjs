@@ -39,6 +39,13 @@ function resolveImportPath(importPath, fromFile) {
     return `${importPath}/index.js`;
   }
 
+  // Verify the file exists before adding extension
+  if (!existsSync(`${resolvedPath}.js`)) {
+    console.warn(
+      `Warning: Could not resolve import '${importPath}' from ${relative(buildDir, fromFile)}`,
+    );
+  }
+
   // Default: assume it's a file and add .js
   return `${importPath}.js`;
 }

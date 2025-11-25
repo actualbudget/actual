@@ -1093,7 +1093,7 @@ export function RuleEditor({
         type: FIELD_TYPES.get(field),
         field,
         op: 'set',
-        value: null,
+        value: '',
         options: { splitIndex },
         inputKey: uuid(),
       };
