@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { type CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import {
@@ -41,6 +43,7 @@ export function BudgetAnalysisGraph({
   showBalance = true,
   isConcise = true,
 }: BudgetAnalysisGraphProps) {
+  const { t } = useTranslation();
   const format = useFormat();
   const locale = useLocale();
 
@@ -97,13 +100,13 @@ export function BudgetAnalysisGraph({
             <Bar
               dataKey="budgeted"
               fill={theme.reportsBlue}
-              name="Budgeted"
+              name={t('Budgeted')}
               animationDuration={1000}
             />
             <Bar
               dataKey="spent"
               fill={theme.reportsRed}
-              name="Spent"
+              name={t('Spent')}
               animationDuration={1000}
             />
             {showBalance && (
@@ -112,7 +115,7 @@ export function BudgetAnalysisGraph({
                 dataKey="balance"
                 stroke={theme.pageTextLight}
                 strokeWidth={2}
-                name="Balance"
+                name={t('Balance')}
                 dot={false}
                 animationDuration={1000}
               />
@@ -141,7 +144,7 @@ export function BudgetAnalysisGraph({
               dataKey="budgeted"
               stroke={theme.reportsBlue}
               strokeWidth={2}
-              name="Budgeted"
+              name={t('Budgeted')}
               dot={false}
               animationDuration={1000}
             />
@@ -150,7 +153,7 @@ export function BudgetAnalysisGraph({
               dataKey="spent"
               stroke={theme.reportsRed}
               strokeWidth={2}
-              name="Spent"
+              name={t('Spent')}
               dot={false}
               animationDuration={1000}
             />
@@ -160,7 +163,7 @@ export function BudgetAnalysisGraph({
                 dataKey="balance"
                 stroke={theme.pageTextLight}
                 strokeWidth={2}
-                name="Balance"
+                name={t('Balance')}
                 dot={false}
                 animationDuration={1000}
               />
