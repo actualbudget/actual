@@ -68,12 +68,9 @@ export default {
       balance => 'nonInvoiced' === balance.balanceType,
     );
 
-    return sortedTransactions.reduce(
-      (total, trans) => {
-        return total - amountToInteger(trans.transactionAmount.amount);
-      },
-      -amountToInteger(currentBalance.balanceAmount.amount) +
-        amountToInteger(nonInvoiced.balanceAmount.amount),
-    );
+    return sortedTransactions.reduce((total, trans) => {
+      return total - amountToInteger(trans.transactionAmount.amount);
+    }, -amountToInteger(currentBalance.balanceAmount.amount) +
+      amountToInteger(nonInvoiced.balanceAmount.amount));
   },
 };

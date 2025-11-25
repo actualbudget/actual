@@ -1,0 +1,62 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "organizeImports": {
+    "enabled": false
+  },
+  "linter": {
+    "enabled": false
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "trailingCommas": "all",
+      "arrowParentheses": "asNeeded"
+    }
+  },
+  "json": {
+    "parser": {
+      "allowComments": true,
+      "allowTrailingCommas": true
+    }
+  },
+  "files": {
+    "ignore": [
+      "sync_pb.*",
+      "packages/api/app/bundle.api.js",
+      "packages/api/app/stats.json",
+      "packages/api/@types",
+      "packages/api/migrations",
+      "packages/component-library/src/icons/**/*",
+      "packages/desktop-client/bundle.browser.js",
+      "packages/desktop-client/stats.json",
+      "packages/desktop-client/.swc/",
+      "packages/desktop-client/dev-dist/",
+      "packages/desktop-client/locale/",
+      "packages/desktop-client/build-electron/",
+      "packages/desktop-client/build-stats/",
+      "packages/desktop-client/public/kcab/",
+      "packages/desktop-client/public/data/",
+      "packages/desktop-client/**/node_modules/*",
+      "packages/desktop-client/node_modules/",
+      "packages/desktop-client/test-results/",
+      "packages/desktop-client/playwright-report/",
+      "packages/desktop-electron/client-build/",
+      "packages/loot-core/**/lib-dist/*",
+      "packages/loot-core/**/proto/*",
+      "packages/sync-server/coverage/",
+      "packages/sync-server/user-files/",
+      "packages/sync-server/server-files/",
+      ".yarn/*",
+      "upcoming-release-notes/*",
+      "packages/docs/*",
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**"
+    ]
+  }
+}

@@ -8,10 +8,7 @@
   },
   "main": "dist/index.js",
   "types": "@types/index.d.ts",
-  "files": [
-    "dist",
-    "@types"
-  ],
+  "files": ["dist", "@types"],
   "scripts": {
     "build:app": "yarn workspace loot-core build:api",
     "build:crdt": "yarn workspace @actual-app/crdt build",

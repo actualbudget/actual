@@ -2,9 +2,7 @@
   "name": "@actual-app/web",
   "version": "25.11.0",
   "license": "MIT",
-  "files": [
-    "build"
-  ],
+  "files": ["build"],
   "devDependencies": {
     "@actual-app/components": "workspace:*",
     "@codemirror/autocomplete": "^6.19.1",

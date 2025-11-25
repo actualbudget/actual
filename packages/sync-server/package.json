@@ -7,11 +7,7 @@
     "actual-server": "./build/bin/actual-server.js"
   },
   "type": "module",
-  "files": [
-    "build",
-    "README.md",
-    "LICENSE"
-  ],
+  "files": ["build", "README.md", "LICENSE"],
   "scripts": {
     "start": "yarn build && node build/app",
     "start-monitor": "nodemon --exec 'tsc && node build/app' --ignore './build/**/*' --ext 'ts,js' build/app",

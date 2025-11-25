@@ -31,8 +31,9 @@ describe('SandboxfinanceSfin0000', () => {
     };
 
     it('returns normalized account data returned to Frontend', () => {
-      expect(SandboxfinanceSfin0000.normalizeAccount(accountRaw))
-        .toMatchInlineSnapshot(`
+      expect(
+        SandboxfinanceSfin0000.normalizeAccount(accountRaw),
+      ).toMatchInlineSnapshot(`
         {
           "account_id": "99a0bfe2-0bef-46df-bff2-e9ae0c6c5838",
           "iban": "GL0865354374424724",

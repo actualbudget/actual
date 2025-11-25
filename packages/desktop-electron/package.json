@@ -37,10 +37,7 @@
       "target": [
         {
           "target": "dmg",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
+          "arch": ["x64", "arm64"]
         }
       ]
     },
@@ -48,22 +45,15 @@
       "target": [
         {
           "target": "flatpak",
-          "arch": [
-            "x64"
-          ]
+          "arch": ["x64"]
         },
         {
           "target": "AppImage",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
+          "arch": ["x64", "arm64"]
         }
       ],
       "artifactName": "${productName}-linux-${arch}.${ext}",
-      "extraResources": [
-        "extra-resources/linux"
-      ],
+      "extraResources": ["extra-resources/linux"],
       "executableName": "actual"
     },
     "flatpak": {
@@ -74,19 +64,11 @@
       "target": [
         {
           "target": "appx",
-          "arch": [
-            "ia32",
-            "x64",
-            "arm64"
-          ]
+          "arch": ["ia32", "x64", "arm64"]
         },
         {
           "target": "nsis",
-          "arch": [
-            "ia32",
-            "x64",
-            "arm64"
-          ]
+          "arch": ["ia32", "x64", "arm64"]
         }
       ],
       "icon": "icons/icon.png",

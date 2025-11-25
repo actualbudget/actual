@@ -5,9 +5,7 @@
   "description": "CRDT layer of Actual",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "build:node": "tsc --p tsconfig.dist.json",
     "proto:generate": "./bin/generate-proto",
