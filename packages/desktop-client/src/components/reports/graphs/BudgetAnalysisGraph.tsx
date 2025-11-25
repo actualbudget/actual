@@ -1,5 +1,4 @@
-import React, { type CSSProperties } from 'react';
-
+import { type CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import {
   Bar,
@@ -45,12 +44,16 @@ export function BudgetAnalysisGraph({
   const format = useFormat();
   const locale = useLocale();
 
-  const graphData = data.intervalData.map(item => ({
-    date: item.date,
-    budgeted: item.budgeted,
-    spent: item.spent,
-    balance: item.balance,
-  }));
+  const graphData = data.intervalData;
+
+  const tooltipContentStyle = {
+    pointerEvents: 'none' as const,
+    zIndex: 1000,
+    borderRadius: 2,
+    boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+    color: theme.menuItemText,
+    backgroundColor: theme.menuBackground,
+  };
 
   const formatDate = (date: string) => {
     if (isConcise) {
@@ -73,7 +76,7 @@ export function BudgetAnalysisGraph({
       {(width, height) => {
         const chartProps = { ...commonProps, width, height };
 
-        return graphData && graphType === 'Bar' ? (
+        return graphType === 'Bar' ? (
           <ComposedChart {...chartProps}>
             <CartesianGrid strokeDasharray="3 3" stroke={theme.pillBorder} />
             <XAxis
@@ -88,14 +91,7 @@ export function BudgetAnalysisGraph({
             <Tooltip
               cursor={{ fill: 'transparent' }}
               formatter={(value: number) => format(value, 'financial')}
-              contentStyle={{
-                pointerEvents: 'none',
-                zIndex: 1000,
-                borderRadius: 2,
-                boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-                color: theme.menuItemText,
-                backgroundColor: theme.menuBackground,
-              }}
+              contentStyle={tooltipContentStyle}
               isAnimationActive={false}
             />
             <Bar
@@ -137,14 +133,7 @@ export function BudgetAnalysisGraph({
             <Tooltip
               cursor={{ fill: 'transparent' }}
               formatter={(value: number) => format(value, 'financial')}
-              contentStyle={{
-                pointerEvents: 'none',
-                zIndex: 1000,
-                borderRadius: 2,
-                boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-                color: theme.menuItemText,
-                backgroundColor: theme.menuBackground,
-              }}
+              contentStyle={tooltipContentStyle}
               isAnimationActive={false}
             />
             <Line

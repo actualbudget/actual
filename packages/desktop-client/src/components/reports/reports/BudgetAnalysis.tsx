@@ -105,13 +105,22 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
+  const calculateIsConcise = (startMonth: string, endMonth: string) => {
+    const numDays = d.differenceInCalendarDays(
+      d.parseISO(endMonth + '-01'),
+      d.parseISO(startMonth + '-01'),
+    );
+    return numDays > 31 * 3;
+  };
+
   useEffect(() => {
     async function run() {
       const earliestTrans = await send('get-earliest-transaction');
       const latestTrans = await send('get-latest-transaction');
-      setLatestTransaction(
-        latestTrans ? fromDateRepr(latestTrans.date) : monthUtils.currentDay(),
-      );
+      const latestTransDate = latestTrans
+        ? fromDateRepr(latestTrans.date)
+        : monthUtils.currentDay();
+      setLatestTransaction(latestTransDate);
 
       const currentMonth = monthUtils.currentMonth();
       let earliestMonth = earliestTrans
@@ -144,17 +153,14 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
       if (widget?.meta?.timeFrame) {
         const [calculatedStart, calculatedEnd] = calculateTimeRange(
           widget.meta.timeFrame,
+          undefined,
+          latestTransDate,
         );
         setStart(calculatedStart);
         setEnd(calculatedEnd);
         setMode(widget.meta.timeFrame.mode);
 
-        // Calculate isConcise based on date range
-        const numDays = d.differenceInCalendarDays(
-          d.parseISO(calculatedEnd + '-01'),
-          d.parseISO(calculatedStart + '-01'),
-        );
-        setIsConcise(numDays > 31 * 3);
+        setIsConcise(calculateIsConcise(calculatedStart, calculatedEnd));
       } else {
         const [liveStart, liveEnd] = calculateTimeRange({
           start: monthUtils.subMonths(currentMonth, 5),
@@ -164,12 +170,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         setStart(liveStart);
         setEnd(liveEnd);
 
-        // Calculate isConcise based on date range
-        const numDays = d.differenceInCalendarDays(
-          d.parseISO(liveEnd + '-01'),
-          d.parseISO(liveStart + '-01'),
-        );
-        setIsConcise(numDays > 31 * 3);
+        setIsConcise(calculateIsConcise(liveStart, liveEnd));
       }
     }
     run();
@@ -211,12 +212,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
     setEnd(newEnd);
     setMode(newMode);
 
-    // Recalculate isConcise based on new date range
-    const numDays = d.differenceInCalendarDays(
-      d.parseISO(newEnd + '-01'),
-      d.parseISO(newStart + '-01'),
-    );
-    setIsConcise(numDays > 31 * 3);
+    setIsConcise(calculateIsConcise(newStart, newEnd));
   };
 
   async function onSaveWidget() {
@@ -449,17 +445,13 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                   </View>
                 </View>
               </View>
-              {data ? (
-                <BudgetAnalysisGraph
-                  style={{ flexGrow: 1 }}
-                  data={data}
-                  graphType={graphType}
-                  showBalance={showBalance}
-                  isConcise={isConcise}
-                />
-              ) : (
-                <LoadingIndicator message={t('Loading report...')} />
-              )}
+              <BudgetAnalysisGraph
+                style={{ flexGrow: 1 }}
+                data={data}
+                graphType={graphType}
+                showBalance={showBalance}
+                isConcise={isConcise}
+              />
               <View style={{ marginTop: 30 }}>
                 <Trans>
                   <Paragraph>
