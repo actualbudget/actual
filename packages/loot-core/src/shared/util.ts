@@ -461,23 +461,23 @@ export function amountToCurrencyNoDecimal(amount: Amount): CurrencyAmount {
 }
 
 export function currencyToAmount(currencyAmount: string): Amount | null {
-  const normalized = currencyAmount.replace(/\u2212/g, '-');
+  currencyAmount = currencyAmount.replace(/\u2212/g, '-');
 
   let integer, fraction;
 
   // match the last dot or comma in the string
-  const match = normalized.match(/[,.](?=[^.,]*$)/);
+  const match = currencyAmount.match(/[,.](?=[^.,]*$)/);
 
   if (
     !match ||
     (match[0] === getNumberFormat().thousandsSeparator &&
-      match.index + 4 <= normalized.length)
+      match.index + 4 <= currencyAmount.length)
   ) {
     fraction = null;
-    integer = normalized.replace(/[^\d-]/g, '');
+    integer = currencyAmount.replace(/[^\d-]/g, '');
   } else {
-    integer = normalized.slice(0, match.index).replace(/[^\d-]/g, '');
-    fraction = normalized.slice(match.index + 1);
+    integer = currencyAmount.slice(0, match.index).replace(/[^\d-]/g, '');
+    fraction = currencyAmount.slice(match.index + 1);
   }
 
   const amount = parseFloat(integer + '.' + fraction);
@@ -520,7 +520,7 @@ export function integerToAmount(
 // number format, because the user could be importing from many
 // currencies. We extract out the numbers and just ignore separators.
 export function looselyParseAmount(amount: string) {
-  let normalized = amount.replace(/\u2212/g, '-');
+  amount = amount.replace(/\u2212/g, '-');
 
   function safeNumber(v: number): null | number {
     if (isNaN(v)) {
@@ -539,19 +539,19 @@ export function looselyParseAmount(amount: string) {
     return v.replace(/[^0-9-]/g, '');
   }
 
-  if (normalized.startsWith('(') && normalized.endsWith(')')) {
-    normalized = normalized.replace('(', '-').replace(')', '');
+  if (amount.startsWith('(') && amount.endsWith(')')) {
+    amount = amount.replace('(', '-').replace(')', '');
   }
 
   // Look for a decimal marker, then look for either 1-2 or 4-9 decimal places.
   // This avoids matching against 3 places which may not actually be decimal
-  const m = normalized.match(/[.,]([^.,]{4,9}|[^.,]{1,2})$/);
+  const m = amount.match(/[.,]([^.,]{4,9}|[^.,]{1,2})$/);
   if (!m || m.index === undefined) {
-    return safeNumber(parseFloat(extractNumbers(normalized)));
+    return safeNumber(parseFloat(extractNumbers(amount)));
   }
 
-  const left = extractNumbers(normalized.slice(0, m.index));
-  const right = extractNumbers(normalized.slice(m.index + 1));
+  const left = extractNumbers(amount.slice(0, m.index));
+  const right = extractNumbers(amount.slice(m.index + 1));
 
   return safeNumber(parseFloat(left + '.' + right));
 }
