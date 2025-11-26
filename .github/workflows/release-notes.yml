@@ -28,9 +28,5 @@ jobs:
           else
             echo "only_docs=false" >> $GITHUB_OUTPUT
           fi
-      - name: Check release notes
-        if: startsWith(github.head_ref, 'release/') == false && steps.changed-files.outputs.only_docs != 'true'
-        uses: actualbudget/actions/release-notes/check@main
       - name: Generate release notes
-        if: startsWith(github.head_ref, 'release/') == true
         uses: actualbudget/actions/release-notes/generate@main
