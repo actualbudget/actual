@@ -156,7 +156,7 @@ export function SidebarGroup({
                     ? [
                         {
                           name: 'apply-multiple-category-template',
-                          text: t('Overwrite budget templates'),
+                          text: t('Overwrite with budget template'),
                         },
                       ]
                     : []),
