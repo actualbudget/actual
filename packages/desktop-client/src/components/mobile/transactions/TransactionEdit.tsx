@@ -1491,11 +1491,14 @@ function TransactionEditUnconnected({
         if (diff) {
           Object.keys(diff).forEach(key => {
             const field = key as keyof TransactionEntity;
+            // Update "empty" fields in general
+            // Or update all fields if the payee changes (assists location-based entry)
             if (
               newTransaction[field] == null ||
               newTransaction[field] === '' ||
               newTransaction[field] === 0 ||
-              newTransaction[field] === false
+              newTransaction[field] === false ||
+              updatedField === 'payee'
             ) {
               // @ts-expect-error - fix me
               newTransaction[field] = diff[field];
