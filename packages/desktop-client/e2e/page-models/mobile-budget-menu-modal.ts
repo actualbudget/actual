@@ -30,7 +30,7 @@ export class BudgetMenuModal {
       name: 'Set to yearly average',
     });
     this.applyBudgetTemplateButton = locator.getByRole('button', {
-      name: 'Overwrite budget template',
+      name: 'Overwrite with budget template',
     });
   }
 
