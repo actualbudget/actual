@@ -1097,7 +1097,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   top: '75%',
                   right: '20px',
                   transform: 'translateY(-50%)',
-                  background: '#dc3545',
+                  bbackground: theme.errorBackground,
                   border: 'none',
                   color: 'white',
                   fontSize: '11px',
@@ -1334,6 +1334,7 @@ function TransactionEditUnconnected({
   lastTransaction,
   dateFormat,
 }: TransactionEditUnconnectedProps) {
+  const { t } = useTranslation();
   const { transactionId } = useParams();
   const { state: locationState } = useLocation();
   const [searchParams] = useSearchParams();
@@ -1407,6 +1408,7 @@ function TransactionEditUnconnected({
     if (!locationAccess) {
       return;
     }
+    let unmounted = false;
 
     async function findNearbyPayee() {
       try {
@@ -1414,18 +1416,17 @@ function TransactionEditUnconnected({
         const nearbyPayees =
           await locationService.getNearbyPayees(currentLocation);
 
-        if (nearbyPayees.length > 0) {
+        if (!unmounted && nearbyPayees.length > 0) {
           setNearestPayee(nearbyPayees[0]);
           setAutoSelectedPayeeId(nearbyPayees[0].id);
           setShouldShowForgetLocation(false);
         }
       } catch (error) {
         // Don't block transaction creation
-        console.log(
-          'Could not auto-select nearest payee:',
-          (error as Error).message,
-        );
       }
+      return () => {
+        unmounted = true;
+      };
     }
 
     findNearbyPayee();
@@ -1635,7 +1636,7 @@ function TransactionEditUnconnected({
         );
 
         // Find the most recently created location (likely the one that was just auto-saved)
-        const mostRecentLocation = payeeLocations.sort(
+        const mostRecentLocation = [...payeeLocations].sort(
           (a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
         )[0];
@@ -1656,9 +1657,16 @@ function TransactionEditUnconnected({
         setShouldShowForgetLocation(false);
       }
     } catch (error) {
-      console.error('Failed to forget location:', error);
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t('Failed to forget location'),
+          },
+        }),
+      );
     }
-  }, [transactions, dispatch, setShouldShowForgetLocation]);
+  }, [t, transactions, dispatch, setShouldShowForgetLocation]);
 
   // Automatically select the nearest payee if available and unset
   useEffect(() => {

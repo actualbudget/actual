@@ -907,7 +907,7 @@ function NearbyPayeeItem({
           type="button"
           onClick={handleForgetClick}
           className={css({
-            background: '#dc3545',
+            bbackground: theme.errorBackground,
             border: 'none',
             color: 'white',
             fontSize: '11px',
