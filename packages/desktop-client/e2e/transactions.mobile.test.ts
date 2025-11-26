@@ -61,8 +61,7 @@ test.describe('Mobile Transactions', () => {
         '?category=Food&amount=23.42&account=HSBC&date=2025-10-31&cleared=true&payee=Kroger&notes=just+a+note',
     );
     // Note: no easy way to test cleared checkbox
-    await expect(page.getByTestId('transaction-form'))
-      .toMatchAriaSnapshot(`- text: Amount
+    await expect(page.getByTestId('transaction-form')).toMatchAriaSnapshot(`- text: Amount
 - textbox
 - text: 23.42 Payee
 - button "Kroger" [disabled]

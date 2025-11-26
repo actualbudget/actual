@@ -746,7 +746,6 @@ export function ImportTransactionsModal({
 
     runImportPreview();
     // intentionally exclude runImportPreview from dependencies to avoid infinite rerenders
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     filetype,
     flipAmount,

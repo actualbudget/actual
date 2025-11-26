@@ -137,7 +137,10 @@ const sidebars = {
                 type: 'doc',
                 id: 'budgeting/credit-cards/index',
               },
-              items: ['budgeting/credit-cards/paying-in-full', 'budgeting/credit-cards/carrying-debt'],
+              items: [
+                'budgeting/credit-cards/paying-in-full',
+                'budgeting/credit-cards/carrying-debt',
+              ],
             },
             'budgeting/multi-currency',
             'budgeting/joint-accounts',
@@ -224,7 +227,7 @@ const sidebars = {
             'experimental/monthly-cleanup',
             'experimental/rule-templating',
             'experimental/pluggyai',
-            'experimental/crossover-point-report'
+            'experimental/crossover-point-report',
           ],
         },
         'getting-started/tips-tricks',
