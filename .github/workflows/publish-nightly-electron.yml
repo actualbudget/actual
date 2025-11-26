@@ -1,4 +1,10 @@
-name: Electron
+name: Publish nightly desktop app
+
+# Publish nightly version of desktop app - Runs every day at midnight
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 defaults:
   run:
@@ -7,12 +13,9 @@ defaults:
 env:
   CI: true
 
-on:
-  pull_request:
-
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -27,12 +30,14 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - if: ${{ startsWith(matrix.os, 'windows') }}
         run: pip.exe install setuptools
+
       - if: ${{ ! startsWith(matrix.os, 'windows') }}
         run: |
           mkdir .venv
           python3 -m venv .venv
           source .venv/bin/activate
           python3 -m pip install setuptools
+
       - if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           sudo apt-get update
@@ -42,9 +47,30 @@ jobs:
           sudo flatpak install org.freedesktop.Sdk//24.08 -y
           sudo flatpak install org.freedesktop.Platform//24.08 -y
           sudo flatpak install org.electronjs.Electron2.BaseApp//24.08 -y
+
       - name: Set up environment
         uses: ./.github/actions/setup
+
+      - name: Update package versions
+        run: |
+          # Get new nightly version
+          NEW_DESKTOP_APP_VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/desktop-electron/package.json --type nightly)
+
+          # Set package version
+          npm version $NEW_DESKTOP_APP_VERSION --no-git-tag-version --workspace=desktop-electron --no-workspaces-update
+
+      - name: Build Electron for Mac
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        run: ./bin/package-electron
+        env:
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
       - name: Build Electron
+        if: ${{ ! startsWith(matrix.os, 'macos') }}
         run: ./bin/package-electron
 
       - name: Upload Linux x64 AppImage
@@ -60,13 +86,6 @@ jobs:
           name: Actual-linux-arm64.AppImage
           if-no-files-found: ignore
           path: packages/desktop-electron/dist/Actual-linux-arm64.AppImage
-
-      - name: Upload Linux x64 flatpak
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
-        with:
-          name: Actual-linux-x86_64.flatpak
-          if-no-files-found: ignore
-          path: packages/desktop-electron/dist/Actual-linux-x86_64.flatpak
 
       - name: Upload Windows x32 exe
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0

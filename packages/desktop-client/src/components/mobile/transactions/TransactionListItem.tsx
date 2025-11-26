@@ -336,7 +336,10 @@ function PayeeIcons({ transaction, transferAccount }: PayeeIconsProps) {
   const isPreview = isPreviewId(id);
   const schedule = schedules.find(s => s.id === scheduleId);
   const isScheduleRecurring =
-    schedule && schedule._date && !!schedule._date.frequency;
+    schedule &&
+    schedule._date &&
+    typeof schedule._date === 'object' &&
+    !!schedule._date.frequency;
 
   if (isSchedulesLoading) {
     return null;
