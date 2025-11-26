@@ -26,7 +26,7 @@ Remember to use a negative number for the balance on credit or loan accounts
 
 ![Image of reconcile box with no bank sync](/img/reconcile/reconcile-3-2025.png)
 
-Or, if you use bank sync, the last synced balance will be shown. You can use that balance by clicking the **Use last synced total** button.
+Or, if you use certain bank sync providers, the last synced balance will be shown. You can use that balance by clicking the **Use last synced total** button.
 
 ![Image of reconcile box with bank sync](/img/reconcile/reconcile-3a-2025.png)
 
@@ -47,7 +47,7 @@ If you fail to click the **Lock transactions** button after the _All reconciled!
 
 ![Image of newly locked transactions](/img/reconcile/reconcile-6-2025.png)
 
-If you ever need to change a locked transaction. Click on the lock of any transaction to open a dialog to unlock it.
+If you ever need to change a locked transaction. Click on the lock of any transaction to open a dialog to unlock it. You must click **Confirm** to unlock the transaction.
 
 ![Image of unlock transaction box](/img/reconcile/reconcile-7.png)
 
