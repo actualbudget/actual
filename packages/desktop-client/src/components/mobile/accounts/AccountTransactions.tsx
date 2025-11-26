@@ -18,8 +18,12 @@ import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useTransactions } from '@desktop-client/hooks/useTransactions';
+import {
+  useTransactions,
+  calculateRunningBalancesTopDown,
+} from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
 import * as queries from '@desktop-client/queries';
@@ -73,6 +77,15 @@ function TransactionListWithPreviews({
   const shouldCalculateRunningBalances =
     showRunningBalances === 'true' && !!account?.id && !isSearching;
 
+  const accountBalanceValue = useSheetValue<
+    'account',
+    'balance' | 'accounts-balance'
+  >(
+    account?.id
+      ? bindings.accountBalance(account?.id)
+      : bindings.allAccountBalance(),
+  );
+
   const {
     transactions,
     runningBalances,
@@ -83,7 +96,10 @@ function TransactionListWithPreviews({
   } = useTransactions({
     query: transactionsQuery,
     options: {
-      calculateRunningBalances: shouldCalculateRunningBalances,
+      calculateRunningBalances: shouldCalculateRunningBalances
+        ? calculateRunningBalancesTopDown
+        : shouldCalculateRunningBalances,
+      startingBalance: accountBalanceValue || 0,
     },
   });
 
