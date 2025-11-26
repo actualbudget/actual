@@ -47,9 +47,13 @@ If you fail to click the **Lock transactions** button after the _All reconciled!
 
 ![Image of newly locked transactions](/img/reconcile/reconcile-6-2025.png)
 
-If you ever need to change a locked transaction. Click on the lock of any transaction to open a dialog to unlock it. You must click **Confirm** to unlock the transaction.
+If you ever need to unlock a transaction. Click on the lock of any transaction to open a dialog to unlock it. After you unlock a transaction this way, the status will revert to "Cleared". A reconcile will need to be performed to re-lock the transaction.
 
 ![Image of unlock transaction box](/img/reconcile/reconcile-7.png)
+
+If you try to edit a locked transaction, the following warning will appear. Click **Confirm** to proceed. Once confirmed, the edit will be made and the transaction will remain locked.
+
+![Image of unlock transaction box](/img/reconcile/reconcile-12.png)
 
 ## Using the Reconciliation Tool for Off Budget Asset Tracking
 
