@@ -63,23 +63,10 @@ function getTagCSSColors(theme: Theme, color?: string | null) {
     ];
   }
 
-  if (theme === 'auto') {
-    theme = window.matchMedia('(prefers-color-scheme: light)').matches
-      ? 'light'
-      : 'dark';
-  }
-
-  if (theme === 'light') {
-    return [
-      getContrastedColor(color),
-      color,
-      `color-mix(in srgb, ${color} 85%, white)`,
+  return [
+    getContrastedColor(color),
+    color,
+    `color-mix(in srgb, ${color} 85%, white)`,
     ];
-  } else {
-    return [
-      getContrastedColor(color),
-      color,
-      `color-mix(in srgb, ${color} 85%, white)`,
-    ];
-  }
+  
 }
