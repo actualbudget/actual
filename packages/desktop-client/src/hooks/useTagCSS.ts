@@ -67,6 +67,5 @@ function getTagCSSColors(theme: Theme, color?: string | null) {
     getContrastedColor(color),
     color,
     `color-mix(in srgb, ${color} 85%, white)`,
-    ];
-  
+  ];
 }
