@@ -108,6 +108,7 @@ prefs
 Primoco
 Priotecs
 proactively
+pwa
 Qatari
 QNTOFRP
 QONTO
@@ -133,6 +134,7 @@ SWEDNOKK
 Synology
 systemctl
 tada
+taskbar
 templating
 THB
 touchscreen

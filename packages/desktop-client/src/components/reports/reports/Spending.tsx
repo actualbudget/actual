@@ -363,6 +363,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 height: 28,
                 backgroundColor: theme.pillBorderDark,
                 marginRight: 10,
+                marginLeft: 10,
               }}
             />
 

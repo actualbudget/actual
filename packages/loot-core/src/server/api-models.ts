@@ -5,15 +5,14 @@ import type {
   CategoryGroupEntity,
   PayeeEntity,
   ScheduleEntity,
-  RecurConfig,
 } from '../types/models';
 
 import { RemoteFile } from './cloud-storage';
 import * as models from './models';
 
 export type APIAccountEntity = Pick<AccountEntity, 'id' | 'name'> & {
-  offbudget: boolean;
-  closed: boolean;
+  offbudget?: boolean;
+  closed?: boolean;
 };
 
 export const accountModel = {
@@ -74,7 +73,7 @@ export type APICategoryGroupEntity = Pick<
   CategoryGroupEntity,
   'id' | 'name' | 'is_income' | 'hidden'
 > & {
-  categories: APICategoryEntity[];
+  categories?: APICategoryEntity[];
 };
 
 export const categoryGroupModel = {
@@ -92,7 +91,7 @@ export const categoryGroupModel = {
 
   fromExternal(group: APICategoryGroupEntity) {
     const result = { ...group } as unknown as CategoryGroupEntity;
-    if ('categories' in group) {
+    if ('categories' in group && group.categories) {
       result.categories = group.categories.map(categoryModel.fromExternal);
     }
     return result;
@@ -158,16 +157,18 @@ export const budgetModel = {
 
 export type AmountOPType = 'is' | 'isapprox' | 'isbetween';
 
-export type APIScheduleEntity = Pick<ScheduleEntity, 'id' | 'name'> & {
-  rule?: string; //All schedules has an associated underlying rule. not to be supplied iwth a new schedule
-  next_date?: string; //Next occurence of a schedule. not to be supplied iwth a new schedule
-  completed?: boolean; //not to be supplied iwth a new schedule
-  posts_transaction: boolean; //Whethere the schedule should auto post transaction on your behalf. Default to false
-  payee?: string | null; // Optional will default to null
-  account?: string | null; // Optional will default to null
-  amount: number | { num1: number; num2: number }; // Provide only 1 number except if the Amount
+export type APIScheduleEntity = Pick<
+  ScheduleEntity,
+  'id' | 'name' | 'posts_transaction'
+> & {
+  rule?: ScheduleEntity['rule']; //All schedules has an associated underlying rule. not to be supplied iwth a new schedule
+  next_date?: ScheduleEntity['next_date']; //Next occurence of a schedule. not to be supplied iwth a new schedule
+  completed?: ScheduleEntity['completed']; //not to be supplied with a new schedule
+  payee?: ScheduleEntity['_payee']; // Optional will default to null
+  account?: ScheduleEntity['_account']; // Optional will default to null
+  amount?: ScheduleEntity['_amount']; // Provide only 1 number except if the Amount
   amountOp: AmountOPType; // 'is' | 'isapprox' | 'isbetween'
-  date: RecurConfig; // mandatory field in creating a schedule Mandatory field in creation
+  date: ScheduleEntity['_date']; // mandatory field in creating a schedule Mandatory field in creation
 };
 
 export const scheduleModel = {
@@ -189,6 +190,7 @@ export const scheduleModel = {
   //just an update
 
   fromExternal(schedule: APIScheduleEntity): ScheduleEntity {
+    const amount = schedule.amount ?? 0;
     const result: ScheduleEntity = {
       id: schedule.id,
       name: schedule.name,
@@ -199,14 +201,14 @@ export const scheduleModel = {
       tombstone: false,
       _payee: String(schedule.payee),
       _account: String(schedule.account),
-      _amount: schedule.amount,
+      _amount: amount,
       _amountOp: schedule.amountOp, // e.g. 'isapprox', 'is', etc.
       _date: schedule.date,
       _conditions: [
         { op: 'is', field: 'payee', value: String(schedule.payee) },
         { op: 'is', field: 'account', value: String(schedule.account) },
         { op: 'isapprox', field: 'date', value: schedule.date },
-        { op: schedule.amountOp, field: 'amount', value: schedule.amount },
+        { op: schedule.amountOp, field: 'amount', value: amount },
       ],
       _actions: [], // empty array, as you requested
     };

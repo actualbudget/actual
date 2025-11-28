@@ -12,5 +12,11 @@
     "rootDir": ".."
   },
   "include": ["."],
-  "exclude": ["**/node_modules/*", "build/**/*", "e2e/**/*"]
+  "exclude": [
+    "**/node_modules/*",
+    "build/**/*",
+    "e2e/**/*",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
 }
