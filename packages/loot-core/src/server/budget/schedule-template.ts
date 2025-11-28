@@ -10,7 +10,7 @@ import { ScheduleTemplate, Template } from '../../types/models/templates';
 import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
 
-import { isReflectBudget } from './actions';
+import { getSheetValue, isReflectBudget } from './actions';
 
 type ScheduleTemplateTarget = {
   name: string;
@@ -240,14 +240,14 @@ function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
   return total;
 }
 
-function getSinkingTotal(t: ScheduleTemplateTarget[]) {
-  //sum the total of all upcoming schedules
-  let total = 0;
-  for (const schedule of t) {
-    total += schedule.target;
-  }
-  return total;
-}
+//function getSinkingTotal(t: ScheduleTemplateTarget[]) {
+//  //sum the total of all upcoming schedules
+//  let total = 0;
+//  for (const schedule of t) {
+//    total += schedule.target;
+//  }
+//  return total;
+//}
 
 export async function runSchedule(
   template_lines: Template[],
@@ -282,11 +282,16 @@ export async function runSchedule(
     .filter(c => !isPayMonthOf(c))
     .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
   const totalPayMonthOf = getPayMonthOfTotal(t_payMonthOf);
-  const totalSinking = getSinkingTotal(t_sinking);
+  //const totalSinking = getSinkingTotal(t_sinking);
   const totalSinkingBaseContribution =
     getSinkingBaseContributionTotal(t_sinking);
+  const lastMonthGoal =
+    (await getSheetValue(
+      monthUtils.sheetForMonth(monthUtils.subMonths(current_month, 1)),
+      `goal-${category.id}`,
+    )) || 0;
 
-  if (balance >= totalSinking + totalPayMonthOf) {
+  if (balance >= lastMonthGoal) {
     to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);
   } else {
     const totalSinkingContribution = await getSinkingContributionTotal(
