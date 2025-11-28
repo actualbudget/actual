@@ -57,6 +57,7 @@ type TransactionRowProps = {
   fields: string[];
   selected: boolean;
   format: (value: unknown, type: FormatType) => string;
+  hideSelect?: boolean;
 };
 
 const TransactionRow = memo(function TransactionRow({
@@ -64,6 +65,7 @@ const TransactionRow = memo(function TransactionRow({
   fields,
   selected,
   format,
+  hideSelect,
 }: TransactionRowProps) {
   const { t } = useTranslation();
 
@@ -75,9 +77,10 @@ const TransactionRow = memo(function TransactionRow({
   return (
     <Row style={{ color: theme.tableText }}>
       <SelectCell
-        exposed={true}
+        exposed={!hideSelect}
         focused={false}
         onSelect={e => {
+          if (hideSelect) return;
           dispatchSelected({
             type: 'select',
             id: transaction.id,
@@ -175,6 +178,7 @@ type SimpleTransactionsTableProps = {
   renderEmpty: ReactNode;
   fields?: string[];
   style?: CSSProperties;
+  hideSelect?: boolean;
 };
 
 export function SimpleTransactionsTable({
@@ -182,6 +186,7 @@ export function SimpleTransactionsTable({
   renderEmpty,
   fields = ['date', 'payee', 'amount'],
   style,
+  hideSelect,
 }: SimpleTransactionsTableProps) {
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
@@ -201,10 +206,11 @@ export function SimpleTransactionsTable({
           fields={memoFields}
           selected={selectedItems && selectedItems.has(item.id)}
           format={format}
+          hideSelect={hideSelect}
         />
       );
     },
-    [memoFields, selectedItems, format],
+    [memoFields, selectedItems, format, hideSelect],
   );
 
   return (
@@ -215,16 +221,18 @@ export function SimpleTransactionsTable({
       headers={
         <>
           <SelectCell
-            exposed={true}
+            exposed={!hideSelect}
+            disabled={hideSelect}
             focused={false}
             selected={selectedItems.size > 0}
             width={20}
-            onSelect={e =>
+            onSelect={e => {
+              if (hideSelect) return;
               dispatchSelected({
                 type: 'select-all',
                 isRangeSelect: e.shiftKey,
-              })
-            }
+              });
+            }}
           />
           {fields.map((field, i) => {
             switch (field) {
