@@ -41,7 +41,7 @@ export type FormatResult = {
 function format(
   value: unknown,
   type: FormatType,
-  formatter: Intl.NumberFormat,
+  formatter: { format: (value: number) => string },
   decimalPlaces: number,
 ): FormatResult {
   switch (type) {
