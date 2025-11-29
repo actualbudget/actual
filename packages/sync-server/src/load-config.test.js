@@ -2,7 +2,7 @@ import convict from 'convict';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 // Import the custom format
-import './load-config.js';
+import './load-config';
 
 describe('tokenExpiration format', () => {
   let originalEnv;

@@ -1,9 +1,9 @@
-import { formatPayeeName } from '../../util/payee-name.js';
-import { title } from '../../util/title/index.js';
+import { formatPayeeName } from '../../util/payee-name';
+import { title } from '../../util/title/index';
 
-import Fallback from './integration-bank.js';
+import Fallback from './integration-bank';
 
-/** @type {import('./bank.interface.js').IBank} */
+/** @type {import('./bank.interface').IBank} */
 export default {
   ...Fallback,
 
@@ -31,7 +31,7 @@ export default {
 
 /**
  * Extracts the payee name from the remittanceInformationStructured
- * @param {import('../gocardless-node.types.js').Transaction} transaction
+ * @param {import('../gocardless-node.types').Transaction} transaction
  */
 function extractPayeeName(transaction) {
   const structured = transaction.remittanceInformationStructured;

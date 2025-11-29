@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { config } from '../src/load-config.js';
+import { config } from '../src/load-config';
 
 async function ensureExists(path) {
   try {

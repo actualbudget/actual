@@ -3,20 +3,20 @@ import path from 'path';
 import { isAxiosError } from 'axios';
 import express from 'express';
 
-import { sha256String } from '../util/hash.js';
+import { sha256String } from '../util/hash';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
-} from '../util/middlewares.js';
+} from '../util/middlewares';
 
 import {
   AccountNotLinkedToRequisition,
   GenericGoCardlessError,
   RateLimitError,
   RequisitionNotLinked,
-} from './errors.js';
-import { goCardlessService } from './services/gocardless-service.js';
-import { handleError } from './util/handle-error.js';
+} from './errors';
+import { goCardlessService } from './services/gocardless-service';
+import { handleError } from './util/handle-error';
 
 const app = express();
 app.use(requestLoggerMiddleware);

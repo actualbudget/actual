@@ -1,4 +1,4 @@
-import { config } from '../load-config.js';
+import { config } from '../load-config';
 
 const protocol =
   config.get('https.key') && config.get('https.cert') ? 'https' : 'http';

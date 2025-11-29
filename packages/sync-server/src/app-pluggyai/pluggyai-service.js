@@ -1,6 +1,6 @@
 import { PluggyClient } from 'pluggy-sdk';
 
-import { SecretName, secretsService } from '../services/secrets-service.js';
+import { SecretName, secretsService } from '../services/secrets-service';
 
 let pluggyClient = null;
 

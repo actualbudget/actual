@@ -1,6 +1,6 @@
-import { bootstrap, needsBootstrap } from '../account-db.js';
-import { changePassword } from '../accounts/password.js';
-import { promptPassword } from '../util/prompt.js';
+import { bootstrap, needsBootstrap } from '../account-db';
+import { changePassword } from '../accounts/password';
+import { promptPassword } from '../util/prompt';
 
 if (needsBootstrap()) {
   console.log(

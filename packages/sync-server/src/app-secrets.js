@@ -1,11 +1,11 @@
 import express from 'express';
 
-import { getAccountDb, isAdmin } from './account-db.js';
-import { secretsService } from './services/secrets-service.js';
+import { getAccountDb, isAdmin } from './account-db';
+import { secretsService } from './services/secrets-service';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
-} from './util/middlewares.js';
+} from './util/middlewares';
 
 const app = express();
 

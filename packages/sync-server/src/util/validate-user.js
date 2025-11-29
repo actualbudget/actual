@@ -1,7 +1,7 @@
 import ipaddr from 'ipaddr.js';
 
-import { getSession } from '../account-db.js';
-import { config } from '../load-config.js';
+import { getSession } from '../account-db';
+import { config } from '../load-config';
 
 export const TOKEN_EXPIRATION_NEVER = -1;
 const MS_PER_SECOND = 1000;
