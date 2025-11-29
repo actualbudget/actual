@@ -98,7 +98,10 @@ export const categoryGroupModel = {
   },
 };
 
-export type APIPayeeEntity = Pick<PayeeEntity, 'id' | 'name' | 'transfer_acct'>;
+export type APIPayeeEntity = Pick<
+  PayeeEntity,
+  'id' | 'name' | 'transfer_acct' | 'location'
+>;
 
 export const payeeModel = {
   ...models.payeeModel,
