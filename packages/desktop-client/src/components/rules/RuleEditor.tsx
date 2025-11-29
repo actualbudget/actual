@@ -1018,6 +1018,7 @@ export function RuleEditor({
   const [stage, setStage] = useState(defaultRule.stage);
   const [conditionsOp, setConditionsOp] = useState(defaultRule.conditionsOp);
   const [transactions, setTransactions] = useState([]);
+  const [previewTransactions, setPreviewTransactions] = useState([]);
   const dispatch = useDispatch();
   const scrollableEl = useRef(undefined);
 
@@ -1238,6 +1239,22 @@ export function RuleEditor({
       });
       setActionSplits([...actionSplits]);
     });
+  }
+
+  function onPreview() {
+    const selectedTransactions = transactions.filter(({ id }) =>
+      selectedInst.items.has(id),
+    );
+    send('rule-preview-actions', {
+      transactions: selectedTransactions,
+      actions: getUnparsedActions(actionSplits),
+    }).then(content => {
+      setPreviewTransactions(content);
+    });
+  }
+
+  function onHidePreview() {
+    setPreviewTransactions([]);
   }
 
   async function onSave() {
@@ -1499,12 +1516,26 @@ export function RuleEditor({
               <Trans>This rule applies to these transactions:</Trans>
             </Text>
 
-            <Button
-              isDisabled={selectedInst.items.size === 0}
-              onPress={onApply}
+            <span
+              style={{
+                display: 'flex',
+                gap: 10,
+              }}
             >
-              <Trans>Apply actions</Trans> ({selectedInst.items.size})
-            </Button>
+              <Button
+                isDisabled={selectedInst.items.size === 0}
+                onPress={onPreview}
+              >
+                <Trans>Preview</Trans>
+              </Button>
+
+              <Button
+                isDisabled={selectedInst.items.size === 0}
+                onPress={onApply}
+              >
+                <Trans>Apply actions</Trans> ({selectedInst.items.size})
+              </Button>
+            </span>
           </SpaceBetween>
 
           {/* @ts-expect-error fix this */}
@@ -1516,6 +1547,40 @@ export function RuleEditor({
               borderRadius: '6px 6px 0 0',
             }}
           />
+          {previewTransactions.length > 0 && (
+            <>
+              <SpaceBetween
+                gap={5}
+                style={{
+                  flexDirection: 'row',
+                  flexWrap: 'nowrap',
+                  justifyContent: 'space-between',
+                  margin: '20px 0 12px 0',
+                }}
+              >
+                <Text style={{ color: theme.pageTextLight, marginBottom: 0 }}>
+                  <Trans>Preview of changes to selected transactions:</Trans>
+                </Text>
+
+                <Button onPress={onHidePreview}>
+                  <Trans>Hide preview</Trans>
+                </Button>
+              </SpaceBetween>
+              {/* @ts-expect-error fix this */}
+              <SimpleTransactionsTable
+                transactions={previewTransactions}
+                fields={getTransactionFields(
+                  conditions,
+                  getActions(actionSplits),
+                )}
+                style={{
+                  border: '1px solid ' + theme.tableBorder,
+                  borderRadius: '6px 6px 0 0',
+                }}
+                hideSelect
+              />
+            </>
+          )}
 
           <SpaceBetween
             style={{

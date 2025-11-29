@@ -652,7 +652,12 @@ export function conditionsToAQL(
   return { filters, errors };
 }
 
-export async function applyActions(
+/**
+ * Same as applyActions but returns the updated transactions instead of saving them
+ * @param transactions
+ * @param actions
+ */
+export async function runActions(
   transactions: TransactionEntity[],
   actions: Array<Action | RuleActionEntity>,
 ) {
@@ -710,6 +715,15 @@ export async function applyActions(
   for (const trans of updated) {
     finalized.push(await finalizeTransactionForRules(trans));
   }
+
+  return finalized;
+}
+
+export async function applyActions(
+  transactions: TransactionEntity[],
+  actions: Array<Action | RuleActionEntity>,
+) {
+  const finalized = await runActions(transactions, actions);
 
   return batchUpdateTransactions({ updated: finalized });
 }
