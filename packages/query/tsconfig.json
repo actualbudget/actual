@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2021",
+    "noEmit": false,
+    "declaration": true,
+    "outDir": "dist",
+    "declarationDir": "@types"
+  },
+  "include": ["."],
+  "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts"]
+}
