@@ -383,7 +383,6 @@ export function BudgetTable({
             backgroundColor: theme.pageBackground,
             minHeight: '100vh',
             paddingBottom: MOBILE_NAV_HEIGHT,
-
           }}
         >
           <SchedulesProvider query={schedulesQuery}>
