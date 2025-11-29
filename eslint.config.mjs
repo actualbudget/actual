@@ -666,7 +666,7 @@ export default defineConfig(
         'warn',
         {
           types: {
-            // forbid FC as superflous
+            // forbid FC as superfluous
             FunctionComponent: {
               message:
                 'Type the props argument and let TS infer or use ComponentType for a component prop',
