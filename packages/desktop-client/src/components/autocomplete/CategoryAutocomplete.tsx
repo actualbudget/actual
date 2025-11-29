@@ -136,12 +136,20 @@ function CategoryList({
         }}
       >
         {splitTransaction &&
-          renderSplitTransactionButton({
-            key: 'split',
-            ...(getItemProps ? getItemProps({ item: splitTransaction }) : {}),
-            highlighted: splitTransaction.highlightedIndex === highlightedIndex,
-            embedded,
-          })}
+          (() => {
+            const splitButtonProps = getItemProps
+              ? getItemProps({ item: splitTransaction })
+              : {};
+            const { onClick, ...restSplitButtonProps } = splitButtonProps;
+            return renderSplitTransactionButton({
+              key: 'split',
+              ...restSplitButtonProps,
+              onClick,
+              highlighted:
+                splitTransaction.highlightedIndex === highlightedIndex,
+              embedded,
+            });
+          })()}
         {groupedCategories.map(({ group, categories }) => {
           if (!group) {
             return null;
@@ -334,7 +342,7 @@ function defaultRenderCategoryItemGroupHeader(
   return <ItemHeader {...props} type="category" />;
 }
 
-type SplitTransactionButtonProps = {
+type SplitTransactionButtonProps = ComponentPropsWithoutRef<typeof View> & {
   Icon?: ComponentType<SVGProps<SVGElement>>;
   highlighted?: boolean;
   embedded?: boolean;
