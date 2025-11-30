@@ -21,9 +21,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import * as monthUtils from 'loot-core/shared/months';
-import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
 
 import { type CategoryGroupMonthProps, type CategoryMonthProps } from '..';
 
@@ -42,6 +40,7 @@ import {
   type SheetCellProps,
 } from '@desktop-client/components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useUndo } from '@desktop-client/hooks/useUndo';
@@ -213,6 +212,7 @@ export const CategoryMonth = memo(function CategoryMonth({
 }: CategoryMonthProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
+  const format = useFormat();
 
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const triggerBalanceMenuRef = useRef(null);
@@ -352,12 +352,8 @@ export const CategoryMonth = memo(function CategoryMonth({
             binding: trackingBudget.catBudgeted(category.id),
             type: 'financial',
             getValueStyle: makeAmountGrey,
-            formatExpr: expr => {
-              return integerToCurrency(expr);
-            },
-            unformatExpr: expr => {
-              return amountToInteger(evalArithmetic(expr, 0));
-            },
+            formatExpr: format.forEdit,
+            unformatExpr: format.fromEdit,
           }}
           inputProps={{
             onBlur: () => {
@@ -367,10 +363,10 @@ export const CategoryMonth = memo(function CategoryMonth({
               backgroundColor: theme.tableBackground,
             },
           }}
-          onSave={amount => {
+          onSave={(parsedIntegerAmount: number | null) => {
             onBudgetAction(month, 'budget-amount', {
               category: category.id,
-              amount,
+              amount: parsedIntegerAmount ?? 0,
             });
           }}
         />
