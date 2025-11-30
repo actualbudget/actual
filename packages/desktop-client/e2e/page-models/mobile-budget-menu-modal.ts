@@ -6,6 +6,7 @@ export class BudgetMenuModal {
   readonly heading: Locator;
   readonly budgetAmountInput: Locator;
   readonly copyLastMonthBudgetButton: Locator;
+  readonly setToSpentButton: Locator;
   readonly setTo3MonthAverageButton: Locator;
   readonly setTo6MonthAverageButton: Locator;
   readonly setToYearlyAverageButton: Locator;
@@ -19,6 +20,9 @@ export class BudgetMenuModal {
     this.budgetAmountInput = locator.getByTestId('amount-input');
     this.copyLastMonthBudgetButton = locator.getByRole('button', {
       name: 'Copy last month’s budget',
+    });
+    this.setToSpentButton = locator.getByRole('button', {
+      name: 'Set equal to amount spent',
     });
     this.setTo3MonthAverageButton = locator.getByRole('button', {
       name: 'Set to 3 month average',
@@ -46,6 +50,10 @@ export class BudgetMenuModal {
 
   async copyLastMonthBudget() {
     await this.copyLastMonthBudgetButton.click();
+  }
+
+  async setToSpent() {
+    await this.setToSpentButton.click();
   }
 
   async setTo3MonthAverage() {
