@@ -371,7 +371,7 @@ export function getNumberFormat({
         };
 
   const intlFormatter = new Intl.NumberFormat(locale, fractionDigitsOptions);
-  
+
   // Wrapper to handle -0 edge case
   const formatter = {
     format: (value: number) => {
