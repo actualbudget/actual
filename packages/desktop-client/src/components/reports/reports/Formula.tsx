@@ -14,6 +14,7 @@ import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -253,13 +254,16 @@ function FormulaInner({ widget }: FormulaInnerProps) {
           <View
             style={{
               padding: 20,
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              gap: 10,
+              minHeight: 120,
             }}
           >
             <div
               style={{
                 fontSize: 14,
                 color: theme.pageTextSubdued,
-                marginBottom: 8,
               }}
             >
               <Trans>Result:</Trans>
@@ -268,6 +272,13 @@ function FormulaInner({ widget }: FormulaInnerProps) {
               style={{
                 height: 120,
                 width: '100%',
+                overflow: 'auto',
+                backgroundColor: theme.cardBackground,
+                borderRadius: 6,
+                ...styles.horizontalScrollbar,
+                '::-webkit-scrollbar': {
+                  height: '8px',
+                },
               }}
             >
               <FormulaResult
@@ -284,7 +295,7 @@ function FormulaInner({ widget }: FormulaInnerProps) {
           <View
             style={{
               flex: 1,
-              minHeight: 300,
+              minHeight: 50,
               margin: 20,
               overflow: 'hidden',
             }}
@@ -358,8 +369,6 @@ function FormulaInner({ widget }: FormulaInnerProps) {
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setStaticFontSize(Number(e.target.value))
                   }
-                  min="8"
-                  max="200"
                 />
               </View>
             )}
