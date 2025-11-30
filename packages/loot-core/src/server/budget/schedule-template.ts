@@ -240,8 +240,6 @@ function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
   return total;
 }
 
-<<<<<<< HEAD
-=======
 function getSinkingTotal(t: ScheduleTemplateTarget[]) {
   //sum the total of all upcoming schedules
   let total = 0;
@@ -251,7 +249,6 @@ function getSinkingTotal(t: ScheduleTemplateTarget[]) {
   return total;
 }
 
->>>>>>> 74bb4beb2 (make logic better)
 export async function runSchedule(
   template_lines: Template[],
   current_month: string,
@@ -285,10 +282,7 @@ export async function runSchedule(
     .filter(c => !isPayMonthOf(c))
     .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
   const totalPayMonthOf = getPayMonthOfTotal(t_payMonthOf);
-<<<<<<< HEAD
-=======
   const totalSinking = getSinkingTotal(t_sinking);
->>>>>>> 74bb4beb2 (make logic better)
   const totalSinkingBaseContribution =
     getSinkingBaseContributionTotal(t_sinking);
   const lastMonthGoal = await getSheetValue(
