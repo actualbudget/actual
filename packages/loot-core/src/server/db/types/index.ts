@@ -121,7 +121,6 @@ export type DbSchedule = {
   tombstone: 1 | 0;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type DbScheduleJsonPath = {
   schedule_id: DbSchedule['id'];
   payee: string;
@@ -140,7 +139,7 @@ export type DbScheduleNextDate = {
 };
 
 // This is unused in the codebase.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 type DbPendingTransaction = {
   id: string;
   acct: number;
