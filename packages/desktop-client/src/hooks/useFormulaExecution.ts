@@ -170,6 +170,8 @@ function timeFrameModeToCondition(mode: TimeFrame['mode']): string | null {
   switch (mode) {
     case 'full':
       return 'All time';
+    case 'lastMonth':
+      return 'Last month';
     case 'lastYear':
       return 'Last year';
     case 'yearToDate':
