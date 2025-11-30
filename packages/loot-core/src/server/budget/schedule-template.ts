@@ -240,6 +240,18 @@ function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
   return total;
 }
 
+<<<<<<< HEAD
+=======
+function getSinkingTotal(t: ScheduleTemplateTarget[]) {
+  //sum the total of all upcoming schedules
+  let total = 0;
+  for (const schedule of t) {
+    total += schedule.target;
+  }
+  return total;
+}
+
+>>>>>>> 74bb4beb2 (make logic better)
 export async function runSchedule(
   template_lines: Template[],
   current_month: string,
@@ -273,15 +285,27 @@ export async function runSchedule(
     .filter(c => !isPayMonthOf(c))
     .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
   const totalPayMonthOf = getPayMonthOfTotal(t_payMonthOf);
+<<<<<<< HEAD
+=======
+  const totalSinking = getSinkingTotal(t_sinking);
+>>>>>>> 74bb4beb2 (make logic better)
   const totalSinkingBaseContribution =
     getSinkingBaseContributionTotal(t_sinking);
-  const lastMonthGoal =
-    (await getSheetValue(
-      monthUtils.sheetForMonth(monthUtils.subMonths(current_month, 1)),
-      `goal-${category.id}`,
-    )) || 0;
+  const lastMonthGoal = await getSheetValue(
+    monthUtils.sheetForMonth(monthUtils.subMonths(current_month, 1)),
+    `goal-${category.id}`,
+  );
 
-  if (balance >= lastMonthGoal) {
+  // check and see if we should budget the full amount becaue the previous schedules
+  // haven't been paid yet, or if we can use the leftover balance for this month
+  // First option: check if the previous month doesn't have its monthly schedules paid yet
+  // Second option: check if the previous month needed less than this month and hasn't paid yet
+  if (
+    balance >= totalSinking + totalPayMonthOf ||
+    (lastMonthGoal < totalSinking + totalPayMonthOf &&
+      lastMonthGoal !== 0 &&
+      balance >= lastMonthGoal)
+  ) {
     to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);
   } else {
     const totalSinkingContribution = await getSinkingContributionTotal(
