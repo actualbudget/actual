@@ -99,7 +99,6 @@ export function summarySpreadsheet(
               },
             },
           ],
-          'payee.transfer_acct': null,
         })
         .filter({
           [conditionsOpKey]: filters,
@@ -294,7 +293,6 @@ async function calculatePercentage(
     q('transactions')
       .filter({
         [conditionsOpKey]: filters,
-        'payee.transfer_acct': null,
       })
       .select([{ amount: { $sum: '$amount' } }]);
 
