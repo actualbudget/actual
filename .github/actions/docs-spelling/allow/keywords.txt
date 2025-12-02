@@ -56,7 +56,6 @@ GTQ
 HSA
 htpasswd
 IBANs
-icns
 IDR
 iex
 importtransactions
