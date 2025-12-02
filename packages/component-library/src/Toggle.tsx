@@ -32,7 +32,7 @@ export const Toggle = ({
         className={css({
           height: 0,
           width: 0,
-          visiblity: 'hidden',
+          visibility: 'hidden',
         })}
         type="checkbox"
       />
