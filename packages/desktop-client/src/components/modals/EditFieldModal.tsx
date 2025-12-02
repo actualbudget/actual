@@ -135,6 +135,7 @@ export function EditFieldModal({
                 key={mode}
                 style={{
                   padding: '5px 10px',
+                  height: '100%',
                   width: `${100 / arr.length}%`,
                   backgroundColor: theme.menuBackground,
                   marginRight: 5,
