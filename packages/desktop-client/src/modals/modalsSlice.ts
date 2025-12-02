@@ -203,8 +203,15 @@ export type Modal =
         name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>;
         onSubmit: (
           name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>,
-          value: string | number,
-          mode?: 'prepend' | 'append' | 'replace' | null,
+          value:
+            | string
+            | number
+            | {
+                regex: boolean;
+                find: string;
+                replace: string;
+              },
+          mode?: 'prepend' | 'append' | 'replace' | 'findAndReplace' | null,
         ) => void;
         onClose?: () => void;
       };

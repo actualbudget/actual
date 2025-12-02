@@ -1,17 +1,14 @@
-import React, {
-  type CSSProperties,
-  type ReactNode,
-  useRef,
-  useState,
-} from 'react';
+import { type CSSProperties, type ReactNode, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
+import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
-import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
+import { format as formatDate, parse as parseDate, parseISO } from 'date-fns';
 
 import { currentDay, dayFromDate } from 'loot-core/shared/months';
 import { amountToInteger, currencyToInteger } from 'loot-core/shared/util';
@@ -33,9 +30,16 @@ const itemStyle: CSSProperties = {
   paddingBottom: 8,
 };
 
-type NoteAmendMode = 'replace' | 'prepend' | 'append';
+type NoteAmendValue = Parameters<EditFieldModalProps['onSubmit']>[1];
+type NoteAmendMode = Parameters<EditFieldModalProps['onSubmit']>[2];
+const noteAmendStrings: Record<NoteAmendMode, string> = {
+  replace: 'Replace',
+  prepend: 'Prepend',
+  append: 'Append',
+  findAndReplace: 'Find and Replace',
+};
 
-type EditFieldModalProps = Extract<
+export type EditFieldModalProps = Extract<
   ModalType,
   { name: 'edit-field' }
 >['options'];
@@ -48,8 +52,9 @@ export function EditFieldModal({
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const noteInputRef = useRef<HTMLInputElement | null>(null);
+  const noteReplaceInputRef = useRef<HTMLInputElement | null>(null);
 
-  function onSelectNote(value: string, mode?: NoteAmendMode) {
+  function onSelectNote(value: NoteAmendValue, mode?: NoteAmendMode) {
     if (value != null) {
       onSubmit(name, value, mode);
     }
@@ -85,6 +90,11 @@ export function EditFieldModal({
   };
 
   const [noteAmend, onChangeMode] = useState<NoteAmendMode>('replace');
+  const [noteFindReplace, setNoteFindReplace] = useState({
+    regex: false,
+    find: '',
+    replace: '',
+  });
 
   switch (name) {
     case 'date':
@@ -120,109 +130,104 @@ export function EditFieldModal({
               justifyContent: 'center',
             }}
           >
-            <Button
-              style={{
-                padding: '5px 10px',
-                width: '33.33%',
-                backgroundColor: theme.menuBackground,
-                marginRight: 5,
-                fontSize: 'inherit',
-                ...(noteAmend === 'prepend' && {
-                  backgroundColor: theme.buttonPrimaryBackground,
-                  color: theme.buttonPrimaryText,
-                  ':hover': {
-                    backgroundColor: theme.buttonPrimaryBackgroundHover,
-                    color: theme.buttonPrimaryTextHover,
-                  },
-                }),
-                ...(noteAmend !== 'prepend' && {
-                  backgroundColor: theme.buttonNormalBackground,
-                  color: theme.buttonNormalText,
-                  ':hover': {
-                    backgroundColor: theme.buttonNormalBackgroundHover,
-                    color: theme.buttonNormalTextHover,
-                  },
-                }),
-              }}
-              onPress={() => {
-                onChangeMode('prepend');
-                noteInputRef.current?.focus();
-              }}
-            >
-              <Trans>Prepend</Trans>
-            </Button>
-            <Button
-              style={{
-                padding: '5px 10px',
-                width: '33.34%',
-                backgroundColor: theme.menuBackground,
-                marginRight: 5,
-                fontSize: 'inherit',
-                ...(noteAmend === 'replace' && {
-                  backgroundColor: theme.buttonPrimaryBackground,
-                  color: theme.buttonPrimaryText,
-                  ':hover': {
-                    backgroundColor: theme.buttonPrimaryBackgroundHover,
-                    color: theme.buttonPrimaryTextHover,
-                  },
-                }),
-                ...(noteAmend !== 'replace' && {
-                  backgroundColor: theme.buttonNormalBackground,
-                  color: theme.buttonNormalText,
-                  ':hover': {
-                    backgroundColor: theme.buttonNormalBackgroundHover,
-                    color: theme.buttonNormalTextHover,
-                  },
-                }),
-              }}
-              onPress={() => {
-                onChangeMode('replace');
-                noteInputRef.current?.focus();
-              }}
-            >
-              <Trans>Replace</Trans>
-            </Button>
-            <Button
-              style={{
-                padding: '5px 10px',
-                width: '33.33%',
-                backgroundColor: theme.menuBackground,
-                marginRight: 5,
-                fontSize: 'inherit',
-                ...(noteAmend === 'append' && {
-                  backgroundColor: theme.buttonPrimaryBackground,
-                  color: theme.buttonPrimaryText,
-                  ':hover': {
-                    backgroundColor: theme.buttonPrimaryBackgroundHover,
-                    color: theme.buttonPrimaryTextHover,
-                  },
-                }),
-                ...(noteAmend !== 'append' && {
-                  backgroundColor: theme.buttonNormalBackground,
-                  color: theme.buttonNormalText,
-                  ':hover': {
-                    backgroundColor: theme.buttonNormalBackgroundHover,
-                    color: theme.buttonNormalTextHover,
-                  },
-                }),
-              }}
-              onPress={() => {
-                onChangeMode('append');
-                noteInputRef.current?.focus();
-              }}
-            >
-              <Trans>Append</Trans>
-            </Button>
+            {Object.keys(noteAmendStrings).map((mode, _, arr) => (
+              <Button
+                key={mode}
+                style={{
+                  padding: '5px 10px',
+                  width: `${100 / arr.length}%`,
+                  backgroundColor: theme.menuBackground,
+                  marginRight: 5,
+                  fontSize: 'inherit',
+                  ...(noteAmend === mode && {
+                    backgroundColor: theme.buttonPrimaryBackground,
+                    color: theme.buttonPrimaryText,
+                    ':hover': {
+                      backgroundColor: theme.buttonPrimaryBackgroundHover,
+                      color: theme.buttonPrimaryTextHover,
+                    },
+                  }),
+                  ...(noteAmend !== mode && {
+                    backgroundColor: theme.buttonNormalBackground,
+                    color: theme.buttonNormalText,
+                    ':hover': {
+                      backgroundColor: theme.buttonNormalBackgroundHover,
+                      color: theme.buttonNormalTextHover,
+                    },
+                  }),
+                }}
+                onPress={() => {
+                  onChangeMode(mode as NoteAmendMode);
+                  noteInputRef.current?.focus();
+                }}
+              >
+                <Trans>{noteAmendStrings[mode]}</Trans>
+              </Button>
+            ))}
           </View>
-          <Input
-            ref={noteInputRef}
-            autoFocus
-            onEnter={value => {
-              onSelectNote(value, noteAmend);
-              close();
-            }}
-            style={inputStyle}
-          />
+          {noteAmend === 'findAndReplace' ? (
+            <View style={{ gap: 10 }}>
+              <SpaceBetween gap={8}>
+                <Toggle
+                  id="noteRegex"
+                  isOn={noteFindReplace.regex}
+                  onToggle={isOn =>
+                    setNoteFindReplace(current => ({ ...current, regex: isOn }))
+                  }
+                />
+                <label htmlFor="noteRegex" title={t('Use Regular Expressions')}>
+                  {t('Use Regular Expressions')}
+                </label>
+              </SpaceBetween>
+              <Input
+                ref={noteInputRef}
+                autoFocus
+                placeholder={t('Find')}
+                value={noteFindReplace.find}
+                onChange={({ currentTarget: { value } }) =>
+                  setNoteFindReplace(current => ({ ...current, find: value }))
+                }
+                onEnter={() => {
+                  noteReplaceInputRef.current?.focus();
+                }}
+                style={inputStyle}
+              />
+              <Input
+                ref={noteReplaceInputRef}
+                placeholder={t('Replace')}
+                value={noteFindReplace.replace}
+                onChange={({ currentTarget: { value } }) =>
+                  setNoteFindReplace(current => ({
+                    ...current,
+                    replace: value,
+                  }))
+                }
+                onEnter={() => {
+                  if (noteFindReplace.regex) {
+                    try {
+                      new RegExp(noteFindReplace.find, 'g');
+                    } catch (error) {
+                      alert(t('Invalid regular expression'));
+                      return;
+                    }
+                  }
+                  onSelectNote(noteFindReplace, noteAmend);
+                  close();
+                }}
+                style={inputStyle}
+              />
+            </View>
+          ) : (
+            <Input
+              ref={noteInputRef}
+              autoFocus
+              onEnter={value => {
+                onSelectNote(value, noteAmend);
+                close();
+              }}
+              style={inputStyle}
+            />
+          )}
         </>
       );
       break;

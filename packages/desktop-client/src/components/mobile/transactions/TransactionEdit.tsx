@@ -884,7 +884,22 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     options: {
                       name,
                       onSubmit: (name, value) => {
-                        onUpdateInner(transactionToEdit, name, value);
+                        if (typeof value === 'object' && 'regex' in value) {
+                          onUpdateInner(
+                            transactionToEdit,
+                            name,
+                            value.find === ''
+                              ? value.replace
+                              : (transactionToEdit.notes?.replaceAll(
+                                  value.regex
+                                    ? new RegExp(value.find, 'g')
+                                    : value.find,
+                                  value.replace,
+                                ) ?? null),
+                          );
+                        } else {
+                          onUpdateInner(transactionToEdit, name, value);
+                        }
                       },
                       onClose: () => {
                         onClearActiveEdit();

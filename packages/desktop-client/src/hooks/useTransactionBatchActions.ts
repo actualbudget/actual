@@ -19,6 +19,7 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { type EditFieldModalProps } from '@desktop-client/components/modals/EditFieldModal';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
@@ -29,8 +30,8 @@ type BatchEditProps = {
   onSuccess?: (
     ids: Array<TransactionEntity['id']>,
     name: keyof TransactionEntity,
-    value: string | number | boolean | null,
-    mode: 'prepend' | 'append' | 'replace' | null | undefined,
+    value: Parameters<EditFieldModalProps['onSubmit']>[1] | boolean,
+    mode: Parameters<EditFieldModalProps['onSubmit']>[2],
   ) => void;
 };
 
@@ -73,8 +74,8 @@ export function useTransactionBatchActions() {
 
     const onChange = async (
       name: keyof TransactionEntity,
-      value: string | number | boolean | null,
-      mode?: 'prepend' | 'append' | 'replace' | null | undefined,
+      value: Parameters<BatchEditProps['onSuccess']>[2],
+      mode?: Parameters<BatchEditProps['onSuccess']>[3],
     ) => {
       let transactionsToChange = transactions;
 
@@ -117,6 +118,18 @@ export function useTransactionBatchActions() {
               trans.notes === null ? value : `${trans.notes}${value}`;
           } else if (mode === 'replace') {
             valueToSet = value;
+          } else if (
+            mode === 'findAndReplace' &&
+            typeof value === 'object' &&
+            'regex' in value
+          ) {
+            valueToSet =
+              value.find === ''
+                ? value.replace
+                : (trans.notes?.replaceAll(
+                    value.regex ? new RegExp(value.find, 'g') : value.find,
+                    value.replace,
+                  ) ?? null);
           }
         }
         const transaction = {
