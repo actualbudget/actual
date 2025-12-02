@@ -22,6 +22,7 @@ import { SectionLabel } from '@desktop-client/components/forms';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { LabeledCheckbox } from '../forms/LabeledCheckbox';
 
 const itemStyle: CSSProperties = {
   fontSize: 17,
@@ -168,18 +169,18 @@ export function EditFieldModal({
           </View>
           {noteAmend === 'findAndReplace' ? (
             <View style={{ gap: 10 }}>
-              <SpaceBetween gap={8}>
-                <Toggle
-                  id="noteRegex"
-                  isOn={noteFindReplace.regex}
-                  onToggle={isOn =>
-                    setNoteFindReplace(current => ({ ...current, regex: isOn }))
-                  }
-                />
-                <label htmlFor="noteRegex" title={t('Use Regular Expressions')}>
-                  {t('Use Regular Expressions')}
-                </label>
-              </SpaceBetween>
+              <LabeledCheckbox
+                id="noteRegex"
+                checked={noteFindReplace.regex}
+                onChange={({ currentTarget: { checked } }) =>
+                  setNoteFindReplace(current => ({
+                    ...current,
+                    regex: checked,
+                  }))
+                }
+              >
+                {t('Use Regular Expressions')}
+              </LabeledCheckbox>
               <Input
                 ref={noteInputRef}
                 autoFocus
