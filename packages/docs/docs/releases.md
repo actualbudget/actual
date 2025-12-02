@@ -6,7 +6,7 @@ Release date: 2025-12-03
 
 This release contains the following notable improvements, along with numerous fixes:
 
-- Experimental: Crossover report for tracking progress towards financial independance.
+- Experimental: Crossover report for tracking progress towards financial independence.
 - Experimental: Add force reload button to settings to force update the budget client.
 - Add ability to quickly create single instance schedules from the account ledger.
 - Add running balance on mobile account view.
@@ -112,7 +112,7 @@ Docker Tag: v25.12.0
 - [#6217](https://github.com/actualbudget/actual/pull/6217) Revert changes to Merkle test, restoring previous key ordering and helper function usage. — thanks @MatissJanis
 - [#6230](https://github.com/actualbudget/actual/pull/6230) Remove automated PR maintainer assignment workflow and script for comments and reviews. — thanks @MatissJanis
 - [#6231](https://github.com/actualbudget/actual/pull/6231) Updating the release notes workflow to not run when docs related config have changed — thanks @MikesGlitch
-- [#6242](https://github.com/actualbudget/actual/pull/6242) Add a wokflow for building a nightly signed desktop app — thanks @MikesGlitch
+- [#6242](https://github.com/actualbudget/actual/pull/6242) Add a workflow for building a nightly signed desktop app — thanks @MikesGlitch
 - [#6246](https://github.com/actualbudget/actual/pull/6246) Nightly & PR builds now provide individual desktop app installers for smaller, faster downloads. — thanks @MikesGlitch
 - [#6260](https://github.com/actualbudget/actual/pull/6260) Bump `node-forge` to 1.3.2 — thanks @matt-fidd
 

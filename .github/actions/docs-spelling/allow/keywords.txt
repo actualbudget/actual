@@ -7,6 +7,7 @@ Andelskassen
 AQL
 Authelia
 autocompletes
+Belarusian
 Blix
 bnp
 BSCHESMM
@@ -34,6 +35,7 @@ debian
 dedupes
 deleteaccount
 DKB
+DKK
 dmg
 easybank
 Edenred
@@ -50,9 +52,12 @@ Fortuneo
 gebabebb
 GEBABEBB
 Greenshot
+GTQ
 HSA
 htpasswd
 IBANs
+icns
+IDR
 iex
 importtransactions
 ING
@@ -82,6 +87,7 @@ minimalistic
 monkeypatch
 Monobank
 Morrisons
+MYR
 NAIAGB
 NDEADKKK
 Netflix
@@ -108,6 +114,7 @@ QFX
 QIF
 Quicken
 returnsandreimbursements
+responsitivity
 Rezip
 roadmap
 RUpdate
