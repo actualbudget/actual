@@ -73,16 +73,54 @@ jobs:
         if: ${{ ! startsWith(matrix.os, 'macos') }}
         run: ./bin/package-electron
 
-      - name: Upload Build
+      - name: Upload Linux x64 AppImage
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
-          name: actual-electron-${{ matrix.os }}
-          path: |
-            packages/desktop-electron/dist/*.dmg
-            packages/desktop-electron/dist/*.exe
-            !packages/desktop-electron/dist/Actual-windows.exe
-            packages/desktop-electron/dist/*.AppImage
-            packages/desktop-electron/dist/*.flatpak
+          name: Actual-linux-x86_64.AppImage
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-linux-x86_64.AppImage
+
+      - name: Upload Linux arm64 AppImage
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: Actual-linux-arm64.AppImage
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-linux-arm64.AppImage
+
+      - name: Upload Windows x32 exe
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: Actual-windows-ia32.exe
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-windows-ia32.exe
+
+      - name: Upload Windows x64 exe
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: Actual-windows-x64.exe
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-windows-x64.exe
+
+      - name: Upload Windows arm64 exe
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: Actual-windows-arm64.exe
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-windows-arm64.exe
+
+      - name: Upload Mac x64 dmg
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: Actual-mac-x64.dmg
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-mac-x64.dmg
+
+      - name: Upload Mac arm64 dmg
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: Actual-mac-arm64.dmg
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-mac-arm64.dmg
 
       - name: Upload Windows Store Build
         if: ${{ startsWith(matrix.os, 'windows') }}
