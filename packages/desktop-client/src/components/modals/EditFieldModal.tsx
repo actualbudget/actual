@@ -4,9 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
-import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
-import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { format as formatDate, parse as parseDate, parseISO } from 'date-fns';
 
@@ -19,10 +17,10 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { SectionLabel } from '@desktop-client/components/forms';
+import { LabeledCheckbox } from '@desktop-client/components/forms/LabeledCheckbox';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { LabeledCheckbox } from '../forms/LabeledCheckbox';
 
 const itemStyle: CSSProperties = {
   fontSize: 17,
