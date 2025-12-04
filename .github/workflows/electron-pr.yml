@@ -45,7 +45,7 @@ jobs:
 
         # Specify the xcode version manually to use the latest electron-builder
       - name: Set Xcode version
-      - if: ${{ startsWith(matrix.os, 'macos') }}
+        if: ${{ startsWith(matrix.os, 'macos') }}
         run: sudo xcode-select -s /Applications/Xcode_26.1.1.app
 
       - name: Set up environment
