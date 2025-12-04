@@ -59,6 +59,9 @@ describe('utility functions', () => {
   test('looseParseAmount works with parentheses (negative)', () => {
     expect(looselyParseAmount('(3.45)')).toBe(-3.45);
     expect(looselyParseAmount('(3)')).toBe(-3);
+    // Parentheses with Unicode minus
+    expect(looselyParseAmount('(−3.45)')).toBe(-3.45);
+    expect(looselyParseAmount('(−3)')).toBe(-3);
   });
 
   test('looseParseAmount ignores non-numeric characters', () => {

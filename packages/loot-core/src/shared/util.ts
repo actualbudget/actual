@@ -522,8 +522,6 @@ export function integerToAmount(
 // number format, because the user could be importing from many
 // currencies. We extract out the numbers and just ignore separators.
 export function looselyParseAmount(amount: string) {
-  amount = amount.replace(/\u2212/g, '-');
-
   function safeNumber(v: number): null | number {
     if (isNaN(v)) {
       return null;
@@ -542,7 +540,12 @@ export function looselyParseAmount(amount: string) {
   }
 
   if (amount.startsWith('(') && amount.endsWith(')')) {
+    // Remove Unicode minus inside parentheses before converting to ASCII minus
+    amount = amount.replace(/\u2212/g, '');
     amount = amount.replace('(', '-').replace(')', '');
+  } else {
+    // Replace Unicode minus with ASCII minus for non-parenthesized amounts
+    amount = amount.replace(/\u2212/g, '-');
   }
 
   // Look for a decimal marker, then look for either 1-2 or 4-9 decimal places.
