@@ -1,0 +1,25 @@
+services:
+  actual-sync-server:
+    build:
+      context: .
+      dockerfile: sync-server.Dockerfile
+    image: actual-sync-server
+    environment:
+      ACTUAL_DATA_DIR: /data
+      ACTUAL_PORT: 5006
+    ports:
+      - "${ACTUAL_PORT:-5006}:${ACTUAL_PORT:-5006}"
+    user: "actual:actual"
+    volumes:
+      - sync_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: curl -f http://localhost:${ACTUAL_PORT:-5006}/health || exit 1
+      interval: 30s
+      retries: 3
+      start_period: 5s
+      timeout: 10s
+
+volumes:
+  sync_data:
+    driver: local
