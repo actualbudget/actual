@@ -4,7 +4,6 @@
 // 1. Identify the migrations in packages/loot-core/migrations/* on `master` and HEAD
 // 2. Make sure that any new migrations on HEAD are dated after the latest migration on `master`.
 
-const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 

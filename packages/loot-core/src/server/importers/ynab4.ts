@@ -111,7 +111,6 @@ async function importPayees(
     if (!payee.isTombstone) {
       const id = await actual.createPayee({
         name: payee.name,
-        category: entityIdMap.get(payee.autoFillCategoryId) || null,
         transfer_acct: entityIdMap.get(payee.targetAccountId) || null,
       });
 

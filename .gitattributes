@@ -12,6 +12,8 @@
 *.sh text eol=lf
 *.tsx text eol=lf
 
+**/bin/* text eol=lf
+
 yarn.lock text eol=lf
 
 # Denote all files that are truly binary and should not be modified.

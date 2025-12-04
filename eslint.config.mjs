@@ -2,6 +2,7 @@ import tsParser from '@typescript-eslint/parser';
 import { defineConfig } from 'eslint/config';
 import pluginImport from 'eslint-plugin-import';
 import pluginJSXA11y from 'eslint-plugin-jsx-a11y';
+import oxlint from 'eslint-plugin-oxlint';
 import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
 import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
@@ -664,7 +665,7 @@ export default defineConfig(
         'warn',
         {
           types: {
-            // forbid FC as superflous
+            // forbid FC as superfluous
             FunctionComponent: {
               message:
                 'Type the props argument and let TS infer or use ComponentType for a component prop',
@@ -722,54 +723,6 @@ export default defineConfig(
   },
 
   {
-    // TODO: fix the issues in these files
-    files: [
-      'packages/desktop-client/src/components/accounts/Account.jsx',
-      'packages/desktop-client/src/components/accounts/MobileAccount.jsx',
-      'packages/desktop-client/src/components/accounts/MobileAccounts.jsx',
-      'packages/desktop-client/src/components/budget/BudgetCategories.jsx',
-      'packages/desktop-client/src/components/budget/BudgetSummaries.tsx',
-      'packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx',
-      'packages/desktop-client/src/components/budget/index.tsx',
-      'packages/desktop-client/src/components/budget/MobileBudget.tsx',
-      'packages/desktop-client/src/components/budget/envelope/HoldMenu.tsx',
-      'packages/desktop-client/src/components/budget/envelope/TransferMenu.tsx',
-      'packages/component-library/src/Menu.tsx',
-      'packages/desktop-client/src/components/FinancesApp.tsx',
-      'packages/desktop-client/src/components/GlobalKeys.ts',
-      'packages/desktop-client/src/components/LoggedInUser.tsx',
-      'packages/desktop-client/src/components/manager/ManagementApp.jsx',
-      'packages/desktop-client/src/components/manager/subscribe/common.tsx',
-      'packages/desktop-client/src/components/ManageRules.tsx',
-      'packages/desktop-client/src/components/mobile/MobileAmountInput.jsx',
-      'packages/desktop-client/src/components/mobile/MobileNavTabs.tsx',
-      'packages/desktop-client/src/components/Modals.tsx',
-      'packages/desktop-client/src/components/modals/EditRule.jsx',
-      'packages/desktop-client/src/components/modals/ImportTransactions.jsx',
-      'packages/desktop-client/src/components/modals/MergeUnusedPayees.jsx',
-      'packages/desktop-client/src/components/Notifications.tsx',
-      'packages/desktop-client/src/components/payees/ManagePayees.jsx',
-      'packages/desktop-client/src/components/payees/ManagePayeesWithData.jsx',
-      'packages/desktop-client/src/components/payees/PayeeTable.tsx',
-      'packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTable.tsx',
-      'packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTableTotals.tsx',
-      'packages/desktop-client/src/components/reports/reports/CashFlowCard.jsx',
-      'packages/desktop-client/src/components/reports/reports/CustomReport.jsx',
-      'packages/desktop-client/src/components/reports/reports/NetWorthCard.jsx',
-      'packages/desktop-client/src/components/reports/SaveReportName.tsx',
-      'packages/desktop-client/src/components/reports/useReport.ts',
-      'packages/desktop-client/src/components/schedules/ScheduleDetails.jsx',
-      'packages/desktop-client/src/components/schedules/SchedulesTable.tsx',
-      'packages/desktop-client/src/components/select/DateSelect.tsx',
-      'packages/desktop-client/src/components/sidebar/Tools.tsx',
-      'packages/desktop-client/src/components/sort.tsx',
-    ],
-
-    rules: {
-      'react-hooks/exhaustive-deps': 'off',
-    },
-  },
-  {
     files: [
       'eslint.config.mjs',
       '**/*.test.js',
@@ -810,4 +763,7 @@ export default defineConfig(
       'import/no-default-export': 'off',
     },
   },
+  // Disable ESLint rules that are already covered by oxlint
+  // This must be at the end to override previous rule configurations
+  ...oxlint.configs['flat/recommended'],
 );

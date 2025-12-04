@@ -95,8 +95,7 @@ export function CreateEncryptionKeyModal({
                     We will generate a key based on a password and use it to
                     encrypt from now on.{' '}
                     <strong>This requires a sync reset</strong> and all other
-                    devices will have to revert to this version of your
-                    data.{' '}
+                    devices will have to revert to this version of your data.{' '}
                   </Trans>
                   <Link
                     variant="external"

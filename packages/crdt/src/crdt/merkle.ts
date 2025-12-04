@@ -22,7 +22,7 @@ export type TrieNode = {
 type NumberTrieNodeKey = keyof Omit<TrieNode, 'hash'>;
 
 export function emptyTrie(): TrieNode {
-  return createTrieNode({ hash: 0 });
+  return { hash: 0 };
 }
 
 function isNumberTrieNodeKey(input: string): input is NumberTrieNodeKey {
@@ -31,33 +31,6 @@ function isNumberTrieNodeKey(input: string): input is NumberTrieNodeKey {
 
 export function getKeys(trie: TrieNode): NumberTrieNodeKey[] {
   return Object.keys(trie).filter(isNumberTrieNodeKey);
-}
-
-/**
- * Creates a TrieNode with keys in deterministic sorted order:
- * numeric keys ('0', '1', '2') first in order, then 'hash' last.
- * This ensures consistent serialization for snapshots.
- */
-function createTrieNode(props: TrieNode = {}): TrieNode {
-  const result: TrieNode = {};
-
-  // Add numeric keys in sorted order
-  if (props['0'] !== undefined) {
-    result['0'] = props['0'];
-  }
-  if (props['1'] !== undefined) {
-    result['1'] = props['1'];
-  }
-  if (props['2'] !== undefined) {
-    result['2'] = props['2'];
-  }
-
-  // Add hash last
-  if (props.hash !== undefined) {
-    result.hash = props.hash;
-  }
-
-  return result;
 }
 
 export function keyToTimestamp(key: string): number {
@@ -76,12 +49,7 @@ export function insert(trie: TrieNode, timestamp: Timestamp) {
   const hash = timestamp.hash();
   const key = Number(Math.floor(timestamp.millis() / 1000 / 60)).toString(3);
 
-  trie = createTrieNode({
-    '0': trie['0'],
-    '1': trie['1'],
-    '2': trie['2'],
-    hash: (trie.hash || 0) ^ hash,
-  });
+  trie = Object.assign({}, trie, { hash: (trie.hash || 0) ^ hash });
   return insertKey(trie, key, hash);
 }
 
@@ -92,19 +60,10 @@ function insertKey(trie: TrieNode, key: string, hash: number): TrieNode {
   const c = key[0];
   const t = isNumberTrieNodeKey(c) ? trie[c] : undefined;
   const n = t || {};
-  const childWithInserted = insertKey(n, key.slice(1), hash);
-  const updatedChild = createTrieNode({
-    '0': childWithInserted['0'],
-    '1': childWithInserted['1'],
-    '2': childWithInserted['2'],
-    hash: (n.hash || 0) ^ hash,
-  });
-
-  return createTrieNode({
-    '0': c === '0' ? updatedChild : trie['0'],
-    '1': c === '1' ? updatedChild : trie['1'],
-    '2': c === '2' ? updatedChild : trie['2'],
-    hash: trie.hash,
+  return Object.assign({}, trie, {
+    [c]: Object.assign({}, n, insertKey(n, key.slice(1), hash), {
+      hash: (n.hash || 0) ^ hash,
+    }),
   });
 }
 
@@ -188,11 +147,7 @@ export function prune(trie: TrieNode, n = 2): TrieNode {
   const keys = getKeys(trie);
   keys.sort();
 
-  const prunedChildren: {
-    '0'?: TrieNode;
-    '1'?: TrieNode;
-    '2'?: TrieNode;
-  } = {};
+  const next: TrieNode = { hash: trie.hash };
 
   // Prune child nodes.
   for (const k of keys.slice(-n)) {
@@ -202,15 +157,10 @@ export function prune(trie: TrieNode, n = 2): TrieNode {
       throw new Error(`TrieNode for key ${k} could not be found`);
     }
 
-    prunedChildren[k] = prune(node, n);
+    next[k] = prune(node, n);
   }
 
-  return createTrieNode({
-    '0': prunedChildren['0'],
-    '1': prunedChildren['1'],
-    '2': prunedChildren['2'],
-    hash: trie.hash,
-  });
+  return next;
 }
 
 export function debug(trie: TrieNode, k = '', indent = 0): string {
