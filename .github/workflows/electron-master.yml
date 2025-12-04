@@ -47,6 +47,12 @@ jobs:
           sudo flatpak install org.freedesktop.Sdk//24.08 -y
           sudo flatpak install org.freedesktop.Platform//24.08 -y
           sudo flatpak install org.electronjs.Electron2.BaseApp//24.08 -y
+
+      # Specify the xcode version manually to use the latest electron-builder
+      - name: Set Xcode version
+      - if: ${{ startsWith(matrix.os, 'macos') }}
+        run: sudo xcode-select -s /Applications/Xcode_26.1.1.app
+
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Electron for Mac
