@@ -9,13 +9,13 @@ import {
   type CategoryGroupEntity,
   type GoCardlessToken,
   type NewRuleEntity,
+  type NewUserEntity,
+  type NoteEntity,
   type RuleEntity,
   type ScheduleEntity,
   type TransactionEntity,
-  type UserEntity,
   type UserAccessEntity,
-  type NewUserEntity,
-  type NoteEntity,
+  type UserEntity,
 } from 'loot-core/types/models';
 import { type Template } from 'loot-core/types/models/templates';
 
@@ -207,7 +207,7 @@ export type Modal =
             | string
             | number
             | {
-                regex: boolean;
+                useRegex: boolean;
                 find: string;
                 replace: string;
               },

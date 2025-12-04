@@ -13,13 +13,12 @@ import {
 import { validForTransfer } from 'loot-core/shared/transfer';
 import { applyChanges, type Diff } from 'loot-core/shared/util';
 import {
-  type PayeeEntity,
   type AccountEntity,
+  type PayeeEntity,
   type ScheduleEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { type EditFieldModalProps } from '@desktop-client/components/modals/EditFieldModal';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
@@ -30,8 +29,14 @@ type BatchEditProps = {
   onSuccess?: (
     ids: Array<TransactionEntity['id']>,
     name: keyof TransactionEntity,
-    value: Parameters<EditFieldModalProps['onSubmit']>[1] | boolean,
-    mode: Parameters<EditFieldModalProps['onSubmit']>[2],
+    value:
+      | Parameters<
+          Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
+        >[1]
+      | boolean,
+    mode: Parameters<
+      Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
+    >[2],
   ) => void;
 };
 
@@ -127,7 +132,7 @@ export function useTransactionBatchActions() {
               value.find === ''
                 ? value.replace
                 : (trans.notes?.replaceAll(
-                    value.regex ? new RegExp(value.find, 'g') : value.find,
+                    value.useRegex ? value.replace : value.find,
                     value.replace,
                   ) ?? null);
           }

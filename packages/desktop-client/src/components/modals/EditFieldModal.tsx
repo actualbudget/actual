@@ -38,7 +38,7 @@ const noteAmendStrings: Record<NoteAmendMode, string> = {
   findAndReplace: 'Find and Replace',
 };
 
-export type EditFieldModalProps = Extract<
+type EditFieldModalProps = Extract<
   ModalType,
   { name: 'edit-field' }
 >['options'];
@@ -89,8 +89,10 @@ export function EditFieldModal({
   };
 
   const [noteAmend, onChangeMode] = useState<NoteAmendMode>('replace');
-  const [noteFindReplace, setNoteFindReplace] = useState({
-    regex: false,
+  const [noteFindReplace, setNoteFindReplace] = useState<
+    Extract<NoteAmendValue, { useRegex: boolean }>
+  >({
+    useRegex: false,
     find: '',
     replace: '',
   });
@@ -161,7 +163,7 @@ export function EditFieldModal({
                   noteInputRef.current?.focus();
                 }}
               >
-                <Trans>{noteAmendStrings[mode]}</Trans>
+                <Trans> {t(noteAmendStrings[mode])}</Trans>
               </Button>
             ))}
           </View>
@@ -169,11 +171,11 @@ export function EditFieldModal({
             <View style={{ gap: 10 }}>
               <LabeledCheckbox
                 id="noteRegex"
-                checked={noteFindReplace.regex}
+                checked={noteFindReplace.useRegex}
                 onChange={({ currentTarget: { checked } }) =>
                   setNoteFindReplace(current => ({
                     ...current,
-                    regex: checked,
+                    useRegex: checked,
                   }))
                 }
               >
@@ -203,7 +205,7 @@ export function EditFieldModal({
                   }))
                 }
                 onEnter={() => {
-                  if (noteFindReplace.regex) {
+                  if (noteFindReplace.useRegex) {
                     try {
                       new RegExp(noteFindReplace.find, 'g');
                     } catch (error) {
