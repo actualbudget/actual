@@ -104,7 +104,7 @@
     ],
     "*.{js,mjs,jsx,ts,tsx}": [
       "oxlint --deny-warnings --fix",
-      "eslint --max-warnings 0 --fix"
+      "eslint --max-warnings 0 --fix --no-warn-ignored"
     ]
   },
   "packageManager": "yarn@4.10.3",

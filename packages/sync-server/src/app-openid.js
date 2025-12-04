@@ -82,7 +82,7 @@ app.post('/config', async (req, res) => {
   try {
     const openIdConfig = JSON.parse(auth.extra_data);
     res.send({ status: 'ok', data: { openId: openIdConfig } });
-  } catch (error) {
+  } catch {
     res
       .status(500)
       .send({ status: 'error', reason: 'Invalid OpenID configuration' });

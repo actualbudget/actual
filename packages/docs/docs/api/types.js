@@ -561,7 +561,7 @@ export function PrimitiveType({ name, type, description }) {
   );
 }
 
-export function StructType({ name, fields }) {
+export function StructType({ fields }) {
   return (
     <div className="struct mt-4 mb-10">
       <Table
