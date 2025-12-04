@@ -366,7 +366,7 @@ export function isValidRedirectUrl(url) {
     } else {
       return false;
     }
-  } catch (err) {
+  } catch {
     return false;
   }
 }
