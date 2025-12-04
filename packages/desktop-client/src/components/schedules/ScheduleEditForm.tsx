@@ -5,6 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Input } from '@actual-app/components/input';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -127,10 +128,11 @@ export function ScheduleEditForm({
           <FormField style={{ flex: 1 }}>
             <FormLabel title={t('Schedule Name')} htmlFor="name-field" />
             <InitialFocus>
-              <GenericInput
-                type="string"
+              <Input
+                id="name-field"
                 value={fields.name}
-                onChange={e => {
+                placeholder={t('nothing')}
+                onChangeValue={e => {
                   dispatch({ type: 'set-field', field: 'name', value: e });
                 }}
               />
@@ -314,84 +316,83 @@ export function ScheduleEditForm({
               <Trans>Repeats</Trans>
             </label>
           </View>
+        </SpaceBetween>
 
-          <SpaceBetween
-            gap={5}
-            direction="vertical"
-            style={{ alignItems: 'flex-end' }}
+        <SpaceBetween
+          gap={5}
+          direction="vertical"
+          align="end"
+          style={{ marginTop: 10 }}
+        >
+          <View
+            style={{
+              marginTop: 5,
+              flexDirection: 'row',
+              alignItems: 'center',
+              userSelect: 'none',
+              justifyContent: 'flex-end',
+            }}
           >
-            <View
-              style={{
-                marginTop: 5,
-                flexDirection: 'row',
-                alignItems: 'center',
-                userSelect: 'none',
-                justifyContent: 'flex-end',
+            <Checkbox
+              id="form_posts_transaction"
+              checked={fields.posts_transaction}
+              onChange={e => {
+                dispatch({
+                  type: 'set-field',
+                  field: 'posts_transaction',
+                  value: e.target.checked,
+                });
               }}
+            />
+            <label
+              htmlFor="form_posts_transaction"
+              style={{ userSelect: 'none' }}
             >
-              <Checkbox
-                id="form_posts_transaction"
-                checked={fields.posts_transaction}
-                onChange={e => {
-                  dispatch({
-                    type: 'set-field',
-                    field: 'posts_transaction',
-                    value: e.target.checked,
-                  });
-                }}
-              />
-              <label
-                htmlFor="form_posts_transaction"
-                style={{ userSelect: 'none' }}
-              >
-                <Trans>Automatically add transaction</Trans>
-              </label>
-            </View>
+              <Trans>Automatically add transaction</Trans>
+            </label>
+          </View>
 
-            <Text
-              style={{
-                width: 350,
-                textAlign: 'right',
-                color: theme.pageTextLight,
-                fontSize: 13,
-                lineHeight: '1.4em',
-              }}
-            >
-              <Trans>
-                If checked, the schedule will automatically create transactions
-                for you in the specified account
-              </Trans>
-            </Text>
+          <Text
+            style={{
+              maxWidth: 350,
+              textAlign: 'right',
+              color: theme.pageTextLight,
+              fontSize: 13,
+              lineHeight: '1.4em',
+            }}
+          >
+            <Trans>
+              If checked, the schedule will automatically create transactions
+              for you in the specified account
+            </Trans>
+          </Text>
 
-            {!adding && schedule.rule && (
-              <SpaceBetween style={{ marginTop: 20, alignItems: 'center' }}>
-                {isCustom && (
-                  <Text
-                    style={{
-                      color: theme.pageTextLight,
-                      fontSize: 13,
-                      textAlign: 'right',
-                      width: 350,
-                    }}
-                  >
-                    <Trans>
-                      This schedule has custom conditions and actions
-                    </Trans>
-                  </Text>
-                )}
-                <Button onPress={() => onEditRule(schedule.rule)}>
-                  <Trans>Edit as rule</Trans>
-                </Button>
-              </SpaceBetween>
-            )}
-          </SpaceBetween>
+          {!adding && schedule.rule && (
+            <SpaceBetween style={{ marginTop: 20, alignItems: 'center' }}>
+              {isCustom && (
+                <Text
+                  style={{
+                    color: theme.pageTextLight,
+                    fontSize: 13,
+                    textAlign: 'right',
+                    width: 350,
+                  }}
+                >
+                  <Trans>This schedule has custom conditions and actions</Trans>
+                </Text>
+              )}
+              <Button onPress={() => onEditRule(schedule.rule)}>
+                <Trans>Edit as rule</Trans>
+              </Button>
+            </SpaceBetween>
+          )}
         </SpaceBetween>
       </View>
 
       <View
         style={{
           padding: 10,
-          minHeight: 150,
+          minHeight: '30vh',
           borderTop: `1px solid ${theme.tableBorder}`,
         }}
       >
