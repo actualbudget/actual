@@ -12,7 +12,24 @@ export interface RuleEntity extends NewRuleEntity {
   id: string;
 }
 
-export type RuleConditionOp = RuleConditionEntity['op'];
+export type RuleConditionOp =
+  | 'is'
+  | 'isNot'
+  | 'oneOf'
+  | 'notOneOf'
+  | 'isapprox'
+  | 'isbetween'
+  | 'gt'
+  | 'gte'
+  | 'lt'
+  | 'lte'
+  | 'contains'
+  | 'doesNotContain'
+  | 'hasTags'
+  | 'and'
+  | 'matches'
+  | 'onBudget'
+  | 'offBudget';
 
 export type FieldValueTypes = {
   account: string;

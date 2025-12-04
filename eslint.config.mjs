@@ -97,6 +97,8 @@ export default defineConfig(
       'packages/loot-core/**/proto/*',
       'packages/sync-server/user-files/',
       'packages/sync-server/server-files/',
+      'packages/plugins-core/build/',
+      'packages/plugins-core/node_modules/',
       '.yarn/*',
       '.github/*',
       '**/build/',
