@@ -350,7 +350,6 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
     }
 
     run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

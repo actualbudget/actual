@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/sync-server",
-  "version": "25.11.0",
+  "version": "25.12.0",
   "license": "MIT",
   "description": "actual syncing server",
   "bin": {
@@ -35,11 +35,11 @@
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "debug": "^4.4.3",
-    "express": "5.1.0",
+    "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "express-winston": "^4.2.0",
     "ipaddr.js": "^2.2.0",
-    "jws": "^4.0.0",
+    "jws": "^4.0.1",
     "migrate": "^2.1.0",
     "nordigen-node": "^1.4.1",
     "openid-client": "^5.7.1",
