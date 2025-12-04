@@ -1097,7 +1097,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   top: '75%',
                   right: '20px',
                   transform: 'translateY(-50%)',
-                  bbackground: theme.errorBackground,
+                  background: theme.errorBackground,
                   border: 'none',
                   color: 'white',
                   fontSize: '11px',
