@@ -123,8 +123,8 @@ export function MobileNavTabs() {
       Icon: SvgReports,
     },
     {
-      name: t('Schedules (Soon)'),
-      path: '/schedules/soon',
+      name: t('Schedules'),
+      path: '/schedules',
       style: navTabStyle,
       Icon: SvgCalendar3,
     },
