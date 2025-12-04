@@ -3,7 +3,6 @@
   "plugins": ["react", "typescript", "import", "jsx-a11y"],
   "rules": {
     // TODO fix all these and re-enable
-    "import/namespace": "off",
     "jsx-a11y/alt-text": "off",
     "jsx-a11y/aria-role": "off",
     "jsx-a11y/click-events-have-key-events": "off",
@@ -16,8 +15,6 @@
     "no-constant-condition": "off",
     "no-empty-pattern": "off",
     "no-extra-boolean-cast": "off",
-    "no-unused-vars": "off",
-    "no-useless-catch": "off",
     "react/jsx-key": "off",
   },
   "overrides": [

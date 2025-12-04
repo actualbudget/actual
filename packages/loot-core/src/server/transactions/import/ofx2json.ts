@@ -145,7 +145,7 @@ export async function ofx2json(ofx: string): Promise<OFXParseResult> {
   let dataParsed = null;
   try {
     dataParsed = await parseXml(content);
-  } catch (e) {
+  } catch {
     const sanitized = sgml2Xml(content);
     dataParsed = await parseXml(sanitized);
   }
