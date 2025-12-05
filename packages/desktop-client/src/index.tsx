@@ -23,6 +23,7 @@ import * as budgetSlice from './budget/budgetSlice';
 import * as budgetfilesSlice from './budgetfiles/budgetfilesSlice';
 import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
+import * as globalSyncedPrefsSlice from './globalSyncedPrefs/globalSyncedPrefsSlice';
 import * as modalsSlice from './modals/modalsSlice';
 import * as notificationsSlice from './notifications/notificationsSlice';
 import * as payeesSlice from './payees/payeesSlice';
@@ -47,6 +48,7 @@ const boundActions = bindActionCreators(
     ...transactionsSlice.actions,
     ...tagsSlice.actions,
     ...usersSlice.actions,
+    ...globalSyncedPrefsSlice.actions,
   },
   store.dispatch,
 );
