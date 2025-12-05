@@ -52,14 +52,14 @@ async function needsBootstrap({ url }: { url?: string } = {}) {
     if (!serverConfig) {
       return { bootstrapped: true, hasServer: false };
     }
-  } catch (err) {
+  } catch {
     return { error: 'get-server-failure' };
   }
 
   let resText: string;
   try {
     resText = await get(serverConfig.SIGNUP_SERVER + '/needs-bootstrap');
-  } catch (err) {
+  } catch {
     return { error: 'network-failure' };
   }
 
@@ -79,7 +79,7 @@ async function needsBootstrap({ url }: { url?: string } = {}) {
 
   try {
     res = JSON.parse(resText);
-  } catch (err) {
+  } catch {
     return { error: 'parse-failure' };
   }
 

@@ -2,7 +2,6 @@ import { useCallback, type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { AutoTextSize } from 'auto-text-size';
 
@@ -28,7 +27,6 @@ type BudgetCellProps<
   typeof CellValue<'envelope-budget' | 'tracking-budget', SheetFieldName>
 > & {
   category: CategoryEntity;
-  style?: CSSProperties;
   month: string;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
 };
@@ -40,7 +38,6 @@ export function BudgetCell<
   category,
   month,
   onBudgetAction,
-  style,
   children,
   ...props
 }: BudgetCellProps<SheetFieldName>) {

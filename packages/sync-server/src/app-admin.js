@@ -21,7 +21,7 @@ app.get('/owner-created/', (req, res) => {
   try {
     const ownerCount = UserService.getOwnerCount();
     res.json(ownerCount > 0);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Failed to retrieve owner count' });
   }
 });
