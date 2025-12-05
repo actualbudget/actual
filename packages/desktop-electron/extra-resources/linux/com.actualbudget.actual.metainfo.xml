@@ -11,6 +11,10 @@
     <p>Designed for speed, Actual Budget has a streamlined interface that minimizes distractions, making it easy to navigate your finances. It operates locally, ensuring functionality without a network connection while syncing data across devices. This local-first approach also enhances privacy through end-to-end encryption.</p>
     <p>The budgeting system is grounded in real income, helping you track spending and savings accurately. The app simplifies managing transactions with a minimal, efficient interface, supporting features like split transactions and transfers. Additionally, Actual Budget offers customizable reports alongside default net worth and cash flow reports, enabling users to analyze your finances in a way that suits you.</p>
   </description>
+  <branding>
+    <color type="primary" scheme_preference="light">#a37fe1</color>
+    <color type="primary" scheme_preference="dark">#311c70</color>
+  </branding>
   <launchable type="desktop-id">com.actualbudget.actual.desktop</launchable>
   <url type="homepage">https://actualbudget.org/</url>
   <url type="bugtracker">https://github.com/actualbudget/actual/issues</url>
