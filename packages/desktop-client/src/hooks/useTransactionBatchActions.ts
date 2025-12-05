@@ -19,7 +19,10 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { pushModal } from '@desktop-client/modals/modalsSlice';
+import {
+  pushModal,
+  type Modal as ModalType,
+} from '@desktop-client/modals/modalsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -126,13 +129,13 @@ export function useTransactionBatchActions() {
           } else if (
             mode === 'findAndReplace' &&
             typeof value === 'object' &&
-            'regex' in value
+            'useRegex' in value
           ) {
             valueToSet =
               value.find === ''
                 ? value.replace
                 : (trans.notes?.replaceAll(
-                    value.useRegex ? value.replace : value.find,
+                    value.useRegex ? new RegExp(value.find, 'g') : value.find,
                     value.replace,
                   ) ?? null);
           }

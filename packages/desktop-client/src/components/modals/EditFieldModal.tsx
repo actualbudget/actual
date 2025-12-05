@@ -1,5 +1,5 @@
 import { type CSSProperties, type ReactNode, useRef, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -163,7 +163,7 @@ export function EditFieldModal({
                   noteInputRef.current?.focus();
                 }}
               >
-                <Trans> {t(noteAmendStrings[mode])}</Trans>
+                {t(noteAmendStrings[mode])}
               </Button>
             ))}
           </View>
