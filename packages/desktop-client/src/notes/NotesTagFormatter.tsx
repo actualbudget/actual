@@ -31,7 +31,7 @@ export function NotesTagFormatter({
           isLast ||
           (nextSegment?.type === 'text' && /^\s/.test(nextSegment.content))
             ? ''
-            : '';
+            : ' ';
 
         switch (segment.type) {
           case 'text':

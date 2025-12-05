@@ -16,6 +16,16 @@ const WWW_URL_REGEX = /www\.[^\s]+/;
 const UNIX_PATH_REGEX = /^\/(?:[^\s/]+\/)*[^\s/]+$/;
 const WINDOWS_PATH_REGEX = /^[A-Z]:\\(?:[^\s\\]+\\)*[^\s\\]+$/i;
 
+// Common trailing punctuation that should not be part of URLs
+const TRAILING_PUNCTUATION_REGEX = /[.,;:!?)\]"']+$/;
+
+/**
+ * Strips trailing punctuation from a URL
+ */
+function stripTrailingPunctuation(url: string): string {
+  return url.replace(TRAILING_PUNCTUATION_REGEX, '');
+}
+
 /**
  * Checks if a URL is a file path
  */
@@ -136,8 +146,11 @@ export function parseNotes(notes: string): ParsedSegment[] {
         segments.push(...parseTextWithTags(textBefore));
       }
 
+      // Strip trailing punctuation from the URL
+      const rawUrl = urlMatch[0];
+      const url = stripTrailingPunctuation(rawUrl);
+
       // Add the link segment
-      const url = urlMatch[0];
       segments.push({
         type: 'link',
         content: url,
@@ -159,8 +172,11 @@ export function parseNotes(notes: string): ParsedSegment[] {
         segments.push(...parseTextWithTags(textBefore));
       }
 
+      // Strip trailing punctuation from the URL
+      const rawUrl = wwwMatch[0];
+      const url = stripTrailingPunctuation(rawUrl);
+
       // Add the link segment
-      const url = wwwMatch[0];
       segments.push({
         type: 'link',
         content: url,
