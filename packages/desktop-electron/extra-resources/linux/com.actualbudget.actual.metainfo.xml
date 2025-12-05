@@ -54,7 +54,11 @@
     </screenshot>
   </screenshots>
   <releases>
-    <release version="%RELEASE_VERSION%" date="%RELEASE_DATE%"></release>
+    <release version="%RELEASE_VERSION%" date="%RELEASE_DATE%">
+      <description>
+        <p>Check out the full release notes at actualbudget.org/docs/releases</p>
+      </description>
+    </release>
   </releases>
   <developer_name>Actual Core Contributors</developer_name>
   <update_contact>dev@actualbudget.org</update_contact>
