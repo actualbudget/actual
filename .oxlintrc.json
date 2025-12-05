@@ -106,7 +106,7 @@
         "packages/desktop-client/src/hooks/useQuery.ts",
       ],
       "rules": {
-        "react-hooks/exhaustive-deps": "off",
+        "react/exhaustive-deps": "off",
       },
     },
   ]
