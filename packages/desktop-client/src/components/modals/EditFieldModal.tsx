@@ -30,7 +30,9 @@ const itemStyle: CSSProperties = {
 };
 
 type NoteAmendValue = Parameters<EditFieldModalProps['onSubmit']>[1];
-type NoteAmendMode = Parameters<EditFieldModalProps['onSubmit']>[2];
+type NoteAmendMode = NonNullable<
+  Parameters<EditFieldModalProps['onSubmit']>[2]
+>;
 const noteAmendStrings: Record<NoteAmendMode, string> = {
   replace: 'Replace',
   prepend: 'Prepend',
@@ -163,7 +165,7 @@ export function EditFieldModal({
                   noteInputRef.current?.focus();
                 }}
               >
-                {t(noteAmendStrings[mode])}
+                {t(noteAmendStrings[mode as NoteAmendMode])}
               </Button>
             ))}
           </View>
@@ -208,7 +210,7 @@ export function EditFieldModal({
                   if (noteFindReplace.useRegex) {
                     try {
                       new RegExp(noteFindReplace.find, 'g');
-                    } catch (error) {
+                    } catch {
                       alert(t('Invalid regular expression'));
                       return;
                     }

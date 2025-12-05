@@ -36,7 +36,8 @@ type BatchEditProps = {
       | Parameters<
           Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
         >[1]
-      | boolean,
+      | boolean
+      | null,
     mode: Parameters<
       Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
     >[2],
@@ -82,8 +83,8 @@ export function useTransactionBatchActions() {
 
     const onChange = async (
       name: keyof TransactionEntity,
-      value: Parameters<BatchEditProps['onSuccess']>[2],
-      mode?: Parameters<BatchEditProps['onSuccess']>[3],
+      value: Parameters<NonNullable<BatchEditProps['onSuccess']>>[2],
+      mode?: Parameters<NonNullable<BatchEditProps['onSuccess']>>[3],
     ) => {
       let transactionsToChange = transactions;
 
@@ -137,7 +138,7 @@ export function useTransactionBatchActions() {
                 : (trans.notes?.replaceAll(
                     value.useRegex ? new RegExp(value.find, 'g') : value.find,
                     value.replace,
-                  ) ?? null);
+                  ) ?? '');
           }
         }
         const transaction = {

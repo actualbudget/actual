@@ -895,7 +895,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                                     ? new RegExp(value.find, 'g')
                                     : value.find,
                                   value.replace,
-                                ) ?? null),
+                                ) ?? undefined),
                           );
                         } else {
                           onUpdateInner(transactionToEdit, name, value);
