@@ -244,7 +244,7 @@ export function BudgetPage() {
       const group = categoryGroups.find(g => g.id === groupId);
       onSaveGroup({
         ...group,
-        hidden: !!!group.hidden,
+        hidden: group.hidden ? false : true,
       });
       dispatch(collapseModals({ rootModalName: 'category-group-menu' }));
     },
@@ -301,7 +301,7 @@ export function BudgetPage() {
       const category = categories.find(c => c.id === categoryId);
       onSaveCategory({
         ...category,
-        hidden: !!!category.hidden,
+        hidden: category.hidden ? false : true,
       });
       dispatch(collapseModals({ rootModalName: 'category-menu' }));
     },

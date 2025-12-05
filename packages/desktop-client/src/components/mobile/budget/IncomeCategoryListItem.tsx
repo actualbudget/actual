@@ -258,7 +258,7 @@ export function IncomeCategoryListItem({
           paddingLeft: 5,
           paddingRight: 5,
           borderBottomWidth: 1,
-          opacity: !!category.hidden ? 0.5 : undefined,
+          opacity: category.hidden ? 0.5 : undefined,
           backgroundColor: monthUtils.isCurrentMonth(month)
             ? theme.budgetCurrentMonth
             : theme.budgetOtherMonth,

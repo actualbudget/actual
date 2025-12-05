@@ -31,8 +31,8 @@ export function FilterList<T extends { id: string; name: string }>({
         {items.map((item, idx) => {
           return [
             <div
-              {...(getItemProps ? getItemProps({ item }) : null)}
               key={item.id}
+              {...(getItemProps ? getItemProps({ item }) : null)}
               style={{
                 backgroundColor:
                   highlightedIndex === idx
