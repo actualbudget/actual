@@ -37,6 +37,21 @@ export type Modal =
       };
     }
   | {
+      name: 'import-categories';
+      options: {
+        newCategories: string[];
+        onConfirm: (
+          mappings: Array<{
+            originalName: string;
+            finalName: string;
+            existingCategoryId: CategoryEntity['id'] | null;
+            groupId: CategoryGroupEntity['id'] | null;
+          }>,
+        ) => void;
+        onCancel: () => void;
+      };
+    }
+  | {
       name: 'add-account';
       options: {
         upgradingAccountId?: string;
