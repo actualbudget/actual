@@ -55,8 +55,9 @@
   </screenshots>
   <releases>
     <release version="%RELEASE_VERSION%" date="%RELEASE_DATE%">
+      <url>https://actualbudget.org/docs/releases</url>
       <description>
-        <p>Check out the full release notes at actualbudget.org/docs/releases</p>
+        <p>Check out the full release notes on our website. https://shouldbreakthepipeline.com</p>
       </description>
     </release>
   </releases>
