@@ -3,6 +3,7 @@ import {
   getNumberFormat,
   setNumberFormat,
   currencyToAmount,
+  stringToInteger,
   titleFirst,
 } from './util';
 
@@ -49,11 +50,18 @@ describe('utility functions', () => {
     expect(looselyParseAmount('-3')).toBe(-3);
     expect(looselyParseAmount('-3.45')).toBe(-3.45);
     expect(looselyParseAmount('-3,45')).toBe(-3.45);
+    // Unicode minus
+    expect(looselyParseAmount('−3')).toBe(-3);
+    expect(looselyParseAmount('−3.45')).toBe(-3.45);
+    expect(looselyParseAmount('−3,45')).toBe(-3.45);
   });
 
   test('looseParseAmount works with parentheses (negative)', () => {
     expect(looselyParseAmount('(3.45)')).toBe(-3.45);
     expect(looselyParseAmount('(3)')).toBe(-3);
+    // Parentheses with Unicode minus
+    expect(looselyParseAmount('(−3.45)')).toBe(-3.45);
+    expect(looselyParseAmount('(−3)')).toBe(-3);
   });
 
   test('looseParseAmount ignores non-numeric characters', () => {
@@ -142,6 +150,10 @@ describe('utility functions', () => {
     expect(currencyToAmount('-3')).toBe(-3);
     expect(currencyToAmount('-3.45')).toBe(-3.45);
     expect(currencyToAmount('-3,45')).toBe(-3.45);
+    // Unicode minus
+    expect(currencyToAmount('−3')).toBe(-3);
+    expect(currencyToAmount('−3.45')).toBe(-3.45);
+    expect(currencyToAmount('−3,45')).toBe(-3.45);
   });
 
   test('currencyToAmount works with non-fractional numbers', () => {
@@ -180,5 +192,11 @@ describe('utility functions', () => {
     expect(titleFirst(null)).toBe('');
     expect(titleFirst('a')).toBe('A');
     expect(titleFirst('abc')).toBe('Abc');
+  });
+
+  test('stringToInteger works with negative numbers', () => {
+    expect(stringToInteger('-3')).toBe(-3);
+    // Unicode minus
+    expect(stringToInteger('−3')).toBe(-3);
   });
 });

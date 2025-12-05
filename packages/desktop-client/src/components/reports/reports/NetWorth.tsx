@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -68,6 +74,16 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
+  const getDefaultIntervalForMode = useCallback(
+    (mode: TimeFrame['mode']): 'Daily' | 'Weekly' | 'Monthly' | 'Yearly' => {
+      if (mode === 'lastMonth') {
+        return 'Weekly'; // For a single month, weekly interval provides better granularity than a single monthly data point
+      }
+      return 'Monthly';
+    },
+    [],
+  );
+
   const accounts = useAccounts();
   const {
     conditions,
@@ -89,7 +105,20 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [start, setStart] = useState(monthUtils.currentMonth());
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
-  const [interval, setInterval] = useState(widget?.meta?.interval || 'Monthly');
+  const [interval, setInterval] = useState(
+    widget?.meta?.interval || getDefaultIntervalForMode(mode),
+  );
+  // Combined setter: set mode and update interval (unless interval was set in widget meta)
+  const setModeAndInterval = useCallback(
+    (newMode: TimeFrame['mode']) => {
+      setMode(newMode);
+      if (!widget?.meta?.interval) {
+        setInterval(getDefaultIntervalForMode(newMode));
+      }
+    },
+    [widget?.meta?.interval, getDefaultIntervalForMode],
+  );
+
   const [latestTransaction, setLatestTransaction] = useState('');
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
@@ -182,14 +211,14 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
       );
       setStart(initialStart);
       setEnd(initialEnd);
-      setMode(initialMode);
+      setModeAndInterval(initialMode);
     }
-  }, [latestTransaction, widget?.meta?.timeFrame]);
+  }, [latestTransaction, widget?.meta?.timeFrame, setModeAndInterval]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
     setEnd(end);
-    setMode(mode);
+    setModeAndInterval(mode);
   }
 
   async function onSaveWidget() {

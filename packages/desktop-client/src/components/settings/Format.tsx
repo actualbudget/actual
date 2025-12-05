@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
