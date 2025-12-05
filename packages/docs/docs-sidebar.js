@@ -11,17 +11,6 @@
 
 // @ts-check
 
-/**
- * @param {string} title
- * @returns {import('@docusaurus/plugin-content-docs').PropSidebarItemHtml}
- */
-const unavailable = title => ({
-  type: 'html',
-  value: title,
-  className: 'menu__link menu__link--unavailable',
-  defaultStyle: true,
-});
-
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 const sidebars = {
   docs: [

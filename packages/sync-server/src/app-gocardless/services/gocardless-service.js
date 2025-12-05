@@ -332,7 +332,7 @@ export const goCardlessService = {
     };
     try {
       response = await client.initSession(body);
-    } catch (error) {
+    } catch {
       try {
         console.log('Failed to link using:');
         console.log(body);

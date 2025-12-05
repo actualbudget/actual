@@ -411,7 +411,7 @@ function QueryItem({
           },
         }),
       );
-    } catch (error) {
+    } catch {
       dispatch(
         addNotification({
           notification: {
@@ -457,7 +457,7 @@ function QueryItem({
           }),
         );
       }
-    } catch (error) {
+    } catch {
       dispatch(
         addNotification({
           notification: {
