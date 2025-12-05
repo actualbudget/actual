@@ -141,7 +141,7 @@ async function loadGlobalPrefs() {
         'utf8',
       ),
     );
-  } catch (e) {
+  } catch {
     logMessage('info', 'Could not load global state - using defaults');
     state = {};
   }

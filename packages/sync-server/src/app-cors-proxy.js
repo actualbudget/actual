@@ -151,7 +151,7 @@ app.use('/', async (req, res) => {
   let url;
   try {
     url = new URL(targetUrlString);
-  } catch (e) {
+  } catch {
     return res.status(400).json({ error: 'Invalid url parameter' });
   }
 
