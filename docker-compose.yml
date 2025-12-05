@@ -1,17 +1,23 @@
-###################################################
-# This creates and stands up the development
-# docker container. Depends on the Dockerfile and
-# docker-start.sh files.
-###################################################
-
 services:
-  actual-development:
+  actual-sync-server:
     build: .
-    image: actual-development
+    image: actual-sync-server
     environment:
-      - HTTPS
+      ACTUAL_DATA_DIR: /data
+      ACTUAL_PORT: 5006
     ports:
-      - '3001:3001'
+      - '${ACTUAL_PORT:-5006}:${ACTUAL_PORT:-5006}'
+    user: 'actual:actual'
     volumes:
-      - '.:/app'
-    restart: 'no'
+      - sync_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: curl -f http://localhost:${ACTUAL_PORT:-5006}/health || exit 1
+      interval: 30s
+      retries: 3
+      start_period: 5s
+      timeout: 10s
+
+volumes:
+  sync_data:
+    driver: local
