@@ -65,6 +65,10 @@ contextBridge.exposeInMainWorld('Actual', {
     ipcRenderer.invoke('open-external-url', url);
   },
 
+  openFileInExplorer: (filepath: string) => {
+    ipcRenderer.invoke('open-file-in-explorer', filepath);
+  },
+
   onEventFromMain: (type: string, handler: (...args: unknown[]) => void) => {
     ipcRenderer.on(type, handler);
   },

@@ -607,6 +607,10 @@ ipcMain.handle('open-external-url', (event, url) => {
   shell.openExternal(url);
 });
 
+ipcMain.handle('open-file-in-explorer', (event, filepath) => {
+  shell.showItemInFolder(filepath);
+});
+
 ipcMain.on('message', (_event, msg) => {
   if (!serverProcess) {
     return;
