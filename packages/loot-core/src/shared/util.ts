@@ -591,13 +591,13 @@ export function applyFindReplace(
   replace: string,
   useRegex: boolean,
 ): string {
-  if (find === '') return replace;
+  if (find === '') return text ?? '';
   if (!text) return '';
 
   try {
     const pattern = useRegex ? new RegExp(find, 'g') : find;
     return text.replaceAll(pattern, replace);
   } catch {
-    return text ?? '';
+    return text;
   }
 }
