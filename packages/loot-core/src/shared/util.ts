@@ -584,3 +584,20 @@ export function tsToRelativeTime(
 
   return distance;
 }
+
+export function applyFindReplace(
+  text: string | null | undefined,
+  find: string,
+  replace: string,
+  useRegex: boolean,
+): string {
+  if (find === '') return replace;
+  if (!text) return '';
+
+  try {
+    const pattern = useRegex ? new RegExp(find, 'g') : find;
+    return text.replaceAll(pattern, replace);
+  } catch {
+    return text ?? '';
+  }
+}

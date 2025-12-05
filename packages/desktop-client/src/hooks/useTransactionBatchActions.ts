@@ -11,7 +11,11 @@ import {
   updateTransaction,
 } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
-import { applyChanges, type Diff } from 'loot-core/shared/util';
+import {
+  applyChanges,
+  applyFindReplace,
+  type Diff,
+} from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type PayeeEntity,
@@ -132,13 +136,12 @@ export function useTransactionBatchActions() {
             typeof value === 'object' &&
             'useRegex' in value
           ) {
-            valueToSet =
-              value.find === ''
-                ? value.replace
-                : (trans.notes?.replaceAll(
-                    value.useRegex ? new RegExp(value.find, 'g') : value.find,
-                    value.replace,
-                  ) ?? '');
+            valueToSet = applyFindReplace(
+              trans.notes,
+              value.find,
+              value.replace,
+              value.useRegex,
+            );
           }
         }
         const transaction = {
