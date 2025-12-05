@@ -16,6 +16,45 @@
     "no-empty-pattern": "off",
     "no-extra-boolean-cast": "off",
     "react/jsx-key": "off",
+
+    // Keep these rules
+    "no-var": "warn",
+
+    // React rules
+    "react/exhaustive-deps": [
+      "warn",
+      {
+        "additionalHooks": "(useQuery|useEffectAfterMount)",
+      },
+    ],
+    "react/jsx-curly-brace-presence": "warn",
+    "react/jsx-filename-extension": [
+      "warn",
+      {
+        "extensions": [".jsx", ".tsx"],
+        "allow": "as-needed",
+      },
+    ],
+    "react/jsx-no-comment-textnodes": "warn",
+    "react/jsx-no-duplicate-props": "warn",
+    "react/jsx-no-target-blank": "warn",
+    "react/jsx-no-undef": "error",
+    "react/jsx-no-useless-fragment": "warn",
+    "react/jsx-pascal-case": [
+      "warn",
+      {
+        "allowAllCaps": true,
+        "ignore": [],
+      },
+    ],
+    "react/no-danger-with-children": "warn",
+    "react/no-direct-mutation-state": "warn",
+    "react/no-is-mounted": "warn",
+    "react/no-unstable-nested-components": "warn",
+    "react/require-render-return": "error",
+    "react/rules-of-hooks": "error",
+    "react/self-closing-comp": "warn",
+    "react/style-prop-object": "warn",
   },
   "overrides": [
     {
