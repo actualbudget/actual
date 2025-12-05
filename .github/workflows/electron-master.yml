@@ -57,6 +57,7 @@ jobs:
           TODAY=$(date +%Y-%m-%d)
           VERSION=${{ steps.process_version.outputs.version }}
           sed -i "s/%RELEASE_VERSION%/$VERSION/g; s/%RELEASE_DATE%/$TODAY/g" "$METAINFO_FILE"
+          sudo apt-get install appstream
           appstreamcli --version
           appstreamcli validate "$METAINFO_FILE"
       - name: Set up environment
