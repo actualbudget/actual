@@ -42,8 +42,8 @@ export function DesktopLinkedNotes({
 
     if (isFilePath) {
       if (isElectron()) {
-        // Open file in explorer/finder
-        window.Actual?.openFileInExplorer(url);
+        // Open file in file manager
+        window.Actual?.openInFileManager(url);
       } else {
         // Browser fallback: copy to clipboard
         await navigator.clipboard.writeText(url);

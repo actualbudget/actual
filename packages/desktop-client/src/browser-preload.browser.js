@@ -190,8 +190,8 @@ global.Actual = {
   openURLInBrowser: url => {
     window.open(url, '_blank');
   },
-  openFileInExplorer: () => {
-    // File explorer not available in browser
+  openInFileManager: () => {
+    // File manager not available in browser
   },
   onEventFromMain: () => {},
   isUpdateReadyForDownload: () => isUpdateReadyForDownload,

@@ -13,7 +13,7 @@ type Actual = {
   IS_DEV: boolean;
   ACTUAL_VERSION: string;
   openURLInBrowser: (url: string) => void;
-  openFileInExplorer: (filepath: string) => void;
+  openInFileManager: (filepath: string) => void;
   saveFile: (
     contents: string | Buffer,
     filename: string,
