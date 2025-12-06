@@ -20,6 +20,49 @@
     // Keep these rules
     "no-var": "warn",
 
+    // Import rules
+    "import/first": "error",
+    "import/no-amd": "error",
+    "import/no-default-export": "warn",
+    "import/no-webpack-loader-syntax": "error",
+    "import/no-useless-path-segments": "warn",
+    "import/no-unresolved": "warn",
+    "import/no-unused-modules": "warn",
+    "import/no-duplicates": [
+      "warn",
+      {
+        "prefer-inline": true,
+      },
+    ],
+    "import/order": [
+      "warn",
+      {
+        "alphabetize": {
+          "caseInsensitive": true,
+          "order": "asc",
+        },
+        "groups": ["builtin", "external", "parent", "sibling", "index"],
+        "newlines-between": "always",
+      },
+      {
+      "pathGroups": [
+        {
+          // Enforce that React (and react-related packages) is the first import
+          "group": "builtin",
+          "pattern": "react?(-*)",
+          "position": "before",
+        },
+        {
+            // Separate imports from Actual from "real" external imports
+            "group": "external",
+            "pattern": "loot-{core,design}/**/*",
+            "position": "after",
+          },
+        ],
+        "pathGroupsExcludedImportTypes": ["react"],
+      },
+    ],
+
     // React rules
     "react/exhaustive-deps": [
       "warn",
@@ -109,5 +152,18 @@
         "react-hooks/exhaustive-deps": "off",
       },
     },
+
+    {
+      "files": [
+        "packages/docs/**/*", // TODO: fix these issues
+        "packages/api/migrations/*",
+        "packages/loot-core/migrations/*",
+        "packages/sync-server/src/app-gocardless/banks/*.js",
+        "*.config.{ts,mts,mjs}",
+      ],
+      "rules": {
+        "import/no-default-export": "off",
+      }
+    }
   ]
 }

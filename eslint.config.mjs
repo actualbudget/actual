@@ -1,13 +1,12 @@
 import tsParser from '@typescript-eslint/parser';
 import { defineConfig } from 'eslint/config';
-import pluginImport from 'eslint-plugin-import';
 import pluginJSXA11y from 'eslint-plugin-jsx-a11y';
 import oxlint from 'eslint-plugin-oxlint';
 import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
 import globals from 'globals';
 import pluginTypescript from 'typescript-eslint';
 
-// eslint-disable-next-line import/extensions
+// oxlint-disable-next-line import/extensions
 import pluginActual from './packages/eslint-plugin-actual/lib/index.js';
 
 const confusingBrowserGlobals = [
@@ -149,7 +148,6 @@ export default defineConfig(
     },
   },
   pluginTypescript.configs.recommended,
-  pluginImport.flatConfigs.recommended,
   {
     plugins: {
       actual: pluginActual,
@@ -313,55 +311,6 @@ export default defineConfig(
 
       'getter-return': 'warn',
 
-      // https://github.com/benmosher/eslint-plugin-import/tree/master/docs/rules
-      'import/first': 'error',
-      'import/no-amd': 'error',
-      'import/no-anonymous-default-export': 'warn',
-      'import/no-webpack-loader-syntax': 'error',
-      'import/extensions': [
-        'warn',
-        'never',
-        {
-          json: 'always',
-        },
-      ],
-      'import/no-useless-path-segments': 'warn',
-      'import/no-duplicates': [
-        'warn',
-        {
-          'prefer-inline': true,
-        },
-      ],
-      'import/order': [
-        'warn',
-        {
-          alphabetize: {
-            caseInsensitive: true,
-            order: 'asc',
-          },
-
-          groups: ['builtin', 'external', 'parent', 'sibling', 'index'],
-          'newlines-between': 'always',
-
-          pathGroups: [
-            {
-              // Enforce that React (and react-related packages) is the first import
-              group: 'builtin',
-              pattern: 'react?(-*)',
-              position: 'before',
-            },
-            {
-              // Separate imports from Actual from "real" external imports
-              group: 'external',
-              pattern: 'loot-{core,design}/**/*',
-              position: 'after',
-            },
-          ],
-
-          pathGroupsExcludedImportTypes: ['react'],
-        },
-      ],
-
       // https://github.com/evcohen/eslint-plugin-jsx-a11y/tree/master/docs/rules
       'jsx-a11y/alt-text': 'warn',
       'jsx-a11y/anchor-has-content': 'warn',
@@ -496,7 +445,6 @@ export default defineConfig(
       'prefer-spread': 'off',
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-require-imports': 'off',
-      'import/no-default-export': 'warn',
     },
   },
   {
@@ -527,13 +475,6 @@ export default defineConfig(
       'no-dupe-class-members': 'off',
       // 'tsc' already handles this (https://github.com/typescript-eslint/typescript-eslint/issues/477)
       'no-undef': 'off',
-
-      // TypeScript already handles these (https://typescript-eslint.io/troubleshooting/typed-linting/performance/#eslint-plugin-import)
-      'import/named': 'off',
-      'import/namespace': 'off',
-      'import/default': 'off',
-      'import/no-named-as-default-member': 'off',
-      'import/no-unresolved': 'off',
 
       // Add TypeScript specific rules (and turn off ESLint equivalents)
       '@typescript-eslint/consistent-type-assertions': 'warn',
@@ -616,48 +557,6 @@ export default defineConfig(
   },
   {
     files: [
-      'packages/loot-core/src/types/**/*',
-      'packages/loot-core/src/client/state-types/**/*',
-      '**/icons/**/*',
-      '**/{mocks,__mocks__}/**/*',
-      // can't correctly resolve usages
-      '**/*.{testing,electron,browser,web,api}.ts',
-    ],
-
-    rules: {
-      'import/no-unused-modules': 'off',
-    },
-  },
-  {
-    files: ['packages/api/migrations/*', 'packages/loot-core/migrations/*'],
-
-    rules: {
-      'import/no-default-export': 'off',
-    },
-  },
-  {
-    files: ['packages/api/index.ts'],
-    rules: {
-      'import/no-unresolved': 'off',
-    },
-  },
-
-  // Allow configuring vitest with default exports (recommended as per vitest docs)
-  {
-    files: [
-      '**/vitest.config.{ts,mts}',
-      '**/vitest.web.config.ts',
-      '**/vite.config.{ts,mts}',
-      'eslint.config.mjs',
-    ],
-    rules: {
-      'import/no-anonymous-default-export': 'off',
-      'import/no-default-export': 'off',
-    },
-  },
-
-  {
-    files: [
       'eslint.config.mjs',
       '**/*.test.js',
       '**/*.test.ts',
@@ -687,15 +586,7 @@ export default defineConfig(
     files: ['packages/sync-server/**/*'],
     // TODO: fix the issues in these files
     rules: {
-      'import/extensions': 'off',
       'actual/typography': 'off',
-    },
-  },
-  {
-    files: ['packages/sync-server/src/app-gocardless/banks/*.js'],
-    rules: {
-      'import/no-anonymous-default-export': 'off',
-      'import/no-default-export': 'off',
     },
   },
   // Disable ESLint rules that are already covered by oxlint
