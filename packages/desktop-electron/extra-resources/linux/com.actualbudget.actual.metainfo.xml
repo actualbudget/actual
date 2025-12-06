@@ -12,10 +12,10 @@
     <p>The budgeting system is grounded in real income, helping you track spending and savings accurately. The app simplifies managing transactions with a minimal, efficient interface, supporting features like split transactions and transfers. Additionally, Actual Budget offers customizable reports alongside default net worth and cash flow reports, enabling users to analyze your finances in a way that suits you.</p>
   </description>
   <branding>
-    <!-- 40% lighter than icon color as per recommendations -->
-    <color type="primary" scheme_preference="light">#9d8bd6</color>
-    <!-- 40% darker than icon color as per recommendations -->
-    <color type="primary" scheme_preference="dark">#2e1f5e</color>
+    <!-- purple200 -->
+    <color type="primary" scheme_preference="light">#B990FF</color>
+     <!-- bit darker than our purple900 for contrast -->
+    <color type="primary" scheme_preference="dark">#1E0232</color>
   </branding>
   <launchable type="desktop-id">com.actualbudget.actual.desktop</launchable>
   <url type="homepage">https://actualbudget.org/</url>
