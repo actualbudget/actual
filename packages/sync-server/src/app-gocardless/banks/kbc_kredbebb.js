@@ -1,7 +1,7 @@
-import Fallback from './integration-bank.js';
-import { extractPayeeNameFromRemittanceInfo } from './util/extract-payeeName-from-remittanceInfo.js';
+import Fallback from './integration-bank';
+import { extractPayeeNameFromRemittanceInfo } from './util/extract-payeeName-from-remittanceInfo';
 
-/** @type {import('./bank.interface.js').IBank} */
+/** @type {import('./bank.interface').IBank} */
 export default {
   ...Fallback,
 
