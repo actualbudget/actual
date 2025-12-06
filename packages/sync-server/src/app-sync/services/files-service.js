@@ -1,5 +1,5 @@
-import { getAccountDb, isAdmin } from '../../account-db.js';
-import { FileNotFound, GenericFileError } from '../errors.js';
+import { getAccountDb, isAdmin } from '../../account-db';
+import { FileNotFound, GenericFileError } from '../errors';
 
 class FileBase {
   constructor(
