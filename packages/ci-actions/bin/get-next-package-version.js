@@ -6,7 +6,7 @@
 import fs from 'node:fs';
 import { parseArgs } from 'node:util';
 
-// eslint-disable-next-line import/extensions
+// oxlint-disable-next-line import/extensions
 import { getNextVersion } from '../src/versions/get-next-package-version.js';
 
 const args = process.argv;
