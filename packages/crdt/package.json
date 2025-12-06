@@ -12,6 +12,7 @@
     "build:node": "tsc --p tsconfig.dist.json",
     "proto:generate": "./bin/generate-proto",
     "build": "rm -rf dist && yarn run build:node",
+    "typecheck": "tsc --noEmit -p tsconfig.dist.json",
     "test": "vitest --run --globals"
   },
   "dependencies": {
