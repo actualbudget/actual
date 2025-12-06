@@ -19,6 +19,7 @@
     "build:migrations": "cp migrations/*.sql dist/migrations",
     "build:default-db": "cp default-db.sqlite dist/",
     "build": "yarn run clean && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
+    "typecheck": "tsc --noEmit -p tsconfig.dist.json",
     "test": "yarn run build:app && yarn run build:crdt && vitest --run",
     "clean": "rm -rf dist @types"
   },

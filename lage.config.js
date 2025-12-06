@@ -11,6 +11,10 @@ module.exports = {
         ],
       },
     },
+    typecheck: {
+      type: 'npmScript',
+      cache: true,
+    },
     build: {
       type: 'npmScript',
       cache: true,
