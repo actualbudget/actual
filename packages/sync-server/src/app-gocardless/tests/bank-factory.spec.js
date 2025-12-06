@@ -1,5 +1,5 @@
-import { BankFactory, banks } from '../bank-factory.js';
-import IntegrationBank from '../banks/integration-bank.js';
+import { BankFactory, banks } from '../bank-factory';
+import IntegrationBank from '../banks/integration-bank';
 
 describe('BankFactory', () => {
   it.each(banks.flatMap(bank => bank.institutionIds))(

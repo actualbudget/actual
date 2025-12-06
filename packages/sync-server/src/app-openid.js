@@ -1,17 +1,14 @@
 import express from 'express';
 
-import { disableOpenID, enableOpenID, isAdmin } from './account-db.js';
-import {
-  isValidRedirectUrl,
-  loginWithOpenIdFinalize,
-} from './accounts/openid.js';
-import { checkPassword } from './accounts/password.js';
-import * as UserService from './services/user-service.js';
+import { disableOpenID, enableOpenID, isAdmin } from './account-db';
+import { isValidRedirectUrl, loginWithOpenIdFinalize } from './accounts/openid';
+import { checkPassword } from './accounts/password';
+import * as UserService from './services/user-service';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
-} from './util/middlewares.js';
+} from './util/middlewares';
 
 const app = express();
 app.use(express.json());

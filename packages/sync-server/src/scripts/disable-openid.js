@@ -2,8 +2,8 @@ import {
   disableOpenID,
   getActiveLoginMethod,
   needsBootstrap,
-} from '../account-db.js';
-import { promptPassword } from '../util/prompt.js';
+} from '../account-db';
+import { promptPassword } from '../util/prompt';
 
 if (needsBootstrap()) {
   console.log('System needs to be bootstrapped first. OpenID is not enabled.');

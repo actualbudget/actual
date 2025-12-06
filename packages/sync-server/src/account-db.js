@@ -2,10 +2,10 @@ import { join, resolve } from 'node:path';
 
 import * as bcrypt from 'bcrypt';
 
-import { bootstrapOpenId } from './accounts/openid.js';
-import { bootstrapPassword, loginWithPassword } from './accounts/password.js';
-import { openDatabase } from './db.js';
-import { config } from './load-config.js';
+import { bootstrapOpenId } from './accounts/openid';
+import { bootstrapPassword, loginWithPassword } from './accounts/password';
+import { openDatabase } from './db';
+import { config } from './load-config';
 
 let _accountDb;
 

@@ -753,7 +753,6 @@ export default defineConfig(
     files: ['packages/sync-server/**/*'],
     // TODO: fix the issues in these files
     rules: {
-      'import/extensions': 'off',
       'actual/typography': 'off',
     },
   },

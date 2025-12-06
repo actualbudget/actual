@@ -1,4 +1,4 @@
-import BperRetail from '../bper_retail_bpmoit22.js';
+import BperRetail from '../bper_retail_bpmoit22';
 
 const bookingDate = '2025-09-17';
 
