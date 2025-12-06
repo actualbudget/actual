@@ -1,5 +1,6 @@
 import tsParser from '@typescript-eslint/parser';
 import { defineConfig } from 'eslint/config';
+import pluginImport from 'eslint-plugin-import';
 import pluginJSXA11y from 'eslint-plugin-jsx-a11y';
 import oxlint from 'eslint-plugin-oxlint';
 import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
@@ -148,6 +149,7 @@ export default defineConfig(
     },
   },
   pluginTypescript.configs.recommended,
+  pluginImport.flatConfigs.recommended,
   {
     plugins: {
       actual: pluginActual,
@@ -310,6 +312,36 @@ export default defineConfig(
       ],
 
       'getter-return': 'warn',
+
+      'import/order': [
+        'warn',
+        {
+          alphabetize: {
+            caseInsensitive: true,
+            order: 'asc',
+          },
+
+          groups: ['builtin', 'external', 'parent', 'sibling', 'index'],
+          'newlines-between': 'always',
+
+          pathGroups: [
+            {
+              // Enforce that React (and react-related packages) is the first import
+              group: 'builtin',
+              pattern: 'react?(-*)',
+              position: 'before',
+            },
+            {
+              // Separate imports from Actual from "real" external imports
+              group: 'external',
+              pattern: 'loot-{core,design}/**/*',
+              position: 'after',
+            },
+          ],
+
+          pathGroupsExcludedImportTypes: ['react'],
+        },
+      ],
 
       // https://github.com/evcohen/eslint-plugin-jsx-a11y/tree/master/docs/rules
       'jsx-a11y/alt-text': 'warn',

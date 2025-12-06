@@ -34,34 +34,6 @@
         "prefer-inline": true,
       },
     ],
-    "import/order": [
-      "warn",
-      {
-        "alphabetize": {
-          "caseInsensitive": true,
-          "order": "asc",
-        },
-        "groups": ["builtin", "external", "parent", "sibling", "index"],
-        "newlines-between": "always",
-      },
-      {
-      "pathGroups": [
-        {
-          // Enforce that React (and react-related packages) is the first import
-          "group": "builtin",
-          "pattern": "react?(-*)",
-          "position": "before",
-        },
-        {
-            // Separate imports from Actual from "real" external imports
-            "group": "external",
-            "pattern": "loot-{core,design}/**/*",
-            "position": "after",
-          },
-        ],
-        "pathGroupsExcludedImportTypes": ["react"],
-      },
-    ],
 
     // React rules
     "react/exhaustive-deps": [
