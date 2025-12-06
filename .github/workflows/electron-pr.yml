@@ -46,7 +46,7 @@ jobs:
 
           METAINFO_FILE="packages/desktop-electron/extra-resources/linux/com.actualbudget.actual.metainfo.xml"
           TODAY=$(date +%Y-%m-%d)
-          VERSION="0.0.1"
+          VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/desktop-electron/package.json --type nightly)
           sed -i "s/%RELEASE_VERSION%/$VERSION/g; s/%RELEASE_DATE%/$TODAY/g" "$METAINFO_FILE"
           sudo apt-get install appstream
           appstreamcli --version
