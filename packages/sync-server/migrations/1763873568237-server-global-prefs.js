@@ -1,4 +1,4 @@
-import { getAccountDb } from '../src/account-db.js';
+import { getAccountDb } from '../src/account-db';
 
 export const up = async function () {
   const accountDb = getAccountDb();
