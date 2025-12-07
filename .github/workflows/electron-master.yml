@@ -189,7 +189,7 @@ jobs:
           cat com.actualbudget.actual.yml
 
       - name: Create PR in Flathub repo
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.FLATHUB_GITHUB_TOKEN }}
           commit-message: "Update Actual flatpak to version ${{ needs.build.outputs.version }}"
