@@ -1310,7 +1310,10 @@ function TransactionEditUnconnected({
     [accounts, searchParams],
   );
   const searchParamPayee = useMemo(
-    () => payees.find(p => p.name === searchParams.get('payee'))?.id,
+    () =>
+      payees.find(
+        p => searchParams.get('payee')?.toLowerCase() === p.name.toLowerCase(),
+      )?.id,
     [payees, searchParams],
   );
 
