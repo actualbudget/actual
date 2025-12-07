@@ -140,7 +140,7 @@ if (process.env.NODE_ENV === 'development') {
 
   app.use(
     httpProxyMiddleware.createProxyMiddleware({
-      target: 'http://localhost:3001',
+      target: process.env.CLIENT_URL || 'http://localhost:3001',
       changeOrigin: true,
       ws: true,
     }),
