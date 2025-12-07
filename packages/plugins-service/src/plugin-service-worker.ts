@@ -1,10 +1,10 @@
 /// <reference lib="WebWorker" />
+import { CacheableResponsePlugin } from 'workbox-cacheable-response';
+import type { WorkboxPlugin } from 'workbox-core';
+import { ExpirationPlugin } from 'workbox-expiration';
 import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
 import { NavigationRoute, registerRoute } from 'workbox-routing';
 import { CacheFirst, NetworkFirst } from 'workbox-strategies';
-import { CacheableResponsePlugin } from 'workbox-cacheable-response';
-import { ExpirationPlugin } from 'workbox-expiration';
-import type { WorkboxPlugin } from 'workbox-core';
 
 // Service Worker Global Types
 declare const self: ServiceWorkerGlobalScope & {
@@ -157,7 +157,7 @@ const pluginDataMatch = ({ url }: { url: URL }) => {
   return pluginsIndex !== -1 && pathSegments[pluginsIndex + 1] !== undefined;
 };
 
-registerRoute(pluginDataMatch, async ({ request, url }) => {
+registerRoute(pluginDataMatch, async ({ request: _request, url }) => {
   const pathSegments = url.pathname.split('/').filter(Boolean);
   const pluginsIndex = pathSegments.indexOf('plugin-data');
   const slugIndex = pluginsIndex + 1;

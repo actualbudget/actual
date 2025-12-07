@@ -279,7 +279,7 @@ async function populateDefaultFilesystem() {
     try {
       await mkdir('/migrations');
       await mkdir('/demo-budget');
-    } catch (dirErr) {
+    } catch {
       // Directories might already exist, ignore error
     }
   }
