@@ -171,7 +171,7 @@ jobs:
     if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
     steps:
       - name: Checkout Flathub repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: flathub/com.actualbudget.actual
           token: ${{ secrets.FLATHUB_GITHUB_TOKEN }}
@@ -185,6 +185,8 @@ jobs:
           # Replace arm64 entry
           sed -i "/arm64.AppImage/{n;s|sha256:.*|sha256: ${{ needs.build.outputs.appimage_arm64_sha256 }}|}" com.actualbudget.actual.yml
           sed -i "/arm64.AppImage/s|url:.*|url: https://github.com/actualbudget/actual/releases/download/v${{ needs.build.outputs.version }}/Actual-linux-arm64.AppImage|" com.actualbudget.actual.yml
+
+          cat com.actualbudget.actual.yml
 
       - name: Create PR in Flathub repo
         uses: peter-evans/create-pull-request@v5
