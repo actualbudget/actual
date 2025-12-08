@@ -32,7 +32,7 @@ export function FormulaActionEditor({
         flex: 1,
         border: `1px solid ${theme.formInputBorder}`,
         borderRadius: 4,
-        overflow: 'hidden',
+        overflow: 'visible',
         backgroundColor: disabled
           ? theme.formInputBackgroundSelection
           : theme.tableBackground,
