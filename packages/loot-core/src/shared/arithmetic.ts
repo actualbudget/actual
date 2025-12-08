@@ -121,7 +121,7 @@ export function evalArithmetic(
   let result: number;
   try {
     result = evaluate(parse(expression));
-  } catch (e) {
+  } catch {
     // If it errors, return the default value
     return defaultValue;
   }

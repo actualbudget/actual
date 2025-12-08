@@ -57,7 +57,7 @@ export async function post(
     });
     clearTimeout(timeoutId);
     text = await res.text();
-  } catch (err) {
+  } catch {
     throw new PostError('network-failure');
   }
 
@@ -67,7 +67,7 @@ export async function post(
 
   try {
     responseData = JSON.parse(text);
-  } catch (err) {
+  } catch {
     // Something seriously went wrong. TODO handle errors
     throw new PostError('parse-json', { meta: text });
   }
@@ -109,7 +109,7 @@ export async function del(url, data, headers = {}, timeout = null) {
     });
     clearTimeout(timeoutId);
     text = await res.text();
-  } catch (err) {
+  } catch {
     throw new PostError('network-failure');
   }
 
@@ -117,7 +117,7 @@ export async function del(url, data, headers = {}, timeout = null) {
 
   try {
     res = JSON.parse(text);
-  } catch (err) {
+  } catch {
     // Something seriously went wrong. TODO handle errors
     throw new PostError('parse-json', { meta: text });
   }
@@ -157,7 +157,7 @@ export async function patch(url, data, headers = {}, timeout = null) {
     });
     clearTimeout(timeoutId);
     text = await res.text();
-  } catch (err) {
+  } catch {
     throw new PostError('network-failure');
   }
 
@@ -165,7 +165,7 @@ export async function patch(url, data, headers = {}, timeout = null) {
 
   try {
     res = JSON.parse(text);
-  } catch (err) {
+  } catch {
     // Something seriously went wrong. TODO handle errors
     throw new PostError('parse-json', { meta: text });
   }
@@ -198,7 +198,7 @@ export async function postBinary(url, data, headers) {
         ...headers,
       },
     });
-  } catch (err) {
+  } catch {
     throw new PostError('network-failure');
   }
 

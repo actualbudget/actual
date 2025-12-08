@@ -303,14 +303,7 @@ function MediumFeature({ title, media, src, flip, children }) {
   );
 }
 
-function BigFeature({
-  title,
-  media,
-  srcLight,
-  srcDark = null,
-  flip,
-  children,
-}) {
+function BigFeature({ title, media, srcLight, srcDark = null, children }) {
   const imgDark = srcDark ? srcDark : srcLight;
   return (
     <div className={classes.bigFeature}>
