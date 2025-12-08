@@ -1,6 +1,6 @@
 # Importing Transactions
 
-There are various ways to get transactions into the system. 
+There are various ways to get transactions into Actual. 
 
 ## Linked Bank Import
 
@@ -12,7 +12,7 @@ There are also [community projects](/docs/community-repos.md) that implement ban
 
 A quick way to import transactions is to login to your bank's website and download a file. 
 
-Actual supports importing QIF, OFX, QFX and CAMT files. Your bank probably allows you to download one of these formats (OFX/QFX is recommended).
+Actual supports importing CSV, QIF, OFX, QFX and CAMT files. Your bank probably allows you to download one of these formats (OFX/QFX is recommended).
 
 1. Open the account you want to import transactions into.
 2. Press the **Import** button and select the file.
