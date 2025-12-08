@@ -10,12 +10,7 @@
     "jsx-a11y/prefer-tag-over-role": "off",
     "jsx-a11y/role-has-required-aria-props": "off",
     "jsx-a11y/tabindex-no-positive": "off",
-    "no-async-promise-executor": "off",
     "no-autofocus": "off",
-    "no-constant-condition": "off",
-    "no-empty-pattern": "off",
-    "no-extra-boolean-cast": "off",
-    "react/jsx-key": "off",
   },
   "overrides": [
     {
