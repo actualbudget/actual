@@ -685,19 +685,75 @@ describe('/delete-user-file', () => {
     expect(res.text).toEqual('file-not-found');
   });
 
-  it('marks the file as deleted', async () => {
+  it('marks the file as deleted when user is the owner', async () => {
     const accountDb = getAccountDb();
     const fileId = crypto.randomBytes(16).toString('hex');
 
-    // Insert a file into the database
+    // Insert a file owned by genericAdmin (the user behind 'valid-token')
     accountDb.mutate(
-      'INSERT OR IGNORE INTO files (id, deleted) VALUES (?, FALSE)',
-      [fileId],
+      'INSERT OR IGNORE INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
+      [fileId, 'genericAdmin'],
     );
 
     const res = await request(app)
       .post('/delete-user-file')
       .set('x-actual-token', 'valid-token')
+      .send({ fileId });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({ status: 'ok' });
+
+    // Verify that the file is marked as deleted
+    const rows = accountDb.all('SELECT deleted FROM files WHERE id = ?', [
+      fileId,
+    ]);
+    expect(rows[0].deleted).toBe(1);
+  });
+
+  it('returns 403 if the user is not the file owner', async () => {
+    const accountDb = getAccountDb();
+    const fileId = crypto.randomBytes(16).toString('hex');
+
+    // Insert a file owned by genericAdmin
+    accountDb.mutate(
+      'INSERT OR IGNORE INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
+      [fileId, 'genericAdmin'],
+    );
+
+    // Try to delete with genericUser token (not the owner)
+    const res = await request(app)
+      .post('/delete-user-file')
+      .set('x-actual-token', 'valid-token-user')
+      .send({ fileId });
+
+    expect(res.statusCode).toEqual(403);
+    expect(res.body).toEqual({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'not-file-owner',
+    });
+
+    // Verify that the file is NOT marked as deleted
+    const rows = accountDb.all('SELECT deleted FROM files WHERE id = ?', [
+      fileId,
+    ]);
+    expect(rows[0].deleted).toBe(0);
+  });
+
+  it('allows admin to delete any file regardless of ownership', async () => {
+    const accountDb = getAccountDb();
+    const fileId = crypto.randomBytes(16).toString('hex');
+
+    // Insert a file owned by genericUser
+    accountDb.mutate(
+      'INSERT OR IGNORE INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
+      [fileId, 'genericUser'],
+    );
+
+    // Delete with admin token (genericAdmin is an ADMIN)
+    const res = await request(app)
+      .post('/delete-user-file')
+      .set('x-actual-token', 'valid-token-admin')
       .send({ fileId });
 
     expect(res.statusCode).toEqual(200);

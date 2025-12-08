@@ -7,7 +7,7 @@ import { SyncProtoBuf } from '@actual-app/crdt';
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getAccountDb } from './account-db';
+import { getAccountDb, isAdmin } from './account-db';
 import { FileNotFound } from './app-sync/errors';
 import {
   File,
@@ -19,6 +19,7 @@ import {
   validateUploadedFile,
 } from './app-sync/validation';
 import { config } from './load-config';
+import { getFileOwnerId } from './services/user-service';
 import * as simpleSync from './sync-simple';
 import {
   errorMiddleware,
@@ -405,6 +406,18 @@ app.post('/delete-user-file', (req, res) => {
 
   const filesService = new FilesService(getAccountDb());
   if (!verifyFileExists(fileId, filesService, res, 'file-not-found')) {
+    return;
+  }
+
+  // Check if the user is the file owner or an admin
+  const fileOwner = getFileOwnerId(fileId);
+  const userId = res.locals.user_id;
+  if (fileOwner !== userId && !isAdmin(userId)) {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'not-file-owner',
+    });
     return;
   }
 

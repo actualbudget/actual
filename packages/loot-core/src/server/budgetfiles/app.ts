@@ -14,6 +14,7 @@ import * as budget from '../budget/base';
 import * as cloudStorage from '../cloud-storage';
 import * as db from '../db';
 import * as mappings from '../db/mappings';
+import { PostError } from '../errors';
 import { handleBudgetImport, ImportableBudgetType } from '../importers';
 import { app as mainApp } from '../main-app';
 import { mutator } from '../mutators';
@@ -286,14 +287,27 @@ async function deleteBudget({
 }: {
   id?: Budget['id'];
   cloudFileId?: Budget['cloudFileId'];
-}) {
+}): Promise<{ error?: string }> {
+  let cloudError: string | undefined;
+
   // If it's a cloud file, you can delete it from the server by
   // passing its cloud id
   if (cloudFileId) {
-    await cloudStorage.removeFile(cloudFileId).catch(() => {});
+    try {
+      await cloudStorage.removeFile(cloudFileId);
+    } catch (e) {
+      // Track the error reason if it's a permission error
+      if (e instanceof PostError) {
+        cloudError = e.reason;
+      } else {
+        // For other errors (network issues, etc.), just log
+        logger.log('Error deleting cloud file:', e);
+      }
+    }
   }
 
   // If a local file exists, you can delete it by passing its local id
+  // Local deletion should always be attempted regardless of cloud errors
   if (id) {
     // opening and then closing the database is a hack to be able to delete
     // the budget file if it hasn't been opened yet.  This needs a better
@@ -304,11 +318,16 @@ async function deleteBudget({
       const budgetDir = fs.getBudgetDir(id);
       await fs.removeDirRecursively(budgetDir);
     } catch {
-      return 'fail';
+      return { error: 'failed-local-delete' };
     }
   }
 
-  return 'ok';
+  // Report cloud error after local deletion completes
+  if (cloudError) {
+    return { error: cloudError };
+  }
+
+  return {};
 }
 
 async function duplicateBudget({

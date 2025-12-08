@@ -12,9 +12,10 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
+import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 type DeleteFileModalProps = Extract<
   ModalType,
@@ -30,6 +31,15 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
   const isCloudFile = 'cloudFileId' in file && file.state !== 'broken';
   const serverStatus = useSyncServerStatus();
   const dispatch = useDispatch();
+  const userData = useSelector(state => state.user.data);
+  const multiuserEnabled = useMultiuserEnabled();
+
+  // Check if the current user is the owner of the file
+  const isOwner =
+    !multiuserEnabled ||
+    !('owner' in file) ||
+    !file.owner ||
+    file.owner === userData?.userId;
 
   const [loadingState, setLoadingState] = useState<'cloud' | 'local' | null>(
     null,
@@ -59,14 +69,24 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
                   <Trans>
                     This is a <strong>hosted file</strong> which means it is
                     stored on your server to make it available for download on
-                    any device. You can delete it from the server, which will
-                    also remove it from all of your devices.
-                  </Trans>
+                    any device.
+                  </Trans>{' '}
+                  {isOwner ? (
+                    <Trans>
+                      You can delete it from the server, which will also remove
+                      it from all of your devices.
+                    </Trans>
+                  ) : (
+                    <Trans>
+                      Only the file owner can delete it from the server.
+                    </Trans>
+                  )}
                 </Text>
 
                 {serverStatus === 'online' ? (
                   <ButtonWithLoading
                     variant="primary"
+                    isDisabled={!isOwner}
                     isLoading={loadingState === 'cloud'}
                     style={{
                       backgroundColor: theme.errorText,
@@ -77,15 +97,18 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
                     }}
                     onPress={async () => {
                       setLoadingState('cloud');
-                      await dispatch(
+                      const result = await dispatch(
                         deleteBudget({
                           id: 'id' in file ? file.id : undefined,
                           cloudFileId: file.cloudFileId,
                         }),
-                      );
+                      ).unwrap();
                       setLoadingState(null);
 
-                      close();
+                      // Only close the modal if deletion was successful
+                      if (!result.error) {
+                        close();
+                      }
                     }}
                   >
                     <Trans>Delete file from all devices</Trans>

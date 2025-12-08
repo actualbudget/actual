@@ -10,6 +10,7 @@ import { type Handlers } from 'loot-core/types/handlers';
 
 import { resetApp, setAppState } from '@desktop-client/app/appSlice';
 import { closeModal, pushModal } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { loadGlobalPrefs, loadPrefs } from '@desktop-client/prefs/prefsSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 import { signOut } from '@desktop-client/users/usersSlice';
@@ -130,9 +131,34 @@ type DeleteBudgetPayload = {
 
 export const deleteBudget = createAppAsyncThunk(
   `${sliceName}/deleteBudget`,
-  async ({ id, cloudFileId }: DeleteBudgetPayload, { dispatch }) => {
-    await send('delete-budget', { id, cloudFileId });
+  async (
+    { id, cloudFileId }: DeleteBudgetPayload,
+    { dispatch },
+  ): Promise<{ error?: string }> => {
+    const result = await send('delete-budget', { id, cloudFileId });
+
+    if ('error' in result) {
+      const errorMessage =
+        result.error === 'forbidden'
+          ? t(
+              'You do not have permission to delete this file from the server. Only the file owner can delete it.',
+            )
+          : t('Failed to delete the file. Please try again.');
+
+      dispatch(
+        addNotification({
+          notification: {
+            id: `${sliceName}/deleteBudget/error`,
+            type: 'error',
+            message: errorMessage,
+          },
+        }),
+      );
+      return { error: result.error };
+    }
+
     await dispatch(loadAllFiles());
+    return {};
   },
 );
 
