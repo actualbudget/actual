@@ -11,17 +11,6 @@
 
 // @ts-check
 
-/**
- * @param {string} title
- * @returns {import('@docusaurus/plugin-content-docs').PropSidebarItemHtml}
- */
-const unavailable = title => ({
-  type: 'html',
-  value: title,
-  className: 'menu__link menu__link--unavailable',
-  defaultStyle: true,
-});
-
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 const sidebars = {
   docs: [
@@ -137,7 +126,10 @@ const sidebars = {
                 type: 'doc',
                 id: 'budgeting/credit-cards/index',
               },
-              items: ['budgeting/credit-cards/paying-in-full', 'budgeting/credit-cards/carrying-debt'],
+              items: [
+                'budgeting/credit-cards/paying-in-full',
+                'budgeting/credit-cards/carrying-debt',
+              ],
             },
             'budgeting/multi-currency',
             'budgeting/joint-accounts',
@@ -224,7 +216,7 @@ const sidebars = {
             'experimental/monthly-cleanup',
             'experimental/rule-templating',
             'experimental/pluggyai',
-            'experimental/crossover-point-report'
+            'experimental/crossover-point-report',
           ],
         },
         'getting-started/tips-tricks',
@@ -307,6 +299,10 @@ const sidebars = {
             'contributing/project-details/advice',
           ],
         },
+        'contributing/development-setup',
+        'contributing/testing',
+        'contributing/code-style',
+        'contributing/troubleshooting',
         'contributing/i18n',
         'contributing/preview-builds',
         'contributing/releasing',

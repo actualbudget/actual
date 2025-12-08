@@ -203,15 +203,16 @@ describe('Budget', () => {
   test('budget updates when changing a category', async () => {
     const spreadsheet = await sheet.loadSpreadsheet(db);
     function captureChangedCells(func) {
-      return new Promise<unknown[]>(async resolve => {
+      return new Promise<unknown[]>(resolve => {
         let changed = [];
         const remove = spreadsheet.addEventListener('change', ({ names }) => {
           changed = changed.concat(names);
         });
-        await func();
-        remove();
-        spreadsheet.onFinish(() => {
-          resolve(changed);
+        func().then(() => {
+          remove();
+          spreadsheet.onFinish(() => {
+            resolve(changed);
+          });
         });
       });
     }

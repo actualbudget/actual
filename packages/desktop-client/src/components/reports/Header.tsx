@@ -219,6 +219,25 @@ export function Header({
                 onChangeDates(
                   ...convertToMonth(
                     ...getLiveRange(
+                      'Last month',
+                      earliestTransaction,
+                      latestTransaction,
+                      false,
+                      firstDayOfWeekIdx,
+                    ),
+                    'lastMonth',
+                  ),
+                )
+              }
+            >
+              <Trans>Last month</Trans>
+            </Button>
+            <Button
+              variant="bare"
+              onPress={() =>
+                onChangeDates(
+                  ...convertToMonth(
+                    ...getLiveRange(
                       'Last year',
                       earliestTransaction,
                       latestTransaction,

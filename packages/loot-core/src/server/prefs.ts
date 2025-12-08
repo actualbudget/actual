@@ -30,7 +30,7 @@ export async function loadPrefs(id?: string): Promise<MetadataPrefs> {
 
   try {
     prefs = JSON.parse(await fs.readFile(fullpath));
-  } catch (e) {
+  } catch {
     // If the user messed something up, be flexible and allow them to
     // still load the budget database. Default the budget name to the
     // id.

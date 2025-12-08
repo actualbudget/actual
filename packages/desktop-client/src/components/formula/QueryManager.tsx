@@ -411,7 +411,7 @@ function QueryItem({
           },
         }),
       );
-    } catch (error) {
+    } catch {
       dispatch(
         addNotification({
           notification: {
@@ -457,7 +457,7 @@ function QueryItem({
           }),
         );
       }
-    } catch (error) {
+    } catch {
       dispatch(
         addNotification({
           notification: {
@@ -670,6 +670,16 @@ function QueryItem({
                   : 'sliding-window';
 
                 switch (item) {
+                  case 'last-month': {
+                    const prevMonth = monthUtils.subMonths(
+                      monthUtils.currentMonth(),
+                      1,
+                    );
+                    start = monthUtils.firstDayOfMonth(prevMonth);
+                    end = monthUtils.lastDayOfMonth(prevMonth);
+                    mode = quickSelectMode;
+                    break;
+                  }
                   case '1-month': {
                     const [startMonth, endMonth] = getLatestRange(0);
                     start = monthUtils.firstDayOfMonth(startMonth);
@@ -760,6 +770,7 @@ function QueryItem({
                 { name: '1-year', text: t('1 year') },
                 Menu.line,
                 { name: 'year-to-date', text: t('Year to date') },
+                { name: 'last-month', text: t('Last month') },
                 { name: 'last-year', text: t('Last year') },
                 {
                   name: 'prior-year-to-date',
@@ -845,6 +856,7 @@ function QueryItem({
               onDelete={filters.onDelete}
               conditionsOp={filters.conditionsOp}
               onConditionsOpChange={filters.onConditionsOpChange}
+              style={{ maxWidth: '100%' }}
             />
           )}
           <FilterButton

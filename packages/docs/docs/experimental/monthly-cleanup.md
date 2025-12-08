@@ -18,7 +18,6 @@ Enable this feature alongside the **Goals** experimental feature by enabling **G
 
 There are different ways to interact with the cleanup script, and a few of the examples will be given. But first, let's explore the syntax.
 
-<!-- prettier-ignore -->
 ### Global Source and Sinks
 Global source and sink definitions can affect the whole budget.
 
