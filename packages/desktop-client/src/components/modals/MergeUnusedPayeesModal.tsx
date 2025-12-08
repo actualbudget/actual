@@ -188,7 +188,7 @@ export function MergeUnusedPayeesModal({
                   onChange={e => setShouldCreateRule(e.target.checked)}
                 />
                 <Text style={{ marginLeft: 3 }}>
-                  <Trans count={payees.length}>
+                  <Trans>
                     Automatically rename these payees in the future
                   </Trans>
                 </Text>
