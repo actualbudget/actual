@@ -856,6 +856,7 @@ function QueryItem({
               onDelete={filters.onDelete}
               conditionsOp={filters.conditionsOp}
               onConditionsOpChange={filters.onConditionsOpChange}
+              style={{ maxWidth: '100%' }}
             />
           )}
           <FilterButton
