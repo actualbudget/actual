@@ -7,7 +7,7 @@ import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
 import globals from 'globals';
 import pluginTypescript from 'typescript-eslint';
 
-// oxlint-disable-next-line import/extensions
+// eslint-disable-next-line import/extensions
 import pluginActual from './packages/eslint-plugin-actual/lib/index.js';
 
 const confusingBrowserGlobals = [
@@ -313,6 +313,13 @@ export default defineConfig(
 
       'getter-return': 'warn',
 
+      'import/extensions': [
+        'warn',
+        'never',
+        {
+          json: 'always',
+        },
+      ],
       'import/order': [
         'warn',
         {
