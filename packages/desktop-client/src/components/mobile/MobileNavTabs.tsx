@@ -70,7 +70,7 @@ export function MobileNavTabs() {
         config: canceled ? config.wobbly : config.stiff,
       });
     },
-    [api, OPEN_FULL_Y],
+    [api],
   );
 
   const openDefault = useCallback(
@@ -82,7 +82,7 @@ export function MobileNavTabs() {
         config: { ...config.stiff, velocity },
       });
     },
-    [api, OPEN_DEFAULT_Y],
+    [api],
   );
 
   const hide = useCallback(
@@ -94,7 +94,7 @@ export function MobileNavTabs() {
         config: { ...config.stiff, velocity },
       });
     },
-    [api, HIDDEN_Y],
+    [api],
   );
 
   const navTabs = [
@@ -123,8 +123,8 @@ export function MobileNavTabs() {
       Icon: SvgReports,
     },
     {
-      name: t('Schedules (Soon)'),
-      path: '/schedules/soon',
+      name: t('Schedules'),
+      path: '/schedules',
       style: navTabStyle,
       Icon: SvgCalendar3,
     },

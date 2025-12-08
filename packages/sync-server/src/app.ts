@@ -6,17 +6,17 @@ import cors from 'cors';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 
-import { bootstrap } from './account-db.js';
-import * as accountApp from './app-account.js';
-import * as adminApp from './app-admin.js';
-import * as corsApp from './app-cors-proxy.js';
-import * as goCardlessApp from './app-gocardless/app-gocardless.js';
-import * as openidApp from './app-openid.js';
-import * as pluggai from './app-pluggyai/app-pluggyai.js';
-import * as secretApp from './app-secrets.js';
-import * as simpleFinApp from './app-simplefin/app-simplefin.js';
-import * as syncApp from './app-sync.js';
-import { config } from './load-config.js';
+import { bootstrap } from './account-db';
+import * as accountApp from './app-account';
+import * as adminApp from './app-admin';
+import * as corsApp from './app-cors-proxy';
+import * as goCardlessApp from './app-gocardless/app-gocardless';
+import * as openidApp from './app-openid';
+import * as pluggai from './app-pluggyai/app-pluggyai';
+import * as secretApp from './app-secrets';
+import * as simpleFinApp from './app-simplefin/app-simplefin';
+import * as syncApp from './app-sync';
+import { config } from './load-config';
 
 const app = express();
 

@@ -1,4 +1,4 @@
-import LhvLhvbee22 from '../lhv-lhvbee22.js';
+import LhvLhvbee22 from '../lhv-lhvbee22';
 
 describe('#normalizeTransaction', () => {
   const bookedCardTransaction = {
