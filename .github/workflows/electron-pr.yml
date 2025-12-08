@@ -39,7 +39,6 @@ jobs:
         if: ${{ startsWith(matrix.os, 'macos') }}
         run: |
           sudo xcode-select -s /Applications/Xcode_26.1.1.app
-          actool --version
 
       - if: ${{ startsWith(matrix.os, 'ubuntu') }}
         name: Setup Flatpak dependencies
