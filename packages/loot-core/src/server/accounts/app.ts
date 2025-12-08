@@ -709,7 +709,7 @@ async function simpleFinAccounts() {
       },
       60000,
     );
-  } catch (error) {
+  } catch {
     return { error_code: 'TIMED_OUT' };
   }
 }
@@ -735,7 +735,7 @@ async function pluggyAiAccounts() {
       },
       60000,
     );
-  } catch (error) {
+  } catch {
     return { error_code: 'TIMED_OUT' };
   }
 }

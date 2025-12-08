@@ -44,7 +44,7 @@ export async function shutdown() {
   if (actualApp) {
     try {
       await actualApp.send('sync');
-    } catch (e) {
+    } catch {
       // most likely that no budget is loaded, so the sync failed
     }
     await actualApp.send('close-budget');

@@ -55,7 +55,7 @@ If you want Actual to serve over HTTPS, you can set this key to an object with t
 
 - `key`: The path to the private key file. (environment variable: `ACTUAL_HTTPS_KEY`)
 - `cert`: The path to the certificate file. (environment variable: `ACTUAL_HTTPS_CERT`)
-- any other options from Node’s [`tls.createServer()`](https://nodejs.org/docs/latest-v16.x/api/tls.html#tlscreateserveroptions-secureconnectionlistener), [`tls.createSecureContext()`](https://nodejs.org/docs/latest-v16.x/api/tls.html#tlscreatesecurecontextoptions), or [`http.createServer()`](https://nodejs.org/docs/latest-v16.x/api/http.html#httpcreateserveroptions-requestlistener) functions (optional, most people won’t need to set any of these).
+- any other options from Node's [`tls.createServer()`](https://nodejs.org/api/tls.html#tlscreateserveroptions-secureconnectionlistener), [`tls.createSecureContext()`](https://nodejs.org/api/tls.html#tlscreatesecurecontextoptions), or [`http.createServer()`](https://nodejs.org/api/http.html#httpcreateserveroptions-requestlistener) functions (optional, most people won't need to set any of these).
 
 See [Activating HTTPS](/config/https.md) for more information on how to get HTTPS working.
 

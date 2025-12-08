@@ -1,23 +1,17 @@
 // @ts-strict-ignore
-import React, { useEffect, useReducer } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { t } from 'i18next';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import { extractScheduleConds } from 'loot-core/shared/schedules';
-import {
-  type TransactionEntity,
-  type ScheduleEntity,
-  type RuleConditionOp,
-  type RecurConfig,
-} from 'loot-core/types/models';
+import { type ScheduleEntity, type RecurConfig } from 'loot-core/types/models';
 
-import { ScheduleEditForm, type ScheduleFormFields } from './ScheduleEditForm';
+import { updateScheduleConditions } from './schedule-edit-utils';
+import { ScheduleEditForm } from './ScheduleEditForm';
 
 import {
   Modal,
@@ -25,6 +19,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useScheduleEdit } from '@desktop-client/hooks/useScheduleEdit';
 import { useSelected } from '@desktop-client/hooks/useSelected';
 import {
   type Modal as ModalType,
@@ -32,60 +27,7 @@ import {
 } from '@desktop-client/modals/modalsSlice';
 import { getPayeesById } from '@desktop-client/payees/payeesSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { liveQuery } from '@desktop-client/queries/liveQuery';
 import { useDispatch } from '@desktop-client/redux';
-
-type Fields = ScheduleFormFields;
-
-function updateScheduleConditions(
-  schedule: Partial<ScheduleEntity>,
-  fields: Fields,
-) {
-  const conds = extractScheduleConds(schedule._conditions);
-
-  const updateCond = (
-    cond: ReturnType<typeof extractScheduleConds>[keyof ReturnType<
-      typeof extractScheduleConds
-    >],
-    op: RuleConditionOp,
-    field: string,
-    value: (typeof fields)[keyof typeof fields],
-  ) => {
-    if (cond) {
-      return { ...cond, value };
-    }
-
-    if (value != null || field === 'payee') {
-      return { op, field, value };
-    }
-
-    return null;
-  };
-
-  // Validate
-  if (fields.date == null) {
-    return { error: t('Date is required') };
-  }
-
-  if (fields.amount == null) {
-    return { error: t('A valid amount is required') };
-  }
-
-  return {
-    conditions: [
-      updateCond(conds.payee, 'is', 'payee', fields.payee),
-      updateCond(conds.account, 'is', 'account', fields.account),
-      updateCond(conds.date, 'isapprox', 'date', fields.date),
-      // We don't use `updateCond` for amount because we want to
-      // overwrite it completely
-      {
-        op: fields.amountOp,
-        field: 'amount',
-        value: fields.amount,
-      },
-    ].filter(val => !!val),
-  };
-}
 
 type ScheduleEditModalProps = Extract<
   ModalType,
@@ -100,357 +42,54 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
   const payees = getPayeesById(usePayees());
   const globalDispatch = useDispatch();
 
-  const [state, dispatch] = useReducer(
-    (
-      state: {
-        isCustom?: boolean;
-        schedule: null | Partial<ScheduleEntity>;
-        upcomingDates: null | string[];
-        error: null | string;
-        fields: Fields;
-        transactions: TransactionEntity[];
-        transactionsMode: 'matched' | 'linked';
-      },
-      action:
-        | {
-            type: 'set-schedule';
-            schedule: Partial<ScheduleEntity>;
-          }
-        | {
-            type: 'set-field';
-            field: 'name' | 'account' | 'payee';
-            value: string;
-          }
-        | {
-            type: 'set-field';
-            field: 'amountOp';
-            value: 'is' | 'isbetween' | 'isapprox';
-          }
-        | {
-            type: 'set-field';
-            field: 'amount';
-            value: number | { num1: number; num2: number };
-          }
-        | {
-            type: 'set-field';
-            field: 'date';
-            value: string | RecurConfig;
-          }
-        | {
-            type: 'set-field';
-            field: 'posts_transaction';
-            value: boolean;
-          }
-        | {
-            type: 'set-transactions';
-            transactions: TransactionEntity[];
-          }
-        | {
-            type: 'set-repeats';
-            repeats: boolean;
-          }
-        | {
-            type: 'set-upcoming-dates';
-            dates: null | string[];
-          }
-        | {
-            type: 'form-error';
-            error: null | string;
-          }
-        | {
-            type: 'switch-transactions';
-            mode: 'matched' | 'linked';
+  // Create initial schedule if adding from transaction
+  const initialSchedule = useMemo(() => {
+    if (!adding) {
+      return undefined;
+    }
+
+    const date = {
+      start: monthUtils.currentDay(),
+      frequency: 'monthly',
+      patterns: [],
+      skipWeekend: false,
+      weekendSolveMode: 'after',
+      endMode: 'never',
+      endOccurrences: 1,
+      endDate: monthUtils.currentDay(),
+    } satisfies RecurConfig;
+
+    const transFields = fromTrans
+      ? ({
+          _account: transaction.account,
+          _amount: transaction.amount,
+          _amountOp: 'is',
+          name: transaction.payee ? payees[transaction.payee].name : '',
+          _payee: transaction.payee ? transaction.payee : '',
+          _date: {
+            ...date,
+            frequency: 'monthly',
+            start: transaction.date,
+            patterns: [],
           },
-    ) => {
-      switch (action.type) {
-        case 'set-schedule': {
-          const schedule = action.schedule;
+        } satisfies Partial<ScheduleEntity>)
+      : {};
 
-          // See if there are custom rules
-          const conds = extractScheduleConds(schedule._conditions);
-          const condsSet = new Set(Object.values(conds));
-          const isCustom = !!(
-            schedule._conditions?.find(c => !condsSet.has(c)) ||
-            schedule._actions?.find(a => a.op !== 'link-schedule')
-          );
+    return {
+      posts_transaction: false,
+      _date: date,
+      _conditions: [{ op: 'isapprox', field: 'date', value: date }],
+      _actions: [],
+      ...transFields,
+    } satisfies Partial<ScheduleEntity>;
+  }, [adding, fromTrans, payees, transaction]);
 
-          return {
-            ...state,
-            schedule: action.schedule,
-            isCustom,
-            fields: {
-              payee: schedule._payee ?? null,
-              account: schedule._account ?? null,
-              amount: schedule._amount || 0,
-              amountOp: schedule._amountOp || 'isapprox',
-              date: schedule._date ?? null,
-              posts_transaction: action.schedule.posts_transaction ?? false,
-              name: schedule.name ?? null,
-            },
-          };
-        }
-        case 'set-field': {
-          if (!(action.field in state.fields)) {
-            throw new Error('Unknown field: ' + action.field);
-          }
-
-          const fields: { [key: string]: typeof action.value | undefined } = {
-            [action.field]: action.value,
-          };
-
-          // If we are changing the amount operator either to or
-          // away from the `isbetween` operator, the amount value is
-          // different and we need to convert it
-          if (
-            action.field === 'amountOp' &&
-            action.value !== state.fields.amountOp
-          ) {
-            if (action.value === 'isbetween') {
-              // We need a range if switching to `isbetween`. The
-              // amount field should be a number since we are
-              // switching away from the other ops, but check just in
-              // case
-              fields.amount =
-                typeof state.fields.amount === 'number'
-                  ? { num1: state.fields.amount, num2: state.fields.amount }
-                  : { num1: 0, num2: 0 };
-            } else if (state.fields.amountOp === 'isbetween') {
-              // We need just a number if switching away from
-              // `isbetween`. The amount field should be a range, but
-              // also check just in case. We grab just the first
-              // number and use it
-              fields.amount =
-                typeof state.fields.amount === 'number'
-                  ? state.fields.amount
-                  : state.fields.amount?.num1;
-            }
-          }
-
-          return {
-            ...state,
-            fields: { ...state.fields, ...fields },
-          };
-        }
-
-        case 'set-transactions': {
-          if (fromTrans && action.transactions) {
-            action.transactions.sort(a => {
-              return transaction.id === a.id ? -1 : 1;
-            });
-          }
-          return { ...state, transactions: action.transactions };
-        }
-
-        case 'set-repeats': {
-          return {
-            ...state,
-            fields: {
-              ...state.fields,
-              date: action.repeats
-                ? ({
-                    frequency: 'monthly',
-                    endMode: 'never',
-                    start: monthUtils.currentDay(),
-                    patterns: [],
-                  } satisfies RecurConfig)
-                : monthUtils.currentDay(),
-            },
-          };
-        }
-
-        case 'set-upcoming-dates': {
-          return {
-            ...state,
-            upcomingDates: action.dates,
-          };
-        }
-
-        case 'form-error': {
-          return { ...state, error: action.error };
-        }
-
-        case 'switch-transactions': {
-          return { ...state, transactionsMode: action.mode };
-        }
-
-        default: {
-          throw new Error('Unknown action');
-        }
-      }
-    },
-    {
-      schedule: null,
-      upcomingDates: null,
-      error: null,
-      fields: {
-        payee: null,
-        account: null,
-        amount: null,
-        amountOp: null,
-        date: null,
-        posts_transaction: false,
-        name: null,
-      },
-      transactions: [],
-      transactionsMode: adding ? 'matched' : 'linked',
-    },
-  );
-
-  async function loadSchedule() {
-    const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
-    return data[0];
-  }
-
-  useEffect(() => {
-    async function run() {
-      if (adding) {
-        const date = {
-          start: monthUtils.currentDay(),
-          frequency: 'monthly',
-          patterns: [],
-          skipWeekend: false,
-          weekendSolveMode: 'after',
-          endMode: 'never',
-          endOccurrences: 1,
-          endDate: monthUtils.currentDay(),
-        } satisfies RecurConfig;
-
-        const schedule: Partial<ScheduleEntity> = fromTrans
-          ? {
-              posts_transaction: false,
-              _conditions: [{ op: 'isapprox', field: 'date', value: date }],
-              _actions: [],
-              _account: transaction.account,
-              _amount: transaction.amount,
-              _amountOp: 'is',
-              name: transaction.payee ? payees[transaction.payee].name : '',
-              _payee: transaction.payee ? transaction.payee : '',
-              _date: {
-                ...date,
-                frequency: 'monthly',
-                start: transaction.date,
-                patterns: [],
-              },
-            }
-          : {
-              posts_transaction: false,
-              _date: date,
-              _conditions: [{ op: 'isapprox', field: 'date', value: date }],
-              _actions: [],
-            };
-
-        dispatch({ type: 'set-schedule', schedule });
-      } else {
-        const schedule = await loadSchedule();
-
-        if (schedule && state.schedule == null) {
-          dispatch({ type: 'set-schedule', schedule });
-        }
-      }
-    }
-
-    run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    async function run() {
-      const date = state.fields.date;
-
-      if (date === null) {
-        dispatch({ type: 'set-upcoming-dates', dates: null });
-        return;
-      }
-
-      if (typeof date === 'string') {
-        const today = monthUtils.currentDay();
-        if (date === today || monthUtils.isAfter(date, today)) {
-          dispatch({ type: 'set-upcoming-dates', dates: [date] });
-        } else {
-          dispatch({ type: 'set-upcoming-dates', dates: null });
-        }
-        return;
-      }
-
-      const { data } = await sendCatch('schedule/get-upcoming-dates', {
-        config: date,
-        count: 3,
-      });
-      dispatch({ type: 'set-upcoming-dates', dates: data });
-    }
-    run();
-  }, [state.fields.date]);
-
-  useEffect(() => {
-    if (
-      state.schedule &&
-      state.schedule.id &&
-      state.transactionsMode === 'linked'
-    ) {
-      const live = liveQuery<TransactionEntity>(
-        q('transactions')
-          .filter({ schedule: state.schedule.id })
-          .select('*')
-          .options({ splits: 'all' }),
-        {
-          onData: data =>
-            dispatch({ type: 'set-transactions', transactions: data }),
-        },
-      );
-      return live.unsubscribe;
-    }
-  }, [state.schedule, state.transactionsMode]);
-
-  useEffect(() => {
-    let current = true;
-    let unsubscribe: (() => void) | undefined;
-
-    if (state.schedule && state.transactionsMode === 'matched') {
-      const updated = updateScheduleConditions(state.schedule, state.fields);
-
-      if ('error' in updated) {
-        dispatch({ type: 'form-error', error: updated.error });
-        return;
-      }
-
-      // *Extremely* gross hack because the rules are not mapped to
-      // public names automatically. We really should be doing that
-      // at the database layer
-      const conditions = updated.conditions.map(cond => {
-        if (cond.field === 'description') {
-          return { ...cond, field: 'payee' };
-        } else if (cond.field === 'acct') {
-          return { ...cond, field: 'account' };
-        }
-        return cond;
-      });
-
-      send('make-filters-from-conditions', {
-        conditions,
-      }).then(({ filters }) => {
-        if (current) {
-          const live = liveQuery<TransactionEntity>(
-            q('transactions')
-              .filter({ $and: filters })
-              .select('*')
-              .options({ splits: 'all' }),
-            {
-              onData: data =>
-                dispatch({ type: 'set-transactions', transactions: data }),
-            },
-          );
-          unsubscribe = live.unsubscribe;
-        }
-      });
-    }
-
-    return () => {
-      current = false;
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  }, [state.schedule, state.transactionsMode, state.fields]);
+  const { state, dispatch, loadSchedule } = useScheduleEdit({
+    scheduleId: id,
+    adding,
+    initialSchedule,
+    transactionId: transaction?.id,
+  });
 
   const selectedInst = useSelected(
     'transactions',
@@ -531,6 +170,10 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
             rule,
             onSave: async () => {
               const schedule = await loadSchedule();
+              if (schedule) {
+                throw new Error('Schedule found');
+              }
+
               dispatch({ type: 'set-schedule', schedule });
             },
           },

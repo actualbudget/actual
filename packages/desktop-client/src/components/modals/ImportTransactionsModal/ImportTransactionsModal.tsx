@@ -284,14 +284,14 @@ export function ImportTransactionsModal({
         }
 
         const {
-          inflow,
-          outflow,
-          inOut,
-          existing,
-          ignored,
-          selected,
-          selected_merge,
-          tombstone,
+          inflow: _inflow,
+          outflow: _outflow,
+          inOut: _inOut,
+          existing: _existing,
+          ignored: _ignored,
+          selected: _selected,
+          selected_merge: _selected_merge,
+          tombstone: _tombstone,
           ...finalTransaction
         } = trans;
         previewTransactions.push({
@@ -624,14 +624,14 @@ export function ImportTransactionsModal({
       trans.category = category_id;
 
       const {
-        inflow,
-        outflow,
-        inOut,
-        existing,
-        ignored,
-        selected,
-        selected_merge,
-        trx_id,
+        inflow: _inflow,
+        outflow: _outflow,
+        inOut: _inOut,
+        existing: _existing,
+        ignored: _ignored,
+        selected: _selected,
+        selected_merge: _selected_merge,
+        trx_id: _trx_id,
         ...finalTransaction
       } = trans;
 
@@ -746,7 +746,6 @@ export function ImportTransactionsModal({
 
     runImportPreview();
     // intentionally exclude runImportPreview from dependencies to avoid infinite rerenders
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     filetype,
     flipAmount,
