@@ -1295,6 +1295,7 @@ function TransactionEditUnconnected({
   const { state: locationState } = useLocation();
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
   const [fetchedTransactions, setFetchedTransactions] = useState<
     TransactionEntity[]
@@ -1615,23 +1616,10 @@ function TransactionEditUnconnected({
           <Button
             variant="primary"
             onPress={() => {
-              dispatch(
-                pushModal({
-                  modal: {
-                    name: 'new-category-group',
-                    options: {
-                      onValidate: name =>
-                        !name ? t('Name is required.') : null,
-                      onSubmit: async name => {
-                        await send('category-group-create', { name });
-                      },
-                    },
-                  },
-                }),
-              );
+              navigate('/budget');
             }}
           >
-            <Trans>Add category</Trans>
+            <Trans>Go to budget</Trans>
           </Button>
         </View>
       </Page>
