@@ -148,7 +148,9 @@ export default defineConfig(async ({ mode }) => {
       watch: {
         disableGlobbing: false,
       },
-      allowedHosts: env.ALLOWED_HOSTS ? env.ALLOWED_HOSTS.split(',') : ['localhost'],
+      allowedHosts: env.ALLOWED_HOSTS
+        ? env.ALLOWED_HOSTS.split(',')
+        : ['localhost'],
     },
     resolve: {
       extensions: resolveExtensions,
