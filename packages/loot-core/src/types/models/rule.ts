@@ -117,7 +117,8 @@ export type RuleConditionEntity =
     >
   | BaseConditionEntity<'saved', 'is'>
   | BaseConditionEntity<'cleared', 'is'>
-  | BaseConditionEntity<'reconciled', 'is'>;
+  | BaseConditionEntity<'reconciled', 'is'>
+  | BaseConditionEntity<'transfer', 'is'>;
 
 export type RuleActionEntity =
   | SetRuleActionEntity

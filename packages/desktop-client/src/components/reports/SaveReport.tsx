@@ -109,7 +109,7 @@ export function SaveReport({
       return;
     }
 
-    const { name, id, ...props } = customReportItems;
+    const { name: _name, id: _id, ...props } = customReportItems;
 
     const updatedReport = {
       ...report,

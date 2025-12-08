@@ -133,7 +133,7 @@ function IncomeGroupHeader({
         justifyContent: 'space-between',
         paddingLeft: 5,
         paddingRight: 5,
-        opacity: !!group.hidden ? 0.5 : undefined,
+        opacity: group.hidden ? 0.5 : undefined,
         backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetHeaderCurrentMonth
           : theme.budgetHeaderOtherMonth,

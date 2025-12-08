@@ -1,4 +1,4 @@
-import BoursoBank from '../boursobank_bousfrppxxx.js';
+import BoursoBank from '../boursobank_bousfrppxxx';
 
 describe('BoursoBank', () => {
   describe('#normalizeTransaction', () => {

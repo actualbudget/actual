@@ -89,7 +89,9 @@ export function FormulaResult({
   // Debounce the calculation to avoid too many recalculations
   const debouncedCalculateFontSize = useRef(
     debounce(() => {
-      calculateFontSize();
+      if (fontSizeMode === 'dynamic') {
+        calculateFontSize();
+      }
     }, 100),
   );
 
@@ -97,13 +99,15 @@ export function FormulaResult({
   useEffect(() => {
     debouncedCalculateFontSize.current.cancel?.();
     debouncedCalculateFontSize.current = debounce(() => {
-      calculateFontSize();
+      if (fontSizeMode === 'dynamic') {
+        calculateFontSize();
+      }
     }, 100);
 
     return () => {
       debouncedCalculateFontSize.current.cancel?.();
     };
-  }, [calculateFontSize]);
+  }, [calculateFontSize, fontSizeMode]);
 
   const ref = useResizeObserver(() => {
     if (fontSizeMode === 'dynamic') {
@@ -135,7 +139,7 @@ export function FormulaResult({
       : theme.pageText;
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
       {loading && <LoadingIndicator />}
       {!loading && (
         <View
@@ -162,6 +166,6 @@ export function FormulaResult({
           </span>
         </View>
       )}
-    </>
+    </View>
   );
 }

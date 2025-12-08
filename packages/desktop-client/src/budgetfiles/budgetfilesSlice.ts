@@ -320,9 +320,9 @@ export const downloadBudget = createAppAsyncThunk(
         const opts = {
           hasExistingKey: Boolean(
             error.meta &&
-              typeof error.meta === 'object' &&
-              'isMissingKey' in error.meta &&
-              error.meta.isMissingKey,
+            typeof error.meta === 'object' &&
+            'isMissingKey' in error.meta &&
+            error.meta.isMissingKey,
           ),
           cloudFileId,
           onSuccess: () => {

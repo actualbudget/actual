@@ -22,7 +22,8 @@ import type { ApiHandlers } from './api-handlers';
 import type { ServerHandlers } from './server-handlers';
 
 export interface Handlers
-  extends ServerHandlers,
+  extends
+    ServerHandlers,
     ApiHandlers,
     BudgetHandlers,
     DashboardHandlers,

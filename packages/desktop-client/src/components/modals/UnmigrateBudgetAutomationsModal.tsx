@@ -43,7 +43,7 @@ export function UnmigrateBudgetAutomationsModal({
           templates,
         );
         if (mounted) setRendered(text);
-      } catch (e) {
+      } catch {
         if (mounted) setRendered('');
       }
     })();

@@ -95,7 +95,7 @@ function parseArray(str) {
   let value;
   try {
     value = typeof str === 'string' ? JSON.parse(str) : str;
-  } catch (e) {
+  } catch {
     throw new RuleError('internal', 'Cannot parse rule json');
   }
 

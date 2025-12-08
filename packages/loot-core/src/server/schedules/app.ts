@@ -280,7 +280,7 @@ export async function updateSchedule({
       await updateRule({ id: rule.id, conditions: newConditions });
 
       // Annoyingly, sometimes it has `type` and sometimes it doesn't
-      const stripType = ({ type, ...fields }) => fields;
+      const stripType = ({ type: _type, ...fields }) => fields;
 
       // Update `next_date` if the user forced it, or if the account
       // or date changed. We check account because we don't update
@@ -480,7 +480,7 @@ async function advanceSchedulesService(syncSuccess) {
         if (schedule._date.frequency) {
           try {
             await setNextDate({ id: schedule.id });
-          } catch (err) {
+          } catch {
             // This might error if the rule is corrupted and it can't
             // find the rule
           }

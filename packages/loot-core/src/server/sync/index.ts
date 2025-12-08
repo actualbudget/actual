@@ -233,7 +233,7 @@ function applyMessagesForImport(messages: Message[]): void {
       if (!msg.old) {
         try {
           apply(msg);
-        } catch (e) {
+        } catch {
           apply(msg, true);
         }
 

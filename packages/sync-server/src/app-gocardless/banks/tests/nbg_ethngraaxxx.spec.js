@@ -1,4 +1,4 @@
-import NbgEthngraaxxx from '../nbg_ethngraaxxx.js';
+import NbgEthngraaxxx from '../nbg_ethngraaxxx';
 
 describe('NbgEthngraaxxx', () => {
   describe('#normalizeTransaction', () => {

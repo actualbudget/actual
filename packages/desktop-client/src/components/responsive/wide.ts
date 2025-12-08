@@ -1,6 +1,7 @@
 export { Budget } from '../budget';
 
 export { Schedules } from '../schedules';
+export { Schedules as ScheduleEdit } from '../schedules';
 
 export { GoCardlessLink } from '../gocardless/GoCardlessLink';
 

@@ -461,6 +461,8 @@ export function amountToCurrencyNoDecimal(amount: Amount): CurrencyAmount {
 }
 
 export function currencyToAmount(currencyAmount: string): Amount | null {
+  currencyAmount = currencyAmount.replace(/\u2212/g, '-');
+
   let integer, fraction;
 
   // match the last dot or comma in the string
@@ -490,7 +492,9 @@ export function currencyToInteger(
 }
 
 export function stringToInteger(str: string): number | null {
-  const amount = parseInt(str.replace(/[^-0-9.,]/g, ''));
+  const amount = parseInt(
+    str.replace(/\u2212/g, '-').replace(/[^-0-9.,]/g, ''),
+  );
   if (!isNaN(amount)) {
     return amount;
   }
@@ -536,7 +540,12 @@ export function looselyParseAmount(amount: string) {
   }
 
   if (amount.startsWith('(') && amount.endsWith(')')) {
+    // Remove Unicode minus inside parentheses before converting to ASCII minus
+    amount = amount.replace(/\u2212/g, '');
     amount = amount.replace('(', '-').replace(')', '');
+  } else {
+    // Replace Unicode minus with ASCII minus for non-parenthesized amounts
+    amount = amount.replace(/\u2212/g, '-');
   }
 
   // Look for a decimal marker, then look for either 1-2 or 4-9 decimal places.

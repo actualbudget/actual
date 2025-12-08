@@ -11,9 +11,7 @@
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
-    "write-heading-ids": "docusaurus write-heading-ids",
-    "format": "prettier --write .",
-    "lint": "prettier --check ."
+    "write-heading-ids": "docusaurus write-heading-ids"
   },
   "dependencies": {
     "@docusaurus/core": "^3.9.2",
@@ -32,8 +30,7 @@
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.9.2",
-    "@types/react": "^19.2.5",
-    "prettier": "^3.6.2"
+    "@types/react": "^19.2.5"
   },
   "browserslist": {
     "production": [

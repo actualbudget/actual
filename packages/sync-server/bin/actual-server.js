@@ -118,6 +118,7 @@ if (values.config) {
 
 if (values['reset-password']) {
   console.info('Running reset password script...');
+  // eslint-disable-next-line import/extensions
   await import('../src/scripts/reset-password.js');
   process.exit();
 }

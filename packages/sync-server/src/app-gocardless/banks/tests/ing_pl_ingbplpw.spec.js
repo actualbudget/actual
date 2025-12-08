@@ -1,9 +1,9 @@
-import { mockTransactionAmount } from '../../services/tests/fixtures.js';
-import IngPlIngbplpw from '../ing_pl_ingbplpw.js';
+import { mockTransactionAmount } from '../../services/tests/fixtures';
+import IngPlIngbplpw from '../ing_pl_ingbplpw';
 
 describe('IngPlIngbplpw', () => {
   describe('#normalizeAccount', () => {
-    /** @type {import('../../gocardless.types.js').DetailedAccountWithInstitution} */
+    /** @type {import('../../gocardless.types').DetailedAccountWithInstitution} */
     const accountRaw = {
       resourceId: 'PL00000000000000000987654321',
       iban: 'PL00000000000000000987654321',
@@ -139,7 +139,7 @@ describe('IngPlIngbplpw', () => {
 
   describe('#countStartingBalance', () => {
     it('should calculate the starting balance correctly', () => {
-      /** @type {import('../../gocardless-node.types.js').Transaction[]} */
+      /** @type {import('../../gocardless-node.types').Transaction[]} */
       const sortedTransactions = [
         {
           transactionAmount: { amount: '-100.00', currency: 'USD' },
@@ -164,7 +164,7 @@ describe('IngPlIngbplpw', () => {
         },
       ];
 
-      /** @type {import('../../gocardless-node.types.js').Balance[]} */
+      /** @type {import('../../gocardless-node.types').Balance[]} */
       const balances = [
         {
           balanceType: 'interimBooked',
@@ -187,7 +187,7 @@ describe('IngPlIngbplpw', () => {
     it('returns the same balance amount when no transactions', () => {
       const transactions = [];
 
-      /** @type {import('../../gocardless-node.types.js').Balance[]} */
+      /** @type {import('../../gocardless-node.types').Balance[]} */
       const balances = [
         {
           balanceType: 'interimBooked',

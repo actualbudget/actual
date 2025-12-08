@@ -201,7 +201,7 @@ export function TransferOwnership({
                     closeAndLoadBudget({ fileId: (currentFile as Budget).id }),
                   );
                   close();
-                } catch (error) {
+                } catch {
                   dispatch(
                     addNotification({
                       notification: {

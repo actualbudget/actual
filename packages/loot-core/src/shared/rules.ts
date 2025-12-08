@@ -311,7 +311,7 @@ export function parse(item) {
   return { ...item, error: null };
 }
 
-export function unparse({ error, inputKey, ...item }) {
+export function unparse({ error: _error, inputKey: _inputKey, ...item }) {
   if (item.op === 'set-split-amount') {
     if (item.options.method === 'fixed-amount') {
       return {
