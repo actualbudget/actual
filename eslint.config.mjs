@@ -313,6 +313,7 @@ export default defineConfig(
 
       'getter-return': 'warn',
 
+      'import/no-unresolved': 'off',
       'import/extensions': [
         'warn',
         'never',
