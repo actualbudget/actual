@@ -7,7 +7,7 @@ import { SyncProtoBuf } from '@actual-app/crdt';
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getAccountDb } from './account-db';
+import { getAccountDb, isAdmin } from './account-db';
 import { FileNotFound } from './app-sync/errors';
 import {
   File,
@@ -404,7 +404,23 @@ app.post('/delete-user-file', (req, res) => {
   }
 
   const filesService = new FilesService(getAccountDb());
-  if (!verifyFileExists(fileId, filesService, res, 'file-not-found')) {
+  const file = verifyFileExists(fileId, filesService, res, 'file-not-found');
+  if (!file) {
+    return;
+  }
+
+  // Check if user has permission to delete the file
+  const { user_id: userId } = res.locals;
+
+  const isOwner = file.owner === userId;
+  const isServerAdmin = isAdmin(userId);
+
+  if (!isOwner && !isServerAdmin) {
+    res.status(403).send({
+      status: 'error',
+      reason: 'unauthorized',
+      details: 'file-delete-not-allowed',
+    });
     return;
   }
 
