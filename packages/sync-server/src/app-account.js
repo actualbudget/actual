@@ -7,14 +7,11 @@ import {
   listLoginMethods,
   getUserInfo,
   getActiveLoginMethod,
-} from './account-db.js';
-import { isValidRedirectUrl, loginWithOpenIdSetup } from './accounts/openid.js';
-import { changePassword, loginWithPassword } from './accounts/password.js';
-import {
-  errorMiddleware,
-  requestLoggerMiddleware,
-} from './util/middlewares.js';
-import { validateAuthHeader, validateSession } from './util/validate-user.js';
+} from './account-db';
+import { isValidRedirectUrl, loginWithOpenIdSetup } from './accounts/openid';
+import { changePassword, loginWithPassword } from './accounts/password';
+import { errorMiddleware, requestLoggerMiddleware } from './util/middlewares';
+import { validateAuthHeader, validateSession } from './util/validate-user';
 
 const app = express();
 app.use(express.json());

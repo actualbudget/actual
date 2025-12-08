@@ -522,7 +522,9 @@ function Table({ style, headers, className, children }) {
       <thead>
         <tr>
           {headers.map(header => (
-            <th className="text-gray-900 font-thin">{header}</th>
+            <th key={header} className="text-gray-900 font-thin">
+              {header}
+            </th>
           ))}
         </tr>
       </thead>
@@ -537,6 +539,7 @@ export function PrimitiveTypeList() {
       {Object.keys(types).map(name => {
         return (
           <PrimitiveType
+            key={name}
             name={types[name].name}
             type={types[name].type}
             description={types[name].description}
@@ -571,7 +574,7 @@ export function StructType({ fields }) {
       >
         {fields.map(field => {
           return (
-            <tr>
+            <tr key={field.name}>
               <td valign="top">
                 <code>{field.name}</code>
               </td>
@@ -598,7 +601,9 @@ function Argument({ arg }) {
       <span>
         {arg.name ? arg.name + ': ' : ''}
         {'{ '}
-        {arg.properties.map(prop => <Argument arg={prop} />).map(insertCommas)}
+        {arg.properties
+          .map(prop => <Argument key={prop.name} arg={prop} />)
+          .map(insertCommas)}
         {' }'}
       </span>
     );
@@ -628,8 +633,11 @@ export function Method({ name, args, returns = 'Promise<null>', children }) {
     <p className="method">
       <div className="p-4 pb-6 rounded border-b bg-gray-100 overflow-auto">
         <code className="text-blue-800">
-          {name}({args.map(arg => <Argument arg={arg} />).map(insertCommas)}){' '}
-          <span className="text-gray-500">&rarr; {returns}</span>
+          {name}(
+          {args
+            .map(arg => <Argument key={arg.name} arg={arg} />)
+            .map(insertCommas)}
+          ) <span className="text-gray-500">&rarr; {returns}</span>
         </code>
       </div>
       {children && React.cloneElement(children, {})}

@@ -1,4 +1,4 @@
-import CBCcregbebb from '../cbc_cregbebb.js';
+import CBCcregbebb from '../cbc_cregbebb';
 
 describe('cbc_cregbebb', () => {
   describe('#normalizeTransaction', () => {
