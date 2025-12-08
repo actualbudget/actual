@@ -1290,6 +1290,7 @@ function TransactionEditUnconnected({
   lastTransaction,
   dateFormat,
 }: TransactionEditUnconnectedProps) {
+  const { t } = useTranslation();
   const { transactionId } = useParams();
   const { state: locationState } = useLocation();
   const [searchParams] = useSearchParams();
@@ -1526,11 +1527,58 @@ function TransactionEditUnconnected({
     [transactions],
   );
 
-  if (
-    categories.length === 0 ||
-    accounts.length === 0 ||
-    transactions.length === 0
-  ) {
+  if (accounts.length === 0) {
+    return (
+      <Page
+        header={
+          <MobilePageHeader
+            title={t('New Transaction')}
+            leftContent={<MobileBackButton />}
+          />
+        }
+        padding={0}
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20,
+            backgroundColor: theme.mobilePageBackground,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 15,
+              textAlign: 'center',
+              marginBottom: 20,
+              lineHeight: '1.5em',
+            }}
+          >
+            <Trans>
+              To add a transaction, you need to{' '}
+              <strong>create an account first</strong>. You can add an account
+              from the accounts page.
+            </Trans>
+          </Text>
+          <Button
+            variant="primary"
+            onPress={() => {
+              dispatch(
+                pushModal({
+                  modal: { name: 'add-account', options: {} },
+                }),
+              );
+            }}
+          >
+            <Trans>Add account</Trans>
+          </Button>
+        </View>
+      </Page>
+    );
+  }
+
+  if (categories.length === 0 || transactions.length === 0) {
     return null;
   }
 
