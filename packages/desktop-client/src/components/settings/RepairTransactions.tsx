@@ -176,7 +176,7 @@ export function RepairTransactions() {
             and removes the errors if found.
           </li>
           <li>
-            Check if you have any budget transfers that erroneous contain a
+            Check if you have any budget transfers that erroneously contain a
             category, and remove the category.
           </li>
           <li>

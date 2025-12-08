@@ -17,7 +17,8 @@ type ElectronFixtures = {
 
 // Create the extended test with fixtures
 export const test = base.extend<ElectronFixtures>({
-  electronApp: async (_, use, testInfo: TestInfo) => {
+  // oxlint-disable-next-line no-empty-pattern
+  electronApp: async ({}, use, testInfo: TestInfo) => {
     const uniqueTestId = testInfo.testId.replace(/[^\w-]/g, '-');
     const testDataDir = path.join('e2e/data/', uniqueTestId);
 

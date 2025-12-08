@@ -8,6 +8,7 @@ import { parseDate, format, currentDay } from '../../shared/months';
 import { FIELD_TYPES } from '../../shared/rules';
 import { TransactionForRules } from '../transactions/transaction-rules';
 
+import { CustomFunctionsPlugin } from './customFunctions';
 import { assert } from './rule-utils';
 
 const ACTION_OPS = [
@@ -248,6 +249,8 @@ export class Action {
     }
 
     try {
+      HyperFormula.registerFunctionPlugin(CustomFunctionsPlugin);
+
       hfInstance = HyperFormula.buildEmpty({
         licenseKey: 'gpl-v3',
       });
@@ -270,51 +273,23 @@ export class Action {
         category_name: transaction._category_name || '',
       };
 
-      let row = 1;
       for (const key of Object.keys(fieldValues)) {
-        hfInstance.setCellContents({ sheet: sheetId, col: 0, row }, [['']]);
-        hfInstance.addNamedExpression(key, `=Sheet1!$A$${row + 1}`);
-
-        row++;
+        let cellValue: string | number | boolean;
+        if (
+          fieldValues[key] === undefined ||
+          fieldValues[key] === null ||
+          typeof fieldValues[key] === 'object'
+        ) {
+          cellValue = '';
+        } else {
+          cellValue = fieldValues[key];
+        }
+        hfInstance.addNamedExpression(key, cellValue);
       }
 
       hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [
         [formula],
       ]);
-
-      const parserCache = (
-        hfInstance as unknown as {
-          _parser: { cache: { cache: Map<string, { ast: unknown }> } };
-        }
-      )._parser.cache.cache;
-      const cacheEntry = parserCache.get(formula);
-      const usedVariables = new Set<string>();
-
-      if (cacheEntry && cacheEntry.ast) {
-        const extractedVars = this.extractVariablesFromAST(cacheEntry.ast);
-        for (const variable of extractedVars) {
-          usedVariables.add(variable);
-        }
-      }
-
-      row = 1;
-      for (const [, value] of Object.entries(fieldValues)) {
-        let cellValue: string | number | boolean;
-        if (
-          value === undefined ||
-          value === null ||
-          typeof value === 'object'
-        ) {
-          cellValue = '';
-        } else {
-          cellValue = value;
-        }
-
-        hfInstance.setCellContents({ sheet: sheetId, col: 0, row }, [
-          [cellValue],
-        ]);
-        row++;
-      }
 
       const cellAddress = { sheet: sheetId, col: 0, row: 0 };
       const cellValue = hfInstance.getCellValue(cellAddress);

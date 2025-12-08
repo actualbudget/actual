@@ -1,5 +1,5 @@
-import { mockTransactionAmount } from '../../services/tests/fixtures.js';
-import Belfius from '../belfius_gkccbebb.js';
+import { mockTransactionAmount } from '../../services/tests/fixtures';
+import Belfius from '../belfius_gkccbebb';
 
 describe('Belfius', () => {
   describe('#normalizeTransaction', () => {
