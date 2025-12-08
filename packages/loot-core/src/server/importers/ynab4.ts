@@ -325,7 +325,7 @@ function findLatestDevice(zipped: AdmZip, entries: AdmZip.IZipEntry[]): string {
       let data;
       try {
         data = JSON.parse(contents);
-      } catch (e) {
+      } catch {
         return null;
       }
 
@@ -435,7 +435,7 @@ export function parseFile(buffer: Buffer): YNAB4.YFull {
 
   try {
     return JSON.parse(contents);
-  } catch (e) {
+  } catch {
     throw new Error('Error parsing Budget.yfull file');
   }
 }

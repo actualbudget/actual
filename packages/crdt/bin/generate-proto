@@ -16,7 +16,7 @@ protoc --plugin="protoc-gen-ts=../../node_modules/.bin/protoc-gen-ts" \
   --proto_path=src/proto \
   sync.proto
 
-../../node_modules/.bin/prettier --write src/proto/*.d.ts
+../../node_modules/.bin/oxfmt src/proto/*.d.ts
 
 for file in src/proto/*.d.ts; do
   { echo "/* eslint-disable @typescript-eslint/no-namespace */"; sed 's/export class/export declare class/g' "$file"; } > "${file%.d.ts}.ts"

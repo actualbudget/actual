@@ -23,7 +23,7 @@ async function loadState() {
     state = JSON.parse(
       fs.readFileSync(path.join(getDataDir(), 'window.json'), 'utf8'),
     );
-  } catch (e) {
+  } catch {
     console.log('Could not load window state');
   }
 

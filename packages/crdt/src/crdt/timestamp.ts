@@ -57,7 +57,7 @@ export function deserializeClock(clock: string): Clock {
   let data;
   try {
     data = JSON.parse(clock);
-  } catch (e) {
+  } catch {
     data = {
       timestamp: '1970-01-01T00:00:00.000Z-0000-' + makeClientId(),
       merkle: {},
