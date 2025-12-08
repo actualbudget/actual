@@ -53,17 +53,15 @@ export default function Key({ mod, fixed, mods = [], k, arrow }) {
 
   return (
     <div style={{ display: 'inline-flex' }}>
-      {keys.map(
-        (key, idx) => (
-          <div
-            className={classes.key}
-            style={{ marginLeft: idx === 0 ? 0 : '0.25rem' }}
-          >
-            {key}
-          </div>
-        ),
-        [],
-      )}
+      {keys.map((key, idx) => (
+        <div
+          key={idx}
+          className={classes.key}
+          style={{ marginLeft: idx === 0 ? 0 : '0.25rem' }}
+        >
+          {key}
+        </div>
+      ))}
     </div>
   );
 }
