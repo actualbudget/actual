@@ -1,10 +1,18 @@
 # Importing Transactions
 
-There are a couple ways to get transactions into the system. For now, automatic transaction downloading is not available but it will be available very soon.
+There are various ways to get transactions into Actual. 
+
+## Linked Bank Import
+
+Actual Budget supports [linking your bank accounts](/docs/advanced/bank-sync.md) to sync using SimpleFIN, GoCardless or Pluggy.ai.
+
+There are also [community projects](/docs/community-repos.md) that implement bank syncing. 
 
 ## Import Financial Files
 
-A quick way to import transactions is to login to your bank's website and download a file. Actual supports importing QIF, OFX, and QFX files. Your bank probably allows you to download one of these formats (OFX/QFX is recommended).
+A quick way to import transactions is to login to your bank's website and download a file. 
+
+Actual supports importing CSV, QIF, OFX, QFX and CAMT files. Your bank probably allows you to download one of these formats (OFX/QFX is recommended).
 
 1. Open the account you want to import transactions into.
 2. Press the **Import** button and select the file.
