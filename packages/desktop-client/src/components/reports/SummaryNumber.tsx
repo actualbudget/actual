@@ -74,7 +74,6 @@ export function SummaryNumber({
       {!loading && (
         <View
           ref={mergedRef as Ref<HTMLDivElement>}
-          role="text"
           aria-label={
             value < 0
               ? t('Negative amount: {{amount}}', { amount: displayAmount })
