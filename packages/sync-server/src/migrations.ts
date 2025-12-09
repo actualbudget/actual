@@ -1,6 +1,6 @@
+import { readdir } from 'node:fs/promises';
 import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readdir } from 'node:fs/promises';
 
 import { load } from 'migrate';
 
@@ -18,14 +18,18 @@ export async function run(direction: 'up' | 'down' = 'up'): Promise<void> {
     // Load all script files in the migrations directory
     const files = await readdir(migrationsDir);
     type MigrationCallback = (err?: Error) => void;
-    const migrationsModules: Record<string, { up: (next?: MigrationCallback) => void; down: (next?: MigrationCallback) => void }> = {};
+    const migrationsModules: Record<
+      string,
+      {
+        up: (next?: MigrationCallback) => void;
+        down: (next?: MigrationCallback) => void;
+      }
+    > = {};
 
     await Promise.all(
-      files
-        .sort()
-        .map(async (f) => {
-          migrationsModules[f] = await import(path.join(migrationsDir, f));
-        })
+      files.sort().map(async f => {
+        migrationsModules[f] = await import(path.join(migrationsDir, f));
+      }),
     );
 
     return new Promise<void>((resolve, reject) => {
@@ -43,7 +47,7 @@ export async function run(direction: 'up' | 'down' = 'up'): Promise<void> {
             console.log('Migrations: DONE');
             resolve();
           });
-        }
+        },
       );
     });
   } catch (err) {
