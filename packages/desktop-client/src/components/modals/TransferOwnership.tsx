@@ -125,7 +125,7 @@ export function TransferOwnership({
                     value={userId}
                     defaultLabel={t('Select a user')}
                   />
-                  <label
+                  <Text
                     style={{
                       ...styles.verySmallText,
                       color: theme.pageTextLight,
@@ -136,8 +136,8 @@ export function TransferOwnership({
                       Select a user from the directory to designate as the new
                       budget owner.
                     </Trans>
-                  </label>
-                  <label
+                  </Text>
+                  <Text
                     style={{
                       ...styles.verySmallText,
                       color: theme.errorText,
@@ -147,8 +147,8 @@ export function TransferOwnership({
                     {t(
                       'This action is irreversible, ownership of this budget file will only be able to be transferred by the server administrator or new owner.',
                     )}
-                  </label>
-                  <label
+                  </Text>
+                  <Text
                     style={{
                       ...styles.verySmallText,
                       color: theme.errorText,
@@ -156,7 +156,7 @@ export function TransferOwnership({
                     }}
                   >
                     <Trans>Proceed with caution.</Trans>
-                  </label>
+                  </Text>
                 </View>
               )}
               {availableUsers.length === 0 && (

@@ -3,17 +3,15 @@
   "plugins": ["react", "typescript", "import", "jsx-a11y"],
   "rules": {
     // TODO fix all these and re-enable
-    "jsx-a11y/alt-text": "off",
-    "jsx-a11y/aria-role": "off",
     "jsx-a11y/click-events-have-key-events": "off",
-    "jsx-a11y/label-has-associated-control": "off",
     "jsx-a11y/prefer-tag-over-role": "off",
-    "jsx-a11y/role-has-required-aria-props": "off",
     "jsx-a11y/tabindex-no-positive": "off",
-    "no-autofocus": "off",
 
     // Keep these rules
     "no-var": "warn",
+    
+    // JSX A11y rules
+    "jsx-a11y/no-autofocus": ["warn", { "ignoreNonDOM": true }],
 
     // Import rules
     "import/first": "error",
