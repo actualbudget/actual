@@ -11,6 +11,13 @@
     <p>Designed for speed, Actual Budget has a streamlined interface that minimizes distractions, making it easy to navigate your finances. It operates locally, ensuring functionality without a network connection while syncing data across devices. This local-first approach also enhances privacy through end-to-end encryption.</p>
     <p>The budgeting system is grounded in real income, helping you track spending and savings accurately. The app simplifies managing transactions with a minimal, efficient interface, supporting features like split transactions and transfers. Additionally, Actual Budget offers customizable reports alongside default net worth and cash flow reports, enabling users to analyze your finances in a way that suits you.</p>
   </description>
+  <branding>
+    <!-- For Flathub Banners - https://docs.flathub.org/banner-preview/-->
+    <!-- purple100 -->
+    <color type="primary" scheme_preference="light">#f2ebfe</color>
+     <!-- bit darker than our purple900 for contrast -->
+    <color type="primary" scheme_preference="dark">#270241</color>
+  </branding>
   <launchable type="desktop-id">com.actualbudget.actual.desktop</launchable>
   <url type="homepage">https://actualbudget.org/</url>
   <url type="bugtracker">https://github.com/actualbudget/actual/issues</url>
@@ -21,40 +28,45 @@
   </recommends>
   <screenshots>
     <screenshot type="default" environment="gnome:dark">
-      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/budget-gnome-dark.png</image>
-      <caption>Budget screen (dark theme)</caption>
+      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/budget-gnome-dark.png</image>
+      <caption xml:lang="en">Budget screen (dark theme)</caption>
     </screenshot>
     <screenshot environment="gnome">
-      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/budget-gnome-light.png</image>
-      <caption>Budget screen (light theme)</caption>
+      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/budget-gnome-light.png</image>
+      <caption xml:lang="en">Budget screen (light theme)</caption>
     </screenshot>
     <screenshot environment="gnome:dark">
-      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/transactions-gnome-dark.png</image>
-      <caption>Transactions screen (dark theme)</caption>
+      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/transactions-gnome-dark.png</image>
+      <caption xml:lang="en">Transactions screen (dark theme)</caption>
     </screenshot>
     <screenshot environment="gnome">
-      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/transactions-gnome-light.png</image>
-      <caption>Transactions screen (light theme)</caption>
+      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/transactions-gnome-light.png</image>
+      <caption xml:lang="en">Transactions screen (light theme)</caption>
     </screenshot>
     <screenshot environment="gnome:dark">
-      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/schedules-gnome-dark.png</image>
-      <caption>Schedules screen (dark theme)</caption>
+      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/schedules-gnome-dark.png</image>
+      <caption xml:lang="en">Schedules screen (dark theme)</caption>
     </screenshot>
     <screenshot environment="gnome">
-      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/schedules-gnome-light.png</image>
-      <caption>Schedules screen (light theme)</caption>
+      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/schedules-gnome-light.png</image>
+      <caption xml:lang="en">Schedules screen (light theme)</caption>
     </screenshot>
     <screenshot environment="gnome:dark">
-      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/reports-gnome-dark.png</image>
-      <caption>Reports screen (dark theme)</caption>
+      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/reports-gnome-dark.png</image>
+      <caption xml:lang="en">Reports screen (dark theme)</caption>
     </screenshot>
     <screenshot environment="gnome">
-      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/reports-gnome-light.png</image>
-      <caption>Reports screen (light theme)</caption>
+      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/reports-gnome-light.png</image>
+      <caption xml:lang="en">Reports screen (light theme)</caption>
     </screenshot>
   </screenshots>
   <releases>
-    <release version="25.10.0" date="2025-10-02" />
+    <release version="%RELEASE_VERSION%" date="%RELEASE_DATE%">
+      <url>https://actualbudget.org/docs/releases</url>
+      <description>
+        <p>Check out the full release notes on our website.</p>
+      </description>
+    </release>
   </releases>
   <developer_name>Actual Core Contributors</developer_name>
   <update_contact>dev@actualbudget.org</update_contact>

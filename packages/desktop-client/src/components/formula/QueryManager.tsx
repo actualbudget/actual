@@ -411,7 +411,7 @@ function QueryItem({
           },
         }),
       );
-    } catch (error) {
+    } catch {
       dispatch(
         addNotification({
           notification: {
@@ -457,7 +457,7 @@ function QueryItem({
           }),
         );
       }
-    } catch (error) {
+    } catch {
       dispatch(
         addNotification({
           notification: {
@@ -856,6 +856,7 @@ function QueryItem({
               onDelete={filters.onDelete}
               conditionsOp={filters.conditionsOp}
               onConditionsOpChange={filters.onConditionsOpChange}
+              style={{ maxWidth: '100%' }}
             />
           )}
           <FilterButton

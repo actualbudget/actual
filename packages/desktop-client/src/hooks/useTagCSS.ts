@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 
 import { theme as themeStyle } from '@actual-app/components/theme';
 import { css } from '@emotion/css';

@@ -577,7 +577,7 @@ export async function reconcileTransactions(
       }
     } else {
       // Insert a new transaction
-      const { forceAddTransaction, ...newTrans } = trans;
+      const { forceAddTransaction: _forceAddTransaction, ...newTrans } = trans;
       const finalTransaction = {
         ...newTrans,
         id: uuidv4(),

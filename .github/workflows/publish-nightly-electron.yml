@@ -3,7 +3,7 @@ name: Publish nightly desktop app
 # Publish nightly version of desktop app - Runs every day at midnight
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 defaults:
@@ -39,6 +39,7 @@ jobs:
           python3 -m pip install setuptools
 
       - if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        name: Setup Flatpak dependencies
         run: |
           sudo apt-get update
           sudo apt-get install flatpak -y
@@ -48,6 +49,13 @@ jobs:
           sudo flatpak install org.freedesktop.Platform//24.08 -y
           sudo flatpak install org.electronjs.Electron2.BaseApp//24.08 -y
 
+          METAINFO_FILE="packages/desktop-electron/extra-resources/linux/com.actualbudget.actual.metainfo.xml"
+          TODAY=$(date +%Y-%m-%d)
+          VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/desktop-electron/package.json --type nightly)
+          sed -i "s/%RELEASE_VERSION%/$VERSION/g; s/%RELEASE_DATE%/$TODAY/g" "$METAINFO_FILE"
+          sudo apt-get install appstream
+          appstreamcli --version
+          appstreamcli validate "$METAINFO_FILE"
       - name: Set up environment
         uses: ./.github/actions/setup
 

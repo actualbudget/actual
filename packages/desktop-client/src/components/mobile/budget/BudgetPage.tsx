@@ -244,7 +244,7 @@ export function BudgetPage() {
       const group = categoryGroups.find(g => g.id === groupId);
       onSaveGroup({
         ...group,
-        hidden: !!!group.hidden,
+        hidden: group.hidden ? false : true,
       });
       dispatch(collapseModals({ rootModalName: 'category-group-menu' }));
     },
@@ -301,7 +301,7 @@ export function BudgetPage() {
       const category = categories.find(c => c.id === categoryId);
       onSaveCategory({
         ...category,
-        hidden: !!!category.hidden,
+        hidden: category.hidden ? false : true,
       });
       dispatch(collapseModals({ rootModalName: 'category-menu' }));
     },
@@ -731,6 +731,7 @@ function UncategorizedTransactionsBanner(props) {
 
 function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
   const { t } = useTranslation();
+  const format = useFormat();
   const toBudgetAmount = useSheetValue<
     'envelope-budget',
     typeof envelopeBudget.toBudget
@@ -754,6 +755,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
               onBudgetAction(month, 'cover-overbudgeted', {
                 category: categoryId,
                 amount,
+                currencyCode: format.currency.code,
               });
               showUndoNotification({
                 message: t('Covered overbudgeted from {{categoryName}}', {
@@ -773,6 +775,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
     showUndoNotification,
     t,
     toBudgetAmount,
+    format.currency.code,
   ]);
 
   if (!toBudgetAmount || toBudgetAmount >= 0) {
@@ -863,6 +866,7 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
                   to: category.id,
                   from: fromCategoryId,
                   amount,
+                  currencyCode: format.currency.code,
                 });
                 showUndoNotification({
                   message: t(
@@ -890,6 +894,7 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
       onBudgetAction,
       showUndoNotification,
       t,
+      format.currency.code,
     ],
   );
 

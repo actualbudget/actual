@@ -1,8 +1,8 @@
-import SpkMarburgBiedenkopfHeladef1mar from '../spk_marburg_biedenkopf_heladef1mar.js';
+import SpkMarburgBiedenkopfHeladef1mar from '../spk_marburg_biedenkopf_heladef1mar';
 
 describe('SpkMarburgBiedenkopfHeladef1mar', () => {
   describe('#normalizeAccount', () => {
-    /** @type {import('../../gocardless.types.js').DetailedAccountWithInstitution} */
+    /** @type {import('../../gocardless.types').DetailedAccountWithInstitution} */
     const accountRaw = {
       resourceId: 'e896eec6-6096-4efc-a941-756bd9d74765',
       iban: 'DE50533500000123456789',
@@ -210,7 +210,7 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
   });
 
   describe('#countStartingBalance', () => {
-    /** @type {import('../../gocardless-node.types.js').Balance[]} */
+    /** @type {import('../../gocardless-node.types').Balance[]} */
     const balances = [
       {
         balanceAmount: { amount: '3596.87', currency: 'EUR' },
