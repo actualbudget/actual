@@ -74,16 +74,22 @@ import { getPrettyPayee } from '@desktop-client/components/mobile/utils';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { createSingleTimeScheduleFromTransaction } from '@desktop-client/components/transactions/TransactionList';
 import { AmountInput } from '@desktop-client/components/util/AmountInput';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSingleActiveEditForm } from '@desktop-client/hooks/useSingleActiveEditForm';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import {
+  SingleActiveEditFormProvider,
+  useSingleActiveEditForm,
+} from '@desktop-client/hooks/useSingleActiveEditForm';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 import { setLastTransaction } from '@desktop-client/transactions/transactionsSlice';
 
 function getFieldName(transactionId: TransactionEntity['id'], field: string) {
@@ -1570,3 +1576,26 @@ type TransactionEditProps = Omit<
   TransactionEditUnconnectedProps,
   'categories' | 'accounts' | 'payees' | 'lastTransaction' | 'dateFormat'
 >;
+
+export const TransactionEdit = (props: TransactionEditProps) => {
+  const { list: categories } = useCategories();
+  const payees = usePayees();
+  const lastTransaction = useSelector(
+    state => state.transactions.lastTransaction,
+  );
+  const accounts = useAccounts();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+
+  return (
+    <SingleActiveEditFormProvider formName="mobile-transaction">
+      <TransactionEditUnconnected
+        {...props}
+        categories={categories}
+        payees={payees}
+        lastTransaction={lastTransaction}
+        accounts={accounts}
+        dateFormat={dateFormat}
+      />
+    </SingleActiveEditFormProvider>
+  );
+};
