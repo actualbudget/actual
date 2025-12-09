@@ -58,7 +58,7 @@ jobs:
         with:
           repository: ${{ steps.metadata.outputs.head_repo }}
           ref: ${{ steps.metadata.outputs.head_ref }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
           fetch-depth: 0
 
       - name: Validate and apply patch
