@@ -2,9 +2,9 @@ import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readdir } from 'node:fs/promises';
 
-import migrate from 'migrate';
+import { load } from 'migrate';
 
-import { config } from './load-config.js';
+import { config } from './load-config';
 
 export async function run(direction: 'up' | 'down' = 'up'): Promise<void> {
   console.log(
@@ -17,7 +17,8 @@ export async function run(direction: 'up' | 'down' = 'up'): Promise<void> {
   try {
     // Load all script files in the migrations directory
     const files = await readdir(migrationsDir);
-    const migrationsModules: { [key: string]: { up: Function, down: Function } } = {};
+    type MigrationCallback = (err?: Error) => void;
+    const migrationsModules: Record<string, { up: (next?: MigrationCallback) => void; down: (next?: MigrationCallback) => void }> = {};
 
     await Promise.all(
       files
@@ -28,7 +29,7 @@ export async function run(direction: 'up' | 'down' = 'up'): Promise<void> {
     );
 
     return new Promise<void>((resolve, reject) => {
-      migrate.load(
+      load(
         {
           stateStore: `${path.join(config.get('dataDir'), '.migrate')}${config.get('mode') === 'test' ? '-test' : ''}`,
           migrations: migrationsModules,
