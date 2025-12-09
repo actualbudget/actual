@@ -78,6 +78,7 @@ export function MobilePageHeader({
       </View>
       <View
         role="heading"
+        aria-level={1}
         style={{
           textAlign: 'center',
           alignItems: 'center',
