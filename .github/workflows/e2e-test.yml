@@ -2,6 +2,13 @@ name: E2E Tests
 
 on:
   pull_request:
+    paths:
+      - "packages/**"
+      - "!packages/sync-server/**" # Sync server changes don't affect E2E tests
+      - "!packages/api/**" # API changes don't affect E2E tests
+      - "!packages/ci-actions/**" # CI actions changes don't affect E2E tests
+      - "!packages/docs/**" # Docs changes don't affect E2E tests
+      - "!packages/eslint-plugin-actual/**" # Eslint plugin changes don't affect E2E tests
 
 env:
   GITHUB_PR_NUMBER: ${{github.event.pull_request.number}}
