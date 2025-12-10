@@ -231,6 +231,7 @@ export type InitConfig = {
   dataDir?: string;
   serverURL?: string;
   password?: string;
+  token?: string;
   verbose?: boolean;
 };
 
@@ -258,7 +259,30 @@ export async function init(config: InitConfig) {
   if (serverURL) {
     setServer(serverURL);
 
-    if (config.password) {
+    // Validate that only one auth method is provided
+    if (config.password && config.token) {
+      throw new Error(
+        'Cannot specify both password and token. Use one authentication method.',
+      );
+    }
+
+    if (config.token) {
+      // Set the token directly for API token authentication
+      await runHandler(handlers['subscribe-set-token'], {
+        token: config.token,
+      });
+
+      // Validate the token
+      const user = await runHandler(handlers['subscribe-get-user'], undefined);
+      if (user === null) {
+        const { InvalidTokenError } = await import('./errors');
+        throw new InvalidTokenError();
+      }
+      if (user.tokenExpired) {
+        const { TokenExpiredError } = await import('./errors');
+        throw new TokenExpiredError();
+      }
+    } else if (config.password) {
       const result = await runHandler(handlers['subscribe-sign-in'], {
         password: config.password,
       });
