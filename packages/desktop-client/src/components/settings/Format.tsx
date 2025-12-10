@@ -60,6 +60,9 @@ export function FormatSettings() {
   const [_numberFormat, setNumberFormatPref] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction, setHideFractionPref] = useSyncedPref('hideFraction');
+  const [slashedZero, setSlashedZeroPref] = useSyncedPref('slashedZero');
+  const [alternateDigits, setAlternateDigitsPref] =
+    useSyncedPref('alternateDigits');
 
   const { daysOfWeek } = useDaysOfWeek();
 
@@ -108,6 +111,32 @@ export function FormatSettings() {
               />
               <label htmlFor="settings-textDecimal">
                 <Trans>Hide decimal places</Trans>
+              </label>
+            </Text>
+
+            <Text style={{ display: 'flex' }}>
+              <Checkbox
+                id="settings-alternateDigits"
+                checked={String(alternateDigits) === 'true'}
+                onChange={e =>
+                  setAlternateDigitsPref(String(e.currentTarget.checked))
+                }
+              />
+              <label htmlFor="settings-alternateDigits">
+                <Trans>Use alternate digits</Trans>
+              </label>
+            </Text>
+
+            <Text style={{ display: 'flex' }}>
+              <Checkbox
+                id="settings-slashedZero"
+                checked={String(slashedZero) === 'true'}
+                onChange={e =>
+                  setSlashedZeroPref(String(e.currentTarget.checked))
+                }
+              />
+              <label htmlFor="settings-slashedZero">
+                <Trans>Use slashed zeros</Trans>
               </label>
             </Text>
           </Column>
