@@ -11,6 +11,7 @@ on:
   pull_request:
     paths:
       - "packages/**"
+      - ".github/workflows/electron-pr.yml"
       - "!packages/api/**" # API changes don't affect Electron
       - "!packages/ci-actions/**" # CI actions changes don't affect Electron
       - "!packages/docs/**" # Docs changes don't affect Electron
