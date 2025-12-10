@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "packages/**"
+      - "yarn.lock"
       - ".github/workflows/e2e-test.yml"
       - "!packages/sync-server/**" # Sync server changes don't affect E2E tests
       - "!packages/api/**" # API changes don't affect E2E tests
