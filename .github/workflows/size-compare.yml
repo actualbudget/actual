@@ -15,6 +15,7 @@ on:
   pull_request_target:
     paths:
       - "packages/**"
+      - "package.json"
       - "yarn.lock"
       - ".github/workflows/size-compare.yml"
       - "!packages/sync-server/**" # Sync server changes don't affect the size of the web
