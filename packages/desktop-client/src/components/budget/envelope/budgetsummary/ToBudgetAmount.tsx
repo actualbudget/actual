@@ -52,7 +52,7 @@ export function ToBudgetAmount({
   const isNegative = num < 0;
 
   return (
-    <View style={{ alignItems: 'center', ...style }}>
+    <View style={{ alignItems: 'center', ...styles.tnum, ...style }}>
       <Block>{isNegative ? t('Overbudgeted:') : t('To Budget:')}</Block>
       <View>
         <Tooltip
