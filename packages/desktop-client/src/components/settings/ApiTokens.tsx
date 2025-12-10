@@ -235,7 +235,7 @@ function ShowTokenModal({
         </Text>
 
         <Text style={{ marginBottom: 10, color: theme.warningText }}>
-          <Trans>Copy this token now. You won't be able to see it again!</Trans>
+          <Trans>Copy this token now. You won&#39;t be able to see it again!</Trans>
         </Text>
 
         <View
