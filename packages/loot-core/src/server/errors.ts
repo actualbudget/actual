@@ -133,20 +133,14 @@ export class TokenExpiredError extends AuthError {
 
 export class InvalidTokenError extends AuthError {
   constructor() {
-    super(
-      'invalid-token',
-      'The API token is invalid or has been revoked.',
-    );
+    super('invalid-token', 'The API token is invalid or has been revoked.');
     this.name = 'InvalidTokenError';
   }
 }
 
 export class TokenScopeError extends AuthError {
   constructor() {
-    super(
-      'scope-error',
-      'The API token does not have access to this budget.',
-    );
+    super('scope-error', 'The API token does not have access to this budget.');
     this.name = 'TokenScopeError';
   }
 }
