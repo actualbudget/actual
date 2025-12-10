@@ -137,6 +137,7 @@ export const ReportTableRow = memo(
                 return (
                   <Cell
                     key={index}
+                    textAlign="right"
                     style={{
                       minWidth: compact ? 50 : 85,
                       ...(colorized && {
@@ -188,6 +189,7 @@ export const ReportTableRow = memo(
                         ? format(item.totalAssets, 'financial')
                         : undefined
                     }
+                    textAlign="right"
                     width="flex"
                     privacyFilter
                     style={{
@@ -228,6 +230,7 @@ export const ReportTableRow = memo(
                         ? format(item.totalDebts, 'financial')
                         : undefined
                     }
+                    textAlign="right"
                     width="flex"
                     privacyFilter
                     style={{
@@ -270,6 +273,7 @@ export const ReportTableRow = memo(
                 ? format(item[balanceTypeOp], 'financial')
                 : undefined
             }
+            textAlign="right"
             style={{
               fontWeight: 600,
               minWidth: compact ? 50 : 85,
@@ -309,6 +313,7 @@ export const ReportTableRow = memo(
                 ? format(average, 'financial')
                 : undefined
             }
+            textAlign="right"
             style={{
               fontWeight: 600,
               minWidth: compact ? 50 : 85,
