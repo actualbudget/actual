@@ -53,12 +53,13 @@ All NPM packages should be automatically released and pushed to the NPM registry
 
 For the Windows Store desktop app, a submission will be automatically uploaded and submitted for certification. The certification process can take up to 3 business days; once complete the app will be in the Store. You can check the update status [here](https://partner.microsoft.com/en-us/dashboard) if you have permission. Note that the Store UI will not correctly reflect the submission status for about 30 minutes after submission.
 
-For the Flathub desktop app, a PR will be created against the [Actual Flathub Repository](https://github.com/flathub/com.actualbudget.actual) and the core maintainers will be assigned as reviewers. Once created, a Flatpak Build will be kicked off and will validated the release. Once successful, the Core team will review the PR and merge it to `master`, which will kick off a production release to the Flathub Store. It can take anywhere from hours to a few days before the app will be available in the Flathub Store.
+For the Flathub desktop app, a PR will be created against the [Actual Flathub Repository](https://github.com/flathub/com.actualbudget.actual/pulls) and the core maintainers will be assigned as reviewers. Once created, a Flatpak Build will be kicked off and will validated the release. Once successful, the Core team will review the PR and merge it to `master`, which will kick off a production release to the Flathub Store. It can take anywhere from hours to a few days before the app will be available in the Flathub Store.
 
 Finally, a draft GitHub release should be automatically created [here](https://github.com/actualbudget/actual/releases).
 
 ## Finalize the release
 
+- [ ] Approve and merge the [Flathub Release PR](https://github.com/flathub/com.actualbudget.actual/pulls) to master.
 - [ ] After the Docker image for the release is ready and pushed to Docker Hub, remember to deploy it and do a quick smoke test to verify things still work as expected.
 - [ ] Un-draft the GitHub release which will send announcement notifications to all apps.
 - [ ] Wrap up by sending an announcement on Discord and Twitter.
