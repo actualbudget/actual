@@ -168,12 +168,22 @@ function CreateTokenModal({
           </Text>
         )}
 
-        <View style={{ flexDirection: 'row', gap: 10, justifyContent: 'flex-end' }}>
+        <View
+          style={{ flexDirection: 'row', gap: 10, justifyContent: 'flex-end' }}
+        >
           <Button variant="bare" onPress={onClose}>
             <Trans>Cancel</Trans>
           </Button>
-          <Button variant="primary" onPress={handleCreate} isDisabled={creating}>
-            {creating ? <Trans>Creating...</Trans> : <Trans>Create Token</Trans>}
+          <Button
+            variant="primary"
+            onPress={handleCreate}
+            isDisabled={creating}
+          >
+            {creating ? (
+              <Trans>Creating...</Trans>
+            ) : (
+              <Trans>Create Token</Trans>
+            )}
           </Button>
         </View>
       </View>
@@ -225,9 +235,7 @@ function ShowTokenModal({
         </Text>
 
         <Text style={{ marginBottom: 10, color: theme.warningText }}>
-          <Trans>
-            Copy this token now. You won't be able to see it again!
-          </Trans>
+          <Trans>Copy this token now. You won't be able to see it again!</Trans>
         </Text>
 
         <View
@@ -244,7 +252,9 @@ function ShowTokenModal({
           {token.token}
         </View>
 
-        <View style={{ flexDirection: 'row', gap: 10, justifyContent: 'flex-end' }}>
+        <View
+          style={{ flexDirection: 'row', gap: 10, justifyContent: 'flex-end' }}
+        >
           <Button variant="normal" onPress={handleCopy}>
             {copied ? <Trans>Copied!</Trans> : <Trans>Copy to Clipboard</Trans>}
           </Button>
@@ -352,10 +362,7 @@ export function ApiTokensSettings() {
       )}
 
       {newToken && (
-        <ShowTokenModal
-          token={newToken}
-          onClose={() => setNewToken(null)}
-        />
+        <ShowTokenModal token={newToken} onClose={() => setNewToken(null)} />
       )}
     </Setting>
   );

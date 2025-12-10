@@ -5,7 +5,13 @@ import { getAccountDb } from './account-db';
 import { handlers as app } from './app-api-tokens';
 
 // Helper functions
-const createUser = (userId, userName, role = 'BASIC', owner = 0, enabled = 1) => {
+const createUser = (
+  userId,
+  userName,
+  role = 'BASIC',
+  owner = 0,
+  enabled = 1,
+) => {
   getAccountDb().mutate(
     'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, ?, ?, ?)',
     [userId, userName, `${userName} display`, enabled, owner, role],
@@ -13,7 +19,10 @@ const createUser = (userId, userName, role = 'BASIC', owner = 0, enabled = 1) =>
 };
 
 const deleteUser = userId => {
-  getAccountDb().mutate('DELETE FROM api_token_budgets WHERE token_id IN (SELECT id FROM api_tokens WHERE user_id = ?)', [userId]);
+  getAccountDb().mutate(
+    'DELETE FROM api_token_budgets WHERE token_id IN (SELECT id FROM api_tokens WHERE user_id = ?)',
+    [userId],
+  );
   getAccountDb().mutate('DELETE FROM api_tokens WHERE user_id = ?', [userId]);
   getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [userId]);
   getAccountDb().mutate('DELETE FROM users WHERE id = ?', [userId]);
@@ -87,9 +96,7 @@ describe('/api-tokens', () => {
     });
 
     it('should return 401 if not authenticated', async () => {
-      const res = await request(app)
-        .post('/')
-        .send({ name: 'Test Token' });
+      const res = await request(app).post('/').send({ name: 'Test Token' });
 
       expect(res.statusCode).toEqual(401);
     });
@@ -97,10 +104,10 @@ describe('/api-tokens', () => {
     it('should create token with budget scopes', async () => {
       const budgetId = uuidv4();
       // Create a file for the budget
-      getAccountDb().mutate(
-        'INSERT INTO files (id, owner) VALUES (?, ?)',
-        [budgetId, userId],
-      );
+      getAccountDb().mutate('INSERT INTO files (id, owner) VALUES (?, ?)', [
+        budgetId,
+        userId,
+      ]);
 
       const res = await request(app)
         .post('/')
@@ -289,9 +296,7 @@ describe('/api-tokens', () => {
       expect(res.statusCode).toEqual(200);
 
       // Verify token is enabled
-      listRes = await request(app)
-        .get('/')
-        .set('x-actual-token', sessionToken);
+      listRes = await request(app).get('/').set('x-actual-token', sessionToken);
 
       expect(listRes.body.data[0].enabled).toBe(true);
     });
