@@ -6,6 +6,14 @@ import { validateNodeVersion } from './validateNodeVersion';
 export * from './methods';
 export * as utils from './utils';
 
+// Authentication error types for API token support
+export {
+  AuthError,
+  TokenExpiredError,
+  InvalidTokenError,
+  TokenScopeError,
+} from 'loot-core/server/errors';
+
 /** @deprecated Please use return value of `init` instead */
 export let internal: typeof lib | null = null;
 

@@ -27,6 +27,7 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { loadPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 
+import { ApiTokensSettings } from './ApiTokens';
 import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
@@ -242,6 +243,7 @@ export function Settings() {
         {isCurrencyExperimentalEnabled && <CurrencySettings />}
         <LanguageSettings />
         <AuthSettings />
+        <ApiTokensSettings />
         <EncryptionSettings />
         <BudgetTypeSettings />
         {isElectron() && <Backups />}
