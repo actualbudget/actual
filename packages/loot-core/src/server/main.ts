@@ -238,22 +238,32 @@ type ServerInitConfig = BaseInitConfig & {
 type PasswordAuthConfig = ServerInitConfig & {
   password: string;
   sessionToken?: never;
+  token?: never;
 };
 
 type SessionTokenAuthConfig = ServerInitConfig & {
   sessionToken: string;
   password?: never;
+  token?: never;
+};
+
+type ApiTokenAuthConfig = ServerInitConfig & {
+  token: string;
+  password?: never;
+  sessionToken?: never;
 };
 
 type NoServerConfig = BaseInitConfig & {
   serverURL?: undefined;
   password?: never;
   sessionToken?: never;
+  token?: never;
 };
 
 export type InitConfig =
   | PasswordAuthConfig
   | SessionTokenAuthConfig
+  | ApiTokenAuthConfig
   | NoServerConfig;
 
 export async function init(config: InitConfig) {
@@ -280,7 +290,23 @@ export async function init(config: InitConfig) {
   if (serverURL) {
     setServer(serverURL);
 
-    if ('sessionToken' in config && config.sessionToken) {
+    if ('token' in config && config.token) {
+      // API token authentication
+      await runHandler(handlers['subscribe-set-token'], {
+        token: config.token,
+      });
+
+      // Validate the token
+      const user = await runHandler(handlers['subscribe-get-user'], undefined);
+      if (user === null) {
+        const { InvalidTokenError } = await import('./errors');
+        throw new InvalidTokenError();
+      }
+      if (user.tokenExpired) {
+        const { TokenExpiredError } = await import('./errors');
+        throw new TokenExpiredError();
+      }
+    } else if ('sessionToken' in config && config.sessionToken) {
       // Session token authentication
       await runHandler(handlers['subscribe-set-token'], {
         token: config.sessionToken,

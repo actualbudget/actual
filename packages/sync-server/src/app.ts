@@ -9,6 +9,7 @@ import rateLimit from 'express-rate-limit';
 import { bootstrap } from './account-db';
 import * as accountApp from './app-account';
 import * as adminApp from './app-admin';
+import * as apiTokensApp from './app-api-tokens';
 import * as corsApp from './app-cors-proxy';
 import * as goCardlessApp from './app-gocardless/app-gocardless';
 import * as openidApp from './app-openid';
@@ -67,6 +68,7 @@ if (config.get('corsProxy.enabled')) {
 
 app.use('/admin', adminApp.handlers);
 app.use('/openid', openidApp.handlers);
+app.use('/api-tokens', apiTokensApp.handlers);
 
 app.get('/mode', (req, res) => {
   res.send(config.get('mode'));

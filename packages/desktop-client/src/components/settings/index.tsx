@@ -14,6 +14,7 @@ import { css } from '@emotion/css';
 import { listen } from 'loot-core/platform/client/connection';
 import { isElectron } from 'loot-core/shared/environment';
 
+import { ApiTokensSettings } from './ApiTokens';
 import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
@@ -247,6 +248,7 @@ export function Settings() {
         {isCurrencyExperimentalEnabled && <CurrencySettings />}
         <LanguageSettings />
         <AuthSettings />
+        <ApiTokensSettings />
         <EncryptionSettings />
         <BudgetTypeSettings />
         {isElectron() && <Backups />}

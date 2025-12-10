@@ -3,15 +3,30 @@ import ipaddr from 'ipaddr.js';
 
 import { getSession } from '../account-db';
 import { config } from '../load-config';
+import { apiTokenService } from '../services/api-token-service';
 
 export const TOKEN_EXPIRATION_NEVER = -1;
 const MS_PER_SECOND = 1000;
+const API_TOKEN_PREFIX = 'act_';
 
-export function validateSession(req: Request, res: Response) {
+export async function validateSession(req: Request, res: Response) {
   let { token } = req.body || {};
 
   if (!token) {
     token = req.headers['x-actual-token'];
+  }
+
+  // Also check Authorization header for Bearer tokens
+  if (!token) {
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.slice(7);
+    }
+  }
+
+  // Check if this is an API token
+  if (token && token.startsWith(API_TOKEN_PREFIX)) {
+    return await validateApiToken(token, res);
   }
 
   const session = getSession(token);
@@ -39,6 +54,31 @@ export function validateSession(req: Request, res: Response) {
   }
 
   return session;
+}
+
+/**
+ * Validate an API token and return session-like object
+ */
+async function validateApiToken(token: string, res: Response) {
+  const result = await apiTokenService.validateToken(token);
+
+  if (!result) {
+    res.status(401);
+    res.send({
+      status: 'error',
+      reason: 'unauthorized',
+      details: 'invalid-api-token',
+    });
+    return null;
+  }
+
+  // Return a session-like object for compatibility
+  return {
+    user_id: result.userId,
+    token_id: result.tokenId,
+    budget_ids: result.budgetIds,
+    auth_method: 'api_token',
+  };
 }
 
 export function validateAuthHeader(req: Request) {
