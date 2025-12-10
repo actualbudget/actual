@@ -1,32 +1,25 @@
 import { join } from 'path';
 
-import { type Page } from '@playwright/test';
-
 import { expect, test } from './fixtures';
 import { type AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
 
 test.describe('Accounts', () => {
-  let page: Page;
   let navigation: Navigation;
   let configurationPage: ConfigurationPage;
   let accountPage: AccountPage;
 
-  test.beforeEach(async ({ browser }) => {
-    page = await browser.newPage();
+  test.beforeEach(async ({ page }) => {
     navigation = new Navigation(page);
     configurationPage = new ConfigurationPage(page);
 
-    await page.goto('/');
     await configurationPage.createTestFile();
   });
 
-  test.afterEach(async () => {
-    await page.close();
-  });
-
-  test('creates a new account and views the initial balance transaction', async () => {
+  test('creates a new account and views the initial balance transaction', async ({
+    page,
+  }) => {
     accountPage = await navigation.createAccount({
       name: 'New Account',
       offBudget: false,
@@ -42,7 +35,7 @@ test.describe('Accounts', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('closes an account', async () => {
+  test('closes an account', async ({ page }) => {
     accountPage = await navigation.goToAccountPage('Roth IRA');
 
     await expect(accountPage.accountName).toHaveText('Roth IRA');
@@ -57,12 +50,9 @@ test.describe('Accounts', () => {
   });
 
   test.describe('On Budget Accounts', () => {
-    // Reset filters
-    test.afterEach(async () => {
-      await accountPage.removeFilter(0);
-    });
-
-    test('creates a transfer from two existing transactions', async () => {
+    test('creates a transfer from two existing transactions', async ({
+      page,
+    }) => {
       accountPage = await navigation.goToAccountPage('On budget');
       await accountPage.waitFor();
 
@@ -103,6 +93,9 @@ test.describe('Accounts', () => {
       await expect(transaction.category).toHaveText('Transfer');
       await expect(transaction.debit).toHaveText('34.56');
       await expect(transaction.account).toHaveText('Ally Savings');
+
+      // Cleanup: Reset filters
+      await accountPage.removeFilter(0);
     });
   });
 
@@ -116,7 +109,7 @@ test.describe('Accounts', () => {
       await accountPage.waitFor();
     });
 
-    async function importCsv(screenshot = false) {
+    test('imports transactions from a CSV file', async ({ page }) => {
       const fileChooserPromise = page.waitForEvent('filechooser');
       await accountPage.page.getByRole('button', { name: 'Import' }).click();
 
@@ -129,20 +122,27 @@ test.describe('Accounts', () => {
 
       await importButton.waitFor({ state: 'visible' });
 
-      if (screenshot) await expect(page).toMatchThemeScreenshots();
+      await expect(page).toMatchThemeScreenshots();
 
       await importButton.click();
 
       await expect(importButton).not.toBeVisible();
-    }
-
-    test('imports transactions from a CSV file', async () => {
-      await importCsv(true);
     });
 
-    test('import csv file twice', async () => {
-      await importCsv(false);
+    test('import csv file twice', async ({ page }) => {
+      // First import
+      const fileChooserPromise1 = page.waitForEvent('filechooser');
+      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      const fileChooser1 = await fileChooserPromise1;
+      await fileChooser1.setFiles(join(__dirname, 'data/test.csv'));
+      const importButton1 = accountPage.page.getByRole('button', {
+        name: /Import \d+ transactions/,
+      });
+      await importButton1.waitFor({ state: 'visible' });
+      await importButton1.click();
+      await expect(importButton1).not.toBeVisible();
 
+      // Second import
       const fileChooserPromise = page.waitForEvent('filechooser');
       await accountPage.page.getByRole('button', { name: 'Import' }).click();
 
@@ -167,7 +167,9 @@ test.describe('Accounts', () => {
       await expect(importButton).not.toBeVisible();
     });
 
-    test('import notes checkbox is not shown for CSV files', async () => {
+    test('import notes checkbox is not shown for CSV files', async ({
+      page,
+    }) => {
       const fileChooserPromise = page.waitForEvent('filechooser');
       await accountPage.page.getByRole('button', { name: 'Import' }).click();
 

@@ -1,44 +1,27 @@
-import { type Page } from '@playwright/test';
-
 import { expect, test } from './fixtures';
 import { type AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
 
 test.describe('Transactions', () => {
-  let page: Page;
   let navigation: Navigation;
   let accountPage: AccountPage;
   let configurationPage: ConfigurationPage;
 
-  test.beforeAll(async ({ browser }) => {
-    page = await browser.newPage();
+  test.beforeEach(async ({ page }) => {
     navigation = new Navigation(page);
     configurationPage = new ConfigurationPage(page);
 
-    await page.goto('/');
     await configurationPage.createTestFile();
-  });
-
-  test.afterAll(async () => {
-    await page.close();
-  });
-
-  test.beforeEach(async () => {
     accountPage = await navigation.goToAccountPage('Ally Savings');
   });
 
-  test('checks the page visuals', async () => {
+  test('checks the page visuals', async ({ page }) => {
     await expect(page).toMatchThemeScreenshots();
   });
 
   test.describe('filters transactions', () => {
-    // Reset filters
-    test.afterEach(async () => {
-      await accountPage.removeFilter(0);
-    });
-
-    test('by date', async () => {
+    test('by date', async ({ page }) => {
       const filterTooltip = await accountPage.filterBy('Date');
       await expect(filterTooltip.locator).toMatchThemeScreenshots();
 
@@ -54,9 +37,12 @@ test.describe('Transactions', () => {
       // Assert that there are no transactions
       await expect(accountPage.transactionTable).toHaveText('No transactions');
       await expect(page).toMatchThemeScreenshots();
+
+      // Cleanup: Reset filters
+      await accountPage.removeFilter(0);
     });
 
-    test('by category', async () => {
+    test('by category', async ({ page }) => {
       const filterTooltip = await accountPage.filterBy('Category');
       await expect(filterTooltip.locator).toMatchThemeScreenshots();
 
@@ -85,10 +71,13 @@ test.describe('Transactions', () => {
         'Clothing',
       );
       await expect(page).toMatchThemeScreenshots();
+
+      // Cleanup: Reset filters
+      await accountPage.removeFilter(0);
     });
   });
 
-  test('creates a test transaction', async () => {
+  test('creates a test transaction', async ({ page }) => {
     await accountPage.createSingleTransaction({
       payee: 'Home Depot',
       notes: 'Notes field',
@@ -105,7 +94,7 @@ test.describe('Transactions', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('creates a split test transaction', async () => {
+  test('creates a split test transaction', async ({ page }) => {
     await accountPage.createSplitTransaction([
       {
         payee: 'Krogger',
@@ -144,7 +133,7 @@ test.describe('Transactions', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('creates a transfer test transaction', async () => {
+  test('creates a transfer test transaction', async ({ page }) => {
     await accountPage.enterSingleTransaction({
       payee: 'Bank of America',
       notes: 'Notes field',

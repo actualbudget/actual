@@ -1,17 +1,12 @@
-import { type Page } from '@playwright/test';
-
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 
 test.describe('Help menu', () => {
-  let page: Page;
   let configurationPage: ConfigurationPage;
 
-  test.beforeAll(async ({ browser }) => {
-    page = await browser.newPage();
+  test.beforeEach(async ({ page }) => {
     configurationPage = new ConfigurationPage(page);
 
-    await page.goto('/');
     await configurationPage.createTestFile();
 
     // Move mouse to corner of the screen;
@@ -20,18 +15,14 @@ test.describe('Help menu', () => {
     await page.mouse.move(0, 0);
   });
 
-  test.afterAll(async () => {
-    await page.close();
-  });
-
-  test('Check the help menu visuals', async () => {
+  test('Check the help menu visuals', async ({ page }) => {
     await page.getByRole('button', { name: 'Help' }).click();
     expect(page.getByText('Keyboard shortcuts')).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
     await page.keyboard.press('Escape');
   });
 
-  test('Check the keyboard shortcuts modal visuals', async () => {
+  test('Check the keyboard shortcuts modal visuals', async ({ page }) => {
     await page.getByRole('button', { name: 'Help' }).click();
     await page.getByText('Keyboard shortcuts').click();
 

@@ -1,18 +1,14 @@
-import { type Page } from '@playwright/test';
-
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
 import { type MobileRulesPage } from './page-models/mobile-rules-page';
 
 test.describe('Mobile Rules', () => {
-  let page: Page;
   let navigation: MobileNavigation;
   let rulesPage: MobileRulesPage;
   let configurationPage: ConfigurationPage;
 
-  test.beforeEach(async ({ browser }) => {
-    page = await browser.newPage();
+  test.beforeEach(async ({ page }) => {
     navigation = new MobileNavigation(page);
     configurationPage = new ConfigurationPage(page);
 
@@ -22,18 +18,13 @@ test.describe('Mobile Rules', () => {
       height: 600,
     });
 
-    await page.goto('/');
     await configurationPage.createTestFile();
 
     // Navigate to rules page and wait for it to load
     rulesPage = await navigation.goToRulesPage();
   });
 
-  test.afterEach(async () => {
-    await page.close();
-  });
-
-  test('checks the page visuals', async () => {
+  test('checks the page visuals', async ({ page }) => {
     await rulesPage.searchFor('Dominion');
 
     // Check that the header is present
@@ -52,13 +43,13 @@ test.describe('Mobile Rules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('clicking add button opens rule creation form', async () => {
+  test('clicking add button opens rule creation form', async ({ page }) => {
     await rulesPage.clickAddRule();
 
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('clicking on a rule opens edit form', async () => {
+  test('clicking on a rule opens edit form', async ({ page }) => {
     await expect(async () => {
       const ruleCount = await rulesPage.getRuleCount();
       expect(ruleCount).toBeGreaterThan(0);
@@ -73,7 +64,7 @@ test.describe('Mobile Rules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('page handles empty state gracefully', async () => {
+  test('page handles empty state gracefully', async ({ page }) => {
     // Search for something that won't match to get empty state
     await rulesPage.searchFor('NonExistentRule123456789');
     await page.waitForTimeout(500);

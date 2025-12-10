@@ -1,5 +1,3 @@
-import { type Page } from '@playwright/test';
-
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency, currencyToAmount } from 'loot-core/shared/util';
 
@@ -83,7 +81,6 @@ const budgetTypes = ['Envelope', 'Tracking'] as const;
 
 budgetTypes.forEach(budgetType => {
   test.describe(`Mobile Budget [${budgetType}]`, () => {
-    let page: Page;
     let navigation: MobileNavigation;
     let configurationPage: ConfigurationPage;
     let previousGlobalIsTesting: boolean;
@@ -99,8 +96,7 @@ budgetTypes.forEach(budgetType => {
       global.IS_TESTING = previousGlobalIsTesting;
     });
 
-    test.beforeEach(async ({ browser }) => {
-      page = await browser.newPage();
+    test.beforeEach(async ({ page }) => {
       navigation = new MobileNavigation(page);
       configurationPage = new ConfigurationPage(page);
 
@@ -108,18 +104,13 @@ budgetTypes.forEach(budgetType => {
         width: 350,
         height: 600,
       });
-      await page.goto('/');
       await configurationPage.createTestFile();
 
       const settingsPage = await navigation.goToSettingsPage();
       await settingsPage.useBudgetType(budgetType);
     });
 
-    test.afterEach(async () => {
-      await page.close();
-    });
-
-    test('loads the budget page with budgeted amounts', async () => {
+    test('loads the budget page with budgeted amounts', async ({ page }) => {
       const budgetPage = await navigation.goToBudgetPage();
 
       await expect(budgetPage.categoryNames).toHaveText([
@@ -145,7 +136,9 @@ budgetTypes.forEach(budgetType => {
 
     // Page Header Tests
 
-    test('checks that clicking the Actual logo in the page header opens the budget page menu', async () => {
+    test('checks that clicking the Actual logo in the page header opens the budget page menu', async ({
+      page,
+    }) => {
       const budgetPage = await navigation.goToBudgetPage();
 
       await budgetPage.openBudgetPageMenu();
@@ -156,7 +149,9 @@ budgetTypes.forEach(budgetType => {
       await expect(page).toMatchThemeScreenshots();
     });
 
-    test("checks that clicking the left arrow in the page header shows the previous month's budget", async () => {
+    test("checks that clicking the left arrow in the page header shows the previous month's budget", async ({
+      page,
+    }) => {
       const budgetPage = await navigation.goToBudgetPage();
 
       const selectedMonth = await budgetPage.getSelectedMonth();
@@ -177,7 +172,9 @@ budgetTypes.forEach(budgetType => {
       await expect(page).toMatchThemeScreenshots();
     });
 
-    test('checks that clicking the month in the page header opens the month menu modal', async () => {
+    test('checks that clicking the month in the page header opens the month menu modal', async ({
+      page,
+    }) => {
       const budgetPage = await navigation.goToBudgetPage();
 
       const selectedMonth = await budgetPage.getSelectedMonth();
@@ -195,7 +192,9 @@ budgetTypes.forEach(budgetType => {
       await expect(page).toMatchThemeScreenshots();
     });
 
-    test("checks that clicking the right arrow in the page header shows the next month's budget", async () => {
+    test("checks that clicking the right arrow in the page header shows the next month's budget", async ({
+      page,
+    }) => {
       const budgetPage = await navigation.goToBudgetPage();
 
       const selectedMonth = await budgetPage.getSelectedMonth();
@@ -218,7 +217,9 @@ budgetTypes.forEach(budgetType => {
 
     // Category / Category Group Menu Tests
 
-    test('checks that clicking the category group name opens the category group menu modal', async () => {
+    test('checks that clicking the category group name opens the category group menu modal', async ({
+      page,
+    }) => {
       const budgetPage = await navigation.goToBudgetPage();
 
       const categoryGroupName = await budgetPage.getCategoryGroupNameForRow(0);
@@ -232,7 +233,9 @@ budgetTypes.forEach(budgetType => {
       await expect(page).toMatchThemeScreenshots();
     });
 
-    test('checks that clicking the category name opens the category menu modal', async () => {
+    test('checks that clicking the category name opens the category menu modal', async ({
+      page,
+    }) => {
       const budgetPage = await navigation.goToBudgetPage();
 
       const categoryName = await budgetPage.getCategoryNameForRow(0);
@@ -244,7 +247,9 @@ budgetTypes.forEach(budgetType => {
 
     // Budgeted Cell Tests
 
-    test('checks that clicking the budgeted cell opens the budget menu modal', async () => {
+    test('checks that clicking the budgeted cell opens the budget menu modal', async ({
+      page,
+    }) => {
       const budgetPage = await navigation.goToBudgetPage();
 
       const categoryName = await budgetPage.getCategoryNameForRow(0);
@@ -254,7 +259,7 @@ budgetTypes.forEach(budgetType => {
       await expect(page).toMatchThemeScreenshots();
     });
 
-    test('updates the budgeted amount', async () => {
+    test('updates the budgeted amount', async ({ page }) => {
       const budgetPage = await navigation.goToBudgetPage();
 
       const categoryName = await budgetPage.getCategoryNameForRow(0);
@@ -272,7 +277,7 @@ budgetTypes.forEach(budgetType => {
       await expect(page).toMatchThemeScreenshots();
     });
 
-    test(`copies last month's budget`, async () => {
+    test(`copies last month's budget`, async ({ page }) => {
       const budgetPage = await navigation.goToBudgetPage();
 
       const categoryName = await budgetPage.getCategoryNameForRow(3);
@@ -302,7 +307,9 @@ budgetTypes.forEach(budgetType => {
         [12, setToYearlyAverage],
       ] as const
     ).forEach(([numberOfMonths, setBudgetAverageFn]) => {
-      test(`set budget to ${numberOfMonths} month average`, async () => {
+      test(`set budget to ${numberOfMonths} month average`, async ({
+        page,
+      }) => {
         const budgetPage = await navigation.goToBudgetPage();
 
         const categoryName = await budgetPage.getCategoryNameForRow(3);
@@ -324,7 +331,7 @@ budgetTypes.forEach(budgetType => {
       });
     });
 
-    test(`applies budget template`, async () => {
+    test(`applies budget template`, async ({ page }) => {
       const settingsPage = await navigation.goToSettingsPage();
       await settingsPage.enableExperimentalFeature('Goal templates');
 
@@ -357,7 +364,9 @@ budgetTypes.forEach(budgetType => {
 
     // Spent Cell Tests
 
-    test('checks that clicking spent cell redirects to the category transactions page', async () => {
+    test('checks that clicking spent cell redirects to the category transactions page', async ({
+      page,
+    }) => {
       const budgetPage = await navigation.goToBudgetPage();
 
       const categoryName = await budgetPage.getCategoryNameForRow(0);
@@ -370,7 +379,9 @@ budgetTypes.forEach(budgetType => {
 
     // Balance Cell Tests
 
-    test('checks that clicking the balance cell opens the balance menu modal', async () => {
+    test('checks that clicking the balance cell opens the balance menu modal', async ({
+      page,
+    }) => {
       const budgetPage = await navigation.goToBudgetPage();
 
       const categoryName = await budgetPage.getCategoryNameForRow(0);
@@ -381,7 +392,9 @@ budgetTypes.forEach(budgetType => {
     });
 
     if (budgetType === 'Envelope') {
-      test('checks that clicking the To Budget/Overbudgeted amount opens the budget summary menu modal', async () => {
+      test('checks that clicking the To Budget/Overbudgeted amount opens the budget summary menu modal', async ({
+        page,
+      }) => {
         const budgetPage = await navigation.goToBudgetPage();
 
         const envelopeBudgetSummaryModal =
@@ -395,7 +408,9 @@ budgetTypes.forEach(budgetType => {
     }
 
     if (budgetType === 'Tracking') {
-      test('checks that clicking the Saved/Projected Savings/Overspent amount opens the budget summary menu modal', async () => {
+      test('checks that clicking the Saved/Projected Savings/Overspent amount opens the budget summary menu modal', async ({
+        page,
+      }) => {
         const budgetPage = await navigation.goToBudgetPage();
 
         const trackingBudgetSummaryModal =

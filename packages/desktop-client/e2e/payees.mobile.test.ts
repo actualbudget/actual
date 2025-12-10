@@ -1,18 +1,14 @@
-import { type Page } from '@playwright/test';
-
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
 import { type MobilePayeesPage } from './page-models/mobile-payees-page';
 
 test.describe('Mobile Payees', () => {
-  let page: Page;
   let navigation: MobileNavigation;
   let payeesPage: MobilePayeesPage;
   let configurationPage: ConfigurationPage;
 
-  test.beforeEach(async ({ browser }) => {
-    page = await browser.newPage();
+  test.beforeEach(async ({ page }) => {
     navigation = new MobileNavigation(page);
     configurationPage = new ConfigurationPage(page);
 
@@ -22,18 +18,13 @@ test.describe('Mobile Payees', () => {
       height: 600,
     });
 
-    await page.goto('/');
     await configurationPage.createTestFile();
 
     // Navigate to payees page and wait for it to load
     payeesPage = await navigation.goToPayeesPage();
   });
 
-  test.afterEach(async () => {
-    await page.close();
-  });
-
-  test('checks the page visuals', async () => {
+  test('checks the page visuals', async ({ page }) => {
     await payeesPage.waitForLoadingToComplete();
 
     // Check that the header is present
@@ -51,7 +42,7 @@ test.describe('Mobile Payees', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('filters out unrelated payees', async () => {
+  test('filters out unrelated payees', async ({ page }) => {
     await payeesPage.searchFor('asdfasdf-nonsense');
 
     // Get the text 'No payees found.' from the page
@@ -62,7 +53,7 @@ test.describe('Mobile Payees', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('clicking on a payee opens payee edit page', async () => {
+  test('clicking on a payee opens payee edit page', async ({ page }) => {
     await payeesPage.waitForLoadingToComplete();
 
     const payeeCount = await payeesPage.getPayeeCount();
@@ -83,7 +74,7 @@ test.describe('Mobile Payees', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('page handles empty state gracefully', async () => {
+  test('page handles empty state gracefully', async ({ page }) => {
     // Search for something that won't match to get empty state
     await payeesPage.searchFor('NonExistentPayee123456789');
     await page.waitForTimeout(500);
@@ -98,7 +89,7 @@ test.describe('Mobile Payees', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('search functionality works correctly', async () => {
+  test('search functionality works correctly', async ({ page }) => {
     await payeesPage.waitForLoadingToComplete();
 
     // Test searching for a specific payee

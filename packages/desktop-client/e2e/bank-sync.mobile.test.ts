@@ -1,18 +1,14 @@
-import { type Page } from '@playwright/test';
-
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { type MobileBankSyncPage } from './page-models/mobile-bank-sync-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
 
 test.describe('Mobile Bank Sync', () => {
-  let page: Page;
   let navigation: MobileNavigation;
   let bankSyncPage: MobileBankSyncPage;
   let configurationPage: ConfigurationPage;
 
-  test.beforeEach(async ({ browser }) => {
-    page = await browser.newPage();
+  test.beforeEach(async ({ page }) => {
     navigation = new MobileNavigation(page);
     configurationPage = new ConfigurationPage(page);
 
@@ -21,17 +17,12 @@ test.describe('Mobile Bank Sync', () => {
       height: 600,
     });
 
-    await page.goto('/');
     await configurationPage.createTestFile();
 
     bankSyncPage = await navigation.goToBankSyncPage();
   });
 
-  test.afterEach(async () => {
-    await page.close();
-  });
-
-  test('checks the page visuals', async () => {
+  test('checks the page visuals', async ({ page }) => {
     await bankSyncPage.waitToLoad();
 
     await expect(
@@ -47,13 +38,13 @@ test.describe('Mobile Bank Sync', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('searches for accounts', async () => {
+  test('searches for accounts', async ({ page }) => {
     await bankSyncPage.searchFor('Checking');
     await expect(bankSyncPage.searchBox).toHaveValue('Checking');
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('page handles empty state gracefully', async () => {
+  test('page handles empty state gracefully', async ({ page }) => {
     await bankSyncPage.searchFor('NonExistentAccount123456789');
 
     const emptyMessage = page.getByText(/No accounts found/);

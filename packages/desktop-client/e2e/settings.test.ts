@@ -1,38 +1,26 @@
-import { type Page } from '@playwright/test';
-
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
 import { type SettingsPage } from './page-models/settings-page';
 
 test.describe('Settings', () => {
-  let page: Page;
   let navigation: Navigation;
   let settingsPage: SettingsPage;
   let configurationPage: ConfigurationPage;
 
-  test.beforeAll(async ({ browser }) => {
-    page = await browser.newPage();
+  test.beforeEach(async ({ page }) => {
     navigation = new Navigation(page);
     configurationPage = new ConfigurationPage(page);
 
-    await page.goto('/');
     await configurationPage.createTestFile();
-  });
-
-  test.afterAll(async () => {
-    await page.close();
-  });
-
-  test.beforeEach(async () => {
     settingsPage = await navigation.goToSettingsPage();
   });
 
-  test('checks the page visuals', async () => {
+  test('checks the page visuals', async ({ page }) => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('downloads the export of the budget', async () => {
+  test('downloads the export of the budget', async ({ page }) => {
     const downloadPromise = page.waitForEvent('download');
 
     await settingsPage.exportData();

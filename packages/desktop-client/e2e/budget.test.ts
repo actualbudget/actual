@@ -1,19 +1,14 @@
-import { type Page } from '@playwright/test';
-
 import { expect, test } from './fixtures';
 import { type BudgetPage } from './page-models/budget-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 
 test.describe('Budget', () => {
-  let page: Page;
   let configurationPage: ConfigurationPage;
   let budgetPage: BudgetPage;
 
-  test.beforeAll(async ({ browser }) => {
-    page = await browser.newPage();
+  test.beforeEach(async ({ page }) => {
     configurationPage = new ConfigurationPage(page);
 
-    await page.goto('/');
     budgetPage = await configurationPage.createTestFile();
 
     // Move mouse to corner of the screen;
@@ -22,11 +17,9 @@ test.describe('Budget', () => {
     await page.mouse.move(0, 0);
   });
 
-  test.afterAll(async () => {
-    await page.close();
-  });
-
-  test('renders the summary information: available funds, overspent, budgeted and for next month', async () => {
+  test('renders the summary information: available funds, overspent, budgeted and for next month', async ({
+    page,
+  }) => {
     const summary = budgetPage.budgetSummary.first();
 
     await expect(summary.getByText('Available funds')).toBeVisible({
@@ -38,7 +31,7 @@ test.describe('Budget', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('transfer funds to another category', async () => {
+  test('transfer funds to another category', async ({ page }) => {
     const currentFundsA = await budgetPage.getBalanceForRow(1);
     const currentFundsB = await budgetPage.getBalanceForRow(2);
 
@@ -60,7 +53,9 @@ test.describe('Budget', () => {
     });
   });
 
-  test('clicking on spent amounts opens a transaction page', async () => {
+  test('clicking on spent amounts opens a transaction page', async ({
+    page,
+  }) => {
     const accountPage = await budgetPage.clickOnSpentAmountForRow(1);
     expect(page.url()).toContain('/accounts');
     expect(await accountPage.accountName.textContent()).toMatch('All Accounts');

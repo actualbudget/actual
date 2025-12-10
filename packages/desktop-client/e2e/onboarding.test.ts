@@ -1,31 +1,21 @@
 import path from 'path';
 
-import { type Page } from '@playwright/test';
-
 import { expect, test } from './fixtures';
 import { AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
 
 test.describe('Onboarding', () => {
-  let page: Page;
   let navigation: Navigation;
   let configurationPage: ConfigurationPage;
 
-  test.beforeEach(async ({ browser }) => {
-    page = await browser.newPage();
+  test.beforeEach(async ({ page }) => {
     navigation = new Navigation(page);
     configurationPage = new ConfigurationPage(page);
-
-    await page.goto('/');
   });
 
-  test.afterEach(async () => {
-    await page.close();
-  });
-
-  test('checks the page visuals', async () => {
-    await expect(configurationPage.heading).toHaveText('Where’s the server?');
+  test('checks the page visuals', async ({ page }) => {
+    await expect(configurationPage.heading).toHaveText(/Where.s the server\?/);
     await expect(page).toMatchThemeScreenshots();
 
     await configurationPage.clickOnNoServer();
@@ -82,7 +72,7 @@ test.describe('Onboarding', () => {
     await expect(accountPage.accountBalance).toHaveText('2,745.81');
   });
 
-  test('creates a new empty budget file', async () => {
+  test('creates a new empty budget file', async ({ page }) => {
     await configurationPage.clickOnNoServer();
     await configurationPage.startFresh();
 
@@ -92,7 +82,9 @@ test.describe('Onboarding', () => {
     await expect(accountPage.accountBalance).toHaveText('0.00');
   });
 
-  test('navigates back to start page by clicking on “no server” in an empty budget file', async () => {
+  test('navigates back to start page by clicking on "no server" in an empty budget file', async ({
+    page,
+  }) => {
     await configurationPage.clickOnNoServer();
     const accountPage = await configurationPage.startFresh();
 
@@ -101,6 +93,6 @@ test.describe('Onboarding', () => {
     await navigation.clickOnNoServer();
     await page.getByRole('button', { name: 'Start using a server' }).click();
 
-    await expect(configurationPage.heading).toHaveText('Where’s the server?');
+    await expect(configurationPage.heading).toHaveText(/Where.s the server\?/);
   });
 });

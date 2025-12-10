@@ -1,17 +1,12 @@
-import { type Page } from '@playwright/test';
-
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 
 test.describe('Command bar', () => {
-  let page: Page;
   let configurationPage: ConfigurationPage;
 
-  test.beforeAll(async ({ browser }) => {
-    page = await browser.newPage();
+  test.beforeEach(async ({ page }) => {
     configurationPage = new ConfigurationPage(page);
 
-    await page.goto('/');
     await configurationPage.createTestFile();
 
     // Move mouse to corner of the screen;
@@ -26,11 +21,7 @@ test.describe('Command bar', () => {
     });
   });
 
-  test.afterAll(async () => {
-    await page.close();
-  });
-
-  test('Check the command bar visuals', async () => {
+  test('Check the command bar visuals', async ({ page }) => {
     // Open the command bar
     await page.keyboard.press('ControlOrMeta+k');
     const commandBar = page.getByRole('combobox', {
@@ -45,7 +36,7 @@ test.describe('Command bar', () => {
     await expect(commandBar).not.toBeVisible();
   });
 
-  test('Check the command bar search works correctly', async () => {
+  test('Check the command bar search works correctly', async ({ page }) => {
     await page.keyboard.press('ControlOrMeta+k');
 
     const commandBar = page.getByRole('combobox', {

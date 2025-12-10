@@ -1,16 +1,12 @@
-import { type Page } from '@playwright/test';
-
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
 
 test.describe('Mobile Settings', () => {
-  let page: Page;
   let navigation: MobileNavigation;
   let configurationPage: ConfigurationPage;
 
-  test.beforeEach(async ({ browser }) => {
-    page = await browser.newPage();
+  test.beforeEach(async ({ page }) => {
     navigation = new MobileNavigation(page);
     configurationPage = new ConfigurationPage(page);
 
@@ -18,15 +14,10 @@ test.describe('Mobile Settings', () => {
       width: 350,
       height: 600,
     });
-    await page.goto('/');
     await configurationPage.createTestFile();
   });
 
-  test.afterEach(async () => {
-    await page.close();
-  });
-
-  test('checks that settings page can be opened', async () => {
+  test('checks that settings page can be opened', async ({ page }) => {
     const settingsPage = await navigation.goToSettingsPage();
     await expect(page).toMatchThemeScreenshots();
 

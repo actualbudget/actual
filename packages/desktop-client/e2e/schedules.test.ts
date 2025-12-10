@@ -1,38 +1,28 @@
-import { type Page } from '@playwright/test';
-
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
 import { type SchedulesPage } from './page-models/schedules-page';
 
 test.describe('Schedules', () => {
-  let page: Page;
   let navigation: Navigation;
   let schedulesPage: SchedulesPage;
   let configurationPage: ConfigurationPage;
 
-  test.beforeAll(async ({ browser }) => {
-    page = await browser.newPage();
+  test.beforeEach(async ({ page }) => {
     navigation = new Navigation(page);
     configurationPage = new ConfigurationPage(page);
 
-    await page.goto('/');
     await configurationPage.createTestFile();
-  });
-
-  test.afterAll(async () => {
-    await page.close();
-  });
-
-  test.beforeEach(async () => {
     schedulesPage = await navigation.goToSchedulesPage();
   });
 
-  test('checks the page visuals', async () => {
+  test('checks the page visuals', async ({ page }) => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('creates a new schedule, posts the transaction and later completes it', async () => {
+  test('creates a new schedule, posts the transaction and later completes it', async ({
+    page,
+  }) => {
     test.setTimeout(40000);
 
     const scheduleEditModal = await schedulesPage.addNewSchedule();
@@ -89,7 +79,9 @@ test.describe('Schedules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('creates two new schedules, posts both transactions and later completes one', async () => {
+  test('creates two new schedules, posts both transactions and later completes one', async ({
+    page,
+  }) => {
     test.setTimeout(40000);
 
     // Adding two schedules with the same payee and account and amount, mimicking two different subscriptions
@@ -157,7 +149,7 @@ test.describe('Schedules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('creates a "full" list of schedules', async () => {
+  test('creates a "full" list of schedules', async ({ page }) => {
     // Schedules search shouldn't shrink with many schedules
     for (let i = 0; i < 10; i++) {
       const scheduleEditModal = await schedulesPage.addNewSchedule();

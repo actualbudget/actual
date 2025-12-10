@@ -1,39 +1,29 @@
-import { type Page } from '@playwright/test';
-
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
 import { type RulesPage } from './page-models/rules-page';
 
 test.describe('Rules', () => {
-  let page: Page;
   let navigation: Navigation;
   let rulesPage: RulesPage;
   let configurationPage: ConfigurationPage;
 
-  test.beforeAll(async ({ browser }) => {
-    page = await browser.newPage();
+  test.beforeEach(async ({ page }) => {
     navigation = new Navigation(page);
     configurationPage = new ConfigurationPage(page);
 
-    await page.goto('/');
     await configurationPage.createTestFile();
-  });
-
-  test.afterAll(async () => {
-    await page.close();
-  });
-
-  test.beforeEach(async () => {
     rulesPage = await navigation.goToRulesPage();
   });
 
-  test('checks the page visuals', async () => {
+  test('checks the page visuals', async ({ page }) => {
     await rulesPage.searchFor('Dominion');
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('creates a rule and makes sure it is applied when creating a transaction', async () => {
+  test('creates a rule and makes sure it is applied when creating a transaction', async ({
+    page,
+  }) => {
     await rulesPage.searchFor('Fast Internet');
     const editRuleModal = await rulesPage.createNewRule();
     await editRuleModal.fill({
@@ -72,9 +62,9 @@ test.describe('Rules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('creates a split transaction rule and makes sure it is applied when creating a transaction', async () => {
-    rulesPage = await navigation.goToRulesPage();
-
+  test('creates a split transaction rule and makes sure it is applied when creating a transaction', async ({
+    page,
+  }) => {
     const editRuleModal = await rulesPage.createNewRule();
     await editRuleModal.fill({
       conditions: [

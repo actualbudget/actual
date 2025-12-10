@@ -1,18 +1,14 @@
-import { type Page } from '@playwright/test';
-
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
 import { type MobileSchedulesPage } from './page-models/mobile-schedules-page';
 
 test.describe('Mobile Schedules', () => {
-  let page: Page;
   let navigation: MobileNavigation;
   let schedulesPage: MobileSchedulesPage;
   let configurationPage: ConfigurationPage;
 
-  test.beforeEach(async ({ browser }) => {
-    page = await browser.newPage();
+  test.beforeEach(async ({ page }) => {
     navigation = new MobileNavigation(page);
     configurationPage = new ConfigurationPage(page);
 
@@ -22,18 +18,13 @@ test.describe('Mobile Schedules', () => {
       height: 600,
     });
 
-    await page.goto('/');
     await configurationPage.createTestFile();
 
     // Navigate to schedules page and wait for it to load
     schedulesPage = await navigation.goToSchedulesPage();
   });
 
-  test.afterEach(async () => {
-    await page.close();
-  });
-
-  test('checks the page visuals', async () => {
+  test('checks the page visuals', async ({ page }) => {
     await schedulesPage.waitForLoadingToComplete();
 
     // Check that the header is present
@@ -54,7 +45,7 @@ test.describe('Mobile Schedules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('page handles empty state gracefully', async () => {
+  test('page handles empty state gracefully', async ({ page }) => {
     // Search for something that won't match to get empty state
     await schedulesPage.searchFor('NonExistentSchedule123456789');
     await page.waitForTimeout(500);
@@ -65,7 +56,7 @@ test.describe('Mobile Schedules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('clicking on a schedule opens edit form', async () => {
+  test('clicking on a schedule opens edit form', async ({ page }) => {
     await schedulesPage.waitForLoadingToComplete();
 
     // Wait for at least one schedule to be present
@@ -88,7 +79,7 @@ test.describe('Mobile Schedules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('searches and filters schedules', async () => {
+  test('searches and filters schedules', async ({ page }) => {
     await schedulesPage.waitForLoadingToComplete();
 
     // Wait for schedules to load
@@ -117,7 +108,7 @@ test.describe('Mobile Schedules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('displays schedule details correctly in list', async () => {
+  test('displays schedule details correctly in list', async ({ page }) => {
     await schedulesPage.waitForLoadingToComplete();
 
     // Wait for schedules to load
