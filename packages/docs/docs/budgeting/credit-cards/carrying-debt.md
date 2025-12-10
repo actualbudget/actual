@@ -82,8 +82,10 @@ If you have been paying the statement balance in full every month, but need to i
   - Your payment is the sum of the New Purchases from your statement (minus any return credits) plus the "Uncleared total" from Actual plus the amount in the **Budgeted** column of **Bank Card Debt**.
   - This is the same as the difference between the Account Balance in Actual and the Category Balance of **Bank Card Debt**.
 
-  :::warning
+:::warning
+
 If the calculated payment is less than the statement Minimum Payment, you _**must**_ make the statement Minimum Payment! In this rare case, add an amount to the **Budgeted** column so your resulting payment adds up to at least the statement Minimum Payment.  _Cover_ any additions to the **Budgeted** amount by transferring from another category with a positive balance.
+
 :::
 
 - Use _Make Transfer_ to transfer the calculated amount from your Checking account to the Credit Card account. Send that amount to the Credit Card Bank to pay your bill. 
