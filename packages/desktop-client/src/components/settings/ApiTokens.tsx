@@ -188,7 +188,6 @@ function ShowTokenModal({
   token: ApiTokenCreateResult;
   onClose: () => void;
 }) {
-  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -259,7 +258,6 @@ function ShowTokenModal({
 }
 
 export function ApiTokensSettings() {
-  const { t } = useTranslation();
   const serverURL = useServerURL();
   const [tokens, setTokens] = useState<ApiToken[]>([]);
   const [loading, setLoading] = useState(true);
