@@ -113,7 +113,7 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
     try {
       const value = JSON.parse(str);
       return value && value !== '' ? value : null;
-    } catch (e) {
+    } catch {
       return null;
     }
   };

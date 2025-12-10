@@ -81,7 +81,7 @@ export const categoryModel = {
       update,
     );
 
-    const { sort_order, ...rest } = category;
+    const { sort_order: _sort_order, ...rest } = category;
     return { ...rest } as DbCategory;
   },
   toDb(
@@ -116,7 +116,7 @@ export const categoryGroupModel = {
       update,
     );
 
-    const { sort_order, ...rest } = categoryGroup;
+    const { sort_order: _sort_order, ...rest } = categoryGroup;
     return { ...rest } as DbCategoryGroup;
   },
   toDb(

@@ -91,13 +91,8 @@ export function runQuery(
       throw e;
     }
   } else {
-    try {
-      stmt.run(params);
-      return { changes: db.getRowsModified() };
-    } catch (e) {
-      // console.log(sql);
-      throw e;
-    }
+    stmt.run(params);
+    return { changes: db.getRowsModified() };
   }
 }
 

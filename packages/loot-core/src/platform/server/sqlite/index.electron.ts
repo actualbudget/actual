@@ -49,13 +49,8 @@ export function runQuery(
       throw e;
     }
   } else {
-    try {
-      const info = stmt.run(...params);
-      return { changes: info.changes, insertId: info.lastInsertRowid };
-    } catch (e) {
-      // console.log('error', sql);
-      throw e;
-    }
+    const info = stmt.run(...params);
+    return { changes: info.changes, insertId: info.lastInsertRowid };
   }
 }
 

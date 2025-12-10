@@ -141,7 +141,7 @@ async function loadGlobalPrefs() {
         'utf8',
       ),
     );
-  } catch (e) {
+  } catch {
     logMessage('info', 'Could not load global state - using defaults');
     state = {};
   }
@@ -605,6 +605,10 @@ ipcMain.handle(
 
 ipcMain.handle('open-external-url', (event, url) => {
   shell.openExternal(url);
+});
+
+ipcMain.handle('open-in-file-manager', (event, filepath) => {
+  shell.showItemInFolder(filepath);
 });
 
 ipcMain.on('message', (_event, msg) => {

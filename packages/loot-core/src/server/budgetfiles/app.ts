@@ -269,7 +269,7 @@ async function closeBudget() {
 
   try {
     await asyncStorage.setItem('lastBudget', '');
-  } catch (e) {
+  } catch {
     // This might fail if we are shutting down after failing to load a
     // budget. We want to unload whatever has already been loaded but
     // be resilient to anything failing
@@ -303,7 +303,7 @@ async function deleteBudget({
       await db.closeDatabase();
       const budgetDir = fs.getBudgetDir(id);
       await fs.removeDirRecursively(budgetDir);
-    } catch (e) {
+    } catch {
       return 'fail';
     }
   }
@@ -444,7 +444,7 @@ async function createBudget({
   if (!avoidUpload && !testMode) {
     try {
       await cloudStorage.upload();
-    } catch (e) {
+    } catch {
       // Ignore any errors uploading. If they are offline they should
       // still be able to create files.
     }

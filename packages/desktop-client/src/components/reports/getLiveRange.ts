@@ -16,7 +16,7 @@ export function getLiveRange(
   let dateEnd = latestTransaction;
   const rangeName = ReportOptions.dateRangeMap.get(cond);
   switch (rangeName) {
-    case 'yearToDate':
+    case 'yearToDate': {
       [dateStart, dateEnd] = validateRange(
         earliestTransaction,
         latestTransaction,
@@ -24,7 +24,18 @@ export function getLiveRange(
         monthUtils.currentDay(),
       );
       break;
-    case 'lastYear':
+    }
+    case 'lastMonth': {
+      const prevMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
+      [dateStart, dateEnd] = validateRange(
+        earliestTransaction,
+        latestTransaction,
+        monthUtils.firstDayOfMonth(prevMonth),
+        monthUtils.lastDayOfMonth(prevMonth),
+      );
+      break;
+    }
+    case 'lastYear': {
       [dateStart, dateEnd] = validateRange(
         earliestTransaction,
         latestTransaction,
@@ -35,7 +46,8 @@ export function getLiveRange(
           '-31',
       );
       break;
-    case 'priorYearToDate':
+    }
+    case 'priorYearToDate': {
       [dateStart, dateEnd] = validateRange(
         earliestTransaction,
         latestTransaction,
@@ -45,10 +57,12 @@ export function getLiveRange(
         monthUtils.prevYear(monthUtils.currentDate(), 'yyyy-MM-dd'),
       );
       break;
-    case 'allTime':
+    }
+    case 'allTime': {
       dateStart = earliestTransaction;
       dateEnd = latestTransaction;
       break;
+    }
     default:
       if (typeof rangeName === 'number') {
         [dateStart, dateEnd] = getSpecificRange(

@@ -195,7 +195,7 @@ export async function importBuffer(fileData, buffer) {
   try {
     zipped = new AdmZip(buffer);
     entries = zipped.getEntries();
-  } catch (err) {
+  } catch {
     throw FileDownloadError('not-zip-file');
   }
   const dbEntry = entries.find(e => e.entryName.includes('db.sqlite'));
@@ -211,7 +211,7 @@ export async function importBuffer(fileData, buffer) {
   let meta;
   try {
     meta = JSON.parse(metaContent.toString('utf8'));
-  } catch (err) {
+  } catch {
     throw FileDownloadError('invalid-meta-file');
   }
 

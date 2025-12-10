@@ -1,6 +1,7 @@
-// @ts-strict-ignore
 import * as fs from 'fs/promises';
 import * as path from 'path';
+
+import { type RuleEntity } from 'loot-core/types/models';
 
 import * as api from './index';
 
@@ -282,7 +283,7 @@ describe('API CRUD operations', () => {
     expect(await api.getAccountBalance(accountId2)).toEqual(0);
 
     await api.updateAccount(accountId1, { offbudget: false });
-    await api.closeAccount(accountId1, accountId2, null);
+    await api.closeAccount(accountId1, accountId2);
     await api.deleteAccount(accountId2);
 
     // accounts successfully updated, and one of them deleted
@@ -505,7 +506,7 @@ describe('API CRUD operations', () => {
       ...rule,
       stage: 'post',
       conditionsOp: 'or',
-    };
+    } satisfies RuleEntity;
     expect(await api.updateRule(updatedRule)).toEqual(updatedRule);
 
     expect(await api.getRules()).toEqual(
@@ -719,7 +720,7 @@ describe('API CRUD operations', () => {
 
     // Test without notes
     const transactionsWithoutNotes = [
-      { date: '2023-11-03', imported_id: '11', amount: 100, notes: null },
+      { date: '2023-11-03', imported_id: '11', amount: 100 },
     ];
 
     const addResultWithoutNotes = await api.addTransactions(

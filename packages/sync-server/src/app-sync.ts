@@ -7,25 +7,25 @@ import { SyncProtoBuf } from '@actual-app/crdt';
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getAccountDb } from './account-db.js';
-import { FileNotFound } from './app-sync/errors.js';
+import { getAccountDb } from './account-db';
+import { FileNotFound } from './app-sync/errors';
 import {
   File,
   FilesService,
   FileUpdate,
-} from './app-sync/services/files-service.js';
+} from './app-sync/services/files-service';
 import {
   validateSyncedFile,
   validateUploadedFile,
-} from './app-sync/validation.js';
-import { config } from './load-config.js';
-import * as simpleSync from './sync-simple.js';
+} from './app-sync/validation';
+import { config } from './load-config';
+import * as simpleSync from './sync-simple';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
-} from './util/middlewares.js';
-import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
+} from './util/middlewares';
+import { getPathForUserFile, getPathForGroupFile } from './util/paths';
 
 const app = express();
 app.use(validateSessionMiddleware);

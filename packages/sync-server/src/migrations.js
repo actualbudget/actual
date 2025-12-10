@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 
 import migrate from 'migrate';
 
-import { config } from './load-config.js';
+import { config } from './load-config';
 
 export function run(direction = 'up') {
   console.log(

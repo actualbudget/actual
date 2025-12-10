@@ -48,6 +48,7 @@ export const ReportCardName = ({
         marginBottom: 5,
       }}
       role="heading"
+      aria-level={2}
     >
       {name}
     </Block>

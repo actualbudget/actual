@@ -1,6 +1,6 @@
-import { title } from '../../util/title/index.js';
+import { title } from '../../util/title/index';
 
-import Fallback from './integration-bank.js';
+import Fallback from './integration-bank';
 
 const regexCard =
   /^CARTE (?<date>\d{2}\/\d{2}\/\d{2}) (?<payeeName>.+?)( \d+)?( CB\*\d{4})?$/;
@@ -13,7 +13,7 @@ const regexLoan = /^ECH PRET:/;
 const regexCreditNote =
   /^AVOIR (?<date>\d{2}\/\d{2}\/\d{2}) (?<payeeName>.+?) CB\*\d{4,}/;
 
-/** @type {import('./bank.interface.js').IBank} */
+/** @type {import('./bank.interface').IBank} */
 export default {
   ...Fallback,
 

@@ -79,7 +79,7 @@ export function recalculateSplit(trans: TransactionEntity) {
     0,
   );
 
-  const { error, ...rest } = trans;
+  const { error: _error, ...rest } = trans;
   return {
     ...rest,
     error:
@@ -290,7 +290,7 @@ export function deleteTransaction(
       if (trans.id === id) {
         return null;
       } else if (trans.subtransactions?.length === 1) {
-        const { subtransactions, ...rest } = trans;
+        const { subtransactions: _subtransactions, ...rest } = trans;
         return {
           ...rest,
           is_parent: false,
@@ -325,7 +325,7 @@ export function splitTransaction(
       makeChild(trans),
     ];
 
-    const { error, ...rest } = trans;
+    const { error: _error, ...rest } = trans;
 
     return {
       ...rest,

@@ -15,7 +15,7 @@ export const init: T.Init = function ({ persist = true } = {}) {
   if (persist) {
     try {
       store = JSON.parse(fs.readFileSync(getStorePath(), 'utf8'));
-    } catch (e) {
+    } catch {
       store = {};
     }
   } else {

@@ -178,7 +178,7 @@ export async function loadBackup(id: string, backupId: string) {
     // Re-upload the new file
     try {
       await cloudStorage.upload();
-    } catch (e) {}
+    } catch {}
     prefs.unloadPrefs();
   } else {
     logger.log('Loading backup', backupId);
@@ -197,7 +197,7 @@ export async function loadBackup(id: string, backupId: string) {
     // Re-upload the new file
     try {
       await cloudStorage.upload();
-    } catch (e) {}
+    } catch {}
 
     prefs.unloadPrefs();
 

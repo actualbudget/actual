@@ -69,7 +69,7 @@ export function BudgetMenu({
           ? [
               {
                 name: 'apply-single-category-template',
-                text: t('Apply budget template'),
+                text: t('Overwrite with template'),
               },
             ]
           : []),

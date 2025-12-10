@@ -76,7 +76,7 @@ export function convertOutputType(value, type) {
     case 'json/fallback':
       try {
         return JSON.parse(value);
-      } catch (e) {
+      } catch {
         return type === 'json/fallback' ? value : null;
       }
     default:

@@ -1,4 +1,4 @@
-import CommerzbankCobadeff from '../commerzbank_cobadeff.js';
+import CommerzbankCobadeff from '../commerzbank_cobadeff';
 
 describe('CommerzbankCobadeff', () => {
   describe('#normalizeTransaction', () => {

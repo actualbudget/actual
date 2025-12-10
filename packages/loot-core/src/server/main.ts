@@ -84,7 +84,7 @@ handlers['get-server-version'] = async function () {
 
     const info = JSON.parse(res);
     version = info.build.version;
-  } catch (err) {
+  } catch {
     return { error: 'network-failure' };
   }
 
@@ -172,7 +172,7 @@ async function setupDocumentsDir() {
   if (documentDir) {
     try {
       await ensureExists(documentDir);
-    } catch (e) {
+    } catch {
       documentDir = null;
     }
   }

@@ -174,7 +174,7 @@ Please follow the following patterns when implementing a custom normalizeTransac
 E.g.
 
 ```js
-import Fallback from './integration-bank.js';
+import Fallback from './integration-bank';
 
 export default {
   ...

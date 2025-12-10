@@ -2,11 +2,9 @@ import { useCallback, type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { AutoTextSize } from 'auto-text-size';
 
-import { integerToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { getColumnWidth, PILL_STYLE } from './BudgetTable';
@@ -28,7 +26,6 @@ type BudgetCellProps<
   typeof CellValue<'envelope-budget' | 'tracking-budget', SheetFieldName>
 > & {
   category: CategoryEntity;
-  style?: CSSProperties;
   month: string;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
 };
@@ -40,7 +37,6 @@ export function BudgetCell<
   category,
   month,
   onBudgetAction,
-  style,
   children,
   ...props
 }: BudgetCellProps<SheetFieldName>) {
@@ -68,7 +64,7 @@ export function BudgetCell<
                 amount,
               });
               showUndoNotification({
-                message: `${category.name} budget has been updated to ${integerToCurrency(amount)}.`,
+                message: `${category.name} budget has been updated to ${format(amount, 'financial')}.`,
               });
             },
             onCopyLastMonthAverage: () => {
@@ -116,6 +112,7 @@ export function BudgetCell<
     month,
     onBudgetAction,
     showUndoNotification,
+    format,
   ]);
 
   return (

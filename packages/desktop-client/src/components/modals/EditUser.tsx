@@ -221,7 +221,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
               borderColor: theme.buttonMenuBorder,
             }}
           />
-          <label
+          <Text
             style={{
               ...styles.verySmallText,
               color: theme.pageTextLight,
@@ -229,7 +229,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
             }}
           >
             <Trans>The username registered within the OpenID provider.</Trans>
-          </label>
+          </Text>
         </FormField>
         <View
           style={{
@@ -254,7 +254,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
         </View>
       </SpaceBetween>
       {isOwner && (
-        <label
+        <Text
           style={{
             ...styles.verySmallText,
             color: theme.errorText,
@@ -264,7 +264,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
           <Trans>
             Change this username with caution; it is the server owner.
           </Trans>
-        </label>
+        </Text>
       )}
       <SpaceBetween style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
@@ -365,7 +365,7 @@ const RoleDescription = () => {
         </Trans>
       </Text>
       <View style={{ paddingTop: 5 }}>
-        <label
+        <Text
           style={{
             ...styles.altMenuHeaderText,
             ...styles.verySmallText,
@@ -373,7 +373,7 @@ const RoleDescription = () => {
           }}
         >
           <Trans>Basic</Trans>
-        </label>
+        </Text>
         <Text
           style={{
             ...styles.verySmallText,
@@ -398,7 +398,7 @@ const RoleDescription = () => {
         </Text>
       </View>
       <View style={{ paddingTop: 10 }}>
-        <label
+        <Text
           style={{
             ...styles.altMenuHeaderText,
             ...styles.verySmallText,
@@ -406,7 +406,7 @@ const RoleDescription = () => {
           }}
         >
           <Trans>Admin</Trans>
-        </label>
+        </Text>
         <Text
           style={{
             ...styles.verySmallText,

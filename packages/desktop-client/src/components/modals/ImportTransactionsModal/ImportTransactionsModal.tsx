@@ -342,14 +342,14 @@ export function ImportTransactionsModal({
         }
 
         const {
-          inflow,
-          outflow,
-          inOut,
-          existing,
-          ignored,
-          selected,
-          selected_merge,
-          tombstone,
+          inflow: _inflow,
+          outflow: _outflow,
+          inOut: _inOut,
+          existing: _existing,
+          ignored: _ignored,
+          selected: _selected,
+          selected_merge: _selected_merge,
+          tombstone: _tombstone,
           ...finalTransaction
         } = trans;
         previewTransactions.push({
@@ -837,14 +837,14 @@ export function ImportTransactionsModal({
       }
 
       const {
-        inflow,
-        outflow,
-        inOut,
-        existing,
-        ignored,
-        selected,
-        selected_merge,
-        trx_id,
+        inflow: _inflow,
+        outflow: _outflow,
+        inOut: _inOut,
+        existing: _existing,
+        ignored: _ignored,
+        selected: _selected,
+        selected_merge: _selected_merge,
+        trx_id: _trx_id,
         ...finalTransaction
       } = trans;
 
@@ -959,7 +959,6 @@ export function ImportTransactionsModal({
 
     runImportPreview();
     // intentionally exclude runImportPreview from dependencies to avoid infinite rerenders
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     filetype,
     flipAmount,
@@ -1184,6 +1183,7 @@ export function ImportTransactionsModal({
                   <View style={{ marginLeft: 10, gap: 5 }}>
                     <SectionLabel title={t('CSV OPTIONS')} />
                     <label
+                      htmlFor="csv-delimiter-select"
                       style={{
                         display: 'flex',
                         flexDirection: 'row',
@@ -1193,6 +1193,7 @@ export function ImportTransactionsModal({
                     >
                       <Trans>Delimiter:</Trans>
                       <Select
+                        id="csv-delimiter-select"
                         options={[
                           [',', ','],
                           [';', ';'],
@@ -1208,6 +1209,7 @@ export function ImportTransactionsModal({
                       />
                     </label>
                     <label
+                      htmlFor="csv-skip-start-lines"
                       style={{
                         display: 'flex',
                         flexDirection: 'row',
@@ -1217,6 +1219,7 @@ export function ImportTransactionsModal({
                     >
                       <Trans>Skip start lines:</Trans>
                       <Input
+                        id="csv-skip-start-lines"
                         type="number"
                         value={skipStartLines}
                         min="0"
@@ -1228,6 +1231,7 @@ export function ImportTransactionsModal({
                       />
                     </label>
                     <label
+                      htmlFor="csv-skip-end-lines"
                       style={{
                         display: 'flex',
                         flexDirection: 'row',
@@ -1237,6 +1241,7 @@ export function ImportTransactionsModal({
                     >
                       <Trans>Skip end lines:</Trans>
                       <Input
+                        id="csv-skip-end-lines"
                         type="number"
                         value={skipEndLines}
                         min="0"

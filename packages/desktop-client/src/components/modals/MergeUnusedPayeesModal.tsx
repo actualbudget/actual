@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
@@ -31,6 +31,7 @@ export function MergeUnusedPayeesModal({
   payeeIds,
   targetPayeeId,
 }: MergeUnusedPayeesModalProps) {
+  const { t } = useTranslation();
   const allPayees = usePayees();
   const modalStack = useSelector(state => state.modals.modalStack);
   const isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
@@ -177,6 +178,9 @@ export function MergeUnusedPayeesModal({
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
+                aria-label={t(
+                  'Automatically rename these payees in the future',
+                )}
               >
                 <input
                   type="checkbox"
@@ -184,9 +188,7 @@ export function MergeUnusedPayeesModal({
                   onChange={e => setShouldCreateRule(e.target.checked)}
                 />
                 <Text style={{ marginLeft: 3 }}>
-                  <Trans count={payees.length}>
-                    Automatically rename these payees in the future
-                  </Trans>
+                  <Trans>Automatically rename these payees in the future</Trans>
                 </Text>
               </label>
             )}

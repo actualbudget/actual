@@ -23,17 +23,20 @@ For example:
 - `v23.3.2` - another bugfix launched later in the month of March;
 - `v23.4.0` - first release launched on 9th of April, 2023;
 
-## Set up the PRs
-Pull requests will need to be opened in two repositories - [docs](https://github.com/actualbudget/docs), [actual](https://github.com/actualbudget/actual).
+## Set up the PR
 
-### actual
+### Code
 - [ ] Run [this GitHub Action](https://github.com/actualbudget/actual/actions/workflows/generate-release-pr.yml) to generate a release PR (for a regular monthly release, leave the arguments set to their default values).
 - [ ] Open the generated PR and ensure the release notes workflow has started to collate the release notes into a comment in the PR. You may need to push an empty commit in order to trigger CI.
-- [ ] Remove `[WIP]` from the PR title to mark it as ready for review, and share in the release channel on Discord.
 
-### docs
-- [ ] Open an empty PR. Make sure to name the branch `release/X.Y.Z` where `X.Y.Z` is the version number.
-- [ ] After the release notes workflows in the `actual` PR has been run, copy the collated notes into a new blog post using a previous release as a template. The release notes will also need adding to the `docs/releases.md` file.
+### Docs
+- [ ] Open the release PR `release/vYY.MM.xx`
+- [ ] After the release notes workflows in the PR has been run, copy the collated notes into a new blog post using a previous release as a template. The release notes will also need adding to the `docs/releases.md` file.
+- [ ] Fix spelling as needed.
+
+## Await approval of the Release PR
+- [ ] Remove `[WIP]` from the PR title to mark it as ready for review, and share in the release channel on Discord.
+- [ ] Wait until at least 2 other maintainers have approved the release before merging the release PR.
 
 ## Trigger the release pipeline
 
@@ -59,5 +62,6 @@ Finally, a draft GitHub release should be automatically created [here](https://g
 - [ ] After the Docker image for the release is ready and pushed to Docker Hub, remember to deploy it and do a quick smoke test to verify things still work as expected.
 - [ ] Un-draft the GitHub release which will send announcement notifications to all apps.
 - [ ] Wrap up by sending an announcement on Discord and Twitter.
+- [ ] Wait one to two days to see if any new bugs show up that need a patch release. If none show up, end the merge freeze.
 
 :tada:

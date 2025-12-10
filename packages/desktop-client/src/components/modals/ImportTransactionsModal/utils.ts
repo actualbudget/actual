@@ -119,7 +119,7 @@ export function formatDate(
   }
   try {
     return formatDate_(date, format);
-  } catch (e) {}
+  } catch {}
   return null;
 }
 
@@ -265,12 +265,12 @@ export function parseAmountFields(
 
 export function stripCsvImportTransaction(transaction: ImportTransaction) {
   const {
-    existing,
-    ignored,
-    selected,
-    selected_merge,
-    trx_id,
-    tombstone,
+    existing: _existing,
+    ignored: _ignored,
+    selected: _selected,
+    selected_merge: _selected_merge,
+    trx_id: _trx_id,
+    tombstone: _tombstone,
     ...trans
   } = transaction;
 

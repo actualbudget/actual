@@ -19,6 +19,5 @@ export function useEffectAfterMount(
       return effect();
     }
     isFirstRender.current = false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 }

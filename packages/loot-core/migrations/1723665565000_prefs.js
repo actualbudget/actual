@@ -53,7 +53,7 @@ export default async function runMigration(db, { fs, fileId }) {
         ]);
       }),
     );
-  } catch (e) {
+  } catch {
     // Do nothing
   }
 }

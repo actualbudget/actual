@@ -12,7 +12,9 @@ export interface ServerHandlers {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   query: (query: QueryState) => Promise<{ data: any; dependencies: string[] }>;
 
-  'get-server-version': () => Promise<{ error?: string } | { version: string }>;
+  'get-server-version': () => Promise<
+    { error: 'no-server' } | { error: 'network-failure' } | { version: string }
+  >;
 
   'get-server-url': () => Promise<string | null>;
 

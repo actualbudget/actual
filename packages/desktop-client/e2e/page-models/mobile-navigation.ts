@@ -7,6 +7,7 @@ import { MobileBudgetPage } from './mobile-budget-page';
 import { MobilePayeesPage } from './mobile-payees-page';
 import { MobileReportsPage } from './mobile-reports-page';
 import { MobileRulesPage } from './mobile-rules-page';
+import { MobileSchedulesPage } from './mobile-schedules-page';
 import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
 import { SettingsPage } from './settings-page';
 
@@ -24,6 +25,7 @@ const ROUTES_BY_PAGE = {
   Accounts: '/accounts',
   Transaction: '/transactions/new',
   Reports: '/reports',
+  Schedules: '/schedules',
   Payees: '/payees',
   Rules: '/rules',
   'Bank Sync': '/bank-sync',
@@ -175,6 +177,13 @@ export class MobileNavigation {
     return await this.navigateToPage(
       'Payees',
       () => new MobilePayeesPage(this.page),
+    );
+  }
+
+  async goToSchedulesPage() {
+    return this.navigateToPage(
+      'Schedules',
+      () => new MobileSchedulesPage(this.page),
     );
   }
 

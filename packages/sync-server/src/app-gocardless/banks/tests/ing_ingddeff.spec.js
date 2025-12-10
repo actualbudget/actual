@@ -1,8 +1,8 @@
-import IngIngddeff from '../ing_ingddeff.js';
+import IngIngddeff from '../ing_ingddeff';
 
 describe('IngIngddeff', () => {
   describe('#normalizeAccount', () => {
-    /** @type {import('../../gocardless.types.js').DetailedAccountWithInstitution} */
+    /** @type {import('../../gocardless.types').DetailedAccountWithInstitution} */
     const accountRaw = {
       resourceId: 'e896eec6-6096-4efc-a941-756bd9d74765',
       iban: 'DE02500105170137075030',
@@ -266,7 +266,7 @@ describe('IngIngddeff', () => {
   });
 
   describe('#countStartingBalance', () => {
-    /** @type {import('../../gocardless-node.types.js').Balance[]} */
+    /** @type {import('../../gocardless-node.types').Balance[]} */
     const balances = [
       {
         balanceAmount: { amount: '3596.87', currency: 'EUR' },

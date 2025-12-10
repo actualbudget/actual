@@ -20,7 +20,7 @@ jobs:
         run: |
           git fetch origin ${{ github.base_ref }}
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
-          NON_DOCS_FILES=$(echo "$CHANGED_FILES" | grep -v "^packages/docs/" || true)
+          NON_DOCS_FILES=$(echo "$CHANGED_FILES" | grep -v -e "^packages/docs/" -e "^\.github/actions/docs-spelling/" || true)
 
           if [ -z "$NON_DOCS_FILES" ] && [ -n "$CHANGED_FILES" ]; then
             echo "only_docs=true" >> $GITHUB_OUTPUT

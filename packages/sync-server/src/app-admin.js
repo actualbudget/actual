@@ -1,14 +1,14 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
-import { isAdmin } from './account-db.js';
-import * as UserService from './services/user-service.js';
+import { isAdmin } from './account-db';
+import * as UserService from './services/user-service';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
-} from './util/middlewares.js';
-import { validateSession } from './util/validate-user.js';
+} from './util/middlewares';
+import { validateSession } from './util/validate-user';
 
 const app = express();
 app.use(express.json());
@@ -21,7 +21,7 @@ app.get('/owner-created/', (req, res) => {
   try {
     const ownerCount = UserService.getOwnerCount();
     res.json(ownerCount > 0);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Failed to retrieve owner count' });
   }
 });
