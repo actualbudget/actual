@@ -101,6 +101,8 @@ offbudget
 ofx
 OFX
 oneof
+oxfmt
+oxlint
 payeerule
 pikaday
 pikapods
