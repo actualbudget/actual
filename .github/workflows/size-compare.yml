@@ -19,7 +19,6 @@ on:
       - "yarn.lock"
       - ".github/workflows/size-compare.yml"
       - "!packages/sync-server/**" # Sync server changes don't affect the size of the web
-      - "!packages/api/**" # API changes don't affect the size of the web
       - "!packages/ci-actions/**" # CI actions changes don't affect the size of the web
       - "!packages/docs/**" # Docs changes don't affect the size of the web
       - "!packages/eslint-plugin-actual/**" # Eslint plugin changes don't affect the size of the web
