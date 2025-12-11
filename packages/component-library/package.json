@@ -41,7 +41,7 @@
     "./select": "./src/Select.tsx",
     "./space-between": "./src/SpaceBetween.tsx",
     "./styles": "./src/styles.ts",
-    "./text": "./src/Text.tsx",
+      "./text": "./src/Text.tsx",
     "./text-one-line": "./src/TextOneLine.tsx",
     "./theme": "./src/theme.ts",
     "./tokens": "./src/tokens.ts",
