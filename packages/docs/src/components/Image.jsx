@@ -51,6 +51,7 @@ export default function Image({ img, ...props }) {
     }
     return <IdealImage img={img} theme={theme} {...props} />;
   } else {
+    // oxlint-disable-next-line alt-text
     return <img {...props} />;
   }
 }
