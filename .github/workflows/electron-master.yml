@@ -199,3 +199,4 @@ jobs:
             This PR updates the Actual desktop flatpak to version ${{ needs.build.outputs.version }}.
 
             :link: [View release notes](https://actualbudget.org/blog/release-${{ needs.build.outputs.version }})
+          reviewers: "jfdoming,MatissJanis,youngcw" # The core team that have accepted the collaborator access to the Flathub repo

@@ -10,7 +10,7 @@ import { ScheduleTemplate, Template } from '../../types/models/templates';
 import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
 
-import { isReflectBudget } from './actions';
+import { getSheetValue, isReflectBudget } from './actions';
 
 type ScheduleTemplateTarget = {
   name: string;
@@ -285,8 +285,21 @@ export async function runSchedule(
   const totalSinking = getSinkingTotal(t_sinking);
   const totalSinkingBaseContribution =
     getSinkingBaseContributionTotal(t_sinking);
+  const lastMonthGoal = await getSheetValue(
+    monthUtils.sheetForMonth(monthUtils.subMonths(current_month, 1)),
+    `goal-${category.id}`,
+  );
 
-  if (balance >= totalSinking + totalPayMonthOf) {
+  // check and see if we should budget the full amount becaue the previous schedules
+  // haven't been paid yet, or if we can use the leftover balance for this month
+  // First option: check if the previous month doesn't have its monthly schedules paid yet
+  // Second option: check if the previous month needed less than this month and hasn't paid yet
+  if (
+    balance >= totalSinking + totalPayMonthOf ||
+    (lastMonthGoal < totalSinking + totalPayMonthOf &&
+      lastMonthGoal !== 0 &&
+      balance >= lastMonthGoal)
+  ) {
     to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);
   } else {
     const totalSinkingContribution = await getSinkingContributionTotal(
