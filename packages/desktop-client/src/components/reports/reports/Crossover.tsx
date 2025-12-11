@@ -120,7 +120,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const [swr, setSwr] = useState(0.04);
   const [estimatedReturn, setEstimatedReturn] = useState<number | null>(null);
   const [projectionType, setProjectionType] = useState<'trend' | 'hampel'>(
-    'trend',
+    'hampel',
   );
   const [showHiddenCategories, setShowHiddenCategories] = useState(false);
   const [selectionsInitialized, setSelectionsInitialized] = useState(false);
@@ -154,7 +154,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     setSelectedIncomeAccountIds(initialIncomeAccountIds);
     setSwr(widget?.meta?.safeWithdrawalRate ?? 0.04);
     setEstimatedReturn(widget?.meta?.estimatedReturn ?? null);
-    setProjectionType(widget?.meta?.projectionType ?? 'trend');
+    setProjectionType(widget?.meta?.projectionType ?? 'hampel');
     setShowHiddenCategories(widget?.meta?.showHiddenCategories ?? false);
 
     setSelectionsInitialized(true);

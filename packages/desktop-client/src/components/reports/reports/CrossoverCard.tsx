@@ -123,7 +123,7 @@ export function CrossoverCard({
 
   const swr = meta?.safeWithdrawalRate ?? 0.04;
   const estimatedReturn = meta?.estimatedReturn ?? null;
-  const projectionType = meta?.projectionType ?? 'trend';
+  const projectionType = meta?.projectionType ?? 'hampel';
 
   const params = useMemo(
     () =>
