@@ -58,7 +58,7 @@ jobs:
         with:
           repository: ${{ steps.metadata.outputs.head_repo }}
           ref: ${{ steps.metadata.outputs.head_ref }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
           fetch-depth: 0
 
       - name: Validate and apply patch
@@ -121,7 +121,11 @@ jobs:
         env:
           HEAD_REF: ${{ steps.metadata.outputs.head_ref }}
           HEAD_REPO: ${{ steps.metadata.outputs.head_repo }}
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
         run: |
+          # Configure git to use the token via credential helper (avoids token in URLs/logs)
+          git config --local credential.helper '!f() { echo "username=x-access-token"; echo "password=${GITHUB_TOKEN}"; }; f'
+          git remote set-url origin "https://github.com/${HEAD_REPO}.git"
           git push origin "HEAD:refs/heads/$HEAD_REF"
           echo "Successfully pushed VRT updates to $HEAD_REPO@$HEAD_REF"
 
