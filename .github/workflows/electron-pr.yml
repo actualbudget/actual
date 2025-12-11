@@ -9,6 +9,15 @@ env:
 
 on:
   pull_request:
+    paths:
+      - "packages/**"
+      - "package.json"
+      - "yarn.lock"
+      - ".github/workflows/electron-pr.yml"
+      - "!packages/api/**" # API changes don't affect Electron
+      - "!packages/ci-actions/**" # CI actions changes don't affect Electron
+      - "!packages/docs/**" # Docs changes don't affect Electron
+      - "!packages/eslint-plugin-actual/**" # Eslint plugin changes don't affect Electron
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
