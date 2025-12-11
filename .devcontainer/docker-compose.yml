@@ -1,6 +1,18 @@
-version: '3.8'
+###################################################
+# This creates and stands up the development
+# docker container. Depends on the Dockerfile and
+# docker-start.sh files.
+###################################################
+
 services:
   actual-development:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    ports:
+      - '3001:3001'
     volumes:
-      - ..:/workspaces:cached
+      - ..:/workspaces
     command: /bin/sh -c "while sleep 1000; do :; done"
+    restart: 'no'
+    
