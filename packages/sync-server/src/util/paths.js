@@ -1,6 +1,6 @@
 import { join, resolve } from 'node:path';
 
-import { config } from '../load-config.js';
+import { config } from '../load-config';
 
 /** @param {string} fileId */
 export function getPathForUserFile(fileId) {

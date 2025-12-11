@@ -144,8 +144,6 @@ async function execTransactionsGrouped(
     rows = await db.all<db.DbViewTransactionInternal>(rowSql, params);
   } else {
     // TODO: phew, what a doozy. write docs why it works this way
-    //
-    // prettier-ignore
     const rowSql = `
       SELECT group_id, matched FROM (
         SELECT

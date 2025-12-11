@@ -82,7 +82,9 @@ export function useCategoryScheduleGoalTemplateIndicator({
     return {
       schedule,
       scheduleStatus,
-      isScheduleRecurring: !!schedule?._date?.frequency,
+      isScheduleRecurring: !!(
+        typeof schedule?._date === 'object' && schedule?._date?.frequency
+      ),
       description,
     };
   }, [locale, month, scheduleStatuses, schedules, t]);

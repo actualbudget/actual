@@ -3,7 +3,9 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Input } from '@actual-app/components/input';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -16,8 +18,6 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
-import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
 import {
   FormField,
   FormLabel,
@@ -50,7 +50,7 @@ export type ScheduleFormFields = {
   name: null | string;
 };
 
-type ScheduleEditFormDispatch =
+export type ScheduleEditFormDispatch =
   | {
       type: 'set-field';
       field: 'name' | 'account' | 'payee';
@@ -97,8 +97,6 @@ type ScheduleEditFormProps = {
   onSwitchTransactions: (mode: 'linked' | 'matched') => void;
   onLinkTransactions: (ids: string[], scheduleId?: string) => Promise<void>;
   onUnlinkTransactions: (ids: string[]) => Promise<void>;
-  onSave: () => Promise<void>;
-  onCancel: () => void;
 };
 
 export function ScheduleEditForm({
@@ -117,203 +115,215 @@ export function ScheduleEditForm({
   onSwitchTransactions,
   onLinkTransactions,
   onUnlinkTransactions,
-  onSave,
-  onCancel,
 }: ScheduleEditFormProps) {
   const locale = useLocale();
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const { isNarrowWidth } = useResponsive();
 
   return (
     <>
-      <SpaceBetween style={{ marginTop: 10 }}>
-        <FormField style={{ flex: 1 }}>
-          <FormLabel title={t('Schedule Name')} htmlFor="name-field" />
-          <InitialFocus>
-            <GenericInput
-              type="string"
-              value={fields.name}
-              onChange={e => {
-                dispatch({ type: 'set-field', field: 'name', value: e });
-              }}
-            />
-          </InitialFocus>
-        </FormField>
-      </SpaceBetween>
-      <SpaceBetween style={{ marginTop: 20 }}>
-        <FormField style={{ flex: 1 }}>
-          <FormLabel
-            title={t('Payee')}
-            id="payee-label"
-            htmlFor="payee-field"
-          />
-          <PayeeAutocomplete
-            value={fields.payee}
-            labelProps={{ id: 'payee-label' }}
-            inputProps={{ id: 'payee-field', placeholder: t('(none)') }}
-            onSelect={id =>
-              dispatch({ type: 'set-field', field: 'payee', value: id })
-            }
-          />
-        </FormField>
-
-        <FormField style={{ flex: 1 }}>
-          <FormLabel
-            title={t('Account')}
-            id="account-label"
-            htmlFor="account-field"
-          />
-          <AccountAutocomplete
-            includeClosedAccounts={false}
-            value={fields.account}
-            labelProps={{ id: 'account-label' }}
-            inputProps={{ id: 'account-field', placeholder: t('(none)') }}
-            onSelect={id =>
-              dispatch({ type: 'set-field', field: 'account', value: id })
-            }
-          />
-        </FormField>
-
-        <FormField style={{ flex: 1 }}>
-          <SpaceBetween style={{ marginBottom: 3, alignItems: 'center' }}>
-            <FormLabel
-              title={t('Amount')}
-              htmlFor="amount-field"
-              style={{ margin: 0, flex: 1 }}
-            />
-            <OpSelect
-              ops={['isapprox', 'is', 'isbetween']}
-              value={fields.amountOp as 'isapprox' | 'is' | 'isbetween'}
-              formatOp={op => {
-                switch (op) {
-                  case 'is':
-                    return t('is exactly');
-                  case 'isapprox':
-                    return t('is approximately');
-                  case 'isbetween':
-                    return t('is between');
-                  default:
-                    throw new Error('Invalid op for select: ' + op);
-                }
-              }}
-              style={{
-                padding: '0 10px',
-                color: theme.pageTextLight,
-                fontSize: 12,
-              }}
-              onChange={(_, op) =>
-                dispatch({
-                  type: 'set-field',
-                  field: 'amountOp',
-                  value: op,
-                })
-              }
-            />
-          </SpaceBetween>
-          {fields.amountOp === 'isbetween' ? (
-            <BetweenAmountInput
-              // @ts-expect-error fix me
-              defaultValue={fields.amount}
-              onChange={value =>
-                dispatch({
-                  type: 'set-field',
-                  field: 'amount',
-                  value,
-                })
-              }
-            />
-          ) : (
-            <AmountInput
-              id="amount-field"
-              // @ts-expect-error fix me
-              value={fields.amount}
-              onUpdate={value =>
-                dispatch({
-                  type: 'set-field',
-                  field: 'amount',
-                  value,
-                })
-              }
-            />
-          )}
-        </FormField>
-      </SpaceBetween>
-
-      <View style={{ marginTop: 20 }}>
-        <FormLabel title={t('Date')} />
-      </View>
-
-      <SpaceBetween
-        style={{
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-        }}
-      >
-        <View style={{ width: '13.44rem' }}>
-          {repeats ? (
-            <RecurringSchedulePicker
-              // @ts-expect-error fix me
-              value={fields.date}
-              onChange={value =>
-                dispatch({ type: 'set-field', field: 'date', value })
-              }
-            />
-          ) : (
-            <DateSelect
-              // @ts-expect-error fix me
-              value={fields.date}
-              onSelect={date =>
-                dispatch({ type: 'set-field', field: 'date', value: date })
-              }
-              dateFormat={dateFormat}
-            />
-          )}
-
-          {upcomingDates && (
-            <View style={{ fontSize: 13, marginTop: 20 }}>
-              <Text style={{ color: theme.pageTextLight, fontWeight: 600 }}>
-                <Trans>Upcoming dates</Trans>
-              </Text>
-              <SpaceBetween
-                direction="vertical"
-                gap={5}
-                style={{
-                  marginTop: 10,
-                  color: theme.pageTextLight,
-                  alignItems: 'flex-start',
+      <View style={{ display: 'block', overflow: 'scroll', padding: 10 }}>
+        <SpaceBetween style={{ marginTop: 10 }}>
+          <FormField style={{ flex: 1 }}>
+            <FormLabel title={t('Schedule Name')} htmlFor="name-field" />
+            <InitialFocus>
+              <Input
+                id="name-field"
+                value={fields.name}
+                placeholder={t('nothing')}
+                onChangeValue={e => {
+                  dispatch({ type: 'set-field', field: 'name', value: e });
                 }}
-              >
-                {upcomingDates.map(date => (
-                  <View key={date}>
-                    {monthUtils.format(date, `${dateFormat} EEEE`, locale)}
-                  </View>
-                ))}
-              </SpaceBetween>
-            </View>
-          )}
-        </View>
-
-        <View
+              />
+            </InitialFocus>
+          </FormField>
+        </SpaceBetween>
+        <SpaceBetween
           style={{
-            marginTop: 5,
-            flexDirection: 'row',
-            alignItems: 'center',
-            userSelect: 'none',
+            marginTop: 20,
+            display: isNarrowWidth ? 'grid' : 'flex',
+            gridTemplateColumns: '1fr 1fr',
           }}
         >
-          <Checkbox
-            id="form_repeats"
-            checked={repeats}
-            onChange={e => {
-              dispatch({ type: 'set-repeats', repeats: e.target.checked });
-            }}
-          />
-          <label htmlFor="form_repeats" style={{ userSelect: 'none' }}>
-            <Trans>Repeats</Trans>
-          </label>
+          <FormField style={{ flex: 1 }}>
+            <FormLabel
+              title={t('Payee')}
+              id="payee-label"
+              htmlFor="payee-field"
+            />
+            <GenericInput
+              type="id"
+              field="payee"
+              value={fields.payee || ''}
+              onChange={id =>
+                dispatch({ type: 'set-field', field: 'payee', value: id })
+              }
+            />
+          </FormField>
+
+          <FormField style={{ flex: 1 }}>
+            <FormLabel
+              title={t('Account')}
+              id="account-label"
+              htmlFor="account-field"
+            />
+            <GenericInput
+              type="id"
+              field="account"
+              value={fields.account || ''}
+              onChange={id =>
+                dispatch({ type: 'set-field', field: 'account', value: id })
+              }
+            />
+          </FormField>
+
+          <FormField style={{ flex: 1, gridColumn: '1 / -1' }}>
+            <SpaceBetween style={{ marginBottom: 3, alignItems: 'center' }}>
+              <FormLabel
+                title={t('Amount')}
+                htmlFor="amount-field"
+                style={{ margin: 0, flex: 1 }}
+              />
+              <OpSelect
+                ops={['isapprox', 'is', 'isbetween']}
+                value={fields.amountOp as 'isapprox' | 'is' | 'isbetween'}
+                formatOp={op => {
+                  switch (op) {
+                    case 'is':
+                      return t('is exactly');
+                    case 'isapprox':
+                      return t('is approximately');
+                    case 'isbetween':
+                      return t('is between');
+                    default:
+                      throw new Error('Invalid op for select: ' + op);
+                  }
+                }}
+                style={{
+                  padding: '0 10px',
+                  color: theme.pageTextLight,
+                  fontSize: 12,
+                }}
+                onChange={(_, op) =>
+                  dispatch({
+                    type: 'set-field',
+                    field: 'amountOp',
+                    value: op,
+                  })
+                }
+              />
+            </SpaceBetween>
+            {fields.amountOp === 'isbetween' ? (
+              <BetweenAmountInput
+                // @ts-expect-error fix me
+                defaultValue={fields.amount}
+                onChange={value =>
+                  dispatch({
+                    type: 'set-field',
+                    field: 'amount',
+                    value,
+                  })
+                }
+              />
+            ) : (
+              <AmountInput
+                id="amount-field"
+                // @ts-expect-error fix me
+                value={fields.amount}
+                onUpdate={value =>
+                  dispatch({
+                    type: 'set-field',
+                    field: 'amount',
+                    value,
+                  })
+                }
+              />
+            )}
+          </FormField>
+        </SpaceBetween>
+
+        <View style={{ marginTop: 20 }}>
+          <FormLabel title={t('Date')} />
         </View>
 
-        <SpaceBetween direction="vertical" style={{ alignItems: 'flex-end' }}>
+        <SpaceBetween
+          style={{
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+          }}
+        >
+          <View style={{ width: '13.44rem' }}>
+            {repeats ? (
+              <RecurringSchedulePicker
+                // @ts-expect-error fix me
+                value={fields.date}
+                onChange={value =>
+                  dispatch({ type: 'set-field', field: 'date', value })
+                }
+              />
+            ) : (
+              <DateSelect
+                // @ts-expect-error fix me
+                value={fields.date}
+                onSelect={date =>
+                  dispatch({ type: 'set-field', field: 'date', value: date })
+                }
+                dateFormat={dateFormat}
+              />
+            )}
+
+            {upcomingDates && (
+              <View style={{ fontSize: 13, marginTop: 20 }}>
+                <Text style={{ color: theme.pageTextLight, fontWeight: 600 }}>
+                  <Trans>Upcoming dates</Trans>
+                </Text>
+                <SpaceBetween
+                  direction="vertical"
+                  gap={5}
+                  style={{
+                    marginTop: 10,
+                    color: theme.pageTextLight,
+                    alignItems: 'flex-start',
+                  }}
+                >
+                  {upcomingDates.map(date => (
+                    <View key={date}>
+                      {monthUtils.format(date, `${dateFormat} EEEE`, locale)}
+                    </View>
+                  ))}
+                </SpaceBetween>
+              </View>
+            )}
+          </View>
+
+          <View
+            style={{
+              marginTop: 5,
+              flexDirection: 'row',
+              alignItems: 'center',
+              userSelect: 'none',
+            }}
+          >
+            <Checkbox
+              id="form_repeats"
+              checked={repeats}
+              onChange={e => {
+                dispatch({ type: 'set-repeats', repeats: e.target.checked });
+              }}
+            />
+            <label htmlFor="form_repeats" style={{ userSelect: 'none' }}>
+              <Trans>Repeats</Trans>
+            </label>
+          </View>
+        </SpaceBetween>
+
+        <SpaceBetween
+          gap={5}
+          direction="vertical"
+          align="end"
+          style={{ marginTop: 10 }}
+        >
           <View
             style={{
               marginTop: 5,
@@ -344,10 +354,9 @@ export function ScheduleEditForm({
 
           <Text
             style={{
-              width: 350,
+              maxWidth: 350,
               textAlign: 'right',
               color: theme.pageTextLight,
-              marginTop: 10,
               fontSize: 13,
               lineHeight: '1.4em',
             }}
@@ -378,9 +387,15 @@ export function ScheduleEditForm({
             </SpaceBetween>
           )}
         </SpaceBetween>
-      </SpaceBetween>
+      </View>
 
-      <View style={{ marginTop: 30, flex: 1 }}>
+      <View
+        style={{
+          padding: 10,
+          minHeight: '30vh',
+          borderTop: `1px solid ${theme.tableBorder}`,
+        }}
+      >
         <SelectedProvider instance={selectedInst}>
           {adding ? (
             <View style={{ flexDirection: 'row', padding: '5px 0' }}>
@@ -465,21 +480,9 @@ export function ScheduleEditForm({
         </SelectedProvider>
       </View>
 
-      <SpaceBetween
-        style={{
-          marginTop: 20,
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-        }}
-      >
-        {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
-        <Button style={{ marginRight: 10 }} onPress={onCancel}>
-          <Trans>Cancel</Trans>
-        </Button>
-        <Button variant="primary" onPress={onSave}>
-          {adding ? t('Add') : t('Save')}
-        </Button>
-      </SpaceBetween>
+      {error && (
+        <Text style={{ color: theme.errorText, marginTop: 10 }}>{error}</Text>
+      )}
     </>
   );
 }

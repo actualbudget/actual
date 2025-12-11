@@ -138,7 +138,7 @@ export function SelectedTransactionsButton({
   const canMerge = useMemo(() => {
     return Boolean(
       twoTransactions &&
-        twoTransactions[0].amount === twoTransactions[1].amount,
+      twoTransactions[0].amount === twoTransactions[1].amount,
     );
   }, [twoTransactions]);
 
@@ -282,7 +282,7 @@ export function SelectedTransactionsButton({
   );
   // merge
   useHotkeys(
-    'm',
+    'g',
     () => canMerge && onMergeTransactions(selectedIds),
     hotKeyOptions,
     [onMergeTransactions, selectedIds],
@@ -387,7 +387,7 @@ export function SelectedTransactionsButton({
                     {
                       name: 'merge-transactions',
                       text: t('Merge'),
-                      key: 'M',
+                      key: 'G',
                     } as const,
                   ]
                 : []),

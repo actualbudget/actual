@@ -381,7 +381,7 @@ function SelectedTransactionsFloatingActionBar({
   const canMerge = useMemo(() => {
     return Boolean(
       twoTransactions &&
-        twoTransactions[0].amount === twoTransactions[1].amount,
+      twoTransactions[0].amount === twoTransactions[1].amount,
     );
   }, [twoTransactions]);
 

@@ -17,7 +17,6 @@ export function useQuery<Response = unknown>(
   // Memo the resulting query. We don't care if the function
   // that creates the query changes, only the resulting query.
   // Safe to ignore the eslint warning here.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const query = useMemo(makeQuery, dependencies);
 
   const [data, setData] = useState<ReadonlyArray<Response> | null>(null);

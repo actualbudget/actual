@@ -13,6 +13,7 @@ type Actual = {
   IS_DEV: boolean;
   ACTUAL_VERSION: string;
   openURLInBrowser: (url: string) => void;
+  openInFileManager: (filepath: string) => void;
   saveFile: (
     contents: string | Buffer,
     filename: string,
@@ -52,10 +53,5 @@ declare global {
 
   var IS_TESTING: boolean;
 
-  /**
-   * Test-only override for currentMonth().
-   * Set this in tests to make date-dependent behavior deterministic.
-   * Always reset to null in afterEach() to prevent test pollution.
-   */
-  var currentMonth: string | undefined;
+  var currentMonth: string | null;
 }
