@@ -10,7 +10,7 @@ on:
       - "yarn.lock"
       - ".github/workflows/vrt-update-generate.yml"
       - "!packages/sync-server/**" # Sync server changes don't affect the VRT
-      - "!packages/api/**" # API changes don't affect the the VRT
+      - "!packages/api/**" # API changes don't affect the VRT
       - "!packages/ci-actions/**" # CI actions changes don't affect the VRT
       - "!packages/docs/**" # Docs changes don't affect the VRT
       - "!packages/eslint-plugin-actual/**" # Eslint plugin changes don't affect the VRT
