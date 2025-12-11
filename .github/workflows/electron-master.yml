@@ -104,6 +104,9 @@ jobs:
             <a href="https://apps.microsoft.com/detail/9p2hmlhsdbrm?cid=Github+Releases&mode=direct">
               <img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
             </a>
+            <a href="https://flathub.org/apps/com.actualbudget.actual">
+                <img width="165" alt="Get it on Flathub" src="https://flathub.org/api/badge?locale=en" />
+            </a>
           files: |
             packages/desktop-electron/dist/*.dmg
             packages/desktop-electron/dist/*.exe
