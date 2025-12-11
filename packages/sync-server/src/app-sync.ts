@@ -418,7 +418,7 @@ app.post('/delete-user-file', (req, res) => {
   if (!isOwner && !isServerAdmin) {
     res.status(403).send({
       status: 'error',
-      reason: 'unauthorized',
+      reason: 'forbidden',
       details: 'file-delete-not-allowed',
     });
     return;
