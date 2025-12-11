@@ -145,7 +145,15 @@ export const ReportTableRow = memo(
                       }),
                     }}
                     unexposedContent={({ value }) => (
-                      <Text style={hoverUnderline}>{value}</Text>
+                      <Text
+                        style={{
+                          ...hoverUnderline,
+                          textAlign: 'right',
+                          flexGrow: 1,
+                        }}
+                      >
+                        {value}
+                      </Text>
                     )}
                     valueStyle={compactStyle}
                     value={format(intervalItem[balanceTypeOp], 'financial')}
@@ -199,7 +207,15 @@ export const ReportTableRow = memo(
                       }),
                     }}
                     unexposedContent={({ value }) => (
-                      <Text style={hoverUnderline}>{value}</Text>
+                      <Text
+                        style={{
+                          ...hoverUnderline,
+                          textAlign: 'right',
+                          flexGrow: 1,
+                        }}
+                      >
+                        {value}
+                      </Text>
                     )}
                     valueStyle={compactStyle}
                     onClick={() =>
@@ -240,7 +256,15 @@ export const ReportTableRow = memo(
                       }),
                     }}
                     unexposedContent={({ value }) => (
-                      <Text style={hoverUnderline}>{value}</Text>
+                      <Text
+                        style={{
+                          ...hoverUnderline,
+                          textAlign: 'right',
+                          flexGrow: 1,
+                        }}
+                      >
+                        {value}
+                      </Text>
                     )}
                     valueStyle={compactStyle}
                     onClick={() =>
@@ -280,7 +304,15 @@ export const ReportTableRow = memo(
               ...(colorized && { color: getAmountColor(item[balanceTypeOp]) }),
             }}
             unexposedContent={({ value }) => (
-              <Text style={hoverUnderline}>{value}</Text>
+              <Text
+                style={{
+                  ...hoverUnderline,
+                  textAlign: 'right',
+                  flexGrow: 1,
+                }}
+              >
+                {value}
+              </Text>
             )}
             valueStyle={compactStyle}
             onClick={() =>
