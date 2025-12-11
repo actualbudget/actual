@@ -224,6 +224,7 @@ const sidebars = {
           label: 'API',
           link: { type: 'doc', id: 'api/index' },
           items: [
+            'api/api-tokens',
             'api/reference',
             'api/cli',
             {
