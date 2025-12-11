@@ -28,6 +28,7 @@ type CrossoverGraphProps = {
       investmentIncome: number;
       expenses: number;
       nestEgg: number;
+      adjustedExpenses?: number;
       isProjection?: boolean;
     }>;
     start: string;
@@ -62,6 +63,7 @@ export function CrossoverGraph({
       investmentIncome: number | string;
       expenses: number | string;
       nestEgg: number | string;
+      adjustedExpenses?: number | string;
       isProjection?: boolean;
     };
   };
@@ -120,6 +122,21 @@ export function CrossoverGraph({
                 </div>
                 <div>{format(payload[0].payload.expenses, 'financial')}</div>
               </View>
+              {payload[0].payload.adjustedExpenses != null && (
+                <View
+                  className={css({
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                  })}
+                >
+                  <div>
+                    <Trans>Target income:</Trans>
+                  </div>
+                  <div>
+                    {format(payload[0].payload.adjustedExpenses, 'financial')}
+                  </div>
+                </View>
+              )}
               <View
                 className={css({
                   display: 'flex',
@@ -199,6 +216,15 @@ export function CrossoverGraph({
                 dot={false}
                 stroke={theme.reportsRed}
                 strokeWidth={2}
+                {...animationProps}
+              />
+              <Line
+                type="monotone"
+                dataKey="adjustedExpenses"
+                dot={false}
+                stroke={theme.reportsRed}
+                strokeWidth={2}
+                strokeDasharray="5 5"
                 {...animationProps}
               />
             </LineChart>
