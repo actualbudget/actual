@@ -93,10 +93,11 @@ export const styles: Record<string, any> = {
   tnum: {
     // tnum: Tabular (monospaced) numbers for better alignment in tables.
     // ss01: Alternate digits (controlled by --font-feature-ss01 CSS variable)
+    // ss04: Disambiguated characters (better legibility in body text)
     // zero: Slashed zero (controlled by --font-feature-zero CSS variable)
     fontFeatureSettings:
       //eslint-disable-next-line actual/typography
-      '"tnum", var(--font-feature-ss01, "ss01" 0), var(--font-feature-zero, "zero" 0)',
+      '"tnum", var(--font-feature-ss01, "ss01" 0), "ss04", var(--font-feature-zero, "zero" 0)',
   },
   notFixed: { fontFeatureSettings: '' },
   text: {
