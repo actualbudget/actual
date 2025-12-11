@@ -35,6 +35,42 @@ OpenID can be enabled here. [Learn more](/docs/config/oauth-auth)
 
 ![Image of OpenID setting](/img/using-actual/actual-openid.webp)
 
+### API Tokens
+
+API tokens allow you to grant programmatic access to your budgets without sharing your password. This is useful for scripts, automations, and third-party integrations that use the [Actual API](/docs/api/).
+
+#### Creating a Token
+
+1. Click **Create API Token**
+2. Enter a descriptive name for the token (e.g., "Bank sync script" or "Monthly export automation")
+3. Click **Create Token**
+4. **Copy the token immediately** - it will only be shown once
+
+:::warning
+
+The full token is only displayed once when created. If you lose it, you'll need to create a new token and update any scripts using the old one.
+
+:::
+
+#### Managing Tokens
+
+The API Tokens section displays all your tokens with:
+- **Name** - The descriptive name you gave the token
+- **Prefix** - The first few characters of the token (e.g., `act_a1b2...`) for identification
+- **Created date** - When the token was created
+- **Last used** - When the token was last used to authenticate
+
+To revoke a token, click the **Revoke** button next to it. This immediately invalidates the token - any scripts or integrations using it will no longer be able to authenticate.
+
+#### Best Practices
+
+- **Use descriptive names** - Name tokens after their purpose so you know what will break if you revoke them
+- **Create separate tokens** for different scripts or integrations, so you can revoke one without affecting others
+- **Revoke unused tokens** - Regularly review your tokens and remove any that are no longer needed
+- **Monitor last used dates** - If a token hasn't been used in a long time, consider revoking it
+
+For information on using tokens in your scripts, see the [API documentation](/docs/api/api-tokens).
+
 ### Encryption
 
 End-to-end encryption allows you to encrypt the data on your remote server with a password. If you don't trust the server's owners, enable this setting to fully encrypt the data. [Learn more](/docs/getting-started/sync/#end-to-end-encryption)
