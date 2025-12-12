@@ -179,6 +179,7 @@ __metadata:
     mdast-util-newline-to-break: "npm:^2.0.0"
     memoize-one: "npm:^6.0.0"
     pikaday: "npm:1.8.2"
+    playwright-network-cache: "npm:^0.2.2"
     promise-retry: "npm:^2.0.1"
     prop-types: "npm:^15.8.1"
     re-resizable: "npm:^6.11.2"
@@ -20414,7 +20415,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mime-types@npm:^2.1.12, mime-types@npm:^2.1.27, mime-types@npm:~2.1.17, mime-types@npm:~2.1.24, mime-types@npm:~2.1.34":
+"mime-types@npm:2.1.35, mime-types@npm:^2.1.12, mime-types@npm:^2.1.27, mime-types@npm:~2.1.17, mime-types@npm:~2.1.24, mime-types@npm:~2.1.34":
   version: 2.1.35
   resolution: "mime-types@npm:2.1.35"
   dependencies:
@@ -22106,6 +22107,16 @@ __metadata:
   bin:
     playwright-core: cli.js
   checksum: 10/df785eb3b3a8392b10dcde5f768e09b7fe459a7b06ed81180da69e048f2154b761f86d79572c2b62037a1f18a44e4ace72f5b6547f4f473b4ab13ab1d94007d2
+  languageName: node
+  linkType: hard
+
+"playwright-network-cache@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "playwright-network-cache@npm:0.2.2"
+  dependencies:
+    debug: "npm:^4.4.0"
+    mime-types: "npm:2.1.35"
+  checksum: 10/2d0059e0e5601ed8c138a590a6039189f0692194ad68cc1e24c6e59df2e9f73d074e960f3667ed4f5c310e77510717511f6e0eb98e95091882fdfdef9797ca8b
   languageName: node
   linkType: hard
 
