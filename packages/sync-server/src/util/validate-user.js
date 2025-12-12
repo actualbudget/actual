@@ -12,7 +12,7 @@ const API_TOKEN_PREFIX = 'act_';
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  */
-export function validateSession(req, res) {
+export async function validateSession(req, res) {
   let { token } = req.body || {};
 
   if (!token) {
@@ -29,7 +29,7 @@ export function validateSession(req, res) {
 
   // Check if this is an API token
   if (token && token.startsWith(API_TOKEN_PREFIX)) {
-    return validateApiToken(token, res);
+    return await validateApiToken(token, res);
   }
 
   const session = getSession(token);
@@ -64,8 +64,8 @@ export function validateSession(req, res) {
  * @param {string} token - The API token
  * @param {import('express').Response} res
  */
-function validateApiToken(token, res) {
-  const result = apiTokenService.validateToken(token);
+async function validateApiToken(token, res) {
+  const result = await apiTokenService.validateToken(token);
 
   if (!result) {
     res.status(401);

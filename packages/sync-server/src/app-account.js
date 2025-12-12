@@ -114,8 +114,8 @@ app.post('/login', async (req, res) => {
   res.send({ status: 'ok', data: { token } });
 });
 
-app.post('/change-password', (req, res) => {
-  const session = validateSession(req, res);
+app.post('/change-password', async (req, res) => {
+  const session = await validateSession(req, res);
   if (!session) return;
 
   const { error } = changePassword(req.body.password);
@@ -128,8 +128,8 @@ app.post('/change-password', (req, res) => {
   res.send({ status: 'ok', data: {} });
 });
 
-app.get('/validate', (req, res) => {
-  const session = validateSession(req, res);
+app.get('/validate', async (req, res) => {
+  const session = await validateSession(req, res);
   if (session) {
     const user = getUserInfo(session.user_id);
     if (!user) {
