@@ -34,10 +34,10 @@ type NoteAmendMode = NonNullable<
   Parameters<EditFieldModalProps['onSubmit']>[2]
 >;
 const noteAmendStrings: Record<NoteAmendMode, string> = {
-  replace: 'Replace',
   prepend: 'Prepend',
-  append: 'Append',
+  replace: 'Replace',
   findAndReplace: 'Find and Replace',
+  append: 'Append',
 };
 
 type EditFieldModalProps = Extract<
