@@ -729,7 +729,7 @@ describe('/delete-user-file', () => {
     expect(res.statusCode).toEqual(403);
     expect(res.body).toEqual({
       status: 'error',
-      reason: 'unauthorized',
+      reason: 'forbidden',
       details: 'file-delete-not-allowed',
     });
 
