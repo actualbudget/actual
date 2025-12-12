@@ -81,8 +81,8 @@ export interface ApiTokenService {
     name: string,
     budgetIds?: string[],
     expiresAt?: number | null,
-  ): CreateTokenResult;
-  validateToken(token: string): ValidateTokenResult | null;
+  ): Promise<CreateTokenResult>;
+  validateToken(token: string): Promise<ValidateTokenResult | null>;
   listTokens(userId: string): TokenListItem[];
   revokeToken(tokenId: string, userId: string): boolean;
   setTokenEnabled(tokenId: string, userId: string, enabled: boolean): boolean;
@@ -132,8 +132,8 @@ function extractPrefix(token: string): string {
  * @param token - The token to hash
  * @returns The bcrypt hash
  */
-function hashToken(token: string): string {
-  return bcrypt.hashSync(token, BCRYPT_ROUNDS);
+async function hashToken(token: string): Promise<string> {
+  return bcrypt.hash(token, BCRYPT_ROUNDS);
 }
 
 /**
@@ -142,8 +142,8 @@ function hashToken(token: string): string {
  * @param hash - The bcrypt hash to compare against
  * @returns True if the token matches
  */
-function verifyToken(token: string, hash: string): boolean {
-  return bcrypt.compareSync(token, hash);
+async function verifyToken(token: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(token, hash);
 }
 
 // ============================================
@@ -158,15 +158,15 @@ export const apiTokenService: ApiTokenService = {
    * @param budgetIds - Array of budget/file IDs to scope the token to (empty = all)
    * @param expiresAt - Unix timestamp for expiration, or null for never
    */
-  createToken(
+  async createToken(
     userId: string,
     name: string,
     budgetIds: string[] = [],
     expiresAt: number | null = null,
-  ): CreateTokenResult {
+  ): Promise<CreateTokenResult> {
     const accountDb = getAccountDb() as WrappedDatabase;
     const token = generateToken();
-    const tokenHash = hashToken(token);
+    const tokenHash = await hashToken(token);
     const tokenPrefix = extractPrefix(token);
     const tokenId = uuidv4();
     const createdAt = Math.floor(Date.now() / 1000);
@@ -203,7 +203,7 @@ export const apiTokenService: ApiTokenService = {
    * Validate an API token and return the associated user context
    * @param token - The full API token
    */
-  validateToken(token: string): ValidateTokenResult | null {
+  async validateToken(token: string): Promise<ValidateTokenResult | null> {
     if (!token || !token.startsWith(TOKEN_PREFIX)) {
       return null;
     }
@@ -224,7 +224,7 @@ export const apiTokenService: ApiTokenService = {
     }
 
     // Verify the full token against the hash
-    if (!verifyToken(token, tokenRow.token_hash)) {
+    if (!(await verifyToken(token, tokenRow.token_hash))) {
       return null;
     }
 
