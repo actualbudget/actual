@@ -18,6 +18,7 @@ node_modules
 packages/api/dist
 packages/api/@types
 packages/crdt/dist
+packages/desktop-client/dev-dist
 packages/desktop-electron/client-build
 packages/desktop-electron/build
 packages/desktop-electron/.electron-symbols
@@ -25,6 +26,7 @@ packages/desktop-electron/dist
 packages/desktop-electron/loot-core
 packages/desktop-client/service-worker
 packages/plugins-service/dist
+packages/loot-core/lib-dist
 bundle.desktop.js
 bundle.desktop.js.map
 bundle.mobile.js

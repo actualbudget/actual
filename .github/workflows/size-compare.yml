@@ -14,8 +14,14 @@ name: Compare Sizes
 on:
   pull_request_target:
     paths:
-      - 'packages/**'
-      - '!packages/sync-server/**'
+      - "packages/**"
+      - "package.json"
+      - "yarn.lock"
+      - ".github/workflows/size-compare.yml"
+      - "!packages/sync-server/**" # Sync server changes don't affect the size of the web/api
+      - "!packages/ci-actions/**" # CI actions changes don't affect the size of the web/api
+      - "!packages/docs/**" # Docs changes don't affect the size of the web/api
+      - "!packages/eslint-plugin-actual/**" # Eslint plugin changes don't affect the size of the web/api
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -35,7 +41,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
-          download-translations: 'false'
+          download-translations: "false"
 
       - name: Wait for ${{github.base_ref}} web build to succeed
         uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
@@ -79,7 +85,7 @@ jobs:
         with:
           branch: ${{github.base_ref}}
           workflow: build.yml
-          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
+          workflow_conclusion: "" # ignore the conclusion of the workflow, since we already checked it
           name: build-stats
           path: base
       - name: Download API build artifact from ${{github.base_ref}}
@@ -88,7 +94,7 @@ jobs:
         with:
           branch: ${{github.base_ref}}
           workflow: build.yml
-          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
+          workflow_conclusion: "" # ignore the conclusion of the workflow, since we already checked it
           name: api-build-stats
           path: base
       - name: Download build stats from PR
@@ -96,7 +102,7 @@ jobs:
         with:
           pr: ${{github.event.pull_request.number}}
           workflow: build.yml
-          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
+          workflow_conclusion: "" # ignore the conclusion of the workflow, since we already checked it
           name: build-stats
           path: head
           allow_forks: true
@@ -105,7 +111,7 @@ jobs:
         with:
           pr: ${{github.event.pull_request.number}}
           workflow: build.yml
-          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
+          workflow_conclusion: "" # ignore the conclusion of the workflow, since we already checked it
           name: api-build-stats
           path: head
           allow_forks: true
