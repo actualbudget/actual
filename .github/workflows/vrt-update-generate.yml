@@ -21,7 +21,7 @@ jobs:
     # Only run on PR comments containing /update-vrt
     if: >
       github.event.issue.pull_request &&
-      contains(github.event.comment.body, '/update-vrt')
+      startsWith(github.event.comment.body, '/update-vrt')
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-jammy
     steps:
