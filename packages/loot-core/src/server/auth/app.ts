@@ -136,13 +136,9 @@ async function getLoginMethods() {
       res.json(),
     );
   } catch (err) {
-    if (err instanceof PostError) {
-      return {
-        error: err.reason || 'network-failure',
-      };
-    }
-
-    throw err;
+    return {
+      error: 'network-failure',
+    };
   }
 
   if (res.methods) {
@@ -436,10 +432,7 @@ async function listApiTokens(): Promise<
     }
     return { error: parsed.reason || 'unknown-error' };
   } catch (err) {
-    if (err instanceof PostError) {
-      return { error: err.reason || 'network-failure' };
-    }
-    throw err;
+    return { error: 'network-failure' };
   }
 }
 
@@ -476,10 +469,7 @@ async function createApiToken(params: {
     }
     return { error: res.reason || 'unknown-error' };
   } catch (err) {
-    if (err instanceof PostError) {
-      return { error: err.reason || 'network-failure' };
-    }
-    throw err;
+    return { error: 'network-failure' };
   }
 }
 
@@ -514,10 +504,7 @@ async function revokeApiToken(params: {
     }
     return { error: res.reason || 'unknown-error' };
   } catch (err) {
-    if (err instanceof PostError) {
-      return { error: err.reason || 'network-failure' };
-    }
-    throw err;
+    return { error: 'network-failure' };
   }
 }
 
@@ -554,9 +541,6 @@ async function updateApiToken(params: {
     }
     return { error: res.reason || 'unknown-error' };
   } catch (err) {
-    if (err instanceof PostError) {
-      return { error: err.reason || 'network-failure' };
-    }
-    throw err;
+    return { error: 'network-failure' };
   }
 }

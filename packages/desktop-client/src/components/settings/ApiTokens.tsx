@@ -10,6 +10,9 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import type { ApiToken, ApiTokenCreateResult } from 'loot-core/server/auth/app';
 
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
+
 import { Setting } from './UI';
 
 import { useServerURL } from '@desktop-client/components/ServerContext';
@@ -198,12 +201,25 @@ function ShowTokenModal({
   token: ApiTokenCreateResult;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(token.token);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(token.token);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t('Failed to copy to clipboard'),
+          },
+        }),
+      );
+    }
   };
 
   return (
