@@ -277,23 +277,37 @@ export const apiTokenService: ApiTokenService = {
       [userId],
     );
 
-    return tokens.map((token) => {
-      const budgetRows = accountDb.all<ApiTokenBudgetRow>(
-        `SELECT file_id FROM api_token_budgets WHERE token_id = ?`,
-        [token.id],
-      );
+    // Early return if no tokens
+    if (tokens.length === 0) {
+      return [];
+    }
 
-      return {
-        id: token.id,
-        name: token.name,
-        prefix: token.token_prefix,
-        createdAt: token.created_at,
-        lastUsedAt: token.last_used_at,
-        expiresAt: token.expires_at,
-        enabled: Boolean(token.enabled),
-        budgetIds: budgetRows.map((row) => row.file_id),
-      };
-    });
+    // Fetch all budgets for all tokens in a single query (avoids N+1)
+    const tokenIds = tokens.map((t) => t.id);
+    const placeholders = tokenIds.map(() => '?').join(',');
+    const allBudgets = accountDb.all<ApiTokenBudgetRow>(
+      `SELECT token_id, file_id FROM api_token_budgets WHERE token_id IN (${placeholders})`,
+      tokenIds,
+    );
+
+    // Build a lookup map: token_id -> array of file_ids
+    const budgetsByToken = new Map<string, string[]>();
+    for (const budget of allBudgets) {
+      const existing = budgetsByToken.get(budget.token_id) || [];
+      existing.push(budget.file_id);
+      budgetsByToken.set(budget.token_id, existing);
+    }
+
+    return tokens.map((token) => ({
+      id: token.id,
+      name: token.name,
+      prefix: token.token_prefix,
+      createdAt: token.created_at,
+      lastUsedAt: token.last_used_at,
+      expiresAt: token.expires_at,
+      enabled: Boolean(token.enabled),
+      budgetIds: budgetsByToken.get(token.id) || [],
+    }));
   },
 
   /**
