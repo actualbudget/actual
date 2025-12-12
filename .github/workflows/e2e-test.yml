@@ -149,5 +149,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `VRT tests ❌ failed. [View the test report](${{ steps.playwright-report-vrt.outputs.artifact-url }}).`
+              body: `VRT tests ❌ failed. [View the test report](${{ steps.playwright-report-vrt.outputs.artifact-url }}).\n\nTo update the VRT screenshots, comment \`/update-vrt\` on this PR.`
             });
