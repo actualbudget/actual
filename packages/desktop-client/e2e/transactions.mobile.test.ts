@@ -32,9 +32,7 @@ test.describe('Mobile Transactions', () => {
 
     await expect(transactionEntryPage.header).toHaveText('New Transaction');
 
-    await transactionEntryPage.amountField.fill('12.34');
-    // Click anywhere to cancel active edit.
-    await transactionEntryPage.header.click();
+    await transactionEntryPage.enterAmountWithKeypad('12.34');
     await transactionEntryPage.fillField(
       page.getByTestId('payee-field'),
       'Kroger',
@@ -54,6 +52,38 @@ test.describe('Mobile Transactions', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('supports arithmetic entry via calculator keypad (Amount field)', async () => {
+    const transactionEntryPage = await navigation.goToTransactionEntryPage();
+
+    await transactionEntryPage.openAmountKeypad();
+    await transactionEntryPage.pressKeypadSequence(['Clear', '1', '+', '2']);
+    await page
+      .getByTestId('money-keypad-modal')
+      .getByRole('button', { name: 'Done' })
+      .click();
+
+    await expect(page.getByTestId('money-keypad-modal')).toHaveCount(0);
+    await expect(transactionEntryPage.amountDisplayButton).toContainText('3');
+  });
+
+  test('opens calculator keypad when splitting and tapping child amount', async () => {
+    const transactionEntryPage = await navigation.goToTransactionEntryPage();
+
+    // Split button only appears once there is a non-zero total amount.
+    await transactionEntryPage.enterAmountWithKeypad('12.34');
+
+    await transactionEntryPage.splitTransaction();
+
+    const firstChildAmount = transactionEntryPage.childAmountInputs().first();
+    await expect(firstChildAmount).toBeVisible();
+
+    // Keypad should only open on explicit user interaction.
+    await expect(page.getByTestId('money-keypad-modal')).toHaveCount(0);
+
+    await firstChildAmount.click();
+    await expect(page.getByTestId('money-keypad-modal')).toBeVisible();
+  });
+
   test('prefills a new transaction with URL search params', async () => {
     const transactionEntryPage = await navigation.goToTransactionEntryPage();
     await page.goto(
@@ -63,20 +93,21 @@ test.describe('Mobile Transactions', () => {
     // Note: no easy way to test cleared checkbox
     await expect(page.getByTestId('transaction-form'))
       .toMatchAriaSnapshot(`- text: Amount
-- textbox
-- text: 23.42 Payee
-- button "Kroger" [disabled]
+- button "-"
+- button "23.42"
+- text: Payee
+- button "Kroger"
 - text: Category
-- button "Food" [disabled]
-- button "Split" [disabled]:
+- button "Food"
+- button "Split":
   - img
   - text: Split
 - text: Account
-- button "HSBC" [disabled]
+- button "HSBC"
 - text: Date
-- textbox [disabled]: 2025-10-31
+- textbox: 2025-10-31
 - text: Cleared Notes
-- textbox [disabled]: just a note`);
+- textbox: just a note`);
   });
 
   test('creates a transaction from `/accounts/:id` page', async () => {
@@ -87,9 +118,7 @@ test.describe('Mobile Transactions', () => {
     await expect(transactionEntryPage.header).toHaveText('New Transaction');
     await expect(page).toMatchThemeScreenshots();
 
-    await transactionEntryPage.amountField.fill('12.34');
-    // Click anywhere to cancel active edit.
-    await transactionEntryPage.header.click();
+    await transactionEntryPage.enterAmountWithKeypad('12.34');
     await transactionEntryPage.fillField(
       page.getByTestId('payee-field'),
       'Kroger',
@@ -109,9 +138,7 @@ test.describe('Mobile Transactions', () => {
   test('creates an uncategorized transaction from `/categories/uncategorized` page', async () => {
     // Create uncategorized transaction
     let transactionEntryPage = await navigation.goToTransactionEntryPage();
-    await transactionEntryPage.amountField.fill('12.35');
-    // Click anywhere to cancel active edit.
-    await transactionEntryPage.header.click();
+    await transactionEntryPage.enterAmountWithKeypad('12.35');
     await transactionEntryPage.fillField(
       page.getByTestId('account-field'),
       'Ally Savings',
@@ -123,9 +150,7 @@ test.describe('Mobile Transactions', () => {
 
     await expect(transactionEntryPage.header).toHaveText('New Transaction');
 
-    await transactionEntryPage.amountField.fill('12.34');
-    // Click anywhere to cancel active edit.
-    await transactionEntryPage.header.click();
+    await transactionEntryPage.enterAmountWithKeypad('12.34');
     await transactionEntryPage.fillField(
       page.getByTestId('payee-field'),
       'Kroger',
@@ -142,9 +167,7 @@ test.describe('Mobile Transactions', () => {
   test('creates a categorized transaction from `/categories/uncategorized` page', async () => {
     // Create uncategorized transaction
     let transactionEntryPage = await navigation.goToTransactionEntryPage();
-    await transactionEntryPage.amountField.fill('12.35');
-    // Click anywhere to cancel active edit.
-    await transactionEntryPage.header.click();
+    await transactionEntryPage.enterAmountWithKeypad('12.35');
     await transactionEntryPage.fillField(
       page.getByTestId('account-field'),
       'Ally Savings',
@@ -156,9 +179,7 @@ test.describe('Mobile Transactions', () => {
 
     await expect(transactionEntryPage.header).toHaveText('New Transaction');
 
-    await transactionEntryPage.amountField.fill('12.34');
-    // Click anywhere to cancel active edit.
-    await transactionEntryPage.header.click();
+    await transactionEntryPage.enterAmountWithKeypad('12.34');
     await transactionEntryPage.fillField(
       page.getByTestId('payee-field'),
       'Kroger',

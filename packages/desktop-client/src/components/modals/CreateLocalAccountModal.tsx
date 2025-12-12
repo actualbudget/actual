@@ -12,7 +12,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { toRelaxedNumber } from 'loot-core/shared/util';
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { currencyToAmount, toRelaxedNumber } from 'loot-core/shared/util';
 
 import { createAccount } from '@desktop-client/accounts/accountsSlice';
 import { Link } from '@desktop-client/components/common/Link';
@@ -25,7 +26,9 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { Checkbox } from '@desktop-client/components/forms';
 import { validateAccountName } from '@desktop-client/components/util/accountValidation';
+import { MoneyKeypad } from '@desktop-client/components/util/MoneyKeypad';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useIsMobileCalculatorKeypadEnabled } from '@desktop-client/hooks/useIsMobileCalculatorKeypadEnabled';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { closeModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -35,14 +38,29 @@ export function CreateLocalAccountModal() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const accounts = useAccounts();
+  const isMobileKeypadEnabled = useIsMobileCalculatorKeypadEnabled();
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
+  const [isKeypadOpen, setIsKeypadOpen] = useState(false);
+  const [didCommitFromKeypad, setDidCommitFromKeypad] = useState(false);
 
   const [nameError, setNameError] = useState(null);
   const [balanceError, setBalanceError] = useState(false);
 
-  const validateBalance = balance => !isNaN(parseFloat(balance));
+  const validateBalance = (balance: string) => {
+    const trimmed = balance.trim();
+    if (trimmed === '') {
+      return false;
+    }
+
+    const arithmetic = evalArithmetic(trimmed, null);
+    if (arithmetic != null && !isNaN(arithmetic)) {
+      return true;
+    }
+    const asAmount = currencyToAmount(trimmed);
+    return asAmount != null && !isNaN(asAmount);
+  };
 
   const validateAndSetName = (name: string) => {
     const nameError = validateAccountName(name, '', accounts);
@@ -164,9 +182,15 @@ export function CreateLocalAccountModal() {
               <InlineField label={t('Balance')} width="100%">
                 <Input
                   name="balance"
-                  inputMode="decimal"
+                  inputMode={isMobileKeypadEnabled ? 'none' : 'decimal'}
                   value={balance}
                   onChangeValue={setBalance}
+                  onPointerDown={() => {
+                    if (isMobileKeypadEnabled) {
+                      setDidCommitFromKeypad(false);
+                      setIsKeypadOpen(true);
+                    }
+                  }}
                   onUpdate={value => {
                     const balance = value.trim();
                     setBalance(balance);
@@ -177,6 +201,62 @@ export function CreateLocalAccountModal() {
                   style={{ flex: 1 }}
                 />
               </InlineField>
+              {isMobileKeypadEnabled && isKeypadOpen && (
+                <MoneyKeypad
+                  modalName="money-keypad"
+                  title={t('Balance')}
+                  defaultValue={balance}
+                  onChangeValue={setBalance}
+                  onClose={() => {
+                    setIsKeypadOpen(false);
+                    if (!didCommitFromKeypad) {
+                      return;
+                    }
+                    setDidCommitFromKeypad(false);
+                  }}
+                  onEvaluate={text => {
+                    const trimmed = text.trim();
+                    const arithmetic = evalArithmetic(trimmed, null);
+                    const numericValue =
+                      arithmetic != null && !isNaN(arithmetic)
+                        ? arithmetic
+                        : currencyToAmount(trimmed);
+
+                    if (numericValue == null || isNaN(numericValue)) {
+                      return {
+                        ok: false as const,
+                        error: t('Invalid expression'),
+                      };
+                    }
+
+                    return { ok: true as const, value: String(numericValue) };
+                  }}
+                  onDone={text => {
+                    const trimmed = text.trim();
+                    const arithmetic = evalArithmetic(trimmed, null);
+                    const numericValue =
+                      arithmetic != null && !isNaN(arithmetic)
+                        ? arithmetic
+                        : currencyToAmount(trimmed);
+
+                    if (numericValue == null || isNaN(numericValue)) {
+                      return {
+                        ok: false as const,
+                        error: t('Invalid expression'),
+                      };
+                    }
+
+                    setBalance(String(numericValue));
+                    setDidCommitFromKeypad(true);
+                    setIsKeypadOpen(false);
+                    if (balanceError) {
+                      setBalanceError(false);
+                    }
+
+                    return { ok: true as const, value: undefined };
+                  }}
+                />
+              )}
               {balanceError && (
                 <FormError style={{ marginLeft: 75 }}>
                   <Trans>Balance must be a number</Trans>
