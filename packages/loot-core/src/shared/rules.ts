@@ -68,7 +68,10 @@ const FIELD_INFO = {
   payee: { type: 'id', disallowedOps: new Set(['onBudget', 'offBudget']) },
   payee_name: { type: 'string' },
   date: { type: 'date' },
-  notes: { type: 'string', disallowedOps: new Set(['oneOf', 'notOneOf', 'hasTags']) },
+  notes: {
+    type: 'string',
+    disallowedOps: new Set(['oneOf', 'notOneOf', 'hasTags']),
+  },
   amount: { type: 'number' },
   category: {
     type: 'id',

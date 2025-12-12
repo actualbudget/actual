@@ -1046,9 +1046,7 @@ describe('RuleIndexer', () => {
 
     const rule = new Rule({
       conditionsOp: 'and',
-      conditions: [
-        { op: 'is', field: 'notes', value: 'James' },
-      ],
+      conditions: [{ op: 'is', field: 'notes', value: 'James' }],
       actions: [{ op: 'set', field: 'category', value: 'Food' }],
     });
     indexer.index(rule);
@@ -1062,13 +1060,10 @@ describe('RuleIndexer', () => {
 
     const rule3 = new Rule({
       conditionsOp: 'and',
-      conditions: [
-        { op: 'is', field: 'notes', value: 'Evy' },
-      ],
+      conditions: [{ op: 'is', field: 'notes', value: 'Evy' }],
       actions: [{ op: 'set', field: 'category', value: 'Food' }],
     });
     indexer.index(rule3);
-
 
     expect(indexer.getApplicableRules({ notes: 'James' })).toEqual(
       new Set([rule]),
