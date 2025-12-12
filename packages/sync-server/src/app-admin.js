@@ -215,9 +215,9 @@ app.get('/access', validateSessionMiddleware, (req, res) => {
   res.json(accesses);
 });
 
-app.post('/access', (req, res) => {
+app.post('/access', async (req, res) => {
   const userAccess = req.body || {};
-  const session = validateSession(req, res);
+  const session = await validateSession(req, res);
 
   if (!session) return;
 
@@ -270,9 +270,9 @@ app.post('/access', (req, res) => {
   res.status(200).send({ status: 'ok', data: {} });
 });
 
-app.delete('/access', (req, res) => {
+app.delete('/access', async (req, res) => {
   const fileId = req.query.fileId;
-  const session = validateSession(req, res);
+  const session = await validateSession(req, res);
   if (!session) return;
 
   const { granted } = UserService.checkFilePermission(

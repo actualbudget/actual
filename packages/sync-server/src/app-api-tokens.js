@@ -43,7 +43,7 @@ app.post('/', async (req, res) => {
   }
 
   try {
-    const result = apiTokenService.createToken(
+    const result = await apiTokenService.createToken(
       userId,
       name.trim(),
       budgetIds,
