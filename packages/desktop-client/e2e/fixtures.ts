@@ -5,13 +5,17 @@ import {
 } from '@playwright/test';
 import { CacheRoute } from 'playwright-network-cache';
 
+type Fixtures = {
+  cacheRoute?: CacheRoute;
+};
+
 const STATIC_ASSET_PATTERN =
   /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?|ttf|eot)(\?.*)?$/;
 
 /* eslint-disable react-hooks/rules-of-hooks */
-export const test = base.extend({
+export const test = base.extend<Fixtures>({
   cacheRoute: async ({ page }, use) => {
-    // Only enable static asset caching in CI to speed up test runs
+    // Only enable static asset caching in CI to reduce bandwidth usage
     if (process.env.CI) {
       const cacheRoute = new CacheRoute(page, {
         baseDir: 'e2e/.network-cache',
