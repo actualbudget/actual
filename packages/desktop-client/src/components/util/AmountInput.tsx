@@ -20,11 +20,15 @@ import { css, cx } from '@emotion/css';
 
 import { type IntegerAmount } from 'loot-core/shared/util';
 
+import { MoneyKeypad } from './MoneyKeypad';
+
 import { useFormat } from '@desktop-client/hooks/useFormat';
+import { useIsMobileCalculatorKeypadEnabled } from '@desktop-client/hooks/useIsMobileCalculatorKeypadEnabled';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 
 type AmountInputProps = {
   id?: string;
+  dataTestId?: string;
   ref?: Ref<HTMLInputElement>;
   value: IntegerAmount;
   zeroSign?: '-' | '+';
@@ -47,6 +51,7 @@ type AmountInputProps = {
 
 export function AmountInput({
   id,
+  dataTestId,
   ref,
   value: initialValue,
   zeroSign = '-', // + or -
@@ -65,12 +70,38 @@ export function AmountInput({
 }: AmountInputProps) {
   const { t } = useTranslation();
   const format = useFormat();
+  const isMobileKeypadEnabled = useIsMobileCalculatorKeypadEnabled();
   const [symbol, setSymbol] = useState<'+' | '-'>(() => {
     if (sign) return sign;
     return initialValue === 0 ? zeroSign : initialValue > 0 ? '+' : '-';
   });
 
   const [isFocused, setIsFocused] = useState(focused ?? false);
+  const [isKeypadOpen, setIsKeypadOpen] = useState(false);
+
+  const applySymbolToExpression = useCallback(
+    (expr: string) => {
+      const trimmed = expr.trim();
+      if (symbol !== '-') {
+        return trimmed;
+      }
+
+      if (trimmed === '') {
+        return trimmed;
+      }
+
+      // If the user already typed a leading '-', respect it.
+      if (trimmed.startsWith('-')) {
+        return trimmed;
+      }
+
+      // Apply the sign to the entire expression (not just the first number).
+      // `evalArithmetic` doesn't support unary minus before parentheses, so use
+      // binary subtraction instead.
+      return `0-(${trimmed})`;
+    },
+    [symbol],
+  );
 
   const getDisplayValue = useCallback(
     (value: number, isEditing: boolean) => {
@@ -83,14 +114,36 @@ export function AmountInput({
   );
 
   const [value, setValue] = useState(getDisplayValue(initialValue, false));
-  useEffect(
-    () => setValue(getDisplayValue(initialValue, isFocused)),
-    [initialValue, isFocused, getDisplayValue],
-  );
+  useEffect(() => {
+    // Keep the displayed value in sync with external updates when not editing.
+    // When focused, the user (or mobile keypad) owns the input state.
+    if (!isFocused) {
+      setValue(getDisplayValue(initialValue, false));
+    }
+  }, [initialValue, isFocused, getDisplayValue]);
 
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const innerRef = useRef<HTMLInputElement | null>(null);
+  const isKeypadOpenRef = useRef(false);
+  const didCommitFromKeypadRef = useRef(false);
   const mergedRef = useMergedRefs<HTMLInputElement>(ref, innerRef);
+
+  const openMobileKeypad = useCallback(() => {
+    if (!isMobileKeypadEnabled || disabled || isKeypadOpenRef.current) {
+      return;
+    }
+
+    setIsFocused(true);
+    const editValue =
+      (initialValue ?? 0) === 0 ? '' : format.forEdit(Math.abs(initialValue));
+    setValue(editValue);
+
+    isKeypadOpenRef.current = true;
+    setTimeout(() => {
+      // Defer to avoid fighting with focus transitions.
+      setIsKeypadOpen(true);
+    }, 0);
+  }, [disabled, format, initialValue, isMobileKeypadEnabled]);
 
   useEffect(() => {
     if (focused) {
@@ -105,9 +158,15 @@ export function AmountInput({
   }, [sign]);
 
   const getAmount = useCallback(() => {
-    const signedValued = symbol === '-' ? symbol + value : value;
-    return format.fromEdit(signedValued, 0);
-  }, [symbol, value, format]);
+    return format.fromEdit(applySymbolToExpression(value), 0);
+  }, [applySymbolToExpression, value, format]);
+
+  const parseAmount = useCallback(
+    (nextValue: string) => {
+      return format.fromEdit(applySymbolToExpression(nextValue), null);
+    },
+    [format, applySymbolToExpression],
+  );
 
   useEffect(() => {
     if (innerRef.current) {
@@ -133,13 +192,19 @@ export function AmountInput({
 
   function onInputTextChange(val) {
     let newText = val;
-    if (autoDecimals) {
-      const digits = val.replace(/\D/g, '');
-      if (digits === '') {
-        newText = '';
-      } else {
-        const intValue = parseInt(digits, 10);
-        newText = format.forEdit(intValue);
+    const shouldAutoDecimals = autoDecimals && !isMobileKeypadEnabled;
+    if (shouldAutoDecimals) {
+      // If the user starts typing an arithmetic expression, preserve the raw
+      // text so operators like + - * / work.
+      const hasArithmetic = /[+\-*/^()]/.test(val);
+      if (!hasArithmetic) {
+        const digits = val.replace(/\D/g, '');
+        if (digits === '') {
+          newText = '';
+        } else {
+          const intValue = parseInt(digits, 10);
+          newText = format.forEdit(intValue);
+        }
       }
     }
 
@@ -202,8 +267,9 @@ export function AmountInput({
 
       <Input
         id={id}
+        data-testid={dataTestId}
         ref={mergedRef}
-        inputMode="decimal"
+        inputMode={isMobileKeypadEnabled ? 'none' : 'decimal'}
         value={value}
         disabled={disabled}
         style={inputStyle}
@@ -220,12 +286,27 @@ export function AmountInput({
           }),
           inputClassName,
         )}
+        onPointerDown={() => {
+          // On mobile, only open the calculator keypad on an explicit pointer
+          // interaction (tap/click). This avoids reopening due to programmatic
+          // focus or focus restoration when dismissing the modal.
+          openMobileKeypad();
+        }}
         onFocus={e => {
           setIsFocused(true);
-          setValue(format.forEdit(Math.abs(initialValue ?? 0)));
+          if (!isMobileKeypadEnabled) {
+            const editValue = format.forEdit(Math.abs(initialValue ?? 0));
+            setValue(editValue);
+          }
+
           onFocus?.(e);
         }}
         onBlur={e => {
+          if (isMobileKeypadEnabled && isKeypadOpenRef.current) {
+            onBlur?.(e);
+            return;
+          }
+
           setIsFocused(false);
           onInputAmountBlur(e);
         }}
@@ -236,6 +317,56 @@ export function AmountInput({
         }}
         onChangeValue={onInputTextChange}
       />
+
+      {isMobileKeypadEnabled && isKeypadOpen && (
+        <MoneyKeypad
+          modalName="money-keypad"
+          title={t('Amount')}
+          defaultValue={value}
+          onChangeValue={text => {
+            setValue(text);
+            onChangeValue?.(text);
+          }}
+          onClose={() => {
+            if (didCommitFromKeypadRef.current) {
+              didCommitFromKeypadRef.current = false;
+              isKeypadOpenRef.current = false;
+              setIsKeypadOpen(false);
+              return;
+            }
+
+            isKeypadOpenRef.current = false;
+            setIsKeypadOpen(false);
+            setIsFocused(false);
+            setValue(getDisplayValue(initialValue, false));
+          }}
+          onEvaluate={text => {
+            const parsed = parseAmount(text);
+            if (parsed == null) {
+              return { ok: false as const, error: t('Invalid expression') };
+            }
+
+            return {
+              ok: true as const,
+              value: format.forEdit(Math.abs(parsed)),
+            };
+          }}
+          onDone={text => {
+            const parsed = parseAmount(text);
+            if (parsed == null) {
+              return { ok: false as const, error: t('Invalid expression') };
+            }
+
+            fireUpdate(parsed);
+            didCommitFromKeypadRef.current = true;
+            isKeypadOpenRef.current = false;
+            setIsKeypadOpen(false);
+            setIsFocused(false);
+
+            return { ok: true as const, value: undefined };
+          }}
+        />
+      )}
     </View>
   );
 }
