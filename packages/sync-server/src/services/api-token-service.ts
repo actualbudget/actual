@@ -253,7 +253,7 @@ export const apiTokenService: ApiTokenService = {
       `SELECT file_id FROM api_token_budgets WHERE token_id = ?`,
       [tokenRow.id],
     );
-    const budgetIds = budgetRows.map((row) => row.file_id);
+    const budgetIds = budgetRows.map(row => row.file_id);
 
     return {
       userId: tokenRow.user_id,
@@ -283,7 +283,7 @@ export const apiTokenService: ApiTokenService = {
     }
 
     // Fetch all budgets for all tokens in a single query (avoids N+1)
-    const tokenIds = tokens.map((t) => t.id);
+    const tokenIds = tokens.map(t => t.id);
     const placeholders = tokenIds.map(() => '?').join(',');
     const allBudgets = accountDb.all<ApiTokenBudgetRow>(
       `SELECT token_id, file_id FROM api_token_budgets WHERE token_id IN (${placeholders})`,
@@ -298,7 +298,7 @@ export const apiTokenService: ApiTokenService = {
       budgetsByToken.set(budget.token_id, existing);
     }
 
-    return tokens.map((token) => ({
+    return tokens.map(token => ({
       id: token.id,
       name: token.name,
       prefix: token.token_prefix,
@@ -371,7 +371,7 @@ export const apiTokenService: ApiTokenService = {
       [tokenId],
     );
 
-    return budgetRows.map((row) => row.file_id);
+    return budgetRows.map(row => row.file_id);
   },
 
   /**
@@ -409,6 +409,6 @@ export const apiTokenService: ApiTokenService = {
     }
 
     // Check if budget is in token's scopes
-    return budgetScopes.some((scope) => scope.file_id === budgetId);
+    return budgetScopes.some(scope => scope.file_id === budgetId);
   },
 };

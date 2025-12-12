@@ -8,14 +8,15 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
-import type { ApiToken, ApiTokenCreateResult } from 'loot-core/server/auth/app';
-
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { type ApiToken, type ApiTokenCreateResult } from 'loot-core/server/auth/app';
 
 import { Setting } from './UI';
 
 import { useServerURL } from '@desktop-client/components/ServerContext';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
+
+
 
 function formatDate(timestamp: number | null): string {
   if (!timestamp || timestamp === -1) {
