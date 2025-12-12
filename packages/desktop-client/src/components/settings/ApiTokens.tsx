@@ -18,9 +18,9 @@ import { useDispatch } from '@desktop-client/redux';
 
 
 
-function formatDate(timestamp: number | null): string {
-  if (!timestamp || timestamp === -1) {
-    return 'Never';
+function formatDate(timestamp: number | null | undefined, t: (key: string) => string): string {
+  if (timestamp === null || timestamp === undefined || timestamp === -1) {
+    return t('Never');
   }
   return new Date(timestamp * 1000).toLocaleDateString();
 }
@@ -66,17 +66,17 @@ function TokenRow({
           <code>{token.prefix}...</code>
         </Text>
         <Text style={{ fontSize: 11, color: theme.pageTextSubdued }}>
-          <Trans>Created:</Trans> {formatDate(token.createdAt)}
+          <Trans>Created:</Trans> {formatDate(token.createdAt, t)}
           {token.lastUsedAt && (
             <>
               {' · '}
-              <Trans>Last used:</Trans> {formatDate(token.lastUsedAt)}
+              <Trans>Last used:</Trans> {formatDate(token.lastUsedAt, t)}
             </>
           )}
           {token.expiresAt !== -1 && (
             <>
               {' · '}
-              <Trans>Expires:</Trans> {formatDate(token.expiresAt)}
+              <Trans>Expires:</Trans> {formatDate(token.expiresAt, t)}
             </>
           )}
         </Text>
