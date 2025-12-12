@@ -7,7 +7,10 @@ import { getAccountDb } from '../account-db';
 import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user';
 
 const TOKEN_PREFIX = 'act_';
-const TOKEN_RANDOM_BYTES = 24; // 32 chars when base64url encoded
+const TOKEN_LENGTH = 32;
+// base64 produces 4 chars per 3 bytes, then ~3% are filtered out as non-alphanumeric
+// 32 chars * (3 bytes / 4 chars) * 1.34 safety margin = 32 bytes → 43 base64 chars → <1e-8 failure rate
+const TOKEN_RANDOM_BYTES = Math.ceil((TOKEN_LENGTH * 3 / 4) * 1.34);
 const BCRYPT_ROUNDS = 12;
 
 /**
@@ -19,7 +22,7 @@ function generateToken() {
   const randomPart = randomBytes
     .toString('base64url')
     .replace(/[^a-zA-Z0-9]/g, '')
-    .slice(0, 32);
+    .slice(0, TOKEN_LENGTH);
   return `${TOKEN_PREFIX}${randomPart}`;
 }
 
