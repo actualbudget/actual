@@ -105,7 +105,6 @@ jobs:
         run: yarn vrt --shard=${{ matrix.shard }}/5
         env:
           E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
-          VRT: true
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: ${{ !cancelled() }}
         with:
