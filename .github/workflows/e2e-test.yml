@@ -106,7 +106,7 @@ jobs:
         env:
           E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
-        if: ${{ !cancelled() }}
+        if: always()
         with:
           name: vrt-blob-report-${{ matrix.shard }}
           path: packages/desktop-client/blob-report/
