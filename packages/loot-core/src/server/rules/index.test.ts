@@ -37,9 +37,6 @@ describe('Condition', () => {
     cond = new Condition('matches', 'notes', '^fo*$', null);
     expect(cond.eval({ notes: null })).toBe(false);
 
-    cond = new Condition('oneOf', 'notes', ['foo'], null);
-    expect(cond.eval({ notes: null })).toBe(false);
-
     ['gt', 'gte', 'lt', 'lte', 'isapprox'].forEach(op => {
       const cond = new Condition(op, 'date', '2020-01-01', null);
       expect(cond.eval({ date: null })).toBe(false);
@@ -201,12 +198,6 @@ describe('Condition', () => {
     expect(cond.eval({ notes: 'foo' })).toBe(true);
     expect(cond.eval({ notes: 'FOO' })).toBe(true);
     expect(cond.eval({ notes: 'foo2' })).toBe(false);
-
-    cond = new Condition('oneOf', 'notes', ['foo', 'bar'], null);
-    expect(cond.eval({ notes: 'foo' })).toBe(true);
-    expect(cond.eval({ notes: 'FOO' })).toBe(true);
-    expect(cond.eval({ notes: 'Bar' })).toBe(true);
-    expect(cond.eval({ notes: 'bar2' })).toBe(false);
 
     cond = new Condition('contains', 'notes', 'foo', null);
     expect(cond.eval({ notes: 'bar foo baz' })).toBe(true);
@@ -886,19 +877,18 @@ describe('Rule', () => {
 
     rules = [
       rule('id1', [{ op: 'contains', field: 'notes', value: 'sar' }]),
-      rule('id2', [{ op: 'oneOf', field: 'notes', value: ['jim', 'sar'] }]),
-      rule('id3', [{ op: 'is', field: 'notes', value: 'James' }]),
-      rule('id4', [
+      rule('id2', [{ op: 'is', field: 'notes', value: 'James' }]),
+      rule('id3', [
         { op: 'is', field: 'notes', value: 'James' },
         { op: 'gt', field: 'amount', value: 5 },
       ]),
-      rule('id5', [
+      rule('id4', [
         { op: 'is', field: 'notes', value: 'James' },
         { op: 'gt', field: 'amount', value: 5 },
         { op: 'lt', field: 'amount', value: 10 },
       ]),
     ];
-    expectOrder(rankRules(rules), ['id1', 'id4', 'id5', 'id2', 'id3']);
+    expectOrder(rankRules(rules), ['id1', 'id3', 'id4', 'id2']);
   });
 
   test('iterateIds finds all the ids', () => {
@@ -1057,7 +1047,7 @@ describe('RuleIndexer', () => {
     const rule = new Rule({
       conditionsOp: 'and',
       conditions: [
-        { op: 'oneOf', field: 'notes', value: ['James', 'Sarah', 'Evy'] },
+        { op: 'is', field: 'notes', value: 'James' },
       ],
       actions: [{ op: 'set', field: 'category', value: 'Food' }],
     });
@@ -1070,11 +1060,21 @@ describe('RuleIndexer', () => {
     });
     indexer.index(rule2);
 
+    const rule3 = new Rule({
+      conditionsOp: 'and',
+      conditions: [
+        { op: 'is', field: 'notes', value: 'Evy' },
+      ],
+      actions: [{ op: 'set', field: 'category', value: 'Food' }],
+    });
+    indexer.index(rule3);
+
+
     expect(indexer.getApplicableRules({ notes: 'James' })).toEqual(
       new Set([rule]),
     );
     expect(indexer.getApplicableRules({ notes: 'Evy' })).toEqual(
-      new Set([rule]),
+      new Set([rule3]),
     );
     expect(indexer.getApplicableRules({ notes: 'Charlotte' })).toEqual(
       new Set([]),
