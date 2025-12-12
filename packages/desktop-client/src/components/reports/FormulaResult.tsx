@@ -144,7 +144,6 @@ export function FormulaResult({
       {!loading && (
         <View
           ref={mergedRef as Ref<HTMLDivElement>}
-          role="text"
           aria-label={displayValue}
           style={{
             alignItems: 'center',

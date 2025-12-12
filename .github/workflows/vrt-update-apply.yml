@@ -58,7 +58,8 @@ jobs:
         with:
           repository: ${{ steps.metadata.outputs.head_repo }}
           ref: ${{ steps.metadata.outputs.head_ref }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Validate and apply patch
@@ -121,7 +122,12 @@ jobs:
         env:
           HEAD_REF: ${{ steps.metadata.outputs.head_ref }}
           HEAD_REPO: ${{ steps.metadata.outputs.head_repo }}
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
         run: |
+          # Use PAT in URL to ensure push triggers CI workflows
+          # Note: GitHub Actions automatically masks secrets in logs
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${HEAD_REPO}.git"
+
           git push origin "HEAD:refs/heads/$HEAD_REF"
           echo "Successfully pushed VRT updates to $HEAD_REPO@$HEAD_REF"
 

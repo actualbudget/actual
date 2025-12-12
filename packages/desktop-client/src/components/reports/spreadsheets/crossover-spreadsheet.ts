@@ -249,11 +249,10 @@ function recalculate(
     lastBalance = balance;
     lastExpense = spend;
 
-    if (crossoverIndex == null && Math.round(monthlyIncome) >= spend) {
-      crossoverIndex = idx;
-    } else if (crossoverIndex != null && Math.round(monthlyIncome) < spend) {
-      crossoverIndex = null;
-    }
+    // Note: We don't check for crossover in historical data to avoid triggering
+    // a crossover detection when expenses drop below the investment income for
+    // a short time. Crossover is determined based on projected expenses, not
+    // actual historical expenses.
   });
 
   // If estimatedReturn provided, project future months until investment income exceeds expenses
@@ -295,7 +294,7 @@ function recalculate(
     }
   }
 
-  if (months.length > 0 && crossoverIndex == null) {
+  if (months.length > 0) {
     // If no explicit return provided, use the calculated default
     if (monthlyReturn == null) {
       // not quite right.  Need a better approximation
