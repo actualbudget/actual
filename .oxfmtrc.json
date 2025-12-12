@@ -3,34 +3,6 @@
   "singleQuote": true,
   "trailingComma": "all",
   "arrowParens": "avoid",
-  "printWidth": 80,
-  "ignorePatterns": [
-    "packages/docs",
-
-    "packages/api/app/bundle.api.js",
-    "packages/api/app/stats.json",
-    "packages/api/@types",
-    "packages/api/migrations",
-    "packages/component-library/src/icons/**/*",
-    "packages/desktop-client/bundle.browser.js",
-    "packages/desktop-client/dev-dist/",
-    "packages/desktop-client/service-worker/*",
-    "packages/desktop-client/build-electron/",
-    "packages/desktop-client/build-stats/",
-    "packages/desktop-client/public/kcab/",
-    "packages/desktop-client/public/data/",
-    "packages/desktop-client/test-results/",
-    "packages/desktop-client/playwright-report/",
-    "packages/desktop-electron/client-build/",
-    "packages/loot-core/**/lib-dist/*",
-    "packages/loot-core/**/proto/*",
-    "packages/sync-server/user-files/",
-    "packages/sync-server/server-files/",
-    ".yarn/*",
-    ".github/*",
-    "**/build/",
-    "**/dist/",
-    "**/node_modules/"
-  ]
+  "printWidth": 80
 }
 
