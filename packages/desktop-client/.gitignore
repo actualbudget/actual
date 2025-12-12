@@ -7,6 +7,7 @@ node_modules
 coverage
 test-results
 playwright-report
+e2e/.network-cache
 
 # production
 build

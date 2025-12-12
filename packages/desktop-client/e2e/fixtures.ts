@@ -1,6 +1,34 @@
-import { expect as baseExpect, type Locator } from '@playwright/test';
+import {
+  test as base,
+  expect as baseExpect,
+  type Locator,
+} from '@playwright/test';
+import { CacheRoute } from 'playwright-network-cache';
 
-export { test } from '@playwright/test';
+const STATIC_ASSET_PATTERN =
+  /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?|ttf|eot)(\?.*)?$/;
+
+/* eslint-disable react-hooks/rules-of-hooks */
+export const test = base.extend({
+  cacheRoute: async ({ page }, use) => {
+    // Only enable static asset caching in CI to speed up test runs
+    if (process.env.CI) {
+      const cacheRoute = new CacheRoute(page, {
+        baseDir: 'e2e/.network-cache',
+      });
+
+      // Cache static assets
+      await cacheRoute.GET('*', {
+        match: req => STATIC_ASSET_PATTERN.test(req.url()),
+      });
+
+      await use(cacheRoute);
+    } else {
+      await use(undefined);
+    }
+  },
+});
+/* eslint-enable react-hooks/rules-of-hooks */
 
 export const expect = baseExpect.extend({
   async toMatchThemeScreenshots(locator: Locator) {

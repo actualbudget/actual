@@ -51,6 +51,7 @@
     "mdast-util-newline-to-break": "^2.0.0",
     "memoize-one": "^6.0.0",
     "pikaday": "1.8.2",
+    "playwright-network-cache": "^1.5.0",
     "promise-retry": "^2.0.1",
     "prop-types": "^15.8.1",
     "re-resizable": "^6.11.2",
