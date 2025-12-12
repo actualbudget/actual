@@ -131,6 +131,7 @@ export function EditFieldModal({
               marginRight: 4,
               alignItems: 'center',
               justifyContent: 'center',
+              gap: 5,
             }}
           >
             {Object.keys(noteAmendStrings).map((mode, _, arr) => (
@@ -141,7 +142,6 @@ export function EditFieldModal({
                   height: '100%',
                   width: `${100 / arr.length}%`,
                   backgroundColor: theme.menuBackground,
-                  marginRight: 5,
                   fontSize: 'inherit',
                   ...(noteAmend === mode && {
                     backgroundColor: theme.buttonPrimaryBackground,
@@ -207,6 +207,10 @@ export function EditFieldModal({
                   }))
                 }
                 onEnter={() => {
+                  if (noteFindReplace.find === '') {
+                    alert(t('Find value required'));
+                    return;
+                  }
                   if (noteFindReplace.useRegex) {
                     try {
                       new RegExp(noteFindReplace.find, 'g');
