@@ -135,7 +135,7 @@ async function getLoginMethods() {
     res = await fetch(serverConfig.SIGNUP_SERVER + '/login-methods').then(res =>
       res.json(),
     );
-  } catch (err) {
+  } catch {
     return {
       error: 'network-failure',
     };
@@ -431,7 +431,7 @@ async function listApiTokens(): Promise<
       return { data: parsed.data };
     }
     return { error: parsed.reason || 'unknown-error' };
-  } catch (err) {
+  } catch {
     return { error: 'network-failure' };
   }
 }
@@ -468,7 +468,7 @@ async function createApiToken(params: {
       return { data: res.data };
     }
     return { error: res.reason || 'unknown-error' };
-  } catch (err) {
+  } catch {
     return { error: 'network-failure' };
   }
 }
@@ -503,7 +503,7 @@ async function revokeApiToken(params: {
       return { success: true };
     }
     return { error: res.reason || 'unknown-error' };
-  } catch (err) {
+  } catch {
     return { error: 'network-failure' };
   }
 }
@@ -540,7 +540,7 @@ async function updateApiToken(params: {
       return { success: true };
     }
     return { error: res.reason || 'unknown-error' };
-  } catch (err) {
+  } catch {
     return { error: 'network-failure' };
   }
 }
