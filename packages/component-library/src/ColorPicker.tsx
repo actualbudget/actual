@@ -15,7 +15,6 @@ import {
 import { theme as themeStyle } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import { type Theme } from 'loot-core/types/prefs';
-import { useTags } from './useTags';
 import { useTheme } from '@desktop-client/style';
 
 import { Input } from './Input';
