@@ -32,29 +32,28 @@ function ColorSwatch(props: ColorSwatchProps) {
   );
 }
 
-// colors from https://materialui.co/colors
 const DEFAULT_COLOR_SET = [
-  '#D2B6E7',
-  '#F1C0C0',
-  '#E8ABC3',
-  '#D7BBE3',
-  '#CAC0E4',
-  '#C0C5E2',
-  '#BAD5F1',
-  '#B3DBF1',
-  '#B2DFE4',
-  '#BBDAD6',
-  '#BED9BF',
-  '#CDDEBE',
-  '#E2E4B2',
-  '#FDE5AB',
-  '#FFD999',
-  '#FBCFA3',
-  '#F5B6A3',
-  '#CEC6C4',
-  '#CCCCCC',
-  '#C7CED1',
-  '#690CB0',
+  '#FF6666', //red
+  '#FF99FF', //magenta
+  '#C39DDF', //purple
+  '#6666FF', //blue
+  '#B2FFFF', //cyan
+  '#99cb99', //green
+  '#FFFF7F', //yellow
+  '#FFAB66', //orange
+  '#D4B89C', //brown
+  '#BFBFBF', //gray
+  '#FFAEAE', //colors repeat from above with a lighter tint
+  '#FFCCFF',
+  '#F2EBFF', //this is now purple100
+  '#B0B0FF',
+  '#D8FFFF',
+  '#CFE5CF',
+  '#FFFFB2',
+  '#FFD5B3',
+  '#E4D3C3',
+  '#DADADA',
+  '#690CB0', //dark colors start here from https://materialui.co/colors
   '#D32F2F',
   '#C2185B',
   '#7B1FA2',
