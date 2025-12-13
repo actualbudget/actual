@@ -23,7 +23,7 @@ test.describe('Mobile Accounts', () => {
   });
 
   test.afterEach(async () => {
-    await page.close();
+    await page?.close();
   });
 
   test('opens the accounts page and asserts on balances', async () => {
