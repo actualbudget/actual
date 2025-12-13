@@ -80,6 +80,7 @@ export function createCrossoverSpreadsheet({
         historicalReturn: null,
         yearsToRetire: null,
         targetMonthlyIncome: null,
+        targetNestEgg: null,
       });
       return;
     }
@@ -231,6 +232,7 @@ function recalculate(
     x: string;
     investmentIncome: number;
     expenses: number;
+    nestEgg: number;
     isProjection?: boolean;
   }> = [];
 
@@ -245,6 +247,7 @@ function recalculate(
       x: d.format(d.parseISO(month + '-01'), 'MMM yyyy'),
       investmentIncome: Math.round(monthlyIncome),
       expenses: spend,
+      nestEgg: balance,
     });
     lastBalance = balance;
     lastExpense = spend;
@@ -353,6 +356,7 @@ function recalculate(
         x: d.format(monthCursor, 'MMM yyyy'),
         investmentIncome: Math.round(projectedIncome),
         expenses: Math.round(projectedExpenses),
+        nestEgg: Math.round(projectedBalance),
         isProjection: true,
       });
 
@@ -368,6 +372,7 @@ function recalculate(
   // Calculate years to retire based on crossover point
   let yearsToRetire: number | null = null;
   let targetMonthlyIncome: number | null = null;
+  let targetNestEgg: number | null = null;
 
   if (crossoverIndex != null && crossoverIndex < data.length) {
     const crossoverData = data[crossoverIndex];
@@ -377,6 +382,8 @@ function recalculate(
       const monthsDiff = d.differenceInMonths(crossoverDate, currentDate);
       yearsToRetire = monthsDiff > 0 ? monthsDiff / 12 : 0;
       targetMonthlyIncome = crossoverData.expenses;
+      // Calculate target nest egg: target monthly income / monthly safe withdrawal rate
+      targetNestEgg = Math.round(targetMonthlyIncome / monthlySWR);
     }
   }
 
@@ -403,5 +410,7 @@ function recalculate(
     yearsToRetire,
     // Target monthly income at crossover point
     targetMonthlyIncome,
+    // Target nest egg at crossover point
+    targetNestEgg,
   };
 }

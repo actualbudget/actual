@@ -205,7 +205,7 @@ export function MergeUnusedPayeesModal({
               >
                 <Trans>Merge</Trans>
               </Button>
-              {!isEditingRule && (
+              {!isEditingRule && shouldCreateRule && (
                 <Button
                   style={{ marginRight: 10 }}
                   onPress={() => {
