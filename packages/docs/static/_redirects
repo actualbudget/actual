@@ -1,6 +1,10 @@
 # Redirects from pages on the classic actualbudget.com site to their new routes
 # (no broken links!)
 
+# Redirect the .com domain to the .org domain
+http://actualbudget.com/* https://actualbudget.org/:splat 301!
+https://actualbudget.com/* https://actualbudget.org/:splat 301!
+
 /account/*     https://sunset.actualbudget.com/account/:splat
 /pricing/*     /
 
