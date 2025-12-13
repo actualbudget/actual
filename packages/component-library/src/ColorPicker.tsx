@@ -32,30 +32,61 @@ function ColorSwatch(props: ColorSwatchProps) {
   );
 }
 
-// colors from https://materialui.co/colors
-const DEFAULT_COLOR_SET = [
-  '#690CB0',
-  '#D32F2F',
-  '#C2185B',
-  '#7B1FA2',
-  '#512DA8',
-  '#303F9F',
-  '#1976D2',
-  '#0288D1',
-  '#0097A7',
-  '#00796B',
-  '#388E3C',
-  '#689F38',
-  '#AFB42B',
-  '#FBC02D',
-  '#FFA000',
-  '#F57C00',
-  '#E64A19',
-  '#5D4037',
-  '#616161',
-  '#455A64',
-];
+// dark theme colors from https://materialui.co/colors. Light theme colors HSL 0.90 light tint of dark colors.
+if (theme === 'auto') {
+    theme = window.matchMedia('(prefers-color-scheme: light)').matches
+      ? 'light'
+      : 'dark';
+  }
 
+  if (theme === 'light') {
+    const DEFAULT_COLOR_SET = [
+    '#F2EBFE',
+    '#F8E3E3',
+    '#F6DDE7',
+    '#E9DBEF',
+    '#E1DBEE',
+    '#DDDFED',
+    '#D5E5F6',
+    '#D6EAF6',
+    '#D9EEF0',
+    '#DFEDEC',
+    '#DEEBDE',
+    '#E4EDDD',
+    '#F0F0DB',
+    '#FDEFD0',
+    '#FFECCC',
+    '#FCE6D1',
+    '#FADAD1',
+    '#E8E4E4',
+    '#E6E6E6',
+    '#E2E6E7',
+    ];
+  } else {
+    
+    const DEFAULT_COLOR_SET = [
+    '#690CB0',
+    '#D32F2F',
+    '#C2185B',
+    '#7B1FA2',
+    '#512DA8',
+    '#303F9F',
+    '#1976D2',
+    '#0288D1',
+    '#0097A7',
+    '#00796B',
+    '#388E3C',
+    '#689F38',
+    '#AFB42B',
+    '#FBC02D',
+    '#FFA000',
+    '#F57C00',
+    '#E64A19',
+    '#5D4037',
+    '#616161',
+    '#455A64',
+    ];
+  }
 interface ColorSwatchPickerProps {
   columns?: number;
   colorset?: string[];
