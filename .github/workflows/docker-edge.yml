@@ -33,6 +33,7 @@ jobs:
     name: Build Docker image
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu, alpine]
     steps:
@@ -76,13 +77,18 @@ jobs:
         run: yarn build:server
 
       - name: Build image for testing
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        id: build-test
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
         with:
-          context: .
-          push: false
-          load: true
-          file: packages/sync-server/docker/${{ matrix.os }}.Dockerfile
-          tags: actualbudget/actual-server-testing
+          timeout_minutes: 30
+          max_attempts: 3
+          retry_wait_seconds: 60
+          command: |
+            docker buildx build \
+              --load \
+              --file packages/sync-server/docker/${{ matrix.os }}.Dockerfile \
+              --tag actualbudget/actual-server-testing \
+              .
 
       - name: Test that the docker image boots
         run: |
@@ -93,12 +99,21 @@ jobs:
       # This will use the cache from the earlier build step and not rebuild the image
       # https://docs.docker.com/build/ci/github-actions/test-before-push/
       - name: Build and push images
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        id: build-push
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+        env:
+          DOCKER_TAGS: ${{ steps.meta.outputs.tags }}
         with:
-          context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          file: packages/sync-server/docker/${{ matrix.os }}.Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/arm/v7${{ matrix.os == 'alpine' && ',linux/arm/v6' || '' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          build-args: |
-            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          timeout_minutes: 60
+          max_attempts: 3
+          retry_wait_seconds: 60
+          command: |
+            # Convert newline-separated tags to --tag arguments
+            TAG_ARGS=$(echo "$DOCKER_TAGS" | sed 's/^/--tag /' | tr '\n' ' ')
+            docker buildx build \
+              --push \
+              --file packages/sync-server/docker/${{ matrix.os }}.Dockerfile \
+              --platform linux/amd64,linux/arm64,linux/arm/v7${{ matrix.os == 'alpine' && ',linux/arm/v6' || '' }} \
+              --build-arg GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+              $TAG_ARGS \
+              .
