@@ -12,6 +12,7 @@ import {
   parseColor,
 } from 'react-aria-components';
 
+import { theme as themeStyle } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
 import { Input } from './Input';
