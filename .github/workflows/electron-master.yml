@@ -101,9 +101,11 @@ jobs:
             ## Desktop releases
             Please note: Microsoft store updates can sometimes lag behind the main release by a couple of days while they verify the new version.
 
-            <a href="https://apps.microsoft.com/detail/9p2hmlhsdbrm?cid=Github+Releases&mode=direct">
-              <img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
-            </a>
+            <p>
+              <a href="https://apps.microsoft.com/detail/9p2hmlhsdbrm?cid=Github+Releases&mode=direct"><img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200" /></a>
+              <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width="12" height="1" alt="" />
+              <a href="https://flathub.org/apps/com.actualbudget.actual"><img width="165" style="margin-left:12px;" alt="Get it on Flathub" src="https://flathub.org/api/badge?locale=en" /></a>
+            </p>
           files: |
             packages/desktop-electron/dist/*.dmg
             packages/desktop-electron/dist/*.exe
@@ -199,3 +201,4 @@ jobs:
             This PR updates the Actual desktop flatpak to version ${{ needs.build.outputs.version }}.
 
             :link: [View release notes](https://actualbudget.org/blog/release-${{ needs.build.outputs.version }})
+          reviewers: "jfdoming,MatissJanis,youngcw" # The core team that have accepted the collaborator access to the Flathub repo
