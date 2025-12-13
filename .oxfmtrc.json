@@ -3,5 +3,8 @@
   "singleQuote": true,
   "trailingComma": "all",
   "arrowParens": "avoid",
-  "printWidth": 80
+  "printWidth": 80,
+  "ignorePatterns": [
+    "packages/docs/*" // TOOD: fixme; temporary
+  ]
 }
