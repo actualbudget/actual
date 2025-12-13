@@ -11,6 +11,7 @@ import {
   type RefObject,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -2375,10 +2376,52 @@ export const TransactionTable = forwardRef(
 
     const dispatch = useDispatch();
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
-    const [newTransactions, setNewTransactions] = useState<TransactionEntity[]>(
+
+    // Track user edits to newTransactions separately from the initial computed value
+    const [editedTransactions, setEditedTransactions] = useState<
+      TransactionEntity[]
+    >([]);
+    const prevIsAddingRef = useRef(props.isAdding);
+    const hasUserEditedRef = useRef(false);
+
+    // Compute initial transactions when isAdding becomes true
+    const computedTransactions = useMemo(() => {
+      if (props.isAdding) {
+        return makeTemporaryTransactions(
+          props.currentAccountId,
+          props.currentCategoryId,
+        );
+      }
+      return [];
+    }, [props.isAdding, props.currentAccountId, props.currentCategoryId]);
+
+    const newTransactions = useMemo(() => {
+      if (!props.isAdding) {
+        return [];
+      }
+      if (hasUserEditedRef.current && editedTransactions.length > 0) {
+        return editedTransactions;
+      }
+      return computedTransactions;
+    }, [props.isAdding, editedTransactions, computedTransactions]);
+
+    // Reset edit state when isAdding changes
+    useEffect(() => {
+      if (prevIsAddingRef.current !== props.isAdding) {
+        hasUserEditedRef.current = false;
+        setEditedTransactions([]);
+        prevIsAddingRef.current = props.isAdding;
+      }
+    }, [props.isAdding]);
+
+    // Wrapper to mark transactions as user-edited
+    const setNewTransactions = useCallback(
+      (transactions: TransactionEntity[]) => {
+        hasUserEditedRef.current = true;
+        setEditedTransactions(transactions);
+      },
       [],
     );
-    const [prevIsAdding, setPrevIsAdding] = useState(false);
     const splitsExpanded = useSplitsExpanded();
     const splitsExpandedDispatch = splitsExpanded.dispatch;
     const prevSplitsExpanded = useRef<SplitsExpandedContextValue | null>(null);
@@ -2508,53 +2551,44 @@ export const TransactionTable = forwardRef(
       transactions: props.transactions,
     };
 
-    // Derive new transactions from the `isAdding` prop
-    if (prevIsAdding !== props.isAdding) {
-      if (!prevIsAdding && props.isAdding) {
-        setNewTransactions(
-          makeTemporaryTransactions(
-            props.currentAccountId,
-            props.currentCategoryId,
-          ),
-        );
-      }
-      setPrevIsAdding(props.isAdding);
-    }
-
-    if (shouldAdd.current || shouldAddAndClose.current) {
-      if (newTransactions?.[0] && newTransactions[0].account == null) {
-        dispatch(
-          addNotification({
-            notification: {
-              type: 'error',
-              message: t('Account is a required field'),
-            },
-          }),
-        );
-        newNavigator.onEdit('temp', 'account');
-      } else {
-        const transactions = latestState.current.newTransactions;
-
-        if (shouldAddAndClose.current) {
-          props.onAdd(transactions);
-          props.onCloseAddTransaction();
-        } else {
-          const lastDate =
-            transactions.length > 0 ? transactions[0].date : null;
-          setNewTransactions(
-            makeTemporaryTransactions(
-              props.currentAccountId,
-              props.currentCategoryId,
-              lastDate,
-            ),
+    // Handle add/addAndClose actions in useLayoutEffect to run synchronously
+    // but after render (avoiding setState during render)
+    useLayoutEffect(() => {
+      if (shouldAdd.current || shouldAddAndClose.current) {
+        if (newTransactions?.[0] && newTransactions[0].account == null) {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: t('Account is a required field'),
+              },
+            }),
           );
-          newNavigator.onEdit('temp', 'date');
-          props.onAdd(transactions);
+          newNavigator.onEdit('temp', 'account');
+        } else {
+          const transactions = latestState.current.newTransactions;
+
+          if (shouldAddAndClose.current) {
+            props.onAdd(transactions);
+            props.onCloseAddTransaction();
+          } else {
+            const lastDate =
+              transactions.length > 0 ? transactions[0].date : null;
+            setNewTransactions(
+              makeTemporaryTransactions(
+                props.currentAccountId,
+                props.currentCategoryId,
+                lastDate,
+              ),
+            );
+            newNavigator.onEdit('temp', 'date');
+            props.onAdd(transactions);
+          }
         }
+        shouldAdd.current = false;
+        shouldAddAndClose.current = false;
       }
-      shouldAdd.current = false;
-      shouldAddAndClose.current = false;
-    }
+    });
 
     useEffect(() => {
       if (savePending.current && afterSaveFunc.current) {
@@ -2563,7 +2597,7 @@ export const TransactionTable = forwardRef(
       }
 
       savePending.current = false;
-    }, [newTransactions, props, props.transactions]);
+    }, [editedTransactions, props.transactions]);
 
     function getFieldsNewTransaction(item?: TransactionEntity) {
       const fields = [
@@ -2754,23 +2788,26 @@ export const TransactionTable = forwardRef(
           onSaveProp(groupedTransaction);
         }
       },
-      [onSaveProp, onApplyRulesProp],
+      [onSaveProp, onApplyRulesProp, setNewTransactions],
     );
 
-    const onDelete = useCallback((id: TransactionEntity['id']) => {
-      const temporary = isTemporaryId(id);
+    const onDelete = useCallback(
+      (id: TransactionEntity['id']) => {
+        const temporary = isTemporaryId(id);
 
-      if (temporary) {
-        const newTrans = latestState.current.newTransactions;
+        if (temporary) {
+          const newTrans = latestState.current.newTransactions;
 
-        if (id === newTrans[0].id) {
-          // You can never delete the parent new transaction
-          return;
+          if (id === newTrans[0].id) {
+            // You can never delete the parent new transaction
+            return;
+          }
+
+          setNewTransactions(deleteTransaction(newTrans, id).data);
         }
-
-        setNewTransactions(deleteTransaction(newTrans, id).data);
-      }
-    }, []);
+      },
+      [setNewTransactions],
+    );
 
     const onBatchDelete = useCallback(
       (ids: TransactionEntity['id'][]) => {
@@ -2864,7 +2901,7 @@ export const TransactionTable = forwardRef(
           }
         }
       };
-    }, [onSplitProp, splitsExpandedDispatch]);
+    }, [onSplitProp, splitsExpandedDispatch, setNewTransactions]);
 
     const { onAddSplit: onAddSplitProp } = props;
 
@@ -2891,7 +2928,7 @@ export const TransactionTable = forwardRef(
           );
         }
       },
-      [onAddSplitProp],
+      [onAddSplitProp, setNewTransactions],
     );
 
     const onDistributeRemainder = useCallback(

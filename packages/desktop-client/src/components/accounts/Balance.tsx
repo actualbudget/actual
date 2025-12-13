@@ -61,7 +61,10 @@ type SelectedBalanceProps = {
   account?: AccountEntity;
 };
 
-function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
+export function SelectedBalance({
+  selectedItems,
+  account,
+}: SelectedBalanceProps) {
   const { t } = useTranslation();
 
   const name = `selected-balance-${[...selectedItems].join('-')}`;
@@ -114,7 +117,7 @@ function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
     }
   }
 
-  if (!balance && !scheduleBalance) {
+  if (balance == null && scheduleBalance === 0) {
     return null;
   } else {
     balance = (balance ?? 0) + scheduleBalance;
