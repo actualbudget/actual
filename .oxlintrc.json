@@ -9,7 +9,7 @@
 
     // Keep these rules
     "no-var": "warn",
-    
+
     // JSX A11y rules
     "jsx-a11y/no-autofocus": ["warn", { "ignoreNonDOM": true }],
 
@@ -24,24 +24,24 @@
     "import/no-duplicates": [
       "warn",
       {
-        "prefer-inline": true,
-      },
+        "prefer-inline": true
+      }
     ],
 
     // React rules
     "react/exhaustive-deps": [
       "warn",
       {
-        "additionalHooks": "(useQuery|useEffectAfterMount)",
-      },
+        "additionalHooks": "(useQuery|useEffectAfterMount)"
+      }
     ],
     "react/jsx-curly-brace-presence": "warn",
     "react/jsx-filename-extension": [
       "warn",
       {
         "extensions": [".jsx", ".tsx"],
-        "allow": "as-needed",
-      },
+        "allow": "as-needed"
+      }
     ],
     "react/jsx-no-comment-textnodes": "warn",
     "react/jsx-no-duplicate-props": "warn",
@@ -52,8 +52,8 @@
       "warn",
       {
         "allowAllCaps": true,
-        "ignore": [],
-      },
+        "ignore": []
+      }
     ],
     "react/no-danger-with-children": "warn",
     "react/no-direct-mutation-state": "warn",
@@ -63,6 +63,119 @@
     "react/rules-of-hooks": "error",
     "react/self-closing-comp": "warn",
     "react/style-prop-object": "warn",
+
+    // ESLint rules
+    "eslint/no-redeclare": "warn",
+    "eslint/no-regex-spaces": "warn",
+    "eslint/no-restricted-globals": [
+      "warn",
+
+      // https://github.com/facebook/create-react-app/tree/main/packages/confusing-browser-globals
+      "addEventListener",
+      "blur",
+      "close",
+      "closed",
+      "confirm",
+      "defaultStatus",
+      "defaultstatus",
+      "event",
+      "external",
+      "find",
+      "focus",
+      "frameElement",
+      "frames",
+      "history",
+      "innerHeight",
+      "innerWidth",
+      "length",
+      "location",
+      "locationbar",
+      "menubar",
+      "moveBy",
+      "moveTo",
+      "name",
+      "onblur",
+      "onerror",
+      "onfocus",
+      "onload",
+      "onresize",
+      "onunload",
+      "open",
+      "opener",
+      "opera",
+      "outerHeight",
+      "outerWidth",
+      "pageXOffset",
+      "pageYOffset",
+      "parent",
+      "print",
+      "removeEventListener",
+      "resizeBy",
+      "resizeTo",
+      "screen",
+      "screenLeft",
+      "screenTop",
+      "screenX",
+      "screenY",
+      "scroll",
+      "scrollbars",
+      "scrollBy",
+      "scrollTo",
+      "scrollX",
+      "scrollY",
+      "status",
+      "statusbar",
+      "stop",
+      "toolbar",
+      "top"
+    ],
+    "eslint/no-restricted-imports": [
+      "warn",
+      {
+        "paths": [
+          {
+            "name": "react-router",
+            "importNames": ["useNavigate"],
+            "message": "Please import Actual's useNavigate() hook from `src/hooks` instead."
+          },
+          {
+            "name": "react-redux",
+            "importNames": ["useDispatch"],
+            "message": "Please import Actual's useDispatch() hook from `src/redux` instead."
+          },
+          {
+            "name": "react-redux",
+            "importNames": ["useSelector"],
+            "message": "Please import Actual's useSelector() hook from `src/redux` instead."
+          },
+          {
+            "name": "react-redux",
+            "importNames": ["useStore"],
+            "message": "Please import Actual's useStore() hook from `src/redux` instead."
+          }
+        ],
+        "patterns": [
+          {
+            "group": ["*.api", "*.web", "*.electron"],
+            "message": "Don't directly reference imports from other platforms"
+          },
+          {
+            "group": ["uuid"],
+            "importNames": ["*"],
+            "message": "Use `import { v4 as uuidv4 } from 'uuid'` instead"
+          },
+          {
+            "group": ["**/style", "**/colors"],
+            "importNames": ["colors"],
+            "message": "Please use themes instead of colors"
+          },
+          {
+            "group": ["@actual-app/web/*"],
+            "message": "Please do not import `@actual-app/web` in `loot-core`"
+          }
+        ]
+      }
+    ]
   },
   "overrides": [
     {
@@ -111,11 +224,11 @@
         "packages/desktop-client/src/components/sidebar/Tools.tsx",
         "packages/desktop-client/src/components/sort.tsx",
         "packages/desktop-client/src/hooks/useEffectAfterMount.ts",
-        "packages/desktop-client/src/hooks/useQuery.ts",
+        "packages/desktop-client/src/hooks/useQuery.ts"
       ],
       "rules": {
-        "react/exhaustive-deps": "off",
-      },
+        "react/exhaustive-deps": "off"
+      }
     },
 
     {
@@ -124,10 +237,10 @@
         "packages/api/migrations/*",
         "packages/loot-core/migrations/*",
         "packages/sync-server/src/app-gocardless/banks/*.js",
-        "*.config.{ts,mts,mjs}",
+        "*.config.{ts,mts,mjs}"
       ],
       "rules": {
-        "import/no-default-export": "off",
+        "import/no-default-export": "off"
       }
     }
   ]
