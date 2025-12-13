@@ -18,4 +18,14 @@ export default defineConfig({
   expect: {
     toHaveScreenshot: { maxDiffPixels: 5 },
   },
+  webServer: process.env.E2E_START_URL
+    ? undefined
+    : {
+        command: 'yarn start:browser',
+        url: 'http://localhost:3001',
+        reuseExistingServer: !process.env.CI,
+        stdout: 'ignore',
+        stderr: 'pipe',
+        ignoreHTTPSErrors: true,
+      },
 });
