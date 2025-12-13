@@ -27,7 +27,7 @@ test.describe('Command bar', () => {
   });
 
   test.afterEach(async () => {
-    await page.close();
+    await page?.close();
   });
 
   test('Check the command bar visuals', async () => {

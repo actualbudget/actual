@@ -25,7 +25,7 @@ test.describe.parallel('Reports', () => {
   });
 
   test.afterEach(async () => {
-    await page.close();
+    await page?.close();
   });
 
   test('loads net worth and cash flow reports', async () => {

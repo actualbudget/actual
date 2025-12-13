@@ -25,7 +25,7 @@ test.describe('Payees', () => {
   });
 
   test.afterEach(async () => {
-    await page.close();
+    await page?.close();
   });
 
   test('checks the payees page visuals', async () => {

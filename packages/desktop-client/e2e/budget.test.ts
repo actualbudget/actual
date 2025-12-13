@@ -23,7 +23,7 @@ test.describe('Budget', () => {
   });
 
   test.afterEach(async () => {
-    await page.close();
+    await page?.close();
   });
 
   test('renders the summary information: available funds, overspent, budgeted and for next month', async () => {

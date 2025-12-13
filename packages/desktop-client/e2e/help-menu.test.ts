@@ -21,7 +21,7 @@ test.describe('Help menu', () => {
   });
 
   test.afterEach(async () => {
-    await page.close();
+    await page?.close();
   });
 
   test('Check the help menu visuals', async () => {

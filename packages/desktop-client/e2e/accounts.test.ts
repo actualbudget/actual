@@ -23,7 +23,7 @@ test.describe('Accounts', () => {
   });
 
   test.afterEach(async () => {
-    await page.close();
+    await page?.close();
   });
 
   test('creates a new account and views the initial balance transaction', async () => {
