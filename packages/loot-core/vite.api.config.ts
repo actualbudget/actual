@@ -4,7 +4,6 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import peggyLoader from 'vite-plugin-peggy-loader';
 
-// eslint-disable-next-line import/no-default-export
 export default defineConfig(({ mode }) => {
   const outDir = path.resolve(__dirname, '../api/app');
   const crdtDir = path.resolve(__dirname, '../crdt');

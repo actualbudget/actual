@@ -1,9 +1,9 @@
 import { defineConfig } from '@playwright/test';
 
-// eslint-disable-next-line import/no-default-export
 export default defineConfig({
   timeout: 60000, // 60 seconds
   retries: 1,
+  fullyParallel: true,
   workers: process.env.CI ? 1 : undefined,
   testDir: 'e2e/',
   reporter: process.env.CI ? 'blob' : [['html', { open: 'never' }]],

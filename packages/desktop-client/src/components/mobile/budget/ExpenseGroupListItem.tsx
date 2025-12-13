@@ -138,13 +138,15 @@ export function ExpenseGroupHeader({
 }: ExpenseGroupHeaderProps) {
   return (
     <View
+      data-testid="category-group-row"
+      onClick={() => onToggleCollapse(categoryGroup.id)}
       style={{
+        cursor: 'pointer',
         height: ROW_HEIGHT,
         borderBottomWidth: 1,
         borderColor: theme.tableBorder,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
         paddingLeft: 5,
         paddingRight: 5,
         opacity: isHidden ? 0.5 : undefined,
@@ -152,7 +154,6 @@ export function ExpenseGroupHeader({
           ? theme.budgetHeaderCurrentMonth
           : theme.budgetHeaderOtherMonth,
       }}
-      data-testid="category-group-row"
     >
       <ExpenseGroupName
         group={categoryGroup}

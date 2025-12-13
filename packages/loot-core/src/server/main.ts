@@ -259,9 +259,12 @@ export async function init(config: InitConfig) {
     setServer(serverURL);
 
     if (config.password) {
-      await runHandler(handlers['subscribe-sign-in'], {
+      const result = await runHandler(handlers['subscribe-sign-in'], {
         password: config.password,
       });
+      if (result?.error) {
+        throw new Error(`Authentication failed: ${result.error}`);
+      }
     }
   } else {
     // This turns off all server URLs. In this mode we don't want any
