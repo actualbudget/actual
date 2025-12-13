@@ -327,9 +327,9 @@ export function KeyboardShortcutModal() {
             description: t('Move right when editing'),
           },
           {
-            id: 'add-new-transaction',
+            id: 'set-date-for-selected-transactions',
             shortcut: 'T',
-            description: t('Add a new transaction'),
+            description: t('Set date for selected transactions'),
           },
           {
             id: 'add-transaction-and-close',
