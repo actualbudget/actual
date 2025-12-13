@@ -45,3 +45,5 @@
 # Redirect the .com domain to the .org domain
 http://actualbudget.com/* https://actualbudget.org/:splat 301!
 https://actualbudget.com/* https://actualbudget.org/:splat 301!
+http://www.actualbudget.com/* https://actualbudget.org/:splat 301!
+https://www.actualbudget.com/* https://actualbudget.org/:splat 301!
