@@ -7,6 +7,10 @@ title: 'Tips & Tricks'
 
 If you ever make a mistake, pressing <Key mod="cmd" k="z" /> will undo, and pressing <Key mod="cmd shift" k="z" /> will redo. Using the desktop app, this is an undo system that you can always rely on; any change can be undone and the UI will walk back in time.  If you're using the web app, this is only good for the current session of the website. If you refresh, or close the browser tab, undo history is lost.
 
+## Context Menus
+
+Context menus (right-click menus) are available throughout Actual. Use the method to access them based on your OS and hardware.
+
 ## Keyboard Shortcuts
 
 Actual has a number of keyboard shortcuts that can help you navigate and manage the application more efficiently.
@@ -24,26 +28,32 @@ Once open, you can start typing to search for the functions in the sidebar, or y
 through the list of available commands. You can also quickly move to any of the available accounts by typing their name.
 
 
-### Other Global Shortcuts
+### General Shortcuts
 
--  <Key mod="ctrl" k="O" /> (the letter O, not zero) this will close the file and list other available files to open.
+-  <Key k="?" /> Open the help menu.
+-  <Key mod="ctrl" k="O" /> (the letter O, not zero) Close the current budget and list other available budgets to open.
    On macOS, you can also use the <Key mod="cmd" k="O" /> key combination.
+-  <Key mod="shift" mod="ctrl" k="P" /> Toggle the privacy filter.   
 
 
 ### Within the Budget View
 
 - <Key k="enter" /> while editing a budget amount will move to the next category.
-- <Key mod="shift" k="enter" /> will move to the previous category.
+- <Key mod="shift" k="enter" /> Move to the previous budget category.
+- <Key k="0" /> (zero) View the current month.
+- <Key arrow="left" /> View the previous month.
+- <Key arrow="right" /> View the next month.
 
-### When Editing Transactions
+### Account page shortcuts
 
-- When editing, <Key k="enter" /> and <Key mod="shift" k="enter" /> will move down and up. If a dropdown is open and you've typed a new value, this will instead save the value and close the dropdown.
-- When editing, <Key k="tab" /> and <Key mod="shift" k="tab" /> will move left and right
-- When adding a new transaction, <Key mod="cmd" k="enter" /> will add it regardless of where you are editing. Pressing <Key k="enter" /> in either the Payment or Deposit columns will add it as well.
+- <Key k="enter" /> and <Key mod="shift" k="enter" /> when editing will move down and up. If a dropdown is open and you've typed a new value, this will instead save the value and close the dropdown.
+- <Key k="tab" /> and <Key mod="shift" k="tab" /> when editing will move left and right
+- <Key mod="ctrl" k="enter" /> will add the transaction and close the form regardless of where you are editing.
+- <Key k="enter" /> in either the Payment or Deposit columns will add the transaction as well.
 
 ### When Managing Transactions
 
-- <Key k="f" /> Show only selected transactions.
+- <Key k="f" /> Show only selected transactions. If no transaction is selected, it brings up the Filter dropdown menu.
 - <Key k="d" /> Delete selected transactions.
 - <Key k="u" /> Duplicate selected transactions.
 - <Key k="g" /> Merge selected transactions
@@ -54,13 +64,10 @@ through the list of available commands. You can also quickly move to any of the 
 - <Key k="c" /> Set category for selected transactions.
 - <Key k="m" /> Set amount for selected transactions.
 - <Key k="l" /> Toggle cleared for current transaction.
-
-The following require a transaction to have been selected first:
-
-- <Key k="J" />/<Key arrow="down" /> Move to the next transaction down.
-- <Key k="K" />/<Key arrow="up" /> Move to the next transaction up.
+- <Key k="J" /> or <Key arrow="down" /> Move to the next transaction down.
+- <Key k="K" /> or <Key arrow="up" /> Move to the next transaction up.
 - <Key k="space" /> Toggle selection of current transaction.
-- <Key mod="shift" k="space" /> Add all transactions between current transaction and most recently selected transaction.
+- <Key mod="shift" k="space" /> Select all transactions between current transaction and most recently selected transaction.
 
 ## How to View Multiple Months at Once
 
