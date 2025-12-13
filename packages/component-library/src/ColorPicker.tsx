@@ -12,13 +12,18 @@ import {
   parseColor,
 } from 'react-aria-components';
 
-import { theme as themeStyle } from '@actual-app/components/theme';
-import { css } from '@emotion/css';
-import { type Theme } from 'loot-core/types/prefs';
-import { useTheme } from '@desktop-client/style';
-
 import { Input } from './Input';
 import { Popover } from './Popover';
+
+// import { theme as themeStyle } from '@actual-app/components/theme';
+import { css } from '@emotion/css';
+import { type Theme } from 'loot-core/types/prefs';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+
+function findTheme() {
+  const [theme = 'auto', setThemePref] = useGlobalPref('theme');
+  return [theme, setThemePref] as const;
+}
 
 function ColorSwatch(props: ColorSwatchProps) {
   return (
