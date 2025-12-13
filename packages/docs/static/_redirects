@@ -41,3 +41,7 @@
 /docs/budgeting/returnsandreimbursements    /docs/budgeting/returns-and-reimbursements
 /docs/budgeting/creditcards                 /docs/budgeting/credit-cards
 /docs/budgeting/jointaccounts               /docs/budgeting/joint-accounts
+
+# Redirect the .com domain to the .org domain
+http://actualbudget.com/* https://actualbudget.org/:splat 301!
+https://actualbudget.com/* https://actualbudget.org/:splat 301!
