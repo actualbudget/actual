@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
@@ -21,7 +23,8 @@ export default defineConfig({
   webServer: process.env.E2E_START_URL
     ? undefined
     : {
-        command: 'yarn start:browser',
+        cwd: path.join(__dirname, '..', '..'),
+        command: 'yarn start',
         url: 'http://localhost:3001',
         reuseExistingServer: !process.env.CI,
         stdout: 'ignore',
