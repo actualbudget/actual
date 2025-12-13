@@ -41,7 +41,9 @@ export class BudgetMenuModal {
 
   private async dismissKeypadIfOpen() {
     if (await this.moneyKeypadModal.isVisible()) {
-      await this.moneyKeypadModal.getByRole('button', { name: 'Close' }).click();
+      await this.moneyKeypadModal
+        .getByRole('button', { name: 'Close' })
+        .click();
       await expect(this.moneyKeypadModal).toHaveCount(0);
     }
   }
