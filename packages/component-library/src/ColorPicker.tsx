@@ -20,8 +20,6 @@ import { useTheme } from '@desktop-client/style';
 import { Input } from './Input';
 import { Popover } from './Popover';
 
-let [theme] = useTheme();
-
 function ColorSwatch(props: ColorSwatchProps) {
   return (
     <AriaColorSwatch
