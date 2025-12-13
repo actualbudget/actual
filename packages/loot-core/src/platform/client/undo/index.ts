@@ -1,5 +1,5 @@
 // This is temporary until we move all loot-core/client over to desktop-client.
-// eslint-disable-next-line no-restricted-imports
+// oxlint-disable-next-line eslint/no-restricted-imports
 import { Modal } from '@actual-app/web/src/modals/modalsSlice';
 import { v4 as uuidv4 } from 'uuid';
 
