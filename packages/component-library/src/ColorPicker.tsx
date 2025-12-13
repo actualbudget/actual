@@ -15,14 +15,14 @@ import {
 import { Input } from './Input';
 import { Popover } from './Popover';
 
-// import { theme as themeStyle } from '@actual-app/components/theme';
+import { theme as themeStyle } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import { type Theme } from 'loot-core/types/prefs';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 function findTheme() {
-  const [theme = 'auto', setThemePref] = useGlobalPref('theme');
-  return [theme, setThemePref] as const;
+  const [theme = 'auto'] = useGlobalPref('theme');
+  return [theme] as const;
 }
 
 function ColorSwatch(props: ColorSwatchProps) {
