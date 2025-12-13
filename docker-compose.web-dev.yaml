@@ -1,0 +1,58 @@
+services:
+  actual-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.web-dev
+    container_name: actual-server-dev
+    networks:
+      - actual-net
+    volumes:
+      - .:/app:cached
+    ports:
+      - "5006:5006"
+    environment:
+      NODE_ENV: development
+      # expose service outside the container
+      HOST: "0.0.0.0"
+      # We prefer ipv4 for timeout issues
+      NODE_OPTIONS: "--dns-result-order=ipv4first"
+      # internal url
+      CLIENT_URL: "http://actual-web-dev:3001"
+    command: >
+      sh -c "
+        yarn install &&
+        cd packages/sync-server &&
+        yarn rebuild better-sqlite3 &&
+        cd ../.. &&
+        yarn start:server
+      "
+
+  actual-web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web-dev
+    container_name: actual-web-dev
+    networks:
+      - actual-net
+    volumes:
+      - .:/app:cached
+    ports:
+      - "3001:3001"
+    environment:
+      # Expose vite outside the container
+      HOST: "0.0.0.0"
+      # avoid chrome opening
+      BROWSER: none
+      # allowed hosts from env in vite
+      ALLOWED_HOSTS: "actual-web-dev"
+      # Url to load locally
+      VITE_SERVER_URL: "http://localhost:5006"
+    command: >
+      bash -c "
+        yarn install &&
+        yarn start:browser
+      "
+
+networks:
+  actual-net:
+    driver: bridge
