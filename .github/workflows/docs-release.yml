@@ -16,4 +16,4 @@ jobs:
     name: Deploy Docs
     steps:
       - name: Docusaurus Deploy
-        run: yarn docs:deploy
+        run: yarn deploy:docs
