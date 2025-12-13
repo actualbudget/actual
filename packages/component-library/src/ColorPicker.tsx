@@ -13,10 +13,13 @@ import {
 } from 'react-aria-components';
 
 import { theme as themeStyle } from '@actual-app/components/theme';
+import { useTheme } from '@desktop-client/style';
 import { css } from '@emotion/css';
 
 import { Input } from './Input';
 import { Popover } from './Popover';
+
+const [theme] = useTheme();
 
 function ColorSwatch(props: ColorSwatchProps) {
   return (
@@ -33,7 +36,7 @@ function ColorSwatch(props: ColorSwatchProps) {
   );
 }
 
-// dark theme colors from https://materialui.co/colors. Light theme colors HSL 0.90 light tint of dark colors.
+// dark theme colors from https://materialui.co/colors light theme colors HSL lightness 0.90
 if (theme === 'auto') {
     theme = window.matchMedia('(prefers-color-scheme: light)').matches
       ? 'light'
