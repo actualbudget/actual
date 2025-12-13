@@ -72,5 +72,6 @@ ignore$
 (?:^|/)yarn\.lock$
 (?:^|/)(?i)docusaurus.config.js
 (?:^|/)(?i)README.md
+(?:^|/)(?i).nojekyll
 ^\static/
 \.tsx$
