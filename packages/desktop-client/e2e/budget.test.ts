@@ -9,7 +9,7 @@ test.describe('Budget', () => {
   let configurationPage: ConfigurationPage;
   let budgetPage: BudgetPage;
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
     configurationPage = new ConfigurationPage(page);
 
@@ -22,7 +22,7 @@ test.describe('Budget', () => {
     await page.mouse.move(0, 0);
   });
 
-  test.afterAll(async () => {
+  test.afterEach(async () => {
     await page.close();
   });
 
