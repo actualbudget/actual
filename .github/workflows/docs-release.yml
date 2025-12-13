@@ -1,0 +1,19 @@
+name: Release Docs to Github Pages
+
+# Release docs on every push to master
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "packages/docs/**"
+      - ".github/workflows/docs-spelling.yml"
+      - ".github/actions/docs-spelling/**"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy Docs
+    steps:
+      - name: Docusaurus Deploy
+        run: yarn docs:deploy
