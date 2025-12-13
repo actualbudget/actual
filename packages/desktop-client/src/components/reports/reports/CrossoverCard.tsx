@@ -32,6 +32,7 @@ type CrossoverData = {
       x: string;
       investmentIncome: number;
       expenses: number;
+      nestEgg: number;
       isProjection?: boolean;
     }>;
     start: string;
@@ -44,6 +45,7 @@ type CrossoverData = {
   historicalReturn: number | null;
   yearsToRetire: number | null;
   targetMonthlyIncome: number | null;
+  targetNestEgg: number | null;
 };
 
 type CrossoverCardProps = {
