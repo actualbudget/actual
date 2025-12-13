@@ -233,7 +233,6 @@
 
     {
       "files": [
-        "packages/docs/**/*", // TODO: fix these issues
         "packages/api/migrations/*",
         "packages/loot-core/migrations/*",
         "packages/sync-server/src/app-gocardless/banks/*.js",
