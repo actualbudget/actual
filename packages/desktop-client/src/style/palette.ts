@@ -70,6 +70,7 @@ export const red700 = oldColors.r3;
 export const red800 = oldColors.r2;
 export const red900 = oldColors.r1;
 export const purple50 = oldColors.p11;
+export const purple75 = '#f8f5ff';
 export const purple100 = oldColors.p10;
 export const purple150 = oldColors.p9;
 export const purple200 = oldColors.p8;
