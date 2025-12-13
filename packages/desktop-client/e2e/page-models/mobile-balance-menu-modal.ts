@@ -1,10 +1,11 @@
-import { type Page, type Locator } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 export class BalanceMenuModal {
   readonly page: Page;
   readonly locator: Locator;
   readonly heading: Locator;
   readonly balanceAmountInput: Locator;
+  readonly moneyKeypadModal: Locator;
   readonly transferToAnotherCategoryButton: Locator;
   readonly coverOverspendingButton: Locator;
   readonly rolloverOverspendingButton: Locator;
@@ -16,6 +17,7 @@ export class BalanceMenuModal {
 
     this.heading = locator.getByRole('heading');
     this.balanceAmountInput = locator.getByTestId('amount-input');
+    this.moneyKeypadModal = this.page.getByTestId('money-keypad-modal');
     this.transferToAnotherCategoryButton = locator.getByRole('button', {
       name: 'Transfer to another category',
     });
@@ -30,7 +32,17 @@ export class BalanceMenuModal {
     });
   }
 
+  private async dismissKeypadIfOpen() {
+    if (await this.moneyKeypadModal.isVisible()) {
+      await this.moneyKeypadModal
+        .getByRole('button', { name: 'Close' })
+        .click();
+      await expect(this.moneyKeypadModal).toHaveCount(0);
+    }
+  }
+
   async close() {
+    await this.dismissKeypadIfOpen();
     await this.heading.getByRole('button', { name: 'Close' }).click();
   }
 }
