@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*", "typings/**/*"],
+  "exclude": ["**/node_modules/*", "lib-dist", "**/*.test.ts", "**/*.test.tsx"]
+}
