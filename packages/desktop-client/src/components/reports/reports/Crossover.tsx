@@ -196,63 +196,74 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   }, []);
 
   useEffect(() => {
-    if (latestTransaction && allMonths) {
-      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+    if (latestTransaction && allMonths?.length) {
+      const [initialStart, initialEnd, mode] = calculateTimeRange(
         widget?.meta?.timeFrame,
         defaultTimeFrame,
         latestTransaction,
       );
       const earliestMonth = allMonths[allMonths.length - 1].name;
       const latestMonth = allMonths[0].name;
+      let start = initialStart;
+      let end = initialEnd;
+
+      const clampMonth = (m: string) => {
+        if (monthUtils.isBefore(m, earliestMonth)) return earliestMonth;
+        if (monthUtils.isAfter(m, latestMonth)) return latestMonth;
+        return m;
+      };
 
       // For both sliding-window and full modes, ensure end doesn't include current month
-      if (initialMode === 'sliding-window') {
+      if (mode === 'sliding-window') {
         // Shift both start and end back one month for sliding-window
-        const shiftedStart = monthUtils.subMonths(initialStart, 1);
-        const shiftedEnd = monthUtils.subMonths(initialEnd, 1);
-        const boundedStart = monthUtils.isBefore(shiftedStart, earliestMonth)
-          ? earliestMonth
-          : shiftedStart;
-        const boundedEnd = monthUtils.isBefore(shiftedEnd, boundedStart)
-          ? boundedStart
-          : shiftedEnd;
-        setStart(boundedStart);
-        setEnd(boundedEnd);
-      } else if (initialMode === 'full') {
-        setStart(earliestMonth);
-        setEnd(latestMonth);
+        start = clampMonth(monthUtils.subMonths(start, 1));
+        end = clampMonth(monthUtils.subMonths(end, 1));
+      } else if (mode === 'full') {
+        start = earliestMonth;
+        end = latestMonth;
       } else {
-        setStart(initialStart);
-        setEnd(initialEnd);
+        start = clampMonth(start);
+        end = clampMonth(end);
       }
-      setMode(initialMode);
+      if (monthUtils.isBefore(end, start)) {
+        end = start;
+      }
+      setStart(start);
+      setEnd(end);
+      setMode(mode);
     }
   }, [latestTransaction, widget?.meta?.timeFrame, allMonths]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
-    if (mode === 'sliding-window') {
-      // This is because we don't include the current month in the sliding window
-      // Shift both start and end back one month
-      const shiftedStart = monthUtils.subMonths(start, 1);
-      const shiftedEnd = monthUtils.subMonths(end, 1);
-
-      // Get earliest month for bounds checking
-      const earliestMonth = allMonths[allMonths.length - 1].name;
-
-      // Ensure dates don't go before earliest transaction
-      const boundedStart = monthUtils.isBefore(shiftedStart, earliestMonth)
-        ? earliestMonth
-        : shiftedStart;
-      const boundedEnd = monthUtils.isBefore(shiftedEnd, boundedStart)
-        ? boundedStart
-        : shiftedEnd;
-
-      setStart(boundedStart);
-      setEnd(boundedEnd);
-    } else {
-      setStart(start);
-      setEnd(end);
+    if (!allMonths?.length) {
+      return;
     }
+    const earliestMonth = allMonths[allMonths.length - 1].name;
+    const latestMonth = allMonths[0].name;
+
+    const clampMonth = (m: string) => {
+      if (monthUtils.isBefore(m, earliestMonth)) return earliestMonth;
+      if (monthUtils.isAfter(m, latestMonth)) return latestMonth;
+      return m;
+    };
+
+    // For both sliding-window and full modes, ensure end doesn't include current month
+    if (mode === 'sliding-window') {
+      // Shift both start and end back one month for sliding-window
+      start = clampMonth(monthUtils.subMonths(start, 1));
+      end = clampMonth(monthUtils.subMonths(end, 1));
+    } else if (mode === 'full') {
+      start = earliestMonth;
+      end = latestMonth;
+    } else {
+      start = clampMonth(start);
+      end = clampMonth(end);
+    }
+    if (monthUtils.isBefore(end, start)) {
+      end = start;
+    }
+    setStart(start);
+    setEnd(end);
     setMode(mode);
   }
 
