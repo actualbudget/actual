@@ -194,7 +194,12 @@ export function useTransactions({
     } else {
       setRunningBalances(new Map());
     }
-  }, [transactions, query, options?.calculateRunningBalances, options?.startingBalance]);
+  }, [
+    transactions,
+    query,
+    options?.calculateRunningBalances,
+    options?.startingBalance,
+  ]);
 
   const loadMore = useCallback(async () => {
     if (!pagedQueryRef.current) {
