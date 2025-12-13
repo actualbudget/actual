@@ -13,13 +13,15 @@ import {
 } from 'react-aria-components';
 
 import { theme as themeStyle } from '@actual-app/components/theme';
-import { useTheme } from '@desktop-client/style';
 import { css } from '@emotion/css';
+import { type Theme } from 'loot-core/types/prefs';
+import { useTags } from './useTags';
+import { useTheme } from '@desktop-client/style';
 
 import { Input } from './Input';
 import { Popover } from './Popover';
 
-const [theme] = useTheme();
+let [theme] = useTheme();
 
 function ColorSwatch(props: ColorSwatchProps) {
   return (
@@ -43,7 +45,7 @@ if (theme === 'auto') {
       : 'dark';
   }
 
-const DEFAULT_COLOR_SET = [
+let DEFAULT_COLOR_SET = [
   '#690CB0',
   '#D32F2F',
   '#C2185B',
@@ -67,7 +69,7 @@ const DEFAULT_COLOR_SET = [
 ];
 
 if (theme === 'light') {
-  const DEFAULT_COLOR_SET = [
+  let DEFAULT_COLOR_SET = [
     '#F2EBFE',
     '#F8E3E3',
     '#F6DDE7',
