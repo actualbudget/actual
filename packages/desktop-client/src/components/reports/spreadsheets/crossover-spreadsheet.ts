@@ -309,26 +309,24 @@ function recalculate(
     let expenseIntercept = lastExpense;
     let hampelFilteredExpense = 0;
 
-    if (expenseMap.size >= 2) {
-      const y: number[] = months.map(m => expenseMap.get(m) || 0);
+    const y: number[] = months.map(m => expenseMap.get(m) || 0);
 
-      if (params.projectionType === 'trend') {
-        // Linear trend calculation: y = a + b * t
-        const x: number[] = months.map((_m, i) => i);
-        const n = x.length;
-        const sumX = x.reduce((a, b) => a + b, 0);
-        const sumY = y.reduce((a, b) => a + b, 0);
-        const sumXY = x.reduce((a, xi, idx) => a + xi * y[idx], 0);
-        const sumX2 = x.reduce((a, xi) => a + xi * xi, 0);
-        const denom = n * sumX2 - sumX * sumX;
-        if (denom !== 0) {
-          expenseSlope = (n * sumXY - sumX * sumY) / denom;
-          expenseIntercept = (sumY - expenseSlope * sumX) / n;
-        }
-      } else if (params.projectionType === 'hampel') {
-        // Hampel filtered median calculation
-        hampelFilteredExpense = calculateHampelFilteredMedian(y);
+    if (params.projectionType === 'trend') {
+      // Linear trend calculation: y = a + b * t
+      const x: number[] = months.map((_m, i) => i);
+      const n = x.length;
+      const sumX = x.reduce((a, b) => a + b, 0);
+      const sumY = y.reduce((a, b) => a + b, 0);
+      const sumXY = x.reduce((a, xi, idx) => a + xi * y[idx], 0);
+      const sumX2 = x.reduce((a, xi) => a + xi * xi, 0);
+      const denom = n * sumX2 - sumX * sumX;
+      if (denom !== 0) {
+        expenseSlope = (n * sumXY - sumX * sumY) / denom;
+        expenseIntercept = (sumY - expenseSlope * sumX) / n;
       }
+    } else if (params.projectionType === 'hampel') {
+      // Hampel filtered median calculation
+      hampelFilteredExpense = calculateHampelFilteredMedian(y);
     }
 
     for (let i = 1; i <= maxProjectionMonths; i++) {
