@@ -699,7 +699,7 @@ export function getMonthDisplayName(
       const periodNumber = getPayPeriodNumberInMonth(monthId, activeConfig);
       const startDate = getMonthStartDate(monthId, activeConfig);
       const monthName = d.format(startDate, 'MMM', { locale });
-      return `${monthName}-${periodNumber}`;
+      return `${monthName.charAt(0)}${periodNumber}`;
     }
     // Fallback if config truly unavailable
     const mm = parseInt(monthId.slice(5, 7));

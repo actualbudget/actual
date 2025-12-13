@@ -28,18 +28,7 @@ export function applyPayPeriodPrefs(prefs: {
   payPeriodFrequency?: string;
   payPeriodStartDate?: string;
 }): void {
-  try {
-    const config: PayPeriodConfig = {
-      enabled: prefs.showPayPeriods === 'true',
-      payFrequency:
-        (prefs.payPeriodFrequency as PayPeriodConfig['payFrequency']) ||
-        'monthly',
-      startDate:
-        prefs.payPeriodStartDate || new Date().toISOString().slice(0, 10),
-    };
-
-    setPayPeriodConfig(config);
-  } catch (error) {
+  if (!prefs) {
     // Set a disabled default config to ensure graceful fallback
     const fallbackConfig = {
       enabled: false,
@@ -47,7 +36,19 @@ export function applyPayPeriodPrefs(prefs: {
       startDate: new Date().toISOString().slice(0, 10),
     };
     setPayPeriodConfig(fallbackConfig);
+    return;
   }
+
+  const config: PayPeriodConfig = {
+    enabled: prefs.showPayPeriods === 'true',
+    payFrequency:
+      (prefs.payPeriodFrequency as PayPeriodConfig['payFrequency']) ||
+      'monthly',
+    startDate:
+      prefs.payPeriodStartDate || new Date().toISOString().slice(0, 10),
+  };
+
+  setPayPeriodConfig(config);
 }
 
 export function isPayPeriod(monthId: string): boolean {

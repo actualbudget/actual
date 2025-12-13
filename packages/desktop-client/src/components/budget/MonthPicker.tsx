@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import {
   SvgCheveronLeft,
   SvgCheveronRight,
+  SvgLoadBalancer,
 } from '@actual-app/components/icons/v1';
 import { SvgCalendar } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
@@ -16,8 +17,10 @@ import * as monthUtils from 'loot-core/shared/months';
 import { type MonthBounds } from './MonthsContext';
 
 import { Link } from '@desktop-client/components/common/Link';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type MonthPickerProps = {
   startMonth: string;
@@ -35,6 +38,9 @@ export const MonthPicker = ({
   onSelect,
 }: MonthPickerProps) => {
   const locale = useLocale();
+  const payPeriodFeatureFlagEnabled = useFeatureFlag('payPeriodsEnabled');
+  const [payPeriodViewEnabled, setPayPeriodViewEnabled] =
+    useSyncedPref('showPayPeriods');
   const { t } = useTranslation();
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
@@ -93,6 +99,40 @@ export const MonthPicker = ({
           justifyContent: 'center',
         }}
       >
+        {payPeriodFeatureFlagEnabled && (
+          <Link
+            variant="button"
+            buttonVariant="bare"
+            onPress={() =>
+              setPayPeriodViewEnabled(
+                String(payPeriodViewEnabled) === 'true' ? 'false' : 'true',
+              )
+            }
+            style={{
+              padding: '3px 3px',
+              marginRight: '12px',
+              color:
+                String(payPeriodViewEnabled) === 'true'
+                  ? theme.buttonNormalText
+                  : theme.pageTextSubdued,
+            }}
+          >
+            <View
+              title={
+                String(payPeriodViewEnabled) === 'true'
+                  ? t('Hide pay periods')
+                  : t('Show pay periods')
+              }
+            >
+              <SvgLoadBalancer
+                style={{
+                  width: 16,
+                  height: 16,
+                }}
+              />
+            </View>
+          </Link>
+        )}
         <Link
           variant="button"
           buttonVariant="bare"
@@ -183,27 +223,27 @@ export const MonthPicker = ({
                 ...(hoverId !== null &&
                   !hovered &&
                   selected && {
-                    filter: 'brightness(65%)',
-                  }),
+                  filter: 'brightness(65%)',
+                }),
                 ...(hovered &&
                   !selected && {
-                    backgroundColor: theme.buttonBareBackgroundHover,
-                  }),
+                  backgroundColor: theme.buttonBareBackgroundHover,
+                }),
                 ...(!hovered &&
                   !selected &&
                   current && {
-                    backgroundColor: theme.buttonBareBackgroundHover,
-                    filter: 'brightness(120%)',
-                  }),
+                  backgroundColor: theme.buttonBareBackgroundHover,
+                  filter: 'brightness(120%)',
+                }),
                 ...(hovered &&
                   selected &&
                   current && {
-                    filter: 'brightness(120%)',
-                  }),
+                  filter: 'brightness(120%)',
+                }),
                 ...(hovered &&
                   selected && {
-                    backgroundColor: theme.tableBorderHover,
-                  }),
+                  backgroundColor: theme.tableBorderHover,
+                }),
                 ...((idx === firstSelectedIndex ||
                   (idx === hoverId && !selected)) && {
                   borderTopLeftRadius: 2,
