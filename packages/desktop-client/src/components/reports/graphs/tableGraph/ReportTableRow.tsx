@@ -137,6 +137,7 @@ export const ReportTableRow = memo(
                 return (
                   <Cell
                     key={index}
+                    textAlign="right"
                     style={{
                       minWidth: compact ? 50 : 85,
                       ...(colorized && {
@@ -144,7 +145,15 @@ export const ReportTableRow = memo(
                       }),
                     }}
                     unexposedContent={({ value }) => (
-                      <Text style={hoverUnderline}>{value}</Text>
+                      <Text
+                        style={{
+                          ...hoverUnderline,
+                          textAlign: 'right',
+                          flexGrow: 1,
+                        }}
+                      >
+                        {value}
+                      </Text>
                     )}
                     valueStyle={compactStyle}
                     value={format(intervalItem[balanceTypeOp], 'financial')}
@@ -188,6 +197,7 @@ export const ReportTableRow = memo(
                         ? format(item.totalAssets, 'financial')
                         : undefined
                     }
+                    textAlign="right"
                     width="flex"
                     privacyFilter
                     style={{
@@ -197,7 +207,15 @@ export const ReportTableRow = memo(
                       }),
                     }}
                     unexposedContent={({ value }) => (
-                      <Text style={hoverUnderline}>{value}</Text>
+                      <Text
+                        style={{
+                          ...hoverUnderline,
+                          textAlign: 'right',
+                          flexGrow: 1,
+                        }}
+                      >
+                        {value}
+                      </Text>
                     )}
                     valueStyle={compactStyle}
                     onClick={() =>
@@ -228,6 +246,7 @@ export const ReportTableRow = memo(
                         ? format(item.totalDebts, 'financial')
                         : undefined
                     }
+                    textAlign="right"
                     width="flex"
                     privacyFilter
                     style={{
@@ -237,7 +256,15 @@ export const ReportTableRow = memo(
                       }),
                     }}
                     unexposedContent={({ value }) => (
-                      <Text style={hoverUnderline}>{value}</Text>
+                      <Text
+                        style={{
+                          ...hoverUnderline,
+                          textAlign: 'right',
+                          flexGrow: 1,
+                        }}
+                      >
+                        {value}
+                      </Text>
                     )}
                     valueStyle={compactStyle}
                     onClick={() =>
@@ -270,13 +297,22 @@ export const ReportTableRow = memo(
                 ? format(item[balanceTypeOp], 'financial')
                 : undefined
             }
+            textAlign="right"
             style={{
               fontWeight: 600,
               minWidth: compact ? 50 : 85,
               ...(colorized && { color: getAmountColor(item[balanceTypeOp]) }),
             }}
             unexposedContent={({ value }) => (
-              <Text style={hoverUnderline}>{value}</Text>
+              <Text
+                style={{
+                  ...hoverUnderline,
+                  textAlign: 'right',
+                  flexGrow: 1,
+                }}
+              >
+                {value}
+              </Text>
             )}
             valueStyle={compactStyle}
             onClick={() =>
@@ -309,6 +345,7 @@ export const ReportTableRow = memo(
                 ? format(average, 'financial')
                 : undefined
             }
+            textAlign="right"
             style={{
               fontWeight: 600,
               minWidth: compact ? 50 : 85,
