@@ -7,7 +7,7 @@ export default function APIList({ title, sections }) {
 
       <ul>
         {sections.map(name => {
-          let id = name.replace(/[ -]/g, '-').toLowerCase();
+          const id = name.replace(/[ -]/g, '-').toLowerCase();
           return (
             <li
               key={id}

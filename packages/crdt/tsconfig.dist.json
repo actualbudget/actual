@@ -9,8 +9,8 @@
     "noEmit": false,
     "declaration": true,
     "strict": true,
-    "outDir": "dist"
+    "outDir": "dist",
   },
   "include": ["."],
-  "exclude": ["dist", "**/*.test.ts", "**/*.spec.ts"]
+  "exclude": ["dist", "**/*.test.ts", "**/*.spec.ts"],
 }

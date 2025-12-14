@@ -3,15 +3,15 @@ name: E2E Tests
 on:
   pull_request:
     paths:
-      - "packages/**"
-      - "package.json"
-      - "yarn.lock"
-      - ".github/workflows/e2e-test.yml"
-      - "!packages/sync-server/**" # Sync server changes don't affect E2E tests
-      - "!packages/api/**" # API changes don't affect E2E tests
-      - "!packages/ci-actions/**" # CI actions changes don't affect E2E tests
-      - "!packages/docs/**" # Docs changes don't affect E2E tests
-      - "!packages/eslint-plugin-actual/**" # Eslint plugin changes don't affect E2E tests
+      - 'packages/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.github/workflows/e2e-test.yml'
+      - '!packages/sync-server/**' # Sync server changes don't affect E2E tests
+      - '!packages/api/**' # API changes don't affect E2E tests
+      - '!packages/ci-actions/**' # CI actions changes don't affect E2E tests
+      - '!packages/docs/**' # Docs changes don't affect E2E tests
+      - '!packages/eslint-plugin-actual/**' # Eslint plugin changes don't affect E2E tests
 
 env:
   GITHUB_PR_NUMBER: ${{github.event.pull_request.number}}
@@ -21,25 +21,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  netlify:
-    name: Wait for Netlify build to finish
-    runs-on: ubuntu-latest
-    outputs:
-      netlify_url: ${{ steps.netlify.outputs.url }}
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - name: Set up environment
-        uses: ./.github/actions/setup
-      - name: Wait for Netlify build to finish
-        id: netlify
-        env:
-          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./.github/actions/netlify-wait-for-build
-
   functional:
     name: Functional (shard ${{ matrix.shard }}/5)
-    needs: netlify
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -51,12 +34,12 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
       - name: Trust the repository directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - name: Run E2E Tests on Netlify URL
+      - name: Run E2E Tests
         run: yarn e2e --shard=${{ matrix.shard }}/5
-        env:
-          E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: always()
         with:
@@ -74,6 +57,8 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
       - name: Trust the repository directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Run Desktop app E2E Tests
@@ -89,7 +74,6 @@ jobs:
 
   vrt:
     name: Visual regression (shard ${{ matrix.shard }}/5)
-    needs: netlify
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -101,10 +85,10 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Set up environment
         uses: ./.github/actions/setup
-      - name: Run VRT Tests on Netlify URL
+        with:
+          download-translations: 'false'
+      - name: Run VRT Tests
         run: yarn vrt --shard=${{ matrix.shard }}/5
-        env:
-          E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: always()
         with:
@@ -149,5 +133,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `VRT tests ❌ failed. [View the test report](${{ steps.playwright-report-vrt.outputs.artifact-url }}).`
+              body: `VRT tests ❌ failed. [View the test report](${{ steps.playwright-report-vrt.outputs.artifact-url }}).\n\nTo update the VRT screenshots, comment \`/update-vrt\` on this PR.`
             });

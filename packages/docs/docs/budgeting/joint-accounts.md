@@ -21,8 +21,6 @@ spending aligns with joint expenses and goals.
 Choosing the right approach depends on your communication style, financial goals, and the level of financial
 independence or collaboration you prefer in your relationship.
 
-
-
 ## Tracking A Shared Account With A Shared Actual Budget
 
 If you and your partner are in a serious relationship and have begun reimbursing each other, you should consider the next step: creating a joint account for joint expenses.
@@ -48,7 +46,6 @@ Another tip is to let your partner be the primary account holder for your joint 
 4. Decide how big each partner's contribution to the joint account should be (see below).
 5. Follow the [Starting Fresh guide](/docs/getting-started/starting-fresh) with your partner.
 
-
 ### Deciding on how big each partner's contribution should be
 
 For many couples, this could be a very tough and emotional discussion. It might be a litmus test if your relationship
@@ -58,6 +55,7 @@ both must look hard at your approach to your relationship.
 There are a few ways to decide how much each partner should contribute.
 
 #### Pool all income into the joint account
+
 A common way is to pool all income into the joint account and then withdraw personal spending from this account.
 As most partners have different spending habits, depending on their personal needs and wants, pooling all income may
 cause friction. The partners may refrain from spending joint money on personal projects or other needs.
@@ -74,9 +72,8 @@ Both will then contribute their share of the joint expenses. This is called _pla
 
 But how do you find your just share? The most just way to do this is by percentage of normal income per partner.
 If Bob makes $ 4,000 a month and Alice makes $ 6,000, the total income is $ 10,000. Out of
-this, Bob will contribute 40% to the joint expenses. To compute the percentage for Bob: 400 (Bob's income) * 100 / 10000
+this, Bob will contribute 40% to the joint expenses. To compute the percentage for Bob: 400 (Bob's income) \* 100 / 10000
 (total income). Alice's percentage is 60%, found by subtracting Bob's percentage from 100.
-
 
 ### Tracking personal spending in the budget
 
@@ -91,26 +88,19 @@ If the reimbursements happen immediately, there is no need to enter these two tr
 as they will zero each other out.
 :::
 
-
 ### Adding funds to the joint account
 
 To keep track of your and your partner's contributions to your join account, create one income category named
-_Partners Contributions_. This category is *only used* to track _planned income_ from each partner. You also want
+_Partners Contributions_. This category is _only used_ to track _planned income_ from each partner. You also want
 two categories called _Partner Reimbursements_ and _Common Income_.
 
-* When both partners pay their share, this is added to the _Partners Contributions_. This way makes it easy to track
+- When both partners pay their share, this is added to the _Partners Contributions_. This way makes it easy to track
   that everyone has contributed their part. When starting with joint budgeting, you will have partial insights into your spending habits, and extra funds need to be added to the joint account, so
   good visibility is a must.
-* When reimbursements for personal spending occur, use the _Partner Reimbursements_ income category and immediately
+- When reimbursements for personal spending occur, use the _Partner Reimbursements_ income category and immediately
   use this amount against the _Partner Personal Spending_ category.
-* _Common Income_ is all other income that is _not planned_. This could be gifts, or if you sell stuff that you own
+- _Common Income_ is all other income that is _not planned_. This could be gifts, or if you sell stuff that you own
   together, etc.
-
-
-
-
-
-
 
 ## Tracking A Shared Account With Your Personal Actual Budget
 

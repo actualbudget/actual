@@ -8,28 +8,26 @@ zip export, you can restore this backup by importing it using the Import File bu
 ### Steps to Restore a Backup:
 
 1. Close your current budget by clicking on the budget name in the top left
-corner of the screen and choosing the option to close the budget file.
+   corner of the screen and choosing the option to close the budget file.
 
-  ![Close the current budget file](/img/backup-restore/restore-close-budget.png)
+![Close the current budget file](/img/backup-restore/restore-close-budget.png)
 
-2. In the *Budget Selection Screen*, or File Screen that appears, click on *Import file*.
+2. In the _Budget Selection Screen_, or File Screen that appears, click on _Import file_.
 
    ![Click on the import file link](/img/backup-restore/restore-import-file.png)
 
-3. Choose the *Actual* option.
+3. Choose the _Actual_ option.
 
    ![Click on the import file link](/img/backup-restore/restore-import-file-dialog.png)
 
-
-4. Then click on the *Select file...* button.
+4. Then click on the _Select file..._ button.
 
    ![Click on the import file link](/img/backup-restore/restore-import-file-select-file.png)
 
 5. Navigate to the location of where you stored your backup file, select it and click
-on the *upload button*.
+   on the _upload button_.
 
    ![Click on the import file link](/img/backup-restore/restore-import-file-choose-file.png)
-
 
 That is it. The backup is now restored. If the imported budget is a copy
 of your current budget, you may want to rename the import by clicking on its name
@@ -39,16 +37,15 @@ and deleting the old copy.
 
 ![Click on the import file link](/img/backup-restore/restore-import-imported-budget.png)
 
-
-
 ## Errors When Restoring Database From Backup
+
 You may encounter an error during restoration that says:
 
 `This budget cannot be loaded with this version of the app. Make sure the app is up-to-date.`
 
 This should only happen when you upgrade from a Docker image with the `edge` tag to a stable release, such as `latest`. It should not happen in other instances. If you see this bug, please submit a bug report.
 
-**IMPORTANT NOTE**: You *MUST* download a backup of each of your budgets using the process outlined above **before** continuing. It's always good practice to backup your data before upgrading to a new version.
+**IMPORTANT NOTE**: You _MUST_ download a backup of each of your budgets using the process outlined above **before** continuing. It's always good practice to backup your data before upgrading to a new version.
 
 The fix for this is to migrate your SQLite database in the steps outlined below manually:
 
@@ -74,11 +71,9 @@ Actual keeps backups of your data locally. If something disastrous happens, you 
 
 Currently, it keeps up to 10 backups, one for each you used the app, and multiple backups of the current day. The result is you will have data backed up **up to the last 15 minutes**, in addition to the previous 10 days you used the app.
 
-
 ### Loading an Automatic Backup
 
 - Select the **File > Load Backup…** menu item
 - Choose the backup you want to load and select it
-
 
 The app will reload with the data from that backup. If you want to keep using that backup, you don't have to do anything else; keep using the app. If you wish to return to the previous data, reopen the backup menu and select **Revert to original version**. This option will be available until another backup is made.
