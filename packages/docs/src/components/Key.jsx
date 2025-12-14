@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import classes from './Key.module.css';
 
 function title(str) {
@@ -33,7 +34,7 @@ const arrows = {
 };
 
 export default function Key({ mod, fixed, mods = [], k, arrow }) {
-  let [isMacLike, setMacLike] = useState(true);
+  const [isMacLike, setMacLike] = useState(true);
 
   useEffect(() => {
     setMacLike(detectMac());
@@ -49,7 +50,7 @@ export default function Key({ mod, fixed, mods = [], k, arrow }) {
 
   mods = mods.map(mod => (fixed ? mod : transform(mod, isMacLike))).map(title);
 
-  let keys = [...mods, title(k)];
+  const keys = [...mods, title(k)];
 
   return (
     <div style={{ display: 'inline-flex' }}>

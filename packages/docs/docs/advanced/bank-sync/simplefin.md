@@ -9,13 +9,11 @@ Server Version 24.10.0 or higher are required for this feature.
 
 1. Create an account with SimpleFIN Bridge - https://beta-bridge.simplefin.org/ , by clicking "Get Started" and entering your email address.
 
-    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-01.png)
-
+   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-01.png)
 
 2. You will receive an email with the login link, after a few minutes. Click this link to log into your account dashboard.
 
-    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-02.png)
-
+   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-02.png)
 
 3. Accept the terms, on first login, and then you will be taken to "My Account".
 
@@ -27,28 +25,27 @@ Server Version 24.10.0 or higher are required for this feature.
 
    _This is only for you to easily identify it in the SimpleFIN connections overview._
 
-    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-03.png)
+   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-03.png)
 
 6. Save the generated Setup Token someplace safe (one-time use only).
 
-    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-04.png)
+   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-04.png)
 
 7. Back in Actual, click on “+ Add account” at the bottom of the sidebar.
 
-    ![](/img/connecting-your-bank/connecting-your-bank-02.png)
+   ![](/img/connecting-your-bank/connecting-your-bank-02.png)
 
 8. Click “Link bank account with SimpleFIN”.
 
-    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-05.png)
+   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-05.png)
 
 9. You will be asked to enter your SimpleFIN setup token. The keys from this value will be saved on the server, so you will only need to enter it once.
 
-    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-06.png)
+   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-06.png)
 
 ### Link Accounts with SimpleFIN
 
 1. Add the link to your accounts in actual (Existing or New).
-
    - **_For an existing account, click on that account, select the ... (kebab menu) in the top right, and choose Link Account_**
 
      ![](/img/connecting-your-bank/connecting-your-bank-01.png)
@@ -91,4 +88,3 @@ To reset your SimpleFIN setup token:
 3. Click "Reset SimpleFIN credentials".
 
 You will then need to obtain a new setup token from SimpleFIN and enter it into Actual.
-

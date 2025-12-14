@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { patchFetchForSqlJS } from '../../../mocks/util';
 
-// eslint-disable-next-line no-restricted-imports
+// oxlint-disable-next-line eslint/no-restricted-imports
 import {
   init,
   openDatabase,

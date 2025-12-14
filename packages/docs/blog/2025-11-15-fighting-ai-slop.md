@@ -8,7 +8,7 @@ hide_table_of_contents: false
 authors: MatissJanis
 ---
 
-Actual has started receiving what can only be described as *AI slop* — pull requests and issues generated entirely by automated systems with no human involvement. These require the same amount of triage and review time as genuine contributions, but add no value. Every minute spent dealing with machine-generated junk is time not spent improving Actual itself.
+Actual has started receiving what can only be described as _AI slop_ — pull requests and issues generated entirely by automated systems with no human involvement. These require the same amount of triage and review time as genuine contributions, but add no value. Every minute spent dealing with machine-generated junk is time not spent improving Actual itself.
 
 <!--truncate-->
 
@@ -23,6 +23,7 @@ From this point on, we will close any PRs or issues that appear to be 100% AI-ge
 ## Why This Matters
 
 Every AI slop PR or issue requires the same triage and review time as genuine contributions. With limited maintainer bandwidth, this directly impacts:
+
 - Response times for real issues and feature requests
 - Time available for reviewing legitimate contributions
 - Overall project velocity
@@ -32,6 +33,7 @@ We want to spend our time improving Actual, not filtering through automated nois
 ## How to Contribute Properly with AI
 
 If you're using AI to help with contributions, that's perfectly fine! Just make sure you:
+
 - **Review everything** before submitting, understand what changed and why
 - **Test your changes** - don't assume AI-generated code works correctly
 - **Respond to feedback** - be ready to discuss, iterate, and improve your contribution
@@ -51,4 +53,3 @@ Even so, it would be better not to receive AI slop at all.
 Please, if you're using AI to help contribute, stay in the loop. Review, edit, and understand what you're submitting. Actual is built by humans, for humans. Keep it that way.
 
 We're grateful for all genuine contributions, whether AI-assisted or not. The key is human oversight and understanding. Thank you for helping keep Actual focused on what matters.
-
