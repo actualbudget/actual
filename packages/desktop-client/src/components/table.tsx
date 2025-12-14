@@ -55,10 +55,13 @@ import {
 export const ROW_HEIGHT = 32;
 
 function fireBlur(onBlur, e) {
-  if (document.hasFocus()) {
-    // We only fire the blur event if the app is still focused
-    // because the blur event is fired when the app goes into
-    // the background and we want to ignore that
+  // We only fire the blur event if the app is still focused or if focus
+  // is moving to another element (relatedTarget exists). This handles:
+  // - Normal focus changes within the app (relatedTarget is set)
+  // - iOS keyboard appearing/disappearing (may cause brief hasFocus() false)
+  // We suppress blur events when the app goes into the background
+  // (no relatedTarget AND document doesn't have focus)
+  if (document.hasFocus() || e.relatedTarget) {
     onBlur?.(e);
   } else {
     // Otherwise, stop React from bubbling this event and swallow it
@@ -460,10 +463,11 @@ export function CustomCell({
   }
 
   function onBlur_(e: FocusEvent) {
-    // Only save on blur if the app is focused. Blur events fire when
-    // the app unfocuses, and it's unintuitive to save the value since
-    // the input will be focused again when the app regains focus
-    if (document.hasFocus()) {
+    // Only save on blur if the app is focused or focus is moving to another
+    // element. Blur events fire when the app unfocuses, and it's unintuitive
+    // to save the value since the input will be focused again when the app
+    // regains focus. This also handles iOS keyboard transitions properly.
+    if (document.hasFocus() || e.relatedTarget) {
       onUpdate?.(value);
       fireBlur(onBlur, e);
     }
