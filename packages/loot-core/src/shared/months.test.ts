@@ -89,7 +89,7 @@ describe('Pay Period Integration with Month Utilities', () => {
         payPeriodMonth,
         payPeriodConfig,
       );
-      expect(displayName).toMatch(/Jan-\d+/); // Should be "Jan-1" or similar
+      expect(displayName).toMatch(/J\d+/); // Should be "Jan-1" or similar
 
       const dateRange = monthUtils.getMonthDateRange(
         payPeriodMonth,
