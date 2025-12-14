@@ -63,7 +63,7 @@ through the list of available commands. You can also quickly move to any of the 
 - <Key k="n" /> Set notes for selected transactions.
 - <Key k="c" /> Set category for selected transactions.
 - <Key k="m" /> Set amount for selected transactions.
-- <Key k="l" /> Toggle cleared for current transaction.
+- <Key k="l" /> Toggle cleared status for current transaction.
 - <Key k="J" /> or <Key arrow="down" /> Move to the next transaction down.
 - <Key k="K" /> or <Key arrow="up" /> Move to the next transaction up.
 - <Key k="space" /> Toggle selection of current transaction.
