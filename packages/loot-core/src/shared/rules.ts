@@ -70,6 +70,9 @@ const FIELD_INFO = {
   date: { type: 'date' },
   notes: {
     type: 'string',
+    // Disabled the 'oneOf', 'notOneOf', and 'hasTags' ops for notes
+    // because they don't make much sense in this context.
+    // the notes filter should just be a simple string match.
     disallowedOps: new Set(['oneOf', 'notOneOf', 'hasTags']),
   },
   amount: { type: 'number' },
