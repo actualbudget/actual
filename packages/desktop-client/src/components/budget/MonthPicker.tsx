@@ -223,27 +223,27 @@ export const MonthPicker = ({
                 ...(hoverId !== null &&
                   !hovered &&
                   selected && {
-                  filter: 'brightness(65%)',
-                }),
+                    filter: 'brightness(65%)',
+                  }),
                 ...(hovered &&
                   !selected && {
-                  backgroundColor: theme.buttonBareBackgroundHover,
-                }),
+                    backgroundColor: theme.buttonBareBackgroundHover,
+                  }),
                 ...(!hovered &&
                   !selected &&
                   current && {
-                  backgroundColor: theme.buttonBareBackgroundHover,
-                  filter: 'brightness(120%)',
-                }),
+                    backgroundColor: theme.buttonBareBackgroundHover,
+                    filter: 'brightness(120%)',
+                  }),
                 ...(hovered &&
                   selected &&
                   current && {
-                  filter: 'brightness(120%)',
-                }),
+                    filter: 'brightness(120%)',
+                  }),
                 ...(hovered &&
                   selected && {
-                  backgroundColor: theme.tableBorderHover,
-                }),
+                    backgroundColor: theme.tableBorderHover,
+                  }),
                 ...((idx === firstSelectedIndex ||
                   (idx === hoverId && !selected)) && {
                   borderTopLeftRadius: 2,

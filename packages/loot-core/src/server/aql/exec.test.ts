@@ -287,7 +287,7 @@ describe('compileAndRunQuery', () => {
   it('uses date range filtering for pay periods instead of $month transform', async () => {
     // This test verifies the fix: categoryBalance now uses createMonthDateFilter
     // which detects pay periods and uses date range filtering instead of $month transform
-    
+
     // Set up pay period config for biweekly starting Jan 5, 2024
     setPayPeriodConfig({
       enabled: true,
