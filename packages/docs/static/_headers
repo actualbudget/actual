@@ -1,0 +1,13 @@
+
+# /assets folder contain processed assets with a file hash
+# They are safe for immutable caching, as filename change when content change
+
+/assets/*
+  Cache-Control: public
+  Cache-Control: max-age=365000000
+  Cache-Control: immutable
+
+/img/*
+  Cache-Control: public
+  Cache-Control: max-age=604800
+  Cache-Control: immutable
