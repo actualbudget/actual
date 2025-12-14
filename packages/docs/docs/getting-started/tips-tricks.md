@@ -5,7 +5,7 @@ title: 'Tips & Tricks'
 
 ## Undo/Redo {#undo-redo}
 
-If you ever make a mistake, pressing <Key mod="cmd" k="z" /> will undo, and pressing <Key mod="cmd shift" k="z" /> will redo. Using the desktop app, this is an undo system that you can always rely on; any change can be undone and the UI will walk back in time.  If you're using the web app, this is only good for the current session of the website. If you refresh, or close the browser tab, undo history is lost.
+If you ever make a mistake, pressing <Key mod="cmd" k="z" /> will undo, and pressing <Key mod="cmd shift" k="z" /> will redo. Using the desktop app, this is an undo system that you can always rely on; any change can be undone and the UI will walk back in time. If you're using the web app, this is only good for the current session of the website. If you refresh, or close the browser tab, undo history is lost.
 
 ## Keyboard Shortcuts
 
@@ -15,6 +15,7 @@ Below is a list of the most useful shortcuts.
 ### The Command Palette
 
 The Command Palette is a powerful tool which allows you to quickly access various features and functions within Actual.
+
 - On Windows and Linux, you can open it by pressing the <Key mod="ctrl" fixed k="k" /> combination to open the Command Palette.
 - On macOS, you can use the <Key mod="cmd" fixed k="k" /> or the <Key mod="ctrl" fixed k="k" /> key combinations to open the Command Palette.
 
@@ -23,12 +24,10 @@ The Command Palette is a powerful tool which allows you to quickly access variou
 Once open, you can start typing to search for the functions in the sidebar, or you can use the arrow keys to navigate
 through the list of available commands. You can also quickly move to any of the available accounts by typing their name.
 
-
 ### Other Global Shortcuts
 
--  <Key mod="ctrl" k="O" /> (the letter O, not zero) this will close the file and list other available files to open.
-   On macOS, you can also use the <Key mod="cmd" k="O" /> key combination.
-
+- <Key mod="ctrl" k="O" /> (the letter O, not zero) this will close the file and list other available files to open.
+  On macOS, you can also use the <Key mod="cmd" k="O" /> key combination.
 
 ### Within the Budget View
 
@@ -76,7 +75,7 @@ This only controls the _maximum_ number of months. If the app is too small to re
 
 ## Scramble and Hide Data
 
-Actual Budget includes a privacy filter to help you obfuscate sensitive *amounts* on screen.
+Actual Budget includes a privacy filter to help you obfuscate sensitive _amounts_ on screen.
 
 :::important
 Be advised that when you hover over scrambled items, the amounts will be shown. This is a feature to help you see the actual amounts when you need them, but it may not be suitable for sharing screenshots or screen recordings.
@@ -91,6 +90,7 @@ When enabled, only currency amounts are scrambled so you can take screenshots or
 ![Top right corner](/img/tips-tricks/scrambled-scrambled-view.png)
 
 What changes when the filter is on
+
 - Hidden/Scrambled: account balances, budgeted/available amounts, transaction amounts, totals in reports and widgets.
 - Remain Visible: account names, category group and category names, payee names, transaction dates, notes/memos, flags, cleared status, and the presence of individual transactions (only the amounts are scrambled).
 
@@ -98,10 +98,7 @@ What changes when the filter is on
 The privacy filter is visual only: it does not encrypt, delete, or alter your saved data or exports.
 :::
 
-
 **Turn it off**: Click the _eye icon_ again to restore normal viewing. This will show the data in its original form.
-
-
 
 ## Show The Running Balance
 
@@ -116,7 +113,6 @@ To enable this:
 A new column should appear which shows the balance of the account after each transaction:
 
 ![Show running balance](/img/tips-tricks/running-balance.png)
-
 
 ## Using Emojis in Actual
 
