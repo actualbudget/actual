@@ -9,7 +9,7 @@ If you ever make a mistake, pressing <Key mod="cmd" k="z" /> will undo, and pres
 
 ## Context Menus
 
-Context menus (right-click menus) are available throughout Actual. Use the method to access them based on your OS and hardware.
+Context menus (right-click menus) are available throughout Actual. Use the method to access them based on your operating system and hardware.
 
 ## The Command Palette
 
@@ -29,7 +29,7 @@ through the list of available commands. You can also quickly move to any of the 
 <Key k="?" /> Open the help menu. 
 The Help Menu contains a link to the documentation, the community Discord and the Keyboard shortcuts.
 
-###General shortcuts
+### General shortcuts
 
 -  <Key mod="ctrl" k="O" /> (the letter O, not zero) Close the current budget and list other available budgets to open.
    On macOS, you can also use the <Key mod="cmd" k="O" /> key combination.
@@ -47,10 +47,11 @@ The Help Menu contains a link to the documentation, the community Discord and th
 ### Account page shortcuts
 
 - <Key k="enter" /> and <Key mod="shift" k="enter" /> when editing will move down and up. If a dropdown is open and you've typed a new value, this will instead save the value and close the dropdown.
-- <Key mod="ctrl" k="I" /> Import transactions.
 - <Key k="tab" /> and <Key mod="shift" k="tab" /> when editing will move left and right
 - <Key mod="ctrl" k="enter" /> will add the transaction and close the form regardless of where you are editing.
 - <Key k="enter" /> in either the Payment or Deposit columns will add the transaction as well.
+- <Key mod="ctrl" k="I" /> (i) Import transactions.
+- <Key mod="ctrl" k="B" /> Initiate bank sync.
 
 ### When Managing Transactions
 
@@ -58,15 +59,17 @@ The Help Menu contains a link to the documentation, the community Discord and th
 - <Key k="d" /> Delete selected transactions.
 - <Key k="u" /> Duplicate selected transactions.
 - <Key k="g" /> Merge selected transactions
-- <Key k="t" /> Set date for selected transactions.
 - <Key k="a" /> Set account for selected transactions.
 - <Key k="p" /> set payee for selected transactions.
 - <Key k="n" /> Set notes for selected transactions.
 - <Key k="c" /> Set category for selected transactions.
 - <Key k="m" /> Set amount for selected transactions.
 - <Key k="l" /> Toggle cleared status for current transaction.
-- <Key k="J" /> or <Key arrow="down" /> Move to the next transaction down.
-- <Key k="K" /> or <Key arrow="up" /> Move to the next transaction up.
+- <Key k="S" /> Link or view schedule for selected transactions
+- <Key mod="ctrl" k="A" /> Select all transactions
+- <Key k="t" /> Set date for selected transactions.
+- <Key k="J" /> or <Key arrow="down" /> Move to the next transaction down. Hold to scroll down.
+- <Key k="K" /> or <Key arrow="up" /> Move to the next transaction up. Hold to scroll up.
 - <Key k="space" /> Toggle selection of current transaction.
 - <Key mod="shift" k="space" /> Select all transactions between current transaction and most recently selected transaction.
 
@@ -90,7 +93,7 @@ Actual Budget includes a privacy filter to help you obfuscate sensitive _amounts
 Be advised that when you hover over scrambled items, the amounts will be shown. This is a feature to help you see the actual amounts when you need them, but it may not be suitable for sharing screenshots or screen recordings.
 :::
 
-**Turn it on**: Click the _eye icon_ in the top-right corner of the app.
+**Turn it on**: Click the _eye icon_ in the top-right corner of the app or use the shortcut <Key mod="shift" mod="ctrl" k="P" />. 
 
 ![Top right corner](/img/a-tour-of-actual/tour-overview-top-right.png)
 
@@ -107,11 +110,15 @@ What changes when the filter is on
 The privacy filter is visual only: it does not encrypt, delete, or alter your saved data or exports.
 :::
 
-**Turn it off**: Click the _eye icon_ again to restore normal viewing. This will show the data in its original form.
+**Turn it off**: Click the _eye icon_ or <Key mod="shift" mod="ctrl" k="P" /> again to restore normal viewing. This will show the data in its original form.
 
 ## Show The Running Balance
 
-A "running balance" is the balance of the account after every transaction over time. This is very useful for reconciling accounts with banks because you can see the balance at a specific date and use it to compare it with your bank. Note that the "Show running balance" option and column is only available when the list of transactions is sorted by date in descending order.
+A "running balance" is the balance of the account after every transaction over time. This is very useful for reconciling accounts with banks because you can see the balance at a specific date and use it to compare it with your bank. 
+
+:::note
+The "Show running balance" option and column is only available when the list of transactions is sorted by date in descending order. It can be toggled on or off separately for each account.
+:::
 
 To enable this:
 
@@ -134,6 +141,10 @@ like [Emojipedia](https://emojipedia.org/), [EmojiDB](https://emojidb.org/) or [
 ![Emojis everywhere](/img/tips-tricks/using-emojis.png)
 
 By using emojis on the accounts, you can have grouping of accounts by type, such as credit cards, expenses, and savings.
+
+:::tip[Hint]
+To scrub them out of an exported list, use the formula `=REGEXREPLACE(text or cell reference, "[^\x00-\x7F]", "")` in Excel or Google sheets.
+:::
 
 ## Math Operators
 
