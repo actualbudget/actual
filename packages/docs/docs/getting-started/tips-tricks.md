@@ -7,8 +7,10 @@ title: 'Tips & Tricks'
 
 If you ever make a mistake, pressing <Key mod="ctrl" k="z" /> will undo, and pressing <Key mod="ctrl" mod="shift" k="z" /> will redo. Using the desktop app, this is an undo system that you can always rely on; any change can be undone and the UI will walk back in time. If you're using the web app, this is only good for the current session of the website. If you refresh, or close the browser tab, undo history is lost.
 
-:::note 
+:::note
+
 On macOS keyboards, the key modifier <Key mod="cmd" /> replaces <Key mod="ctrl" />.
+
 :::
 
 
@@ -62,15 +64,15 @@ The Help Menu contains a link to the Documentation, Community support (Discord) 
 - <Key k="f" /> Show only selected transactions. If no transaction is selected, it brings up the Filter dropdown menu.
 - <Key k="d" /> Delete selected transactions.
 - <Key k="u" /> Duplicate selected transactions.
-- <Key k="g" /> Merge selected transactions
+- <Key k="g" /> Merge selected transactions.
 - <Key k="a" /> Set account for selected transactions.
 - <Key k="p" /> set payee for selected transactions.
 - <Key k="n" /> Set notes for selected transactions.
 - <Key k="c" /> Set category for selected transactions.
 - <Key k="m" /> Set amount for selected transactions.
 - <Key k="l" /> Toggle cleared status for current transaction.
-- <Key k="S" /> Link or view schedule for selected transactions
-- <Key mod="ctrl" k="A" /> Select all transactions
+- <Key k="S" /> Link or view schedule for selected transactions.
+- <Key mod="ctrl" k="A" /> Select all transactions.
 - <Key k="t" /> Set date for selected transactions.
 - <Key k="J" /> or <Key arrow="down" /> Move to the next transaction down. Hold to scroll down.
 - <Key k="K" /> or <Key arrow="up" /> Move to the next transaction up. Hold to scroll up.
@@ -86,7 +88,9 @@ In the top left of the budget, you will see this control:
 This sets the maximum amount of months to render at once, and defaults to 1. If you want to view multiple months on the same page, click the boxes to increase the number.
 
 :::note
+
 This only controls the _maximum_ number of months. If the app is too small to render all of them it will only render the months that fit on the screen.
+
 :::
 
 ## Scramble and Hide Data
@@ -94,7 +98,9 @@ This only controls the _maximum_ number of months. If the app is too small to re
 Actual Budget includes a privacy filter to help you obfuscate sensitive _amounts_ on screen.
 
 :::important
+
 Be advised that when you hover over scrambled items, the amounts will be shown. This is a feature to help you see the actual amounts when you need them, but it may not be suitable for sharing screenshots or screen recordings.
+
 :::
 
 **Turn it on**: Click the _eye icon_ in the top-right corner of the app or use the shortcut <Key mod="shift" mod="ctrl" k="P" />. 
@@ -105,13 +111,15 @@ When enabled, only currency amounts are scrambled so you can take screenshots or
 
 ![Top right corner](/img/tips-tricks/scrambled-scrambled-view.png)
 
-What changes when the filter is on
+What changes when the filter is on:
 
 - Hidden/Scrambled: account balances, budgeted/available amounts, transaction amounts, totals in reports and widgets.
 - Remain Visible: account names, category group and category names, payee names, transaction dates, notes/memos, flags, cleared status, and the presence of individual transactions (only the amounts are scrambled).
 
 :::note
+
 The privacy filter is visual only: it does not encrypt, delete, or alter your saved data or exports.
+
 :::
 
 **Turn it off**: Click the _eye icon_ or <Key mod="shift" mod="ctrl" k="P" /> again to restore normal viewing. This will show the data in its original form.
@@ -121,7 +129,9 @@ The privacy filter is visual only: it does not encrypt, delete, or alter your sa
 A "running balance" is the balance of the account after every transaction over time. This is very useful for reconciling accounts with banks because you can see the balance at a specific date and use it to compare it with your bank. 
 
 :::note
+
 The "Show running balance" option and column is only available when the list of transactions is sorted by date in descending order. It can be toggled on or off separately for each account.
+
 :::
 
 To enable this:
@@ -146,8 +156,10 @@ like [Emojipedia](https://emojipedia.org/), [EmojiDB](https://emojidb.org/) or [
 
 By using emojis on the accounts, you can have grouping of accounts by type, such as credit cards, expenses, and savings.
 
-:::tip[Hint]
+:::tip[HINT]
+
 To scrub emojis out of an exported list, use the formula `=REGEXREPLACE(text or cell reference, "[^\x00-\x7F]", "")` in Excel or Google sheets.
+
 :::
 
 ## Math Operators
