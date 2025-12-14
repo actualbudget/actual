@@ -27,7 +27,7 @@ through the list of available commands. You can also quickly move to any of the 
 ## Keyboard Shortcuts
 
 <Key k="?" /> Open the help menu. 
-The Help Menu contains a link to the documentation, the community Discord and the Keyboard shortcuts.
+The Help Menu contains a link to the Documentation, Community support (Discord) and the Keyboard shortcuts.
 
 ### General shortcuts
 
