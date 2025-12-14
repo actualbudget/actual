@@ -15,6 +15,7 @@ import { SaveReportDelete } from './SaveReportDelete';
 import { SaveReportMenu } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
 
+import { useDashboards } from '@desktop-client/hooks/useDashboard';
 import { useReports } from '@desktop-client/hooks/useReports';
 
 type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
@@ -54,6 +55,7 @@ export function SaveReport({
   onReportChange,
 }: SaveReportProps) {
   const { data: listReports } = useReports();
+  const { data: dashboards } = useDashboards();
   const triggerRef = useRef(null);
   const [deleteMenuOpen, setDeleteMenuOpen] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
@@ -91,12 +93,15 @@ export function SaveReport({
       }
 
       // Add to dashboard
-      await send('dashboard-add-widget', {
-        type: 'custom-report',
-        width: 4,
-        height: 2,
-        meta: { id: response.data },
-      });
+      if (dashboards.length > 0) {
+        await send('dashboard-add-widget', {
+          type: 'custom-report',
+          width: 4,
+          height: 2,
+          meta: { id: response.data },
+          dashboardId: dashboards[0].id,
+        });
+      }
 
       setNameMenuOpen(false);
       onReportChange({
