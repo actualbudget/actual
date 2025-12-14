@@ -21,12 +21,12 @@ Users can be added, disabled, enabled, removed from this page:
 There are two user roles _Basic_ or _Admin_.
 
 - The Basic role:
-Users with the Basic role can create new budgets and collaborate on budgets made by others.
-This role is ideal for users who primarily need to manage and participate in shared budget activities.
+  Users with the Basic role can create new budgets and collaborate on budgets made by others.
+  This role is ideal for users who primarily need to manage and participate in shared budget activities.
 
 - The Admin role:
-This role can do everything the Basic user role can. It can also add new users to the user directory and allow all users to access budget files.
-The role can assign ownership of a budget to another person, ensuring efficient budget management.
+  This role can do everything the Basic user role can. It can also add new users to the user directory and allow all users to access budget files.
+  The role can assign ownership of a budget to another person, ensuring efficient budget management.
 
 ## User Access Management
 

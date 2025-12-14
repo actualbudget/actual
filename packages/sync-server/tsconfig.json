@@ -3,14 +3,14 @@
   "compilerOptions": {
     "lib": ["ES2021"],
     "noEmit": false,
-    "outDir": "build"
+    "outDir": "build",
   },
   "include": [
     "src/**/*",
     "migrations/**/*",
     "types/**/*",
     "app.ts",
-    "bin/**/*"
+    "bin/**/*",
   ],
-  "exclude": ["node_modules", "build", "coverage"]
+  "exclude": ["node_modules", "build", "coverage"],
 }

@@ -1,6 +1,6 @@
+import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
 import ThemedImage from '@theme/ThemedImage';
-import Link from '@docusaurus/Link';
 
 import Button from '../components/Button';
 

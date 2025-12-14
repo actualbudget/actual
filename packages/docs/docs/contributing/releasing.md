@@ -24,15 +24,18 @@ For example:
 ## Set up the PR
 
 ### Code
+
 - [ ] Run [this GitHub Action](https://github.com/actualbudget/actual/actions/workflows/generate-release-pr.yml) to generate a release PR (for a regular monthly release, leave the arguments set to their default values).
 - [ ] Open the generated PR and ensure the release notes workflow has started to collate the release notes into a comment in the PR. You may need to push an empty commit in order to trigger CI.
 
 ### Docs
+
 - [ ] Open the release PR `release/vYY.MM.xx`
 - [ ] After the release notes workflows in the PR has been run, copy the collated notes into a new blog post using a previous release as a template. The release notes will also need adding to the `docs/releases.md` file.
 - [ ] Fix spelling as needed.
 
 ## Await approval of the Release PR
+
 - [ ] Remove `[WIP]` from the PR title to mark it as ready for review, and share in the release channel on Discord.
 - [ ] Wait until at least 2 other maintainers have approved the release before merging the release PR.
 
@@ -41,12 +44,13 @@ For example:
 Once the release PRs have been merged, the commit in `actual` needs to be tagged. When the tag is pushed, it will trigger the Docker stable image, all NPM package and the Desktop app to be built and published.
 
 - [ ] Run the below in the `actual` repository, or use the GitHub UI.
-    ```bash
-    git tag vX.Y.Z
-    git push vX.Y.Z
-    ```
+  ```bash
+  git tag vX.Y.Z
+  git push vX.Y.Z
+  ```
 
 All NPM packages should be automatically released and pushed to the NPM registry. Check them here:
+
 - [@actual-app/api](https://www.npmjs.com/package/@actual-app/api)
 - [@actual-app/web](https://www.npmjs.com/package/@actual-app/web)
 - [@actual-app/sync-server](https://www.npmjs.com/package/@actual-app/sync-server)
