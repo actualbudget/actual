@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import React, {
   type FocusEvent,
+  type FocusEventHandler,
   forwardRef,
   useCallback,
   useImperativeHandle,
@@ -54,7 +55,14 @@ import {
 
 export const ROW_HEIGHT = 32;
 
-function fireBlur(onBlur, e) {
+function fireBlur(
+  onBlur:
+    | FocusEventHandler<HTMLInputElement>
+    | FocusEventHandler<HTMLDivElement>
+    | ((e: UIEvent<unknown>) => void)
+    | undefined,
+  e: FocusEvent,
+) {
   // We only fire the blur event if the app is still focused or if focus
   // is moving to another element (relatedTarget exists). This handles:
   // - Normal focus changes within the app (relatedTarget is set)
@@ -62,6 +70,7 @@ function fireBlur(onBlur, e) {
   // We suppress blur events when the app goes into the background
   // (no relatedTarget AND document doesn't have focus)
   if (document.hasFocus() || e.relatedTarget) {
+    // @ts-expect-error - onBlur can be various FocusEventHandler types
     onBlur?.(e);
   } else {
     // Otherwise, stop React from bubbling this event and swallow it
