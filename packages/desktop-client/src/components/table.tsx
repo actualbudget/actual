@@ -343,13 +343,26 @@ function InputValue({
 }: InputValueProps) {
   const [value, setValue] = useState(defaultValue);
   const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
+  const lastFocusTime = useRef<number>(0);
 
   if (prevDefaultValue !== defaultValue) {
     setValue(defaultValue);
     setPrevDefaultValue(defaultValue);
   }
 
+  function onFocus_(e) {
+    lastFocusTime.current = Date.now();
+    props.onFocus?.(e);
+  }
+
   function onBlur_(e) {
+    // Ignore blur events that happen within 150ms of focus
+    // This prevents iOS keyboard appearance from triggering unwanted blur
+    const timeSinceFocus = Date.now() - lastFocusTime.current;
+    if (timeSinceFocus < 150) {
+      return;
+    }
+
     if (onBlur) {
       fireBlur(onBlur, e);
     }
@@ -392,6 +405,7 @@ function InputValue({
       {...props}
       value={value}
       onChangeValue={setValue_}
+      onFocus={onFocus_}
       onBlur={onBlur_}
       onUpdate={onUpdate}
       onKeyDown={onKeyDown}
