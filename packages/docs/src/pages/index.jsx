@@ -1,16 +1,20 @@
-import Link from '@docusaurus/Link';
-import Layout from '@theme/Layout';
-import ThemedImage from '@theme/ThemedImage';
+import Link from "@docusaurus/Link";
+import useBaseUrl from "@docusaurus/useBaseUrl";
+import Layout from "@theme/Layout";
+import ThemedImage from "@theme/ThemedImage";
 
-import Button from '../components/Button';
+import Button from "../components/Button";
 
-import classes from './index.module.css';
+import classes from "./index.module.css";
 
 export default function Hello() {
   return (
-    <Layout title="Actual" style={{ position: 'relative' }}>
-      <img alt="" src="/img/homepage/hero-bg.svg" className={classes.heroBg} />
-
+    <Layout title="Actual" style={{ position: "relative" }}>
+      <img
+        alt=""
+        src={useBaseUrl("/img/homepage/hero-bg.svg")}
+        className={classes.heroBg}
+      />
       <div className={`${classes.main} ${classes.container}`}>
         <h1>Your Finances — made simple</h1>
         <p className={classes.heroText}>
@@ -22,20 +26,20 @@ export default function Hello() {
           it. Featuring multi-device sync, optional end-to-end encryption and so
           much more.
         </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1em' }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
           <div>
             <Button primary to="https://www.pikapods.com/pods?run=actual">
               Set up on PikaPods in 2 minutes
               <sup
                 style={{
                   lineHeight: 0,
-                  fontSize: '0.75em',
-                  display: 'inline-block',
-                  transform: 'translateY(0.1em)',
+                  fontSize: "0.75em",
+                  display: "inline-block",
+                  transform: "translateY(0.1em)",
                 }}
               >
                 *
-              </sup>{' '}
+              </sup>{" "}
               <span aria-hidden="true">↗</span>
             </Button>
             <Button to="/docs/install/">Set up manually</Button>
@@ -44,8 +48,8 @@ export default function Hello() {
         <div className={classes.heroImage}>
           <ThemedImage
             sources={{
-              light: '/img/homepage/actual-main-budget.png',
-              dark: '/img/homepage/actual-main-budget-dark.png',
+              light: useBaseUrl("/img/homepage/actual-main-budget.png"),
+              dark: useBaseUrl("/img/homepage/actual-main-budget-dark.png"),
             }}
             alt="Actual Budget"
           />
@@ -62,14 +66,13 @@ export default function Hello() {
 
         <MediumFeature
           title="Be involved in your financial decisions"
-          src="/img/homepage/superpowers.svg"
+          src={useBaseUrl("/img/homepage/superpowers.svg")}
         >
           Automated finance tools are great, except when they aren’t. We provide
-          you with tools that are quick to use, but ultimately{' '}
+          you with tools that are quick to use, but ultimately{" "}
           <strong>you are in control</strong>. We help you learn, instead of
           dictating.
         </MediumFeature>
-
         <MediumFeature
           flip
           title="Meticulously designed for speed"
@@ -79,8 +82,8 @@ export default function Hello() {
               muted
               autoPlay
               playsInline
-              src="/img/homepage/design.mp4"
-              style={{ width: '100%' }}
+              src={useBaseUrl("/img/homepage/design.mp4")}
+              style={{ width: "100%" }}
             />
           }
         >
@@ -91,38 +94,38 @@ export default function Hello() {
 
         <MediumFeature
           title="Unabashedly local-first software"
-          src="/img/homepage/local-first.svg"
+          src={useBaseUrl("/img/homepage/local-first.svg")}
         >
           <strong>Actual is a local app, plain and simple.</strong> Your data is
           synced in the background so all devices have access, but the app
-          totally works regardless of your network connection. This also allows{' '}
+          totally works regardless of your network connection. This also allows{" "}
           <Link to="/docs/getting-started/sync#end-to-end-encryption">
             end-to-end encryption
-          </Link>{' '}
+          </Link>{" "}
           to keep your data private.
         </MediumFeature>
 
         <div id="features" />
         <BigFeature
           title="Powerful budgeting made simple"
-          srcLight="/img/homepage/actual-main-budget.png"
-          srcDark="/img/homepage/actual-main-budget-dark.png"
+          srcLight={useBaseUrl("/img/homepage/actual-main-budget.png")}
+          srcDark={useBaseUrl("/img/homepage/actual-main-budget-dark.png")}
         >
           <strong>
             Save hundreds of dollars a year (at least!) by tracking your
             spending.
-          </strong>{' '}
+          </strong>{" "}
           Based on tried and true methods, our budgeting system is based off of
           your real income instead of made up numbers. This makes you face your
           real spending, and clearly shows how much you are saving each month.
-          We make this process as simple as possible.{' '}
+          We make this process as simple as possible.{" "}
           <Link to="/docs/budgeting/">Learn&nbsp;more</Link>
         </BigFeature>
 
         <BigFeature
           title="The fastest way to manage transactions"
-          srcLight="/img/homepage/actual-main-transaction.png"
-          srcDark="/img/homepage/actual-main-transaction-dark.png"
+          srcLight={useBaseUrl("/img/homepage/actual-main-transaction.png")}
+          srcDark={useBaseUrl("/img/homepage/actual-main-transaction-dark.png")}
         >
           Breeze through your transactions and update them easily with a
           streamlined, minimal interface. Categorizing your transactions
@@ -132,8 +135,10 @@ export default function Hello() {
 
         <BigFeature
           title="Oh my, the reports"
-          srcLight="/img/homepage/actual-report-dashboard-light.png"
-          srcDark="/img/homepage/actual-report-dashboard-dark.png"
+          srcLight={useBaseUrl(
+            "/img/homepage/actual-report-dashboard-light.png"
+          )}
+          srcDark={useBaseUrl("/img/homepage/actual-report-dashboard-dark.png")}
         >
           Intuitive reports give you a quick way to learn about your finances.
           By default, we include net worth and cash flow reports. Actual also
@@ -141,11 +146,10 @@ export default function Hello() {
           fit your needs.
         </BigFeature>
       </div>
-
       <div className={classes.featuresSection}>
         <img
           alt=""
-          src="/img/homepage/features-bg.svg"
+          src={useBaseUrl("/img/homepage/features-bg.svg")}
           className={classes.featuresBg}
         />
 
@@ -248,13 +252,13 @@ export default function Hello() {
 
         <p
           className={classes.container}
-          style={{ maxWidth: 500, marginTop: '12em', marginBottom: '-12em' }}
+          style={{ maxWidth: 500, marginTop: "12em", marginBottom: "-12em" }}
         >
           <small style={{ opacity: 0.6 }}>
             * PikaPods donates 20% of fees people like you pay to run Actual on
-            their servers to{' '}
+            their servers to{" "}
             <a
-              style={{ color: 'inherit', textDecoration: 'underline' }}
+              style={{ color: "inherit", textDecoration: "underline" }}
               href="https://opencollective.com/actual"
             >
               our Open Collective
@@ -275,7 +279,7 @@ function SmallFeature({ title, icon, learnMore, children }) {
       <div className={classes.smallFeatureContent}>
         <h3 className={classes.smallFeatureTitle}>{title}</h3>
         <p className={classes.smallFeatureText}>
-          {children}{' '}
+          {children}{" "}
           {learnMore ? <Link to={learnMore}>Learn&nbsp;more</Link> : null}
         </p>
       </div>
@@ -287,7 +291,7 @@ function MediumFeature({ title, media, src, flip, children }) {
   return (
     <div
       className={`${classes.mediumFeature} ${
-        flip ? classes.mediumFeature_flip : ''
+        flip ? classes.mediumFeature_flip : ""
       }`}
     >
       <div className={classes.mediumFeatureContent}>
