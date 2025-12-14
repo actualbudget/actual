@@ -113,6 +113,7 @@ Qatari
 QNTOFRP
 QONTO
 Raiffeisen
+REGEXREPLACE
 revolut
 RIED
 RSchedule
