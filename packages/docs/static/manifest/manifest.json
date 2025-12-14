@@ -1,0 +1,26 @@
+{
+  "theme_color": "#8936FF",
+  "background_color": "#8936FF",
+  "icons": [
+    {
+      "purpose": "maskable",
+      "sizes": "512x512",
+      "src": "icon512_maskable.png",
+      "type": "image/png"
+    },
+    {
+      "purpose": "any",
+      "sizes": "512x512",
+      "src": "icon512_rounded.png",
+      "type": "image/png"
+    }
+  ],
+  "orientation": "any",
+  "display": "standalone",
+  "dir": "auto",
+  "lang": "en-GB",
+  "name": "Actual Documentation",
+  "short_name": "Actual Docs",
+  "start_url": "https://actualbudget.org",
+  "scope": "https://actualbudget.org"
+}
