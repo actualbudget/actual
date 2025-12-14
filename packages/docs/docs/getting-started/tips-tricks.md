@@ -11,12 +11,7 @@ If you ever make a mistake, pressing <Key mod="cmd" k="z" /> will undo, and pres
 
 Context menus (right-click menus) are available throughout Actual. Use the method to access them based on your OS and hardware.
 
-## Keyboard Shortcuts
-
-Actual has a number of keyboard shortcuts that can help you navigate and manage the application more efficiently.
-Below is a list of the most useful shortcuts.
-
-### The Command Palette
+## The Command Palette
 
 The Command Palette is a powerful tool which allows you to quickly access various features and functions within Actual.
 - On Windows and Linux, you can open it by pressing the <Key mod="ctrl" fixed k="k" /> combination to open the Command Palette.
@@ -28,15 +23,19 @@ Once open, you can start typing to search for the functions in the sidebar, or y
 through the list of available commands. You can also quickly move to any of the available accounts by typing their name.
 
 
-### General Shortcuts
+## Keyboard Shortcuts
 
--  <Key k="?" /> Open the help menu.
+<Key k="?" /> Open the help menu. 
+The Help Menu contains a link to the documentation, the community Discord and the Keyboard shortcuts.
+
+###General shortcuts
+
 -  <Key mod="ctrl" k="O" /> (the letter O, not zero) Close the current budget and list other available budgets to open.
    On macOS, you can also use the <Key mod="cmd" k="O" /> key combination.
 -  <Key mod="shift" mod="ctrl" k="P" /> Toggle the privacy filter.   
 
 
-### Within the Budget View
+### Budget page shortcuts
 
 - <Key k="enter" /> while editing a budget amount will move to the next category.
 - <Key mod="shift" k="enter" /> Move to the previous budget category.
@@ -47,6 +46,7 @@ through the list of available commands. You can also quickly move to any of the 
 ### Account page shortcuts
 
 - <Key k="enter" /> and <Key mod="shift" k="enter" /> when editing will move down and up. If a dropdown is open and you've typed a new value, this will instead save the value and close the dropdown.
+- <Key mod="ctrl" k="I" /> Import transactions.
 - <Key k="tab" /> and <Key mod="shift" k="tab" /> when editing will move left and right
 - <Key mod="ctrl" k="enter" /> will add the transaction and close the form regardless of where you are editing.
 - <Key k="enter" /> in either the Payment or Deposit columns will add the transaction as well.
