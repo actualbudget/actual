@@ -10,4 +10,3 @@
 /img/*
   Cache-Control: public
   Cache-Control: max-age=604800
-  Cache-Control: immutable
