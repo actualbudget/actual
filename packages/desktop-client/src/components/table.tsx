@@ -55,6 +55,10 @@ import {
 
 export const ROW_HEIGHT = 32;
 
+// Time window in milliseconds to ignore blur events after focus.
+// This prevents iOS keyboard appearance from triggering unwanted blur events.
+const IOS_KEYBOARD_BLUR_PROTECTION_MS = 150;
+
 function fireBlur(
   onBlur:
     | FocusEventHandler<HTMLInputElement>
@@ -343,7 +347,7 @@ function InputValue({
 }: InputValueProps) {
   const [value, setValue] = useState(defaultValue);
   const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
-  const lastFocusTime = useRef<number>(0);
+  const lastFocusTime = useRef<number | null>(null);
 
   if (prevDefaultValue !== defaultValue) {
     setValue(defaultValue);
@@ -356,11 +360,13 @@ function InputValue({
   }
 
   function onBlur_(e) {
-    // Ignore blur events that happen within 150ms of focus
+    // Ignore blur events that happen too soon after focus
     // This prevents iOS keyboard appearance from triggering unwanted blur
-    const timeSinceFocus = Date.now() - lastFocusTime.current;
-    if (timeSinceFocus < 150) {
-      return;
+    if (lastFocusTime.current !== null) {
+      const timeSinceFocus = Date.now() - lastFocusTime.current;
+      if (timeSinceFocus < IOS_KEYBOARD_BLUR_PROTECTION_MS) {
+        return;
+      }
     }
 
     if (onBlur) {
