@@ -5,18 +5,23 @@ title: 'Tips & Tricks'
 
 ## Undo/Redo {#undo-redo}
 
-If you ever make a mistake, pressing <Key mod="cmd" k="z" /> will undo, and pressing <Key mod="cmd shift" k="z" /> will redo. Using the desktop app, this is an undo system that you can always rely on; any change can be undone and the UI will walk back in time. If you're using the web app, this is only good for the current session of the website. If you refresh, or close the browser tab, undo history is lost.
+If you ever make a mistake, pressing <Key mod="ctrl" k="z" /> will undo, and pressing <Key mod="ctrl" mod="shift" k="z" /> will redo. Using the desktop app, this is an undo system that you can always rely on; any change can be undone and the UI will walk back in time. If you're using the web app, this is only good for the current session of the website. If you refresh, or close the browser tab, undo history is lost.
+
+:::note 
+On macOS keyboards, the key modifier <Key mod="cmd" /> replaces <Key mod="ctrl" />.
+:::
+
 
 ## Context Menus
 
-Context menus (right-click menus) are available throughout Actual. Use the method to access them based on your operating system and hardware.
+Context menus (right-click menus) are available throughout Actual. Use the method based on your operating system and/or hardware to access them .
+
 
 ## The Command Palette
 
 The Command Palette is a powerful tool which allows you to quickly access various features and functions within Actual.
 
-- On Windows and Linux, you can open it by pressing the <Key mod="ctrl" fixed k="k" /> combination to open the Command Palette.
-- On macOS, you can use the <Key mod="cmd" fixed k="k" /> or the <Key mod="ctrl" fixed k="k" /> key combinations to open the Command Palette.
+- Open it by pressing the <Key mod="ctrl" fixed k="k" /> combination to open the Command Palette.
 
 ![Command Palette](/img/tips-tricks/command-palette.png)
 
@@ -26,13 +31,12 @@ through the list of available commands. You can also quickly move to any of the 
 
 ## Keyboard Shortcuts
 
-<Key k="?" /> Open the help menu. 
+<Key k="?" /> will open the help menu. 
 The Help Menu contains a link to the Documentation, Community support (Discord) and the Keyboard shortcuts.
 
 ### General shortcuts
 
 -  <Key mod="ctrl" k="O" /> (the letter O, not zero) Close the current budget and list other available budgets to open.
-   On macOS, you can also use the <Key mod="cmd" k="O" /> key combination.
 -  <Key mod="shift" mod="ctrl" k="P" /> Toggle the privacy filter.   
 
 
@@ -143,7 +147,7 @@ like [Emojipedia](https://emojipedia.org/), [EmojiDB](https://emojidb.org/) or [
 By using emojis on the accounts, you can have grouping of accounts by type, such as credit cards, expenses, and savings.
 
 :::tip[Hint]
-To scrub them out of an exported list, use the formula `=REGEXREPLACE(text or cell reference, "[^\x00-\x7F]", "")` in Excel or Google sheets.
+To scrub emojis out of an exported list, use the formula `=REGEXREPLACE(text or cell reference, "[^\x00-\x7F]", "")` in Excel or Google sheets.
 :::
 
 ## Math Operators
