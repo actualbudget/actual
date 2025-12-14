@@ -13,9 +13,6 @@ import pluginActual from './packages/eslint-plugin-actual/lib/index.js';
 export default defineConfig(
   {
     ignores: [
-      //temporary
-      'packages/docs',
-
       'packages/api/app/bundle.api.js',
       'packages/api/app/stats.json',
       'packages/api/@types',
@@ -255,6 +252,7 @@ export default defineConfig(
         'never',
         {
           json: 'always',
+          svg: 'always',
         },
       ],
       'import/order': [
@@ -490,6 +488,14 @@ export default defineConfig(
       'actual/typography': 'off',
       'actual/no-untranslated-strings': 'off',
       'actual/prefer-logger-over-console': 'off',
+    },
+  },
+  {
+    files: ['packages/docs/**/*'],
+    rules: {
+      'actual/typography': 'off',
+      'actual/no-untranslated-strings': 'off',
+      'no-restricted-syntax': 'off',
     },
   },
   {
