@@ -25,6 +25,7 @@ export function CurrencySettings() {
         ['ARS', t('Argentinian Peso')],
         ['AUD', t('Australian Dollar')],
         ['BRL', t('Brazilian Real')],
+        ['BTC', t('Bitcoin')],
         ['BYN', t('Belarusian Ruble')],
         ['CAD', t('Canadian Dollar')],
         ['CHF', t('Swiss Franc')],
