@@ -36,7 +36,15 @@ function focusElement(
   }
 
   if (el instanceof HTMLInputElement) {
-    el.setSelectionRange(0, 10000);
+    // Use setTimeout to avoid iOS keyboard issues
+    // On iOS 18.2, calling setSelectionRange synchronously can cause the keyboard to dismiss
+    setTimeout(() => {
+      try {
+        el.setSelectionRange(0, 10000);
+      } catch {
+        // Ignore errors on inputs that don't support selection ranges (e.g., number inputs)
+      }
+    }, 0);
   }
 }
 
