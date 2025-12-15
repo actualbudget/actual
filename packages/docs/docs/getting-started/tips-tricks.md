@@ -42,32 +42,34 @@ through the list of available commands. You can also quickly move to any of the 
 - <Key arrow="left" /> View the previous month.
 - <Key arrow="right" /> View the next month.
   
-### When Editing Transactions
+### Account page shortcuts
 
-- When editing, <Key k="enter" /> and <Key mod="shift" k="enter" /> will move down and up. If a dropdown is open and you've typed a new value, this will instead save the value and close the dropdown.
-- When editing, <Key k="tab" /> and <Key mod="shift" k="tab" /> will move left and right
-- When adding a new transaction, <Key mod="cmd" k="enter" /> will add it regardless of where you are editing. Pressing <Key k="enter" /> in either the Payment or Deposit columns will add it as well.
+- <Key k="enter" /> and <Key mod="shift" k="enter" /> when editing will move down and up. In a dropdown, this will save the value and close the dropdown.
+- <Key k="tab" /> and <Key mod="shift" k="tab" /> when editing will move left and right
+- <Key mod="ctrl" k="enter" /> will add the transaction and close the form regardless of where you are editing.
+- <Key k="enter" /> in either the Payment or Deposit columns will add the transaction; the form remains open for the next addition.
+- <Key mod="ctrl" k="I" /> (i) Import transactions.
+- <Key mod="ctrl" k="B" /> Initiate bank sync.
 
 ### When Managing Transactions
 
-- <Key k="f" /> Show only selected transactions.
+- <Key k="f" /> Show only selected transactions. If no transaction is selected, it brings up the Filter dropdown menu.
 - <Key k="d" /> Delete selected transactions.
 - <Key k="u" /> Duplicate selected transactions.
-- <Key k="g" /> Merge selected transactions
-- <Key k="t" /> Set date for selected transactions.
+- <Key k="g" /> Merge selected transactions.
 - <Key k="a" /> Set account for selected transactions.
 - <Key k="p" /> set payee for selected transactions.
 - <Key k="n" /> Set notes for selected transactions.
 - <Key k="c" /> Set category for selected transactions.
 - <Key k="m" /> Set amount for selected transactions.
-- <Key k="l" /> Toggle cleared for current transaction.
-
-The following require a transaction to have been selected first:
-
-- <Key k="J" />/<Key arrow="down" /> Move to the next transaction down.
-- <Key k="K" />/<Key arrow="up" /> Move to the next transaction up.
+- <Key k="l" /> Toggle cleared status for current transaction.
+- <Key k="S" /> Link or view schedule for selected transactions.
+- <Key mod="ctrl" k="A" /> Select all transactions.
+- <Key k="t" /> Set date for selected transactions.
+- <Key k="J" /> or <Key arrow="down" /> Move to the next transaction down. Hold to scroll down.
+- <Key k="K" /> or <Key arrow="up" /> Move to the next transaction up. Hold to scroll up.
 - <Key k="space" /> Toggle selection of current transaction.
-- <Key mod="shift" k="space" /> Add all transactions between current transaction and most recently selected transaction.
+- <Key mod="shift" k="space" /> Select all transactions between current transaction and most recently selected transaction.
 
 ## How to View Multiple Months at Once
 
