@@ -91,7 +91,7 @@ Actual Budget includes a privacy filter to help you obfuscate sensitive _amounts
 Be advised that when you hover over scrambled items, the amounts will be shown. This is a feature to help you see the actual amounts when you need them, but it may not be suitable for sharing screenshots or screen recordings.
 :::
 
-**Turn it on**: Click the _eye icon_ in the top-right corner of the app.
+**Turn it on**: Click the _eye icon_ in the top-right corner of the app or use the shortcut <Key mod="shift" mod="ctrl" k="P" />.
 
 ![Top right corner](/img/a-tour-of-actual/tour-overview-top-right.png)
 
@@ -108,7 +108,7 @@ What changes when the filter is on
 The privacy filter is visual only: it does not encrypt, delete, or alter your saved data or exports.
 :::
 
-**Turn it off**: Click the _eye icon_ again to restore normal viewing. This will show the data in its original form.
+**Turn it off**: Click the _eye icon_ or <Key mod="shift" mod="ctrl" k="P" /> again to restore normal viewing. This will show the data in its original form.
 
 ## Show The Running Balance
 
