@@ -34,18 +34,14 @@ Once open, you can start typing to search for the functions in the sidebar, or y
 through the list of available commands. You can also quickly move to any of the available accounts by typing their name.
 
 
-### Global Shortcuts
+### Other Global Shortcuts
 
-- <Key mod="ctrl" k="O" /> (the letter O, not zero) Close the current budget and list other available budgets to open.
-- <Key mod="ctrl" mod="shift" k="P" /> [Toggle the privacy filter.](#scramble-and-hide-data)
+- <Key mod="ctrl" k="O" /> (the letter O, not zero) this will close the file and list other available files to open.
 
 ### Within the Budget View
 
 - <Key k="enter" /> while editing a budget amount will move to the next category.
-- <Key mod="shift" k="enter" /> Move to the previous budget category.
-- <Key k="0" /> (zero) View the current month.
-- <Key arrow="left" /> View the previous month.
-- <Key arrow="right" /> View the next month.
+- <Key mod="shift" k="enter" /> will move to the previous category.
 
 ### When Editing Transactions
 
