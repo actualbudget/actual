@@ -19,29 +19,31 @@ Context menus (right-click menus) are available throughout Actual. Use the metho
 
 ## Keyboard Shortcuts
 
-<Key k="?" /> will open the help menu. 
 The Help Menu contains a link to the Documentation, Community support (Discord) and the Keyboard shortcuts.
+<Key k="?" /> will open the help menu. 
 
 ### The Command Palette
 
 The Command Palette is a powerful tool which allows you to quickly access various features and functions within Actual.
 
-Open it by pressing the <Key mod="ctrl" fixed k="k" /> combination to open the Command Palette.
+- On Windows and Linux, you can open it by pressing the <Key mod="ctrl" fixed k="k" /> combination to open the Command Palette.
+- On macOS, you can use the <Key mod="cmd" fixed k="k" /> or the <Key mod="ctrl" fixed k="k" /> key combinations to open the Command Palette.
 
 ![Command Palette](/img/tips-tricks/command-palette.png)
 
 Once open, you can start typing to search for the functions in the sidebar, or you can use the arrow keys to navigate
 through the list of available commands. You can also quickly move to any of the available accounts by typing their name.
 
-
 ### Other Global Shortcuts
 
 - <Key mod="ctrl" k="O" /> (the letter O, not zero) this will close the file and list other available files to open.
+  On macOS, you can also use the <Key mod="cmd" k="O" /> key combination.
 
 ### Within the Budget View
 
 - <Key k="enter" /> while editing a budget amount will move to the next category.
 - <Key mod="shift" k="enter" /> will move to the previous category.
+
 
 ### When Editing Transactions
 
