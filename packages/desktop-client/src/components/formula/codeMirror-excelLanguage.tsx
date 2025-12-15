@@ -641,69 +641,83 @@ const tooltipPortalConfig =
     : tooltips({ position: 'fixed', parent: document.body });
 
 const autocompletePopoverTheme = EditorView.baseTheme({
+  // Wrapper: keep transparent; the list and info panel are the actual "cards".
   '.cm-tooltip.cm-tooltip-autocomplete': {
-    ...styles.shadowLarge,
-    margin: 0,
-    padding: '10px !important',
-    maxHeight: '260px !important',
-    minWidth: '280px !important',
-    listStyle: 'none !important',
-    backgroundColor: theme.menuAutoCompleteBackground || theme.menuBackground,
-    color: theme.menuAutoCompleteText || theme.menuItemText,
-    borderRadius: '6px !important',
+    backgroundColor: 'transparent',
+    border: 'none',
+    boxShadow: 'none',
+    padding: 0,
+    margin: '6px',
     overflow: 'visible',
     fontFamily: 'inherit',
     userSelect: 'none',
   },
 
+  // The suggestion list card
+  '.cm-tooltip.cm-tooltip-autocomplete > ul': {
+    ...styles.shadowLarge,
+    margin: 0,
+    // Outer inset gutter for the whole list (so content never hugs the edges)
+    padding: '12px',
+    maxHeight: '260px',
+    minWidth: '280px',
+    listStyle: 'none',
+    backgroundColor: theme.menuBackground,
+    color: theme.menuItemText,
+    borderRadius: '6px',
+    overflow: 'hidden',
+    overflowY: 'auto',
+  },
+
+  // Hide CodeMirror's leading icons (gear / f / etc.)
+  '.cm-tooltip.cm-tooltip-autocomplete .cm-completionIcon': {
+    display: 'none !important',
+    width: 0,
+    margin: 0,
+    padding: 0,
+  },
+  '.cm-tooltip.cm-tooltip-autocomplete .cm-completionIcon::before': {
+    display: 'none !important',
+  },
+
+  // Section headers
   '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection': {
-    padding: '6px 12px 4px',
+    padding: '6px 10px 4px',
     fontSize: '11px',
     lineHeight: '1em',
     textTransform: 'uppercase',
     letterSpacing: '0.03em',
-    color: theme.menuAutoCompleteTextHeader || theme.menuItemTextHeader,
-    opacity: 1,
-    marginTop: '2px',
+    color: theme.menuItemTextHeader,
+    opacity: 0.9,
+    marginTop: '8px',
   },
   '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection:first-child': {
     marginTop: 0,
   },
 
-  '.cm-tooltip.cm-tooltip-autocomplete > ul > li': {
-    paddingLeft: '20px !important',
-  },
-
+  // Completion rows
   '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem': {
-    padding: '8px 12px',
+    padding: '8px 10px',
     lineHeight: '1.2',
     cursor: 'default',
     display: 'flex',
     alignItems: 'baseline',
     gap: '8px',
+    borderRadius: '4px',
   },
-
-  '.cm-tooltip.cm-tooltip-autocomplete > ul > completion-section': {
-    padding: '0 !important',
-    position: 'sticky',
-    top: 0,
-    backgroundColor: theme.menuBackground,
-    opacity: '1 !important',
-    zIndex: 1,
-  },
-
   '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem[aria-selected]': {
-    backgroundColor:
-      theme.menuAutoCompleteBackgroundHover || theme.menuItemBackgroundHover,
-    color: theme.menuAutoCompleteTextHover || theme.menuItemTextHover,
+    backgroundColor: theme.menuItemBackgroundHover,
+    color: theme.menuItemTextHover,
   },
 
+  // Matched text within a label
   '.cm-tooltip.cm-tooltip-autocomplete .cm-completionMatchedText': {
     fontWeight: '600',
     textDecoration: 'underline',
     textUnderlineOffset: '2px',
   },
 
+  // Label + detail formatting
   '.cm-tooltip.cm-tooltip-autocomplete .cm-completionLabel': {
     fontSize: '13px',
     flex: '1 1 auto',
@@ -719,11 +733,10 @@ const autocompletePopoverTheme = EditorView.baseTheme({
   },
   '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem[aria-selected] .cm-completionDetail':
     {
-      color:
-        theme.menuAutoCompleteItemTextHover || theme.menuAutoCompleteTextHover,
-      borderRadius: '6px !important',
+      color: theme.menuItemTextHover,
     },
 
+  // Docs panel for selected completion
   '.cm-tooltip.cm-tooltip-autocomplete .cm-completionInfo': {
     backgroundColor: theme.menuBackground,
     color: theme.pageText,
