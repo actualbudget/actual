@@ -7,16 +7,6 @@ title: 'Tips & Tricks'
 
 If you ever make a mistake, pressing <Key mod="cmd" k="z" /> will undo, and pressing <Key mod="cmd shift" k="z" /> will redo. Using the desktop app, this is an undo system that you can always rely on; any change can be undone and the UI will walk back in time. If you're using the web app, this is only good for the current session of the website. If you refresh, or close the browser tab, undo history is lost.
 
-:::note
-
-On macOS keyboards, the key modifier <Key mod="cmd" /> replaces <Key mod="ctrl" />.
-
-:::
-
-## Context Menus
-
-Context menus (right-click menus) are available throughout Actual. Use the method based on your operating system and/or hardware to access them .
-
 ## Keyboard Shortcuts
 
 Actual has a number of keyboard shortcuts that can help you navigate and manage the application more efficiently.
@@ -43,7 +33,7 @@ through the list of available commands. You can also quickly move to any of the 
 
 - <Key k="enter" /> while editing a budget amount will move to the next category.
 - <Key mod="shift" k="enter" /> will move to the previous category.
-
+- 
 ### When Editing Transactions
 
 - When editing, <Key k="enter" /> and <Key mod="shift" k="enter" /> will move down and up. If a dropdown is open and you've typed a new value, this will instead save the value and close the dropdown.
