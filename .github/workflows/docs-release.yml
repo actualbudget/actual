@@ -6,9 +6,9 @@ on:
     branches:
       - master
     paths:
-      - "packages/docs/**"
-      - ".github/workflows/docs-spelling.yml"
-      - ".github/actions/docs-spelling/**"
+      - 'packages/docs/**'
+      - '.github/workflows/docs-spelling.yml'
+      - '.github/actions/docs-spelling/**'
   workflow_dispatch:
 
 jobs:

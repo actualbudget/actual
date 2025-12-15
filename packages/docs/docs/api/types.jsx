@@ -1,6 +1,6 @@
 import React from 'react';
 
-export let types = {
+export const types = {
   id: {
     name: 'id',
     type: 'string',
@@ -36,7 +36,7 @@ export let types = {
   },
 };
 
-export let objects = {
+export const objects = {
   initConfig: [
     {
       name: 'serverURL',

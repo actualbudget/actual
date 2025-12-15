@@ -194,11 +194,11 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.FLATHUB_GITHUB_TOKEN }}
-          commit-message: "Update Actual flatpak to version ${{ needs.build.outputs.version }}"
-          branch: "release/${{ needs.build.outputs.version }}"
-          title: "Update Actual flatpak to version ${{ needs.build.outputs.version }}"
+          commit-message: 'Update Actual flatpak to version ${{ needs.build.outputs.version }}'
+          branch: 'release/${{ needs.build.outputs.version }}'
+          title: 'Update Actual flatpak to version ${{ needs.build.outputs.version }}'
           body: |
             This PR updates the Actual desktop flatpak to version ${{ needs.build.outputs.version }}.
 
             :link: [View release notes](https://actualbudget.org/blog/release-${{ needs.build.outputs.version }})
-          reviewers: "jfdoming,MatissJanis,youngcw" # The core team that have accepted the collaborator access to the Flathub repo
+          reviewers: 'jfdoming,MatissJanis,youngcw' # The core team that have accepted the collaborator access to the Flathub repo

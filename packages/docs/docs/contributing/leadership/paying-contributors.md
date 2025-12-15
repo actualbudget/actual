@@ -18,9 +18,9 @@ Total points earned: 25
 
 Value of each point: $1000 / 25 = $40
 
-Jack (Dublin) receives: 10 * $40 = $400
+Jack (Dublin) receives: 10 \* $40 = $400
 
-Nancy (Amsterdam) receives: 15 * $40 = $600
+Nancy (Amsterdam) receives: 15 \* $40 = $600
 
 ## Questions and Answers
 
