@@ -37,8 +37,11 @@ through the list of available commands. You can also quickly move to any of the 
 ### Within the Budget View
 
 - <Key k="enter" /> while editing a budget amount will move to the next category.
-- <Key mod="shift" k="enter" /> will move to the previous category.
-- 
+- <Key mod="shift" k="enter" /> Move to the previous budget category.
+- <Key k="0" /> (zero) View the current month.
+- <Key arrow="left" /> View the previous month.
+- <Key arrow="right" /> View the next month.
+  
 ### When Editing Transactions
 
 - When editing, <Key k="enter" /> and <Key mod="shift" k="enter" /> will move down and up. If a dropdown is open and you've typed a new value, this will instead save the value and close the dropdown.
