@@ -574,31 +574,15 @@ function ActionEditor({
                     : onChange('formula', options.formula || value || '=')
                 }
               >
-                {hasFormula ? (
-                  <span
-                    style={{
-                      fontSize: 14,
-                      fontFamily: 'serif',
-                      textAlign: 'center',
-                    }}
-                  >
-                    ƒ
-                  </span>
-                ) : hasFormula ? (
-                  <SvgCode
-                    style={{ width: 12, height: 12, color: 'inherit' }}
-                  />
-                ) : (
-                  <span
-                    style={{
-                      fontSize: 14,
-                      fontFamily: 'serif',
-                      textAlign: 'center',
-                    }}
-                  >
-                    ƒ
-                  </span>
-                )}
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontFamily: 'serif',
+                    textAlign: 'center',
+                  }}
+                >
+                  ƒ
+                </span>
               </Button>
             )}
           {isTemplatingEnabled &&
@@ -668,7 +652,7 @@ function ActionEditor({
                 />
               ))}
           </View>
-          {isFormulaEnabled && (
+          {isFormulaEnabled && options.method !== 'remainder' && (
             <Button
               variant="bare"
               isDisabled={templated}
@@ -689,29 +673,15 @@ function ActionEditor({
                   : onChange('formula', options.formula || value || '=')
               }
             >
-              {hasFormula ? (
-                <span
-                  style={{
-                    fontSize: 14,
-                    fontFamily: 'serif',
-                    textAlign: 'center',
-                  }}
-                >
-                  ƒ
-                </span>
-              ) : hasFormula ? (
-                <SvgCode style={{ width: 12, height: 12, color: 'inherit' }} />
-              ) : (
-                <span
-                  style={{
-                    fontSize: 14,
-                    fontFamily: 'serif',
-                    textAlign: 'center',
-                  }}
-                >
-                  ƒ
-                </span>
-              )}
+              <span
+                style={{
+                  fontSize: 14,
+                  fontFamily: 'serif',
+                  textAlign: 'center',
+                }}
+              >
+                ƒ
+              </span>
             </Button>
           )}
         </>
