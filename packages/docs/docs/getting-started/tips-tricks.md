@@ -7,7 +7,9 @@ title: 'Tips & Tricks'
 
 If you ever make a mistake, pressing <Key mod="ctrl" k="z" /> will undo, and pressing <Key mod="ctrl shift" k="z" /> will redo. Using the desktop app, this is an undo system that you can always rely on; any change can be undone and the UI will walk back in time. If you're using the web app, this is only good for the current session of the website. If you refresh, or close the browser tab, undo history is lost.
 
-On macOS keyboards, the key modifier <Key mod="cmd" /> replaces <Key mod="ctrl" />.
+## Context Menus
+
+Context menus (right-click menus) are available throughout Actual. Use the method based on your operating system and/or hardware to access them .
 
 ## Keyboard Shortcuts
 
@@ -17,8 +19,9 @@ Below is a list of the most useful shortcuts.
 ### The Command Palette
 
 The Command Palette is a powerful tool which allows you to quickly access various features and functions within Actual.
-Open it by pressing the <Key mod="ctrl" fixed k="k" /> combination to open the Command Palette.
 
+- On Windows and Linux, you can open it by pressing the <Key mod="ctrl" fixed k="k" /> combination to open the Command Palette.
+- On macOS, you can use the <Key mod="cmd" fixed k="k" /> or the <Key mod="ctrl" fixed k="k" /> key combinations to open the Command Palette.
 
 ![Command Palette](/img/tips-tricks/command-palette.png)
 
@@ -31,6 +34,9 @@ through the list of available commands. You can also quickly move to any of the 
   On macOS, you can also use the <Key mod="cmd" k="O" /> key combination.
 
 ### Within the Budget View
+
+- <Key k="enter" /> while editing a budget amount will move to the next category.
+- <Key mod="shift" k="enter" /> will move to the previous category.### Within the Budget View
 
 - <Key k="enter" /> while editing a budget amount will move to the next category.
 - <Key mod="shift" k="enter" /> will move to the previous category.
