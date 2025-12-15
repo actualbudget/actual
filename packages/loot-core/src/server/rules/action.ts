@@ -203,7 +203,7 @@ export class Action {
               `Error executing formula for split amount: ${err instanceof Error ? err.message : String(err)}`,
             );
           }
-        } else if (this.options.method === 'fixed-amount') {
+        } else if (this.options?.method === 'fixed-amount') {
           object.amount = this.value;
         }
         break;
