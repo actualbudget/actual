@@ -6,6 +6,7 @@ title: 'Tips & Tricks'
 ## Undo/Redo {#undo-redo}
 
 If you ever make a mistake, pressing <Key mod="ctrl" k="z" /> will undo, and pressing <Key mod="ctrl shift" k="z" /> will redo. Using the desktop app, this is an undo system that you can always rely on; any change can be undone and the UI will walk back in time. If you're using the web app, this is only good for the current session of the website. If you refresh, or close the browser tab, undo history is lost.
+On macOS keyboards, the key modifier <Key mod="cmd" /> replaces <Key mod="ctrl" />.
 
 ## Context Menus
 
@@ -34,9 +35,6 @@ through the list of available commands. You can also quickly move to any of the 
   On macOS, you can also use the <Key mod="cmd" k="O" /> key combination.
 
 ### Within the Budget View
-
-- <Key k="enter" /> while editing a budget amount will move to the next category.
-- <Key mod="shift" k="enter" /> will move to the previous category.### Within the Budget View
 
 - <Key k="enter" /> while editing a budget amount will move to the next category.
 - <Key mod="shift" k="enter" /> will move to the previous category.
