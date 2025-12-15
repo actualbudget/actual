@@ -173,11 +173,38 @@ export class Action {
         }
         break;
       case 'set-split-amount':
-        switch (this.options.method) {
-          case 'fixed-amount':
-            object.amount = this.value;
-            break;
-          default:
+        if (this.options?.formula && this.options.method !== 'remainder') {
+          try {
+            if (!object._ruleErrors) {
+              object._ruleErrors = [];
+            }
+            const result = this.executeFormulaSync(
+              this.options.formula,
+              object,
+            );
+            const numValue =
+              typeof result === 'number' ? result : parseFloat(String(result));
+
+            if (isNaN(numValue)) {
+              object._ruleErrors.push(
+                `Formula for split amount must produce a numeric value. Got: ${JSON.stringify(result)}`,
+              );
+            } else if (this.options.method === 'fixed-amount') {
+              object.amount = numValue;
+            } else if (this.options.method === 'fixed-percent') {
+              //this.value will be used in rule.ts to calculate the percentages.
+              this.value = numValue;
+            }
+          } catch (err) {
+            if (!object._ruleErrors) {
+              object._ruleErrors = [];
+            }
+            object._ruleErrors.push(
+              `Error executing formula for split amount: ${err instanceof Error ? err.message : String(err)}`,
+            );
+          }
+        } else if (this.options.method === 'fixed-amount') {
+          object.amount = this.value;
         }
         break;
       case 'link-schedule':

@@ -146,6 +146,7 @@ export interface SetSplitAmountRuleActionEntity {
   options?: {
     splitIndex?: number;
     method: 'fixed-amount' | 'fixed-percent' | 'remainder';
+    formula?: string;
   };
 }
 

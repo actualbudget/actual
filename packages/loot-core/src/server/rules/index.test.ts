@@ -863,6 +863,142 @@ describe('Rule', () => {
         subtransactions: [{ amount: 100 }, { amount: 100 }],
       });
     });
+
+    describe('formula support', () => {
+      test('fixed-amount with formula calculates split amount', () => {
+        const rule = new Rule({
+          conditionsOp: 'and',
+          conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+          actions: [
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: {
+                splitIndex: 1,
+                method: 'fixed-amount',
+                formula: '=300',
+              },
+            },
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              options: { splitIndex: 2, method: 'remainder' },
+            },
+          ],
+        });
+
+        // Fixed amount 300, remainder = 700
+        expect(
+          rule.exec({ imported_payee: 'James', amount: 1000 }),
+        ).toMatchObject({
+          subtransactions: [{ amount: 300 }, { amount: 700 }],
+        });
+      });
+
+      test('fixed-percent with formula calculates percentage', () => {
+        const rule = new Rule({
+          conditionsOp: 'and',
+          conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+          actions: [
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: {
+                splitIndex: 1,
+                method: 'fixed-percent',
+                formula: '=25',
+              },
+            },
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              options: { splitIndex: 2, method: 'remainder' },
+            },
+          ],
+        });
+
+        // 25% of 200 = 50, remainder = 150
+        expect(
+          rule.exec({ imported_payee: 'James', amount: 200 }),
+        ).toMatchObject({
+          subtransactions: [{ amount: 50 }, { amount: 150 }],
+        });
+      });
+
+      test('fixed-percent formula calculates 50/50 split', () => {
+        const rule = new Rule({
+          conditionsOp: 'and',
+          conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+          actions: [
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: {
+                splitIndex: 1,
+                method: 'fixed-percent',
+                formula: '=50',
+              },
+            },
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: {
+                splitIndex: 2,
+                method: 'fixed-percent',
+                formula: '=50',
+              },
+            },
+          ],
+        });
+
+        // Both splits get 50% of 200 = 100 each
+        expect(
+          rule.exec({ imported_payee: 'James', amount: 200 }),
+        ).toMatchObject({
+          subtransactions: [{ amount: 100 }, { amount: 100 }],
+        });
+      });
+
+      test('multiple fixed-amount formulas work together', () => {
+        const rule = new Rule({
+          conditionsOp: 'and',
+          conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+          actions: [
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: {
+                splitIndex: 1,
+                method: 'fixed-amount',
+                formula: '=100',
+              },
+            },
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: {
+                splitIndex: 2,
+                method: 'fixed-amount',
+                formula: '=100',
+              },
+            },
+          ],
+        });
+
+        // Both splits get 100 each
+        expect(
+          rule.exec({ imported_payee: 'James', amount: 200 }),
+        ).toMatchObject({
+          subtransactions: [{ amount: 100 }, { amount: 100 }],
+        });
+      });
+    });
   });
 
   test('rules are deterministically ranked', () => {
