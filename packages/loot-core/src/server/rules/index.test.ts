@@ -217,6 +217,16 @@ describe('Condition', () => {
     expect(cond.eval({ notes: 'bfoo' })).toBe(false);
     expect(cond.eval({ notes: 'bfo' })).toBe(false);
     expect(cond.eval({ notes: 'f o o' })).toBe(false);
+
+    cond = new Condition('hasTags', 'notes', ' tag      test ', null);
+    expect(cond.eval({ notes: '#tag tagged tx' })).toBe(true);
+    expect(cond.eval({ notes: 'tx has #tag' })).toBe(true);
+    expect(cond.eval({ notes: 'tag tagged tx' })).toBe(false);
+    expect(cond.eval({ notes: 'tx has tag' })).toBe(false);
+    expect(cond.eval({ notes: 'tx has #test tag' })).toBe(true);
+    expect(cond.eval({ notes: '#test tag for tx' })).toBe(true);
+    expect(cond.eval({ notes: 'test tag for tx' })).toBe(false);
+    expect(cond.eval({ notes: 'double #test #tag' })).toBe(true);
   });
 
   test('matches handles invalid regex', () => {
