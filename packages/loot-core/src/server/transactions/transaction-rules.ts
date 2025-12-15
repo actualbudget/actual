@@ -600,7 +600,7 @@ export function conditionsToAQL(
       case 'hasTags':
         return {
           $and: value.map(v => {
-            debugger;
+            
             const regex = new RegExp(
               `(?<!#)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=\\s|#|$)`,
             );

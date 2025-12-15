@@ -132,13 +132,15 @@ export const CONDITION_TYPES = {
       }
 
       if (op === 'hasTags') {
-        return value
-          // Trim extra spaces
-          .trim()
-          // Replace multiple spaces with a single space
-          .replace(/\s\s+/g, ' ')
-          .split(' ')
-          .map(v => `#${v}`);
+        return (
+          value
+            // Trim extra spaces
+            .trim()
+            // Replace multiple spaces with a single space
+            .replace(/\s\s+/g, ' ')
+            .split(' ')
+            .map(v => `#${v}`)
+        );
       }
 
       return value.toLowerCase();
