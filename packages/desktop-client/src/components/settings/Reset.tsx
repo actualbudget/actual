@@ -106,7 +106,7 @@ export function ForceReload() {
           }
         }
       }
-    } catch (error) {
+    } catch {
       // Do nothing
     } finally {
       window.location.reload();

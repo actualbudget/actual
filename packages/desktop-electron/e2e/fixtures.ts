@@ -1,5 +1,4 @@
-/* eslint-disable no-empty-pattern */
-/* eslint-disable react-hooks/rules-of-hooks */
+/* oxlint-disable react-hooks/rules-of-hooks */
 import path from 'node:path';
 
 import {
@@ -18,6 +17,7 @@ type ElectronFixtures = {
 
 // Create the extended test with fixtures
 export const test = base.extend<ElectronFixtures>({
+  // oxlint-disable-next-line no-empty-pattern
   electronApp: async ({}, use, testInfo: TestInfo) => {
     const uniqueTestId = testInfo.testId.replace(/[^\w-]/g, '-');
     const testDataDir = path.join('e2e/data/', uniqueTestId);

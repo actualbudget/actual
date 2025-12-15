@@ -27,6 +27,7 @@ type CrossoverGraphProps = {
       x: string;
       investmentIncome: number;
       expenses: number;
+      nestEgg: number;
       isProjection?: boolean;
     }>;
     start: string;
@@ -60,6 +61,7 @@ export function CrossoverGraph({
       x: string;
       investmentIncome: number | string;
       expenses: number | string;
+      nestEgg: number | string;
       isProjection?: boolean;
     };
   };
@@ -69,7 +71,7 @@ export function CrossoverGraph({
     payload?: PayloadItem[];
   };
 
-  // eslint-disable-next-line react/no-unstable-nested-components
+  // oxlint-disable-next-line react/no-unstable-nested-components
   const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
@@ -117,6 +119,21 @@ export function CrossoverGraph({
                   <Trans>Monthly expenses:</Trans>
                 </div>
                 <div>{format(payload[0].payload.expenses, 'financial')}</div>
+              </View>
+              <View
+                className={css({
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                })}
+              >
+                <div>
+                  {payload[0].payload.isProjection ? (
+                    <Trans>Target Nest Egg:</Trans>
+                  ) : (
+                    <Trans>Nest Egg:</Trans>
+                  )}
+                </div>
+                <div>{format(payload[0].payload.nestEgg, 'financial')}</div>
               </View>
             </div>
           </div>

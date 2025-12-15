@@ -112,7 +112,7 @@ export function EditUserAccess({
                     onChange={(newValue: string) => setUserId(newValue)}
                     value={userId}
                   />
-                  <label
+                  <Text
                     style={{
                       ...styles.verySmallText,
                       color: theme.pageTextLight,
@@ -120,7 +120,7 @@ export function EditUserAccess({
                     }}
                   >
                     <Trans>Select a user from the directory</Trans>
-                  </label>
+                  </Text>
                 </View>
               )}
               {availableUsers.length === 0 && (

@@ -54,6 +54,28 @@ Here are some initial guidelines for how contributions will be treated:
 - @twk3
 - @UnderKoen
 
+### Getting Started
+
+Before you begin contributing, make sure you have your development environment set up:
+
+1. **Set up your development environment**: Follow the [Development Setup Guide](./development-setup.md) to install prerequisites and get started.
+2. **Understand the codebase**: Review the [Project Structure](./project-details/index.md) to understand how the codebase is organized.
+3. **Learn the coding conventions**: Read the [Code Style Guide](./code-style.md) to understand our coding standards.
+4. **Familiarize yourself with testing**: Check out the [Testing Guide](./testing.md) to learn how to write and run tests.
+
+### Development Workflow
+
+When making changes to Actual, follow this workflow:
+
+1. **Read relevant files**: Understand the current implementation before making changes.
+2. **Make focused, incremental changes**: Keep changes small and focused on a single feature or bugfix.
+3. **Run type checking**: Always run `yarn typecheck` before committing to catch type errors.
+4. **Run linting**: Run `yarn lint:fix` to ensure code follows style guidelines.
+5. **Run relevant tests**: Run tests for the code you've changed (`yarn test` for all tests, or workspace-specific commands).
+6. **Fix any issues**: Address any type errors, linter errors, or test failures before submitting your PR.
+
+For more details, see the [Development Setup Guide](./development-setup.md) and [Testing Guide](./testing.md).
+
 ### The Project Layout
 
 The layout of the codebase in Actual Budget takes a bit of getting used to and finding things at first can be a little tricky. We have put together a help [document](./project-details/index.md) that shows the structure of the project. While this isn't 100% complete it will give you a good starting point for your development.
@@ -121,3 +143,11 @@ Try to phrase your message as a command, e.g. "Add option to include exchange ra
 The goal of the UI is to be minimalistic, but expose more advanced features progressively as the user interacts with the product (for example: the notes button is not visible by default if an account has no notes, but it becomes persistent visible if there are notes). We advocate for a similar approach in other places too. We are against adding a button/user setting for every little piece of UI (sizes, paddings, margins, etc.) as that goes against this simple design philosophy.
 
 The settings screen needs to also remain a place where core settings lives, we don't really want to have a myriad of options in here for each and every setting within the UI, doing that makes the code un-manageable for future contributors and clutters up and confuses things for the users of Actual Budget.
+
+## Additional Resources
+
+- [Development Setup](./development-setup.md) - Set up your development environment
+- [Testing Guide](./testing.md) - Learn about testing strategies and how to run tests
+- [Code Style Guide](./code-style.md) - Coding conventions and style guidelines
+- [Troubleshooting](./troubleshooting.md) - Common issues and solutions
+- [Project Structure](./project-details/index.md) - Understanding the codebase organization

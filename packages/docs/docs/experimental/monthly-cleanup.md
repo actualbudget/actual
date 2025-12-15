@@ -18,24 +18,25 @@ Enable this feature alongside the **Goals** experimental feature by enabling **G
 
 There are different ways to interact with the cleanup script, and a few of the examples will be given. But first, let's explore the syntax.
 
-<!-- prettier-ignore -->
 ### Global Source and Sinks
+
 Global source and sink definitions can affect the whole budget.
 
-|Syntax|Description|Application|
-|---|---|---|
-|#cleanup source|This is a source of money to be reused at the end of the month|Electricity is intentionally over budgeted each month and the excess is used to pay down debt|
-|#cleanup sink|This is a category where extra money will be moved. Weight: 1|This can be a vacation, debt, or other savings category where you want to accelerate the savings rate|
-|#cleanup sink 2|This is a category where extra money will be moved. Weight: 2|This can be a vacation, debt, or other savings category where you want to accelerate the savings rate|
+| Syntax          | Description                                                    | Application                                                                                           |
+| --------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| #cleanup source | This is a source of money to be reused at the end of the month | Electricity is intentionally over budgeted each month and the excess is used to pay down debt         |
+| #cleanup sink   | This is a category where extra money will be moved. Weight: 1  | This can be a vacation, debt, or other savings category where you want to accelerate the savings rate |
+| #cleanup sink 2 | This is a category where extra money will be moved. Weight: 2  | This can be a vacation, debt, or other savings category where you want to accelerate the savings rate |
 
 ### Local Group Source and Sinks
+
 Local groups can be defined to target certain categories for more refined control. You can have many groups by changing the group name.
 
-|Syntax|Description|Application|
-|---|---|---|
-|#cleanup _Group_ source|This is a source of money to be reused at the end of the month with any Group categories|A reimbursement holding category exists for making small loans to family or friends|
-|#cleanup _Group_ sink |This is a category where extra money will be moved into from the Group source. Weight: 1|This can be a category specific to a person or a business where reimbursements are expected.|
-|#cleanup _Group_ sink 2 |This is a category where extra money will be moved into from the Group source. Weight: 2|This can be a category specific to a person or a business where reimbursements are expected.|
+| Syntax                  | Description                                                                              | Application                                                                                  |
+| ----------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| #cleanup _Group_ source | This is a source of money to be reused at the end of the month with any Group categories | A reimbursement holding category exists for making small loans to family or friends          |
+| #cleanup _Group_ sink   | This is a category where extra money will be moved into from the Group source. Weight: 1 | This can be a category specific to a person or a business where reimbursements are expected. |
+| #cleanup _Group_ sink 2 | This is a category where extra money will be moved into from the Group source. Weight: 2 | This can be a category specific to a person or a business where reimbursements are expected. |
 
 The feature works sequentially in the following manner after pressing the **End of month cleanup** button .
 
@@ -43,9 +44,9 @@ The feature works sequentially in the following manner after pressing the **End 
 
 1. Local groups are applied first. Overspent categories are not automatically filled at this step and the group source funds will be distributed.
 1. Any `#cleanup source` entries will be found and all extra money in those categories will be returned to **To Budget**.
-    - A source category that has a negative balance will be ignored.
-2. **Overspent** categories that do NOT use **Rollover Overspending** will be found and will attempt to cover the overspending from **To Budget**.
-3. Any `#cleanup sink` entries will be found and redistribute the remaining **To Budget** amounts based on the weight given.
+   - A source category that has a negative balance will be ignored.
+1. **Overspent** categories that do NOT use **Rollover Overspending** will be found and will attempt to cover the overspending from **To Budget**.
+1. Any `#cleanup sink` entries will be found and redistribute the remaining **To Budget** amounts based on the weight given.
 
 ## Calculating the Weights of 'Sink' Categories
 
@@ -110,8 +111,9 @@ One way to do this is to have a Utilities holding category with $500 budgeted. W
 Method 2:
 
 Another way to accomplish this is to budget what you think you will spend for each of the utilities in each category. For example:
-* Power - $200
-* Water - $150
-* Gas - $150
+
+- Power - $200
+- Water - $150
+- Gas - $150
 
 In each category use `#cleanup utilities source` and `#cleanup utilities sink`. When the script is run, all of the remaining funds from each utilities category will be used to fund your overspent categories within the group and the leftover money will be evenly distributed to the utilities to carry over for the next month. Add a weight to the end of any of the categories if you would like to fund more.

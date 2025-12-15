@@ -47,7 +47,7 @@ export function FormulaCard({
       RESULT: result ?? 0,
       ...Object.entries(themeColors).reduce(
         (acc, [key, value]) => {
-          acc[`theme.${key}`] = value;
+          acc[`theme_${key}`] = value;
           return acc;
         },
         {} as Record<string, string>,
@@ -90,7 +90,6 @@ export function FormulaCard({
             onRemove();
             break;
           default:
-            console.warn(`Unrecognized menu selection: ${item}`);
             break;
         }
       }}

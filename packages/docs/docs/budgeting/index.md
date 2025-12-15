@@ -33,7 +33,6 @@ At a high-level, using the budget looks like this:
 4. At the end of the month, create a new budget for next month. Ideally, you will use income available from last month to cover the new budget. You will quickly see how much you saved by seeing the leftover **To budget** amount after budgeting for the new month.
 5. Move your leftover saved amount into a general savings category or another specific category that you are saving up for.
 
-
 ## How money rolls over
 
 ### Income
@@ -69,7 +68,6 @@ If you hold funds regularly, you can [automatically hold funds from specific inc
 When you overspend in a category, that needs to rollover as well. You spent money that wasn't budgeted, so now you need to go back and take it out from somewhere. Doing this keeps your budget intact.
 
 One way to do this would be to simply roll it over into next month's budget for that category, subtracting it from the available amount. This hardly ever works in real life — if you have a food budget it's highly unlikely you'll be able go under it next month just because you overspent on it this month.
-
 
 Usually you have a couple places that you draw money from to cover overspending. To make it easy, **all overspending is automatically taken out of next month's To budget amount**, and category balances are reset to zero. This makes it easy to make up for it by reducing your budget in some other category (like savings).
 
@@ -112,14 +110,13 @@ You can automate holding funds from specific income categories for future months
 
 ![Auto hold funds menu](/img/how-it-works/auto-hold.png)
 
-When the *auto hold* function has been enabled for an income category, this will be indicated by an arrow.
+When the _auto hold_ function has been enabled for an income category, this will be indicated by an arrow.
 The income category will be set for automatic holding starting from the current month and the following 12 months.
-If wanted, the *auto hold* functionality can be turned off by clicking the income balance and choosing "Disable auto hold".
+If wanted, the _auto hold_ functionality can be turned off by clicking the income balance and choosing "Disable auto hold".
 
 ![Auto hold indicator](/img/how-it-works/auto-hold-carryover.png)
 
-If you need to modify the *held funds* later in the month, you can disable the auto hold for the current month by clicking the budget value and choosing "Disable current auto hold."
-You may then set the held funds like normal and the *auto hold* will still be set in the future.
+If you need to modify the _held funds_ later in the month, you can disable the auto hold for the current month by clicking the budget value and choosing "Disable current auto hold."
+You may then set the held funds like normal and the _auto hold_ will still be set in the future.
 
 ![Auto hold disable current month](/img/how-it-works/auto-hold-disable.png)
-

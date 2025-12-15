@@ -1,9 +1,11 @@
+import path from 'node:path';
+
 import { defineConfig } from '@playwright/test';
 
-// eslint-disable-next-line import/no-default-export
 export default defineConfig({
   timeout: 60000, // 60 seconds
   retries: 1,
+  fullyParallel: true,
   workers: process.env.CI ? 1 : undefined,
   testDir: 'e2e/',
   reporter: process.env.CI ? 'blob' : [['html', { open: 'never' }]],
@@ -18,4 +20,15 @@ export default defineConfig({
   expect: {
     toHaveScreenshot: { maxDiffPixels: 5 },
   },
+  webServer: process.env.E2E_START_URL
+    ? undefined
+    : {
+        cwd: path.join(__dirname, '..', '..'),
+        command: 'yarn start',
+        url: 'http://localhost:3001',
+        reuseExistingServer: !process.env.CI,
+        stdout: 'ignore',
+        stderr: 'pipe',
+        ignoreHTTPSErrors: true,
+      },
 });

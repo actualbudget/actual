@@ -1,5 +1,4 @@
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
-// eslint-disable-next-line import/no-unresolved
 import { registerSW } from 'virtual:pwa-register';
 
 import * as Platform from 'loot-core/shared/platform';
@@ -189,6 +188,9 @@ global.Actual = {
 
   openURLInBrowser: url => {
     window.open(url, '_blank');
+  },
+  openInFileManager: () => {
+    // File manager not available in browser
   },
   onEventFromMain: () => {},
   isUpdateReadyForDownload: () => isUpdateReadyForDownload,

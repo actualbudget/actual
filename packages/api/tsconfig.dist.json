@@ -11,9 +11,9 @@
     "outDir": "dist",
     "declarationDir": "@types",
     "paths": {
-      "loot-core/*": ["./@types/loot-core/src/*"]
-    }
+      "loot-core/*": ["./@types/loot-core/src/*"],
+    },
   },
   "include": ["."],
-  "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts"]
+  "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts"],
 }

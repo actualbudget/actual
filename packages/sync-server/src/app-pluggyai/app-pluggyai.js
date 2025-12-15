@@ -1,10 +1,10 @@
 import express from 'express';
 
-import { handleError } from '../app-gocardless/util/handle-error.js';
-import { SecretName, secretsService } from '../services/secrets-service.js';
-import { requestLoggerMiddleware } from '../util/middlewares.js';
+import { handleError } from '../app-gocardless/util/handle-error';
+import { SecretName, secretsService } from '../services/secrets-service';
+import { requestLoggerMiddleware } from '../util/middlewares';
 
-import { pluggyaiService } from './pluggyai-service.js';
+import { pluggyaiService } from './pluggyai-service';
 
 const app = express();
 export { app as handlers };

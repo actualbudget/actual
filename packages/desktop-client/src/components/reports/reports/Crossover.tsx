@@ -57,6 +57,7 @@ type CrossoverData = {
       x: string;
       investmentIncome: number;
       expenses: number;
+      nestEgg: number;
       isProjection?: boolean;
     }>;
     start: string;
@@ -69,6 +70,7 @@ type CrossoverData = {
   historicalReturn: number | null;
   yearsToRetire: number | null;
   targetMonthlyIncome: number | null;
+  targetNestEgg: number | null;
 };
 
 export function Crossover() {
@@ -120,7 +122,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const [swr, setSwr] = useState(0.04);
   const [estimatedReturn, setEstimatedReturn] = useState<number | null>(null);
   const [projectionType, setProjectionType] = useState<'trend' | 'hampel'>(
-    'trend',
+    'hampel',
   );
   const [showHiddenCategories, setShowHiddenCategories] = useState(false);
   const [selectionsInitialized, setSelectionsInitialized] = useState(false);
@@ -154,7 +156,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     setSelectedIncomeAccountIds(initialIncomeAccountIds);
     setSwr(widget?.meta?.safeWithdrawalRate ?? 0.04);
     setEstimatedReturn(widget?.meta?.estimatedReturn ?? null);
-    setProjectionType(widget?.meta?.projectionType ?? 'trend');
+    setProjectionType(widget?.meta?.projectionType ?? 'hampel');
     setShowHiddenCategories(widget?.meta?.showHiddenCategories ?? false);
 
     setSelectionsInitialized(true);
@@ -298,6 +300,9 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
   // Get target monthly income from spreadsheet data
   const targetMonthlyIncome = data?.targetMonthlyIncome ?? null;
+
+  // Get target nest egg from spreadsheet data
+  const targetNestEgg = data?.targetNestEgg ?? null;
 
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
@@ -787,6 +792,20 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                   <PrivacyFilter>
                     {targetMonthlyIncome != null && !isNaN(targetMonthlyIncome)
                       ? format(targetMonthlyIncome, 'financial')
+                      : t('N/A')}
+                  </PrivacyFilter>
+                </span>
+              </View>
+              <View
+                style={{
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <span>
+                  <Trans>Target Nest Egg</Trans>:{' '}
+                  <PrivacyFilter>
+                    {targetNestEgg != null && !isNaN(targetNestEgg)
+                      ? format(targetNestEgg, 'financial')
                       : t('N/A')}
                   </PrivacyFilter>
                 </span>
