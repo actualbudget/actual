@@ -9,7 +9,7 @@ If you ever make a mistake, pressing <Key mod="ctrl" k="z" /> will undo, and pre
 
 ## Context Menus
 
-Context menus (right-click menus) are available throughout Actual. Use the method based on your operating system and/or hardware to access them .
+Context menus (right-click menus) are available throughout Actual. Use the method based on your operating system and/or hardware to access them.
 
 ## Keyboard Shortcuts
 
@@ -31,7 +31,7 @@ through the list of available commands. You can also quickly move to any of the 
 
 - <Key k="?" /> will open the help menu. The Help Menu contains links to the Documentation, Community support (Discord) and the Keyboard shortcuts.
 - <Key mod="ctrl" k="O" /> (the letter O, not zero) this will close the budget and list other available budgets to open.
-- <Key mod="shift" mod="ctrl" k="P" /> Toggle the privacy filter.  
+- <Key mod="shift" mod="ctrl" k="P" /> [Toggle the privacy filter.](#scramble-hide)  
 
 ### Budget page shortcuts
 
@@ -44,7 +44,7 @@ through the list of available commands. You can also quickly move to any of the 
 ### Account page shortcuts
 
 - <Key k="enter" /> and <Key mod="shift" k="enter" /> when editing will move down and up. In a dropdown, this will save the value and close the dropdown.
-- <Key k="tab" /> and <Key mod="shift" k="tab" /> when editing will move left and right
+- <Key k="tab" /> and <Key mod="shift" k="tab" /> when editing will move left and right. Like <Key k="enter" />, this will save the value and close an open dropdown.
 - <Key mod="ctrl" k="enter" /> will add the transaction and close the form regardless of where you are editing.
 - <Key k="enter" /> in either the Payment or Deposit columns will add the transaction; the form remains open for the next addition.
 - <Key mod="ctrl" k="I" /> ( i ) Import transactions.
@@ -82,7 +82,7 @@ This sets the maximum amount of months to render at once, and defaults to 1. If 
 This only controls the _maximum_ number of months. If the app is too small to render all of them it will only render the months that fit on the screen.
 :::
 
-## Scramble and Hide Data
+## Scramble and Hide Data {#scramble-hide}
 
 Actual Budget includes a privacy filter to help you obfuscate sensitive _amounts_ on screen.
 
@@ -113,9 +113,9 @@ A "running balance" is the balance of the account after every transaction over t
 
 To enable this:
 
-1. Click on an account
-2. Click on the 3 dots to show the actions menu
-3. Select "Show running balance"
+1. Click on an account.
+2. Click on the 3 dots to show the actions menu.
+3. Select "Show running balance".
 
 A new column should appear which shows the balance of the account after each transaction:
 
