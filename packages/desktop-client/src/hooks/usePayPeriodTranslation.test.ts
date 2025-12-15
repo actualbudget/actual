@@ -67,31 +67,55 @@ describe('Pay Period Translation Utilities', () => {
     ]);
   });
 
-  test('createAQLTransactionFilter creates date range filters for pay periods', () => {
+  test('createTransactionFilterConditions creates date range filters for pay periods', () => {
     const filter = createTransactionFilterConditions(
       '2024-13',
       'test-category',
     );
 
-    expect(filter).toEqual({
-      category: 'test-category',
-      date: {
-        $gte: '2024-01-05',
-        $lte: '2024-01-18',
+    expect(filter).toEqual([
+      {
+        field: 'category',
+        op: 'is',
+        type: 'id',
+        value: 'test-category',
       },
-    });
+      {
+        field: 'date',
+        op: 'gte',
+        type: 'date',
+        value: '2024-01-05',
+      },
+      {
+        field: 'date',
+        op: 'lte',
+        type: 'date',
+        value: '2024-01-18',
+      },
+    ]);
   });
 
-  test('createAQLTransactionFilter creates month transform filters for calendar months', () => {
+  test('createTransactionFilterConditions creates month transform filters for calendar months', () => {
     const filter = createTransactionFilterConditions(
       '2024-01',
       'test-category',
     );
 
-    expect(filter).toEqual({
-      category: 'test-category',
-      date: { $transform: '$month', $eq: '2024-01' },
-    });
+    expect(filter).toEqual([
+      {
+        field: 'category',
+        op: 'is',
+        type: 'id',
+        value: 'test-category',
+      },
+      {
+        field: 'date',
+        op: 'is',
+        type: 'date',
+        value: '2024-01',
+        options: { month: true },
+      },
+    ]);
   });
 
   test('handles different pay period frequencies', () => {
