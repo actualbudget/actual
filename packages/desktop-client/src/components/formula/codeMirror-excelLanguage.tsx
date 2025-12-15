@@ -705,6 +705,16 @@ const autocompletePopoverTheme = EditorView.baseTheme({
     gap: '8px',
     borderRadius: '4px',
   },
+
+  '.cm-tooltip.cm-tooltip-autocomplete > ul > completion-section, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection': {
+    padding: '0 !important',
+    position: 'sticky',
+    top: 0,
+    backgroundColor: theme.menuBackground,
+    opacity: '1 !important',
+    zIndex: 1,
+  },
+
   '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem[aria-selected]': {
     backgroundColor: theme.menuItemBackgroundHover,
     color: theme.menuItemTextHover,
