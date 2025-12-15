@@ -1,5 +1,7 @@
 /* eslint-disable actual/typography */
 import React from 'react';
+import { Trans } from 'react-i18next';
+
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -44,7 +46,7 @@ function FunctionTooltip({
       <div style={{ marginBottom: '8px' }}>{description}</div>
       <div style={{ fontSize: '0.9em', opacity: 0.8 }}>
         <div style={{ fontWeight: 500, marginBottom: '4px' }}>
-          {t('Parameters:')}
+          {<Trans>Parameters:</Trans>}
         </div>
         {parameters.map((p, i) => (
           <div key={i} style={{ marginBottom: '2px' }}>

@@ -3,6 +3,8 @@ import * as dateFns from 'date-fns';
 import * as Handlebars from 'handlebars';
 import { HyperFormula } from 'hyperformula';
 
+import { amountToInteger } from 'loot-core/shared/util';
+
 import { logger } from '../../platform/server/log';
 import { parseDate, format, currentDay } from '../../shared/months';
 import { FIELD_TYPES } from '../../shared/rules';
@@ -10,7 +12,6 @@ import { TransactionForRules } from '../transactions/transaction-rules';
 
 import { CustomFunctionsPlugin } from './customFunctions';
 import { assert } from './rule-utils';
-import { amountToInteger } from 'loot-core/shared/util';
 
 const ACTION_OPS = [
   'set',
