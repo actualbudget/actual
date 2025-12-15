@@ -240,7 +240,10 @@ export function SelectedTransactionsButton({
     onDelete,
     selectedIds,
   ]);
-  useHotkeys('t', () => onEdit('date', selectedIds), hotKeyOptions, [
+  useHotkeys('shift+t', () => onEdit('date', selectedIds), {
+    ...hotKeyOptions,
+    splitKey: '+',
+  }, [
     onEdit,
     selectedIds,
   ]);
@@ -393,7 +396,7 @@ export function SelectedTransactionsButton({
                 : []),
               Menu.line,
               { type: Menu.label, name: t('Edit field'), text: '' } as const,
-              { name: 'date', text: t('Date'), key: 'T' } as const,
+              { name: 'date', text: t('Date'), key: '⇧T' } as const,
               { name: 'account', text: t('Account'), key: 'A' } as const,
               { name: 'payee', text: t('Payee'), key: 'P' } as const,
               { name: 'notes', text: t('Notes'), key: 'N' } as const,
