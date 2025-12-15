@@ -138,6 +138,8 @@ export const CONDITION_TYPES = {
             .trim()
             // Replace multiple spaces with a single space
             .replace(/\s\s+/g, ' ')
+            // Replace already added # to avoid ##tag
+            .replace(/(?<!#)#(\w+)/g, '$1')
             .split(' ')
             .map(v => `#${v}`)
         );
