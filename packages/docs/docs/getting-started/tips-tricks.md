@@ -29,8 +29,8 @@ through the list of available commands. You can also quickly move to any of the 
 
 ### General shortcuts
 
-- <Key k="?" /> will open the help menu. The Help Menu contains a link to the Documentation, Community support (Discord) and the Keyboard shortcuts.
-- <Key mod="ctrl" k="O" /> (the letter O, not zero) this will close the file and list other available files to open.
+- <Key k="?" /> will open the help menu. The Help Menu contains links to the Documentation, Community support (Discord) and the Keyboard shortcuts.
+- <Key mod="ctrl" k="O" /> (the letter O, not zero) this will close the budget and list other available budgets to open.
 - <Key mod="shift" mod="ctrl" k="P" /> Toggle the privacy filter.  
 
 ### Budget page shortcuts
@@ -61,9 +61,9 @@ through the list of available commands. You can also quickly move to any of the 
 - <Key k="n" /> Set notes for selected transactions.
 - <Key k="c" /> Set category for selected transactions.
 - <Key k="m" /> Set amount for selected transactions.
-- <Key k="l" /> Toggle cleared status for current transaction.
+- <Key k="l" /> Toggle cleared status for selected transactions.
 - <Key k="S" /> Link or view schedule for selected transactions.
-- <Key mod="ctrl" k="A" /> Select all transactions.
+- <Key mod="ctrl" k="A" /> Toggle selection or deselection of all transactions.
 - <Key k="t" /> Set date for selected transactions.
 - <Key k="J" /> or <Key arrow="down" /> Move to the next transaction down. Hold to scroll down.
 - <Key k="K" /> or <Key arrow="up" /> Move to the next transaction up. Hold to scroll up.
@@ -87,6 +87,8 @@ This only controls the _maximum_ number of months. If the app is too small to re
 Actual Budget includes a privacy filter to help you obfuscate sensitive _amounts_ on screen.
 
 :::important
+The privacy filter is visual only: it does not encrypt, delete, or alter your saved data or exports.
+
 Be advised that when you hover over scrambled items, the amounts will be shown. This is a feature to help you see the actual amounts when you need them, but it may not be suitable for sharing screenshots or screen recordings.
 :::
 
@@ -98,14 +100,10 @@ When enabled, only currency amounts are scrambled so you can take screenshots or
 
 ![Top right corner](/img/tips-tricks/scrambled-scrambled-view.png)
 
-What changes when the filter is on
+What changes when the filter is on:
 
 - Hidden/Scrambled: account balances, budgeted/available amounts, transaction amounts, totals in reports and widgets.
 - Remain Visible: account names, category group and category names, payee names, transaction dates, notes/memos, flags, cleared status, and the presence of individual transactions (only the amounts are scrambled).
-
-:::note
-The privacy filter is visual only: it does not encrypt, delete, or alter your saved data or exports.
-:::
 
 **Turn it off**: Click the _eye icon_ or <Key mod="shift" mod="ctrl" k="P" /> again to restore normal viewing. This will show the data in its original form.
 
