@@ -17,7 +17,6 @@ On macOS keyboards, the key modifier <Key mod="cmd" /> replaces <Key mod="ctrl" 
 
 Context menus (right-click menus) are available throughout Actual. Use the method based on your operating system and/or hardware to access them .
 
-
 ## The Command Palette
 
 The Command Palette is a powerful tool which allows you to quickly access various features and functions within Actual.
