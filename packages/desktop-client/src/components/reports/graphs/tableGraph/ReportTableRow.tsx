@@ -119,6 +119,7 @@ export const ReportTableRow = memo(
           style={{
             flexDirection: 'row',
             flex: 1,
+            backgroundColor: style?.backgroundColor,
             ...totalStyle,
           }}
         >
@@ -129,6 +130,7 @@ export const ReportTableRow = memo(
               width: compact ? 80 : 125,
               flexShrink: 0,
               flexGrow: 1,
+              backgroundColor: style?.backgroundColor,
             }}
             valueStyle={compactStyle}
           />
@@ -140,6 +142,7 @@ export const ReportTableRow = memo(
                     textAlign="right"
                     style={{
                       minWidth: compact ? 50 : 85,
+                      backgroundColor: style?.backgroundColor,
                       ...(colorized && {
                         color: getAmountColor(intervalItem[balanceTypeOp]),
                       }),
@@ -202,6 +205,7 @@ export const ReportTableRow = memo(
                     privacyFilter
                     style={{
                       minWidth: compact ? 50 : 85,
+                      backgroundColor: style?.backgroundColor,
                       ...(colorized && {
                         color: getAmountColor(item.totalAssets),
                       }),
@@ -251,6 +255,7 @@ export const ReportTableRow = memo(
                     privacyFilter
                     style={{
                       minWidth: compact ? 50 : 85,
+                      backgroundColor: style?.backgroundColor,
                       ...(colorized && {
                         color: getAmountColor(item.totalDebts),
                       }),
@@ -301,6 +306,7 @@ export const ReportTableRow = memo(
             style={{
               fontWeight: 600,
               minWidth: compact ? 50 : 85,
+              backgroundColor: style?.backgroundColor,
               ...(colorized && { color: getAmountColor(item[balanceTypeOp]) }),
             }}
             unexposedContent={({ value }) => (
@@ -349,6 +355,7 @@ export const ReportTableRow = memo(
             style={{
               fontWeight: 600,
               minWidth: compact ? 50 : 85,
+              backgroundColor: style?.backgroundColor,
               ...(colorized && { color: getAmountColor(average) }),
             }}
             valueStyle={compactStyle}
