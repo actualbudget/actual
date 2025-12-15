@@ -28,7 +28,7 @@ export function updateFilterReducer<T extends RuleConditionEntity>(
         value = null;
       }
 
-      if(action.op === 'oneOf' || action.op === 'notOneOf') {
+      if (action.op === 'oneOf' || action.op === 'notOneOf') {
         // Ensure value is an array for multi-select ops
         if (!Array.isArray(value)) {
           const fixedValue = value !== null ? [value] : [];
