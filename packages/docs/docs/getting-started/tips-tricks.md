@@ -21,7 +21,7 @@ Below is a list of the most useful shortcuts.
 The Command Palette is a powerful tool which allows you to quickly access various features and functions within Actual.
 
 - On Windows and Linux, you can open it by pressing the <Key mod="ctrl" fixed k="k" /> combination to open the Command Palette.
-- On macOS, you can use the <Key mod="cmd" fixed /> or the <Key mod="ctrl" fixed /> key combinations.
+- On macOS, you can use the <Key mod="cmd" fixed k="k" /> or the <Key mod="ctrl" fixed k="k" /> key combinations to open the Command Palette.
 
 ![Command Palette](/img/tips-tricks/command-palette.png)
 
@@ -30,8 +30,9 @@ through the list of available commands. You can also quickly move to any of the 
 
 ### Other Global Shortcuts
 
+- <Key k="?" /> will open the help menu. The Help Menu contains a link to the Documentation, Community support (Discord) and the Keyboard shortcuts.
 - <Key mod="ctrl" k="O" /> (the letter O, not zero) this will close the file and list other available files to open.
-  On macOS, you can also use the <Key mod="cmd" k="O" /> key combination.
+- <Key mod="shift" mod="ctrl" k="P" /> Toggle the privacy filter.  
 
 ### Within the Budget View
 
