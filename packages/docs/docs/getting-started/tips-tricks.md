@@ -28,13 +28,13 @@ The Command Palette is a powerful tool which allows you to quickly access variou
 Once open, you can start typing to search for the functions in the sidebar, or you can use the arrow keys to navigate
 through the list of available commands. You can also quickly move to any of the available accounts by typing their name.
 
-### Other Global Shortcuts
+### General shortcuts
 
 - <Key k="?" /> will open the help menu. The Help Menu contains a link to the Documentation, Community support (Discord) and the Keyboard shortcuts.
 - <Key mod="ctrl" k="O" /> (the letter O, not zero) this will close the file and list other available files to open.
 - <Key mod="shift" mod="ctrl" k="P" /> Toggle the privacy filter.  
 
-### Within the Budget View
+### Budget page shortcuts
 
 - <Key k="enter" /> while editing a budget amount will move to the next category.
 - <Key mod="shift" k="enter" /> Move to the previous budget category.
