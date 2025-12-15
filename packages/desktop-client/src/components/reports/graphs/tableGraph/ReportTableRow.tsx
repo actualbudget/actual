@@ -101,6 +101,8 @@ export const ReportTableRow = memo(
           }
         : {};
 
+    const isListRow = !totalScrollRef;
+
     return (
       <Row
         key={item.id}
@@ -109,6 +111,10 @@ export const ReportTableRow = memo(
         style={{
           color: theme.tableText,
           backgroundColor: theme.tableBackground,
+          ...(isListRow && {
+            minWidth: '100%',
+            width: 'max-content',
+          }),
           ...style,
         }}
       >
