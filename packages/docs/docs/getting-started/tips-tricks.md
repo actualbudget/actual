@@ -7,6 +7,12 @@ title: 'Tips & Tricks'
 
 If you ever make a mistake, pressing <Key mod="cmd" k="z" /> will undo, and pressing <Key mod="cmd shift" k="z" /> will redo. Using the desktop app, this is an undo system that you can always rely on; any change can be undone and the UI will walk back in time. If you're using the web app, this is only good for the current session of the website. If you refresh, or close the browser tab, undo history is lost.
 
+:::note
+
+On macOS keyboards, the key modifier <Key mod="cmd" /> replaces <Key mod="ctrl" />.
+
+:::
+
 ## Context Menus
 
 Context menus (right-click menus) are available throughout Actual. Use the method based on your operating system and/or hardware to access them .
@@ -30,13 +36,16 @@ through the list of available commands. You can also quickly move to any of the 
 
 ### Global Shortcuts
 
-- <Key mod="ctrl" k="O" /> (the letter O, not zero) this will close the file and list other available files to open.
-  On macOS, you can also use the <Key mod="cmd" k="O" /> key combination.
+- <Key mod="ctrl" k="O" /> (the letter O, not zero) Close the current budget and list other available budgets to open.
+- <Key mod="ctrl" mod="shift" k="P" /> [Toggle the privacy filter.](#scramble-and-hide-data)
 
 ### Within the Budget View
 
 - <Key k="enter" /> while editing a budget amount will move to the next category.
-- <Key mod="shift" k="enter" /> will move to the previous category.
+- <Key mod="shift" k="enter" /> Move to the previous budget category.
+- <Key k="0" /> (zero) View the current month.
+- <Key arrow="left" /> View the previous month.
+- <Key arrow="right" /> View the next month.
 
 ### When Editing Transactions
 
