@@ -2,12 +2,180 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "import", "jsx-a11y"],
   "rules": {
-    "jsx-a11y/no-autofocus": ["warn", { "ignoreNonDOM": true }],
-
     // TODO fix all these and re-enable
     "jsx-a11y/click-events-have-key-events": "off",
     "jsx-a11y/prefer-tag-over-role": "off",
     "jsx-a11y/tabindex-no-positive": "off",
+
+    // Keep these rules
+    "no-var": "warn",
+
+    // JSX A11y rules
+    "jsx-a11y/no-autofocus": ["warn", { "ignoreNonDOM": true }],
+
+    // Import rules
+    "import/first": "error",
+    "import/no-amd": "error",
+    "import/no-default-export": "warn",
+    "import/no-webpack-loader-syntax": "error",
+    "import/no-useless-path-segments": "warn",
+    "import/no-unresolved": "warn",
+    "import/no-unused-modules": "warn",
+    "import/no-duplicates": [
+      "warn",
+      {
+        "prefer-inline": true
+      }
+    ],
+
+    // React rules
+    "react/exhaustive-deps": [
+      "warn",
+      {
+        "additionalHooks": "(useQuery|useEffectAfterMount)"
+      }
+    ],
+    "react/jsx-curly-brace-presence": "warn",
+    "react/jsx-filename-extension": [
+      "warn",
+      {
+        "extensions": [".jsx", ".tsx"],
+        "allow": "as-needed"
+      }
+    ],
+    "react/jsx-no-comment-textnodes": "warn",
+    "react/jsx-no-duplicate-props": "warn",
+    "react/jsx-no-target-blank": "warn",
+    "react/jsx-no-undef": "error",
+    "react/jsx-no-useless-fragment": "warn",
+    "react/jsx-pascal-case": [
+      "warn",
+      {
+        "allowAllCaps": true,
+        "ignore": []
+      }
+    ],
+    "react/no-danger-with-children": "warn",
+    "react/no-direct-mutation-state": "warn",
+    "react/no-is-mounted": "warn",
+    "react/no-unstable-nested-components": "warn",
+    "react/require-render-return": "error",
+    "react/rules-of-hooks": "error",
+    "react/self-closing-comp": "warn",
+    "react/style-prop-object": "warn",
+
+    // ESLint rules
+    "eslint/no-redeclare": "warn",
+    "eslint/no-regex-spaces": "warn",
+    "eslint/no-restricted-globals": [
+      "warn",
+
+      // https://github.com/facebook/create-react-app/tree/main/packages/confusing-browser-globals
+      "addEventListener",
+      "blur",
+      "close",
+      "closed",
+      "confirm",
+      "defaultStatus",
+      "defaultstatus",
+      "event",
+      "external",
+      "find",
+      "focus",
+      "frameElement",
+      "frames",
+      "history",
+      "innerHeight",
+      "innerWidth",
+      "length",
+      "location",
+      "locationbar",
+      "menubar",
+      "moveBy",
+      "moveTo",
+      "name",
+      "onblur",
+      "onerror",
+      "onfocus",
+      "onload",
+      "onresize",
+      "onunload",
+      "open",
+      "opener",
+      "opera",
+      "outerHeight",
+      "outerWidth",
+      "pageXOffset",
+      "pageYOffset",
+      "parent",
+      "print",
+      "removeEventListener",
+      "resizeBy",
+      "resizeTo",
+      "screen",
+      "screenLeft",
+      "screenTop",
+      "screenX",
+      "screenY",
+      "scroll",
+      "scrollbars",
+      "scrollBy",
+      "scrollTo",
+      "scrollX",
+      "scrollY",
+      "status",
+      "statusbar",
+      "stop",
+      "toolbar",
+      "top"
+    ],
+    "eslint/no-restricted-imports": [
+      "warn",
+      {
+        "paths": [
+          {
+            "name": "react-router",
+            "importNames": ["useNavigate"],
+            "message": "Please import Actual's useNavigate() hook from `src/hooks` instead."
+          },
+          {
+            "name": "react-redux",
+            "importNames": ["useDispatch"],
+            "message": "Please import Actual's useDispatch() hook from `src/redux` instead."
+          },
+          {
+            "name": "react-redux",
+            "importNames": ["useSelector"],
+            "message": "Please import Actual's useSelector() hook from `src/redux` instead."
+          },
+          {
+            "name": "react-redux",
+            "importNames": ["useStore"],
+            "message": "Please import Actual's useStore() hook from `src/redux` instead."
+          }
+        ],
+        "patterns": [
+          {
+            "group": ["*.api", "*.web", "*.electron"],
+            "message": "Don't directly reference imports from other platforms"
+          },
+          {
+            "group": ["uuid"],
+            "importNames": ["*"],
+            "message": "Use `import { v4 as uuidv4 } from 'uuid'` instead"
+          },
+          {
+            "group": ["**/style", "**/colors"],
+            "importNames": ["colors"],
+            "message": "Please use themes instead of colors"
+          },
+          {
+            "group": ["@actual-app/web/*"],
+            "message": "Please do not import `@actual-app/web` in `loot-core`"
+          }
+        ]
+      }
+    ]
   },
   "overrides": [
     {
@@ -56,11 +224,23 @@
         "packages/desktop-client/src/components/sidebar/Tools.tsx",
         "packages/desktop-client/src/components/sort.tsx",
         "packages/desktop-client/src/hooks/useEffectAfterMount.ts",
-        "packages/desktop-client/src/hooks/useQuery.ts",
+        "packages/desktop-client/src/hooks/useQuery.ts"
       ],
       "rules": {
-        "react-hooks/exhaustive-deps": "off",
-      },
+        "react/exhaustive-deps": "off"
+      }
     },
+
+    {
+      "files": [
+        "packages/api/migrations/*",
+        "packages/loot-core/migrations/*",
+        "packages/sync-server/src/app-gocardless/banks/*.js",
+        "*.config.{ts,mts,mjs}"
+      ],
+      "rules": {
+        "import/no-default-export": "off"
+      }
+    }
   ]
 }

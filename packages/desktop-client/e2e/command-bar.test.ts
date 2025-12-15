@@ -7,7 +7,7 @@ test.describe('Command bar', () => {
   let page: Page;
   let configurationPage: ConfigurationPage;
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
     configurationPage = new ConfigurationPage(page);
 
@@ -26,8 +26,8 @@ test.describe('Command bar', () => {
     });
   });
 
-  test.afterAll(async () => {
-    await page.close();
+  test.afterEach(async () => {
+    await page?.close();
   });
 
   test('Check the command bar visuals', async () => {

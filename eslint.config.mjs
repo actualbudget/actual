@@ -3,8 +3,6 @@ import { defineConfig } from 'eslint/config';
 import pluginImport from 'eslint-plugin-import';
 import pluginJSXA11y from 'eslint-plugin-jsx-a11y';
 import oxlint from 'eslint-plugin-oxlint';
-import pluginReact from 'eslint-plugin-react';
-import pluginReactHooks from 'eslint-plugin-react-hooks';
 import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
 import globals from 'globals';
 import pluginTypescript from 'typescript-eslint';
@@ -12,73 +10,9 @@ import pluginTypescript from 'typescript-eslint';
 // eslint-disable-next-line import/extensions
 import pluginActual from './packages/eslint-plugin-actual/lib/index.js';
 
-const confusingBrowserGlobals = [
-  // https://github.com/facebook/create-react-app/tree/main/packages/confusing-browser-globals
-  'addEventListener',
-  'blur',
-  'close',
-  'closed',
-  'confirm',
-  'defaultStatus',
-  'defaultstatus',
-  'event',
-  'external',
-  'find',
-  'focus',
-  'frameElement',
-  'frames',
-  'history',
-  'innerHeight',
-  'innerWidth',
-  'length',
-  'location',
-  'locationbar',
-  'menubar',
-  'moveBy',
-  'moveTo',
-  'name',
-  'onblur',
-  'onerror',
-  'onfocus',
-  'onload',
-  'onresize',
-  'onunload',
-  'open',
-  'opener',
-  'opera',
-  'outerHeight',
-  'outerWidth',
-  'pageXOffset',
-  'pageYOffset',
-  'parent',
-  'print',
-  'removeEventListener',
-  'resizeBy',
-  'resizeTo',
-  'screen',
-  'screenLeft',
-  'screenTop',
-  'screenX',
-  'screenY',
-  'scroll',
-  'scrollbars',
-  'scrollBy',
-  'scrollTo',
-  'scrollX',
-  'scrollY',
-  'status',
-  'statusbar',
-  'stop',
-  'toolbar',
-  'top',
-];
-
 export default defineConfig(
   {
     ignores: [
-      //temporary
-      'packages/docs',
-
       'packages/api/app/bundle.api.js',
       'packages/api/app/stats.json',
       'packages/api/@types',
@@ -150,10 +84,8 @@ export default defineConfig(
       },
     },
   },
-  pluginReact.configs.flat.recommended,
-  pluginReact.configs.flat['jsx-runtime'],
   pluginTypescript.configs.recommended,
-  pluginImport.flatConfigs.recommended,
+  { plugins: { import: pluginImport } },
   {
     plugins: {
       actual: pluginActual,
@@ -167,7 +99,6 @@ export default defineConfig(
     files: ['**/*.{js,ts,jsx,tsx,mjs,mts}'],
     plugins: {
       'jsx-a11y': pluginJSXA11y,
-      'react-hooks': pluginReactHooks,
     },
     rules: {
       // http://eslint.org/docs/rules/
@@ -242,8 +173,6 @@ export default defineConfig(
       'no-obj-calls': 'warn',
       'no-octal': 'warn',
       'no-octal-escape': 'warn',
-      'no-redeclare': 'warn',
-      'no-regex-spaces': 'warn',
       'no-script-url': 'warn',
       'no-self-assign': 'warn',
       'no-self-compare': 'warn',
@@ -318,23 +247,12 @@ export default defineConfig(
 
       'getter-return': 'warn',
 
-      // https://github.com/benmosher/eslint-plugin-import/tree/master/docs/rules
-      'import/first': 'error',
-      'import/no-amd': 'error',
-      'import/no-anonymous-default-export': 'warn',
-      'import/no-webpack-loader-syntax': 'error',
       'import/extensions': [
         'warn',
         'never',
         {
           json: 'always',
-        },
-      ],
-      'import/no-useless-path-segments': 'warn',
-      'import/no-duplicates': [
-        'warn',
-        {
-          'prefer-inline': true,
+          svg: 'always',
         },
       ],
       'import/order': [
@@ -367,53 +285,6 @@ export default defineConfig(
         },
       ],
 
-      // https://github.com/yannickcr/eslint-plugin-react/tree/master/docs/rules
-      'react/forbid-foreign-prop-types': [
-        'warn',
-        {
-          allowInPropTypes: true,
-        },
-      ],
-      'react/jsx-no-comment-textnodes': 'warn',
-      'react/jsx-no-duplicate-props': 'warn',
-      'react/jsx-no-target-blank': 'warn',
-      'react/jsx-no-undef': 'error',
-      'react/jsx-pascal-case': [
-        'warn',
-        {
-          allowAllCaps: true,
-          ignore: [],
-        },
-      ],
-      'react/no-danger-with-children': 'warn',
-      // Disabled because of undesirable warnings
-      // See https://github.com/facebook/create-react-app/issues/5204 for
-      // blockers until its re-enabled
-      // 'react/no-deprecated': 'warn',
-      'react/no-direct-mutation-state': 'warn',
-      'react/no-is-mounted': 'warn',
-      'react/no-typos': 'error',
-      'react/require-render-return': 'error',
-      'react/style-prop-object': 'warn',
-      'react/jsx-no-useless-fragment': 'warn',
-      'react/self-closing-comp': 'warn',
-      'react/jsx-filename-extension': [
-        'warn',
-        {
-          extensions: ['.jsx', '.tsx'],
-          allow: 'as-needed',
-        },
-      ],
-      'react/no-unstable-nested-components': [
-        'warn',
-        {
-          allowAsProps: true,
-          customValidators: ['formatter'],
-        },
-      ],
-      // Don't need this as we're using TypeScript
-      'react/prop-types': 'off',
-
       // https://github.com/evcohen/eslint-plugin-jsx-a11y/tree/master/docs/rules
       'jsx-a11y/alt-text': 'warn',
       'jsx-a11y/anchor-has-content': 'warn',
@@ -443,15 +314,6 @@ export default defineConfig(
       'jsx-a11y/role-supports-aria-props': 'warn',
       'jsx-a11y/scope': 'warn',
 
-      // https://github.com/facebook/react/tree/main/packages/eslint-plugin-react-hooks
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': [
-        'warn',
-        {
-          additionalHooks: '(useQuery|useEffectAfterMount)',
-        },
-      ],
-
       'actual/typography': 'warn',
       'actual/prefer-if-statement': 'warn',
       'actual/prefer-logger-over-console': 'error',
@@ -468,16 +330,10 @@ export default defineConfig(
         },
       ],
 
-      'no-restricted-globals': ['warn', ...confusingBrowserGlobals],
-
       // https://github.com/eslint/eslint/issues/16954
       // https://github.com/eslint/eslint/issues/16953
       'no-loop-func': 'off',
 
-      // TODO: re-enable these rules
-      'react/react-in-jsx-scope': 'off',
-      'no-var': 'warn',
-      'react/jsx-curly-brace-presence': 'warn',
       'object-shorthand': ['warn', 'properties'],
 
       'no-restricted-syntax': [
@@ -496,58 +352,6 @@ export default defineConfig(
         },
       ],
 
-      'no-restricted-imports': [
-        'warn',
-        {
-          paths: [
-            {
-              name: 'react-router',
-              importNames: ['useNavigate'],
-              message:
-                "Please import Actual's useNavigate() hook from `src/hooks` instead.",
-            },
-            {
-              name: 'react-redux',
-              importNames: ['useDispatch'],
-              message:
-                "Please import Actual's useDispatch() hook from `src/redux` instead.",
-            },
-            {
-              name: 'react-redux',
-              importNames: ['useSelector'],
-              message:
-                "Please import Actual's useSelector() hook from `src/redux` instead.",
-            },
-            {
-              name: 'react-redux',
-              importNames: ['useStore'],
-              message:
-                "Please import Actual's useStore() hook from `src/redux` instead.",
-            },
-          ],
-          patterns: [
-            {
-              group: ['*.api', '*.web', '*.electron'],
-              message: "Don't directly reference imports from other platforms",
-            },
-            {
-              group: ['uuid'],
-              importNames: ['*'],
-              message: "Use `import { v4 as uuidv4 } from 'uuid'` instead",
-            },
-            {
-              group: ['**/style', '**/colors'],
-              importNames: ['colors'],
-              message: 'Please use themes instead of colors',
-            },
-            {
-              group: ['@actual-app/web/*'],
-              message: 'Please do not import `@actual-app/web` in `loot-core`',
-            },
-          ],
-        },
-      ],
-
       '@typescript-eslint/ban-ts-comment': [
         'error',
         {
@@ -561,7 +365,6 @@ export default defineConfig(
       'prefer-spread': 'off',
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-require-imports': 'off',
-      'import/no-default-export': 'warn',
     },
   },
   {
@@ -593,19 +396,10 @@ export default defineConfig(
       // 'tsc' already handles this (https://github.com/typescript-eslint/typescript-eslint/issues/477)
       'no-undef': 'off',
 
-      // TypeScript already handles these (https://typescript-eslint.io/troubleshooting/typed-linting/performance/#eslint-plugin-import)
-      'import/named': 'off',
-      'import/namespace': 'off',
-      'import/default': 'off',
-      'import/no-named-as-default-member': 'off',
-      'import/no-unresolved': 'off',
-
       // Add TypeScript specific rules (and turn off ESLint equivalents)
       '@typescript-eslint/consistent-type-assertions': 'warn',
       'no-array-constructor': 'off',
       '@typescript-eslint/no-array-constructor': 'warn',
-      'no-redeclare': 'off',
-      '@typescript-eslint/no-redeclare': 'warn',
       'no-use-before-define': 'off',
 
       '@typescript-eslint/no-use-before-define': [
@@ -682,48 +476,6 @@ export default defineConfig(
   },
   {
     files: [
-      'packages/loot-core/src/types/**/*',
-      'packages/loot-core/src/client/state-types/**/*',
-      '**/icons/**/*',
-      '**/{mocks,__mocks__}/**/*',
-      // can't correctly resolve usages
-      '**/*.{testing,electron,browser,web,api}.ts',
-    ],
-
-    rules: {
-      'import/no-unused-modules': 'off',
-    },
-  },
-  {
-    files: ['packages/api/migrations/*', 'packages/loot-core/migrations/*'],
-
-    rules: {
-      'import/no-default-export': 'off',
-    },
-  },
-  {
-    files: ['packages/api/index.ts'],
-    rules: {
-      'import/no-unresolved': 'off',
-    },
-  },
-
-  // Allow configuring vitest with default exports (recommended as per vitest docs)
-  {
-    files: [
-      '**/vitest.config.{ts,mts}',
-      '**/vitest.web.config.ts',
-      '**/vite.config.{ts,mts}',
-      'eslint.config.mjs',
-    ],
-    rules: {
-      'import/no-anonymous-default-export': 'off',
-      'import/no-default-export': 'off',
-    },
-  },
-
-  {
-    files: [
       'eslint.config.mjs',
       '**/*.test.js',
       '**/*.test.ts',
@@ -736,6 +488,14 @@ export default defineConfig(
       'actual/typography': 'off',
       'actual/no-untranslated-strings': 'off',
       'actual/prefer-logger-over-console': 'off',
+    },
+  },
+  {
+    files: ['packages/docs/**/*'],
+    rules: {
+      'actual/typography': 'off',
+      'actual/no-untranslated-strings': 'off',
+      'no-restricted-syntax': 'off',
     },
   },
   {
@@ -754,13 +514,6 @@ export default defineConfig(
     // TODO: fix the issues in these files
     rules: {
       'actual/typography': 'off',
-    },
-  },
-  {
-    files: ['packages/sync-server/src/app-gocardless/banks/*.js'],
-    rules: {
-      'import/no-anonymous-default-export': 'off',
-      'import/no-default-export': 'off',
     },
   },
   // Disable ESLint rules that are already covered by oxlint

@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-restricted-imports -- fix me
+// oxlint-disable-next-line eslint/no-restricted-imports -- fix me
 import { ConfigurationPage } from '@actual-app/web/e2e/page-models/configuration-page';
 import { expect } from '@playwright/test';
 

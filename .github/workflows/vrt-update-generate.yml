@@ -1,30 +1,47 @@
 name: VRT Update - Generate
 # SECURITY: This workflow runs in untrusted fork context with no write permissions.
 # It only generates VRT patch artifacts that are later applied by vrt-update-apply.yml
+# Triggered by commenting "/update-vrt" on a pull request.
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-    paths:
-      - 'packages/**'
-      - '.github/workflows/vrt-update-generate.yml'
+  issue_comment:
+    types: [created]
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
   cancel-in-progress: true
 
 jobs:
   generate-vrt-updates:
     name: Generate VRT Updates
     runs-on: ubuntu-latest
+    # Only run on PR comments containing /update-vrt
+    if: >
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/update-vrt')
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-jammy
     steps:
+      - name: Get PR details
+        id: pr
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            core.setOutput('head_sha', pr.head.sha);
+            core.setOutput('head_ref', pr.head.ref);
+            core.setOutput('head_repo', pr.head.repo.full_name);
+
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ steps.pr.outputs.head_sha }}
 
       - name: Set up environment
         uses: ./.github/actions/setup
@@ -34,18 +51,9 @@ jobs:
         run: |
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" -- yarn e2e:desktop --update-snapshots
 
-      - name: Wait for Netlify build to finish
-        id: netlify
-        env:
-          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./.github/actions/netlify-wait-for-build
-
-      - name: Run VRT Tests on Netlify URL
+      - name: Run VRT Tests
         continue-on-error: true
         run: yarn vrt --update-snapshots
-        env:
-          E2E_START_URL: ${{ steps.netlify.outputs.url }}
 
       - name: Create patch with PNG changes only
         id: create-patch
@@ -84,7 +92,7 @@ jobs:
         if: steps.create-patch.outputs.has_changes == 'true'
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
-          name: vrt-patch-${{ github.event.pull_request.number }}
+          name: vrt-patch-${{ github.event.issue.number }}
           path: vrt-update.patch
           retention-days: 5
 
@@ -92,14 +100,14 @@ jobs:
         if: steps.create-patch.outputs.has_changes == 'true'
         run: |
           mkdir -p pr-metadata
-          echo "${{ github.event.pull_request.number }}" > pr-metadata/pr-number.txt
-          echo "${{ github.event.pull_request.head.ref }}" > pr-metadata/head-ref.txt
-          echo "${{ github.event.pull_request.head.repo.full_name }}" > pr-metadata/head-repo.txt
+          echo "${{ github.event.issue.number }}" > pr-metadata/pr-number.txt
+          echo "${{ steps.pr.outputs.head_ref }}" > pr-metadata/head-ref.txt
+          echo "${{ steps.pr.outputs.head_repo }}" > pr-metadata/head-repo.txt
 
       - name: Upload PR metadata
         if: steps.create-patch.outputs.has_changes == 'true'
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
-          name: vrt-metadata-${{ github.event.pull_request.number }}
+          name: vrt-metadata-${{ github.event.issue.number }}
           path: pr-metadata/
           retention-days: 5

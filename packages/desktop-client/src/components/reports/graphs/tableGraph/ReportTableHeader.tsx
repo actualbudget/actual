@@ -90,6 +90,7 @@ export function ReportTableHeader({
                   valueStyle={compactStyle}
                   key={index}
                   value={header.date}
+                  textAlign="right"
                   width="flex"
                 />
               );
@@ -102,6 +103,7 @@ export function ReportTableHeader({
                   }}
                   valueStyle={compactStyle}
                   value={t('Deposits')}
+                  textAlign="right"
                   width="flex"
                 />
                 <Cell
@@ -110,6 +112,7 @@ export function ReportTableHeader({
                   }}
                   valueStyle={compactStyle}
                   value={t('Payments')}
+                  textAlign="right"
                   width="flex"
                 />
               </>
@@ -120,6 +123,7 @@ export function ReportTableHeader({
           }}
           valueStyle={compactStyle}
           value={t('Totals')}
+          textAlign="right"
           width="flex"
         />
         <Cell
@@ -128,6 +132,7 @@ export function ReportTableHeader({
           }}
           valueStyle={compactStyle}
           value={t('Average')}
+          textAlign="right"
           width="flex"
         />
       </View>

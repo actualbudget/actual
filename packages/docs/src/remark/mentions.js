@@ -7,7 +7,7 @@ function githubMentionPlugin() {
       const text = node.value;
       let match;
       let lastIndex = 0;
-      let segments = [];
+      const segments = [];
       while ((match = pattern.exec(text))) {
         const { index } = match;
         const username = match[1];
