@@ -3,6 +3,8 @@ import * as dateFns from 'date-fns';
 import * as Handlebars from 'handlebars';
 import { HyperFormula } from 'hyperformula';
 
+import { amountToInteger } from 'loot-core/shared/util';
+
 import { logger } from '../../platform/server/log';
 import { parseDate, format, currentDay } from '../../shared/months';
 import { FIELD_TYPES } from '../../shared/rules';
@@ -296,6 +298,10 @@ export class Action {
 
       if (cellValue && typeof cellValue === 'object' && 'type' in cellValue) {
         throw new Error(`Formula error: ${cellValue.message}`);
+      }
+
+      if (typeof cellValue === 'number') {
+        return amountToInteger(Math.round(cellValue * 100) / 100);
       }
 
       return cellValue;
