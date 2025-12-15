@@ -7,11 +7,7 @@ title: 'Tips & Tricks'
 
 If you ever make a mistake, pressing <Key mod="ctrl" k="z" /> will undo, and pressing <Key mod="ctrl shift" k="z" /> will redo. Using the desktop app, this is an undo system that you can always rely on; any change can be undone and the UI will walk back in time. If you're using the web app, this is only good for the current session of the website. If you refresh, or close the browser tab, undo history is lost.
 
-:::note
-
 On macOS keyboards, the key modifier <Key mod="cmd" /> replaces <Key mod="ctrl" />.
-
-:::
 
 ## Keyboard Shortcuts
 
