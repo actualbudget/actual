@@ -15,7 +15,12 @@ import {
   type StreamParser,
 } from '@codemirror/language';
 import { type Extension } from '@codemirror/state';
-import { hoverTooltip, type Tooltip, EditorView } from '@codemirror/view';
+import {
+  hoverTooltip,
+  type Tooltip,
+  EditorView,
+  tooltips,
+} from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 import { t } from 'i18next';
 import { createRoot } from 'react-dom/client';
@@ -38,7 +43,9 @@ function FunctionTooltip({
       <div style={{ fontWeight: 600, marginBottom: '4px' }}>{name}</div>
       <div style={{ marginBottom: '8px' }}>{description}</div>
       <div style={{ fontSize: '0.9em', opacity: 0.8 }}>
-        <div style={{ fontWeight: 500, marginBottom: '4px' }}>Parameters:</div>
+        <div style={{ fontWeight: 500, marginBottom: '4px' }}>
+          {t('Parameters:')}
+        </div>
         {parameters.map((p, i) => (
           <div key={i} style={{ marginBottom: '2px' }}>
             •{' '}
@@ -416,7 +423,13 @@ function getFunctionCompletions(mode: FormulaMode): Completion[] {
     label: name,
     type: 'function',
     section,
-    info: `${func.description}\n\nParameters: ${func.parameters.map(p => p.name).join(', ')}\n\n${func.parameters.map(p => `- ${p.name}: ${p.description}`).join('\n')}`,
+    info: [
+      func.description,
+      '',
+      `${t('Parameters:')} ${func.parameters.map(p => p.name).join(', ')}`,
+      '',
+      func.parameters.map(p => `- ${p.name}: ${p.description}`).join('\n'),
+    ].join('\n'),
     apply: `${name}()`,
     boost: 10, // Boost functions to appear higher
   });
@@ -560,18 +573,7 @@ export function excelFormulaHover(mode: FormulaMode): Extension {
         create() {
           const dom = document.createElement('div');
           dom.className = 'cm-tooltip-hover';
-          Object.assign(dom.style, {
-            padding: '8px',
-            boxShadow:
-              '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)',
-            borderWidth: '2px',
-            borderRadius: '4px',
-            borderStyle: 'solid',
-            borderColor: theme.tooltipBorder,
-            backgroundColor: theme.tooltipBackground,
-            color: theme.tooltipText,
-            overflow: 'auto',
-          });
+          Object.assign(dom.style, styles.tooltip, { padding: '8px' });
           const root = createRoot(dom);
           root.render(
             <FunctionTooltip
@@ -601,18 +603,7 @@ export function excelFormulaHover(mode: FormulaMode): Extension {
           create() {
             const dom = document.createElement('div');
             dom.className = 'cm-tooltip-hover';
-            Object.assign(dom.style, {
-              padding: '8px',
-              boxShadow:
-                '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)',
-              borderWidth: '2px',
-              borderRadius: '4px',
-              borderStyle: 'solid',
-              borderColor: theme.tooltipBorder,
-              backgroundColor: theme.tooltipBackground,
-              color: theme.tooltipText,
-              overflow: 'auto',
-            });
+            Object.assign(dom.style, styles.tooltip, { padding: '8px' });
             const root = createRoot(dom);
             const infoText = typeof field.info === 'string' ? field.info : '';
             root.render(<FieldTooltip label={field.label} info={infoText} />);
@@ -633,6 +624,119 @@ export function excelFormulaHover(mode: FormulaMode): Extension {
 
 // Excel formula language support
 export const excelFormulaLanguage = StreamLanguage.define(excelFormulaParser);
+
+const tooltipZIndexTheme = EditorView.baseTheme({
+  '.cm-tooltip': {
+    zIndex: '4000 !important',
+  },
+  '.cm-tooltip-autocomplete': {
+    zIndex: '4000 !important',
+  },
+});
+
+const tooltipPortalConfig =
+  typeof document === 'undefined'
+    ? tooltips({ position: 'fixed' })
+    : tooltips({ position: 'fixed', parent: document.body });
+
+const autocompletePopoverTheme = EditorView.baseTheme({
+  '.cm-tooltip.cm-tooltip-autocomplete': {
+    ...styles.shadowLarge,
+    margin: 0,
+    padding: '10px !important',
+    maxHeight: '260px !important',
+    minWidth: '280px !important',
+    listStyle: 'none !important',
+    backgroundColor: theme.menuAutoCompleteBackground || theme.menuBackground,
+    color: theme.menuAutoCompleteText || theme.menuItemText,
+    borderRadius: '6px !important',
+    overflow: 'visible',
+    fontFamily: 'inherit',
+    userSelect: 'none',
+  },
+
+  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection': {
+    padding: '6px 12px 4px',
+    fontSize: '11px',
+    lineHeight: '1em',
+    textTransform: 'uppercase',
+    letterSpacing: '0.03em',
+    color: theme.menuAutoCompleteTextHeader || theme.menuItemTextHeader,
+    opacity: 1,
+    marginTop: '2px',
+  },
+  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection:first-child': {
+    marginTop: 0,
+  },
+
+  '.cm-tooltip.cm-tooltip-autocomplete > ul > li': {
+    paddingLeft: '20px !important',
+  },
+
+  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem': {
+    padding: '8px 12px',
+    lineHeight: '1.2',
+    cursor: 'default',
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '8px',
+  },
+
+  '.cm-tooltip.cm-tooltip-autocomplete > ul > completion-section': {
+    padding: '0 !important',
+    position: 'sticky',
+    top: 0,
+    backgroundColor: theme.menuBackground,
+    opacity: '1 !important',
+    zIndex: 1,
+  },
+
+  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem[aria-selected]': {
+    backgroundColor:
+      theme.menuAutoCompleteBackgroundHover || theme.menuItemBackgroundHover,
+    color: theme.menuAutoCompleteTextHover || theme.menuItemTextHover,
+  },
+
+  '.cm-tooltip.cm-tooltip-autocomplete .cm-completionMatchedText': {
+    fontWeight: '600',
+    textDecoration: 'underline',
+    textUnderlineOffset: '2px',
+  },
+
+  '.cm-tooltip.cm-tooltip-autocomplete .cm-completionLabel': {
+    fontSize: '13px',
+    flex: '1 1 auto',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  '.cm-tooltip.cm-tooltip-autocomplete .cm-completionDetail': {
+    fontSize: '12px',
+    color: theme.menuKeybindingText,
+    marginLeft: 'auto',
+    whiteSpace: 'nowrap',
+  },
+  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem[aria-selected] .cm-completionDetail':
+    {
+      color:
+        theme.menuAutoCompleteItemTextHover || theme.menuAutoCompleteTextHover,
+      borderRadius: '6px !important',
+    },
+
+  '.cm-tooltip.cm-tooltip-autocomplete .cm-completionInfo': {
+    backgroundColor: theme.menuBackground,
+    color: theme.pageText,
+    padding: '12px 14px',
+    maxWidth: '360px',
+    whiteSpace: 'pre-wrap',
+    fontSize: '12px',
+    lineHeight: '1.4',
+    ...styles.shadowLarge,
+    border: 'none',
+    borderRadius: '6px',
+    marginLeft: '8px',
+  },
+});
 
 // Custom theme for categorized function highlighting (light)
 const functionCategoryTheme = EditorView.baseTheme({
@@ -691,5 +795,8 @@ export function excelFormulaExtension(
     excelFormulaHover(mode),
     isDark ? excelFormulaDarkHighlighting : excelFormulaHighlighting,
     isDark ? functionCategoryThemeDark : functionCategoryTheme,
+    tooltipZIndexTheme,
+    tooltipPortalConfig,
+    autocompletePopoverTheme,
   ];
 }

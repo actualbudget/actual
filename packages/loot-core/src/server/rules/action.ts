@@ -10,6 +10,7 @@ import { TransactionForRules } from '../transactions/transaction-rules';
 
 import { CustomFunctionsPlugin } from './customFunctions';
 import { assert } from './rule-utils';
+import { amountToInteger } from 'loot-core/shared/util';
 
 const ACTION_OPS = [
   'set',
@@ -296,6 +297,10 @@ export class Action {
 
       if (cellValue && typeof cellValue === 'object' && 'type' in cellValue) {
         throw new Error(`Formula error: ${cellValue.message}`);
+      }
+
+      if (typeof cellValue === 'number') {
+        return amountToInteger(Math.round(cellValue * 100) / 100);
       }
 
       return cellValue;
