@@ -14,7 +14,6 @@ Context menus (right-click menus) are available throughout Actual. Use the metho
 ## Keyboard Shortcuts
 
 Actual has a number of keyboard shortcuts that can help you navigate and manage the application more efficiently.
-Below is a list of the most useful shortcuts.
 
 ### The Command Palette
 
@@ -48,7 +47,7 @@ through the list of available commands. You can also quickly move to any of the 
 - <Key k="tab" /> and <Key mod="shift" k="tab" /> when editing will move left and right
 - <Key mod="ctrl" k="enter" /> will add the transaction and close the form regardless of where you are editing.
 - <Key k="enter" /> in either the Payment or Deposit columns will add the transaction; the form remains open for the next addition.
-- <Key mod="ctrl" k="I" /> (i) Import transactions.
+- <Key mod="ctrl" k="I" /> ( i ) Import transactions.
 - <Key mod="ctrl" k="B" /> Initiate bank sync.
 
 ### When Managing Transactions
@@ -58,7 +57,7 @@ through the list of available commands. You can also quickly move to any of the 
 - <Key k="u" /> Duplicate selected transactions.
 - <Key k="g" /> Merge selected transactions.
 - <Key k="a" /> Set account for selected transactions.
-- <Key k="p" /> set payee for selected transactions.
+- <Key k="p" /> Set payee for selected transactions.
 - <Key k="n" /> Set notes for selected transactions.
 - <Key k="c" /> Set category for selected transactions.
 - <Key k="m" /> Set amount for selected transactions.
@@ -134,7 +133,11 @@ like [Emojipedia](https://emojipedia.org/), [EmojiDB](https://emojidb.org/) or [
 
 ![Emojis everywhere](/img/tips-tricks/using-emojis.png)
 
-HINT
+:::tip[HINT]
+
+To scrub emojis out of an exported list, use the formula `=REGEXREPLACE(text or cell reference, "[^\x00-\x7F]", "")` in Excel or Google sheets.
+
+:::
 
 By using emojis on the accounts, you can have grouping of accounts by type, such as credit cards, expenses, and savings.
 
