@@ -23,13 +23,12 @@ Context menus (right-click menus) are available throughout Actual. Use the metho
 
 The Command Palette is a powerful tool which allows you to quickly access various features and functions within Actual.
 
-- Open it by pressing the <Key mod="ctrl" fixed k="k" /> combination to open the Command Palette.
+Open it by pressing the <Key mod="ctrl" fixed k="k" /> combination to open the Command Palette.
 
 ![Command Palette](/img/tips-tricks/command-palette.png)
 
 Once open, you can start typing to search for the functions in the sidebar, or you can use the arrow keys to navigate
 through the list of available commands. You can also quickly move to any of the available accounts by typing their name.
-
 
 ## Keyboard Shortcuts
 
@@ -38,8 +37,8 @@ The Help Menu contains a link to the Documentation, Community support (Discord) 
 
 ### General shortcuts
 
--  <Key mod="ctrl" k="O" /> (the letter O, not zero) Close the current budget and list other available budgets to open.
--  <Key mod="shift" mod="ctrl" k="P" /> Toggle the privacy filter.   
+- <Key mod="ctrl" k="O" /> (the letter O, not zero) Close the current budget and list other available budgets to open.
+- <Key mod="shift" mod="ctrl" k="P" /> Toggle the privacy filter.   
 
 
 ### Budget page shortcuts
@@ -52,10 +51,10 @@ The Help Menu contains a link to the Documentation, Community support (Discord) 
 
 ### Account page shortcuts
 
-- <Key k="enter" /> and <Key mod="shift" k="enter" /> when editing will move down and up. If a dropdown is open and you've typed a new value, this will instead save the value and close the dropdown.
+- <Key k="enter" /> and <Key mod="shift" k="enter" /> when editing will move down and up. In a dropdown, this will save the value and close the dropdown.
 - <Key k="tab" /> and <Key mod="shift" k="tab" /> when editing will move left and right
 - <Key mod="ctrl" k="enter" /> will add the transaction and close the form regardless of where you are editing.
-- <Key k="enter" /> in either the Payment or Deposit columns will add the transaction as well.
+- <Key k="enter" /> in either the Payment or Deposit columns will add the transaction; the form remains open for the next addition.
 - <Key mod="ctrl" k="I" /> (i) Import transactions.
 - <Key mod="ctrl" k="B" /> Initiate bank sync.
 
