@@ -43,7 +43,6 @@ import { useDispatch, useSelector, useStore } from '@desktop-client/redux';
 import {
   hasHiddenScrollbars,
   ThemeStyle,
-  FontFeatureStyle,
   useTheme,
 } from '@desktop-client/style';
 import { signOut } from '@desktop-client/users/usersSlice';
@@ -241,7 +240,6 @@ export function App() {
                       <AppInner />
                     </ErrorBoundary>
                     <ThemeStyle />
-                    <FontFeatureStyle />
                     <ErrorBoundary FallbackComponent={FatalError}>
                       <Modals />
                     </ErrorBoundary>

@@ -92,12 +92,10 @@ export const styles: Record<string, any> = {
   shadowLarge,
   tnum: {
     // tnum: Tabular (monospaced) numbers for better alignment in tables.
-    // ss01: Alternate digits (controlled by --font-feature-ss01 CSS variable)
-    // ss04: Disambiguated characters (better legibility in body text)
-    // zero: Slashed zero (controlled by --font-feature-zero CSS variable)
-    fontFeatureSettings:
-      //eslint-disable-next-line actual/typography
-      '"tnum", var(--font-feature-ss01, "ss01" 0), "ss04", var(--font-feature-zero, "zero" 0)',
+    // ss01: Alternate digits with open features
+    // ss02: Disambiguated characters w/ zero
+    //eslint-disable-next-line actual/typography
+    fontFeatureSettings: '"tnum", "ss01", "ss02"',
   },
   notFixed: { fontFeatureSettings: '' },
   text: {

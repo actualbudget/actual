@@ -9,7 +9,6 @@ import * as lightTheme from './themes/light';
 import * as midnightTheme from './themes/midnight';
 
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 const themes = {
   light: { name: 'Light', colors: lightTheme },
@@ -97,19 +96,4 @@ export function ThemeStyle() {
     .map(([key, value]) => `  --color-${key}: ${value};`)
     .join('\n');
   return <style>{`:root {\n${css}}`}</style>;
-}
-
-export function FontFeatureStyle() {
-  const [slashedZero] = useSyncedPref('slashedZero');
-  const [alternateDigits] = useSyncedPref('alternateDigits');
-
-  // Set CSS variables for font features
-  // eslint-disable-next-line actual/typography
-  const zeroFeature = slashedZero === 'true' ? '"zero" 1' : '"zero" 0';
-  // eslint-disable-next-line actual/typography
-  const ss01Feature = alternateDigits === 'true' ? '"ss01" 1' : '"ss01" 0';
-
-  return (
-    <style>{`:root { --font-feature-zero: ${zeroFeature}; --font-feature-ss01: ${ss01Feature}; }`}</style>
-  );
 }

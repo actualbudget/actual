@@ -19,8 +19,6 @@ export type SyncedPrefs = Partial<
     | 'dateFormat'
     | 'numberFormat'
     | 'hideFraction'
-    | 'alternateDigits'
-    | 'slashedZero'
     | 'isPrivacyEnabled'
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
