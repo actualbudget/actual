@@ -19,8 +19,8 @@ Context menus (right-click menus) are available throughout Actual. Use the metho
 
 ## Keyboard Shortcuts
 
-The Help Menu contains a link to the Documentation, Community support (Discord) and the Keyboard shortcuts.
-<Key k="?" /> will open the help menu. 
+Actual has a number of keyboard shortcuts that can help you navigate and manage the application more efficiently.
+Below is a list of the most useful shortcuts.
 
 ### The Command Palette
 
@@ -43,7 +43,6 @@ through the list of available commands. You can also quickly move to any of the 
 
 - <Key k="enter" /> while editing a budget amount will move to the next category.
 - <Key mod="shift" k="enter" /> will move to the previous category.
-
 
 ### When Editing Transactions
 
