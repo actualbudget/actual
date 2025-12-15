@@ -64,23 +64,43 @@ export class BudgetMenuModal {
   }
 
   private formatDigitStringAsCurrencyText(amount: string) {
+    return this.formatDigitStringAsCurrencyTextWithSeparator(amount, '.');
+  }
+
+  private formatDigitStringAsCurrencyTextWithSeparator(
+    amount: string,
+    decimalSeparator: string,
+  ) {
     const digits = amount.replace(/\D/g, '');
     if (digits === '') {
       return '0';
     }
     if (digits.length <= 2) {
-      return `0.${digits.padStart(2, '0')}`;
+      return `0${decimalSeparator}${digits.padStart(2, '0')}`;
     }
-    return `${digits.slice(0, -2)}.${digits.slice(-2)}`;
+    return `${digits.slice(0, -2)}${decimalSeparator}${digits.slice(-2)}`;
+  }
+
+  private async getKeypadDecimalSeparator() {
+    const decimalButton = this.moneyKeypadModal.getByRole('button', {
+      name: /[.,]/,
+    });
+    return await decimalButton.innerText();
   }
 
   private async enterAmountWithKeypad(amount: string) {
     await this.openAmountKeypad();
 
-    const keypadInput = this.moneyKeypadModal.getByRole('textbox', {
-      name: 'Calculator input',
-    });
-    await keypadInput.fill(this.formatDigitStringAsCurrencyText(amount));
+    await this.moneyKeypadModal.getByRole('button', { name: 'Clear' }).click();
+
+    const decimalSeparator = await this.getKeypadDecimalSeparator();
+    const formatted = this.formatDigitStringAsCurrencyTextWithSeparator(
+      amount,
+      decimalSeparator,
+    );
+    for (const key of formatted.split('')) {
+      await this.moneyKeypadModal.getByRole('button', { name: key }).click();
+    }
 
     await this.moneyKeypadModal.getByRole('button', { name: 'Done' }).click();
     await expect(this.moneyKeypadModal).toHaveCount(0);

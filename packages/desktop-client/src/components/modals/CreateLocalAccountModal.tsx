@@ -48,18 +48,23 @@ export function CreateLocalAccountModal() {
   const [nameError, setNameError] = useState(null);
   const [balanceError, setBalanceError] = useState(false);
 
-  const validateBalance = (balance: string) => {
+  const parseBalance = (balance: string): number | null => {
     const trimmed = balance.trim();
     if (trimmed === '') {
-      return false;
+      return null;
     }
 
     const arithmetic = evalArithmetic(trimmed, null);
     if (arithmetic != null && !isNaN(arithmetic)) {
-      return true;
+      return arithmetic;
     }
+
     const asAmount = currencyToAmount(trimmed);
-    return asAmount != null && !isNaN(asAmount);
+    return asAmount != null && !isNaN(asAmount) ? asAmount : null;
+  };
+
+  const validateBalance = (balance: string) => {
+    return parseBalance(balance) != null;
   };
 
   const validateAndSetName = (name: string) => {
@@ -215,14 +220,8 @@ export function CreateLocalAccountModal() {
                     setDidCommitFromKeypad(false);
                   }}
                   onEvaluate={text => {
-                    const trimmed = text.trim();
-                    const arithmetic = evalArithmetic(trimmed, null);
-                    const numericValue =
-                      arithmetic != null && !isNaN(arithmetic)
-                        ? arithmetic
-                        : currencyToAmount(trimmed);
-
-                    if (numericValue == null || isNaN(numericValue)) {
+                    const numericValue = parseBalance(text);
+                    if (numericValue == null) {
                       return {
                         ok: false as const,
                         error: t('Invalid expression'),
@@ -232,14 +231,8 @@ export function CreateLocalAccountModal() {
                     return { ok: true as const, value: String(numericValue) };
                   }}
                   onDone={text => {
-                    const trimmed = text.trim();
-                    const arithmetic = evalArithmetic(trimmed, null);
-                    const numericValue =
-                      arithmetic != null && !isNaN(arithmetic)
-                        ? arithmetic
-                        : currencyToAmount(trimmed);
-
-                    if (numericValue == null || isNaN(numericValue)) {
+                    const numericValue = parseBalance(text);
+                    if (numericValue == null) {
                       return {
                         ok: false as const,
                         error: t('Invalid expression'),

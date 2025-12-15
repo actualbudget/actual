@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -56,6 +54,39 @@ describe('AmountInput mobile calculator keypad', () => {
     // Default `zeroSign` is '-', so the expression is treated as an outflow:
     // -(1 + 2) dollars => -3.00 => -300 cents
     expect(onUpdate).toHaveBeenCalledWith(-300);
+  });
+
+  test('supports multiply and divide operator buttons', async () => {
+    vi.mocked(useIsMobileCalculatorKeypadEnabled).mockReturnValue(true);
+
+    const onUpdate = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <TestProvider>
+        <AmountInput value={0} onUpdate={onUpdate} />
+      </TestProvider>,
+    );
+
+    await user.click(screen.getByRole('textbox'));
+    expect(screen.getByTestId('money-keypad-modal')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '1' }));
+    await user.click(screen.getByRole('button', { name: 'Multiply' }));
+    await user.click(screen.getByRole('button', { name: '2' }));
+    await user.click(screen.getByRole('button', { name: 'Done' }));
+
+    expect(onUpdate).toHaveBeenCalledWith(-200);
+
+    await user.click(screen.getByRole('textbox'));
+    expect(screen.getByTestId('money-keypad-modal')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '4' }));
+    await user.click(screen.getByRole('button', { name: 'Divide' }));
+    await user.click(screen.getByRole('button', { name: '2' }));
+    await user.click(screen.getByRole('button', { name: 'Done' }));
+
+    expect(onUpdate).toHaveBeenLastCalledWith(-200);
   });
 
   test('opens keypad when focused programmatically (focused prop)', async () => {
@@ -141,6 +172,6 @@ describe('AmountInput expression typing', () => {
     await user.click(textbox);
     await user.type(textbox, '123+45');
 
-    expect((textbox as HTMLInputElement).value).toContain('+');
+    expect(textbox).toHaveDisplayValue(/\+/);
   });
 });

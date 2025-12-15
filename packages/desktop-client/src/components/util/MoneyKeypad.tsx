@@ -209,13 +209,11 @@ export function MoneyKeypad({
         <ReactAriaModal>
           <Dialog
             aria-label={t('Calculator dialog')}
-            className={undefined}
             style={{
               outline: 'none',
             }}
           >
             <View
-              className={undefined}
               style={{
                 ...styles.shadowLarge,
                 backgroundColor: theme.modalBackground,
@@ -290,7 +288,7 @@ export function MoneyKeypad({
 
                         return (
                           <Button
-                            key={(key.action ?? key.insert ?? key.label) + idx}
+                            key={key.action ?? key.insert ?? key.label}
                             aria-label={key.ariaLabel}
                             onPress={() => handleKey(key)}
                             variant={isDone ? 'primary' : 'normal'}

@@ -58,7 +58,13 @@ export class MobileTransactionEntryPage {
     await expect(keypad).toBeVisible();
 
     for (const key of keys) {
-      await keypad.getByRole('button', { name: key }).click();
+      let buttonName = key;
+      if (key === '*') {
+        buttonName = 'Multiply';
+      } else if (key === '/') {
+        buttonName = 'Divide';
+      }
+      await keypad.getByRole('button', { name: buttonName }).click();
     }
   }
 

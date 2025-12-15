@@ -241,7 +241,7 @@ const AmountInput = memo(function AmountInput({
             isKeypadOpenRef.current = false;
             setIsKeypadOpen(false);
             props.onBlur?.(
-              undefined as unknown as FocusEvent<HTMLInputElement>,
+              new FocusEvent('blur') as unknown as FocusEvent<HTMLInputElement>,
             );
 
             return { ok: true as const, value: undefined };
@@ -259,7 +259,7 @@ const AmountInput = memo(function AmountInput({
             setEditing(false);
             setText('');
             props.onBlur?.(
-              undefined as unknown as FocusEvent<HTMLInputElement>,
+              new FocusEvent('blur') as unknown as FocusEvent<HTMLInputElement>,
             );
           }}
         />
