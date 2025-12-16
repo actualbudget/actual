@@ -13,5 +13,5 @@ export function parseAmountExpression(expression: string): number | null {
   }
 
   const asAmount = currencyToAmount(trimmed);
-  return asAmount != null && !isNaN(asAmount) ? asAmount : null;
+  return asAmount;
 }

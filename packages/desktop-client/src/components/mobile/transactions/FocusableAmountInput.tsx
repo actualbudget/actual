@@ -112,9 +112,27 @@ const AmountInput = memo(function AmountInput({
   };
 
   const notifyParentBlur = () => {
-    props.onBlur?.(
-      new FocusEvent('blur') as unknown as FocusEvent<HTMLInputElement>,
-    );
+    if (!props.onBlur) {
+      return;
+    }
+
+    const input = inputRef.current;
+    if (!input) {
+      return;
+    }
+
+    // We intentionally notify the parent that the field has "blurred" when the
+    // keypad is dismissed/committed. Create a minimal, event-like object so any
+    // consumer that relies on `target`/`currentTarget` won't explode at runtime.
+    const syntheticEvent = {
+      target: input,
+      currentTarget: input,
+      defaultPrevented: true,
+      preventDefault: () => {},
+      stopPropagation: () => {},
+    } as unknown as FocusEvent<HTMLInputElement>;
+
+    props.onBlur(syntheticEvent);
   };
 
   const parseExpression = (expr: string): number | null => {

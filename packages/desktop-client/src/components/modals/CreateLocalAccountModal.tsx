@@ -48,12 +48,8 @@ export function CreateLocalAccountModal() {
   const [nameError, setNameError] = useState(null);
   const [balanceError, setBalanceError] = useState(false);
 
-  const parseBalance = (balance: string): number | null => {
-    return parseAmountExpression(balance);
-  };
-
   const validateBalance = (balance: string) => {
-    return parseBalance(balance) != null;
+    return parseAmountExpression(balance) != null;
   };
 
   const validateAndSetName = (name: string) => {
@@ -209,7 +205,7 @@ export function CreateLocalAccountModal() {
                     setDidCommitFromKeypad(false);
                   }}
                   onEvaluate={text => {
-                    const numericValue = parseBalance(text);
+                    const numericValue = parseAmountExpression(text);
                     if (numericValue == null) {
                       return {
                         ok: false as const,
@@ -220,7 +216,7 @@ export function CreateLocalAccountModal() {
                     return { ok: true as const, value: String(numericValue) };
                   }}
                   onDone={text => {
-                    const numericValue = parseBalance(text);
+                    const numericValue = parseAmountExpression(text);
                     if (numericValue == null) {
                       return {
                         ok: false as const,
