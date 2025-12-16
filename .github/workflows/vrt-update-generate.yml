@@ -45,6 +45,8 @@ jobs:
 
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
 
       - name: Run VRT Tests on Desktop app
         continue-on-error: true
