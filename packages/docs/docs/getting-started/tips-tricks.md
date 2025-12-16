@@ -70,7 +70,8 @@ through the list of available commands. You can also quickly move to any of the 
 #### When Managing Transactions
 
 :::important
-Transaction(s) must be selected for the following shortcuts, as noted.
+Transaction(s) must be selected for the following shortcuts, or as noted.
+
 See [Bulk Actions](/docs/transactions/bulk-editing.md) for guidance on working with multiple transactions.
 :::
 
@@ -80,7 +81,6 @@ See [Bulk Actions](/docs/transactions/bulk-editing.md) for guidance on working w
 - <Key k="c" /> Set category for selected transactions.
 - <Key k="m" /> Set amount for selected transactions.
 - <Key k="l" /> Toggle cleared status for selected transactions.
-
 - <Key k="a" /> Set account for selected transactions.
 - <Key k="S" /> Link or view schedule for selected transactions.
 - <Key k="d" /> Delete selected transactions.
