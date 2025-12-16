@@ -11,7 +11,6 @@ import {
   resetMockStore,
 } from '@desktop-client/redux/mock';
 
-
 vi.mock('react-hotkeys-hook', () => ({
   useHotkeysContext: () => ({
     enableScope: () => {},
