@@ -267,8 +267,8 @@ export function KeyboardShortcutModal() {
         ],
       },
       {
-        id: 'account-page-selection',
-        name: t('Account page transaction selection'),
+        id: 'account-transaction-selection',
+        name: t('Account transaction selection'),
         items: [
           {
             id: 'select-all-transactions',
@@ -312,8 +312,8 @@ export function KeyboardShortcutModal() {
         ],
       },
       {
-        id: 'account-page-editing',
-        name: t('Account page transaction editing'),
+        id: 'account-transaction-editing',
+        name: t('Account transaction editing'),
         items: [
           {
             id: 'move-down',
@@ -346,8 +346,8 @@ export function KeyboardShortcutModal() {
         ],
       },
       {
-        id: 'account-page-managing-transactions',
-        name: t('Account page managing transactions'),
+        id: 'account-transaction-management',
+        name: t('Account transaction management'),
         items: [
           {
             id: 'set-date-for-selected-transactions',
