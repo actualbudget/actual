@@ -1,40 +1,40 @@
 // @ts-strict-ignore
-import React, { useState, useEffect, useCallback } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import React, { useState, useEffect, useCallback } from "react";
+import { Trans, useTranslation } from "react-i18next";
 
-import { Button, ButtonWithLoading } from '@actual-app/components/button';
-import { BigInput } from '@actual-app/components/input';
-import { Label } from '@actual-app/components/label';
-import { Text } from '@actual-app/components/text';
-import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
+import { Button, ButtonWithLoading } from "@actual-app/components/button";
+import { BigInput } from "@actual-app/components/input";
+import { Label } from "@actual-app/components/label";
+import { Text } from "@actual-app/components/text";
+import { theme } from "@actual-app/components/theme";
+import { View } from "@actual-app/components/view";
+import { css } from "@emotion/css";
 
 import {
   isNonProductionEnvironment,
   isElectron,
-} from 'loot-core/shared/environment';
+} from "loot-core/shared/environment";
 
-import { Title } from './subscribe/common';
+import { Title } from "./subscribe/common";
 
-import { createBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
-import { Link } from '@desktop-client/components/common/Link';
+import { createBudget } from "@desktop-client/budgetfiles/budgetfilesSlice";
+import { Link } from "@desktop-client/components/common/Link";
 import {
   useServerURL,
   useSetServerURL,
-} from '@desktop-client/components/ServerContext';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { saveGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import { loggedIn, signOut } from '@desktop-client/users/usersSlice';
+} from "@desktop-client/components/ServerContext";
+import { useGlobalPref } from "@desktop-client/hooks/useGlobalPref";
+import { useNavigate } from "@desktop-client/hooks/useNavigate";
+import { saveGlobalPrefs } from "@desktop-client/prefs/prefsSlice";
+import { useDispatch } from "@desktop-client/redux";
+import { loggedIn, signOut } from "@desktop-client/users/usersSlice";
 
 export function ElectronServerConfig({
   onDoNotUseServer,
   onSetServerConfigView,
 }: {
   onDoNotUseServer: () => void;
-  onSetServerConfigView: (view: 'internal' | 'external') => void;
+  onSetServerConfigView: (view: "internal" | "external") => void;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -43,10 +43,10 @@ export function ElectronServerConfig({
   const dispatch = useDispatch();
 
   const [syncServerConfig, setSyncServerConfig] =
-    useGlobalPref('syncServerConfig');
+    useGlobalPref("syncServerConfig");
 
   const [electronServerPort, setElectronServerPort] = useState(
-    syncServerConfig?.port || 5007,
+    syncServerConfig?.port || 5007
   );
   const [configError, setConfigError] = useState<string | null>(null);
 
@@ -65,7 +65,7 @@ export function ElectronServerConfig({
       electronServerPort <= 0 ||
       electronServerPort > 65535
     ) {
-      setConfigError(t('Ports must be within range 1 - 65535'));
+      setConfigError(t("Ports must be within range 1 - 65535"));
       return;
     }
 
@@ -82,7 +82,7 @@ export function ElectronServerConfig({
               autoStart: true,
             },
           },
-        }),
+        })
       ).unwrap();
 
       await window.globalThis.Actual.stopSyncServer();
@@ -90,11 +90,11 @@ export function ElectronServerConfig({
       setStartingSyncServer(false);
       initElectronSyncServerRunningStatus();
       await setServerUrl(`http://localhost:${electronServerPort}`);
-      navigate('/');
+      navigate("/");
     } catch (error) {
       setStartingSyncServer(false);
-      setConfigError(t('Failed to configure sync server'));
-      console.error('Failed to configure sync server:', error);
+      setConfigError(t("Failed to configure sync server"));
+      console.error("Failed to configure sync server:", error);
     }
   };
 
@@ -103,7 +103,7 @@ export function ElectronServerConfig({
 
   const initElectronSyncServerRunningStatus = async () => {
     setElectronSyncServerRunning(
-      await window.globalThis.Actual.isSyncServerRunning(),
+      await window.globalThis.Actual.isSyncServerRunning()
     );
   };
 
@@ -123,11 +123,11 @@ export function ElectronServerConfig({
 
   return (
     <>
-      <Title text={t('Configure your server')} />
+      <Title text={t("Configure your server YO THIS IS A TEST")} />
       <View
         style={{
-          display: 'flex',
-          flexDirection: 'column',
+          display: "flex",
+          flexDirection: "column",
           gap: 20,
         }}
       >
@@ -151,13 +151,13 @@ export function ElectronServerConfig({
           }}
         >
           <Trans>
-            Need to expose your server to the internet? Follow our step-by-step{' '}
+            Need to expose your server to the internet? Follow our step-by-step{" "}
             <Link
               variant="external"
               to="https://actualbudget.org/docs/install/desktop-app"
             >
               guide
-            </Link>{' '}
+            </Link>{" "}
             for more information.
           </Trans>
         </Text>
@@ -170,47 +170,47 @@ export function ElectronServerConfig({
 
         <View
           style={{
-            display: 'flex',
-            flexDirection: 'row',
+            display: "flex",
+            flexDirection: "row",
             gap: 10,
           }}
         >
-          <View style={{ flexDirection: 'column', gap: 5, flex: 1 }}>
-            <Label title={t('Domain')} style={{ textAlign: 'left' }} />
+          <View style={{ flexDirection: "column", gap: 5, flex: 1 }}>
+            <Label title={t("Domain")} style={{ textAlign: "left" }} />
             <BigInput
               value="localhost"
               disabled
               type="text"
               className={css({
-                '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
-                  WebkitAppearance: 'none',
+                "&::-webkit-outer-spin-button, &::-webkit-inner-spin-button": {
+                  WebkitAppearance: "none",
                   margin: 0,
                 },
               })}
             />
           </View>
 
-          <View style={{ flexDirection: 'column', gap: 5 }}>
+          <View style={{ flexDirection: "column", gap: 5 }}>
             <Label
-              title={t('Port')}
-              style={{ textAlign: 'left', width: '7ch' }}
+              title={t("Port")}
+              style={{ textAlign: "left", width: "7ch" }}
             />
             <BigInput
               name="port"
               value={String(electronServerPort)}
-              aria-label={t('Port')}
+              aria-label={t("Port")}
               type="number"
               className={css({
-                '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
-                  WebkitAppearance: 'none',
+                "&::-webkit-outer-spin-button, &::-webkit-inner-spin-button": {
+                  WebkitAppearance: "none",
                   margin: 0,
                 },
-                width: '7ch',
-                textAlign: 'center',
+                width: "7ch",
+                textAlign: "center",
               })}
               autoFocus={true}
               maxLength={5}
-              onChange={event =>
+              onChange={(event) =>
                 setElectronServerPort(Number(event.target.value))
               }
             />
@@ -218,16 +218,16 @@ export function ElectronServerConfig({
 
           <View
             style={{
-              flexDirection: 'column',
+              flexDirection: "column",
               gap: 5,
-              justifyContent: 'end',
+              justifyContent: "end",
             }}
           >
-            <Label title={t('')} style={{ textAlign: 'left', width: '7ch' }} />
+            <Label title={t("")} style={{ textAlign: "left", width: "7ch" }} />
             {!electronSyncServerRunning ? (
               <ButtonWithLoading
                 variant="primary"
-                style={{ padding: 10, width: '8ch' }}
+                style={{ padding: 10, width: "8ch" }}
                 onPress={onConfigureSyncServer}
                 isLoading={startingSyncServer}
               >
@@ -236,7 +236,7 @@ export function ElectronServerConfig({
             ) : (
               <ButtonWithLoading
                 variant="primary"
-                style={{ padding: 10, width: '8ch' }}
+                style={{ padding: 10, width: "8ch" }}
                 onPress={onConfigureSyncServer}
                 isLoading={startingSyncServer}
               >
@@ -249,11 +249,11 @@ export function ElectronServerConfig({
 
       <View
         style={{
-          flexDirection: 'row',
+          flexDirection: "row",
           marginTop: 20,
           gap: 15,
-          flexFlow: 'row wrap',
-          justifyContent: 'center',
+          flexFlow: "row wrap",
+          justifyContent: "center",
         }}
       >
         {hasInternalServerConfig && (
@@ -276,7 +276,7 @@ export function ElectronServerConfig({
           <Button
             variant="bare"
             style={{ color: theme.pageTextLight, margin: 5 }}
-            onPress={() => onSetServerConfigView('external')}
+            onPress={() => onSetServerConfigView("external")}
           >
             <Trans>Use an external server</Trans>
           </Button>
@@ -290,7 +290,7 @@ export function ConfigServer() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState("");
   const currentUrl = useServerURL();
   const setServerUrl = useSetServerURL();
   useEffect(() => {
@@ -305,25 +305,25 @@ export function ConfigServer() {
   }, []);
 
   const [_serverSelfSignedCert, setServerSelfSignedCert] = useGlobalPref(
-    'serverSelfSignedCert',
-    restartElectronServer,
+    "serverSelfSignedCert",
+    restartElectronServer
   );
 
   function getErrorMessage(error: string) {
     switch (error) {
-      case 'network-failure':
+      case "network-failure":
         return t(
-          'Server is not running at this URL. Make sure you have HTTPS set up properly.',
+          "Server is not running at this URL. Make sure you have HTTPS set up properly."
         );
       default:
         return t(
-          'Server does not look like an Actual server. Is it set up correctly?',
+          "Server does not look like an Actual server. Is it set up correctly?"
         );
     }
   }
 
   async function onSubmit() {
-    if (url === null || url === '' || loading) {
+    if (url === null || url === "" || loading) {
       return;
     }
 
@@ -331,8 +331,8 @@ export function ConfigServer() {
     setLoading(true);
 
     let httpUrl = url;
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      httpUrl = 'https://' + url;
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      httpUrl = "https://" + url;
     }
 
     const { error } = await setServerUrl(httpUrl);
@@ -344,7 +344,7 @@ export function ConfigServer() {
     } else {
       setLoading(false);
       await dispatch(signOut());
-      navigate('/');
+      navigate("/");
     }
   }
 
@@ -354,11 +354,11 @@ export function ConfigServer() {
 
   async function onSelectSelfSignedCertificate() {
     const selfSignedCertificateLocation = await window.Actual.openFileDialog({
-      properties: ['openFile'],
+      properties: ["openFile"],
       filters: [
         {
-          name: 'Self Signed Certificate',
-          extensions: ['crt', 'pem'],
+          name: "Self Signed Certificate",
+          extensions: ["crt", "pem"],
         },
       ],
     });
@@ -371,40 +371,40 @@ export function ConfigServer() {
   async function onSkip() {
     await setServerUrl(null);
     await dispatch(loggedIn());
-    navigate('/');
+    navigate("/");
   }
 
   async function onCreateTestFile() {
     await setServerUrl(null);
     await dispatch(createBudget({ testMode: true }));
-    navigate('/');
+    navigate("/");
   }
 
-  const [syncServerConfig] = useGlobalPref('syncServerConfig');
+  const [syncServerConfig] = useGlobalPref("syncServerConfig");
 
   const hasExternalServerConfig = !syncServerConfig?.port && !!currentUrl;
 
   const [serverConfigView, onSetServerConfigView] = useState<
-    'internal' | 'external'
+    "internal" | "external"
   >(() => {
     if (isElectron() && !hasExternalServerConfig) {
-      return 'internal';
+      return "internal";
     }
 
-    return 'external';
+    return "external";
   });
 
   return (
     <View style={{ maxWidth: 500, marginTop: -30 }}>
-      {serverConfigView === 'internal' && (
+      {serverConfigView === "internal" && (
         <ElectronServerConfig
           onDoNotUseServer={onSkip}
           onSetServerConfigView={onSetServerConfigView}
         />
       )}
-      {serverConfigView === 'external' && (
+      {serverConfigView === "external" && (
         <>
-          <Title text={t('Where’s the server?')} />
+          <Title text={t("Where’s the server?")} />
           <Text
             style={{
               fontSize: 16,
@@ -440,8 +440,8 @@ export function ConfigServer() {
               {isElectron() && (
                 <View
                   style={{
-                    display: 'flex',
-                    flexDirection: 'row',
+                    display: "flex",
+                    flexDirection: "row",
                     marginTop: 20,
                   }}
                 >
@@ -453,7 +453,7 @@ export function ConfigServer() {
                     }}
                   >
                     <Trans>
-                      If the server is using a self-signed certificate{' '}
+                      If the server is using a self-signed certificate{" "}
                       <Link
                         variant="text"
                         style={{ fontSize: 15 }}
@@ -469,12 +469,12 @@ export function ConfigServer() {
             </>
           )}
           <View
-            style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
+            style={{ display: "flex", flexDirection: "row", marginTop: 30 }}
           >
             <BigInput
               autoFocus={true}
-              placeholder={t('https://example.com')}
-              value={url || ''}
+              placeholder={t("https://example.com")}
+              value={url || ""}
               onChangeValue={setUrl}
               style={{ flex: 1, marginRight: 10 }}
               onEnter={onSubmit}
@@ -499,9 +499,9 @@ export function ConfigServer() {
           </View>
           <View
             style={{
-              flexDirection: 'row',
-              flexFlow: 'row wrap',
-              justifyContent: 'center',
+              flexDirection: "row",
+              flexFlow: "row wrap",
+              justifyContent: "center",
               marginTop: 15,
             }}
           >
@@ -542,7 +542,7 @@ export function ConfigServer() {
                     style={{ marginLeft: 15 }}
                     onPress={async () => {
                       await onCreateTestFile();
-                      navigate('/');
+                      navigate("/");
                     }}
                   >
                     <Trans>Create test file</Trans>
