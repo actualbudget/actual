@@ -46,7 +46,7 @@
     "test": "lage test --continue",
     "test:debug": "lage test --no-cache --continue",
     "e2e": "yarn workspace @actual-app/web run e2e",
-    "e2e:desktop": "yarn build:desktop --skip-exe-build && yarn workspace desktop-electron e2e",
+    "e2e:desktop": "yarn build:desktop --skip-exe-build --skip-translations && yarn workspace desktop-electron e2e",
     "playwright": "yarn workspace @actual-app/web run playwright",
     "vrt": "yarn workspace @actual-app/web run vrt",
     "vrt:docker": "./bin/run-vrt",
