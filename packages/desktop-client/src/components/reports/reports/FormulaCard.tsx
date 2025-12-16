@@ -90,7 +90,6 @@ export function FormulaCard({
             onRemove();
             break;
           default:
-            console.warn(`Unrecognized menu selection: ${item}`);
             break;
         }
       }}

@@ -32,7 +32,7 @@ When the template input mode is active you can type your template into the input
 ## Variables
 
 | Variable              | Type    | Notes                                                                                                             |
-|-----------------------|---------|-------------------------------------------------------------------------------------------------------------------|
+| --------------------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
 | today                 | date    | Today's date                                                                                                      |
 | account               | id      |                                                                                                                   |
 | balance               | number  | Balance of account as of the date of the transaction, excluding the transaction amount, stored without decimal    |
@@ -57,7 +57,7 @@ When the template input mode is active you can type your template into the input
 ### Mathematical
 
 | Function | Arguments           | Notes |
-|----------|---------------------|-------|
+| -------- | ------------------- | ----- |
 | add      | number1, number2... |       |
 | sub      | number1, number2... |       |
 | div      | number1, number2... |       |
@@ -74,7 +74,7 @@ When the template input mode is active you can type your template into the input
 ### Text
 
 | Function   | Arguments                   | Notes                                                                                                        |
-|------------|-----------------------------|--------------------------------------------------------------------------------------------------------------|
+| ---------- | --------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | regex      | value, regex, replacement   |                                                                                                              |
 | replace    | value, pattern, replacement | Mimics js replace. When pattern is not as /regex/flags it just uses raw value as opposed to `{{regex ...`    |
 | replaceAll | value, pattern, replacement | Mimics js replaceAll. When pattern is not as /regex/flags it just uses raw value as opposed to `{{regex ...` |
@@ -83,7 +83,7 @@ When the template input mode is active you can type your template into the input
 ### Date
 
 | Function  | Arguments    | Notes                                                                     |
-|-----------|--------------|---------------------------------------------------------------------------|
+| --------- | ------------ | ------------------------------------------------------------------------- |
 | addDays   | date, number |                                                                           |
 | subDays   | date, number | Subtract days from date                                                   |
 | addWeeks  | date, number |                                                                           |
@@ -101,5 +101,5 @@ When the template input mode is active you can type your template into the input
 ### Other
 
 | Function | Arguments | Notes                                                   |
-|----------|-----------|---------------------------------------------------------|
+| -------- | --------- | ------------------------------------------------------- |
 | debug    | any       | Prints the arguments to the browser development console |

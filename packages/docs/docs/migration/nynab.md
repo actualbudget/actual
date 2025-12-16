@@ -92,11 +92,12 @@ This extra comes from nYNAB including funds budgeted in future months when calcu
 Actual does not include those funds by default, but offers a way to manually reserve funds for use in future months.
 This is affectively the same thing nYNAB does, but in a manual form.
 To `hold` the leftover funds for the next month follow these steps:
+
 1. Click on your `To Budget` value for the month.
 2. Select `Hold for next month`.
 3. Fill in how much you would like to reserve for the future. By default the current `To Budget` value is filled in. Using this value will bring your `To Budget` to zero.
 4. Click `Hold`.
-4. Repeat for all desired months.
+5. Repeat for all desired months.
 
 A full description of how funds rollover and the `hold` feature can be found in [this article.](../budgeting/#how-money-rolls-over)
 
@@ -109,9 +110,11 @@ Make sure to show hidden categories to see if you have any of these duplicates.
 To see your hidden categories select the "Toggle Hidden Categories" option in the kebab menu next to the "Categories" header.
 
 **To Fix duplicate groups**:
+
 1. Move any categories inside the duplicate group to a different group.
 2. Delete the duplicate group by selecting "Delete" in the menu next to the group name.
 
 **To Fix Duplicate Categories**:
+
 1. Find the duplicate category and select "Delete" in the menu next to the category name.
 2. Choose what category to move any transactions to that are part of this duplicate category.
