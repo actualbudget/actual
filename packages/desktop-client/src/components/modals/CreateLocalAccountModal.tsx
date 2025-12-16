@@ -12,8 +12,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import { currencyToAmount, toRelaxedNumber } from 'loot-core/shared/util';
+import { toRelaxedNumber } from 'loot-core/shared/util';
 
 import { createAccount } from '@desktop-client/accounts/accountsSlice';
 import { Link } from '@desktop-client/components/common/Link';
@@ -32,6 +31,7 @@ import { useIsMobileCalculatorKeypadEnabled } from '@desktop-client/hooks/useIsM
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { closeModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { parseAmountExpression } from '@desktop-client/util/parseAmountExpression';
 
 export function CreateLocalAccountModal() {
   const { t } = useTranslation();
@@ -49,18 +49,7 @@ export function CreateLocalAccountModal() {
   const [balanceError, setBalanceError] = useState(false);
 
   const parseBalance = (balance: string): number | null => {
-    const trimmed = balance.trim();
-    if (trimmed === '') {
-      return null;
-    }
-
-    const arithmetic = evalArithmetic(trimmed, null);
-    if (arithmetic != null && !isNaN(arithmetic)) {
-      return arithmetic;
-    }
-
-    const asAmount = currencyToAmount(trimmed);
-    return asAmount != null && !isNaN(asAmount) ? asAmount : null;
+    return parseAmountExpression(balance);
   };
 
   const validateBalance = (balance: string) => {

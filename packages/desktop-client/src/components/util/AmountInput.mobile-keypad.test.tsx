@@ -1,8 +1,6 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { AmountInput } from './AmountInput';
-
 import { useIsMobileCalculatorKeypadEnabled } from '@desktop-client/hooks/useIsMobileCalculatorKeypadEnabled';
 import { mergeSyncedPrefs } from '@desktop-client/prefs/prefsSlice';
 import {
@@ -10,6 +8,8 @@ import {
   mockStore,
   resetMockStore,
 } from '@desktop-client/redux/mock';
+
+import { AmountInput } from './AmountInput';
 
 vi.mock('react-hotkeys-hook', () => ({
   useHotkeysContext: () => ({
@@ -89,7 +89,7 @@ describe('AmountInput mobile calculator keypad', () => {
     expect(onUpdate).toHaveBeenLastCalledWith(-200);
   });
 
-  test('opens keypad when focused programmatically (focused prop)', async () => {
+  test('does not open keypad when focused programmatically (focused prop)', async () => {
     vi.mocked(useIsMobileCalculatorKeypadEnabled).mockReturnValue(true);
 
     render(
@@ -128,8 +128,9 @@ describe('AmountInput mobile calculator keypad', () => {
     });
 
     // Give any deferred focus handlers a chance to run.
-    await new Promise(resolve => setTimeout(resolve, 0));
-    expect(screen.queryByTestId('money-keypad-modal')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByTestId('money-keypad-modal')).not.toBeInTheDocument();
+    });
   });
 
   test('uses localized decimal separator on keypad', async () => {

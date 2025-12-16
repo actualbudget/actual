@@ -85,7 +85,10 @@ export class BudgetMenuModal {
     const decimalButton = this.moneyKeypadModal.getByRole('button', {
       name: /[.,]/,
     });
-    return await decimalButton.innerText();
+    if ((await decimalButton.count()) === 0) {
+      return '.';
+    }
+    return await decimalButton.first().innerText();
   }
 
   private async enterAmountWithKeypad(amount: string) {

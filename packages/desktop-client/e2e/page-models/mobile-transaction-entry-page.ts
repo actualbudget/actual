@@ -84,7 +84,7 @@ export class MobileTransactionEntryPage {
     return new MobileAccountPage(this.page);
   }
 
-  childAmountInputs() {
+  childAmountInputs(): Locator {
     return this.page.locator('[data-testid^=child-amount-input-]');
   }
 

@@ -17,7 +17,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import {
   amountToCurrency,
   appendDecimals,
@@ -30,6 +29,7 @@ import { MoneyKeypad } from '@desktop-client/components/util/MoneyKeypad';
 import { useIsMobileCalculatorKeypadEnabled } from '@desktop-client/hooks/useIsMobileCalculatorKeypadEnabled';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { parseAmountExpression } from '@desktop-client/util/parseAmountExpression';
 
 type AmountInputProps = {
   value: number;
@@ -111,18 +111,20 @@ const AmountInput = memo(function AmountInput({
     return newValue;
   };
 
+  const notifyParentBlur = () => {
+    props.onBlur?.(
+      new FocusEvent('blur') as unknown as FocusEvent<HTMLInputElement>,
+    );
+  };
+
   const parseExpression = (expr: string): number | null => {
     const trimmed = expr.trim();
     if (trimmed === '') {
       return 0;
     }
 
-    let numericValue: number | null = evalArithmetic(trimmed, null);
-    if (numericValue === null || isNaN(numericValue)) {
-      numericValue = currencyToAmount(trimmed);
-    }
-
-    if (numericValue === null || isNaN(numericValue)) {
+    const numericValue = parseAmountExpression(trimmed);
+    if (numericValue === null) {
       return null;
     }
 
@@ -240,9 +242,7 @@ const AmountInput = memo(function AmountInput({
             didCommitFromKeypadRef.current = true;
             isKeypadOpenRef.current = false;
             setIsKeypadOpen(false);
-            props.onBlur?.(
-              new FocusEvent('blur') as unknown as FocusEvent<HTMLInputElement>,
-            );
+            notifyParentBlur();
 
             return { ok: true as const, value: undefined };
           }}
@@ -258,9 +258,7 @@ const AmountInput = memo(function AmountInput({
             setIsKeypadOpen(false);
             setEditing(false);
             setText('');
-            props.onBlur?.(
-              new FocusEvent('blur') as unknown as FocusEvent<HTMLInputElement>,
-            );
+            notifyParentBlur();
           }}
         />
       )}
