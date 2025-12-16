@@ -4,8 +4,12 @@ import { breakpoints } from '@actual-app/components/tokens';
 
 import { useFeatureFlag } from './useFeatureFlag';
 
-function useMatchMedia(query: string) {
+function useMatchMedia(query: string, enabled: boolean) {
   const [matches, setMatches] = useState(() => {
+    if (!enabled) {
+      return false;
+    }
+
     if (typeof window === 'undefined' || !window.matchMedia) {
       return false;
     }
@@ -13,6 +17,11 @@ function useMatchMedia(query: string) {
   });
 
   useEffect(() => {
+    if (!enabled) {
+      setMatches(false);
+      return;
+    }
+
     if (typeof window === 'undefined' || !window.matchMedia) {
       return;
     }
@@ -34,7 +43,7 @@ function useMatchMedia(query: string) {
 
     media.addListener(onChange);
     return () => media.removeListener(onChange);
-  }, [query]);
+  }, [enabled, query]);
 
   return matches;
 }
@@ -45,13 +54,14 @@ export function useIsMobileCalculatorKeypadEnabled() {
   // Use media queries for deterministic behavior (including in Playwright).
   const isNarrowViewport = useMatchMedia(
     `(max-width: ${breakpoints.small - 1}px)`,
+    isFeatureEnabled,
   );
 
   // Prefer capability detection over user-agent sniffing.
   // - pointer: coarse => touch-first device
   // - hover: none => no hover (typical mobile browsers)
-  const isCoarsePointer = useMatchMedia('(pointer: coarse)');
-  const isNoHover = useMatchMedia('(hover: none)');
+  const isCoarsePointer = useMatchMedia('(pointer: coarse)', isFeatureEnabled);
+  const isNoHover = useMatchMedia('(hover: none)', isFeatureEnabled);
 
   return (
     isFeatureEnabled && (isNarrowViewport || (isCoarsePointer && isNoHover))

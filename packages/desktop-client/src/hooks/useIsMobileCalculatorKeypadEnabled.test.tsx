@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 
 import { useIsMobileCalculatorKeypadEnabled } from './useIsMobileCalculatorKeypadEnabled';
 
@@ -117,5 +117,46 @@ describe('useIsMobileCalculatorKeypadEnabled', () => {
     );
 
     expect(screen.getByText('disabled')).toBeInTheDocument();
+  });
+
+  test('does not crash when feature flag toggles while mounted', async () => {
+    mockMatchMedia({
+      isNarrowViewport: true,
+      isCoarsePointer: true,
+      isNoHover: true,
+    });
+
+    render(
+      <TestProvider>
+        <Probe />
+      </TestProvider>,
+    );
+
+    // Starts disabled (flag default false)
+    expect(screen.getByText('disabled')).toBeInTheDocument();
+
+    // Toggle on
+    act(() => {
+      mockStore.dispatch(
+        mergeSyncedPrefs({
+          'flags.mobileCalculatorKeypad': 'true',
+        }),
+      );
+    });
+    await waitFor(() => {
+      expect(screen.getByText('enabled')).toBeInTheDocument();
+    });
+
+    // Toggle off
+    act(() => {
+      mockStore.dispatch(
+        mergeSyncedPrefs({
+          'flags.mobileCalculatorKeypad': 'false',
+        }),
+      );
+    });
+    await waitFor(() => {
+      expect(screen.getByText('disabled')).toBeInTheDocument();
+    });
   });
 });
