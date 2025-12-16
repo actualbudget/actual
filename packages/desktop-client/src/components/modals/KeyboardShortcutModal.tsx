@@ -161,8 +161,8 @@ export function KeyboardShortcutModal() {
   const defaultShortcuts: ShortcutCategories[] = useMemo(
     () => [
       {
-        name: t('General'),
-        id: 'general',
+        name: t('Global'),
+        id: 'global',
         items: [
           {
             id: 'help',
