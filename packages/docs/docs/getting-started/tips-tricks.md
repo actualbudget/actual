@@ -83,6 +83,7 @@ See [Bulk Actions](/docs/transactions/bulk-editing.md) for guidance on working w
 - <Key k="l" /> Toggle cleared status for selected transactions.
 - <Key k="a" /> Set account for selected transactions.
 - <Key k="S" /> Link or view schedule for selected transactions.
+- <Key k="f" /> Show only selected transactions. If no transaction is selected, it brings up the Filter dropdown menu.
 - <Key k="d" /> Delete selected transactions.
 - <Key k="u" /> Duplicate selected transactions.
 - <Key k="g" /> Merge selected transactions. Only _two_ transactions with equal amounts can be selected. [Learn more.](/docs/transactions/merging.md)
