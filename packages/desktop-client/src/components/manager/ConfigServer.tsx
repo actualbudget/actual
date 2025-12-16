@@ -404,7 +404,7 @@ export function ConfigServer() {
       )}
       {serverConfigView === 'external' && (
         <>
-          <Title text={t('Where’s the server? YO HELLO IM HERE')} />
+          <Title text={t('Where’s the server?')} />
           <Text
             style={{
               fontSize: 16,
