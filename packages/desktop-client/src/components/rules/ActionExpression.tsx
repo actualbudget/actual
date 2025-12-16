@@ -98,6 +98,7 @@ function SetSplitAmountActionExpression({
   value,
   options,
 }: SetSplitAmountRuleActionEntity) {
+  const { t } = useTranslation();
   const method = options?.method;
   if (!method) {
     return null;
@@ -108,10 +109,16 @@ function SetSplitAmountActionExpression({
       <Text>{friendlyOp(op)}</Text>{' '}
       <Text style={valueStyle}>{getAllocationMethods()[method]}</Text>
       {method !== 'remainder' && ': '}
-      {method === 'fixed-amount' && (
+      {options?.formula ? (
+        <>
+          <Text>{t('formula ')}</Text>
+          <Text style={valueStyle}>{options.formula}</Text>
+        </>
+      ) : method === 'fixed-amount' ? (
         <Value style={valueStyle} value={value} field="amount" />
-      )}
-      {method === 'fixed-percent' && <Text style={valueStyle}>{value}%</Text>}
+      ) : method === 'fixed-percent' ? (
+        <Text style={valueStyle}>{value}%</Text>
+      ) : null}
     </>
   );
 }
