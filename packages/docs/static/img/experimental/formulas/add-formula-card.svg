@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <defs>
+    <style>
+      .bg { fill: #0b1220; }
+      .panel { fill: #111c33; stroke: #2b3a5e; stroke-width: 2; }
+      .text { fill: #e5e7eb; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
+      .muted { fill: #9ca3af; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
+      .accent { fill: #60a5fa; }
+      .chip { fill: #0f2a4a; stroke: #1f4f8a; stroke-width: 2; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="960" height="540" />
+  <rect class="panel" x="60" y="60" width="840" height="420" rx="14" />
+
+  <text class="text" x="96" y="110" font-size="26" font-weight="700">Placeholder screenshot</text>
+  <text class="muted" x="96" y="140" font-size="16">Replace with: Reports → Edit dashboard → Add widget → “Formula card”</text>
+
+  <rect class="panel" x="96" y="175" width="520" height="260" rx="10" />
+  <text class="text" x="122" y="212" font-size="18" font-weight="600">Reports dashboard</text>
+  <rect class="chip" x="122" y="230" width="180" height="34" rx="8" />
+  <text class="text" x="138" y="253" font-size="14" font-weight="600">Edit dashboard</text>
+
+  <rect class="panel" x="640" y="175" width="224" height="260" rx="10" />
+  <text class="text" x="664" y="212" font-size="16" font-weight="600">Add widget</text>
+  <rect class="chip" x="664" y="230" width="176" height="38" rx="8" />
+  <text class="text" x="682" y="255" font-size="14">Cash flow graph</text>
+  <rect class="chip" x="664" y="278" width="176" height="38" rx="8" />
+  <text class="text" x="682" y="303" font-size="14">Summary card</text>
+  <rect class="chip" x="664" y="326" width="176" height="38" rx="8" />
+  <text class="text" x="682" y="351" font-size="14">Text widget</text>
+  <rect class="chip" x="664" y="374" width="176" height="44" rx="8" />
+  <text class="text" x="682" y="402" font-size="15" font-weight="700">Formula card</text>
+  <rect class="accent" x="664" y="374" width="6" height="44" rx="3" />
+
+  <text class="muted mono" x="96" y="458" font-size="13">/img/experimental/formulas/add-formula-card.svg</text>
+</svg>
+
+
+

@@ -7,6 +7,7 @@ Currently, Actual comes with a few built in reports:
  - text widget
  - summary card
  - calendar card
+ - formula card (experimental) — see [Excel Formula Mode](/docs/experimental/formulas)
 
 ![](/img/reports/reports-dashboard.png)
 
