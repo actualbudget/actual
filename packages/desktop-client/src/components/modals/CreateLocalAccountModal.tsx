@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useRef, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
@@ -11,8 +11,6 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { toRelaxedNumber } from 'loot-core/shared/util';
 
 import { createAccount } from '@desktop-client/accounts/accountsSlice';
 import { Link } from '@desktop-client/components/common/Link';
@@ -42,6 +40,7 @@ export function CreateLocalAccountModal() {
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
+  const initialBalanceRef = useRef(balance);
   const [isKeypadOpen, setIsKeypadOpen] = useState(false);
   const [didCommitFromKeypad, setDidCommitFromKeypad] = useState(false);
 
@@ -75,7 +74,7 @@ export function CreateLocalAccountModal() {
       const id = await dispatch(
         createAccount({
           name,
-          balance: toRelaxedNumber(balance),
+          balance: parseAmountExpression(balance) ?? 0,
           offBudget: offbudget,
         }),
       ).unwrap();
@@ -177,6 +176,7 @@ export function CreateLocalAccountModal() {
                   onChangeValue={setBalance}
                   onPointerDown={() => {
                     if (isMobileKeypadEnabled) {
+                      initialBalanceRef.current = balance;
                       setDidCommitFromKeypad(false);
                       setIsKeypadOpen(true);
                     }
@@ -200,7 +200,7 @@ export function CreateLocalAccountModal() {
                   onClose={() => {
                     setIsKeypadOpen(false);
                     if (!didCommitFromKeypad) {
-                      return;
+                      setBalance(initialBalanceRef.current);
                     }
                     setDidCommitFromKeypad(false);
                   }}
