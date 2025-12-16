@@ -1,6 +1,6 @@
 # Merging Duplicate Transactions
 
-To merge two duplicate transactions, select two transactions with the same amount (e.g. two payments of 2 USD), then either use the <Key k="G" /> shortcut or select the transaction menu dropdown in the top right and click merge. This option will only appear when exactly two matching transactions are selected.
+To merge two duplicate transactions, select two transactions with the same amount (e.g. two payments of 2 USD), then either use the shortcut key "G" or select the transaction menu dropdown in the top right and click merge. This option will only appear when exactly two matching transactions are selected.
 
 ![Merge Transactions](/img/merge-transactions/merge-g.png)
 
