@@ -56,7 +56,7 @@ through the list of available commands. You can also quickly move to any of the 
 - <Key mod="ctrl" k="A" /> Toggle selection of all transactions or deselection of all selected transactions.
 - <Key k="space" /> Toggle selection of current transaction.
 - <Key mod="shift" k="space" /> Select all transactions between current transaction and most recently selected transaction.
-- <Key k="J" /> or <Key arrow="down" /> With a transaciton selected, move to the next transaction down. Hold to scroll down.
+- <Key k="J" /> or <Key arrow="down" /> With a transaction selected, move to the next transaction down. Hold to scroll down.
 - <Key k="K" /> or <Key arrow="up" /> With a transaction selected, move to the next transaction up. Hold to scroll up.
 
 #### Transaction shortcuts
