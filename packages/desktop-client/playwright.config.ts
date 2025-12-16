@@ -8,7 +8,7 @@ export default defineConfig({
   fullyParallel: true,
   workers: process.env.CI ? 1 : undefined,
   testDir: 'e2e/',
-  reporter: process.env.CI ? 'blob' : [['html', { open: 'never' }]],
+  reporter: process.env.CI ? [['blob'],['dot']] : [['html', { open: 'never' }]],
   use: {
     userAgent: 'playwright',
     screenshot: 'on',
