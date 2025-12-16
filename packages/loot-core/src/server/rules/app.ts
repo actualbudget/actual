@@ -75,6 +75,7 @@ export type RulesHandlers = {
   'rule-delete': typeof deleteRule;
   'rule-delete-all': typeof deleteAllRules;
   'rule-apply-actions': typeof applyRuleActions;
+  'rule-preview-actions': typeof previewRuleActions;
   'rule-add-payee-rename': typeof addRulePayeeRename;
   'rules-get': typeof getRules;
   'rule-get': typeof getRule;
@@ -89,6 +90,7 @@ app.method('rule-add', mutator(addRule));
 app.method('rule-update', mutator(undoable(updateRule)));
 app.method('rule-delete', mutator(undoable(deleteRule)));
 app.method('rule-delete-all', mutator(undoable(deleteAllRules)));
+app.method('rule-preview-actions', previewRuleActions);
 app.method('rule-apply-actions', mutator(undoable(applyRuleActions)));
 app.method('rule-add-payee-rename', mutator(addRulePayeeRename));
 app.method('rules-get', getRules);
@@ -145,6 +147,16 @@ async function deleteAllRules(
   });
 
   return { someDeletionsFailed };
+}
+
+async function previewRuleActions({
+  transactions,
+  actions,
+}: {
+  transactions: TransactionEntity[];
+  actions: Array<Action | RuleActionEntity>;
+}): Promise<TransactionEntity[]> {
+  return rules.runActions(transactions, actions);
 }
 
 async function applyRuleActions({
