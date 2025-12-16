@@ -31,7 +31,10 @@ through the list of available commands. You can also quickly move to any of the 
 
 - <Key k="?" /> will open the help menu. The Help Menu contains links to the Documentation, Community support (Discord) and the Keyboard shortcuts.
 - <Key mod="ctrl" k="O" /> (the letter O, not zero) this will close the budget and list other available budgets to open.
-- <Key mod="shift" mod="ctrl" k="P" /> [Toggle the privacy filter.](#scramble-hide)  
+- <Key mod="shift" mod="ctrl" k="P" /> [Toggle the privacy filter.](#scramble-hide)
+- <Key mod="ctrl" fixed k="k" /> Open Command Palette.
+- <Key mod="ctrl" k="z" /> Undo.
+- <Key mod="ctrl shift" k="z" /> Redo.
 
 ### Budget page shortcuts
 
@@ -43,32 +46,46 @@ through the list of available commands. You can also quickly move to any of the 
   
 ### Account page shortcuts
 
-- <Key k="enter" /> and <Key mod="shift" k="enter" /> when editing will move down and up. In a dropdown, this will save the value and close the dropdown.
-- <Key k="tab" /> and <Key mod="shift" k="tab" /> when editing will move left and right. Like <Key k="enter" />, this will save the value and close an open dropdown.
-- <Key mod="ctrl" k="enter" /> will add the transaction and close the form regardless of where you are editing.
-- <Key k="enter" /> in either the Payment or Deposit columns will add the transaction; the form remains open for the next addition.
-- <Key mod="ctrl" k="I" /> ( i ) Import transactions.
 - <Key mod="ctrl" k="B" /> Initiate bank sync.
+- <Key mod="ctrl" k="I" /> ( i ) Import transactions.
+- <Key k="t" /> Add new transaction with date picker open, or open date picker and set date for selected transactions.
+- <Key k="f" /> Show only selected transactions. If no transaction is selected, it brings up the Filter dropdown menu.
+
+#### Selection shortcuts
+
+- <Key mod="ctrl" k="A" /> Toggle selection of all transactions or deselection of all selected transactions.
+- <Key k="space" /> Toggle selection of current transaction.
+- <Key mod="shift" k="space" /> Select all transactions between current transaction and most recently selected transaction.
+- <Key k="J" /> or <Key arrow="down" /> With a transaciton selected, move to the next transaction down. Hold to scroll down.
+- <Key k="K" /> or <Key arrow="up" /> With a transaction selected, move to the next transaction up. Hold to scroll up.
+
+#### Transaction shortcuts
+  
+- <Key k="enter" /> when editing will move down. In a dropdown, this will save the value and close the dropdown. in either the Payment or Deposit columns this will add the transaction; the form remains open for the next addition.
+- <Key mod="shift" k="enter" /> when editing will move up. In a dropdown, this will save the value and close the dropdown.
+- <Key mod="ctrl" k="enter" /> will add the transaction and close the form regardless of where you are editing.
+- <Key k="tab" /> when editing will move right. This will save the value and close an open dropdown.
+- <Key mod="shift" k="tab" /> when editing will move left. This will save the value and close an open dropdown.
 
 ### When Managing Transactions
 
-- <Key k="f" /> Show only selected transactions. If no transaction is selected, it brings up the Filter dropdown menu.
-- <Key k="d" /> Delete selected transactions.
-- <Key k="u" /> Duplicate selected transactions.
-- <Key k="g" /> Merge selected transactions.
-- <Key k="a" /> Set account for selected transactions.
+::important
+Transaction(s) must be selected for the following shortcuts, as noted.
+See [Bulk Actions](/docs/transactions/bulk-editing.md) for guidance on working with multiple transactions.
+:::
+
+- <Key k="t" /> Open date picker and set date for selected transactions or open a new transaction if none are selected.
 - <Key k="p" /> Set payee for selected transactions.
 - <Key k="n" /> Set notes for selected transactions.
 - <Key k="c" /> Set category for selected transactions.
 - <Key k="m" /> Set amount for selected transactions.
 - <Key k="l" /> Toggle cleared status for selected transactions.
+
+- <Key k="a" /> Set account for selected transactions.
 - <Key k="S" /> Link or view schedule for selected transactions.
-- <Key mod="ctrl" k="A" /> Toggle selection or deselection of all transactions.
-- <Key k="t" /> Set date for selected transactions.
-- <Key k="J" /> or <Key arrow="down" /> Move to the next transaction down. Hold to scroll down.
-- <Key k="K" /> or <Key arrow="up" /> Move to the next transaction up. Hold to scroll up.
-- <Key k="space" /> Toggle selection of current transaction.
-- <Key mod="shift" k="space" /> Select all transactions between current transaction and most recently selected transaction.
+- <Key k="d" /> Delete selected transactions.
+- <Key k="u" /> Duplicate selected transactions.
+- <Key k="g" /> Merge selected transactions. Only _two_ transactions with equal amounts can be selected. [Learn more.](/docs/transactions/merging.md)
 
 ## How to View Multiple Months at Once
 
