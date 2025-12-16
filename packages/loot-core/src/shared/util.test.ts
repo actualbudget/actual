@@ -1,13 +1,13 @@
 import {
-  currencyToAmount,
   getNumberFormat,
   looselyParseAmount,
   setNumberFormat,
+  formattedToAmount,
   stringToInteger,
   titleFirst,
-  integerToCurrency,
-  amountToCurrency,
-  amountToCurrencyNoDecimal,
+  integerToFormatted,
+  amountToFormatted,
+  amountToFormattedNoDecimal,
 } from './util';
 
 describe('utility functions', () => {
@@ -148,106 +148,106 @@ describe('utility functions', () => {
     expect(formatter.format(Number('-1.2'))).toBe('-1');
   });
 
-  test('currencyToAmount works with basic numbers', () => {
-    expect(currencyToAmount('3')).toBe(3);
-    expect(currencyToAmount('3.4')).toBe(3.4);
-    expect(currencyToAmount('3.45')).toBe(3.45);
-    expect(currencyToAmount('3.45060')).toBe(3.4506);
+  test('formattedToAmount works with basic numbers', () => {
+    expect(formattedToAmount('3')).toBe(3);
+    expect(formattedToAmount('3.4')).toBe(3.4);
+    expect(formattedToAmount('3.45')).toBe(3.45);
+    expect(formattedToAmount('3.45060')).toBe(3.4506);
   });
 
-  test('currencyToAmount works with varied formats', () => {
+  test('formattedToAmount works with varied formats', () => {
     setNumberFormat({ format: 'comma-dot', hideFraction: true });
-    expect(currencyToAmount('3,45')).toBe(3.45);
-    expect(currencyToAmount('3,456')).toBe(3456);
-    expect(currencyToAmount('3,45000')).toBe(345000);
-    expect(currencyToAmount("3'456.78")).toBe(3456.78);
-    expect(currencyToAmount("3'456.78000")).toBe(3456.78);
-    expect(currencyToAmount('1,00,000.99')).toBe(100000.99);
-    expect(currencyToAmount('1,00,000.99000')).toBe(100000.99);
+    expect(formattedToAmount('3,45')).toBe(3.45);
+    expect(formattedToAmount('3,456')).toBe(3456);
+    expect(formattedToAmount('3,45000')).toBe(345000);
+    expect(formattedToAmount("3'456.78")).toBe(3456.78);
+    expect(formattedToAmount("3'456.78000")).toBe(3456.78);
+    expect(formattedToAmount('1,00,000.99')).toBe(100000.99);
+    expect(formattedToAmount('1,00,000.99000')).toBe(100000.99);
   });
 
-  test('currencyToAmount works with leading decimal characters', () => {
-    expect(currencyToAmount('.45')).toBe(0.45);
-    expect(currencyToAmount(',45')).toBe(0.45);
+  test('formattedToAmount works with leading decimal characters', () => {
+    expect(formattedToAmount('.45')).toBe(0.45);
+    expect(formattedToAmount(',45')).toBe(0.45);
   });
 
-  test('currencyToAmount works with negative numbers', () => {
-    expect(currencyToAmount('-3')).toBe(-3);
-    expect(currencyToAmount('-3.45')).toBe(-3.45);
-    expect(currencyToAmount('-3,45')).toBe(-3.45);
+  test('formattedToAmount works with negative numbers', () => {
+    expect(formattedToAmount('-3')).toBe(-3);
+    expect(formattedToAmount('-3.45')).toBe(-3.45);
+    expect(formattedToAmount('-3,45')).toBe(-3.45);
     // Unicode minus
-    expect(currencyToAmount('−3')).toBe(-3);
-    expect(currencyToAmount('−3.45')).toBe(-3.45);
-    expect(currencyToAmount('−3,45')).toBe(-3.45);
+    expect(formattedToAmount('−3')).toBe(-3);
+    expect(formattedToAmount('−3.45')).toBe(-3.45);
+    expect(formattedToAmount('−3,45')).toBe(-3.45);
   });
 
-  test('currencyToAmount works with non-fractional numbers', () => {
+  test('formattedToAmount works with non-fractional numbers', () => {
     setNumberFormat({ format: 'comma-dot', hideFraction: false });
-    expect(currencyToAmount('3.')).toBe(3);
-    expect(currencyToAmount('3,')).toBe(3);
-    expect(currencyToAmount('3,000')).toBe(3000);
-    expect(currencyToAmount('3,000.')).toBe(3000);
+    expect(formattedToAmount('3.')).toBe(3);
+    expect(formattedToAmount('3,')).toBe(3);
+    expect(formattedToAmount('3,000')).toBe(3000);
+    expect(formattedToAmount('3,000.')).toBe(3000);
   });
 
-  test('currencyToAmount works with hidden fractions', () => {
+  test('formattedToAmount works with hidden fractions', () => {
     setNumberFormat({ format: 'comma-dot', hideFraction: true });
-    expect(currencyToAmount('3.45')).toBe(3.45);
-    expect(currencyToAmount('3.456')).toBe(3.456);
-    expect(currencyToAmount('3.4500')).toBe(3.45);
-    expect(currencyToAmount('3.')).toBe(3);
-    expect(currencyToAmount('3,')).toBe(3);
-    expect(currencyToAmount('3,000')).toBe(3000);
-    expect(currencyToAmount('3,000.')).toBe(3000);
+    expect(formattedToAmount('3.45')).toBe(3.45);
+    expect(formattedToAmount('3.456')).toBe(3.456);
+    expect(formattedToAmount('3.4500')).toBe(3.45);
+    expect(formattedToAmount('3.')).toBe(3);
+    expect(formattedToAmount('3,')).toBe(3);
+    expect(formattedToAmount('3,000')).toBe(3000);
+    expect(formattedToAmount('3,000.')).toBe(3000);
   });
 
-  test('currencyToAmount works with apostrophe-dot format', () => {
+  test('formattedToAmount works with apostrophe-dot format', () => {
     setNumberFormat({ format: 'apostrophe-dot', hideFraction: false });
 
     // Test with regular apostrophe (U+0027) - what users type on keyboard
     const keyboardApostrophe = '12\u0027345.67';
     expect(keyboardApostrophe.charCodeAt(2)).toBe(0x0027); // Verify it's U+0027
-    expect(currencyToAmount(keyboardApostrophe)).toBe(12345.67);
-    expect(currencyToAmount('1\u0027234.56')).toBe(1234.56);
-    expect(currencyToAmount('1\u0027000.33')).toBe(1000.33);
-    expect(currencyToAmount('100\u0027000.99')).toBe(100000.99);
-    expect(currencyToAmount('1\u0027000\u0027000.50')).toBe(1000000.5);
+    expect(formattedToAmount(keyboardApostrophe)).toBe(12345.67);
+    expect(formattedToAmount('1\u0027234.56')).toBe(1234.56);
+    expect(formattedToAmount('1\u0027000.33')).toBe(1000.33);
+    expect(formattedToAmount('100\u0027000.99')).toBe(100000.99);
+    expect(formattedToAmount('1\u0027000\u0027000.50')).toBe(1000000.5);
 
     // Test with right single quotation mark (U+2019) - what Intl.NumberFormat outputs
     const intlApostrophe = '12\u2019345.67';
     expect(intlApostrophe.charCodeAt(2)).toBe(0x2019); // Verify it's U+2019
-    expect(currencyToAmount(intlApostrophe)).toBe(12345.67);
-    expect(currencyToAmount('1\u2019234.56')).toBe(1234.56);
-    expect(currencyToAmount('1\u2019000.33')).toBe(1000.33);
+    expect(formattedToAmount(intlApostrophe)).toBe(12345.67);
+    expect(formattedToAmount('1\u2019234.56')).toBe(1234.56);
+    expect(formattedToAmount('1\u2019000.33')).toBe(1000.33);
   });
 
-  test('currencyToAmount works with dot-comma', () => {
+  test('formattedToAmount works with dot-comma', () => {
     setNumberFormat({ format: 'dot-comma', hideFraction: false });
-    expect(currencyToAmount('3,45')).toBe(3.45);
-    expect(currencyToAmount('3,456')).toBe(3.456);
-    expect(currencyToAmount('3,4500')).toBe(3.45);
-    expect(currencyToAmount('3,')).toBe(3);
-    expect(currencyToAmount('3.')).toBe(3);
-    expect(currencyToAmount('3.000')).toBe(3000);
-    expect(currencyToAmount('3.000,')).toBe(3000);
+    expect(formattedToAmount('3,45')).toBe(3.45);
+    expect(formattedToAmount('3,456')).toBe(3.456);
+    expect(formattedToAmount('3,4500')).toBe(3.45);
+    expect(formattedToAmount('3,')).toBe(3);
+    expect(formattedToAmount('3.')).toBe(3);
+    expect(formattedToAmount('3.000')).toBe(3000);
+    expect(formattedToAmount('3.000,')).toBe(3000);
   });
 
-  test('currencyToAmount works with sat-comma format (round-trip precision)', () => {
+  test('formattedToAmount works with sat-comma format (round-trip precision)', () => {
     setNumberFormat({ format: 'sat-comma', hideFraction: false });
     // Test round-trip: format -> parse -> should equal original value
     // The formatted string contains U+202F narrow no-break spaces in the fraction
     // which must be stripped for proper parsing
     const formatted1 = '1.23\u202F456\u202F789';
-    expect(currencyToAmount(formatted1)).toBe(1.23456789);
+    expect(formattedToAmount(formatted1)).toBe(1.23456789);
 
     const formatted2 = '0.00\u202F000\u202F001';
-    expect(currencyToAmount(formatted2)).toBe(0.00000001);
+    expect(formattedToAmount(formatted2)).toBe(0.00000001);
 
     const formatted3 = '123.45\u202F600\u202F000';
-    expect(currencyToAmount(formatted3)).toBe(123.456);
+    expect(formattedToAmount(formatted3)).toBe(123.456);
 
     // Test with grouping separators in integer part
     const formatted4 = '1,234,567.89\u202F012\u202F345';
-    expect(currencyToAmount(formatted4)).toBe(1234567.89012345);
+    expect(formattedToAmount(formatted4)).toBe(1234567.89012345);
   });
 
   test('titleFirst works with all inputs', () => {
@@ -264,97 +264,97 @@ describe('utility functions', () => {
     expect(stringToInteger('−3')).toBe(-3);
   });
 
-  test('integerToCurrency works with sat-comma format', () => {
+  test('integerToFormatted works with sat-comma format', () => {
     setNumberFormat({ format: 'sat-comma', hideFraction: false });
     // 12345 satoshis = 0.00012345 BTC with 8 decimal places
-    expect(integerToCurrency(12345)).toBe('0.00\u202F012\u202F345');
+    expect(integerToFormatted(12345)).toBe('0.00\u202F012\u202F345');
     // 123456789 satoshis = 1.23456789 BTC
-    expect(integerToCurrency(123456789)).toBe('1.23\u202F456\u202F789');
+    expect(integerToFormatted(123456789)).toBe('1.23\u202F456\u202F789');
     // 100000000 satoshis = 1 BTC
-    expect(integerToCurrency(100000000)).toBe('1.00\u202F000\u202F000');
+    expect(integerToFormatted(100000000)).toBe('1.00\u202F000\u202F000');
 
     setNumberFormat({ format: 'sat-comma', hideFraction: true });
     // With hideFraction, still displays as satoshis (the amount is converted to BTC then back to sats)
     // 12345 sats -> 0.00012345 BTC -> 12,345 sats displayed
-    expect(integerToCurrency(12345)).toBe('12,345');
+    expect(integerToFormatted(12345)).toBe('12,345');
     // 123456789 sats -> 1.23456789 BTC -> 123,456,789 sats displayed
-    expect(integerToCurrency(123456789)).toBe('123,456,789');
+    expect(integerToFormatted(123456789)).toBe('123,456,789');
     // 100000000 sats -> 1 BTC -> 100,000,000 sats displayed
-    expect(integerToCurrency(100000000)).toBe('100,000,000');
+    expect(integerToFormatted(100000000)).toBe('100,000,000');
   });
 
-  test('amountToCurrency works with sat-comma format', () => {
+  test('amountToFormatted works with sat-comma format', () => {
     setNumberFormat({ format: 'sat-comma', hideFraction: false });
     // 8 decimal places with special grouping
-    expect(amountToCurrency(1.23456789)).toBe('1.23\u202F456\u202F789');
-    expect(amountToCurrency(0.00000001)).toBe('0.00\u202F000\u202F001');
-    expect(amountToCurrency(123.456)).toBe('123.45\u202F600\u202F000');
-    expect(amountToCurrency(1234567.89012345)).toBe(
+    expect(amountToFormatted(1.23456789)).toBe('1.23\u202F456\u202F789');
+    expect(amountToFormatted(0.00000001)).toBe('0.00\u202F000\u202F001');
+    expect(amountToFormatted(123.456)).toBe('123.45\u202F600\u202F000');
+    expect(amountToFormatted(1234567.89012345)).toBe(
       '1,234,567.89\u202F012\u202F345',
     );
 
     setNumberFormat({ format: 'sat-comma', hideFraction: true });
     // Convert to satoshis (multiply by 100 million)
-    expect(amountToCurrency(1.23456789)).toBe('123,456,789');
-    expect(amountToCurrency(0.00000001)).toBe('1');
-    expect(amountToCurrency(21)).toBe('2,100,000,000');
+    expect(amountToFormatted(1.23456789)).toBe('123,456,789');
+    expect(amountToFormatted(0.00000001)).toBe('1');
+    expect(amountToFormatted(21)).toBe('2,100,000,000');
   });
-  test('amountToCurrencyNoDecimal works with sat-comma format', () => {
+  test('amountToFormattedNoDecimal works with sat-comma format', () => {
     // This function always uses hideFraction: true
     setNumberFormat({ format: 'sat-comma', hideFraction: false });
     // Should still convert to satoshis even though base format has hideFraction: false
-    expect(amountToCurrencyNoDecimal(1.23456789)).toBe('123,456,789');
-    expect(amountToCurrencyNoDecimal(0.00000001)).toBe('1');
-    expect(amountToCurrencyNoDecimal(21)).toBe('2,100,000,000');
+    expect(amountToFormattedNoDecimal(1.23456789)).toBe('123,456,789');
+    expect(amountToFormattedNoDecimal(0.00000001)).toBe('1');
+    expect(amountToFormattedNoDecimal(21)).toBe('2,100,000,000');
 
     setNumberFormat({ format: 'sat-comma', hideFraction: true });
-    expect(amountToCurrencyNoDecimal(1.23456789)).toBe('123,456,789');
+    expect(amountToFormattedNoDecimal(1.23456789)).toBe('123,456,789');
   });
 
-  test('amountToCurrency preserves negative sign for values between -1 and 0', () => {
+  test('amountToFormatted preserves negative sign for values between -1 and 0', () => {
     setNumberFormat({ format: 'sat-comma', hideFraction: false });
     // Regression test for negative values between -1 and 0
     // -0.00000001 BTC (the smallest unit: -1 satoshi)
-    expect(amountToCurrency(-0.00000001)).toBe('-0.00\u202F000\u202F001');
+    expect(amountToFormatted(-0.00000001)).toBe('-0.00\u202F000\u202F001');
     // -0.5 BTC
-    expect(amountToCurrency(-0.5)).toBe('-0.50\u202F000\u202F000');
+    expect(amountToFormatted(-0.5)).toBe('-0.50\u202F000\u202F000');
     // -0.00012345 BTC
-    expect(amountToCurrency(-0.00012345)).toBe('-0.00\u202F012\u202F345');
+    expect(amountToFormatted(-0.00012345)).toBe('-0.00\u202F012\u202F345');
 
     setNumberFormat({ format: 'sat-comma', hideFraction: true });
     // With hideFraction, show as negative satoshis
-    expect(amountToCurrency(-0.00000001)).toBe('-1');
-    expect(amountToCurrency(-0.5)).toBe('-50,000,000');
-    expect(amountToCurrency(-0.00012345)).toBe('-12,345');
+    expect(amountToFormatted(-0.00000001)).toBe('-1');
+    expect(amountToFormatted(-0.5)).toBe('-50,000,000');
+    expect(amountToFormatted(-0.00012345)).toBe('-12,345');
   });
 
-  test('integerToCurrency preserves negative sign for negative satoshi values', () => {
+  test('integerToFormatted preserves negative sign for negative satoshi values', () => {
     setNumberFormat({ format: 'sat-comma', hideFraction: false });
     // Negative satoshis converted to BTC
-    expect(integerToCurrency(-1)).toBe('-0.00\u202F000\u202F001');
-    expect(integerToCurrency(-12345)).toBe('-0.00\u202F012\u202F345');
-    expect(integerToCurrency(-100000000)).toBe('-1.00\u202F000\u202F000');
+    expect(integerToFormatted(-1)).toBe('-0.00\u202F000\u202F001');
+    expect(integerToFormatted(-12345)).toBe('-0.00\u202F012\u202F345');
+    expect(integerToFormatted(-100000000)).toBe('-1.00\u202F000\u202F000');
 
     setNumberFormat({ format: 'sat-comma', hideFraction: true });
     // Display as negative satoshis
-    expect(integerToCurrency(-1)).toBe('-1');
-    expect(integerToCurrency(-12345)).toBe('-12,345');
-    expect(integerToCurrency(-100000000)).toBe('-100,000,000');
+    expect(integerToFormatted(-1)).toBe('-1');
+    expect(integerToFormatted(-12345)).toBe('-12,345');
+    expect(integerToFormatted(-100000000)).toBe('-100,000,000');
   });
 
-  test('amountToCurrency handles non-finite numbers (NaN, Infinity)', () => {
+  test('amountToFormatted handles non-finite numbers (NaN, Infinity)', () => {
     setNumberFormat({ format: 'sat-comma', hideFraction: false });
     // NaN should be formatted as "NaN" by native Intl.NumberFormat
-    expect(amountToCurrency(NaN)).toBe('NaN');
+    expect(amountToFormatted(NaN)).toBe('NaN');
     // Infinity should be formatted as "∞" by native Intl.NumberFormat
-    expect(amountToCurrency(Infinity)).toBe('∞');
-    expect(amountToCurrency(-Infinity)).toBe('-∞');
+    expect(amountToFormatted(Infinity)).toBe('∞');
+    expect(amountToFormatted(-Infinity)).toBe('-∞');
 
     setNumberFormat({ format: 'sat-comma', hideFraction: true });
     // Non-finite numbers should still work with hideFraction
-    expect(amountToCurrency(NaN)).toBe('NaN');
-    expect(amountToCurrency(Infinity)).toBe('∞');
-    expect(amountToCurrency(-Infinity)).toBe('-∞');
+    expect(amountToFormatted(NaN)).toBe('NaN');
+    expect(amountToFormatted(Infinity)).toBe('∞');
+    expect(amountToFormatted(-Infinity)).toBe('-∞');
   });
 
   test('number formatting supports formatRangeToParts with locale-aware approximation', () => {

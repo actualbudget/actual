@@ -4,10 +4,10 @@ import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { getCurrency, type Currency } from 'loot-core/shared/currencies';
 import {
   amountToInteger,
-  currencyToAmount,
+  formattedToAmount,
   getNumberFormat,
   integerToAmount,
-  integerToCurrency,
+  integerToFormatted,
   parseNumberFormat,
   setNumberFormat,
   type IntegerAmount,
@@ -94,7 +94,7 @@ function format(
 
       return {
         numericValue: localValue,
-        formattedString: integerToCurrency(
+        formattedString: integerToFormatted(
           localValue,
           formatter,
           decimalPlaces,
@@ -257,7 +257,7 @@ export function useFormat(): UseFormatResult {
       let numericValue: number | null = evalArithmetic(normalized, null);
 
       if (numericValue === null || isNaN(numericValue)) {
-        numericValue = currencyToAmount(normalized);
+        numericValue = formattedToAmount(trimmed);
       }
 
       if (numericValue !== null && !isNaN(numericValue)) {

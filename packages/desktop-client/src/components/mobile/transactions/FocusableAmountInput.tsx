@@ -16,9 +16,9 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import {
-  amountToCurrency,
+  amountToFormatted,
   appendDecimals,
-  currencyToAmount,
+  formattedToAmount,
   reapplyThousandSeparators,
 } from 'loot-core/shared/util';
 
@@ -83,7 +83,7 @@ const AmountInput = memo(function AmountInput({
   };
 
   const applyText = () => {
-    const parsed = currencyToAmount(text) || 0;
+    const parsed = formattedToAmount(text) || 0;
     const newValue = editing ? parsed : value;
 
     setValue(Math.abs(newValue));
@@ -158,7 +158,7 @@ const AmountInput = memo(function AmountInput({
         }}
         data-testid="amount-input-text"
       >
-        {editing ? text : amountToCurrency(value)}
+        {editing ? text : amountToFormatted(value)}
       </Text>
     </View>
   );
@@ -289,7 +289,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
                 ...textStyle,
               }}
             >
-              {amountToCurrency(Math.abs(value))}
+              {amountToFormatted(Math.abs(value))}
             </Text>
           </View>
         </Button>

@@ -51,7 +51,7 @@ import {
   getChangedValues,
   groupById,
   integerToAmount,
-  integerToCurrency,
+  integerToFormatted,
   titleFirst,
 } from 'loot-core/shared/util';
 import {
@@ -269,7 +269,7 @@ function Footer({
               <Trans>
                 Add new split -{' '}
                 {{
-                  amount: integerToCurrency(
+                  amount: integerToFormatted(
                     transaction.amount > 0
                       ? transaction.error.difference
                       : -transaction.error.difference,
@@ -281,7 +281,7 @@ function Footer({
               <Trans>
                 Amount left:{' '}
                 {{
-                  amount: integerToCurrency(
+                  amount: integerToFormatted(
                     transaction.amount > 0
                       ? transaction.error.difference
                       : -transaction.error.difference,

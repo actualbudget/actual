@@ -27,7 +27,7 @@ import {
 } from '@react-aria/interactions';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
-import { integerToCurrency, type IntegerAmount } from 'loot-core/shared/util';
+import { integerToFormatted, type IntegerAmount } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type TransactionEntity,
@@ -288,7 +288,7 @@ export function TransactionListItem({
                 ...textStyle,
               }}
             >
-              {integerToCurrency(amount)}
+              {integerToFormatted(amount)}
             </Text>
             {showRunningBalance && runningBalance !== undefined && (
               <Text
@@ -299,7 +299,7 @@ export function TransactionListItem({
                   ...makeBalanceAmountStyle(runningBalance),
                 }}
               >
-                {integerToCurrency(runningBalance)}
+                {integerToFormatted(runningBalance)}
               </Text>
             )}
           </View>

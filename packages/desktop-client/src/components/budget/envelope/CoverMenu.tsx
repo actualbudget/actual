@@ -11,7 +11,7 @@ import { View } from '@actual-app/components/view';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import {
   amountToInteger,
-  integerToCurrency,
+  integerToFormatted,
   type IntegerAmount,
 } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
@@ -54,7 +54,7 @@ export function CoverMenu({
       : categoryGroups;
   }, [categoryId, showToBeBudgeted, originalCategoryGroups]);
 
-  const _initialAmount = integerToCurrency(Math.abs(initialAmount ?? 0));
+  const _initialAmount = integerToFormatted(Math.abs(initialAmount ?? 0));
   const [amount, setAmount] = useState<string | null>(null);
 
   function _onSubmit() {

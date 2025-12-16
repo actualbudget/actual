@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { currencyToAmount } from './util';
+import { formattedToAmount } from './util';
 
 function fail(state, msg) {
   throw new Error(
@@ -49,7 +49,7 @@ function parsePrimary(state) {
     fail(state, 'Unexpected character');
   }
 
-  const number = currencyToAmount(numberStr);
+  const number = formattedToAmount(numberStr);
   return isNegative ? -number : number;
 }
 

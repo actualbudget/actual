@@ -57,11 +57,10 @@ import {
   updateTransaction,
 } from 'loot-core/shared/transactions';
 import {
-  amountToCurrency,
-  currencyToAmount,
-  integerToCurrency,
-  titleFirst,
+  amountToFormatted,
+  formattedToAmount,
   type IntegerAmount,
+  titleFirst,
 } from 'loot-core/shared/util';
 import {
   type AccountEntity,
@@ -1605,10 +1604,10 @@ const Transaction = memo(function Transaction({
         name="debit"
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
-        value={debit === '' && credit === '' ? amountToCurrency(0) : debit}
+        value={debit === '' && credit === '' ? amountToFormatted(0) : debit}
         formatter={value =>
           // reformat value so since we might have kept decimals
-          value ? amountToCurrency(currencyToAmount(value) || 0) : ''
+          value ? amountToFormatted(formattedToAmount(value) || 0) : ''
         }
         valueStyle={valueStyle}
         textAlign="right"
@@ -1620,7 +1619,7 @@ const Transaction = memo(function Transaction({
           ...amountStyle,
         }}
         inputProps={{
-          value: debit === '' && credit === '' ? amountToCurrency(0) : debit,
+          value: debit === '' && credit === '' ? amountToFormatted(0) : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
           'data-1p-ignore': true,
         }}
@@ -1639,7 +1638,7 @@ const Transaction = memo(function Transaction({
         value={credit}
         formatter={value =>
           // reformat value so since we might have kept decimals
-          value ? amountToCurrency(currencyToAmount(value) || 0) : ''
+          value ? amountToFormatted(formattedToAmount(value) || 0) : ''
         }
         valueStyle={valueStyle}
         textAlign="right"
@@ -1667,7 +1666,7 @@ const Transaction = memo(function Transaction({
           value={
             runningBalance == null || isChild || isTemporaryId(id)
               ? ''
-              : integerToCurrency(runningBalance)
+              : integerToFormatted(runningBalance)
           }
           valueStyle={{
             color:
@@ -1740,7 +1739,7 @@ function TransactionError({
             <Text style={{ whiteSpace: 'nowrap' }}>
               <Trans>Amount left:</Trans>{' '}
               <Text style={{ fontWeight: 500 }}>
-                {integerToCurrency(
+                {integerToFormatted(
                   isDeposit ? error.difference : -error.difference,
                 )}
               </Text>

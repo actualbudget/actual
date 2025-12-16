@@ -6,7 +6,7 @@ import * as asyncStorage from '../../platform/server/asyncStorage';
 import { getLocale } from '../../shared/locale';
 import * as monthUtils from '../../shared/months';
 import {
-  integerToCurrency,
+  integerToFormatted,
   safeNumber,
   type IntegerAmount,
 } from '../../shared/util';
@@ -628,7 +628,7 @@ async function addMovementNotes({
   currencyCode: string;
 }) {
   const currency = getCurrency(currencyCode);
-  const displayAmount = integerToCurrency(
+  const displayAmount = integerToFormatted(
     amount,
     undefined,
     currency.decimalPlaces,

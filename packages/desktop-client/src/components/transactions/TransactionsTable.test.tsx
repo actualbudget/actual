@@ -17,7 +17,7 @@ import {
   splitTransaction,
   updateTransaction,
 } from 'loot-core/shared/transactions';
-import { integerToCurrency } from 'loot-core/shared/util';
+import { integerToFormatted } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type CategoryEntity,
@@ -462,7 +462,7 @@ describe('Transactions', () => {
       );
       if (transaction.amount <= 0) {
         expect(queryField(container, 'debit', 'div', idx).textContent).toBe(
-          integerToCurrency(-transaction.amount),
+          integerToFormatted(-transaction.amount),
         );
         expect(queryField(container, 'credit', 'div', idx).textContent).toBe(
           '',
@@ -470,7 +470,7 @@ describe('Transactions', () => {
       } else {
         expect(queryField(container, 'debit', 'div', idx).textContent).toBe('');
         expect(queryField(container, 'credit', 'div', idx).textContent).toBe(
-          integerToCurrency(transaction.amount),
+          integerToFormatted(transaction.amount),
         );
       }
     });

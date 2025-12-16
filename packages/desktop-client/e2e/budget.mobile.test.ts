@@ -1,7 +1,7 @@
 import { type Page } from '@playwright/test';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { amountToCurrency, currencyToAmount } from 'loot-core/shared/util';
+import { amountToFormatted, formattedToAmount } from 'loot-core/shared/util';
 
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
@@ -63,7 +63,7 @@ async function setBudgetAverage(
     if (!spent) {
       throw new Error('Failed to get spent amount');
     }
-    totalSpent += currencyToAmount(spent) ?? 0;
+    totalSpent += formattedToAmount(spent) ?? 0;
   }
 
   // Calculate average amount
@@ -268,7 +268,7 @@ budgetTypes.forEach(budgetType => {
       const budgetedButton =
         await budgetPage.getButtonForBudgeted(categoryName);
 
-      await expect(budgetedButton).toHaveText(amountToCurrency(budgetAmount));
+      await expect(budgetedButton).toHaveText(amountToFormatted(budgetAmount));
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -318,7 +318,7 @@ budgetTypes.forEach(budgetType => {
           await budgetPage.getButtonForBudgeted(categoryName);
 
         await expect(budgetedButton).toHaveText(
-          amountToCurrency(Math.abs(averageSpent)),
+          amountToFormatted(Math.abs(averageSpent)),
         );
         await expect(page).toMatchThemeScreenshots();
       });
@@ -348,7 +348,7 @@ budgetTypes.forEach(budgetType => {
       await budgetMenuModal.close();
 
       await expect(budgetedButton).toHaveText(
-        amountToCurrency(amountToTemplate),
+        amountToFormatted(amountToTemplate),
       );
       const templateNotification = page.getByRole('alert').nth(1);
       await expect(templateNotification).toContainText(templateNotes);

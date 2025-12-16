@@ -22,7 +22,7 @@ import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { integerToCurrency } from 'loot-core/shared/util';
+import { integerToFormatted } from 'loot-core/shared/util';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
@@ -508,7 +508,7 @@ function CategoryItem({
                 <>
                   {' '}
                   <FinancialText>
-                    {integerToCurrency(toBudget || 0)}
+                    {integerToFormatted(toBudget || 0)}
                   </FinancialText>
                 </>
               )
@@ -516,7 +516,7 @@ function CategoryItem({
                 <>
                   {' '}
                   <FinancialText>
-                    {integerToCurrency(balance || 0)}
+                    {integerToFormatted(balance || 0)}
                   </FinancialText>
                 </>
               )}

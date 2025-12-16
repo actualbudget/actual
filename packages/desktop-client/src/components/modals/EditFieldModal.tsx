@@ -9,7 +9,7 @@ import { View } from '@actual-app/components/view';
 import { format as formatDate, parse as parseDate, parseISO } from 'date-fns';
 
 import { currentDay, dayFromDate } from 'loot-core/shared/months';
-import { amountToInteger, currencyToInteger } from 'loot-core/shared/util';
+import { amountToInteger, formattedToInteger } from 'loot-core/shared/util';
 
 import {
   Modal,
@@ -66,7 +66,7 @@ export function EditFieldModal({
       // Process the value if needed
       if (name === 'amount') {
         if (typeof value === 'string') {
-          const parsed = currencyToInteger(value);
+          const parsed = formattedToInteger(value);
           if (parsed === null) {
             alert(t('Invalid amount value'));
             return;

@@ -7,7 +7,7 @@ import { t } from 'i18next';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { currencyToAmount, integerToCurrency } from 'loot-core/shared/util';
+import { formattedToAmount, integerToFormatted } from 'loot-core/shared/util';
 import { type Handlers } from 'loot-core/types/handlers';
 import {
   type CategoryEntity,
@@ -74,10 +74,10 @@ export function makeBalanceAmountStyle(
 ) {
   // Converts an integer currency value to a normalized decimal amount.
   // First converts the integer to currency format, then to a decimal amount.
-  // Uses integerToCurrency to display the value correctly according to user prefs.
+  // Uses integerToFormatted to display the value correctly according to user prefs.
 
   const normalizeIntegerValue = (val: number | null | undefined) =>
-    typeof val === 'number' ? currencyToAmount(integerToCurrency(val)) : 0;
+    typeof val === 'number' ? formattedToAmount(integerToFormatted(val)) : 0;
 
   const currencyValue = normalizeIntegerValue(value);
 

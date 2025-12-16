@@ -8,7 +8,7 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { amountToCurrency } from 'loot-core/shared/util';
+import { amountToFormatted } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { ParsedDate } from './ParsedDate';
@@ -255,10 +255,10 @@ export function Transaction({
             title={
               outflow === null
                 ? t('Invalid: unable to parse the value')
-                : amountToCurrency(outflow)
+                : amountToFormatted(outflow)
             }
           >
-            {amountToCurrency(outflow || 0)}
+            {amountToFormatted(outflow || 0)}
           </Field>
           <Field
             width={90}
@@ -272,10 +272,10 @@ export function Transaction({
             title={
               inflow === null
                 ? t('Invalid: unable to parse the value')
-                : amountToCurrency(inflow)
+                : amountToFormatted(inflow)
             }
           >
-            {amountToCurrency(inflow || 0)}
+            {amountToFormatted(inflow || 0)}
           </Field>
         </>
       ) : (
@@ -291,10 +291,10 @@ export function Transaction({
               ? t('Invalid: unable to parse the value ({{amount}})', {
                   amount: transaction.amount,
                 })
-              : amountToCurrency(amount)
+              : amountToFormatted(amount)
           }
         >
-          {amountToCurrency(amount || 0)}
+          {amountToFormatted(amount || 0)}
         </Field>
       )}
     </Row>
