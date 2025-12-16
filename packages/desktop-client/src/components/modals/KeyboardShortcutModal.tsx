@@ -296,22 +296,22 @@ export function KeyboardShortcutModal() {
           {
             id: 'move-next-transaction',
             shortcut: 'J',
-            description: t('Move to the next transaction down'),
+            description: t('Move down to the next transaction'),
           },
           {
             id: 'move-next-transaction-scroll',
             shortcut: '↓',
-            description: t('Move to the next transaction and scroll'),
+            description: t('Move down to the next transaction and scroll'),
           },
           {
             id: 'move-previous-transaction',
             shortcut: 'K',
-            description: t('Move to the next transaction up'),
+            description: t('Move up to the next transaction'),
           },
           {
             id: 'move-previous-transaction-scroll',
             shortcut: '↑',
-            description: t('Move to the previous transaction and scroll'),
+            description: t('Move up to the next transaction and scroll'),
           },
         ],
       },
