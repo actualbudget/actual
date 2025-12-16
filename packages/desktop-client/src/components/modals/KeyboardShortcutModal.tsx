@@ -408,7 +408,7 @@ export function KeyboardShortcutModal() {
             id: 'merge-selected-transactions',
             shortcut: 'G',
             description: t('Merge the selected transactions'),
-          },     
+          },
         ],
       },
     ],
