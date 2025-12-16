@@ -123,7 +123,7 @@ export function ElectronServerConfig({
 
   return (
     <>
-      <Title text={t('Configure your server YO THIS IS A TEST')} />
+      <Title text={t('Configure your server')} />
       <View
         style={{
           display: 'flex',
@@ -404,7 +404,7 @@ export function ConfigServer() {
       )}
       {serverConfigView === 'external' && (
         <>
-          <Title text={t('Where’s the server?')} />
+          <Title text={t('Where’s the server? YO HELLO IM HERE')} />
           <Text
             style={{
               fontSize: 16,
