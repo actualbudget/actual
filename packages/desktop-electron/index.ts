@@ -29,7 +29,6 @@ import {
   get as getWindowState,
   listen as listenToWindowState,
 } from './window-state';
-
 import './security';
 
 const BUILD_ROOT = `${__dirname}/..`;

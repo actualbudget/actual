@@ -1,13 +1,12 @@
 import tsParser from '@typescript-eslint/parser';
-import { defineConfig } from 'eslint/config';
-import pluginImport from 'eslint-plugin-import';
 import pluginJSXA11y from 'eslint-plugin-jsx-a11y';
 import oxlint from 'eslint-plugin-oxlint';
+import pluginPerfectionist from 'eslint-plugin-perfectionist';
 import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
+import { defineConfig } from 'eslint/config';
 import globals from 'globals';
 import pluginTypescript from 'typescript-eslint';
 
-// eslint-disable-next-line import/extensions
 import pluginActual from './packages/eslint-plugin-actual/lib/index.js';
 
 export default defineConfig(
@@ -85,10 +84,10 @@ export default defineConfig(
     },
   },
   pluginTypescript.configs.recommended,
-  { plugins: { import: pluginImport } },
   {
     plugins: {
       actual: pluginActual,
+      perfectionist: pluginPerfectionist,
     },
     rules: {
       'actual/no-untranslated-strings': 'error',
@@ -247,41 +246,34 @@ export default defineConfig(
 
       'getter-return': 'warn',
 
-      'import/extensions': [
-        'warn',
-        'never',
-        {
-          json: 'always',
-          svg: 'always',
-        },
-      ],
-      'import/order': [
+      'perfectionist/sort-imports': [
         'warn',
         {
-          alphabetize: {
-            caseInsensitive: true,
-            order: 'asc',
-          },
-
-          groups: ['builtin', 'external', 'parent', 'sibling', 'index'],
-          'newlines-between': 'always',
-
-          pathGroups: [
+          groups: [
+            'react',
+            'builtin',
+            'external',
+            'loot-core',
+            'parent',
+            'sibling',
+            'index',
+            'desktop-client',
+          ],
+          customGroups: [
             {
-              // Enforce that React (and react-related packages) is the first import
-              group: 'builtin',
-              pattern: 'react?(-*)',
-              position: 'before',
+              groupName: 'react',
+              elementNamePattern: '^react(-.*)?$',
             },
             {
-              // Separate imports from Actual from "real" external imports
-              group: 'external',
-              pattern: 'loot-{core,design}/**/*',
-              position: 'after',
+              groupName: 'loot-core',
+              elementNamePattern: '^loot-core',
+            },
+            {
+              groupName: 'desktop-client',
+              elementNamePattern: '^@desktop-client',
             },
           ],
-
-          pathGroupsExcludedImportTypes: ['react'],
+          newlinesBetween: 'always',
         },
       ],
 
