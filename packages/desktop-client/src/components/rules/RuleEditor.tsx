@@ -1360,6 +1360,8 @@ export function RuleEditor({
           overflow: 'auto',
           maxHeight: 'calc(100% - 300px)',
           minHeight: 100,
+          position: 'relative',
+          zIndex: 2,
         }}
       >
         <View style={{ flexShrink: 0 }}>
@@ -1509,7 +1511,14 @@ export function RuleEditor({
       </View>
 
       <SelectedProvider instance={selectedInst}>
-        <View style={{ padding: '20px', flex: 1 }}>
+        <View
+          style={{
+            padding: '20px',
+            flex: 1,
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
           <SpaceBetween
             gap={5}
             style={{
