@@ -595,7 +595,7 @@ function RecurringScheduleTooltip({
 }
 
 type RecurringSchedulePickerProps = {
-  value: RecurConfig;
+  value: RecurConfig | null;
   buttonStyle?: CSSProperties;
   onChange: (config: RecurConfig) => void;
 };
@@ -618,13 +618,13 @@ export function RecurringSchedulePicker({
   }
 
   const recurringDescription = useMemo(
-    () => getRecurringDescription(value, dateFormat, locale),
+    () => (value ? getRecurringDescription(value, dateFormat, locale) : null),
     [locale, value, dateFormat],
   );
 
   const tooltip = (
     <RecurringScheduleTooltip
-      config={value}
+      config={value ?? ({} as RecurConfig)}
       onClose={() => setIsOpen(false)}
       onSave={onSave}
     />
