@@ -890,9 +890,9 @@ describe('Rule', () => {
 
         // Fixed amount 300, remainder = 700
         expect(
-          rule.exec({ imported_payee: 'James', amount: 1000 }),
+          rule.exec({ imported_payee: 'James', amount: 100000 }),
         ).toMatchObject({
-          subtransactions: [{ amount: 300 }, { amount: 700 }],
+          subtransactions: [{ amount: 30000 }, { amount: 70000 }],
         });
       });
 
@@ -908,7 +908,7 @@ describe('Rule', () => {
               options: {
                 splitIndex: 1,
                 method: 'fixed-percent',
-                formula: '=25',
+                formula: '=.25',
               },
             },
             {
@@ -939,7 +939,7 @@ describe('Rule', () => {
               options: {
                 splitIndex: 1,
                 method: 'fixed-percent',
-                formula: '=50',
+                formula: '=.50',
               },
             },
             {
@@ -949,7 +949,7 @@ describe('Rule', () => {
               options: {
                 splitIndex: 2,
                 method: 'fixed-percent',
-                formula: '=50',
+                formula: '=.50',
               },
             },
           ],
@@ -993,9 +993,9 @@ describe('Rule', () => {
 
         // Both splits get 100 each
         expect(
-          rule.exec({ imported_payee: 'James', amount: 200 }),
+          rule.exec({ imported_payee: 'James', amount: 20000 }),
         ).toMatchObject({
-          subtransactions: [{ amount: 100 }, { amount: 100 }],
+          subtransactions: [{ amount: 10000 }, { amount: 10000 }],
         });
       });
     });
