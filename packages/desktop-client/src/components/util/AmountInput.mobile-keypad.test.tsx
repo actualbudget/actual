@@ -1,6 +1,8 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { AmountInput } from './AmountInput';
+
 import { useIsMobileCalculatorKeypadEnabled } from '@desktop-client/hooks/useIsMobileCalculatorKeypadEnabled';
 import { mergeSyncedPrefs } from '@desktop-client/prefs/prefsSlice';
 import {
@@ -9,7 +11,6 @@ import {
   resetMockStore,
 } from '@desktop-client/redux/mock';
 
-import { AmountInput } from './AmountInput';
 
 vi.mock('react-hotkeys-hook', () => ({
   useHotkeysContext: () => ({
@@ -129,7 +130,9 @@ describe('AmountInput mobile calculator keypad', () => {
 
     // Give any deferred focus handlers a chance to run.
     await waitFor(() => {
-      expect(screen.queryByTestId('money-keypad-modal')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('money-keypad-modal'),
+      ).not.toBeInTheDocument();
     });
   });
 
