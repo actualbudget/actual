@@ -4,6 +4,20 @@ import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
 
+async function enableMobileCalculatorKeypad(page: Page) {
+  await page.waitForFunction(() =>
+    Boolean(window.__actionsForMenu?.saveSyncedPrefs),
+  );
+
+  await page.evaluate(async () => {
+    await window.__actionsForMenu.saveSyncedPrefs({
+      prefs: {
+        'flags.mobileCalculatorKeypad': 'true',
+      },
+    });
+  });
+}
+
 test.describe('Mobile Transactions', () => {
   let page: Page;
   let navigation: MobileNavigation;
@@ -20,6 +34,8 @@ test.describe('Mobile Transactions', () => {
     });
     await page.goto('/');
     await configurationPage.createTestFile();
+
+    await enableMobileCalculatorKeypad(page);
   });
 
   test.afterEach(async () => {

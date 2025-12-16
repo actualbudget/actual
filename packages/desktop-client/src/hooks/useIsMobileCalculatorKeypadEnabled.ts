@@ -42,10 +42,6 @@ function useMatchMedia(query: string) {
 export function useIsMobileCalculatorKeypadEnabled() {
   const isFeatureEnabled = useFeatureFlag('mobileCalculatorKeypad');
 
-  if (!isFeatureEnabled) {
-    return false;
-  }
-
   // Use media queries for deterministic behavior (including in Playwright).
   const isNarrowViewport = useMatchMedia(
     `(max-width: ${breakpoints.small - 1}px)`,
@@ -57,5 +53,7 @@ export function useIsMobileCalculatorKeypadEnabled() {
   const isCoarsePointer = useMatchMedia('(pointer: coarse)');
   const isNoHover = useMatchMedia('(hover: none)');
 
-  return isNarrowViewport || (isCoarsePointer && isNoHover);
+  return (
+    isFeatureEnabled && (isNarrowViewport || (isCoarsePointer && isNoHover))
+  );
 }

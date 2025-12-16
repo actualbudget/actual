@@ -8,6 +8,20 @@ import { ConfigurationPage } from './page-models/configuration-page';
 import { type MobileBudgetPage } from './page-models/mobile-budget-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
 
+async function enableMobileCalculatorKeypad(page: Page) {
+  await page.waitForFunction(() =>
+    Boolean(window.__actionsForMenu?.saveSyncedPrefs),
+  );
+
+  await page.evaluate(async () => {
+    await window.__actionsForMenu.saveSyncedPrefs({
+      prefs: {
+        'flags.mobileCalculatorKeypad': 'true',
+      },
+    });
+  });
+}
+
 const copyLastMonthBudget = async (
   budgetPage: MobileBudgetPage,
   categoryName: string,
@@ -110,6 +124,8 @@ budgetTypes.forEach(budgetType => {
       });
       await page.goto('/');
       await configurationPage.createTestFile();
+
+      await enableMobileCalculatorKeypad(page);
 
       const settingsPage = await navigation.goToSettingsPage();
       await settingsPage.useBudgetType(budgetType);
