@@ -257,12 +257,16 @@ export function KeyboardShortcutModal() {
           {
             id: 'add-new-transaction',
             shortcut: 'T',
-            description: t('Add new transaction when no transactions are selected'),
+            description: t(
+              'Add new transaction when no transactions are selected',
+            ),
           },
           {
             id: 'filter-menu',
             shortcut: 'F',
-            description: t('Show filter dropdown when no transactions are selected'),
+            description: t(
+              'Show filter dropdown when no transactions are selected',
+            ),
           },
         ],
       },
