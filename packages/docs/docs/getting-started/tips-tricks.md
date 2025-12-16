@@ -67,9 +67,9 @@ through the list of available commands. You can also quickly move to any of the 
 - <Key k="tab" /> when editing will move right. This will save the value and close an open dropdown.
 - <Key mod="shift" k="tab" /> when editing will move left. This will save the value and close an open dropdown.
 
-### When Managing Transactions
+#### When Managing Transactions
 
-::important
+:::important
 Transaction(s) must be selected for the following shortcuts, as noted.
 See [Bulk Actions](/docs/transactions/bulk-editing.md) for guidance on working with multiple transactions.
 :::
