@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 
 import { breakpoints } from '@actual-app/components/tokens';
 
+import { useFeatureFlag } from './useFeatureFlag';
+
 function useMatchMedia(query: string) {
   const [matches, setMatches] = useState(() => {
     if (typeof window === 'undefined' || !window.matchMedia) {
@@ -38,6 +40,12 @@ function useMatchMedia(query: string) {
 }
 
 export function useIsMobileCalculatorKeypadEnabled() {
+  const isFeatureEnabled = useFeatureFlag('mobileCalculatorKeypad');
+
+  if (!isFeatureEnabled) {
+    return false;
+  }
+
   // Use media queries for deterministic behavior (including in Playwright).
   const isNarrowViewport = useMatchMedia(
     `(max-width: ${breakpoints.small - 1}px)`,
