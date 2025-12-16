@@ -390,19 +390,15 @@ export function Overview() {
   const onCreateDashboard = async (name: string) => {
     const newId = await send('dashboard-create', {
       name,
-      copyFromId: activeDashboardId,
     });
     return newId;
   };
 
-  const onRenameDashboard = async (name: string, id?: string) => {
-    const targetId = id || activeDashboardId;
-    if (targetId) {
-      await send('dashboard-rename', { id: targetId, name });
-      // After completed rename, clear renaming and switch to the renamed dashboard
-      setRenamingId(null);
-      switchDashboard(targetId);
-    }
+  const onRenameDashboard = async (name: string, targetId: string) => {
+    await send('dashboard-rename', { id: targetId, name });
+    // After completed rename, clear renaming and switch to the renamed dashboard
+    setRenamingId(null);
+    switchDashboard(targetId);
   };
 
   const openConfirmDeleteDashboard = (id: string) => {
@@ -417,9 +413,7 @@ export function Overview() {
             onConfirm: async () => {
               await send('dashboard-delete', id);
               // Switch to first dashboard to the left (or right if none to the left)
-              const currentIndex = dashboards.findIndex(
-                d => d.id === activeDashboardId,
-              );
+              const currentIndex = dashboards.findIndex(d => d.id === id);
               const newDashboard =
                 dashboards[currentIndex > 0 ? currentIndex - 1 : 1];
               switchDashboard(newDashboard.id);
@@ -438,9 +432,7 @@ export function Overview() {
 
   const finishRename = (dashboard: DashboardEntity, e: SyntheticEvent) => {
     e.preventDefault();
-    if (renameValue.trim() !== '') {
-      onRenameDashboard(renameValue.trim(), dashboard.id);
-    }
+    onRenameDashboard(renameValue.trim(), dashboard.id);
   };
 
   const openRenameDashboard = async (id: string, name?: string) => {
@@ -692,7 +684,7 @@ export function Overview() {
                 flexDirection: 'row',
                 gap: 5,
                 marginTop: 10,
-                alignItems: 'center',
+                alignItems: 'stretch',
                 marginLeft: 20,
               }}
             >
@@ -710,7 +702,7 @@ export function Overview() {
                     </Form>
                   ) : (
                     <View
-                      style={{ flexDirection: 'row', alignItems: 'center' }}
+                      style={{ flexDirection: 'row', alignItems: 'stretch' }}
                     >
                       <Button
                         variant={
@@ -718,6 +710,7 @@ export function Overview() {
                             ? 'primary'
                             : 'normal'
                         }
+                        style={{ minWidth: 40 }}
                         onPress={() => switchDashboard(dashboard.id)}
                         onDoubleClick={() =>
                           openRenameDashboard(dashboard.id, dashboard.name)

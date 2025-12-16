@@ -101,43 +101,9 @@ async function getDashboards() {
   return db.all('SELECT * FROM dashboards WHERE tombstone = 0');
 }
 
-async function createDashboard({
-  name,
-  copyFromId,
-}: {
-  name: string;
-  copyFromId?: string;
-}) {
+async function createDashboard({ name }: { name: string }) {
   const id = uuidv4();
   await db.insertWithSchema('dashboards', { id, name });
-
-  if (copyFromId) {
-    const widgets = await db.selectWithSchema(
-      'dashboard',
-      'SELECT * FROM dashboard WHERE dashboard_id = ? AND tombstone = 0',
-      [copyFromId],
-    );
-
-    await Promise.all(
-      widgets.map(widget =>
-        db.insertWithSchema('dashboard', {
-          ...widget,
-          id: uuidv4(),
-          dashboard_id: id,
-        }),
-      ),
-    );
-  } else {
-    // Default state if no copyFromId is provided
-    await Promise.all(
-      DEFAULT_DASHBOARD_STATE.map(widget =>
-        db.insertWithSchema('dashboard', {
-          ...widget,
-          dashboard_id: id,
-        }),
-      ),
-    );
-  }
 
   return id;
 }

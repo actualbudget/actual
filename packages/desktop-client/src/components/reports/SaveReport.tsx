@@ -1,9 +1,11 @@
-import React, { createRef, useRef, useState } from 'react';
-import { Trans } from 'react-i18next';
+import React, { createRef, useRef, useState, useEffect } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { Popover } from '@actual-app/components/popover';
+import { Select } from '@actual-app/components/select';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -15,6 +17,7 @@ import { SaveReportDelete } from './SaveReportDelete';
 import { SaveReportMenu } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
 
+import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { useDashboards } from '@desktop-client/hooks/useDashboard';
 import { useReports } from '@desktop-client/hooks/useReports';
 
@@ -65,6 +68,14 @@ export function SaveReport({
   const [err, setErr] = useState('');
   const [newName, setNewName] = useState(report.name ?? '');
   const inputRef = createRef<HTMLInputElement>();
+  const { t } = useTranslation();
+  const [saveDashboardId, setSaveDashboardId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!saveDashboardId && dashboards && dashboards.length) {
+      setSaveDashboardId(dashboards[0].id);
+    }
+  }, [saveDashboardId, dashboards]);
 
   async function onApply(cond: string) {
     const chooseSavedReport = listReports.find(r => cond === r.id);
@@ -92,16 +103,18 @@ export function SaveReport({
         return;
       }
 
-      // Add to dashboard
-      if (dashboards.length > 0) {
-        await send('dashboard-add-widget', {
-          type: 'custom-report',
-          width: 4,
-          height: 2,
-          meta: { id: response.data },
-          dashboardId: dashboards[0].id,
-        });
+      if (!saveDashboardId) {
+        setErr('Cannot find dashboard to save report to!');
+        return;
       }
+
+      await send('dashboard-add-widget', {
+        type: 'custom-report',
+        width: 4,
+        height: 2,
+        meta: { id: response.data },
+        dashboardId: saveDashboardId,
+      });
 
       setNameMenuOpen(false);
       onReportChange({
@@ -230,14 +243,44 @@ export function SaveReport({
         onOpenChange={() => setNameMenuOpen(false)}
         style={{ width: 325 }}
       >
-        <SaveReportName
-          menuItem={menuItem}
-          name={newName}
-          setName={setNewName}
-          inputRef={inputRef}
-          onAddUpdate={onAddUpdate}
-          err={err}
-        />
+        <View>
+          <SaveReportName
+            menuItem={menuItem}
+            name={newName}
+            setName={setNewName}
+            inputRef={inputRef}
+            onAddUpdate={onAddUpdate}
+            err={err}
+          />
+
+          <View>
+            <SpaceBetween
+              style={{
+                padding: 15,
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+              }}
+            >
+              <FormField style={{ flex: 1 }}>
+                <FormLabel
+                  title={t('Dashboard')}
+                  htmlFor="dashboard-select"
+                  style={{ userSelect: 'none' }}
+                />
+                <Select
+                  id="dashboard-select"
+                  value={saveDashboardId}
+                  onChange={v => setSaveDashboardId(v)}
+                  defaultLabel={t('None')}
+                  options={
+                    dashboards ? dashboards.map(d => [d.id, d.name]) : []
+                  }
+                  style={{ marginTop: 10, width: 300 }}
+                />
+              </FormField>
+            </SpaceBetween>
+          </View>
+        </View>
       </Popover>
 
       <Popover
