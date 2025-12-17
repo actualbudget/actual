@@ -48,10 +48,10 @@ __metadata:
   dependencies:
     "@emotion/css": "npm:^11.13.5"
     "@svgr/cli": "npm:^8.1.0"
-    "@types/react": "npm:^19.2.5"
-    react: "npm:19.2.0"
+    "@types/react": "npm:^19.2.7"
+    react: "npm:19.2.3"
     react-aria-components: "npm:^1.13.0"
-    react-dom: "npm:19.2.0"
+    react-dom: "npm:19.2.3"
     usehooks-ts: "npm:^3.1.1"
     vitest: "npm:^4.0.9"
   peerDependencies:
@@ -154,14 +154,14 @@ __metadata:
     "@testing-library/user-event": "npm:14.6.1"
     "@types/lodash": "npm:^4"
     "@types/promise-retry": "npm:^1.1.6"
-    "@types/react": "npm:^19.2.5"
+    "@types/react": "npm:^19.2.7"
     "@types/react-dom": "npm:^19.2.3"
     "@types/react-grid-layout": "npm:^1"
     "@types/react-modal": "npm:^3.16.3"
     "@uiw/react-codemirror": "npm:^4.25.3"
     "@use-gesture/react": "npm:^10.3.1"
     "@vitejs/plugin-basic-ssl": "npm:^2.1.0"
-    "@vitejs/plugin-react": "npm:^5.1.1"
+    "@vitejs/plugin-react": "npm:^5.1.2"
     auto-text-size: "npm:^0.2.3"
     babel-plugin-react-compiler: "npm:^1.0.0"
     cmdk: "npm:^1.1.1"
@@ -182,16 +182,16 @@ __metadata:
     promise-retry: "npm:^2.0.1"
     prop-types: "npm:^15.8.1"
     re-resizable: "npm:^6.11.2"
-    react: "npm:19.2.0"
+    react: "npm:19.2.3"
     react-aria: "npm:^3.44.0"
     react-aria-components: "npm:^1.13.0"
     react-dnd: "npm:^16.0.1"
     react-dnd-html5-backend: "npm:^16.0.1"
-    react-dom: "npm:19.2.0"
+    react-dom: "npm:19.2.3"
     react-error-boundary: "npm:^6.0.0"
     react-grid-layout: "npm:^2.1.0"
     react-hotkeys-hook: "npm:^5.2.1"
-    react-i18next: "npm:^16.3.3"
+    react-i18next: "npm:^16.5.0"
     react-markdown: "npm:^10.1.0"
     react-modal: "npm:3.16.3"
     react-redux: "npm:^9.2.0"
@@ -7299,10 +7299,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rolldown/pluginutils@npm:1.0.0-beta.47":
-  version: 1.0.0-beta.47
-  resolution: "@rolldown/pluginutils@npm:1.0.0-beta.47"
-  checksum: 10/c1794cb39642e644dc7194043543780fd9f83e58052f1e5608d9d063a74592577bcb3b1283e3928db99ff52b208f7d5c47342f376de823f9fd584f189a371ed4
+"@rolldown/pluginutils@npm:1.0.0-beta.53":
+  version: 1.0.0-beta.53
+  resolution: "@rolldown/pluginutils@npm:1.0.0-beta.53"
+  checksum: 10/09dab7cbff3143838310a003ea5e453b219b27d00f34a88efe4c0c4d2540f16d95b770db2be111a424d51947dc3a3598798124e3f3622a99337f7a7c3f6913b2
   languageName: node
   linkType: hard
 
@@ -9055,12 +9055,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^19.2.5":
+"@types/react@npm:*":
   version: 19.2.5
   resolution: "@types/react@npm:19.2.5"
   dependencies:
     csstype: "npm:^3.0.2"
   checksum: 10/31067648e1380f6ddade8f586c7ff54db89c1b11e23cb307fb69e5bfceae22105721568e2eec15be2af03e63bf5fb6da4284b8621447d20ade7b7afab043b945
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^19.2.7":
+  version: 19.2.7
+  resolution: "@types/react@npm:19.2.7"
+  dependencies:
+    csstype: "npm:^3.2.2"
+  checksum: 10/dc0b756eee2c9782d282ae47eaa8d537b2a569eb889a6808c4b172d70fb690b2b1d8fe6239db451aa1c90d2a947cc21c9b537ce177ba9e6121468e403e4079c5
   languageName: node
   linkType: hard
 
@@ -9697,19 +9706,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitejs/plugin-react@npm:^5.1.1":
-  version: 5.1.1
-  resolution: "@vitejs/plugin-react@npm:5.1.1"
+"@vitejs/plugin-react@npm:^5.1.2":
+  version: 5.1.2
+  resolution: "@vitejs/plugin-react@npm:5.1.2"
   dependencies:
     "@babel/core": "npm:^7.28.5"
     "@babel/plugin-transform-react-jsx-self": "npm:^7.27.1"
     "@babel/plugin-transform-react-jsx-source": "npm:^7.27.1"
-    "@rolldown/pluginutils": "npm:1.0.0-beta.47"
+    "@rolldown/pluginutils": "npm:1.0.0-beta.53"
     "@types/babel__core": "npm:^7.20.5"
     react-refresh: "npm:^0.18.0"
   peerDependencies:
     vite: ^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
-  checksum: 10/e975ccb9f8e258b91d9a3ff58a3864053b0b7f63d641b070508bb38f6ffb93015fd2421d36cee7b90fd123da962ceb3d2951df359fc906c920037923854a621d
+  checksum: 10/2b15994a7f787456bf66d00cc231617148bd10a439a115767ab14d47d435f182758bce38f7c07d5275e79930dc7f689e3ebab44ac57a833fe13b6a233aa37738
   languageName: node
   linkType: hard
 
@@ -12993,6 +13002,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"csstype@npm:^3.2.2":
+  version: 3.2.3
+  resolution: "csstype@npm:3.2.3"
+  checksum: 10/ad41baf7e2ffac65ab544d79107bf7cd1a4bb9bab9ac3302f59ab4ba655d5e30942a8ae46e10ba160c6f4ecea464cc95b975ca2fefbdeeacd6ac63f12f99fe1f
+  languageName: node
+  linkType: hard
+
 "csv-parse@npm:^6.1.0":
   version: 6.1.0
   resolution: "csv-parse@npm:6.1.0"
@@ -13911,11 +13927,11 @@ __metadata:
     "@easyops-cn/docusaurus-search-local": "npm:^0.52.1"
     "@mdx-js/react": "npm:^3.1.1"
     "@r74tech/docusaurus-plugin-panzoom": "npm:^2.4.0"
-    "@types/react": "npm:^19.2.5"
+    "@types/react": "npm:^19.2.7"
     clsx: "npm:^2.1.1"
     prism-react-renderer: "npm:^2.4.1"
-    react: "npm:^19.2.0"
-    react-dom: "npm:^19.2.0"
+    react: "npm:^19.2.3"
+    react-dom: "npm:^19.2.3"
   languageName: unknown
   linkType: soft
 
@@ -23441,14 +23457,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:19.2.0, react-dom@npm:^19.2.0":
-  version: 19.2.0
-  resolution: "react-dom@npm:19.2.0"
+"react-dom@npm:19.2.3, react-dom@npm:^19.2.3":
+  version: 19.2.3
+  resolution: "react-dom@npm:19.2.3"
   dependencies:
     scheduler: "npm:^0.27.0"
   peerDependencies:
-    react: ^19.2.0
-  checksum: 10/3dbba071b9b1e7a19eae55f05c100f6b44f88c0aee72397d719ae338248ca66ed5028e6964c1c14870cc3e1abcecc91b22baba6dc2072f819dea81a9fd72f2fd
+    react: ^19.2.3
+  checksum: 10/5780f6d4c8e8ece09f82c5500ba2d55e01c30b5273f9281734d7d3b65013cd1fa52ec4e4436e5248c0a9e5bc340836044051168bbad8d7eac4d33ee6c2a867a1
   languageName: node
   linkType: hard
 
@@ -23526,9 +23542,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-i18next@npm:^16.3.3":
-  version: 16.3.3
-  resolution: "react-i18next@npm:16.3.3"
+"react-i18next@npm:^16.5.0":
+  version: 16.5.0
+  resolution: "react-i18next@npm:16.5.0"
   dependencies:
     "@babel/runtime": "npm:^7.27.6"
     html-parse-stringify: "npm:^3.0.1"
@@ -23544,7 +23560,7 @@ __metadata:
       optional: true
     typescript:
       optional: true
-  checksum: 10/84e40b97cee012bc525f5c1959dbd80a681d4904530c0c8e887dbbca1cfa84e061d5a52cf93c055e85bdeb2b2ac627a9c6c5e9bca5e05eda31367fb9f135caf4
+  checksum: 10/1c0cebe33dece1ebe9683acf7437b013dd9c42837c2bfd862f1304f1704d5aba40051ed0c2b5989bcf096da828eacd9ca751a234b340dac1c2bbbeb285a40bda
   languageName: node
   linkType: hard
 
@@ -23887,10 +23903,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:19.2.0, react@npm:^19.2.0":
-  version: 19.2.0
-  resolution: "react@npm:19.2.0"
-  checksum: 10/e13bcdb8e994c3cfa922743cb75ca8deb60531bf02f584d2d8dab940a8132ce8a2e6ef16f8ed7f372b4072e7a7eeff589b2812dabbedfa73e6e46201dac8a9d0
+"react@npm:19.2.3, react@npm:^19.2.3":
+  version: 19.2.3
+  resolution: "react@npm:19.2.3"
+  checksum: 10/d16b7f35c0d35a56f63d9d1693819762e4abc479c57dd6310298920bed3820fcec7e17a99d44983416d8f5049143ea45b8005d3ab8324bae8973224400502b08
   languageName: node
   linkType: hard
 

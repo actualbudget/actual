@@ -1,10 +1,13 @@
+import type { CSSProperties as ReactCSSProperties } from 'react';
+
 import { keyframes } from '@emotion/css';
+import { type CSSObject } from '@emotion/serialize';
 
 import { theme } from './theme';
 import { tokens } from './tokens';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type CSSProperties = Record<string, any>;
+// combine emotion and React possible properties
+export type CSSProperties = CSSObject & ReactCSSProperties;
 
 const MOBILE_MIN_HEIGHT = 40;
 

@@ -12,6 +12,10 @@ type BlockProps = HTMLProps<HTMLDivElement> & {
 export function Block(props: BlockProps) {
   const { className = '', style, innerRef, ...restProps } = props;
   return (
-    <div {...restProps} ref={innerRef} className={cx(className, css(style))} />
+    <div
+      {...restProps}
+      ref={innerRef}
+      className={cx(className, style ? css(style) : undefined)}
+    />
   );
 }

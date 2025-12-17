@@ -95,7 +95,7 @@ const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
       className={() =>
         String(
           css({
-            ...style,
+            ...(style || {}),
             '&[data-pressed]': activeStyle,
             ...(match ? activeStyle : {}),
           }),
