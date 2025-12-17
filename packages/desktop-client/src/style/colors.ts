@@ -62,7 +62,7 @@ export const p6 = '#9446ED';
 export const p7 = '#A368FC';
 export const p8 = '#B990FF';
 export const p9 = '#DAC4FF';
-export const p10 = '#F2EBFF';
+export const p10 = '#F2EBFE';
 export const p11 = '#F9F6FE';
 
 export const border = n10;
