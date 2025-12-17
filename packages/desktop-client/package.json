@@ -56,7 +56,7 @@
     "i18next": "^25.6.2",
     "i18next-parser": "^9.3.0",
     "i18next-resources-to-backend": "^1.2.1",
-    "inter-ui": "^3.19.3",
+    "inter-ui": "^4.1.1",
     "jsdom": "^27.2.0",
     "lodash": "^4.17.21",
     "loot-core": "workspace:*",

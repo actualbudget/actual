@@ -172,7 +172,7 @@ __metadata:
     i18next: "npm:^25.6.2"
     i18next-parser: "npm:^9.3.0"
     i18next-resources-to-backend: "npm:^1.2.1"
-    inter-ui: "npm:^3.19.3"
+    inter-ui: "npm:^4.1.1"
     jsdom: "npm:^27.2.0"
     lodash: "npm:^4.17.21"
     loot-core: "workspace:*"
@@ -17027,10 +17027,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"inter-ui@npm:^3.19.3":
-  version: 3.19.3
-  resolution: "inter-ui@npm:3.19.3"
-  checksum: 10/48bf4ef8c121f5b6aabdd691c00abb83c18f14692dbe633b50981f07f931ee13932d0e2d2d119f20452ac305414381f2e2ad3ba8b72aac923eeec6ad06d02d1b
+"inter-ui@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "inter-ui@npm:4.1.1"
+  checksum: 10/4c5438a85ea037c6c9e89a80ea7f5d7f31293c91110934a4faffd28da53577cc92480845a7959eb3501f243b58774f5f32b2a7aee597b49b5fc5455880186061
   languageName: node
   linkType: hard
 
