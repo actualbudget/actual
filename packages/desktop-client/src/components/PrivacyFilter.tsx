@@ -1,8 +1,10 @@
 // @ts-strict-ignore
-import React, {
+import {
   Children,
   type ComponentPropsWithRef,
   type ReactNode,
+  useLayoutEffect,
+  useRef,
 } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -67,6 +69,45 @@ export function PrivacyFilter({
   );
 }
 
+type RedactedContentProps = {
+  children: ReactNode;
+};
+
+// Component that filters text content to remove non-alphanumeric characters
+// This works by intercepting the actual rendered text via a ref and modifying it
+function RedactedContent({ children }: RedactedContentProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (containerRef.current) {
+      // Walk all text nodes and replace non-alphanumeric characters
+      const walker = document.createTreeWalker(
+        containerRef.current,
+        NodeFilter.SHOW_TEXT,
+        null,
+      );
+
+      const textNodes: Text[] = [];
+      let node: Text | null;
+      while ((node = walker.nextNode() as Text | null)) {
+        textNodes.push(node);
+      }
+
+      for (const textNode of textNodes) {
+        const original = textNode.textContent || '';
+        // Keep only alphanumeric characters to create a continuous squiggle
+        // Remove spaces and special characters completely
+        const redacted = original.replace(/[^a-zA-Z0-9]/g, '*');
+        if (redacted !== original) {
+          textNode.textContent = redacted;
+        }
+      }
+    }
+  }, [children]);
+
+  return <div ref={containerRef}>{children}</div>;
+}
+
 function PrivacyOverlay({ children, ...props }) {
   const { style, ...restProps } = props;
 
@@ -122,7 +163,7 @@ function PrivacyOverlay({ children, ...props }) {
           width: '100%',
         })}
       >
-        {children}
+        <RedactedContent>{children}</RedactedContent>
       </div>
     </View>
   );
