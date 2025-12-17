@@ -20,5 +20,3 @@ export function normalizeQueryTimeFrameEnd(dateOrMonth: string) {
     ? monthUtils.lastDayOfMonth(dateOrMonth)
     : monthUtils.dayFromDate(dateOrMonth);
 }
-
-

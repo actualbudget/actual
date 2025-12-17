@@ -13,7 +13,7 @@ export const autocompleteTabAccept = keymap.of([
     },
   },
 ]);
- 
+
 /**
  * Give this keymap highest priority so it wins over `basicSetup` bindings like
  * `indentWithTab`.

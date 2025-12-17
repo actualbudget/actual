@@ -226,7 +226,9 @@ function toMonth(dateOrMonth: string) {
     : monthUtils.monthFromDate(dateOrMonth);
 }
 
-async function buildFilteredTransactionsQuery(config: QueryConfig): Promise<Query> {
+async function buildFilteredTransactionsQuery(
+  config: QueryConfig,
+): Promise<Query> {
   const conditions = config.conditions || [];
   const conditionsOp = config.conditionsOp || 'and';
   const timeFrame = config.timeFrame;
@@ -256,7 +258,10 @@ async function buildFilteredTransactionsQuery(config: QueryConfig): Promise<Quer
         // (in months) and always anchor the end to the current month/day.
         const startMonth = toMonth(timeFrame.start);
         const endMonth = toMonth(timeFrame.end);
-        const offset = monthUtils.differenceInCalendarMonths(endMonth, startMonth);
+        const offset = monthUtils.differenceInCalendarMonths(
+          endMonth,
+          startMonth,
+        );
 
         const liveEndMonth = monthUtils.currentMonth();
         const liveStartMonth = monthUtils.subMonths(liveEndMonth, offset);

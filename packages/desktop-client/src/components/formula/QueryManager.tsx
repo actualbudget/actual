@@ -21,6 +21,11 @@ import {
   type TimeFrame,
 } from 'loot-core/types/models';
 
+import {
+  normalizeQueryTimeFrameEnd,
+  normalizeQueryTimeFrameStart,
+} from './queryTimeFrame';
+
 import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
 import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
 import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
@@ -35,10 +40,6 @@ import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionF
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
-import {
-  normalizeQueryTimeFrameEnd,
-  normalizeQueryTimeFrameStart,
-} from '@desktop-client/components/formula/queryTimeFrame';
 
 type QueryConfig = {
   conditions?: RuleConditionEntity[];
