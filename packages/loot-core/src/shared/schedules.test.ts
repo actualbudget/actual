@@ -433,8 +433,9 @@ describe('schedules', () => {
       ['2-day', 2, '2017-01-01'],
       ['5-week', 35, '2017-01-01'],
       ['3-month', 91, '2017-01-01'],
-      ['4-year', 1462, '2017-01-01'],
-    ])(
+      ['4-year', 1462, '2017-01-01'],      ['1-year', 366, '2017-06-15'], // Test year from mid-year (Jun 1, 2017 to Jun 1, 2018 + 1)
+      ['1-year', 367, '2019-06-15'], // Test year from mid-year with leap year 2020
+      ['2-year', 731, '2017-06-15'], // Test 2 years from mid-year (Jun 1, 2017 to Jun 1, 2019 + 1)    ])(
       'value of %s on returns %i days on %s',
       (value: string, expected: number, date: string) => {
         expect(getUpcomingDays(value, date)).toEqual(expected);
