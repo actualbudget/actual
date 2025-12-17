@@ -240,13 +240,15 @@ export function SelectedTransactionsButton({
     onDelete,
     selectedIds,
   ]);
-  useHotkeys('shift+t', () => onEdit('date', selectedIds), {
-    ...hotKeyOptions,
-    splitKey: '+',
-  }, [
-    onEdit,
-    selectedIds,
-  ]);
+  useHotkeys(
+    'shift+t',
+    () => onEdit('date', selectedIds),
+    {
+      ...hotKeyOptions,
+      splitKey: '+',
+    },
+    [onEdit, selectedIds],
+  );
   useHotkeys('a', () => onEdit('account', selectedIds), hotKeyOptions, [
     onEdit,
     selectedIds,
