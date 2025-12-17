@@ -189,7 +189,7 @@ __metadata:
     react-dnd-html5-backend: "npm:^16.0.1"
     react-dom: "npm:19.2.0"
     react-error-boundary: "npm:^6.0.0"
-    react-grid-layout: "npm:^1.5.2"
+    react-grid-layout: "npm:^2.1.0"
     react-hotkeys-hook: "npm:^5.2.1"
     react-i18next: "npm:^16.3.3"
     react-markdown: "npm:^10.1.0"
@@ -23483,9 +23483,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-grid-layout@npm:^1.5.2":
-  version: 1.5.2
-  resolution: "react-grid-layout@npm:1.5.2"
+"react-grid-layout@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "react-grid-layout@npm:2.1.0"
   dependencies:
     clsx: "npm:^2.1.1"
     fast-equals: "npm:^4.0.3"
@@ -23496,7 +23496,7 @@ __metadata:
   peerDependencies:
     react: ">= 16.3.0"
     react-dom: ">= 16.3.0"
-  checksum: 10/0b2ed84b8b7eeebfd30671a879c84b7873830354389bcec98f38efccf51c2e78115bf76b19a77d5b07e139478ba7cc26593e122a0e5e71487ad8ad2b6af55629
+  checksum: 10/a7cb8665c297344811aa4332975d687cc9b98629508ba0e9995ae07c0af4b737d84cb7b2a970e424c68c61f458ed56bb21721801fccbe45c83e2866aa27a0804
   languageName: node
   linkType: hard
 
