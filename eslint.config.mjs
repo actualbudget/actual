@@ -1,82 +1,17 @@
 import tsParser from '@typescript-eslint/parser';
-import { defineConfig } from 'eslint/config';
-import pluginImport from 'eslint-plugin-import';
 import pluginJSXA11y from 'eslint-plugin-jsx-a11y';
 import oxlint from 'eslint-plugin-oxlint';
+import pluginPerfectionist from 'eslint-plugin-perfectionist';
 import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
+import { defineConfig } from 'eslint/config';
 import globals from 'globals';
 import pluginTypescript from 'typescript-eslint';
 
-// eslint-disable-next-line import/extensions
 import pluginActual from './packages/eslint-plugin-actual/lib/index.js';
-
-const confusingBrowserGlobals = [
-  // https://github.com/facebook/create-react-app/tree/main/packages/confusing-browser-globals
-  'addEventListener',
-  'blur',
-  'close',
-  'closed',
-  'confirm',
-  'defaultStatus',
-  'defaultstatus',
-  'event',
-  'external',
-  'find',
-  'focus',
-  'frameElement',
-  'frames',
-  'history',
-  'innerHeight',
-  'innerWidth',
-  'length',
-  'location',
-  'locationbar',
-  'menubar',
-  'moveBy',
-  'moveTo',
-  'name',
-  'onblur',
-  'onerror',
-  'onfocus',
-  'onload',
-  'onresize',
-  'onunload',
-  'open',
-  'opener',
-  'opera',
-  'outerHeight',
-  'outerWidth',
-  'pageXOffset',
-  'pageYOffset',
-  'parent',
-  'print',
-  'removeEventListener',
-  'resizeBy',
-  'resizeTo',
-  'screen',
-  'screenLeft',
-  'screenTop',
-  'screenX',
-  'screenY',
-  'scroll',
-  'scrollbars',
-  'scrollBy',
-  'scrollTo',
-  'scrollX',
-  'scrollY',
-  'status',
-  'statusbar',
-  'stop',
-  'toolbar',
-  'top',
-];
 
 export default defineConfig(
   {
     ignores: [
-      //temporary
-      'packages/docs',
-
       'packages/api/app/bundle.api.js',
       'packages/api/app/stats.json',
       'packages/api/@types',
@@ -149,10 +84,10 @@ export default defineConfig(
     },
   },
   pluginTypescript.configs.recommended,
-  pluginImport.flatConfigs.recommended,
   {
     plugins: {
       actual: pluginActual,
+      perfectionist: pluginPerfectionist,
     },
     rules: {
       'actual/no-untranslated-strings': 'error',
@@ -237,8 +172,6 @@ export default defineConfig(
       'no-obj-calls': 'warn',
       'no-octal': 'warn',
       'no-octal-escape': 'warn',
-      'no-redeclare': 'warn',
-      'no-regex-spaces': 'warn',
       'no-script-url': 'warn',
       'no-self-assign': 'warn',
       'no-self-compare': 'warn',
@@ -313,41 +246,34 @@ export default defineConfig(
 
       'getter-return': 'warn',
 
-      'import/no-unresolved': 'off',
-      'import/extensions': [
-        'warn',
-        'never',
-        {
-          json: 'always',
-        },
-      ],
-      'import/order': [
+      'perfectionist/sort-imports': [
         'warn',
         {
-          alphabetize: {
-            caseInsensitive: true,
-            order: 'asc',
-          },
-
-          groups: ['builtin', 'external', 'parent', 'sibling', 'index'],
-          'newlines-between': 'always',
-
-          pathGroups: [
+          groups: [
+            'react',
+            'builtin',
+            'external',
+            'loot-core',
+            'parent',
+            'sibling',
+            'index',
+            'desktop-client',
+          ],
+          customGroups: [
             {
-              // Enforce that React (and react-related packages) is the first import
-              group: 'builtin',
-              pattern: 'react?(-*)',
-              position: 'before',
+              groupName: 'react',
+              elementNamePattern: '^react(-.*)?$',
             },
             {
-              // Separate imports from Actual from "real" external imports
-              group: 'external',
-              pattern: 'loot-{core,design}/**/*',
-              position: 'after',
+              groupName: 'loot-core',
+              elementNamePattern: '^loot-core',
+            },
+            {
+              groupName: 'desktop-client',
+              elementNamePattern: '^@desktop-client',
             },
           ],
-
-          pathGroupsExcludedImportTypes: ['react'],
+          newlinesBetween: 'always',
         },
       ],
 
@@ -396,8 +322,6 @@ export default defineConfig(
         },
       ],
 
-      'no-restricted-globals': ['warn', ...confusingBrowserGlobals],
-
       // https://github.com/eslint/eslint/issues/16954
       // https://github.com/eslint/eslint/issues/16953
       'no-loop-func': 'off',
@@ -417,58 +341,6 @@ export default defineConfig(
           // forbid <a> in favor of <Link>
           selector: 'JSXOpeningElement[name.name="a"]',
           message: 'Using <a> is discouraged, please use <Link> instead.',
-        },
-      ],
-
-      'no-restricted-imports': [
-        'warn',
-        {
-          paths: [
-            {
-              name: 'react-router',
-              importNames: ['useNavigate'],
-              message:
-                "Please import Actual's useNavigate() hook from `src/hooks` instead.",
-            },
-            {
-              name: 'react-redux',
-              importNames: ['useDispatch'],
-              message:
-                "Please import Actual's useDispatch() hook from `src/redux` instead.",
-            },
-            {
-              name: 'react-redux',
-              importNames: ['useSelector'],
-              message:
-                "Please import Actual's useSelector() hook from `src/redux` instead.",
-            },
-            {
-              name: 'react-redux',
-              importNames: ['useStore'],
-              message:
-                "Please import Actual's useStore() hook from `src/redux` instead.",
-            },
-          ],
-          patterns: [
-            {
-              group: ['*.api', '*.web', '*.electron'],
-              message: "Don't directly reference imports from other platforms",
-            },
-            {
-              group: ['uuid'],
-              importNames: ['*'],
-              message: "Use `import { v4 as uuidv4 } from 'uuid'` instead",
-            },
-            {
-              group: ['**/style', '**/colors'],
-              importNames: ['colors'],
-              message: 'Please use themes instead of colors',
-            },
-            {
-              group: ['@actual-app/web/*'],
-              message: 'Please do not import `@actual-app/web` in `loot-core`',
-            },
-          ],
         },
       ],
 
@@ -520,7 +392,6 @@ export default defineConfig(
       '@typescript-eslint/consistent-type-assertions': 'warn',
       'no-array-constructor': 'off',
       '@typescript-eslint/no-array-constructor': 'warn',
-      'no-redeclare': 'off',
       'no-use-before-define': 'off',
 
       '@typescript-eslint/no-use-before-define': [
@@ -609,6 +480,14 @@ export default defineConfig(
       'actual/typography': 'off',
       'actual/no-untranslated-strings': 'off',
       'actual/prefer-logger-over-console': 'off',
+    },
+  },
+  {
+    files: ['packages/docs/**/*'],
+    rules: {
+      'actual/typography': 'off',
+      'actual/no-untranslated-strings': 'off',
+      'no-restricted-syntax': 'off',
     },
   },
   {

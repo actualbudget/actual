@@ -97,6 +97,14 @@ class Query {
   serialize() {
     return this.state;
   }
+
+  reset() {
+    return q(this.state.table);
+  }
+
+  serializeAsString() {
+    return JSON.stringify(this.serialize());
+  }
 }
 
 export function q(table) {

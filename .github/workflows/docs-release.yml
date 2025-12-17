@@ -6,9 +6,9 @@ on:
     branches:
       - master
     paths:
-      - "packages/docs/**"
-      - ".github/workflows/docs-spelling.yml"
-      - ".github/actions/docs-spelling/**"
+      - 'packages/docs/**'
+      - '.github/workflows/docs-spelling.yml'
+      - '.github/actions/docs-spelling/**'
   workflow_dispatch:
 
 jobs:
@@ -20,6 +20,8 @@ jobs:
 
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
 
       - name: Docusaurus Deploy
         run: |

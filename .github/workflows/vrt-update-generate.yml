@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.issue.number }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   generate-vrt-updates:
@@ -45,24 +45,17 @@ jobs:
 
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
 
       - name: Run VRT Tests on Desktop app
         continue-on-error: true
         run: |
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" -- yarn e2e:desktop --update-snapshots
 
-      - name: Wait for Netlify build to finish
-        id: netlify
-        env:
-          COMMIT_SHA: ${{ steps.pr.outputs.head_sha }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./.github/actions/netlify-wait-for-build
-
-      - name: Run VRT Tests on Netlify URL
+      - name: Run VRT Tests
         continue-on-error: true
         run: yarn vrt --update-snapshots
-        env:
-          E2E_START_URL: ${{ steps.netlify.outputs.url }}
 
       - name: Create patch with PNG changes only
         id: create-patch
