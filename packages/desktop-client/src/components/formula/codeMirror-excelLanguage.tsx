@@ -1,5 +1,6 @@
 /* eslint-disable actual/typography */
 import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { Trans } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -24,7 +25,6 @@ import {
 } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 import { t } from 'i18next';
-import { createRoot } from 'react-dom/client';
 
 import { queryModeFunctions, type FunctionDef } from './queryModeFunctions';
 import { transactionModeFunctions } from './transactionModeFunctions';

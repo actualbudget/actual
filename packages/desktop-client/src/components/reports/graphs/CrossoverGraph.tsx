@@ -127,11 +127,7 @@ export function CrossoverGraph({
                 })}
               >
                 <div>
-                  {payload[0].payload.isProjection ? (
-                    <Trans>Target Nest Egg:</Trans>
-                  ) : (
-                    <Trans>Nest Egg:</Trans>
-                  )}
+                  <Trans>Life savings:</Trans>
                 </div>
                 <div>{format(payload[0].payload.nestEgg, 'financial')}</div>
               </View>
