@@ -1,5 +1,5 @@
 @use '@fontsource/redacted-script';
 @use 'inter-ui/variable' with (
-  $inter-font-path: '../../../node_modules/inter-ui/Inter (web)'
+  $inter-font-path: 'inter-ui/variable'
 );
 @include variable.default;
