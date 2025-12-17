@@ -141,6 +141,7 @@ __metadata:
     "@codemirror/state": "npm:^6.5.2"
     "@codemirror/view": "npm:^6.38.7"
     "@emotion/css": "npm:^11.13.5"
+    "@fontsource-variable/inter": "npm:^5.2.8"
     "@fontsource/redacted-script": "npm:^5.2.8"
     "@juggle/resize-observer": "npm:^3.4.0"
     "@lezer/highlight": "npm:^1.2.3"
@@ -172,7 +173,6 @@ __metadata:
     i18next: "npm:^25.6.2"
     i18next-parser: "npm:^9.3.0"
     i18next-resources-to-backend: "npm:^1.2.1"
-    inter-ui: "npm:^4.1.1"
     jsdom: "npm:^27.2.0"
     lodash: "npm:^4.17.21"
     loot-core: "workspace:*"
@@ -3915,6 +3915,13 @@ __metadata:
     "@eslint/core": "npm:^0.17.0"
     levn: "npm:^0.4.1"
   checksum: 10/c5947d0ffeddca77d996ac1b886a66060c1a15ed1d5e425d0c7e7d7044a4bd3813fc968892d03950a7831c9b89368a2f7b281e45dd3c74a048962b74bf3a1cb4
+  languageName: node
+  linkType: hard
+
+"@fontsource-variable/inter@npm:^5.2.8":
+  version: 5.2.8
+  resolution: "@fontsource-variable/inter@npm:5.2.8"
+  checksum: 10/7f45ab415f0d3c43f31129dd9972dcbfb60ebe51801891b9a88a7ba395d4be664c507b0027138f42307b9ffe91bdd564fcae98bce5b244046274f4aceae07382
   languageName: node
   linkType: hard
 
@@ -17024,13 +17031,6 @@ __metadata:
   version: 0.2.4
   resolution: "inline-style-parser@npm:0.2.4"
   checksum: 10/80814479d1f3c9cbd102f9de4cd6558cf43cc2e48640e81c4371c3634f1e8b6dfeb2f21063cfa31d46cc83e834c20cd59ed9eeed9bfd45ef5bc02187ad941faf
-  languageName: node
-  linkType: hard
-
-"inter-ui@npm:^4.1.1":
-  version: 4.1.1
-  resolution: "inter-ui@npm:4.1.1"
-  checksum: 10/4c5438a85ea037c6c9e89a80ea7f5d7f31293c91110934a4faffd28da53577cc92480845a7959eb3501f243b58774f5f32b2a7aee597b49b5fc5455880186061
   languageName: node
   linkType: hard
 

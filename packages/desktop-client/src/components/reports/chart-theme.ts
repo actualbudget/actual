@@ -11,7 +11,7 @@ const colorFades = {
 
 // Typography
 const sansSerif =
-  'InterVariable, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, Helvetica, Arial, sans-serif';
+  'Inter Variable, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, Helvetica, Arial, sans-serif';
 const letterSpacing = 'normal';
 const fontSize = 13;
 
