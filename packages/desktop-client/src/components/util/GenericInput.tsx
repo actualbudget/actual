@@ -79,7 +79,7 @@ type GenericInputProps = {
         }
       | {
           field: 'date';
-          value: RecurConfig | null;
+          value: RecurConfig;
           onChange: (value: RecurConfig) => void;
         }
     ))
