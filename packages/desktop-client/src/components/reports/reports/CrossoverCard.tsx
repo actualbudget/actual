@@ -22,6 +22,7 @@ import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { useWidgetMoveMenu } from '@desktop-client/components/reports/useWidgetMoveMenu';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
@@ -55,6 +56,7 @@ type CrossoverCardProps = {
   meta?: CrossoverWidget['meta'];
   onMetaChange: (newMeta: CrossoverWidget['meta']) => void;
   onRemove: () => void;
+  onMove: (targetDashboardId: string, copy: boolean) => void;
 };
 
 export function CrossoverCard({
@@ -64,11 +66,19 @@ export function CrossoverCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onMove,
 }: CrossoverCardProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+
+  const {
+    menuItems: moveMenuItems,
+    handleMenuSelect: handleMoveMenuSelect,
+    MoveMenuPopover,
+    disableClick: moveMenuDisableClick,
+  } = useWidgetMoveMenu(onMove);
 
   // Calculate date range from meta or use default range
   const [start, setStart] = useState<string>('');
@@ -157,13 +167,15 @@ export function CrossoverCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      disableClick={nameMenuOpen}
+      disableClick={nameMenuOpen || moveMenuDisableClick}
       to={`/reports/crossover/${widgetId}`}
       menuItems={[
         { name: 'rename', text: t('Rename') },
         { name: 'remove', text: t('Remove') },
+        ...moveMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleMoveMenuSelect(item as string)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -176,6 +188,7 @@ export function CrossoverCard({
         }
       }}
     >
+      <MoveMenuPopover />
       <View
         style={{ flex: 1 }}
         onPointerEnter={onCardHover}

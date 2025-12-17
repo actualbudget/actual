@@ -23,6 +23,7 @@ import { ReportCardName } from '@desktop-client/components/reports/ReportCardNam
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { useWidgetMoveMenu } from '@desktop-client/components/reports/useWidgetMoveMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
@@ -34,6 +35,7 @@ type NetWorthCardProps = {
   meta?: NetWorthWidget['meta'];
   onMetaChange: (newMeta: NetWorthWidget['meta']) => void;
   onRemove: () => void;
+  onMove: (targetDashboardId: string, copy: boolean) => void;
 };
 
 export function NetWorthCard({
@@ -43,6 +45,7 @@ export function NetWorthCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onMove,
 }: NetWorthCardProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -54,6 +57,13 @@ export function NetWorthCard({
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [isCardHovered, setIsCardHovered] = useState(false);
+
+  const {
+    menuItems: moveMenuItems,
+    handleMenuSelect: handleMoveMenuSelect,
+    MoveMenuPopover,
+    disableClick: moveMenuDisableClick,
+  } = useWidgetMoveMenu(onMove);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -103,7 +113,7 @@ export function NetWorthCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      disableClick={nameMenuOpen}
+      disableClick={nameMenuOpen || moveMenuDisableClick}
       to={`/reports/net-worth/${widgetId}`}
       menuItems={[
         {
@@ -114,8 +124,10 @@ export function NetWorthCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...moveMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleMoveMenuSelect(item as string)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -128,6 +140,7 @@ export function NetWorthCard({
         }
       }}
     >
+      <MoveMenuPopover />
       <View
         style={{ flex: 1 }}
         onPointerEnter={onCardHover}

@@ -42,6 +42,7 @@ import {
   calendarSpreadsheet,
 } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { useWidgetMoveMenu } from '@desktop-client/components/reports/useWidgetMoveMenu';
 import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -53,6 +54,7 @@ type CalendarCardProps = {
   meta?: CalendarWidget['meta'];
   onMetaChange: (newMeta: CalendarWidget['meta']) => void;
   onRemove: () => void;
+  onMove: (targetDashboardId: string, copy: boolean) => void;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
 };
 
@@ -62,6 +64,7 @@ export function CalendarCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onMove,
   firstDayOfWeekIdx,
 }: CalendarCardProps) {
   const { t } = useTranslation();
@@ -168,9 +171,17 @@ export function CalendarCard({
     return data?.calendarData.length;
   }, [data]);
 
+  const {
+    menuItems: moveMenuItems,
+    handleMenuSelect: handleMoveMenuSelect,
+    MoveMenuPopover,
+    disableClick: moveMenuDisableClick,
+  } = useWidgetMoveMenu(onMove);
+
   return (
     <ReportCard
       isEditing={isEditing}
+      disableClick={nameMenuOpen || moveMenuDisableClick}
       to={`/reports/calendar/${widgetId}`}
       menuItems={[
         {
@@ -181,8 +192,10 @@ export function CalendarCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...moveMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleMoveMenuSelect(item as string)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -195,6 +208,7 @@ export function CalendarCard({
         }
       }}
     >
+      <MoveMenuPopover />
       <View
         ref={el => (el ? cardRef(el) : undefined)}
         style={{ flex: 1, margin: 2, overflow: 'hidden', width: '100%' }}

@@ -18,6 +18,7 @@ import { calculateTimeRange } from '@desktop-client/components/reports/reportRan
 import { summarySpreadsheet } from '@desktop-client/components/reports/spreadsheets/summary-spreadsheet';
 import { SummaryNumber } from '@desktop-client/components/reports/SummaryNumber';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { useWidgetMoveMenu } from '@desktop-client/components/reports/useWidgetMoveMenu';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type SummaryCardProps = {
@@ -26,6 +27,7 @@ type SummaryCardProps = {
   meta?: SummaryWidget['meta'];
   onMetaChange: (newMeta: SummaryWidget['meta']) => void;
   onRemove: () => void;
+  onMove: (targetDashboardId: string, copy: boolean) => void;
 };
 
 export function SummaryCard({
@@ -34,11 +36,19 @@ export function SummaryCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onMove,
 }: SummaryCardProps) {
   const locale = useLocale();
   const { t } = useTranslation();
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+
+  const {
+    menuItems: moveMenuItems,
+    handleMenuSelect: handleMoveMenuSelect,
+    MoveMenuPopover,
+    disableClick: moveMenuDisableClick,
+  } = useWidgetMoveMenu(onMove);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -93,7 +103,7 @@ export function SummaryCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      disableClick={nameMenuOpen}
+      disableClick={nameMenuOpen || moveMenuDisableClick}
       to={`/reports/summary/${widgetId}`}
       menuItems={[
         {
@@ -104,8 +114,10 @@ export function SummaryCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...moveMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleMoveMenuSelect(item as string)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -114,11 +126,11 @@ export function SummaryCard({
             onRemove();
             break;
           default:
-            console.warn(`Unrecognized menu selection: ${item}`);
-            break;
+            throw new Error(`Unrecognized menu selection: ${item}`);
         }
       }}
     >
+      <MoveMenuPopover />
       <View style={{ flex: 1, overflow: 'hidden' }}>
         <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
           <ReportCardName

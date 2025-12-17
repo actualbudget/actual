@@ -18,6 +18,7 @@ import { MissingReportCard } from './MissingReportCard';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
+import { useWidgetMoveMenu } from '@desktop-client/components/reports/useWidgetMoveMenu';
 import { calculateHasWarning } from '@desktop-client/components/reports/util';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -30,12 +31,14 @@ type CustomReportListCardsProps = {
   isEditing?: boolean;
   report?: CustomReportEntity;
   onRemove: () => void;
+  onMove: (targetDashboardId: string, copy: boolean) => void;
 };
 
 export function CustomReportListCards({
   isEditing,
   report,
   onRemove,
+  onMove,
 }: CustomReportListCardsProps) {
   // It's possible for a dashboard to reference a non-existing
   // custom report
@@ -52,6 +55,7 @@ export function CustomReportListCards({
       isEditing={isEditing}
       report={report}
       onRemove={onRemove}
+      onMove={onMove}
     />
   );
 }
@@ -60,6 +64,7 @@ function CustomReportListCardsInner({
   isEditing,
   report,
   onRemove,
+  onMove,
 }: Omit<CustomReportListCardsProps, 'report'> & {
   report: CustomReportEntity;
 }) {
@@ -70,6 +75,13 @@ function CustomReportListCardsInner({
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [earliestTransaction, setEarliestTransaction] = useState('');
   const [latestTransaction, setLatestTransaction] = useState('');
+
+  const {
+    menuItems: moveMenuItems,
+    handleMenuSelect: handleMoveMenuSelect,
+    MoveMenuPopover,
+    disableClick: moveMenuDisableClick,
+  } = useWidgetMoveMenu(onMove);
 
   const payees = usePayees();
   const accounts = useAccounts();
@@ -127,7 +139,7 @@ function CustomReportListCardsInner({
   return (
     <ReportCard
       isEditing={isEditing}
-      disableClick={nameMenuOpen}
+      disableClick={nameMenuOpen || moveMenuDisableClick}
       to={`/reports/custom/${report.id}`}
       menuItems={[
         {
@@ -138,8 +150,10 @@ function CustomReportListCardsInner({
           name: 'remove',
           text: t('Remove'),
         },
+        ...moveMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleMoveMenuSelect(item as string)) return;
         switch (item) {
           case 'remove':
             onRemove();
@@ -150,6 +164,7 @@ function CustomReportListCardsInner({
         }
       }}
     >
+      <MoveMenuPopover />
       <View style={{ flex: 1, padding: 10 }}>
         <View
           style={{

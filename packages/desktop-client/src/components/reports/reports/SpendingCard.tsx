@@ -18,6 +18,7 @@ import { ReportCardName } from '@desktop-client/components/reports/ReportCardNam
 import { calculateSpendingReportTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpendingSpreadsheet } from '@desktop-client/components/reports/spreadsheets/spending-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { useWidgetMoveMenu } from '@desktop-client/components/reports/useWidgetMoveMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type SpendingCardProps = {
@@ -26,6 +27,7 @@ type SpendingCardProps = {
   meta?: SpendingWidget['meta'];
   onMetaChange: (newMeta: SpendingWidget['meta']) => void;
   onRemove: () => void;
+  onMove: (targetDashboardId: string, copy: boolean) => void;
 };
 
 export function SpendingCard({
@@ -34,12 +36,21 @@ export function SpendingCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onMove,
 }: SpendingCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+
+  const {
+    menuItems: moveMenuItems,
+    handleMenuSelect: handleMoveMenuSelect,
+    MoveMenuPopover,
+    disableClick: moveMenuDisableClick,
+  } = useWidgetMoveMenu(onMove);
+
   const spendingReportMode = meta?.mode ?? 'single-month';
 
   const [compare, compareTo] = calculateSpendingReportTimeRange(meta ?? {});
@@ -72,7 +83,7 @@ export function SpendingCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      disableClick={nameMenuOpen}
+      disableClick={nameMenuOpen || moveMenuDisableClick}
       to={`/reports/spending/${widgetId}`}
       menuItems={[
         {
@@ -83,8 +94,10 @@ export function SpendingCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...moveMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleMoveMenuSelect(item as string)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -97,6 +110,7 @@ export function SpendingCard({
         }
       }}
     >
+      <MoveMenuPopover />
       <View
         style={{ flex: 1 }}
         onPointerEnter={() => setIsCardHovered(true)}

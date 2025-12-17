@@ -259,6 +259,18 @@ export function Overview() {
     send('dashboard-remove-widget', widgetId);
   };
 
+  const onMoveWidget = (
+    widgetId: string,
+    targetDashboardId: string,
+    copy: boolean,
+  ) => {
+    send('dashboard-move-widget', {
+      widgetId,
+      targetDashboardId,
+      copy,
+    });
+  };
+
   const onExport = () => {
     const widgetMap = new Map(widgets.map(item => [item.id, item]));
 
@@ -767,6 +779,9 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onMove={(targetDashboardId, copy) =>
+                        onMoveWidget(item.i, targetDashboardId, copy)
+                      }
                     />
                   ) : item.type === 'crossover-card' &&
                     crossoverReportEnabled ? (
@@ -777,6 +792,9 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onMove={(targetDashboardId, copy) =>
+                        onMoveWidget(item.i, targetDashboardId, copy)
+                      }
                     />
                   ) : item.type === 'cash-flow-card' ? (
                     <CashFlowCard
@@ -785,6 +803,9 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onMove={(targetDashboardId, copy) =>
+                        onMoveWidget(item.i, targetDashboardId, copy)
+                      }
                     />
                   ) : item.type === 'spending-card' ? (
                     <SpendingCard
@@ -793,6 +814,9 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onMove={(targetDashboardId, copy) =>
+                        onMoveWidget(item.i, targetDashboardId, copy)
+                      }
                     />
                   ) : item.type === 'markdown-card' ? (
                     <MarkdownCard
@@ -800,12 +824,18 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onMove={(targetDashboardId, copy) =>
+                        onMoveWidget(item.i, targetDashboardId, copy)
+                      }
                     />
                   ) : item.type === 'custom-report' ? (
                     <CustomReportListCards
                       isEditing={isEditing}
                       report={customReportMap.get(item.meta.id)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onMove={(targetDashboardId, copy) =>
+                        onMoveWidget(item.i, targetDashboardId, copy)
+                      }
                     />
                   ) : item.type === 'summary-card' ? (
                     <SummaryCard
@@ -814,6 +844,9 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onMove={(targetDashboardId, copy) =>
+                        onMoveWidget(item.i, targetDashboardId, copy)
+                      }
                     />
                   ) : item.type === 'calendar-card' ? (
                     <CalendarCard
@@ -823,6 +856,9 @@ export function Overview() {
                       firstDayOfWeekIdx={firstDayOfWeekIdx}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onMove={(targetDashboardId, copy) =>
+                        onMoveWidget(item.i, targetDashboardId, copy)
+                      }
                     />
                   ) : item.type === 'formula-card' && formulaMode ? (
                     <FormulaCard
@@ -831,6 +867,9 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onMove={(targetDashboardId, copy) =>
+                        onMoveWidget(item.i, targetDashboardId, copy)
+                      }
                     />
                   ) : null}
                 </div>

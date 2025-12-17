@@ -213,6 +213,61 @@ async function removeDashboardWidget(widgetId: string) {
   await db.delete_('dashboard', widgetId);
 }
 
+async function moveDashboardWidget({
+  widgetId,
+  targetDashboardId,
+  copy,
+}: {
+  widgetId: string;
+  targetDashboardId: string;
+  copy: boolean;
+}) {
+  // Get the widget to move/copy
+  const widget = await db.first<db.DbDashboard>(
+    'SELECT * FROM dashboard WHERE id = ? AND tombstone = 0',
+    [widgetId],
+  );
+
+  if (!widget) {
+    throw new Error(`Widget not found: ${widgetId}`);
+  }
+
+  // Calculate position for the new widget in target dashboard
+  const targetData = await db.first<
+    Pick<db.DbDashboard, 'x' | 'y' | 'width' | 'height'>
+  >(
+    'SELECT x, y, width, height FROM dashboard WHERE dashboard_id = ? AND tombstone = 0 ORDER BY y DESC, x DESC',
+    [targetDashboardId],
+  );
+
+  let newX = 0;
+  let newY = 0;
+
+  if (targetData) {
+    const xBoundaryCheck = targetData.x + targetData.width + widget.width;
+    newX = xBoundaryCheck > 12 ? 0 : targetData.x + targetData.width;
+    newY = targetData.y + (xBoundaryCheck > 12 ? targetData.height : 0);
+  }
+
+  await batchMessages(async () => {
+    // Insert the widget to target dashboard
+    await db.insertWithSchema('dashboard', {
+      type: widget.type,
+      width: widget.width,
+      height: widget.height,
+      x: newX,
+      y: newY,
+      meta: widget.meta,
+      dashboard_id: targetDashboardId,
+    });
+
+    // If move (not copy), delete the original widget
+    if (!copy) {
+      await db.delete_('dashboard', widgetId);
+    }
+  });
+}
+
 async function importDashboard({
   filepath,
   dashboardId,
@@ -315,6 +370,7 @@ export type DashboardHandlers = {
   'dashboard-reset': typeof resetDashboard;
   'dashboard-add-widget': typeof addDashboardWidget;
   'dashboard-remove-widget': typeof removeDashboardWidget;
+  'dashboard-move-widget': typeof moveDashboardWidget;
   'dashboard-import': typeof importDashboard;
 };
 
@@ -329,4 +385,5 @@ app.method('dashboard-update-widget', mutator(undoable(updateDashboardWidget)));
 app.method('dashboard-reset', mutator(undoable(resetDashboard)));
 app.method('dashboard-add-widget', mutator(undoable(addDashboardWidget)));
 app.method('dashboard-remove-widget', mutator(undoable(removeDashboardWidget)));
+app.method('dashboard-move-widget', mutator(undoable(moveDashboardWidget)));
 app.method('dashboard-import', mutator(undoable(importDashboard)));

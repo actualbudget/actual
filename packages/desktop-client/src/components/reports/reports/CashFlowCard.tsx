@@ -31,6 +31,7 @@ import { ReportCardName } from '@desktop-client/components/reports/ReportCardNam
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { simpleCashFlow } from '@desktop-client/components/reports/spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { useWidgetMoveMenu } from '@desktop-client/components/reports/useWidgetMoveMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type CustomLabelProps = {
@@ -104,6 +105,7 @@ type CashFlowCardProps = {
   meta?: CashFlowWidget['meta'];
   onMetaChange: (newMeta: CashFlowWidget['meta']) => void;
   onRemove: () => void;
+  onMove: (targetDashboardId: string, copy: boolean) => void;
 };
 
 export function CashFlowCard({
@@ -112,11 +114,19 @@ export function CashFlowCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onMove,
 }: CashFlowCardProps) {
   const { t } = useTranslation();
   const animationProps = useRechartsAnimation();
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+
+  const {
+    menuItems: moveMenuItems,
+    handleMenuSelect: handleMoveMenuSelect,
+    MoveMenuPopover,
+    disableClick: moveMenuDisableClick,
+  } = useWidgetMoveMenu(onMove);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -151,7 +161,7 @@ export function CashFlowCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      disableClick={nameMenuOpen}
+      disableClick={nameMenuOpen || moveMenuDisableClick}
       to={`/reports/cash-flow/${widgetId}`}
       menuItems={[
         {
@@ -162,8 +172,10 @@ export function CashFlowCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...moveMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleMoveMenuSelect(item as string)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -176,6 +188,7 @@ export function CashFlowCard({
         }
       }}
     >
+      <MoveMenuPopover />
       <View
         style={{ flex: 1 }}
         onPointerEnter={onCardHover}
