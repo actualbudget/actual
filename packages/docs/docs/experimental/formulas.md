@@ -21,7 +21,7 @@ Go to `Settings -> Show advanced settings -> Experimental features` and enable:
 
 - **Excel formula mode (Formula cards & Rule formulas)**
 
-![Placeholder: enable Excel formula mode toggle](/img/experimental/formulas/enable-formula-mode.svg)
+![Placeholder: enable Excel formula mode toggle](/img/experimental/formulas/enable-formula-mode.png)
 
 ## Formula cards
 
@@ -34,7 +34,7 @@ Go to `Settings -> Show advanced settings -> Experimental features` and enable:
 
 Click the card to open the editor (where you can save the widget).
 
-![Placeholder: add Formula card from Reports dashboard](/img/experimental/formulas/add-formula-card.svg)
+![Placeholder: add Formula card from Reports dashboard](/img/experimental/formulas/add-formula-card.png)
 
 ### Write a formula
 
@@ -193,7 +193,7 @@ In the Formula editor page, use **Query Definitions**:
    - **Static**: fixed start/end dates
 3. Add **Filters** (same style as report filters)
 
-![Placeholder: formula editor and Query Definitions panel](/img/experimental/formulas/formula-editor-and-queries.svg)
+![Placeholder: formula editor and Query Definitions panel](/img/experimental/formulas/formula-editor-and-queries.png)
 
 ### Optional: conditional color
 
@@ -215,7 +215,7 @@ In **More -> Rules -> edit a rule**, on a **Set** action:
 - Formula mode is not available for actions that set **payee**, **category**, or **account** (those values are IDs).
 - Rule action templating (the `</>` icon) and formulas are mutually exclusive: enabling one disables the other.
 
-![Placeholder: Rule action formula toggle (ƒ)](/img/experimental/formulas/rule-formula-toggle.svg)
+![Placeholder: Rule action formula toggle (ƒ)](/img/experimental/formulas/rule-formula-toggle.png)
 
 ### Available variables
 
