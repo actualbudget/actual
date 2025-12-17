@@ -18,4 +18,4 @@ export const autocompleteTabAccept = keymap.of([
  * Give this keymap highest priority so it wins over `basicSetup` bindings like
  * `indentWithTab`.
  */
-export const autocompleteTabAcceptHighest = Prec.highest(autocompleteTabAccept);``
+export const autocompleteTabAcceptHighest = Prec.highest(autocompleteTabAccept);
