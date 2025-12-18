@@ -5,7 +5,7 @@
   "dockerComposeFile": ["docker-compose.yml"],
   // Alternatively:
   // "image": "mcr.microsoft.com/devcontainers/typescript-node:0-16",
-  "service": "actual-development",
+  "service": "browser",
   "workspaceFolder": "/workspaces",
   "postCreateCommand": "yarn install"
 }
