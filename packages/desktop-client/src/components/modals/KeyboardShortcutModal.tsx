@@ -301,8 +301,7 @@ export function KeyboardShortcutModal() {
           },
           {
             id: 'set-date-for-selected-transactions',
-            shortcut: 'T',
-            shift: true,
+            shortcut: 'E',
             description: t('Set date for selected transactions'),
           },
           {
