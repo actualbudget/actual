@@ -2,16 +2,14 @@
 // This file will initialize the app if we are in a real browser
 // environment (not electron)
 import './browser-preload';
-
 import './fonts.scss';
-
 import './i18n';
 
 import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 
 import { bindActionCreators } from '@reduxjs/toolkit';
-import { createRoot } from 'react-dom/client';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';

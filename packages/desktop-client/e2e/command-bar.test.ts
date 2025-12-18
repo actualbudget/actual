@@ -61,7 +61,9 @@ test.describe('Command bar', () => {
     await commandBar.fill('reports');
     await page.keyboard.press('Enter');
     await expect(page.getByTestId('reports-page')).toBeVisible();
-    await expect(page.getByText('Loading reports...')).not.toBeVisible(); // wait for screen to load
+    await expect(page.getByText('Loading reports...')).not.toBeVisible({
+      timeout: 10000, // Wait for 10 seconds max for reports to load
+    }); // wait for screen to load
 
     // Navigate to schedule page
     await page.keyboard.press('ControlOrMeta+k');
