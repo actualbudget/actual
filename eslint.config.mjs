@@ -111,9 +111,7 @@ export default defineConfig(
       ],
 
       curly: ['warn', 'multi-line', 'consistent'],
-      'dot-location': ['warn', 'property'],
       eqeqeq: ['warn', 'smart'],
-      'new-parens': 'warn',
       'no-array-constructor': 'warn',
       'no-caller': 'warn',
       'no-cond-assign': ['warn', 'except-parens'],
@@ -147,20 +145,6 @@ export default defineConfig(
       ],
 
       'no-lone-blocks': 'warn',
-
-      'no-mixed-operators': [
-        'warn',
-        {
-          groups: [
-            ['&', '|', '^', '~', '<<', '>>', '>>>'],
-            ['==', '!=', '===', '!==', '>', '>=', '<', '<='],
-            ['&&', '||'],
-            ['in', 'instanceof'],
-          ],
-
-          allowSamePrecedence: false,
-        },
-      ],
 
       'no-multi-str': 'warn',
       'no-global-assign': 'warn',
@@ -219,10 +203,8 @@ export default defineConfig(
       ],
 
       'no-with': 'warn',
-      'no-whitespace-before-property': 'warn',
 
       'require-yield': 'warn',
-      'rest-spread-spacing': ['warn', 'never'],
       strict: ['warn', 'never'],
       'unicode-bom': ['warn', 'never'],
       'use-isnan': 'warn',
