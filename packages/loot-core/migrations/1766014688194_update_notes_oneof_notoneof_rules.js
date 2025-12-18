@@ -16,26 +16,25 @@ export default async function runMigration(db) {
         .filter(c => c.field === 'notes')
         .filter(c => c.op === 'oneOf');
 
-      if(conditionsToUpdate.length === 0) continue;
+      if (conditionsToUpdate.length === 0) continue;
 
       const updatedConditions = conditionsToUpdate.map(c => {
         const values = Array.isArray(c.value) ? c.value : [];
-        const newValues = values
-          .map(v => v.toLowerCase())
-          .join('|');
+        const newValues = values.map(v => v.toLowerCase()).join('|');
 
-        return {...c, op: "matches", value: newValues}
+        return { ...c, op: 'matches', value: newValues };
       });
 
-      const otherConditions = conditions
-        .filter(c => !conditionsToUpdate.some(o => o.id === c.id));
+      const otherConditions = conditions.filter(
+        c => !conditionsToUpdate.some(o => o.id === c.id),
+      );
 
-      const newConditionsValue = [
-        ...otherConditions,
-        ...updatedConditions
-      ];
+      const newConditionsValue = [...otherConditions, ...updatedConditions];
 
-      db.runQuery('UPDATE rules SET conditions = ? WHERE id = ?', [JSON.stringify(newConditionsValue), rule.id])
+      db.runQuery('UPDATE rules SET conditions = ? WHERE id = ?', [
+        JSON.stringify(newConditionsValue),
+        rule.id,
+      ]);
     }
   });
 }
