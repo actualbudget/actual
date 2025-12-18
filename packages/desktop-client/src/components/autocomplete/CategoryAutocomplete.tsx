@@ -300,22 +300,22 @@ export function CategoryAutocomplete({
     },
     [],
   );
+  
 
   return (
     <Autocomplete
       strict={true}
-      highlightFirst={true}
+      highlightFirst={false}
       embedded={embedded}
       closeOnBlur={closeOnBlur}
       getHighlightedIndex={suggestions => {
         if (suggestions.length === 0) {
           return null;
-        } else if (suggestions[0].id === 'split') {
-          // Highlight the first category since the split option is at index 0.
-          return suggestions.length > 1 ? 1 : null;
         }
         return 0;
       }}
+      skipSplit={false}
+
       filterSuggestions={filterSuggestions}
       suggestions={categorySuggestions}
       renderItems={(items, getItemProps, highlightedIndex) => (
