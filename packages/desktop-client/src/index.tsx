@@ -96,7 +96,7 @@ root.render(
 );
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+  // oxlint-disable-next-line typescript/consistent-type-definitions
   interface Window {
     __actionsForMenu: typeof boundActions & {
       undo: typeof undo;

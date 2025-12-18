@@ -9,7 +9,7 @@ export interface ServerHandlers {
     applySpecialCases?: boolean;
   }) => Promise<{ filters: unknown[] }>;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   query: (query: QueryState) => Promise<{ data: any; dependencies: string[] }>;
 
   'get-server-version': () => Promise<
