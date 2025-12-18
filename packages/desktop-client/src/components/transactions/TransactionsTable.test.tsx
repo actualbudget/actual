@@ -70,7 +70,7 @@ const payees: PayeeEntity[] = [
 ];
 vi.mock('../../hooks/usePayees', async importOriginal => {
   const actual =
-    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+    // oxlint-disable-next-line typescript/consistent-type-imports
     await importOriginal<typeof import('../../hooks/usePayees')>();
   return {
     ...actual,

@@ -1,4 +1,3 @@
-import tsParser from '@typescript-eslint/parser';
 import pluginJSXA11y from 'eslint-plugin-jsx-a11y';
 import oxlint from 'eslint-plugin-oxlint';
 import pluginPerfectionist from 'eslint-plugin-perfectionist';
@@ -29,6 +28,7 @@ export default defineConfig(
       'packages/desktop-electron/client-build/',
       'packages/loot-core/**/lib-dist/*',
       'packages/loot-core/**/proto/*',
+      'packages/sync-server/coverage/',
       'packages/sync-server/user-files/',
       'packages/sync-server/server-files/',
       '.yarn/*',
@@ -46,15 +46,8 @@ export default defineConfig(
     ],
     languageOptions: {
       globals: {
+        ...globals.jest,
         vi: true,
-        describe: true,
-        expect: true,
-        it: true,
-        beforeAll: true,
-        beforeEach: true,
-        afterAll: true,
-        afterEach: true,
-        test: true,
       },
     },
   },
@@ -67,8 +60,23 @@ export default defineConfig(
         ...globals.browser,
         ...globals.commonjs,
         ...globals.node,
+        ...globals.jest,
         globalThis: false,
         vi: true,
+
+        RequestInfo: true,
+        RequestInit: true,
+        ParentNode: true,
+        FS: true,
+        IDBValidKey: true,
+        NodeJS: true,
+        Electron: true,
+
+        // Worker globals
+        FetchEvent: true,
+        ExtendableEvent: true,
+        ExtendableMessageEvent: true,
+        ServiceWorkerGlobalScope: true,
       },
     },
     settings: {
@@ -83,7 +91,7 @@ export default defineConfig(
       },
     },
   },
-  pluginTypescript.configs.recommended,
+  pluginTypescript.configs.base,
   {
     plugins: {
       actual: pluginActual,
@@ -102,13 +110,6 @@ export default defineConfig(
     rules: {
       // http://eslint.org/docs/rules/
       'array-callback-return': 'warn',
-
-      'default-case': [
-        'warn',
-        {
-          commentPattern: '^no default$',
-        },
-      ],
 
       curly: ['warn', 'multi-line', 'consistent'],
       'dot-location': ['warn', 'property'],
@@ -310,18 +311,6 @@ export default defineConfig(
       'actual/prefer-if-statement': 'warn',
       'actual/prefer-logger-over-console': 'error',
 
-      // Note: base rule explicitly disabled in favor of the TS one
-      'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        {
-          varsIgnorePattern: '^(_|React)',
-          argsIgnorePattern: '^(_|React)',
-          ignoreRestSiblings: true,
-          caughtErrors: 'none',
-        },
-      ],
-
       // https://github.com/eslint/eslint/issues/16954
       // https://github.com/eslint/eslint/issues/16953
       'no-loop-func': 'off',
@@ -344,79 +333,9 @@ export default defineConfig(
         },
       ],
 
-      '@typescript-eslint/ban-ts-comment': [
-        'error',
-        {
-          'ts-ignore': 'allow-with-description',
-        },
-      ],
-
       // Rules disabled during TS migration
-      '@typescript-eslint/no-var-requires': 'off',
       'prefer-const': 'warn',
       'prefer-spread': 'off',
-      '@typescript-eslint/no-empty-function': 'off',
-      '@typescript-eslint/no-require-imports': 'off',
-    },
-  },
-  {
-    files: ['**/*.{ts,tsx}'],
-
-    languageOptions: {
-      parser: tsParser,
-      ecmaVersion: 2018,
-      sourceType: 'module',
-
-      parserOptions: {
-        projectService: true,
-        ecmaFeatures: {
-          jsx: true,
-        },
-
-        // typescript-eslint specific options
-        warnOnUnsupportedTypeScriptVersion: true,
-      },
-    },
-
-    // If adding a typescript-eslint version of an existing ESLint rule,
-    // make sure to disable the ESLint rule here.
-    rules: {
-      // TypeScript's `noFallthroughCasesInSwitch` option is more robust (#6906)
-      'default-case': 'off',
-      // 'tsc' already handles this (https://github.com/typescript-eslint/typescript-eslint/issues/291)
-      'no-dupe-class-members': 'off',
-      // 'tsc' already handles this (https://github.com/typescript-eslint/typescript-eslint/issues/477)
-      'no-undef': 'off',
-
-      // Add TypeScript specific rules (and turn off ESLint equivalents)
-      '@typescript-eslint/consistent-type-assertions': 'warn',
-      'no-array-constructor': 'off',
-      '@typescript-eslint/no-array-constructor': 'warn',
-      'no-use-before-define': 'off',
-
-      '@typescript-eslint/no-use-before-define': [
-        'warn',
-        {
-          functions: false,
-          classes: false,
-          variables: false,
-          typedefs: false,
-        },
-      ],
-
-      'no-unused-expressions': 'off',
-
-      '@typescript-eslint/no-unused-expressions': [
-        'error',
-        {
-          allowShortCircuit: true,
-          allowTernary: true,
-          allowTaggedTemplates: true,
-        },
-      ],
-
-      'no-useless-constructor': 'off',
-      '@typescript-eslint/no-useless-constructor': 'warn',
     },
   },
   {
@@ -430,40 +349,6 @@ export default defineConfig(
         { preferPathOverBaseUrl: true },
       ],
       'typescript-paths/absolute-import': ['error', { enableAlias: false }],
-    },
-  },
-  {
-    files: [
-      'packages/desktop-client/**/*.{ts,tsx}',
-      'packages/loot-core/src/client/**/*.{ts,tsx}',
-    ],
-    rules: {
-      // enforce import type
-      '@typescript-eslint/consistent-type-imports': [
-        'warn',
-        {
-          prefer: 'type-imports',
-          fixStyle: 'inline-type-imports',
-        },
-      ],
-
-      '@typescript-eslint/no-restricted-types': [
-        'warn',
-        {
-          types: {
-            // forbid FC as superfluous
-            FunctionComponent: {
-              message:
-                'Type the props argument and let TS infer or use ComponentType for a component prop',
-            },
-
-            FC: {
-              message:
-                'Type the props argument and let TS infer or use ComponentType for a component prop',
-            },
-          },
-        },
-      ],
     },
   },
   {
@@ -488,17 +373,6 @@ export default defineConfig(
       'actual/typography': 'off',
       'actual/no-untranslated-strings': 'off',
       'no-restricted-syntax': 'off',
-    },
-  },
-  {
-    files: [
-      'packages/desktop-client/**/*.{ts,tsx}',
-      'packages/loot-core/src/client/**/*.{ts,tsx}',
-    ],
-    ignores: ['**/**/globals.d.ts'],
-    rules: {
-      // enforce type over interface
-      '@typescript-eslint/consistent-type-definitions': ['warn', 'type'],
     },
   },
   {

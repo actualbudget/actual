@@ -3,6 +3,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+import yargs from 'yargs';
+
 import { logger } from '../../platform/server/log';
 import * as sqlite from '../../platform/server/sqlite';
 
@@ -16,7 +18,7 @@ import {
   migrate,
 } from './migrations';
 
-const argv = require('yargs').options({
+const argv = yargs().options({
   m: {
     alias: 'migrationsDir',
     requiresArg: true,

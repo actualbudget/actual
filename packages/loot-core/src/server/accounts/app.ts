@@ -850,7 +850,7 @@ function handleSyncError(
   acct: db.DbAccount,
 ): SyncError {
   // TODO: refactor bank sync logic to use BankSyncError properly
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   if (err instanceof BankSyncError || (err as any)?.type === 'BankSyncError') {
     const error = err as BankSyncError;
 
