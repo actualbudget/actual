@@ -21,6 +21,11 @@ import {
   type TimeFrame,
 } from 'loot-core/types/models';
 
+import {
+  normalizeQueryTimeFrameEnd,
+  normalizeQueryTimeFrameStart,
+} from './queryTimeFrame';
+
 import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
 import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
 import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
@@ -168,7 +173,7 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
           <Text style={{ fontSize: 12, marginTop: 8 }}>
             <Trans>
               Queries allow you to reference filtered transaction data in your
-              formulas using QUERY(‘queryName’)
+              formulas using QUERY(‘queryName’) or QUERY_COUNT(‘queryName’)
             </Trans>
           </Text>
         </View>
@@ -367,23 +372,23 @@ function QueryItem({
   ]);
 
   function handleStartDateChange(newStart: string) {
-    setStartDate(monthUtils.dayFromDate(newStart));
+    setStartDate(normalizeQueryTimeFrameStart(newStart));
     sendUpdate(
       filters.conditions,
       filters.conditionsOp,
-      monthUtils.dayFromDate(newStart),
+      normalizeQueryTimeFrameStart(newStart),
       endDate,
       timeRangeRef.current as TimeFrame['mode'],
     );
   }
 
   function handleEndDateChange(newEnd: string) {
-    setEndDate(monthUtils.dayFromDate(newEnd));
+    setEndDate(normalizeQueryTimeFrameEnd(newEnd));
     sendUpdate(
       filters.conditions,
       filters.conditionsOp,
       startDate,
-      monthUtils.dayFromDate(newEnd),
+      normalizeQueryTimeFrameEnd(newEnd),
       timeRangeRef.current as TimeFrame['mode'],
     );
   }
@@ -433,17 +438,22 @@ function QueryItem({
         timeRangeRef.current = config.timeFrame.mode;
 
         setStartDate(
-          config.timeFrame.start ||
-            monthUtils.dayFromDate(monthUtils.currentMonth()),
+          config.timeFrame.start
+            ? normalizeQueryTimeFrameStart(config.timeFrame.start)
+            : monthUtils.dayFromDate(monthUtils.currentMonth()),
         );
-        setEndDate(config.timeFrame.end || monthUtils.currentDay());
+        setEndDate(
+          config.timeFrame.end
+            ? normalizeQueryTimeFrameEnd(config.timeFrame.end)
+            : monthUtils.currentDay(),
+        );
 
         // Update the query
         sendUpdate(
           config.conditions,
           config.conditionsOp,
-          config.timeFrame.start,
-          config.timeFrame.end,
+          normalizeQueryTimeFrameStart(config.timeFrame.start),
+          normalizeQueryTimeFrameEnd(config.timeFrame.end),
           config.timeFrame.mode,
         );
         setImportJsonText('');
@@ -677,7 +687,7 @@ function QueryItem({
                     );
                     start = monthUtils.firstDayOfMonth(prevMonth);
                     end = monthUtils.lastDayOfMonth(prevMonth);
-                    mode = quickSelectMode;
+                    mode = 'lastMonth';
                     break;
                   }
                   case '1-month': {
