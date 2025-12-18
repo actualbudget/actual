@@ -18,24 +18,26 @@ import {
   migrate,
 } from './migrations';
 
-const argv = yargs().options({
-  m: {
-    alias: 'migrationsDir',
-    requiresArg: true,
-    type: 'string',
-    describe: 'Migrations directory',
-  },
-  name: {
-    requiresArg: true,
-    type: 'string',
-    describe: 'Name of new migration',
-  },
-  db: {
-    requiresArg: true,
-    type: 'string',
-    describe: 'Path to database',
-  },
-}).argv;
+const argv = yargs()
+  .options({
+    m: {
+      alias: 'migrationsDir',
+      requiresArg: true,
+      type: 'string',
+      describe: 'Migrations directory',
+    },
+    name: {
+      requiresArg: true,
+      type: 'string',
+      describe: 'Name of new migration',
+    },
+    db: {
+      requiresArg: true,
+      type: 'string',
+      describe: 'Path to database',
+    },
+  })
+  .parseSync();
 
 function getDatabase() {
   return sqlite.openDatabase(argv.db);
@@ -64,7 +66,7 @@ async function list(db) {
 
 const cmd = argv._[0];
 
-withMigrationsDir(argv.migrationsDir || getMigrationsDir(), async () => {
+withMigrationsDir(argv.m || getMigrationsDir(), async () => {
   switch (cmd) {
     case 'reset':
       fs.unlinkSync(argv.db);
