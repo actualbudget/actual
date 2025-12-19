@@ -131,6 +131,7 @@ If a function isn’t listed here, it still might work. Actual uses HyperFormula
 | `PV` | Query | Calculates present value of investment. | `=PV(0.05/12, 12, -100)` | — |
 | `QUARTILE` | Query | Returns the quartile of a dataset. | `=QUARTILE(A1:A100, 1)` | — |
 | `QUERY` | Query | Execute a query and return the result. | `=QUERY("expenses")` | — |
+| `QUERY_COUNT` | Query | Execute a query and return the number of matching rows. | `=QUERY_COUNT("expenses")` | — |
 | `RANK` | Query | Returns the rank of a number in a list. | `=RANK(10, A1:A10, 0)` | — |
 | `RATE` | Query | Calculates interest rate per period. | `=RATE(60, -200, 10000)` | — |
 | `REPLACE` | Query, Rules | Replaces substring at specified position. | `=REPLACE(notes, 1, 5, "")` | — |
@@ -170,7 +171,7 @@ If a function isn’t listed here, it still might work. Actual uses HyperFormula
 | `XOR` | Query, Rules | Returns TRUE if odd number of arguments are TRUE. | `=XOR(TRUE(), FALSE())` | Accepts more than 2 conditions |
 | `YEAR` | Query, Rules | Returns the year from a date. | `=YEAR(date)` | — |
 
-### Use queries with `QUERY("name")`
+### Use queries with `QUERY("name")` and `QUERY_COUNT("name")`
 
 Formula cards can reference **named queries** that you define in the right-side panel (**Query Definitions**).
 
