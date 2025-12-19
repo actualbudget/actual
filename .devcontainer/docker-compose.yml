@@ -1,59 +1,27 @@
-###################################################
-# This creates and stands up the development
-# docker container. Depends on the Dockerfile and
-# docker-start.sh files.
-###################################################
-
 services:
-  yarn-install:
-    build:
-      context: ..
-      dockerfile: .devcontainer/Dockerfile
-    volumes:
-     - ..:/workspaces
-    command: >
-      bash -c "
-        cd workspaces
-        if [ ! -d \"node_modules\" ] || [ ! -d \"node_modules/.bin\" ]; then
-          echo 'Installing dependencies...' &&
-          yarn install --frozen-lockfile
-        else
-          echo 'Dependencies already installed, skipping install.'
-        fi
-        touch node_modules/.installed
-        tail -f /dev/null   # Keep the container running
-      "
-    healthcheck:
-      test: ["CMD", "test", "-f", "/workspaces/node_modules/.installed"]
-      interval: 3s
-      retries: 200
-      timeout: 3s
-      start_period: 1s
 
+  # Actual sync-server
   server:
     build:
       context: ..
-      dockerfile: .devcontainer/Dockerfile
+      dockerfile: .devcontainer/Dockerfile   # Dockerfile includes yarn dependencies
     environment:
       NODE_ENV: development
-      ACTUAL_DATA_DIR: /data
+      ACTUAL_DATA_DIR: /data   # Persist data for the sync-server
       ACTUAL_PORT: 5006
     ports:
       - '${ACTUAL_PORT:-5006}:${ACTUAL_PORT:-5006}'
     volumes:
+      - ..:/workspaces   # Mount host files within container
       - sync_data:/data
-      - ..:/workspaces
+      # Use the container version of the following directories
+      - node_modules:/workspaces/node_modules
+      - node_modules2:/workspaces/packages/desktop-client/node_modules
+      - node_modules3:/workspaces/packages/sync-server/node_modules
     networks:
       - actual-net
-    depends_on:
-      yarn-install:
-        condition: service_healthy
-    command: >
-      bash -c "
-        cd workspaces
-        yarn start:server
-      "
-        restart: unless-stopped
+    command: yarn start:server
+    restart: unless-stopped
     healthcheck:
       test: curl -f http://localhost:${ACTUAL_PORT:-5006}/health || exit 1
       interval: 3s
@@ -61,6 +29,7 @@ services:
       start_period: 1s
       timeout: 10s
 
+  # Actual browser client
   browser:
     build:
       context: ..
@@ -70,23 +39,19 @@ services:
     ports:
       - '3001:3001'
     volumes:
-      - ..:/workspaces
+      - ..:/workspaces   # Mount host files within container
+      # Use the container version of the following directories
+      - node_modules:/workspaces/node_modules
+      - node_modules2:/workspaces/packages/desktop-client/node_modules
+      - node_modules3:/workspaces/packages/sync-server/node_modules
     environment:
       NODE_ENV: development
       BROWSER: none
     depends_on:
-      yarn-install:
-        condition: service_healthy
       server:
         condition: service_healthy
-    command: >
-      bash -c "
-        cd workspaces
-        yarn start:browser
-      "
+    command: yarn start:browser
     restart: 'no'
-<<<<<<< HEAD
-=======
 
 networks:
   actual-net:
@@ -95,4 +60,9 @@ networks:
 volumes:
   sync_data:
     driver: local
->>>>>>> 1de34a4db (Improve devcontainer to include both server and browser components)
+  node_modules:
+    driver: local
+  node_modules2:
+    driver: local
+  node_modules3:
+    driver: local
