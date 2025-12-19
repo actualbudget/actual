@@ -55,22 +55,23 @@ function getTagCSSColors(theme: Theme, color?: string | null) {
 
   // see: https://www.w3.org/TR/AERT/#color-contrast
   const r = parseInt(color.substring(1, 3), 16);
-  const g = parseInt(color.substring(3, 5), 16);
-  const b = parseInt(color.substring(5, 7), 16);
-  const brightnessDiff = (r * 299 + g * 587 + b * 114) / 1000;
+  const g = parseInt(color.substring(3, 5), 16);
+  const b = parseInt(color.substring(5, 7), 16);
+  const brightnessDiff = (r * 299 + g * 587 + b * 114) / 1000;
 
   if (brightnessDiff >= 125) {
-    return [  //tag is light, hover darker
+    return [
+      //tag is light, hover darker
       'black',
       color,
       `color-mix(in srgb, ${color} 85%, black)`,
     ];
   }
 
-    return [  //tag is dark, hover lighter
-      'white',
-      color,
-      `color-mix(in srgb, ${color} 85%, white)`,
-    ];
-  
+  return [
+    //tag is dark, hover lighter
+    'white',
+    color,
+    `color-mix(in srgb, ${color} 85%, white)`,
+  ];
 }
