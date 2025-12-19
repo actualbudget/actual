@@ -6,6 +6,5 @@
   // Alternatively:
   // "image": "mcr.microsoft.com/devcontainers/typescript-node:0-16",
   "service": "browser",
-  "workspaceFolder": "/workspaces",
-  "postCreateCommand": "yarn install"
+  "workspaceFolder": "/workspaces"
 }

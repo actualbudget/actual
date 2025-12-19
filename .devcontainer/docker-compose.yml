@@ -13,14 +13,14 @@ services:
       - '${ACTUAL_PORT:-5006}:${ACTUAL_PORT:-5006}'
     volumes:
       - ..:/workspaces   # Mount host files within container
-      - data:/data   # Persist data for the sync-server between sessions
+      - server_data:/data   # Persist data for the sync-server between sessions
       # Use the container version of the following directories
-      - node_modules:/workspaces/node_modules
-      - desktop_client_node_modules:/workspaces/packages/desktop-client/node_modules
-      - desktop_client_public:/workspaces/packages/desktop-client/public
-      - plugins_service_dist:/workspaces/packages/plugins-service/dist
-      - sync_server_node_modules:/workspaces/packages/sync-server/node_modules
-      - sync_server_build:/workspaces/packages/sync-server/build
+      - server_cache_1:/workspaces/node_modules
+      - server_cache_2:/workspaces/packages/desktop-client/node_modules
+      - server_cache_3:/workspaces/packages/desktop-client/public
+      - server_cache_4:/workspaces/packages/plugins-service/dist
+      - server_cache_5:/workspaces/packages/sync-server/build
+      - server_cache_6:/workspaces/packages/sync-server/node_modules
     command: yarn start:server
     restart: unless-stopped
     healthcheck:
@@ -40,33 +40,50 @@ services:
     volumes:
       - ..:/workspaces   # Mount host files within container
       # Use the container version of the following directories
-      - node_modules:/workspaces/node_modules
-      - desktop_client_node_modules:/workspaces/packages/desktop-client/node_modules
-      - desktop_client_public:/workspaces/packages/desktop-client/public
-      - plugins_service_dist:/workspaces/packages/plugins-service/dist
-      - sync_server_node_modules:/workspaces/packages/sync-server/node_modules
-      - sync_server_build:/workspaces/packages/sync-server/build
+      - browser_cache_1:/workspaces/node_modules
+      - browser_cache_2:/workspaces/packages/desktop-client/node_modules
+      - browser_cache_3:/workspaces/packages/desktop-client/public
+      - browser_cache_4:/workspaces/packages/plugins-service/dist
+      - browser_cache_5:/workspaces/packages/sync-server/build
+      - browser_cache_6:/workspaces/packages/sync-server/node_modules
     environment:
       NODE_ENV: development
       BROWSER: none
     depends_on:
-      server:
-        condition: service_healthy
+      - server
+    # depends_on:
+    #   server:
+    #     condition: service_healthy
     command: yarn start:browser
     restart: 'no'
 
 volumes:
-  data:
+  browser_cache_1:
     driver: local
-  node_modules:
+  browser_cache_2:
     driver: local
-  desktop_client_node_modules:
+  browser_cache_3:
     driver: local
-  desktop_client_public:
+  browser_cache_4:
     driver: local
-  plugins_service_dist:
+  browser_cache_5:
     driver: local
-  sync_server_node_modules:
+  browser_cache_6:
     driver: local
-  sync_server_build:
+  server_data:
     driver: local
+  server_cache_1:
+    driver: local
+  server_cache_2:
+    driver: local
+  server_cache_3:
+    driver: local
+  server_cache_4:
+    driver: local
+  server_cache_5:
+    driver: local
+  server_cache_6:
+    driver: local
+
+  
+  
