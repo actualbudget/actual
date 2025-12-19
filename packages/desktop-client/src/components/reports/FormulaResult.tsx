@@ -32,7 +32,7 @@ type FormulaResultProps = {
   fontSizeMode?: 'dynamic' | 'static';
   staticFontSize?: number;
   customColor?: string | null;
-  containerRef?: RefObject<HTMLDivElement>;
+  containerRef?: RefObject<HTMLDivElement | null>;
 };
 
 export function FormulaResult({
