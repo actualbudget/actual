@@ -197,7 +197,7 @@ export async function select(table, id) {
   );
   // TODO: In the next phase, we will make this function generic
   // and pass the type of the return type to `runQuery`.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   return rows[0] as any;
 }
 
@@ -279,7 +279,7 @@ export async function selectWithSchema(table, sql, params) {
     .map(row => convertFromSelect(schema, schemaConfig, table, row))
     .filter(Boolean);
   // TODO: Make convertFromSelect generic so we don't need this cast
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   return convertedRows as any[];
 }
 

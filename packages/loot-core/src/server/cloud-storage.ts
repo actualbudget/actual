@@ -306,7 +306,7 @@ export async function upload() {
           : null),
         ...(groupId ? { 'X-ACTUAL-GROUP-ID': groupId } : null),
         // TODO: fix me
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // oxlint-disable-next-line typescript/no-explicit-any
       } as any,
       body: uploadContent,
     });

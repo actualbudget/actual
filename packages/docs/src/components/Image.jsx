@@ -1,4 +1,5 @@
 import React from 'react';
+
 import IdealImage from '@theme/IdealImage';
 
 // https://github.com/endiliey/react-ideal-image/blob/de4e8f0388ac3645d3f32355c79c3b6a7cc61ff3/src/components/theme.js

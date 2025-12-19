@@ -161,8 +161,7 @@ category: ${type}
 authors: [${username}]
 ---
 
-${summary}
-`;
+${summary}`;
 }
 
 // simple exec that fails silently and returns an empty string on failure
