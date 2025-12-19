@@ -72,5 +72,5 @@ function getTagCSSColors(theme: Theme, color?: string | null) {
       color,
       `color-mix(in srgb, ${color} 85%, white)`,
     ];
-  {
+  
 }
