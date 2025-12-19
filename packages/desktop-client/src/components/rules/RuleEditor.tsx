@@ -1152,7 +1152,7 @@ export function RuleEditor({
 
             if (field === 'field') {
               a.type = FIELD_TYPES.get(a.field);
-              a.value = null;
+              a.value = value === 'date' ? '' : null;
               a.options = {
                 ...a.options,
                 template: undefined,
