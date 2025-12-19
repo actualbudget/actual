@@ -44,16 +44,6 @@ export function useTagCSS() {
   );
 }
 
-function getContrastedColor(hexcolor: string) {
-  // see: https://www.w3.org/TR/AERT/#color-contrast
-  const r = parseInt(hexcolor.substring(1, 3), 16);
-  const g = parseInt(hexcolor.substring(3, 5), 16);
-  const b = parseInt(hexcolor.substring(5, 7), 16);
-  const brightnessDiff = (r * 299 + g * 587 + b * 114) / 1000;
-
-  return brightnessDiff >= 125 ? 'black' : 'white';
-}
-
 function getTagCSSColors(theme: Theme, color?: string | null) {
   if (!color) {
     return [
@@ -63,9 +53,24 @@ function getTagCSSColors(theme: Theme, color?: string | null) {
     ];
   }
 
-  return [
-    getContrastedColor(color),
-    color,
-    `color-mix(in srgb, ${color} 85%, white)`,
-  ];
+  // see: https://www.w3.org/TR/AERT/#color-contrast
+  const r = parseInt(color.substring(1, 3), 16);
+  const g = parseInt(color.substring(3, 5), 16);
+  const b = parseInt(color.substring(5, 7), 16);
+  const brightnessDiff = (r * 299 + g * 587 + b * 114) / 1000;
+
+  if (brightnessDiff >= 125) {
+    return [  //tag is light, hover darker
+      'black',
+      color,
+      `color-mix(in srgb, ${color} 85%, black)`,
+    ];
+  }
+
+    return [  //tag is dark, hover lighter
+      'white',
+      color,
+      `color-mix(in srgb, ${color} 85%, white)`,
+    ];
+  {
 }
