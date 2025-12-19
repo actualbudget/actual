@@ -26,7 +26,9 @@ export async function run(direction: 'up' | 'down' = 'up'): Promise<void> {
       }
     > = {};
 
-    for (const f of files.filter(f => f.endsWith('.js') || f.endsWith('.ts')).sort()) {
+    for (const f of files
+      .filter(f => f.endsWith('.js') || f.endsWith('.ts'))
+      .sort()) {
       migrationsModules[f] = await import(path.join(migrationsDir, f));
     }
 
