@@ -105,13 +105,12 @@ describe('sync migrations', () => {
               { isChild: number; parent_id: string | null; id: string }
             >;
             if (
-              ts &&
-              [...ts.values()].find(
+              !ts ||
+              ![...ts.values()].find(
                 t =>
                   t.isChild === 1 && t.parent_id == null && t.id.includes('/'),
               )
             ) {
-            } else {
               tracer.event('applied');
             }
           });

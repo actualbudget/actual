@@ -63,7 +63,6 @@
     "@octokit/rest": "^22.0.1",
     "@types/node": "^22.19.1",
     "@types/prompts": "^2.4.9",
-    "@typescript-eslint/parser": "^8.46.4",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
     "eslint-import-resolver-typescript": "^4.4.4",

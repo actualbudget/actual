@@ -9331,7 +9331,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:8.46.4, @typescript-eslint/parser@npm:^8.46.4":
+"@typescript-eslint/parser@npm:8.46.4":
   version: 8.46.4
   resolution: "@typescript-eslint/parser@npm:8.46.4"
   dependencies:
@@ -10105,7 +10105,6 @@ __metadata:
     "@octokit/rest": "npm:^22.0.1"
     "@types/node": "npm:^22.19.1"
     "@types/prompts": "npm:^2.4.9"
-    "@typescript-eslint/parser": "npm:^8.46.4"
     cross-env: "npm:^10.1.0"
     eslint: "npm:^9.39.2"
     eslint-import-resolver-typescript: "npm:^4.4.4"

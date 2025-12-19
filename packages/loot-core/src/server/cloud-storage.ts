@@ -90,7 +90,7 @@ export async function checkKey(): Promise<{
   return {
     valid:
       // This == comparison is important, they could be null or undefined
-      // eslint-disable-next-line eqeqeq
+      // oxlint-disable-next-line eslint/eqeqeq
       res.id == encryptKeyId &&
       (encryptKeyId == null || encryption.hasKey(encryptKeyId)),
   };
@@ -306,7 +306,7 @@ export async function upload() {
           : null),
         ...(groupId ? { 'X-ACTUAL-GROUP-ID': groupId } : null),
         // TODO: fix me
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // oxlint-disable-next-line typescript/no-explicit-any
       } as any,
       body: uploadContent,
     });
