@@ -10,14 +10,14 @@ import { dayFromDate } from '../../shared/months';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
 import {
-  AccountEntity,
-  CategoryEntity,
-  SyncServerGoCardlessAccount,
-  TransactionEntity,
-  SyncServerSimpleFinAccount,
-  SyncServerPluggyAiAccount,
+  type AccountEntity,
+  type CategoryEntity,
+  type SyncServerGoCardlessAccount,
+  type TransactionEntity,
+  type SyncServerSimpleFinAccount,
+  type SyncServerPluggyAiAccount,
   type GoCardlessToken,
-  ImportTransactionEntity,
+  type ImportTransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
