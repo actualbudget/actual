@@ -1,10 +1,9 @@
 services:
-
   # Actual sync-server
   server:
     build:
       context: ..
-      dockerfile: .devcontainer/Dockerfile   # Dockerfile already has yarn dependencies
+      dockerfile: .devcontainer/Dockerfile # Dockerfile already has yarn dependencies
     environment:
       NODE_ENV: development
       ACTUAL_DATA_DIR: /data
@@ -12,8 +11,8 @@ services:
     ports:
       - '${ACTUAL_PORT:-5006}:${ACTUAL_PORT:-5006}'
     volumes:
-      - ..:/workspaces   # Mount host files within container
-      - server_data:/data   # Persist data for the sync-server between sessions
+      - ..:/workspaces # Mount host files within container
+      - server_data:/data # Persist data for the sync-server between sessions
       # Use the container version of the following directories
       - server_cache_1:/workspaces/node_modules
       - server_cache_2:/workspaces/packages/desktop-client/node_modules
@@ -38,7 +37,7 @@ services:
     ports:
       - '3001:3001'
     volumes:
-      - ..:/workspaces   # Mount host files within container
+      - ..:/workspaces # Mount host files within container
       # Use the container version of the following directories
       - browser_cache_1:/workspaces/node_modules
       - browser_cache_2:/workspaces/packages/desktop-client/node_modules
@@ -84,6 +83,3 @@ volumes:
     driver: local
   server_cache_6:
     driver: local
-
-  
-  
