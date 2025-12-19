@@ -15,6 +15,7 @@ export default defineConfig(
       'packages/api/app/stats.json',
       'packages/api/@types',
       'packages/api/migrations',
+      'packages/crdt/src/proto/sync_pb.js',
       'packages/component-library/src/icons/**/*',
       'packages/desktop-client/bundle.browser.js',
       'packages/desktop-client/dev-dist/',
@@ -37,19 +38,6 @@ export default defineConfig(
       '**/dist/',
       '**/node_modules/',
     ],
-  },
-  {
-    // Temporary until the sync-server is migrated to TypeScript
-    files: [
-      'packages/sync-server/**/*.spec.{js,jsx}',
-      'packages/sync-server/**/*.test.{js,jsx}',
-    ],
-    languageOptions: {
-      globals: {
-        ...globals.jest,
-        vi: true,
-      },
-    },
   },
   {
     linterOptions: {
@@ -83,12 +71,6 @@ export default defineConfig(
       react: {
         version: 'detect',
       },
-
-      'import/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-        },
-      },
     },
   },
   pluginTypescript.configs.base,
@@ -109,107 +91,12 @@ export default defineConfig(
     },
     rules: {
       // http://eslint.org/docs/rules/
-      'array-callback-return': 'warn',
-
-      curly: ['warn', 'multi-line', 'consistent'],
-      eqeqeq: ['warn', 'smart'],
-      'no-array-constructor': 'warn',
-      'no-caller': 'warn',
-      'no-cond-assign': ['warn', 'except-parens'],
-      'no-const-assign': 'warn',
-      'no-control-regex': 'warn',
-      'no-delete-var': 'warn',
       'no-dupe-args': 'warn',
-      'no-dupe-class-members': 'warn',
-      'no-dupe-keys': 'warn',
-      'no-duplicate-case': 'warn',
-      'no-empty-character-class': 'warn',
-      'no-empty-pattern': 'warn',
-      'no-eval': 'warn',
-      'no-ex-assign': 'warn',
-      'no-extend-native': 'warn',
-      'no-extra-bind': 'warn',
-      'no-extra-label': 'warn',
-      'no-fallthrough': 'warn',
-      'no-func-assign': 'warn',
-      'no-implied-eval': 'warn',
-      'no-invalid-regexp': 'warn',
-      'no-iterator': 'warn',
-      'no-label-var': 'warn',
-
-      'no-labels': [
-        'warn',
-        {
-          allowLoop: true,
-          allowSwitch: false,
-        },
-      ],
-
-      'no-lone-blocks': 'warn',
-
-      'no-multi-str': 'warn',
-      'no-global-assign': 'warn',
-      'no-unsafe-negation': 'warn',
-      'no-new-func': 'warn',
       'no-new-object': 'warn',
       'no-new-symbol': 'warn',
-      'no-new-wrappers': 'warn',
-      'no-obj-calls': 'warn',
       'no-octal': 'warn',
       'no-octal-escape': 'warn',
-      'no-script-url': 'warn',
-      'no-self-assign': 'warn',
-      'no-self-compare': 'warn',
-      'no-sequences': 'warn',
-      'no-shadow-restricted-names': 'warn',
-      'no-sparse-arrays': 'warn',
-      'no-template-curly-in-string': 'warn',
-      'no-this-before-super': 'warn',
-      'no-throw-literal': 'warn',
-      'no-undef': 'error',
-      'no-unreachable': 'warn',
-
-      'no-unused-expressions': [
-        'error',
-        {
-          allowShortCircuit: true,
-          allowTernary: true,
-          allowTaggedTemplates: true,
-        },
-      ],
-
-      'no-unused-labels': 'warn',
-
-      'no-use-before-define': [
-        'warn',
-        {
-          functions: false,
-          classes: false,
-          variables: false,
-        },
-      ],
-
-      'no-useless-computed-key': 'warn',
-      'no-useless-concat': 'warn',
-      'no-useless-constructor': 'warn',
-      'no-useless-escape': 'warn',
-
-      'no-useless-rename': [
-        'warn',
-        {
-          ignoreDestructuring: false,
-          ignoreImport: false,
-          ignoreExport: false,
-        },
-      ],
-
-      'no-with': 'warn',
-
-      'require-yield': 'warn',
       strict: ['warn', 'never'],
-      'unicode-bom': ['warn', 'never'],
-      'use-isnan': 'warn',
-      'valid-typeof': 'warn',
 
       'no-restricted-properties': [
         'error',
@@ -226,8 +113,6 @@ export default defineConfig(
             'Please use import() instead. More info: https://facebook.github.io/create-react-app/docs/code-splitting',
         },
       ],
-
-      'getter-return': 'warn',
 
       'perfectionist/sort-imports': [
         'warn',
@@ -293,10 +178,6 @@ export default defineConfig(
       'actual/prefer-if-statement': 'warn',
       'actual/prefer-logger-over-console': 'error',
 
-      // https://github.com/eslint/eslint/issues/16954
-      // https://github.com/eslint/eslint/issues/16953
-      'no-loop-func': 'off',
-
       'object-shorthand': ['warn', 'properties'],
 
       'no-restricted-syntax': [
@@ -317,7 +198,6 @@ export default defineConfig(
 
       // Rules disabled during TS migration
       'prefer-const': 'warn',
-      'prefer-spread': 'off',
     },
   },
   {

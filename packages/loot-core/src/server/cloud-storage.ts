@@ -90,7 +90,7 @@ export async function checkKey(): Promise<{
   return {
     valid:
       // This == comparison is important, they could be null or undefined
-      // eslint-disable-next-line eqeqeq
+      // oxlint-disable-next-line eslint/eqeqeq
       res.id == encryptKeyId &&
       (encryptKeyId == null || encryption.hasKey(encryptKeyId)),
   };

@@ -51,7 +51,7 @@ async function checkFirstComment() {
 
     const isFirstSummaryComment =
       coderabbitSummaryComments.length === 1 &&
-      coderabbitSummaryComments[0].id == commentId;
+      coderabbitSummaryComments[0].id === commentId;
 
     console.log(
       `CodeRabbit summary comments found: ${coderabbitSummaryComments.length}`,
