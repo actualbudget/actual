@@ -397,33 +397,6 @@
     // TODO: enable these
     {
       "files": [
-        "packages/api/**",
-        "packages/component-library/**",
-        "packages/crdt/**",
-        "packages/desktop-electron/**",
-        "packages/desktop-client/vite.config.mts",
-        "packages/loot-core/**",
-        "packages/sync-server/**"
-      ],
-      "rules": {
-        "typescript/consistent-type-imports": "off"
-      }
-    },
-    {
-      "files": [
-        "packages/api/**",
-        "packages/component-library/**",
-        "packages/loot-core/src/server/**",
-        "packages/loot-core/src/types/**",
-        "packages/sync-server/**",
-        "packages/loot-core/typings/window.ts"
-      ],
-      "rules": {
-        "typescript/consistent-type-definitions": "off"
-      }
-    },
-    {
-      "files": [
         "packages/desktop-client/src/components/budget/envelope/budgetsummary/BudgetMonthMenu.tsx",
         "packages/desktop-client/src/components/budget/tracking/budgetsummary/BudgetMonthMenu.tsx",
         "packages/desktop-client/src/components/HelpMenu.tsx",

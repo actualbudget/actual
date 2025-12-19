@@ -9,7 +9,7 @@ import * as db from '../db';
 
 import { listen, unlisten } from './migrate';
 
-import { Message, addSyncListener, sendMessages } from './index';
+import { type Message, addSyncListener, sendMessages } from './index';
 
 beforeEach(() => {
   listen();

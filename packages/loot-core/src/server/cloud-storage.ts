@@ -23,13 +23,13 @@ import { getServer } from './server-config';
 
 const UPLOAD_FREQUENCY_IN_DAYS = 7;
 
-export interface UsersWithAccess {
+export type UsersWithAccess = {
   userId: string;
   userName: string;
   displayName: string;
   owner: boolean;
-}
-export interface RemoteFile {
+};
+export type RemoteFile = {
   deleted: boolean;
   fileId: string;
   groupId: string;
@@ -38,7 +38,7 @@ export interface RemoteFile {
   hasKey: boolean;
   owner: string;
   usersWithAccess: UsersWithAccess[];
-}
+};
 
 async function checkHTTPStatus(res) {
   if (res.status !== 200) {

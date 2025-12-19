@@ -6,7 +6,7 @@ import { getIn } from '../shared/util';
 import { type HandlerFunctions } from '../types/handlers';
 
 import { withMutatorContext, getMutatorContext } from './mutators';
-import { Message, sendMessages } from './sync';
+import { type Message, sendMessages } from './sync';
 
 // A marker always sits as the first entry to simplify logic
 type MarkerMessage = { type: 'marker'; meta?: unknown };

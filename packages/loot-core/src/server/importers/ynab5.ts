@@ -11,7 +11,7 @@ import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
 import { sortByKey, groupBy } from '../../shared/util';
 
-import * as YNAB5 from './ynab5-types';
+import type * as YNAB5 from './ynab5-types';
 
 function amountFromYnab(amount: number) {
   // ynabs multiplies amount by 1000 and actual by 100
