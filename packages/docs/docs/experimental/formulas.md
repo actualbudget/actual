@@ -222,12 +222,28 @@ In **More -> Rules -> edit a rule**, on a **Set** action:
 
 Rule formulas evaluate with named variables from the transaction context, including:
 
-- `today` (YYYY-MM-DD)
-- `amount` (number, stored in **cents**)
-- `balance` (number, stored in **cents**)
-- `date`, `notes`, `imported_payee`
-- `payee_name`, `account_name`, `category_name`
-- `cleared`, `reconciled`
+**Date variables:**
+- `today` — Current date in YYYY-MM-DD format (e.g., `"2025-12-19"`)
+- `date` — Transaction date in YYYY-MM-DD format (e.g., `"2025-01-15"`)
+
+**Numeric variables (stored in cents):**
+- `amount` — Transaction amount as an integer in cents (e.g., `12345` represents $123.45)
+  - Positive for income, negative for expenses
+  - To convert to dollars: `=amount / 100`
+- `balance` — Account balance after this transaction, as an integer in cents
+  - Represents the running balance at this transaction
+  - To convert to dollars: `=balance / 100`
+
+**Text variables:**
+- `notes` — Transaction notes/memo field (string, may be empty)
+- `imported_payee` — Original payee name from import before any rules applied (string)
+- `payee_name` — Resolved payee name (string)
+- `account_name` — Account name where transaction exists (string)
+- `category_name` — Category name assigned to transaction (string)
+
+**Boolean variables:**
+- `cleared` — Whether transaction is cleared (`TRUE` or `FALSE`)
+- `reconciled` — Whether transaction is reconciled (`TRUE` or `FALSE`)
 
 Tip: if you want “dollars” from `amount`, use `=amount / 100`.
 
