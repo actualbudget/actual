@@ -66,7 +66,6 @@
     "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
     "eslint-import-resolver-typescript": "^4.4.4",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-oxlint": "^1.32.0",
     "eslint-plugin-perfectionist": "^4.15.1",
     "eslint-plugin-typescript-paths": "^0.0.33",
