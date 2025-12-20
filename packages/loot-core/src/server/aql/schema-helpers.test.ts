@@ -63,7 +63,7 @@ describe('schema-helpers', () => {
         account: 'foo',
         amount: 5,
       });
-    }).toThrow(/“transactions2” does not exist/);
+    }).toThrow(/"transactions2" does not exist/);
 
     expect(() => {
       convertForInsert(basicSchema, {}, 'transactions', {
@@ -71,7 +71,7 @@ describe('schema-helpers', () => {
         account: 'foo',
         amount: 5,
       });
-    }).toThrow(/“date” is required/);
+    }).toThrow(/"date" is required/);
 
     expect(() => {
       convertForInsert(basicSchema, {}, 'transactions', {
@@ -80,7 +80,7 @@ describe('schema-helpers', () => {
         amount: 5,
         date: null,
       });
-    }).toThrow(/“date” is required/);
+    }).toThrow(/"date" is required/);
   });
 
   test('update forces required fields be non-null', () => {
@@ -90,7 +90,7 @@ describe('schema-helpers', () => {
         account: 'acct',
         amount: 5,
       });
-    }).toThrow(/“transactions2” does not exist/);
+    }).toThrow(/"transactions2" does not exist/);
 
     expect(() => {
       convertForUpdate(basicSchema, {}, 'transactions', {
@@ -98,7 +98,7 @@ describe('schema-helpers', () => {
         account: 'acct',
         amount: 5,
       });
-    }).not.toThrow(/“date” is required/);
+    }).not.toThrow(/"date" is required/);
 
     expect(() => {
       convertForUpdate(basicSchema, {}, 'transactions', {
@@ -107,7 +107,7 @@ describe('schema-helpers', () => {
         amount: 5,
         date: null,
       });
-    }).toThrow(/“date” is required/);
+    }).toThrow(/"date" is required/);
 
     // It should enforce fields that have a `default` too
     expect(() => {
@@ -116,7 +116,7 @@ describe('schema-helpers', () => {
         account: 'acct',
         amount: null,
       });
-    }).toThrow(/“amount” is required/);
+    }).toThrow(/"amount" is required/);
   });
 
   test('conform converts types to db representations', () => {

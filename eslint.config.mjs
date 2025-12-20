@@ -79,6 +79,7 @@ export default defineConfig(
       perfectionist: pluginPerfectionist,
     },
     rules: {
+      'actual/typography': 'warn',
       'actual/no-untranslated-strings': 'error',
       'actual/prefer-trans-over-t': 'error',
     },
@@ -141,7 +142,6 @@ export default defineConfig(
         },
       ],
 
-      'actual/typography': 'warn',
       'actual/prefer-if-statement': 'warn',
       'actual/prefer-logger-over-console': 'error',
 

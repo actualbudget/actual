@@ -330,7 +330,7 @@ export function BudgetPage() {
 
   // const onOpenMonthActionMenu = () => {
   //   const options = [
-  //     'Copy last month’s budget',
+  //     'Copy last month's budget',
   //     'Set budgets to zero',
   //     'Set budgets to 3 month average',
   //     budgetType === 'tracking' && 'Apply to all future budgets',

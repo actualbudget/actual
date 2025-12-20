@@ -216,7 +216,7 @@ async function downloadBudget({
   return { id };
 }
 
-// open and sync, but don’t close
+// open and sync, but don't close
 async function syncBudget() {
   setSyncingMode('enabled');
   const result = await initialFullSync();

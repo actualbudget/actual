@@ -200,7 +200,22 @@ exports[`Database > transactions are sorted by starting balance flag 1`] = `
 ]
 `;
 
-exports[`Database > transactions don’t show orphaned child transactions 1`] = `
+exports[`Database > transactions don't show orphaned child transactions 1`] = `
+[
+  {
+    "amount": -23,
+    "date": "2018-01-05",
+    "id": "id2",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 5,
+    "starting_balance_flag": false,
+  },
+]
+`;
+
+exports[`Database > transactions don't show orphaned child transactions 1`] = `
 [
   {
     "amount": -23,
