@@ -60,7 +60,11 @@ function getTagCSSColors(theme: Theme, color?: string | null) {
   const brightnessDiff = (r * 299 + g * 587 + b * 114) / 1000;
 
   if (brightnessDiff >= 125) {
-    return ['black !important', color, `color-mix(in srgb, ${color} 30%, black)`];
+    return [
+      'black !important',
+      color,
+      `color-mix(in srgb, ${color} 30%, black)`,
+    ];
   }
 
   return ['white !important', color, `color-mix(in srgb, ${color} 70%, white)`];
