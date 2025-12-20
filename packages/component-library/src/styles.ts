@@ -91,8 +91,11 @@ export const styles: Record<string, any> = {
   },
   shadowLarge,
   tnum: {
-    // eslint-disable-next-line actual/typography
-    fontFeatureSettings: '"tnum"',
+    // tnum: Tabular (monospaced) numbers for better alignment in tables.
+    // ss01: Alternate digits with open features
+    // ss02: Disambiguated characters w/ zero
+    //eslint-disable-next-line actual/typography
+    fontFeatureSettings: '"tnum", "ss01", "ss02"',
   },
   notFixed: { fontFeatureSettings: '' },
   text: {
