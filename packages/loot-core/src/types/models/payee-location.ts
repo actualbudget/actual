@@ -1,4 +1,4 @@
-export interface PayeeLocationEntity {
+export type PayeeLocationEntity = {
   id: string;
   payee_id: string;
   latitude: number;

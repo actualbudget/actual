@@ -1,5 +1,13 @@
+import { v4 as uuidv4 } from 'uuid';
+
+import { DEFAULT_MAX_DISTANCE } from 'loot-core/shared/constants';
+
 import { type Diff } from '../../shared/util';
-import { type PayeeEntity, type RuleEntity, type PayeeLocationEntity } from '../../types/models';
+import {
+  type PayeeEntity,
+  type RuleEntity,
+  type PayeeLocationEntity,
+} from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
 import { payeeModel } from '../models';
@@ -7,8 +15,6 @@ import { mutator } from '../mutators';
 import { batchMessages } from '../sync';
 import * as rules from '../transactions/transaction-rules';
 import { undoable } from '../undo';
-import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_MAX_DISTANCE } from 'loot-core/shared/constants';
 
 export type PayeesHandlers = {
   'payee-create': typeof createPayee;

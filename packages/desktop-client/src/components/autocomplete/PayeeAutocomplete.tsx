@@ -818,7 +818,6 @@ function NearbyPayeeItem({
   onForgetLocation,
   ...props
 }: NearbyPayeeItemProps) {
-  const { t } = useTranslation();
   const locationAccess = useLocationPermission();
   const unitOfMeasurementFormat = useUnitOfMeasurementFormat();
   const narrowStyle = locationAccess

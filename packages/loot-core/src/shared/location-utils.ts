@@ -7,7 +7,7 @@ const metersInKilometer = 1000;
 const metersToFeet = 3.28084;
 const feetInMile = 5280;
 
-export interface LocationCoordinates {
+export type LocationCoordinates = {
   latitude: number;
   longitude: number;
 }

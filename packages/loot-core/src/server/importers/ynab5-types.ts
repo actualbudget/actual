@@ -11,11 +11,11 @@ export type Budget = {
   payee_locations?: PayeeLocationsData;
 };
 
-export interface PayeeLocationsData {
+export type PayeeLocationsData = {
   data: {
     payee_locations: PayeeLocation[];
   };
-};
+}
 
 export type Account = {
   id: string;
@@ -38,7 +38,7 @@ export type PayeeLocation = {
   latitude: string;
   longitude: string;
   deleted: boolean;
-}
+};
 
 export type CategoryGroup = {
   id: string;

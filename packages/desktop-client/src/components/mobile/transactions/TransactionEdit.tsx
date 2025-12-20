@@ -1420,7 +1420,7 @@ function TransactionEditUnconnected({
           setAutoSelectedPayeeId(nearbyPayees[0].id);
           setShouldShowForgetLocation(false);
         }
-      } catch (error) {
+      } catch {
         // Don't block transaction creation
       }
       return () => {
@@ -1655,7 +1655,7 @@ function TransactionEditUnconnected({
 
         setShouldShowForgetLocation(false);
       }
-    } catch (error) {
+    } catch {
       dispatch(
         addNotification({
           notification: {

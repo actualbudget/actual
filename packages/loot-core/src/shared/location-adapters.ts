@@ -9,14 +9,14 @@ import { type LocationCoordinates } from './location-utils';
 /**
  * Abstraction for geolocation functionality
  */
-export interface GeolocationAdapter {
+export type GeolocationAdapter = {
   getCurrentPosition(options?: PositionOptions): Promise<LocationCoordinates>;
 }
 
 /**
  * Abstraction for location-related API calls
  */
-export interface LocationApiClient {
+export type LocationApiClient = {
   saveLocation(
     payeeId: string,
     coordinates: LocationCoordinates,
