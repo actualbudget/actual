@@ -510,6 +510,10 @@ export function Overview() {
                               case 'import':
                                 onImport();
                                 break;
+                              default:
+                                throw new Error(
+                                  `Unrecognized menu option: ${item}`,
+                                );
                             }
                           }}
                           items={[
