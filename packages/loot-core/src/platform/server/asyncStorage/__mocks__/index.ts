@@ -4,7 +4,9 @@ import type * as T from '../index-types';
 
 const store: GlobalPrefsJson = {};
 
-export const init: T.Init = function () {};
+export const init: T.Init = function () {
+  // No need to initialise in tests
+};
 
 export const getItem: T.GetItem = async function (key) {
   return store[key];

@@ -161,7 +161,7 @@
     "eslint/no-dupe-keys": "warn",
     "eslint/no-duplicate-case": "warn",
     "eslint/no-empty-character-class": "warn",
-    // "eslint/no-empty-function": "warn", // TODO: enable this
+    "eslint/no-empty-function": "warn",
     "eslint/no-empty-pattern": "warn",
     "eslint/no-eval": "warn",
     "eslint/no-ex-assign": "warn",
@@ -392,6 +392,25 @@
       ],
       "rules": {
         "import/no-default-export": "off"
+      }
+    },
+    // TODO: enable these
+    {
+      "files": [
+        "packages/desktop-client/src/components/admin/UserAccess/UserAccess.tsx",
+        "packages/desktop-client/src/components/admin/UserDirectory/UserDirectory.tsx",
+        "packages/desktop-client/src/components/budget/BudgetCategories.tsx",
+        "packages/desktop-client/src/components/budget/envelope/BalanceMovementMenu.tsx",
+        "packages/desktop-client/src/components/ManageRules.tsx",
+        "packages/desktop-client/src/components/mobile/budget/ExpenseGroupList.tsx",
+        "packages/desktop-client/src/components/modals/EditFieldModal.tsx",
+        "packages/desktop-client/src/components/reports/reports/Calendar.tsx",
+        "packages/desktop-client/src/components/schedules/ScheduleLink.tsx",
+        "packages/desktop-client/src/components/ServerContext.tsx",
+        "packages/desktop-client/src/components/table.tsx"
+      ],
+      "rules": {
+        "eslint/no-empty-function": "off"
       }
     },
     // TODO: enable these

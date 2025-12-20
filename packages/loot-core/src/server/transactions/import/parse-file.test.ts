@@ -15,7 +15,7 @@ beforeEach(global.emptyDatabase());
 // it hard to test.
 const old = console.warn;
 beforeAll(() => {
-  console.warn = () => {};
+  console.warn = vi.fn();
 });
 afterAll(() => {
   console.warn = old;
