@@ -13,8 +13,7 @@ module.exports = {
     fixable: 'code',
     schema: [],
     messages: {
-      // eslint-disable-next-line actual/typography
-      quote: `Avoid using curly quotes (‘ ’ or “ ”) in user-visible text. Use straight quotes (' or ") instead.`,
+      quote: `Avoid using curly quotes (\u2018 \u2019 or \u201C \u201D) in user-visible text. Use straight quotes (' or ") instead.`,
     },
   },
 
