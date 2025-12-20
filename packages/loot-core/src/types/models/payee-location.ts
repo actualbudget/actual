@@ -5,4 +5,4 @@ export type PayeeLocationEntity = {
   longitude: number;
   created_at: number;
   distance?: number;
-}
+};

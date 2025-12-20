@@ -11,7 +11,7 @@ import { type LocationCoordinates } from './location-utils';
  */
 export type GeolocationAdapter = {
   getCurrentPosition(options?: PositionOptions): Promise<LocationCoordinates>;
-}
+};
 
 /**
  * Abstraction for location-related API calls
@@ -27,7 +27,7 @@ export type LocationApiClient = {
     coordinates: LocationCoordinates,
     maxDistance: number,
   ): Promise<PayeeEntity[]>;
-}
+};
 
 /**
  * Browser implementation of geolocation using the Web Geolocation API

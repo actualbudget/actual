@@ -15,7 +15,7 @@ export type PayeeLocationsData = {
   data: {
     payee_locations: PayeeLocation[];
   };
-}
+};
 
 export type Account = {
   id: string;

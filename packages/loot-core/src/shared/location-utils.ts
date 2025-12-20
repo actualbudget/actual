@@ -10,7 +10,7 @@ const feetInMile = 5280;
 export type LocationCoordinates = {
   latitude: number;
   longitude: number;
-}
+};
 
 /**
  * Calculate the distance between two geographic coordinates using the Haversine formula
