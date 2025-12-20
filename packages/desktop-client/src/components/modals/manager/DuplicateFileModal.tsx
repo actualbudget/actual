@@ -86,7 +86,7 @@ export function DuplicateFileModal({
           addNotification({
             notification: {
               type: 'message',
-              message: t('Duplicate file “{{newName}}” created.', { newName }),
+              message: t('Duplicate file "{{newName}}" created.', { newName }),
             },
           }),
         );
@@ -119,7 +119,7 @@ export function DuplicateFileModal({
       {({ state: { close } }) => (
         <View style={{ maxWidth: 700 }}>
           <ModalHeader
-            title={t('Duplicate “{{fileName}}”', { fileName: file.name })}
+            title={t('Duplicate "{{fileName}}"', { fileName: file.name })}
             rightContent={
               <ModalCloseButton
                 onPress={() => {

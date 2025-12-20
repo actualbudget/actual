@@ -365,7 +365,7 @@ export async function insertCategoryGroup(
   );
   if (existingGroup) {
     throw new Error(
-      `A ${existingGroup.hidden ? 'hidden ' : ''}’${existingGroup.name}’ category group already exists.`,
+      `A ${existingGroup.hidden ? 'hidden ' : ''}'${existingGroup.name}' category group already exists.`,
     );
   }
 
@@ -436,7 +436,7 @@ export async function insertCategory(
     );
     if (existingCatInGroup) {
       throw new Error(
-        `Category ‘${category.name}’ already exists in group ‘${category.cat_group}’`,
+        `Category '${category.name}' already exists in group '${category.cat_group}'`,
       );
     }
 
@@ -667,7 +667,6 @@ export function getCommonPayees() {
   `);
 }
 
-/* eslint-disable actual/typography */
 const orphanedPayeesQuery = `
   SELECT p.id
   FROM payees p
@@ -685,7 +684,6 @@ const orphanedPayeesQuery = `
         AND json_extract(cond.value, '$.value') = pm.targetId
     );
 `;
-/* eslint-enable actual/typography */
 
 export function syncGetOrphanedPayees() {
   return all<Pick<DbPayee, 'id'>>(orphanedPayeesQuery);

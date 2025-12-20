@@ -270,7 +270,7 @@ export function ElectronServerConfig({
           style={{ color: theme.pageTextLight, margin: 5 }}
           onPress={dontUseSyncServer}
         >
-          <Trans>Don’t use a server</Trans>
+          <Trans>Don't use a server</Trans>
         </Button>
         {canShowExternalServerConfig && (
           <Button
@@ -404,7 +404,7 @@ export function ConfigServer() {
       )}
       {serverConfigView === 'external' && (
         <>
-          <Title text={t('Where’s the server?')} />
+          <Title text={t("Where's the server?")} />
           <Text
             style={{
               fontSize: 16,
@@ -533,7 +533,7 @@ export function ConfigServer() {
                   style={{ color: theme.pageTextLight, margin: 5 }}
                   onPress={onSkip}
                 >
-                  <Trans>Don’t use a server</Trans>
+                  <Trans>Don't use a server</Trans>
                 </Button>
 
                 {isNonProductionEnvironment() && (

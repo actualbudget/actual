@@ -794,7 +794,7 @@ function ConditionsList({
       });
     }
 
-    // (remove the inflow and outflow pseudo-fields since they’d be a pain to get right)
+    // (remove the inflow and outflow pseudo-fields since they'd be a pain to get right)
     let fields = conditionFields
       .map(f => f[0])
       .filter(f => f !== 'amount-inflow' && f !== 'amount-outflow');

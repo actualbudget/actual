@@ -64,7 +64,7 @@ export default function Hello() {
           title="Be involved in your financial decisions"
           src="/img/homepage/superpowers.svg"
         >
-          Automated finance tools are great, except when they aren’t. We provide
+          Automated finance tools are great, except when they aren't. We provide
           you with tools that are quick to use, but ultimately{' '}
           <strong>you are in control</strong>. We help you learn, instead of
           dictating.
@@ -126,7 +126,7 @@ export default function Hello() {
         >
           Breeze through your transactions and update them easily with a
           streamlined, minimal interface. Categorizing your transactions
-          correctly is important and we’ve optimized this process. Manage split
+          correctly is important and we've optimized this process. Manage split
           transactions and transfers all in the same editor.
         </BigFeature>
 
@@ -166,7 +166,7 @@ export default function Hello() {
             icon={icons.synchronizeArrows1}
             learnMore="/docs/accounts/"
           >
-            Self-host our syncing service. It’s easy to set up, but uses
+            Self-host our syncing service. It's easy to set up, but uses
             sophisticated distributed systems technology to sync changes across
             any number of devices.
           </SmallFeature>
