@@ -38,7 +38,7 @@ export function CategoryPage() {
               <View>
                 <TextOneLine>{category.name}</TextOneLine>
                 <TextOneLine>
-                  ({monthUtils.format(month, "MMMM 'yy", locale)})
+                  ({monthUtils.format(month, "MMMM ''yy", locale)})
                 </TextOneLine>
               </View>
             ) : (

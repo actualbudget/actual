@@ -59,7 +59,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
     ? SvgArrowButtonDown1
     : SvgArrowButtonUp1;
 
-  const displayMonth = monthUtils.format(month, "MMMM 'yy", locale);
+  const displayMonth = monthUtils.format(month, "MMMM ''yy", locale);
   const { t } = useTranslation();
 
   return (

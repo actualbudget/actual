@@ -240,7 +240,7 @@ function recalculate(
 
     // Use standardized format from ReportOptions
     const displayFormat =
-      ReportOptions.intervalFormat.get(interval) ?? "MMM 'yy";
+      ReportOptions.intervalFormat.get(interval) ?? "MMM ''yy";
 
     const tooltipFormat =
       interval === 'Daily'

@@ -486,7 +486,7 @@ export function BudgetPage() {
             name: 'notes',
             options: {
               id: `budget-${month}`,
-              name: monthUtils.format(month, "MMMM 'yy", locale),
+              name: monthUtils.format(month, "MMMM ''yy", locale),
               onSave: onSaveNotes,
             },
           },
@@ -1016,7 +1016,7 @@ function MonthSelector({
         data-month={month}
       >
         <Text style={styles.underlinedText}>
-          {monthUtils.format(month, "MMMM 'yy", locale)}
+          {monthUtils.format(month, "MMMM ''yy", locale)}
         </Text>
       </Button>
       <Button
