@@ -1,4 +1,3 @@
-import oxlint from 'eslint-plugin-oxlint';
 import pluginPerfectionist from 'eslint-plugin-perfectionist';
 import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
 import { defineConfig } from 'eslint/config';
@@ -163,7 +162,4 @@ export default defineConfig(
       'no-restricted-syntax': 'off',
     },
   },
-  // Disable ESLint rules that are already covered by oxlint
-  // This must be at the end to override previous rule configurations
-  ...oxlint.configs['flat/recommended'],
 );

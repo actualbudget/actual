@@ -10054,7 +10054,6 @@ __metadata:
     cross-env: "npm:^10.1.0"
     eslint: "npm:^9.39.2"
     eslint-import-resolver-typescript: "npm:^4.4.4"
-    eslint-plugin-oxlint: "npm:^1.32.0"
     eslint-plugin-perfectionist: "npm:^4.15.1"
     eslint-plugin-typescript-paths: "npm:^0.0.33"
     globals: "npm:^16.5.0"
@@ -14710,15 +14709,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-oxlint@npm:^1.32.0":
-  version: 1.32.0
-  resolution: "eslint-plugin-oxlint@npm:1.32.0"
-  dependencies:
-    jsonc-parser: "npm:^3.3.1"
-  checksum: 10/0c82c8fdb2201c71825f4e6c796801b72795fa567a3a9e927e36bf197ed55d2cd2a72373c726f56a49d5c6c1eb3a1dffe25ce0f2ea492e13bef6a6de73db07ff
-  languageName: node
-  linkType: hard
-
 "eslint-plugin-perfectionist@npm:^4.15.1":
   version: 4.15.1
   resolution: "eslint-plugin-perfectionist@npm:4.15.1"
@@ -18341,7 +18331,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonc-parser@npm:^3.2.0, jsonc-parser@npm:^3.3.1":
+"jsonc-parser@npm:^3.2.0":
   version: 3.3.1
   resolution: "jsonc-parser@npm:3.3.1"
   checksum: 10/9b0dc391f20b47378f843ef1e877e73ec652a5bdc3c5fa1f36af0f119a55091d147a86c1ee86a232296f55c929bba174538c2bf0312610e0817a22de131cc3f4
