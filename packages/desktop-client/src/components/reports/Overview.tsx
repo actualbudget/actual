@@ -184,7 +184,7 @@ export function Overview() {
 
     onDispatchSucessNotification(
       t(
-        'Dashboard has been successfully reset to default state. Don’t like what you see? You can always press [ctrl+z](#undo) to undo.',
+        "Dashboard has been successfully reset to default state. Don't like what you see? You can always press [ctrl+z](#undo) to undo.",
       ),
     );
   };
@@ -334,7 +334,7 @@ export function Overview() {
 
     onDispatchSucessNotification(
       t(
-        'Dashboard has been successfully imported. Don’t like what you see? You can always press [ctrl+z](#undo) to undo.',
+        "Dashboard has been successfully imported. Don't like what you see? You can always press [ctrl+z](#undo) to undo.",
       ),
     );
   };

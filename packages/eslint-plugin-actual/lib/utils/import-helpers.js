@@ -1,5 +1,3 @@
-/* eslint-disable actual/typography */
-
 /**
  * Shared utilities for managing imports in ESLint rules
  */

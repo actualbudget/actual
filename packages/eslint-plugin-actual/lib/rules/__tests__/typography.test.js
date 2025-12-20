@@ -15,9 +15,9 @@ runClassic(
   rule,
   {
     valid: [
-      `let test = 'I said “Hello, world!”';`,
-      `let test = "I said ‘Hello, world!’";`,
-      `let test = \`I said ‘Hello, world!’\`;`,
+      `let test = 'I said "Hello, world!"';`,
+      `let test = "I said 'Hello, world!'";`,
+      `let test = \`I said 'Hello, world!'\`;`,
       `let selected = document.querySelector('[data-test="foo"]');`,
       `let selected = document.querySelectorAll('[data-test="foo"]');`,
       `myNode.innerHTML = '<div data-test="foo">Hello, world!</div>';`,

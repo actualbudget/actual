@@ -52,7 +52,7 @@ export async function checkTemplateNotes(): Promise<Notification> {
         template.type === 'schedule' &&
         !scheduleNames.includes(template.name)
       ) {
-        errors.push(`${name}: Schedule “${template.name}” does not exist`);
+        errors.push(`${name}: Schedule “${template.name}" does not exist`);
       }
     });
   });

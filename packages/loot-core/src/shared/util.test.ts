@@ -116,11 +116,11 @@ describe('utility functions', () => {
   test('number formatting works with apostrophe-dot format', () => {
     setNumberFormat({ format: 'apostrophe-dot', hideFraction: false });
     let formatter = getNumberFormat().formatter;
-    expect(formatter.format(Number('1234.56'))).toBe('1’234.56');
+    expect(formatter.format(Number('1234.56'))).toBe("1'234.56");
 
     setNumberFormat({ format: 'apostrophe-dot', hideFraction: true });
     formatter = getNumberFormat().formatter;
-    expect(formatter.format(Number('1234.56'))).toBe('1’235');
+    expect(formatter.format(Number('1234.56'))).toBe("1'235");
   });
 
   test('currencyToAmount works with basic numbers', () => {

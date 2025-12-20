@@ -207,7 +207,7 @@ describe('schema-helpers', () => {
         id: 'id',
         amount: 45.5,
       });
-    }).toThrow('Can’t convert to integer');
+    }).toThrow("Can't convert to integer");
   });
 
   test('dates before 1995-01-01 are rejected', () => {

@@ -31,7 +31,7 @@ async function getTransactionsByIds(
   return incrFetch(
     (query, params) => db.selectWithSchema('transactions', query, params),
     ids,
-    // eslint-disable-next-line actual/typography
+
     id => `id = '${id}'`,
     where => `SELECT * FROM v_transactions_internal WHERE ${where}`,
   );

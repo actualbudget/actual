@@ -8,13 +8,13 @@ module.exports = {
     type: 'suggestion',
     docs: {
       description:
-        'Detects usage of straight quotes in potentially user-visible locations',
+        'Detects usage of curly quotes in potentially user-visible locations',
     },
-    fixable: null,
+    fixable: 'code',
     schema: [],
     messages: {
       // eslint-disable-next-line actual/typography
-      quote: `Avoid using straight quotes (' or ") in user-visible text. Use curly quotes (‘ ’ or “ ”) instead.`,
+      quote: `Avoid using curly quotes (‘ ’ or “ ”) in user-visible text. Use straight quotes (' or ") instead.`,
     },
   },
 
@@ -26,22 +26,63 @@ module.exports = {
     //----------------------------------------------------------------------
 
     function check(node, { value = node.value, strip = false } = {}) {
-      // eslint-disable-next-line actual/typography
-      if (!value.includes("'") && !value.includes('"')) return;
+      // U+2019: right single quotation mark, U+201D: right double quotation mark
+      if (!value.includes('\u2019') && !value.includes('\u201D')) return;
 
       let rawText = context.getSourceCode().getText(node);
+      const originalRawText = rawText;
       if (strip) rawText = rawText.slice(1, -1);
-      for (const match of rawText.matchAll(/['"]/g)) {
-        const index = node.range[0] + match.index + (strip ? 1 : 0);
-        context.report({
-          node,
-          loc: {
-            start: context.getSourceCode().getLocFromIndex(index),
-            end: context.getSourceCode().getLocFromIndex(index + 1),
-          },
-          messageId: 'quote',
-        });
-      }
+
+      // Find all curly quote matches (U+2018, U+2019, U+201C, U+201D)
+      const curlyQuoteRegex = /[\u2018\u2019\u201C\u201D]/g;
+      const matches = Array.from(rawText.matchAll(curlyQuoteRegex));
+      if (matches.length === 0) return;
+
+      const sourceCode = context.getSourceCode();
+      const firstMatch = matches[0];
+      const index = node.range[0] + firstMatch.index + (strip ? 1 : 0);
+
+      context.report({
+        node,
+        loc: {
+          start: sourceCode.getLocFromIndex(index),
+          end: sourceCode.getLocFromIndex(index + 1),
+        },
+        messageId: 'quote',
+        fix(fixer) {
+          // Determine the quote delimiter type
+          const firstChar = originalRawText[0];
+          const isSingleQuoted = firstChar === "'";
+          const isDoubleQuoted = firstChar === '"';
+
+          // Replace curly quotes with appropriate straight quotes
+          // Escape them if they match the delimiter
+          const fixedText = originalRawText.replace(curlyQuoteRegex, match => {
+            // U+2018, U+2019 are single curly quotes
+            // U+201C, U+201D are double curly quotes
+            const isCurlySingle = match === '\u2018' || match === '\u2019';
+            const isCurlyDouble = match === '\u201C' || match === '\u201D';
+
+            if (isSingleQuoted && isCurlySingle) {
+              // In single-quoted strings, escape single quotes
+              return "\\'";
+            } else if (isDoubleQuoted && isCurlyDouble) {
+              // In double-quoted strings, escape double quotes
+              return '\\"';
+            } else if (isCurlySingle) {
+              // Curly single quote in double-quoted string or template literal
+              return "'";
+            } else {
+              // Curly double quote in single-quoted string or template literal
+              return '"';
+            }
+          });
+          return fixer.replaceTextRange(
+            [node.range[0], node.range[1]],
+            fixedText,
+          );
+        },
+      });
     }
 
     function isMemberCall(node, object, properties) {

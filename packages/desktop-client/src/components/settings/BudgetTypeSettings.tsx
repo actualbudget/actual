@@ -58,8 +58,8 @@ export function BudgetTypeSettings() {
       <Text>
         <Trans>
           With <strong>tracking budgeting</strong>, category balances reset each
-          month, and funds are managed using a “Saved” metric instead of “To Be
-          Budgeted.” Income is forecasted to plan future spending, rather than
+          month, and funds are managed using a "Saved" metric instead of "To Be
+          Budgeted." Income is forecasted to plan future spending, rather than
           relying on current available funds.
         </Trans>{' '}
         <Link

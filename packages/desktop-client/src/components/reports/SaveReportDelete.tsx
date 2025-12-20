@@ -29,7 +29,7 @@ export function SaveReportDelete({
             <Text style={{ display: 'inline' }}>
               {{ name } as TransObjectLiteral}
             </Text>
-            ’?
+            '?
           </Trans>
         </Text>
       </View>

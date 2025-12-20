@@ -325,7 +325,7 @@ export class MobileBudgetPage {
     }
 
     throw new Error(
-      'Neither “To Budget” nor “Overbudgeted” button could be located on the page.',
+      'Neither "To Budget" nor "Overbudgeted" button could be located on the page.',
     );
   }
 
@@ -363,7 +363,7 @@ export class MobileBudgetPage {
     }
 
     throw new Error(
-      'None of “Saved”, “Projected savings”, or “Overspent” buttons could be located on the page.',
+      'None of "Saved", "Projected savings", or "Overspent" buttons could be located on the page.',
     );
   }
 

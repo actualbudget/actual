@@ -137,7 +137,7 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
         >
           <View style={{ display: 'flex', flexDirection: 'row', gap: 8 }}>
             <Input
-              placeholder={t('Query name (e.g., ‘expenses’, ‘income’)')}
+              placeholder={t("Query name (e.g., 'expenses', 'income')")}
               value={newQueryName}
               onChange={e => setNewQueryName(e.target.value)}
               onKeyDown={e => {
@@ -167,13 +167,13 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
         >
           <Text>
             <Trans>
-              No queries defined. Click ‘Add Query’ to create your first query.
+              No queries defined. Click 'Add Query' to create your first query.
             </Trans>
           </Text>
           <Text style={{ fontSize: 12, marginTop: 8 }}>
             <Trans>
               Queries allow you to reference filtered transaction data in your
-              formulas using QUERY(‘queryName’) or QUERY_COUNT(‘queryName’)
+              formulas using QUERY('queryName') or QUERY_COUNT('queryName')
             </Trans>
           </Text>
         </View>
@@ -509,7 +509,7 @@ function QueryItem({
           }}
         >
           <Text style={{ fontWeight: 600, fontFamily: 'monospace' }}>
-            <Trans>QUERY(‘{queryName}’)</Trans>
+            <Trans>QUERY(‘{queryName}')</Trans>
           </Text>
         </View>
         <View
