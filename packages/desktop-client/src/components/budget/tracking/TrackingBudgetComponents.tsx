@@ -250,6 +250,16 @@ export const CategoryMonth = memo(function CategoryMonth({
         '&:hover .hover-visible': {
           opacity: 1,
         },
+        '& .hover-expand': {
+          width: 0,
+          overflow: 'hidden',
+          opacity: 0,
+        },
+        '&:hover .hover-expand': {
+          width: 'auto',
+          overflow: 'visible',
+          opacity: 1,
+        },
       }}
     >
       <View
@@ -260,6 +270,7 @@ export const CategoryMonth = memo(function CategoryMonth({
       >
         {!editing && (
           <View
+            className={menuOpen ? '' : 'hover-expand'}
             style={{
               flexDirection: 'row',
               flexShrink: 0,
