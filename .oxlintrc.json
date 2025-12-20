@@ -412,31 +412,7 @@
       "rules": {
         "eslint/no-empty-function": "off"
       }
-    },
-    // TODO: enable these
-    {
-      "files": [
-        "packages/desktop-client/src/components/budget/envelope/budgetsummary/BudgetMonthMenu.tsx",
-        "packages/desktop-client/src/components/budget/tracking/budgetsummary/BudgetMonthMenu.tsx",
-        "packages/desktop-client/src/components/HelpMenu.tsx",
-        "packages/desktop-client/src/components/mobile/budget/CategoryGroupActionMenu.tsx",
-        "packages/desktop-client/src/components/modals/SelectLinkedAccountsModal.tsx",
-        "packages/desktop-client/src/components/reports/Overview.tsx",
-        "packages/desktop-client/src/components/reports/reports/CustomReport.tsx",
-        "packages/desktop-client/src/components/reports/reports/CustomReportListCards.tsx",
-        "packages/desktop-client/src/components/reports/reports/MissingReportCard.tsx",
-        "packages/desktop-client/src/components/reports/util.ts",
-        "packages/desktop-client/src/components/sidebar/Account.tsx",
-        "packages/desktop-client/src/hooks/useSplitsExpanded.tsx",
-        "packages/loot-core/src/server/budget/category-template-context.ts",
-        "packages/loot-core/src/server/budget/schedule-template.ts",
-        "packages/loot-core/src/server/importers/ynab5.ts",
-        "packages/loot-core/src/server/rules/action.ts",
-        "packages/loot-core/src/shared/schedules.ts"
-      ],
-      "rules": {
-        "eslint/default-case": "off"
-      }
+    }
     }
   ]
 }

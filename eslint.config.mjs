@@ -79,6 +79,7 @@ export default defineConfig(
       perfectionist: pluginPerfectionist,
     },
     rules: {
+      'actual/typography': 'warn',
       'actual/no-untranslated-strings': 'error',
       'actual/prefer-trans-over-t': 'error',
     },
@@ -141,7 +142,6 @@ export default defineConfig(
         },
       ],
 
-      'actual/typography': 'warn',
       'actual/prefer-if-statement': 'warn',
       'actual/prefer-logger-over-console': 'error',
 
@@ -191,7 +191,6 @@ export default defineConfig(
     ],
 
     rules: {
-      'actual/typography': 'off',
       'actual/no-untranslated-strings': 'off',
       'actual/prefer-logger-over-console': 'off',
     },
@@ -199,16 +198,8 @@ export default defineConfig(
   {
     files: ['packages/docs/**/*'],
     rules: {
-      'actual/typography': 'off',
       'actual/no-untranslated-strings': 'off',
       'no-restricted-syntax': 'off',
-    },
-  },
-  {
-    files: ['packages/sync-server/**/*'],
-    // TODO: fix the issues in these files
-    rules: {
-      'actual/typography': 'off',
     },
   },
   // Disable ESLint rules that are already covered by oxlint

@@ -222,8 +222,8 @@ export function DiscoverSchedules() {
           </Paragraph>
           <Paragraph>
             <Trans>
-              If you expected a schedule here and don’t see it, it might be
-              because the payees of the transactions don’t match. Make sure you
+              If you expected a schedule here and don't see it, it might be
+              because the payees of the transactions don't match. Make sure you
               rename payees on all transactions for a schedule to be the same
               payee.
             </Trans>

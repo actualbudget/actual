@@ -9,7 +9,7 @@ https://github.com/tlesicka/actual-budget-multicurrency-todo
 Until multi-currency is supported natively by Actual Budget, you can use the method described in this document to achieve similar results.
 
 :::warning
-This uses an _experimental feature_, so we’re still working on finishing it. There may be bugs, missing functionality, or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [open an issue](https://github.com/actualbudget/actual/issues) or post a message in Discord.
+This uses an _experimental feature_, so we're still working on finishing it. There may be bugs, missing functionality, or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [open an issue](https://github.com/actualbudget/actual/issues) or post a message in Discord.
 :::
 
 ## Setup

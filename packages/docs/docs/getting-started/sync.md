@@ -16,7 +16,7 @@ If you have already created files, after logging in Actual will show you all the
 
 ## End-to-End Encryption
 
-In addition to the requirement to enter your password before the Actual server will allow you to access your budget, you can optionally enable end-to-end encryption. This will require you to enter a second password to access the budget, and that the server will no longer be able to access your budget information. On the one hand, this improves security if you’re worried that someone else will have access to the server’s file or if you don’t trust the server to check the password correctly (that said, we have done our best to make the server secure). On the other hand, you **will not be able to recover your data if you forget your encryption password**. If you forget the encryption password and you still have a copy of your data locally, you can reset your key which will do a [sync reset](#what-does-resetting-sync-mean) and generate a new key.
+In addition to the requirement to enter your password before the Actual server will allow you to access your budget, you can optionally enable end-to-end encryption. This will require you to enter a second password to access the budget, and that the server will no longer be able to access your budget information. On the one hand, this improves security if you're worried that someone else will have access to the server's file or if you don't trust the server to check the password correctly (that said, we have done our best to make the server secure). On the other hand, you **will not be able to recover your data if you forget your encryption password**. If you forget the encryption password and you still have a copy of your data locally, you can reset your key which will do a [sync reset](#what-does-resetting-sync-mean) and generate a new key.
 
 End-to-end encryption offers the ability for you to generate a key based on a password and encrypt it so that hosted services can't read the data. Before your data leaves your device, it is encrypted using keys only you have.
 
@@ -28,12 +28,12 @@ There are some things to consider with end-to-end encryption:
 
 - **Pro:** Your data is fully secure and nobody except you can read it
 - **Pro:** If you don't want to sync across devices, this still allows you keep a fully encrypted backup of your data
-- **Pro:** If you want to share the server with someone else, you can use different passwords to encrypt separate budget files, and you won’t be able to access each other’s budgets.
+- **Pro:** If you want to share the server with someone else, you can use different passwords to encrypt separate budget files, and you won't be able to access each other's budgets.
 - **Con:** If you lose your local data copy and forget your password, you can never recover your data
 - **Con:** It is not possible to turn off encryption. This is a one way process. If you would like to move back to an unencrypted file after enabling encryption, you can use the steps in the [Backup](../backup-restore/backup.md) and [Restore](../backup-restore/restore.md) sections.
 - **Con:** There is a minor performance hit because of encoding & decoding your data whenever syncing
 
-Note: even if you don’t have the password, you can still remove an encrypted file from the server.
+Note: even if you don't have the password, you can still remove an encrypted file from the server.
 
 ### Setting up End-to-End Encryption
 
