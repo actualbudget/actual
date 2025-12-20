@@ -14,7 +14,7 @@ you would have if you sold all your assets and paid off all your debts.
 
 **Cash flow** tracks your spending over time by focusing solely on budget accounts and displaying their balances.
 It includes separate visualizations for income and expenses, providing a quick overview of how these factors affect
-your available money over time. By considering your budgeted accounts as “cash on hand,” cash flow clearly shows how your available funds fluctuate.
+your available money over time. By considering your budgeted accounts as "cash on hand," cash flow clearly shows how your available funds fluctuate.
 
 These reports are detailed in the [reports section](/docs/reports/) in the manual.
 

@@ -107,6 +107,9 @@ function useSelectedCategories(
         return categories.filter(
           ({ id }) => !existingCategoryCondition.value.includes(id),
         );
+
+      default:
+        break;
     }
 
     return categories;

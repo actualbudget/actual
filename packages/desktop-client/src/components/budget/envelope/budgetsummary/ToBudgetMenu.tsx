@@ -71,7 +71,7 @@ export function ToBudgetMenu({
       ? [
           {
             name: 'reset-buffer',
-            text: t('Reset next month’s buffer'),
+            text: t("Reset next month's buffer"),
           },
         ]
       : []),

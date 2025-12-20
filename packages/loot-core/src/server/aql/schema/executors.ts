@@ -50,7 +50,7 @@ function execTransactions(
     ? (tableOptions.splits as string)
     : 'inline';
   if (!isValidSplitsOption(splitType)) {
-    throw new Error(`Invalid “splits” option for transactions: “${splitType}”`);
+    throw new Error(`Invalid "splits" option for transactions: "${splitType}"`);
   }
 
   if (splitType === 'all' || splitType === 'inline' || splitType === 'none') {
@@ -265,7 +265,7 @@ async function execCategoryGroups(
     : 'all';
   if (!isValidCategoriesOption(categoriesOption)) {
     throw new Error(
-      `Invalid “categories” option for category_groups: “${categoriesOption}”`,
+      `Invalid "categories" option for category_groups: "${categoriesOption}"`,
     );
   }
 

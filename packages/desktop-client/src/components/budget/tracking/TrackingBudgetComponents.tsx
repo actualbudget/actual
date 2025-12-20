@@ -310,7 +310,7 @@ export const CategoryMonth = memo(function CategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: `Budget set to last month’s budget.`,
+                    message: `Budget set to last month's budget.`,
                   });
                 }}
                 onSetMonthsAverage={numberOfMonths => {

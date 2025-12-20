@@ -282,7 +282,7 @@ export const numberFormats: Array<{
     label: '1\u202F000,33',
     labelNoFraction: '1\u202F000',
   },
-  { value: 'apostrophe-dot', label: '1’000.33', labelNoFraction: '1’000' },
+  { value: 'apostrophe-dot', label: "1'000.33", labelNoFraction: "1'000" },
   { value: 'comma-dot-in', label: '1,00,000.33', labelNoFraction: '1,00,000' },
 ];
 
@@ -341,7 +341,7 @@ export function getNumberFormat({
       break;
     case 'apostrophe-dot':
       locale = 'de-CH';
-      thousandsSeparator = '’';
+      thousandsSeparator = "'";
       decimalSeparator = '.';
       break;
     case 'comma-dot-in':
@@ -413,7 +413,7 @@ export function safeNumber(value: number) {
   }
   if (value > MAX_SAFE_NUMBER || value < MIN_SAFE_NUMBER) {
     throw new Error(
-      'safeNumber: can’t safely perform arithmetic with number: ' + value,
+      "safeNumber: can't safely perform arithmetic with number: " + value,
     );
   }
   return value;

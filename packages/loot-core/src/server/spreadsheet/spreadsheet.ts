@@ -268,8 +268,9 @@ export class Spreadsheet {
 
     if (!this.running && this.computeQueue.length === 0) {
       func([]);
-      // The remove function does nothing
-      return () => {};
+      return () => {
+        // The remove function does nothing
+      };
     }
 
     const remove = this.addEventListener('change', (...args) => {

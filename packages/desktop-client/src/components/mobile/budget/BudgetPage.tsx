@@ -330,7 +330,7 @@ export function BudgetPage() {
 
   // const onOpenMonthActionMenu = () => {
   //   const options = [
-  //     'Copy last month’s budget',
+  //     'Copy last month's budget',
   //     'Set budgets to zero',
   //     'Set budgets to 3 month average',
   //     budgetType === 'tracking' && 'Apply to all future budgets',
@@ -486,7 +486,7 @@ export function BudgetPage() {
             name: 'notes',
             options: {
               id: `budget-${month}`,
-              name: monthUtils.format(month, 'MMMM ‘yy', locale),
+              name: monthUtils.format(month, "MMMM ''yy", locale),
               onSave: onSaveNotes,
             },
           },
@@ -1016,7 +1016,7 @@ function MonthSelector({
         data-month={month}
       >
         <Text style={styles.underlinedText}>
-          {monthUtils.format(month, 'MMMM ‘yy', locale)}
+          {monthUtils.format(month, "MMMM ''yy", locale)}
         </Text>
       </Button>
       <Button

@@ -57,10 +57,12 @@ export function BudgetMonthMenu({
           case 'overwrite-goal-template':
             onOverwriteWithBudgetTemplates();
             break;
+          default:
+            throw new Error(`Unrecognized menu option: ${name}`);
         }
       }}
       items={[
-        { name: 'copy-last', text: t('Copy last month’s budget') },
+        { name: 'copy-last', text: t("Copy last month's budget") },
         { name: 'set-zero', text: t('Set budgets to zero') },
         {
           name: 'set-3-avg',
