@@ -55,6 +55,8 @@ export function getStatusLabel(status: string) {
       return t('missed');
     case 'scheduled':
       return t('scheduled');
+    default:
+      return t('unknown');
   }
 }
 
@@ -124,6 +126,7 @@ export function getRecurringDescription(
       });
       break;
     default:
+      break;
   }
 
   const weekendSolveModeString = config.weekendSolveMode
@@ -276,6 +279,7 @@ export function recurConfigToRSchedule(config) {
       base.end = monthUtils.parseDate(config.endDate);
       break;
     default:
+      break;
   }
 
   const abbrevDay = name => name.slice(0, 2).toUpperCase();

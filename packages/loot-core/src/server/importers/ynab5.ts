@@ -346,6 +346,8 @@ async function importTransactions(
             // So we advance to the next subtransaction
             subtransactionIdx++;
             break;
+          default:
+            throw new Error(`Unrecognized orphan transfer comparator result`);
         }
       } while (
         transactionIdx < transactions.length &&

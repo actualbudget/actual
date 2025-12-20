@@ -57,6 +57,8 @@ export function BudgetMonthMenu({
           case 'overwrite-goal-template':
             onOverwriteWithBudgetTemplates();
             break;
+          default:
+            throw new Error(`Unrecognized menu option: ${name}`);
         }
       }}
       items={[

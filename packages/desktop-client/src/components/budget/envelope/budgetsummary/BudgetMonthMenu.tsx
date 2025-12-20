@@ -62,6 +62,8 @@ export function BudgetMonthMenu({
           case 'cleanup-goal-template':
             onEndOfMonthCleanup();
             break;
+          default:
+            throw new Error(`Unrecognized menu option: ${name}`);
         }
       }}
       items={[

@@ -127,6 +127,9 @@ export class Action {
                 object[this.field] = String(result);
                 break;
               }
+              default: {
+                break;
+              }
             }
           } catch (err) {
             const error = `Error executing formula for “${this.field}”: ${err instanceof Error ? err.message : String(err)}`;
@@ -165,6 +168,8 @@ export class Action {
             case 'boolean':
               object[this.field] = object[this.field] === 'true';
               break;
+            default:
+              break;
           }
         } else {
           object[this.field] = this.value;
@@ -180,6 +185,7 @@ export class Action {
             object.amount = this.value;
             break;
           default:
+            break;
         }
         break;
       case 'link-schedule':
@@ -199,6 +205,7 @@ export class Action {
         object['tombstone'] = 1;
         break;
       default:
+        break;
     }
   }
 
