@@ -72,7 +72,7 @@ export function BudgetCell<
                 category: category.id,
               });
               showUndoNotification({
-                message: `${category.name} budget has been set last to month's budgeted amount.`,
+                message: `${category.name} budget has been set to last month's budgeted amount.`,
               });
             },
             onSetMonthsAverage: numberOfMonths => {
