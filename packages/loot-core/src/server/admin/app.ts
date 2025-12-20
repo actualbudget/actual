@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import {
-  UserAvailable,
-  UserEntity,
-  NewUserAccessEntity,
+  type UserAvailable,
+  type UserEntity,
+  type NewUserAccessEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import { del, get, patch, post } from '../post';

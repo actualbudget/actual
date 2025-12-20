@@ -20,7 +20,7 @@ import type {
 
 import { random } from './random';
 
-import { CategoryGroupDefinition } from '.';
+import { type CategoryGroupDefinition } from '.';
 
 type MockPayeeEntity = Partial<PayeeEntity> & { bill?: boolean };
 

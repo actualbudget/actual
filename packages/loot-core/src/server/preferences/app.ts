@@ -2,8 +2,8 @@ import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as fs from '../../platform/server/fs';
 import { stringToInteger } from '../../shared/util';
 import {
-  GlobalPrefs,
-  MetadataPrefs,
+  type GlobalPrefs,
+  type MetadataPrefs,
   type SyncedPrefs,
 } from '../../types/prefs';
 import { createApp } from '../app';
@@ -18,14 +18,14 @@ import {
 import { getServer } from '../server-config';
 import { undoable } from '../undo';
 
-export interface PreferencesHandlers {
+export type PreferencesHandlers = {
   'preferences/save': typeof saveSyncedPrefs;
   'preferences/get': typeof getSyncedPrefs;
   'save-global-prefs': typeof saveGlobalPrefs;
   'load-global-prefs': typeof loadGlobalPrefs;
   'save-prefs': typeof saveMetadataPrefs;
   'load-prefs': typeof loadMetadataPrefs;
-}
+};
 
 export const app = createApp<PreferencesHandlers>();
 

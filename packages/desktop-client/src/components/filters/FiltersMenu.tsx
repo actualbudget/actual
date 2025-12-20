@@ -283,7 +283,7 @@ function ConfigureField<T extends RuleConditionEntity>({
             op={op}
             options={subfieldToOptions(field, subfield)}
             style={{ marginTop: 10 }}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // oxlint-disable-next-line typescript/no-explicit-any
             onChange={(v: any) => {
               dispatch({ type: 'set-value', value: v });
             }}
