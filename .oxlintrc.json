@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "import", "jsx-a11y"],
+  "jsPlugins": ["./packages/eslint-plugin-actual/lib/index.js"],
   "env": {
     "browser": true,
     "jest": true,
@@ -18,8 +19,12 @@
     "jsx-a11y/prefer-tag-over-role": "off",
     "jsx-a11y/tabindex-no-positive": "off",
 
-    // Keep these rules
-    "no-var": "warn",
+    // Actual rules
+    "actual/typography": "warn",
+    "actual/no-untranslated-strings": "error",
+    "actual/prefer-trans-over-t": "error",
+    "actual/prefer-if-statement": "warn",
+    "actual/prefer-logger-over-console": "error",
 
     // JSX A11y rules
     "jsx-a11y/no-autofocus": [
@@ -173,6 +178,7 @@
     "eslint/no-invalid-regexp": "warn",
     "eslint/no-iterator": "warn",
     "eslint/no-label-var": "warn",
+    "eslint/no-var": "warn",
     "eslint/no-labels": [
       "warn",
       {
@@ -198,6 +204,8 @@
     "eslint/no-global-assign": "warn",
     "eslint/no-lone-blocks": "warn",
     "eslint/no-unused-labels": "warn",
+    "eslint/no-object-constructor": "warn",
+    "eslint/no-new-native-nonconstructor": "warn",
     "eslint/no-redeclare": "warn",
     "eslint/no-useless-computed-key": "warn",
     "eslint/no-useless-concat": "warn",
@@ -381,6 +389,13 @@
       ],
       "rules": {
         "react/exhaustive-deps": "off"
+      }
+    },
+    {
+      "files": ["**/*.test.{js,ts,jsx,tsx}", "packages/docs/**/*"],
+      "rules": {
+        "actual/no-untranslated-strings": "off",
+        "actual/prefer-logger-over-console": "off"
       }
     },
     {
