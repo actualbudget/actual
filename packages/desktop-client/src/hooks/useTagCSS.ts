@@ -67,9 +67,5 @@ function getTagCSSColors(theme: Theme, color?: string | null) {
     ];
   }
 
-  return [
-    'white !important', 
-    color, 
-    `color-mix(in srgb, ${color} 70%, white)`
-  ];
+  return ['white !important', color, `color-mix(in srgb, ${color} 70%, white)`];
 }
