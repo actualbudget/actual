@@ -433,10 +433,6 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         earliestTransaction={earliestTransaction}
         latestTransaction={latestTransaction}
         onChangeDates={onChangeDates}
-        conditionsOp="and"
-        onUpdateFilter={() => {}}
-        onDeleteFilter={() => {}}
-        onConditionsOpChange={() => {}}
       >
         {widget && (
           <Button variant="primary" onPress={onSaveWidget}>

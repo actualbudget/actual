@@ -208,7 +208,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
                 <TransactionTable
                   {...props}
                   transactions={transactions}
-                  loadMoreTransactions={() => {}}
+                  loadMoreTransactions={vi.fn()}
                   // @ts-ignore TODO:
                   commonPayees={[]}
                   payees={payees}

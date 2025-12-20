@@ -329,7 +329,9 @@ handlers['api/finish-import'] = async function () {
   await handlers['get-budget-bounds']();
   await sheet.waitOnSpreadsheet();
 
-  await cloudStorage.upload().catch(() => {});
+  await cloudStorage.upload().catch(() => {
+    // Ignore errors
+  });
 
   connection.send('finish-import');
   IMPORT_MODE = false;
