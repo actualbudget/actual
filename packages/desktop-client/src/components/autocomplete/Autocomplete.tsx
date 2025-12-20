@@ -693,7 +693,10 @@ function MultiAutocomplete<T extends AutocompleteItem>({
   ...props
 }: MultiAutocompleteProps<T>) {
   const [focused, setFocused] = useState(false);
-  const selectedItemIds = selectedItems.map(getItemId);
+  // Ensure selectedItems is always an array to prevent crashes when
+  // switching filter types (e.g., from "contains" to "one of")
+  const normalizedItems = Array.isArray(selectedItems) ? selectedItems : [];
+  const selectedItemIds = normalizedItems.map(getItemId);
   const inputRef = useRef(null);
   useProperFocus(inputRef, focused);
 
@@ -714,7 +717,7 @@ function MultiAutocomplete<T extends AutocompleteItem>({
     prevOnKeyDown?: ComponentProps<typeof Input>['onKeyDown'],
   ) {
     if (e.key === 'Backspace' && e.currentTarget.value === '') {
-      onRemoveItem(selectedItemIds[selectedItems.length - 1]);
+      onRemoveItem(selectedItemIds[normalizedItems.length - 1]);
     }
 
     prevOnKeyDown?.(e);
@@ -749,7 +752,7 @@ function MultiAutocomplete<T extends AutocompleteItem>({
             }),
           }}
         >
-          {selectedItems.map((item, idx) => {
+          {normalizedItems.map((item, idx) => {
             item = findItem(strict, suggestions, item);
             return (
               item && (
