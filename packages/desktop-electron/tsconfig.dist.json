@@ -9,7 +9,7 @@
     "noEmit": false,
     "declaration": true,
     "outDir": "build",
-    "rootDir": ".."
+    "rootDir": "..",
   },
   "include": ["."],
   "exclude": [
@@ -17,6 +17,6 @@
     "build/**/*",
     "e2e/**/*",
     "**/*.test.ts",
-    "**/*.spec.ts"
-  ]
+    "**/*.spec.ts",
+  ],
 }

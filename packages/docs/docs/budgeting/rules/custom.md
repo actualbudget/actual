@@ -32,10 +32,10 @@ It is recommended to also limit the rule to a specific account.
 If you are using bank syncing on both accounts in the transfer you will need to create a rule for both accounts.
 This will prevent the creation of duplicate transfers.
 The processes will look like this:
+
 1. Bank account **A** is imported and has a transfer
 2. Your rule will catch the transaction that should be labeled as a transfer and create the transfer.
 3. The transfer will show up in both accounts.
 4. Bank account **B** is imported and contains a transaction for the same transfer.
 5. Your second rule will catch the transfer transaction and set it as a transfer.
 6. Actual's deduplication will see two transfers of the same amount on the same day with the same payee and delete the duplicate.
-

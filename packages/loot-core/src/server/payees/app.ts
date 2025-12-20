@@ -1,13 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
-
-import { DEFAULT_MAX_DISTANCE } from 'loot-core/shared/constants';
-
-import { Diff } from '../../shared/util';
-import {
-  PayeeEntity,
-  PayeeLocationEntity,
-  RuleEntity,
-} from '../../types/models';
+import { type Diff } from '../../shared/util';
+import { type PayeeEntity, type RuleEntity, type PayeeLocationEntity } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
 import { payeeModel } from '../models';
@@ -15,6 +7,8 @@ import { mutator } from '../mutators';
 import { batchMessages } from '../sync';
 import * as rules from '../transactions/transaction-rules';
 import { undoable } from '../undo';
+import { v4 as uuidv4 } from 'uuid';
+import { DEFAULT_MAX_DISTANCE } from 'loot-core/shared/constants';
 
 export type PayeesHandlers = {
   'payee-create': typeof createPayee;
@@ -176,7 +170,8 @@ async function getPayeeLocations({
 
   query += ' ORDER BY created_at DESC';
 
-  return db.runQuery(query, params, true);
+  const results = await db.runQuery<PayeeLocationEntity>(query, params, true);
+  return results || [];
 }
 
 async function deletePayeeLocation({
@@ -229,16 +224,20 @@ async function getNearbyPayees({
         p.tombstone,
         -- Haversine formula to calculate distance
         ((6371 * acos(
-          cos(radians(?)) * cos(radians(pl.latitude)) * 
-          cos(radians(pl.longitude) - radians(?)) + 
-          sin(radians(?)) * sin(radians(pl.latitude))
+          MIN(1, MAX(-1,
+            cos(radians(?)) * cos(radians(pl.latitude)) * 
+            cos(radians(pl.longitude) - radians(?)) + 
+            sin(radians(?)) * sin(radians(pl.latitude))
+          ))
         ))) * 1000 as distance,
         -- Rank locations by distance for each payee
         ROW_NUMBER() OVER (PARTITION BY pl.payee_id ORDER BY (
           (6371 * acos(
-            cos(radians(?)) * cos(radians(pl.latitude)) * 
-            cos(radians(pl.longitude) - radians(?)) + 
-            sin(radians(?)) * sin(radians(pl.latitude))
+            MIN(1, MAX(-1,
+              cos(radians(?)) * cos(radians(pl.latitude)) * 
+              cos(radians(pl.longitude) - radians(?)) + 
+              sin(radians(?)) * sin(radians(pl.latitude))
+            ))
           )) * 1000
         )) as distance_rank
       FROM payee_locations pl
@@ -246,9 +245,11 @@ async function getNearbyPayees({
       WHERE p.tombstone IS NOT 1
         -- Filter by distance using Haversine formula
         AND (6371 * acos(
-          cos(radians(?)) * cos(radians(pl.latitude)) * 
-          cos(radians(pl.longitude) - radians(?)) + 
-          sin(radians(?)) * sin(radians(pl.latitude))
+          MIN(1, MAX(-1,
+            cos(radians(?)) * cos(radians(pl.latitude)) * 
+            cos(radians(pl.longitude) - radians(?)) + 
+            sin(radians(?)) * sin(radians(pl.latitude))
+          ))
         )) * 1000 <= ?
     )
     SELECT 

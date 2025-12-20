@@ -315,6 +315,7 @@ export function ModalHeader({
   return (
     <View
       role="heading"
+      aria-level={1}
       style={{
         justifyContent: 'center',
         alignItems: 'center',

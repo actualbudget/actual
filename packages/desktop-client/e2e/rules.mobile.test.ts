@@ -30,7 +30,7 @@ test.describe('Mobile Rules', () => {
   });
 
   test.afterEach(async () => {
-    await page.close();
+    await page?.close();
   });
 
   test('checks the page visuals', async () => {

@@ -1,6 +1,6 @@
 import React, {
-  ChangeEvent,
-  ComponentPropsWithRef,
+  type ChangeEvent,
+  type ComponentPropsWithRef,
   type KeyboardEvent,
   type FocusEvent,
 } from 'react';

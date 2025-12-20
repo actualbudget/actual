@@ -23,7 +23,7 @@ test.describe('Mobile Transactions', () => {
   });
 
   test.afterEach(async () => {
-    await page.close();
+    await page?.close();
   });
 
   test('creates a transaction via footer button', async () => {

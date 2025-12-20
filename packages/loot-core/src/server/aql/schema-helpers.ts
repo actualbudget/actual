@@ -25,7 +25,7 @@ export function convertInputType(value, type) {
         return toDateRepr(dayFromDate(value));
       } else if (
         value.match(/^\d{4}-\d{2}-\d{2}$/) == null ||
-        value < '2000-01-01'
+        value < '1995-01-01'
       ) {
         throw new Error('Invalid date: ' + value);
       }

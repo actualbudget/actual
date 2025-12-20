@@ -14,6 +14,7 @@ describe('unicode LIKE functionality', () => {
   });
 
   it('should match special characters', () => {
+    // oxlint-disable-next-line no-template-curly-in-string
     const result = unicodeLike('.*+^${}()|[]\\', '.*+^${}()|[]\\');
 
     expect(result).toBe(1);

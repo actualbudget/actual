@@ -1,8 +1,8 @@
 // @ts-strict-ignore
-import { GlobalPrefsJson } from '../../../types/prefs';
+import { type GlobalPrefsJson } from '../../../types/prefs';
 import { getDatabase } from '../indexeddb';
 
-import * as T from './index-types';
+import type * as T from './index-types';
 
 export const init: T.Init = function () {};
 

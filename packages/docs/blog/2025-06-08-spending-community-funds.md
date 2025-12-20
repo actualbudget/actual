@@ -22,7 +22,6 @@ We believe it’s time to recognize the financial value of labor — but before 
 
 > **Update:** This proposal has been approved. More details about the payment system can be found in the [paying contributors](/docs/contributing/leadership/paying-contributors) page.
 
-
 <!--truncate-->
 
 ## What We’re Proposing

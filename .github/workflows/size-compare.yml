@@ -15,7 +15,13 @@ on:
   pull_request_target:
     paths:
       - 'packages/**'
-      - '!packages/sync-server/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.github/workflows/size-compare.yml'
+      - '!packages/sync-server/**' # Sync server changes don't affect the size of the web/api
+      - '!packages/ci-actions/**' # CI actions changes don't affect the size of the web/api
+      - '!packages/docs/**' # Docs changes don't affect the size of the web/api
+      - '!packages/eslint-plugin-actual/**' # Eslint plugin changes don't affect the size of the web/api
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

@@ -1,12 +1,13 @@
 # Reports
 
 Currently, Actual comes with a few built in reports:
- - net worth graph
- - cash flow graph
- - spending analysis
- - text widget
- - summary card
- - calendar card
+
+- net worth graph
+- cash flow graph
+- spending analysis
+- text widget
+- summary card
+- calendar card
 
 ![](/img/reports/reports-dashboard.png)
 

@@ -13,6 +13,7 @@ This release contains the following notable improvements, along with numerous fi
 - Add CTRL/CMD+Enter keyboard command for entering only a single new transaction on desktop.
 
 <!--truncate-->
+
 **Docker Tag: v25.12.0**
 
 #### Features
@@ -127,7 +128,7 @@ This release contains the following notable improvements, along with numerous fi
 - Experimental feature: expand the currencies available and where they are displayed
 - Experimental feature: formula card and rule/report formulas
 
-*Note:* We are dropping support for Node versions older than 22 in this release. If you are using one of these versions of Node you will need to upgrade to at least Node 22.
+_Note:_ We are dropping support for Node versions older than 22 in this release. If you are using one of these versions of Node you will need to upgrade to at least Node 22.
 
 <!--truncate-->
 
@@ -374,7 +375,7 @@ This release contains the following improvements, along with numerous fixes:
 - [#5507](https://github.com/actualbudget/actual/pull/5507) Add Philippine Peso currency — thanks @joel-jeremy
 - [#5516](https://github.com/actualbudget/actual/pull/5516) Extract mobile rules editing to a dedicated page, enhancing user navigation and experience. — thanks @MatissJanis
 - [#5521](https://github.com/actualbudget/actual/pull/5521) Show the absolute date of reconciliation (e.g. "08/08/2025") in addition to the relative date (e.g. "3 days ago") — thanks @j-maas
-- [#5528](https://github.com/actualbudget/actual/pull/5528) Fix incorrect mathematical equation calculations in the  reconcile window (Bug #5527) — thanks @junyuanz1
+- [#5528](https://github.com/actualbudget/actual/pull/5528) Fix incorrect mathematical equation calculations in the reconcile window (Bug #5527) — thanks @junyuanz1
 - [#5543](https://github.com/actualbudget/actual/pull/5543) Convert EditRuleModal to TypeScript, enhancing type safety and updating save function behavior. — thanks @MatissJanis
 - [#5574](https://github.com/actualbudget/actual/pull/5574) Better readability of tags — thanks @pogman-code
 - [#5604](https://github.com/actualbudget/actual/pull/5604) Enable Make Transfer menu for child transactions — thanks @joel-jeremy
@@ -539,6 +540,7 @@ This release contains the following improvements:
 Release date: 2025-07-02
 
 This release contains the following improvements:
+
 - Fix the amount input in the rules and schedules page not allowing decimals
 
 <!--truncate-->
@@ -651,6 +653,7 @@ As of this release we are also now publishing **nightly** versions of all the NP
 Release date: 2025-06-04
 
 This release contains the following improvements:
+
 - Ensures the server version is accurately displayed when deploying using Docker
 - Fixes a rare crash when selecting dates
 - Upgrades the Docker image to use Node.js version 20
@@ -675,6 +678,7 @@ Release date: 2025-06-03
 This release includes the ability to **run the sync server from within the desktop app**. This should make it much simpler to get access to features such as bank sync.
 
 Other notable improvements:
+
 - Upcoming/missed/due schedules in a category template are now shown on the desktop budget table
 - Numerous fixes for bugs and visual glitches
 
@@ -963,7 +967,6 @@ The release has the following notable improvements:
 - [#4716](https://github.com/actualbudget/actual/pull/4716) Fix menu not closing when menu item is clicked — thanks @MatissJanis
 - [#4729](https://github.com/actualbudget/actual/pull/4729) Fix alignment of balance menu options — thanks @matt-fidd
 
-
 #### Maintenance
 
 - [#4114](https://github.com/actualbudget/actual/pull/4114) Phase 2 - Redux Toolkit Migration - budgets slice — thanks @joel-jeremy
@@ -1064,7 +1067,7 @@ Starting next release, we plan on deprecating the `@actual-app/web` NPM package.
 - [#4294](https://github.com/actualbudget/actual/pull/4294) Properly handle nynab hidden categories/groups on import — thanks @youngcw
 - [#4372](https://github.com/actualbudget/actual/pull/4372) Sync server development mode with react fast refresh — thanks @lelemm
 - [#4380](https://github.com/actualbudget/actual/pull/4380) Add button to go to current month in budget view on mobile — thanks @adastx
-- [#4388](https://github.com/actualbudget/actual/pull/4388) Add BANK\_MILLENNIUM\_BIGBPLPW, BNP\_PL\_PPABPLPK, MBANK\_RETAIL\_BREXPLPW to `BANKS_WITH_LIMITED_HISTORY` constant. — thanks @michalgolab
+- [#4388](https://github.com/actualbudget/actual/pull/4388) Add BANK_MILLENNIUM_BIGBPLPW, BNP_PL_PPABPLPK, MBANK_RETAIL_BREXPLPW to `BANKS_WITH_LIMITED_HISTORY` constant. — thanks @michalgolab
 - [#4403](https://github.com/actualbudget/actual/pull/4403) Update bank sync mapping data for existing transactions on sync — thanks @matt-fidd
 - [#4408](https://github.com/actualbudget/actual/pull/4408) Extending translations for components: Account, SidebarCategory, TotalsList, MobileNavTabs, AccountTransactions (Mobile), Accounts (Mobile), BudgetTable (Mobile), TransactionEdit (Mobile), TransactionList (Mobile), TransactionListItem (Mobile), CategoryMenuModal, CreateLocalAccountModal, ImportModal, ReportSideBar, CustomReport, Spending, Export, TransactionsTable — thanks @lelemm
 - [#4415](https://github.com/actualbudget/actual/pull/4415) Start the application with the browser's default language — thanks @lelemm
@@ -1316,6 +1319,7 @@ The release has the following notable improvements:
 Release date: 2025-01-07
 
 The release has the following notable improvements:
+
 - New calendar report card type
 - Ability to duplicate budgets
 - Experimental support for multiple users via OpenID Connect
@@ -1379,14 +1383,14 @@ The release has the following notable improvements:
 
 #### Enhancements
 
-- [#506](https://github.com/actualbudget/actual-server/pull/506) Add GoCardless integration for ENTERCARD\_SWEDNOKK — thanks @kyrias
+- [#506](https://github.com/actualbudget/actual-server/pull/506) Add GoCardless integration for ENTERCARD_SWEDNOKK — thanks @kyrias
 - [#509](https://github.com/actualbudget/actual-server/pull/509) Add more logging for GoCardless rate limit information — thanks @matt-fidd
 - [#510](https://github.com/actualbudget/actual-server/pull/510) GoCardless: `ISYBANK_ITBBITMM` should prefer valueDate over bookingDate — thanks @matt-fidd
 - [#512](https://github.com/actualbudget/actual-server/pull/512) Enhances Hype Bank transaction info parsing — thanks @guglicap
-- [#513](https://github.com/actualbudget/actual-server/pull/513) Add GoCardless integration for ABNAMRO\_ABNANL2A — thanks @nsulzer
+- [#513](https://github.com/actualbudget/actual-server/pull/513) Add GoCardless integration for ABNAMRO_ABNANL2A — thanks @nsulzer
 - [#526](https://github.com/actualbudget/actual-server/pull/526) Better invalid password message when disabling openid — thanks @lelemm
 - [#527](https://github.com/actualbudget/actual-server/pull/527) Commands to enable/disable OpenID from console. Also, enabling to login with oauth2 (for github). — thanks @lelemm
-- [#528](https://github.com/actualbudget/actual-server/pull/528) Add Deutsche Kreditbank AG (DKB) (DKB\_BYLADEM1) to the 90-days sync limited list — thanks @zenminimalist
+- [#528](https://github.com/actualbudget/actual-server/pull/528) Add Deutsche Kreditbank AG (DKB) (DKB_BYLADEM1) to the 90-days sync limited list — thanks @zenminimalist
 
 #### Bugfix
 
@@ -1394,7 +1398,7 @@ The release has the following notable improvements:
 
 #### Maintenance
 
-- [#518](https://github.com/actualbudget/actual-server/pull/518) Add support for "FORTUNEO\_FTNOFRP1XXX" to BANKS\_WITH\_LIMITED\_HISTORY — thanks @Sthaagg
+- [#518](https://github.com/actualbudget/actual-server/pull/518) Add support for "FORTUNEO_FTNOFRP1XXX" to BANKS_WITH_LIMITED_HISTORY — thanks @Sthaagg
 - [#524](https://github.com/actualbudget/actual-server/pull/524) Support for Node v22+, by upgrading the better-sqlite3 dependency. — thanks @FliegendeWurst
 
 ## 24.12.0
@@ -1402,6 +1406,7 @@ The release has the following notable improvements:
 Release date: 2024-12-06
 
 The release has the following notable improvements:
+
 - Dashboards (also called Reports) officially released as first-party feature (for details see: https://actualbudget.org/docs/tour/reports)
 - Tracking budget officially released as first-party feature (for details see https://actualbudget.org/docs/getting-started/tracking-budget)
 - New summary report card type
@@ -1480,7 +1485,7 @@ The release has the following notable improvements:
 - [#3868](https://github.com/actualbudget/actual/pull/3868) Convert PostsOfflineNotification.jsx to Typescript — thanks @joel-jeremy
 - [#3870](https://github.com/actualbudget/actual/pull/3870) Convert SimpleTransactionsTable.jsx to tsx — thanks @joel-jeremy
 - [#3871](https://github.com/actualbudget/actual/pull/3871) Summary Report: Update font size implementation to be simpler — thanks @MikesGlitch
-- [#3904](https://github.com/actualbudget/actual/pull/3904) Use useNavigate instead of accessing window.__navigate — thanks @joel-jeremy
+- [#3904](https://github.com/actualbudget/actual/pull/3904) Use useNavigate instead of accessing window.\_\_navigate — thanks @joel-jeremy
 
 ### Actual Server
 
@@ -1513,6 +1518,7 @@ The release has the following notable improvements:
 Release date: 2024-11-03
 
 The release has the following notable improvements:
+
 - Optimizations to some SimpleFIN API calls
 - Experimental support for setting the upcoming schedule duration
 - Many improvements to the experimental dashboards feature
@@ -1617,7 +1623,7 @@ The release has the following notable improvements:
 - [#481](https://github.com/actualbudget/actual-server/pull/481) Add "Fineco" bank (IT, UK) to list of banks with limited history — thanks @ftruzzi
 - [#482](https://github.com/actualbudget/actual-server/pull/482) Don't pull transactions from SimpleFIN when asking for the list of accounts. — thanks @psybers
 - [#483](https://github.com/actualbudget/actual-server/pull/483) SimpleFIN: when syncing a single account, only pull transactions for that account. — thanks @psybers
-- [#486](https://github.com/actualbudget/actual-server/pull/486) Change `access_valid_for_days` from "180" to "179" for institution "EASYBANK\_BAWAATWW" — thanks @clutwo
+- [#486](https://github.com/actualbudget/actual-server/pull/486) Change `access_valid_for_days` from "180" to "179" for institution "EASYBANK_BAWAATWW" — thanks @clutwo
 
 #### Bugfix
 

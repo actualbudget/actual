@@ -1,7 +1,7 @@
 import {
-  GoCardlessAmount,
-  GoCardlessBalance,
-  GoCardlessTransaction,
+  type GoCardlessAmount,
+  type GoCardlessBalance,
+  type GoCardlessTransaction,
 } from './gocardless';
 
 export type BankSyncBalance = GoCardlessBalance;

@@ -907,20 +907,16 @@ function NearbyPayeeItem({
           type="button"
           onClick={handleForgetClick}
           className={css({
-            bbackground: theme.errorBackground,
+            backgroundColor: theme.errorBackground,
             border: 'none',
             color: 'white',
             fontSize: '11px',
             padding: '2px 6px',
             cursor: 'pointer',
             borderRadius: 3,
-            ':hover': {
-              backgroundColor: '#c82333',
-              color: 'white',
-            },
           })}
         >
-          <Trans>{t('forget')}</Trans>
+          <Trans i18nKey="forget">Forget</Trans>
           <SvgLocationCurrent
             width={10}
             height={10}

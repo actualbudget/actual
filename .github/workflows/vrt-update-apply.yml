@@ -58,7 +58,8 @@ jobs:
         with:
           repository: ${{ steps.metadata.outputs.head_repo }}
           ref: ${{ steps.metadata.outputs.head_ref }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Validate and apply patch
@@ -121,21 +122,14 @@ jobs:
         env:
           HEAD_REF: ${{ steps.metadata.outputs.head_ref }}
           HEAD_REPO: ${{ steps.metadata.outputs.head_repo }}
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
         run: |
+          # Use PAT in URL to ensure push triggers CI workflows
+          # Note: GitHub Actions automatically masks secrets in logs
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${HEAD_REPO}.git"
+
           git push origin "HEAD:refs/heads/$HEAD_REF"
           echo "Successfully pushed VRT updates to $HEAD_REPO@$HEAD_REF"
-
-      - name: Comment on PR - Success
-        if: steps.apply.outputs.applied == 'true'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        with:
-          script: |
-            await github.rest.issues.createComment({
-              issue_number: ${{ steps.metadata.outputs.pr_number }},
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '✅ VRT screenshots have been automatically updated.'
-            });
 
       - name: Comment on PR - Failure
         if: failure() && steps.metadata.outputs.pr_number != ''

@@ -1,7 +1,7 @@
 import { AccountEntity } from './account';
 import { PayeeLocationEntity } from './payee-location';
 
-export interface PayeeEntity {
+export type PayeeEntity = {
   id: string;
   name: string;
   transfer_acct?: AccountEntity['id'];
@@ -9,4 +9,4 @@ export interface PayeeEntity {
   learn_categories?: boolean;
   tombstone?: boolean;
   location?: PayeeLocationEntity;
-}
+};

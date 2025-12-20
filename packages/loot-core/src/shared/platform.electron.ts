@@ -1,4 +1,4 @@
-const os = require('os');
+import os from 'os';
 
 const isWindows = os.platform() === 'win32';
 const isMac = os.platform() === 'darwin';

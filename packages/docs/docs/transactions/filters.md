@@ -25,7 +25,7 @@ The great thing is that you are not limited to just one Filter. You can select m
 
 There are further options within each area to narrow the filter further. Here are a couple to illustrate the choices – Dates and Categories:
 
-The `matches` operator uses *[regular expressions](https://regextutorial.org/)*, the other condition types are further explained at [Rules Page](../budgeting/rules/#condition-types).
+The `matches` operator uses _[regular expressions](https://regextutorial.org/)_, the other condition types are further explained at [Rules Page](../budgeting/rules/#condition-types).
 
 ![](/img/filtering/conditions-1.png)
 
@@ -84,4 +84,3 @@ To modify or delete the filter, click on the top-right dropdown menu. It will pr
 ![](/img/filtering/modify-saved.png)
 
 To clear out any filtered transactions, click on the dropdown menu in the top-right corner above your transactions table and click **Clear all conditions**.
-

@@ -10,26 +10,26 @@ If you're ok with truly starting completely from scratch, [just make a new file]
 Remember to [back up your budget](/docs/backup-restore/backup) before making any significant changes to your budget.
 :::
 
-
 ## Restarting Your Budget by Deleting Transactions
 
 ### Step 1: Delete All Transactions
-- Click on *All Accounts* in the left sidebar.
+
+- Click on _All Accounts_ in the left sidebar.
 - Select all transactions by clicking the checkbox at the top of the list (or use the shortcut `Ctrl + A` on Windows or `Cmd + A` on Mac).
 - Click on the lilac dropdown menu at the top of the transaction list and select **Delete**.
 
 ![Steps for deleting all transactions](/img/accounts/account-delete-all-transactions.png)
 
-
 ### Step 2: Set Starting Balances
+
 - Go to each account and set the starting balance for today's date to the current amount in that account.
 
 ### Step 3: Adjust Previous Months' Category Balances
+
 - Navigate to the month prior to your new start (e.g., the end of May, if the month you're restarting from is June).
 - Review each budget category:
   - If a category has a **negative balance**, allocate additional funds to bring the balance to zero.
   - If a category has a **positive balance**, click on the category and transfer the balance amount back to the **"To Budget"** area.
-
 
 ## Restarting Your Budget Without Deleting Transactions
 

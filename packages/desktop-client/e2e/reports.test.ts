@@ -12,22 +12,20 @@ test.describe.parallel('Reports', () => {
   let reportsPage: ReportsPage;
   let configurationPage: ConfigurationPage;
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
     navigation = new Navigation(page);
     configurationPage = new ConfigurationPage(page);
 
     await page.goto('/');
     await configurationPage.createTestFile();
-  });
 
-  test.afterAll(async () => {
-    await page.close();
-  });
-
-  test.beforeEach(async () => {
     reportsPage = await navigation.goToReportsPage();
     await reportsPage.waitToLoad();
+  });
+
+  test.afterEach(async () => {
+    await page?.close();
   });
 
   test('loads net worth and cash flow reports', async () => {

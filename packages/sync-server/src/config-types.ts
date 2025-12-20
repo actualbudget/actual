@@ -1,8 +1,8 @@
-import { ServerOptions } from 'https';
+import { type ServerOptions } from 'https';
 
 type LoginMethod = 'password' | 'header' | 'openid';
 
-export interface Config {
+export type Config = {
   mode: 'test' | 'development';
   loginMethod?: LoginMethod;
   allowedLoginMethods: LoginMethod[];
@@ -41,4 +41,4 @@ export interface Config {
   token_expiration?: 'never' | 'openid-provider' | number;
   enforceOpenId: boolean;
   userCreationMode?: 'manual' | 'login';
-}
+};

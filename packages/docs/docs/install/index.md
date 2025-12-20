@@ -1,17 +1,17 @@
 # Installing Actual
 
-The Actual Budget project is made up of two parts: the client and the server.  A server is not required for Actual to function but it is strongly recommended as it provides increased functionality. Below is a table of features of Actual and if those features work with just a client or if a server is needed.
+The Actual Budget project is made up of two parts: the client and the server. A server is not required for Actual to function but it is strongly recommended as it provides increased functionality. Below is a table of features of Actual and if those features work with just a client or if a server is needed.
 
-| Feature | Without Server | Needs Server |
-|:-|:-:|:-:|
-| Import transactions from files | X | |
-| All budgeting features (budgets, reports, schedules, etc) | X | |
-| Import or Export budget files | X | |
-| Use Actual on a mobile device | | X[^1] |
-| Use Actual in a web browser | | X[^1] |
-| Sync budget between devices| | X |
-| Use bank syncing (GoCardless or SimpleFIN)| | X |
-| Use the Actual API | | X |
+| Feature                                                   | Without Server | Needs Server |
+| :-------------------------------------------------------- | :------------: | :----------: |
+| Import transactions from files                            |       X        |              |
+| All budgeting features (budgets, reports, schedules, etc) |       X        |              |
+| Import or Export budget files                             |       X        |              |
+| Use Actual on a mobile device                             |                |    X[^1]     |
+| Use Actual in a web browser                               |                |    X[^1]     |
+| Sync budget between devices                               |                |      X       |
+| Use bank syncing (GoCardless or SimpleFIN)                |                |      X       |
+| Use the Actual API                                        |                |      X       |
 
 The standard way of using Actual is to set up a personal server and use a web browser for the application. For quick testing or getting to know Actual before setting up a server, the [demo](https://demo.actualbudget.org) or a [desktop application](https://github.com/actualbudget/actual/releases) are a good place to start.
 
@@ -32,9 +32,10 @@ This solution is not recommended for long-term use due to the maintenance requir
 ## Server-Optional Client Options
 
 Desktop applications are available for Windows, Mac, and Linux. These can be [downloaded from GitHub](https://github.com/actualbudget/actual/releases). The desktop apps have the following benefits:
-* Can connect to a server (this gives them the ability to use the server-based features)
-* Automated backups
-* Offline use is ready out of the box
+
+- Can connect to a server (this gives them the ability to use the server-based features)
+- Automated backups
+- Offline use is ready out of the box
 
 ## Server-Based Client Options
 
@@ -79,4 +80,5 @@ Content contained on external links is not managed or maintained by the Actual B
   - [actual-server](https://aur.archlinux.org/packages/actual-server) - Server and Web Client, based on `@actual-app/sync-server` NPM package, provides a systemd unit file to run the server.
 
 [^1]: You technically don't need a server instance for this. You need to run either a web-based client or a server, but a server is the same effort.
+
 [^2]: A portion of the cost to host on PikaPods is donated to the Actual Budget Project. With that said, PikaPods is a very simple, and cost-effective way to host your server.

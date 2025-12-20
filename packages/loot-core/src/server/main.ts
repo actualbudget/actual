@@ -10,7 +10,7 @@ import { logger, setVerboseMode } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { q } from '../shared/query';
 import { amountToInteger, integerToAmount } from '../shared/util';
-import { Handlers } from '../types/handlers';
+import { type Handlers } from '../types/handlers';
 
 import { app as accountsApp } from './accounts/app';
 import { app as adminApp } from './admin/app';
@@ -259,9 +259,12 @@ export async function init(config: InitConfig) {
     setServer(serverURL);
 
     if (config.password) {
-      await runHandler(handlers['subscribe-sign-in'], {
+      const result = await runHandler(handlers['subscribe-sign-in'], {
         password: config.password,
       });
+      if (result?.error) {
+        throw new Error(`Authentication failed: ${result.error}`);
+      }
     }
   } else {
     // This turns off all server URLs. In this mode we don't want any

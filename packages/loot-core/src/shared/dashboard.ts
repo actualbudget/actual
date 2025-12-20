@@ -215,6 +215,14 @@ export const DEFAULT_DASHBOARD_STATE: NewWidget[] = [
         end: '2024-03-31',
         mode: 'sliding-window',
       },
+      conditions: [
+        {
+          field: 'transfer',
+          op: 'is',
+          value: false,
+        },
+      ],
+      conditionsOp: 'and',
     },
   },
   {

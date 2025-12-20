@@ -8,6 +8,7 @@ import CodeMirror, {
 
 import { excelFormulaExtension } from './codeMirror-excelLanguage';
 
+import { autocompleteTabAcceptHighest } from '@desktop-client/components/codemirror/autocompleteTabAccept';
 import { useTheme } from '@desktop-client/style/theme';
 
 type FormulaMode = 'transaction' | 'query';
@@ -71,6 +72,8 @@ export function FormulaEditor({
       ...excelFormulaExtension(mode, queries, isDarkTheme, variables),
       EditorView.lineWrapping,
       EditorView.editable.of(!disabled),
+      // Must come late + highest precedence so Tab accepts completion when the popup is open
+      autocompleteTabAcceptHighest,
     ],
     [mode, queries, isDarkTheme, disabled, singleLine, variables],
   );

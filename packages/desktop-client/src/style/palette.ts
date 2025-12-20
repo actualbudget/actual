@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-restricted-imports
+// oxlint-disable-next-line eslint/no-restricted-imports
 import * as oldColors from './colors';
 
 // Only for use in contextual color definitions

@@ -1,0 +1,66 @@
+name: VRT Comment
+# This workflow posts VRT failure comments on PRs, including fork PRs.
+# It runs with elevated permissions via workflow_run trigger.
+on:
+  workflow_run:
+    workflows: ['E2E Tests']
+    types:
+      - completed
+
+permissions:
+  actions: read
+  pull-requests: write
+
+jobs:
+  comment:
+    name: Post VRT Comment
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.event == 'pull_request'
+    steps:
+      - name: Download VRT metadata
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          name: vrt-comment-metadata
+          path: /tmp/vrt-metadata
+        continue-on-error: true
+
+      - name: Extract metadata
+        id: metadata
+        run: |
+          if [ ! -f "/tmp/vrt-metadata/pr-number.txt" ]; then
+            echo "No metadata found, skipping..."
+            echo "should_comment=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          PR_NUMBER=$(cat "/tmp/vrt-metadata/pr-number.txt")
+          VRT_RESULT=$(cat "/tmp/vrt-metadata/vrt-result.txt")
+          ARTIFACT_URL=$(cat "/tmp/vrt-metadata/artifact-url.txt")
+
+          echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "vrt_result=$VRT_RESULT" >> "$GITHUB_OUTPUT"
+          echo "artifact_url=$ARTIFACT_URL" >> "$GITHUB_OUTPUT"
+
+          if [ "$VRT_RESULT" = "failure" ]; then
+            echo "should_comment=true" >> "$GITHUB_OUTPUT"
+            echo "VRT tests failed for PR #$PR_NUMBER"
+          else
+            echo "should_comment=false" >> "$GITHUB_OUTPUT"
+            echo "VRT tests passed or skipped for PR #$PR_NUMBER"
+          fi
+
+      - name: Comment on PR with VRT report link
+        if: steps.metadata.outputs.should_comment == 'true'
+        uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405 # v2.9.4
+        with:
+          number: ${{ steps.metadata.outputs.pr_number }}
+          header: vrt-comment
+          hide_and_recreate: true
+          hide_classify: OUTDATED
+          message: |
+            <!-- vrt-comment -->
+            VRT tests ❌ failed. [View the test report](${{ steps.metadata.outputs.artifact_url }}).
+
+            To update the VRT screenshots, comment `/update-vrt` on this PR. The VRT update operation takes about 50 minutes.

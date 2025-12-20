@@ -17,13 +17,13 @@ import {
   deleteTransaction,
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
-import { Handlers } from '../types/handlers';
+import { type Handlers } from '../types/handlers';
 import {
-  AccountEntity,
-  CategoryGroupEntity,
-  ScheduleEntity,
+  type AccountEntity,
+  type CategoryGroupEntity,
+  type ScheduleEntity,
 } from '../types/models';
-import { ServerHandlers } from '../types/server-handlers';
+import { type ServerHandlers } from '../types/server-handlers';
 
 import { addTransactions } from './accounts/sync';
 import {
@@ -34,8 +34,8 @@ import {
   payeeModel,
   remoteFileModel,
   scheduleModel,
-  APIScheduleEntity,
-  AmountOPType,
+  type APIScheduleEntity,
+  type AmountOPType,
 } from './api-models';
 import { aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';

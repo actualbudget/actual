@@ -2,7 +2,7 @@
  * Represents a transaction object specifically for import operations.
  * This type is used when importing transactions from external sources.
  */
-export interface ImportTransactionEntity {
+export type ImportTransactionEntity = {
   /** Required. The ID of the account this transaction belongs to */
   account: string;
 
@@ -53,4 +53,4 @@ export interface ImportTransactionEntity {
     category?: string;
     notes?: string;
   }>;
-}
+};

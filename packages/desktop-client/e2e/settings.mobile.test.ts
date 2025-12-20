@@ -23,7 +23,7 @@ test.describe('Mobile Settings', () => {
   });
 
   test.afterEach(async () => {
-    await page.close();
+    await page?.close();
   });
 
   test('checks that settings page can be opened', async () => {

@@ -14,7 +14,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -38,9 +37,9 @@ import { CategorySelector } from '@desktop-client/components/reports/CategorySel
 import { CrossoverGraph } from '@desktop-client/components/reports/graphs/CrossoverGraph';
 import { Header } from '@desktop-client/components/reports/Header';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -57,6 +56,7 @@ type CrossoverData = {
       x: string;
       investmentIncome: number;
       expenses: number;
+      nestEgg: number;
       isProjection?: boolean;
     }>;
     start: string;
@@ -69,7 +69,14 @@ type CrossoverData = {
   historicalReturn: number | null;
   yearsToRetire: number | null;
   targetMonthlyIncome: number | null;
+  targetNestEgg: number | null;
 };
+
+export const defaultTimeFrame = {
+  start: monthUtils.subMonths(monthUtils.currentMonth(), 120),
+  end: monthUtils.subMonths(monthUtils.currentMonth(), 1),
+  mode: 'full',
+} satisfies TimeFrame;
 
 export function Crossover() {
   const params = useParams();
@@ -108,8 +115,8 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const [start, setStart] = useState<string>('');
   const [end, setEnd] = useState<string>('');
   const [mode, setMode] = useState<TimeFrame['mode']>('static');
-  const [earliestTransactionDate, setEarliestTransactionDate] =
-    useState<string>('');
+  const [earliestTransaction, setEarliestTransaction] = useState<string>('');
+  const [latestTransaction, setLatestTransaction] = useState<string>('');
 
   const [selectedExpenseCategories, setSelectedExpenseCategories] =
     useState<Array<CategoryEntity>>(expenseCategories);
@@ -120,7 +127,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const [swr, setSwr] = useState(0.04);
   const [estimatedReturn, setEstimatedReturn] = useState<number | null>(null);
   const [projectionType, setProjectionType] = useState<'trend' | 'hampel'>(
-    'trend',
+    'hampel',
   );
   const [showHiddenCategories, setShowHiddenCategories] = useState(false);
   const [selectionsInitialized, setSelectionsInitialized] = useState(false);
@@ -154,7 +161,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     setSelectedIncomeAccountIds(initialIncomeAccountIds);
     setSwr(widget?.meta?.safeWithdrawalRate ?? 0.04);
     setEstimatedReturn(widget?.meta?.estimatedReturn ?? null);
-    setProjectionType(widget?.meta?.projectionType ?? 'trend');
+    setProjectionType(widget?.meta?.projectionType ?? 'hampel');
     setShowHiddenCategories(widget?.meta?.showHiddenCategories ?? false);
 
     setSelectionsInitialized(true);
@@ -162,49 +169,100 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
   useEffect(() => {
     async function run() {
-      const trans = await send('get-earliest-transaction');
+      const earliestTransactionData = await send('get-earliest-transaction');
+
       const currentMonth = monthUtils.currentMonth();
-      const earliestMonth = trans
-        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
-        : currentMonth;
-      const latestMonth = monthUtils.subMonths(currentMonth, 1);
+      const previousMonth = monthUtils.subMonths(currentMonth, 1);
 
-      // Initialize date range from widget meta or use default range
-      let startMonth = earliestMonth;
-      let endMonth = monthUtils.isBefore(startMonth, latestMonth)
-        ? latestMonth
-        : startMonth;
-      let timeMode: TimeFrame['mode'] = 'static';
+      // Set earliest transaction date
+      const earliestDate = earliestTransactionData
+        ? earliestTransactionData.date
+        : monthUtils.firstDayOfMonth(previousMonth);
+      setEarliestTransaction(earliestDate);
 
-      if (widget?.meta?.timeFrame?.start && widget?.meta?.timeFrame?.end) {
-        startMonth = widget.meta.timeFrame.start;
-        endMonth = widget.meta.timeFrame.end;
-        timeMode = widget.meta.timeFrame.mode || 'static';
-      }
+      // Set latest transaction date, ensuring it doesn't include current month
+      const latestDate = monthUtils.lastDayOfMonth(previousMonth);
+      setLatestTransaction(latestDate);
 
-      setStart(startMonth);
-      setEnd(endMonth);
-      setMode(timeMode);
-      setEarliestTransactionDate(earliestMonth);
-
-      const months = monthUtils
-        .rangeInclusive(earliestMonth, latestMonth)
+      const allMonths = monthUtils
+        .rangeInclusive(earliestDate, latestDate)
         .map(month => ({
           name: month,
           pretty: monthUtils.format(month, 'MMMM, yyyy'),
         }))
         .reverse();
 
-      setAllMonths(months);
+      setAllMonths(allMonths);
     }
     run();
-  }, [widget?.meta?.timeFrame]);
+  }, []);
+
+  useEffect(() => {
+    if (latestTransaction && allMonths?.length) {
+      const [initialStart, initialEnd, mode] = calculateTimeRange(
+        widget?.meta?.timeFrame,
+        defaultTimeFrame,
+        latestTransaction,
+      );
+      const earliestMonth = allMonths[allMonths.length - 1].name;
+      const latestMonth = allMonths[0].name;
+      let start = initialStart;
+      let end = initialEnd;
+
+      const clampMonth = (m: string) => {
+        if (monthUtils.isBefore(m, earliestMonth)) return earliestMonth;
+        if (monthUtils.isAfter(m, latestMonth)) return latestMonth;
+        return m;
+      };
+
+      // For both sliding-window and full modes, ensure end doesn't include current month
+      if (mode === 'sliding-window') {
+        // Shift both start and end back one month for sliding-window
+        start = clampMonth(monthUtils.subMonths(start, 1));
+        end = clampMonth(monthUtils.subMonths(end, 1));
+      } else if (mode === 'full') {
+        start = earliestMonth;
+        end = latestMonth;
+      } else {
+        start = clampMonth(start);
+        end = clampMonth(end);
+      }
+      if (monthUtils.isBefore(end, start)) {
+        end = start;
+      }
+      setStart(start);
+      setEnd(end);
+      setMode(mode);
+    }
+  }, [latestTransaction, widget?.meta?.timeFrame, allMonths]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
+    if (!allMonths?.length) {
+      return;
+    }
+    const earliestMonth = allMonths[allMonths.length - 1].name;
+    const latestMonth = allMonths[0].name;
+
+    const clampMonth = (m: string) => {
+      if (monthUtils.isBefore(m, earliestMonth)) return earliestMonth;
+      if (monthUtils.isAfter(m, latestMonth)) return latestMonth;
+      return m;
+    };
+
+    // For both sliding-window and full modes, ensure end doesn't include current month
     if (mode === 'sliding-window') {
-      // This is because we don't include the current month in the sliding window
-      start = monthUtils.subMonths(start, 1);
-      end = monthUtils.subMonths(end, 1);
+      // Shift both start and end back one month for sliding-window
+      start = clampMonth(monthUtils.subMonths(start, 1));
+      end = clampMonth(monthUtils.subMonths(end, 1));
+    } else if (mode === 'full') {
+      start = earliestMonth;
+      end = latestMonth;
+    } else {
+      start = clampMonth(start);
+      end = clampMonth(end);
+    }
+    if (monthUtils.isBefore(end, start)) {
+      end = start;
     }
     setStart(start);
     setEnd(end);
@@ -299,6 +357,9 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   // Get target monthly income from spreadsheet data
   const targetMonthlyIncome = data?.targetMonthlyIncome ?? null;
 
+  // Get target nest egg from spreadsheet data
+  const targetNestEgg = data?.targetNestEgg ?? null;
+
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
@@ -369,13 +430,13 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         end={end}
         mode={mode}
         allMonths={allMonths || []}
-        earliestTransaction={earliestTransactionDate}
+        earliestTransaction={earliestTransaction}
+        latestTransaction={latestTransaction}
         onChangeDates={onChangeDates}
         conditionsOp="and"
         onUpdateFilter={() => {}}
         onDeleteFilter={() => {}}
         onConditionsOpChange={() => {}}
-        latestTransaction=""
       >
         {widget && (
           <Button variant="primary" onPress={onSaveWidget}>
@@ -787,6 +848,20 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                   <PrivacyFilter>
                     {targetMonthlyIncome != null && !isNaN(targetMonthlyIncome)
                       ? format(targetMonthlyIncome, 'financial')
+                      : t('N/A')}
+                  </PrivacyFilter>
+                </span>
+              </View>
+              <View
+                style={{
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <span>
+                  <Trans>Target Life Savings</Trans>:{' '}
+                  <PrivacyFilter>
+                    {targetNestEgg != null && !isNaN(targetNestEgg)
+                      ? format(targetNestEgg, 'financial')
                       : t('N/A')}
                   </PrivacyFilter>
                 </span>

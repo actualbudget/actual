@@ -38,7 +38,12 @@ jobs:
           python3 -m venv .venv
           source .venv/bin/activate
           python3 -m pip install setuptools
+      - name: Process release version
+        id: process_version
+        run: |
+          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
       - if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        name: Setup Flatpak dependencies
         run: |
           sudo apt-get update
           sudo apt-get install flatpak -y
@@ -47,6 +52,14 @@ jobs:
           sudo flatpak install org.freedesktop.Sdk//24.08 -y
           sudo flatpak install org.freedesktop.Platform//24.08 -y
           sudo flatpak install org.electronjs.Electron2.BaseApp//24.08 -y
+
+          METAINFO_FILE="packages/desktop-electron/extra-resources/linux/com.actualbudget.actual.metainfo.xml"
+          TODAY=$(date +%Y-%m-%d)
+          VERSION=${{ steps.process_version.outputs.version }}
+          sed -i "s/%RELEASE_VERSION%/$VERSION/g; s/%RELEASE_DATE%/$TODAY/g" "$METAINFO_FILE"
+          sudo apt-get install appstream
+          appstreamcli --version
+          appstreamcli validate "$METAINFO_FILE"
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Electron for Mac
@@ -78,10 +91,6 @@ jobs:
           name: actual-electron-${{ matrix.os }}-appx
           path: |
             packages/desktop-electron/dist/*.appx
-      - name: Process release version
-        id: process_version
-        run: |
-          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
       - name: Add to new release
         uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
         with:
@@ -92,15 +101,29 @@ jobs:
             ## Desktop releases
             Please note: Microsoft store updates can sometimes lag behind the main release by a couple of days while they verify the new version.
 
-            <a href="https://apps.microsoft.com/detail/9p2hmlhsdbrm?cid=Github+Releases&mode=direct">
-              <img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
-            </a>
+            <p>
+              <a href="https://apps.microsoft.com/detail/9p2hmlhsdbrm?cid=Github+Releases&mode=direct"><img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200" /></a>
+              <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width="12" height="1" alt="" />
+              <a href="https://flathub.org/apps/com.actualbudget.actual"><img width="165" style="margin-left:12px;" alt="Get it on Flathub" src="https://flathub.org/api/badge?locale=en" /></a>
+            </p>
           files: |
             packages/desktop-electron/dist/*.dmg
             packages/desktop-electron/dist/*.exe
             !packages/desktop-electron/dist/Actual-windows.exe
             packages/desktop-electron/dist/*.AppImage
             packages/desktop-electron/dist/*.flatpak
+      - name: Retrieve AppImage SHA256 for Flathub
+        id: appimage_sha256
+        run: |
+          APPIMAGE_X64_SHA256=$(sha256sum packages/desktop-electron/dist/Actual-linux-x86_64.AppImage | awk '{ print $1 }')
+          APPIMAGE_ARM64_SHA256=$(sha256sum packages/desktop-electron/dist/Actual-linux-arm64.AppImage | awk '{ print $1 }')
+          echo "appimage_x64_sha256=$APPIMAGE_X64_SHA256" >> "$GITHUB_OUTPUT"
+          echo "appimage_arm64_sha256=$APPIMAGE_ARM64_SHA256" >> "$GITHUB_OUTPUT"
+
+    outputs:
+      version: ${{ steps.process_version.outputs.version }}
+      appimage_x64_sha256: ${{ steps.appimage_sha256.outputs.appimage_x64_sha256 }}
+      appimage_arm64_sha256: ${{ steps.appimage_sha256.outputs.appimage_arm64_sha256 }}
 
   publish-microsoft-store:
     needs: build
@@ -143,3 +166,39 @@ jobs:
             -NoStatus `
             -AutoCommit `
             -Force
+
+  publish-flathub:
+    needs: build
+    runs-on: ubuntu-22.04
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+    steps:
+      - name: Checkout Flathub repo
+        uses: actions/checkout@v6
+        with:
+          repository: flathub/com.actualbudget.actual
+          token: ${{ secrets.FLATHUB_GITHUB_TOKEN }}
+
+      - name: Update manifest with new SHA256
+        run: |
+          # Replace x86_64 entry
+          sed -i "/x86_64.AppImage/{n;s|sha256:.*|sha256: ${{ needs.build.outputs.appimage_x64_sha256 }}|}" com.actualbudget.actual.yml
+          sed -i "/x86_64.AppImage/s|url:.*|url: https://github.com/actualbudget/actual/releases/download/v${{ needs.build.outputs.version }}/Actual-linux-x86_64.AppImage|" com.actualbudget.actual.yml
+
+          # Replace arm64 entry
+          sed -i "/arm64.AppImage/{n;s|sha256:.*|sha256: ${{ needs.build.outputs.appimage_arm64_sha256 }}|}" com.actualbudget.actual.yml
+          sed -i "/arm64.AppImage/s|url:.*|url: https://github.com/actualbudget/actual/releases/download/v${{ needs.build.outputs.version }}/Actual-linux-arm64.AppImage|" com.actualbudget.actual.yml
+
+          cat com.actualbudget.actual.yml
+
+      - name: Create PR in Flathub repo
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.FLATHUB_GITHUB_TOKEN }}
+          commit-message: 'Update Actual flatpak to version ${{ needs.build.outputs.version }}'
+          branch: 'release/${{ needs.build.outputs.version }}'
+          title: 'Update Actual flatpak to version ${{ needs.build.outputs.version }}'
+          body: |
+            This PR updates the Actual desktop flatpak to version ${{ needs.build.outputs.version }}.
+
+            :link: [View release notes](https://actualbudget.org/blog/release-${{ needs.build.outputs.version }})
+          reviewers: 'jfdoming,MatissJanis,youngcw' # The core team that have accepted the collaborator access to the Flathub repo

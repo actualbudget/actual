@@ -1,4 +1,4 @@
-export interface Budget {
+export type Budget = {
   name?: string;
   budget_name?: string;
   accounts: Account[];
@@ -9,30 +9,30 @@ export interface Budget {
   subtransactions: Subtransaction[];
   months: Month[];
   payee_locations?: PayeeLocationsData;
-}
+};
 
 export interface PayeeLocationsData {
   data: {
     payee_locations: PayeeLocation[];
   };
-}
+};
 
-export interface Account {
+export type Account = {
   id: string;
   name: string;
   on_budget: boolean;
   deleted: boolean;
   closed: boolean;
-}
+};
 
-export interface Payee {
+export type Payee = {
   id: string;
   name: string;
   deleted: boolean;
   transfer_acct?: string;
-}
+};
 
-export interface PayeeLocation {
+export type PayeeLocation = {
   id: string;
   payee_id: string;
   latitude: string;
@@ -40,24 +40,24 @@ export interface PayeeLocation {
   deleted: boolean;
 }
 
-export interface CategoryGroup {
+export type CategoryGroup = {
   id: string;
   name: string;
   deleted: boolean;
   hidden: boolean;
   note?: string;
-}
+};
 
-export interface Category {
+export type Category = {
   id: string;
   category_group_id: string;
   name: string;
   deleted: boolean;
   hidden: boolean;
   note?: string;
-}
+};
 
-export interface Transaction {
+export type Transaction = {
   id: string;
   account_id: string;
   date: string;
@@ -70,9 +70,9 @@ export interface Transaction {
   cleared: string;
   amount: number;
   deleted: boolean;
-}
+};
 
-export interface Subtransaction {
+export type Subtransaction = {
   id: string;
   transaction_id: string;
   category_id: string;
@@ -80,15 +80,15 @@ export interface Subtransaction {
   amount: number;
   transfer_account_id: string;
   payee_id: string;
-}
+};
 
-export interface Month {
+export type Month = {
   month: string;
   categories: MonthCategory[];
-}
+};
 
-export interface MonthCategory {
+export type MonthCategory = {
   category_group_id: string;
   id: string;
   budgeted: number;
-}
+};

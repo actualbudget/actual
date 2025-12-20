@@ -3,7 +3,7 @@ import type { Template } from '../../types/models/templates';
 import { storeTemplates } from './goal-template';
 import { parse } from './goal-template.pegjs';
 import {
-  CategoryWithTemplateNote,
+  type CategoryWithTemplateNote,
   getActiveSchedules,
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,

@@ -210,15 +210,15 @@ describe('schema-helpers', () => {
     }).toThrow('Can’t convert to integer');
   });
 
-  test('dates before 2000-01-01 are rejected', () => {
+  test('dates before 1995-01-01 are rejected', () => {
     expect(() => {
       convertForInsert(basicSchema, {}, 'transactions', {
         id: 't1',
         account: 'foo',
         amount: 5,
-        date: '1999-12-31',
+        date: '1994-12-31',
       });
-    }).toThrow('Invalid date: 1999-12-31');
+    }).toThrow('Invalid date: 1994-12-31');
 
     expect(() => {
       convertForInsert(basicSchema, {}, 'transactions', {
@@ -230,13 +230,13 @@ describe('schema-helpers', () => {
     }).toThrow('Invalid date: 1900-01-01');
   });
 
-  test('dates on or after 2000-01-01 are accepted', () => {
+  test('dates on or after 1995-01-01 are accepted', () => {
     const trans = convertForInsert(basicSchema, {}, 'transactions', {
       id: 't1',
       account: 'foo',
       amount: 5,
-      date: '2000-01-01',
+      date: '1995-01-01',
     });
-    expect(trans.date).toBe(20000101);
+    expect(trans.date).toBe(19950101);
   });
 });

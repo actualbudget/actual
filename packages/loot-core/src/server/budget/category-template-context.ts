@@ -1,21 +1,21 @@
 // @ts-strict-ignore
-import { Currency, getCurrency } from 'loot-core/shared/currencies';
+import { type Currency, getCurrency } from 'loot-core/shared/currencies';
 import { q } from 'loot-core/shared/query';
 
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, integerToAmount } from '../../shared/util';
-import { CategoryEntity } from '../../types/models';
+import { type CategoryEntity } from '../../types/models';
 import {
-  AverageTemplate,
-  ByTemplate,
-  CopyTemplate,
-  GoalTemplate,
-  PercentageTemplate,
-  RemainderTemplate,
-  SimpleTemplate,
-  SpendTemplate,
-  Template,
-  PeriodicTemplate,
+  type AverageTemplate,
+  type ByTemplate,
+  type CopyTemplate,
+  type GoalTemplate,
+  type PercentageTemplate,
+  type RemainderTemplate,
+  type SimpleTemplate,
+  type SpendTemplate,
+  type Template,
+  type PeriodicTemplate,
 } from '../../types/models/templates';
 import { aqlQuery } from '../aql';
 import * as db from '../db';

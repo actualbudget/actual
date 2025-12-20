@@ -7,7 +7,7 @@ test.describe('Help menu', () => {
   let page: Page;
   let configurationPage: ConfigurationPage;
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
     configurationPage = new ConfigurationPage(page);
 
@@ -20,8 +20,8 @@ test.describe('Help menu', () => {
     await page.mouse.move(0, 0);
   });
 
-  test.afterAll(async () => {
-    await page.close();
+  test.afterEach(async () => {
+    await page?.close();
   });
 
   test('Check the help menu visuals', async () => {

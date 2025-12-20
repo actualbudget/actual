@@ -41,7 +41,6 @@ actual-server [options]
 
 If no `--config` option is set, Actual will search for a `config.json` file in the current directory. If it exists it will be used. If it doesn't exist, Actual will set a [Default Configuration](../config/index.md).
 
-
 ### Examples
 
 Run with [Default Configuration](../config/index.md):

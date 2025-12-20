@@ -64,6 +64,12 @@
       "extraResources": [
         "extra-resources/linux"
       ],
+      "desktop": {
+        "entry": {
+          "Categories": "Finance;Office",
+          "Keywords": "Budget;Finance;Money;Expenses;Savings;"
+        }
+      },
       "executableName": "actual"
     },
     "flatpak": {

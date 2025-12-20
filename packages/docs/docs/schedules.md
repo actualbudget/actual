@@ -12,14 +12,12 @@ By combining automation with proactive planning, schedules enable you to maintai
 
 ## The Schedules Overview Screen
 
-
 Most of the columns in the Schedules overview screen are self-explanatory.
 
 However, if there is ~ (tilde) in front of the _Amount_ column, it indicates that the amount is an approximate value.
 This is useful for transactions that may vary slightly each time, such as utility bills or subscriptions that change based on usage.
 
 See [Creating a Schedule](#creating-a-schedule) for more information on how to set up approximate amounts.
-
 
 ## What are Schedules?
 
@@ -34,7 +32,6 @@ Schedules can also be used to link transactions together, making it easy to trac
 Schedules can be created from scratch or existing transactions, and they can be customized to fit your specific
 needs. You can also use rules to automatically categorize and add notes to scheduled transactions, making it easier
 to keep track of your budget.
-
 
 ## Adjusting the Upcoming Length of Schedules
 
@@ -71,7 +68,6 @@ Some of the available options to tailor schedules to your needs are:
    a. "Last" day of month can be selected by selecting "Add specific days", and selecting "Last" from the day drop-down list.
    c. If you select 31st, approximately every other month will be skipped.
 
-
 ![Example of adding a schedule for a mortgage](/img/schedules/schedules-add.png)
 
 The example above shows a mortgage payment schedule which is to be executed on the 10th of July.
@@ -81,9 +77,7 @@ This is useful for transactions that occur on multiple days of the month, such a
 
 ![Example of changing the frequencey of a schedule](/img/schedules/schedules-add-repeat.png)
 
-
 The **Move schedule** checkbox allows you to move the schedule either before or after a weekend, if the selected date falls on a weekend.
-
 
 :::note
 Schedules do not account for holidays.
@@ -104,9 +98,7 @@ It may also be useful to link the schedule to transactions.
 
 ![Example of pre-adding a transaction](/img/schedules/schedules-add-with-repeat-and-autoadd.png)
 
-
-Once a schedule is started, Actual will search the transaction history for entries that match the schedule.  You can then select the matches, and will have the option to link those transactions to the current schedule. You can click on the **Find matching transactions** button to have Actual look for matches.
-
+Once a schedule is started, Actual will search the transaction history for entries that match the schedule. You can then select the matches, and will have the option to link those transactions to the current schedule. You can click on the **Find matching transactions** button to have Actual look for matches.
 
 ## Let Actual Find Scheduled Transactions
 
@@ -119,7 +111,6 @@ Click the **Find schedules** button in the bottom left corner of the Schedules p
 Select the suggested schedules you want to add, and click the **Create schedule** button. Actual will then create schedules based on the selected transactions. You may need to adjust the dates and other settings for the schedules to fit your needs after they have been created.
 
 If a schedule you expect does not appear, it may be because the payees on the transactions do not match. Ensure all transactions for a schedule use the same payee name.
-
 
 ## Creating Schedules From Transactions
 
@@ -135,7 +126,6 @@ Navigate to the Accounts page, find the transaction you wish to create a schedul
 
 In the Pop up that appears click "Create New"
 
-
 ![Rule associated with the mortgage schedule](/img/schedules/schedules-from-transactions-link-schedule.png)
 
 You are now presented with the same dialog as when creating a new schedule from scratch.
@@ -144,8 +134,6 @@ Adjust any additional fields, and then click Add.
 
 ![Rule associated with the mortgage schedule](/img/schedules/schedules-from-transaction-add-as-usual.png)
 
-
-
 ## Managing Schedules
 
 Once you have created a schedule, you can edit it by clicking on the schedule line in the Schedules view. This will open the Schedule Details dialogue, where you can edit the schedule.
@@ -153,7 +141,6 @@ Once you have created a schedule, you can edit it by clicking on the schedule li
 If you click on the ellipsis at the end of the schedule line, you will see various options to manage the schedule.
 
 ![Example of managing a schedule](/img/schedules/schedules-manage.png)
-
 
 ## How Actual Finds Schedules
 
@@ -170,7 +157,6 @@ You can resolve this issue in one of two ways.
 1. Skip the next schedule by selecting the upcoming scheduled transaction and choosing the "Skip Scheduled Date" from the menu options.
 2. Accept that the date doesn't match and leave it as is so the schedule doesn't prompt a second transaction.
 
-
 ## How To Use Rules With Schedules
 
 Many times it's desired to add notes to the scheduled transactions or to assign categories automatically. This is done with the [Rules](/docs/budgeting/rules) tool. The tool can be reached directly from the Schedules page by clicking on the **Edit as a rule** button in the edit dialog of a schedule.
@@ -178,7 +164,6 @@ Many times it's desired to add notes to the scheduled transactions or to assign 
 When you edit a schedule, the **Edit as rule** button will appear in the dialog
 
 ![Example of editing a scheudle](/img/schedules/schedules-edit-as-rule.png)
-
 
 Click on **Edit as Rule** to further customize the automatic entry.
 
@@ -192,4 +177,3 @@ Next you can select all the matching transactions that you want to apply this ru
 ![Rule associated with the mortgage schedule](/img/schedules/schedules-rule-apply-action.png)
 
 Save the rule and any time this scheduled transaction gets entered into the register it can be automatically categorized with a helpful note.
-

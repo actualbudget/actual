@@ -31,12 +31,10 @@ The server runs on `localhost` by default and mostly uses the default [server co
 
 Click **Start** to run the server.
 
-
 ![](/img/install/configure-server.png)
 <br />
 
 Upon starting the server, you’ll be prompted to create a password (if you haven’t already). Sign in to complete the configuration.
-
 
 ## Exposing your local server to the internet
 

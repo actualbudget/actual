@@ -33,7 +33,7 @@ export function CategoryGroupActionMenu({
           ? [
               {
                 name: 'apply-budget-templates-in-group',
-                text: t('Apply budget template'),
+                text: t('Overwrite with templates'),
               },
             ]
           : []),

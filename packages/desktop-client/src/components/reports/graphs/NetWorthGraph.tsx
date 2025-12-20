@@ -115,7 +115,7 @@ export function NetWorthGraph({
     payload?: PayloadItem[];
   };
 
-  // eslint-disable-next-line react/no-unstable-nested-components
+  // oxlint-disable-next-line react/no-unstable-nested-components
   const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (

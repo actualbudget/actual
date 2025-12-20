@@ -3,7 +3,7 @@ import * as db from '../db';
 
 import { parse } from './goal-template.pegjs';
 import {
-  CategoryWithTemplateNote,
+  type CategoryWithTemplateNote,
   getActiveSchedules,
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
