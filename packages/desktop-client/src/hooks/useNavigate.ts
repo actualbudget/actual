@@ -5,7 +5,7 @@ import {
   type NavigateOptions,
   type To,
   useLocation,
-  // eslint-disable-next-line no-restricted-imports
+  // oxlint-disable-next-line eslint/no-restricted-imports
   useNavigate as useNavigateReactRouter,
 } from 'react-router';
 

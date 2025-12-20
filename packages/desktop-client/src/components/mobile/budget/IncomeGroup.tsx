@@ -124,22 +124,23 @@ function IncomeGroupHeader({
 }: IncomeGroupHeaderProps) {
   return (
     <View
+      data-testid="category-group-row"
+      onClick={() => onToggleCollapse(group.id)}
       style={{
+        cursor: 'pointer',
         height: ROW_HEIGHT,
         borderBottomWidth: 1,
         borderColor: theme.tableBorder,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
         paddingLeft: 5,
         paddingRight: 5,
-        opacity: !!group.hidden ? 0.5 : undefined,
+        opacity: group.hidden ? 0.5 : undefined,
         backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetHeaderCurrentMonth
           : theme.budgetHeaderOtherMonth,
         ...style,
       }}
-      data-testid="category-group-row"
     >
       <IncomeGroupName
         group={group}

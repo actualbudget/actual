@@ -7,7 +7,7 @@ import {
   makeClientId,
   Timestamp,
 } from '@actual-app/crdt';
-import { Database } from '@jlongster/sql.js';
+import { type Database } from '@jlongster/sql.js';
 import { LRUCache } from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -15,8 +15,8 @@ import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
-import { TransactionEntity } from '../../types/models';
-import { WithRequired } from '../../types/util';
+import { type TransactionEntity } from '../../types/models';
+import { type WithRequired } from '../../types/util';
 import {
   schema,
   schemaConfig,
@@ -35,18 +35,18 @@ import { sendMessages, batchMessages } from '../sync';
 
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
 import {
-  DbAccount,
-  DbBank,
-  DbCategory,
-  DbCategoryGroup,
-  DbCategoryMapping,
-  DbClockMessage,
-  DbPayee,
-  DbPayeeMapping,
-  DbTag,
-  DbTransaction,
-  DbViewTransaction,
-  DbViewTransactionInternalAlive,
+  type DbAccount,
+  type DbBank,
+  type DbCategory,
+  type DbCategoryGroup,
+  type DbCategoryMapping,
+  type DbClockMessage,
+  type DbPayee,
+  type DbPayeeMapping,
+  type DbTag,
+  type DbTransaction,
+  type DbViewTransaction,
+  type DbViewTransactionInternalAlive,
 } from './types';
 
 export * from './types';
@@ -197,7 +197,7 @@ export async function select(table, id) {
   );
   // TODO: In the next phase, we will make this function generic
   // and pass the type of the return type to `runQuery`.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   return rows[0] as any;
 }
 
@@ -279,7 +279,7 @@ export async function selectWithSchema(table, sql, params) {
     .map(row => convertFromSelect(schema, schemaConfig, table, row))
     .filter(Boolean);
   // TODO: Make convertFromSelect generic so we don't need this cast
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   return convertedRows as any[];
 }
 

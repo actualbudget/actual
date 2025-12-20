@@ -15,9 +15,15 @@ export-2020-01-10.csv
 
 # JavaScript
 node_modules
+packages/api/app/stats.json
 packages/api/dist
 packages/api/@types
 packages/crdt/dist
+packages/desktop-client/build-stats
+packages/desktop-client/dev-dist
+packages/desktop-client/locale
+packages/desktop-client/playwright-report
+packages/desktop-client/test-results
 packages/desktop-electron/client-build
 packages/desktop-electron/build
 packages/desktop-electron/.electron-symbols
@@ -25,6 +31,8 @@ packages/desktop-electron/dist
 packages/desktop-electron/loot-core
 packages/desktop-client/service-worker
 packages/plugins-service/dist
+packages/loot-core/lib-dist
+packages/sync-server/coverage
 bundle.desktop.js
 bundle.desktop.js.map
 bundle.mobile.js

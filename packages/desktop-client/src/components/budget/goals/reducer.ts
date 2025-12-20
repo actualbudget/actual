@@ -6,7 +6,10 @@ import { type ReducerState, type DisplayTemplateType } from './constants';
 export const DEFAULT_PRIORITY = 1;
 
 export const getInitialState = (template: Template | null): ReducerState => {
-  const type = template?.type;
+  if (!template) {
+    throw new Error('Template cannot be null');
+  }
+  const type = template.type;
   switch (type) {
     case 'simple':
       return {

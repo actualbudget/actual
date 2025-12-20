@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import type { IRuleOptions } from '@rschedule/core';
 import * as d from 'date-fns';
-import { Locale } from 'date-fns';
+import { type Locale } from 'date-fns';
 import { t } from 'i18next';
 
 import {
@@ -446,7 +446,7 @@ export function getUpcomingDays(
             const future = monthUtils.addMonths(today, value);
             return monthUtils.differenceInCalendarDays(future, month) + 1;
           case 'year':
-            const futureYear = monthUtils.addYears(today, value);
+            const futureYear = monthUtils.addMonths(today, value * 12);
             return monthUtils.differenceInCalendarDays(futureYear, month) + 1;
           default:
             return 7;

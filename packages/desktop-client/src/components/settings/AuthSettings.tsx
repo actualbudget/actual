@@ -84,11 +84,11 @@ export function AuthSettings() {
                 <Trans>Disable OpenID</Trans>
               </Button>
               {multiuserEnabled && (
-                <label style={{ paddingTop: 5, color: theme.errorText }}>
+                <Text style={{ paddingTop: 5, color: theme.errorText }}>
                   <Trans>
                     Disabling OpenID will deactivate multi-user mode.
                   </Trans>
-                </label>
+                </Text>
               )}
             </>
           )}

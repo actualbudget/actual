@@ -157,6 +157,7 @@ function defaultRenderItems<T extends AutocompleteItem>(
         const name = getItemName(item);
         return (
           <div
+            key={name}
             {...getItemProps({ item })}
             // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
             // event handler they set on this element. When this code runs
@@ -180,7 +181,6 @@ function defaultRenderItems<T extends AutocompleteItem>(
             // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
             // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
             role="button"
-            key={name}
             className={css({
               padding: 5,
               cursor: 'default',

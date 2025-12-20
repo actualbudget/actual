@@ -7,7 +7,7 @@
 // * Need to check to make sure if account exists when handling
 // * transaction changes in syncing
 
-import { Timestamp } from './timestamp';
+import { type Timestamp } from './timestamp';
 
 /**
  * Represents a node within a trinary radix trie.
@@ -88,7 +88,7 @@ export function diff(trie1: TrieNode, trie2: TrieNode): number | null {
   // where the hashes differ, or otherwise when there are no leaves
   // left (this shouldn't happen, if that's the case the hash check at
   // the top of this function should pass)
-  while (1) {
+  while (true) {
     const keyset = new Set([...getKeys(node1), ...getKeys(node2)]);
     const keys = [...keyset.values()];
     keys.sort();
@@ -134,7 +134,7 @@ export function diff(trie1: TrieNode, trie2: TrieNode): number | null {
     node2 = node2[diffkey] || emptyTrie();
   }
 
-  // eslint-disable-next-line no-unreachable
+  // oxlint-disable-next-line no-unreachable
   return null;
 }
 

@@ -5,13 +5,13 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "allowJs": false,
-    "noEmit": false
+    "noEmit": false,
   },
   "include": ["./typings", "./src/server/*"],
   "exclude": [
     "**/node_modules/*",
     "**/build/*",
     "**/lib-dist/*",
-    "./src/server/bench.ts"
-  ]
+    "./src/server/bench.ts",
+  ],
 }
