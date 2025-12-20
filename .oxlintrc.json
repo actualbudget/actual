@@ -413,6 +413,5 @@
         "eslint/no-empty-function": "off"
       }
     }
-    }
   ]
 }
