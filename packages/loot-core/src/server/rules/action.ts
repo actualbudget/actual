@@ -99,7 +99,7 @@ export class Action {
                     : parseFloat(String(result));
 
                 if (isNaN(numValue)) {
-                  const error = `Formula for “${this.field}" must produce a numeric value. Got: ${JSON.stringify(result)}`;
+                  const error = `Formula for "${this.field}" must produce a numeric value. Got: ${JSON.stringify(result)}`;
                   object._ruleErrors.push(error);
                 } else {
                   object[this.field] = numValue;
@@ -111,7 +111,7 @@ export class Action {
                 if (parsed && dateFns.isValid(parsed)) {
                   object[this.field] = format(parsed, 'yyyy-MM-dd');
                 } else {
-                  const error = `Formula for “${this.field}" must produce a valid date. Got: ${JSON.stringify(result)}`;
+                  const error = `Formula for "${this.field}" must produce a valid date. Got: ${JSON.stringify(result)}`;
                   object._ruleErrors.push(error);
                 }
                 break;
@@ -129,7 +129,7 @@ export class Action {
               }
             }
           } catch (err) {
-            const error = `Error executing formula for “${this.field}": ${err instanceof Error ? err.message : String(err)}`;
+            const error = `Error executing formula for "${this.field}": ${err instanceof Error ? err.message : String(err)}`;
             object._ruleErrors.push(error);
             break;
           }
@@ -154,7 +154,7 @@ export class Action {
               } else {
                 // Keep original string; log for diagnostics but avoid hard crash
                 logger.error(
-                  `rules: invalid date produced by template for field “${this.field}":`,
+                  `rules: invalid date produced by template for field "${this.field}":`,
                   object[this.field],
                 );
                 // Make it stick like a sore thumb

@@ -53,7 +53,7 @@ export function serializeTransaction(
     // stops the UI from crashing, but this is a serious problem with
     // the data. This allows the user to go through and see empty
     // dates and manually fix them.
-    console.error(`Date ‘${date}' is not valid.`);
+    console.error(`Date '${date}' is not valid.`);
     // TODO: the fact that the date type is not nullable but we are setting it to null needs to be changed
     date = null as unknown as string;
   }

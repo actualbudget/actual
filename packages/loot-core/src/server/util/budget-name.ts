@@ -32,7 +32,7 @@ export async function validateBudgetName(
     message = 'Budget name is too long (max length 100)';
   }
   if (uniqueName !== trimmedName) {
-    message = `“${name}" already exists, try "${uniqueName}" instead`;
+    message = `"${name}" already exists, try "${uniqueName}" instead`;
   }
 
   return message ? { valid: false, message } : { valid: true };

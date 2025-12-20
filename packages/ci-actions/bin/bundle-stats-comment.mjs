@@ -22,7 +22,7 @@ function parseRawArgs(argv) {
 
     if (!key?.startsWith('--')) {
       throw new Error(
-        `Unexpected argument “${key ?? ''}". Use --key value pairs.`,
+        `Unexpected argument "${key ?? ''}". Use --key value pairs.`,
       );
     }
 
@@ -34,7 +34,7 @@ function parseRawArgs(argv) {
     }
 
     if (values.length === 0) {
-      throw new Error(`Missing value for argument “${key}".`);
+      throw new Error(`Missing value for argument "${key}".`);
     }
 
     const keyName = key.slice(2);
@@ -55,14 +55,14 @@ function getSingleValue(args, key) {
     return undefined;
   }
   if (values.length !== 1) {
-    throw new Error(`Argument “--${key}" must have exactly one value.`);
+    throw new Error(`Argument "--${key}" must have exactly one value.`);
   }
   return values[0];
 }
 
 function parseMapping(values, key, description) {
   if (!values || values.length === 0) {
-    throw new Error(`Missing required argument “--${key}" (${description}).`);
+    throw new Error(`Missing required argument "--${key}" (${description}).`);
   }
 
   if (values.length === 1) {
@@ -81,7 +81,7 @@ function parseMapping(values, key, description) {
           Object.entries(parsed).map(([name, pathValue]) => {
             if (typeof pathValue !== 'string') {
               throw new Error(
-                `Value for “${name}" in "--${key}" must be a string path.`,
+                `Value for "${name}" in "--${key}" must be a string path.`,
               );
             }
             return [name, pathValue];
@@ -91,7 +91,7 @@ function parseMapping(values, key, description) {
         const message =
           error instanceof Error ? error.message : 'Unknown parsing error';
         throw new Error(
-          `Failed to parse “--${key}" value as JSON object: ${message}`,
+          `Failed to parse "--${key}" value as JSON object: ${message}`,
         );
       }
     }
@@ -104,7 +104,7 @@ function parseMapping(values, key, description) {
 
     if (!rawName || rawPathParts.length === 0) {
       throw new Error(
-        `Argument “--${key}" must be provided as name=path pairs or a JSON object.`,
+        `Argument "--${key}" must be provided as name=path pairs or a JSON object.`,
       );
     }
 
@@ -112,12 +112,12 @@ function parseMapping(values, key, description) {
     const pathValue = rawPathParts.join('=').trim();
 
     if (!name) {
-      throw new Error(`Argument “--${key}" contains an empty bundle name.`);
+      throw new Error(`Argument "--${key}" contains an empty bundle name.`);
     }
 
     if (!pathValue) {
       throw new Error(
-        `Argument “--${key}" for bundle "${name}" must include a non-empty path.`,
+        `Argument "--${key}" for bundle "${name}" must include a non-empty path.`,
       );
     }
 
@@ -125,7 +125,7 @@ function parseMapping(values, key, description) {
   }
 
   if (entries.size === 0) {
-    throw new Error(`Argument “--${key}" must define at least one bundle.`);
+    throw new Error(`Argument "--${key}" must define at least one bundle.`);
   }
 
   return entries;
@@ -152,7 +152,7 @@ function parseArgs(argv) {
 
     if (!headPath) {
       throw new Error(
-        `Bundle “${name}" is missing a corresponding "--head" entry.`,
+        `Bundle "${name}" is missing a corresponding "--head" entry.`,
       );
     }
 
@@ -166,7 +166,7 @@ function parseArgs(argv) {
   for (const name of headMap.keys()) {
     if (!baseMap.has(name)) {
       throw new Error(
-        `Bundle “${name}" is missing a corresponding "--base" entry.`,
+        `Bundle "${name}" is missing a corresponding "--base" entry.`,
       );
     }
   }
@@ -194,8 +194,8 @@ async function loadStats(filePath) {
       error instanceof Error
         ? error.message
         : 'Unknown error while parsing stats file';
-    console.error(`[bundle-stats] Failed to parse “${filePath}": ${message}`);
-    throw new Error(`Failed to load stats file “${filePath}": ${message}`);
+    console.error(`[bundle-stats] Failed to parse "${filePath}": ${message}`);
+    throw new Error(`Failed to load stats file "${filePath}": ${message}`);
   }
 }
 

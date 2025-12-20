@@ -436,7 +436,7 @@ export async function insertCategory(
     );
     if (existingCatInGroup) {
       throw new Error(
-        `Category ‘${category.name}' already exists in group '${category.cat_group}'`,
+        `Category '${category.name}' already exists in group '${category.cat_group}'`,
       );
     }
 

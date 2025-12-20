@@ -8,7 +8,7 @@ import { EnvelopeBudgetSummaryModal } from './mobile-envelope-budget-summary-mod
 import { TrackingBudgetSummaryModal } from './mobile-tracking-budget-summary-modal';
 
 export class MobileBudgetPage {
-  readonly MONTH_HEADER_DATE_FORMAT = 'MMMM ‘yy';
+  readonly MONTH_HEADER_DATE_FORMAT = "MMMM 'yy";
 
   readonly page: Page;
   readonly heading: Locator;

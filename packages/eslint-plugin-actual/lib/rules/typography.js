@@ -26,8 +26,13 @@ module.exports = {
     //----------------------------------------------------------------------
 
     function check(node, { value = node.value, strip = false } = {}) {
-      // U+2019: right single quotation mark, U+201D: right double quotation mark
-      if (!value.includes('\u2019') && !value.includes('\u201D')) return;
+      if (
+        !value.includes('\u2018') &&
+        !value.includes('\u2019') &&
+        !value.includes('\u201C') &&
+        !value.includes('\u201D')
+      )
+        return;
 
       let rawText = context.getSourceCode().getText(node);
       const originalRawText = rawText;

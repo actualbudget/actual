@@ -47,13 +47,13 @@ function typed(value, type, { literal = false } = {}) {
 
 function getFieldDescription(schema, tableName, field) {
   if (schema[tableName] == null) {
-    throw new CompileError(`Table “${tableName}" does not exist in the schema`);
+    throw new CompileError(`Table "${tableName}" does not exist in the schema`);
   }
 
   const fieldDesc = schema[tableName][field];
   if (fieldDesc == null) {
     throw new CompileError(
-      `Field “${field}" does not exist in table "${tableName}"`,
+      `Field "${field}" does not exist in table "${tableName}"`,
     );
   }
   return fieldDesc;
@@ -78,7 +78,7 @@ function makePath(state, path) {
 
     if (!table[field] || table[field].ref == null) {
       throw new CompileError(
-        `Field not joinable on table ${tableName}: “${field}"`,
+        `Field not joinable on table ${tableName}: "${field}"`,
       );
     }
 
@@ -227,7 +227,7 @@ function inferParam(param, type) {
       (!casts[type] || !casts[type].includes(existingType))
     ) {
       throw new Error(
-        `Parameter “${param.paramName}" can't convert to ${type} (already inferred as ${existingType})`,
+        `Parameter "${param.paramName}" can't convert to ${type} (already inferred as ${existingType})`,
       );
     }
   } else {
@@ -521,7 +521,7 @@ const compileFunction = saveStack('function', (state, func) => {
 
   if (name[0] !== '$') {
     throw new CompileError(
-      `Unknown property “${name}." Did you mean to call a function? Try prefixing it with $`,
+      `Unknown property "${name}." Did you mean to call a function? Try prefixing it with $`,
     );
   }
 
@@ -858,7 +858,7 @@ function expandStar(state, expr) {
 
   const table = state.schema[pathInfo.tableName];
   if (table == null) {
-    throw new Error(`Table “${pathInfo.tableName}" does not exist`);
+    throw new Error(`Table "${pathInfo.tableName}" does not exist`);
   }
 
   return Object.keys(table).map(field => (path ? `${path}.${field}` : field));
@@ -895,7 +895,7 @@ const compileSelect = saveStack(
       if (name[0] === '$') {
         state.compileStack.push({ type: 'value', value: expr });
         throw new CompileError(
-          `Invalid field “${name}", are you trying to select a function? You need to name the expression`,
+          `Invalid field "${name}", are you trying to select a function? You need to name the expression`,
         );
       }
 

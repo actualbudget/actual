@@ -509,7 +509,7 @@ function QueryItem({
           }}
         >
           <Text style={{ fontWeight: 600, fontFamily: 'monospace' }}>
-            <Trans>QUERY(‘{queryName}')</Trans>
+            <Trans>QUERY('{queryName}')</Trans>
           </Text>
         </View>
         <View

@@ -45,7 +45,7 @@ export function BudgetTypeSettings() {
           <strong>Envelope budgeting</strong> (recommended) digitally mimics
           physical envelope budgeting system by allocating funds into virtual
           envelopes for different expenses. It helps track spending and ensure
-          you don‘t overspend in any category.
+          you don't overspend in any category.
         </Trans>{' '}
         <Link
           variant="external"

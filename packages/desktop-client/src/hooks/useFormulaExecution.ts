@@ -75,7 +75,7 @@ export function useFormulaExecution(
           const queryConfig = queries[queryName];
 
           if (!queryConfig) {
-            console.warn(`Query “${queryName}" not found in queries config`);
+            console.warn(`Query "${queryName}" not found in queries config`);
             queryData[queryName] = 0;
             continue;
           }
@@ -88,7 +88,7 @@ export function useFormulaExecution(
           const queryConfig = queries[queryName];
 
           if (!queryConfig) {
-            console.warn(`Query “${queryName}" not found in queries config`);
+            console.warn(`Query "${queryName}" not found in queries config`);
             queryCountData[queryName] = 0;
             continue;
           }
