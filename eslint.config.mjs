@@ -158,7 +158,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['**/*.test.{js,ts,jsx,tsx}', 'packages/docs/**/*'],
+    files: ['packages/docs/**/*'],
     rules: {
       'no-restricted-syntax': 'off',
     },
