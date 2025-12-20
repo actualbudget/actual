@@ -44,22 +44,15 @@ module.exports = {
       if (matches.length === 0) return;
 
       const sourceCode = context.getSourceCode();
-      const firstMatch = matches[0];
-      const index = node.range[0] + firstMatch.index + (strip ? 1 : 0);
 
-      context.report({
-        node,
-        loc: {
-          start: sourceCode.getLocFromIndex(index),
-          end: sourceCode.getLocFromIndex(index + 1),
-        },
-        messageId: 'quote',
-        fix(fixer) {
-          // Determine the quote delimiter type
-          const firstChar = originalRawText[0];
-          const isSingleQuoted = firstChar === "'";
-          const isDoubleQuoted = firstChar === '"';
+      // Determine the quote delimiter type for fixing
+      const firstChar = originalRawText[0];
+      const isSingleQuoted = firstChar === "'";
+      const isDoubleQuoted = firstChar === '"';
 
+      // Create a shared fix function that replaces all curly quotes
+      const createFix = () => {
+        return fixer => {
           // Replace curly quotes with appropriate straight quotes
           // Escape them if they match the delimiter
           const fixedText = originalRawText.replace(curlyQuoteRegex, match => {
@@ -86,8 +79,22 @@ module.exports = {
             [node.range[0], node.range[1]],
             fixedText,
           );
-        },
-      });
+        };
+      };
+
+      // Report one error per curly quote match
+      for (const match of matches) {
+        const index = node.range[0] + match.index + (strip ? 1 : 0);
+        context.report({
+          node,
+          loc: {
+            start: sourceCode.getLocFromIndex(index),
+            end: sourceCode.getLocFromIndex(index + 1),
+          },
+          messageId: 'quote',
+          fix: createFix(),
+        });
+      }
     }
 
     function isMemberCall(node, object, properties) {

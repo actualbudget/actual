@@ -46,6 +46,7 @@ describe('arithmetic', () => {
     expect(evalArithmetic('1\u202F222,45')).toEqual(1222.45);
 
     setNumberFormat({ format: 'apostrophe-dot', hideFraction: false });
-    expect(evalArithmetic("1'222.45")).toEqual(1222.45);
+    // eslint-disable-next-line actual/typography
+    expect(evalArithmetic('1’222.45')).toEqual(1222.45);
   });
 });
