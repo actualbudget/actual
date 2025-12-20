@@ -5,8 +5,11 @@ import {
   getDateWithSkippedWeekend,
   extractScheduleConds,
 } from '../../shared/schedules';
-import { CategoryEntity } from '../../types/models';
-import { ScheduleTemplate, Template } from '../../types/models/templates';
+import { type CategoryEntity } from '../../types/models';
+import {
+  type ScheduleTemplate,
+  type Template,
+} from '../../types/models/templates';
 import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
 
