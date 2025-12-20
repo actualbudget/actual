@@ -61,7 +61,11 @@ function getTagCSSColors(theme: Theme, color?: string | null) {
 
   if (brightnessDiff >= 125) {
     // !important is used to override the hover text color in button.tsx used to style the tag button
-    return ['black !important', color, `color-mix(in srgb, ${color} 80%, black)`,];
+    return [
+      'black !important',
+      color,
+      `color-mix(in srgb, ${color} 80%, black)`,
+    ];
   }
 
   return ['white !important', color, `color-mix(in srgb, ${color} 70%, white)`];
