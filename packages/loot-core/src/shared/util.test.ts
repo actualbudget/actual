@@ -123,6 +123,15 @@ describe('utility functions', () => {
     expect(formatter.format(Number('1234.56'))).toBe(`1\u2019235`);
   });
 
+  test('number formatting works with small negative numbers with 0 decimal places', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    const formatter = getNumberFormat().formatter;
+    expect(formatter.format(Number('-0.1'))).toBe('0');
+    expect(formatter.format(Number('-0.5'))).toBe('-1');
+    expect(formatter.format(Number('-0.9'))).toBe('-1');
+    expect(formatter.format(Number('-1.2'))).toBe('-1');
+  });
+
   test('currencyToAmount works with basic numbers', () => {
     expect(currencyToAmount('3')).toBe(3);
     expect(currencyToAmount('3.4')).toBe(3.4);
