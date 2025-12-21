@@ -25,6 +25,10 @@
     "actual/prefer-trans-over-t": "error",
     "actual/prefer-if-statement": "warn",
     "actual/prefer-logger-over-console": "error",
+    "actual/object-shorthand-properties": "warn",
+    "actual/prefer-const": "warn",
+    "actual/no-anchor-tag": "warn",
+    "actual/no-react-default-import": "warn",
 
     // JSX A11y rules
     "jsx-a11y/no-autofocus": [
@@ -407,6 +411,12 @@
       ],
       "rules": {
         "import/no-default-export": "off"
+      }
+    },
+    {
+      "files": ["packages/docs/**/*"],
+      "rules": {
+        "actual/no-anchor-tag": "off"
       }
     },
     // TODO: enable these
