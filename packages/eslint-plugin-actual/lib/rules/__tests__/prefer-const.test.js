@@ -49,7 +49,7 @@ runClassic(
       `function test(x) { return x; }`,
 
       // Variables in different scopes
-      `let x = 1; function test() { let x = 2; x = 3; }`,
+      `const x = 1; function test() { let x = 2; x = 3; }`,
     ],
 
     invalid: [

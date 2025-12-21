@@ -19,12 +19,26 @@ module.exports = {
 
   create(context) {
     const sourceCode = context.getSourceCode();
-    const reassignedVariables = new Set();
+    // Map of scope to Set of reassigned variable names in that scope
+    const reassignedVariablesByScope = new Map();
     const letDeclarations = [];
 
     //----------------------------------------------------------------------
     // Helpers
     //----------------------------------------------------------------------
+
+    /**
+     * Gets the scope for a node
+     * @param {import('estree').Node} node
+     * @returns {import('eslint').Scope.Scope | null}
+     */
+    function getScope(node) {
+      try {
+        return sourceCode.getScope(node);
+      } catch {
+        return null;
+      }
+    }
 
     /**
      * Gets the variable name from an identifier node
@@ -36,6 +50,74 @@ module.exports = {
         return node.name;
       }
       return null;
+    }
+
+    /**
+     * Marks a variable as reassigned in its scope
+     * @param {string} name
+     * @param {import('estree').Node} node
+     */
+    function markAsReassigned(name, node) {
+      const scope = getScope(node);
+      if (scope) {
+        // Get the identifier being assigned
+        let identifier = null;
+        if (node.type === 'AssignmentExpression') {
+          identifier = node.left.type === 'Identifier' ? node.left : null;
+        } else if (node.type === 'UpdateExpression') {
+          identifier =
+            node.argument.type === 'Identifier' ? node.argument : null;
+        }
+
+        if (identifier) {
+          // Use ESLint's scope analysis to find the variable being referenced
+          // Search from the identifier's scope upward to find the variable
+          let identifierScope = getScope(identifier);
+          while (identifierScope) {
+            const variable = identifierScope.variables.find(
+              v => v.name === name,
+            );
+            if (variable) {
+              // Found the variable - it's declared in identifierScope
+              // (variables in a scope's variables array are declared in that scope)
+              if (!reassignedVariablesByScope.has(identifierScope)) {
+                reassignedVariablesByScope.set(identifierScope, new Set());
+              }
+              reassignedVariablesByScope.get(identifierScope).add(name);
+              return;
+            }
+            identifierScope = identifierScope.upper;
+          }
+        }
+
+        // Fallback: find variable in scope chain (for destructuring, etc.)
+        let currentScope = scope;
+        while (currentScope) {
+          const variable = currentScope.variables.find(
+            v => v.name === name && v.defs.length > 0,
+          );
+          if (variable) {
+            // Variable is declared in currentScope (it's in currentScope.variables)
+            if (!reassignedVariablesByScope.has(currentScope)) {
+              reassignedVariablesByScope.set(currentScope, new Set());
+            }
+            reassignedVariablesByScope.get(currentScope).add(name);
+            return;
+          }
+          currentScope = currentScope.upper;
+        }
+      }
+    }
+
+    /**
+     * Checks if a variable is reassigned in its scope
+     * @param {string} name
+     * @param {import('eslint').Scope.Scope} variableScope
+     * @returns {boolean}
+     */
+    function isReassignedInScope(name, variableScope) {
+      const reassigned = reassignedVariablesByScope.get(variableScope);
+      return reassigned ? reassigned.has(name) : false;
     }
 
     /**
@@ -110,12 +192,12 @@ module.exports = {
         // Handle simple assignments: x = value
         const name = getVariableName(node.left);
         if (name) {
-          reassignedVariables.add(name);
+          markAsReassigned(name, node);
         } else {
           // Handle destructuring assignments: ({ x } = value) or [x] = value
           const patternNames = extractVariableNames(node.left);
           for (const patternName of patternNames) {
-            reassignedVariables.add(patternName);
+            markAsReassigned(patternName, node);
           }
         }
       },
@@ -124,7 +206,7 @@ module.exports = {
       UpdateExpression(node) {
         const name = getVariableName(node.argument);
         if (name) {
-          reassignedVariables.add(name);
+          markAsReassigned(name, node);
         }
       },
 
@@ -134,14 +216,14 @@ module.exports = {
           for (const declarator of node.init.declarations) {
             const name = getVariableName(declarator.id);
             if (name) {
-              reassignedVariables.add(name);
+              markAsReassigned(name, node);
             }
           }
         }
         if (node.update) {
           const name = getVariableName(node.update);
           if (name) {
-            reassignedVariables.add(name);
+            markAsReassigned(name, node);
           }
         }
       },
@@ -151,7 +233,7 @@ module.exports = {
           for (const declarator of node.left.declarations) {
             const name = getVariableName(declarator.id);
             if (name) {
-              reassignedVariables.add(name);
+              markAsReassigned(name, node);
             }
           }
         }
@@ -162,7 +244,7 @@ module.exports = {
           for (const declarator of node.left.declarations) {
             const name = getVariableName(declarator.id);
             if (name) {
-              reassignedVariables.add(name);
+              markAsReassigned(name, node);
             }
           }
         }
@@ -178,27 +260,56 @@ module.exports = {
       // Check all let declarations at the end
       'Program:exit'() {
         for (const node of letDeclarations) {
-          // Collect all variables in this declaration
-          const allVariablesInDeclaration = new Set();
+          const nodeScope = getScope(node);
+          if (!nodeScope) continue;
+
+          // Collect all variables in this declaration with their scopes
+          // Variables declared in a VariableDeclaration are in the scope that contains that declaration
+          const allVariablesInDeclaration = new Map();
           for (const declarator of node.declarations) {
             const variableNames = extractVariableNames(declarator.id);
             for (const name of variableNames) {
-              allVariablesInDeclaration.add(name);
+              // Find the variable in nodeScope (where it should be declared)
+              // Use the scope where we actually find the variable
+              let variableScope = nodeScope;
+              const variable = nodeScope.variables.find(v => v.name === name);
+              if (variable) {
+                // Variable found in nodeScope - use nodeScope
+                variableScope = nodeScope;
+              } else {
+                // Variable not found in nodeScope, search upward (shouldn't happen, but be safe)
+                let currentScope = nodeScope.upper;
+                while (currentScope) {
+                  const foundVar = currentScope.variables.find(
+                    v => v.name === name,
+                  );
+                  if (foundVar) {
+                    variableScope = currentScope;
+                    break;
+                  }
+                  currentScope = currentScope.upper;
+                }
+              }
+              allVariablesInDeclaration.set(name, variableScope);
             }
           }
 
           // Check if all variables in this declaration can be const
-          const allCanBeConst = Array.from(allVariablesInDeclaration).every(
-            name => !reassignedVariables.has(name),
-          );
+          const allCanBeConst = Array.from(
+            allVariablesInDeclaration.entries(),
+          ).every(([name, varScope]) => !isReassignedInScope(name, varScope));
 
           // Check each declarator
           for (const declarator of node.declarations) {
             const variableNames = extractVariableNames(declarator.id);
 
             for (const variableName of variableNames) {
-              // Skip if the variable is reassigned
-              if (reassignedVariables.has(variableName)) {
+              // Get the scope for this variable
+              const variableScope = allVariablesInDeclaration.get(variableName);
+              if (!variableScope) continue;
+
+              // Skip if the variable is reassigned in its scope
+              if (isReassignedInScope(variableName, variableScope)) {
                 continue;
               }
 
