@@ -81,6 +81,7 @@ const exportModel = {
           'markdown-card',
           'summary-card',
           'calendar-card',
+          'formula-card',
         ].includes(widget.type)
       ) {
         throw new ValidationError(

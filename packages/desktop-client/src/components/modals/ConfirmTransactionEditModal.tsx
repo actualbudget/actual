@@ -78,7 +78,7 @@ export function ConfirmTransactionEditModal({
             ) : confirmReason === 'unlockReconciled' ? (
               <Block>
                 <Trans>
-                  Unlocking this transaction means you won‘t be warned about
+                  Unlocking this transaction means you won't be warned about
                   changes that can impact your reconciled balance. (Changes to
                   amount, account, payee, etc).
                 </Trans>

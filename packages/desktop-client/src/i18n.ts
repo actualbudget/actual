@@ -7,9 +7,9 @@ import * as Platform from 'loot-core/shared/platform';
 
 import { languages } from './languages';
 
-export const availableLanguages = Object.keys(languages).map(
-  path => path.split('/')[2].split('.')[0],
-);
+export const availableLanguages = Platform.isPlaywright
+  ? []
+  : Object.keys(languages).map(path => path.split('/')[2].split('.')[0]);
 
 const isLanguageAvailable = (language: string) =>
   Object.hasOwn(languages, `/locale/${language}.json`);
@@ -43,9 +43,7 @@ i18n
 export const setI18NextLanguage = (language: string) => {
   if (!language) {
     // System default
-    setI18NextLanguage(
-      Platform.isPlaywright ? 'cimode' : navigator.language || 'en',
-    );
+    setI18NextLanguage(navigator.language || 'en');
     return;
   }
 

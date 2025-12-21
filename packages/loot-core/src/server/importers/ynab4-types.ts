@@ -1,4 +1,4 @@
-export interface YFull {
+export type YFull = {
   masterCategories: MasterCategory[];
   payees: Payee[];
   monthlyBudgets: MonthlyBudget[];
@@ -8,9 +8,9 @@ export interface YFull {
   // accountMappings: [];
   budgetMetaData: BudgetMetaData;
   accounts: Account[];
-}
+};
 
-export interface MasterCategory {
+export type MasterCategory = {
   entityType: string;
   expanded: boolean;
   note?: string;
@@ -24,9 +24,9 @@ export interface MasterCategory {
 
   // speculative
   isTombstone?: boolean;
-}
+};
 
-export interface SubCategory {
+export type SubCategory = {
   entityType: string;
   name: string;
   note?: string;
@@ -39,9 +39,9 @@ export interface SubCategory {
 
   // speculative
   isTombstone?: boolean;
-}
+};
 
-export interface Payee {
+export type Payee = {
   entityType: string;
   autoFillCategoryId?: string;
   autoFillAmount: number;
@@ -56,26 +56,26 @@ export interface Payee {
 
   // speculative
   isTombstone?: boolean;
-}
+};
 
-export interface RenameCondition {
+export type RenameCondition = {
   entityType: string;
   parentPayeeId: string;
   operator: string;
   operand: string;
   entityVersion: string;
   entityId: string;
-}
+};
 
-export interface MonthlyBudget {
+export type MonthlyBudget = {
   entityType: string;
   monthlySubCategoryBudgets: MonthlySubCategoryBudget[];
   month: string;
   entityVersion: string;
   entityId: string;
-}
+};
 
-export interface MonthlySubCategoryBudget {
+export type MonthlySubCategoryBudget = {
   entityType: string;
   categoryId: string;
   budgeted: number;
@@ -86,15 +86,15 @@ export interface MonthlySubCategoryBudget {
 
   // speculative
   isTombstone?: boolean;
-}
+};
 
-export interface FileMetaData {
+export type FileMetaData = {
   entityType: string;
   budgetDataVersion: string;
   currentKnowledge: string;
-}
+};
 
-export interface Transaction {
+export type Transaction = {
   entityType: string;
   entityId: string;
   categoryId: string;
@@ -112,12 +112,12 @@ export interface Transaction {
   subTransactions?: SubTransaction[];
   transferTransactionId?: string;
   targetAccountId?: string;
-}
+};
 
 // speculative, not in the test data
 export type SubTransaction = Omit<Transaction, 'subTransactions'>;
 
-export interface ScheduledTransaction {
+export type ScheduledTransaction = {
   entityType: string;
   entityId: string;
   categoryId: string;
@@ -132,9 +132,9 @@ export interface ScheduledTransaction {
   cleared: string;
   frequency: string;
   accepted: boolean;
-}
+};
 
-export interface BudgetMetaData {
+export type BudgetMetaData = {
   entityType: string;
   strictBudget: string;
   currencyISOSymbol?: string;
@@ -143,9 +143,9 @@ export interface BudgetMetaData {
   budgetType: string;
   dateLocale: string;
   entityId: string;
-}
+};
 
-export interface Account {
+export type Account = {
   entityType: string;
   // lastReconciledDate: null;
   lastEnteredCheckNumber: number;
@@ -160,4 +160,4 @@ export interface Account {
 
   // speculative
   isTombstone?: boolean;
-}
+};

@@ -303,8 +303,8 @@ export function CategoryAutocomplete({
 
   return (
     <Autocomplete
-      strict={true}
-      highlightFirst={true}
+      strict
+      highlightFirst
       embedded={embedded}
       closeOnBlur={closeOnBlur}
       getHighlightedIndex={suggestions => {

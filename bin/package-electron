@@ -8,6 +8,7 @@ CI=${CI:-false}
 cd "$ROOT/.."
 POSITIONAL=()
 SKIP_EXE_BUILD=false
+SKIP_TRANSLATIONS=false
 while [[ $# -gt 0 ]]; do
   key="$1"
 
@@ -20,6 +21,10 @@ while [[ $# -gt 0 ]]; do
       SKIP_EXE_BUILD=true
       shift
       ;;
+      --skip-translations)
+      SKIP_TRANSLATIONS=true
+      shift
+      ;;
       *)
       POSITIONAL+=("$1")
       shift
@@ -29,15 +34,19 @@ done
 
 set -- "${POSITIONAL[@]}"
 
-# Get translations
-echo "Updating translations..."
-if ! [ -d packages/desktop-client/locale ]; then
-    git clone https://github.com/actualbudget/translations packages/desktop-client/locale
+if [ $SKIP_TRANSLATIONS == false ]; then
+  # Get translations
+  echo "Updating translations..."
+  if ! [ -d packages/desktop-client/locale ]; then
+      git clone https://github.com/actualbudget/translations packages/desktop-client/locale
+  fi
+
+  pushd packages/desktop-client/locale > /dev/null
+
+  git pull
+  popd > /dev/null
+  packages/desktop-client/bin/remove-untranslated-languages
 fi
-pushd packages/desktop-client/locale > /dev/null
-git pull
-popd > /dev/null
-packages/desktop-client/bin/remove-untranslated-languages
 
 export NODE_OPTIONS="--max-old-space-size=4096"
 

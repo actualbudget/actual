@@ -44,6 +44,7 @@ crt
 Danske
 datadir
 Depositos
+deselection
 DIREKT
 Dockerfiles
 Dominguez
@@ -113,6 +114,7 @@ Qatari
 QNTOFRP
 QONTO
 Raiffeisen
+REGEXREPLACE
 revolut
 RIED
 RSchedule

@@ -189,7 +189,7 @@ const TransactionHeader = memo(
       >
         {showSelection && (
           <SelectCell
-            exposed={true}
+            exposed
             focused={false}
             selected={hasSelected}
             width={20}
@@ -720,9 +720,9 @@ function PayeeCell({
             onKeyDown,
             style: inputStyle,
           }}
-          showManagePayees={true}
+          showManagePayees
           clearOnBlur={false}
-          focused={true}
+          focused
           onUpdate={(_, value) => onUpdate?.(value)}
           onSelect={onSave}
           onManagePayees={() => onManagePayees(payee?.id)}
@@ -1308,7 +1308,7 @@ const Transaction = memo(function Transaction({
               dateFormat={dateFormat}
               inputProps={{ onBlur, onKeyDown, style: inputStyle }}
               shouldSaveFromKey={shouldSaveFromKey}
-              clearOnBlur={true}
+              clearOnBlur
               onUpdate={onUpdate}
               onSelect={onSave}
             />
@@ -1353,7 +1353,7 @@ const Transaction = memo(function Transaction({
               value={accountId}
               shouldSaveFromKey={shouldSaveFromKey}
               clearOnBlur={false}
-              focused={true}
+              focused
               inputProps={{ onBlur, onKeyDown, style: inputStyle }}
               onUpdate={onUpdate}
               onSelect={onSave}
@@ -1580,7 +1580,7 @@ const Transaction = memo(function Transaction({
               <CategoryAutocomplete
                 categoryGroups={categoryGroups}
                 value={categoryId ?? null}
-                focused={true}
+                focused
                 clearOnBlur={false}
                 showSplitOption={!isChild && !isParent && allowSplitTransaction}
                 shouldSaveFromKey={shouldSaveFromKey}
@@ -1889,7 +1889,7 @@ function NewTransaction({
           payees={payees}
           dateFormat={dateFormat}
           hideFraction={!!hideFraction}
-          expanded={true}
+          expanded
           onEdit={onEdit}
           onSave={onSave}
           onSplit={onSplit}
@@ -1902,8 +1902,8 @@ function NewTransaction({
           onNavigateToSchedule={onNavigateToSchedule}
           onNotesTagClick={onNotesTagClick}
           balance={balance ?? 0}
-          showSelection={true}
-          allowSplitTransaction={true}
+          showSelection
+          allowSplitTransaction
           showHiddenCategories={showHiddenCategories}
         />
       ))}

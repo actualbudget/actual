@@ -1,25 +1,25 @@
-export interface NewUserEntity {
+export type NewUserEntity = {
   userName: string;
   displayName: string;
   role: string;
   enabled: boolean;
-}
+};
 
-export interface UserEntity extends NewUserEntity {
+export type UserEntity = {
   id: string;
   owner: boolean;
-}
+} & NewUserEntity;
 
-export interface UserEntityDropdown {
+export type UserEntityDropdown = {
   userId: string;
   userName: string;
   displayName?: string;
-}
+};
 
-export interface UserAvailable {
+export type UserAvailable = {
   userId: string;
   displayName?: string;
   userName: string;
   haveAccess?: number;
   owner?: number;
-}
+};

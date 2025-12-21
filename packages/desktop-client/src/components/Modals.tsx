@@ -411,6 +411,6 @@ export function Modals() {
     ));
 
   // fragment needed per TS types
-  // eslint-disable-next-line react/jsx-no-useless-fragment
+  // oxlint-disable-next-line react/jsx-no-useless-fragment
   return <>{modals}</>;
 }
