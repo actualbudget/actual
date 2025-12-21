@@ -65,7 +65,7 @@ export function ExportBudget() {
           <strong>Export</strong> your data as a zip file containing{' '}
           <code>db.sqlite</code> and <code>metadata.json</code> files. It can be
           imported into another Actual instance by closing an open file (if
-          any), then clicking the “Import file” button, then choosing “Actual.”
+          any), then clicking the "Import file" button, then choosing "Actual."
         </Trans>
       </Text>
       {encryptKeyId ? (

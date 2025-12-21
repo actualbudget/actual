@@ -9,13 +9,13 @@ Filtering is a little known tool in Actual but is really quite a powerhouse. Fil
 Inevitably, there are some restrictions but these offer a great opportunity for developers to improve Actual in the future:
 
 1. The only way to print the filtered results is via a screen shot (unless you save to a spreadsheet as a CSV file first)
-1. The columns of the filtered view cannot yet be sorted. But you can of course export the filtered results to a spreadsheet and play with them to your heart’s content.
+1. The columns of the filtered view cannot yet be sorted. But you can of course export the filtered results to a spreadsheet and play with them to your heart's content.
 1. Split transactions do not behave well in the filtered view. The non-applicable part of the filtered results can end up getting added into the total.
 1. Filters are just one way of searching and viewing your data. There is still great scope for the future development of graphical style reports in Actual.
 
 ### How to use the Filter tool
 
-Well, having got that out of the way please don’t let any of this put you off. Filters are a great tool – and there is lots more scope for further development.
+Well, having got that out of the way please don't let any of this put you off. Filters are a great tool – and there is lots more scope for further development.
 
 First go to the relevant account screen and select **Filter**. You will see from this drop-down that there are a number of options to choose from:
 
@@ -35,7 +35,7 @@ The `matches` operator uses _[regular expressions](https://regextutorial.org/)_,
 
 ### Example
 
-In this example we are finding out how much the Mercedes car cost to run during the 2024 calendar year. To enhance this analysis a tag of each vehicle owned was added to transactions in the “Car” category group. Alternatively, you could just be more granular in your creation of Categories.
+In this example we are finding out how much the Mercedes car cost to run during the 2024 calendar year. To enhance this analysis a tag of each vehicle owned was added to transactions in the "Car" category group. Alternatively, you could just be more granular in your creation of Categories.
 
 ![](/img/filtering/multiple-filters.png)
 

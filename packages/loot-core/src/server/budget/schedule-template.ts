@@ -237,6 +237,8 @@ function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
         if (intervalMonths === 0) intervalMonths = 1;
         monthlyAmount = schedule.target / intervalMonths;
         break;
+      default:
+        break;
     }
     total += monthlyAmount;
   }

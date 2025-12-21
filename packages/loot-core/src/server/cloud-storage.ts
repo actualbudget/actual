@@ -357,7 +357,9 @@ export async function possiblyUpload() {
   }
 
   // Don't block on uploading
-  upload().catch(() => {});
+  upload().catch(() => {
+    // Ignore errors
+  });
 }
 
 export async function removeFile(fileId) {

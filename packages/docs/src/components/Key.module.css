@@ -2,7 +2,7 @@
   display: inline-block;
   border-radius: 0.25rem;
   padding-inline: 0.25rem;
-  /* “Disabmiguation” */
+  /* "Disabmiguation" */
   font-feature-settings: 'ss02' on;
   background-color: var(--ifm-color-primary-contrast-background);
 }

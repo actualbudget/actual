@@ -342,7 +342,7 @@ export function CommandBar() {
                             'var(--color-menuItemBackgroundHover)',
                           color: 'var(--color-menuItemTextHover)',
                         },
-                      // eslint-disable-next-line actual/typography
+
                       "&[data-selected='true']": {
                         backgroundColor: 'var(--color-menuItemBackgroundHover)',
                         color: 'var(--color-menuItemTextHover)',

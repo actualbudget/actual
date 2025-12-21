@@ -13,8 +13,8 @@ A shared budget fosters collaboration but requires consistent communication to k
 you both set clear boundaries for individual and shared expenses while working together toward common financial objectives.
 See [Multi-user](/docs/getting-started/sync#multi-user-support) regarding simultaneous edits.
 
-Alternatively, you can track your partner’s contributions within your personal Actual Budget file. This allows you to
-maintain individual control over your finances while still acknowledging and accounting for your partner’s financial
+Alternatively, you can track your partner's contributions within your personal Actual Budget file. This allows you to
+maintain individual control over your finances while still acknowledging and accounting for your partner's financial
 inputs. This method benefits couples who prefer to manage their finances independently but want to monitor how their
 spending aligns with joint expenses and goals.
 
