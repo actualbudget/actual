@@ -5,10 +5,15 @@ import ThemedImage from '@theme/ThemedImage';
 import Button from '../components/Button';
 
 import classes from './index.module.css';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
 export default function Hello() {
+  const { siteConfig} = useDocusaurusContext();
+  siteConfig.title = 'Actual Budget | Your Finances — made simple';
+  siteConfig.description = 'Actual Budget is a super fast and privacy-focused app for managing your finances. At its heart is the well proven and much loved Envelope Budgeting methodology.';
+
   return (
-    <Layout title="Actual" style={{ position: 'relative' }}>
+    <Layout style={{ position: 'relative' }}>
       <img alt="" src="/img/homepage/hero-bg.svg" className={classes.heroBg} />
 
       <div className={`${classes.main} ${classes.container}`}>
