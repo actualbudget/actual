@@ -118,7 +118,7 @@ When setup is done, you will be redirected to the _login_ page:
 
 #### `ACTUAL_OPENID_DISCOVERY_URL`
 
-- **Purpose:** If your OpenID provider supports discovery, this is the URL where discovery metadata can be found.  
+- **Purpose:** If your OpenID provider supports discovery, this is the URL where discovery metadata can be found.
   **Example Value:** `https://<openid-provider.com>/.well-known/openid-configuration`
 
 #### `ACTUAL_OPENID_CLIENT_ID`
@@ -133,22 +133,22 @@ When setup is done, you will be redirected to the _login_ page:
 
 #### `ACTUAL_OPENID_SERVER_HOSTNAME`
 
-- **Purpose:** The public URL of your Actual Server, which the provider redirects to after authentication.  
+- **Purpose:** The public URL of your Actual Server, which the provider redirects to after authentication.
   **Example Value:** `https://<actual.myserver.com>`
 
 #### `ACTUAL_OPENID_AUTHORIZATION_ENDPOINT`
 
-- **Purpose:** Provider’s authorization endpoint (for providers that don’t support discovery).  
+- **Purpose:** Provider's authorization endpoint (for providers that don't support discovery).
   **Example Value:** `https://<openid-provider.com>/oauth2/authorize`
 
 #### `ACTUAL_OPENID_TOKEN_ENDPOINT`
 
-- **Purpose:** Provider’s token endpoint (for providers that don’t support discovery).  
+- **Purpose:** Provider's token endpoint (for providers that don't support discovery).
   **Example Value:** `https://<openid-provider.com>/oauth2/token`
 
 #### `ACTUAL_OPENID_USERINFO_ENDPOINT`
 
-- **Purpose:** Provider’s user-info endpoint (for providers that don’t support discovery).  
+- **Purpose:** Provider's user-info endpoint (for providers that don't support discovery).
   **Example Value:** `https://<openid-provider.com>/oauth2/userinfo`
 
 #### `ACTUAL_OPENID_AUTH_METHOD`
@@ -159,7 +159,7 @@ When setup is done, you will be redirected to the _login_ page:
   - `oauth2`
 
 :::tip
-Use `oauth2` for providers like GitHub that don’t fully support OpenID discovery.
+Use `oauth2` for providers like GitHub that don't fully support OpenID discovery.
 :::
 
 #### `ACTUAL_OPENID_ENFORCE`

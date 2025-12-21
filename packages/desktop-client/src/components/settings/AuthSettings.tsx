@@ -45,9 +45,7 @@ export function AuthSettings() {
                     pushModal({
                       modal: {
                         name: 'enable-openid',
-                        options: {
-                          onSave: async () => {},
-                        },
+                        options: {},
                       },
                     }),
                   )
@@ -73,9 +71,7 @@ export function AuthSettings() {
                     pushModal({
                       modal: {
                         name: 'enable-password-auth',
-                        options: {
-                          onSave: async () => {},
-                        },
+                        options: {},
                       },
                     }),
                   )

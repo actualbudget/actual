@@ -137,7 +137,7 @@ async function parseCSV(
       columns: options?.hasHeaderRow,
       bom: true,
       delimiter: options?.delimiter || ',',
-      // eslint-disable-next-line actual/typography
+
       quote: '"',
       trim: true,
       relax_column_count: true,
@@ -166,7 +166,7 @@ async function parseQIF(
     data = qif2json(contents);
   } catch (err) {
     errors.push({
-      message: 'Failed parsing: doesn’t look like a valid QIF file.',
+      message: "Failed parsing: doesn't look like a valid QIF file.",
       internal: err.stack,
     });
     return { errors, transactions: [] };

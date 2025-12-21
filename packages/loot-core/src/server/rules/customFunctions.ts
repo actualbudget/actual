@@ -1,6 +1,6 @@
 import { FunctionPlugin, FunctionArgumentType } from 'hyperformula';
-import { InterpreterState } from 'hyperformula/typings/interpreter/InterpreterState';
-import { ProcedureAst } from 'hyperformula/typings/parser';
+import { type InterpreterState } from 'hyperformula/typings/interpreter/InterpreterState';
+import { type ProcedureAst } from 'hyperformula/typings/parser';
 
 import { integerToAmount } from '../../shared/util';
 

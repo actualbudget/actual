@@ -46,11 +46,11 @@ Please note, you will only be able to connect your account to meu.pluggy.ai whil
 
 Pluggy integration is experimental at this point, so before you can use it you need to enable it under Settings -> Advanced Settings -> Experimental Features -> Pluggy.ai Bank Sync
 
-1. In Actual, click **“+ Add account”** at the bottom of the sidebar.
+1. In Actual, click **"+ Add account"** at the bottom of the sidebar.
 
    ![](/img/connecting-your-bank/connecting-your-bank-02.png)
 
-2. Select **“Set-up Pluggy for bank-sync.”**
+2. Select **"Set-up Pluggy for bank-sync."**
 
    ![](/img/connecting-your-bank/pluggy-setup-modal-setup.png)
 
@@ -72,7 +72,7 @@ Pluggy integration is experimental at this point, so before you can use it you n
 
      ![](/img/connecting-your-bank/connecting-your-bank-01.png)
 
-   - For a **new account**, click **“+ Add account”** in the sidebar.
+   - For a **new account**, click **"+ Add account"** in the sidebar.
 
      ![](/img/connecting-your-bank/connecting-your-bank-02.png)
 
@@ -100,7 +100,7 @@ Pluggy integration is experimental at this point, so before you can use it you n
 To reset your Pluggy connection:
 
 1. In Actual, click **Add Account**.
-2. Next to “Set-up Pluggy for bank-sync”, open the three-dot menu.
+2. Next to "Set-up Pluggy for bank-sync", open the three-dot menu.
 3. Click **Reset Pluggy credentials**.
 
 You'll then need to generate a new API key and obtain a new Item ID to reconnect.
