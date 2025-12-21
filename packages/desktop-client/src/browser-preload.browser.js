@@ -1,8 +1,10 @@
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
-import packageJson from 'desktop-client/package.json';
 import { registerSW } from 'virtual:pwa-register';
 
 import * as Platform from 'loot-core/shared/platform';
+
+// eslint-disable-next-line typescript-paths/absolute-parent-import
+import packageJson from '../package.json';
 
 const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
 
