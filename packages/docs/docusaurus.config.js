@@ -68,6 +68,7 @@ module.exports = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      image: 'img/og.png',
       navbar: {
         logo: {
           alt: 'Actual Open Source',
