@@ -6,7 +6,6 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -20,9 +19,9 @@ import { CrossoverGraph } from '@desktop-client/components/reports/graphs/Crosso
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
+import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 // Type for the return value of the recalculate function
@@ -79,28 +78,68 @@ export function CrossoverCard({
   useEffect(() => {
     let isMounted = true;
     async function calculateDateRange() {
-      if (meta?.timeFrame?.start && meta?.timeFrame?.end) {
-        setStart(meta.timeFrame.start);
-        setEnd(meta.timeFrame.end);
-        return;
-      }
+      const currentMonth = monthUtils.currentMonth();
+      const previousMonth = monthUtils.subMonths(currentMonth, 1);
 
-      const trans = await send('get-earliest-transaction');
+      // Fetch earliest transaction to build the valid range
+      const earliestTransactionData = await send('get-earliest-transaction');
       if (!isMounted) return;
 
-      const currentMonth = monthUtils.currentMonth();
-      const startMonth = trans
-        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
-        : currentMonth;
+      // Build allMonths list similar to Crossover.tsx
+      const earliestDate = earliestTransactionData
+        ? earliestTransactionData.date
+        : monthUtils.firstDayOfMonth(previousMonth);
+      const latestDate = monthUtils.lastDayOfMonth(previousMonth);
 
-      const previousMonth = monthUtils.subMonths(currentMonth, 1);
-      const endMonth = monthUtils.isBefore(startMonth, previousMonth)
-        ? previousMonth
-        : startMonth;
+      const allMonths = monthUtils
+        .rangeInclusive(earliestDate, latestDate)
+        .map(month => ({
+          name: month,
+          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+        }))
+        .reverse();
 
-      // Use saved timeFrame from meta or default range
-      setStart(startMonth);
-      setEnd(endMonth);
+      // Use calculateTimeRange to get initial values based on timeFrame mode
+      const [initialStart, initialEnd, mode] = calculateTimeRange(
+        meta?.timeFrame,
+        undefined,
+        previousMonth,
+      );
+
+      const earliestMonth = allMonths[allMonths.length - 1].name;
+      const latestMonth = allMonths[0].name;
+      let start = initialStart;
+      let end = initialEnd;
+
+      const clampMonth = (m: string) => {
+        if (monthUtils.isBefore(m, earliestMonth)) return earliestMonth;
+        if (monthUtils.isAfter(m, latestMonth)) return latestMonth;
+        return m;
+      };
+
+      // Apply mode-specific logic similar to Crossover.tsx
+      if (mode === 'sliding-window') {
+        // Shift both start and end back one month for sliding-window
+        start = clampMonth(monthUtils.subMonths(start, 1));
+        end = clampMonth(monthUtils.subMonths(end, 1));
+      } else if (mode === 'full') {
+        start = earliestMonth;
+        end = latestMonth;
+      } else {
+        // static mode
+        start = clampMonth(start);
+        end = clampMonth(end);
+      }
+
+      // Ensure end doesn't go before start
+      if (monthUtils.isBefore(end, start)) {
+        end = start;
+      }
+
+      if (isMounted) {
+        setStart(start);
+        setEnd(end);
+      }
     }
     calculateDateRange();
     return () => {
