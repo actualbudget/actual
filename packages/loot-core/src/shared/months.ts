@@ -518,7 +518,7 @@ export function getDay(day: string): number {
 }
 
 export function getMonthEnd(day: string): string {
-  return subDays(nextMonth(day.slice(0, 7)) + '-01', 1);
+  return dayFromDate(getMonthEndDate(day));
 }
 
 export function getWeekEnd(

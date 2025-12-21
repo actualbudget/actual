@@ -7,6 +7,7 @@ import { RuleConditionEntity } from '../../types/models';
 import { RuleError } from '../errors';
 import { RSchedule } from '../util/rschedule';
 
+import * as monthUtils from '../../shared/months';
 import { Rule } from './rule';
 
 export function assert(test: unknown, type: string, msg: string): asserts test {
@@ -241,21 +242,21 @@ export function parseDateString(str) {
     return null;
   } else if (str.length === 10) {
     // YYYY-MM-DD
-    if (!dateFns.isValid(dateFns.parseISO(str))) {
+    if (!dateFns.isValid(monthUtils.parseDate(str))) {
       return null;
     }
 
     return { type: 'date', date: str };
   } else if (str.length === 7) {
-    // YYYY-MM
-    if (!dateFns.isValid(dateFns.parseISO(str + '-01'))) {
+    // YYYY-MM or YYYY-PP
+    if (!dateFns.isValid(monthUtils.parseDate(str))) {
       return null;
     }
 
     return { type: 'month', date: str };
   } else if (str.length === 4) {
     // YYYY
-    if (!dateFns.isValid(dateFns.parseISO(str + '-01-01'))) {
+    if (!dateFns.isValid(monthUtils.parseDate(str))) {
       return null;
     }
 

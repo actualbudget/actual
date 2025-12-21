@@ -102,12 +102,10 @@ function handleTransactionChange(transaction, changedFields, createdMonths) {
     const date = db.fromDateRepr(transaction.date);
     const calendarMonth = monthUtils.dayFromDate(date).slice(0, 7);
 
-    if (createdMonths.has(calendarMonth)) {
-      const sheetName = monthUtils.sheetForMonth(calendarMonth);
-      sheet
-        .get()
-        .recompute(resolveName(sheetName, 'sum-amount-' + transaction.category));
-    }
+    const sheetName = monthUtils.sheetForMonth(calendarMonth);
+    sheet
+      .get()
+      .recompute(resolveName(sheetName, 'sum-amount-' + transaction.category));
 
     const config = monthUtils.getPayPeriodConfig();
     if (config) {
