@@ -57,7 +57,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
     ? SvgArrowButtonDown1
     : SvgArrowButtonUp1;
 
-  const displayMonth = monthUtils.format(month, "MMMM ''yy", locale);
+  const displayMonth = monthUtils.getMonthDateRange(month, undefined, locale);
 
   return (
     <View
@@ -126,7 +126,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               textDecorationSkip: 'ink',
             })}
           >
-            {monthUtils.format(month, 'MMMM', locale)}
+            {displayMonth}
           </div>
 
           <View
