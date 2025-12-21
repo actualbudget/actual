@@ -314,7 +314,7 @@
         ],
         "patterns": [
           {
-            "group": ["*.api", "*.web", "*.electron"],
+            "group": ["**/*.api", "**/*.web", "**/*.electron"],
             "message": "Don't directly reference imports from other platforms"
           },
           {
@@ -328,7 +328,7 @@
             "message": "Please use themes instead of colors"
           },
           {
-            "group": ["@actual-app/web/*"],
+            "group": ["@actual-app/web/**/*"],
             "message": "Please do not import `@actual-app/web` in `loot-core`"
           }
         ]
