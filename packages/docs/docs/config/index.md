@@ -29,7 +29,7 @@ This is the path to the config file. If not specified, the server will look for 
 
 See the `ACTUAL_DATA_DIR` section above to override the data folder location.
 
-You can’t specify this option in `config.json` since it needs to be used to find the `config.json` in the first place.
+You can't specify this option in `config.json` since it needs to be used to find the `config.json` in the first place.
 
 ## `ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB`
 
@@ -55,13 +55,13 @@ If you want Actual to serve over HTTPS, you can set this key to an object with t
 
 - `key`: The path to the private key file. (environment variable: `ACTUAL_HTTPS_KEY`)
 - `cert`: The path to the certificate file. (environment variable: `ACTUAL_HTTPS_CERT`)
-- any other options from Node’s [`tls.createServer()`](https://nodejs.org/docs/latest-v16.x/api/tls.html#tlscreateserveroptions-secureconnectionlistener), [`tls.createSecureContext()`](https://nodejs.org/docs/latest-v16.x/api/tls.html#tlscreatesecurecontextoptions), or [`http.createServer()`](https://nodejs.org/docs/latest-v16.x/api/http.html#httpcreateserveroptions-requestlistener) functions (optional, most people won’t need to set any of these).
+- any other options from Node's [`tls.createServer()`](https://nodejs.org/api/tls.html#tlscreateserveroptions-secureconnectionlistener), [`tls.createSecureContext()`](https://nodejs.org/api/tls.html#tlscreatesecurecontextoptions), or [`http.createServer()`](https://nodejs.org/api/http.html#httpcreateserveroptions-requestlistener) functions (optional, most people won't need to set any of these).
 
 See [Activating HTTPS](/config/https.md) for more information on how to get HTTPS working.
 
 <!-- ## `mode`
 
-The `mode` key is not currently used by anything, as far as I can tell. It’s exposed on the `/mode` route, but that route does not appear to be called by the frontend. -->
+The `mode` key is not currently used by anything, as far as I can tell. It's exposed on the `/mode` route, but that route does not appear to be called by the frontend. -->
 
 ## `port`
 
@@ -87,7 +87,7 @@ See the `ACTUAL_DATA_DIR` section above to override the data folder location.
 
 (Advanced, most people will not need to configure this.) The server will serve the frontend from this directory. If not specified, the server will use the files in the `@actual-app/web` package that it has installed. (environment variable: `ACTUAL_WEB_ROOT`)
 
-If you’re providing a custom frontend, make sure you provide an `index.html` in the top level of the `webRoot` directory, which will be served from the `/` route.
+If you're providing a custom frontend, make sure you provide an `index.html` in the top level of the `webRoot` directory, which will be served from the `/` route.
 
 ## `loginMethod`
 

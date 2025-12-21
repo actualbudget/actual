@@ -17,8 +17,8 @@ export function FilterAutocomplete({
 
   return (
     <Autocomplete
-      strict={true}
-      highlightFirst={true}
+      strict
+      highlightFirst
       embedded={embedded}
       suggestions={filters}
       renderItems={(items, getItemProps, highlightedIndex) => (

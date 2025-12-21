@@ -1,7 +1,7 @@
 import {
-  CategoryEntity,
-  CategoryGroupEntity,
-  PayeeEntity,
+  type CategoryEntity,
+  type CategoryGroupEntity,
+  type PayeeEntity,
 } from '../types/models';
 
 import {
@@ -11,7 +11,12 @@ import {
   schema,
   schemaConfig,
 } from './aql';
-import { DbAccount, DbCategory, DbCategoryGroup, DbPayee } from './db';
+import {
+  type DbAccount,
+  type DbCategory,
+  type DbCategoryGroup,
+  type DbPayee,
+} from './db';
 import { ValidationError } from './errors';
 
 export function requiredFields<T extends object, K extends keyof T>(
@@ -81,7 +86,7 @@ export const categoryModel = {
       update,
     );
 
-    const { sort_order, ...rest } = category;
+    const { sort_order: _sort_order, ...rest } = category;
     return { ...rest } as DbCategory;
   },
   toDb(
@@ -116,7 +121,7 @@ export const categoryGroupModel = {
       update,
     );
 
-    const { sort_order, ...rest } = categoryGroup;
+    const { sort_order: _sort_order, ...rest } = categoryGroup;
     return { ...rest } as DbCategoryGroup;
   },
   toDb(

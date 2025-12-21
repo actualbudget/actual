@@ -46,9 +46,9 @@ export const PayeeFilter = ({ value, op, onChange }: PayeeFilterProps) => {
     // @ts-ignore: typing is not playing nicely with the union type of AutocompleteProps.
     <PayeeAutocomplete
       type={multi ? 'multi' : 'single'}
-      showInactivePayees={true}
+      showInactivePayees
       showMakeTransfer={false}
-      openOnFocus={true}
+      openOnFocus
       value={coercedValue}
       inputProps={{ placeholder }}
       onSelect={(payeeIdOrIds: string | string[], _: string) =>

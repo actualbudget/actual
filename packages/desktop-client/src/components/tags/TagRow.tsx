@@ -84,7 +84,7 @@ export const TagRow = memo(
               ? theme.tableRowBackgroundHover
               : theme.tableBackground,
         }}
-        collapsed={true}
+        collapsed
         onMouseEnter={() => onHover(tag.id)}
         onMouseLeave={() => onHover()}
         onContextMenu={handleContextMenu}

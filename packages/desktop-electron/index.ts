@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { createServer, Server } from 'http';
+import { createServer, type Server } from 'http';
 import path from 'path';
 
 import {
@@ -13,11 +13,11 @@ import {
   powerMonitor,
   protocol,
   utilityProcess,
-  UtilityProcess,
-  OpenDialogSyncOptions,
-  SaveDialogOptions,
-  Env,
-  ForkOptions,
+  type UtilityProcess,
+  type OpenDialogSyncOptions,
+  type SaveDialogOptions,
+  type Env,
+  type ForkOptions,
 } from 'electron';
 import { copy, exists, mkdir, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
@@ -29,7 +29,6 @@ import {
   get as getWindowState,
   listen as listenToWindowState,
 } from './window-state';
-
 import './security';
 
 const BUILD_ROOT = `${__dirname}/..`;
@@ -141,7 +140,7 @@ async function loadGlobalPrefs() {
         'utf8',
       ),
     );
-  } catch (e) {
+  } catch {
     logMessage('info', 'Could not load global state - using defaults');
     state = {};
   }
@@ -605,6 +604,10 @@ ipcMain.handle(
 
 ipcMain.handle('open-external-url', (event, url) => {
   shell.openExternal(url);
+});
+
+ipcMain.handle('open-in-file-manager', (event, filepath) => {
+  shell.showItemInFolder(filepath);
 });
 
 ipcMain.on('message', (_event, msg) => {

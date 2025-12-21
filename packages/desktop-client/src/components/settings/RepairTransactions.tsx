@@ -56,7 +56,7 @@ function useRenderResults() {
       }
       if (numDeleted > 0) {
         result.push(
-          t('Fixed {{count}} splits that weren’t properly deleted.', {
+          t("Fixed {{count}} splits that weren't properly deleted.", {
             count: numDeleted,
           }),
         );
@@ -148,8 +148,8 @@ export function RepairTransactions() {
       <Trans>
         <Text>
           <strong>Repair transactions</strong> if you are experiencing bugs
-          relating to split transactions or transfers and the “Reset budget
-          cache” button above does not help, this tool may fix them. Some
+          relating to split transactions or transfers and the "Reset budget
+          cache" button above does not help, this tool may fix them. Some
           examples of bugs include seeing blank payees on splits or incorrect
           account balances. This tool does four things:
         </Text>
@@ -163,8 +163,8 @@ export function RepairTransactions() {
           </li>
           <li>
             Sync the payee and cleared flag of a split transaction to the main
-            or “parent” transaction, if appropriate. The payee will only be set
-            if it currently doesn’t have one.
+            or "parent" transaction, if appropriate. The payee will only be set
+            if it currently doesn't have one.
           </li>
           <li>
             Checks that the sum of all child transactions adds up to the total
@@ -176,7 +176,7 @@ export function RepairTransactions() {
             and removes the errors if found.
           </li>
           <li>
-            Check if you have any budget transfers that erroneous contain a
+            Check if you have any budget transfers that erroneously contain a
             category, and remove the category.
           </li>
           <li>

@@ -21,7 +21,7 @@ function joinURL(base: string | URL, ...paths: string[]): string {
 export function isValidBaseURL(base: string): boolean {
   try {
     return Boolean(new URL(base));
-  } catch (error) {
+  } catch {
     return false;
   }
 }

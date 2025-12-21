@@ -2,7 +2,7 @@
 title: Contributing to Actual Budget
 ---
 
-So, you want to get stuck in and help out with existing issues in Actual Budget or develop a feature of your own. That’s great and we really appreciate it!
+So, you want to get stuck in and help out with existing issues in Actual Budget or develop a feature of your own. That's great and we really appreciate it!
 We have created this document to signpost you to some of the key areas that will be of interest when developing for Actual Budget.
 
 As always, if you need any help or want something clarified, jump into the Discord and we will try our best to help you out.
@@ -54,6 +54,28 @@ Here are some initial guidelines for how contributions will be treated:
 - @twk3
 - @UnderKoen
 
+### Getting Started
+
+Before you begin contributing, make sure you have your development environment set up:
+
+1. **Set up your development environment**: Follow the [Development Setup Guide](./development-setup.md) to install prerequisites and get started.
+2. **Understand the codebase**: Review the [Project Structure](./project-details/index.md) to understand how the codebase is organized.
+3. **Learn the coding conventions**: Read the [Code Style Guide](./code-style.md) to understand our coding standards.
+4. **Familiarize yourself with testing**: Check out the [Testing Guide](./testing.md) to learn how to write and run tests.
+
+### Development Workflow
+
+When making changes to Actual, follow this workflow:
+
+1. **Read relevant files**: Understand the current implementation before making changes.
+2. **Make focused, incremental changes**: Keep changes small and focused on a single feature or bugfix.
+3. **Run type checking**: Always run `yarn typecheck` before committing to catch type errors.
+4. **Run linting**: Run `yarn lint:fix` to ensure code follows style guidelines.
+5. **Run relevant tests**: Run tests for the code you've changed (`yarn test` for all tests, or workspace-specific commands).
+6. **Fix any issues**: Address any type errors, linter errors, or test failures before submitting your PR.
+
+For more details, see the [Development Setup Guide](./development-setup.md) and [Testing Guide](./testing.md).
+
 ### The Project Layout
 
 The layout of the codebase in Actual Budget takes a bit of getting used to and finding things at first can be a little tricky. We have put together a help [document](./project-details/index.md) that shows the structure of the project. While this isn't 100% complete it will give you a good starting point for your development.
@@ -94,7 +116,7 @@ Before creating your pull request, run the command `yarn generate:release-notes`
 
 For a better experience with the release note generation script, consider installing [the official GitHub CLI](https://github.com/cli/cli) and running `gh auth login`. This will allow the script to automatically fill in some information like your GitHub username and current PR information if you've already opened one from a fork you created.
 
-Create a Markdown file in the upcoming-release-notes directory of the repository you’re contributing to named after the PR number. The file should contain front matter with a category key (defining which header to put the entry under) and an authors key (defining the author of the entry). The body of the file should contain the changelog entry. Keep it short and clear — ideally one sentence, and also non-technical (unless the category is “Maintenance”). Copy-paste the template below to get started!
+Create a Markdown file in the upcoming-release-notes directory of the repository you're contributing to named after the PR number. The file should contain front matter with a category key (defining which header to put the entry under) and an authors key (defining the author of the entry). The body of the file should contain the changelog entry. Keep it short and clear — ideally one sentence, and also non-technical (unless the category is "Maintenance"). Copy-paste the template below to get started!
 
 ```markdown
 ---
@@ -110,14 +132,22 @@ Valid categories:
 - `Features`: New features
 - `Enhancements`: Improvements to existing features
 - `Bugfix`: Bug fixes
-- `Maintenance`: Internal changes that don’t directly affect users
+- `Maintenance`: Internal changes that don't directly affect users
 
 The `authors` key should be an array with the GitHub usernames of the people who contributed to the PR. In most cases, this should just be you but you can add multiple people if needed.
 
-Try to phrase your message as a command, e.g. "Add option to include exchange rate multiplier during import" rather than "Added option to include exchange rate multiplier during import” or "Adds option to include exchange rate multiplier during import." Generally your message should match the PR title, but you can change it if you think it’s more clear.
+Try to phrase your message as a command, e.g. "Add option to include exchange rate multiplier during import" rather than "Added option to include exchange rate multiplier during import" or "Adds option to include exchange rate multiplier during import." Generally your message should match the PR title, but you can change it if you think it's more clear.
 
 ### The Design Strategy Of Actual
 
 The goal of the UI is to be minimalistic, but expose more advanced features progressively as the user interacts with the product (for example: the notes button is not visible by default if an account has no notes, but it becomes persistent visible if there are notes). We advocate for a similar approach in other places too. We are against adding a button/user setting for every little piece of UI (sizes, paddings, margins, etc.) as that goes against this simple design philosophy.
 
 The settings screen needs to also remain a place where core settings lives, we don't really want to have a myriad of options in here for each and every setting within the UI, doing that makes the code un-manageable for future contributors and clutters up and confuses things for the users of Actual Budget.
+
+## Additional Resources
+
+- [Development Setup](./development-setup.md) - Set up your development environment
+- [Testing Guide](./testing.md) - Learn about testing strategies and how to run tests
+- [Code Style Guide](./code-style.md) - Coding conventions and style guidelines
+- [Troubleshooting](./troubleshooting.md) - Common issues and solutions
+- [Project Structure](./project-details/index.md) - Understanding the codebase organization

@@ -115,7 +115,7 @@ export function NetWorthGraph({
     payload?: PayloadItem[];
   };
 
-  // eslint-disable-next-line react/no-unstable-nested-components
+  // oxlint-disable-next-line react/no-unstable-nested-components
   const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
@@ -235,7 +235,7 @@ export function NetWorthGraph({
                 strokeWidth={2}
                 fill={`url(#${gradientId})`}
                 fillOpacity={1}
-                connectNulls={true}
+                connectNulls
               />
             </AreaChart>
           </div>

@@ -16,7 +16,9 @@ function verifyParamTypes(sql, arr) {
   });
 }
 
-export async function init() {}
+export async function init() {
+  // No need to initialise on electron
+}
 
 export function prepare(db, sql) {
   return db.prepare(sql);
@@ -49,13 +51,8 @@ export function runQuery(
       throw e;
     }
   } else {
-    try {
-      const info = stmt.run(...params);
-      return { changes: info.changes, insertId: info.lastInsertRowid };
-    } catch (e) {
-      // console.log('error', sql);
-      throw e;
-    }
+    const info = stmt.run(...params);
+    return { changes: info.changes, insertId: info.lastInsertRowid };
   }
 }
 

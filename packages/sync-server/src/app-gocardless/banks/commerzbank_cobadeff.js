@@ -1,7 +1,7 @@
-import Fallback from './integration-bank.js';
-import { escapeRegExp } from './util/escape-regexp.js';
+import Fallback from './integration-bank';
+import { escapeRegExp } from './util/escape-regexp';
 
-/** @type {import('./bank.interface.js').IBank} */
+/** @type {import('./bank.interface').IBank} */
 export default {
   ...Fallback,
 

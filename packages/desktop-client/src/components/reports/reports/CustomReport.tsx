@@ -107,6 +107,9 @@ function useSelectedCategories(
         return categories.filter(
           ({ id }) => !existingCategoryCondition.value.includes(id),
         );
+
+      default:
+        break;
     }
 
     return categories;
@@ -394,7 +397,6 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
 
     run();
     // omitted `conditions` and `conditionsOp` from dependencies to avoid infinite loops
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     interval,
     dateRange,

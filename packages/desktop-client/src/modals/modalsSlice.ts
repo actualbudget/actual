@@ -465,6 +465,9 @@ export type Modal =
       };
     }
   | {
+      name: 'schedules-page-menu';
+    }
+  | {
       name: 'envelope-budget-month-menu';
       options: {
         month: string;
@@ -531,13 +534,13 @@ export type Modal =
   | {
       name: 'enable-openid';
       options: {
-        onSave: () => void;
+        onSave?: () => void;
       };
     }
   | {
       name: 'enable-password-auth';
       options: {
-        onSave: () => void;
+        onSave?: () => void;
       };
     }
   | {

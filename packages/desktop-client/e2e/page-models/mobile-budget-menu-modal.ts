@@ -18,7 +18,7 @@ export class BudgetMenuModal {
     this.heading = locator.getByRole('heading');
     this.budgetAmountInput = locator.getByTestId('amount-input');
     this.copyLastMonthBudgetButton = locator.getByRole('button', {
-      name: 'Copy last month’s budget',
+      name: "Copy last month's budget",
     });
     this.setTo3MonthAverageButton = locator.getByRole('button', {
       name: 'Set to 3 month average',
@@ -30,7 +30,7 @@ export class BudgetMenuModal {
       name: 'Set to yearly average',
     });
     this.applyBudgetTemplateButton = locator.getByRole('button', {
-      name: 'Apply budget template',
+      name: 'Overwrite with template',
     });
   }
 

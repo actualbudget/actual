@@ -2,12 +2,12 @@ const { visitParents } = require('unist-util-visit-parents');
 
 function githubMentionPlugin() {
   const pattern = /@([\w-]+)/g;
-  const transformer = async (ast, file) => {
+  const transformer = async ast => {
     visitParents(ast, 'text', (node, ancestors) => {
       const text = node.value;
       let match;
       let lastIndex = 0;
-      let segments = [];
+      const segments = [];
       while ((match = pattern.exec(text))) {
         const { index } = match;
         const username = match[1];

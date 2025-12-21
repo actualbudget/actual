@@ -13,6 +13,7 @@ type Actual = {
   IS_DEV: boolean;
   ACTUAL_VERSION: string;
   openURLInBrowser: (url: string) => void;
+  openInFileManager: (filepath: string) => void;
   saveFile: (
     contents: string | Buffer,
     filename: string,
@@ -44,10 +45,6 @@ type Actual = {
 };
 
 declare global {
-  interface Window {
-    __navigate?: import('react-router').NavigateFunction;
-  }
-
   var Actual: Actual;
 
   var IS_TESTING: boolean;

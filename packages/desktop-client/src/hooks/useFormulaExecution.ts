@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
+import { q, type Query } from 'loot-core/shared/query';
 import { integerToAmount } from 'loot-core/shared/util';
 import {
   type RuleConditionEntity,
@@ -53,36 +53,62 @@ export function useFormulaExecution(
       setError(null);
 
       try {
-        // Extract QUERY() function calls
+        // Extract QUERY() and QUERY_COUNT() function calls
         const queryMatches = Array.from(
           formula.matchAll(/QUERY\s*\(\s*["']([^"']+)["']\s*\)/gi),
+        );
+        const queryCountMatches = Array.from(
+          formula.matchAll(/QUERY_COUNT\s*\(\s*["']([^"']+)["']\s*\)/gi),
         );
 
         // Fetch data for each query
         const queryData: Record<string, number> = {};
+        const queryCountData: Record<string, number> = {};
 
-        for (const match of queryMatches) {
-          const queryName = match[1];
+        // Deduplicate names (a query can appear multiple times in the same formula)
+        const queryNames = Array.from(new Set(queryMatches.map(m => m[1])));
+        const queryCountNames = Array.from(
+          new Set(queryCountMatches.map(m => m[1])),
+        );
+
+        for (const queryName of queryNames) {
           const queryConfig = queries[queryName];
 
           if (!queryConfig) {
-            console.warn(`Query “${queryName}” not found in queries config`);
+            console.warn(`Query "${queryName}" not found in queries config`);
             queryData[queryName] = 0;
             continue;
           }
 
-          // Fetch the actual transaction data based on the query config
-          // For now, we'll use a simplified approach
-          // In a real implementation, this would call a backend API
-          const data = await fetchQueryData(queryConfig);
+          const data = await fetchQuerySum(queryConfig);
           queryData[queryName] = integerToAmount(data, 2);
         }
 
-        // Replace QUERY() calls with actual values in the formula
+        for (const queryName of queryCountNames) {
+          const queryConfig = queries[queryName];
+
+          if (!queryConfig) {
+            console.warn(`Query "${queryName}" not found in queries config`);
+            queryCountData[queryName] = 0;
+            continue;
+          }
+
+          const count = await fetchQueryCount(queryConfig);
+          queryCountData[queryName] = count;
+        }
+
+        // Replace QUERY() and QUERY_COUNT() calls with actual values in the formula
         let processedFormula = formula;
         for (const [queryName, value] of Object.entries(queryData)) {
           const regex = new RegExp(
             `QUERY\\s*\\(\\s*["']${escapeRegExp(queryName)}["']\\s*\\)`,
+            'gi',
+          );
+          processedFormula = processedFormula.replace(regex, String(value));
+        }
+        for (const [queryName, value] of Object.entries(queryCountData)) {
+          const regex = new RegExp(
+            `QUERY_COUNT\\s*\\(\\s*["']${escapeRegExp(queryName)}["']\\s*\\)`,
             'gi',
           );
           processedFormula = processedFormula.replace(regex, String(value));
@@ -170,6 +196,8 @@ function timeFrameModeToCondition(mode: TimeFrame['mode']): string | null {
   switch (mode) {
     case 'full':
       return 'All time';
+    case 'lastMonth':
+      return 'Last month';
     case 'lastYear':
       return 'Last year';
     case 'yearToDate':
@@ -187,97 +215,135 @@ function timeFrameModeToCondition(mode: TimeFrame['mode']): string | null {
   }
 }
 
-// Helper function to fetch query data
-async function fetchQueryData(config: QueryConfig): Promise<number> {
-  try {
-    const conditions = config.conditions || [];
-    const conditionsOp = config.conditionsOp || 'and';
-    const timeFrame = config.timeFrame;
+function isMonthOnlyDate(s: string) {
+  // YYYY-MM
+  return s.includes('-') && s.split('-').length === 2;
+}
 
-    // Convert conditions to query filters
-    const { filters: queryFilters } = await send(
-      'make-filters-from-conditions',
-      {
-        conditions,
-      },
-    );
+function toMonth(dateOrMonth: string) {
+  return isMonthOnlyDate(dateOrMonth)
+    ? dateOrMonth
+    : monthUtils.monthFromDate(dateOrMonth);
+}
 
-    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+async function buildFilteredTransactionsQuery(
+  config: QueryConfig,
+): Promise<Query> {
+  const conditions = config.conditions || [];
+  const conditionsOp = config.conditionsOp || 'and';
+  const timeFrame = config.timeFrame;
 
-    // Start building the query
-    let transQuery = q('transactions');
+  // Convert conditions to query filters
+  const { filters: queryFilters } = await send('make-filters-from-conditions', {
+    conditions,
+  });
 
-    // Add date range filter if provided
-    if (timeFrame && timeFrame.mode) {
-      let startDate: string | undefined;
-      let endDate: string | undefined;
+  const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-      if (
-        (timeFrame.mode === 'sliding-window' || timeFrame.mode === 'static') &&
-        timeFrame.start &&
-        timeFrame.end
-      ) {
-        // For sliding-window and static modes, use the actual start/end dates from timeFrame
-        // Convert month format (YYYY-MM) to full date format (YYYY-MM-DD) if needed
-        startDate =
-          timeFrame.start.includes('-') &&
-          timeFrame.start.split('-').length === 2
-            ? timeFrame.start + '-01'
-            : timeFrame.start;
-        endDate =
-          timeFrame.end.includes('-') && timeFrame.end.split('-').length === 2
-            ? monthUtils.getMonthEnd(timeFrame.end + '-01')
-            : timeFrame.end;
+  // Start building the query
+  let transQuery = q('transactions');
+
+  // Add date range filter if provided
+  if (timeFrame && timeFrame.mode) {
+    let startDate: string | undefined;
+    let endDate: string | undefined;
+
+    if (
+      (timeFrame.mode === 'sliding-window' || timeFrame.mode === 'static') &&
+      timeFrame.start &&
+      timeFrame.end
+    ) {
+      if (timeFrame.mode === 'sliding-window') {
+        // Sliding-window should move with time. Interpret start/end as a window length
+        // (in months) and always anchor the end to the current month/day.
+        const startMonth = toMonth(timeFrame.start);
+        const endMonth = toMonth(timeFrame.end);
+        const offset = monthUtils.differenceInCalendarMonths(
+          endMonth,
+          startMonth,
+        );
+
+        const liveEndMonth = monthUtils.currentMonth();
+        const liveStartMonth = monthUtils.subMonths(liveEndMonth, offset);
+
+        startDate = monthUtils.firstDayOfMonth(liveStartMonth);
+        endDate = monthUtils.currentDay();
       } else {
-        // For other modes, use getLiveRange with the appropriate condition
-        const condition = timeFrameModeToCondition(timeFrame.mode);
-        if (condition) {
-          // Get earliest and latest transactions for getLiveRange
-          const earliestTransaction = await send('get-earliest-transaction');
-          const latestTransaction = await send('get-latest-transaction');
-
-          const earliestDate = earliestTransaction
-            ? earliestTransaction.date
-            : monthUtils.currentDay();
-          const latestDate = latestTransaction
-            ? latestTransaction.date
-            : monthUtils.currentDay();
-
-          const [calculatedStart, calculatedEnd] = getLiveRange(
-            condition,
-            earliestDate,
-            latestDate,
-            true, // includeCurrentInterval
-          );
-
-          startDate = calculatedStart;
-          endDate = calculatedEnd;
-        } else {
-          // No valid condition found, skip date filtering entirely
-          // Continue without adding date filter
-        }
+        // Static mode: use the actual stored start/end dates.
+        // Convert month format (YYYY-MM) to full date format (YYYY-MM-DD) if needed
+        startDate = isMonthOnlyDate(timeFrame.start)
+          ? timeFrame.start + '-01'
+          : timeFrame.start;
+        endDate = isMonthOnlyDate(timeFrame.end)
+          ? monthUtils.getMonthEnd(timeFrame.end + '-01')
+          : timeFrame.end;
       }
+    } else {
+      // For other modes, use getLiveRange with the appropriate condition
+      const condition = timeFrameModeToCondition(timeFrame.mode);
+      if (condition) {
+        // Get earliest and latest transactions for getLiveRange
+        const earliestTransaction = await send('get-earliest-transaction');
+        const latestTransaction = await send('get-latest-transaction');
 
-      // Apply the date filter only if we have valid dates
-      if (startDate && endDate) {
-        transQuery = transQuery.filter({
-          $and: [{ date: { $gte: startDate } }, { date: { $lte: endDate } }],
-        });
+        const earliestDate = earliestTransaction
+          ? earliestTransaction.date
+          : monthUtils.currentDay();
+        const latestDate = latestTransaction
+          ? latestTransaction.date
+          : monthUtils.currentDay();
+
+        const [calculatedStart, calculatedEnd] = getLiveRange(
+          condition,
+          earliestDate,
+          latestDate,
+          true, // includeCurrentInterval
+        );
+
+        startDate = calculatedStart;
+        endDate = calculatedEnd;
+      } else {
+        // No valid condition found, skip date filtering entirely
+        // Continue without adding date filter
       }
     }
 
-    // Add user-defined filters
-    if (queryFilters.length > 0) {
-      transQuery = transQuery.filter({ [conditionsOpKey]: queryFilters });
+    // Apply the date filter only if we have valid dates
+    if (startDate && endDate) {
+      transQuery = transQuery.filter({
+        $and: [{ date: { $gte: startDate } }, { date: { $lte: endDate } }],
+      });
     }
+  }
 
-    // Calculate sum
-    transQuery = transQuery.calculate({ $sum: '$amount' });
+  // Add user-defined filters
+  if (queryFilters.length > 0) {
+    transQuery = transQuery.filter({ [conditionsOpKey]: queryFilters });
+  }
 
-    const { data } = await send('query', transQuery.serialize());
+  return transQuery;
+}
+
+async function fetchQuerySum(config: QueryConfig): Promise<number> {
+  try {
+    const transQuery = await buildFilteredTransactionsQuery(config);
+    const summedQuery = transQuery.calculate({ $sum: '$amount' });
+    const { data } = await send('query', summedQuery.serialize());
     return data || 0;
   } catch (err) {
-    console.error('Error fetching query data:', err);
+    console.error('Error fetching query sum:', err);
+    return 0;
+  }
+}
+
+async function fetchQueryCount(config: QueryConfig): Promise<number> {
+  try {
+    const transQuery = await buildFilteredTransactionsQuery(config);
+    const countQuery = transQuery.calculate({ $count: '*' });
+    const { data } = await send('query', countQuery.serialize());
+    return data || 0;
+  } catch (err) {
+    console.error('Error fetching query count:', err);
     return 0;
   }
 }

@@ -13,7 +13,7 @@ import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, groupBy, sortByKey } from '../../shared/util';
 
-import * as YNAB4 from './ynab4-types';
+import type * as YNAB4 from './ynab4-types';
 
 // Importer
 
@@ -325,7 +325,7 @@ function findLatestDevice(zipped: AdmZip, entries: AdmZip.IZipEntry[]): string {
       let data;
       try {
         data = JSON.parse(contents);
-      } catch (e) {
+      } catch {
         return null;
       }
 
@@ -435,7 +435,7 @@ export function parseFile(buffer: Buffer): YNAB4.YFull {
 
   try {
     return JSON.parse(contents);
-  } catch (e) {
+  } catch {
     throw new Error('Error parsing Budget.yfull file');
   }
 }

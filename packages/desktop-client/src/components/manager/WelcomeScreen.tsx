@@ -27,7 +27,7 @@ export function WelcomeScreen() {
         marginBlock: 20,
       }}
     >
-      <Text style={styles.veryLargeText}>{t('Let’s get started!')}</Text>
+      <Text style={styles.veryLargeText}>{t("Let's get started!")}</Text>
       <View style={{ overflowY: 'auto' }}>
         <Paragraph>
           <Trans>
@@ -60,7 +60,7 @@ export function WelcomeScreen() {
               guided tour
             </Link>{' '}
             to help you get your bearings, and check out the rest of the
-            documentation while you’re there to learn more about advanced
+            documentation while you're there to learn more about advanced
             topics.
           </Trans>
         </Paragraph>

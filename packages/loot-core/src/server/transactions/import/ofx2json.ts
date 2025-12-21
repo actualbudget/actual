@@ -33,8 +33,8 @@ export function html2Plain(value) {
   return value
     ?.replace(/&lt;/g, '<') // lessthan
     .replace(/&gt;/g, '>') // greaterthan
-    .replace(/&#39;/g, "'") // eslint-disable-line actual/typography
-    .replace(/&quot;/g, '"') // eslint-disable-line actual/typography
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
     .replace(/(&amp;|&#038;)/g, '&'); // ampersands
 }
 
@@ -145,7 +145,7 @@ export async function ofx2json(ofx: string): Promise<OFXParseResult> {
   let dataParsed = null;
   try {
     dataParsed = await parseXml(content);
-  } catch (e) {
+  } catch {
     const sanitized = sgml2Xml(content);
     dataParsed = await parseXml(sanitized);
   }
