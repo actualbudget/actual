@@ -142,7 +142,7 @@ export function FieldMapping({
                   border: '1px solid var(--color-tableBorder)',
                   minHeight: '40px',
                 }}
-                collapsed={true}
+                collapsed
               >
                 <Cell
                   width={calculatedActualFieldWidth}

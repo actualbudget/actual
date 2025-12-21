@@ -156,6 +156,8 @@ export function SplitsExpandedProvider({
           };
         case 'finish-switch-mode':
           return { ...state, transitionId: null };
+        default:
+          throw new Error('Unrecognized action');
       }
     },
     previousState.current || {

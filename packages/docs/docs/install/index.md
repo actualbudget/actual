@@ -43,16 +43,16 @@ The server provides a web-based version of Actual. This web app can be used in a
 
 ## Running a Server
 
-While running a server can be a complicated endeavor, we’ve tried to make it fairly easy to set up and hands-off to maintain. Choose one of the following options to get started:
+While running a server can be a complicated endeavor, we've tried to make it fairly easy to set up and hands-off to maintain. Choose one of the following options to get started:
 
-- If you’re not comfortable with the command line and are willing to pay a small amount of money to have your version of Actual hosted on the cloud for you, we recommend [PikaPods](pikapods.md).[^2]
-- If you’re willing to run a few commands in the terminal:
+- If you're not comfortable with the command line and are willing to pay a small amount of money to have your version of Actual hosted on the cloud for you, we recommend [PikaPods](pikapods.md).[^2]
+- If you're willing to run a few commands in the terminal:
   - You can run the server with a simple command using the [CLI tool](cli-tool.md)
   - [Fly.io](fly.md) also offers cloud hosting for a similar amount of money.
   - If you want to use Docker, we have instructions for [using our provided Docker containers](docker.md).
-  - You could [build Actual from source](build-from-source.md) on macOS, Windows, or Linux if you don’t want to use a tool like Docker. (This method is the best option if you want to contribute to Actual's development!)
+  - You could [build Actual from source](build-from-source.md) on macOS, Windows, or Linux if you don't want to use a tool like Docker. (This method is the best option if you want to contribute to Actual's development!)
 
-Once you’ve set up your server, you can [configure it](../config/index.md) to change a few of the ways it works.
+Once you've set up your server, you can [configure it](../config/index.md) to change a few of the ways it works.
 
 If you're coming from the original, managed Actual subscription service, you may want to [migrate your data](../migration/index.md).
 

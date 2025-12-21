@@ -99,7 +99,7 @@ function About() {
         ) : (
           <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
             {notifyWhenUpdateIsAvailable ? (
-              <Trans>You’re up to date!</Trans>
+              <Trans>You're up to date!</Trans>
             ) : null}
           </Text>
         )}

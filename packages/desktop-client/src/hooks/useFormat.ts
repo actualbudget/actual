@@ -41,13 +41,13 @@ export type FormatResult = {
 function format(
   value: unknown,
   type: FormatType,
-  formatter: Intl.NumberFormat,
+  formatter: { format: (value: number) => string },
   decimalPlaces: number,
 ): FormatResult {
   switch (type) {
     case 'string': {
       const val = JSON.stringify(value);
-      // eslint-disable-next-line actual/typography
+
       if (val.charAt(0) === '"' && val.charAt(val.length - 1) === '"') {
         return { formattedString: val.slice(1, -1) };
       }

@@ -7,19 +7,19 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out this feature request! Please ensure you provide as much information as possible so we can better understand what you’re proposing so we can come up with the best solution for everyone.
+        Thanks for taking the time to fill out this feature request! Please ensure you provide as much information as possible so we can better understand what you're proposing so we can come up with the best solution for everyone.
   - type: checkboxes
     id: existing-issue
     attributes:
       label: 'Verified feature request does not already exist?'
-      description: 'Please search to see if an issue or PR already exists for the feature you’re requesting.'
+      description: "Please search to see if an issue or PR already exists for the feature you're requesting."
       options:
         - label: 'I have searched and found no existing issue'
           required: true
   - type: checkboxes
     attributes:
       label: '💻'
-      description: (Optional) Please check this box if you’re willing to open a PR to implement this feature. We’ll help you get started and answer any questions you have along the way :)
+      description: (Optional) Please check this box if you're willing to open a PR to implement this feature. We'll help you get started and answer any questions you have along the way :)
       options:
         - label: Would you like to implement this feature?
   - type: textarea
@@ -33,7 +33,7 @@ body:
     id: solution
     attributes:
       label: Describe your ideal solution to this problem
-      description: Feel free to give multiple different ideas for how the problem could be solved — we’d love to have a discussion to find the best way to solve your problem and related problems others may face! (Or leave this blank if you don’t have a solution in mind yet.)
+      description: Feel free to give multiple different ideas for how the problem could be solved — we'd love to have a discussion to find the best way to solve your problem and related problems others may face! (Or leave this blank if you don't have a solution in mind yet.)
     validations:
       required: false
   - type: textarea

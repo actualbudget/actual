@@ -31,7 +31,7 @@ One dollar (or whatever your currency is) may be used for Netflix while the next
 Giving every dollar a job forces you to be honest about where your money is going because each dollar can
 only have one job.
 
-Here’s what Zero-Sum Budgeting involves:
+Here's what Zero-Sum Budgeting involves:
 
 - **Total Allocation**: All your income is allocated to specific categories, resulting in a
   zero balance.
@@ -75,7 +75,7 @@ For example, if you make $ 3,000 this month, instead of spending it on this mont
 cover next month's expenses. Most people cannot achieve this in one month, so the way forward is to build up a
 buffer. Instead of aiming to save the full $ 3,000 in one go, begin by setting aside a smaller amount each month.
 For example, if you can set aside $ 200 each month, gradually build your buffer over several months. As you save
-more, you’ll start to pay some of next month’s bills with this reserve.
+more, you'll start to pay some of next month's bills with this reserve.
 
 You can also read about this strategy in [one of our blog posts](/blog/2023-12-15-automate-your-budget-with-goal-templates).
 
@@ -92,7 +92,7 @@ For example, if you earn $ 3,000 a month, you might decide to save 20%, or $ 600
 You set up an automatic transfer to move this amount into a savings account, ensuring it is set aside before you
 pay any bills or make purchases. The remaining $ 2,400 is then available to cover your living expenses, such as rent,
 utilities, groceries, and entertainment. This method guarantees that your savings goal is consistently met without
-having to rely on what’s left at the end of the month.
+having to rely on what's left at the end of the month.
 
 ### Credit Cards
 
@@ -171,7 +171,7 @@ As you become more accustomed to this budgeting method, you can update Actual Bu
 such as once a week. This flexibility allows you to adapt the system to your lifestyle. Additionally,
 if supported, you can set up automatic syncing with your bank to streamline the process.
 
-Here’s how to do it:
+Here's how to do it:
 
 1. **Record every transaction**: Every time you spend money, whether it's buying groceries or paying for gas,
    immediately enter the amount into Actual Budget under the appropriate category. This ensures that your budget
@@ -189,7 +189,7 @@ your finances and work more effectively towards your financial goals.
 ### 4. Adjust and adapt
 
 Life is full of unexpected twists and turns; your budget should be just as flexible. When you overspend in a
-budget category for the month, it’s crucial to adjust and adapt rather than feel defeated. As you adapt your plans
+budget category for the month, it's crucial to adjust and adapt rather than feel defeated. As you adapt your plans
 in real life, you can do the same with your budget.
 
 Maybe an unexpected event arose, or you underestimated your expenses. The key is to remain flexible and make
@@ -205,7 +205,7 @@ necessary adjustments.
    Flexibility is key. Adjusting your budget is a normal part of the process.
 
 You can also set up Actual Budget to
-[automatically deduct the overspending](/docs/budgeting/#rollover-negative-category-balances) from next month’s funds. Be aware that
+[automatically deduct the overspending](/docs/budgeting/#rollover-negative-category-balances) from next month's funds. Be aware that
 even if you _can_ do something, it does not mean that you _should_ do it.
 
 You maintain control over your budget by reallocating funds and avoiding unnecessary stress. This process helps
@@ -213,7 +213,7 @@ you understand that budgets are not rigid constraints but flexible tools that ca
 
 ### 5. Prepare for the unexpected
 
-There’s no such thing as a "normal" month when it comes to expenses. Your costs fluctuate throughout the year,
+There's no such thing as a "normal" month when it comes to expenses. Your costs fluctuate throughout the year,
 often unpredictably. Envelope budgeting helps you prepare for these irregular expenses by adding funds to
 your categories.
 
@@ -226,7 +226,7 @@ Many people face financial stress because of large, infrequent expenses that cat
 - Home repairs
 
 Without planning, these expenses can lead to financial crises, forcing you to dip into savings or debt.
-Envelope budgeting encourages proactive saving, so you’re never caught off guard.
+Envelope budgeting encourages proactive saving, so you're never caught off guard.
 
 Some regular expenses you already know about. You can plan for those and set aside a smaller amount of money each
 month to cover these rather than having to put up the larger amount when the bill comes.
@@ -238,12 +238,12 @@ month to cover these rather than having to put up the larger amount when the bil
 2. **Break Down Annual Costs**: Calculate the total annual cost for each expense.
 3. **Divide into Monthly Savings**: Divide the annual cost by 12 to determine how much you need to save each month.
 4. **Create Specific Categories**: For each irregular expense, set up specific categories in Actual Budget.
-   Label them clearly, such as “Car Insurance,” “Holiday Gifts,” or “Home Repairs.”
+   Label them clearly, such as "Car Insurance," "Holiday Gifts," or "Home Repairs."
 5. **Allocate Funds Monthly**: Allocate the calculated amount to these categories each month. Treat this allocation
    as a fixed expense to ensure you consistently save for these future costs.
 
-**Example:** Let’s say your annual insurance costs are $ 2,400. Instead of scrambling to find this amount when the bill
-arrives, you can set aside $ 200 each month. By the time the bill is due, you’ll have the total amount saved and ready,
+**Example:** Let's say your annual insurance costs are $ 2,400. Instead of scrambling to find this amount when the bill
+arrives, you can set aside $ 200 each month. By the time the bill is due, you'll have the total amount saved and ready,
 avoiding the need to dip into savings or incur debt.
 
 ## Using Actual Budget with debit cards is better than using cash

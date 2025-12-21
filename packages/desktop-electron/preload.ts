@@ -1,9 +1,9 @@
-import { ipcRenderer, contextBridge, IpcRenderer } from 'electron';
+import { ipcRenderer, contextBridge, type IpcRenderer } from 'electron';
 
 import {
-  GetBootstrapDataPayload,
-  OpenFileDialogPayload,
-  SaveFileDialogPayload,
+  type GetBootstrapDataPayload,
+  type OpenFileDialogPayload,
+  type SaveFileDialogPayload,
 } from './index';
 
 const { version: VERSION, isDev: IS_DEV }: GetBootstrapDataPayload =
@@ -75,7 +75,10 @@ contextBridge.exposeInMainWorld('Actual', {
 
   // No auto-updates in the desktop app
   isUpdateReadyForDownload: () => false,
-  waitForUpdateReadyForDownload: () => new Promise<void>(() => {}),
+  waitForUpdateReadyForDownload: () =>
+    new Promise<void>(() => {
+      // This is used in browser environment; do nothing in electron
+    }),
 
   getServerSocket: async () => {
     return null;

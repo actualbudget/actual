@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import * as d from 'date-fns';
-import { Locale } from 'date-fns';
+import { type Locale } from 'date-fns';
 import memoizeOne from 'memoize-one';
 
 import { type SyncedPrefs } from '../types/prefs';
@@ -545,7 +545,7 @@ export function sheetForMonth(month: string): string {
 }
 
 export function nameForMonth(month: DateLike, locale?: Locale): string {
-  return d.format(_parse(month), 'MMMM ‘yy', { locale });
+  return d.format(_parse(month), "MMMM ''yy", { locale });
 }
 
 export function format(

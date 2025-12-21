@@ -38,7 +38,7 @@ export function useCategoryActions() {
         notification: {
           type: 'error',
           message: t(
-            'Category “{{name}}” already exists in group (it may be hidden)',
+            'Category "{{name}}" already exists in group (it may be hidden)',
             { name },
           ),
         },

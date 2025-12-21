@@ -1,4 +1,4 @@
-import { Budget } from '../types/budget';
+import { type Budget } from '../types/budget';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -7,7 +7,7 @@ import type {
   ScheduleEntity,
 } from '../types/models';
 
-import { RemoteFile } from './cloud-storage';
+import { type RemoteFile } from './cloud-storage';
 import * as models from './models';
 
 export type APIAccountEntity = Pick<AccountEntity, 'id' | 'name'> & {
