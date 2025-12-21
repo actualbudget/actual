@@ -19,8 +19,8 @@ export function ReportAutocomplete({
 
   return (
     <Autocomplete
-      strict={true}
-      highlightFirst={true}
+      strict
+      highlightFirst
       embedded={embedded}
       suggestions={reports}
       renderItems={(items, getItemProps, highlightedIndex) => (
