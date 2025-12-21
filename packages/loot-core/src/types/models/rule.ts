@@ -18,6 +18,7 @@ export type FieldValueTypes = {
   account: string;
   amount: number;
   category: string;
+  group: string;
   date: string | RecurConfig;
   notes: string;
   payee: string;
@@ -68,6 +69,16 @@ export type RuleConditionEntity =
     >
   | BaseConditionEntity<
       'category',
+      | 'is'
+      | 'isNot'
+      | 'oneOf'
+      | 'notOneOf'
+      | 'contains'
+      | 'doesNotContain'
+      | 'matches'
+    >
+  | BaseConditionEntity<
+      'group',
       | 'is'
       | 'isNot'
       | 'oneOf'

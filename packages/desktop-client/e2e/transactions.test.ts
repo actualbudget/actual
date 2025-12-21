@@ -84,6 +84,42 @@ test.describe('Transactions', () => {
       );
       await expect(page).toMatchThemeScreenshots();
     });
+
+    test('by group', async () => {
+      const filterTooltip = await accountPage.filterBy('Group');
+      await expect(filterTooltip.locator).toMatchThemeScreenshots();
+
+      // Type in the autocomplete box
+      const autocomplete = page.getByTestId('autocomplete');
+      await expect(autocomplete).toMatchThemeScreenshots();
+
+      const group = page.getByTestId('Income-group-item');
+
+      // Select the active item
+      await group.hover();
+      await group.click();
+
+      await filterTooltip.applyButton.click();
+
+      // Assert that there are only transactions in the income group
+      //TODO: improve this test during the PR to add a Group column(?) to the transaction page
+      await expect(accountPage.getNthTransaction(0).category).toHaveText(
+        'Income',
+      );
+      await expect(accountPage.getNthTransaction(1).category).toHaveText(
+        'Income',
+      );
+      await expect(accountPage.getNthTransaction(2).category).toHaveText(
+        'Income',
+      );
+      await expect(accountPage.getNthTransaction(3).category).toHaveText(
+        'Income',
+      );
+      await expect(accountPage.getNthTransaction(4).category).toHaveText(
+        'Income',
+      );
+      await expect(page).toMatchThemeScreenshots();
+    });
   });
 
   test('creates a test transaction', async () => {
