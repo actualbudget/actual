@@ -454,7 +454,7 @@ export function PayeeAutocomplete({
   return (
     <Autocomplete
       key={focusTransferPayees ? 'transfers' : 'all'}
-      strict={true}
+      strict
       embedded={embedded}
       value={stripNew(value)}
       suggestions={payeeSuggestions}

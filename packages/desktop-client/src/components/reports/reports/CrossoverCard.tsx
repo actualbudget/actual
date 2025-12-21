@@ -229,7 +229,7 @@ export function CrossoverCard({
         {data ? (
           <CrossoverGraph
             graphData={data.graphData}
-            compact={true}
+            compact
             showTooltip={!isEditing && !isNarrowWidth}
             style={{ height: 'auto', flex: 1 }}
           />

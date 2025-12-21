@@ -346,7 +346,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         onChangeDates={onChangeDates}
-        show1Month={true}
+        show1Month
       >
         {widget && (
           <Button variant="primary" onPress={onSaveWidget}>
