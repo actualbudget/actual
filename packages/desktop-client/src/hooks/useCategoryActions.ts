@@ -8,6 +8,7 @@ import {
 
 import { useCategories } from './useCategories';
 import { useNavigate } from './useNavigate';
+import { createTransactionFilterConditions } from './usePayPeriodTranslation';
 
 import {
   createCategory,
@@ -152,16 +153,10 @@ export function useCategoryActions() {
   };
 
   const onShowActivity = (categoryId: CategoryEntity['id'], month: string) => {
-    const filterConditions = [
-      { field: 'category', op: 'is', value: categoryId, type: 'id' },
-      {
-        field: 'date',
-        op: 'is',
-        value: month,
-        options: { month: true },
-        type: 'date',
-      },
-    ];
+    const filterConditions = createTransactionFilterConditions(
+      month,
+      categoryId,
+    );
     navigate('/accounts', {
       state: {
         goBack: true,

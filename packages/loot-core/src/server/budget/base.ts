@@ -88,7 +88,7 @@ function handleAccountChange(months, oldValue, newValue) {
   }
 }
 
-function handleTransactionChange(transaction, changedFields) {
+function handleTransactionChange(transaction, changedFields, createdMonths) {
   if (
     (changedFields.has('date') ||
       changedFields.has('acct') ||
@@ -99,12 +99,31 @@ function handleTransactionChange(transaction, changedFields) {
     transaction.date &&
     transaction.category
   ) {
-    const month = monthUtils.monthFromDate(db.fromDateRepr(transaction.date));
-    const sheetName = monthUtils.sheetForMonth(month);
+    const date = db.fromDateRepr(transaction.date);
+    const calendarMonth = monthUtils.dayFromDate(date).slice(0, 7);
 
-    sheet
-      .get()
-      .recompute(resolveName(sheetName, 'sum-amount-' + transaction.category));
+    if (createdMonths.has(calendarMonth)) {
+      const sheetName = monthUtils.sheetForMonth(calendarMonth);
+      sheet
+        .get()
+        .recompute(resolveName(sheetName, 'sum-amount-' + transaction.category));
+    }
+
+    const config = monthUtils.getPayPeriodConfig();
+    if (config) {
+      const payPeriod = monthUtils.getPayPeriodFromDate(
+        monthUtils.parseDate(date),
+        config,
+      );
+      if (createdMonths.has(payPeriod) && payPeriod !== calendarMonth) {
+        const sheetName = monthUtils.sheetForMonth(payPeriod);
+        sheet
+          .get()
+          .recompute(
+            resolveName(sheetName, 'sum-amount-' + transaction.category),
+          );
+      }
+    }
   }
 }
 
@@ -168,9 +187,9 @@ export function triggerBudgetChanges(oldValues, newValues) {
           );
 
           if (oldValue) {
-            handleTransactionChange(oldValue, changed);
+            handleTransactionChange(oldValue, changed, createdMonths);
           }
-          handleTransactionChange(newValue, changed);
+          handleTransactionChange(newValue, changed, createdMonths);
         } else if (table === 'category_mapping') {
           handleCategoryMappingChange(createdMonths, oldValue, newValue);
         } else if (table === 'categories') {

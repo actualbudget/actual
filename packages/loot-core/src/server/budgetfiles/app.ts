@@ -92,6 +92,10 @@ app.method('backup-load', loadBackup);
 app.method('backup-make', makeBackup);
 app.method('get-last-opened-backup', getLastOpenedBackup);
 
+app.events.on('pay-period-config-changed', () => {
+  resetBudgetCache();
+});
+
 async function handleValidateBudgetName({ name }: { name: string }) {
   return validateBudgetName(name);
 }
@@ -291,7 +295,7 @@ async function deleteBudget({
   // If it's a cloud file, you can delete it from the server by
   // passing its cloud id
   if (cloudFileId) {
-    await cloudStorage.removeFile(cloudFileId).catch(() => {});
+    await cloudStorage.removeFile(cloudFileId).catch(() => { });
   }
 
   // If a local file exists, you can delete it by passing its local id
@@ -367,7 +371,7 @@ async function duplicateBudget({
       if (await fs.exists(newBudgetDir)) {
         await fs.removeDirRecursively(newBudgetDir);
       }
-    } catch {} // Ignore cleanup errors
+    } catch { } // Ignore cleanup errors
     throw new Error(`Failed to duplicate budget file: ${error.message}`);
   }
 
@@ -502,11 +506,11 @@ function onSheetChange({ names }: { names: string[] }) {
 
 async function _loadBudget(id: Budget['id']): Promise<{
   error?:
-    | 'budget-not-found'
-    | 'loading-budget'
-    | 'out-of-sync-migrations'
-    | 'out-of-sync-data'
-    | 'opening-budget';
+  | 'budget-not-found'
+  | 'loading-budget'
+  | 'out-of-sync-migrations'
+  | 'out-of-sync-data'
+  | 'opening-budget';
 }> {
   let dir: string;
   try {

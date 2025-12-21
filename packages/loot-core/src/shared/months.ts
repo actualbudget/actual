@@ -20,7 +20,7 @@ import {
   addPayPeriods,
   differenceInPayPeriods,
   getCurrentPayPeriod,
-  getPayPeriodFromDate,
+  getPayPeriodFromDate as _getPayPeriodFromDate,
   generatePayPeriodRange,
   getPayPeriodNumberInMonth,
 } from './pay-periods';
@@ -631,6 +631,13 @@ export const getShortYearRegex = memoizeOne((format: string) => {
 
 export function isPayPeriod(monthId: string): boolean {
   return _isPayPeriod(monthId);
+}
+
+export function getPayPeriodFromDate(
+  date: Date,
+  config: PayPeriodConfig,
+): string {
+  return _getPayPeriodFromDate(date, config);
 }
 
 function getCalendarMonthStartDate(monthId: string): Date {

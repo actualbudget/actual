@@ -12,6 +12,7 @@ import { ServerEvents } from '../types/server-events';
 type Events = {
   sync: ServerEvents['sync-event'];
   'load-budget': { id: string };
+  'pay-period-config-changed': void;
 };
 
 type UnlistenService = () => void;
