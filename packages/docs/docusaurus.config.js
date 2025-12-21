@@ -10,7 +10,7 @@ const defaultOptions = {
 
 /** @type {import('@docusaurus/types').Config} */
 module.exports = {
-  title: 'Actual Budget Documentation',
+  title: 'Actual Budget',
   tagline: 'Your finances - made simple',
   url: 'https://actualbudget.org/',
   baseUrl: '/',
