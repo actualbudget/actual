@@ -21,7 +21,7 @@ async function enableMobileCalculatorKeypad(page: Page) {
   // Set the feature flag with proper error handling
   try {
     await page.evaluate(async () => {
-      await window.__actionsForMenu.saveSyncedPrefs({
+      window.__actionsForMenu.saveSyncedPrefs({
         prefs: {
           'flags.mobileCalculatorKeypad': 'true',
         },
@@ -36,7 +36,7 @@ async function enableMobileCalculatorKeypad(page: Page) {
     ).catch(() => {}); // Ignore timeout on second try
 
     await page.evaluate(async () => {
-      await window.__actionsForMenu.saveSyncedPrefs({
+      window.__actionsForMenu.saveSyncedPrefs({
         prefs: {
           'flags.mobileCalculatorKeypad': 'true',
         },
