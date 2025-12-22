@@ -77,6 +77,7 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
+import { useIsMobileCalculatorKeypadEnabled } from '@desktop-client/hooks/useIsMobileCalculatorKeypadEnabled';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
@@ -348,7 +349,6 @@ function Footer({
 
 type ChildTransactionEditProps = {
   transaction: TransactionEntity;
-  amountFocused: boolean;
   amountSign: '+' | '-';
   getCategory: (transaction: TransactionEntity, isOffBudget: boolean) => string;
   getPayee: (transaction: TransactionEntity) => PayeeEntity | undefined;
@@ -376,7 +376,6 @@ const ChildTransactionEdit = forwardRef<
   (
     {
       transaction,
-      amountFocused,
       amountSign,
       getCategory,
       getPayee,
@@ -437,7 +436,7 @@ const ChildTransactionEdit = forwardRef<
                 !!editingField &&
                 editingField !== getFieldName(transaction.id, 'amount')
               }
-              focused={amountFocused}
+              dataTestId={`child-amount-input-${transaction.id}`}
               value={amountToInteger(transaction.amount)}
               zeroSign={amountSign}
               style={{ marginRight: 8 }}
@@ -594,10 +593,12 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
+
+    const isMobileKeypadEnabled = useIsMobileCalculatorKeypadEnabled();
     const [totalAmountFocused, setTotalAmountFocused] = useState(
       // iOS does not support automatically opening up the keyboard for the
       // total amount field. Hence we should not focus on it on page render.
-      !Platform.isIOSAgent,
+      !Platform.isIOSAgent && !isMobileKeypadEnabled,
     );
     const childTransactionElementRefMap = useRef<
       Record<TransactionEntity['id'], HTMLDivElement | null>
@@ -617,10 +618,15 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const isInitialMount = useInitialMount();
 
     useEffect(() => {
-      if (isInitialMount && isAdding && !Platform.isIOSAgent) {
+      if (
+        isInitialMount &&
+        isAdding &&
+        !Platform.isIOSAgent &&
+        !isMobileKeypadEnabled
+      ) {
         onTotalAmountEdit();
       }
-    }, [isAdding, isInitialMount, onTotalAmountEdit]);
+    }, [isAdding, isInitialMount, isMobileKeypadEnabled, onTotalAmountEdit]);
 
     const getAccount = useCallback(
       (trans: TransactionEntity) => {
@@ -1101,11 +1107,10 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             </View>
           )}
 
-          {childTransactions.map((childTrans, i, arr) => (
+          {childTransactions.map(childTrans => (
             <ChildTransactionEdit
               key={childTrans.id}
               transaction={childTrans}
-              amountFocused={arr.findIndex(c => c.amount === 0) === i}
               amountSign={childAmountSign}
               ref={r => {
                 childTransactionElementRefMap.current = {

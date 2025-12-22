@@ -3,6 +3,7 @@ export type FeatureFlag =
   | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
   | 'formulaMode'
+  | 'mobileCalculatorKeypad'
   | 'currency'
   | 'crossoverReport'
   | 'plugins'

@@ -7,6 +7,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   goalTemplatesUIEnabled: false,
   actionTemplating: false,
   formulaMode: false,
+  mobileCalculatorKeypad: false,
   currency: false,
   crossoverReport: false,
   plugins: false,

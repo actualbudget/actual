@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useRef, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
@@ -12,8 +12,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { toRelaxedNumber } from 'loot-core/shared/util';
-
 import { createAccount } from '@desktop-client/accounts/accountsSlice';
 import { Link } from '@desktop-client/components/common/Link';
 import {
@@ -25,24 +23,33 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { Checkbox } from '@desktop-client/components/forms';
 import { validateAccountName } from '@desktop-client/components/util/accountValidation';
+import { MoneyKeypad } from '@desktop-client/components/util/MoneyKeypad';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useIsMobileCalculatorKeypadEnabled } from '@desktop-client/hooks/useIsMobileCalculatorKeypadEnabled';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { closeModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { parseAmountExpression } from '@desktop-client/util/parseAmountExpression';
 
 export function CreateLocalAccountModal() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const accounts = useAccounts();
+  const isMobileKeypadEnabled = useIsMobileCalculatorKeypadEnabled();
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
+  const initialBalanceRef = useRef(balance);
+  const [isKeypadOpen, setIsKeypadOpen] = useState(false);
+  const [didCommitFromKeypad, setDidCommitFromKeypad] = useState(false);
 
   const [nameError, setNameError] = useState(null);
   const [balanceError, setBalanceError] = useState(false);
 
-  const validateBalance = balance => !isNaN(parseFloat(balance));
+  const validateBalance = (balance: string) => {
+    return parseAmountExpression(balance) != null;
+  };
 
   const validateAndSetName = (name: string) => {
     const nameError = validateAccountName(name, '', accounts);
@@ -67,7 +74,7 @@ export function CreateLocalAccountModal() {
       const id = await dispatch(
         createAccount({
           name,
-          balance: toRelaxedNumber(balance),
+          balance: parseAmountExpression(balance) ?? 0,
           offBudget: offbudget,
         }),
       ).unwrap();
@@ -164,9 +171,16 @@ export function CreateLocalAccountModal() {
               <InlineField label={t('Balance')} width="100%">
                 <Input
                   name="balance"
-                  inputMode="decimal"
+                  inputMode={isMobileKeypadEnabled ? 'none' : 'decimal'}
                   value={balance}
                   onChangeValue={setBalance}
+                  onPointerDown={() => {
+                    if (isMobileKeypadEnabled) {
+                      initialBalanceRef.current = balance;
+                      setDidCommitFromKeypad(false);
+                      setIsKeypadOpen(true);
+                    }
+                  }}
                   onUpdate={value => {
                     const balance = value.trim();
                     setBalance(balance);
@@ -177,6 +191,50 @@ export function CreateLocalAccountModal() {
                   style={{ flex: 1 }}
                 />
               </InlineField>
+              {isMobileKeypadEnabled && isKeypadOpen && (
+                <MoneyKeypad
+                  modalName="money-keypad"
+                  title={t('Balance')}
+                  defaultValue={balance}
+                  onChangeValue={setBalance}
+                  onClose={() => {
+                    setIsKeypadOpen(false);
+                    if (!didCommitFromKeypad) {
+                      setBalance(initialBalanceRef.current);
+                    }
+                    setDidCommitFromKeypad(false);
+                  }}
+                  onEvaluate={text => {
+                    const numericValue = parseAmountExpression(text);
+                    if (numericValue == null) {
+                      return {
+                        ok: false as const,
+                        error: t('Invalid expression'),
+                      };
+                    }
+
+                    return { ok: true as const, value: String(numericValue) };
+                  }}
+                  onDone={text => {
+                    const numericValue = parseAmountExpression(text);
+                    if (numericValue == null) {
+                      return {
+                        ok: false as const,
+                        error: t('Invalid expression'),
+                      };
+                    }
+
+                    setBalance(String(numericValue));
+                    setDidCommitFromKeypad(true);
+                    setIsKeypadOpen(false);
+                    if (balanceError) {
+                      setBalanceError(false);
+                    }
+
+                    return { ok: true as const, value: undefined };
+                  }}
+                />
+              )}
               {balanceError && (
                 <FormError style={{ marginLeft: 75 }}>
                   <Trans>Balance must be a number</Trans>

@@ -1,4 +1,4 @@
-import React, {
+import {
   type Ref,
   type ComponentPropsWithRef,
   type HTMLProps,
@@ -7,7 +7,9 @@ import React, {
   useRef,
   useState,
   type CSSProperties,
+  type FocusEvent,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
@@ -23,8 +25,11 @@ import {
 } from 'loot-core/shared/util';
 
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import { MoneyKeypad } from '@desktop-client/components/util/MoneyKeypad';
+import { useIsMobileCalculatorKeypadEnabled } from '@desktop-client/hooks/useIsMobileCalculatorKeypadEnabled';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { parseAmountExpression } from '@desktop-client/util/parseAmountExpression';
 
 type AmountInputProps = {
   value: number;
@@ -46,10 +51,15 @@ const AmountInput = memo(function AmountInput({
   textStyle,
   ...props
 }: AmountInputProps) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isMobileKeypadEnabled = useIsMobileCalculatorKeypadEnabled();
+  const [isKeypadOpen, setIsKeypadOpen] = useState(false);
+  const isKeypadOpenRef = useRef(false);
+  const didCommitFromKeypadRef = useRef(false);
   const [hideFraction] = useSyncedPref('hideFraction');
 
   const mergedInputRef = useMergedRefs<HTMLInputElement>(
@@ -61,9 +71,17 @@ const AmountInput = memo(function AmountInput({
 
   useEffect(() => {
     if (focused) {
-      inputRef.current?.focus();
+      if (isMobileKeypadEnabled) {
+        // On mobile, open the custom keypad instead of the OS keyboard.
+        isKeypadOpenRef.current = true;
+        setIsKeypadOpen(true);
+        setEditing(true);
+        setText(initialValue === 0 ? '' : amountToCurrency(initialValue));
+      } else {
+        inputRef.current?.focus();
+      }
     }
-  }, [focused]);
+  }, [focused, isMobileKeypadEnabled, initialValue]);
 
   useEffect(() => {
     setEditing(false);
@@ -93,6 +111,46 @@ const AmountInput = memo(function AmountInput({
     return newValue;
   };
 
+  const notifyParentBlur = () => {
+    if (!props.onBlur) {
+      return;
+    }
+
+    const input = inputRef.current;
+    if (!input) {
+      return;
+    }
+
+    // We intentionally notify the parent that the field has "blurred" when the
+    // keypad is dismissed/committed. Create a minimal, event-like object so any
+    // consumer that relies on `target`/`currentTarget` won't explode at runtime.
+    const syntheticEvent = {
+      target: input,
+      currentTarget: input,
+      defaultPrevented: true,
+      preventDefault: () => undefined,
+      stopPropagation: () => undefined,
+    } as unknown as FocusEvent<HTMLInputElement>;
+
+    props.onBlur(syntheticEvent);
+  };
+
+  const parseExpression = (expr: string): number | null => {
+    const trimmed = expr.trim();
+    if (trimmed === '') {
+      return 0;
+    }
+
+    const numericValue = parseAmountExpression(trimmed);
+    if (numericValue === null) {
+      return null;
+    }
+
+    // This component handles the sign separately (via FocusableAmountInput),
+    // so normalize to absolute here.
+    return Math.abs(numericValue);
+  };
+
   const onFocus: HTMLProps<HTMLInputElement>['onFocus'] = e => {
     props.onFocus?.(e);
   };
@@ -108,12 +166,22 @@ const AmountInput = memo(function AmountInput({
 
   const onBlur: HTMLProps<HTMLInputElement>['onBlur'] = e => {
     props.onBlur?.(e);
+
+    if (isMobileKeypadEnabled && isKeypadOpenRef.current) {
+      return;
+    }
+
     if (!e.defaultPrevented) {
       onUpdate(e.target.value);
     }
   };
 
   const onChangeText = (text: string) => {
+    if (isMobileKeypadEnabled) {
+      // The custom keypad owns editing on mobile.
+      return;
+    }
+
     text = reapplyThousandSeparators(text);
     text = appendDecimals(text, String(hideFraction) === 'true');
     setEditing(true);
@@ -126,7 +194,7 @@ const AmountInput = memo(function AmountInput({
       type="text"
       ref={mergedInputRef}
       value={text}
-      inputMode="decimal"
+      inputMode={isMobileKeypadEnabled ? 'none' : 'decimal'}
       autoCapitalize="none"
       onChange={e => onChangeText(e.target.value)}
       onFocus={onFocus}
@@ -151,6 +219,68 @@ const AmountInput = memo(function AmountInput({
       }}
     >
       <View style={{ overflowY: 'auto', overflowX: 'hidden' }}>{input}</View>
+
+      {isMobileKeypadEnabled && focused && isKeypadOpen && (
+        <MoneyKeypad
+          modalName="money-keypad"
+          title={t('Amount')}
+          defaultValue={text}
+          onChangeValue={nextText => {
+            setEditing(true);
+            setText(nextText);
+            props.onChangeValue?.(nextText);
+          }}
+          onEvaluate={expr => {
+            const parsed = parseExpression(expr);
+            if (parsed == null) {
+              return { ok: false as const, error: t('Invalid expression') };
+            }
+
+            return {
+              ok: true as const,
+              value: amountToCurrency(parsed),
+            };
+          }}
+          onDone={expr => {
+            const parsed = parseExpression(expr);
+            if (parsed == null) {
+              return { ok: false as const, error: t('Invalid expression') };
+            }
+
+            setValue(parsed);
+            setEditing(false);
+            setText('');
+
+            const originalAmount = Math.abs(props.value);
+            if (parsed !== originalAmount) {
+              props.onUpdate?.(String(parsed));
+              props.onUpdateAmount?.(parsed);
+            }
+
+            didCommitFromKeypadRef.current = true;
+            isKeypadOpenRef.current = false;
+            setIsKeypadOpen(false);
+            notifyParentBlur();
+
+            return { ok: true as const, value: undefined };
+          }}
+          onClose={() => {
+            if (didCommitFromKeypadRef.current) {
+              didCommitFromKeypadRef.current = false;
+              isKeypadOpenRef.current = false;
+              setIsKeypadOpen(false);
+              return;
+            }
+
+            isKeypadOpenRef.current = false;
+            setIsKeypadOpen(false);
+            setEditing(false);
+            setText('');
+            notifyParentBlur();
+          }}
+        />
+      )}
+
       <Text
         style={{
           pointerEvents: 'none',
@@ -258,6 +388,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
           // Defines how far touch can start away from the button
           // hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
           {...buttonProps}
+          data-testid="amount-display"
           className={css({
             ...(buttonProps && buttonProps.style),
             ...(focused && { display: 'none' }),

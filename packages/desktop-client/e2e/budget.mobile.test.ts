@@ -8,6 +8,47 @@ import { ConfigurationPage } from './page-models/configuration-page';
 import { type MobileBudgetPage } from './page-models/mobile-budget-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
 
+async function enableMobileCalculatorKeypad(page: Page) {
+  // Wait for page to be stable before trying to evaluate
+  await page.waitForLoadState('networkidle');
+
+  // Wait for the actions to be available with a reasonable timeout
+  await page.waitForFunction(
+    () => Boolean(window.__actionsForMenu?.saveSyncedPrefs),
+    { timeout: 15000 },
+  );
+
+  // Set the feature flag with proper error handling
+  try {
+    await page.evaluate(async () => {
+      window.__actionsForMenu.saveSyncedPrefs({
+        prefs: {
+          'flags.mobileCalculatorKeypad': 'true',
+        },
+      });
+    });
+  } catch {
+    // If the page context was destroyed, wait and try once more
+    await page.waitForTimeout(1000);
+    await page
+      .waitForFunction(
+        () => Boolean(window.__actionsForMenu?.saveSyncedPrefs),
+        { timeout: 5000 },
+      )
+      .catch(() => {
+        // Ignore timeout on second try
+      });
+
+    await page.evaluate(async () => {
+      window.__actionsForMenu.saveSyncedPrefs({
+        prefs: {
+          'flags.mobileCalculatorKeypad': 'true',
+        },
+      });
+    });
+  }
+}
+
 const copyLastMonthBudget = async (
   budgetPage: MobileBudgetPage,
   categoryName: string,
@@ -110,6 +151,8 @@ budgetTypes.forEach(budgetType => {
       });
       await page.goto('/');
       await configurationPage.createTestFile();
+
+      await enableMobileCalculatorKeypad(page);
 
       const settingsPage = await navigation.goToSettingsPage();
       await settingsPage.useBudgetType(budgetType);
