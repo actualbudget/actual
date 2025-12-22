@@ -9,8 +9,14 @@ import type { FeatureFlag, ServerPrefs } from 'loot-core/types/prefs';
 
 import { Setting } from './UI';
 
+import { useAuth } from '@desktop-client/auth/AuthProvider';
+import { Permissions } from '@desktop-client/auth/types';
 import { Link } from '@desktop-client/components/common/Link';
 import { Checkbox } from '@desktop-client/components/forms';
+import {
+  useLoginMethod,
+  useMultiuserEnabled,
+} from '@desktop-client/components/ServerContext';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useServerPref } from '@desktop-client/hooks/useServerPref';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
@@ -90,8 +96,20 @@ function ServerFeatureToggle({
   const syncServerStatus = useSyncServerStatus();
   const isUsingServer = syncServerStatus !== 'no-server';
   const isServerOffline = syncServerStatus === 'offline';
+  const { hasPermission } = useAuth();
+  const loginMethod = useLoginMethod();
+  const multiuserEnabled = useMultiuserEnabled();
 
   if (!isUsingServer || isServerOffline) {
+    return null;
+  }
+
+  // Show to admins if OIDC is enabled, or to everyone if multi-user is not enabled
+  const isAdmin = hasPermission(Permissions.ADMINISTRATOR);
+  const oidcEnabled = loginMethod === 'openid';
+  const shouldShow = (oidcEnabled && isAdmin) || !multiuserEnabled;
+
+  if (!shouldShow) {
     return null;
   }
 
@@ -185,7 +203,7 @@ export function ExperimentalFeatures() {
               <Trans>Force reload app button</Trans>
             </FeatureToggle>
             <ServerFeatureToggle
-              prefName="plugins"
+              prefName="flags.plugins"
               disableToggle
               feedbackLink="https://github.com/actualbudget/actual/issues/5950"
             >

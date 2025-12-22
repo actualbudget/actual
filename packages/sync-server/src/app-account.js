@@ -9,6 +9,7 @@ import {
   getActiveLoginMethod,
   getServerPrefs,
   setServerPrefs,
+  isAdmin,
 } from './account-db';
 import { isValidRedirectUrl, loginWithOpenIdSetup } from './accounts/openid';
 import { changePassword, loginWithPassword } from './accounts/password';
@@ -133,6 +134,15 @@ app.post('/change-password', (req, res) => {
 app.post('/server-prefs', (req, res) => {
   const session = validateSession(req, res);
   if (!session) return;
+
+  if (!isAdmin(session.user_id)) {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'permission-not-found',
+    });
+    return;
+  }
 
   const { prefs } = req.body || {};
 
