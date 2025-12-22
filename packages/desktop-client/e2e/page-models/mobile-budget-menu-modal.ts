@@ -63,7 +63,6 @@ export class BudgetMenuModal {
     await expect(this.moneyKeypadModal).toBeVisible();
   }
 
-
   private formatDigitStringAsCurrencyTextWithSeparator(
     amount: string,
     decimalSeparator: string,

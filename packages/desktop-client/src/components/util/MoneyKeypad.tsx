@@ -188,7 +188,7 @@ export function MoneyKeypad({
     <ReactAriaModalOverlay
       data-testid={`${modalName}-modal`}
       isDismissable
-      defaultOpen={true}
+      defaultOpen
       onOpenChange={isOpen => !isOpen && onClose()}
       style={{
         position: 'fixed',
