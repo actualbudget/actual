@@ -164,7 +164,7 @@ app.get('/validate', (req, res) => {
         userId: session?.user_id,
         displayName: user?.display_name,
         loginMethod: session?.auth_method,
-        globalSyncedPrefs: getServerPrefs(),
+        prefs: getServerPrefs(),
       },
     });
   }

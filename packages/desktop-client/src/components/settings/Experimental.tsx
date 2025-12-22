@@ -5,15 +5,16 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import type { FeatureFlag, GlobalSyncedPrefs } from 'loot-core/types/prefs';
+import type { FeatureFlag, ServerPrefs } from 'loot-core/types/prefs';
 
 import { Setting } from './UI';
 
 import { Link } from '@desktop-client/components/common/Link';
 import { Checkbox } from '@desktop-client/components/forms';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useGlobalSyncedPref } from '@desktop-client/hooks/useGlobalSyncedPref';
+import { useServerPref } from '@desktop-client/hooks/useServerPref';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 type FeatureToggleProps = {
   flag: FeatureFlag;
@@ -69,22 +70,30 @@ function FeatureToggle({
   );
 }
 
-type GlobalFeatureToggleProps = {
-  prefName: keyof GlobalSyncedPrefs;
+type ServerFeatureToggleProps = {
+  prefName: keyof ServerPrefs;
   disableToggle?: boolean;
   error?: ReactNode;
   children: ReactNode;
   feedbackLink?: string;
 };
 
-function GlobalFeatureToggle({
+function ServerFeatureToggle({
   prefName,
   disableToggle = false,
   feedbackLink,
   error,
   children,
-}: GlobalFeatureToggleProps) {
-  const [enabled, setEnabled] = useGlobalSyncedPref(prefName);
+}: ServerFeatureToggleProps) {
+  const [enabled, setEnabled] = useServerPref(prefName);
+
+  const syncServerStatus = useSyncServerStatus();
+  const isUsingServer = syncServerStatus !== 'no-server';
+  const isServerOffline = syncServerStatus === 'offline';
+
+  if (!isUsingServer || isServerOffline) {
+    return null;
+  }
 
   return (
     <label style={{ display: 'flex' }}>
@@ -175,13 +184,13 @@ export function ExperimentalFeatures() {
             <FeatureToggle flag="forceReload">
               <Trans>Force reload app button</Trans>
             </FeatureToggle>
-            <GlobalFeatureToggle
+            <ServerFeatureToggle
               prefName="plugins"
               disableToggle
               feedbackLink="https://github.com/actualbudget/actual/issues/5950"
             >
               <Trans>Client-Side plugins (soon)</Trans>
-            </GlobalFeatureToggle>
+            </ServerFeatureToggle>
           </View>
         ) : (
           <Link

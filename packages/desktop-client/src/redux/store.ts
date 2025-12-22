@@ -22,10 +22,6 @@ import {
   reducer as budgetfilesSliceReducer,
 } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import {
-  name as globalSyncedPrefsSliceName,
-  reducer as globalSyncedPrefsSliceReducer,
-} from '@desktop-client/globalSyncedPrefs/globalSyncedPrefsSlice';
-import {
   name as modalsSliceName,
   reducer as modalsSliceReducer,
 } from '@desktop-client/modals/modalsSlice';
@@ -42,6 +38,10 @@ import {
   name as prefsSliceName,
   reducer as prefsSliceReducer,
 } from '@desktop-client/prefs/prefsSlice';
+import {
+  name as serverPrefsSliceName,
+  reducer as serverPrefsSliceReducer,
+} from '@desktop-client/serverPrefs/serverPrefsSlice';
 import {
   name as tagsSliceName,
   reducer as tagsSliceReducer,
@@ -64,7 +64,7 @@ const rootReducer = combineReducers({
   [notificationsSliceName]: notificationsSliceReducer,
   [payeesSliceName]: payeesSliceReducer,
   [prefsSliceName]: prefsSliceReducer,
-  [globalSyncedPrefsSliceName]: globalSyncedPrefsSliceReducer,
+  [serverPrefsSliceName]: serverPrefsSliceReducer,
   [transactionsSliceName]: transactionsSliceReducer,
   [tagsSliceName]: tagsSliceReducer,
   [usersSliceName]: usersSliceReducer,

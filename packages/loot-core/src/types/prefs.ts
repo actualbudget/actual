@@ -153,4 +153,4 @@ export type GlobalPrefsJson = Partial<{
 
 export type AuthMethods = 'password' | 'openid';
 
-export type GlobalSyncedPrefs = Partial<Record<'plugins', string>>;
+export type ServerPrefs = Partial<Record<'plugins', string>>;
