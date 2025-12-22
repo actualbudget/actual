@@ -201,17 +201,21 @@ export function MobileBankSyncPage() {
               fontSize: 14,
             }}
           >
-            {isProcessingQueue
-              ? syncQueue.some(req => req.id === 'ALL_ACCOUNTS')
-                ? t('Processing {{count}} linked accounts', {
-                    count: linkedAccounts.length,
-                  })
-                : t('Processing {{count}} account', {
-                    count: syncQueue.length,
-                  })
-              : t('{{count}} linked accounts', {
-                  count: linkedAccounts.length,
-                })}
+            {isProcessingQueue ? (
+              syncQueue.some(req => req.id === 'ALL_ACCOUNTS') ? (
+                <Trans count={linkedAccounts.length}>
+                  Processing {{ count: linkedAccounts.length }} linked accounts
+                </Trans>
+              ) : (
+                <Trans count={syncQueue.length}>
+                  Processing {{ count: syncQueue.length }} account
+                </Trans>
+              )
+            ) : (
+              <Trans count={linkedAccounts.length}>
+                {{ count: linkedAccounts.length }} linked accounts
+              </Trans>
+            )}
           </Text>
         </View>
       )}
