@@ -221,6 +221,5 @@ export default defineConfig(async ({ mode }) => {
       },
       maxWorkers: 2,
     },
-    // oxlint-disable-next-line typescript/no-explicit-any
-  } satisfies UserConfig & { test: any };
+  } satisfies UserConfig;
 });

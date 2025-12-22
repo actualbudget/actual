@@ -295,19 +295,19 @@ export async function upload() {
     res = await fetchJSON(getServer().SYNC_SERVER + '/upload-user-file', {
       method: 'POST',
       headers: {
-        'Content-Length': uploadContent.length,
+        'Content-Length': String(uploadContent.length),
         'Content-Type': 'application/encrypted-file',
         'X-ACTUAL-TOKEN': userToken,
         'X-ACTUAL-FILE-ID': cloudFileId,
         'X-ACTUAL-NAME': encodeURIComponent(budgetName),
-        'X-ACTUAL-FORMAT': 2,
+        'X-ACTUAL-FORMAT': '2',
         ...(uploadMeta
           ? { 'X-ACTUAL-ENCRYPT-META': JSON.stringify(uploadMeta) }
           : null),
         ...(groupId ? { 'X-ACTUAL-GROUP-ID': groupId } : null),
         // TODO: fix me
         // oxlint-disable-next-line typescript/no-explicit-any
-      } as any,
+      },
       body: uploadContent,
     });
   } catch (err) {
