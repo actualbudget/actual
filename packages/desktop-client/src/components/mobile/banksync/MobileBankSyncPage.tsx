@@ -14,11 +14,11 @@ import {
 
 import { BankSyncAccountsList } from './BankSyncAccountsList';
 
-import { syncAccounts } from '@desktop-client/accounts/accountsSlice';
 import { Search } from '@desktop-client/components/common/Search';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncAll } from '@desktop-client/hooks/useSyncAll';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 
@@ -45,24 +45,14 @@ export function MobileBankSyncPage() {
   const accounts = useAccounts();
   const [filter, setFilter] = useState('');
 
-  // Get sync queue state
-  const { syncQueue, isProcessingQueue } = useSelector(state => state.account);
+  // Get sync queue state and sync all functionality
+  const { linkedAccounts, handleSyncAll, isProcessingQueue } = useSyncAll();
+  const { syncQueue } = useSelector(state => state.account);
 
   const openAccounts = useMemo(
     () => accounts.filter(a => !a.closed),
     [accounts],
   );
-
-  // Get linked accounts (accounts that can be synced)
-  const linkedAccounts = useMemo(() => {
-    return openAccounts.filter(a => a.account_sync_source);
-  }, [openAccounts]);
-
-  const handleSyncAll = useCallback(() => {
-    if (linkedAccounts.length > 0) {
-      dispatch(syncAccounts({})); // No id = sync all accounts
-    }
-  }, [dispatch, linkedAccounts.length]);
 
   const groupedAccounts = useMemo(() => {
     const unsorted = openAccounts.reduce(
