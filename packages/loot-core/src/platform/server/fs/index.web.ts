@@ -4,7 +4,7 @@ import IndexedDBBackend from 'absurd-sql/dist/indexeddb-backend';
 
 import * as connection from '../connection';
 import * as idb from '../indexeddb';
-import { _getModule, SqlJsModule } from '../sqlite';
+import { _getModule, type SqlJsModule } from '../sqlite';
 
 import { join } from './path-join';
 

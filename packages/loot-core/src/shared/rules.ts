@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { t } from 'i18next';
 
-import { FieldValueTypes, RuleConditionOp } from '../types/models';
+import { type FieldValueTypes, type RuleConditionOp } from '../types/models';
 
 // For now, this info is duplicated from the backend. Figure out how
 // to share it later.

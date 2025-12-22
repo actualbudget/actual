@@ -101,7 +101,7 @@ export function TransferModal({
               <InitialFocus>
                 <AmountInput
                   value={initialAmount}
-                  autoDecimals={true}
+                  autoDecimals
                   style={{
                     marginLeft: styles.mobileEditingPadding,
                     marginRight: styles.mobileEditingPadding,

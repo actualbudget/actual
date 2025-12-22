@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
@@ -29,6 +29,7 @@ export function FormulaCard({
   const { t } = useTranslation();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const themeColors = useThemeColors();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const formula = meta?.formula || '=SUM(1, 2, 3)';
   const fontSize = meta?.fontSize;
@@ -110,6 +111,7 @@ export function FormulaCard({
           />
         </View>
         <View
+          ref={containerRef}
           style={{
             justifyContent: 'center',
             alignItems: 'center',
@@ -132,6 +134,7 @@ export function FormulaCard({
             staticFontSize={staticFontSize}
             customColor={customColor}
             animate={isEditing ?? false}
+            containerRef={containerRef}
           />
         </View>
       </View>

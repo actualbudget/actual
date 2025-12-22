@@ -77,7 +77,7 @@ export const Modal = ({
     <ReactAriaModalOverlay
       data-testid={`${name}-modal`}
       isDismissable
-      defaultOpen={true}
+      defaultOpen
       onOpenChange={isOpen => !isOpen && handleOnClose?.()}
       style={{
         position: 'fixed',

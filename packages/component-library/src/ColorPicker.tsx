@@ -1,11 +1,11 @@
-import { ChangeEvent, ReactNode } from 'react';
+import { type ChangeEvent, type ReactNode } from 'react';
 import {
   ColorPicker as AriaColorPicker,
-  ColorPickerProps as AriaColorPickerProps,
+  type ColorPickerProps as AriaColorPickerProps,
   Dialog,
   DialogTrigger,
   ColorSwatch as AriaColorSwatch,
-  ColorSwatchProps,
+  type ColorSwatchProps,
   ColorSwatchPicker as AriaColorSwatchPicker,
   ColorSwatchPickerItem,
   ColorField,
@@ -56,10 +56,10 @@ const DEFAULT_COLOR_SET = [
   '#455A64',
 ];
 
-interface ColorSwatchPickerProps {
+type ColorSwatchPickerProps = {
   columns?: number;
   colorset?: string[];
-}
+};
 
 function ColorSwatchPicker({
   columns = 5,
@@ -89,7 +89,6 @@ function ColorSwatchPicker({
             cursor: 'pointer',
 
             '&[data-selected]::after': {
-              // eslint-disable-next-line actual/typography
               content: '""',
               position: 'absolute',
               inset: 0,
@@ -123,11 +122,11 @@ function ColorSwatchPicker({
 }
 const isColor = (value: string) => /^#[0-9a-fA-F]{6}$/.test(value);
 
-interface ColorPickerProps extends AriaColorPickerProps {
+type ColorPickerProps = {
   children?: ReactNode;
   columns?: number;
   colorset?: string[];
-}
+} & AriaColorPickerProps;
 
 export function ColorPicker({
   children,
