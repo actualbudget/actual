@@ -21,28 +21,26 @@ import type { TransactionHandlers } from '../server/transactions/app';
 import type { ApiHandlers } from './api-handlers';
 import type { ServerHandlers } from './server-handlers';
 
-export interface Handlers
-  extends
-    ServerHandlers,
-    ApiHandlers,
-    BudgetHandlers,
-    DashboardHandlers,
-    FiltersHandlers,
-    NotesHandlers,
-    PreferencesHandlers,
-    ReportsHandlers,
-    RulesHandlers,
-    SchedulesHandlers,
-    TransactionHandlers,
-    AdminHandlers,
-    ToolsHandlers,
-    AccountHandlers,
-    PayeesHandlers,
-    SpreadsheetHandlers,
-    SyncHandlers,
-    BudgetFileHandlers,
-    EncryptionHandlers,
-    TagsHandlers,
-    AuthHandlers {}
+export type Handlers = {} & ServerHandlers &
+  ApiHandlers &
+  BudgetHandlers &
+  DashboardHandlers &
+  FiltersHandlers &
+  NotesHandlers &
+  PreferencesHandlers &
+  ReportsHandlers &
+  RulesHandlers &
+  SchedulesHandlers &
+  TransactionHandlers &
+  AdminHandlers &
+  ToolsHandlers &
+  AccountHandlers &
+  PayeesHandlers &
+  SpreadsheetHandlers &
+  SyncHandlers &
+  BudgetFileHandlers &
+  EncryptionHandlers &
+  TagsHandlers &
+  AuthHandlers;
 
 export type HandlerFunctions = Handlers[keyof Handlers];

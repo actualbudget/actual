@@ -1,7 +1,7 @@
 # Budget Templates
 
 :::warning
-This is an **experimental feature**. That means we’re still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [open an issue](https://github.com/actualbudget/actual/issues) or post a message in the Discord.
+This is an **experimental feature**. That means we're still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [open an issue](https://github.com/actualbudget/actual/issues) or post a message in the Discord.
 :::
 :::warning
 All functionality described here may not be available in the latest stable release. See [Experimental Features](/docs/experimental/) for instructions to enable experimental features. Use the `edge` images for the latest implementation.
@@ -132,9 +132,8 @@ Templates can be given a priority flag to change the order that the templates ge
 
   - **Expected budgeted amount is 450**
     **No maximum category balance exists**
-    `     #template 150 up to 500
-    #template-1 300
-    `
+    `    #template 150 up to 500
+#template-1 300`
 
 ### Notes on all templates
 
@@ -159,18 +158,18 @@ This template also has a few variations making it likely the most used template 
 Below is an example of how it works.
 The template budgets just what you ask, no matter how much the respective category has in its balance.
 
-|Syntax|Budgeted Amount|
-|---|:---:|
-|`#template 50`| $ 50 |
+| Syntax         | Budgeted Amount |
+| -------------- | :-------------: |
+| `#template 50` |      $ 50       |
 
 There is also a useful variation of a simple template.
 This variation will put a **limit** on how much the balance of a category can be that month.
 Here are some examples of how this is used
 
-|Syntax| Previous Balance | Budgeted Amount | New Balance |
-|---|:---:| :---: |:---:|
-|`#template 50 up to 100`| $ 80 | $ 20 | $ 100 |
-|`#template 50 up to 100`| $ 20 | $ 50 | $ 70 |
+| Syntax                   | Previous Balance | Budgeted Amount | New Balance |
+| ------------------------ | :--------------: | :-------------: | :---------: |
+| `#template 50 up to 100` |       $ 80       |      $ 20       |    $ 100    |
+| `#template 50 up to 100` |       $ 20       |      $ 50       |    $ 70     |
 
 Isn't that neat!
 This is especially useful for budget categories that have month to month variation in spending such as groceries.
@@ -180,10 +179,10 @@ The last variation of the simple template is sometimes referred to as a "refill"
 With this style the template budgets whatever it takes to hit a "full" amount.
 Here is how it works:
 
-|Syntax| Previous Balance | Budgeted Amount | New Balance |
-|---|:---:| :---: |:---:|
-|`#template up to 150`| $ 10 | $ 140  | $ 150 |
-|`#template up to 150`| $ -20 | $ 170  | $ 150 |
+| Syntax                | Previous Balance | Budgeted Amount | New Balance |
+| --------------------- | :--------------: | :-------------: | :---------: |
+| `#template up to 150` |       $ 10       |      $ 140      |    $ 150    |
+| `#template up to 150` |      $ -20       |      $ 170      |    $ 150    |
 
 Cool, right! This is another way to gracefully handle categories that have month to month variation.
 This will always give you the same amount available each month no matter what you spend the previous month and not ever build up more funds than you need.
@@ -204,14 +203,14 @@ You can also modify the limit to not ever remove funds over your limit.
 This can be useful if you get refunds or reimbursements that you would like to have remain inside a category even if over your limit.
 Below is examples of these different variations of simple templates.
 
-|Syntax|Description|Example Application|
-|---|---|---|
-|`#template 50`|Budget 50 each month|Regular monthly bills, such as internet|
-|`#template 50 up to 300`|Budget 50 each month up to a maximum of 300|Funding rainy day categories, such as replacement shoes and bicycle repairs
-|`#template up to 150`|Budget up to 150 each month, and remove extra funds over 150|Variable expenses, such as petrol and groceries|
-|`#template up to 150 hold`|Budget up to 150 each month, but retain any funds over 150 |Variable expenses that may get refunds or reimbursements|
-|`#template up to 5 per day` |Budget up to 5 per day that month, and remove extra funds | Setting a daily coffee budget|
-|`#template up to 100 per week starting 2024-10-07` |Budget 100 per week starting on Mondays, and remove extra funds| Setting a weekly grocery budget |
+| Syntax                                             | Description                                                     | Example Application                                                         |
+| -------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `#template 50`                                     | Budget 50 each month                                            | Regular monthly bills, such as internet                                     |
+| `#template 50 up to 300`                           | Budget 50 each month up to a maximum of 300                     | Funding rainy day categories, such as replacement shoes and bicycle repairs |
+| `#template up to 150`                              | Budget up to 150 each month, and remove extra funds over 150    | Variable expenses, such as petrol and groceries                             |
+| `#template up to 150 hold`                         | Budget up to 150 each month, but retain any funds over 150      | Variable expenses that may get refunds or reimbursements                    |
+| `#template up to 5 per day`                        | Budget up to 5 per day that month, and remove extra funds       | Setting a daily coffee budget                                               |
+| `#template up to 100 per week starting 2024-10-07` | Budget 100 per week starting on Mondays, and remove extra funds | Setting a weekly grocery budget                                             |
 
 ### By Type
 
@@ -219,18 +218,18 @@ The **By** type of template is for saving up funds _by_ a certain month.
 For example, it is January and you are trying to save for a new car by the end of the year.
 If the new car will cost $ 10,000 and you plan to buy it in December, you will use something like the following:
 
-|Syntax| Budgeted Amount |
-|---|:---:|
-|`#template 10000 by 2025-12` | $ 833.33 |
+| Syntax                       | Budgeted Amount |
+| ---------------------------- | :-------------: |
+| `#template 10000 by 2025-12` |    $ 833.33     |
 
 That example is pretty basic.
 The by template is smarter than just 10000/12.
 Lets say the example is the same, but you already have $ 1,500 saved.
 In that case you get this.
 
-|Syntax| Previous Balance | Budgeted Amount | New Balance |
-|---|:---:| :---: |:---:|
-|`#template 10000 by 2025-12` |$ 1,500 | $ 708.33 | $ 2,208.33 |
+| Syntax                       | Previous Balance | Budgeted Amount | New Balance |
+| ---------------------------- | :--------------: | :-------------: | :---------: |
+| `#template 10000 by 2025-12` |     $ 1,500      |    $ 708.33     | $ 2,208.33  |
 
 Nice!
 This even works if you add more funds later.
@@ -247,10 +246,10 @@ The repeat period can be both a number of months or number of years.
 If you need to repeat based on a number of weeks, use the Week template.
 In that case use the following variation:
 
-|Syntax| Budgeted Amount | Note |
-|---|:---:| --- |
-|`#template 500 by 2025-03 repeat every year` | $ 166.66  | Assuming starting in January 2025 |
-|`#template 500 by 2025-03 repeat every year` | $ 41.66  | All months after March 2025 |
+| Syntax                                       | Budgeted Amount | Note                              |
+| -------------------------------------------- | :-------------: | --------------------------------- |
+| `#template 500 by 2025-03 repeat every year` |    $ 166.66     | Assuming starting in January 2025 |
+| `#template 500 by 2025-03 repeat every year` |     $ 41.66     | All months after March 2025       |
 
 #### By Spend
 
@@ -259,24 +258,24 @@ This is most commonly used for holiday savings where you will spend some of the 
 An example of this is buying Christmas gifts in November and December.
 The table below shows how this works.
 
-|Syntax| Budgeted Amount | Spent so far| New Balance| Note |
-|---|:---:| :---: | --- | --- |
-|`#template 500 by 2025-12 spend from 2025-11`| $ 41.66  | 0 | previous + $ 41.66| Assuming starting in January 2025, all months before December |
-|`#template 500 by 2025-12 spend from 2025-11`| $ 41.66  | $ 100 | $ 400 | Assuming the beginning of December, but have not spent anything in December yet |
+| Syntax                                        | Budgeted Amount | Spent so far | New Balance        | Note                                                                            |
+| --------------------------------------------- | :-------------: | :----------: | ------------------ | ------------------------------------------------------------------------------- |
+| `#template 500 by 2025-12 spend from 2025-11` |     $ 41.66     |      0       | previous + $ 41.66 | Assuming starting in January 2025, all months before December                   |
+| `#template 500 by 2025-12 spend from 2025-11` |     $ 41.66     |    $ 100     | $ 400              | Assuming the beginning of December, but have not spent anything in December yet |
 
 #### Available Variations
 
 Below is a table of the variations of the By template.
 
-|Syntax|Description|Example Application|
-|---|---|---|
-|`#template 500 by 2027-03`|Break down large, less-frequent expenses into manageable monthly expenses|Saving for a replacement car in a few years
-|`#template 500 by 2025-03 repeat every 6 months`|Break down large, less-frequent expenses into manageable monthly expenses|Biannual credit card fees
-|`#template 500 by 2025-03 repeat every year`|Break down large, less-frequent expenses into manageable monthly expenses|Annual insurance premium
-|`#template 500 by 2025-03 repeat every 2 years`|Break down large, less-frequent expenses into manageable monthly expenses|Domain name renewal|
-|`#template 500 by 2024-12 spend from 2024-03`|Budget 500 by December. Any spending between March and December is OK.|Christmas presents, overseas holiday, or any other expenses that I will be partially paying for before the target period ends.|
-|`#template 500 by 2024-12 spend from 2024-03 repeat every year`| |
-|`#template 500 by 2024-12 spend from 2024-03 repeat every 2 years`| |
+| Syntax                                                             | Description                                                               | Example Application                                                                                                            |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `#template 500 by 2027-03`                                         | Break down large, less-frequent expenses into manageable monthly expenses | Saving for a replacement car in a few years                                                                                    |
+| `#template 500 by 2025-03 repeat every 6 months`                   | Break down large, less-frequent expenses into manageable monthly expenses | Biannual credit card fees                                                                                                      |
+| `#template 500 by 2025-03 repeat every year`                       | Break down large, less-frequent expenses into manageable monthly expenses | Annual insurance premium                                                                                                       |
+| `#template 500 by 2025-03 repeat every 2 years`                    | Break down large, less-frequent expenses into manageable monthly expenses | Domain name renewal                                                                                                            |
+| `#template 500 by 2024-12 spend from 2024-03`                      | Budget 500 by December. Any spending between March and December is OK.    | Christmas presents, overseas holiday, or any other expenses that I will be partially paying for before the target period ends. |
+| `#template 500 by 2024-12 spend from 2024-03 repeat every year`    |                                                                           |
+| `#template 500 by 2024-12 spend from 2024-03 repeat every 2 years` |                                                                           |
 
 ### Periodic Type
 
@@ -286,37 +285,37 @@ You set a period and the start date, and every period, starting from your start 
 Periods can be set for any number of days, weeks, months, or years.
 See the table below for examples.
 
-|Syntax| Budgeted Amount | Note |
-|---|:---:| :---: |
-|`#template 10 repeat every week starting 2025-01-06` | $ 50 | When budgeting in March 2025 |
-|`#template 100 repeat every 2 months starting 2025-01-01` | $0 | When budgeting in February 2025
-|`#template 100 repeat every 2 months starting 2025-01-01` | $100 | When budgeting in March 2025
+| Syntax                                                    | Budgeted Amount |              Note               |
+| --------------------------------------------------------- | :-------------: | :-----------------------------: |
+| `#template 10 repeat every week starting 2025-01-06`      |      $ 50       |  When budgeting in March 2025   |
+| `#template 100 repeat every 2 months starting 2025-01-01` |       $0        | When budgeting in February 2025 |
+| `#template 100 repeat every 2 months starting 2025-01-01` |      $100       |  When budgeting in March 2025   |
 
 As you can see, the template will be budgeted based on the defined period.
 
 The Periodic template also supports limits the same way the simple template does.
 For example, if you budget in January with a limited template:
 
-|Syntax| Previous Balance | Budgeted Amount | New Balance |
-|---|:---:| :---: |:---:|
-|`#template 10 repeat every week starting 2025-01-06 up to 55` | $ 20 | $ 35 | $ 55 |
+| Syntax                                                        | Previous Balance | Budgeted Amount | New Balance |
+| ------------------------------------------------------------- | :--------------: | :-------------: | :---------: |
+| `#template 10 repeat every week starting 2025-01-06 up to 55` |       $ 20       |      $ 35       |    $ 55     |
 
 #### Available Variations
 
 Below is a table of the variations of the Week template.
 
-|Syntax|Description|Example Application|
-|---|---|---|
-|`#template 10 repeat every day starting 2025-01-01` | Budget 10 per day | Budget for lunches |
-|`#template 50 repeat every 30 days starting 2025-01-01` | Budget 50 every 30 days | A bill that is not quite monthly |
-|`#template 10 repeat every day starting 2025-01-01 up to 400` | Budget 10 per day, up to a maximum of 400 | Budget for lunches, but don't budget too much |
-|`#template 50 repeat every week starting 2025-01-03`|Budget 50 a week| Budget for a weekly date night |
-|`#template 50 repeat every week starting 2025-01-03 up to 300`|Budget 10 a week, up to a maximum of 80| Weekly date night, but don't budget too much |
-|`#template 10 repeat every 2 weeks starting 2025-01-04`|Budget 10 fortnightly| Add to a savings category for every paycheck |
-|`#template 500 repeat every 3 months starting 2025-01-01` | Budget 100 per quarter | Taxes that are quarterly |
-|`#template 1500 repeat every year starting 2025-03-01` | Budget 1500 every March | Yearly insurance premiums |
-|`#template 1500 repeat every year starting 2025-05-01 up to 2000` | Budget 1500 every March, up to a maximum of 2000 | A summer spending budget |
-|`#template 1500 repeat every 2 years starting 2025-01-01` | Budget 1500 in January every other year |
+| Syntax                                                            | Description                                      | Example Application                           |
+| ----------------------------------------------------------------- | ------------------------------------------------ | --------------------------------------------- |
+| `#template 10 repeat every day starting 2025-01-01`               | Budget 10 per day                                | Budget for lunches                            |
+| `#template 50 repeat every 30 days starting 2025-01-01`           | Budget 50 every 30 days                          | A bill that is not quite monthly              |
+| `#template 10 repeat every day starting 2025-01-01 up to 400`     | Budget 10 per day, up to a maximum of 400        | Budget for lunches, but don't budget too much |
+| `#template 50 repeat every week starting 2025-01-03`              | Budget 50 a week                                 | Budget for a weekly date night                |
+| `#template 50 repeat every week starting 2025-01-03 up to 300`    | Budget 10 a week, up to a maximum of 80          | Weekly date night, but don't budget too much  |
+| `#template 10 repeat every 2 weeks starting 2025-01-04`           | Budget 10 fortnightly                            | Add to a savings category for every paycheck  |
+| `#template 500 repeat every 3 months starting 2025-01-01`         | Budget 100 per quarter                           | Taxes that are quarterly                      |
+| `#template 1500 repeat every year starting 2025-03-01`            | Budget 1500 every March                          | Yearly insurance premiums                     |
+| `#template 1500 repeat every year starting 2025-05-01 up to 2000` | Budget 1500 every March, up to a maximum of 2000 | A summer spending budget                      |
+| `#template 1500 repeat every 2 years starting 2025-01-01`         | Budget 1500 in January every other year          |
 
 **Notes**:
 
@@ -335,21 +334,21 @@ All the examples assume the following amounts of income in the listed income cat
 - Dividends - $ 100
 - To Budget - $ 1500
 
-|Syntax| Budgeted Amount | Note |
-|---|:---:| :---: |
-|`#template 10% of all income` | $ 200 | Use the total of your income categories in the calculation |
-|`#template 10% of Paycheck` | $ 190 | Budget 10% of your paycheck |
-|`#template 10% of available funds` | $ 150 | Budget 10% of the current to budget funds |
+| Syntax                             | Budgeted Amount |                            Note                            |
+| ---------------------------------- | :-------------: | :--------------------------------------------------------: |
+| `#template 10% of all income`      |      $ 200      | Use the total of your income categories in the calculation |
+| `#template 10% of Paycheck`        |      $ 190      |                Budget 10% of your paycheck                 |
+| `#template 10% of available funds` |      $ 150      |         Budget 10% of the current to budget funds          |
 
 #### Previous Flag
 
 The percent template can also be pointed to the previous month's income if you are using a month ahead budgeting strategy.
 Below is an example of how to do that.
 
-|Syntax| Budgeted Amount | Note |
-|---|:---:| :---: |
-|`#template 10% of previous all income` | $ 200 | Use the total of your income categories from the previous month |
-|`#template 10% of previous Paycheck` | $ 190 | Budget 10% of last month's paycheck |
+| Syntax                                 | Budgeted Amount |                              Note                               |
+| -------------------------------------- | :-------------: | :-------------------------------------------------------------: |
+| `#template 10% of previous all income` |      $ 200      | Use the total of your income categories from the previous month |
+| `#template 10% of previous Paycheck`   |      $ 190      |               Budget 10% of last month's paycheck               |
 
 The previous option is not available when using the percent of available funds template.
 
@@ -372,10 +371,10 @@ This includes sub-monthly, month, extra-monthly schedules.
 This is the most common template outside of the Simple template.
 Below is an example of the syntax for a $ 100 per month schedule called "Internet", and a $ 2,400 per year schedule called "Taxes".
 
-|Syntax| Budgeted Amount | Note |
-|---|:---:| :---: |
-|`#template schedule Internet` | $ 100 | Budget for the "Internet" schedule |
-|`#template schedule Taxes` | $200 | Build up funds for the schedule that is a year out |
+| Syntax                        | Budgeted Amount |                        Note                        |
+| ----------------------------- | :-------------: | :------------------------------------------------: |
+| `#template schedule Internet` |      $ 100      |         Budget for the "Internet" schedule         |
+| `#template schedule Taxes`    |      $200       | Build up funds for the schedule that is a year out |
 
 The function of the schedule template is very similar to the By template, but you don't need to adjust both a schedule and a template individually.
 You can adjust the schedule in the schedule editor and the template will stay up to date automatically.
@@ -390,10 +389,10 @@ This is useful for small schedules that you don't need to build up over time sin
 This can also help make stacking Schedule templates easier to track.
 Below is an example of using the "Full" flag assuming a once per year schedule for $15 called "Simplefin" due in May.
 
-|Syntax| Budgeted Amount | Note |
-|---|:---:| :---: |
-|`#template schedule full Simplefin` | $ 0 | Budget in all months except May |
-|`#template schedule full Simplefin` | $ 15 | Budget in May |
+| Syntax                              | Budgeted Amount |              Note               |
+| ----------------------------------- | :-------------: | :-----------------------------: |
+| `#template schedule full Simplefin` |       $ 0       | Budget in all months except May |
+| `#template schedule full Simplefin` |      $ 15       |          Budget in May          |
 
 #### Percentage Increase / Decrease
 
@@ -415,11 +414,11 @@ As an example, assuming the amount Scheduled for 'Insurance' the prior year was 
 
 Below is a table of the variations of the Schedule template.
 
-|Syntax|Description|Example Application|
-|---|---|---|
-|`#template schedule {SCHEDULE NAME}`|Fund upcoming scheduled transactions over time|Monthly schedules, or larger non-monthly scheduled transactions|
-|`#template schedule full {SCHEDULE NAME}`|Fund upcoming scheduled transaction only on needed month| Small schedules that are non-monthly|
-|`#template schedule {SCHEDULE NAME} [{increase/decrease} {number}%]`|Fund upcoming scheduled transaction over time, increasing or decreasing the amount by the given percentage|Yearly renewals where the amount changes|
+| Syntax                                                               | Description                                                                                                | Example Application                                             |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `#template schedule {SCHEDULE NAME}`                                 | Fund upcoming scheduled transactions over time                                                             | Monthly schedules, or larger non-monthly scheduled transactions |
+| `#template schedule full {SCHEDULE NAME}`                            | Fund upcoming scheduled transaction only on needed month                                                   | Small schedules that are non-monthly                            |
+| `#template schedule {SCHEDULE NAME} [{increase/decrease} {number}%]` | Fund upcoming scheduled transaction over time, increasing or decreasing the amount by the given percentage | Yearly renewals where the amount changes                        |
 
 ### Average Type
 
@@ -427,9 +426,9 @@ The Average template allows you to budget the average amount spend over a number
 This is the same function provided by the menu in the budget table but it can be used in a single category automatically where the menu option must be applied to the whole budget or a single category.
 The table below shows how to use the Average template.
 
-|Syntax|Description|Example Application|
-|---|---|---|
-|`#template average 6 months` | Budget the average amount spent over the last 6 months. Can set the number to any number > 0. Matches the existing option on the budget page but with flexible month ranges | Try to budget only what you need to spend based on the last 6 months of spending data |
+| Syntax                       | Description                                                                                                                                                                 | Example Application                                                                   |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `#template average 6 months` | Budget the average amount spent over the last 6 months. Can set the number to any number > 0. Matches the existing option on the budget page but with flexible month ranges | Try to budget only what you need to spend based on the last 6 months of spending data |
 
 ### Copy Type
 
@@ -437,9 +436,9 @@ The Copy template will copy the budget amount from some number of months prior.
 This is useful if your spending is inconsistent per month, but cyclical over a period of months.
 The table below shows how to use the Copy template.
 
-|Syntax|Description|Example Application|
-|---|---|---|
-|`#template copy from 12 months ago` | Budget the same amount as was budgeted 12 months ago. Number of months is adjustable | Your power bill fluctuates throughout the year, but is about the same in equivalent months between years. |
+| Syntax                              | Description                                                                          | Example Application                                                                                       |
+| ----------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `#template copy from 12 months ago` | Budget the same amount as was budgeted 12 months ago. Number of months is adjustable | Your power bill fluctuates throughout the year, but is about the same in equivalent months between years. |
 
 ### Remainder Type
 

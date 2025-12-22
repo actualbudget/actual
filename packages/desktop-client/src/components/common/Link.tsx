@@ -51,7 +51,7 @@ const ExternalLink = ({
   linkColor = 'blue',
 }: ExternalLinkProps) => {
   return (
-    // we can’t use <ExternalLink /> here for obvious reasons
+    // we can't use <ExternalLink /> here for obvious reasons
     // eslint-disable-next-line no-restricted-syntax
     <a
       href={to ?? ''}

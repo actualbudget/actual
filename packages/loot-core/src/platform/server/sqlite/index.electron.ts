@@ -16,7 +16,9 @@ function verifyParamTypes(sql, arr) {
   });
 }
 
-export async function init() {}
+export async function init() {
+  // No need to initialise on electron
+}
 
 export function prepare(db, sql) {
   return db.prepare(sql);

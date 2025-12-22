@@ -10,18 +10,16 @@
   it is much easier to not pull in historical data. First, set up your account(s) with a correct opening balance on a recent date, then set up bank sync. Only
   transactions after the opening balance date will be synced, making reconciliation easy.
 
-
 - **Q.** _Can I import my Actual Budget from the hosted instance of Actual to my Self Hosted version_.
 
   **A.** The hosted subscription service was shut down in 2024, but if you are still using the old Actual Budget Desktop App, we have a [migration guide in place for this](/docs/migration/#migration-from-the-old-actual-budget-desktop-app).
 
 - **Q.** _How do I update my version of Actual after it has been updated?_
 
-  **A.** That depends how you’re hosting it.
-
+  **A.** That depends how you're hosting it.
   - PikaPods seems to refresh their image automatically around a week after the release goes out.
   - Actual builds and publishes an updated docker image with each release.
-  - If you’re on Fly.io we have a [guide for that too](./install/fly.md#updating-actual).
+  - If you're on Fly.io we have a [guide for that too](./install/fly.md#updating-actual).
 
 - **Q.** _I'm new to budgeting and learned with nYNAB. I'm not completely clear on how to handle credit
   cards. I largely charge almost everything to them for rewards and pay off in full. How do I track

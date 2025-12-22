@@ -44,7 +44,6 @@ If you fail to click the **Lock transactions** button after the _All reconciled!
 
 ![Image of All reconciled](/img/reconcile/reconcile-5-2025.png)
 
-
 ![Image of newly locked transactions](/img/reconcile/reconcile-6-2025.png)
 
 If you ever need to unlock a transaction. Click on the lock of any transaction to open a dialog to unlock it. After you unlock a transaction this way, the status will revert to "Cleared". A reconcile will need to be performed to re-lock the transaction.
@@ -57,7 +56,7 @@ If you try to edit a locked transaction, the following warning will appear. Clic
 
 ## Using the Reconciliation Tool for Off Budget Asset Tracking
 
-Off budget accounts can easily be used to track values of assets such as vehicles, real estate, retirement accounts, or other investment accounts or property. The reconciliation tool is useful to update these values using the **Create reconciliation transaction** button. 
+Off budget accounts can easily be used to track values of assets such as vehicles, real estate, retirement accounts, or other investment accounts or property. The reconciliation tool is useful to update these values using the **Create reconciliation transaction** button.
 
 For example, on 10-Nov-2025, my house was valued at 231,100 then some houses sold in my neighborhood and a few days later it was valued at 234,600. Go to the House Asset account, choose the reconciliation tool, and enter 234600 as the new value into the tool.
 
@@ -67,11 +66,8 @@ The tool tells us that we have a gain of 3,500.
 
 ![Image of Create transaction](/img/reconcile/reconcile-9-2025.png)
 
-Click on the **Create reconciliation transaction** button to easily create a new transaction that automatically brings the value of the asset in line with the new valuation.  Now the reconciliation tool reports that it is _All reconciled!_ Click the **Lock transactions** button to complete the task.
+Click on the **Create reconciliation transaction** button to easily create a new transaction that automatically brings the value of the asset in line with the new valuation. Now the reconciliation tool reports that it is _All reconciled!_ Click the **Lock transactions** button to complete the task.
 
 ![Image of created transaction All reconciled](/img/reconcile/reconcile-10-2025.png)
 
 ![Image of created transaction locked](/img/reconcile/reconcile-11-2025.png)
-
-
-

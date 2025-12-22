@@ -10,12 +10,16 @@ const defaultOptions = {
 
 /** @type {import('@docusaurus/types').Config} */
 module.exports = {
-  title: 'Actual Budget Documentation',
+  title: 'Actual Budget',
   tagline: 'Your finances - made simple',
   url: 'https://actualbudget.org/',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   favicon: 'img/favicon.ico',
+
+  projectName: 'actualbudget.github.io',
+  organizationName: 'actualbudget',
+  deploymentBranch: 'main',
 
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
@@ -64,6 +68,7 @@ module.exports = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      image: 'img/og.png',
       navbar: {
         logo: {
           alt: 'Actual Open Source',

@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
-import { TransactionEntity } from '../types/models';
+import { type TransactionEntity } from '../types/models';
 
 import {
   splitTransaction,

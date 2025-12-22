@@ -1,6 +1,5 @@
 import { defineConfig } from '@playwright/test';
 
-// eslint-disable-next-line import/no-default-export
 export default defineConfig({
   timeout: 60000, // 60 seconds
   retries: 1,
