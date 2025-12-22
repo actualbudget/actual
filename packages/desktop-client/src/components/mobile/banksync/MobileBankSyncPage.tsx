@@ -46,7 +46,7 @@ export function MobileBankSyncPage() {
   const [filter, setFilter] = useState('');
 
   // Get sync queue state
-  const { isProcessingQueue } = useSelector(state => state.account);
+  const { syncQueue, isProcessingQueue } = useSelector(state => state.account);
 
   const openAccounts = useMemo(
     () => accounts.filter(a => !a.closed),
@@ -202,9 +202,13 @@ export function MobileBankSyncPage() {
             }}
           >
             {isProcessingQueue
-              ? t('Processing {{count}} linked accounts', {
-                  count: linkedAccounts.length,
-                })
+              ? syncQueue.some(req => req.id === 'ALL_ACCOUNTS')
+                ? t('Processing {{count}} linked accounts', {
+                    count: linkedAccounts.length,
+                  })
+                : t('Processing {{count}} account', {
+                    count: syncQueue.length,
+                  })
               : t('{{count}} linked accounts', {
                   count: linkedAccounts.length,
                 })}

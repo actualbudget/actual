@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -48,7 +49,7 @@ export function BankSync() {
   const { isNarrowWidth } = useResponsive();
 
   // Get sync queue state
-  const { isProcessingQueue } = useSelector(state => state.account);
+  const { syncQueue, isProcessingQueue } = useSelector(state => state.account);
 
   const [hoveredAccount, setHoveredAccount] = useState<
     AccountEntity['id'] | null
@@ -158,28 +159,32 @@ export function BankSync() {
               onPress={handleSyncAll}
               isDisabled={isProcessingQueue}
               style={{
-                color: isProcessingQueue ? 'var(--n6)' : 'var(--n1)',
+                color: isProcessingQueue
+                  ? theme.pageTextSubdued
+                  : theme.pageText,
                 textDecoration: 'underline',
                 textDecorationColor: isProcessingQueue
-                  ? 'var(--n6)'
-                  : 'var(--n1)',
+                  ? theme.pageTextSubdued
+                  : theme.pageText,
                 padding: 0,
                 minHeight: 'auto',
               }}
             >
               {isProcessingQueue ? t('Syncing...') : t('Sync All Accounts')}
             </Button>
-            {linkedAccounts.length > 0 && (
-              <Text style={{ color: 'var(--n6)' }}>
-                {isProcessingQueue
+            <Text style={{ color: theme.pageTextSubdued }}>
+              {isProcessingQueue
+                ? syncQueue.some(req => req.id === 'ALL_ACCOUNTS')
                   ? t('Processing {{count}} linked accounts', {
                       count: linkedAccounts.length,
                     })
-                  : t('{{count}} linked accounts', {
-                      count: linkedAccounts.length,
-                    })}
-              </Text>
-            )}
+                  : t('Processing {{count}} account', {
+                      count: syncQueue.length,
+                    })
+                : t('{{count}} linked accounts', {
+                    count: linkedAccounts.length,
+                  })}
+            </Text>
           </View>
         )}
 
