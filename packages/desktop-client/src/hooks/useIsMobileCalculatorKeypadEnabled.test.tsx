@@ -37,11 +37,11 @@ function mockMatchMedia({
         matches,
         media: query,
         onchange: null,
-        addEventListener: () => {},
-        removeEventListener: () => {},
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
         // Safari < 14 support
-        addListener: () => {},
-        removeListener: () => {},
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
         dispatchEvent: () => true,
       } as MediaQueryList;
     },

@@ -13,8 +13,8 @@ import {
 
 vi.mock('react-hotkeys-hook', () => ({
   useHotkeysContext: () => ({
-    enableScope: () => {},
-    disableScope: () => {},
+    enableScope: vi.fn(),
+    disableScope: vi.fn(),
   }),
 }));
 
@@ -94,7 +94,7 @@ describe('AmountInput mobile calculator keypad', () => {
 
     render(
       <TestProvider>
-        <AmountInput value={0} focused={true} />
+        <AmountInput value={0} focused />
       </TestProvider>,
     );
 
@@ -167,7 +167,7 @@ describe('AmountInput expression typing', () => {
 
     render(
       <TestProvider>
-        <AmountInput value={0} autoDecimals={true} />
+        <AmountInput value={0} autoDecimals />
       </TestProvider>,
     );
 

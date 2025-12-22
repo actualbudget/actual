@@ -128,8 +128,8 @@ const AmountInput = memo(function AmountInput({
       target: input,
       currentTarget: input,
       defaultPrevented: true,
-      preventDefault: () => {},
-      stopPropagation: () => {},
+      preventDefault: () => undefined,
+      stopPropagation: () => undefined,
     } as unknown as FocusEvent<HTMLInputElement>;
 
     props.onBlur(syntheticEvent);
