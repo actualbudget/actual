@@ -359,7 +359,7 @@ describe('Pay Period Utilities and Configuration', () => {
         });
       });
 
-      test('Concurrent config access is safe', () => {
+      test('Async config access maintains state consistency', () => {
         // Simulate concurrent access (though JS is single-threaded, this tests state consistency)
         const promises = [];
 

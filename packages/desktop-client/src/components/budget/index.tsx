@@ -103,11 +103,6 @@ export function Budget() {
   // Reset view to current month when toggling between pay periods and calendar months
   useEffect(() => {
     if (!payPeriodFeatureFlagEnabled) {
-      applyPayPeriodPrefs({
-        showPayPeriods: 'false',
-        payPeriodFrequency: 'monthly',
-        payPeriodStartDate: monthUtils.currentMonth(),
-      });
       return;
     }
 
@@ -253,10 +248,6 @@ export function Budget() {
     return String(currentYear) + '-13';
   }, [startMonth, payPeriodViewEnabled]);
 
-  // With enhanced comparison functions, we can use original bounds
-  // The getValidMonthBounds function will handle mixed types safely
-  const derivedBounds = bounds;
-
   if (!initialized || !categoryGroups) {
     return null;
   }
@@ -273,7 +264,7 @@ export function Budget() {
           type={budgetType}
           prewarmStartMonth={derivedStartMonth}
           startMonth={derivedStartMonth}
-          monthBounds={derivedBounds}
+          monthBounds={bounds}
           maxMonths={maxMonths}
           onMonthSelect={onMonthSelect}
           onDeleteCategory={onDeleteCategory}
@@ -299,7 +290,7 @@ export function Budget() {
           type={budgetType}
           prewarmStartMonth={derivedStartMonth}
           startMonth={derivedStartMonth}
-          monthBounds={derivedBounds}
+          monthBounds={bounds}
           maxMonths={maxMonths}
           onMonthSelect={onMonthSelect}
           onDeleteCategory={onDeleteCategory}
