@@ -198,7 +198,7 @@ export function MobileBankSyncPage() {
                 </Trans>
               ) : (
                 <Trans count={syncQueue.length}>
-                  Processing {{ count: syncQueue.length }} account
+                  Processing {{ count: syncQueue.length }} accounts
                 </Trans>
               )
             ) : (
