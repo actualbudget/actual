@@ -69,7 +69,7 @@ export async function loadPayPeriodConfig(): Promise<void> {
   }
 
   // Validate startDate is a valid ISO date string
-  if (config.startDate && isNaN(Date.parse(config.startDate))) {
+  if (isNaN(Date.parse(config.startDate))) {
     config.startDate = new Date().toISOString().slice(0, 10);
   }
 

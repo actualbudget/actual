@@ -4,13 +4,13 @@ import memoizeOne from 'memoize-one';
 
 import { parseDate, dayFromDate } from './date-utils';
 
-export interface PayPeriodConfig {
+export type PayPeriodConfig = {
   enabled: boolean;
   payFrequency: 'weekly' | 'biweekly' | 'semimonthly' | 'monthly';
   startDate: string; // ISO date string (yyyy-MM-dd)
   payDayOfWeek?: number; // 0-6 for weekly/biweekly
   payDayOfMonth?: number; // 1-31 for monthly
-}
+};
 
 // Pay period config will be loaded from database preferences
 let __payPeriodConfig: PayPeriodConfig | null = null;
