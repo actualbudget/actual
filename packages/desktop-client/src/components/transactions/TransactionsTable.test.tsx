@@ -218,8 +218,8 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
                   onAdd={onAdd}
                   onAddSplit={onAddSplit}
                   onCreatePayee={onCreatePayee}
-                  showSelection={true}
-                  allowSplitTransaction={true}
+                  showSelection
+                  allowSplitTransaction
                 />
               </SplitsExpandedProvider>
             </SelectedProviderWithItems>

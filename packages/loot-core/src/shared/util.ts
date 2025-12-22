@@ -370,11 +370,21 @@ export function getNumberFormat({
           maximumFractionDigits: currentHideFraction ? 0 : 2,
         };
 
+  const intlFormatter = new Intl.NumberFormat(locale, fractionDigitsOptions);
+
+  // Wrapper to handle -0 edge case
+  const formatter = {
+    format: (value: number) => {
+      const formatted = intlFormatter.format(value);
+      return formatted === '-0' ? '0' : formatted;
+    },
+  };
+
   return {
     value: currentFormat,
     thousandsSeparator,
     decimalSeparator,
-    formatter: new Intl.NumberFormat(locale, fractionDigitsOptions),
+    formatter,
   };
 }
 

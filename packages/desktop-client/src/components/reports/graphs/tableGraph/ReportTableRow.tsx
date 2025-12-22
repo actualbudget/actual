@@ -105,7 +105,7 @@ export const ReportTableRow = memo(
       <Row
         key={item.id}
         height={height}
-        collapsed={true}
+        collapsed
         style={{
           color: theme.tableText,
           backgroundColor: theme.tableBackground,

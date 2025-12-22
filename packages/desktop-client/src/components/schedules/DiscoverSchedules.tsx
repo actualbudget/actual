@@ -91,7 +91,7 @@ function DiscoverSchedulesTable({
         }}
       >
         <SelectCell
-          exposed={true}
+          exposed
           focused={false}
           selected={selected}
           onSelect={e => {

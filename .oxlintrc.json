@@ -149,6 +149,7 @@
     "react/rules-of-hooks": "error",
     "react/self-closing-comp": "warn",
     "react/style-prop-object": "warn",
+    "react/jsx-boolean-value": "warn",
 
     // ESLint rules
     "eslint/array-callback-return": "warn",

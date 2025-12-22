@@ -208,7 +208,7 @@ export function ElectronServerConfig({
                 width: '7ch',
                 textAlign: 'center',
               })}
-              autoFocus={true}
+              autoFocus
               maxLength={5}
               onChange={event =>
                 setElectronServerPort(Number(event.target.value))
@@ -472,7 +472,7 @@ export function ConfigServer() {
             style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
           >
             <BigInput
-              autoFocus={true}
+              autoFocus
               placeholder={t('https://example.com')}
               value={url || ''}
               onChangeValue={setUrl}

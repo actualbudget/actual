@@ -229,7 +229,7 @@ export function FatalError({ error }: FatalErrorProps) {
             <Trans>Restart app</Trans>
           </Button>
         </Paragraph>
-        <Paragraph isLast={true} style={{ fontSize: 11 }}>
+        <Paragraph isLast style={{ fontSize: 11 }}>
           <Link variant="text" onClick={() => setShowError(state => !state)}>
             <Trans>Show Error</Trans>
           </Link>

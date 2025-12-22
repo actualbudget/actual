@@ -34,7 +34,7 @@ export function IncomeGroup({
   const { IncomeGroupComponent: MonthComponent } = useBudgetComponents();
   return (
     <Row
-      collapsed={true}
+      collapsed
       style={{
         fontWeight: 600,
         backgroundColor: theme.tableRowHeaderBackground,
