@@ -125,7 +125,7 @@ export function RulesListItem({
                   op={condition.op}
                   value={condition.value}
                   options={condition.options}
-                  inline={true}
+                  inline
                 />
               </View>
             ))}

@@ -1,6 +1,4 @@
 // @ts-strict-ignore
-import { type NavigateFunction } from 'react-router';
-
 export {};
 
 type FileDialogOptions = {
@@ -47,11 +45,6 @@ type Actual = {
 };
 
 declare global {
-  // oxlint-disable-next-line typescript/consistent-type-definitions
-  interface Window {
-    __navigate?: NavigateFunction;
-  }
-
   var Actual: Actual;
 
   var IS_TESTING: boolean;

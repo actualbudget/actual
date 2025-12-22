@@ -19,7 +19,7 @@ export function TagsHeader() {
   return (
     <TableHeader>
       <SelectCell
-        exposed={true}
+        exposed
         focused={false}
         selected={selectedItems.size > 0}
         onSelect={e =>

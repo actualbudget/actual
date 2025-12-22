@@ -19,7 +19,7 @@ export class ConfigurationPage {
   }
 
   async clickOnNoServer() {
-    await this.page.getByRole('button', { name: 'Don’t use a server' }).click();
+    await this.page.getByRole('button', { name: "Don't use a server" }).click();
   }
 
   async startFresh() {

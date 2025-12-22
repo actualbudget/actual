@@ -235,7 +235,7 @@ async function run(msgs) {
   });
 
   await global.emptyDatabase()();
-  await sheet.loadSpreadsheet(db, () => {});
+  await sheet.loadSpreadsheet(db, vi.fn());
 
   // The test: split up the messages into chunks and in parallel send
   // them all through `sendMessages`. Then add some messages to the

@@ -80,12 +80,12 @@ export function TransferMenu({
         <CategoryAutocomplete
           categoryGroups={filteredCategoryGroups}
           value={null}
-          openOnFocus={true}
+          openOnFocus
           onSelect={(id: string | undefined) => setToCategoryId(id || null)}
           inputProps={{
             placeholder: '(none)',
           }}
-          showHiddenCategories={true}
+          showHiddenCategories
         />
 
         <View

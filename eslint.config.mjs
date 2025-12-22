@@ -1,11 +1,8 @@
-import oxlint from 'eslint-plugin-oxlint';
 import pluginPerfectionist from 'eslint-plugin-perfectionist';
 import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
 import { defineConfig } from 'eslint/config';
 import globals from 'globals';
 import pluginTypescript from 'typescript-eslint';
-
-import pluginActual from './packages/eslint-plugin-actual/lib/index.js';
 
 export default defineConfig(
   {
@@ -75,25 +72,9 @@ export default defineConfig(
   pluginTypescript.configs.base,
   {
     plugins: {
-      actual: pluginActual,
       perfectionist: pluginPerfectionist,
     },
     rules: {
-      'actual/no-untranslated-strings': 'error',
-      'actual/prefer-trans-over-t': 'error',
-    },
-  },
-  {
-    files: ['**/*.{js,ts,jsx,tsx,mjs,mts}'],
-    rules: {
-      // http://eslint.org/docs/rules/
-      'no-dupe-args': 'warn',
-      'no-new-object': 'warn',
-      'no-new-symbol': 'warn',
-      'no-octal': 'warn',
-      'no-octal-escape': 'warn',
-      strict: ['warn', 'never'],
-
       'no-restricted-properties': [
         'error',
         {
@@ -141,10 +122,6 @@ export default defineConfig(
         },
       ],
 
-      'actual/typography': 'warn',
-      'actual/prefer-if-statement': 'warn',
-      'actual/prefer-logger-over-console': 'error',
-
       'object-shorthand': ['warn', 'properties'],
 
       'no-restricted-syntax': [
@@ -163,7 +140,6 @@ export default defineConfig(
         },
       ],
 
-      // Rules disabled during TS migration
       'prefer-const': 'warn',
     },
   },
@@ -181,37 +157,9 @@ export default defineConfig(
     },
   },
   {
-    files: [
-      'eslint.config.mjs',
-      '**/*.test.js',
-      '**/*.test.ts',
-      '**/*.test.jsx',
-      '**/*.test.tsx',
-      '**/*.spec.js',
-    ],
-
-    rules: {
-      'actual/typography': 'off',
-      'actual/no-untranslated-strings': 'off',
-      'actual/prefer-logger-over-console': 'off',
-    },
-  },
-  {
     files: ['packages/docs/**/*'],
     rules: {
-      'actual/typography': 'off',
-      'actual/no-untranslated-strings': 'off',
       'no-restricted-syntax': 'off',
     },
   },
-  {
-    files: ['packages/sync-server/**/*'],
-    // TODO: fix the issues in these files
-    rules: {
-      'actual/typography': 'off',
-    },
-  },
-  // Disable ESLint rules that are already covered by oxlint
-  // This must be at the end to override previous rule configurations
-  ...oxlint.configs['flat/recommended'],
 );

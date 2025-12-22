@@ -467,7 +467,7 @@ describe('pagedQuery', () => {
 
     await tracer.expect('server-query', [{ result: { $count: '*' } }]);
     await tracer.expect('server-query', ['id']);
-    await tracer.expect('data', () => {});
+    await tracer.expect('data', vi.fn());
 
     paged.fetchNext();
     paged.fetchNext();
@@ -475,7 +475,7 @@ describe('pagedQuery', () => {
     paged.fetchNext();
 
     await tracer.expect('server-query', ['id']);
-    await tracer.expect('data', () => {});
+    await tracer.expect('data', vi.fn());
 
     // Wait a bit and make sure nothing comes through
     const p = Promise.race([tracer.expect('server-query'), wait(200)]);

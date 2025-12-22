@@ -389,7 +389,7 @@ describe('Account sync', () => {
     ]);
   });
 
-  test('reconcile does not merge transactions with different ‘imported_id’ values', async () => {
+  test("reconcile does not merge transactions with different 'imported_id' values", async () => {
     const { id } = await prepareDatabase();
 
     let payees = await getAllPayees();
