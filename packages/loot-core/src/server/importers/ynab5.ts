@@ -170,7 +170,7 @@ async function importCategories(
 function importPayees(data: YNAB5.Budget, entityIdMap: Map<string, string>) {
   return Promise.all(
     data.payees.map(async payee => {
-      if (!payee.deleted) {
+      if (!payee.deleted && payee.name && payee.name.trim() !== '') {
         const id = await actual.createPayee({
           name: payee.name,
         });
@@ -415,9 +415,11 @@ async function importTransactions(
               )?.id;
             } else {
               newTrx.payee = entityIdMap.get(trx.payee_id);
-              newTrx.imported_payee = data.payees.find(
+              const payeeName = data.payees.find(
                 p => !p.deleted && p.id === trx.payee_id,
               )?.name;
+              newTrx.imported_payee =
+                payeeName && payeeName.trim() !== '' ? payeeName : null;
             }
           };
 
