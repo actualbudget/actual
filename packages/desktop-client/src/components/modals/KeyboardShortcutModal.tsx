@@ -258,7 +258,7 @@ export function KeyboardShortcutModal() {
             id: 'add-new-transaction',
             shortcut: 'T',
             description: t(
-              'Add new transaction when no transactions are selected',
+              'Add new transaction',
             ),
           },
           {
@@ -355,7 +355,7 @@ export function KeyboardShortcutModal() {
         items: [
           {
             id: 'set-date-for-selected-transactions',
-            shortcut: 'T',
+            shortcut: 'E',
             description: t('Set date for selected transactions'),
           },
           {
