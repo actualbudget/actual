@@ -52,8 +52,13 @@ type SaveServerPrefsPayload = {
 export const saveServerPrefs = createAppAsyncThunk(
   `${sliceName}/saveServerPrefs`,
   async ({ prefs }: SaveServerPrefsPayload, { dispatch }) => {
-    await send('save-server-prefs', { prefs });
+    const result = await send('save-server-prefs', { prefs });
+    if (result && 'error' in result) {
+      return { error: result.error };
+    }
+
     dispatch(mergeServerPrefs(prefs));
+    return {};
   },
 );
 
