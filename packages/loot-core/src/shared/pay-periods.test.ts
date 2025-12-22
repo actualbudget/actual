@@ -1,4 +1,4 @@
-import * as d from 'date-fns';
+import { addDays, format } from 'date-fns';
 import { describe, expect, test, beforeEach } from 'vitest';
 
 import { parseDate } from './date-utils';
@@ -361,7 +361,7 @@ describe('Pay Period Utilities and Configuration', () => {
 
       test('Async config access maintains state consistency', () => {
         // Simulate concurrent access (though JS is single-threaded, this tests state consistency)
-        const promises = [];
+        const promises: Promise<void>[] = [];
 
         for (let i = 0; i < 50; i++) {
           const promise = new Promise<void>(resolve => {
@@ -716,9 +716,9 @@ describe('Pay Period Utilities and Configuration', () => {
         const nextStart = parseDate(periods[i + 1].startDate);
 
         // Next start should be exactly one day after current end
-        const expectedNextStart = d.addDays(currentEnd, 1);
-        expect(d.format(nextStart, 'yyyy-MM-dd')).toBe(
-          d.format(expectedNextStart, 'yyyy-MM-dd'),
+        const expectedNextStart = addDays(currentEnd, 1);
+        expect(format(nextStart, 'yyyy-MM-dd')).toBe(
+          format(expectedNextStart, 'yyyy-MM-dd'),
         );
       }
     });

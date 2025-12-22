@@ -2,6 +2,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { Value } from './Value';
 import { vi, describe, it, expect } from 'vitest';
+import type * as PayPeriods from 'loot-core/shared/pay-periods';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (s: string) => s }),
@@ -50,8 +51,7 @@ vi.mock('@desktop-client/hooks/usePayees', () => ({
 
 // Mock pay period config
 vi.mock('loot-core/shared/pay-periods', async importOriginal => {
-  const actual =
-    await importOriginal<typeof import('loot-core/shared/pay-periods')>();
+  const actual = await importOriginal<typeof PayPeriods>();
   return {
     ...actual,
     getPayPeriodConfig: () => ({
