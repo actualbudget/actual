@@ -5,17 +5,44 @@ import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
 
 async function enableMobileCalculatorKeypad(page: Page) {
-  await page.waitForFunction(() =>
-    Boolean(window.__actionsForMenu?.saveSyncedPrefs),
+  // Wait for page to be stable before trying to evaluate
+  await page.waitForLoadState('networkidle');
+
+  // Wait for the actions to be available with a reasonable timeout
+  await page.waitForFunction(
+    () => Boolean(window.__actionsForMenu?.saveSyncedPrefs),
+    { timeout: 15000 },
   );
 
-  await page.evaluate(async () => {
-    await window.__actionsForMenu.saveSyncedPrefs({
-      prefs: {
-        'flags.mobileCalculatorKeypad': 'true',
-      },
+  // Set the feature flag with proper error handling
+  try {
+    await page.evaluate(async () => {
+      await window.__actionsForMenu.saveSyncedPrefs({
+        prefs: {
+          'flags.mobileCalculatorKeypad': 'true',
+        },
+      });
     });
-  });
+  } catch {
+    // If the page context was destroyed, wait and try once more
+    await page.waitForTimeout(1000);
+    await page
+      .waitForFunction(
+        () => Boolean(window.__actionsForMenu?.saveSyncedPrefs),
+        { timeout: 5000 },
+      )
+      .catch(() => {
+        // Ignore timeout on second try
+      });
+
+    await page.evaluate(async () => {
+      await window.__actionsForMenu.saveSyncedPrefs({
+        prefs: {
+          'flags.mobileCalculatorKeypad': 'true',
+        },
+      });
+    });
+  }
 }
 
 test.describe('Mobile Transactions', () => {
