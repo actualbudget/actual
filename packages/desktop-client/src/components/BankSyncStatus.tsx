@@ -1,5 +1,4 @@
 import React from 'react';
-import { Trans } from 'react-i18next';
 import { useTransition, animated } from 'react-spring';
 
 import { styles } from '@actual-app/components/styles';
@@ -12,18 +11,25 @@ import { AnimatedRefresh } from './AnimatedRefresh';
 import { useSelector } from '@desktop-client/redux';
 
 export function BankSyncStatus() {
-  const accountsSyncing = useSelector(state => state.account.accountsSyncing);
-  const accountsSyncingCount = accountsSyncing.length;
-  const count = accountsSyncingCount;
-
-  const transitions = useTransition(
-    accountsSyncingCount > 0 ? 'syncing' : null,
-    {
-      from: { opacity: 0, transform: 'translateY(-100px)' },
-      enter: { opacity: 1, transform: 'translateY(0)' },
-      leave: { opacity: 0, transform: 'translateY(-100px)' },
-    },
+  const { accountsSyncing, syncQueue, isProcessingQueue } = useSelector(
+    state => state.account,
   );
+
+  // For "Sync All": use accountsSyncing.length (shows actual accounts being processed)
+  // For individual accounts: use syncQueue.length (shows queued requests)
+  const hasAllAccountsRequest = syncQueue.some(
+    req => req.id === 'ALL_ACCOUNTS',
+  );
+  const totalRemaining = hasAllAccountsRequest
+    ? accountsSyncing.length
+    : syncQueue.length;
+  const showStatus = isProcessingQueue && totalRemaining > 0;
+
+  const transitions = useTransition(showStatus ? 'syncing' : null, {
+    from: { opacity: 0, transform: 'translateY(-100px)' },
+    enter: { opacity: 1, transform: 'translateY(0)' },
+    leave: { opacity: 0, transform: 'translateY(-100px)' },
+  });
 
   return (
     <View
@@ -57,9 +63,8 @@ export function BankSyncStatus() {
                   iconStyle={{ color: theme.pillTextSelected }}
                 />
                 <Text style={{ marginLeft: 5 }}>
-                  <Trans count={accountsSyncingCount}>
-                    Syncing... {{ count }} accounts remaining
-                  </Trans>
+                  Syncing... {totalRemaining} account
+                  {totalRemaining === 1 ? '' : 's'} remaining
                 </Text>
               </View>
             </animated.div>

@@ -1,6 +1,7 @@
 import { useMemo, useState, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -13,12 +14,13 @@ import {
 
 import { BankSyncAccountsList } from './BankSyncAccountsList';
 
+import { syncAccounts } from '@desktop-client/accounts/accountsSlice';
 import { Search } from '@desktop-client/components/common/Search';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 type SyncProviders = BankSyncProviders | 'unlinked';
 
@@ -43,10 +45,24 @@ export function MobileBankSyncPage() {
   const accounts = useAccounts();
   const [filter, setFilter] = useState('');
 
+  // Get sync queue state
+  const { isProcessingQueue } = useSelector(state => state.account);
+
   const openAccounts = useMemo(
     () => accounts.filter(a => !a.closed),
     [accounts],
   );
+
+  // Get linked accounts (accounts that can be synced)
+  const linkedAccounts = useMemo(() => {
+    return openAccounts.filter(a => a.account_sync_source);
+  }, [openAccounts]);
+
+  const handleSyncAll = useCallback(() => {
+    if (linkedAccounts.length > 0) {
+      dispatch(syncAccounts({})); // No id = sync all accounts
+    }
+  }, [dispatch, linkedAccounts.length]);
 
   const groupedAccounts = useMemo(() => {
     const unsorted = openAccounts.reduce(
@@ -150,6 +166,51 @@ export function MobileBankSyncPage() {
           }}
         />
       </View>
+
+      {/* Mobile Sync All Button */}
+      {linkedAccounts.length > 0 && (
+        <View
+          style={{
+            backgroundColor: theme.mobilePageBackground,
+            padding: 15,
+            borderBottomWidth: 1,
+            borderBottomStyle: 'solid',
+            borderBottomColor: theme.tableBorder,
+          }}
+        >
+          <Button
+            variant="bare"
+            onPress={handleSyncAll}
+            isDisabled={isProcessingQueue}
+            style={{
+              color: isProcessingQueue ? theme.pageTextSubdued : theme.pageText,
+              textDecoration: 'underline',
+              textDecorationColor: isProcessingQueue
+                ? theme.pageTextSubdued
+                : theme.pageText,
+              padding: 0,
+              minHeight: 'auto',
+              marginBottom: 8,
+            }}
+          >
+            {isProcessingQueue ? t('Syncing...') : t('Sync All Accounts')}
+          </Button>
+          <Text
+            style={{
+              color: theme.pageTextSubdued,
+              fontSize: 14,
+            }}
+          >
+            {isProcessingQueue
+              ? t('Processing {{count}} linked accounts', {
+                  count: linkedAccounts.length,
+                })
+              : t('{{count}} linked accounts', {
+                  count: linkedAccounts.length,
+                })}
+          </Text>
+        </View>
+      )}
 
       {openAccounts.length === 0 ? (
         <View

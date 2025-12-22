@@ -1,6 +1,7 @@
 import { useMemo, useState, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -13,12 +14,13 @@ import {
 import { AccountsHeader } from './AccountsHeader';
 import { AccountsList } from './AccountsList';
 
+import { syncAccounts } from '@desktop-client/accounts/accountsSlice';
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
 import { Page } from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 type SyncProviders = BankSyncProviders | 'unlinked';
 
@@ -45,9 +47,23 @@ export function BankSync() {
   const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
 
+  // Get sync queue state
+  const { isProcessingQueue } = useSelector(state => state.account);
+
   const [hoveredAccount, setHoveredAccount] = useState<
     AccountEntity['id'] | null
   >(null);
+
+  // Get linked accounts (accounts that can be synced)
+  const linkedAccounts = useMemo(() => {
+    return accounts.filter(a => !a.closed && a.account_sync_source);
+  }, [accounts]);
+
+  const handleSyncAll = useCallback(() => {
+    if (linkedAccounts.length > 0) {
+      dispatch(syncAccounts({})); // No id = sync all accounts
+    }
+  }, [dispatch, linkedAccounts.length]);
 
   const groupedAccounts = useMemo(() => {
     const unsorted = accounts
@@ -126,6 +142,47 @@ export function BankSync() {
             </Trans>
           </Text>
         )}
+
+        {/* Sync All Button */}
+        {linkedAccounts.length > 0 && (
+          <View
+            style={{
+              marginBottom: '1em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            }}
+          >
+            <Button
+              variant="bare"
+              onPress={handleSyncAll}
+              isDisabled={isProcessingQueue}
+              style={{
+                color: isProcessingQueue ? 'var(--n6)' : 'var(--n1)',
+                textDecoration: 'underline',
+                textDecorationColor: isProcessingQueue
+                  ? 'var(--n6)'
+                  : 'var(--n1)',
+                padding: 0,
+                minHeight: 'auto',
+              }}
+            >
+              {isProcessingQueue ? t('Syncing...') : t('Sync All Accounts')}
+            </Button>
+            {linkedAccounts.length > 0 && (
+              <Text style={{ color: 'var(--n6)' }}>
+                {isProcessingQueue
+                  ? t('Processing {{count}} linked accounts', {
+                      count: linkedAccounts.length,
+                    })
+                  : t('{{count}} linked accounts', {
+                      count: linkedAccounts.length,
+                    })}
+              </Text>
+            )}
+          </View>
+        )}
+
         {Object.entries(groupedAccounts).map(([syncProvider, accounts]) => {
           return (
             <View key={syncProvider} style={{ minHeight: 'initial' }}>
