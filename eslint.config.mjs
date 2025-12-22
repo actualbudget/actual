@@ -1,8 +1,7 @@
+import tsparser from '@typescript-eslint/parser';
 import pluginPerfectionist from 'eslint-plugin-perfectionist';
 import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
 import { defineConfig } from 'eslint/config';
-import globals from 'globals';
-import pluginTypescript from 'typescript-eslint';
 
 export default defineConfig(
   {
@@ -40,36 +39,9 @@ export default defineConfig(
       reportUnusedDisableDirectives: true,
     },
     languageOptions: {
-      globals: {
-        ...globals.browser,
-        ...globals.commonjs,
-        ...globals.node,
-        ...globals.jest,
-        globalThis: false,
-        vi: true,
-
-        RequestInfo: true,
-        RequestInit: true,
-        ParentNode: true,
-        FS: true,
-        IDBValidKey: true,
-        NodeJS: true,
-        Electron: true,
-
-        // Worker globals
-        FetchEvent: true,
-        ExtendableEvent: true,
-        ExtendableMessageEvent: true,
-        ServiceWorkerGlobalScope: true,
-      },
-    },
-    settings: {
-      react: {
-        version: 'detect',
-      },
+      parser: tsparser,
     },
   },
-  pluginTypescript.configs.base,
   {
     plugins: {
       perfectionist: pluginPerfectionist,
