@@ -15,7 +15,7 @@ async function enableMobileCalculatorKeypad(page: Page) {
   // Wait for the actions to be available with a reasonable timeout
   await page.waitForFunction(
     () => Boolean(window.__actionsForMenu?.saveSyncedPrefs),
-    { timeout: 15000 }
+    { timeout: 15000 },
   );
 
   // Set the feature flag with proper error handling
@@ -27,13 +27,17 @@ async function enableMobileCalculatorKeypad(page: Page) {
         },
       });
     });
-  } catch (error) {
+  } catch {
     // If the page context was destroyed, wait and try once more
     await page.waitForTimeout(1000);
-    await page.waitForFunction(
-      () => Boolean(window.__actionsForMenu?.saveSyncedPrefs),
-      { timeout: 5000 }
-    ).catch(() => {}); // Ignore timeout on second try
+    await page
+      .waitForFunction(
+        () => Boolean(window.__actionsForMenu?.saveSyncedPrefs),
+        { timeout: 5000 },
+      )
+      .catch(() => {
+        // Ignore timeout on second try
+      });
 
     await page.evaluate(async () => {
       window.__actionsForMenu.saveSyncedPrefs({
