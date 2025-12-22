@@ -8,13 +8,13 @@ import * as connection from '../../platform/server/connection';
 import * as fs from '../../platform/server/fs';
 import { logger } from '../../platform/server/log';
 import * as Platform from '../../shared/platform';
-import { Budget } from '../../types/budget';
+import { type Budget } from '../../types/budget';
 import { createApp } from '../app';
 import * as budget from '../budget/base';
 import * as cloudStorage from '../cloud-storage';
 import * as db from '../db';
 import * as mappings from '../db/mappings';
-import { handleBudgetImport, ImportableBudgetType } from '../importers';
+import { handleBudgetImport, type ImportableBudgetType } from '../importers';
 import { app as mainApp } from '../main-app';
 import { mutator } from '../mutators';
 import { loadPayPeriodConfig } from '../preferences/app';
@@ -91,6 +91,10 @@ app.method('backups-get', getBackups);
 app.method('backup-load', loadBackup);
 app.method('backup-make', makeBackup);
 app.method('get-last-opened-backup', getLastOpenedBackup);
+
+app.events.on('pay-period-config-changed', () => {
+  resetBudgetCache();
+});
 
 async function handleValidateBudgetName({ name }: { name: string }) {
   return validateBudgetName(name);
@@ -217,7 +221,7 @@ async function downloadBudget({
   return { id };
 }
 
-// open and sync, but don’t close
+// open and sync, but don't close
 async function syncBudget() {
   setSyncingMode('enabled');
   const result = await initialFullSync();
@@ -291,7 +295,9 @@ async function deleteBudget({
   // If it's a cloud file, you can delete it from the server by
   // passing its cloud id
   if (cloudFileId) {
-    await cloudStorage.removeFile(cloudFileId).catch(() => {});
+    await cloudStorage.removeFile(cloudFileId).catch(() => {
+      // Ignore errors
+    });
   }
 
   // If a local file exists, you can delete it by passing its local id
@@ -367,7 +373,7 @@ async function duplicateBudget({
       if (await fs.exists(newBudgetDir)) {
         await fs.removeDirRecursively(newBudgetDir);
       }
-    } catch {} // Ignore cleanup errors
+    } catch { } // Ignore cleanup errors
     throw new Error(`Failed to duplicate budget file: ${error.message}`);
   }
 
@@ -502,11 +508,11 @@ function onSheetChange({ names }: { names: string[] }) {
 
 async function _loadBudget(id: Budget['id']): Promise<{
   error?:
-    | 'budget-not-found'
-    | 'loading-budget'
-    | 'out-of-sync-migrations'
-    | 'out-of-sync-data'
-    | 'opening-budget';
+  | 'budget-not-found'
+  | 'loading-budget'
+  | 'out-of-sync-migrations'
+  | 'out-of-sync-data'
+  | 'opening-budget';
 }> {
   let dir: string;
   try {

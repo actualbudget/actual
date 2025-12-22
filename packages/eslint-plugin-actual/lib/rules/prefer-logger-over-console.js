@@ -1,5 +1,3 @@
-/* eslint-disable actual/typography */
-
 const { getImportFix } = require('../utils/import-helpers');
 
 /** @type {import('eslint').Rule.RuleModule} */

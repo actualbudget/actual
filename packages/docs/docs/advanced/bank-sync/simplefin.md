@@ -31,11 +31,11 @@ Server Version 24.10.0 or higher are required for this feature.
 
    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-04.png)
 
-7. Back in Actual, click on “+ Add account” at the bottom of the sidebar.
+7. Back in Actual, click on "+ Add account" at the bottom of the sidebar.
 
    ![](/img/connecting-your-bank/connecting-your-bank-02.png)
 
-8. Click “Link bank account with SimpleFIN”.
+8. Click "Link bank account with SimpleFIN".
 
    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-05.png)
 

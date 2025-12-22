@@ -1,5 +1,5 @@
+import { type CategoryEntity } from '../../types/models';
 import { setPayPeriodConfig } from '../../shared/pay-periods';
-import { CategoryEntity } from '../../types/models';
 import * as db from '../db';
 import { Rule } from '../rules';
 import { getRuleForSchedule } from '../schedules/app';

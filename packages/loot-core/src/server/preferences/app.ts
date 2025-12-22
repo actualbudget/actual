@@ -7,8 +7,8 @@ import {
 } from '../../shared/pay-periods';
 import { stringToInteger } from '../../shared/util';
 import {
-  GlobalPrefs,
-  MetadataPrefs,
+  type GlobalPrefs,
+  type MetadataPrefs,
   type SyncedPrefs,
 } from '../../types/prefs';
 import { createApp } from '../app';
@@ -23,14 +23,14 @@ import {
 import { getServer } from '../server-config';
 import { undoable } from '../undo';
 
-export interface PreferencesHandlers {
+export type PreferencesHandlers = {
   'preferences/save': typeof saveSyncedPrefs;
   'preferences/get': typeof getSyncedPrefs;
   'save-global-prefs': typeof saveGlobalPrefs;
   'load-global-prefs': typeof loadGlobalPrefs;
   'save-prefs': typeof saveMetadataPrefs;
   'load-prefs': typeof loadMetadataPrefs;
-}
+};
 
 export const app = createApp<PreferencesHandlers>();
 
@@ -101,6 +101,7 @@ async function saveSyncedPrefs({
   ) {
     try {
       await loadPayPeriodConfig();
+      app.events.emit('pay-period-config-changed');
     } catch (e) {
       logger.warn('Failed to load pay period config', e);
     }
@@ -203,10 +204,10 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     language,
     theme:
       theme === 'light' ||
-      theme === 'dark' ||
-      theme === 'auto' ||
-      theme === 'development' ||
-      theme === 'midnight'
+        theme === 'dark' ||
+        theme === 'auto' ||
+        theme === 'development' ||
+        theme === 'midnight'
         ? theme
         : 'auto',
     preferredDarkTheme:

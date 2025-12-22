@@ -1,17 +1,99 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "import", "jsx-a11y"],
+  "jsPlugins": ["./packages/eslint-plugin-actual/lib/index.js"],
+  "env": {
+    "browser": true,
+    "jest": true,
+    "node": true
+  },
+  "globals": {
+    "vi": "readonly",
+    "backend": "readonly",
+    "importScripts": "readonly",
+    "FS": "readonly" // TODO: remove this
+  },
   "rules": {
     // TODO fix all these and re-enable
     "jsx-a11y/click-events-have-key-events": "off",
     "jsx-a11y/prefer-tag-over-role": "off",
     "jsx-a11y/tabindex-no-positive": "off",
 
-    // Keep these rules
-    "no-var": "warn",
+    // Actual rules
+    "actual/typography": "warn",
+    "actual/no-untranslated-strings": "error",
+    "actual/prefer-trans-over-t": "error",
+    "actual/prefer-if-statement": "warn",
+    "actual/prefer-logger-over-console": "error",
 
     // JSX A11y rules
-    "jsx-a11y/no-autofocus": ["warn", { "ignoreNonDOM": true }],
+    "jsx-a11y/no-autofocus": [
+      "warn",
+      {
+        "ignoreNonDOM": true
+      }
+    ],
+    "jsx-a11y/alt-text": "warn",
+    "jsx-a11y/anchor-has-content": "warn",
+    "jsx-a11y/anchor-is-valid": [
+      "warn",
+      {
+        "aspects": ["noHref", "invalidHref"]
+      }
+    ],
+    "jsx-a11y/aria-activedescendant-has-tabindex": "warn",
+    "jsx-a11y/aria-props": "warn",
+    "jsx-a11y/aria-proptypes": "warn",
+    "jsx-a11y/aria-role": [
+      "warn",
+      {
+        "ignoreNonDOM": true
+      }
+    ],
+    "jsx-a11y/aria-unsupported-elements": "warn",
+    "jsx-a11y/heading-has-content": "warn",
+    "jsx-a11y/iframe-has-title": "warn",
+    "jsx-a11y/img-redundant-alt": "warn",
+    "jsx-a11y/no-access-key": "warn",
+    "jsx-a11y/no-distracting-elements": "warn",
+    "jsx-a11y/no-redundant-roles": "warn",
+    "jsx-a11y/role-has-required-aria-props": "warn",
+    "jsx-a11y/role-supports-aria-props": "warn",
+    "jsx-a11y/scope": "warn",
+
+    // Typescript rules
+    "typescript/ban-ts-comment": [
+      "warn",
+      {
+        // TODO: remove this
+        "ts-ignore": "allow-with-description"
+      }
+    ],
+    "typescript/consistent-type-definitions": ["warn", "type"],
+    "typescript/consistent-type-imports": [
+      "warn",
+      {
+        "prefer": "type-imports",
+        "fixStyle": "inline-type-imports"
+      }
+    ],
+    "typescript/no-implied-eval": "warn",
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-restricted-types": [
+      "warn",
+      {
+        "types": {
+          // forbid FC as superfluous
+          "FunctionComponent": {
+            "message": "Type the props argument and let TS infer or use ComponentType for a component prop"
+          },
+          "FC": {
+            "message": "Type the props argument and let TS infer or use ComponentType for a component prop"
+          }
+        }
+      }
+    ],
+    "typescript/no-var-requires": "warn",
 
     // Import rules
     "import/first": "error",
@@ -63,9 +145,86 @@
     "react/rules-of-hooks": "error",
     "react/self-closing-comp": "warn",
     "react/style-prop-object": "warn",
+    "react/jsx-boolean-value": "warn",
 
     // ESLint rules
+    "eslint/array-callback-return": "warn",
+    // "eslint/curly": ["warn", "multi-line", "consistent"], // TODO: re-enable? this rule is really slow
+    "eslint/default-case": [
+      "warn",
+      {
+        "commentPattern": "^no default$"
+      }
+    ],
+    "eslint/eqeqeq": ["warn", "smart"],
+    "eslint/no-array-constructor": "warn",
+    "eslint/no-caller": "warn",
+    "eslint/no-cond-assign": ["warn", "except-parens"],
+    "eslint/no-const-assign": "warn",
+    "eslint/no-control-regex": "warn",
+    "eslint/no-delete-var": "warn",
+    "eslint/no-dupe-class-members": "warn",
+    "eslint/no-dupe-keys": "warn",
+    "eslint/no-duplicate-case": "warn",
+    "eslint/no-empty-character-class": "warn",
+    "eslint/no-empty-function": "warn",
+    "eslint/no-empty-pattern": "warn",
+    "eslint/no-eval": "warn",
+    "eslint/no-ex-assign": "warn",
+    "eslint/no-extend-native": "warn",
+    "eslint/no-extra-bind": "warn",
+    "eslint/no-extra-label": "warn",
+    "eslint/no-fallthrough": "warn",
+    "eslint/no-func-assign": "warn",
+    "eslint/no-invalid-regexp": "warn",
+    "eslint/no-iterator": "warn",
+    "eslint/no-label-var": "warn",
+    "eslint/no-var": "warn",
+    "eslint/no-labels": [
+      "warn",
+      {
+        "allowLoop": true,
+        "allowSwitch": false
+      }
+    ],
+    "eslint/no-new-func": "warn",
+    "eslint/no-script-url": "warn",
+    "eslint/no-self-assign": "warn",
+    "eslint/no-self-compare": "warn",
+    "eslint/no-sequences": "warn",
+    "eslint/no-shadow-restricted-names": "warn",
+    "eslint/no-sparse-arrays": "warn",
+    "eslint/no-template-curly-in-string": "warn",
+    "eslint/no-this-before-super": "warn",
+    "eslint/no-throw-literal": "warn",
+    "eslint/no-unreachable": "warn",
+    "eslint/no-obj-calls": "warn",
+    "eslint/no-new-wrappers": "warn",
+    "eslint/no-unsafe-negation": "warn",
+    "eslint/no-multi-str": "warn",
+    "eslint/no-global-assign": "warn",
+    "eslint/no-lone-blocks": "warn",
+    "eslint/no-unused-labels": "warn",
+    "eslint/no-object-constructor": "warn",
+    "eslint/no-new-native-nonconstructor": "warn",
     "eslint/no-redeclare": "warn",
+    "eslint/no-useless-computed-key": "warn",
+    "eslint/no-useless-concat": "warn",
+    "eslint/no-useless-escape": "warn",
+    "eslint/require-yield": "warn",
+    "eslint/getter-return": "warn",
+    "eslint/unicode-bom": ["warn", "never"],
+    "eslint/no-use-isnan": "warn",
+    "eslint/valid-typeof": "warn",
+    "eslint/no-useless-rename": [
+      "warn",
+      {
+        "ignoreDestructuring": false,
+        "ignoreImport": false,
+        "ignoreExport": false
+      }
+    ],
+    "eslint/no-with": "warn",
     "eslint/no-regex-spaces": "warn",
     "eslint/no-restricted-globals": [
       "warn",
@@ -156,7 +315,7 @@
         ],
         "patterns": [
           {
-            "group": ["*.api", "*.web", "*.electron"],
+            "group": ["**/*.api", "**/*.web", "**/*.electron"],
             "message": "Don't directly reference imports from other platforms"
           },
           {
@@ -170,12 +329,15 @@
             "message": "Please use themes instead of colors"
           },
           {
-            "group": ["@actual-app/web/*"],
+            "group": ["@actual-app/web/**/*"],
             "message": "Please do not import `@actual-app/web` in `loot-core`"
           }
         ]
       }
-    ]
+    ],
+    "eslint/no-useless-constructor": "warn",
+    "eslint/no-undef": "warn",
+    "eslint/no-unused-expressions": "warn"
   },
   "overrides": [
     {
@@ -230,7 +392,13 @@
         "react/exhaustive-deps": "off"
       }
     },
-
+    {
+      "files": ["**/*.test.{js,ts,jsx,tsx}", "packages/docs/**/*"],
+      "rules": {
+        "actual/no-untranslated-strings": "off",
+        "actual/prefer-logger-over-console": "off"
+      }
+    },
     {
       "files": [
         "packages/api/migrations/*",
@@ -240,6 +408,25 @@
       ],
       "rules": {
         "import/no-default-export": "off"
+      }
+    },
+    // TODO: enable these
+    {
+      "files": [
+        "packages/desktop-client/src/components/admin/UserAccess/UserAccess.tsx",
+        "packages/desktop-client/src/components/admin/UserDirectory/UserDirectory.tsx",
+        "packages/desktop-client/src/components/budget/BudgetCategories.tsx",
+        "packages/desktop-client/src/components/budget/envelope/BalanceMovementMenu.tsx",
+        "packages/desktop-client/src/components/ManageRules.tsx",
+        "packages/desktop-client/src/components/mobile/budget/ExpenseGroupList.tsx",
+        "packages/desktop-client/src/components/modals/EditFieldModal.tsx",
+        "packages/desktop-client/src/components/reports/reports/Calendar.tsx",
+        "packages/desktop-client/src/components/schedules/ScheduleLink.tsx",
+        "packages/desktop-client/src/components/ServerContext.tsx",
+        "packages/desktop-client/src/components/table.tsx"
+      ],
+      "rules": {
+        "eslint/no-empty-function": "off"
       }
     }
   ]

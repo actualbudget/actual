@@ -2,7 +2,7 @@
 import mitt, { type Emitter } from 'mitt';
 
 import { captureException } from '../platform/exceptions';
-import { ServerEvents } from '../types/server-events';
+import { type ServerEvents } from '../types/server-events';
 
 // This is a simple helper abstraction for defining methods exposed to
 // the client. It doesn't do much, but checks for naming conflicts and
@@ -12,6 +12,7 @@ import { ServerEvents } from '../types/server-events';
 type Events = {
   sync: ServerEvents['sync-event'];
   'load-budget': { id: string };
+  'pay-period-config-changed': void;
 };
 
 type UnlistenService = () => void;

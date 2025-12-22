@@ -7,7 +7,7 @@ import { config } from '../load-config';
 
 if (needsBootstrap()) {
   console.log(
-    'It looks like you don’t have a password set yet. Password is the fallback authentication method when using OpenID. Execute the command reset-password before using this command!',
+    "It looks like you don't have a password set yet. Password is the fallback authentication method when using OpenID. Execute the command reset-password before using this command!",
   );
 
   process.exit(1);

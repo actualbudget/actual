@@ -31,11 +31,11 @@ From July 2025 onwards, GoCardless has stopped accepting new Bank Account Data a
 
    ![Screenshot of GoCardless API secret after successful creation](/img/connecting-your-bank/connecting-your-bank-gocardless-04.png)
 
-6. Back in Actual, click on “+ Add account” at the bottom of the sidebar.
+6. Back in Actual, click on "+ Add account" at the bottom of the sidebar.
 
    ![Actual sidebar with accounts](/img/connecting-your-bank/connecting-your-bank-02.png)
 
-7. Click “Set-up GoCardless for bank-sync.”
+7. Click "Set-up GoCardless for bank-sync."
 
    ![Add account dialog](/img/connecting-your-bank/connecting-your-bank-gocardless-05.png)
 

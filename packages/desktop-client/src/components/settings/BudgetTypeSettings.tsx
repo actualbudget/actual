@@ -45,7 +45,7 @@ export function BudgetTypeSettings() {
           <strong>Envelope budgeting</strong> (recommended) digitally mimics
           physical envelope budgeting system by allocating funds into virtual
           envelopes for different expenses. It helps track spending and ensure
-          you don‘t overspend in any category.
+          you don't overspend in any category.
         </Trans>{' '}
         <Link
           variant="external"
@@ -58,8 +58,8 @@ export function BudgetTypeSettings() {
       <Text>
         <Trans>
           With <strong>tracking budgeting</strong>, category balances reset each
-          month, and funds are managed using a “Saved” metric instead of “To Be
-          Budgeted.” Income is forecasted to plan future spending, rather than
+          month, and funds are managed using a "Saved" metric instead of "To Be
+          Budgeted." Income is forecasted to plan future spending, rather than
           relying on current available funds.
         </Trans>{' '}
         <Link

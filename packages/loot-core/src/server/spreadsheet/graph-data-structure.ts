@@ -157,9 +157,9 @@ export function Graph() {
   return graph;
 }
 
-interface StackItem {
+type StackItem = {
   count: number;
   value: string;
   parent: string;
   level: number;
-}
+};

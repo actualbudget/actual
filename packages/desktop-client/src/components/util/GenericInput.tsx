@@ -232,7 +232,7 @@ export const GenericInput = ({
               categoryGroups={categoryGroups}
               openOnFocus={!isNarrowWidth}
               updateOnValueChange={isNarrowWidth}
-              showHiddenCategories={true}
+              showHiddenCategories
               inputProps={{
                 ref,
                 ...(showPlaceholder ? { placeholder: t('nothing') } : null),
@@ -290,7 +290,7 @@ export const GenericInput = ({
           content = (
             <FilterAutocomplete
               {...savedMultiProps}
-              openOnFocus={true}
+              openOnFocus
               inputProps={{
                 ref,
                 ...(showSavedPlaceholder
@@ -304,7 +304,7 @@ export const GenericInput = ({
           content = (
             <ReportAutocomplete
               {...savedMultiProps}
-              openOnFocus={true}
+              openOnFocus
               inputProps={{
                 ref,
                 ...(showSavedPlaceholder

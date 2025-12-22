@@ -13,7 +13,7 @@ import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, groupBy, sortByKey } from '../../shared/util';
 
-import * as YNAB4 from './ynab4-types';
+import type * as YNAB4 from './ynab4-types';
 
 // Importer
 

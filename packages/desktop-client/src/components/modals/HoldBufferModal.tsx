@@ -50,7 +50,7 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
             <InitialFocus>
               <AmountInput
                 value={available}
-                autoDecimals={true}
+                autoDecimals
                 zeroSign="+"
                 style={{
                   marginLeft: styles.mobileEditingPadding,

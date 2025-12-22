@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import * as d from 'date-fns';
-import { Locale } from 'date-fns';
+import { type Locale } from 'date-fns';
 import memoizeOne from 'memoize-one';
 
 import { type SyncedPrefs } from '../types/prefs';
@@ -20,7 +20,7 @@ import {
   addPayPeriods,
   differenceInPayPeriods,
   getCurrentPayPeriod,
-  getPayPeriodFromDate,
+  getPayPeriodFromDate as _getPayPeriodFromDate,
   generatePayPeriodRange,
   getPayPeriodNumberInMonth,
 } from './pay-periods';
@@ -52,7 +52,26 @@ export function _parse(value: DateLike): Date {
   }
 
   // Use shared date parsing utility for all other cases
-  return sharedParseDate(value);
+  const res = sharedParseDate(value);
+
+  // Strict validation: check if the date overflowed during parsing
+  if (typeof value === 'string' && d.isValid(res)) {
+    if (value.length === 10) {
+      if (d.format(res, 'yyyy-MM-dd') !== value) {
+        return new Date(NaN);
+      }
+    } else if (value.length === 7) {
+      if (!_isPayPeriod(value) && d.format(res, 'yyyy-MM') !== value) {
+        return new Date(NaN);
+      }
+    } else if (value.length === 4) {
+      if (d.format(res, 'yyyy') !== value) {
+        return new Date(NaN);
+      }
+    }
+  }
+
+  return res;
 }
 
 export const parseDate = _parse;
@@ -518,7 +537,7 @@ export function getDay(day: string): number {
 }
 
 export function getMonthEnd(day: string): string {
-  return subDays(nextMonth(day.slice(0, 7)) + '-01', 1);
+  return dayFromDate(getMonthEndDate(day));
 }
 
 export function getWeekEnd(
@@ -545,7 +564,7 @@ export function sheetForMonth(month: string): string {
 }
 
 export function nameForMonth(month: DateLike, locale?: Locale): string {
-  return d.format(_parse(month), 'MMMM ‘yy', { locale });
+  return d.format(_parse(month), "MMMM ''yy", { locale });
 }
 
 export function format(
@@ -631,6 +650,13 @@ export const getShortYearRegex = memoizeOne((format: string) => {
 
 export function isPayPeriod(monthId: string): boolean {
   return _isPayPeriod(monthId);
+}
+
+export function getPayPeriodFromDate(
+  date: Date,
+  config: PayPeriodConfig,
+): string {
+  return _getPayPeriodFromDate(date, config);
 }
 
 function getCalendarMonthStartDate(monthId: string): Date {
