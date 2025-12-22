@@ -181,7 +181,10 @@ export function ExperimentalFeatures() {
             >
               <Trans>Client-Side plugins (soon)</Trans>
             </GlobalFeatureToggle>
-            <FeatureToggle flag="payPeriodsEnabled">
+            <FeatureToggle
+              flag="payPeriodsEnabled"
+              feedbackLink="https://github.com/actualbudget/actual/issues/5859"
+            >
               <Trans>Pay periods</Trans>
             </FeatureToggle>
           </View>

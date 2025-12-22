@@ -8,7 +8,13 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('@actual-app/components/text', () => ({
-  Text: ({ children, style }: any) => <span style={style}>{children}</span>,
+  Text: ({
+    children,
+    style,
+  }: {
+    children: React.ReactNode;
+    style?: React.CSSProperties;
+  }) => <span style={style}>{children}</span>,
 }));
 
 vi.mock('@actual-app/components/theme', () => ({
@@ -31,7 +37,7 @@ vi.mock('@desktop-client/hooks/useDateFormat', () => ({
 }));
 
 vi.mock('@desktop-client/hooks/useFormat', () => ({
-  useFormat: () => (v: any) => v,
+  useFormat: () => (v: unknown) => v,
 }));
 
 vi.mock('@desktop-client/hooks/useLocale', () => ({
@@ -44,7 +50,8 @@ vi.mock('@desktop-client/hooks/usePayees', () => ({
 
 // Mock pay period config
 vi.mock('loot-core/shared/pay-periods', async importOriginal => {
-  const actual = await importOriginal<any>();
+  const actual =
+    await importOriginal<typeof import('loot-core/shared/pay-periods')>();
   return {
     ...actual,
     getPayPeriodConfig: () => ({

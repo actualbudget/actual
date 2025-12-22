@@ -45,10 +45,11 @@ export const MonthPicker = ({
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
 
-  // Don't capture currentMonth during render - calculate it when needed
-  // This ensures pay period config is loaded before determining current month
+  // Calculate current month when needed to ensure pay period config is loaded
   const getCurrentMonth = () => monthUtils.currentMonth();
+  // For comparisons that need a stable reference during render
   const currentMonth = getCurrentMonth();
+
   const firstSelectedMonth = startMonth;
 
   const lastSelectedMonth = monthUtils.addMonths(
@@ -81,6 +82,8 @@ export const MonthPicker = ({
 
   const yearHeadersShown = [];
 
+  const isPayPeriodViewEnabled = String(payPeriodViewEnabled) === 'true';
+
   return (
     <View
       style={{
@@ -104,22 +107,19 @@ export const MonthPicker = ({
             variant="button"
             buttonVariant="bare"
             onPress={() =>
-              setPayPeriodViewEnabled(
-                String(payPeriodViewEnabled) === 'true' ? 'false' : 'true',
-              )
+              setPayPeriodViewEnabled(isPayPeriodViewEnabled ? 'false' : 'true')
             }
             style={{
               padding: '3px 3px',
               marginRight: '12px',
-              color:
-                String(payPeriodViewEnabled) === 'true'
-                  ? theme.buttonNormalText
-                  : theme.pageTextSubdued,
+              color: isPayPeriodViewEnabled
+                ? theme.buttonNormalText
+                : theme.pageTextSubdued,
             }}
           >
             <View
               title={
-                String(payPeriodViewEnabled) === 'true'
+                isPayPeriodViewEnabled
                   ? t('Hide pay periods')
                   : t('Show pay periods')
               }

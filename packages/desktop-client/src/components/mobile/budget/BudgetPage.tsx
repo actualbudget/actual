@@ -125,9 +125,10 @@ export function BudgetPage() {
 
     // Refresh budget bounds to get pay period bounds if enabled
     if (payPeriodViewEnabled === 'true') {
-      send('get-budget-bounds').then(({ start, end }) => {
+      (async () => {
+        const { start, end } = await send('get-budget-bounds');
         setMonthBounds({ start, end });
-      });
+      })();
     }
   }, [
     payPeriodFeatureFlagEnabled,

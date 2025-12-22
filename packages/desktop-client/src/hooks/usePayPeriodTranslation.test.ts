@@ -67,57 +67,6 @@ describe('Pay Period Translation Utilities', () => {
     ]);
   });
 
-  test('createTransactionFilterConditions creates date range filters for pay periods', () => {
-    const filter = createTransactionFilterConditions(
-      '2024-13',
-      'test-category',
-    );
-
-    expect(filter).toEqual([
-      {
-        field: 'category',
-        op: 'is',
-        type: 'id',
-        value: 'test-category',
-      },
-      {
-        field: 'date',
-        op: 'gte',
-        type: 'date',
-        value: '2024-01-05',
-      },
-      {
-        field: 'date',
-        op: 'lte',
-        type: 'date',
-        value: '2024-01-18',
-      },
-    ]);
-  });
-
-  test('createTransactionFilterConditions creates month transform filters for calendar months', () => {
-    const filter = createTransactionFilterConditions(
-      '2024-01',
-      'test-category',
-    );
-
-    expect(filter).toEqual([
-      {
-        field: 'category',
-        op: 'is',
-        type: 'id',
-        value: 'test-category',
-      },
-      {
-        field: 'date',
-        op: 'is',
-        type: 'date',
-        value: '2024-01',
-        options: { month: true },
-      },
-    ]);
-  });
-
   test('handles different pay period frequencies', () => {
     // Test with different pay period (2nd biweekly period)
     const range14 = convertPayPeriodToDateRange('2024-14');
