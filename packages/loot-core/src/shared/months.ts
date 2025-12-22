@@ -52,7 +52,26 @@ export function _parse(value: DateLike): Date {
   }
 
   // Use shared date parsing utility for all other cases
-  return sharedParseDate(value);
+  const res = sharedParseDate(value);
+
+  // Strict validation: check if the date overflowed during parsing
+  if (typeof value === 'string' && d.isValid(res)) {
+    if (value.length === 10) {
+      if (d.format(res, 'yyyy-MM-dd') !== value) {
+        return new Date(NaN);
+      }
+    } else if (value.length === 7) {
+      if (!_isPayPeriod(value) && d.format(res, 'yyyy-MM') !== value) {
+        return new Date(NaN);
+      }
+    } else if (value.length === 4) {
+      if (d.format(res, 'yyyy') !== value) {
+        return new Date(NaN);
+      }
+    }
+  }
+
+  return res;
 }
 
 export const parseDate = _parse;
