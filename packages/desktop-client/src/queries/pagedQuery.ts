@@ -42,7 +42,7 @@ type PagedQueryOptions = LiveQueryOptions & {
 // Paging
 export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
   private _hasReachedEnd: boolean;
-  private _onPageData: (data: Data<TResponse>) => void;
+  private _onPageData?: (data: Data<TResponse>) => void;
   private _pageCount: number;
   private _fetchDataPromise: Promise<void> | null;
   private _totalCount: number;
@@ -67,7 +67,7 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
     this._pageCount = options.pageCount || 500;
     this._fetchDataPromise = null;
     this._hasReachedEnd = false;
-    this._onPageData = onPageData || (() => {});
+    this._onPageData = onPageData;
   }
 
   private fetchCount = () => {
@@ -171,7 +171,7 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
   };
 
   private onPageData = (data: Data<TResponse>) => {
-    this._onPageData(data);
+    this._onPageData?.(data);
   };
 
   // The public version of this function is created below and

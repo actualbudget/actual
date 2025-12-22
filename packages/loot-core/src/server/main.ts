@@ -10,7 +10,7 @@ import { logger, setVerboseMode } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { q } from '../shared/query';
 import { amountToInteger, integerToAmount } from '../shared/util';
-import { Handlers } from '../types/handlers';
+import { type Handlers } from '../types/handlers';
 
 import { app as accountsApp } from './accounts/app';
 import { app as adminApp } from './admin/app';

@@ -140,7 +140,7 @@ function FilteredBalance({ filteredAmount }: FilteredBalanceProps) {
     <DetailedBalance
       name={t('Filtered balance:')}
       balance={filteredAmount ?? 0}
-      isExactBalance={true}
+      isExactBalance
     />
   );
 }

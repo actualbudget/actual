@@ -145,5 +145,9 @@ export const clearServer: T.ClearServer = async function () {
     return new Promise(closeSocket);
   }
 };
-export const initServer: T.InitServer = async function () {};
-export const serverPush: T.ServerPush = async function () {};
+export const initServer: T.InitServer = async function () {
+  // initServer is used in tests to mock the server
+};
+export const serverPush: T.ServerPush = async function () {
+  // serverPush is used in tests to mock the server
+};

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { TransactionForRules } from '../transactions/transaction-rules';
+import { type TransactionForRules } from '../transactions/transaction-rules';
 
 import { Action } from './action';
 
@@ -10,7 +10,7 @@ describe('Formula-based rule actions', () => {
     const transaction: Partial<TransactionForRules> = { amount: 500 };
     const result = action.executeFormulaSync('=100 + 200', transaction);
 
-    expect(result).toBe(300);
+    expect(result).toBe(30000);
   });
 
   it('should use transaction field variables', () => {
@@ -18,7 +18,7 @@ describe('Formula-based rule actions', () => {
     const transaction = { amount: 5000 };
     const result = action.executeFormulaSync('=amount / 100', transaction);
 
-    expect(result).toBe(50);
+    expect(result).toBe(5000);
   });
 
   it('should support IF function with transaction fields', () => {
@@ -108,7 +108,7 @@ describe('Formula-based rule actions', () => {
     };
     const result = action.executeFormulaSync('=balance * 2', transaction);
 
-    expect(result).toBe(3000);
+    expect(result).toBe(300000);
   });
 
   it('should execute formula and convert to number type', () => {
@@ -119,7 +119,7 @@ describe('Formula-based rule actions', () => {
     const transaction = { amount: 100 };
     action.exec(transaction);
 
-    expect(transaction.amount).toBe(750);
+    expect(transaction.amount).toBe(75000);
   });
 
   it('should execute formula and convert to string type', () => {
@@ -170,6 +170,6 @@ describe('Formula-based rule actions', () => {
     action.exec(transaction);
 
     // Should convert number to string
-    expect(transaction.notes).toBe('750');
+    expect(transaction.notes).toBe('75000');
   });
 });

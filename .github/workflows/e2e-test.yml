@@ -124,14 +124,17 @@ jobs:
           path: packages/desktop-client/playwright-report
           retention-days: 30
           overwrite: true
-      - name: Comment on PR with VRT report link
-        if: github.event_name == 'pull_request' && needs.vrt.result == 'failure'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      - name: Save VRT metadata for comment workflow
+        if: github.event_name == 'pull_request'
+        run: |
+          mkdir -p vrt-metadata
+          echo "${{ github.event.pull_request.number }}" > vrt-metadata/pr-number.txt
+          echo "${{ needs.vrt.result }}" > vrt-metadata/vrt-result.txt
+          echo "${{ steps.playwright-report-vrt.outputs.artifact-url }}" > vrt-metadata/artifact-url.txt
+      - name: Upload VRT metadata
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
-          script: |
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `VRT tests ❌ failed. [View the test report](${{ steps.playwright-report-vrt.outputs.artifact-url }}).\n\nTo update the VRT screenshots, comment \`/update-vrt\` on this PR.`
-            });
+          name: vrt-comment-metadata
+          path: vrt-metadata/
+          retention-days: 1

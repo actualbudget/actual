@@ -97,7 +97,7 @@ export function FixEncryptionKeyModal({
             ) : (
               <Paragraph>
                 {t(
-                  'We don’t have a key that encrypts or decrypts this file. Enter the password for this file to create the key for encryption.',
+                  "We don't have a key that encrypts or decrypts this file. Enter the password for this file to create the key for encryption.",
                 )}{' '}
                 <Link
                   variant="external"

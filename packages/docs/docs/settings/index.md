@@ -29,7 +29,6 @@ The language choice alters the display language of all text. If you encounter a 
 
 ![Image of language setting](/img/using-actual/actual-languages.png)
 
-
 ### Authentication Method
 
 OpenID can be enabled here. [Learn more](/docs/config/oauth-auth)
@@ -72,7 +71,7 @@ IDs are the names Actual uses to identify your budget internally. The Budget ID 
 
 ### Reset Budget Cache
 
-**Reset budget cache** will clear all cached values for the budget and recalculate the entire budget. All values in the budget are cached for performance reasons, and if there is a bug in the cache you won’t see correct values. There is no danger in resetting the cache. 
+**Reset budget cache** will clear all cached values for the budget and recalculate the entire budget. All values in the budget are cached for performance reasons, and if there is a bug in the cache you won't see correct values. There is no danger in resetting the cache.
 
 ![Image of Reset Cache setting](/img/using-actual/actual-budget-cache.png)
 
@@ -86,7 +85,7 @@ Actual's sync function is quite complicated and is covered in detail [here](../g
 
 ### Repair Split Transactions
 
-If you are experiencing bugs relating to split transactions or transfers and the “Reset budget cache” button above does not help, this tool may fix them.
+If you are experiencing bugs relating to split transactions or transfers and the "Reset budget cache" button above does not help, this tool may fix them.
 
 ![Image of Repair Splits setting](/img/using-actual/actual-repair.png)
 

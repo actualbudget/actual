@@ -57,7 +57,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
     ? SvgArrowButtonDown1
     : SvgArrowButtonUp1;
 
-  const displayMonth = monthUtils.format(month, 'MMMM ‘yy', locale);
+  const displayMonth = monthUtils.format(month, "MMMM ''yy", locale);
 
   return (
     <View
@@ -172,7 +172,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                     onMenuClose();
                     showUndoNotification({
                       message: t(
-                        '{{displayMonth}} budgets have all been set to last month’s budgeted amounts.',
+                        "{{displayMonth}} budgets have all been set to last month's budgeted amounts.",
                         { displayMonth },
                       ),
                     });

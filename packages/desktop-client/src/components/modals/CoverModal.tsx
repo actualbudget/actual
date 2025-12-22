@@ -108,7 +108,7 @@ export function CoverModal({
             <InitialFocus>
               <AmountInput
                 value={amount}
-                autoDecimals={true}
+                autoDecimals
                 style={{
                   marginLeft: styles.mobileEditingPadding,
                   marginRight: styles.mobileEditingPadding,

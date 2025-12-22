@@ -4,7 +4,7 @@ import { parseStringPromise } from 'xml2js';
 type DateRef = { DtTm: string } | { Dt: string };
 type Amt = { _: string };
 
-interface Ntry {
+type Ntry = {
   AcctSvcrRef?: string;
   Amt?: Amt;
   CdtDbtInd: 'CRDT' | 'DBIT';
@@ -13,13 +13,13 @@ interface Ntry {
   NtryDtls?: NtryDtls;
   AddtlNtryInf?: string;
   NtryRef?: string;
-}
+};
 
-interface NtryDtls {
+type NtryDtls = {
   TxDtls: TxDtls | TxDtls[];
-}
+};
 
-interface TxDtls {
+type TxDtls = {
   RltdPties?: {
     Cdtr: {
       Nm: string;
@@ -31,16 +31,16 @@ interface TxDtls {
   RmtInf?: {
     Ustrd: string | string[];
   };
-}
+};
 
-interface TransactionCAMT {
+type TransactionCAMT = {
   amount: number;
   date: string;
   payee_name: string | null;
   imported_payee: string | null;
   notes: string | null;
   imported_id?: string;
-}
+};
 
 function findKeys(obj: object, key: string): unknown[] {
   let result = [];

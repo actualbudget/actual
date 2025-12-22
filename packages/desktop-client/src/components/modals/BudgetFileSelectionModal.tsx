@@ -42,7 +42,7 @@ export function BudgetFileSelectionModal() {
               {currentFile?.name}
             </Text>
           </View>
-          <BudgetFileSelection showHeader={false} quickSwitchMode={true} />
+          <BudgetFileSelection showHeader={false} quickSwitchMode />
         </>
       )}
     </Modal>

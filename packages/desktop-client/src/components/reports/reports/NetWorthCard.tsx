@@ -172,7 +172,7 @@ export function NetWorthCard({
         {data ? (
           <NetWorthGraph
             graphData={data.graphData}
-            compact={true}
+            compact
             showTooltip={!isEditing && !isNarrowWidth}
             interval={meta?.interval || 'Monthly'}
             style={{ height: 'auto', flex: 1 }}

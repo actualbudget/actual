@@ -136,4 +136,6 @@ export const getNumClients = function () {
   return 1;
 };
 
-export const resetEvents: T.ResetEvents = function () {};
+export const resetEvents: T.ResetEvents = function () {
+  // resetEvents is used in tests to mock the server
+};

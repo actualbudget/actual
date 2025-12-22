@@ -1,6 +1,6 @@
 # Credit Cards and Actual Budget
 
-Using a credit card in any budgeting software can be confusing, and Actual is no different. Of all the questions that are asked about budgeting, credit card usage is near the top of the list so don't feel bad if you're a little confused. 
+Using a credit card in any budgeting software can be confusing, and Actual is no different. Of all the questions that are asked about budgeting, credit card usage is near the top of the list so don't feel bad if you're a little confused.
 
 :::note
 Any Revolving Credit Account that has both purchases and payments in any month should be treated as a credit card, not as a loan. Use [Carrying Debt](./carrying-debt.md) if the balance is not paid off every month.
@@ -12,7 +12,7 @@ We recommend that you place all your credit card accounts **On Budget**. You can
 
 If you pay off your credit card statement every month, then you will want to use the [Paying in Full](./paying-in-full.md) page to understand how Actual helps you work with your credit card to stay _Within the Budget_.
 
-If you are unable to budget for and pay your credit card outstanding balance **in any month**, then we also have you covered, see the [Carrying Debt](./carrying-debt.md) page for a step-by-step guide on how to set up Actual and track this debt in a safe and sustainable manner. 
+If you are unable to budget for and pay your credit card outstanding balance **in any month**, then we also have you covered, see the [Carrying Debt](./carrying-debt.md) page for a step-by-step guide on how to set up Actual and track this debt in a safe and sustainable manner.
 
 **tl;dr. If you don't budget funds you don't have and don't spend money that is not covered in your budget, you will not incur any new debt and always have enough funds to pay for your new credit card purchases whenever you want!**
 
@@ -35,9 +35,10 @@ After the transaction, Checking is -$50, but the On Budget balance is the same $
 As far as Actual is concerned a credit card account is the same as any other account, you just choose to let the balance go negative.
 :::
 
-We highly recommend you follow the _Within the Budget_ strategy for credit card use. _Every_ time you make a credit card purchase, enter the transaction and select a category with money set aside in the Budgeted column and a positive Budget Balance. 
+We highly recommend you follow the _Within the Budget_ strategy for credit card use. _Every_ time you make a credit card purchase, enter the transaction and select a category with money set aside in the Budgeted column and a positive Budget Balance.
 
 ### Credit card "rules" to stay _Within the Budget_:
+
 - Never Over Budget. Only budget funds you actually have!
 - Check your category balance _before_ spending.
 - Enter your new purchase transactions quickly.
@@ -46,11 +47,8 @@ We highly recommend you follow the _Within the Budget_ strategy for credit card 
 - Pay _at least_ your statement New Balance before the due date.
 - A "Credit Limit" is _not_ an invitation to spend it!
 
-
 :::note
 
 If you have recently moved to Actual from nYNAB or some other budgeting apps, you may notice that Actual doesn't use specific "credit card" accounts. Read through how Actual treats credit cards above and follow the examples in [Paying in Full](./paying-in-full.md) and in [Carrying Debt](./carrying-debt.md) to learn how Actual handles credit cards.
 
 :::
-
-

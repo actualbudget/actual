@@ -53,10 +53,10 @@ function PayeeTableHeader() {
           zIndex: 200,
           userSelect: 'none',
         }}
-        collapsed={true}
+        collapsed
       >
         <SelectCell
-          exposed={true}
+          exposed
           focused={false}
           selected={selectedItems.size > 0}
           icon={<SvgSubtract width={6} height={6} />}

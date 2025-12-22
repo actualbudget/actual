@@ -348,7 +348,7 @@ export function DonutGraph({
                 <Tooltip
                   content={() => null}
                   defaultIndex={activeIndex}
-                  active={true}
+                  active
                 />
               </PieChart>
             </div>

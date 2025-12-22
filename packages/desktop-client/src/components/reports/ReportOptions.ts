@@ -225,7 +225,7 @@ const intervalOptions: intervalOptionsProps[] = [
     description: t('Monthly'),
     key: 'Monthly',
     name: 'Month',
-    // eslint-disable-next-line actual/typography
+
     format: "MMM ''yy",
     range: 'rangeInclusive',
   },

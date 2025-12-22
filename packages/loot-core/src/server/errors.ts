@@ -80,7 +80,7 @@ export class RuleError extends Error {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export function APIError(msg: string, meta?: Record<string, any>) {
   return { type: 'APIError', message: msg, meta };
 }

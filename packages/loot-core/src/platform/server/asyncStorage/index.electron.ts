@@ -2,10 +2,10 @@
 import * as fs from 'fs';
 import { join } from 'path';
 
-import { GlobalPrefsJson } from '../../../types/prefs';
+import { type GlobalPrefsJson } from '../../../types/prefs';
 import * as lootFs from '../fs';
 
-import * as T from './index-types';
+import type * as T from './index-types';
 
 const getStorePath = () => join(lootFs.getDataDir(), 'global-store.json');
 let store: GlobalPrefsJson;

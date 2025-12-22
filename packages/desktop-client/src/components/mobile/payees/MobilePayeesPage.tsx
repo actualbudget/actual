@@ -92,7 +92,7 @@ export function MobilePayeesPage() {
       try {
         await send('payees-batch-change', { deleted: [{ id: payee.id }] });
         showUndoNotification({
-          message: t('Payee “{{name}}” deleted successfully', {
+          message: t('Payee "{{name}}" deleted successfully', {
             name: payee.name,
           }),
         });

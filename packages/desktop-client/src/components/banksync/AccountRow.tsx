@@ -47,7 +47,7 @@ export const AccountRow = memo(
             ? theme.tableRowBackgroundHover
             : theme.tableBackground,
         }}
-        collapsed={true}
+        collapsed
         onMouseEnter={() => onHover && onHover(account.id)}
         onMouseLeave={() => onHover && onHover(null)}
       >

@@ -40,7 +40,7 @@ export function InOutOption({
           type="text"
           value={outValue}
           onChangeValue={onChangeText}
-          placeholder={t('Value for out rows, e.g: ‘Credit’')}
+          placeholder={t("Value for out rows, e.g: 'Credit'")}
         />
       )}
     </View>

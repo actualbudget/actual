@@ -391,7 +391,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
             <Paragraph>
               Cash flow shows the balance of your budgeted accounts over time,
               and the amount of expenses/income each day or month. Your budgeted
-              accounts are considered to be “cash on hand,” so this gives you a
+              accounts are considered to be "cash on hand," so this gives you a
               picture of how available money fluctuates.
             </Paragraph>
           </Trans>

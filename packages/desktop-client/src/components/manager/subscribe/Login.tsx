@@ -159,7 +159,7 @@ function OpenIdLogin({ setError }) {
           >
             {warnMasterCreation && askForPassword && (
               <ResponsiveInput
-                autoFocus={true}
+                autoFocus
                 placeholder={t('Enter server password')}
                 type="password"
                 onChangeValue={newValue => {

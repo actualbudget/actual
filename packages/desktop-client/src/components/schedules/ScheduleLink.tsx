@@ -148,7 +148,7 @@ export function ScheduleLink({
               isLoading={isSchedulesLoading}
               allowCompleted={false}
               filter={filter}
-              minimal={true}
+              minimal
               onAction={() => {}}
               onSelect={id => {
                 onSelect(id);

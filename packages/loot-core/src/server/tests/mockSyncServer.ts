@@ -1,13 +1,13 @@
 // @ts-strict-ignore
 import {
-  Clock,
+  type Clock,
   makeClock,
   Timestamp,
   merkle,
   SyncProtoBuf,
 } from '@actual-app/crdt';
 
-import { Message } from '../sync';
+import { type Message } from '../sync';
 
 import { basic as defaultMockData } from './mockData.json';
 

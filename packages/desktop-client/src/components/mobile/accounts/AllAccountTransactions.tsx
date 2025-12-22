@@ -149,7 +149,7 @@ function TransactionListWithPreviews() {
       searchPlaceholder={t('Search All Accounts')}
       onSearch={onSearch}
       onOpenTransaction={onOpenTransaction}
-      showMakeTransfer={true}
+      showMakeTransfer
     />
   );
 }

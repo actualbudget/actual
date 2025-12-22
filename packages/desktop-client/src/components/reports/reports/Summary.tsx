@@ -346,11 +346,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         onChangeDates={onChangeDates}
-        onUpdateFilter={dividendFilters.onUpdate}
-        onDeleteFilter={dividendFilters.onDelete}
-        conditionsOp={dividendFilters.conditionsOp}
-        onConditionsOpChange={dividendFilters.onConditionsOpChange}
-        show1Month={true}
+        show1Month
       >
         {widget && (
           <Button variant="primary" onPress={onSaveWidget}>

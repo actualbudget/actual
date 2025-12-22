@@ -13,6 +13,7 @@ Custom reports allow analyzing transaction data by using charts or a data table 
 ## Left Menu
 
 The **Type** menu can be used to change the display of transactions shown in the report:
+
 1. Payment: outflows from on budget accounts
 2. Deposit: inflows to on budget accounts
 3. Net: sum of outflows and inflows across on budget accounts. Net results are the figures shown in Budget page under Spent and Received columns. This option is currently available in Data Table, Area Graph and partially available in Bar Graph and Donut Graph
@@ -31,12 +32,12 @@ Transactions can be filtered for a certain period of time using **Range**. **Liv
 
 Under Options, reports behavior can be changed
 
-* `Show hidden categories` will enable Categories marked as hidden in the Budget page.
-* `Show empty rows` will show items chosen in Split with 0 value.
-* `Show off budget` enables two categories:
-	* Transfers: include all transfers across on budget account. Transfers from on budget to off budget are not counted.
-	* Off budget: include all transactions in off budget accounts. Transfers from on budget to off budget are not counted.
-* `Show uncategorized` will show transactions which have not been assigned a category.
+- `Show hidden categories` will enable Categories marked as hidden in the Budget page.
+- `Show empty rows` will show items chosen in Split with 0 value.
+- `Show off budget` enables two categories:
+  - Transfers: include all transfers across on budget account. Transfers from on budget to off budget are not counted.
+  - Off budget: include all transactions in off budget accounts. Transfers from on budget to off budget are not counted.
+- `Show uncategorized` will show transactions which have not been assigned a category.
 
 Single Categories or entire Groups can be excluded from the Report by using the list on the bottom left side.
 Grayed out options in dropdown menus are not yet available for the chosen report.
@@ -61,12 +62,11 @@ Saved reports will be shown in the Report page in alphabetical order.
 
 Custom Reports are really powerful and can provide unique insights. We now highlight a complex example that uses most features. Our goal is to have a stacked bar chart broken down by group with month on X axis, in a certain time frame, excluding a certain category and payee.
 
-* Select Bar Graph and set Time Mode
-* Select Split by Group
-* Use the Live Date filter and set Year to date as a Range
-* Click on the checkbox next to Savings to exclude from the sum
-* Click on the Filter icon, select Payee is not "Movies"
-* Enable the legend, summary and label.
+- Select Bar Graph and set Time Mode
+- Select Split by Group
+- Use the Live Date filter and set Year to date as a Range
+- Click on the checkbox next to Savings to exclude from the sum
+- Click on the Filter icon, select Payee is not "Movies"
+- Enable the legend, summary and label.
 
 ![Sample custom report](/img/reports/cr-example.png)
-

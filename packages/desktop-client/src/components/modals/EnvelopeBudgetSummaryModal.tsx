@@ -181,7 +181,7 @@ export function EnvelopeBudgetSummaryModal({
                 ...styles.underlinedText,
               }}
               onClick={() => onClick({ close })}
-              isTotalsListTooltipDisabled={true}
+              isTotalsListTooltipDisabled
             />
           </SheetNameProvider>
         </>

@@ -114,6 +114,8 @@ export function calculateHasWarning(
           return true;
         }
         break;
+      default:
+        break;
     }
   }
   return false;

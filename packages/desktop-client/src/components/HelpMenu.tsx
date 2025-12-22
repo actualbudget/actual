@@ -94,6 +94,8 @@ export const HelpMenu = () => {
       case 'goal-templates':
         dispatch(pushModal({ modal: { name: 'goal-templates' } }));
         break;
+      default:
+        throw new Error(`Unrecognized menu option: ${item}`);
     }
   };
 

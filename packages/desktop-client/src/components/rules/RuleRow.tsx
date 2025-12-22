@@ -70,7 +70,7 @@ export const RuleRow = memo(
               ? theme.tableRowBackgroundHover
               : theme.tableBackground,
         }}
-        collapsed={true}
+        collapsed
         onMouseEnter={() => onHover && onHover(rule.id)}
         onMouseLeave={() => onHover && onHover(null)}
         onContextMenu={handleContextMenu}
@@ -107,7 +107,7 @@ export const RuleRow = memo(
         </Popover>
         <SelectCell
           exposed={hovered || selected}
-          focused={true}
+          focused
           onSelect={e => {
             dispatchSelected({
               type: 'select',
@@ -146,7 +146,7 @@ export const RuleRow = memo(
                   key={i}
                   field={cond.field}
                   op={cond.op}
-                  inline={true}
+                  inline
                   value={cond.value}
                   options={cond.options}
                   prefix={i > 0 ? friendlyOp(rule.conditionsOp) : null}

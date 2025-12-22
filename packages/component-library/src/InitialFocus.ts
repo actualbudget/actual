@@ -3,8 +3,8 @@ import {
   cloneElement,
   isValidElement,
   type ReactElement,
-  Ref,
-  RefObject,
+  type Ref,
+  type RefObject,
   useEffect,
   useRef,
 } from 'react';

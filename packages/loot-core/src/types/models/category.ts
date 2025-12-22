@@ -1,6 +1,6 @@
-import { CategoryGroupEntity } from './category-group';
+import { type CategoryGroupEntity } from './category-group';
 
-export interface CategoryEntity {
+export type CategoryEntity = {
   id: string;
   name: string;
   is_income?: boolean;
@@ -10,4 +10,4 @@ export interface CategoryEntity {
   sort_order?: number;
   tombstone?: boolean;
   hidden?: boolean;
-}
+};

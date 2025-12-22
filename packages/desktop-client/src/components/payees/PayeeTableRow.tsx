@@ -234,9 +234,6 @@ export const PayeeTableRow = memo(
         <CustomCell
           width={20}
           exposed={!payee.transfer_acct}
-          onBlur={() => {}}
-          onUpdate={() => {}}
-          onClick={() => {}}
           style={{
             display: 'flex',
             justifyContent: 'center',

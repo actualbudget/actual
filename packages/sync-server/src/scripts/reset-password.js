@@ -4,7 +4,7 @@ import { promptPassword } from '../util/prompt';
 
 if (needsBootstrap()) {
   console.log(
-    'It looks like you don’t have a password set yet. Let’s set one up now!',
+    "It looks like you don't have a password set yet. Let's set one up now!",
   );
 
   try {
@@ -26,7 +26,7 @@ if (needsBootstrap()) {
     process.exit(1);
   }
 } else {
-  console.log('It looks like you already have a password set. Let’s reset it!');
+  console.log("It looks like you already have a password set. Let's reset it!");
   try {
     const password = await promptPassword();
     const { error } = await changePassword(password);

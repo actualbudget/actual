@@ -553,7 +553,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
           onDeleteFilter={onDeleteFilter}
           conditionsOp={conditionsOp}
           onConditionsOpChange={onConditionsOpChange}
-          show1Month={true}
+          show1Month
         >
           {widget && (
             <Button variant="primary" onPress={onSaveWidget}>
@@ -651,9 +651,9 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     payees={payees}
                     balances={null}
                     showBalances={false}
-                    showReconciled={true}
+                    showReconciled
                     showCleared={false}
-                    showAccount={true}
+                    showAccount
                     isAdding={false}
                     isNew={() => false}
                     isMatched={() => false}

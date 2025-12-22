@@ -25,11 +25,11 @@ export function SaveReportDelete({
       <View style={{ align: 'center' }}>
         <Text style={{ color: theme.errorText, marginBottom: 5 }}>
           <Trans>
-            Are you sure you want to delete the report named{' ‘'}
+            Are you sure you want to delete the report named{" '"}
             <Text style={{ display: 'inline' }}>
               {{ name } as TransObjectLiteral}
             </Text>
-            ’?
+            '?
           </Trans>
         </Text>
       </View>

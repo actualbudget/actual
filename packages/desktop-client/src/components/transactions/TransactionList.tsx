@@ -604,7 +604,7 @@ export function TransactionList({
       showReconciled={showReconciled}
       showCleared={showCleared}
       showAccount={showAccount}
-      showCategory={true}
+      showCategory
       currentAccountId={account && account.id}
       currentCategoryId={category && category.id}
       isAdding={isAdding}

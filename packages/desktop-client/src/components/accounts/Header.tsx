@@ -804,8 +804,8 @@ function AccountMenu({
         {
           name: 'toggle-cleared',
           text: showCleared
-            ? t('Hide “cleared” checkboxes')
-            : t('Show “cleared” checkboxes'),
+            ? t('Hide "cleared" checkboxes')
+            : t('Show "cleared" checkboxes'),
         },
         {
           name: 'toggle-reconciled',

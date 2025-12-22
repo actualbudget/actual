@@ -5,17 +5,20 @@ If you have forgotten your actual-server login password - not all is lost, as th
 A password reset feature is available from version 23.4.2.
 
 ## Execute Directly
+
 ```sh
 npm run reset-password
 ```
 
 ## From a Docker Container
+
 ```sh
 docker exec -it <actual_container> /bin/sh
 node /app/src/scripts/reset-password.js
 ```
 
 ## From a Kubernetes Instance
+
 ```sh
 kubectl exec --stdin --tty <actual_pod_name> -- /bin/sh
 node /app/src/scripts/reset-password.js

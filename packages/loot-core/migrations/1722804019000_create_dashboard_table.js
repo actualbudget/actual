@@ -2,7 +2,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { DEFAULT_DASHBOARD_STATE } from '../src/shared/dashboard';
 
-/* eslint-disable actual/typography */
 export default async function runMigration(db) {
   db.transaction(() => {
     const reports = db.runQuery(

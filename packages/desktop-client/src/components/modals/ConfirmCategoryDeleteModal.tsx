@@ -156,12 +156,12 @@ export function ConfirmCategoryDeleteModal({
                           }))
                   }
                   value={transferCategory}
-                  focused={true}
+                  focused
                   inputProps={{
                     placeholder: t('Select category...'),
                   }}
                   onSelect={category => setTransferCategory(category)}
-                  showHiddenCategories={true}
+                  showHiddenCategories
                 />
               </View>
 

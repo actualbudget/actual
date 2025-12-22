@@ -200,7 +200,7 @@ exports[`Database > transactions are sorted by starting balance flag 1`] = `
 ]
 `;
 
-exports[`Database > transactions don’t show orphaned child transactions 1`] = `
+exports[`Database > transactions don't show orphaned child transactions 1`] = `
 [
   {
     "amount": -23,

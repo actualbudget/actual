@@ -71,7 +71,7 @@ describe('ReconcilingMessage math & UI', () => {
         <ReconcilingMessage
           balanceQuery={makeBalanceQuery()}
           targetBalance={10000}
-          onDone={() => {}}
+          onDone={vi.fn()}
           onCreateTransaction={onCreateTransaction}
         />
       </TestProvider>,
@@ -99,7 +99,7 @@ describe('ReconcilingMessage math & UI', () => {
         <ReconcilingMessage
           balanceQuery={makeBalanceQuery()}
           targetBalance={10000}
-          onDone={() => {}}
+          onDone={vi.fn()}
           onCreateTransaction={onCreateTransaction}
         />
       </TestProvider>,

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { forwardRef, Ref } from 'react';
+import { forwardRef, type Ref } from 'react';
 
 import { render } from '@testing-library/react';
 

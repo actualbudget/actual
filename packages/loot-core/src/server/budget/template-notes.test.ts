@@ -3,7 +3,7 @@ import * as db from '../db';
 
 import { parse } from './goal-template.pegjs';
 import {
-  CategoryWithTemplateNote,
+  type CategoryWithTemplateNote,
   getActiveSchedules,
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
@@ -228,7 +228,7 @@ describe('checkTemplates', () => {
       expected: {
         sticky: true,
         message: 'There were errors interpreting some templates:',
-        pre: 'Category 1: Schedule “Non-existent Schedule” does not exist',
+        pre: 'Category 1: Schedule "Non-existent Schedule" does not exist',
       },
     },
     {

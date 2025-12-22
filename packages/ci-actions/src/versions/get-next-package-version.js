@@ -66,7 +66,7 @@ export function getNextVersion({
       return `${nextVersionYear}.${nextVersionMonth}.0`;
     default:
       throw new Error(
-        'Invalid type specified. Use “auto”, “nightly”, “hotfix”, or “monthly”.',
+        'Invalid type specified. Use "auto", "nightly", "hotfix", or "monthly".',
       );
   }
 }

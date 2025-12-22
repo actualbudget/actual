@@ -15,7 +15,7 @@ beforeEach(global.emptyDatabase());
 // it hard to test.
 const old = console.warn;
 beforeAll(() => {
-  console.warn = () => {};
+  console.warn = vi.fn();
 });
 afterAll(() => {
   console.warn = old;
@@ -54,7 +54,7 @@ async function importFileWithRealTime(
 
   let transactions = originalTransactions;
   if (transactions) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     transactions = (transactions as any[]).map(trans => ({
       ...trans,
       amount: amountToInteger(trans.amount),

@@ -18,9 +18,9 @@ Total points earned: 25
 
 Value of each point: $1000 / 25 = $40
 
-Jack (Dublin) receives: 10 * $40 = $400
+Jack (Dublin) receives: 10 \* $40 = $400
 
-Nancy (Amsterdam) receives: 15 * $40 = $600
+Nancy (Amsterdam) receives: 15 \* $40 = $600
 
 ## Questions and Answers
 
@@ -64,6 +64,6 @@ No. All payments are made transparently and openly. We do not use alternative pa
 
 Currently, we do not pay for features, bug bounties, or other contributions. The focus is on compensating the administrative work required to keep the project running smoothly. We may expand the system in the future.
 
-#### Could someone “farm” points by doing rubber-stamp PRs?
+#### Could someone "farm" points by doing rubber-stamp PRs?
 
 Theoretically, yes. However, we trust the core maintainer team to continue working diligently. Most core maintainers have admin rights and could do significant damage to the repository, but we trust everyone to act responsibly.

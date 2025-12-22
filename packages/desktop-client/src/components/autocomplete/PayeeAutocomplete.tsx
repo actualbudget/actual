@@ -454,7 +454,7 @@ export function PayeeAutocomplete({
   return (
     <Autocomplete
       key={focusTransferPayees ? 'transfers' : 'all'}
-      strict={true}
+      strict
       embedded={embedded}
       value={stripNew(value)}
       suggestions={payeeSuggestions}
@@ -588,7 +588,7 @@ export function CreatePayeeButton({
           style={{ marginRight: 5, display: 'inline-block' }}
         />
       )}
-      <Trans>Create payee “{{ payeeName }}”</Trans>
+      <Trans>Create payee "{{ payeeName }}"</Trans>
     </View>
   );
 }

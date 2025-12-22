@@ -79,11 +79,11 @@ export function ImportYNAB4Modal() {
               </Paragraph>
               <Paragraph>
                 <Trans>
-                  When you’ve located your data,{' '}
+                  When you've located your data,{' '}
                   <strong>compress it into a zip file</strong>. On macOS,
-                  right-click the folder and select “Compress”. On Windows,
-                  right-click and select “Send to &rarr; Compressed (zipped)
-                  folder”. Upload the zipped folder for importing.
+                  right-click the folder and select "Compress". On Windows,
+                  right-click and select "Send to &rarr; Compressed (zipped)
+                  folder". Upload the zipped folder for importing.
                 </Trans>
               </Paragraph>
               <View>

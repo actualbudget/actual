@@ -10,7 +10,6 @@ module.exports = {
     },
     schema: [],
     messages: {
-      // eslint-disable-next-line actual/typography
       preferTrans: "Prefer <Trans>{{ text }}</Trans> over t('{{ text }}')",
     },
     fixable: 'code',

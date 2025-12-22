@@ -149,7 +149,7 @@ export function CloseAccountModal({
               ) : (
                 <span>
                   <Trans>
-                    This account has transactions so we can’t permanently delete
+                    This account has transactions so we can't permanently delete
                     it.
                   </Trans>
                 </span>

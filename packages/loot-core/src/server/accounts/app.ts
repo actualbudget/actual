@@ -10,14 +10,14 @@ import { dayFromDate } from '../../shared/months';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
 import {
-  AccountEntity,
-  CategoryEntity,
-  SyncServerGoCardlessAccount,
-  TransactionEntity,
-  SyncServerSimpleFinAccount,
-  SyncServerPluggyAiAccount,
+  type AccountEntity,
+  type CategoryEntity,
+  type SyncServerGoCardlessAccount,
+  type TransactionEntity,
+  type SyncServerSimpleFinAccount,
+  type SyncServerPluggyAiAccount,
   type GoCardlessToken,
-  ImportTransactionEntity,
+  type ImportTransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
@@ -850,14 +850,14 @@ function handleSyncError(
   acct: db.DbAccount,
 ): SyncError {
   // TODO: refactor bank sync logic to use BankSyncError properly
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   if (err instanceof BankSyncError || (err as any)?.type === 'BankSyncError') {
     const error = err as BankSyncError;
 
     const syncError = {
       type: 'SyncError',
       accountId: acct.id,
-      message: 'Failed syncing account “' + acct.name + '.”',
+      message: 'Failed syncing account "' + acct.name + '."',
       category: error.category,
       code: error.code,
     };
@@ -877,7 +877,7 @@ function handleSyncError(
       accountId: acct.id,
       message: err.reason
         ? err.reason
-        : `Account “${acct.name}” is not linked properly. Please link it again.`,
+        : `Account "${acct.name}" is not linked properly. Please link it again.`,
     };
   }
 
@@ -943,7 +943,7 @@ async function accountsBankSync({
         errors.push(handleSyncError(error, acct));
         captureException({
           ...error,
-          message: 'Failed syncing account “' + acct.name + '.”',
+          message: 'Failed syncing account "' + acct.name + '."',
         } as Error);
       } finally {
         logger.groupEnd();
@@ -1028,7 +1028,7 @@ async function simpleFinBatchSync({
           handleSyncError(
             {
               type: 'BankSyncError',
-              reason: 'Failed syncing account “' + account.name + '.”',
+              reason: 'Failed syncing account "' + account.name + '."',
               category: syncResponse.res.error_type,
               code: syncResponse.res.error_code,
             } as BankSyncError,

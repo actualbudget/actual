@@ -50,7 +50,7 @@ export function BudgetMenu({
       items={[
         {
           name: 'copy-single-last',
-          text: t('Copy last month’s budget'),
+          text: t("Copy last month's budget"),
         },
         {
           name: 'set-single-3-avg',

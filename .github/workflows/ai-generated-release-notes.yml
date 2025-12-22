@@ -20,6 +20,8 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
 
       - name: Check if this is CodeRabbit's first comment
         id: check-first-comment

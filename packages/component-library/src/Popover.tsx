@@ -34,7 +34,7 @@ export const Popover = ({
 
   return (
     <ReactAriaPopover
-      data-popover={true}
+      data-popover
       ref={ref}
       placement="bottom end"
       offset={1}

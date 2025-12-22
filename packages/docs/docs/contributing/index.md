@@ -2,7 +2,7 @@
 title: Contributing to Actual Budget
 ---
 
-So, you want to get stuck in and help out with existing issues in Actual Budget or develop a feature of your own. That’s great and we really appreciate it!
+So, you want to get stuck in and help out with existing issues in Actual Budget or develop a feature of your own. That's great and we really appreciate it!
 We have created this document to signpost you to some of the key areas that will be of interest when developing for Actual Budget.
 
 As always, if you need any help or want something clarified, jump into the Discord and we will try our best to help you out.
@@ -116,7 +116,7 @@ Before creating your pull request, run the command `yarn generate:release-notes`
 
 For a better experience with the release note generation script, consider installing [the official GitHub CLI](https://github.com/cli/cli) and running `gh auth login`. This will allow the script to automatically fill in some information like your GitHub username and current PR information if you've already opened one from a fork you created.
 
-Create a Markdown file in the upcoming-release-notes directory of the repository you’re contributing to named after the PR number. The file should contain front matter with a category key (defining which header to put the entry under) and an authors key (defining the author of the entry). The body of the file should contain the changelog entry. Keep it short and clear — ideally one sentence, and also non-technical (unless the category is “Maintenance”). Copy-paste the template below to get started!
+Create a Markdown file in the upcoming-release-notes directory of the repository you're contributing to named after the PR number. The file should contain front matter with a category key (defining which header to put the entry under) and an authors key (defining the author of the entry). The body of the file should contain the changelog entry. Keep it short and clear — ideally one sentence, and also non-technical (unless the category is "Maintenance"). Copy-paste the template below to get started!
 
 ```markdown
 ---
@@ -132,11 +132,11 @@ Valid categories:
 - `Features`: New features
 - `Enhancements`: Improvements to existing features
 - `Bugfix`: Bug fixes
-- `Maintenance`: Internal changes that don’t directly affect users
+- `Maintenance`: Internal changes that don't directly affect users
 
 The `authors` key should be an array with the GitHub usernames of the people who contributed to the PR. In most cases, this should just be you but you can add multiple people if needed.
 
-Try to phrase your message as a command, e.g. "Add option to include exchange rate multiplier during import" rather than "Added option to include exchange rate multiplier during import” or "Adds option to include exchange rate multiplier during import." Generally your message should match the PR title, but you can change it if you think it’s more clear.
+Try to phrase your message as a command, e.g. "Add option to include exchange rate multiplier during import" rather than "Added option to include exchange rate multiplier during import" or "Adds option to include exchange rate multiplier during import." Generally your message should match the PR title, but you can change it if you think it's more clear.
 
 ### The Design Strategy Of Actual
 

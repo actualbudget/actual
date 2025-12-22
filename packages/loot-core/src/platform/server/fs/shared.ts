@@ -27,7 +27,7 @@ export const getBudgetDir = id => {
   // never allowing slashes.
   if (id.match(/[^A-Za-z0-9\-_]/)) {
     throw new Error(
-      `Invalid budget id “${id}”. Check the id of your budget in the Advanced section of the settings page.`,
+      `Invalid budget id "${id}". Check the id of your budget in the Advanced section of the settings page.`,
     );
   }
 

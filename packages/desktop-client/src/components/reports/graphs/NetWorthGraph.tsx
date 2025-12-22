@@ -235,7 +235,7 @@ export function NetWorthGraph({
                 strokeWidth={2}
                 fill={`url(#${gradientId})`}
                 fillOpacity={1}
-                connectNulls={true}
+                connectNulls
               />
             </AreaChart>
           </div>

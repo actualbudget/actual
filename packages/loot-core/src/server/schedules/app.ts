@@ -17,7 +17,7 @@ import {
   getStatus,
   recurConfigToRSchedule,
 } from '../../shared/schedules';
-import { ScheduleEntity } from '../../types/models';
+import { type ScheduleEntity } from '../../types/models';
 import { addTransactions } from '../accounts/sync';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';

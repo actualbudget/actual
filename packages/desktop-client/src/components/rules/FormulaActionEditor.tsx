@@ -45,7 +45,7 @@ export function FormulaActionEditor({
           onChange={handleChange}
           mode="transaction"
           disabled={disabled}
-          singleLine={true}
+          singleLine
           showLineNumbers={false}
         />
       </Suspense>

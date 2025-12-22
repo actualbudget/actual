@@ -38,14 +38,15 @@ services:
     volumes:
       - ./actual-data:/data
 ```
+
 Caddyfile:
+
 ```
 budget.example.org {
     encode gzip zstd
     reverse_proxy actual_server:5006
 }
 ```
-
 
 ## Traefik
 
@@ -181,13 +182,14 @@ ngrok http --url=your-custom-domain.ngrok-free.app 5006
 If running Actual on your PC, you may find it helpful to run this command when your computer starts up. There are many ways to do this. The below is not a complete list:
 
 - On Windows, you can use the [Task Scheduler](https://www.technipages.com/scheduled-task-windows/)
-  - Create a *Basic Task*, give it a name then set the trigger to *At system startup*
-  - Under *Action*, select the program as ngrok.exe, and add arguments ```http --url=your-custom-domain.ngrok-free.app 5006```.
-  - Once complete, you can choose to run this silently in the background by navigating to *properties*, selecting *Run whether user is logged on or not*, and ticking the *Hidden* box.
+  - Create a _Basic Task_, give it a name then set the trigger to _At system startup_
+  - Under _Action_, select the program as ngrok.exe, and add arguments `http --url=your-custom-domain.ngrok-free.app 5006`.
+  - Once complete, you can choose to run this silently in the background by navigating to _properties_, selecting _Run whether user is logged on or not_, and ticking the _Hidden_ box.
 
 - On Linux, you can use [systemd](https://systemd.io/)
   - Navigate to the directory: `/etc/systemd/system/` and create a service file `expose-actual-server.service`
   - Add the following content (and change to suit your needs):
+
     ```
     [Unit]
     Description=Run my Bash script at startup
@@ -201,4 +203,5 @@ If running Actual on your PC, you may find it helpful to run this command when y
     [Install]
     WantedBy=multi-user.target
     ```
-  - Enable the service with ```sudo systemctl enable expose-actual-server.service```
+
+  - Enable the service with `sudo systemctl enable expose-actual-server.service`

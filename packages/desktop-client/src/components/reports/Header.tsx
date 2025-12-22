@@ -41,22 +41,26 @@ type HeaderProps = {
     end: TimeFrame['end'],
     mode: TimeFrame['mode'],
   ) => void;
-  conditionsOp: 'and' | 'or';
-  onUpdateFilter: ComponentProps<typeof AppliedFilters>['onUpdate'];
-  onDeleteFilter: ComponentProps<typeof AppliedFilters>['onDelete'];
-  onConditionsOpChange: ComponentProps<
-    typeof AppliedFilters
-  >['onConditionsOpChange'];
   children?: ReactNode;
   inlineContent?: ReactNode;
 } & (
   | {
       filters: RuleConditionEntity[];
       onApply: (conditions: RuleConditionEntity) => void;
+      onUpdateFilter: ComponentProps<typeof AppliedFilters>['onUpdate'];
+      onDeleteFilter: ComponentProps<typeof AppliedFilters>['onDelete'];
+      conditionsOp: 'and' | 'or';
+      onConditionsOpChange: ComponentProps<
+        typeof AppliedFilters
+      >['onConditionsOpChange'];
     }
   | {
       filters?: never;
       onApply?: never;
+      onUpdateFilter?: never;
+      onDeleteFilter?: never;
+      conditionsOp?: never;
+      onConditionsOpChange?: never;
     }
 );
 

@@ -163,7 +163,7 @@ function TransactionListWithPreviews() {
       searchPlaceholder={t('Search On Budget Accounts')}
       onSearch={onSearch}
       onOpenTransaction={onOpenTransaction}
-      showMakeTransfer={true}
+      showMakeTransfer
     />
   );
 }

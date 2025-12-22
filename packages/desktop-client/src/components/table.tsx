@@ -795,7 +795,7 @@ export function TableHeader({
       }}
     >
       <Row
-        collapsed={true}
+        collapsed
         {...rowProps}
         style={{
           color: theme.tableHeaderText,

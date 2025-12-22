@@ -59,7 +59,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
     ? SvgArrowButtonDown1
     : SvgArrowButtonUp1;
 
-  const displayMonth = monthUtils.format(month, 'MMMM ‘yy', locale);
+  const displayMonth = monthUtils.format(month, "MMMM ''yy", locale);
   const { t } = useTranslation();
 
   return (
@@ -179,7 +179,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
                     onMenuClose();
                     showUndoNotification({
                       message: t(
-                        '{{displayMonth}} budgets have all been set to last month’s budgeted amounts.',
+                        "{{displayMonth}} budgets have all been set to last month's budgeted amounts.",
                         { displayMonth },
                       ),
                     });

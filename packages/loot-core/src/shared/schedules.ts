@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import type { IRuleOptions } from '@rschedule/core';
 import * as d from 'date-fns';
-import { Locale } from 'date-fns';
+import { type Locale } from 'date-fns';
 import { t } from 'i18next';
 
 import {
@@ -55,6 +55,8 @@ export function getStatusLabel(status: string) {
       return t('missed');
     case 'scheduled':
       return t('scheduled');
+    default:
+      return t('unknown');
   }
 }
 
@@ -124,6 +126,7 @@ export function getRecurringDescription(
       });
       break;
     default:
+      break;
   }
 
   const weekendSolveModeString = config.weekendSolveMode
@@ -276,6 +279,7 @@ export function recurConfigToRSchedule(config) {
       base.end = monthUtils.parseDate(config.endDate);
       break;
     default:
+      break;
   }
 
   const abbrevDay = name => name.slice(0, 2).toUpperCase();
@@ -446,7 +450,7 @@ export function getUpcomingDays(
             const future = monthUtils.addMonths(today, value);
             return monthUtils.differenceInCalendarDays(future, month) + 1;
           case 'year':
-            const futureYear = monthUtils.addYears(today, value);
+            const futureYear = monthUtils.addMonths(today, value * 12);
             return monthUtils.differenceInCalendarDays(futureYear, month) + 1;
           default:
             return 7;

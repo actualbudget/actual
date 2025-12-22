@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 type AnyFunction = (...args: any[]) => any;
 
 export function sequential<T extends AnyFunction>(

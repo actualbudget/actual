@@ -13,7 +13,7 @@ type IncomeMenuProps = {
   month: string;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onShowActivity: (id: CategoryEntity['id'], month: string) => void;
-  onClose?: () => void;
+  onClose: () => void;
 };
 
 export function IncomeMenu({
@@ -21,7 +21,7 @@ export function IncomeMenu({
   month,
   onBudgetAction,
   onShowActivity,
-  onClose = () => {},
+  onClose,
 }: IncomeMenuProps) {
   const { t } = useTranslation();
   const carryover = useEnvelopeSheetValue(

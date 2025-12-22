@@ -87,7 +87,7 @@ export function CoverMenu({
         <CategoryAutocomplete
           categoryGroups={filteredCategoryGroups}
           value={null}
-          openOnFocus={true}
+          openOnFocus
           onSelect={(id: string | undefined) => setFromCategoryId(id || null)}
           inputProps={{
             placeholder: t('(none)'),

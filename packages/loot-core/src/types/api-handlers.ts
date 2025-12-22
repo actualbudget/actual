@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { ImportTransactionsOpts } from '@actual-app/api';
+import { type ImportTransactionsOpts } from '@actual-app/api';
 
 import type { ImportTransactionsResult } from '../server/accounts/app';
 import type {
@@ -10,7 +10,7 @@ import type {
   APIPayeeEntity,
   APIScheduleEntity,
 } from '../server/api-models';
-import { BudgetFileHandlers } from '../server/budgetfiles/app';
+import { type BudgetFileHandlers } from '../server/budgetfiles/app';
 import { type batchUpdateTransactions } from '../server/transactions';
 import type { QueryState } from '../shared/query';
 
@@ -22,7 +22,7 @@ import type {
   ScheduleEntity,
 } from './models';
 
-export interface ApiHandlers {
+export type ApiHandlers = {
   'api/batch-budget-start': () => Promise<void>;
 
   'api/batch-budget-end': () => Promise<void>;
@@ -249,4 +249,4 @@ export interface ApiHandlers {
   'api/get-server-version': () => Promise<
     { error: 'no-server' } | { error: 'network-failure' } | { version: string }
   >;
-}
+};

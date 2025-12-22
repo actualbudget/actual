@@ -43,5 +43,7 @@ export async function importActual(_filepath: string, buffer: Buffer) {
   await handlers['load-budget']({ id });
   await handlers['get-budget-bounds']();
   await waitOnSpreadsheet();
-  await cloudStorage.upload().catch(() => {});
+  await cloudStorage.upload().catch(() => {
+    // Ignore errors
+  });
 }

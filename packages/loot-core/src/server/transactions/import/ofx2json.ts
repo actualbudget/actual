@@ -33,8 +33,8 @@ export function html2Plain(value) {
   return value
     ?.replace(/&lt;/g, '<') // lessthan
     .replace(/&gt;/g, '>') // greaterthan
-    .replace(/&#39;/g, "'") // eslint-disable-line actual/typography
-    .replace(/&quot;/g, '"') // eslint-disable-line actual/typography
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
     .replace(/(&amp;|&#038;)/g, '&'); // ampersands
 }
 

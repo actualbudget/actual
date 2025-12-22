@@ -316,7 +316,7 @@ function FormulaInner({ widget }: FormulaInnerProps) {
                 mode="query"
                 queries={queriesRef.current}
                 singleLine={false}
-                showLineNumbers={true}
+                showLineNumbers
               />
             </Suspense>
           </View>
@@ -404,7 +404,7 @@ function FormulaInner({ widget }: FormulaInnerProps) {
                   onChange={setColorFormula}
                   mode="query"
                   queries={queriesRef.current}
-                  singleLine={true}
+                  singleLine
                   showLineNumbers={false}
                 />
               </Suspense>

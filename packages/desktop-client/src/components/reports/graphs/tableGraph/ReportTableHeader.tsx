@@ -44,7 +44,7 @@ export function ReportTableHeader({
   const { t } = useTranslation();
   return (
     <Row
-      collapsed={true}
+      collapsed
       style={{
         justifyContent: 'center',
         borderBottomWidth: 1,

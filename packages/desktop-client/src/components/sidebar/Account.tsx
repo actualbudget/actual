@@ -265,6 +265,9 @@ export function Account<FieldName extends SheetFields<'account'>>({
                       setIsEditing(true);
                       break;
                     }
+                    default: {
+                      throw new Error(`Unrecognized menu option: ${type}`);
+                    }
                   }
                   setMenuOpen(false);
                 }}

@@ -6,7 +6,7 @@ When importing transactions, by default Actual will create new payees based on t
 
 :::info[Payee Management]
 
-To manage payees, either select the **More >  Payees** from the sidebar or click the **Manage Payees** button when editing a transaction's payee.
+To manage payees, either select the **More > Payees** from the sidebar or click the **Manage Payees** button when editing a transaction's payee.
 
 :::
 
@@ -38,7 +38,7 @@ Actual defaults with Category Learning enabled. You can find this setting in the
 A powerful feature is merging payees. You may already have months worth of data and a lot of ugly **Morrisons** payees that all vary slightly. You may want to merge all of these together into one payee.
 
 1. Open the **Payees** page
-  
+
 2. Type "Morrisons" into the filter to only show those payees.
 
 ![Image searching for a Payee](/img/payees/MergePayeesSearch.png)

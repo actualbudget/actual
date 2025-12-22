@@ -14,6 +14,7 @@ describe('unicode LIKE functionality', () => {
   });
 
   it('should match special characters', () => {
+    // oxlint-disable-next-line no-template-curly-in-string
     const result = unicodeLike('.*+^${}()|[]\\', '.*+^${}()|[]\\');
 
     expect(result).toBe(1);
@@ -49,7 +50,7 @@ describe('unicode LIKE functionality', () => {
     expect(result).toBe(1);
   });
 
-  it('should not match null value to the string “null”', () => {
+  it('should not match null value to the string "null"', () => {
     const result = unicodeLike('null', null);
 
     expect(result).toBe(0);

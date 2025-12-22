@@ -51,8 +51,8 @@ export function NotesModal({ id, name, onSave }: NotesModalProps) {
           >
             <Notes
               notes={notes}
-              editable={true}
-              focused={true}
+              editable
+              focused
               getStyle={() => ({
                 borderRadius: 6,
                 flex: 1,

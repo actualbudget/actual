@@ -25,7 +25,7 @@ export function ManageRulesModal({ payeeId }: ManageRulesModalProps) {
   if (isNonProductionEnvironment()) {
     if (location.pathname !== '/payees') {
       throw new Error(
-        `Possibly invalid use of ManageRulesModal, add the current url \`${location.pathname}\` to the allowlist if you’re confident the modal can never appear on top of the \`/rules\` page.`,
+        `Possibly invalid use of ManageRulesModal, add the current url \`${location.pathname}\` to the allowlist if you're confident the modal can never appear on top of the \`/rules\` page.`,
       );
     }
   }

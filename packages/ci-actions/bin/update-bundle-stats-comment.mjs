@@ -26,12 +26,12 @@ function parseArgs(argv) {
 
     if (!key?.startsWith('--')) {
       throw new Error(
-        `Unexpected argument “${key ?? ''}”. Use --key value pairs.`,
+        `Unexpected argument "${key ?? ''}". Use --key value pairs.`,
       );
     }
 
     if (typeof value === 'undefined') {
-      throw new Error(`Missing value for argument “${key}”.`);
+      throw new Error(`Missing value for argument "${key}".`);
     }
 
     switch (key) {
@@ -42,16 +42,16 @@ function parseArgs(argv) {
         args.identifier = value;
         break;
       default:
-        throw new Error(`Unknown argument “${key}”.`);
+        throw new Error(`Unknown argument "${key}".`);
     }
   }
 
   if (!args.commentFile) {
-    throw new Error('Missing required argument “--comment-file“.');
+    throw new Error('Missing required argument "--comment-file".');
   }
 
   if (!args.identifier) {
-    throw new Error('Missing required argument “--identifier“.');
+    throw new Error('Missing required argument "--identifier".');
   }
 
   return args;
@@ -70,7 +70,7 @@ function getRepoInfo() {
 
   const [owner, repo] = repository.split('/');
   if (!owner || !repo) {
-    throw new Error(`Invalid GITHUB_REPOSITORY value “${repository}”.`);
+    throw new Error(`Invalid GITHUB_REPOSITORY value "${repository}".`);
   }
 
   return { owner, repo };

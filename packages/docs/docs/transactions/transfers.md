@@ -32,9 +32,9 @@ Make a transfer of existing transactions in the same way you [bulk-edit transact
 
 ![](/img/transfers/make-transfer-tooltip.png)
 
-1. Go to a multi-account view like “All accounts” so that you can see all transactions.
+1. Go to a multi-account view like "All accounts" so that you can see all transactions.
 2. Identify the transactions that you wish to change and select the tick box in the left hand column (by the date column).
-3. Go to the drop down top right (the arrow below “2 transactions”)
+3. Go to the drop down top right (the arrow below "2 transactions")
 4. If the transactions are valid to be converted to a transfer, you can click **Make transfer**.
 
 ## Deleting a transfer

@@ -30,7 +30,7 @@ yarn add @actual-app/api
 
 ### Connecting to a Remote Server
 
-Next, you’ll need connect to your running server version of Actual to access your budget files.
+Next, you'll need connect to your running server version of Actual to access your budget files.
 
 ```js
 let api = require('@actual-app/api');
@@ -58,7 +58,7 @@ let api = require('@actual-app/api');
 })();
 ```
 
-Heads up! You probably don’t want to hard-code the passwords like that, especially if you’ll be using Git to track your code. You can use environment variables to store the passwords instead, or read them in from a file, or request them interactively when running the script instead.
+Heads up! You probably don't want to hard-code the passwords like that, especially if you'll be using Git to track your code. You can use environment variables to store the passwords instead, or read them in from a file, or request them interactively when running the script instead.
 
 ### Self-Signed Https Certificates
 
@@ -101,7 +101,7 @@ api.runImport('My-Budget', run);
 
 This is very simple, but it takes some data in `my-data.json` and creates all the accounts and transactions from it. Functions used to convert items (like `convertAccount`) are not included here. Use the [reference docs](./reference.md) to learn the shape of objects that Actual expects.
 
-**Note:** it's important that [`addTransactions`](./reference.md#addtransactions) is used here. You want to use it instead of [`importTransactions`](./reference.md#importtransactions) when dumping raw data into Actual. The former will not run the reconciliation process (which deduplicates transactions), and won't create the other side of transfer transactions, and more. If you use `importTransactions` it may adjust your data in ways that don't match the data you’re importing.
+**Note:** it's important that [`addTransactions`](./reference.md#addtransactions) is used here. You want to use it instead of [`importTransactions`](./reference.md#importtransactions) when dumping raw data into Actual. The former will not run the reconciliation process (which deduplicates transactions), and won't create the other side of transfer transactions, and more. If you use `importTransactions` it may adjust your data in ways that don't match the data you're importing.
 
 Check out the [YNAB4](https://github.com/actualbudget/actual/blob/master/packages/loot-core/src/server/importers/ynab4.ts) and [YNAB5](https://github.com/actualbudget/actual/blob/master/packages/loot-core/src/server/importers/ynab5.ts) importers to see how a real importer works.
 
@@ -117,7 +117,7 @@ Call this before attempting to use any of the API methods. This will connect to 
 
 `dataDir` defaults to the current working directory.
 
-If no `serverURL` is provided, no network connections will be made, and you’ll only be able to access budget files already downloaded locally.
+If no `serverURL` is provided, no network connections will be made, and you'll only be able to access budget files already downloaded locally.
 
 You can find your budget id in the "Advanced" section of the settings page.
 
@@ -125,7 +125,7 @@ You can find your budget id in the "Advanced" section of the settings page.
 
 <Method name="shutdown" args={[]} returns="Promise<void>" />
 
-Close the current budget file, and stop any other ongoing processes. It’s recommended to call this before exiting your script.
+Close the current budget file, and stop any other ongoing processes. It's recommended to call this before exiting your script.
 
 #### `utils.amountToInteger`
 

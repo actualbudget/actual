@@ -85,4 +85,6 @@ export const send: T.Send = function (name, args) {
   process.parentPort.postMessage({ type: 'push', name, args });
 };
 
-export const resetEvents: T.ResetEvents = function () {};
+export const resetEvents: T.ResetEvents = function () {
+  // resetEvents is used in tests to mock the server
+};

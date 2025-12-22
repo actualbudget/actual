@@ -113,7 +113,7 @@ export function Schedules() {
         schedules={schedules}
         filter={filter}
         statuses={statuses}
-        allowCompleted={true}
+        allowCompleted
         onSelect={onEdit}
         onAction={onAction}
         style={{ backgroundColor: theme.tableBackground }}

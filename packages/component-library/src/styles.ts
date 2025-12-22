@@ -3,7 +3,7 @@ import { keyframes } from '@emotion/css';
 import { theme } from './theme';
 import { tokens } from './tokens';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export type CSSProperties = Record<string, any>;
 
 const MOBILE_MIN_HEIGHT = 40;
@@ -12,7 +12,7 @@ const shadowLarge = {
   boxShadow: '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)',
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export const styles: Record<string, any> = {
   incomeHeaderHeight: 70,
   cardShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
@@ -91,7 +91,6 @@ export const styles: Record<string, any> = {
   },
   shadowLarge,
   tnum: {
-    // eslint-disable-next-line actual/typography
     fontFeatureSettings: '"tnum"',
   },
   notFixed: { fontFeatureSettings: '' },

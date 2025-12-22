@@ -65,7 +65,7 @@ export function EncryptionSettings() {
       <Text>
         <Trans>
           <strong>End-to-end encryption</strong> is not available when making an
-          unencrypted connection to a remote server. You’ll need to enable HTTPS
+          unencrypted connection to a remote server. You'll need to enable HTTPS
           on your server to use end-to-end encryption. This problem may also
           occur if your browser is too old to work with Actual.
         </Trans>{' '}
@@ -97,7 +97,7 @@ export function EncryptionSettings() {
       <Text>
         <Trans>
           <strong>End-to-end encryption</strong> is not enabled. Any data on the
-          server is still protected by the server password, but it’s not
+          server is still protected by the server password, but it's not
           end-to-end encrypted which means the server owners have the ability to
           read it. If you want, you can use an additional password to encrypt
           your data on the server.

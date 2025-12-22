@@ -8,7 +8,7 @@ import { EnvelopeBudgetSummaryModal } from './mobile-envelope-budget-summary-mod
 import { TrackingBudgetSummaryModal } from './mobile-tracking-budget-summary-modal';
 
 export class MobileBudgetPage {
-  readonly MONTH_HEADER_DATE_FORMAT = 'MMMM ‘yy';
+  readonly MONTH_HEADER_DATE_FORMAT = "MMMM ''yy";
 
   readonly page: Page;
   readonly heading: Locator;
@@ -325,7 +325,7 @@ export class MobileBudgetPage {
     }
 
     throw new Error(
-      'Neither “To Budget” nor “Overbudgeted” button could be located on the page.',
+      'Neither "To Budget" nor "Overbudgeted" button could be located on the page.',
     );
   }
 
@@ -363,7 +363,7 @@ export class MobileBudgetPage {
     }
 
     throw new Error(
-      'None of “Saved”, “Projected savings”, or “Overspent” buttons could be located on the page.',
+      'None of "Saved", "Projected savings", or "Overspent" buttons could be located on the page.',
     );
   }
 

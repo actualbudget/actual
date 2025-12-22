@@ -40,14 +40,14 @@ export const UserDirectoryRow = memo(
               ? theme.tableRowBackgroundHover
               : theme.tableBackground,
         }}
-        collapsed={true}
+        collapsed
         onMouseEnter={() => onHover && onHover(user.id)}
         onMouseLeave={() => onHover && onHover(null)}
       >
         {!user.owner && (
           <SelectCell
             exposed={hovered || selected}
-            focused={true}
+            focused
             onSelect={e => {
               dispatchSelected({
                 type: 'select',
@@ -112,7 +112,7 @@ export const UserDirectoryRow = memo(
           plain
           style={{ padding: '0 15px', paddingLeft: 5 }}
         >
-          <Checkbox checked={user.enabled} disabled={true} />
+          <Checkbox checked={user.enabled} disabled />
         </Cell>
 
         <Cell
@@ -121,7 +121,7 @@ export const UserDirectoryRow = memo(
           plain
           style={{ padding: '0 15px', paddingLeft: 5 }}
         >
-          <Checkbox checked={user.owner} disabled={true} />
+          <Checkbox checked={user.owner} disabled />
         </Cell>
 
         <Cell
