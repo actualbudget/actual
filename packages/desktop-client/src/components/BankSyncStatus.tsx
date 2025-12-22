@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans } from 'react-i18next';
 import { useTransition, animated } from 'react-spring';
 
 import { styles } from '@actual-app/components/styles';
@@ -63,8 +64,9 @@ export function BankSyncStatus() {
                   iconStyle={{ color: theme.pillTextSelected }}
                 />
                 <Text style={{ marginLeft: 5 }}>
-                  Syncing... {totalRemaining} account
-                  {totalRemaining === 1 ? '' : 's'} remaining
+                  <Trans count={totalRemaining}>
+                    Syncing... {{ count: totalRemaining }} accounts remaining
+                  </Trans>
                 </Text>
               </View>
             </animated.div>
