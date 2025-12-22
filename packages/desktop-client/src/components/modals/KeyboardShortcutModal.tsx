@@ -257,9 +257,7 @@ export function KeyboardShortcutModal() {
           {
             id: 'add-new-transaction',
             shortcut: 'T',
-            description: t(
-              'Add new transaction',
-            ),
+            description: t('Add new transaction'),
           },
           {
             id: 'filter-menu',
