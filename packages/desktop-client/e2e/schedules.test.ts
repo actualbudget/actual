@@ -11,21 +11,19 @@ test.describe('Schedules', () => {
   let schedulesPage: SchedulesPage;
   let configurationPage: ConfigurationPage;
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
     navigation = new Navigation(page);
     configurationPage = new ConfigurationPage(page);
 
     await page.goto('/');
     await configurationPage.createTestFile();
-  });
 
-  test.afterAll(async () => {
-    await page.close();
-  });
-
-  test.beforeEach(async () => {
     schedulesPage = await navigation.goToSchedulesPage();
+  });
+
+  test.afterEach(async () => {
+    await page?.close();
   });
 
   test('checks the page visuals', async () => {
@@ -35,11 +33,13 @@ test.describe('Schedules', () => {
   test('creates a new schedule, posts the transaction and later completes it', async () => {
     test.setTimeout(40000);
 
-    await schedulesPage.addNewSchedule({
+    const scheduleEditModal = await schedulesPage.addNewSchedule();
+    await scheduleEditModal.fill({
       payee: 'Home Depot',
       account: 'HSBC',
       amount: 25,
     });
+    await scheduleEditModal.add();
 
     const schedule = schedulesPage.getNthSchedule(2);
     await expect(schedule.payee).toHaveText('Home Depot');
@@ -91,17 +91,21 @@ test.describe('Schedules', () => {
     test.setTimeout(40000);
 
     // Adding two schedules with the same payee and account and amount, mimicking two different subscriptions
-    await schedulesPage.addNewSchedule({
+    let scheduleEditModal = await schedulesPage.addNewSchedule();
+    await scheduleEditModal.fill({
       payee: 'Apple',
       account: 'HSBC',
       amount: 5,
     });
+    await scheduleEditModal.add();
 
-    await schedulesPage.addNewSchedule({
+    scheduleEditModal = await schedulesPage.addNewSchedule();
+    await scheduleEditModal.fill({
       payee: 'Apple',
       account: 'HSBC',
       amount: 5,
     });
+    await scheduleEditModal.add();
 
     const schedule = schedulesPage.getNthSchedule(2);
     await expect(schedule.payee).toHaveText('Apple');
@@ -154,11 +158,13 @@ test.describe('Schedules', () => {
   test('creates a "full" list of schedules', async () => {
     // Schedules search shouldn't shrink with many schedules
     for (let i = 0; i < 10; i++) {
-      await schedulesPage.addNewSchedule({
+      const scheduleEditModal = await schedulesPage.addNewSchedule();
+      await scheduleEditModal.fill({
         payee: 'Home Depot',
         account: 'HSBC',
         amount: 0,
       });
+      await scheduleEditModal.add();
     }
     await expect(page).toMatchThemeScreenshots();
   });

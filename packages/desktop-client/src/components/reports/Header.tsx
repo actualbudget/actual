@@ -41,17 +41,28 @@ type HeaderProps = {
     end: TimeFrame['end'],
     mode: TimeFrame['mode'],
   ) => void;
-  filters?: RuleConditionEntity[];
-  conditionsOp: 'and' | 'or';
-  onApply?: (conditions: RuleConditionEntity) => void;
-  onUpdateFilter: ComponentProps<typeof AppliedFilters>['onUpdate'];
-  onDeleteFilter: ComponentProps<typeof AppliedFilters>['onDelete'];
-  onConditionsOpChange: ComponentProps<
-    typeof AppliedFilters
-  >['onConditionsOpChange'];
   children?: ReactNode;
   inlineContent?: ReactNode;
-};
+} & (
+  | {
+      filters: RuleConditionEntity[];
+      onApply: (conditions: RuleConditionEntity) => void;
+      onUpdateFilter: ComponentProps<typeof AppliedFilters>['onUpdate'];
+      onDeleteFilter: ComponentProps<typeof AppliedFilters>['onDelete'];
+      conditionsOp: 'and' | 'or';
+      onConditionsOpChange: ComponentProps<
+        typeof AppliedFilters
+      >['onConditionsOpChange'];
+    }
+  | {
+      filters?: never;
+      onApply?: never;
+      onUpdateFilter?: never;
+      onDeleteFilter?: never;
+      conditionsOp?: never;
+      onConditionsOpChange?: never;
+    }
+);
 
 export function Header({
   start,
@@ -212,6 +223,25 @@ export function Header({
                 onChangeDates(
                   ...convertToMonth(
                     ...getLiveRange(
+                      'Last month',
+                      earliestTransaction,
+                      latestTransaction,
+                      false,
+                      firstDayOfWeekIdx,
+                    ),
+                    'lastMonth',
+                  ),
+                )
+              }
+            >
+              <Trans>Last month</Trans>
+            </Button>
+            <Button
+              variant="bare"
+              onPress={() =>
+                onChangeDates(
+                  ...convertToMonth(
+                    ...getLiveRange(
                       'Last year',
                       earliestTransaction,
                       latestTransaction,
@@ -263,7 +293,6 @@ export function Header({
                 compact={isNarrowWidth}
                 onApply={onApply}
                 hover={false}
-                exclude={undefined}
               />
             )}
           </SpaceBetween>

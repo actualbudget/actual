@@ -1,14 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  PayeeAutocomplete,
-  type PayeeAutocompleteItem,
-} from '@desktop-client/components/autocomplete/PayeeAutocomplete';
+import { type PayeeEntity } from 'loot-core/types/models';
 
-type PayeeFilterValue =
-  | PayeeAutocompleteItem['id']
-  | PayeeAutocompleteItem['id'][];
+import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
+
+type PayeeFilterValue = PayeeEntity['id'] | PayeeEntity['id'][];
 
 /** This component only supports single- or multi-select operations. */
 type PayeeFilterOp = 'is' | 'isNot' | 'oneOf' | 'notOneOf';
@@ -49,9 +46,9 @@ export const PayeeFilter = ({ value, op, onChange }: PayeeFilterProps) => {
     // @ts-ignore: typing is not playing nicely with the union type of AutocompleteProps.
     <PayeeAutocomplete
       type={multi ? 'multi' : 'single'}
-      showInactivePayees={true}
+      showInactivePayees
       showMakeTransfer={false}
-      openOnFocus={true}
+      openOnFocus
       value={coercedValue}
       inputProps={{ placeholder }}
       onSelect={(payeeIdOrIds: string | string[], _: string) =>

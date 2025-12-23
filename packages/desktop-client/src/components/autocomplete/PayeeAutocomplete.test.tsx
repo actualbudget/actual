@@ -7,7 +7,6 @@ import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 
 import {
   PayeeAutocomplete,
-  type PayeeAutocompleteItem,
   type PayeeAutocompleteProps,
 } from './PayeeAutocomplete';
 
@@ -137,7 +136,7 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
 
   test('list with less than the maximum favorites adds common payees', async () => {
     //Note that the payees list assumes the payees are already sorted
-    const payees: PayeeAutocompleteItem[] = [
+    const payees: PayeeEntity[] = [
       makePayee('Alice'),
       makePayee('Bob'),
       makePayee('Eve', { favorite: true }),

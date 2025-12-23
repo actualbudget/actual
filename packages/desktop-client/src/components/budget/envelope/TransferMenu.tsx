@@ -4,11 +4,9 @@ import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
-import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
 
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
+import { type IntegerAmount } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
@@ -16,13 +14,14 @@ import {
   addToBeBudgetedGroup,
   removeCategoriesFromGroups,
 } from '@desktop-client/components/budget/util';
+import { FinancialInput } from '@desktop-client/components/util/FinancialInput';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 
 type TransferMenuProps = {
   categoryId?: CategoryEntity['id'];
-  initialAmount?: number;
+  initialAmount?: IntegerAmount | null;
   showToBeBudgeted?: boolean;
-  onSubmit: (amount: number, categoryId: CategoryEntity['id']) => void;
+  onSubmit: (amount: IntegerAmount, categoryId: CategoryEntity['id']) => void;
   onClose: () => void;
 };
 
@@ -46,16 +45,15 @@ export function TransferMenu({
       : categoryGroups;
   }, [originalCategoryGroups, categoryId, showToBeBudgeted]);
 
-  const _initialAmount = integerToCurrency(Math.max(initialAmount, 0));
-  const [amount, setAmount] = useState<string | null>(null);
+  const [amount, setAmount] = useState<IntegerAmount>(
+    Math.max(initialAmount ?? 0, 0),
+  );
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
 
-  const _onSubmit = (newAmount: string | null, categoryId: string | null) => {
-    const parsedAmount = evalArithmetic(newAmount || '');
-    if (parsedAmount && categoryId) {
-      onSubmit?.(amountToInteger(parsedAmount), categoryId);
+  const _onSubmit = () => {
+    if (amount != null && amount > 0 && toCategoryId) {
+      onSubmit(amount, toCategoryId);
     }
-
     onClose();
   };
 
@@ -63,7 +61,7 @@ export function TransferMenu({
     <Form
       onSubmit={e => {
         e.preventDefault();
-        _onSubmit(amount, toCategoryId);
+        _onSubmit();
       }}
     >
       <View style={{ padding: 10 }}>
@@ -72,20 +70,22 @@ export function TransferMenu({
         </View>
         <View>
           <InitialFocus>
-            <Input defaultValue={_initialAmount} onUpdate={setAmount} />
+            <FinancialInput value={amount} onUpdate={setAmount} />
           </InitialFocus>
         </View>
-        <View style={{ margin: '10px 0 5px 0' }}>To:</View>
+        <View style={{ margin: '10px 0 5px 0' }}>
+          <Trans>To:</Trans>
+        </View>
 
         <CategoryAutocomplete
           categoryGroups={filteredCategoryGroups}
           value={null}
-          openOnFocus={true}
+          openOnFocus
           onSelect={(id: string | undefined) => setToCategoryId(id || null)}
           inputProps={{
             placeholder: '(none)',
           }}
-          showHiddenCategories={true}
+          showHiddenCategories
         />
 
         <View
@@ -97,6 +97,7 @@ export function TransferMenu({
           <Button
             type="submit"
             variant="primary"
+            isDisabled={!toCategoryId || amount <= 0}
             style={{
               fontSize: 12,
               paddingTop: 3,

@@ -76,10 +76,12 @@ const exportModel = {
           'net-worth-card',
           'cash-flow-card',
           'spending-card',
+          'crossover-card',
           'custom-report',
           'markdown-card',
           'summary-card',
           'calendar-card',
+          'formula-card',
         ].includes(widget.type)
       ) {
         throw new ValidationError(

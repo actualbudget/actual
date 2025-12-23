@@ -11,8 +11,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": false,
-    "types": ["vite/client"]
+    "types": ["vite/client"],
   },
   "include": ["src/plugin-service-worker.ts"],
-  "exclude": ["**/*.test.ts", "**/*.spec.ts"]
+  "exclude": ["**/*.test.ts", "**/*.spec.ts"],
 }

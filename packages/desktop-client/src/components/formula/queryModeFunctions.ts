@@ -403,6 +403,19 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
     description: t('Combines several text strings into one.'),
     parameters: [{ name: 'texts', description: 'Text1, Text2, ...TextN' }],
   },
+  INTEGER_TO_AMOUNT: {
+    name: 'INTEGER_TO_AMOUNT',
+    description: t(
+      'Converts integer amount to decimal amount (e.g., 1234 -> 12.34).',
+    ),
+    parameters: [
+      { name: 'integer_amount', description: 'Integer amount in cents' },
+      {
+        name: 'decimal_places',
+        description: 'Number of decimal places (default: 2)',
+      },
+    ],
+  },
   UPPER: {
     name: 'UPPER',
     description: t('Converts text to uppercase.'),
@@ -768,6 +781,13 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
   QUERY: {
     name: 'QUERY',
     description: t('Execute a query and return the result.'),
+    parameters: [
+      { name: 'queryName', description: 'Name of the query to execute' },
+    ],
+  },
+  QUERY_COUNT: {
+    name: 'QUERY_COUNT',
+    description: t('Execute a query and return the number of matching rows.'),
     parameters: [
       { name: 'queryName', description: 'Name of the query to execute' },
     ],

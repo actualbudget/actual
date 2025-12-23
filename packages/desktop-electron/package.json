@@ -3,7 +3,7 @@
   "author": "Actual",
   "productName": "Actual",
   "description": "A simple and powerful personal finance system",
-  "version": "25.11.0",
+  "version": "25.12.0",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
@@ -64,6 +64,12 @@
       "extraResources": [
         "extra-resources/linux"
       ],
+      "desktop": {
+        "entry": {
+          "Categories": "Finance;Office",
+          "Keywords": "Budget;Finance;Money;Expenses;Savings;"
+        }
+      },
       "executableName": "actual"
     },
     "flatpak": {
@@ -107,7 +113,7 @@
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
-    "@electron/notarize": "3.1.0",
+    "@electron/notarize": "3.1.1",
     "@electron/rebuild": "4.0.1",
     "@playwright/test": "1.56.1",
     "@types/copyfiles": "^2",

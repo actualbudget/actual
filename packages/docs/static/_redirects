@@ -1,0 +1,49 @@
+# Redirects from pages on the classic actualbudget.com site to their new routes
+# (no broken links!)
+
+/account/*     https://sunset.actualbudget.com/account/:splat
+/pricing/*     /
+
+/how-it-works/  /docs/budgeting/
+
+/download/            /docs/install/
+/download-platforms/  /docs/install/
+
+/release-notes          /blog/tags/release
+/blog/release           /blog/tags/release
+/blog/?filter=release   /blog/tags/release
+
+/docs/overview/getting-started            /docs/tour/
+/docs/overview/tips-&-tricks              /docs/getting-started/tips-tricks/
+/docs/overview/syncing-across-devices     /docs/getting-started/sync/
+/docs/overview/migrating-from-other-apps  /docs/migration/
+/docs/overview/managing-files             /docs/getting-started/manage-files/
+/docs/overview/loading-a-backup           /docs/backup-restore/restore/
+
+/docs/accounts/overview/                /docs/accounts/
+/docs/accounts/importing-transactions/  /docs/accounts/importing/
+/docs/accounts/connecting-your-bank/    /docs/advanced/bank-sync/
+/docs/accounts/payees/                  /docs/transactions/payees/
+/docs/accounts/transfers/               /docs/transactions/transfers/
+
+/docs/budgeting/how-it-works/     /docs/budgeting/
+# /docs/budgeting/categories/       /docs/budgeting/categories/
+/docs/reports/overview/           /docs/reports/
+/docs/reports/custom-reports/     /docs/reports/
+
+/docs/other/rules/  /docs/budgeting/rules/
+
+/docs/developers/using-the-API/   /docs/api/
+/docs/developers/API/             /docs/api/reference/
+/docs/developers/ActualQL/        /docs/api/actual-ql/
+
+#files were renamed as part of PR#228
+/docs/budgeting/returnsandreimbursements    /docs/budgeting/returns-and-reimbursements
+/docs/budgeting/creditcards                 /docs/budgeting/credit-cards
+/docs/budgeting/jointaccounts               /docs/budgeting/joint-accounts
+
+# Redirect the .com domain to the .org domain
+http://actualbudget.com/* https://actualbudget.org/:splat 301!
+https://actualbudget.com/* https://actualbudget.org/:splat 301!
+http://www.actualbudget.com/* https://actualbudget.org/:splat 301!
+https://www.actualbudget.com/* https://actualbudget.org/:splat 301!

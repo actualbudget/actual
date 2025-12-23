@@ -282,7 +282,7 @@ export const numberFormats: Array<{
     label: '1\u202F000,33',
     labelNoFraction: '1\u202F000',
   },
-  { value: 'apostrophe-dot', label: '1’000.33', labelNoFraction: '1’000' },
+  { value: 'apostrophe-dot', label: "1'000.33", labelNoFraction: "1'000" },
   { value: 'comma-dot-in', label: '1,00,000.33', labelNoFraction: '1,00,000' },
 ];
 
@@ -341,7 +341,7 @@ export function getNumberFormat({
       break;
     case 'apostrophe-dot':
       locale = 'de-CH';
-      thousandsSeparator = '’';
+      thousandsSeparator = "'";
       decimalSeparator = '.';
       break;
     case 'comma-dot-in':
@@ -370,11 +370,21 @@ export function getNumberFormat({
           maximumFractionDigits: currentHideFraction ? 0 : 2,
         };
 
+  const intlFormatter = new Intl.NumberFormat(locale, fractionDigitsOptions);
+
+  // Wrapper to handle -0 edge case
+  const formatter = {
+    format: (value: number) => {
+      const formatted = intlFormatter.format(value);
+      return formatted === '-0' ? '0' : formatted;
+    },
+  };
+
   return {
     value: currentFormat,
     thousandsSeparator,
     decimalSeparator,
-    formatter: new Intl.NumberFormat(locale, fractionDigitsOptions),
+    formatter,
   };
 }
 
@@ -413,7 +423,7 @@ export function safeNumber(value: number) {
   }
   if (value > MAX_SAFE_NUMBER || value < MIN_SAFE_NUMBER) {
     throw new Error(
-      'safeNumber: can’t safely perform arithmetic with number: ' + value,
+      "safeNumber: can't safely perform arithmetic with number: " + value,
     );
   }
   return value;
@@ -461,6 +471,8 @@ export function amountToCurrencyNoDecimal(amount: Amount): CurrencyAmount {
 }
 
 export function currencyToAmount(currencyAmount: string): Amount | null {
+  currencyAmount = currencyAmount.replace(/\u2212/g, '-');
+
   let integer, fraction;
 
   // match the last dot or comma in the string
@@ -490,7 +502,9 @@ export function currencyToInteger(
 }
 
 export function stringToInteger(str: string): number | null {
-  const amount = parseInt(str.replace(/[^-0-9.,]/g, ''));
+  const amount = parseInt(
+    str.replace(/\u2212/g, '-').replace(/[^-0-9.,]/g, ''),
+  );
   if (!isNaN(amount)) {
     return amount;
   }
@@ -536,7 +550,12 @@ export function looselyParseAmount(amount: string) {
   }
 
   if (amount.startsWith('(') && amount.endsWith(')')) {
+    // Remove Unicode minus inside parentheses before converting to ASCII minus
+    amount = amount.replace(/\u2212/g, '');
     amount = amount.replace('(', '-').replace(')', '');
+  } else {
+    // Replace Unicode minus with ASCII minus for non-parenthesized amounts
+    amount = amount.replace(/\u2212/g, '-');
   }
 
   // Look for a decimal marker, then look for either 1-2 or 4-9 decimal places.

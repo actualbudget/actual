@@ -21,7 +21,6 @@ import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
 import { UserDirectoryPage } from './responsive/wide';
-import { ScrollProvider } from './ScrollProvider';
 import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
@@ -36,6 +35,7 @@ import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { ScrollProvider } from '@desktop-client/hooks/useScrollListener';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 
@@ -259,16 +259,28 @@ export function FinancesApp() {
 
                 <Route
                   path="/schedules"
+                  element={<NarrowAlternate name="Schedules" />}
+                />
+                <Route
+                  path="/schedules/:id"
                   element={
-                    <NarrowNotSupported>
-                      <WideComponent name="Schedules" />
-                    </NarrowNotSupported>
+                    <WideNotSupported>
+                      <NarrowAlternate name="ScheduleEdit" />
+                    </WideNotSupported>
                   }
                 />
 
                 <Route
                   path="/payees"
                   element={<NarrowAlternate name="Payees" />}
+                />
+                <Route
+                  path="/payees/:id"
+                  element={
+                    <WideNotSupported>
+                      <NarrowAlternate name="PayeeEdit" />
+                    </WideNotSupported>
+                  }
                 />
                 <Route
                   path="/rules"
@@ -342,7 +354,7 @@ export function FinancesApp() {
                     element={
                       <ProtectedRoute
                         permission={Permissions.ADMINISTRATOR}
-                        validateOwner={true}
+                        validateOwner
                         element={<UserAccessPage />}
                       />
                     }
@@ -361,6 +373,7 @@ export function FinancesApp() {
               <Route path="/bank-sync" element={<MobileNavTabs />} />
               <Route path="/rules" element={<MobileNavTabs />} />
               <Route path="/payees" element={<MobileNavTabs />} />
+              <Route path="/schedules" element={<MobileNavTabs />} />
               <Route path="*" element={null} />
             </Routes>
           </ScrollProvider>

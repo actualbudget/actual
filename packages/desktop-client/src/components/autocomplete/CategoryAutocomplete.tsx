@@ -136,12 +136,20 @@ function CategoryList({
         }}
       >
         {splitTransaction &&
-          renderSplitTransactionButton({
-            key: 'split',
-            ...(getItemProps ? getItemProps({ item: splitTransaction }) : {}),
-            highlighted: splitTransaction.highlightedIndex === highlightedIndex,
-            embedded,
-          })}
+          (() => {
+            const splitButtonProps = getItemProps
+              ? getItemProps({ item: splitTransaction })
+              : {};
+            const { onClick, ...restSplitButtonProps } = splitButtonProps;
+            return renderSplitTransactionButton({
+              key: 'split',
+              ...restSplitButtonProps,
+              onClick,
+              highlighted:
+                splitTransaction.highlightedIndex === highlightedIndex,
+              embedded,
+            });
+          })()}
         {groupedCategories.map(({ group, categories }) => {
           if (!group) {
             return null;
@@ -265,6 +273,7 @@ export function CategoryAutocomplete({
       suggestions: CategoryAutocompleteItem[],
       value: string,
     ): CategoryAutocompleteItem[] => {
+      const normalizedValue = getNormalisedString(value);
       return suggestions
         .filter(suggestion => {
           if (suggestion.id === 'split') {
@@ -274,11 +283,11 @@ export function CategoryAutocomplete({
           if (suggestion.group) {
             return (
               getNormalisedString(suggestion.group.name).includes(
-                getNormalisedString(value),
+                normalizedValue,
               ) ||
               getNormalisedString(
                 suggestion.group.name + ' ' + suggestion.name,
-              ).includes(getNormalisedString(value))
+              ).includes(normalizedValue)
             );
           }
 
@@ -286,8 +295,7 @@ export function CategoryAutocomplete({
         })
         .sort(
           (a, b) =>
-            customSort(a, getNormalisedString(value)) -
-            customSort(b, getNormalisedString(value)),
+            customSort(a, normalizedValue) - customSort(b, normalizedValue),
         );
     },
     [],
@@ -295,8 +303,8 @@ export function CategoryAutocomplete({
 
   return (
     <Autocomplete
-      strict={true}
-      highlightFirst={true}
+      strict
+      highlightFirst
       embedded={embedded}
       closeOnBlur={closeOnBlur}
       getHighlightedIndex={suggestions => {
@@ -334,7 +342,7 @@ function defaultRenderCategoryItemGroupHeader(
   return <ItemHeader {...props} type="category" />;
 }
 
-type SplitTransactionButtonProps = {
+type SplitTransactionButtonProps = ComponentPropsWithoutRef<typeof View> & {
   Icon?: ComponentType<SVGProps<SVGElement>>;
   highlighted?: boolean;
   embedded?: boolean;

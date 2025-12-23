@@ -2,10 +2,10 @@
 import * as fs from 'fs';
 import { join } from 'path';
 
-import { GlobalPrefsJson } from '../../../types/prefs';
+import { type GlobalPrefsJson } from '../../../types/prefs';
 import * as lootFs from '../fs';
 
-import * as T from './index-types';
+import type * as T from './index-types';
 
 const getStorePath = () => join(lootFs.getDataDir(), 'global-store.json');
 let store: GlobalPrefsJson;
@@ -15,7 +15,7 @@ export const init: T.Init = function ({ persist = true } = {}) {
   if (persist) {
     try {
       store = JSON.parse(fs.readFileSync(getStorePath(), 'utf8'));
-    } catch (e) {
+    } catch {
       store = {};
     }
   } else {

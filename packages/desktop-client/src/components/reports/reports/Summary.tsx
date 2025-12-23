@@ -346,12 +346,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         onChangeDates={onChangeDates}
-        onApply={dividendFilters.onApply}
-        onUpdateFilter={dividendFilters.onUpdate}
-        onDeleteFilter={dividendFilters.onDelete}
-        conditionsOp={dividendFilters.conditionsOp}
-        onConditionsOpChange={dividendFilters.onConditionsOpChange}
-        show1Month={true}
+        show1Month
       >
         {widget && (
           <Button variant="primary" onPress={onSaveWidget}>
@@ -644,7 +639,6 @@ function SumWithRange({
           compact={false}
           onApply={filterObject.onApply}
           hover={false}
-          exclude={undefined}
         />
       </View>
     </View>

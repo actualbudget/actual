@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from 'loot-core/platform/client/fetch';
+import { type IntegerAmount } from 'loot-core/shared/util';
 import { type File } from 'loot-core/types/file';
 import {
   type AccountEntity,
@@ -285,6 +286,7 @@ export type Modal =
         onReopenAccount: (accountId: AccountEntity['id']) => void;
         onEditNotes: (id: NoteEntity['id']) => void;
         onClose?: () => void;
+        onToggleRunningBalance?: () => void;
       };
     }
   | {
@@ -417,10 +419,13 @@ export type Modal =
       name: 'transfer';
       options: {
         title: string;
+        amount: IntegerAmount;
         categoryId?: CategoryEntity['id'];
         month: string;
-        amount: number;
-        onSubmit: (amount: number, toCategoryId: CategoryEntity['id']) => void;
+        onSubmit: (
+          amount: IntegerAmount,
+          toCategoryId: CategoryEntity['id'],
+        ) => void;
         showToBeBudgeted?: boolean;
       };
     }
@@ -428,10 +433,14 @@ export type Modal =
       name: 'cover';
       options: {
         title: string;
+        amount?: IntegerAmount | null;
         categoryId?: CategoryEntity['id'];
         month: string;
         showToBeBudgeted?: boolean;
-        onSubmit: (fromCategoryId: CategoryEntity['id']) => void;
+        onSubmit: (
+          amount: IntegerAmount,
+          fromCategoryId: CategoryEntity['id'],
+        ) => void;
       };
     }
   | {
@@ -462,6 +471,9 @@ export type Modal =
       };
     }
   | {
+      name: 'schedules-page-menu';
+    }
+  | {
       name: 'envelope-budget-month-menu';
       options: {
         month: string;
@@ -486,6 +498,16 @@ export type Modal =
         onConfirm: () => void;
         onCancel?: () => void;
         confirmReason: string;
+      };
+    }
+  | {
+      name: 'convert-to-schedule';
+      options: {
+        onConfirm: () => void;
+        onCancel?: () => void;
+        isBeyondWindow?: boolean;
+        daysUntilTransaction?: number;
+        upcomingDays?: number;
       };
     }
   | {
@@ -518,13 +540,13 @@ export type Modal =
   | {
       name: 'enable-openid';
       options: {
-        onSave: () => void;
+        onSave?: () => void;
       };
     }
   | {
       name: 'enable-password-auth';
       options: {
-        onSave: () => void;
+        onSave?: () => void;
       };
     }
   | {

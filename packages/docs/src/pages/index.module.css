@@ -1,0 +1,239 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 120px;
+  text-align: center;
+  gap: 3rem;
+  padding-inline: 3rem;
+}
+
+.container {
+  width: 950px;
+  margin-inline: auto;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    width: 800px;
+  }
+}
+
+@media (max-width: 850px) {
+  .container {
+    width: 650px;
+  }
+}
+
+@media (max-width: 690px) {
+  .container {
+    width: 100%;
+    padding-inline: 15px;
+  }
+}
+
+.heroBg,
+.featuresBg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+}
+.heroBg {
+  z-index: -1;
+  top: 0;
+  height: 900px;
+}
+[data-theme='dark'] .heroBg {
+  filter: invert();
+}
+.featuresBg {
+  bottom: 0;
+  height: 350px;
+}
+
+.heroImage {
+  position: relative;
+  max-width: 100%;
+}
+.heroImage,
+.bigFeatureMedia {
+  border-radius: 5px;
+  overflow: hidden;
+  line-height: 0;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.demoButton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border: none;
+  font-weight: 500;
+}
+.demoButtonContent {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  font-size: 1.5em;
+  padding: 0.5em;
+  border-radius: 1em;
+  transition: inherit;
+  background: var(--ifm-link-color);
+  color: white;
+}
+
+.demoButton:is(:hover, :focus) .demoButtonContent {
+  filter: brightness(0.9);
+}
+
+.heroText {
+  font-size: 17px;
+}
+@media (min-width: 850px) {
+  .heroText {
+    margin-inline: 5rem;
+  }
+}
+
+.smallFeature {
+  display: flex;
+  gap: 1rem;
+}
+.smallFeatureTitle {
+  font-size: inherit;
+}
+.smallFeatureIcon {
+  display: block;
+  min-width: 24px;
+  max-width: 24px;
+  top: 0;
+}
+
+.smallFeature a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.mediumFeature {
+  display: flex;
+  margin-top: 5rem;
+  align-items: center;
+  text-align: left;
+  flex-direction: column-reverse;
+}
+.mediumFeatureContent {
+  margin-top: 3em;
+}
+
+.mediumFeatureMedia {
+  max-width: 75%;
+}
+
+@media (min-width: 850px) {
+  .mediumFeature {
+    flex-direction: row;
+  }
+  .mediumFeature_flip {
+    text-align: right;
+    flex-direction: row-reverse;
+  }
+  .mediumFeatureContent {
+    margin-top: 0;
+    margin-right: 4rem;
+  }
+  .mediumFeature_flip .mediumFeatureContent {
+    margin-right: 0;
+    margin-left: 4rem;
+  }
+  .mediumFeatureMedia {
+    max-width: 40%;
+  }
+}
+
+.bigFeature {
+  margin-top: 7rem;
+  max-width: 700px;
+}
+
+.bigFeatureContent,
+.bigFeatureMedia {
+  margin-top: 2rem;
+}
+
+.bigFeatureMedia {
+  max-width: 100%;
+}
+@media (min-width: 850px) {
+  .bigFeatureMedia {
+    max-width: 85%;
+  }
+}
+
+.featuresSection {
+  background: linear-gradient(180deg, #242b6b 0%, #1b2152 100%);
+  color: white;
+  fill: currentColor;
+  margin-top: 6rem;
+  padding-top: 8rem;
+  padding-bottom: 12rem;
+  position: relative;
+}
+
+.featuresSection > :not(:first-child) {
+  /* fix bg overlapping */
+  position: relative;
+}
+
+.featuresSectionHeader {
+  text-align: center;
+  margin-bottom: 5rem;
+}
+
+.smallFeaturesGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  margin-bottom: 4rem;
+}
+
+@media (min-width: 690px) {
+  .ownYourDataSection {
+    max-width: 600px;
+  }
+}
+
+@media (max-width: 767px) {
+  .smallFeaturesGrid {
+    display: block;
+  }
+}
+
+@media (min-width: 768px) {
+  .smallFeaturesGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.ownYourDataSection h3 {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.ownYourDataContent {
+  display: flex;
+  gap: 2rem;
+}
+.ownYourDataContent svg {
+  min-width: 50px;
+  max-width: 50px;
+}

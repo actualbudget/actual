@@ -112,7 +112,10 @@ import {
 } from '@desktop-client/components/table';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
+import {
+  DisplayPayeeProvider,
+  useDisplayPayee,
+} from '@desktop-client/hooks/useDisplayPayee';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { usePrevious } from '@desktop-client/hooks/usePrevious';
@@ -186,7 +189,7 @@ const TransactionHeader = memo(
       >
         {showSelection && (
           <SelectCell
-            exposed={true}
+            exposed
             focused={false}
             selected={hasSelected}
             width={20}
@@ -717,9 +720,9 @@ function PayeeCell({
             onKeyDown,
             style: inputStyle,
           }}
-          showManagePayees={true}
+          showManagePayees
           clearOnBlur={false}
-          focused={true}
+          focused
           onUpdate={(_, value) => onUpdate?.(value)}
           onSelect={onSave}
           onManagePayees={() => onManagePayees(payee?.id)}
@@ -768,7 +771,11 @@ function PayeeIcons({
     return null;
   }
 
-  const recurring = schedule && schedule._date && !!schedule._date.frequency;
+  const recurring =
+    schedule &&
+    schedule._date &&
+    typeof schedule._date === 'object' &&
+    !!schedule._date.frequency;
   const isDeposit = transaction.amount > 0;
 
   return (
@@ -1301,7 +1308,7 @@ const Transaction = memo(function Transaction({
               dateFormat={dateFormat}
               inputProps={{ onBlur, onKeyDown, style: inputStyle }}
               shouldSaveFromKey={shouldSaveFromKey}
-              clearOnBlur={true}
+              clearOnBlur
               onUpdate={onUpdate}
               onSelect={onSave}
             />
@@ -1346,7 +1353,7 @@ const Transaction = memo(function Transaction({
               value={accountId}
               shouldSaveFromKey={shouldSaveFromKey}
               clearOnBlur={false}
-              focused={true}
+              focused
               inputProps={{ onBlur, onKeyDown, style: inputStyle }}
               onUpdate={onUpdate}
               onSelect={onSave}
@@ -1573,7 +1580,7 @@ const Transaction = memo(function Transaction({
               <CategoryAutocomplete
                 categoryGroups={categoryGroups}
                 value={categoryId ?? null}
-                focused={true}
+                focused
                 clearOnBlur={false}
                 showSplitOption={!isChild && !isParent && allowSplitTransaction}
                 shouldSaveFromKey={shouldSaveFromKey}
@@ -1882,7 +1889,7 @@ function NewTransaction({
           payees={payees}
           dateFormat={dateFormat}
           hideFraction={!!hideFraction}
-          expanded={true}
+          expanded
           onEdit={onEdit}
           onSave={onSave}
           onSplit={onSplit}
@@ -1895,8 +1902,8 @@ function NewTransaction({
           onNavigateToSchedule={onNavigateToSchedule}
           onNotesTagClick={onNotesTagClick}
           balance={balance ?? 0}
-          showSelection={true}
-          allowSplitTransaction={true}
+          showSelection
+          allowSplitTransaction
           showHiddenCategories={showHiddenCategories}
         />
       ))}
@@ -2368,9 +2375,9 @@ export const TransactionTable = forwardRef(
 
     const dispatch = useDispatch();
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
-    const [newTransactions, setNewTransactions] = useState<
-      TransactionEntity[] | null
-    >(null);
+    const [newTransactions, setNewTransactions] = useState<TransactionEntity[]>(
+      [],
+    );
     const [prevIsAdding, setPrevIsAdding] = useState(false);
     const splitsExpanded = useSplitsExpanded();
     const splitsExpandedDispatch = splitsExpanded.dispatch;
@@ -2974,42 +2981,49 @@ export const TransactionTable = forwardRef(
       [splitsExpandedDispatch],
     );
 
+    const displayPayeeTransactions = useMemo(
+      () => [...props.transactions, ...newTransactions],
+      [props.transactions, newTransactions],
+    );
+
     return (
-      <TransactionTableInner
-        tableRef={mergedRef}
-        listContainerRef={listContainerRef}
-        {...props}
-        transactions={transactionsWithExpandedSplits}
-        transactionMap={transactionMap}
-        transactionsByParent={transactionsByParent}
-        transferAccountsByTransaction={transferAccountsByTransaction}
-        selectedItems={selectedItems}
-        isExpanded={splitsExpanded.isExpanded}
-        onSave={onSave}
-        onDelete={onDelete}
-        onBatchDelete={onBatchDelete}
-        onBatchDuplicate={onBatchDuplicate}
-        onBatchLinkSchedule={onBatchLinkSchedule}
-        onBatchUnlinkSchedule={onBatchUnlinkSchedule}
-        onCreateRule={onCreateRule}
-        onScheduleAction={onScheduleAction}
-        onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
-        onSplit={onSplit}
-        onCheckNewEnter={onCheckNewEnter}
-        onCheckEnter={onCheckEnter}
-        onAddTemporary={onAddTemporary}
-        onAddAndCloseTemporary={onAddAndCloseTemporary}
-        onAddSplit={onAddSplit}
-        onDistributeRemainder={onDistributeRemainder}
-        onCloseAddTransaction={onCloseAddTransaction}
-        onToggleSplit={onToggleSplit}
-        newTransactions={newTransactions ?? []}
-        tableNavigator={tableNavigator}
-        newNavigator={newNavigator}
-        showSelection={props.showSelection}
-        allowSplitTransaction={props.allowSplitTransaction}
-        showHiddenCategories={showHiddenCategories}
-      />
+      <DisplayPayeeProvider transactions={displayPayeeTransactions}>
+        <TransactionTableInner
+          tableRef={mergedRef}
+          listContainerRef={listContainerRef}
+          {...props}
+          transactions={transactionsWithExpandedSplits}
+          transactionMap={transactionMap}
+          transactionsByParent={transactionsByParent}
+          transferAccountsByTransaction={transferAccountsByTransaction}
+          selectedItems={selectedItems}
+          isExpanded={splitsExpanded.isExpanded}
+          onSave={onSave}
+          onDelete={onDelete}
+          onBatchDelete={onBatchDelete}
+          onBatchDuplicate={onBatchDuplicate}
+          onBatchLinkSchedule={onBatchLinkSchedule}
+          onBatchUnlinkSchedule={onBatchUnlinkSchedule}
+          onCreateRule={onCreateRule}
+          onScheduleAction={onScheduleAction}
+          onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
+          onSplit={onSplit}
+          onCheckNewEnter={onCheckNewEnter}
+          onCheckEnter={onCheckEnter}
+          onAddTemporary={onAddTemporary}
+          onAddAndCloseTemporary={onAddAndCloseTemporary}
+          onAddSplit={onAddSplit}
+          onDistributeRemainder={onDistributeRemainder}
+          onCloseAddTransaction={onCloseAddTransaction}
+          onToggleSplit={onToggleSplit}
+          newTransactions={newTransactions ?? []}
+          tableNavigator={tableNavigator}
+          newNavigator={newNavigator}
+          showSelection={props.showSelection}
+          allowSplitTransaction={props.allowSplitTransaction}
+          showHiddenCategories={showHiddenCategories}
+        />
+      </DisplayPayeeProvider>
     );
   },
 );

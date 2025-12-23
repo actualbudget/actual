@@ -23,7 +23,7 @@ import { ExportBudget } from './Export';
 import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
 import { RepairTransactions } from './RepairTransactions';
-import { ResetCache, ResetSync } from './Reset';
+import { ForceReload, ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
@@ -98,7 +98,7 @@ function About() {
         ) : (
           <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
             {notifyWhenUpdateIsAvailable ? (
-              <Trans>You’re up to date!</Trans>
+              <Trans>You're up to date!</Trans>
             ) : null}
           </Text>
         )}
@@ -176,6 +176,7 @@ export function Settings() {
   const [budgetName] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
+  const isForceReloadEnabled = useFeatureFlag('forceReload');
   const [_, setDefaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
 
   const onCloseBudget = () => {
@@ -212,16 +213,22 @@ export function Settings() {
           marginTop: 10,
           flexShrink: 0,
           maxWidth: 530,
+          width: '100%',
           gap: 30,
           paddingBottom: MOBILE_NAV_HEIGHT,
         }}
       >
         {isNarrowWidth && (
           <View
-            style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
+            style={{
+              gap: 10,
+              flexDirection: 'row',
+              alignItems: 'flex-end',
+              width: '100%',
+            }}
           >
             {/* The only spot to close a budget on mobile */}
-            <FormField>
+            <FormField style={{ flex: 1 }}>
               <FormLabel title={t('Budget name')} />
               <Input
                 value={budgetName}
@@ -229,7 +236,7 @@ export function Settings() {
                 style={{ color: theme.buttonNormalDisabledText }}
               />
             </FormField>
-            <Button onPress={onCloseBudget}>
+            <Button onPress={onCloseBudget} style={{ flexShrink: 0 }}>
               <Trans>Switch file</Trans>
             </Button>
           </View>
@@ -246,6 +253,7 @@ export function Settings() {
         <ExportBudget />
         <AdvancedToggle>
           <AdvancedAbout />
+          {isForceReloadEnabled && <ForceReload />}
           <ResetCache />
           <ResetSync />
           <RepairTransactions />

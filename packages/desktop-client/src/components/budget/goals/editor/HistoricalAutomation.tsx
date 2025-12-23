@@ -46,14 +46,13 @@ export const HistoricalAutomation = ({
           title={t('Number of months back')}
           htmlFor="look-back-field"
         />
-        {/* @ts-expect-error should be auto-patched once GenericInput is converted to TS */}
         <GenericInput
           key="look-back-input"
           type="number"
           value={
             template.type === 'average' ? template.numMonths : template.lookBack
           }
-          onChange={(value: number) =>
+          onChange={value =>
             dispatch(
               updateTemplate(
                 template.type === 'average'

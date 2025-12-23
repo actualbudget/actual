@@ -25,9 +25,9 @@ export const defaultReport: CustomReportEntity = {
   sortBy: 'desc',
   showEmpty: false,
   showOffBudget: false,
-  showHiddenCategories: false,
+  showHiddenCategories: true,
   includeCurrentInterval: true,
-  showUncategorized: false,
+  showUncategorized: true,
   trimIntervals: false,
   graphType: 'BarGraph',
   conditions: [],
@@ -225,7 +225,7 @@ const intervalOptions: intervalOptionsProps[] = [
     description: t('Monthly'),
     key: 'Monthly',
     name: 'Month',
-    // eslint-disable-next-line actual/typography
+
     format: "MMM ''yy",
     range: 'rangeInclusive',
   },

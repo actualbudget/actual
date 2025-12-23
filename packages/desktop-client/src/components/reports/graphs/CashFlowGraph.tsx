@@ -16,7 +16,10 @@ import {
   YAxis,
 } from 'recharts';
 
-import { chartTheme } from '@desktop-client/components/reports/chart-theme';
+import {
+  chartTheme,
+  useRechartsAnimation,
+} from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
@@ -130,6 +133,9 @@ export function CashFlowGraph({
   const privacyMode = usePrivacyMode();
   const [yAxisIsHovered, setYAxisIsHovered] = useState(false);
   const format = useFormat();
+  const animationProps = useRechartsAnimation({
+    animationDuration: ANIMATION_DURATION,
+  });
 
   const data = graphData.expenses.map((row, idx) => ({
     date: row.x,
@@ -154,7 +160,6 @@ export function CashFlowGraph({
             dataKey="date"
             tick={{ fill: theme.reportsLabel }}
             tickFormatter={x => {
-              // eslint-disable-next-line actual/typography
               return d.format(x, isConcise ? "MMM ''yy" : 'MMM d', {
                 locale,
               });
@@ -174,7 +179,6 @@ export function CashFlowGraph({
           />
           <Tooltip
             labelFormatter={x => {
-              // eslint-disable-next-line actual/typography
               return d.format(x, isConcise ? "MMM ''yy" : 'MMM d', {
                 locale,
               });
@@ -189,14 +193,14 @@ export function CashFlowGraph({
             stackId="a"
             fill={chartTheme.colors.blue}
             maxBarSize={MAX_BAR_SIZE}
-            animationDuration={ANIMATION_DURATION}
+            {...animationProps}
           />
           <Bar
             dataKey="expenses"
             stackId="a"
             fill={chartTheme.colors.red}
             maxBarSize={MAX_BAR_SIZE}
-            animationDuration={ANIMATION_DURATION}
+            {...animationProps}
           />
           <Line
             type="monotone"
@@ -205,7 +209,7 @@ export function CashFlowGraph({
             hide={!showBalance}
             stroke={theme.pageTextLight}
             strokeWidth={2}
-            animationDuration={ANIMATION_DURATION}
+            {...animationProps}
           />
         </ComposedChart>
       )}

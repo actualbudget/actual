@@ -244,7 +244,7 @@ export function BudgetPage() {
       const group = categoryGroups.find(g => g.id === groupId);
       onSaveGroup({
         ...group,
-        hidden: !!!group.hidden,
+        hidden: group.hidden ? false : true,
       });
       dispatch(collapseModals({ rootModalName: 'category-group-menu' }));
     },
@@ -301,7 +301,7 @@ export function BudgetPage() {
       const category = categories.find(c => c.id === categoryId);
       onSaveCategory({
         ...category,
-        hidden: !!!category.hidden,
+        hidden: category.hidden ? false : true,
       });
       dispatch(collapseModals({ rootModalName: 'category-menu' }));
     },
@@ -330,7 +330,7 @@ export function BudgetPage() {
 
   // const onOpenMonthActionMenu = () => {
   //   const options = [
-  //     'Copy last month’s budget',
+  //     'Copy last month's budget',
   //     'Set budgets to zero',
   //     'Set budgets to 3 month average',
   //     budgetType === 'tracking' && 'Apply to all future budgets',
@@ -486,7 +486,7 @@ export function BudgetPage() {
             name: 'notes',
             options: {
               id: `budget-${month}`,
-              name: monthUtils.format(month, 'MMMM ‘yy', locale),
+              name: monthUtils.format(month, "MMMM ''yy", locale),
               onSave: onSaveNotes,
             },
           },
@@ -731,6 +731,7 @@ function UncategorizedTransactionsBanner(props) {
 
 function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
   const { t } = useTranslation();
+  const format = useFormat();
   const toBudgetAmount = useSheetValue<
     'envelope-budget',
     typeof envelopeBudget.toBudget
@@ -748,10 +749,13 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
           options: {
             title: t('Cover overbudgeted'),
             month,
+            amount: toBudgetAmount,
             showToBeBudgeted: false,
-            onSubmit: categoryId => {
+            onSubmit: (amount, categoryId) => {
               onBudgetAction(month, 'cover-overbudgeted', {
                 category: categoryId,
+                amount,
+                currencyCode: format.currency.code,
               });
               showUndoNotification({
                 message: t('Covered overbudgeted from {{categoryName}}', {
@@ -770,6 +774,8 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
     onBudgetAction,
     showUndoNotification,
     t,
+    toBudgetAmount,
+    format.currency.code,
   ]);
 
   if (!toBudgetAmount || toBudgetAmount >= 0) {
@@ -824,8 +830,11 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
   const dispatch = useDispatch();
   const format = useFormat();
 
-  const { categories: overspentCategories, totalAmount: totalOverspending } =
-    useOverspentCategories({ month });
+  const {
+    categories: overspentCategories,
+    amountsByCategory,
+    totalAmount: totalOverspending,
+  } = useOverspentCategories({ month });
 
   const categoryGroupsToShow = useMemo(
     () =>
@@ -850,11 +859,14 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
             options: {
               title: category.name,
               month,
+              amount: amountsByCategory.get(category.id),
               categoryId: category.id,
-              onSubmit: fromCategoryId => {
+              onSubmit: (amount, fromCategoryId) => {
                 onBudgetAction(month, 'cover-overspending', {
                   to: category.id,
                   from: fromCategoryId,
+                  amount,
+                  currencyCode: format.currency.code,
                 });
                 showUndoNotification({
                   message: t(
@@ -874,7 +886,16 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
         }),
       );
     },
-    [categoriesById, dispatch, month, onBudgetAction, showUndoNotification, t],
+    [
+      amountsByCategory,
+      categoriesById,
+      dispatch,
+      month,
+      onBudgetAction,
+      showUndoNotification,
+      t,
+      format.currency.code,
+    ],
   );
 
   const onOpenCategorySelectionModal = useCallback(() => {
@@ -995,7 +1016,7 @@ function MonthSelector({
         data-month={month}
       >
         <Text style={styles.underlinedText}>
-          {monthUtils.format(month, 'MMMM ‘yy', locale)}
+          {monthUtils.format(month, "MMMM ''yy", locale)}
         </Text>
       </Button>
       <Button

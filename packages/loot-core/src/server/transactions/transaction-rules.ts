@@ -95,7 +95,7 @@ function parseArray(str) {
   let value;
   try {
     value = typeof str === 'string' ? JSON.parse(str) : str;
-  } catch (e) {
+  } catch {
     throw new RuleError('internal', 'Cannot parse rule json');
   }
 
@@ -959,13 +959,6 @@ export async function prepareTransactionForRules(
       r._account = await getAccount(trans.account);
       r._account_name = r._account?.name || '';
     }
-  }
-
-  if (trans.category) {
-    const category = await getCategory(trans.category);
-    if (category) {
-      r._category_name = category.name;
-    }
 
     const dateBoundary = trans.date ?? currentDay();
     let query = q('transactions')
@@ -1003,6 +996,13 @@ export async function prepareTransactionForRules(
     );
 
     r.balance = balance ?? 0;
+  }
+
+  if (trans.category) {
+    const category = await getCategory(trans.category);
+    if (category) {
+      r._category_name = category.name;
+    }
   }
 
   return r;

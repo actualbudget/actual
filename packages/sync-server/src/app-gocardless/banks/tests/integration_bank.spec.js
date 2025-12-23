@@ -1,8 +1,8 @@
 import {
   mockExtendAccountsAboutInstitutions,
   mockInstitution,
-} from '../../services/tests/fixtures.js';
-import IntegrationBank from '../integration-bank.js';
+} from '../../services/tests/fixtures';
+import IntegrationBank from '../integration-bank';
 
 describe('IntegrationBank', () => {
   describe('normalizeAccount', () => {
@@ -80,7 +80,7 @@ describe('IntegrationBank', () => {
   });
 
   describe('calculateStartingBalance', () => {
-    /** @type {import('../../gocardless-node.types.js').Transaction[]} */
+    /** @type {import('../../gocardless-node.types').Transaction[]} */
     const transactions = [
       {
         bookingDate: '2022-01-01',
@@ -96,7 +96,7 @@ describe('IntegrationBank', () => {
       },
     ];
 
-    /** @type {import('../../gocardless-node.types.js').Balance[]} */
+    /** @type {import('../../gocardless-node.types').Balance[]} */
     const balances = [
       {
         balanceAmount: { amount: '1000.00', currency: 'EUR' },

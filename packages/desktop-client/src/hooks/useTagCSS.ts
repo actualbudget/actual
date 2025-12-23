@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 
 import { theme as themeStyle } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
@@ -63,23 +63,9 @@ function getTagCSSColors(theme: Theme, color?: string | null) {
     ];
   }
 
-  if (theme === 'auto') {
-    theme = window.matchMedia('(prefers-color-scheme: light)').matches
-      ? 'light'
-      : 'dark';
-  }
-
-  if (theme === 'light') {
-    return [
-      `${color} !important`,
-      `color-mix(in srgb, ${color} 15%, white)`,
-      `color-mix(in srgb, ${color} 25%, white)`,
-    ];
-  } else {
-    return [
-      getContrastedColor(color),
-      color,
-      `color-mix(in srgb, ${color} 85%, white)`,
-    ];
-  }
+  return [
+    getContrastedColor(color),
+    color,
+    `color-mix(in srgb, ${color} 85%, white)`,
+  ];
 }

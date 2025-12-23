@@ -1,10 +1,14 @@
 // @ts-strict-ignore
 import type { IRuleOptions } from '@rschedule/core';
 import * as d from 'date-fns';
-import { Locale } from 'date-fns';
+import { type Locale } from 'date-fns';
 import { t } from 'i18next';
 
-import { type PayeeEntity, type ScheduleEntity } from 'loot-core/types/models';
+import {
+  type PayeeEntity,
+  type RecurConfig,
+  type ScheduleEntity,
+} from 'loot-core/types/models';
 
 import { Condition } from '../server/rules';
 
@@ -51,12 +55,14 @@ export function getStatusLabel(status: string) {
       return t('missed');
     case 'scheduled':
       return t('scheduled');
+    default:
+      return t('unknown');
   }
 }
 
 export function getHasTransactionsQuery(schedules) {
   const filters = schedules.map(schedule => {
-    const dateCond = schedule._conditions.find(c => c.field === 'date');
+    const dateCond = schedule._conditions?.find(c => c.field === 'date');
     return {
       $and: {
         schedule: schedule.id,
@@ -96,7 +102,11 @@ function prettyDayName(day) {
   return days[day];
 }
 
-export function getRecurringDescription(config, dateFormat, locale: Locale) {
+export function getRecurringDescription(
+  config: RecurConfig,
+  dateFormat: string,
+  locale: Locale,
+) {
   const interval = config.interval || 1;
 
   let endModeSuffix = '';
@@ -116,6 +126,7 @@ export function getRecurringDescription(config, dateFormat, locale: Locale) {
       });
       break;
     default:
+      break;
   }
 
   const weekendSolveModeString = config.weekendSolveMode
@@ -268,6 +279,7 @@ export function recurConfigToRSchedule(config) {
       base.end = monthUtils.parseDate(config.endDate);
       break;
     default:
+      break;
   }
 
   const abbrevDay = name => name.slice(0, 2).toUpperCase();
@@ -438,7 +450,7 @@ export function getUpcomingDays(
             const future = monthUtils.addMonths(today, value);
             return monthUtils.differenceInCalendarDays(future, month) + 1;
           case 'year':
-            const futureYear = monthUtils.addYears(today, value);
+            const futureYear = monthUtils.addMonths(today, value * 12);
             return monthUtils.differenceInCalendarDays(futureYear, month) + 1;
           default:
             return 7;

@@ -321,12 +321,11 @@ function ConditionEditor({
     );
   } else {
     valueEditor = (
-      // @ts-expect-error fix this
       <GenericInput
         key={inputKey}
         field={field}
         type={type}
-        value={value}
+        value={value ?? ''}
         op={op}
         multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
@@ -535,12 +534,15 @@ function ActionEditor({
                   onChange={v => onChange('formula', v, { formula: true })}
                 />
               ) : (
-                // @ts-expect-error fix this
                 <GenericInput
                   key={inputKey}
+                  // @ts-expect-error fix this
                   field={field}
+                  // @ts-expect-error fix this
                   type={templated ? 'string' : type}
+                  // @ts-expect-error fix this
                   op={op}
+                  // @ts-expect-error fix this
                   value={options?.template ?? value}
                   onChange={v => onChange('value', v)}
                   numberFormatType="currency"
@@ -644,9 +646,9 @@ function ActionEditor({
             }}
           >
             {options.method !== 'remainder' && (
-              // @ts-expect-error fix this
               <GenericInput
                 key={inputKey}
+                // @ts-expect-error fix this
                 field={field}
                 op={op}
                 type="number"
@@ -680,9 +682,9 @@ function ActionEditor({
           />
 
           <View style={{ flex: 1 }}>
-            {/* @ts-expect-error fix this */}
             <GenericInput
               key={inputKey}
+              // @ts-expect-error fix this
               field={field}
               type="string"
               op={op}
@@ -792,7 +794,7 @@ function ConditionsList({
       });
     }
 
-    // (remove the inflow and outflow pseudo-fields since they’d be a pain to get right)
+    // (remove the inflow and outflow pseudo-fields since they'd be a pain to get right)
     let fields = conditionFields
       .map(f => f[0])
       .filter(f => f !== 'amount-inflow' && f !== 'amount-outflow');
@@ -1091,7 +1093,7 @@ export function RuleEditor({
         type: FIELD_TYPES.get(field),
         field,
         op: 'set',
-        value: null,
+        value: '',
         options: { splitIndex },
         inputKey: uuid(),
       };
@@ -1150,7 +1152,7 @@ export function RuleEditor({
 
             if (field === 'field') {
               a.type = FIELD_TYPES.get(a.field);
-              a.value = null;
+              a.value = value === 'date' ? '' : null;
               a.options = {
                 ...a.options,
                 template: undefined,
@@ -1334,6 +1336,8 @@ export function RuleEditor({
           overflow: 'auto',
           maxHeight: 'calc(100% - 300px)',
           minHeight: 100,
+          position: 'relative',
+          zIndex: 2,
         }}
       >
         <View style={{ flexShrink: 0 }}>
@@ -1483,7 +1487,14 @@ export function RuleEditor({
       </View>
 
       <SelectedProvider instance={selectedInst}>
-        <View style={{ padding: '20px', flex: 1 }}>
+        <View
+          style={{
+            padding: '20px',
+            flex: 1,
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
           <SpaceBetween
             gap={5}
             style={{

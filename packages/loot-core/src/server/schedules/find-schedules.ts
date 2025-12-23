@@ -245,7 +245,7 @@ async function findStartDate(schedule) {
   const dateCond = conditions.find(c => c.field === 'date');
   let currentConfig = dateCond.value;
 
-  while (1) {
+  while (true) {
     const prevConfig = currentConfig;
     currentConfig = { ...prevConfig };
 

@@ -47,12 +47,10 @@ export function SaveReportChoose({ onApply }: SaveReportChooseProps) {
         <GenericInput
           ref={inputRef}
           field="report"
-          subfield={null}
           type="saved"
           value={value}
-          multi={false}
           style={{ marginTop: 10 }}
-          onChange={(v: string) => setValue(v)}
+          onChange={setValue}
         />
 
         <View

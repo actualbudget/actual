@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { t } from 'i18next';
 
-import { FieldValueTypes, RuleConditionOp } from '../types/models';
+import { type FieldValueTypes, type RuleConditionOp } from '../types/models';
 
 // For now, this info is duplicated from the backend. Figure out how
 // to share it later.
@@ -56,7 +56,7 @@ type FieldInfoConstraint = Record<
   {
     type: keyof typeof TYPE_INFO;
     disallowedOps?: Set<RuleConditionOp>;
-    internalOps?: Set<RuleConditionOp>;
+    internalOps?: Set<RuleConditionOp | 'and'>;
   }
 >;
 
@@ -103,7 +103,7 @@ export function isValidOp(field: keyof FieldValueTypes, op: RuleConditionOp) {
   );
 }
 
-export function getValidOps(field: keyof FieldValueTypes) {
+export function getValidOps(field: keyof FieldValueTypes): RuleConditionOp[] {
   const type = FIELD_TYPES.get(field);
   if (!type) {
     return [];
@@ -311,7 +311,7 @@ export function parse(item) {
   return { ...item, error: null };
 }
 
-export function unparse({ error, inputKey, ...item }) {
+export function unparse({ error: _error, inputKey: _inputKey, ...item }) {
   if (item.op === 'set-split-amount') {
     if (item.options.method === 'fixed-amount') {
       return {

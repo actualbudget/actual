@@ -4,7 +4,9 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
-  | 'plugins';
+  | 'crossoverReport'
+  | 'plugins'
+  | 'forceReload';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -78,6 +80,7 @@ export type LocalPrefs = Partial<{
   'budget.showHiddenCategories': boolean;
   'budget.startMonth': string;
   'flags.updateNotificationShownForVersion': string;
+  'schedules.showCompleted': boolean;
   reportsViewLegend: boolean;
   reportsViewSummary: boolean;
   reportsViewLabel: boolean;

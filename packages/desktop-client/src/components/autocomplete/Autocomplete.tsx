@@ -86,7 +86,7 @@ function getItemName<T extends AutocompleteItem>(
   return item.name || '';
 }
 
-function getItemId<T extends AutocompleteItem>(item: T | T['id']) {
+function getItemId<T extends AutocompleteItem>(item: T | NonNullable<T['id']>) {
   if (typeof item === 'string') {
     return item;
   }
@@ -157,6 +157,7 @@ function defaultRenderItems<T extends AutocompleteItem>(
         const name = getItemName(item);
         return (
           <div
+            key={name}
             {...getItemProps({ item })}
             // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
             // event handler they set on this element. When this code runs
@@ -180,7 +181,6 @@ function defaultRenderItems<T extends AutocompleteItem>(
             // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
             // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
             role="button"
-            key={name}
             className={css({
               padding: 5,
               cursor: 'default',
@@ -680,8 +680,8 @@ const defaultMultiAutocompleteInputClassName = css({
 type MultiAutocompleteProps<T extends AutocompleteItem> =
   CommonAutocompleteProps<T> & {
     type: 'multi';
-    onSelect: (ids: T['id'][], id?: T['id']) => void;
-    value: null | T[] | T['id'][];
+    onSelect: (ids: NonNullable<T['id']>[], id?: NonNullable<T['id']>) => void;
+    value: null | T[] | NonNullable<T['id']>[];
   };
 
 function MultiAutocomplete<T extends AutocompleteItem>({
@@ -726,7 +726,7 @@ function MultiAutocomplete<T extends AutocompleteItem>({
       type="single"
       value={null}
       clearOnBlur={clearOnBlur}
-      clearOnSelect={true}
+      clearOnSelect
       suggestions={suggestions.filter(
         item => !selectedItemIds.includes(getItemId(item)),
       )}

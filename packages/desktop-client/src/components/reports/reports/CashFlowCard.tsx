@@ -19,7 +19,10 @@ import { defaultTimeFrame } from './CashFlow';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { Change } from '@desktop-client/components/reports/Change';
-import { chartTheme } from '@desktop-client/components/reports/chart-theme';
+import {
+  chartTheme,
+  useRechartsAnimation,
+} from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
@@ -111,6 +114,7 @@ export function CashFlowCard({
   onRemove,
 }: CashFlowCardProps) {
   const { t } = useTranslation();
+  const animationProps = useRechartsAnimation();
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
@@ -224,6 +228,7 @@ export function CashFlowCard({
                   dataKey="income"
                   fill={chartTheme.colors.blue}
                   barSize={14}
+                  {...animationProps}
                 >
                   <LabelList
                     dataKey="income"
@@ -236,6 +241,7 @@ export function CashFlowCard({
                   dataKey="expenses"
                   fill={chartTheme.colors.red}
                   barSize={14}
+                  {...animationProps}
                 >
                   <LabelList
                     dataKey="expenses"

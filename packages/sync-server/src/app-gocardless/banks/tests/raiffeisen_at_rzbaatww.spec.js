@@ -1,5 +1,5 @@
-import { mockTransactionAmount } from '../../services/tests/fixtures.js';
-import RaiffeisenAtRzbaatww from '../raiffeisen_at_rzbaatww.js';
+import { mockTransactionAmount } from '../../services/tests/fixtures';
+import RaiffeisenAtRzbaatww from '../raiffeisen_at_rzbaatww';
 
 describe('raiffeisen_at', () => {
   describe('#normalizeTransaction', () => {

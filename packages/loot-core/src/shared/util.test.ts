@@ -3,6 +3,7 @@ import {
   getNumberFormat,
   setNumberFormat,
   currencyToAmount,
+  stringToInteger,
   titleFirst,
 } from './util';
 
@@ -49,11 +50,18 @@ describe('utility functions', () => {
     expect(looselyParseAmount('-3')).toBe(-3);
     expect(looselyParseAmount('-3.45')).toBe(-3.45);
     expect(looselyParseAmount('-3,45')).toBe(-3.45);
+    // Unicode minus
+    expect(looselyParseAmount('−3')).toBe(-3);
+    expect(looselyParseAmount('−3.45')).toBe(-3.45);
+    expect(looselyParseAmount('−3,45')).toBe(-3.45);
   });
 
   test('looseParseAmount works with parentheses (negative)', () => {
     expect(looselyParseAmount('(3.45)')).toBe(-3.45);
     expect(looselyParseAmount('(3)')).toBe(-3);
+    // Parentheses with Unicode minus
+    expect(looselyParseAmount('(−3.45)')).toBe(-3.45);
+    expect(looselyParseAmount('(−3)')).toBe(-3);
   });
 
   test('looseParseAmount ignores non-numeric characters', () => {
@@ -108,11 +116,20 @@ describe('utility functions', () => {
   test('number formatting works with apostrophe-dot format', () => {
     setNumberFormat({ format: 'apostrophe-dot', hideFraction: false });
     let formatter = getNumberFormat().formatter;
-    expect(formatter.format(Number('1234.56'))).toBe('1’234.56');
+    expect(formatter.format(Number('1234.56'))).toBe(`1\u2019234.56`);
 
     setNumberFormat({ format: 'apostrophe-dot', hideFraction: true });
     formatter = getNumberFormat().formatter;
-    expect(formatter.format(Number('1234.56'))).toBe('1’235');
+    expect(formatter.format(Number('1234.56'))).toBe(`1\u2019235`);
+  });
+
+  test('number formatting works with small negative numbers with 0 decimal places', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    const formatter = getNumberFormat().formatter;
+    expect(formatter.format(Number('-0.1'))).toBe('0');
+    expect(formatter.format(Number('-0.5'))).toBe('-1');
+    expect(formatter.format(Number('-0.9'))).toBe('-1');
+    expect(formatter.format(Number('-1.2'))).toBe('-1');
   });
 
   test('currencyToAmount works with basic numbers', () => {
@@ -142,6 +159,10 @@ describe('utility functions', () => {
     expect(currencyToAmount('-3')).toBe(-3);
     expect(currencyToAmount('-3.45')).toBe(-3.45);
     expect(currencyToAmount('-3,45')).toBe(-3.45);
+    // Unicode minus
+    expect(currencyToAmount('−3')).toBe(-3);
+    expect(currencyToAmount('−3.45')).toBe(-3.45);
+    expect(currencyToAmount('−3,45')).toBe(-3.45);
   });
 
   test('currencyToAmount works with non-fractional numbers', () => {
@@ -180,5 +201,11 @@ describe('utility functions', () => {
     expect(titleFirst(null)).toBe('');
     expect(titleFirst('a')).toBe('A');
     expect(titleFirst('abc')).toBe('Abc');
+  });
+
+  test('stringToInteger works with negative numbers', () => {
+    expect(stringToInteger('-3')).toBe(-3);
+    // Unicode minus
+    expect(stringToInteger('−3')).toBe(-3);
   });
 });

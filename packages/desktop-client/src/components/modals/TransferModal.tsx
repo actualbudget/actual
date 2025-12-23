@@ -6,6 +6,8 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
+import { type IntegerAmount } from 'loot-core/shared/util';
+
 import {
   addToBeBudgetedGroup,
   removeCategoriesFromGroups,
@@ -55,7 +57,7 @@ export function TransferModal({
     return [filteredCategoryGroups, filteredCategories];
   }, [categoryId, originalCategoryGroups, showToBeBudgeted]);
 
-  const [amount, setAmount] = useState<number>(initialAmount);
+  const [amount, setAmount] = useState<IntegerAmount>(initialAmount);
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
 
@@ -99,7 +101,7 @@ export function TransferModal({
               <InitialFocus>
                 <AmountInput
                   value={initialAmount}
-                  autoDecimals={true}
+                  autoDecimals
                   style={{
                     marginLeft: styles.mobileEditingPadding,
                     marginRight: styles.mobileEditingPadding,

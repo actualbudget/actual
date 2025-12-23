@@ -18,6 +18,7 @@ import {
 
 import { computePadding } from './util/computePadding';
 
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -55,6 +56,7 @@ export function NetWorthGraph({
   const privacyMode = usePrivacyMode();
   const id = useId();
   const format = useFormat();
+  const animationProps = useRechartsAnimation({ isAnimationActive: false });
 
   // Use more aggressive smoothening for high-frequency data
   const interpolationType =
@@ -113,7 +115,7 @@ export function NetWorthGraph({
     payload?: PayloadItem[];
   };
 
-  // eslint-disable-next-line react/no-unstable-nested-components
+  // oxlint-disable-next-line react/no-unstable-nested-components
   const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
@@ -227,13 +229,13 @@ export function NetWorthGraph({
                 type={interpolationType}
                 dot={false}
                 activeDot={false}
-                animationDuration={0}
+                {...animationProps}
                 dataKey="y"
                 stroke={theme.reportsBlue}
                 strokeWidth={2}
                 fill={`url(#${gradientId})`}
                 fillOpacity={1}
-                connectNulls={true}
+                connectNulls
               />
             </AreaChart>
           </div>
