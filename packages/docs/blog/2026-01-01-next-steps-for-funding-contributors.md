@@ -1,6 +1,6 @@
 ---
 title: Next Steps for Funding Contributors
-description: Expanding upon our successful contributor compensation system, we're exploring new ways to reward broader project involvement—including feature work, bug fixes, and active community participation—while ensuring transparency, fairness, and sustainability in funding for all meaningful contributions.
+description: Expanding upon our successful contributor compensation system, we're exploring new ways to reward broader project involvement—including feature work, bug fixes, and active community participation—while ensuring transparency, fairness, and ongoing support in funding for all meaningful contributions.
 date: 2026-01-01T10:00
 slug: next-steps-for-funding-contributors
 tags: [announcement]
@@ -34,7 +34,7 @@ This model keeps things transparent and simple while rewarding real work from ac
 
 ## Funding all contributors
 
-There’s strong interest in compensating everyone who contributes meaningful work. However, we also have a valid concern that broad payments might encourage low-quality or superficial pull requests. We need to find a balance between inclusivity and quality.
+There’s strong interest in compensating everyone who contributes meaningful work. However, we also have a valid concern that broad payments might encourage low-quality or superficial pull requests. We need to find a balance between being open to more contributors and maintaining quality.
 
 ## Steps we plan to take:
 
