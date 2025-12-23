@@ -232,39 +232,36 @@ async function moveDashboardWidget({
     throw new Error(`Widget not found: ${widgetId}`);
   }
 
-  // Calculate position for the new widget in target dashboard
-  const targetData = await db.first<
-    Pick<db.DbDashboard, 'x' | 'y' | 'width' | 'height'>
-  >(
-    'SELECT x, y, width, height FROM dashboard WHERE dashboard_id = ? AND tombstone = 0 ORDER BY y DESC, x DESC',
-    [targetDashboardId],
-  );
-
-  let newX = 0;
-  let newY = 0;
-
-  if (targetData) {
-    const xBoundaryCheck = targetData.x + targetData.width + widget.width;
-    newX = xBoundaryCheck > 12 ? 0 : targetData.x + targetData.width;
-    newY = targetData.y + (xBoundaryCheck > 12 ? targetData.height : 0);
-  }
-
   await batchMessages(async () => {
     // Insert the widget to target dashboard
-    await db.insertWithSchema('dashboard', {
-      type: widget.type,
-      width: widget.width,
-      height: widget.height,
-      x: newX,
-      y: newY,
-      meta: widget.meta,
-      dashboard_id: targetDashboardId,
-    });
-
-    // If move (not copy), delete the original widget
-    if (!copy) {
-      await db.delete_('dashboard', widgetId);
+    switch (widget.type) {
+      // TODO: This seems like an anti-pattern
+      case 'net-worth-card':
+      case 'cash-flow-card':
+      case 'spending-card':
+      case 'crossover-card':
+      case 'markdown-card':
+      case 'summary-card':
+      case 'calendar-card':
+      case 'formula-card':
+      case 'custom-report':
+        const newWidget = {
+          type: widget.type,
+          width: widget.width,
+          height: widget.height,
+          meta: JSON.parse(widget.meta),
+          dashboardId: targetDashboardId,
+        };
+        await addDashboardWidget(newWidget);
+        // If move (not copy), delete the original widget
+        if (!copy) {
+          await removeDashboardWidget(widgetId);
+        }
+        break;
+      default:
+        throw new Error(`Unsupported widget type: ${widget.type}`);
     }
+
   });
 }
 
