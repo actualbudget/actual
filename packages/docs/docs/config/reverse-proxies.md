@@ -111,7 +111,7 @@ Please refer to the [official documentation](https://doc.traefik.io/traefik/user
 
 ### Note on Cross-Origin Isolation & Header Collisions
 
-Actual Budget requires a "Secure Context" and specific headers (**COOP/COEP**) to enable `SharedArrayBuffer` for its underlying SQLite engine. While the application attempts to set these headers automatically, implementing a manual Nginx configuration as suggested above can lead to **duplicate headers** (e.g., `require-corp, require-corp`).
+Actual Budget requires a "Secure Context" and specific headers (`COOP/COEP`) to enable `SharedArrayBuffer` for its underlying SQLite engine. While the application attempts to set these headers automatically, implementing a manual Nginx configuration as suggested above can lead to **duplicate headers** (e.g., `require-corp, require-corp`).
 
 Modern browsers will invalidate security policies if headers are duplicated, resulting in a `SharedArrayBufferMissing` fatal error.
 
