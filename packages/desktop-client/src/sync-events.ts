@@ -326,7 +326,7 @@ export function listenForSyncEvent(store: AppStore) {
           notif = {
             title: t('Update required'),
             message: t(
-              'We couldn’t apply changes from the server. This probably means you ' +
+              "We couldn't apply changes from the server. This probably means you " +
                 'need to update the app to support the latest database.',
             ),
             type: 'warning',
@@ -336,7 +336,7 @@ export function listenForSyncEvent(store: AppStore) {
           console.trace('apply-failure', event.meta);
           notif = {
             message: t(
-              'We couldn’t apply that change to the database. Please report this as a bug by [opening a GitHub issue]({{githubIssueLink}}).',
+              "We couldn't apply that change to the database. Please report this as a bug by [opening a GitHub issue]({{githubIssueLink}}).",
               { githubIssueLink },
             ),
           };

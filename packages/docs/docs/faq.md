@@ -16,10 +16,10 @@
 
 - **Q.** _How do I update my version of Actual after it has been updated?_
 
-  **A.** That depends how you’re hosting it.
+  **A.** That depends how you're hosting it.
   - PikaPods seems to refresh their image automatically around a week after the release goes out.
   - Actual builds and publishes an updated docker image with each release.
-  - If you’re on Fly.io we have a [guide for that too](./install/fly.md#updating-actual).
+  - If you're on Fly.io we have a [guide for that too](./install/fly.md#updating-actual).
 
 - **Q.** _I'm new to budgeting and learned with nYNAB. I'm not completely clear on how to handle credit
   cards. I largely charge almost everything to them for rewards and pay off in full. How do I track

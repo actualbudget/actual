@@ -32,7 +32,7 @@ test.describe('Payees', () => {
     // This is a simple visual check to ensure the page loads
     await expect(page).toMatchThemeScreenshots();
 
-    // Try searching for “Fast Internet” or “Home Depot,” etc.
+    // Try searching for "Fast Internet" or "Home Depot," etc.
     await payeesPage.searchFor('Fast Internet');
     // Screenshot check after searching
     await expect(page).toMatchThemeScreenshots();

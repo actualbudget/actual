@@ -157,6 +157,8 @@ function CustomReportListCardsInner({
           case 'rename':
             setNameMenuOpen(true);
             break;
+          default:
+            throw new Error(`Unrecognized menu option: ${item}`);
         }
       }}
     >

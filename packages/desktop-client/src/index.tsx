@@ -8,6 +8,7 @@ import './i18n';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
+import { type NavigateFunction } from 'react-router';
 
 import { bindActionCreators } from '@reduxjs/toolkit';
 
@@ -96,8 +97,9 @@ root.render(
 );
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+  // oxlint-disable-next-line typescript/consistent-type-definitions
   interface Window {
+    __navigate?: NavigateFunction;
     __actionsForMenu: typeof boundActions & {
       undo: typeof undo;
       redo: typeof redo;

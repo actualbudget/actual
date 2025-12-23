@@ -61,6 +61,10 @@ Actions can set the following fields:
 
 Actions can also prepend or append text to the `notes` field.
 
+## Experimental: rule formulas
+
+Actual also has an experimental “Excel formula mode” that lets some **Set** actions compute their value from a formula (toggle with the **ƒ** button in the rule editor). See [Excel Formula Mode](/docs/experimental/formulas).
+
 ## Automatic Rules
 
 Right now, there are two types of rules that Actual will automatically create or update for you: renaming payees and categorizing transactions.

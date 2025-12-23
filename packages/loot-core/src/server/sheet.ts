@@ -7,11 +7,12 @@ import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
 import * as Platform from '../shared/platform';
 
+import type * as DbModule from './db';
 import {
-  DbPreference,
-  DbReflectBudget,
-  DbZeroBudget,
-  DbZeroBudgetMonth,
+  type DbPreference,
+  type DbReflectBudget,
+  type DbZeroBudget,
+  type DbZeroBudgetMonth,
 } from './db';
 import { Spreadsheet } from './spreadsheet/spreadsheet';
 import { resolveName } from './spreadsheet/util';
@@ -196,9 +197,7 @@ export async function reloadSpreadsheet(db): Promise<Spreadsheet> {
   }
 }
 
-export async function loadUserBudgets(
-  db: typeof import('./db'),
-): Promise<void> {
+export async function loadUserBudgets(db: typeof DbModule): Promise<void> {
   const sheet = globalSheet;
 
   // TODO: Clear out the cache here so make sure future loads of the app

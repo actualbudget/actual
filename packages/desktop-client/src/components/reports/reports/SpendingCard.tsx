@@ -157,7 +157,7 @@ export function SpendingCard({
         {data ? (
           <SpendingGraph
             style={{ flex: 1 }}
-            compact={true}
+            compact
             data={data}
             mode={spendingReportMode}
             compare={compare}

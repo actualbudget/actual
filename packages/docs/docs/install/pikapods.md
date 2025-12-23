@@ -25,7 +25,7 @@ If you are technically inclined, just [Click here to create an account and run A
 
 You can leave the resources at their lowest setting (although you will need a non-zero amount of storage for your budget files).
 
-_Your browser does most of Actual's computation,_ so purchasing more resources for the server won’t necessarily result in a better experience.
+_Your browser does most of Actual's computation,_ so purchasing more resources for the server won't necessarily result in a better experience.
 
 After setting up your Pod, head over to our [Starting Fresh](/docs/getting-started/starting-fresh) guide to get started with
 Actual Budget.

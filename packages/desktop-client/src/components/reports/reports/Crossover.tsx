@@ -433,10 +433,6 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         earliestTransaction={earliestTransaction}
         latestTransaction={latestTransaction}
         onChangeDates={onChangeDates}
-        conditionsOp="and"
-        onUpdateFilter={() => {}}
-        onDeleteFilter={() => {}}
-        onConditionsOpChange={() => {}}
       >
         {widget && (
           <Button variant="primary" onPress={onSaveWidget}>
@@ -858,7 +854,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                 }}
               >
                 <span>
-                  <Trans>Target Nest Egg</Trans>:{' '}
+                  <Trans>Target Life Savings</Trans>:{' '}
                   <PrivacyFilter>
                     {targetNestEgg != null && !isNaN(targetNestEgg)
                       ? format(targetNestEgg, 'financial')

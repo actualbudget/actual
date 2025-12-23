@@ -72,7 +72,7 @@ export function ImportModal() {
 
             <Text style={{ marginBottom: 15 }}>
               <Trans>
-                Select an app to import from, and we’ll guide you through the
+                Select an app to import from, and we'll guide you through the
                 process.
               </Trans>
             </Text>

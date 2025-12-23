@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { SchemaConfig } from '../compiler';
+import { type SchemaConfig } from '../compiler';
 
 function f(type: string, opts?: Record<string, unknown>) {
   return { type, ...opts };
@@ -312,7 +312,6 @@ export const schemaConfig: SchemaConfig = {
 
     schedules: {
       v_schedules: internalFields => {
-        /* eslint-disable actual/typography */
         const fields = internalFields({
           next_date: `
             CASE
@@ -336,7 +335,6 @@ export const schemaConfig: SchemaConfig = {
         LEFT JOIN rules _rules ON _rules.id = _.rule
         LEFT JOIN payee_mapping pm ON pm.id = json_extract(_rules.conditions, _paths.payee || '.value')
         `;
-        /* eslint-enable actual/typography */
       },
     },
 

@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { TransactionEntity } from '../../types/models';
+import { type TransactionEntity } from '../../types/models';
 import * as db from '../db';
 
 import { mergeTransactions } from './merge';
@@ -282,5 +282,89 @@ describe('Merging success', () => {
       date: 20250101,
       imported_id: 'imported_1',
     });
+  });
+
+  it('preserves split categories when merging split transaction with uncategorized imported transaction', async () => {
+    // Create a manual transaction with splits
+    const manualParent = await db.insertTransaction({
+      account: 'one',
+      amount: 100,
+      date: '2025-01-01',
+      is_parent: true,
+      category: null,
+    });
+
+    const _sub1 = await db.insertTransaction({
+      account: 'one',
+      amount: 60,
+      date: '2025-01-01',
+      category: '1',
+      notes: 'Food',
+      is_child: true,
+      parent_id: manualParent,
+    });
+
+    const _sub2 = await db.insertTransaction({
+      account: 'one',
+      amount: 40,
+      date: '2025-01-01',
+      category: '2',
+      notes: 'Transport',
+      is_child: true,
+      parent_id: manualParent,
+    });
+
+    // Create an uncategorized imported transaction
+    const imported = await db.insertTransaction({
+      account: 'one',
+      amount: 100,
+      date: '2025-01-02',
+      imported_id: 'imported_1',
+      category: null,
+    });
+
+    // Merge: imported transaction should be kept (because it has imported_id)
+    const keptId = await mergeTransactions([
+      { id: manualParent },
+      { id: imported },
+    ]);
+    expect(keptId).toBe(imported);
+
+    // Check that the kept transaction is now a parent
+    const keptTransaction = await db.getTransaction(imported);
+    expect(keptTransaction?.is_parent).toBe(true);
+    expect(keptTransaction?.category).toBeNull();
+    expect(keptTransaction?.imported_id).toBe('imported_1');
+
+    // Check that subtransactions were transferred and still exist
+    const allTransactions = await getAllTransactions();
+    const childTransactions = allTransactions.filter(
+      t => t.parent_id === imported,
+    );
+    expect(childTransactions.length).toBe(2);
+
+    // Verify the subtransactions have the correct parent_id and preserved their categories
+    const child1 = childTransactions.find(t => t.amount === 60);
+    const child2 = childTransactions.find(t => t.amount === 40);
+
+    expect(child1).toMatchObject({
+      parent_id: imported,
+      category: '1',
+      notes: 'Food',
+      is_child: 1, // From getAllTransactions (db.all), not converted
+    });
+
+    expect(child2).toMatchObject({
+      parent_id: imported,
+      category: '2',
+      notes: 'Transport',
+      is_child: 1, // From getAllTransactions (db.all), not converted
+    });
+
+    // Verify no orphaned subtransactions remain
+    const orphanedChildren = allTransactions.filter(
+      t => t.parent_id === manualParent,
+    );
+    expect(orphanedChildren.length).toBe(0);
   });
 });

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { TransactionForRules } from '../transactions/transaction-rules';
+import { type TransactionForRules } from '../transactions/transaction-rules';
 
 import { Action } from './action';
 

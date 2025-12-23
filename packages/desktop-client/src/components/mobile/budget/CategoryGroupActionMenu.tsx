@@ -26,6 +26,8 @@ export function CategoryGroupActionMenu({
           case 'apply-budget-templates-in-group':
             onApplyBudgetTemplatesInGroup();
             break;
+          default:
+            throw new Error(`Unrecognized menu option: ${name}`);
         }
       }}
       items={[
