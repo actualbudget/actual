@@ -58,12 +58,8 @@ export function NetWorthCard({
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [isCardHovered, setIsCardHovered] = useState(false);
 
-  const {
-    menuItems: moveMenuItems,
-    handleMenuSelect: handleMoveMenuSelect,
-    MoveMenuPopover,
-    disableClick: moveMenuDisableClick,
-  } = useWidgetMoveMenu(onMove);
+  const { menuItems: moveMenuItems, handleMenuSelect: handleMoveMenuSelect } =
+    useWidgetMoveMenu(onMove);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -113,7 +109,7 @@ export function NetWorthCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      disableClick={nameMenuOpen || moveMenuDisableClick}
+      disableClick={nameMenuOpen}
       to={`/reports/net-worth/${widgetId}`}
       menuItems={[
         {
@@ -140,7 +136,6 @@ export function NetWorthCard({
         }
       }}
     >
-      <MoveMenuPopover />
       <View
         style={{ flex: 1 }}
         onPointerEnter={onCardHover}

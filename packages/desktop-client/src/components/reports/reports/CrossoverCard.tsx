@@ -73,12 +73,8 @@ export function CrossoverCard({
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
-  const {
-    menuItems: moveMenuItems,
-    handleMenuSelect: handleMoveMenuSelect,
-    MoveMenuPopover,
-    disableClick: moveMenuDisableClick,
-  } = useWidgetMoveMenu(onMove);
+  const { menuItems: moveMenuItems, handleMenuSelect: handleMoveMenuSelect } =
+    useWidgetMoveMenu(onMove);
 
   // Calculate date range from meta or use default range
   const [start, setStart] = useState<string>('');
@@ -167,7 +163,7 @@ export function CrossoverCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      disableClick={nameMenuOpen || moveMenuDisableClick}
+      disableClick={nameMenuOpen}
       to={`/reports/crossover/${widgetId}`}
       menuItems={[
         { name: 'rename', text: t('Rename') },
@@ -188,7 +184,6 @@ export function CrossoverCard({
         }
       }}
     >
-      <MoveMenuPopover />
       <View
         style={{ flex: 1 }}
         onPointerEnter={onCardHover}

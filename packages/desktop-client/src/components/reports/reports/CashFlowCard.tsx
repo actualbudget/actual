@@ -121,12 +121,8 @@ export function CashFlowCard({
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
-  const {
-    menuItems: moveMenuItems,
-    handleMenuSelect: handleMoveMenuSelect,
-    MoveMenuPopover,
-    disableClick: moveMenuDisableClick,
-  } = useWidgetMoveMenu(onMove);
+  const { menuItems: moveMenuItems, handleMenuSelect: handleMoveMenuSelect } =
+    useWidgetMoveMenu(onMove);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -161,7 +157,7 @@ export function CashFlowCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      disableClick={nameMenuOpen || moveMenuDisableClick}
+      disableClick={nameMenuOpen}
       to={`/reports/cash-flow/${widgetId}`}
       menuItems={[
         {
@@ -188,7 +184,6 @@ export function CashFlowCard({
         }
       }}
     >
-      <MoveMenuPopover />
       <View
         style={{ flex: 1 }}
         onPointerEnter={onCardHover}

@@ -512,6 +512,13 @@ export type Modal =
       };
     }
   | {
+      name: 'move-widget-to-dashboard';
+      options: {
+        action: 'move' | 'copy';
+        onSelect: (dashboardId: string) => void;
+      };
+    }
+  | {
       name: 'edit-user';
       options: {
         user: UserEntity | NewUserEntity;

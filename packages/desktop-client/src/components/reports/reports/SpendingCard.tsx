@@ -44,12 +44,8 @@ export function SpendingCard({
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
-  const {
-    menuItems: moveMenuItems,
-    handleMenuSelect: handleMoveMenuSelect,
-    MoveMenuPopover,
-    disableClick: moveMenuDisableClick,
-  } = useWidgetMoveMenu(onMove);
+  const { menuItems: moveMenuItems, handleMenuSelect: handleMoveMenuSelect } =
+    useWidgetMoveMenu(onMove);
 
   const spendingReportMode = meta?.mode ?? 'single-month';
 
@@ -83,7 +79,7 @@ export function SpendingCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      disableClick={nameMenuOpen || moveMenuDisableClick}
+      disableClick={nameMenuOpen}
       to={`/reports/spending/${widgetId}`}
       menuItems={[
         {
@@ -110,7 +106,6 @@ export function SpendingCard({
         }
       }}
     >
-      <MoveMenuPopover />
       <View
         style={{ flex: 1 }}
         onPointerEnter={() => setIsCardHovered(true)}

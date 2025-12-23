@@ -171,17 +171,13 @@ export function CalendarCard({
     return data?.calendarData.length;
   }, [data]);
 
-  const {
-    menuItems: moveMenuItems,
-    handleMenuSelect: handleMoveMenuSelect,
-    MoveMenuPopover,
-    disableClick: moveMenuDisableClick,
-  } = useWidgetMoveMenu(onMove);
+  const { menuItems: moveMenuItems, handleMenuSelect: handleMoveMenuSelect } =
+    useWidgetMoveMenu(onMove);
 
   return (
     <ReportCard
       isEditing={isEditing}
-      disableClick={nameMenuOpen || moveMenuDisableClick}
+      disableClick={nameMenuOpen}
       to={`/reports/calendar/${widgetId}`}
       menuItems={[
         {
@@ -208,7 +204,6 @@ export function CalendarCard({
         }
       }}
     >
-      <MoveMenuPopover />
       <View
         ref={el => (el ? cardRef(el) : undefined)}
         style={{ flex: 1, margin: 2, overflow: 'hidden', width: '100%' }}

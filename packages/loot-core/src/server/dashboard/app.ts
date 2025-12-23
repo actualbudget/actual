@@ -261,7 +261,6 @@ async function moveDashboardWidget({
       default:
         throw new Error(`Unsupported widget type: ${widget.type}`);
     }
-
   });
 }
 

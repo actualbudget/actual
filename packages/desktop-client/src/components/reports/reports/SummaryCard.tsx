@@ -43,12 +43,8 @@ export function SummaryCard({
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
-  const {
-    menuItems: moveMenuItems,
-    handleMenuSelect: handleMoveMenuSelect,
-    MoveMenuPopover,
-    disableClick: moveMenuDisableClick,
-  } = useWidgetMoveMenu(onMove);
+  const { menuItems: moveMenuItems, handleMenuSelect: handleMoveMenuSelect } =
+    useWidgetMoveMenu(onMove);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -103,7 +99,7 @@ export function SummaryCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      disableClick={nameMenuOpen || moveMenuDisableClick}
+      disableClick={nameMenuOpen}
       to={`/reports/summary/${widgetId}`}
       menuItems={[
         {
@@ -130,7 +126,6 @@ export function SummaryCard({
         }
       }}
     >
-      <MoveMenuPopover />
       <View style={{ flex: 1, overflow: 'hidden' }}>
         <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
           <ReportCardName

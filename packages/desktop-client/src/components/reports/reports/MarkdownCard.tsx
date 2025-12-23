@@ -53,17 +53,13 @@ export function MarkdownCard({
 
   const [isVisibleTextArea, setIsVisibleTextArea] = useState(false);
 
-  const {
-    menuItems: moveMenuItems,
-    handleMenuSelect: handleMoveMenuSelect,
-    MoveMenuPopover,
-    disableClick: moveMenuDisableClick,
-  } = useWidgetMoveMenu(onMove);
+  const { menuItems: moveMenuItems, handleMenuSelect: handleMoveMenuSelect } =
+    useWidgetMoveMenu(onMove);
 
   return (
     <ReportCard
       isEditing={isEditing}
-      disableClick={isVisibleTextArea || moveMenuDisableClick}
+      disableClick={isVisibleTextArea}
       menuItems={[
         {
           type: Menu.label,
@@ -125,7 +121,6 @@ export function MarkdownCard({
         }
       }}
     >
-      <MoveMenuPopover />
       <View
         style={{
           flex: 1,

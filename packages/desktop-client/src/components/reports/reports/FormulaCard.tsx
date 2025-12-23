@@ -31,12 +31,8 @@ export function FormulaCard({
 }: FormulaCardProps) {
   const { t } = useTranslation();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
-  const {
-    menuItems: moveMenuItems,
-    handleMenuSelect: handleMoveMenuSelect,
-    MoveMenuPopover,
-    disableClick: moveMenuDisableClick,
-  } = useWidgetMoveMenu(onMove);
+  const { menuItems: moveMenuItems, handleMenuSelect: handleMoveMenuSelect } =
+    useWidgetMoveMenu(onMove);
   const themeColors = useThemeColors();
 
   const formula = meta?.formula || '=SUM(1, 2, 3)';
@@ -78,7 +74,7 @@ export function FormulaCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      disableClick={nameMenuOpen || moveMenuDisableClick}
+      disableClick={nameMenuOpen}
       to={`/reports/formula/${widgetId}`}
       menuItems={[
         {
@@ -119,7 +115,6 @@ export function FormulaCard({
             }}
             onClose={() => setNameMenuOpen(false)}
           />
-          <MoveMenuPopover />
         </View>
         <View
           style={{

@@ -76,12 +76,8 @@ function CustomReportListCardsInner({
   const [earliestTransaction, setEarliestTransaction] = useState('');
   const [latestTransaction, setLatestTransaction] = useState('');
 
-  const {
-    menuItems: moveMenuItems,
-    handleMenuSelect: handleMoveMenuSelect,
-    MoveMenuPopover,
-    disableClick: moveMenuDisableClick,
-  } = useWidgetMoveMenu(onMove);
+  const { menuItems: moveMenuItems, handleMenuSelect: handleMoveMenuSelect } =
+    useWidgetMoveMenu(onMove);
 
   const payees = usePayees();
   const accounts = useAccounts();
@@ -139,7 +135,7 @@ function CustomReportListCardsInner({
   return (
     <ReportCard
       isEditing={isEditing}
-      disableClick={nameMenuOpen || moveMenuDisableClick}
+      disableClick={nameMenuOpen}
       to={`/reports/custom/${report.id}`}
       menuItems={[
         {
@@ -164,7 +160,6 @@ function CustomReportListCardsInner({
         }
       }}
     >
-      <MoveMenuPopover />
       <View style={{ flex: 1, padding: 10 }}>
         <View
           style={{
