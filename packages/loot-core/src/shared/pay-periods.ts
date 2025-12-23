@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
 
@@ -452,6 +451,7 @@ function getMaxPeriodsForYear(config: PayPeriodConfig): number {
   }
 }
 
+// String comparison works because format is 'YYYY-XX' with zero-padded values
 function isPayPeriodBefore(month1: string, month2: string): boolean {
   return month1 < month2;
 }

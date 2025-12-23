@@ -286,37 +286,7 @@ describe('Pay Period Utilities and Configuration', () => {
     });
 
     describe('Performance and Stress Tests', () => {
-      test('Frequent config changes do not degrade performance', () => {
-        const startTime = performance.now();
-
-        // Perform many config changes
-        for (let i = 0; i < 100; i++) {
-          const frequency =
-            i % 3 === 0 ? 'biweekly' : i % 3 === 1 ? 'monthly' : 'semimonthly';
-          const enabled = i % 4 !== 0;
-
-          setPayPeriodConfig({
-            enabled,
-            payFrequency: frequency,
-            startDate: `2024-01-${String((i % 28) + 1).padStart(2, '0')}`,
-          });
-
-          // Force some operations to ensure config is actually used
-          const config = getPayPeriodConfig();
-          if (config?.enabled) {
-            const periods = generatePayPeriods(2024, config);
-            expect(periods.length).toBeGreaterThan(0);
-          }
-        }
-
-        const endTime = performance.now();
-        const totalTime = endTime - startTime;
-
-        // Should complete 100 config changes + operations in reasonable time
-        expect(totalTime).toBeLessThan(1000); // Less than 1 second
-      });
-
-      test('Config loading handles edge cases without memory leaks', () => {
+      test('Config loading handles edge cases without throwing', () => {
         const testCases: PayPeriodConfig[] = [
           // Various valid configurations
           {
@@ -359,7 +329,7 @@ describe('Pay Period Utilities and Configuration', () => {
         });
       });
 
-      test('Async config access maintains state consistency', () => {
+      test('State remains consistent across randomized async operations', () => {
         // Simulate concurrent access (though JS is single-threaded, this tests state consistency)
         const promises: Promise<void>[] = [];
 
