@@ -8,6 +8,12 @@ const CONFIG = {
   POINTS_PER_ISSUE_TRIAGE_ACTION: 1,
   POINTS_PER_ISSUE_CLOSING_ACTION: 1,
   POINTS_PER_RELEASE_PR: 4, // Awarded to whoever merges the release PR
+  PR_CONTRIBUTION_POINTS: {
+    Features: 15,
+    Enhancements: 7,
+    Bugfix: 7,
+    Maintenance: 7,
+  },
   // Point tiers for code changes (non-docs)
   CODE_PR_REVIEW_POINT_TIERS: [
     { minChanges: 500, points: 8 },
@@ -30,6 +36,69 @@ const CONFIG = {
   ],
   DOCS_FILES_PATTERN: 'packages/docs/**/*',
 };
+
+/**
+ * Parse category from release notes file content.
+ * @param {string} content - The content of the release notes file.
+ * @returns {string|null} The category or null if not found.
+ */
+function parseReleaseNotesCategory(content) {
+  if (!content) return null;
+
+  // Extract YAML front matter
+  const frontMatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
+  if (!frontMatterMatch) return null;
+
+  // Extract category from front matter
+  const categoryMatch = frontMatterMatch[1].match(/^category:\s*(.+)$/m);
+  if (!categoryMatch) return null;
+
+  return categoryMatch[1].trim();
+}
+
+/**
+ * Get the category and points for a PR by reading its release notes file.
+ * @param {Octokit} octokit - The Octokit instance.
+ * @param {string} owner - Repository owner.
+ * @param {string} repo - Repository name.
+ * @param {number} prNumber - PR number.
+ * @returns {Object} Object with category and points, or null if error.
+ */
+async function getPRCategoryAndPoints(octokit, owner, repo, prNumber) {
+  const releaseNotesPath = `upcoming-release-notes/${prNumber}.md`;
+
+  try {
+    // Try to read the release notes file from the default branch
+    const { data: fileContent } = await octokit.repos.getContent({
+      owner,
+      repo,
+      path: releaseNotesPath,
+    });
+
+    if (fileContent.content) {
+      // Decode base64 content
+      const content = Buffer.from(fileContent.content, 'base64').toString(
+        'utf-8',
+      );
+      const category = parseReleaseNotesCategory(content);
+
+      if (category && CONFIG.PR_CONTRIBUTION_POINTS[category]) {
+        return {
+          category,
+          points: CONFIG.PR_CONTRIBUTION_POINTS[category],
+        };
+      }
+    }
+  } catch {
+    // Do nothing
+  }
+
+  // Fallback to Maintenance
+  return {
+    category: 'Maintenance',
+    points: CONFIG.PR_CONTRIBUTION_POINTS.Maintenance,
+  };
+}
 
 /**
  * Get the start and end dates for the last month.
@@ -89,6 +158,7 @@ async function countContributorPoints() {
       {
         codeReviews: [], // Will store objects with PR number and points for main repo changes
         docsReviews: [], // Will store objects with PR number and points for docs changes
+        prContributions: [], // Will store objects with PR number, category, and points for PR author contributions
         labelRemovals: [],
         issueClosings: [],
         points: 0,
@@ -202,6 +272,27 @@ async function countContributorPoints() {
             mergerStats.points += CONFIG.POINTS_PER_RELEASE_PR;
           }
         } else {
+          // Award points to PR author if they are a core maintainer
+          const prAuthor = pr.user?.login;
+          if (prAuthor && orgMemberLogins.has(prAuthor)) {
+            const categoryAndPoints = await getPRCategoryAndPoints(
+              octokit,
+              owner,
+              repo,
+              pr.number,
+            );
+
+            if (categoryAndPoints) {
+              const authorStats = stats.get(prAuthor);
+              authorStats.prContributions.push({
+                pr: pr.number.toString(),
+                category: categoryAndPoints.category,
+                points: categoryAndPoints.points,
+              });
+              authorStats.points += categoryAndPoints.points;
+            }
+          }
+
           const uniqueReviewers = new Set();
           reviews.data.forEach(review => {
             if (
@@ -293,7 +384,7 @@ async function countContributorPoints() {
   // Print all statistics
   printStats(
     'Code Review Statistics',
-    stats => stats.codeReviews.length,
+    stats => stats.codeReviews.reduce((sum, r) => sum + r.points, 0),
     (user, count) =>
       `${user}: ${count} (PRs: ${stats
         .get(user)
@@ -308,7 +399,7 @@ async function countContributorPoints() {
 
   printStats(
     'Docs Review Statistics',
-    stats => stats.docsReviews.length,
+    stats => stats.docsReviews.reduce((sum, r) => sum + r.points, 0),
     (user, count) =>
       `${user}: ${count} (PRs: ${stats
         .get(user)
@@ -317,15 +408,25 @@ async function countContributorPoints() {
   );
 
   printStats(
+    'PR Contribution Statistics',
+    stats => stats.prContributions.reduce((sum, r) => sum + r.points, 0),
+    (user, count) =>
+      `${user}: ${count} (PRs: ${stats
+        .get(user)
+        .prContributions.map(r => `#${r.pr} (${r.points}pts - ${r.category})`)
+        .join(', ')})`,
+  );
+
+  printStats(
     '"Needs Triage" Label Removal Statistics',
-    stats => stats.labelRemovals.length,
+    stats => stats.labelRemovals.reduce((sum, r) => sum + r.points, 0),
     (user, count) =>
       `${user}: ${count} (Issues: ${stats.get(user).labelRemovals.join(', ')})`,
   );
 
   printStats(
     'Issue Closing Statistics',
-    stats => stats.issueClosings.length,
+    stats => stats.issueClosings.reduce((sum, r) => sum + r.points, 0),
     (user, count) =>
       `${user}: ${count} (Issues: ${stats.get(user).issueClosings.join(', ')})`,
   );
