@@ -1,5 +1,6 @@
 import {
   Fragment,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -95,6 +96,11 @@ export function Overview() {
   };
   const { data: dashboards = [], isLoading: isDashboardsLoading } =
     useDashboards();
+
+  const dashboardsRef = useRef<readonly DashboardEntity[]>([]);
+  useEffect(() => {
+    dashboardsRef.current = dashboards;
+  }, [dashboards]);
 
   const dashboardIdParam = searchParams.get('dashboardId');
   const activeDashboard = useMemo(
@@ -408,9 +414,39 @@ export function Overview() {
 
   const onRenameDashboard = async (name: string, targetId: string) => {
     await send('dashboard-rename', { id: targetId, name });
-    // After completed rename, clear renaming and switch to the renamed dashboard
-    setRenamingId(null);
-    switchDashboard(targetId);
+  };
+
+  const clearDashboardSearchParam = () => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.delete('dashboardId');
+      return next;
+    });
+  };
+
+  const getNextDashboardIdAfterDelete = (
+    list: readonly DashboardEntity[],
+    deletedId: string,
+  ): string | null => {
+    if (list.length <= 1) {
+      return null;
+    }
+
+    const index = list.findIndex(d => d.id === deletedId);
+    if (index !== -1) {
+      const left = list[index - 1];
+      if (left && left.id !== deletedId) {
+        return left.id;
+      }
+
+      const right = list[index + 1];
+      if (right && right.id !== deletedId) {
+        return right.id;
+      }
+    }
+
+    const fallback = list.find(d => d.id !== deletedId);
+    return fallback ? fallback.id : null;
   };
 
   const openConfirmDeleteDashboard = (id: string) => {
@@ -423,12 +459,18 @@ export function Overview() {
               'Are you sure you want to delete this dashboard? This action cannot be undone.',
             ),
             onConfirm: async () => {
+              const nextDashboardId = getNextDashboardIdAfterDelete(
+                dashboardsRef.current,
+                id,
+              );
+
               await send('dashboard-delete', id);
-              // Switch to first dashboard to the left (or right if none to the left)
-              const currentIndex = dashboards.findIndex(d => d.id === id);
-              const newDashboard =
-                dashboards[currentIndex > 0 ? currentIndex - 1 : 1];
-              switchDashboard(newDashboard.id);
+
+              if (nextDashboardId) {
+                switchDashboard(nextDashboardId);
+              } else {
+                clearDashboardSearchParam();
+              }
             },
           },
         },
@@ -440,27 +482,63 @@ export function Overview() {
 
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
-  const renameInputRef = useRef<HTMLInputElement | null>(null);
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
-  const finishRename = (dashboard: DashboardEntity, e: SyntheticEvent) => {
+  useEffect(() => {
+    if (renamingId && renameInputRef.current) {
+      renameInputRef.current.focus();
+      renameInputRef.current.select();
+    }
+  }, [dashboards, renamingId]);
+
+  const renameInFlightRef = useRef<Set<string>>(new Set());
+
+  const finishRename = async (targetDashboardId: string, e: SyntheticEvent) => {
     e.preventDefault();
-    onRenameDashboard(renameValue.trim(), dashboard.id);
+
+    if (renameInFlightRef.current.has(targetDashboardId)) {
+      return;
+    }
+
+    const trimmedName = renameValue.trim();
+    if (!trimmedName) {
+      setRenamingId(null);
+      setRenameValue('');
+      return;
+    }
+
+    const existing = dashboardsRef.current.find(
+      d => d.id === targetDashboardId,
+    );
+    if (existing && existing.name === trimmedName) {
+      setRenamingId(null);
+      switchDashboard(targetDashboardId);
+      return;
+    }
+
+    renameInFlightRef.current.add(targetDashboardId);
+    try {
+      await onRenameDashboard(trimmedName, targetDashboardId);
+      // After completed rename, clear renaming and switch to the renamed dashboard
+      setRenamingId(null);
+      setRenameValue('');
+      switchDashboard(targetDashboardId);
+    } finally {
+      renameInFlightRef.current.delete(targetDashboardId);
+    }
   };
 
   const openRenameDashboard = async (id: string, name?: string) => {
     setRenamingId(id);
     setRenameValue(name || '');
-    // Do auto-focus in next tick to ensure input is rendered
-    setTimeout(() => {
-      renameInputRef.current?.focus();
-      renameInputRef.current?.select();
-    }, 25);
   };
 
   const handleAddDashboard = async () => {
     const defaultName = t('New dashboard');
     const newId = await onCreateDashboard(defaultName);
     if (newId) {
+      // Switch immediately so the new dashboard becomes active even if the live query lags.
+      switchDashboard(newId);
       openRenameDashboard(newId, defaultName);
     }
   };
@@ -703,12 +781,12 @@ export function Overview() {
               {dashboards.map(dashboard => (
                 <Fragment key={dashboard.id}>
                   {renamingId === dashboard.id ? (
-                    <Form onSubmit={e => finishRename(dashboard, e)}>
+                    <Form onSubmit={e => finishRename(dashboard.id, e)}>
                       <Input
                         ref={renameInputRef}
                         value={renameValue}
                         onChangeValue={setRenameValue}
-                        onBlur={e => finishRename(dashboard, e)}
+                        onBlur={e => finishRename(dashboard.id, e)}
                         style={{ width: 200 }}
                       />
                     </Form>
