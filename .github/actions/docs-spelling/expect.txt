@@ -37,8 +37,10 @@ Cloudflare
 CMCIFRPAXXX
 COBADEFF
 CODEOWNERS
+COEP
 commerzbank
 Copiar
+COOP
 CREGBEBB
 crt
 Danske
