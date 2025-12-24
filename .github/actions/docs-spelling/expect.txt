@@ -39,8 +39,8 @@ COBADEFF
 CODEOWNERS
 COEP
 commerzbank
-Copiar
 COOP
+Copiar
 CREGBEBB
 crt
 Danske
