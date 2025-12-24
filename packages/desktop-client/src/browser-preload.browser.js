@@ -86,9 +86,13 @@ global.Actual = {
       });
   },
 
-  startSyncServer: () => {},
+  startSyncServer: () => {
+    // Only for electron app
+  },
 
-  stopSyncServer: () => {},
+  stopSyncServer: () => {
+    // Only for electron app
+  },
 
   isSyncServerRunning: () => false,
 
@@ -96,7 +100,9 @@ global.Actual = {
     return '';
   },
 
-  restartElectronServer: () => {},
+  restartElectronServer: () => {
+    // Only for electron app
+  },
 
   openFileDialog: async ({ filters = [] }) => {
     const FILE_ACCEPT_OVERRIDES = {
@@ -192,17 +198,23 @@ global.Actual = {
   openInFileManager: () => {
     // File manager not available in browser
   },
-  onEventFromMain: () => {},
+  onEventFromMain: () => {
+    // Only for electron app
+  },
   isUpdateReadyForDownload: () => isUpdateReadyForDownload,
   waitForUpdateReadyForDownload: () => isUpdateReadyForDownloadPromise,
   applyAppUpdate: async () => {
     updateSW();
 
     // Wait for the app to reload
-    await new Promise(() => {});
+    await new Promise(() => {
+      // Do nothing
+    });
   },
 
-  ipcConnect: () => {},
+  ipcConnect: () => {
+    // Only for electron app
+  },
   getServerSocket: async () => {
     return worker;
   },
@@ -211,5 +223,7 @@ global.Actual = {
     window.__actionsForMenu.saveGlobalPrefs({ prefs: { theme } });
   },
 
-  moveBudgetDirectory: () => {},
+  moveBudgetDirectory: () => {
+    // Only for electron app
+  },
 };

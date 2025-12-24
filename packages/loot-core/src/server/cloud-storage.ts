@@ -23,13 +23,13 @@ import { getServer } from './server-config';
 
 const UPLOAD_FREQUENCY_IN_DAYS = 7;
 
-export interface UsersWithAccess {
+export type UsersWithAccess = {
   userId: string;
   userName: string;
   displayName: string;
   owner: boolean;
-}
-export interface RemoteFile {
+};
+export type RemoteFile = {
   deleted: boolean;
   fileId: string;
   groupId: string;
@@ -38,7 +38,7 @@ export interface RemoteFile {
   hasKey: boolean;
   owner: string;
   usersWithAccess: UsersWithAccess[];
-}
+};
 
 async function checkHTTPStatus(res) {
   if (res.status !== 200) {
@@ -90,7 +90,7 @@ export async function checkKey(): Promise<{
   return {
     valid:
       // This == comparison is important, they could be null or undefined
-      // eslint-disable-next-line eqeqeq
+      // oxlint-disable-next-line eslint/eqeqeq
       res.id == encryptKeyId &&
       (encryptKeyId == null || encryption.hasKey(encryptKeyId)),
   };
@@ -295,19 +295,19 @@ export async function upload() {
     res = await fetchJSON(getServer().SYNC_SERVER + '/upload-user-file', {
       method: 'POST',
       headers: {
-        'Content-Length': uploadContent.length,
+        'Content-Length': String(uploadContent.length),
         'Content-Type': 'application/encrypted-file',
         'X-ACTUAL-TOKEN': userToken,
         'X-ACTUAL-FILE-ID': cloudFileId,
         'X-ACTUAL-NAME': encodeURIComponent(budgetName),
-        'X-ACTUAL-FORMAT': 2,
+        'X-ACTUAL-FORMAT': '2',
         ...(uploadMeta
           ? { 'X-ACTUAL-ENCRYPT-META': JSON.stringify(uploadMeta) }
           : null),
         ...(groupId ? { 'X-ACTUAL-GROUP-ID': groupId } : null),
         // TODO: fix me
         // oxlint-disable-next-line typescript/no-explicit-any
-      } as any,
+      },
       body: uploadContent,
     });
   } catch (err) {
@@ -357,7 +357,9 @@ export async function possiblyUpload() {
   }
 
   // Don't block on uploading
-  upload().catch(() => {});
+  upload().catch(() => {
+    // Ignore errors
+  });
 }
 
 export async function removeFile(fileId) {

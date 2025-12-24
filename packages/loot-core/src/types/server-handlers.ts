@@ -1,6 +1,6 @@
-import { QueryState } from '../shared/query';
+import { type QueryState } from '../shared/query';
 
-export interface ServerHandlers {
+export type ServerHandlers = {
   undo: () => Promise<void>;
   redo: () => Promise<void>;
 
@@ -24,4 +24,4 @@ export interface ServerHandlers {
   }) => Promise<{ error?: string }>;
 
   'app-focused': () => Promise<void>;
-}
+};

@@ -29,7 +29,7 @@ This is the path to the config file. If not specified, the server will look for 
 
 See the `ACTUAL_DATA_DIR` section above to override the data folder location.
 
-You can’t specify this option in `config.json` since it needs to be used to find the `config.json` in the first place.
+You can't specify this option in `config.json` since it needs to be used to find the `config.json` in the first place.
 
 ## `ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB`
 
@@ -61,7 +61,7 @@ See [Activating HTTPS](/config/https.md) for more information on how to get HTTP
 
 <!-- ## `mode`
 
-The `mode` key is not currently used by anything, as far as I can tell. It’s exposed on the `/mode` route, but that route does not appear to be called by the frontend. -->
+The `mode` key is not currently used by anything, as far as I can tell. It's exposed on the `/mode` route, but that route does not appear to be called by the frontend. -->
 
 ## `port`
 
@@ -87,7 +87,7 @@ See the `ACTUAL_DATA_DIR` section above to override the data folder location.
 
 (Advanced, most people will not need to configure this.) The server will serve the frontend from this directory. If not specified, the server will use the files in the `@actual-app/web` package that it has installed. (environment variable: `ACTUAL_WEB_ROOT`)
 
-If you’re providing a custom frontend, make sure you provide an `index.html` in the top level of the `webRoot` directory, which will be served from the `/` route.
+If you're providing a custom frontend, make sure you provide an `index.html` in the top level of the `webRoot` directory, which will be served from the `/` route.
 
 ## `loginMethod`
 

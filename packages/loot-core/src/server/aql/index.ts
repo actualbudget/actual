@@ -1,8 +1,8 @@
 import { Query, type QueryState } from '../../shared/query';
 
-import { CompilerState, SqlPieces } from './compiler';
+import { type CompilerState, type SqlPieces } from './compiler';
 import {
-  AqlQueryParams,
+  type AqlQueryParams,
   compileAndRunAqlQuery,
   runCompiledAqlQuery,
 } from './exec';
