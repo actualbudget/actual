@@ -28,17 +28,17 @@ export function MoveWidgetToDashboardModal({
   const [searchParams] = useSearchParams();
 
   const dashboardIdParam = searchParams.get('dashboardId');
-  const currentDashboardId = useMemo(
-    () => dashboardIdParam ?? dashboards[0]?.id,
-    [dashboardIdParam, dashboards],
+  const activeDashboard = useMemo(
+    () => dashboards.find(d => d.id === dashboardIdParam) || dashboards[0],
+    [dashboards, dashboardIdParam],
   );
 
   const items: ComponentProps<typeof Menu>['items'] = useMemo(
     () =>
       dashboards
-        .filter(d => d.id !== currentDashboardId)
+        .filter(d => d.id !== activeDashboard?.id)
         .map(d => ({ name: d.id, text: d.name })),
-    [dashboards, currentDashboardId],
+    [dashboards, activeDashboard],
   );
 
   const title =

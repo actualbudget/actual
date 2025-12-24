@@ -244,12 +244,12 @@ async function moveDashboardWidget({
       case 'summary-card':
       case 'calendar-card':
       case 'formula-card':
-      case 'custom-report':
+      case 'custom-report': {
         const newWidget = {
           type: widget.type,
           width: widget.width,
           height: widget.height,
-          meta: JSON.parse(widget.meta),
+          meta: widget.meta ? JSON.parse(widget.meta) : {},
           dashboardId: targetDashboardId,
         };
         await addDashboardWidget(newWidget);
@@ -258,6 +258,7 @@ async function moveDashboardWidget({
           await removeDashboardWidget(widgetId);
         }
         break;
+      }
       default:
         throw new Error(`Unsupported widget type: ${widget.type}`);
     }

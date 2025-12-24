@@ -104,7 +104,7 @@ export function SaveReport({
       }
 
       if (!saveDashboardId) {
-        setErr('Cannot find dashboard to save report to!');
+        setErr(t('Cannot find dashboard to save report to!'));
         return;
       }
 
@@ -253,33 +253,35 @@ export function SaveReport({
             err={err}
           />
 
-          <View>
-            <SpaceBetween
-              style={{
-                padding: 15,
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-              }}
-            >
-              <FormField style={{ flex: 1 }}>
-                <FormLabel
-                  title={t('Dashboard')}
-                  htmlFor="dashboard-select"
-                  style={{ userSelect: 'none' }}
-                />
-                <Select
-                  id="dashboard-select"
-                  value={saveDashboardId}
-                  onChange={v => setSaveDashboardId(v)}
-                  defaultLabel={t('None')}
-                  options={
-                    dashboards ? dashboards.map(d => [d.id, d.name]) : []
-                  }
-                  style={{ marginTop: 10, width: 300 }}
-                />
-              </FormField>
-            </SpaceBetween>
-          </View>
+          {menuItem === 'save-report' && (
+            <View>
+              <SpaceBetween
+                style={{
+                  padding: 15,
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                }}
+              >
+                <FormField style={{ flex: 1 }}>
+                  <FormLabel
+                    title={t('Dashboard')}
+                    htmlFor="dashboard-select"
+                    style={{ userSelect: 'none' }}
+                  />
+                  <Select
+                    id="dashboard-select"
+                    value={saveDashboardId}
+                    onChange={v => setSaveDashboardId(v)}
+                    defaultLabel={t('None')}
+                    options={
+                      dashboards ? dashboards.map(d => [d.id, d.name]) : []
+                    }
+                    style={{ marginTop: 10, width: 300 }}
+                  />
+                </FormField>
+              </SpaceBetween>
+            </View>
+          )}
         </View>
       </Popover>
 
