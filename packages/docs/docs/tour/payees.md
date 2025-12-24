@@ -6,7 +6,7 @@ you have in your system and if they have any associated [rules](./rules).
 From this view, you can delete and merge payees as you see fit. See the
 [Payee section](/docs/transactions/payees) in the manual for more details.
 
-If you have any unused payees, they are readily available by clicking on the _Show n unused payee_.
+If you have any unused payees, they are readily available by clicking on the _Show unused payee_.
 
 ![](/img/a-tour-of-actual/tour-payees-overview.png)
 
