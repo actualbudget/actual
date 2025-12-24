@@ -1,5 +1,5 @@
-/* eslint-disable actual/typography */
 import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { Trans } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -24,7 +24,6 @@ import {
 } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 import { t } from 'i18next';
-import { createRoot } from 'react-dom/client';
 
 import { queryModeFunctions, type FunctionDef } from './queryModeFunctions';
 import { transactionModeFunctions } from './transactionModeFunctions';
@@ -193,6 +192,7 @@ const DATE_FUNCTIONS = new Set([
 
 const QUERY_FUNCTIONS = new Set([
   'QUERY',
+  'QUERY_COUNT',
   'LOOKUP',
   'VLOOKUP',
   'HLOOKUP',
@@ -466,16 +466,31 @@ export function excelFormulaAutocomplete(
   const functionCompletions = getFunctionCompletions(mode);
 
   const queryCompletions: Completion[] = queries
-    ? Object.keys(queries).map(queryName => ({
-        label: `QUERY("${queryName}")`,
-        type: 'function',
-        section: '🔍 Query Functions',
-        info: t('Execute the {{queryName}} query and return the result.', {
-          queryName,
-        }),
-        apply: `QUERY("${queryName}")`,
-        boost: 15, // Boost query completions to appear at top of Query Functions section
-      }))
+    ? Object.keys(queries).flatMap(queryName => [
+        {
+          label: `QUERY("${queryName}")`,
+          type: 'function',
+          section: '🔍 Query Functions',
+          info: t('Execute the {{queryName}} query and return the result.', {
+            queryName,
+          }),
+          apply: `QUERY("${queryName}")`,
+          boost: 15, // Boost query completions to appear at top of Query Functions section
+        },
+        {
+          label: `QUERY_COUNT("${queryName}")`,
+          type: 'function',
+          section: '🔍 Query Functions',
+          info: t(
+            'Execute the {{queryName}} query and return the number of matching rows.',
+            {
+              queryName,
+            },
+          ),
+          apply: `QUERY_COUNT("${queryName}")`,
+          boost: 14,
+        },
+      ])
     : [];
 
   const variableCompletions: Completion[] = variables

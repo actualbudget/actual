@@ -116,11 +116,20 @@ describe('utility functions', () => {
   test('number formatting works with apostrophe-dot format', () => {
     setNumberFormat({ format: 'apostrophe-dot', hideFraction: false });
     let formatter = getNumberFormat().formatter;
-    expect(formatter.format(Number('1234.56'))).toBe('1’234.56');
+    expect(formatter.format(Number('1234.56'))).toBe(`1\u2019234.56`);
 
     setNumberFormat({ format: 'apostrophe-dot', hideFraction: true });
     formatter = getNumberFormat().formatter;
-    expect(formatter.format(Number('1234.56'))).toBe('1’235');
+    expect(formatter.format(Number('1234.56'))).toBe(`1\u2019235`);
+  });
+
+  test('number formatting works with small negative numbers with 0 decimal places', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    const formatter = getNumberFormat().formatter;
+    expect(formatter.format(Number('-0.1'))).toBe('0');
+    expect(formatter.format(Number('-0.5'))).toBe('-1');
+    expect(formatter.format(Number('-0.9'))).toBe('-1');
+    expect(formatter.format(Number('-1.2'))).toBe('-1');
   });
 
   test('currencyToAmount works with basic numbers', () => {

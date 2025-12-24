@@ -818,7 +818,7 @@ function ConditionsList({
       });
     }
 
-    // (remove the inflow and outflow pseudo-fields since they’d be a pain to get right)
+    // (remove the inflow and outflow pseudo-fields since they'd be a pain to get right)
     let fields = conditionFields
       .map(f => f[0])
       .filter(f => f !== 'amount-inflow' && f !== 'amount-outflow');
@@ -1176,7 +1176,7 @@ export function RuleEditor({
 
             if (field === 'field') {
               a.type = FIELD_TYPES.get(a.field);
-              a.value = null;
+              a.value = value === 'date' ? '' : null;
               a.options = {
                 ...a.options,
                 template: undefined,

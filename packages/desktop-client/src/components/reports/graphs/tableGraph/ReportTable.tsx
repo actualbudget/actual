@@ -132,7 +132,7 @@ export function ReportTable({
           handleScroll={handleScroll}
           height={32 + scrollWidthTotals}
           interval={interval}
-          colorized={true}
+          colorized
         />
       );
     },

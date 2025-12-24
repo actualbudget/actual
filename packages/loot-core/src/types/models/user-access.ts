@@ -1,10 +1,10 @@
-export interface NewUserAccessEntity {
+export type NewUserAccessEntity = {
   fileId: string;
   userId: string;
-}
+};
 
-export interface UserAccessEntity extends NewUserAccessEntity {
+export type UserAccessEntity = {
   displayName: string;
   userName: string;
   fileName: string;
-}
+} & NewUserAccessEntity;

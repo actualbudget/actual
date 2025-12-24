@@ -264,7 +264,7 @@ export function BalanceHistoryGraph({
                       />
                     </linearGradient>
                   </defs>
-                  <YAxis domain={['dataMin', 'dataMax']} hide={true} />
+                  <YAxis domain={['dataMin', 'dataMax']} hide />
                   <RechartsTooltip
                     contentStyle={{
                       display: 'none',

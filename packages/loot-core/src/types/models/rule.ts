@@ -1,16 +1,16 @@
 import { type RecurConfig, type ScheduleEntity } from './schedule';
 
-export interface NewRuleEntity {
+export type NewRuleEntity = {
   stage: 'pre' | null | 'post';
   conditionsOp: 'or' | 'and';
   conditions: RuleConditionEntity[];
   actions: RuleActionEntity[];
   tombstone?: boolean;
-}
+};
 
-export interface RuleEntity extends NewRuleEntity {
+export type RuleEntity = {
   id: string;
-}
+} & NewRuleEntity;
 
 export type RuleConditionOp = RuleConditionEntity['op'];
 
@@ -128,7 +128,7 @@ export type RuleActionEntity =
   | AppendNoteRuleActionEntity
   | DeleteTransactionRuleActionEntity;
 
-export interface SetRuleActionEntity {
+export type SetRuleActionEntity = {
   field: string;
   op: 'set';
   value: unknown;
@@ -138,9 +138,9 @@ export interface SetRuleActionEntity {
     splitIndex?: number;
   };
   type?: string;
-}
+};
 
-export interface SetSplitAmountRuleActionEntity {
+export type SetSplitAmountRuleActionEntity = {
   op: 'set-split-amount';
   value: number;
   options?: {
@@ -148,24 +148,24 @@ export interface SetSplitAmountRuleActionEntity {
     method: 'fixed-amount' | 'fixed-percent' | 'remainder';
     formula?: string;
   };
-}
+};
 
-export interface LinkScheduleRuleActionEntity {
+export type LinkScheduleRuleActionEntity = {
   op: 'link-schedule';
   value: ScheduleEntity;
-}
+};
 
-export interface PrependNoteRuleActionEntity {
+export type PrependNoteRuleActionEntity = {
   op: 'prepend-notes';
   value: string;
-}
+};
 
-export interface AppendNoteRuleActionEntity {
+export type AppendNoteRuleActionEntity = {
   op: 'append-notes';
   value: string;
-}
+};
 
-export interface DeleteTransactionRuleActionEntity {
+export type DeleteTransactionRuleActionEntity = {
   op: 'delete-transaction';
   value: string;
-}
+};

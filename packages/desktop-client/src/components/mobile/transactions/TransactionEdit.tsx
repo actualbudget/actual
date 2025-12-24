@@ -457,7 +457,7 @@ const ChildTransactionEdit = forwardRef<
                   onClearActiveEdit();
                 }
               }}
-              autoDecimals={true}
+              autoDecimals
             />
           </View>
         </View>

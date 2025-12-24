@@ -59,7 +59,7 @@ export function BalanceMovementMenu({
         <TransferMenu
           categoryId={categoryId}
           initialAmount={catBalance}
-          showToBeBudgeted={true}
+          showToBeBudgeted
           onClose={onClose}
           onSubmit={(amount, toCategoryId) => {
             onBudgetAction(month, 'transfer-category', {

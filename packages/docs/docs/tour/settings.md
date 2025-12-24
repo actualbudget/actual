@@ -46,7 +46,7 @@ Actual's sync function is quite complicated and is is covered in detail [here](.
 
 ### Repair Split Transactions
 
-If you are experiencing bugs relating to split transactions and the “Reset budget cache” button above does not help, this tool may fix them.
+If you are experiencing bugs relating to split transactions and the "Reset budget cache" button above does not help, this tool may fix them.
 
 ### Experimental Features
 

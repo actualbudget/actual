@@ -9,8 +9,17 @@ export function sequentialNewlinesPlugin() {
   // Adapted from https://codesandbox.io/s/create-react-app-forked-h3rmcy?file=/src/sequentialNewlinePlugin.js:0-774
   const data = this.data();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function add(field: string, value: any) {
+  function add(
+    field: string,
+    value: {
+      enter: {
+        lineEndingBlank: (token: unknown) => void;
+      };
+      exit: {
+        lineEndingBlank: (token: unknown) => void;
+      };
+    },
+  ) {
     const list = data[field] ? data[field] : (data[field] = []);
 
     list.push(value);
