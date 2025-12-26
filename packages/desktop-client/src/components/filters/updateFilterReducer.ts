@@ -24,12 +24,8 @@ export function updateFilterReducer<T extends RuleConditionEntity>(
           action.op === 'offBudget')
       ) {
         // When switching to single-value operators, convert array to first element
-        if (Array.isArray(value) && value.length > 0) {
-          value = value[0];
-        } else {
-          // Clear out the value if switching between contains or
-          // is/oneof for the id or string type
-          value = null;
+        if (Array.isArray(value)) {
+          value = value.length > 0 ? value[0] : null;
         }
       } else if (
         (type === 'id' || type === 'string') &&
@@ -38,9 +34,10 @@ export function updateFilterReducer<T extends RuleConditionEntity>(
       ) {
         // Convert single value to array when switching to oneOf/notOneOf
         if (value === null || value === undefined) {
-          value = [] as T['value'];
+          value = [];
         } else if (!Array.isArray(value)) {
-          value = [value] as T['value'];
+          // @ts-expect-error - fix me
+          value = [value];
         }
       }
       return { ...state, op: action.op, value };
