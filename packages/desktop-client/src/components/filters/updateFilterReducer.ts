@@ -27,6 +27,10 @@ export function updateFilterReducer<T extends RuleConditionEntity>(
         // or null if empty
         if (Array.isArray(value)) {
           value = value.length > 0 ? value[0] : null;
+        } else {
+          // Clear out the value if switching between contains or
+          // is/oneof for the id or string type
+          value = null;
         }
       } else if (
         (type === 'id' || type === 'string') &&
