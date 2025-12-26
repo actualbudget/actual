@@ -46,7 +46,8 @@ category: ${cleanCategory}
 authors: [${summaryData.author}]
 ---
 
-${summaryData.summary}`;
+${summaryData.summary}
+`;
 
     const fileName = `upcoming-release-notes/${summaryData.prNumber}.md`;
 
