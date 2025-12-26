@@ -52,7 +52,11 @@ import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useUndo } from '@desktop-client/hooks/useUndo';
-import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
+import {
+  closeModal,
+  collapseModals,
+  pushModal,
+} from '@desktop-client/modals/modalsSlice';
 import { uncategorizedTransactions } from '@desktop-client/queries';
 import { useDispatch } from '@desktop-client/redux';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
@@ -880,6 +884,9 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
                     },
                   ),
                 });
+                // Close all modals after cover action to return to budget view
+                // with updated overspending banner
+                dispatch(closeModal());
               },
             },
           },
