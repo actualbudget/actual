@@ -33,9 +33,9 @@ export function updateFilterReducer<T extends RuleConditionEntity>(
       ) {
         // Convert single value to array when switching to oneOf/notOneOf
         if (value != null && !Array.isArray(value)) {
-          value = [value];
+          value = [value] as T['value'];
         } else if (value == null) {
-          value = [];
+          value = [] as T['value'];
         }
       }
       return { ...state, op: action.op, value };
