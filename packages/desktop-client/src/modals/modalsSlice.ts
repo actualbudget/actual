@@ -541,13 +541,13 @@ export type Modal =
   | {
       name: 'enable-openid';
       options: {
-        onSave: () => void;
+        onSave?: () => void;
       };
     }
   | {
       name: 'enable-password-auth';
       options: {
-        onSave: () => void;
+        onSave?: () => void;
       };
     }
   | {

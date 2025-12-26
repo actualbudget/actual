@@ -80,8 +80,13 @@ export class RuleError extends Error {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function APIError(msg: string, meta?: Record<string, any>) {
+export function APIError(
+  msg: string,
+  meta?: {
+    conditionErrors: string[];
+    actionErrors: string[];
+  },
+) {
   return { type: 'APIError', message: msg, meta };
 }
 

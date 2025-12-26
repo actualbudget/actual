@@ -785,4 +785,11 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
       { name: 'queryName', description: 'Name of the query to execute' },
     ],
   },
+  QUERY_COUNT: {
+    name: 'QUERY_COUNT',
+    description: t('Execute a query and return the number of matching rows.'),
+    parameters: [
+      { name: 'queryName', description: 'Name of the query to execute' },
+    ],
+  },
 };

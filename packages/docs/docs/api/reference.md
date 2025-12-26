@@ -590,7 +590,6 @@ Update fields of a rule. `fields` can specify any field described in [`Schedule`
 
 <Method name="deleteSchedule" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
 
-
 ## Misc
 
 #### BudgetFile

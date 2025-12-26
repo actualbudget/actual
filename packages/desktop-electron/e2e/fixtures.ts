@@ -1,12 +1,12 @@
-/* eslint-disable react-hooks/rules-of-hooks */
+/* oxlint-disable react-hooks/rules-of-hooks */
 import path from 'node:path';
 
 import {
   test as base,
   _electron,
-  Page,
-  ElectronApplication,
-  TestInfo,
+  type Page,
+  type ElectronApplication,
+  type TestInfo,
 } from '@playwright/test';
 import { remove, ensureDir } from 'fs-extra';
 

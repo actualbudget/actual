@@ -21,11 +21,11 @@ test.describe('Onboarding', () => {
   });
 
   test.afterEach(async () => {
-    await page.close();
+    await page?.close();
   });
 
   test('checks the page visuals', async () => {
-    await expect(configurationPage.heading).toHaveText('Where’s the server?');
+    await expect(configurationPage.heading).toHaveText("Where's the server?");
     await expect(page).toMatchThemeScreenshots();
 
     await configurationPage.clickOnNoServer();
@@ -92,7 +92,7 @@ test.describe('Onboarding', () => {
     await expect(accountPage.accountBalance).toHaveText('0.00');
   });
 
-  test('navigates back to start page by clicking on “no server” in an empty budget file', async () => {
+  test('navigates back to start page by clicking on "no server" in an empty budget file', async () => {
     await configurationPage.clickOnNoServer();
     const accountPage = await configurationPage.startFresh();
 
@@ -101,6 +101,6 @@ test.describe('Onboarding', () => {
     await navigation.clickOnNoServer();
     await page.getByRole('button', { name: 'Start using a server' }).click();
 
-    await expect(configurationPage.heading).toHaveText('Where’s the server?');
+    await expect(configurationPage.heading).toHaveText("Where's the server?");
   });
 });

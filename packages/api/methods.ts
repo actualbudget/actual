@@ -125,10 +125,10 @@ export function addTransactions(
   });
 }
 
-export interface ImportTransactionsOpts {
+export type ImportTransactionsOpts = {
   defaultCleared?: boolean;
   dryRun?: boolean;
-}
+};
 
 export function importTransactions(
   accountId: APIAccountEntity['id'],

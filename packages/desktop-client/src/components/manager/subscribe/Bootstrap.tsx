@@ -73,7 +73,7 @@ export function Bootstrap() {
       <Paragraph style={{ fontSize: 16, color: theme.pageTextDark }}>
         <Trans>
           Actual is a super fast privacy-focused app for managing your finances.
-          To secure your data, you’ll need to set a password for your server.
+          To secure your data, you'll need to set a password for your server.
         </Trans>
       </Paragraph>
 
@@ -83,7 +83,7 @@ export function Bootstrap() {
           <Link variant="external" to="https://actualbudget.org/docs/tour/">
             our tour
           </Link>{' '}
-          in a new tab for some guidance on what to do when you’ve set your
+          in a new tab for some guidance on what to do when you've set your
           password.
         </Trans>
       </Paragraph>

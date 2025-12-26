@@ -14,17 +14,16 @@ some of the [issues](https://github.com/actualbudget/actual/issues?q=is%3Aissue%
 
 Actual Budget can be installed on many different platforms. However, at this time, the official Actual Budget documentation only supports the following methods:
 
-* Local Installation (on your own machine)
-  * Actual-server
-  * Desktop apps
-* Fly.io
-* PikaPods
-* Docker
+- Local Installation (on your own machine)
+  - Actual-server
+  - Desktop apps
+- Fly.io
+- PikaPods
+- Docker
 
 If you would like to write documentation for another installation variant, please feel free to continue to do this and host it on your own personal blog, Medium, Tumblr, or any other short-form publication service. We will be more than happy to add a link to that from our documentation. Open a [PR](https://github.com/actualbudget/actual/pulls) and add it to the list in the [installation overview](https://actualbudget.org/docs/install/#additional-installation-options).
 
 However, in doing so, you would become responsible for these instructions. If they become out of date or people want in-depth help with them, we will point them to you for assistance if the community is unable to help. If lots of people report issues with them, we may have to remove the link altogether.
-
 
 ## Contributing 
 
