@@ -558,6 +558,34 @@ describe('Pay Period Utilities and Configuration', () => {
       expect(isPayPeriod(result)).toBe(true);
       expect(result.startsWith('2023-')).toBe(true);
     });
+
+    test('handles time-of-day variations on boundary days', () => {
+      // Biweekly config starting on Jan 5, 2024
+      // First period: Jan 5 - Jan 18
+      const config: PayPeriodConfig = {
+        enabled: true,
+        payFrequency: 'biweekly',
+        startDate: '2024-01-05',
+      };
+
+      // Test start day (Jan 5)
+      // Morning (before noon)
+      const startMorning = new Date('2024-01-05T08:00:00');
+      expect(getCurrentPayPeriod(startMorning, config)).toBe('2024-13');
+
+      // Evening (after noon)
+      const startEvening = new Date('2024-01-05T20:00:00');
+      expect(getCurrentPayPeriod(startEvening, config)).toBe('2024-13');
+
+      // Test end day (Jan 18)
+      // Morning
+      const endMorning = new Date('2024-01-18T08:00:00');
+      expect(getCurrentPayPeriod(endMorning, config)).toBe('2024-13');
+
+      // Evening - this is where it likely fails due to noon-alignment gaps
+      const endEvening = new Date('2024-01-18T20:00:00');
+      expect(getCurrentPayPeriod(endEvening, config)).toBe('2024-13');
+    });
   });
 
   describe('Monthly Pay Period End Date Calculation', () => {

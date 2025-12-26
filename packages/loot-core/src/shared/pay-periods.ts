@@ -27,7 +27,7 @@ export function applyPayPeriodPrefs(prefs: {
   payPeriodFrequency?: string;
   payPeriodStartDate?: string;
 }): void {
-  if (!prefs) {
+  if (!prefs || Object.keys(prefs).length === 0) {
     // Set a disabled default config to ensure graceful fallback
     const fallbackConfig = {
       enabled: false,
@@ -96,7 +96,7 @@ function findFirstPeriodOfYear(
   targetYear: number,
 ): Date {
   // Calculate how many days from Jan 1 of target year to the reference start
-  const targetYearStart = new Date(targetYear, 0, 1); // Jan 1 of target year
+  const targetYearStart = new Date(targetYear, 0, 1, 12); // Jan 1 of target year at noon
   const daysDiff = Math.floor(
     (referenceStart.getTime() - targetYearStart.getTime()) /
       (1000 * 60 * 60 * 24),
@@ -165,13 +165,13 @@ function computePayPeriodByIndex(
     // semimonthly: Two periods per month: 1st-15th and 16th-end of month
     const monthOffset = Math.floor((periodIndex - 1) / 2);
     const isFirstHalf = (periodIndex - 1) % 2 === 0;
-    const targetMonth = new Date(targetYear, monthOffset, 1);
+    const targetMonth = new Date(targetYear, monthOffset, 1, 12);
 
     if (isFirstHalf) {
       startDate = d.startOfMonth(targetMonth);
-      endDate = new Date(targetYear, monthOffset, 15);
+      endDate = new Date(targetYear, monthOffset, 15, 12);
     } else {
-      startDate = new Date(targetYear, monthOffset, 16);
+      startDate = new Date(targetYear, monthOffset, 16, 12);
       endDate = d.endOfMonth(targetMonth);
     }
   }
@@ -398,7 +398,14 @@ export function getCurrentPayPeriod(
     const startDate = parseDate(period.startDate);
     const endDate = parseDate(period.endDate);
 
-    if (d.isWithinInterval(date, { start: startDate, end: endDate })) {
+    // Normalize input date to noon to avoid time-of-day gaps
+    // Pay period start/end dates are always set to noon, so we must
+    // compare against a noon-aligned date to match the interval correctly
+    const normalizedDate = parseDate(dayFromDate(date));
+
+    if (
+      d.isWithinInterval(normalizedDate, { start: startDate, end: endDate })
+    ) {
       return period.monthId;
     }
   }
