@@ -36,8 +36,8 @@ type NoteAmendMode = NonNullable<
 const noteAmendStrings: Record<NoteAmendMode, string> = {
   prepend: 'Prepend',
   replace: 'Replace',
-  findAndReplace: 'Find and Replace',
   append: 'Append',
+  findAndReplace: 'Find and Replace',
 };
 
 type EditFieldModalProps = Extract<
