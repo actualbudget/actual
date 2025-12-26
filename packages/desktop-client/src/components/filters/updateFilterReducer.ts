@@ -24,9 +24,8 @@ export function updateFilterReducer<T extends RuleConditionEntity>(
           action.op === 'offBudget')
       ) {
         // When switching to single-value operators, convert array to first element
-        // or null if empty
-        if (Array.isArray(value)) {
-          value = value.length > 0 ? value[0] : null;
+        if (Array.isArray(value) && value.length > 0) {
+          value = value[0];
         } else {
           // Clear out the value if switching between contains or
           // is/oneof for the id or string type
