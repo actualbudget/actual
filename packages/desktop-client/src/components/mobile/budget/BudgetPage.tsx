@@ -1,5 +1,11 @@
 // @ts-strict-ignore
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -52,11 +58,7 @@ import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useUndo } from '@desktop-client/hooks/useUndo';
-import {
-  closeModal,
-  collapseModals,
-  pushModal,
-} from '@desktop-client/modals/modalsSlice';
+import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
 import { uncategorizedTransactions } from '@desktop-client/queries';
 import { useDispatch } from '@desktop-client/redux';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
@@ -840,6 +842,9 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
     totalAmount: totalOverspending,
   } = useOverspentCategories({ month });
 
+  const amountsByCategoryRef = useRef(amountsByCategory);
+  amountsByCategoryRef.current = amountsByCategory;
+
   const categoryGroupsToShow = useMemo(
     () =>
       categoryGroups
@@ -863,7 +868,7 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
             options: {
               title: category.name,
               month,
-              amount: amountsByCategory.get(category.id),
+              amount: amountsByCategoryRef.current.get(category.id),
               categoryId: category.id,
               onSubmit: (amount, fromCategoryId) => {
                 onBudgetAction(month, 'cover-overspending', {
@@ -884,9 +889,6 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
                     },
                   ),
                 });
-                // Close all modals after cover action to return to budget view
-                // with updated overspending banner
-                dispatch(closeModal());
               },
             },
           },
@@ -894,7 +896,6 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
       );
     },
     [
-      amountsByCategory,
       categoriesById,
       dispatch,
       month,
