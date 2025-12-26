@@ -38,7 +38,7 @@ describe('updateFilterReducer', () => {
       expect(result.value).toEqual(['account-id-456']);
     });
 
-    it('should convert array to single value when switching from "oneOf" to "is"', () => {
+    it('should keep first element when switching from "oneOf" to "is" with multiple values', () => {
       const state = {
         field: 'category' as const,
         op: 'oneOf' as const,
@@ -51,7 +51,55 @@ describe('updateFilterReducer', () => {
       });
 
       expect(result.op).toBe('is');
+      expect(result.value).toBe('category-id-123');
+    });
+
+    it('should keep first element when switching from "oneOf" to "is" with single value array', () => {
+      const state = {
+        field: 'category' as const,
+        op: 'oneOf' as const,
+        value: ['category-id-789'],
+      };
+
+      const result = updateFilterReducer(state, {
+        type: 'set-op',
+        op: 'is',
+      });
+
+      expect(result.op).toBe('is');
+      expect(result.value).toBe('category-id-789');
+    });
+
+    it('should handle empty array when switching from "oneOf" to "is"', () => {
+      const state = {
+        field: 'category' as const,
+        op: 'oneOf' as const,
+        value: [],
+      };
+
+      const result = updateFilterReducer(state, {
+        type: 'set-op',
+        op: 'is',
+      });
+
+      expect(result.op).toBe('is');
       expect(result.value).toBe(null);
+    });
+
+    it('should keep first element when switching from "notOneOf" to "isNot"', () => {
+      const state = {
+        field: 'account' as const,
+        op: 'notOneOf' as const,
+        value: ['account-id-111', 'account-id-222'],
+      };
+
+      const result = updateFilterReducer(state, {
+        type: 'set-op',
+        op: 'isNot',
+      });
+
+      expect(result.op).toBe('isNot');
+      expect(result.value).toBe('account-id-111');
     });
 
     it('should handle null value when switching to "oneOf"', () => {
@@ -89,6 +137,8 @@ describe('updateFilterReducer', () => {
     });
 
     it('should not convert value for notes field when switching to "oneOf"', () => {
+      // The notes field is excluded from auto-conversion because it uses
+      // string operators like 'contains' rather than 'oneOf'/'notOneOf'
       const state = {
         field: 'notes' as const,
         op: 'contains' as const,
