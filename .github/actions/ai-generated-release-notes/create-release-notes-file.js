@@ -75,7 +75,7 @@ ${summaryData.summary}`;
       repo: headRepo,
       path: fileName,
       message: `Add release notes for PR #${summaryData.prNumber}`,
-      content: Buffer.from(`${fileContent}\n\n`).toString('base64'),
+      content: Buffer.from(fileContent).toString('base64'),
       branch: prBranch,
       committer: {
         name: 'github-actions[bot]',
