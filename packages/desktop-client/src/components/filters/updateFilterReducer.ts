@@ -26,6 +26,17 @@ export function updateFilterReducer<T extends RuleConditionEntity>(
         // Clear out the value if switching between contains or
         // is/oneof for the id or string type
         value = null;
+      } else if (
+        (type === 'id' || type === 'string') &&
+        state.field !== 'notes' &&
+        (action.op === 'oneOf' || action.op === 'notOneOf')
+      ) {
+        // Convert single value to array when switching to oneOf/notOneOf
+        if (value != null && !Array.isArray(value)) {
+          value = [value];
+        } else if (value == null) {
+          value = [];
+        }
       }
       return { ...state, op: action.op, value };
     }
