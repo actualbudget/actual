@@ -17,7 +17,6 @@ describe('updateFilterReducer', () => {
       });
 
       expect(result.op).toBe('oneOf');
-      expect(Array.isArray(result.value)).toBe(true);
       expect(result.value).toEqual(['category-id-123']);
     });
 
@@ -34,7 +33,6 @@ describe('updateFilterReducer', () => {
       });
 
       expect(result.op).toBe('notOneOf');
-      expect(Array.isArray(result.value)).toBe(true);
       expect(result.value).toEqual(['account-id-456']);
     });
 
@@ -115,7 +113,6 @@ describe('updateFilterReducer', () => {
       });
 
       expect(result.op).toBe('oneOf');
-      expect(Array.isArray(result.value)).toBe(true);
       expect(result.value).toEqual([]);
     });
 
@@ -132,7 +129,6 @@ describe('updateFilterReducer', () => {
       });
 
       expect(result.op).toBe('notOneOf');
-      expect(Array.isArray(result.value)).toBe(true);
       expect(result.value).toEqual(['category-id-123']);
     });
 
