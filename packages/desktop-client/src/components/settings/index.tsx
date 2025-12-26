@@ -13,6 +13,7 @@ import { css } from '@emotion/css';
 import { listen } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
 
+import { AISettings } from './AISettings';
 import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
@@ -177,6 +178,7 @@ export function Settings() {
   const dispatch = useDispatch();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
   const isForceReloadEnabled = useFeatureFlag('forceReload');
+  const isAIAssistantEnabled = useFeatureFlag('aiAssistant');
   const [_, setDefaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
 
   const onCloseBudget = () => {
@@ -246,6 +248,7 @@ export function Settings() {
         <FormatSettings />
         {isCurrencyExperimentalEnabled && <CurrencySettings />}
         <LanguageSettings />
+        {isAIAssistantEnabled && <AISettings />}
         <AuthSettings />
         <EncryptionSettings />
         <BudgetTypeSettings />

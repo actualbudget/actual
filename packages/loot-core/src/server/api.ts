@@ -508,9 +508,21 @@ handlers['api/transactions-add'] = withMutation(async function ({
   learnCategories = false,
 }) {
   checkFileOpen();
+
+  // Check if AI category suggestions are enabled
+  let aiSuggestCategories = false;
+  try {
+    const { getAIConfig } = await import('./ai/service');
+    const aiConfig = await getAIConfig();
+    aiSuggestCategories = aiConfig?.enabled || false;
+  } catch (error) {
+    // AI service not available or not configured
+  }
+
   await addTransactions(accountId, transactions, {
     runTransfers,
     learnCategories,
+    aiSuggestCategories,
   });
   return 'ok' as const;
 });
@@ -968,6 +980,30 @@ handlers['api/get-id-by-name'] = async function ({ type, name }) {
 handlers['api/get-server-version'] = async function () {
   checkFileOpen();
   return handlers['get-server-version']();
+};
+
+handlers['api/ai-suggest-category'] = async function ({ transaction }) {
+  checkFileOpen();
+  const { suggestCategory } = await import('./ai/service');
+  return suggestCategory(transaction);
+};
+
+handlers['api/ai-test-config'] = async function ({ provider, apiKey, model }) {
+  checkFileOpen();
+  const { testAIConfig } = await import('./ai/service');
+  return testAIConfig(provider, apiKey, model);
+};
+
+handlers['api/ai-get-models'] = async function ({ provider, apiKey }) {
+  checkFileOpen();
+  const { fetchOpenAIModels } = await import('./ai/service');
+
+  if (provider === 'openai') {
+    return fetchOpenAIModels(apiKey);
+  }
+
+  // For other providers, return empty array for now
+  return [];
 };
 
 export function installAPI(serverHandlers: ServerHandlers) {

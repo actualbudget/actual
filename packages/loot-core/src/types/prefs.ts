@@ -6,7 +6,8 @@ export type FeatureFlag =
   | 'currency'
   | 'crossoverReport'
   | 'plugins'
-  | 'forceReload';
+  | 'forceReload'
+  | 'aiAssistant';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -47,7 +48,11 @@ export type SyncedPrefs = Partial<
     | `ofx-fallback-missing-payee-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
     | `flags.${FeatureFlag}`
-    | `learn-categories`,
+    | `learn-categories`
+    | 'ai-provider'
+    | 'ai-api-key'
+    | 'ai-model'
+    | 'ai-suggest-categories',
     string
   >
 >;

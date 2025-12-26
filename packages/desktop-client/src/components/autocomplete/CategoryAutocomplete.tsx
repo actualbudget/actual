@@ -9,6 +9,8 @@ import React, {
   type ReactElement,
   type CSSProperties,
   useCallback,
+  useState,
+  useEffect,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -26,6 +28,7 @@ import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
+  type TransactionEntity,
 } from 'loot-core/types/models';
 
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
@@ -36,10 +39,12 @@ import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import {
   trackingBudget,
   envelopeBudget,
 } from '@desktop-client/spreadsheet/bindings';
+import { send } from 'loot-core/platform/client/fetch';
 
 type CategoryAutocompleteItem = Omit<CategoryEntity, 'group'> & {
   group?: CategoryGroupEntity;
@@ -211,6 +216,7 @@ type CategoryAutocompleteProps = ComponentProps<
   categoryGroups?: Array<CategoryGroupEntity>;
   showBalances?: boolean;
   showSplitOption?: boolean;
+  transaction?: Partial<TransactionEntity>;
   renderSplitTransactionButton?: (
     props: ComponentPropsWithoutRef<typeof SplitTransactionButton>,
   ) => ReactElement<typeof SplitTransactionButton>;
@@ -229,6 +235,7 @@ export function CategoryAutocomplete({
   showSplitOption,
   embedded,
   closeOnBlur,
+  transaction,
   renderSplitTransactionButton,
   renderCategoryItemGroupHeader,
   renderCategoryItem,
@@ -236,6 +243,46 @@ export function CategoryAutocomplete({
   ...props
 }: CategoryAutocompleteProps) {
   const { grouped: defaultCategoryGroups = [] } = useCategories();
+  const isAIEnabled = useFeatureFlag('aiAssistant');
+  const [aiSuggestCategories] = useSyncedPref('ai-suggest-categories');
+  const [aiSuggestion, setAiSuggestion] = useState<{
+    categoryId: string;
+    categoryName: string;
+    confidence: number;
+  } | null>(null);
+  const [loadingSuggestion, setLoadingSuggestion] = useState(false);
+
+  // Fetch AI suggestion when component mounts or transaction changes
+  useEffect(() => {
+    const shouldFetchSuggestion =
+      isAIEnabled &&
+      aiSuggestCategories === 'true' &&
+      transaction &&
+      transaction.payee &&
+      !transaction.category;
+
+    if (shouldFetchSuggestion && !aiSuggestion && !loadingSuggestion) {
+      setLoadingSuggestion(true);
+      send('api/ai-suggest-category', { transaction })
+        .then(result => {
+          if (result) {
+            setAiSuggestion(result);
+          }
+        })
+        .catch(error => {
+          console.error('Failed to get AI suggestion:', error);
+        })
+        .finally(() => {
+          setLoadingSuggestion(false);
+        });
+    }
+  }, [
+    isAIEnabled,
+    aiSuggestCategories,
+    transaction,
+    aiSuggestion,
+    loadingSuggestion,
+  ]);
   const categorySuggestions: CategoryAutocompleteItem[] = useMemo(() => {
     const allSuggestions = (categoryGroups || defaultCategoryGroups).reduce(
       (list, group) =>
@@ -319,17 +366,64 @@ export function CategoryAutocomplete({
       filterSuggestions={filterSuggestions}
       suggestions={categorySuggestions}
       renderItems={(items, getItemProps, highlightedIndex) => (
-        <CategoryList
-          items={items}
-          embedded={embedded}
-          getItemProps={getItemProps}
-          highlightedIndex={highlightedIndex}
-          renderSplitTransactionButton={renderSplitTransactionButton}
-          renderCategoryItemGroupHeader={renderCategoryItemGroupHeader}
-          renderCategoryItem={renderCategoryItem}
-          showHiddenItems={showHiddenCategories}
-          showBalances={showBalances}
-        />
+        <>
+          {aiSuggestion && !loadingSuggestion && (
+            <View
+              style={{
+                padding: 8,
+                backgroundColor: theme.noticeBackgroundLight,
+                borderBottom: `1px solid ${theme.noticeBackground}`,
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    fontSize: '0.85em',
+                    fontWeight: 500,
+                    color: theme.noticeTextLight,
+                  }}
+                >
+                  💡 AI suggests: {aiSuggestion.categoryName} (
+                  {Math.round(aiSuggestion.confidence * 100)}% confident)
+                </Text>
+              </View>
+            </View>
+          )}
+          {loadingSuggestion && (
+            <View
+              style={{
+                padding: 8,
+                backgroundColor: theme.tableBackground,
+                borderBottom: `1px solid ${theme.tableBorder}`,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: '0.85em',
+                  color: theme.pageTextSubdued,
+                  fontStyle: 'italic',
+                }}
+              >
+                💭 Getting AI suggestion...
+              </Text>
+            </View>
+          )}
+          <CategoryList
+            items={items}
+            embedded={embedded}
+            getItemProps={getItemProps}
+            highlightedIndex={highlightedIndex}
+            renderSplitTransactionButton={renderSplitTransactionButton}
+            renderCategoryItemGroupHeader={renderCategoryItemGroupHeader}
+            renderCategoryItem={renderCategoryItem}
+            showHiddenItems={showHiddenCategories}
+            showBalances={showBalances}
+          />
+        </>
       )}
       {...props}
     />

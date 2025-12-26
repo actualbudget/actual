@@ -822,7 +822,7 @@ export async function matchTransactions(
 export async function addTransactions(
   acctId,
   transactions,
-  { runTransfers = true, learnCategories = false } = {},
+  { runTransfers = true, learnCategories = false, aiSuggestCategories = false } = {},
 ) {
   const added = [];
 
@@ -835,9 +835,43 @@ export async function addTransactions(
   const accounts: db.DbAccount[] = await db.getAccounts();
   const accountsMap = new Map(accounts.map(account => [account.id, account]));
 
+  // Load AI service if needed
+  let suggestCategory = null;
+  if (aiSuggestCategories) {
+    try {
+      const aiService = await import('../ai/service');
+      suggestCategory = aiService.suggestCategory;
+    } catch (error) {
+      console.error('Failed to load AI service:', error);
+    }
+  }
+
   for (const { trans: originalTrans, subtransactions } of normalized) {
     // Run the rules
     const trans = await runRules(originalTrans, accountsMap);
+
+    // Try AI category suggestion if enabled and no category set yet
+    if (suggestCategory && !trans.category && trans.payee) {
+      try {
+        const suggestion = await suggestCategory({
+          ...trans,
+          account: acctId,
+        });
+
+        if (suggestion && suggestion.categoryId) {
+          trans.category = suggestion.categoryId;
+          // Optionally add a note about AI suggestion
+          if (trans.notes) {
+            trans.notes += ` [AI: ${suggestion.categoryName}]`;
+          } else {
+            trans.notes = `AI suggested: ${suggestion.categoryName}`;
+          }
+        }
+      } catch (error) {
+        console.error('AI category suggestion failed:', error);
+        // Continue without AI suggestion
+      }
+    }
 
     const finalTransaction = {
       id: uuidv4(),

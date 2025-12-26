@@ -1588,6 +1588,7 @@ const Transaction = memo(function Transaction({
                 onUpdate={onUpdate}
                 onSelect={onSave}
                 showHiddenCategories={showHiddenCategories}
+                transaction={transaction}
               />
             </SheetNameProvider>
           )}

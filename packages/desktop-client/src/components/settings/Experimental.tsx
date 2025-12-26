@@ -171,6 +171,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>Crossover Report</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="aiAssistant"
+              feedbackLink="https://github.com/actualbudget/actual/discussions"
+            >
+              <Trans>AI Assistant (OpenAI, Anthropic)</Trans>
+            </FeatureToggle>
             <FeatureToggle flag="forceReload">
               <Trans>Force reload app button</Trans>
             </FeatureToggle>

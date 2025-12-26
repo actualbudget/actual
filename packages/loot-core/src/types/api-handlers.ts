@@ -21,6 +21,7 @@ import type {
   TransactionEntity,
   ScheduleEntity,
 } from './models';
+import {AIModel, AIProvider} from "loot-core/server/ai/service";
 
 export type ApiHandlers = {
   'api/batch-budget-start': () => Promise<void>;
@@ -248,5 +249,27 @@ export type ApiHandlers = {
   }) => Promise<string>;
   'api/get-server-version': () => Promise<
     { error: 'no-server' } | { error: 'network-failure' } | { version: string }
+  >;
+  'api/ai-suggest-category': (arg: {
+    transaction: Partial<TransactionEntity>;
+  }) => Promise<{
+    categoryId: string;
+    categoryName: string;
+    confidence: number;
+    reasoning?: string;
+  } | null>;
+  'api/ai-test-config': (arg: {
+    provider: AIProvider;
+    apiKey: string;
+    model: string;
+  }) => Promise<{ success: boolean; error?: string }>;
+  'api/ai-get-models': (arg: {
+    provider: string;
+    apiKey: string;
+  }) => Promise<
+    Array<{
+      id: string;
+      description?: string;
+    }>
   >;
 };

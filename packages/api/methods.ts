@@ -343,3 +343,20 @@ export function getIDByName(
 export function getServerVersion() {
   return send('api/get-server-version');
 }
+
+export function aiSuggestCategory(transaction: Partial<TransactionEntity>) {
+  return send('api/ai-suggest-category', { transaction });
+}
+
+export function aiTestConfig(
+  provider: string,
+  apiKey: string,
+  model: string,
+) {
+  return send('api/ai-test-config', { provider, apiKey, model });
+}
+
+export function aiGetModels(provider: string, apiKey: string) {
+  return send('api/ai-get-models', { provider, apiKey });
+}
+
