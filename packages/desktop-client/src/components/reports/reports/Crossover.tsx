@@ -38,7 +38,10 @@ import { CrossoverGraph } from '@desktop-client/components/reports/graphs/Crosso
 import { Header } from '@desktop-client/components/reports/Header';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
+import {
+  createCrossoverSpreadsheet,
+  type CrossoverData,
+} from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -48,29 +51,6 @@ import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useWidget } from '@desktop-client/hooks/useWidget';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
-
-// Type for the return value of the recalculate function
-type CrossoverData = {
-  graphData: {
-    data: Array<{
-      x: string;
-      investmentIncome: number;
-      expenses: number;
-      nestEgg: number;
-      isProjection?: boolean;
-    }>;
-    start: string;
-    end: string;
-    crossoverXLabel: string | null;
-  };
-  lastKnownBalance: number;
-  lastKnownMonthlyIncome: number;
-  lastKnownMonthlyExpenses: number;
-  historicalReturn: number | null;
-  yearsToRetire: number | null;
-  targetMonthlyIncome: number | null;
-  targetNestEgg: number | null;
-};
 
 export const defaultTimeFrame = {
   start: monthUtils.subMonths(monthUtils.currentMonth(), 120),
@@ -129,6 +109,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const [projectionType, setProjectionType] = useState<'trend' | 'hampel'>(
     'hampel',
   );
+  const [inflationRate, setInflationRate] = useState<number | null>(null);
   const [showHiddenCategories, setShowHiddenCategories] = useState(false);
   const [selectionsInitialized, setSelectionsInitialized] = useState(false);
 
@@ -162,6 +143,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     setSwr(widget?.meta?.safeWithdrawalRate ?? 0.04);
     setEstimatedReturn(widget?.meta?.estimatedReturn ?? null);
     setProjectionType(widget?.meta?.projectionType ?? 'hampel');
+    setInflationRate(widget?.meta?.inflationRate ?? null);
     setShowHiddenCategories(widget?.meta?.showHiddenCategories ?? false);
 
     setSelectionsInitialized(true);
@@ -291,6 +273,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         safeWithdrawalRate: swr,
         estimatedReturn,
         projectionType,
+        inflationRate,
         showHiddenCategories,
         timeFrame: { start, end, mode },
       },
@@ -332,6 +315,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         safeWithdrawalRate: swr,
         estimatedReturn,
         projectionType,
+        inflationRate,
       });
       await crossoverSpreadsheet(spreadsheet, setData);
     },
@@ -341,6 +325,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
       swr,
       estimatedReturn,
       projectionType,
+      inflationRate,
       expenseCategoryIds,
       selectedIncomeAccountIds,
     ],
@@ -794,6 +779,64 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                     </Trans>
                   </div>
                 )}
+              </View>
+
+              <View style={{ marginBottom: 12 }}>
+                <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <Text>{t('Inflation rate (annual %, optional)')}</Text>
+                    <Tooltip
+                      content={
+                        <View style={{ maxWidth: 300 }}>
+                          <Text>
+                            <Trans>
+                              The expected annual inflation rate, used to adjust
+                              projected expenses for inflation. If not
+                              specified, expenses will be projected without
+                              inflation adjustment.
+                              <br />
+                              <br />
+                              Example: 3% annual inflation means expenses will
+                              grow by approximately 3% per year to maintain the
+                              same purchasing power.
+                            </Trans>
+                          </Text>
+                        </View>
+                      }
+                      placement="right top"
+                      style={{
+                        ...styles.tooltip,
+                      }}
+                    >
+                      <SvgQuestion height={12} width={12} cursor="pointer" />
+                    </Tooltip>
+                  </View>
+                </div>
+                <Input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.1}
+                  value={
+                    inflationRate == null
+                      ? ''
+                      : Number((inflationRate * 100).toFixed(2))
+                  }
+                  onChange={e =>
+                    setInflationRate(
+                      isNaN(e.target.valueAsNumber)
+                        ? null
+                        : e.target.valueAsNumber / 100,
+                    )
+                  }
+                  style={{ width: 120 }}
+                />
               </View>
             </View>
           </View>

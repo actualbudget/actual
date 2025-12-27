@@ -75,6 +75,7 @@ export type CrossoverWidget = AbstractWidget<
     estimatedReturn?: number | null; // annual
     projectionType?: 'trend' | 'hampel'; // expense projection method
     showHiddenCategories?: boolean; // show hidden categories in selector
+    inflationRate?: number | null; // annual inflation rate (e.g., 0.03 for 3%)
   } | null
 >;
 export type MarkdownWidget = AbstractWidget<
