@@ -150,7 +150,7 @@ export const Checkbox = (props: CheckboxProps) => {
             },
           },
         },
-        props.style,
+        ...(props.style ? [props.style] : []),
       ])}
     />
   );

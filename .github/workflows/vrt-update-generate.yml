@@ -44,7 +44,7 @@ jobs:
       github.event.issue.pull_request &&
       startsWith(github.event.comment.body, '/update-vrt')
     container:
-      image: mcr.microsoft.com/playwright:v1.56.0-jammy
+      image: mcr.microsoft.com/playwright:v1.57.0-jammy
     steps:
       - name: Get PR details
         id: pr

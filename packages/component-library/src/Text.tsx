@@ -22,7 +22,7 @@ export const Text = forwardRef<HTMLSpanElement, TextProps>((props, ref) => {
     <span
       {...restProps}
       ref={innerRef ?? ref}
-      className={cx(className, css(style))}
+      className={cx(className, style ? css(style) : undefined)}
     />
   );
 });

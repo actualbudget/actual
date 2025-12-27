@@ -65,10 +65,10 @@ Run manually:
 
 ```sh
 # Run docker container
-docker run --rm --network host -v $(pwd):/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.56.0-jammy /bin/bash
+docker run --rm --network host -v $(pwd):/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.57.0-jammy /bin/bash
 
     # If you receive an error such as "docker: invalid reference format", please instead use the following command:
-    docker run --rm --network host -v ${pwd}:/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.56.0-jammy /bin/bash
+    docker run --rm --network host -v ${pwd}:/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.57.0-jammy /bin/bash
 
 # Once inside the docker container, run the VRT tests: important - they MUST be ran against a HTTPS server.
 # Use the ip and port noted earlier

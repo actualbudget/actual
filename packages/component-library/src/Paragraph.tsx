@@ -20,7 +20,7 @@ export function Paragraph({
       {...props}
       className={css([
         !isLast && { marginBottom: 15 },
-        style,
+        ...(style ? [style] : []),
         {
           lineHeight: '1.5em',
         },
