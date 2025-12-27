@@ -98,6 +98,7 @@ export type CrossoverWidget = AbstractWidget<
     projectionType?: 'hampel' | 'median' | 'mean'; // expense projection method
     showHiddenCategories?: boolean; // show hidden categories in selector
     expenseAdjustmentFactor?: number; // multiplier for expenses (default 1.0)
+    inflationRate?: number | null; // annual inflation rate (e.g., 0.03 for 3%)
   } | null
 >;
 export type MarkdownWidget = AbstractWidget<
