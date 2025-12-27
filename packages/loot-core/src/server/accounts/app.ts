@@ -854,7 +854,7 @@ async function akahuAccounts() {
       },
       60000,
     );
-  } catch (error) {
+  } catch {
     return { error_code: 'TIMED_OUT' };
   }
 }
