@@ -230,7 +230,7 @@ describe('Transactions', () => {
   test('unsplitting last remaining child converts parent to regular transaction', () => {
     const [parent, child] = makeSplitTransaction(
       { id: 't1', amount: 2000, category: 'cat1' },
-      [{ id: 't2', amount: 0,category: 'cat2' }],
+      [{ id: 't2', amount: 0, category: 'cat2' }],
     );
 
     const transactions = [parent, child];
