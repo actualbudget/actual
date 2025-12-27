@@ -14,12 +14,14 @@ import { theme } from './theme';
 
 export const baseInputStyle = {
   outline: 0,
-  backgroundColor: theme.tableBackground,
+  backgroundColor: theme.formInputBackground,
   color: theme.formInputText,
   margin: 0,
   padding: 5,
   borderRadius: 4,
   border: '1px solid ' + theme.formInputBorder,
+  transition:
+    'border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease',
 };
 
 const defaultInputClassName = css({
@@ -30,10 +32,12 @@ const defaultInputClassName = css({
   flexShrink: 0,
   '&[data-focused]': {
     border: '1px solid ' + theme.formInputBorderSelected,
-    boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
+    boxShadow: theme.formInputShadowSelected,
+    backgroundColor: theme.formInputBackgroundSelected,
   },
   '&[data-disabled]': {
     color: theme.formInputTextPlaceholder,
+    opacity: 0.6,
   },
   '::placeholder': { color: theme.formInputTextPlaceholder },
   ...styles.smallText,

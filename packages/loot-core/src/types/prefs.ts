@@ -95,7 +95,8 @@ export type Theme =
   | 'midnight'
   | 'development'
   | string;
-export type DarkTheme = 'dark' | 'midnight';
+export type DarkTheme = 'dark' | 'midnight' | 'nordic';
+export type AccentColor = 'purple' | 'blue' | 'teal' | 'green' | 'orange' | 'red' | 'pink' | 'coral';
 
 // GlobalPrefs are the parsed global-store.json values
 export type GlobalPrefs = Partial<{
@@ -106,6 +107,7 @@ export type GlobalPrefs = Partial<{
   language: string;
   theme: Theme;
   preferredDarkTheme: DarkTheme;
+  accentColor: AccentColor;
   plugins: boolean;
   pluginThemes: Record<
     string,
@@ -145,6 +147,7 @@ export type GlobalPrefsJson = Partial<{
   language?: GlobalPrefs['language'];
   theme?: GlobalPrefs['theme'];
   'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
+  'accent-color'?: GlobalPrefs['accentColor'];
   plugins?: string; // "true" or "false"
   'plugin-theme'?: string; // JSON string of complete plugin theme (current selected plugin theme)
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
