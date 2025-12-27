@@ -300,11 +300,10 @@ export function CategoryAutocomplete({
     },
     [],
   );
-  
 
   return (
     <Autocomplete
-      strict={true}
+      strict
       highlightFirst={false}
       embedded={embedded}
       closeOnBlur={closeOnBlur}
@@ -315,7 +314,6 @@ export function CategoryAutocomplete({
         return 0;
       }}
       skipSplit={false}
-
       filterSuggestions={filterSuggestions}
       suggestions={categorySuggestions}
       renderItems={(items, getItemProps, highlightedIndex) => (

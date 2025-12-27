@@ -524,17 +524,19 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                   },
                   onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
                     const { onKeyDown } = inputProps || {};
-                    let skipSplitToNumber = skipSplit === true ? 1 : 0;
+                    const skipSplitToNumber = skipSplit === true ? 1 : 0;
                     if (
                       e.key === 'ArrowDown' &&
                       isOpen &&
                       highlightedIndex == null &&
-                      (filtered.length > 0)
+                      filtered.length > 0
                     ) {
                       e.preventDefault();
                       setHighlightedIndex(
                         // if skipSplit = true, skipSplitToNumer = 1, so its skip SplitTransaction
-                        filtered[0]?.id === 'split' && filtered.length > 1 ? skipSplitToNumber : null,
+                        filtered[0]?.id === 'split' && filtered.length > 1
+                          ? skipSplitToNumber
+                          : null,
                       );
                       return;
                     }
