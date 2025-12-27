@@ -171,7 +171,8 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
       accentColor === 'green' ||
       accentColor === 'orange' ||
       accentColor === 'red' ||
-      accentColor === 'pink'
+      accentColor === 'pink' ||
+      accentColor === 'coral'
         ? accentColor
         : 'purple',
     serverSelfSignedCert: serverSelfSignedCert || undefined,

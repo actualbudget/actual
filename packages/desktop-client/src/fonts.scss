@@ -37,8 +37,34 @@
     letter-spacing: -0.02em;
   }
 
-  /* Smooth transitions globally */
-  * {
+  /* Smooth transitions for interactive and layout elements */
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  label,
+  [role="button"],
+  [role="tab"],
+  [role="menuitem"],
+  [role="option"],
+  [role="switch"],
+  [role="checkbox"],
+  [role="radio"],
+  .btn,
+  .clickable,
+  .interactive,
+  .sidebar,
+  .modal,
+  .dropdown,
+  .menu,
+  .card,
+  .tooltip,
+  .popover,
+  .collapse,
+  .accordion,
+  .tab,
+  .nav-item {
     transition-timing-function: var(--ease-out-expo);
   }
 

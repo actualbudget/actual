@@ -93,11 +93,11 @@ export function Item({
         }}
         forceActive={forceActive}
         activeStyle={{
-          backgroundColor: 'rgba(255, 107, 74, 0.08)',
+          backgroundColor: `color-mix(in srgb, ${theme.sidebarItemAccentSelected} 8%, transparent)`,
           borderLeft: '3px solid ' + theme.sidebarItemAccentSelected,
           paddingLeft: 16 + indent - 3,
           color: theme.sidebarItemTextSelected,
-          boxShadow: 'inset 0 0 0 1px rgba(255, 107, 74, 0.1)',
+          boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${theme.sidebarItemAccentSelected} 10%, transparent)`,
         }}
         to={to}
         onClick={onClick}

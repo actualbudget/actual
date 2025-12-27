@@ -38,7 +38,7 @@ export function BudgetName({ children }: BudgetNameProps) {
         margin: '0 12px 20px 16px',
         userSelect: 'none',
         transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+        borderBottom: `1px solid ${theme.tableBorder}`,
         paddingBottom: 16,
         ...(hasWindowButtons
           ? {
