@@ -598,17 +598,10 @@ export function conditionsToAQL(
         return { $or: values.map(v => apply(field, '$eq', v)) };
 
       case 'hasTags':
-        const tagValues = [];
-        for (const [_, tag] of value.matchAll(/(?<!#)(#[^#\s]+)/g)) {
-          if (!tagValues.find(t => t.tag === tag)) {
-            tagValues.push(tag);
-          }
-        }
-
         return {
-          $and: tagValues.map(v => {
+          $and: value.map(v => {
             const regex = new RegExp(
-              `(?<!#)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
+              `(?<!#)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=\\s|#|$)`,
             );
             return apply(field, '$regexp', regex.source);
           }),

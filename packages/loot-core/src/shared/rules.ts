@@ -68,7 +68,13 @@ const FIELD_INFO = {
   payee: { type: 'id', disallowedOps: new Set(['onBudget', 'offBudget']) },
   payee_name: { type: 'string' },
   date: { type: 'date' },
-  notes: { type: 'string' },
+  notes: {
+    type: 'string',
+    // Disabled the 'oneOf' and 'notOneOf' ops for notes
+    // because they don't make much sense in this context.
+    // the notes filter should just be a simple string match.
+    disallowedOps: new Set(['oneOf', 'notOneOf']),
+  },
   amount: { type: 'number' },
   category: {
     type: 'id',
