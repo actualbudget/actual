@@ -16,6 +16,7 @@
     "start": "yarn build && node build/app",
     "start-monitor": "nodemon --exec 'yarn build && node build/app' --ignore './build/**/*' --ext 'ts,js' build/app",
     "build": "tsc && yarn add-import-extensions && yarn copy-static-assets",
+    "typecheck": "tsc --noEmit",
     "add-import-extensions": "node bin/add-import-extensions.mjs",
     "copy-static-assets": "rm -rf build/src/sql && cp -r src/sql build/src/sql",
     "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --import ./register-loader.mjs --trace-warnings' vitest --run",

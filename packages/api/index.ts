@@ -1,8 +1,3 @@
-import type {
-  RequestInfo as FetchInfo,
-  RequestInit as FetchInit,
-} from 'node-fetch';
-
 // loot-core types
 import type { InitConfig } from 'loot-core/server/main';
 
@@ -13,6 +8,11 @@ import { validateNodeVersion } from './validateNodeVersion';
 
 let actualApp: null | typeof bundle.lib;
 export const internal = bundle.lib;
+
+type FetchFn = (
+  input: URL | RequestInfo,
+  init?: RequestInit,
+) => Promise<Response>;
 
 export * from './methods';
 export * as utils from './utils';
@@ -27,8 +27,8 @@ export async function init(config: InitConfig = {}) {
   if (!globalThis.fetch) {
     globalThis.fetch = (url: URL | RequestInfo, init?: RequestInit) => {
       return import('node-fetch').then(({ default: fetch }) =>
-        fetch(url as unknown as FetchInfo, init as unknown as FetchInit),
-      ) as unknown as Promise<Response>;
+        (fetch as unknown as FetchFn)(url, init),
+      );
     };
   }
 
