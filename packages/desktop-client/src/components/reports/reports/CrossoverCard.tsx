@@ -32,6 +32,7 @@ type CrossoverData = {
       investmentIncome: number;
       expenses: number;
       nestEgg: number;
+      adjustedExpenses?: number;
       isProjection?: boolean;
     }>;
     start: string;
@@ -165,6 +166,7 @@ export function CrossoverCard({
   const swr = meta?.safeWithdrawalRate ?? 0.04;
   const estimatedReturn = meta?.estimatedReturn ?? null;
   const projectionType = meta?.projectionType ?? 'hampel';
+  const expenseAdjustmentFactor = meta?.expenseAdjustmentFactor ?? 1.0;
 
   const params = useMemo(
     () =>
@@ -176,6 +178,7 @@ export function CrossoverCard({
         safeWithdrawalRate: swr,
         estimatedReturn: estimatedReturn == null ? null : estimatedReturn,
         projectionType,
+        expenseAdjustmentFactor,
       }),
     [
       start,
@@ -185,6 +188,7 @@ export function CrossoverCard({
       swr,
       estimatedReturn,
       projectionType,
+      expenseAdjustmentFactor,
     ],
   );
 
