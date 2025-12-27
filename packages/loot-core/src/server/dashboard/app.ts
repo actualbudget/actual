@@ -1,4 +1,5 @@
 import isMatch from 'lodash/isMatch';
+import { v4 as uuidv4 } from 'uuid';
 
 import { captureException } from '../../platform/exceptions';
 import * as fs from '../../platform/server/fs';
@@ -96,6 +97,40 @@ const exportModel = {
   },
 };
 
+async function getDashboards() {
+  return db.all('SELECT * FROM dashboards WHERE tombstone = 0');
+}
+
+async function createDashboard({ name }: { name: string }) {
+  const id = uuidv4();
+  await db.insertWithSchema('dashboards', { id, name });
+
+  return id;
+}
+
+async function deleteDashboard(id: string) {
+  const res = await db.first<{ c: number }>(
+    'SELECT count(*) as c FROM dashboards WHERE tombstone = 0',
+  );
+
+  if ((res?.c ?? 0) <= 1) {
+    throw new Error('Cannot delete the last dashboard');
+  }
+
+  await batchMessages(async () => {
+    await db.delete_('dashboards', id);
+    // Tombstone all widgets for this dashboard
+    await db.runQuery(
+      'UPDATE dashboard SET tombstone = 1 WHERE dashboard_id = ?',
+      [id],
+    );
+  });
+}
+
+async function renameDashboard({ id, name }: { id: string; name: string }) {
+  await db.updateWithSchema('dashboards', { id, name });
+}
+
 async function updateDashboard(
   widgets: EverythingButIdOptional<Omit<Widget, 'tombstone'>>[],
 ) {
@@ -122,15 +157,21 @@ async function updateDashboardWidget(
   await db.updateWithSchema('dashboard', widget);
 }
 
-async function resetDashboard() {
+async function resetDashboard(id: string) {
   await batchMessages(async () => {
+    const widgets = await db.selectWithSchema(
+      'dashboard',
+      'SELECT id FROM dashboard WHERE dashboard_id = ? AND tombstone = 0',
+      [id],
+    );
+
     await Promise.all([
-      // Delete all widgets
-      db.deleteAll('dashboard'),
+      // Delete all widgets for this dashboard
+      ...widgets.map(({ id }) => db.delete_('dashboard', id)),
 
       // Insert the default state
       ...DEFAULT_DASHBOARD_STATE.map(widget =>
-        db.insertWithSchema('dashboard', widget),
+        db.insertWithSchema('dashboard', { ...widget, dashboard_id: id }),
       ),
     ]);
   });
@@ -138,7 +179,7 @@ async function resetDashboard() {
 
 async function addDashboardWidget(
   widget: Omit<Widget, 'id' | 'x' | 'y' | 'tombstone'> &
-    Partial<Pick<Widget, 'x' | 'y'>>,
+    Partial<Pick<Widget, 'x' | 'y'>> & { dashboardId: string },
 ) {
   // If no x & y was provided - calculate it dynamically
   // The new widget should be the very last one in the list of all widgets
@@ -146,7 +187,8 @@ async function addDashboardWidget(
     const data = await db.first<
       Pick<db.DbDashboard, 'x' | 'y' | 'width' | 'height'>
     >(
-      'SELECT x, y, width, height FROM dashboard WHERE tombstone = 0 ORDER BY y DESC, x DESC',
+      'SELECT x, y, width, height FROM dashboard WHERE dashboard_id = ? AND tombstone = 0 ORDER BY y DESC, x DESC',
+      [widget.dashboardId],
     );
 
     if (!data) {
@@ -159,14 +201,77 @@ async function addDashboardWidget(
     }
   }
 
-  await db.insertWithSchema('dashboard', widget);
+  const { dashboardId, ...widgetWithoutDashboardId } = widget;
+
+  await db.insertWithSchema('dashboard', {
+    ...widgetWithoutDashboardId,
+    dashboard_id: dashboardId,
+  });
 }
 
 async function removeDashboardWidget(widgetId: string) {
   await db.delete_('dashboard', widgetId);
 }
 
-async function importDashboard({ filepath }: { filepath: string }) {
+async function moveDashboardWidget({
+  widgetId,
+  targetDashboardId,
+  copy,
+}: {
+  widgetId: string;
+  targetDashboardId: string;
+  copy: boolean;
+}) {
+  // Get the widget to move/copy
+  const widget = await db.first<db.DbDashboard>(
+    'SELECT * FROM dashboard WHERE id = ? AND tombstone = 0',
+    [widgetId],
+  );
+
+  if (!widget) {
+    throw new Error(`Widget not found: ${widgetId}`);
+  }
+
+  await batchMessages(async () => {
+    // Insert the widget to target dashboard
+    switch (widget.type) {
+      // TODO: This seems like an anti-pattern
+      case 'net-worth-card':
+      case 'cash-flow-card':
+      case 'spending-card':
+      case 'crossover-card':
+      case 'markdown-card':
+      case 'summary-card':
+      case 'calendar-card':
+      case 'formula-card':
+      case 'custom-report': {
+        const newWidget = {
+          type: widget.type,
+          width: widget.width,
+          height: widget.height,
+          meta: widget.meta ? JSON.parse(widget.meta) : {},
+          dashboardId: targetDashboardId,
+        };
+        await addDashboardWidget(newWidget);
+        // If move (not copy), delete the original widget
+        if (!copy) {
+          await removeDashboardWidget(widgetId);
+        }
+        break;
+      }
+      default:
+        throw new Error(`Unsupported widget type: ${widget.type}`);
+    }
+  });
+}
+
+async function importDashboard({
+  filepath,
+  dashboardId,
+}: {
+  filepath: string;
+  dashboardId: string;
+}) {
   try {
     if (!(await fs.exists(filepath))) {
       throw new Error(`File not found at the provided path: ${filepath}`);
@@ -182,10 +287,16 @@ async function importDashboard({ filepath }: { filepath: string }) {
     );
     const customReportIdSet = new Set(customReportIds.map(({ id }) => id));
 
+    const existingWidgets = await db.selectWithSchema(
+      'dashboard',
+      'SELECT id FROM dashboard WHERE dashboard_id = ? AND tombstone = 0',
+      [dashboardId],
+    );
+
     await batchMessages(async () => {
       await Promise.all([
         // Delete all widgets
-        db.deleteAll('dashboard'),
+        ...existingWidgets.map(({ id }) => db.delete_('dashboard', id)),
 
         // Insert new widgets
         ...parsedContent.widgets.map(widget =>
@@ -195,6 +306,7 @@ async function importDashboard({ filepath }: { filepath: string }) {
             height: widget.height,
             x: widget.x,
             y: widget.y,
+            dashboard_id: dashboardId,
             meta: isExportedCustomReportWidget(widget)
               ? { id: widget.meta.id }
               : widget.meta,
@@ -246,19 +358,29 @@ async function importDashboard({ filepath }: { filepath: string }) {
 }
 
 export type DashboardHandlers = {
+  'dashboards-get': typeof getDashboards;
+  'dashboard-create': typeof createDashboard;
+  'dashboard-delete': typeof deleteDashboard;
+  'dashboard-rename': typeof renameDashboard;
   'dashboard-update': typeof updateDashboard;
   'dashboard-update-widget': typeof updateDashboardWidget;
   'dashboard-reset': typeof resetDashboard;
   'dashboard-add-widget': typeof addDashboardWidget;
   'dashboard-remove-widget': typeof removeDashboardWidget;
+  'dashboard-move-widget': typeof moveDashboardWidget;
   'dashboard-import': typeof importDashboard;
 };
 
 export const app = createApp<DashboardHandlers>();
 
+app.method('dashboards-get', getDashboards);
+app.method('dashboard-create', mutator(createDashboard));
+app.method('dashboard-delete', mutator(deleteDashboard));
+app.method('dashboard-rename', mutator(undoable(renameDashboard)));
 app.method('dashboard-update', mutator(undoable(updateDashboard)));
 app.method('dashboard-update-widget', mutator(undoable(updateDashboardWidget)));
 app.method('dashboard-reset', mutator(undoable(resetDashboard)));
 app.method('dashboard-add-widget', mutator(undoable(addDashboardWidget)));
 app.method('dashboard-remove-widget', mutator(undoable(removeDashboardWidget)));
+app.method('dashboard-move-widget', mutator(undoable(moveDashboardWidget)));
 app.method('dashboard-import', mutator(undoable(importDashboard)));

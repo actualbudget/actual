@@ -8,6 +8,7 @@ import { type FormulaWidget } from 'loot-core/types/models';
 import { FormulaResult } from '@desktop-client/components/reports/FormulaResult';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
+import { useWidgetMoveMenu } from '@desktop-client/components/reports/useWidgetMoveMenu';
 import { useFormulaExecution } from '@desktop-client/hooks/useFormulaExecution';
 import { useThemeColors } from '@desktop-client/hooks/useThemeColors';
 
@@ -17,6 +18,7 @@ type FormulaCardProps = {
   meta?: FormulaWidget['meta'];
   onMetaChange: (newMeta: FormulaWidget['meta']) => void;
   onRemove: () => void;
+  onMove: (targetDashboardId: string, copy: boolean) => void;
 };
 
 export function FormulaCard({
@@ -25,9 +27,12 @@ export function FormulaCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onMove,
 }: FormulaCardProps) {
   const { t } = useTranslation();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+  const { menuItems: moveMenuItems, handleMenuSelect: handleMoveMenuSelect } =
+    useWidgetMoveMenu(onMove);
   const themeColors = useThemeColors();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -81,8 +86,10 @@ export function FormulaCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...moveMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleMoveMenuSelect(item as string)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
