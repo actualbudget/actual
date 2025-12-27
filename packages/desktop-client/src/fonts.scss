@@ -3,3 +3,53 @@
   $inter-font-path: '../../../node_modules/inter-ui/Inter (web)'
 );
 @include variable.default;
+
+/* JetBrains Mono for Nordic theme numbers */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* Geist Sans for Nordic theme UI text */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap');
+
+/* Nordic Theme Global Styles */
+:root {
+  --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, Consolas, monospace;
+  --font-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+  /* Animation timing */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Apply Nordic font when nordic theme is active */
+[data-theme="nordic"] {
+  font-family: var(--font-sans) !important;
+
+  /* Monospace for numbers */
+  .amount,
+  .balance,
+  .number,
+  [data-testid*="amount"],
+  [data-testid*="balance"],
+  td:nth-child(n+2) {
+    font-family: var(--font-mono) !important;
+    font-feature-settings: 'tnum' 1, 'ss01' 1;
+    letter-spacing: -0.02em;
+  }
+
+  /* Smooth transitions globally */
+  * {
+    transition-timing-function: var(--ease-out-expo);
+  }
+
+  /* Button and interactive element transitions */
+  button, a, [role="button"] {
+    transition: all 0.2s var(--ease-out-expo);
+  }
+
+  /* Enhanced focus states */
+  :focus-visible {
+    outline: 2px solid var(--color-formInputBorderSelected, #ff6b4a);
+    outline-offset: 2px;
+  }
+}

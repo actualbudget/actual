@@ -32,12 +32,14 @@ export function BudgetName({ children }: BudgetNameProps) {
     <View
       style={{
         paddingTop: 35,
-        height: 30,
+        height: 36,
         flexDirection: 'row',
         alignItems: 'center',
-        margin: '0 8px 23px 20px',
+        margin: '0 12px 20px 16px',
         userSelect: 'none',
-        transition: 'padding .4s',
+        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+        paddingBottom: 16,
         ...(hasWindowButtons
           ? {
               paddingTop: 20,
@@ -126,11 +128,15 @@ function EditableBudgetName() {
         ref={triggerRef}
         variant="bare"
         style={{
-          color: theme.buttonNormalBorder,
-          fontSize: 16,
-          fontWeight: 500,
-          marginLeft: -5,
+          color: theme.sidebarItemText,
+          fontSize: 15,
+          fontWeight: 600,
+          marginLeft: -4,
           flex: '0 auto',
+          padding: '6px 10px',
+          borderRadius: 8,
+          letterSpacing: '-0.02em',
+          transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
         onPress={() => {
           resetPosition();
@@ -141,9 +147,14 @@ function EditableBudgetName() {
           {budgetName || t('Unnamed')}
         </Text>
         <SvgExpandArrow
-          width={7}
-          height={7}
-          style={{ flexShrink: 0, marginLeft: 5 }}
+          width={8}
+          height={8}
+          style={{
+            flexShrink: 0,
+            marginLeft: 6,
+            opacity: 0.5,
+            transition: 'transform 0.2s ease',
+          }}
         />
       </Button>
 

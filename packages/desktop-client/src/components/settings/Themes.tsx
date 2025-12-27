@@ -14,17 +14,55 @@ import { Column, Setting } from './UI';
 
 import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
 import {
+  type AccentColor,
+  accentColors,
+  accentColorOptions,
   themeOptions,
+  useAccentColor,
   useTheme,
   usePreferredDarkTheme,
   darkThemeOptions,
 } from '@desktop-client/style';
+
+function AccentColorSwatch({
+  color,
+  isSelected,
+  onClick,
+}: {
+  color: AccentColor;
+  isSelected: boolean;
+  onClick: () => void;
+}) {
+  const scale = accentColors[color];
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={css({
+        width: 32,
+        height: 32,
+        borderRadius: 6,
+        border: isSelected
+          ? `2px solid ${themeStyle.pageText}`
+          : '2px solid transparent',
+        background: scale[500],
+        cursor: 'pointer',
+        transition: 'transform 0.1s ease, border-color 0.15s ease',
+        '&:hover': {
+          transform: 'scale(1.1)',
+        },
+      })}
+      aria-label={color}
+    />
+  );
+}
 
 export function ThemeSettings() {
   const { t } = useTranslation();
   const sidebar = useSidebar();
   const [theme, switchTheme] = useTheme();
   const [darkTheme, switchDarkTheme] = usePreferredDarkTheme();
+  const [accentColor, setAccentColor] = useAccentColor();
 
   return (
     <Setting
@@ -73,6 +111,24 @@ export function ThemeSettings() {
               />
             </Column>
           )}
+          <Column title={t('Accent color')}>
+            <View
+              style={{
+                flexDirection: 'row',
+                gap: 8,
+                flexWrap: 'wrap',
+              }}
+            >
+              {accentColorOptions.map(([colorKey]) => (
+                <AccentColorSwatch
+                  key={colorKey}
+                  color={colorKey}
+                  isSelected={accentColor === colorKey}
+                  onClick={() => setAccentColor(colorKey)}
+                />
+              ))}
+            </View>
+          </Column>
         </View>
       }
     >

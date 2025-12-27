@@ -96,6 +96,9 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
       prefs.preferredDarkTheme,
     );
   }
+  if (prefs.accentColor !== undefined) {
+    await asyncStorage.setItem('accent-color', prefs.accentColor);
+  }
   if (prefs.serverSelfSignedCert !== undefined) {
     await asyncStorage.setItem(
       'server-self-signed-cert',
@@ -124,6 +127,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     language,
     theme,
     'preferred-dark-theme': preferredDarkTheme,
+    'accent-color': accentColor,
     'server-self-signed-cert': serverSelfSignedCert,
     syncServerConfig,
     notifyWhenUpdateIsAvailable,
@@ -136,6 +140,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     'language',
     'theme',
     'preferred-dark-theme',
+    'accent-color',
     'server-self-signed-cert',
     'syncServerConfig',
     'notifyWhenUpdateIsAvailable',
@@ -159,6 +164,16 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
       preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
         ? preferredDarkTheme
         : 'dark',
+    accentColor:
+      accentColor === 'purple' ||
+      accentColor === 'blue' ||
+      accentColor === 'teal' ||
+      accentColor === 'green' ||
+      accentColor === 'orange' ||
+      accentColor === 'red' ||
+      accentColor === 'pink'
+        ? accentColor
+        : 'purple',
     serverSelfSignedCert: serverSelfSignedCert || undefined,
     syncServerConfig: syncServerConfig || undefined,
     notifyWhenUpdateIsAvailable:

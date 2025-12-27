@@ -83,3 +83,37 @@ export const purple900 = oldColors.p1;
 export const white = '#ffffff';
 export const black = '#000000';
 export const hover = oldColors.hover;
+
+// Nordic Noir Palette - Warm coral accents on deep charcoal
+export const coral50 = '#fff5f3';
+export const coral100 = '#ffe8e4';
+export const coral200 = '#ffd0c7';
+export const coral300 = '#ffab9a';
+export const coral400 = '#ff8066';
+export const coral500 = '#ff6b4a';
+export const coral600 = '#f04723';
+export const coral700 = '#c9351a';
+export const coral800 = '#a62f1a';
+export const coral900 = '#892c1c';
+
+// Charcoal palette for Nordic Noir
+export const charcoal50 = '#f7f7f8';
+export const charcoal100 = '#eeeef0';
+export const charcoal200 = '#d9d9de';
+export const charcoal300 = '#b8b8c1';
+export const charcoal400 = '#91919f';
+export const charcoal500 = '#747484';
+export const charcoal600 = '#5e5e6c';
+export const charcoal700 = '#4d4d59';
+export const charcoal800 = '#42424c';
+export const charcoal900 = '#3a3a42';
+export const charcoal950 = '#18181c';
+export const charcoal975 = '#0f0f12';
+export const charcoal990 = '#0a0a0d';
+
+// Warm off-whites
+export const cream50 = '#fdfcfb';
+export const cream100 = '#f8f6f3';
+export const cream200 = '#f2ede8';
+export const cream300 = '#e8e0d8';
+export const cream400 = '#d4c8bb';

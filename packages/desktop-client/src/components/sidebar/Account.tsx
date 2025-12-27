@@ -47,16 +47,24 @@ import { useDispatch } from '@desktop-client/redux';
 import { type SheetFields, type Binding } from '@desktop-client/spreadsheet';
 
 export const accountNameStyle: CSSProperties = {
-  marginTop: -2,
-  marginBottom: 2,
-  paddingTop: 4,
-  paddingBottom: 4,
-  paddingRight: 15,
-  paddingLeft: 10,
+  marginTop: 1,
+  marginBottom: 1,
+  marginLeft: 8,
+  marginRight: 8,
+  paddingTop: 6,
+  paddingBottom: 6,
+  paddingRight: 12,
+  paddingLeft: 12,
   textDecoration: 'none',
   color: theme.sidebarItemText,
-  ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
+  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+  ':hover': {
+    backgroundColor: theme.sidebarItemBackgroundHover,
+    transform: 'translateX(2px)',
+  },
   ...styles.smallText,
+  fontWeight: 450,
+  letterSpacing: '-0.005em',
 };
 
 type AccountProps<FieldName extends SheetFields<'account'>> = {

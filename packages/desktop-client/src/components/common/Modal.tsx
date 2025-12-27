@@ -128,8 +128,8 @@ export const Modal = ({
                   minWidth: '90vw',
                   maxHeight: 'calc(var(--visual-viewport-height) * 0.9)',
                   minHeight: 0,
-                  borderRadius: 6,
-                  //border: '1px solid ' + theme.modalBorder,
+                  borderRadius: 12,
+                  border: '1px solid ' + theme.modalBorder,
                   color: theme.pageText,
                   backgroundColor: theme.modalBackground,
                   opacity: isHidden ? 0 : 1,
@@ -137,7 +137,8 @@ export const Modal = ({
                     minWidth: tokens.breakpoint_small,
                   },
                   overflowY: 'auto',
-                  ...styles.shadowLarge,
+                  boxShadow:
+                    '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',
                   ...containerProps?.style,
                 }}
               >
