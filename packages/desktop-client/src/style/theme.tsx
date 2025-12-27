@@ -101,9 +101,7 @@ export function ThemeStyle() {
   return (
     <>
       <style>{`:root {\n${baseCSS}\n}`}</style>
-      {customThemeCSS && (
-        <style>{`:root {\n${customThemeCSS}\n}`}</style>
-      )}
+      {customThemeCSS && <style>{`:root {\n${customThemeCSS}\n}`}</style>}
     </>
   );
 }
