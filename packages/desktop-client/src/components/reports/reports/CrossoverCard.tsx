@@ -20,32 +20,12 @@ import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndi
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
+import {
+  createCrossoverSpreadsheet,
+  type CrossoverData,
+} from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useFormat } from '@desktop-client/hooks/useFormat';
-
-// Type for the return value of the recalculate function
-type CrossoverData = {
-  graphData: {
-    data: Array<{
-      x: string;
-      investmentIncome: number;
-      expenses: number;
-      nestEgg: number;
-      isProjection?: boolean;
-    }>;
-    start: string;
-    end: string;
-    crossoverXLabel: string | null;
-  };
-  lastKnownBalance: number;
-  lastKnownMonthlyIncome: number;
-  lastKnownMonthlyExpenses: number;
-  historicalReturn: number | null;
-  yearsToRetire: number | null;
-  targetMonthlyIncome: number | null;
-  targetNestEgg: number | null;
-};
 
 type CrossoverCardProps = {
   widgetId: string;
@@ -165,6 +145,7 @@ export function CrossoverCard({
   const swr = meta?.safeWithdrawalRate ?? 0.04;
   const estimatedReturn = meta?.estimatedReturn ?? null;
   const projectionType = meta?.projectionType ?? 'hampel';
+  const inflationRate = meta?.inflationRate ?? null;
 
   const params = useMemo(
     () =>
@@ -176,6 +157,7 @@ export function CrossoverCard({
         safeWithdrawalRate: swr,
         estimatedReturn: estimatedReturn == null ? null : estimatedReturn,
         projectionType,
+        inflationRate,
       }),
     [
       start,
@@ -185,6 +167,7 @@ export function CrossoverCard({
       swr,
       estimatedReturn,
       projectionType,
+      inflationRate,
     ],
   );
 
