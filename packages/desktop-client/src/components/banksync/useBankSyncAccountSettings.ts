@@ -64,17 +64,23 @@ export function useBankSyncAccountSettings(accountId: string) {
   });
 
   // Parse all transactions with raw_synced_data
-  const parsedTransactions: Array<Record<string, unknown>> = [];
-  for (const transaction of transactions ?? []) {
-    if (transaction.raw_synced_data) {
+  const parsedTransactions: Array<Record<string, unknown>> = (
+    transactions ?? []
+  ).reduce(
+    (acc, transaction) => {
+      if (!transaction.raw_synced_data) {
+        return acc;
+      }
       try {
         const parsed = JSON.parse(transaction.raw_synced_data);
-        parsedTransactions.push(parsed);
+        acc.push(parsed);
       } catch (error) {
         console.error('Failed to parse transaction data:', error);
       }
-    }
-  }
+      return acc;
+    },
+    [] as Array<Record<string, unknown>>,
+  );
 
   const fields: MappableFieldWithExample[] =
     parsedTransactions.length > 0 ? getFields(parsedTransactions) : [];
