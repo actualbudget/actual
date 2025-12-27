@@ -386,13 +386,13 @@ export async function insertCategoryGroup(
 }
 
 export async function updateCategoryGroup(
-  group: WithRequired<Partial<DbCategoryGroup>, 'name' | 'is_income'>,
+  group: WithRequired<Partial<DbCategoryGroup>, 'id' | 'name' | 'is_income'>,
 ) {
   const existingGroup = await first<
     Pick<DbCategoryGroup, 'id' | 'name' | 'hidden'>
   >(
-    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? and tombstone = 0 LIMIT 1`,
-    [group.name.toUpperCase()],
+    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? AND id != ? AND tombstone = 0 LIMIT 1`,
+    [group.name.toUpperCase(), group.id],
   );
   if (existingGroup) {
     throw new Error(
