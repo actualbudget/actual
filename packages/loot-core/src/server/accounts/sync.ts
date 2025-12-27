@@ -89,6 +89,19 @@ async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
   ).data?.[0];
 }
 
+async function getAkahuSyncStartDate(id) {
+  // Akahu can get a maximum of 365 days of transactions when using personal apps
+  const dates = [monthUtils.subDays(monthUtils.currentDay(), 365)];
+
+  const oldestTransaction = await getAccountOldestTransaction(id);
+
+  if (oldestTransaction) dates.push(oldestTransaction.date);
+
+  return monthUtils.dayFromDate(
+    dateFns.max(dates.map(d => monthUtils.parseDate(d))),
+  );
+}
+
 async function getAccountSyncStartDate(id) {
   // Many GoCardless integrations do not support getting more than 90 days
   // worth of data, so make that the earliest possible limit.
@@ -268,6 +281,45 @@ async function downloadPluggyAiTransactions(
 
   const res = await post(
     getServer().PLUGGYAI_SERVER + '/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+    60000,
+  );
+
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code);
+  } else if ('error' in res) {
+    throw BankSyncError('Connection', res.error);
+  }
+
+  let retVal = {};
+  const singleRes = res as BankSyncResponse;
+  retVal = {
+    transactions: singleRes.transactions.all,
+    accountBalance: singleRes.balances,
+    startingBalance: singleRes.startingBalance,
+  };
+
+  logger.log('Response:', retVal);
+  return retVal;
+}
+
+async function downloadAkahuTransactions(
+  acctId: AccountEntity['id'],
+  since: string,
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  logger.log('Pulling transactions from Akahu');
+
+  const res = await post(
+    getServer().AKAHU_SERVER + '/transactions',
     {
       accountId: acctId,
       startDate: since,
@@ -923,6 +975,15 @@ async function processBankSyncDownload(
       balanceToUse = Math.round(previousBalance);
     }
 
+    if (acctRow.account_sync_source === 'akahu') {
+      const currentBalance = download.startingBalance;
+      const previousBalance = transactions.reduce(
+        (total, trans) => total - trans.transactionAmount.amount * 100,
+        currentBalance,
+      );
+      balanceToUse = Math.round(previousBalance);
+    }
+
     const oldestTransaction = transactions[transactions.length - 1];
 
     const oldestDate =
@@ -995,6 +1056,9 @@ export async function syncAccount(
     download = await downloadSimpleFinTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'pluggyai') {
     download = await downloadPluggyAiTransactions(acctId, syncStartDate);
+  } else if (acctRow.account_sync_source === 'akahu') {
+    const syncStartDate = await getAkahuSyncStartDate(id);
+    download = await downloadAkahuTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'goCardless') {
     download = await downloadGoCardlessTransactions(
       userId,
