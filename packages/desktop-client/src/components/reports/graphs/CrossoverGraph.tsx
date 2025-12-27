@@ -85,7 +85,9 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
               })}
             >
               <div>
-                <Trans>Monthly expenses:</Trans>
+                <Trans>
+                  Target monthly expenses (no adjustment/inflation):
+                </Trans>
               </div>
               <div>
                 <FinancialText>
@@ -101,7 +103,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
                 })}
               >
                 <div>
-                  <Trans>Target income:</Trans>
+                  <Trans>Target monthly expenses:</Trans>
                 </div>
                 <div>
                   <FinancialText>
@@ -231,9 +233,8 @@ export function CrossoverGraph({
             type="monotone"
             dataKey="adjustedExpenses"
             dot={false}
-            stroke={theme.reportsNumberNegative}
+            stroke={theme.reportsBlue}
             strokeWidth={2}
-            strokeDasharray="5 5"
             {...animationProps}
           />
         </LineChart>

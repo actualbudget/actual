@@ -151,6 +151,7 @@ export function CrossoverCard({
   const projectionType: 'hampel' | 'median' | 'mean' =
     meta?.projectionType ?? 'hampel';
   const expenseAdjustmentFactor = meta?.expenseAdjustmentFactor ?? 1.0;
+  const inflationRate = meta?.inflationRate ?? null;
 
   const params = useMemo(
     () =>
@@ -164,6 +165,7 @@ export function CrossoverCard({
         expectedContribution,
         projectionType,
         expenseAdjustmentFactor,
+        inflationRate,
       }),
     [
       start,
@@ -175,6 +177,7 @@ export function CrossoverCard({
       expectedContribution,
       projectionType,
       expenseAdjustmentFactor,
+      inflationRate,
     ],
   );
 
