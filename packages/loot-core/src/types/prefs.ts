@@ -23,6 +23,7 @@ export type SyncedPrefs = Partial<
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
     | 'defaultCurrencyCode'
+    | 'customThemeCSS'
     | 'plugins'
     | `show-account-${string}-net-worth-chart`
     | `side-nav.show-balance-history-${string}`

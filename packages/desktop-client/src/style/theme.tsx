@@ -9,6 +9,7 @@ import * as lightTheme from './themes/light';
 import * as midnightTheme from './themes/midnight';
 
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 const themes = {
   light: { name: 'Light', colors: lightTheme },
@@ -45,6 +46,7 @@ export function usePreferredDarkTheme() {
 export function ThemeStyle() {
   const [activeTheme] = useTheme();
   const [darkThemePreference] = usePreferredDarkTheme();
+  const [customThemeCSS] = useSyncedPref('customThemeCSS');
   const [themeColors, setThemeColors] = useState<
     | typeof lightTheme
     | typeof darkTheme
@@ -92,8 +94,16 @@ export function ThemeStyle() {
 
   if (!themeColors) return null;
 
-  const css = Object.entries(themeColors)
+  const baseCSS = Object.entries(themeColors)
     .map(([key, value]) => `  --color-${key}: ${value};`)
     .join('\n');
-  return <style>{`:root {\n${css}}`}</style>;
+
+  return (
+    <>
+      <style>{`:root {\n${baseCSS}\n}`}</style>
+      {customThemeCSS && (
+        <style>{`:root {\n${customThemeCSS}\n}`}</style>
+      )}
+    </>
+  );
 }
