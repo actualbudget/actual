@@ -24,7 +24,6 @@ import Downshift, { type StateChangeTypes } from 'downshift';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
-import { skip } from 'node:test';
 
 type CommonAutocompleteProps<T extends AutocompleteItem> = {
   focused?: boolean;
