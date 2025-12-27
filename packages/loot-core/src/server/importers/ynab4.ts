@@ -108,7 +108,7 @@ async function importPayees(
   entityIdMap: Map<string, string>,
 ) {
   for (const payee of data.payees) {
-    if (!payee.isTombstone) {
+    if (!payee.isTombstone && payee.name && payee.name.trim() !== '') {
       const id = await actual.createPayee({
         name: payee.name,
         transfer_acct: entityIdMap.get(payee.targetAccountId) || null,
@@ -189,9 +189,11 @@ async function importTransactions(
               ).id;
             } else {
               payee = entityIdMap.get(t.payeeId);
-              imported_payee = data.payees.find(
+              const payeeName = data.payees.find(
                 p => p.entityId === t.payeeId,
               )?.name;
+              imported_payee =
+                payeeName && payeeName.trim() !== '' ? payeeName : null;
             }
 
             return {
