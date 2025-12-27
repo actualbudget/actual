@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import {
   SvgCheveronLeft,
   SvgCheveronRight,
+  SvgLoadBalancer,
 } from '@actual-app/components/icons/v1';
 import { SvgCalendar } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
@@ -16,8 +17,10 @@ import * as monthUtils from 'loot-core/shared/months';
 import { type MonthBounds } from './MonthsContext';
 
 import { Link } from '@desktop-client/components/common/Link';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type MonthPickerProps = {
   startMonth: string;
@@ -35,11 +38,18 @@ export const MonthPicker = ({
   onSelect,
 }: MonthPickerProps) => {
   const locale = useLocale();
+  const payPeriodFeatureFlagEnabled = useFeatureFlag('payPeriodsEnabled');
+  const [payPeriodViewEnabled, setPayPeriodViewEnabled] =
+    useSyncedPref('showPayPeriods');
   const { t } = useTranslation();
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
 
-  const currentMonth = monthUtils.currentMonth();
+  // Calculate current month when needed to ensure pay period config is loaded
+  const getCurrentMonth = () => monthUtils.currentMonth();
+  // For comparisons that need a stable reference during render
+  const currentMonth = getCurrentMonth();
+
   const firstSelectedMonth = startMonth;
 
   const lastSelectedMonth = monthUtils.addMonths(
@@ -72,6 +82,8 @@ export const MonthPicker = ({
 
   const yearHeadersShown = [];
 
+  const isPayPeriodViewEnabled = String(payPeriodViewEnabled) === 'true';
+
   return (
     <View
       style={{
@@ -90,10 +102,41 @@ export const MonthPicker = ({
           justifyContent: 'center',
         }}
       >
+        {payPeriodFeatureFlagEnabled && (
+          <Link
+            variant="button"
+            buttonVariant="bare"
+            onPress={() =>
+              setPayPeriodViewEnabled(isPayPeriodViewEnabled ? 'false' : 'true')
+            }
+            style={{
+              padding: '3px 3px',
+              marginRight: '12px',
+              color: isPayPeriodViewEnabled
+                ? theme.buttonNormalText
+                : theme.pageTextSubdued,
+            }}
+          >
+            <View
+              title={
+                isPayPeriodViewEnabled
+                  ? t('Hide pay periods')
+                  : t('Show pay periods')
+              }
+            >
+              <SvgLoadBalancer
+                style={{
+                  width: 16,
+                  height: 16,
+                }}
+              />
+            </View>
+          </Link>
+        )}
         <Link
           variant="button"
           buttonVariant="bare"
-          onPress={() => onSelect(currentMonth)}
+          onPress={() => onSelect(getCurrentMonth())}
           style={{
             padding: '3px 3px',
             marginRight: '12px',
@@ -127,7 +170,11 @@ export const MonthPicker = ({
           </View>
         </Link>
         {range.map((month, idx) => {
-          const monthName = monthUtils.format(month, 'MMM', locale);
+          const displayLabel = monthUtils.getMonthDisplayName(
+            month,
+            undefined,
+            locale,
+          );
           const selected =
             idx >= firstSelectedIndex && idx <= lastSelectedIndex;
 
@@ -214,7 +261,13 @@ export const MonthPicker = ({
               onMouseLeave={() => setHoverId(null)}
             >
               <View>
-                {size === 'small' ? monthName[0] : monthName}
+                {monthUtils.isPayPeriod(month)
+                  ? size === 'small'
+                    ? `P${String(parseInt(month.slice(5, 7)) - 12)}`
+                    : displayLabel
+                  : size === 'small'
+                    ? displayLabel[0]
+                    : displayLabel}
                 {showYearHeader && (
                   <View
                     style={{
