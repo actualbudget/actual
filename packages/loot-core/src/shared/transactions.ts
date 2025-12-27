@@ -74,12 +74,12 @@ function makeNonChild<T extends GenericTransactionEntity>(
 
 function makeTransactionWithChildCategory<T extends GenericTransactionEntity>(
   parent: T,
-  data: object,
+  data: Partial<TransactionEntity>,
 ) {
   return {
     ...parent,
     is_parent: false,
-    category: data['category'] || null,
+    category: data.category || null,
   } as unknown as T;
 }
 
@@ -386,7 +386,11 @@ export function makeAsNonChildTransactions(
     t =>
       !newNonChildTransactions.some(updatedTrans => updatedTrans.id === t.id),
   );
-  if (childTransactions.length === 1) {
+  if (
+    childTransactions.length === 1 &&
+    childTransactionsToUpdate.length === 1 &&
+    childTransactionsToUpdate[0].id === childTransactions[0].id
+  ) {
     return {
       updated: [
         makeTransactionWithChildCategory(
