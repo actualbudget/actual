@@ -260,8 +260,18 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           opacity: 0,
           transition: 'opacity .25s',
         },
-        '&:hover .hover-visible': {
+        '&:hover .hover-visible, & .force-visible .hover-visible': {
           opacity: 1,
+        },
+        '& .hover-expand': {
+          maxWidth: 0,
+          overflow: 'hidden',
+          transition: 'max-width 0s .25s',
+        },
+        '&:hover .hover-expand, & .hover-expand.force-visible': {
+          maxWidth: '300px',
+          overflow: 'visible',
+          transition: 'max-width 0s linear 0s',
         },
       }}
     >
@@ -278,6 +288,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       >
         {!editing && (
           <View
+            className={`hover-expand ${budgetMenuOpen ? 'force-visible' : ''}`}
             style={{
               flexDirection: 'row',
               flexShrink: 1,
@@ -303,7 +314,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                 width={14}
                 height={14}
                 className="hover-visible"
-                style={budgetMenuOpen ? { opacity: 1 } : {}}
               />
             </Button>
 
