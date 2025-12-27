@@ -63,19 +63,21 @@ export function useBankSyncAccountSettings(accountId: string) {
     query: transactionQuery,
   });
 
-  const data = transactions?.[0]?.raw_synced_data;
-  let exampleTransaction;
-  if (data) {
-    try {
-      exampleTransaction = JSON.parse(data);
-    } catch (error) {
-      console.error('Failed to parse transaction data:', error);
+  // Parse all transactions with raw_synced_data
+  const parsedTransactions: Array<Record<string, unknown>> = [];
+  for (const transaction of transactions ?? []) {
+    if (transaction.raw_synced_data) {
+      try {
+        const parsed = JSON.parse(transaction.raw_synced_data);
+        parsedTransactions.push(parsed);
+      } catch (error) {
+        console.error('Failed to parse transaction data:', error);
+      }
     }
   }
 
-  const fields: MappableFieldWithExample[] = exampleTransaction
-    ? getFields(exampleTransaction)
-    : [];
+  const fields: MappableFieldWithExample[] =
+    parsedTransactions.length > 0 ? getFields(parsedTransactions) : [];
 
   const saveSettings = () => {
     const mappingsStr = mappingsToString(mappings);
@@ -112,7 +114,6 @@ export function useBankSyncAccountSettings(accountId: string) {
     setImportTransactions,
     mappings,
     setMapping,
-    exampleTransaction,
     fields,
     saveSettings,
   };

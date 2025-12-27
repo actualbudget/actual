@@ -113,21 +113,30 @@ function getByPath(obj: unknown, path: string): unknown {
 }
 
 export const getFields = (
-  transaction: Record<string, unknown>,
+  transactions: Array<Record<string, unknown>>,
 ): MappableFieldWithExample[] =>
-  mappableFields.map(field => ({
-    actualField: field.actualField,
-    syncFields: field.syncFields
-      .map(syncField => {
+  mappableFields.map(field => {
+    // Collect all unique sync fields that exist in any transaction
+    const fieldMap = new Map<string, string>();
+
+    for (const transaction of transactions) {
+      for (const syncField of field.syncFields) {
         const value = getByPath(transaction, syncField);
-        return value !== undefined
-          ? { field: syncField, example: String(value) }
-          : null;
-      })
-      .filter(
-        (item): item is { field: string; example: string } => item !== null,
-      ),
-  }));
+        // Store the first non-undefined value we find as an example
+        if (value !== undefined && !fieldMap.has(syncField)) {
+          fieldMap.set(syncField, String(value));
+        }
+      }
+    }
+
+    return {
+      actualField: field.actualField,
+      syncFields: Array.from(fieldMap.entries()).map(([field, example]) => ({
+        field,
+        example,
+      })),
+    };
+  });
 
 export type EditSyncAccountProps = {
   account: AccountEntity;
