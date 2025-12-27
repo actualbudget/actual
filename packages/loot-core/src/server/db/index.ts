@@ -331,13 +331,13 @@ export async function getCategoriesGrouped(
     ? `cg.id IN (${toSqlQueryParameters(ids)}) AND`
     : '';
   const categoryGroupQuery = `SELECT cg.* FROM category_groups cg WHERE ${categoryGroupWhereIn} cg.tombstone = 0
-    ORDER BY cg.is_income, cg.sort_order, cg.id`;
+                              ORDER BY cg.is_income, cg.sort_order, cg.id`;
 
   const categoryWhereIn = ids
     ? `c.cat_group IN (${toSqlQueryParameters(ids)}) AND`
     : '';
   const categoryQuery = `SELECT c.* FROM categories c WHERE ${categoryWhereIn} c.tombstone = 0
-    ORDER BY c.sort_order, c.id`;
+                         ORDER BY c.sort_order, c.id`;
 
   const groups = ids
     ? await all<DbCategoryGroup>(categoryGroupQuery, [...ids])
@@ -385,9 +385,20 @@ export async function insertCategoryGroup(
   return id;
 }
 
-export function updateCategoryGroup(
+export async function updateCategoryGroup(
   group: WithRequired<Partial<DbCategoryGroup>, 'name' | 'is_income'>,
 ) {
+  const existingGroup = await first<
+    Pick<DbCategoryGroup, 'id' | 'name' | 'hidden'>
+  >(
+    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? and tombstone = 0 LIMIT 1`,
+    [group.name.toUpperCase()],
+  );
+  if (existingGroup) {
+    throw new Error(
+      `A ${existingGroup.hidden ? 'hidden ' : ''}'${existingGroup.name}' category group already exists.`,
+    );
+  }
   group = categoryGroupModel.validate(group, { update: true });
   return update('category_groups', group);
 }
@@ -839,10 +850,10 @@ export function updateTag(tag) {
 export function findTags() {
   return all<{ notes: string }>(
     `
-    SELECT notes
-    FROM transactions
-    WHERE tombstone = 0 AND notes LIKE ?
-  `,
+      SELECT notes
+      FROM transactions
+      WHERE tombstone = 0 AND notes LIKE ?
+    `,
     ['%#%'],
   );
 }
