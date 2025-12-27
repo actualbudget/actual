@@ -113,21 +113,47 @@ function getByPath(obj: unknown, path: string): unknown {
 }
 
 export const getFields = (
-  transaction: Record<string, unknown>,
-): MappableFieldWithExample[] =>
-  mappableFields.map(field => ({
-    actualField: field.actualField,
-    syncFields: field.syncFields
-      .map(syncField => {
+  transactions: Array<Record<string, unknown>>,
+): MappableFieldWithExample[] => {
+  // Create a map for each actualField to collect sync fields
+  const fieldMaps = new Map<MappableActualFields, Map<string, string>>();
+
+  // Initialize maps for each actualField
+  for (const field of mappableFields) {
+    fieldMaps.set(field.actualField, new Map<string, string>());
+  }
+
+  // Iterate through transactions once and collect all fields
+  for (const transaction of transactions) {
+    for (const field of mappableFields) {
+      const fieldMap = fieldMaps.get(field.actualField)!;
+
+      for (const syncField of field.syncFields) {
+        // Skip if we already have an example for this field
+        if (fieldMap.has(syncField)) {
+          continue;
+        }
+
         const value = getByPath(transaction, syncField);
-        return value !== undefined
-          ? { field: syncField, example: String(value) }
-          : null;
-      })
-      .filter(
-        (item): item is { field: string; example: string } => item !== null,
-      ),
+        // Store the first non-undefined value we find as an example
+        if (value !== undefined) {
+          fieldMap.set(syncField, String(value));
+        }
+      }
+    }
+  }
+
+  // Convert maps to the expected output format
+  return mappableFields.map(field => ({
+    actualField: field.actualField,
+    syncFields: Array.from(fieldMaps.get(field.actualField)!.entries()).map(
+      ([field, example]) => ({
+        field,
+        example,
+      }),
+    ),
   }));
+};
 
 export type EditSyncAccountProps = {
   account: AccountEntity;
