@@ -1,4 +1,6 @@
-const { getImportFix } = require('../utils/import-helpers');
+const path = require('path');
+
+const { ensureImport } = require('../utils/import-helpers');
 
 /** @type {import('eslint').Rule.RuleModule} */
 module.exports = {
@@ -19,8 +21,8 @@ module.exports = {
     const filenameRaw = context.getFilename();
     const normalizedFilename = filenameRaw.replace(/\\/g, '/');
 
-    const isLootCoreFile = normalizedFilename.includes(
-      'packages/loot-core/src/server',
+    const isLootCoreFile = normalizedFilename.match(
+      /packages\/loot-core\/src\/(server|shared|platform)/,
     );
 
     if (!isLootCoreFile) {
@@ -37,13 +39,23 @@ module.exports = {
       groupEnd: 'groupEnd',
     };
 
+    function getLoggerImportPath() {
+      const loggerPath = 'packages/loot-core/src/platform/server/log';
+      const fileDir = path.dirname(normalizedFilename);
+      const relativePath = path.posix.relative(fileDir, loggerPath);
+      return relativePath || './log';
+    }
+
     function getLoggerImportInfo() {
       const { ast } = context.getSourceCode();
+      const importPath = getLoggerImportPath();
+
       for (const node of ast.body) {
         if (
           node.type === 'ImportDeclaration' &&
           typeof node.source.value === 'string' &&
-          node.source.value.includes('platform/server/log')
+          (node.source.value === importPath ||
+            node.source.value.includes('platform/server/log'))
         ) {
           const spec = node.specifiers.find(
             s => s.type === 'ImportSpecifier' && s.imported.name === 'logger',
@@ -51,22 +63,9 @@ module.exports = {
           if (spec) {
             return { decl: node, localName: spec.local.name };
           }
-          return { decl: node, localName: null };
         }
       }
       return { decl: null, localName: null };
-    }
-
-    function getLoggerImportPath() {
-      const pathParts = normalizedFilename.split('/');
-      const serverIndex = pathParts.indexOf('server');
-
-      if (serverIndex > -1) {
-        const depth = pathParts.length - serverIndex - 1;
-        return '../'.repeat(depth) + 'platform/server/log';
-      }
-
-      return '../platform/server/log';
     }
 
     return {
@@ -86,7 +85,7 @@ module.exports = {
             data: { method },
             fix(fixer) {
               const sourceCode = context.getSourceCode();
-              const { decl, localName } = getLoggerImportInfo();
+              const { localName } = getLoggerImportInfo();
               const loggerIdent = localName || 'logger';
               const fixes = [
                 fixer.replaceText(
@@ -95,32 +94,9 @@ module.exports = {
                 ),
               ];
 
+              const importPath = getLoggerImportPath();
               if (!localName) {
-                const importPath = getLoggerImportPath();
-
-                // If the module is already imported, append { logger } to it
-                if (decl && decl.specifiers && decl.specifiers.length > 0) {
-                  const lastSpec = decl.specifiers[decl.specifiers.length - 1];
-                  if (lastSpec.type === 'ImportSpecifier') {
-                    fixes.unshift(fixer.insertTextAfter(lastSpec, ', logger'));
-                  } else {
-                    // Fallback: separate import if default/namespace import only
-                    fixes.unshift(
-                      fixer.insertTextAfter(
-                        decl,
-                        `\nimport { logger } from '${importPath}';`,
-                      ),
-                    );
-                  }
-                } else {
-                  // Use shared utility to add the import
-                  const importFix = getImportFix(
-                    sourceCode,
-                    'logger',
-                    importPath,
-                  )(fixer);
-                  if (importFix) fixes.unshift(importFix);
-                }
+                ensureImport(fixes, sourceCode, fixer, 'logger', importPath);
               }
 
               return fixes;
