@@ -1,5 +1,7 @@
 // @ts-strict-ignore
 import SQL from 'better-sqlite3';
+import { logger } from '../log';
+
 import { v4 as uuidv4 } from 'uuid';
 
 import { removeFile, readFile } from '../fs';
@@ -10,7 +12,7 @@ import { unicodeLike } from './unicodeLike';
 function verifyParamTypes(sql, arr) {
   arr.forEach(val => {
     if (typeof val !== 'string' && typeof val !== 'number' && val !== null) {
-      console.log(sql, arr);
+      logger.log(sql, arr);
       throw new Error('Invalid field type ' + val + ' for sql ' + sql);
     }
   });
@@ -38,7 +40,7 @@ export function runQuery(
   try {
     stmt = typeof sql === 'string' ? db.prepare(sql) : sql;
   } catch (e) {
-    console.log('error', sql);
+    logger.log('error', sql);
     throw e;
   }
 
@@ -47,7 +49,7 @@ export function runQuery(
       const result = stmt.all(...params);
       return result;
     } catch (e) {
-      console.log('error', sql);
+      logger.log('error', sql);
       throw e;
     }
   } else {

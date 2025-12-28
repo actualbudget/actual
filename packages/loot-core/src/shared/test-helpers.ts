@@ -1,3 +1,5 @@
+import { logger } from '../platform/server/log';
+
 export let tracer: null | ReturnType<typeof execTracer> = null;
 
 function timeout<T extends Promise<unknown>>(promise: T, n: number) {
@@ -35,7 +37,7 @@ export function execTracer<T>() {
       if (!hasStarted) {
         return;
       } else if (log) {
-        console.log(`--- event(${name}, ${JSON.stringify(data)}) ---`);
+        logger.log(`--- event(${name}, ${JSON.stringify(data)}) ---`);
       }
 
       if (ended) {
@@ -76,7 +78,7 @@ export function execTracer<T>() {
       if (!hasStarted) {
         throw new Error(`Expected "${name}" but tracer hasn't started yet`);
       } else if (log) {
-        console.log(`--- expectWait(${name}) ---`);
+        logger.log(`--- expectWait(${name}) ---`);
       }
 
       const promise = this.wait(name);
@@ -108,7 +110,7 @@ export function execTracer<T>() {
       if (!hasStarted) {
         throw new Error(`Expected "${name}" but tracer hasn't started yet`);
       } else if (log) {
-        console.log(`--- expectNow(${name}) ---`);
+        logger.log(`--- expectNow(${name}) ---`);
       }
 
       const entry = queue.shift();

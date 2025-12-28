@@ -1,3 +1,5 @@
+import { logger } from '../log';
+
 export const fetch = async (
   input: RequestInfo | URL,
   options?: RequestInit,
@@ -11,7 +13,7 @@ export const fetch = async (
       },
     });
   } catch (error) {
-    console.error(error); // log error
+    logger.error(error); // log error
     throw error;
   }
 };
