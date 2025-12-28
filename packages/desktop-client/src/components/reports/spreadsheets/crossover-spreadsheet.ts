@@ -395,7 +395,10 @@ function recalculate(
       yearsToRetire = monthsDiff > 0 ? monthsDiff / 12 : 0;
       targetMonthlyIncome = crossoverData.adjustedExpenses ?? null;
       // Calculate target nest egg: target monthly income / monthly safe withdrawal rate
-      targetNestEgg = Math.round(targetMonthlyIncome / monthlySWR);
+      targetNestEgg =
+        targetMonthlyIncome != null
+          ? Math.round(targetMonthlyIncome / monthlySWR)
+          : null;
     }
   }
 
