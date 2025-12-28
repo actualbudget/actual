@@ -19,7 +19,7 @@ const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
 };
 
 const deleteUser = (userId: string) => {
-  getAccountDb().mutate('DELETE FROM USERS WHERE id = ?', [userId]);
+  getAccountDb().mutate('DELETE FROM users WHERE id = ?', [userId]);
 };
 
 describe('/user-get-key', () => {
