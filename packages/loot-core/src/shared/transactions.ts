@@ -395,10 +395,10 @@ export function makeAsNonChildTransactions(
       updated: [
         makeTransactionWithChildCategory(
           parentTransaction,
-          childTransactions[0],
+          childTransactionsToUpdate[0],
         ),
       ],
-      deleted: [childTransactions[0]],
+      deleted: [childTransactionsToUpdate[0]],
     };
   }
 
