@@ -394,7 +394,7 @@ export function Overview({ dashboard }: OverviewProps) {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {`${<Trans>Reports</Trans>}: ${dashboard.name}`}
+                  <Trans>Reports</Trans>: {dashboard.name}
                 </View>
               }
             />
