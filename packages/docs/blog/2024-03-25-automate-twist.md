@@ -58,7 +58,7 @@ This approach fills your budget categories as your income arrives by prioritizin
 
 Now that we have our first deposit for the month, we're ready to start budgeting using templates.
 
-![](/img/blog/twist-1.png)
+![](/img/blog/twist-1.webp)
 
 ### Week 1, Apply budget templates
 
@@ -66,7 +66,7 @@ Use the **Apply budget template** menu option in the monthly menu. Open the menu
 
 Notice that both Food, Power, and Cell categories have received funding greater than expected this week. The templates are already funding goals for week 2! Only half ($75) of the desired power budget ($150) is satisfied and was the last category to receive funding. It'll be the first category in the next pay period to be filled. Feel free to refer back to the table above to see which categories are being filled. There is a lot happening here.
 
-![](/img/blog/twist-2.png)
+![](/img/blog/twist-2.webp)
 
 ### Receive second week's income and 'Overwrite with budget templates'
 
@@ -74,19 +74,19 @@ For each time going forward, we're going to use the **Overwrite with budget temp
 
 Notice that week 3 goals are already being funded. Most of the categories still show a yellow indicator. This means that they still need more funding this month to reach all of your goals. If they have turned green, like General, Cell, and Power, the target goal has been reached.
 
-![](/img/blog/twist-3.png)
+![](/img/blog/twist-3.webp)
 
 ### Receive third week's income and 'Overwrite with budget templates'
 
 More green category balances! Keep in mind, you can spend from these categories along the way. I simply didn't show any spending in these graphics.
 
-![](/img/blog/twist-4.png)
+![](/img/blog/twist-4.webp)
 
 ### Receive fourth week's income and 'Overwrite with budget templates'
 
 This is the final pay period for the month. I was successful in reaching all of my target goals. There was even a little extra for the savings category! Amazing!
 
-![](/img/blog/twist-5.png)
+![](/img/blog/twist-5.webp)
 
 # Conclusion
 
