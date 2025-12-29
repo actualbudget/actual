@@ -31,7 +31,7 @@ import { ReportCardName } from '@desktop-client/components/reports/ReportCardNam
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { simpleCashFlow } from '@desktop-client/components/reports/spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { useWidgetMoveMenu } from '@desktop-client/components/reports/useWidgetMoveMenu';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type CustomLabelProps = {
@@ -105,7 +105,7 @@ type CashFlowCardProps = {
   meta?: CashFlowWidget['meta'];
   onMetaChange: (newMeta: CashFlowWidget['meta']) => void;
   onRemove: () => void;
-  onMove: (targetDashboardId: string, copy: boolean) => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function CashFlowCard({
@@ -114,15 +114,15 @@ export function CashFlowCard({
   meta = {},
   onMetaChange,
   onRemove,
-  onMove,
+  onCopy,
 }: CashFlowCardProps) {
   const { t } = useTranslation();
   const animationProps = useRechartsAnimation();
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
-  const { menuItems: moveMenuItems, handleMenuSelect: handleMoveMenuSelect } =
-    useWidgetMoveMenu(onMove);
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -168,10 +168,10 @@ export function CashFlowCard({
           name: 'remove',
           text: t('Remove'),
         },
-        ...moveMenuItems,
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
-        if (handleMoveMenuSelect(item)) return;
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);

@@ -6,24 +6,20 @@ import { type Menu } from '@actual-app/components/menu';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
-type WidgetMoveMenuResult = {
+type WidgetCopyMenuResult = {
   /** Menu items to add to the card's menu */
   menuItems: ComponentProps<typeof Menu<string>>['items'];
   /** Handler for menu selection - call this from onMenuSelect */
   handleMenuSelect: (item: string) => boolean;
 };
 
-export function useWidgetMoveMenu(
-  onMove: (targetDashboardId: string, copy: boolean) => void,
-): WidgetMoveMenuResult {
+export function useWidgetCopyMenu(
+  onCopy: (targetDashboardId: string) => void,
+): WidgetCopyMenuResult {
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
   const menuItems: ComponentProps<typeof Menu<string>>['items'] = [
-    {
-      name: 'move-to-dashboard',
-      text: t('Move to dashboard'),
-    },
     {
       name: 'copy-to-dashboard',
       text: t('Copy to dashboard'),
@@ -32,30 +28,14 @@ export function useWidgetMoveMenu(
 
   const handleMenuSelect = (item: string): boolean => {
     switch (item) {
-      case 'move-to-dashboard':
-        dispatch(
-          pushModal({
-            modal: {
-              name: 'move-widget-to-dashboard',
-              options: {
-                action: 'move',
-                onSelect: targetDashboardId => {
-                  onMove(targetDashboardId, false);
-                },
-              },
-            },
-          }),
-        );
-        return true;
       case 'copy-to-dashboard':
         dispatch(
           pushModal({
             modal: {
-              name: 'move-widget-to-dashboard',
+              name: 'copy-widget-to-dashboard',
               options: {
-                action: 'copy',
                 onSelect: targetDashboardId => {
-                  onMove(targetDashboardId, true);
+                  onCopy(targetDashboardId);
                 },
               },
             },

@@ -23,6 +23,8 @@ export default async function runMigration(db) {
     ]);
 
     // 4. Migrate existing widgets to the default dashboard
-    db.runQuery(`UPDATE dashboard SET dashboard_page_id = ?`, [defaultDashboardId]);
+    db.runQuery(`UPDATE dashboard SET dashboard_page_id = ?`, [
+      defaultDashboardId,
+    ]);
   });
 }

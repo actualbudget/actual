@@ -22,7 +22,7 @@ import { ReportCardName } from '@desktop-client/components/reports/ReportCardNam
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { useWidgetMoveMenu } from '@desktop-client/components/reports/useWidgetMoveMenu';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 // Type for the return value of the recalculate function
@@ -55,7 +55,7 @@ type CrossoverCardProps = {
   meta?: CrossoverWidget['meta'];
   onMetaChange: (newMeta: CrossoverWidget['meta']) => void;
   onRemove: () => void;
-  onMove: (targetDashboardId: string, copy: boolean) => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function CrossoverCard({
@@ -65,15 +65,15 @@ export function CrossoverCard({
   meta = {},
   onMetaChange,
   onRemove,
-  onMove,
+  onCopy,
 }: CrossoverCardProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
-  const { menuItems: moveMenuItems, handleMenuSelect: handleMoveMenuSelect } =
-    useWidgetMoveMenu(onMove);
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
 
   // Calculate date range from meta or use default range
   const [start, setStart] = useState<string>('');
@@ -207,10 +207,10 @@ export function CrossoverCard({
       menuItems={[
         { name: 'rename', text: t('Rename') },
         { name: 'remove', text: t('Remove') },
-        ...moveMenuItems,
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
-        if (handleMoveMenuSelect(item)) return;
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -256,8 +256,8 @@ export function CrossoverCard({
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
                   {yearsToRetire != null
                     ? t('{{years}} years', {
-                      years: format(yearsToRetire, 'number'),
-                    })
+                        years: format(yearsToRetire, 'number'),
+                      })
                     : t('N/A')}
                 </PrivacyFilter>
               </Block>

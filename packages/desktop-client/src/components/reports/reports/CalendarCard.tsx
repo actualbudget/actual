@@ -42,7 +42,7 @@ import {
   calendarSpreadsheet,
 } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { useWidgetMoveMenu } from '@desktop-client/components/reports/useWidgetMoveMenu';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -54,7 +54,7 @@ type CalendarCardProps = {
   meta?: CalendarWidget['meta'];
   onMetaChange: (newMeta: CalendarWidget['meta']) => void;
   onRemove: () => void;
-  onMove: (targetDashboardId: string, copy: boolean) => void;
+  onCopy: (targetDashboardId: string) => void;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
 };
 
@@ -64,7 +64,7 @@ export function CalendarCard({
   meta = {},
   onMetaChange,
   onRemove,
-  onMove,
+  onCopy,
   firstDayOfWeekIdx,
 }: CalendarCardProps) {
   const { t } = useTranslation();
@@ -171,8 +171,8 @@ export function CalendarCard({
     return data?.calendarData.length;
   }, [data]);
 
-  const { menuItems: moveMenuItems, handleMenuSelect: handleMoveMenuSelect } =
-    useWidgetMoveMenu(onMove);
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
 
   return (
     <ReportCard
@@ -188,10 +188,10 @@ export function CalendarCard({
           name: 'remove',
           text: t('Remove'),
         },
-        ...moveMenuItems,
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
-        if (handleMoveMenuSelect(item)) return;
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -416,7 +416,7 @@ function CalendarCardInner({
         if (
           monthNameContainerRef.current &&
           monthNameContainerRef.current.scrollWidth >
-          monthNameContainerRef.current.clientWidth
+            monthNameContainerRef.current.clientWidth
         ) {
           setMonthNameVisible(false);
         } else {

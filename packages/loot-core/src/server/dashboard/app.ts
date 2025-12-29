@@ -213,16 +213,14 @@ async function removeDashboardWidget(widgetId: string) {
   await db.delete_('dashboard', widgetId);
 }
 
-async function moveDashboardWidget({
+async function copyDashboardWidget({
   widgetId,
   targetDashboardPageId,
-  copy,
 }: {
   widgetId: string;
   targetDashboardPageId: string;
-  copy: boolean;
 }) {
-  // Get the widget to move/copy
+  // Get the widget to copy
   const widget = await db.first<db.DbDashboard>(
     'SELECT * FROM dashboard WHERE id = ? AND tombstone = 0',
     [widgetId],
@@ -253,10 +251,6 @@ async function moveDashboardWidget({
           dashboard_page_id: targetDashboardPageId,
         };
         await addDashboardWidget(newWidget);
-        // If move (not copy), delete the original widget
-        if (!copy) {
-          await removeDashboardWidget(widgetId);
-        }
         break;
       }
       default:
@@ -367,7 +361,7 @@ export type DashboardHandlers = {
   'dashboard-reset': typeof resetDashboard;
   'dashboard-add-widget': typeof addDashboardWidget;
   'dashboard-remove-widget': typeof removeDashboardWidget;
-  'dashboard-move-widget': typeof moveDashboardWidget;
+  'dashboard-move-widget': typeof copyDashboardWidget;
   'dashboard-import': typeof importDashboard;
 };
 
@@ -382,5 +376,5 @@ app.method('dashboard-update-widget', mutator(undoable(updateDashboardWidget)));
 app.method('dashboard-reset', mutator(undoable(resetDashboard)));
 app.method('dashboard-add-widget', mutator(undoable(addDashboardWidget)));
 app.method('dashboard-remove-widget', mutator(undoable(removeDashboardWidget)));
-app.method('dashboard-move-widget', mutator(undoable(moveDashboardWidget)));
+app.method('dashboard-move-widget', mutator(undoable(copyDashboardWidget)));
 app.method('dashboard-import', mutator(undoable(importDashboard)));

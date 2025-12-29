@@ -28,26 +28,26 @@ type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
   onReportChange: (
     params:
       | {
-        type: 'add-update';
-        savedReport: CustomReportEntity;
-      }
+          type: 'add-update';
+          savedReport: CustomReportEntity;
+        }
       | {
-        type: 'rename';
-        savedReport?: CustomReportEntity;
-      }
+          type: 'rename';
+          savedReport?: CustomReportEntity;
+        }
       | {
-        type: 'modify';
-      }
+          type: 'modify';
+        }
       | {
-        type: 'reload';
-      }
+          type: 'reload';
+        }
       | {
-        type: 'reset';
-      }
+          type: 'reset';
+        }
       | {
-        type: 'choose';
-        savedReport?: CustomReportEntity;
-      },
+          type: 'choose';
+          savedReport?: CustomReportEntity;
+        },
   ) => void;
 };
 
@@ -274,7 +274,9 @@ export function SaveReport({
                     onChange={v => setSaveDashboardId(v)}
                     defaultLabel={t('None')}
                     options={
-                      dashboard_pages ? dashboard_pages.map(d => [d.id, d.name]) : []
+                      dashboard_pages
+                        ? dashboard_pages.map(d => [d.id, d.name])
+                        : []
                     }
                     style={{ marginTop: 10, width: 300 }}
                   />

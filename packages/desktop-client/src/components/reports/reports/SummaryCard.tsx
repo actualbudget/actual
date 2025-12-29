@@ -18,7 +18,7 @@ import { calculateTimeRange } from '@desktop-client/components/reports/reportRan
 import { summarySpreadsheet } from '@desktop-client/components/reports/spreadsheets/summary-spreadsheet';
 import { SummaryNumber } from '@desktop-client/components/reports/SummaryNumber';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { useWidgetMoveMenu } from '@desktop-client/components/reports/useWidgetMoveMenu';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type SummaryCardProps = {
@@ -27,7 +27,7 @@ type SummaryCardProps = {
   meta?: SummaryWidget['meta'];
   onMetaChange: (newMeta: SummaryWidget['meta']) => void;
   onRemove: () => void;
-  onMove: (targetDashboardId: string, copy: boolean) => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function SummaryCard({
@@ -36,15 +36,15 @@ export function SummaryCard({
   meta = {},
   onMetaChange,
   onRemove,
-  onMove,
+  onCopy,
 }: SummaryCardProps) {
   const locale = useLocale();
   const { t } = useTranslation();
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
-  const { menuItems: moveMenuItems, handleMenuSelect: handleMoveMenuSelect } =
-    useWidgetMoveMenu(onMove);
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -70,13 +70,13 @@ export function SummaryCard({
     () =>
       (meta?.content
         ? (() => {
-          try {
-            return JSON.parse(meta.content);
-          } catch (error) {
-            console.error('Failed to parse meta.content:', error);
-            return { type: 'sum' };
-          }
-        })()
+            try {
+              return JSON.parse(meta.content);
+            } catch (error) {
+              console.error('Failed to parse meta.content:', error);
+              return { type: 'sum' };
+            }
+          })()
         : { type: 'sum' }) as SummaryContent,
     [meta],
   );
@@ -110,10 +110,10 @@ export function SummaryCard({
           name: 'remove',
           text: t('Remove'),
         },
-        ...moveMenuItems,
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
-        if (handleMoveMenuSelect(item)) return;
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);

@@ -512,9 +512,15 @@ export type Modal =
       };
     }
   | {
-      name: 'move-widget-to-dashboard';
+      name: 'rename-dashboard';
       options: {
-        action: 'move' | 'copy';
+        dashboardId: string;
+        currentName: string;
+      };
+    }
+  | {
+      name: 'copy-widget-to-dashboard';
+      options: {
         onSelect: (dashboardId: string) => void;
       };
     }

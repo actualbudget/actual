@@ -1,39 +1,31 @@
-import {
-  Fragment,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type SyntheticEvent,
-} from 'react';
-import { Dialog, DialogTrigger, Form } from 'react-aria-components';
+import { useMemo, useState } from 'react';
+import { Dialog, DialogTrigger } from 'react-aria-components';
 import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSearchParams, useLocation } from 'react-router';
+import { useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import {
-  SvgAdd,
-  SvgDotsHorizontalTriple,
-} from '@actual-app/components/icons/v1';
-import { Input } from '@actual-app/components/input';
+import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { theme } from '@actual-app/components/theme';
 import { breakpoints } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import type {
-  DashboardEntity,
   CustomReportWidget,
+  DashboardEntity,
   ExportImportDashboard,
   MarkdownWidget,
   Widget,
 } from 'loot-core/types/models';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
+import { DashboardHeader } from './DashboardHeader';
+import { DashboardSelector } from './DashboardSelector';
 import { LoadingIndicator } from './LoadingIndicator';
 import { CalendarCard } from './reports/CalendarCard';
 import { CashFlowCard } from './reports/CashFlowCard';
@@ -47,11 +39,7 @@ import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
 
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
-import {
-  MobilePageHeader,
-  Page,
-  PageHeader,
-} from '@desktop-client/components/Page';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import {
   useDashboard,
@@ -62,7 +50,6 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useReports } from '@desktop-client/hooks/useReports';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
 import {
   addNotification,
   removeNotification,
@@ -75,9 +62,14 @@ function isCustomReportWidget(widget: Widget): widget is CustomReportWidget {
   return widget.type === 'custom-report';
 }
 
-export function Overview() {
+type OverviewProps = {
+  dashboard: DashboardEntity;
+};
+
+export function Overview({ dashboard }: OverviewProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
@@ -90,28 +82,10 @@ export function Overview() {
     'mobile' | 'desktop'
   >('desktop');
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const switchDashboard = (id: string) => {
-    setSearchParams({ dashboardId: id });
-  };
-  const { data: dashboard_pages = [], isLoading: isDashboardPagesLoading } =
-    useDashboardPages();
-
-  const dashboardPagesRef = useRef<readonly DashboardEntity[]>([]);
-  useEffect(() => {
-    dashboardPagesRef.current = dashboard_pages;
-  }, [dashboard_pages]);
-
-  const dashboardIdParam = searchParams.get('dashboardId');
-  const activeDashboard = useMemo(
-    () => dashboard_pages.find(d => d.id === dashboardIdParam) || dashboard_pages[0],
-    [dashboard_pages, dashboardIdParam],
-  );
-
-  const activeDashboardId = activeDashboard?.id;
+  const { data: dashboard_pages = [] } = useDashboardPages();
 
   const { data: widgets, isLoading: isWidgetsLoading } = useDashboard(
-    activeDashboardId,
+    dashboard.id,
   );
 
   const { data: customReports, isLoading: isCustomReportsLoading } =
@@ -122,11 +96,7 @@ export function Overview() {
     [customReports],
   );
 
-  const isLoading =
-    isCustomReportsLoading || isWidgetsLoading || isDashboardPagesLoading;
-
   const { isNarrowWidth } = useResponsive();
-  const navigate = useNavigate();
 
   const location = useLocation();
   sessionStorage.setItem('url', location.pathname);
@@ -218,9 +188,8 @@ export function Overview() {
   };
 
   const onResetDashboard = async () => {
-    if (!activeDashboardId) return;
     setIsImporting(true);
-    await send('dashboard-reset', activeDashboardId);
+    await send('dashboard-reset', dashboard.id);
     setIsImporting(false);
 
     onDispatchSucessNotification(
@@ -251,30 +220,17 @@ export function Overview() {
     type: T['type'],
     meta: T['meta'] = null,
   ) => {
-    if (!activeDashboardId) return;
     send('dashboard-add-widget', {
       type,
       width: 4,
       height: 2,
       meta,
-      dashboard_page_id: activeDashboardId,
+      dashboard_page_id: dashboard.id,
     });
   };
 
   const onRemoveWidget = (widgetId: string) => {
     send('dashboard-remove-widget', widgetId);
-  };
-
-  const onMoveWidget = (
-    widgetId: string,
-    targetDashboardPageId: string,
-    copy: boolean,
-  ) => {
-    send('dashboard-move-widget', {
-      widgetId,
-      targetDashboardPageId,
-      copy,
-    });
   };
 
   const onExport = () => {
@@ -315,7 +271,6 @@ export function Overview() {
     );
   };
   const onImport = async () => {
-    if (!activeDashboardId) return;
     const openFileDialog = window.Actual.openFileDialog;
 
     if (!openFileDialog) {
@@ -346,7 +301,7 @@ export function Overview() {
     setIsImporting(true);
     const res = await send('dashboard-import', {
       filepath,
-      dashboardPageId: activeDashboardId,
+      dashboardPageId: dashboard.id,
     });
     setIsImporting(false);
 
@@ -405,145 +360,21 @@ export function Overview() {
     });
   };
 
-  const onCreateDashboard = async (name: string) => {
-    const newId = await send('dashboard-create', {
-      name,
-    });
-    return newId;
-  };
-
-  const onRenameDashboard = async (name: string, targetId: string) => {
-    await send('dashboard-rename', { id: targetId, name });
-  };
-
-  const clearDashboardSearchParam = () => {
-    setSearchParams(prev => {
-      const next = new URLSearchParams(prev);
-      next.delete('dashboardId');
-      return next;
+  const onCopyWidget = (widgetId: string, targetDashboardId: string) => {
+    send('dashboard-move-widget', {
+      widgetId,
+      targetDashboardPageId: targetDashboardId,
     });
   };
 
-  const getNextDashboardIdAfterDelete = (
-    list: readonly DashboardEntity[],
-    deletedId: string,
-  ): string | null => {
-    if (list.length <= 1) {
-      return null;
-    }
-
-    const index = list.findIndex(d => d.id === deletedId);
-    if (index !== -1) {
-      const left = list[index - 1];
-      if (left && left.id !== deletedId) {
-        return left.id;
-      }
-
-      const right = list[index + 1];
-      if (right && right.id !== deletedId) {
-        return right.id;
-      }
-    }
-
-    const fallback = list.find(d => d.id !== deletedId);
-    return fallback ? fallback.id : null;
-  };
-
-  const openConfirmDeleteDashboard = (id: string) => {
-    dispatch(
-      pushModal({
-        modal: {
-          name: 'confirm-delete',
-          options: {
-            message: t(
-              'Are you sure you want to delete this dashboard? This action cannot be undone.',
-            ),
-            onConfirm: async () => {
-              const nextDashboardId = getNextDashboardIdAfterDelete(
-                dashboardPagesRef.current,
-                id,
-              );
-
-              await send('dashboard-delete', id);
-
-              if (nextDashboardId) {
-                switchDashboard(nextDashboardId);
-              } else {
-                clearDashboardSearchParam();
-              }
-            },
-          },
-        },
-      }),
-    );
+  const onDeleteDashboard = async (id: string) => {
+    await send('dashboard-delete', id);
+    navigate('/reports', { replace: true });
   };
 
   const accounts = useAccounts();
 
-  const [renamingId, setRenamingId] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState('');
-  const renameInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (renamingId && renameInputRef.current) {
-      renameInputRef.current.focus();
-      renameInputRef.current.select();
-    }
-  }, [dashboard_pages, renamingId]);
-
-  const renameInFlightRef = useRef<Set<string>>(new Set());
-
-  const finishRename = async (targetDashboardId: string, e: SyntheticEvent) => {
-    e.preventDefault();
-
-    if (renameInFlightRef.current.has(targetDashboardId)) {
-      return;
-    }
-
-    const trimmedName = renameValue.trim();
-    if (!trimmedName) {
-      setRenamingId(null);
-      setRenameValue('');
-      return;
-    }
-
-    const existing = dashboardPagesRef.current.find(
-      d => d.id === targetDashboardId,
-    );
-    if (existing && existing.name === trimmedName) {
-      setRenamingId(null);
-      switchDashboard(targetDashboardId);
-      return;
-    }
-
-    renameInFlightRef.current.add(targetDashboardId);
-    try {
-      await onRenameDashboard(trimmedName, targetDashboardId);
-      // After completed rename, clear renaming and switch to the renamed dashboard
-      setRenamingId(null);
-      setRenameValue('');
-      switchDashboard(targetDashboardId);
-    } finally {
-      renameInFlightRef.current.delete(targetDashboardId);
-    }
-  };
-
-  const openRenameDashboard = async (id: string, name?: string) => {
-    setRenamingId(id);
-    setRenameValue(name || '');
-  };
-
-  const handleAddDashboard = async () => {
-    const defaultName = t('New dashboard');
-    const newId = await onCreateDashboard(defaultName);
-    if (newId) {
-      // Switch immediately so the new dashboard becomes active even if the live query lags.
-      switchDashboard(newId);
-      openRenameDashboard(newId, defaultName);
-    }
-  };
-
-  if (isLoading && !activeDashboard) {
+  if (isWidgetsLoading || isCustomReportsLoading) {
     return <LoadingIndicator message={t('Loading reports...')} />;
   }
 
@@ -551,7 +382,23 @@ export function Overview() {
     <Page
       header={
         isNarrowWidth ? (
-          <MobilePageHeader title={t('Reports')} />
+          <View>
+            <MobilePageHeader title={`${t('Reports')}: ${dashboard.name}`} />
+            <View
+              style={{
+                padding: '10px 15px',
+                borderBottom: '1px solid ' + theme.pillBorder,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+              }}
+            >
+              <DashboardSelector
+                dashboards={dashboard_pages}
+                currentDashboard={dashboard}
+              />
+            </View>
+          </View>
         ) : (
           <View>
             <View
@@ -562,13 +409,13 @@ export function Overview() {
                 alignItems: 'center',
               }}
             >
-              <PageHeader title={t('Reports')} />
+              <DashboardHeader dashboard={dashboard} />
 
               <View
                 style={{
                   flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  gap: 5,
+                  gap: 10,
+                  alignItems: 'center',
                 }}
               >
                 {currentBreakpoint === 'desktop' && (
@@ -625,11 +472,11 @@ export function Overview() {
                               },
                               ...(crossoverReportEnabled
                                 ? [
-                                  {
-                                    name: 'crossover-card' as const,
-                                    text: t('Crossover point'),
-                                  },
-                                ]
+                                    {
+                                      name: 'crossover-card' as const,
+                                      text: t('Crossover point'),
+                                    },
+                                  ]
                                 : []),
                               {
                                 name: 'spending-card' as const,
@@ -649,11 +496,11 @@ export function Overview() {
                               },
                               ...(formulaMode
                                 ? [
-                                  {
-                                    name: 'formula-card' as const,
-                                    text: t('Formula card'),
-                                  },
-                                ]
+                                    {
+                                      name: 'formula-card' as const,
+                                      text: t('Formula card'),
+                                    },
+                                  ]
                                 : []),
                               {
                                 name: 'custom-report' as const,
@@ -661,8 +508,8 @@ export function Overview() {
                               },
                               ...(customReports.length
                                 ? ([Menu.line] satisfies Array<
-                                  typeof Menu.line
-                                >)
+                                    typeof Menu.line
+                                  >)
                                 : []),
                               ...customReports.map(report => ({
                                 name: `custom-report-${report.id}` as const,
@@ -673,6 +520,11 @@ export function Overview() {
                         </Dialog>
                       </Popover>
                     </DialogTrigger>
+
+                    <DashboardSelector
+                      dashboards={dashboard_pages}
+                      currentDashboard={dashboard}
+                    />
 
                     {isEditing ? (
                       <Button
@@ -714,19 +566,7 @@ export function Overview() {
                                   onImport();
                                   break;
                                 case 'delete':
-                                  if (activeDashboardId) {
-                                    openConfirmDeleteDashboard(
-                                      activeDashboardId,
-                                    );
-                                  }
-                                  break;
-                                case 'rename':
-                                  if (activeDashboardId) {
-                                    openRenameDashboard(
-                                      activeDashboardId,
-                                      activeDashboard?.name,
-                                    );
-                                  }
+                                  onDeleteDashboard(dashboard.id);
                                   break;
                                 default:
                                   throw new Error(
@@ -753,14 +593,10 @@ export function Overview() {
                               },
                               Menu.line,
                               {
-                                name: 'rename',
-                                text: t('Rename dashboard'),
-                                disabled: isImporting,
-                              },
-                              {
                                 name: 'delete',
                                 text: t('Delete dashboard'),
-                                disabled: isImporting || dashboard_pages.length <= 1,
+                                disabled:
+                                  isImporting || dashboard_pages.length <= 1,
                               },
                             ]}
                           />
@@ -770,60 +606,6 @@ export function Overview() {
                   </>
                 )}
               </View>
-            </View>
-
-            {/* Dashboard Tabs */}
-            <View
-              style={{
-                flexDirection: 'row',
-                gap: 5,
-                marginTop: 10,
-                alignItems: 'stretch',
-                marginLeft: 20,
-              }}
-            >
-              {dashboard_pages.map(dashboard => (
-                <Fragment key={dashboard.id}>
-                  {renamingId === dashboard.id ? (
-                    <Form onSubmit={e => finishRename(dashboard.id, e)}>
-                      <Input
-                        ref={renameInputRef}
-                        value={renameValue}
-                        onChangeValue={setRenameValue}
-                        onBlur={e => finishRename(dashboard.id, e)}
-                        style={{ width: 200 }}
-                      />
-                    </Form>
-                  ) : (
-                    <View
-                      style={{ flexDirection: 'row', alignItems: 'stretch' }}
-                    >
-                      <Button
-                        variant={
-                          activeDashboardId === dashboard.id
-                            ? 'primary'
-                            : 'normal'
-                        }
-                        style={{ minWidth: 40 }}
-                        onPress={() => switchDashboard(dashboard.id)}
-                        onDoubleClick={() =>
-                          openRenameDashboard(dashboard.id, dashboard.name)
-                        }
-                      >
-                        {dashboard.name}
-                      </Button>
-                    </View>
-                  )}
-                </Fragment>
-              ))}
-
-              <Button
-                variant="bare"
-                aria-label={t('Add dashboard')}
-                onPress={handleAddDashboard}
-              >
-                <SvgAdd width={15} height={15} />
-              </Button>
             </View>
           </View>
         )
@@ -861,8 +643,8 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
-                      onMove={(targetDashboardId, copy) =>
-                        onMoveWidget(item.i, targetDashboardId, copy)
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
                       }
                     />
                   ) : item.type === 'crossover-card' &&
@@ -874,8 +656,8 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
-                      onMove={(targetDashboardId, copy) =>
-                        onMoveWidget(item.i, targetDashboardId, copy)
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
                       }
                     />
                   ) : item.type === 'cash-flow-card' ? (
@@ -885,8 +667,8 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
-                      onMove={(targetDashboardId, copy) =>
-                        onMoveWidget(item.i, targetDashboardId, copy)
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
                       }
                     />
                   ) : item.type === 'spending-card' ? (
@@ -896,8 +678,8 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
-                      onMove={(targetDashboardId, copy) =>
-                        onMoveWidget(item.i, targetDashboardId, copy)
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
                       }
                     />
                   ) : item.type === 'markdown-card' ? (
@@ -906,8 +688,8 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
-                      onMove={(targetDashboardId, copy) =>
-                        onMoveWidget(item.i, targetDashboardId, copy)
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
                       }
                     />
                   ) : item.type === 'custom-report' ? (
@@ -915,8 +697,8 @@ export function Overview() {
                       isEditing={isEditing}
                       report={customReportMap.get(item.meta.id)}
                       onRemove={() => onRemoveWidget(item.i)}
-                      onMove={(targetDashboardId, copy) =>
-                        onMoveWidget(item.i, targetDashboardId, copy)
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
                       }
                     />
                   ) : item.type === 'summary-card' ? (
@@ -926,8 +708,8 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
-                      onMove={(targetDashboardId, copy) =>
-                        onMoveWidget(item.i, targetDashboardId, copy)
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
                       }
                     />
                   ) : item.type === 'calendar-card' ? (
@@ -938,8 +720,8 @@ export function Overview() {
                       firstDayOfWeekIdx={firstDayOfWeekIdx}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
-                      onMove={(targetDashboardId, copy) =>
-                        onMoveWidget(item.i, targetDashboardId, copy)
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
                       }
                     />
                   ) : item.type === 'formula-card' && formulaMode ? (
@@ -949,8 +731,8 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
-                      onMove={(targetDashboardId, copy) =>
-                        onMoveWidget(item.i, targetDashboardId, copy)
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
                       }
                     />
                   ) : null}

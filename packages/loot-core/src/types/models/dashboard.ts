@@ -11,13 +11,13 @@ export type TimeFrame = {
   start: string;
   end: string;
   mode:
-  | 'sliding-window'
-  | 'static'
-  | 'full'
-  | 'lastMonth'
-  | 'lastYear'
-  | 'yearToDate'
-  | 'priorYearToDate';
+    | 'sliding-window'
+    | 'static'
+    | 'full'
+    | 'lastMonth'
+    | 'lastYear'
+    | 'yearToDate'
+    | 'priorYearToDate';
 };
 
 type AbstractWidget<

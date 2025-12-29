@@ -18,7 +18,7 @@ import { ReportCardName } from '@desktop-client/components/reports/ReportCardNam
 import { calculateSpendingReportTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpendingSpreadsheet } from '@desktop-client/components/reports/spreadsheets/spending-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { useWidgetMoveMenu } from '@desktop-client/components/reports/useWidgetMoveMenu';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type SpendingCardProps = {
@@ -27,7 +27,7 @@ type SpendingCardProps = {
   meta?: SpendingWidget['meta'];
   onMetaChange: (newMeta: SpendingWidget['meta']) => void;
   onRemove: () => void;
-  onMove: (targetDashboardId: string, copy: boolean) => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function SpendingCard({
@@ -36,7 +36,7 @@ export function SpendingCard({
   meta = {},
   onMetaChange,
   onRemove,
-  onMove,
+  onCopy,
 }: SpendingCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
@@ -44,8 +44,8 @@ export function SpendingCard({
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
-  const { menuItems: moveMenuItems, handleMenuSelect: handleMoveMenuSelect } =
-    useWidgetMoveMenu(onMove);
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
 
   const spendingReportMode = meta?.mode ?? 'single-month';
 
@@ -73,7 +73,7 @@ export function SpendingCard({
     data &&
     Math.round(
       data.intervalData[todayDay][selection] -
-      data.intervalData[todayDay].compare,
+        data.intervalData[todayDay].compare,
     );
 
   return (
@@ -90,10 +90,10 @@ export function SpendingCard({
           name: 'remove',
           text: t('Remove'),
         },
-        ...moveMenuItems,
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
-        if (handleMoveMenuSelect(item)) return;
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -148,7 +148,7 @@ export function SpendingCard({
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
                   {data &&
                     (difference && difference > 0 ? '+' : '') +
-                    format(difference || 0, 'financial')}
+                      format(difference || 0, 'financial')}
                 </PrivacyFilter>
               </Block>
             </View>
