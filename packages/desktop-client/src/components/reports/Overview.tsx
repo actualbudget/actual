@@ -55,7 +55,7 @@ import {
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import {
   useDashboard,
-  useDashboards,
+  useDashboardPages,
 } from '@desktop-client/hooks/useDashboard';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -94,24 +94,24 @@ export function Overview() {
   const switchDashboard = (id: string) => {
     setSearchParams({ dashboardId: id });
   };
-  const { data: dashboards = [], isLoading: isDashboardsLoading } =
-    useDashboards();
+  const { data: dashboard_pages = [], isLoading: isDashboardPagesLoading } =
+    useDashboardPages();
 
-  const dashboardsRef = useRef<readonly DashboardEntity[]>([]);
+  const dashboardPagesRef = useRef<readonly DashboardEntity[]>([]);
   useEffect(() => {
-    dashboardsRef.current = dashboards;
-  }, [dashboards]);
+    dashboardPagesRef.current = dashboard_pages;
+  }, [dashboard_pages]);
 
   const dashboardIdParam = searchParams.get('dashboardId');
   const activeDashboard = useMemo(
-    () => dashboards.find(d => d.id === dashboardIdParam) || dashboards[0],
-    [dashboards, dashboardIdParam],
+    () => dashboard_pages.find(d => d.id === dashboardIdParam) || dashboard_pages[0],
+    [dashboard_pages, dashboardIdParam],
   );
 
   const activeDashboardId = activeDashboard?.id;
 
   const { data: widgets, isLoading: isWidgetsLoading } = useDashboard(
-    activeDashboardId || null,
+    activeDashboardId,
   );
 
   const { data: customReports, isLoading: isCustomReportsLoading } =
@@ -123,7 +123,7 @@ export function Overview() {
   );
 
   const isLoading =
-    isCustomReportsLoading || isWidgetsLoading || isDashboardsLoading;
+    isCustomReportsLoading || isWidgetsLoading || isDashboardPagesLoading;
 
   const { isNarrowWidth } = useResponsive();
   const navigate = useNavigate();
@@ -257,7 +257,7 @@ export function Overview() {
       width: 4,
       height: 2,
       meta,
-      dashboardId: activeDashboardId,
+      dashboard_page_id: activeDashboardId,
     });
   };
 
@@ -267,12 +267,12 @@ export function Overview() {
 
   const onMoveWidget = (
     widgetId: string,
-    targetDashboardId: string,
+    targetDashboardPageId: string,
     copy: boolean,
   ) => {
     send('dashboard-move-widget', {
       widgetId,
-      targetDashboardId,
+      targetDashboardPageId,
       copy,
     });
   };
@@ -346,7 +346,7 @@ export function Overview() {
     setIsImporting(true);
     const res = await send('dashboard-import', {
       filepath,
-      dashboardId: activeDashboardId,
+      dashboardPageId: activeDashboardId,
     });
     setIsImporting(false);
 
@@ -460,7 +460,7 @@ export function Overview() {
             ),
             onConfirm: async () => {
               const nextDashboardId = getNextDashboardIdAfterDelete(
-                dashboardsRef.current,
+                dashboardPagesRef.current,
                 id,
               );
 
@@ -489,7 +489,7 @@ export function Overview() {
       renameInputRef.current.focus();
       renameInputRef.current.select();
     }
-  }, [dashboards, renamingId]);
+  }, [dashboard_pages, renamingId]);
 
   const renameInFlightRef = useRef<Set<string>>(new Set());
 
@@ -507,7 +507,7 @@ export function Overview() {
       return;
     }
 
-    const existing = dashboardsRef.current.find(
+    const existing = dashboardPagesRef.current.find(
       d => d.id === targetDashboardId,
     );
     if (existing && existing.name === trimmedName) {
@@ -625,11 +625,11 @@ export function Overview() {
                               },
                               ...(crossoverReportEnabled
                                 ? [
-                                    {
-                                      name: 'crossover-card' as const,
-                                      text: t('Crossover point'),
-                                    },
-                                  ]
+                                  {
+                                    name: 'crossover-card' as const,
+                                    text: t('Crossover point'),
+                                  },
+                                ]
                                 : []),
                               {
                                 name: 'spending-card' as const,
@@ -649,11 +649,11 @@ export function Overview() {
                               },
                               ...(formulaMode
                                 ? [
-                                    {
-                                      name: 'formula-card' as const,
-                                      text: t('Formula card'),
-                                    },
-                                  ]
+                                  {
+                                    name: 'formula-card' as const,
+                                    text: t('Formula card'),
+                                  },
+                                ]
                                 : []),
                               {
                                 name: 'custom-report' as const,
@@ -661,8 +661,8 @@ export function Overview() {
                               },
                               ...(customReports.length
                                 ? ([Menu.line] satisfies Array<
-                                    typeof Menu.line
-                                  >)
+                                  typeof Menu.line
+                                >)
                                 : []),
                               ...customReports.map(report => ({
                                 name: `custom-report-${report.id}` as const,
@@ -760,7 +760,7 @@ export function Overview() {
                               {
                                 name: 'delete',
                                 text: t('Delete dashboard'),
-                                disabled: isImporting || dashboards.length <= 1,
+                                disabled: isImporting || dashboard_pages.length <= 1,
                               },
                             ]}
                           />
@@ -782,7 +782,7 @@ export function Overview() {
                 marginLeft: 20,
               }}
             >
-              {dashboards.map(dashboard => (
+              {dashboard_pages.map(dashboard => (
                 <Fragment key={dashboard.id}>
                   {renamingId === dashboard.id ? (
                     <Form onSubmit={e => finishRename(dashboard.id, e)}>

@@ -8,7 +8,7 @@ import { useDispatch } from '@desktop-client/redux';
 
 type WidgetMoveMenuResult = {
   /** Menu items to add to the card's menu */
-  menuItems: ComponentProps<typeof Menu>['items'];
+  menuItems: ComponentProps<typeof Menu<string>>['items'];
   /** Handler for menu selection - call this from onMenuSelect */
   handleMenuSelect: (item: string) => boolean;
 };
@@ -19,7 +19,7 @@ export function useWidgetMoveMenu(
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
-  const menuItems: ComponentProps<typeof Menu>['items'] = [
+  const menuItems: ComponentProps<typeof Menu<string>>['items'] = [
     {
       name: 'move-to-dashboard',
       text: t('Move to dashboard'),

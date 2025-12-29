@@ -246,7 +246,7 @@ export type DbDashboards = {
 
 export type DbDashboard = {
   id: string;
-  dashboard_id?: string | null;
+  dashboard_page_id: string;
   type: string;
   width: number;
   height: number;
@@ -315,9 +315,9 @@ export type DbViewSchedule = {
   name: DbSchedule['name'];
   rule: DbSchedule['rule'];
   next_date:
-    | DbScheduleNextDate['local_next_date_ts']
-    | DbScheduleNextDate['local_next_date']
-    | DbScheduleNextDate['base_next_date'];
+  | DbScheduleNextDate['local_next_date_ts']
+  | DbScheduleNextDate['local_next_date']
+  | DbScheduleNextDate['base_next_date'];
   active: DbSchedule['active'];
   completed: DbSchedule['completed'];
   posts_transaction: DbSchedule['posts_transaction'];

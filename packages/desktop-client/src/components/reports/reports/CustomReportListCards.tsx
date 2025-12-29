@@ -149,7 +149,7 @@ function CustomReportListCardsInner({
         ...moveMenuItems,
       ]}
       onMenuSelect={item => {
-        if (handleMoveMenuSelect(item as string)) return;
+        if (handleMoveMenuSelect(item)) return;
         switch (item) {
           case 'remove':
             onRemove();

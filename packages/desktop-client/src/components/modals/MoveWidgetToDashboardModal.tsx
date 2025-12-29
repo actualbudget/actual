@@ -11,7 +11,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { useDashboards } from '@desktop-client/hooks/useDashboard';
+import { useDashboardPages } from '@desktop-client/hooks/useDashboard';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type MoveWidgetToDashboardModalProps = Extract<
@@ -24,21 +24,21 @@ export function MoveWidgetToDashboardModal({
   onSelect,
 }: MoveWidgetToDashboardModalProps) {
   const { t } = useTranslation();
-  const { data: dashboards = [] } = useDashboards();
+  const { data: dashboard_pages = [] } = useDashboardPages();
   const [searchParams] = useSearchParams();
 
   const dashboardIdParam = searchParams.get('dashboardId');
   const activeDashboard = useMemo(
-    () => dashboards.find(d => d.id === dashboardIdParam) || dashboards[0],
-    [dashboards, dashboardIdParam],
+    () => dashboard_pages.find(d => d.id === dashboardIdParam) || dashboard_pages[0],
+    [dashboard_pages, dashboardIdParam],
   );
 
-  const items: ComponentProps<typeof Menu>['items'] = useMemo(
+  const items: ComponentProps<typeof Menu<string>>['items'] = useMemo(
     () =>
-      dashboards
+      dashboard_pages
         .filter(d => d.id !== activeDashboard?.id)
         .map(d => ({ name: d.id, text: d.name })),
-    [dashboards, activeDashboard],
+    [dashboard_pages, activeDashboard],
   );
 
   const title =
@@ -58,13 +58,13 @@ export function MoveWidgetToDashboardModal({
               <Menu
                 items={items}
                 onMenuSelect={item => {
-                  onSelect(item as string);
+                  onSelect(item);
                   close();
                 }}
               />
             ) : (
               <View>
-                <Trans>No other dashboards available.</Trans>
+                <Trans>No other dashboard pages available.</Trans>
               </View>
             )}
 

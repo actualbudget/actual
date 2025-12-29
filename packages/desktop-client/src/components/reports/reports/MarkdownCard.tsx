@@ -90,7 +90,7 @@ export function MarkdownCard({
         ...moveMenuItems,
       ]}
       onMenuSelect={item => {
-        if (handleMoveMenuSelect(item as string)) return;
+        if (handleMoveMenuSelect(item)) return;
         switch (item) {
           case 'text-left':
             onMetaChange({

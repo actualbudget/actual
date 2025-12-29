@@ -210,7 +210,7 @@ export function CrossoverCard({
         ...moveMenuItems,
       ]}
       onMenuSelect={item => {
-        if (handleMoveMenuSelect(item as string)) return;
+        if (handleMoveMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -256,8 +256,8 @@ export function CrossoverCard({
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
                   {yearsToRetire != null
                     ? t('{{years}} years', {
-                        years: format(yearsToRetire, 'number'),
-                      })
+                      years: format(yearsToRetire, 'number'),
+                    })
                     : t('N/A')}
                 </PrivacyFilter>
               </Block>

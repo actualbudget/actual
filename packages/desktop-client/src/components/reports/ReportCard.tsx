@@ -27,8 +27,8 @@ type ReportCardProps = {
   disableClick?: boolean;
   to?: string;
   children: ReactNode;
-  menuItems?: ComponentProps<typeof Menu>['items'];
-  onMenuSelect?: ComponentProps<typeof Menu>['onMenuSelect'];
+  menuItems?: ComponentProps<typeof Menu<string>>['items'];
+  onMenuSelect?: ComponentProps<typeof Menu<string>>['onMenuSelect'];
   size?: number;
   style?: CSSProperties;
 };
@@ -77,18 +77,18 @@ export function ReportCard({
         transition: 'box-shadow .25s',
         ...(isEditing
           ? {
-              '& .recharts-surface:hover': {
-                cursor: 'move',
-                ':active': { cursor: 'grabbing' },
-              },
+            '& .recharts-surface:hover': {
+              cursor: 'move',
               ':active': { cursor: 'grabbing' },
-              filter: 'grayscale(1)',
-            }
+            },
+            ':active': { cursor: 'grabbing' },
+            filter: 'grayscale(1)',
+          }
           : {
-              '& .recharts-surface:hover': {
-                cursor: 'pointer',
-              },
-            }),
+            '& .recharts-surface:hover': {
+              cursor: 'pointer',
+            },
+          }),
         ':hover': {
           ...(to ? { boxShadow: '0 4px 6px rgba(0, 0, 0, .15)' } : null),
           ...(isEditing ? { cursor: 'move', filter: 'grayscale(0)' } : null),

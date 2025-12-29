@@ -97,38 +97,38 @@ const exportModel = {
   },
 };
 
-async function getDashboards() {
-  return db.all('SELECT * FROM dashboards WHERE tombstone = 0');
+async function getDashboardPages() {
+  return db.all('SELECT * FROM dashboard_pages WHERE tombstone = 0');
 }
 
-async function createDashboard({ name }: { name: string }) {
+async function createDashboardPage({ name }: { name: string }) {
   const id = uuidv4();
-  await db.insertWithSchema('dashboards', { id, name });
+  await db.insertWithSchema('dashboard_pages', { id, name });
 
   return id;
 }
 
-async function deleteDashboard(id: string) {
+async function deleteDashboardPage(id: string) {
   const res = await db.first<{ c: number }>(
-    'SELECT count(*) as c FROM dashboards WHERE tombstone = 0',
+    'SELECT count(*) as c FROM dashboard_pages WHERE tombstone = 0',
   );
 
   if ((res?.c ?? 0) <= 1) {
-    throw new Error('Cannot delete the last dashboard');
+    throw new Error('Cannot delete the last dashboard page');
   }
 
   await batchMessages(async () => {
-    await db.delete_('dashboards', id);
+    await db.delete_('dashboard_pages', id);
     // Tombstone all widgets for this dashboard
     await db.runQuery(
-      'UPDATE dashboard SET tombstone = 1 WHERE dashboard_id = ?',
+      'UPDATE dashboard SET tombstone = 1 WHERE dashboard_page_id = ?',
       [id],
     );
   });
 }
 
-async function renameDashboard({ id, name }: { id: string; name: string }) {
-  await db.updateWithSchema('dashboards', { id, name });
+async function renameDashboardPage({ id, name }: { id: string; name: string }) {
+  await db.updateWithSchema('dashboard_pages', { id, name });
 }
 
 async function updateDashboard(
@@ -161,7 +161,7 @@ async function resetDashboard(id: string) {
   await batchMessages(async () => {
     const widgets = await db.selectWithSchema(
       'dashboard',
-      'SELECT id FROM dashboard WHERE dashboard_id = ? AND tombstone = 0',
+      'SELECT id FROM dashboard WHERE dashboard_page_id = ? AND tombstone = 0',
       [id],
     );
 
@@ -171,7 +171,7 @@ async function resetDashboard(id: string) {
 
       // Insert the default state
       ...DEFAULT_DASHBOARD_STATE.map(widget =>
-        db.insertWithSchema('dashboard', { ...widget, dashboard_id: id }),
+        db.insertWithSchema('dashboard', { ...widget, dashboard_page_id: id }),
       ),
     ]);
   });
@@ -179,7 +179,7 @@ async function resetDashboard(id: string) {
 
 async function addDashboardWidget(
   widget: Omit<Widget, 'id' | 'x' | 'y' | 'tombstone'> &
-    Partial<Pick<Widget, 'x' | 'y'>> & { dashboardId: string },
+    Partial<Pick<Widget, 'x' | 'y'>> & { dashboard_page_id: string },
 ) {
   // If no x & y was provided - calculate it dynamically
   // The new widget should be the very last one in the list of all widgets
@@ -187,8 +187,8 @@ async function addDashboardWidget(
     const data = await db.first<
       Pick<db.DbDashboard, 'x' | 'y' | 'width' | 'height'>
     >(
-      'SELECT x, y, width, height FROM dashboard WHERE dashboard_id = ? AND tombstone = 0 ORDER BY y DESC, x DESC',
-      [widget.dashboardId],
+      'SELECT x, y, width, height FROM dashboard WHERE dashboard_page_id = ? AND tombstone = 0 ORDER BY y DESC, x DESC',
+      [widget.dashboard_page_id],
     );
 
     if (!data) {
@@ -201,11 +201,11 @@ async function addDashboardWidget(
     }
   }
 
-  const { dashboardId, ...widgetWithoutDashboardId } = widget;
+  const { dashboard_page_id, ...widgetWithoutDashboardPageId } = widget;
 
   await db.insertWithSchema('dashboard', {
-    ...widgetWithoutDashboardId,
-    dashboard_id: dashboardId,
+    ...widgetWithoutDashboardPageId,
+    dashboard_page_id: dashboard_page_id,
   });
 }
 
@@ -215,11 +215,11 @@ async function removeDashboardWidget(widgetId: string) {
 
 async function moveDashboardWidget({
   widgetId,
-  targetDashboardId,
+  targetDashboardPageId,
   copy,
 }: {
   widgetId: string;
-  targetDashboardId: string;
+  targetDashboardPageId: string;
   copy: boolean;
 }) {
   // Get the widget to move/copy
@@ -250,7 +250,7 @@ async function moveDashboardWidget({
           width: widget.width,
           height: widget.height,
           meta: widget.meta ? JSON.parse(widget.meta) : {},
-          dashboardId: targetDashboardId,
+          dashboard_page_id: targetDashboardPageId,
         };
         await addDashboardWidget(newWidget);
         // If move (not copy), delete the original widget
@@ -267,10 +267,10 @@ async function moveDashboardWidget({
 
 async function importDashboard({
   filepath,
-  dashboardId,
+  dashboardPageId,
 }: {
   filepath: string;
-  dashboardId: string;
+  dashboardPageId: string;
 }) {
   try {
     if (!(await fs.exists(filepath))) {
@@ -289,8 +289,8 @@ async function importDashboard({
 
     const existingWidgets = await db.selectWithSchema(
       'dashboard',
-      'SELECT id FROM dashboard WHERE dashboard_id = ? AND tombstone = 0',
-      [dashboardId],
+      'SELECT id FROM dashboard WHERE dashboard_page_id = ? AND tombstone = 0',
+      [dashboardPageId],
     );
 
     await batchMessages(async () => {
@@ -306,7 +306,7 @@ async function importDashboard({
             height: widget.height,
             x: widget.x,
             y: widget.y,
-            dashboard_id: dashboardId,
+            dashboard_page_id: dashboardPageId,
             meta: isExportedCustomReportWidget(widget)
               ? { id: widget.meta.id }
               : widget.meta,
@@ -358,10 +358,10 @@ async function importDashboard({
 }
 
 export type DashboardHandlers = {
-  'dashboards-get': typeof getDashboards;
-  'dashboard-create': typeof createDashboard;
-  'dashboard-delete': typeof deleteDashboard;
-  'dashboard-rename': typeof renameDashboard;
+  'dashboard_pages-get': typeof getDashboardPages;
+  'dashboard-create': typeof createDashboardPage;
+  'dashboard-delete': typeof deleteDashboardPage;
+  'dashboard-rename': typeof renameDashboardPage;
   'dashboard-update': typeof updateDashboard;
   'dashboard-update-widget': typeof updateDashboardWidget;
   'dashboard-reset': typeof resetDashboard;
@@ -373,10 +373,10 @@ export type DashboardHandlers = {
 
 export const app = createApp<DashboardHandlers>();
 
-app.method('dashboards-get', getDashboards);
-app.method('dashboard-create', mutator(createDashboard));
-app.method('dashboard-delete', mutator(deleteDashboard));
-app.method('dashboard-rename', mutator(undoable(renameDashboard)));
+app.method('dashboard_pages-get', getDashboardPages);
+app.method('dashboard-create', mutator(undoable(createDashboardPage)));
+app.method('dashboard-delete', mutator(undoable(deleteDashboardPage)));
+app.method('dashboard-rename', mutator(undoable(renameDashboardPage)));
 app.method('dashboard-update', mutator(undoable(updateDashboard)));
 app.method('dashboard-update-widget', mutator(undoable(updateDashboardWidget)));
 app.method('dashboard-reset', mutator(undoable(resetDashboard)));

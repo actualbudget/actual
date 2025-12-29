@@ -5,13 +5,13 @@ import { type Widget, type DashboardEntity } from 'loot-core/types/models';
 
 import { useQuery } from './useQuery';
 
-export function useDashboard(dashboardId: string | null) {
+export function useDashboard(dashboardPageId: string) {
   const { data: queryData, isLoading } = useQuery<Widget>(() => {
-    if (!dashboardId) {
+    if (!dashboardPageId) {
       return null;
     }
-    return q('dashboard').filter({ dashboard_id: dashboardId }).select('*');
-  }, [dashboardId]);
+    return q('dashboard').filter({ dashboard_page_id: dashboardPageId }).select('*');
+  }, [dashboardPageId]);
 
   return useMemo(
     () => ({
@@ -22,9 +22,9 @@ export function useDashboard(dashboardId: string | null) {
   );
 }
 
-export function useDashboards() {
+export function useDashboardPages() {
   const { data: queryData, isLoading } = useQuery<DashboardEntity>(
-    () => q('dashboards').select('*'),
+    () => q('dashboard_pages').select('*'),
     [],
   );
 

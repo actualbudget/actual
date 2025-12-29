@@ -70,13 +70,13 @@ export function SummaryCard({
     () =>
       (meta?.content
         ? (() => {
-            try {
-              return JSON.parse(meta.content);
-            } catch (error) {
-              console.error('Failed to parse meta.content:', error);
-              return { type: 'sum' };
-            }
-          })()
+          try {
+            return JSON.parse(meta.content);
+          } catch (error) {
+            console.error('Failed to parse meta.content:', error);
+            return { type: 'sum' };
+          }
+        })()
         : { type: 'sum' }) as SummaryContent,
     [meta],
   );
@@ -113,7 +113,7 @@ export function SummaryCard({
         ...moveMenuItems,
       ]}
       onMenuSelect={item => {
-        if (handleMoveMenuSelect(item as string)) return;
+        if (handleMoveMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);

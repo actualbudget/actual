@@ -18,7 +18,7 @@ import { SaveReportMenu } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
 
 import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { useDashboards } from '@desktop-client/hooks/useDashboard';
+import { useDashboardPages } from '@desktop-client/hooks/useDashboard';
 import { useReports } from '@desktop-client/hooks/useReports';
 
 type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
@@ -28,26 +28,26 @@ type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
   onReportChange: (
     params:
       | {
-          type: 'add-update';
-          savedReport: CustomReportEntity;
-        }
+        type: 'add-update';
+        savedReport: CustomReportEntity;
+      }
       | {
-          type: 'rename';
-          savedReport?: CustomReportEntity;
-        }
+        type: 'rename';
+        savedReport?: CustomReportEntity;
+      }
       | {
-          type: 'modify';
-        }
+        type: 'modify';
+      }
       | {
-          type: 'reload';
-        }
+        type: 'reload';
+      }
       | {
-          type: 'reset';
-        }
+        type: 'reset';
+      }
       | {
-          type: 'choose';
-          savedReport?: CustomReportEntity;
-        },
+        type: 'choose';
+        savedReport?: CustomReportEntity;
+      },
   ) => void;
 };
 
@@ -58,7 +58,7 @@ export function SaveReport({
   onReportChange,
 }: SaveReportProps) {
   const { data: listReports } = useReports();
-  const { data: dashboards } = useDashboards();
+  const { data: dashboard_pages } = useDashboardPages();
   const triggerRef = useRef(null);
   const [deleteMenuOpen, setDeleteMenuOpen] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
@@ -72,10 +72,10 @@ export function SaveReport({
   const [saveDashboardId, setSaveDashboardId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!saveDashboardId && dashboards && dashboards.length) {
-      setSaveDashboardId(dashboards[0].id);
+    if (!saveDashboardId && dashboard_pages && dashboard_pages.length) {
+      setSaveDashboardId(dashboard_pages[0].id);
     }
-  }, [saveDashboardId, dashboards]);
+  }, [saveDashboardId, dashboard_pages]);
 
   async function onApply(cond: string) {
     const chooseSavedReport = listReports.find(r => cond === r.id);
@@ -113,7 +113,7 @@ export function SaveReport({
         width: 4,
         height: 2,
         meta: { id: response.data },
-        dashboardId: saveDashboardId,
+        dashboard_page_id: saveDashboardId,
       });
 
       setNameMenuOpen(false);
@@ -274,7 +274,7 @@ export function SaveReport({
                     onChange={v => setSaveDashboardId(v)}
                     defaultLabel={t('None')}
                     options={
-                      dashboards ? dashboards.map(d => [d.id, d.name]) : []
+                      dashboard_pages ? dashboard_pages.map(d => [d.id, d.name]) : []
                     }
                     style={{ marginTop: 10, width: 300 }}
                   />

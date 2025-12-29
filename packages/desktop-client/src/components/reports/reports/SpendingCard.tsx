@@ -73,7 +73,7 @@ export function SpendingCard({
     data &&
     Math.round(
       data.intervalData[todayDay][selection] -
-        data.intervalData[todayDay].compare,
+      data.intervalData[todayDay].compare,
     );
 
   return (
@@ -93,7 +93,7 @@ export function SpendingCard({
         ...moveMenuItems,
       ]}
       onMenuSelect={item => {
-        if (handleMoveMenuSelect(item as string)) return;
+        if (handleMoveMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -148,7 +148,7 @@ export function SpendingCard({
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
                   {data &&
                     (difference && difference > 0 ? '+' : '') +
-                      format(difference || 0, 'financial')}
+                    format(difference || 0, 'financial')}
                 </PrivacyFilter>
               </Block>
             </View>

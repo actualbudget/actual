@@ -171,7 +171,7 @@ export function CashFlowCard({
         ...moveMenuItems,
       ]}
       onMenuSelect={item => {
-        if (handleMoveMenuSelect(item as string)) return;
+        if (handleMoveMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
