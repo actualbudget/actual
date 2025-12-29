@@ -94,7 +94,6 @@ export function Overview({ dashboard }: OverviewProps) {
     dashboard.id,
   );
 
-
   const isLoading = isCustomReportsLoading || isWidgetsLoading;
 
   const { isNarrowWidth } = useResponsive();
@@ -479,11 +478,11 @@ export function Overview({ dashboard }: OverviewProps) {
                             },
                             ...(crossoverReportEnabled
                               ? [
-                                {
-                                  name: 'crossover-card' as const,
-                                  text: t('Crossover point'),
-                                },
-                              ]
+                                  {
+                                    name: 'crossover-card' as const,
+                                    text: t('Crossover point'),
+                                  },
+                                ]
                               : []),
                             {
                               name: 'spending-card' as const,
@@ -503,11 +502,11 @@ export function Overview({ dashboard }: OverviewProps) {
                             },
                             ...(formulaMode
                               ? [
-                                {
-                                  name: 'formula-card' as const,
-                                  text: t('Formula card'),
-                                },
-                              ]
+                                  {
+                                    name: 'formula-card' as const,
+                                    text: t('Formula card'),
+                                  },
+                                ]
                               : []),
                             {
                               name: 'custom-report' as const,

@@ -37,6 +37,6 @@ export function ReportsDashboardRouter() {
     }
   }
 
-  // No dashboards exist (NOTE: This should not happen invariant is we always should have at least 1 dashboard) 
+  // No dashboards exist (NOTE: This should not happen invariant is we always should have at least 1 dashboard)
   return <LoadingIndicator message={t('No dashboards available')} />;
 }

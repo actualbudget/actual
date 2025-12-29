@@ -95,6 +95,11 @@ export function SaveReport({
         name: newName,
       };
 
+      if (!saveDashboardId) {
+        setErr(t('Please select a dashboard to save the report'));
+        return;
+      }
+
       const response = await sendCatch('report/create', newSavedReport);
 
       if (response.error) {
@@ -102,12 +107,6 @@ export function SaveReport({
         setNameMenuOpen(true);
         return;
       }
-
-      if (!saveDashboardId) {
-        setErr(t('Cannot find dashboard to save report to!'));
-        return;
-      }
-
       await send('dashboard-add-widget', {
         type: 'custom-report',
         width: 4,

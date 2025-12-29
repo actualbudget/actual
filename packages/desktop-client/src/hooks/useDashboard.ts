@@ -5,11 +5,8 @@ import { type Widget, type DashboardEntity } from 'loot-core/types/models';
 
 import { useQuery } from './useQuery';
 
-export function useDashboard(dashboardPageId: string | undefined) {
+export function useDashboard(dashboardPageId: string) {
   const { data: queryData, isLoading } = useQuery<Widget>(() => {
-    if (!dashboardPageId) {
-      return null;
-    }
     return q('dashboard')
       .filter({ dashboard_page_id: dashboardPageId })
       .select('*');
