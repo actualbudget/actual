@@ -28,6 +28,20 @@ function isExportedCustomReportWidget(
   return widget.type === 'custom-report';
 }
 
+function isWidgetType(type: string): type is Widget['type'] {
+  return [
+    'net-worth-card',
+    'cash-flow-card',
+    'spending-card',
+    'crossover-card',
+    'markdown-card',
+    'summary-card',
+    'calendar-card',
+    'formula-card',
+    'custom-report',
+  ].includes(type);
+}
+
 const exportModel = {
   validate(dashboard: ExportImportDashboard) {
     requiredFields('Dashboard', dashboard, ['version', 'widgets']);
@@ -72,19 +86,7 @@ const exportModel = {
         );
       }
 
-      if (
-        ![
-          'net-worth-card',
-          'cash-flow-card',
-          'spending-card',
-          'crossover-card',
-          'custom-report',
-          'markdown-card',
-          'summary-card',
-          'calendar-card',
-          'formula-card',
-        ].includes(widget.type)
-      ) {
+      if (!isWidgetType(widget.type)) {
         throw new ValidationError(
           `Invalid widget.${idx}.type value ${widget.type}.`,
         );
@@ -228,20 +230,6 @@ async function copyDashboardWidget({
 
   if (!widget) {
     throw new Error(`Widget not found: ${widgetId}`);
-  }
-
-  function isWidgetType(type: string): type is Widget['type'] {
-    return [
-      'net-worth-card',
-      'cash-flow-card',
-      'spending-card',
-      'crossover-card',
-      'markdown-card',
-      'summary-card',
-      'calendar-card',
-      'formula-card',
-      'custom-report',
-    ].includes(type);
   }
 
   await batchMessages(async () => {
