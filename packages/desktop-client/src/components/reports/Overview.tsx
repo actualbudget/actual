@@ -69,7 +69,6 @@ type OverviewProps = {
 export function Overview({ dashboard }: OverviewProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
@@ -82,12 +81,6 @@ export function Overview({ dashboard }: OverviewProps) {
     'mobile' | 'desktop'
   >('desktop');
 
-  const { data: dashboard_pages = [] } = useDashboardPages();
-
-  const { data: widgets, isLoading: isWidgetsLoading } = useDashboard(
-    dashboard.id,
-  );
-
   const { data: customReports, isLoading: isCustomReportsLoading } =
     useReports();
 
@@ -95,8 +88,17 @@ export function Overview({ dashboard }: OverviewProps) {
     () => new Map(customReports.map(report => [report.id, report])),
     [customReports],
   );
+  const { data: dashboard_pages = [] } = useDashboardPages();
+
+  const { data: widgets, isLoading: isWidgetsLoading } = useDashboard(
+    dashboard.id,
+  );
+
+
+  const isLoading = isCustomReportsLoading || isWidgetsLoading;
 
   const { isNarrowWidth } = useResponsive();
+  const navigate = useNavigate();
 
   const location = useLocation();
   sessionStorage.setItem('url', location.pathname);
@@ -361,7 +363,7 @@ export function Overview({ dashboard }: OverviewProps) {
   };
 
   const onCopyWidget = (widgetId: string, targetDashboardId: string) => {
-    send('dashboard-move-widget', {
+    send('dashboard-copy-widget', {
       widgetId,
       targetDashboardPageId: targetDashboardId,
     });
@@ -374,7 +376,7 @@ export function Overview({ dashboard }: OverviewProps) {
 
   const accounts = useAccounts();
 
-  if (isWidgetsLoading || isCustomReportsLoading) {
+  if (isLoading) {
     return <LoadingIndicator message={t('Loading reports...')} />;
   }
 
@@ -386,9 +388,7 @@ export function Overview({ dashboard }: OverviewProps) {
             <MobilePageHeader
               title={
                 <View
-                  title={`${t('Reports')}: ${dashboard.name}`}
                   style={{
-                    maxWidth: '100%',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
@@ -400,11 +400,8 @@ export function Overview({ dashboard }: OverviewProps) {
             />
             <View
               style={{
-                padding: '10px 15px',
+                padding: '5px',
                 borderBottom: '1px solid ' + theme.pillBorder,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 10,
               }}
             >
               <DashboardSelector
@@ -427,7 +424,8 @@ export function Overview({ dashboard }: OverviewProps) {
             <View
               style={{
                 flexDirection: 'row',
-                gap: 10,
+                justifyContent: 'space-between',
+                gap: 5,
                 alignItems: 'center',
               }}
             >
@@ -481,11 +479,11 @@ export function Overview({ dashboard }: OverviewProps) {
                             },
                             ...(crossoverReportEnabled
                               ? [
-                                  {
-                                    name: 'crossover-card' as const,
-                                    text: t('Crossover point'),
-                                  },
-                                ]
+                                {
+                                  name: 'crossover-card' as const,
+                                  text: t('Crossover point'),
+                                },
+                              ]
                               : []),
                             {
                               name: 'spending-card' as const,
@@ -505,11 +503,11 @@ export function Overview({ dashboard }: OverviewProps) {
                             },
                             ...(formulaMode
                               ? [
-                                  {
-                                    name: 'formula-card' as const,
-                                    text: t('Formula card'),
-                                  },
-                                ]
+                                {
+                                  name: 'formula-card' as const,
+                                  text: t('Formula card'),
+                                },
+                              ]
                               : []),
                             {
                               name: 'custom-report' as const,
@@ -535,29 +533,21 @@ export function Overview({ dashboard }: OverviewProps) {
                   />
 
                   {/* The Editing Button */}
-                  <View
-                    style={{
-                      flexGrow: 0,
-                      flexShrink: 0,
-                      flexBasis: 'auto',
-                    }}
-                  >
-                    {isEditing ? (
-                      <Button
-                        isDisabled={isImporting}
-                        onPress={() => setIsEditing(false)}
-                      >
-                        <Trans>Finish editing dashboard</Trans>
-                      </Button>
-                    ) : (
-                      <Button
-                        isDisabled={isImporting}
-                        onPress={() => setIsEditing(true)}
-                      >
-                        <Trans>Edit dashboard</Trans>
-                      </Button>
-                    )}
-                  </View>
+                  {isEditing ? (
+                    <Button
+                      isDisabled={isImporting}
+                      onPress={() => setIsEditing(false)}
+                    >
+                      <Trans>Finish editing dashboard</Trans>
+                    </Button>
+                  ) : (
+                    <Button
+                      isDisabled={isImporting}
+                      onPress={() => setIsEditing(true)}
+                    >
+                      <Trans>Edit dashboard</Trans>
+                    </Button>
+                  )}
 
                   {/* The Menu */}
                   <DialogTrigger>

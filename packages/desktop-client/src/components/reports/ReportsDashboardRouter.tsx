@@ -31,10 +31,12 @@ export function ReportsDashboardRouter() {
     const dashboard = dashboard_pages.find(d => d.id === dashboardId);
     if (dashboard) {
       return <Overview dashboard={dashboard} />;
+    } else {
+      // Invalid dashboardId - show error
+      return <LoadingIndicator message={t('Dashboard not found')} />;
     }
   }
 
-  // No dashboards exist - show empty state:
-  // NOTE: This should not happen
+  // No dashboards exist (NOTE: This should not happen invariant is we always should have at least 1 dashboard) 
   return <LoadingIndicator message={t('No dashboards available')} />;
 }

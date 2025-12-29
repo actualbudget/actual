@@ -363,7 +363,7 @@ export type DashboardHandlers = {
   'dashboard-reset': typeof resetDashboard;
   'dashboard-add-widget': typeof addDashboardWidget;
   'dashboard-remove-widget': typeof removeDashboardWidget;
-  'dashboard-move-widget': typeof copyDashboardWidget;
+  'dashboard-copy-widget': typeof copyDashboardWidget;
   'dashboard-import': typeof importDashboard;
 };
 
@@ -378,5 +378,5 @@ app.method('dashboard-update-widget', mutator(undoable(updateDashboardWidget)));
 app.method('dashboard-reset', mutator(undoable(resetDashboard)));
 app.method('dashboard-add-widget', mutator(undoable(addDashboardWidget)));
 app.method('dashboard-remove-widget', mutator(undoable(removeDashboardWidget)));
-app.method('dashboard-move-widget', mutator(undoable(copyDashboardWidget)));
+app.method('dashboard-copy-widget', mutator(undoable(copyDashboardWidget)));
 app.method('dashboard-import', mutator(undoable(importDashboard)));
