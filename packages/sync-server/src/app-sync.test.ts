@@ -18,6 +18,10 @@ const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
   );
 };
 
+const deleteUser = (userId: string) => {
+  getAccountDb().mutate('DELETE FROM users WHERE id = ?', [userId]);
+};
+
 describe('/user-get-key', () => {
   it('returns 401 if the user is not authenticated', async () => {
     const res = await request(app).post('/user-get-key');
@@ -536,6 +540,8 @@ describe('/list-user-files', () => {
 
   it('returns a list of user files for an authenticated user', async () => {
     createUser('fileListAdminId', 'admin', ADMIN_ROLE, 1);
+    onTestFinished(() => deleteUser('fileListAdminId'));
+
     const fileId1 = crypto.randomBytes(16).toString('hex');
     const fileId2 = crypto.randomBytes(16).toString('hex');
     const fileName1 = 'file1.txt';
