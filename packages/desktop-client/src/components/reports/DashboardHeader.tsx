@@ -47,8 +47,25 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
         '&:hover .hover-visible': {
           opacity: 1,
         },
+        flexGrow: 1,
+        flexShrink: 1,
+        flexBasis: 'auto',
+        minWidth: 0,
+        display: 'flex',
+        justifyContent: 'flex-start',
       }}
     >
+      <View
+        style={{
+          fontSize: 25,
+          fontWeight: 500,
+          flexGrow: 0,
+          flexShrink: 0,
+          flexBasis: 'auto',
+        }}
+      >
+        <Trans>Reports</Trans>:
+      </View>
       {editingName ? (
         <InitialFocus>
           <Input
@@ -61,23 +78,25 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
               fontWeight: 500,
               marginTop: -3,
               marginBottom: -4,
-              marginLeft: -6,
               paddingTop: 2,
               paddingBottom: 2,
-              width: Math.max(20, dashboard.name.length) + 'ch',
             }}
           />
         </InitialFocus>
       ) : (
         <>
-          <View style={{ fontSize: 25, fontWeight: 500 }}>
-            <Trans>Reports</Trans>:
-          </View>
           <View
             style={{
               fontSize: 25,
               fontWeight: 500,
               marginRight: 5,
+              flexGrow: 0,
+              flexShrink: 1,
+              flexBasis: 'auto',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              minWidth: 0,
             }}
           >
             {dashboard.name}
@@ -86,12 +105,18 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
             variant="bare"
             aria-label={t('Rename dashboard')}
             className="hover-visible"
+            style={{
+              marginRight: 5,
+            }}
             onPress={() => setEditingName(true)}
           >
             <SvgPencil1
               style={{
                 width: 11,
                 height: 11,
+                flexGrow: 0,
+                flexShrink: 0,
+                flexBasis: 'auto',
                 color: theme.pageTextSubdued,
               }}
             />

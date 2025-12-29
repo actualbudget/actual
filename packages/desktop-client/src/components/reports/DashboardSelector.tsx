@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { type DashboardEntity } from 'loot-core/types/models';
@@ -38,16 +39,44 @@ export function DashboardSelector({
     <DialogTrigger>
       <Button
         ref={triggerRef}
-        variant="bare"
         onPress={() => setMenuOpen(true)}
         style={{
-          flexDirection: 'row',
+          flexGrow: 1,
+          flexShrink: 1,
+          flexBasis: 'auto',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          minWidth: 0,
+          display: 'flex',
           alignItems: 'center',
-          gap: 5,
+          gap: '5px',
         }}
       >
-        {currentDashboard.name}
-        <SvgExpandArrow width={7} height={7} style={{ marginLeft: 5 }} />
+        <View
+          style={{
+            flexGrow: 1,
+            flexShrink: 1,
+            flexBasis: 'auto',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            minWidth: 0,
+            textAlign: 'center',
+          }}
+        >
+          {currentDashboard.name}
+        </View>
+        <SvgExpandArrow
+          width={7}
+          height={7}
+          style={{
+            flexGrow: 0,
+            flexShrink: 0,
+            flexBasis: 'auto',
+            marginLeft: 5,
+          }}
+        />
       </Button>
 
       {menuOpen && (

@@ -230,31 +230,33 @@ async function copyDashboardWidget({
     throw new Error(`Widget not found: ${widgetId}`);
   }
 
+  function isWidgetType(type: string): type is Widget['type'] {
+    return [
+      'net-worth-card',
+      'cash-flow-card',
+      'spending-card',
+      'crossover-card',
+      'markdown-card',
+      'summary-card',
+      'calendar-card',
+      'formula-card',
+      'custom-report',
+    ].includes(type);
+  }
+
   await batchMessages(async () => {
     // Insert the widget to target dashboard
-    switch (widget.type) {
-      // TODO: This seems like an anti-pattern
-      case 'net-worth-card':
-      case 'cash-flow-card':
-      case 'spending-card':
-      case 'crossover-card':
-      case 'markdown-card':
-      case 'summary-card':
-      case 'calendar-card':
-      case 'formula-card':
-      case 'custom-report': {
-        const newWidget = {
-          type: widget.type,
-          width: widget.width,
-          height: widget.height,
-          meta: widget.meta ? JSON.parse(widget.meta) : {},
-          dashboard_page_id: targetDashboardPageId,
-        };
-        await addDashboardWidget(newWidget);
-        break;
-      }
-      default:
-        throw new Error(`Unsupported widget type: ${widget.type}`);
+    if (isWidgetType(widget.type)) {
+      const newWidget = {
+        type: widget.type,
+        width: widget.width,
+        height: widget.height,
+        meta: widget.meta ? JSON.parse(widget.meta) : {},
+        dashboard_page_id: targetDashboardPageId,
+      };
+      await addDashboardWidget(newWidget);
+    } else {
+      throw new Error(`Unsupported widget type: ${widget.type}`);
     }
   });
 }
