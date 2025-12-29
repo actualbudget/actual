@@ -20,6 +20,7 @@ import { ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
 import { ConfirmTransactionEditModal } from './modals/ConfirmTransactionEditModal';
 import { ConfirmUnlinkAccountModal } from './modals/ConfirmUnlinkAccountModal';
 import { ConvertToScheduleModal } from './modals/ConvertToScheduleModal';
+import { CopyWidgetToDashboardModal } from './modals/CopyWidgetToDashboardModal';
 import { CoverModal } from './modals/CoverModal';
 import { CreateAccountModal } from './modals/CreateAccountModal';
 import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
@@ -52,7 +53,6 @@ import { ImportYNAB4Modal } from './modals/manager/ImportYNAB4Modal';
 import { ImportYNAB5Modal } from './modals/manager/ImportYNAB5Modal';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayeesModal } from './modals/MergeUnusedPayeesModal';
-import { CopyWidgetToDashboardModal } from './modals/MoveWidgetToDashboardModal';
 import { NewCategoryGroupModal } from './modals/NewCategoryGroupModal';
 import { NewCategoryModal } from './modals/NewCategoryModal';
 import { NotesModal } from './modals/NotesModal';
@@ -61,7 +61,6 @@ import { OutOfSyncMigrationsModal } from './modals/OutOfSyncMigrationsModal';
 import { PasswordEnableModal } from './modals/PasswordEnableModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
-import { RenameDashboardModal } from './modals/RenameDashboardModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SchedulesPageMenuModal } from './modals/SchedulesPageMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
@@ -149,9 +148,6 @@ export function Modals() {
 
         case 'confirm-delete':
           return <ConfirmDeleteModal key={key} {...modal.options} />;
-
-        case 'rename-dashboard':
-          return <RenameDashboardModal key={key} {...modal.options} />;
 
         case 'copy-widget-to-dashboard':
           return <CopyWidgetToDashboardModal key={key} {...modal.options} />;

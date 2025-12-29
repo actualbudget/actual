@@ -512,13 +512,6 @@ export type Modal =
       };
     }
   | {
-      name: 'rename-dashboard';
-      options: {
-        dashboardId: string;
-        currentName: string;
-      };
-    }
-  | {
       name: 'copy-widget-to-dashboard';
       options: {
         onSelect: (dashboardId: string) => void;

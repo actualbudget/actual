@@ -44,7 +44,7 @@ type MarkdownCardProps = {
 
 export function MarkdownCard({
   isEditing,
-  meta = { content: '' },
+  meta,
   onMetaChange,
   onRemove,
   onCopy,
