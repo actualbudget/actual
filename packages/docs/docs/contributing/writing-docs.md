@@ -241,7 +241,7 @@ Place the content inside the details-tags.
 
 As part of the build process, GitHub actions runs a spell checker bot on the documentation. If the bot finds any spelling error, it will be reported in the build output on GitHub. You must fix this by editing the file and correcting the spelling error.
 
-![Image of spelling bot error](/img/repo/spellingbot-example.png)
+![Image of spelling bot error](/img/repo/spellingbot-example.webp)
 
 If the bot mistakes a word, you can add it to the `/.github/actions/spelling/allow/keywords.txt` file.
 This will prevent the bot from reporting this word as a spelling error in the future.
@@ -295,17 +295,17 @@ We have a few suggestions when annotating screenshots:
 
 Arrows can inadvertently be misunderstood as pointing _from_ something rather than _to_. As we see in the example below, the reader can not be sure if the arrow means the column, the column header or if _To Budget_ is involved.
 
-![Image of the budget view annotated by a box and an arrow](/img/repo/annotation-boxes-over-arrows.png)
+![Image of the budget view annotated by a box and an arrow](/img/repo/annotation-boxes-over-arrows.webp)
 
 #### Use "Steps" When Referring to Several Elements
 
 Use running numbers or letters inside circles, also known as "steps", when addressing more than one element in the screenshot. If there is a sequence to what a user is going to click on, use step numbers; if you want to address various elements, letters are preferred.
 
-![Image with 3 annotation steps](/img/repo/annotation-steps.png)
+![Image with 3 annotation steps](/img/repo/annotation-steps.webp)
 
 If the annotation tool doesn't support 'steps ', use boxes in different colors and incorporate these colors into the explanation. This will help guide the reader's attention effectively.
 
-![Image with 3 different colored boxes](/img/repo/annotation-colour-boxes.png)
+![Image with 3 different colored boxes](/img/repo/annotation-colour-boxes.webp)
 
 <details>
 <summary>Read example description of this way of annotating</summary>
@@ -334,7 +334,7 @@ Do not use free hand "marker pens", boxes or arrows, as these kind of annotation
 [Actual Budget #documentation Discord channel](https://discord.com/channels/937901803608096828/1027831463103696928)
 if you need to annotate images but are not able to do it yourself.
 
-![Image with ugly free-hand annotations](/img/repo/annotation-free-hand.png)
+![Image with ugly free-hand annotations](/img/repo/annotation-free-hand.webp)
 
 #### Annotation Colors
 
@@ -354,7 +354,7 @@ We suggest using the following colors (RGB values):
 | Blue       | 112, 175, 253 | 70 AF FD  |
 | Green      | 0, 187, 161   | 00 BB A1  |
 
-![Annotation colors as seen in the table](/img/repo/annotation-colours.png)
+![Annotation colors as seen in the table](/img/repo/annotation-colours.webp)
 
 For accessibility reasons (color blindness), avoid using red and green annotation colors on the same image.
 
@@ -362,14 +362,14 @@ For accessibility reasons (color blindness), avoid using red and green annotatio
 
 Different annotation tools handle this in various ways, which means we will get inconsistent screenshots. Secondly, unless you can control the opacity and color of the highlight, using highlighting could easily confuse more than enlighten the reader. Can you quickly find the highlighted number in the screenshot below?
 
-![Image of the budget view using the dark theme showing how highlights or spotlight annotations make the image hard to read](/img/repo/annotation-highlights-are-bad.png)
+![Image of the budget view using the dark theme showing how highlights or spotlight annotations make the image hard to read](/img/repo/annotation-highlights-are-bad.webp)
 
 <details>
 <summary>It might work when using the light theme</summary>
 
 However, because we dim down the rest of the image, this breaks over the notion that images should be clear and crisp.
 
-![Image of the budget view using the light theme showing that highlights may work](/img/repo/annotation-highlights-ligth-theme.png)
+![Image of the budget view using the light theme showing that highlights may work](/img/repo/annotation-highlights-ligth-theme.webp)
 
 </details>
 

@@ -6,7 +6,7 @@ This is an **experimental feature**. That means we're still working on finishing
 
 The Crossover Point Report is a financial planning tool inspired by the "Your Money or Your Life" methodology. This report helps users visualize when their passive income from investments will be sufficient to cover their projected expenses, marking the point where they achieve financial independence.
 
-![Crossover Point Report](/img/experimental/crossover-point-report/full-chart.png)
+![Crossover Point Report](/img/experimental/crossover-point-report/full-chart.webp)
 
 ## Input Parameters
 
