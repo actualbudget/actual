@@ -133,7 +133,7 @@ location / {
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
 }
-
+```
 The SSL certificate is issued by Let's Encrypt. The [Certbot](https://certbot.eff.org/instructions) tool provides options for automatic updating upon expiration.
 At the very least you will need to adapt `server_name` and the `ssl_certificate/ssl_certificate_key` paths to match your setup.
 Please refer to their [official documentation](https://nginx.org/en/docs/) for further details.
