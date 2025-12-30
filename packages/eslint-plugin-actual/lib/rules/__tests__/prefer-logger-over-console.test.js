@@ -21,6 +21,7 @@ runClassic(
         code: 'console.log("test");',
         filename: 'packages/loot-core/src/server/test.ts',
         output: `import { logger } from '../platform/server/log';
+
 logger.log("test");`,
         errors: [
           {
@@ -33,6 +34,7 @@ logger.log("test");`,
         code: 'console.warn("warning");',
         filename: 'packages/loot-core/src/server/test.ts',
         output: `import { logger } from '../platform/server/log';
+
 logger.warn("warning");`,
         errors: [
           {
@@ -45,6 +47,7 @@ logger.warn("warning");`,
         code: 'console.error("error");',
         filename: 'packages/loot-core/src/server/test.ts',
         output: `import { logger } from '../platform/server/log';
+
 logger.error("error");`,
         errors: [
           {
@@ -57,6 +60,7 @@ logger.error("error");`,
         code: 'console.info("info");',
         filename: 'packages/loot-core/src/server/test.ts',
         output: `import { logger } from '../platform/server/log';
+
 logger.info("info");`,
         errors: [
           {
@@ -69,6 +73,7 @@ logger.info("info");`,
         code: 'console.debug("debug");',
         filename: 'packages/loot-core/src/server/test.ts',
         output: `import { logger } from '../platform/server/log';
+
 logger.debug("debug");`,
         errors: [
           {
@@ -81,6 +86,7 @@ logger.debug("debug");`,
         code: 'console.group("Group Name");',
         filename: 'packages/loot-core/src/server/test.ts',
         output: `import { logger } from '../platform/server/log';
+
 logger.group("Group Name");`,
         errors: [
           {
@@ -93,6 +99,7 @@ logger.group("Group Name");`,
         code: 'console.groupEnd();',
         filename: 'packages/loot-core/src/server/test.ts',
         output: `import { logger } from '../platform/server/log';
+
 logger.groupEnd();`,
         errors: [
           {
@@ -105,6 +112,7 @@ logger.groupEnd();`,
         code: 'console.log("test");',
         filename: 'packages/loot-core/src/server/sync/test.ts',
         output: `import { logger } from '../../platform/server/log';
+
 logger.log("test");`,
         errors: [
           {

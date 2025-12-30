@@ -1,7 +1,9 @@
+import { logger } from '../server/log';
+
 export const captureException = function (exc: Error) {
-  console.error('[Exception]', exc);
+  logger.error('[Exception]', exc);
 };
 
 export const captureBreadcrumb = function (crumb: unknown) {
-  console.info('[Breadcrumb]', crumb);
+  logger.info('[Breadcrumb]', crumb);
 };
