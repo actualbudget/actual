@@ -25,7 +25,12 @@ module.exports = {
       /packages\/loot-core\/src\/(server|shared|platform)/,
     );
 
-    if (!isLootCoreFile) {
+    if (
+      !isLootCoreFile ||
+      normalizedFilename.includes(
+        'packages/loot-core/src/platform/server/log/index.ts',
+      )
+    ) {
       return {};
     }
 

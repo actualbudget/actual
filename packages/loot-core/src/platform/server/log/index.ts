@@ -1,4 +1,3 @@
-/* oxlint-disable actual/prefer-logger-over-console */
 let verboseMode = true;
 
 export function setVerboseMode(verbose: boolean) {
