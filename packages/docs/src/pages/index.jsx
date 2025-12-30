@@ -7,8 +7,11 @@ import Button from '../components/Button';
 import classes from './index.module.css';
 
 export default function Hello() {
+  const title = 'Your Finances — made simple';
+  const pageDescription = 'Actual Budget is a super fast and privacy-focused app for managing your finances. At its heart is the well proven and much loved Envelope Budgeting methodology.';
+
   return (
-    <Layout title="Actual" style={{ position: 'relative' }}>
+    <Layout title={title} description={pageDescription} style={{ position: 'relative' }}>
       <img alt="" src="/img/homepage/hero-bg.svg" className={classes.heroBg} />
 
       <div className={`${classes.main} ${classes.container}`}>
@@ -44,8 +47,8 @@ export default function Hello() {
         <div className={classes.heroImage}>
           <ThemedImage
             sources={{
-              light: '/img/homepage/actual-main-budget.png',
-              dark: '/img/homepage/actual-main-budget-dark.png',
+              light: '/img/homepage/actual-main-budget.webp',
+              dark: '/img/homepage/actual-main-budget-dark.webp',
             }}
             alt="Actual Budget"
           />
@@ -105,8 +108,8 @@ export default function Hello() {
         <div id="features" />
         <BigFeature
           title="Powerful budgeting made simple"
-          srcLight="/img/homepage/actual-main-budget.png"
-          srcDark="/img/homepage/actual-main-budget-dark.png"
+          srcLight="/img/homepage/actual-main-budget.webp"
+          srcDark="/img/homepage/actual-main-budget-dark.webp"
         >
           <strong>
             Save hundreds of dollars a year (at least!) by tracking your
@@ -121,8 +124,8 @@ export default function Hello() {
 
         <BigFeature
           title="The fastest way to manage transactions"
-          srcLight="/img/homepage/actual-main-transaction.png"
-          srcDark="/img/homepage/actual-main-transaction-dark.png"
+          srcLight="/img/homepage/actual-main-transaction.webp"
+          srcDark="/img/homepage/actual-main-transaction-dark.webp"
         >
           Breeze through your transactions and update them easily with a
           streamlined, minimal interface. Categorizing your transactions
@@ -132,8 +135,8 @@ export default function Hello() {
 
         <BigFeature
           title="Oh my, the reports"
-          srcLight="/img/homepage/actual-report-dashboard-light.png"
-          srcDark="/img/homepage/actual-report-dashboard-dark.png"
+          srcLight="/img/homepage/actual-report-dashboard-light.webp"
+          srcDark="/img/homepage/actual-report-dashboard-dark.webp"
         >
           Intuitive reports give you a quick way to learn about your finances.
           By default, we include net worth and cash flow reports. Actual also
