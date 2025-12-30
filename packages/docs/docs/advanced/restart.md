@@ -18,7 +18,7 @@ Remember to [back up your budget](/docs/backup-restore/backup) before making any
 - Select all transactions by clicking the checkbox at the top of the list (or use the shortcut `Ctrl + A` on Windows or `Cmd + A` on Mac).
 - Click on the lilac dropdown menu at the top of the transaction list and select **Delete**.
 
-![Steps for deleting all transactions](/img/accounts/account-delete-all-transactions.png)
+![Steps for deleting all transactions](/img/accounts/account-delete-all-transactions.webp)
 
 ### Step 2: Set Starting Balances
 
