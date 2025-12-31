@@ -24,14 +24,14 @@ Setting up the desktop app local server is straightforward. Follow these steps:
 
 In the server selection area, click **Change** as shown below:
 
-![](/img/install/change-server.png)
+![](/img/install/change-server.webp)
 <br />
 
 The server runs on `localhost` by default and mostly uses the default [server configuration](./../config/index.md). You can modify the port if necessary.
 
 Click **Start** to run the server.
 
-![](/img/install/configure-server.png)
+![](/img/install/configure-server.webp)
 <br />
 
 Upon starting the server, you'll be prompted to create a password (if you haven't already). Sign in to complete the configuration.
