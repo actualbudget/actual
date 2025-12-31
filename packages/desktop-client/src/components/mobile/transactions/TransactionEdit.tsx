@@ -85,7 +85,7 @@ import {
   useSingleActiveEditForm,
 } from '@desktop-client/hooks/useSingleActiveEditForm';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { pushModal, popModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useSelector, useDispatch } from '@desktop-client/redux';
@@ -833,6 +833,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                       ),
                       onSelect: categoryId => {
                         onUpdateInner(transactionToEdit, name, categoryId);
+                        // Explicitly close the modal after selection to ensure it closes on mobile
+                        dispatch(popModal());
                       },
                       onClose: () => {
                         onClearActiveEdit();
@@ -850,6 +852,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     options: {
                       onSelect: accountId => {
                         onUpdateInner(transactionToEdit, name, accountId);
+                        // Explicitly close the modal after selection to ensure it closes on mobile
+                        dispatch(popModal());
                       },
                       onClose: () => {
                         onClearActiveEdit();
@@ -867,6 +871,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     options: {
                       onSelect: payeeId => {
                         onUpdateInner(transactionToEdit, name, payeeId);
+                        // Explicitly close the modal after selection to ensure it closes on mobile
+                        dispatch(popModal());
                       },
                       onClose: () => {
                         onClearActiveEdit();
