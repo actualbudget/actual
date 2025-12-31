@@ -831,6 +831,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                       month: monthUtils.monthFromDate(
                         unserializedTransaction.date,
                       ),
+                      closeOnSelect: true,
                       onSelect: categoryId => {
                         onUpdateInner(transactionToEdit, name, categoryId);
                         // Explicitly close the modal after selection to ensure it closes on mobile
