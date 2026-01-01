@@ -15,6 +15,7 @@ import type { SchedulesHandlers } from '../server/schedules/app';
 import type { SpreadsheetHandlers } from '../server/spreadsheet/app';
 import type { SyncHandlers } from '../server/sync/app';
 import type { TagsHandlers } from '../server/tags/app';
+import type { PeopleHandlers } from '../server/people/app';
 import type { ToolsHandlers } from '../server/tools/app';
 import type { TransactionHandlers } from '../server/transactions/app';
 
@@ -41,6 +42,7 @@ export type Handlers = {} & ServerHandlers &
   BudgetFileHandlers &
   EncryptionHandlers &
   TagsHandlers &
+  PeopleHandlers &
   AuthHandlers;
 
 export type HandlerFunctions = Handlers[keyof Handlers];

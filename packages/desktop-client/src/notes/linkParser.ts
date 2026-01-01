@@ -1,6 +1,7 @@
 export type ParsedSegment =
   | { type: 'text'; content: string }
   | { type: 'tag'; content: string; tag: string }
+  | { type: 'person'; content: string; person: string }
   | {
       type: 'link';
       content: string;
@@ -96,6 +97,68 @@ function parseTagsInWord(word: string): ParsedSegment[] {
   });
 
   return segments;
+}
+
+/**
+ * Parses a single word for @ mentions (people tags)
+ * Returns segments for people found in the word
+ */
+function parsePeopleInWord(word: string): ParsedSegment[] {
+  const segments: ParsedSegment[] = [];
+
+  if (!word.includes('@') || word.length <= 1) {
+    return [{ type: 'text', content: word }];
+  }
+
+  let lastEmptyPerson = -1;
+  const parts = word.split('@');
+
+  parts.forEach((person, ti) => {
+    if (ti === 0) {
+      if (person) {
+        segments.push({ type: 'text', content: person });
+      }
+      return;
+    }
+
+    if (!person) {
+      lastEmptyPerson = ti;
+      segments.push({ type: 'text', content: '@' });
+      return;
+    }
+
+    if (lastEmptyPerson === ti - 1) {
+      segments.push({ type: 'text', content: `${person}` });
+      return;
+    }
+    lastEmptyPerson = -1;
+
+    const validPerson = `@${person}`;
+    segments.push({ type: 'person', content: validPerson, person });
+  });
+
+  return segments;
+}
+
+/**
+ * Parses a single word for both hashtags and @ mentions
+ * Processes tags first, then people within text segments
+ */
+function parseTagsAndPeopleInWord(word: string): ParsedSegment[] {
+  // First parse for tags
+  const tagSegments = parseTagsInWord(word);
+
+  // Then parse text segments for people
+  const finalSegments: ParsedSegment[] = [];
+  for (const segment of tagSegments) {
+    if (segment.type === 'text' && segment.content.includes('@')) {
+      finalSegments.push(...parsePeopleInWord(segment.content));
+    } else {
+      finalSegments.push(segment);
+    }
+  }
+
+  return finalSegments;
 }
 
 /**
@@ -198,7 +261,7 @@ export function parseNotes(notes: string): ParsedSegment[] {
 }
 
 /**
- * Parses text that may contain hashtags and file paths
+ * Parses text that may contain hashtags, @ mentions, and file paths
  */
 function parseTextWithTags(text: string): ParsedSegment[] {
   const segments: ParsedSegment[] = [];
@@ -223,9 +286,9 @@ function parseTextWithTags(text: string): ParsedSegment[] {
       continue;
     }
 
-    // Check for hashtags
-    if (word.includes('#') && word.length > 1) {
-      segments.push(...parseTagsInWord(word));
+    // Check for hashtags or @ mentions
+    if ((word.includes('#') || word.includes('@')) && word.length > 1) {
+      segments.push(...parseTagsAndPeopleInWord(word));
       continue;
     }
 
