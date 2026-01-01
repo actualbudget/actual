@@ -73,9 +73,9 @@ Version: v26.1.0
 - [#6120](https://github.com/actualbudget/actual/pull/6120) Agents.md: add missing information — thanks @MatissJanis
 - [#6142](https://github.com/actualbudget/actual/pull/6142) Update validate-user.js to validate-user.ts. — thanks @accountingnerd
 - [#6179](https://github.com/actualbudget/actual/pull/6179) Remove usage of file extensions in sync-server — thanks @MatissJanis
-- [#6259](https://github.com/actualbudget/actual/pull/6259) Move prettier and eslint to oxc — thanks @MatissJanis
+- [#6259](https://github.com/actualbudget/actual/pull/6259) Move prettier and eslint to `oxc` — thanks @MatissJanis
 - [#6280](https://github.com/actualbudget/actual/pull/6280) Bump express to 5.2.1 — thanks @matt-fidd
-- [#6295](https://github.com/actualbudget/actual/pull/6295) Upgrade jws dependency from 4.0.0 to 4.0.1 — thanks @MatissJanis
+- [#6295](https://github.com/actualbudget/actual/pull/6295) Upgrade `jws` dependency from 4.0.0 to 4.0.1 — thanks @MatissJanis
 - [#6299](https://github.com/actualbudget/actual/pull/6299) Fix no-unused-vars lint violations — thanks @MatissJanis
 - [#6300](https://github.com/actualbudget/actual/pull/6300) Fix various lint issues — thanks @MatissJanis
 - [#6301](https://github.com/actualbudget/actual/pull/6301) Fix more lint issues — thanks @MatissJanis
