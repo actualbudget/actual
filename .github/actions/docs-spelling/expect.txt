@@ -101,6 +101,7 @@ ISYBANK
 ITBBITMM
 jfdoming
 JMD
+jws
 KBCBE
 Keycloak
 Khurozov
@@ -121,6 +122,7 @@ nginx
 OIDC
 overbudgeted
 overbudgeting
+oxc
 Paribas
 passwordless
 pluggyai
