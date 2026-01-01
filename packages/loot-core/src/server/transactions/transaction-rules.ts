@@ -474,7 +474,8 @@ export function conditionsToAQL(
       } else if (type === 'string') {
         return {
           [field]: {
-            $transform: op !== 'hasTags' ? '$lower' : undefined,
+            $transform:
+              op !== 'hasTags' && op !== 'hasPeople' ? '$lower' : undefined,
             [aqlOp]: value,
           },
         };
@@ -611,6 +612,29 @@ export function conditionsToAQL(
               `(?<!#)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
             );
             return apply(field, '$regexp', regex.source);
+          }),
+        };
+
+      case 'hasPeople':
+        const peopleValues = [];
+        for (const [_, person] of value.matchAll(/(?<!@)(@[^@\s]+)/g)) {
+          // Normalize to lowercase for case-insensitive matching
+          const lowerPerson = person.toLowerCase();
+          if (!peopleValues.find(p => p === lowerPerson)) {
+            peopleValues.push(lowerPerson);
+          }
+        }
+
+        return {
+          $and: peopleValues.map(v => {
+            // Pattern uses lowercase; field will be lowercased via $lower transform
+            const pattern = `(?<!@)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s@]|$)`;
+            return {
+              [field]: {
+                $transform: '$lower',
+                $regexp: pattern,
+              },
+            };
           }),
         };
 
