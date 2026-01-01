@@ -9,11 +9,11 @@ const CONFIG = {
   POINTS_PER_ISSUE_CLOSING_ACTION: 1,
   POINTS_PER_RELEASE_PR: 4, // Awarded to whoever merges the release PR
   PR_CONTRIBUTION_POINTS: {
-    Features: 10,
-    Enhancements: 5,
-    Bugfix: 5,
-    Maintenance: 5,
-    Unknown: 5,
+    Features: 5,
+    Enhancements: 2,
+    Bugfix: 2,
+    Maintenance: 2,
+    Unknown: 2,
   },
   // Point tiers for code changes (non-docs)
   CODE_PR_REVIEW_POINT_TIERS: [
