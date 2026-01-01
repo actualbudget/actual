@@ -1397,7 +1397,11 @@ const Transaction = memo(function Transaction({
         value={notes ?? (isPreview ? schedule?.name : null) ?? ''}
         valueStyle={valueStyle}
         formatter={value =>
-          NotesTagFormatter({ notes: value, onNotesTagClick, onNotesPersonClick })
+          NotesTagFormatter({
+            notes: value,
+            onNotesTagClick,
+            onNotesPersonClick,
+          })
         }
         onExpose={name => !isPreview && onEdit(id, name)}
         inputProps={{

@@ -57,12 +57,10 @@ function getContrastedColor(hexcolor: string) {
 
 function getPeopleCSSColors(theme: Theme, color?: string | null) {
   if (!color) {
-    // Use same default colors as tags for now
-    // Can be customized with distinct colors by adding notePeopleText, etc. to theme
     return [
-      themeStyle.noteTagText,
-      themeStyle.noteTagBackground,
-      themeStyle.noteTagBackgroundHover,
+      themeStyle.notePeopleText,
+      themeStyle.notePeopleBackground,
+      themeStyle.notePeopleBackgroundHover,
     ];
   }
 
