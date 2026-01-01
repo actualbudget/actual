@@ -21,8 +21,11 @@ export function usePeopleCSS() {
       const [color, backgroundColor, backgroundColorHovered] =
         getPeopleCSSColors(
           theme,
+          // Case-insensitive lookup for person color
           // fallback strategy: options color > person color > default color > theme color (undefined)
-          options.color ?? people.find(p => p.tag === person)?.color,
+          options.color ??
+            people.find(p => p.tag.toLowerCase() === person.toLowerCase())
+              ?.color,
         );
 
       return css({

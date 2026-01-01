@@ -31,23 +31,25 @@ async function createPerson({
   color = null,
   description = null,
 }: Omit<TagEntity, 'id' | 'type'>): Promise<TagEntity> {
-  // Normalize to lowercase for case-insensitive matching
-  const normalizedTag = tag.toLowerCase().trim();
+  // Preserve original case but trim whitespace
+  const normalizedTag = tag.trim();
 
   const allPeople = await db.getAllPeople();
 
-  const { id: personId = null } =
-    allPeople.find(p => p.tag === normalizedTag) || {};
-  if (personId) {
+  // Case-insensitive check for existing person
+  const existingPerson = allPeople.find(
+    p => p.tag.toLowerCase() === normalizedTag.toLowerCase(),
+  );
+  if (existingPerson) {
     await db.updateTag({
-      id: personId,
-      tag: normalizedTag,
+      id: existingPerson.id,
+      tag: normalizedTag, // Update with the new casing if provided
       color,
       description,
       tombstone: 0,
     });
     return {
-      id: personId,
+      id: existingPerson.id,
       tag: normalizedTag,
       type: 'PERSON',
       color,
@@ -93,18 +95,21 @@ async function findPeople(): Promise<TagEntity[]> {
   for (const { notes } of peopleNotes) {
     // Match @person patterns (similar to #tag but for @)
     for (const [, person] of notes.matchAll(/(?<!@)@([^@\s]+)/g)) {
-      const normalizedPerson = person.toLowerCase();
-      if (!people.find(p => p.tag === normalizedPerson)) {
-        people.push(await createPerson({ tag: normalizedPerson }));
+      // Case-insensitive check, but preserve original case when creating
+      if (!people.find(p => p.tag.toLowerCase() === person.toLowerCase())) {
+        people.push(await createPerson({ tag: person }));
       }
     }
   }
 
+  // Case-insensitive sort
   return people.sort(function (a, b) {
-    if (a.tag < b.tag) {
+    const aLower = a.tag.toLowerCase();
+    const bLower = b.tag.toLowerCase();
+    if (aLower < bLower) {
       return -1;
     }
-    if (a.tag > b.tag) {
+    if (aLower > bLower) {
       return 1;
     }
     return 0;

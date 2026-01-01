@@ -44,11 +44,15 @@ export const PeopleCreationRow = ({
   const personInput = useRef<HTMLInputElement>(null);
   const getPeopleCSS = usePeopleCSS();
 
-  const personNames = useMemo(() => people.map(p => p.tag), [people]);
+  // Store lowercase names for case-insensitive duplicate checking
+  const personNamesLower = useMemo(
+    () => people.map(p => p.tag.toLowerCase()),
+    [people],
+  );
 
   const tableNavigator = useTableNavigator(
     [{ id: 'new-person' }],
-    !person || personNames.includes(person.toLowerCase())
+    !person || personNamesLower.includes(person.toLowerCase())
       ? ['person', 'description', 'color', 'cancel']
       : ['person', 'description', 'color', 'cancel', 'add'],
   );
@@ -70,7 +74,7 @@ export const PeopleCreationRow = ({
   const isPersonValid = () => {
     return (
       /^[^@\s]+$/.test(person) && // accept any char except whitespaces and '@'
-      !personNames.includes(person.toLowerCase()) && // does not exist already (case-insensitive)
+      !personNamesLower.includes(person.toLowerCase()) && // does not exist already (case-insensitive)
       // color is null (default color) or is a 6 char hex color
       (color === null || /^#[0-9a-fA-F]{6}$/.test(color))
     );
@@ -81,8 +85,8 @@ export const PeopleCreationRow = ({
       return;
     }
 
-    // Normalize to lowercase when creating
-    dispatch(createPerson({ tag: person.toLowerCase(), color, description }));
+    // Preserve original case when creating
+    dispatch(createPerson({ tag: person, color, description }));
     resetInputs();
   };
 
