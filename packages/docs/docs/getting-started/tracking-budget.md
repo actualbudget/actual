@@ -13,13 +13,13 @@ We, the Actual team, suggest that you try to use the **Envelope Budget** if you 
 
 The **Tracking Budget** feature can be enabled from the Settings page by clicking on "Switch to tracking budgeting".
 
-![](/img/tracking-budget-7.png)
+![](/img/tracking-budget-7.webp)
 
 ## Creating a Budget
 
 Below is a view of what the budget page of a **Tracking Budget** looks like.
 
-![](/img/tracking-budget-1.png)
+![](/img/tracking-budget-1.webp)
 
 If you are creating a budget for the first time, here's how it works:
 
@@ -36,25 +36,25 @@ When one of your categories is overdrawn, increase the budgeted amount for that 
 
 As you can see in the following example, your total budgeted items show in the right hand side of the summary for both your **Income** and **Expenses** and your actual expenses and income are totaled in the left hand side of the summary. The **Projected Savings** field is calculated from your budgeted income minus budgeted expenses, so expect the **Projected Savings** to decrease when covering overspending.
 
-![](/img/tracking-budget-2.png)
+![](/img/tracking-budget-2.webp)
 
 There are useful pie charts next to **Income** and **Expenses** to track your progress visually.
 
-![](/img/tracking-budget-5.png)
+![](/img/tracking-budget-5.webp)
 
 - An incomplete green pie means your total expenses or income are less than your total amount budgeted for expenses or income, respectively.
 
-![](/img/tracking-budget-4.png)
+![](/img/tracking-budget-4.webp)
 
 - A complete green pie chart means your spending and budget are exactly the same.
 
-![](/img/tracking-budget-6.png)
+![](/img/tracking-budget-6.webp)
 
 - A pie chart that has turned red means you have overspent your total budget.
 
 When a new month begins, your **Projected Savings** changes to **Saved** or **Overspent**, depending on your final transactions. The final savings amount calculated for this field is your actual income minus your actual expenses. If you hover your mouse over the **Saved** or **Overspent** text, you can view the breakdown of projected and actual savings for the month.
 
-![](/img/tracking-budget-3.png)
+![](/img/tracking-budget-3.webp)
 
 ## How Money Rolls Over
 

@@ -1,0 +1,7 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "vitest.nodeEnv": {
+    "NODE_OPTIONS": "--experimental-vm-modules --import ./packages/sync-server/register-loader.mjs --trace-warnings"
+  }
+}
