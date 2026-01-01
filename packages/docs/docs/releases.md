@@ -11,6 +11,8 @@ This release contains the following notable improvements, along with numerous fi
 - **Link detection in transaction notes** — URLs in transaction notes are now automatically detected and made clickable
 - **Historical data** — Minimum transaction year extended from 2000 to 1995
 
+For Linux users, we have officially released to [Flathub](https://flathub.org/en/apps/com.actualbudget.actual)!
+
 <!--truncate-->
 
 Version: v26.1.0
