@@ -1,7 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { SvgInformationOutline } from '@actual-app/components/icons/v1';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -90,6 +92,20 @@ export function SummaryCard({
 
   const data = useReport('summary', params);
 
+  // Tooltip content based on widget name
+  const getTooltipContent = () => {
+    const widgetName = meta?.name || '';
+    if (widgetName.includes('Avg Per Day')) {
+      return 'Divides total expenses by the number of days in the period. Shows your daily burn rate.';
+    }
+    if (widgetName.includes('Avg Per Transaction')) {
+      return 'Divides total expenses by the number of transactions. Shows your typical transaction size.';
+    }
+    return null;
+  };
+
+  const tooltipContent = getTooltipContent();
+
   return (
     <ReportCard
       isEditing={isEditing}
@@ -121,19 +137,38 @@ export function SummaryCard({
     >
       <View style={{ flex: 1, overflow: 'hidden' }}>
         <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
-          <ReportCardName
-            name={meta?.name || t('Summary')}
-            isEditing={nameMenuOpen}
-            onChange={newName => {
-              onMetaChange({
-                ...meta,
-                content: JSON.stringify(content),
-                name: newName,
-              });
-              setNameMenuOpen(false);
-            }}
-            onClose={() => setNameMenuOpen(false)}
-          />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <ReportCardName
+              name={meta?.name || t('Summary')}
+              isEditing={nameMenuOpen}
+              onChange={newName => {
+                onMetaChange({
+                  ...meta,
+                  content: JSON.stringify(content),
+                  name: newName,
+                });
+                setNameMenuOpen(false);
+              }}
+              onClose={() => setNameMenuOpen(false)}
+            />
+            {tooltipContent && (
+              <Tooltip
+                content={tooltipContent}
+                placement="right"
+                style={{ maxWidth: 250 }}
+              >
+                <SvgInformationOutline 
+                  style={{ 
+                    width: 16, 
+                    height: 16, 
+                    color: 'currentColor',
+                    opacity: 0.6,
+                    cursor: 'help'
+                  }} 
+                />
+              </Tooltip>
+            )}
+          </View>
           <DateRange start={start} end={end} />
         </View>
         <View

@@ -7,8 +7,10 @@ import { useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
+import { SvgDotsHorizontalTriple, SvgArrowLeft, SvgArrowRight } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
+import * as monthUtils from 'loot-core/shared/months';
+import { MONTHLY_DASHBOARD_STATE, YEARLY_DASHBOARD_STATE } from 'loot-core/shared/dashboard';
 import { Popover } from '@actual-app/components/popover';
 import { breakpoints } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
@@ -31,6 +33,7 @@ import { FormulaCard } from './reports/FormulaCard';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
+import { CategorySpendingCard } from './reports/CategorySpendingCard';
 import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
 
@@ -73,10 +76,50 @@ export function Overview() {
   const [currentBreakpoint, setCurrentBreakpoint] = useState<
     'mobile' | 'desktop'
   >('desktop');
+  const [selectedMonth, setSelectedMonth] = useState<string>(() => 
+    monthUtils.subMonths(monthUtils.currentMonth(), 1)
+  );
+  const [viewMode, setViewMode] = useState<'monthly' | 'yearly'>('monthly');
+
+  // Calculate date range based on view mode
+  const monthDateRange = useMemo(() => {
+    if (viewMode === 'yearly') {
+      const year = selectedMonth.slice(0, 4);
+      return {
+        start: `${year}-01-01`,
+        end: `${year}-12-31`,
+        mode: 'static' as const,
+      };
+    }
+    return {
+      start: monthUtils.firstDayOfMonth(selectedMonth),
+      end: monthUtils.lastDayOfMonth(selectedMonth),
+      mode: 'static' as const,
+    };
+  }, [selectedMonth, viewMode]);
 
   const { data: customReports, isLoading: isCustomReportsLoading } =
     useReports();
   const { data: widgets, isLoading: isWidgetsLoading } = useDashboard();
+
+  // Use predefined dashboard states based on view mode
+  // In monthly view, use MONTHLY_DASHBOARD_STATE (6 widgets)
+  // In yearly view, use YEARLY_DASHBOARD_STATE (full dashboard)
+  const filteredWidgets = useMemo(() => {
+    if (viewMode === 'monthly') {
+      // Use our custom monthly dashboard with 6 widgets
+      return MONTHLY_DASHBOARD_STATE.map((widget, index) => ({
+        ...widget,
+        id: `monthly-widget-${index}`,
+      }));
+    } else {
+      // Use the yearly dashboard state
+      return YEARLY_DASHBOARD_STATE.map((widget, index) => ({
+        ...widget,
+        id: `yearly-widget-${index}`,
+      }));
+    }
+  }, [viewMode]);
 
   const customReportMap = useMemo(
     () => new Map(customReports.map(report => [report.id, report])),
@@ -92,11 +135,11 @@ export function Overview() {
   sessionStorage.setItem('url', location.pathname);
 
   const mobileLayout = useMemo(() => {
-    if (!widgets || widgets.length === 0) {
+    if (!filteredWidgets || filteredWidgets.length === 0) {
       return [];
     }
 
-    const sortedDesktopItems = [...widgets];
+    const sortedDesktopItems = [...filteredWidgets];
 
     // Sort to ensure that items are ordered top-to-bottom, and for items on the same row, left-to-right
     sortedDesktopItems.sort((a, b) => {
@@ -121,11 +164,11 @@ export function Overview() {
         h: widget.height,
       };
     });
-  }, [widgets]);
+  }, [filteredWidgets]);
 
   const desktopLayout = useMemo(() => {
-    if (!widgets) return [];
-    return widgets.map(widget => ({
+    if (!filteredWidgets) return [];
+    return filteredWidgets.map(widget => ({
       i: widget.id,
       w: widget.width,
       h: widget.height,
@@ -135,7 +178,7 @@ export function Overview() {
         isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
       ...widget,
     }));
-  }, [widgets]);
+  }, [filteredWidgets]);
 
   const closeNotifications = () => {
     dispatch(removeNotification({ id: 'import' }));
@@ -365,7 +408,55 @@ export function Overview() {
               marginRight: 15,
             }}
           >
-            <PageHeader title={t('Reports')} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+              <PageHeader title={t('Reports')} />
+              
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginRight: 15 }}>
+                <Button
+                  variant={viewMode === 'monthly' ? 'primary' : 'normal'}
+                  onPress={() => setViewMode('monthly')}
+                  style={{ fontSize: 14, padding: '6px 12px' }}
+                >
+                  Monthly
+                </Button>
+                <Button
+                  variant={viewMode === 'yearly' ? 'primary' : 'normal'}
+                  onPress={() => setViewMode('yearly')}
+                  style={{ fontSize: 14, padding: '6px 12px' }}
+                >
+                  Yearly
+                </Button>
+              </View>
+              
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <Button
+                  variant="bare"
+                  onPress={() => setSelectedMonth(
+                    viewMode === 'yearly'
+                      ? monthUtils.subMonths(selectedMonth, 12)
+                      : monthUtils.subMonths(selectedMonth, 1)
+                  )}
+                >
+                  <SvgArrowLeft style={{ width: 20, height: 20 }} />
+                </Button>
+                <span style={{ fontSize: 16, fontWeight: 500, minWidth: 150, textAlign: 'center' }}>
+                  {viewMode === 'yearly' 
+                    ? selectedMonth.slice(0, 4)
+                    : monthUtils.format(selectedMonth, 'MMMM yyyy')
+                  }
+                </span>
+                <Button
+                  variant="bare"
+                  onPress={() => setSelectedMonth(
+                    viewMode === 'yearly'
+                      ? monthUtils.addMonths(selectedMonth, 12)
+                      : monthUtils.addMonths(selectedMonth, 1)
+                  )}
+                >
+                  <SvgArrowRight style={{ width: 20, height: 20 }} />
+                </Button>
+              </View>
+            </View>
 
             <View
               style={{
@@ -433,6 +524,10 @@ export function Overview() {
                             {
                               name: 'spending-card' as const,
                               text: t('Spending analysis'),
+                            },
+                            {
+                              name: 'category-spending-card' as const,
+                              text: t('Category spending'),
                             },
                             {
                               name: 'markdown-card' as const,
@@ -567,14 +662,34 @@ export function Overview() {
               isDraggable={currentBreakpoint === 'desktop' && isEditing}
               isResizable={currentBreakpoint === 'desktop' && isEditing}
             >
-              {desktopLayout.map(item => (
+              {desktopLayout.map(item => {
+                // Only override meta with month date range in monthly view
+                let metaToUse = item.meta;
+                if (viewMode === 'monthly') {
+                  if (item.type === 'spending-card') {
+                    // Spending card uses compare/compareTo instead of timeFrame
+                    metaToUse = {
+                      ...item.meta,
+                      compare: selectedMonth,
+                      compareTo: monthUtils.subMonths(selectedMonth, 1),
+                      isLive: false,
+                    };
+                  } else {
+                    metaToUse = item.meta ? {
+                      ...item.meta,
+                      timeFrame: monthDateRange,
+                    } : { timeFrame: monthDateRange };
+                  }
+                }
+
+                return (
                 <div key={item.i}>
                   {item.type === 'net-worth-card' ? (
                     <NetWorthCard
                       widgetId={item.i}
                       isEditing={isEditing}
                       accounts={accounts}
-                      meta={item.meta}
+                      meta={metaToUse}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
                     />
@@ -584,7 +699,7 @@ export function Overview() {
                       widgetId={item.i}
                       isEditing={isEditing}
                       accounts={accounts}
-                      meta={item.meta}
+                      meta={metaToUse}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
                     />
@@ -592,7 +707,7 @@ export function Overview() {
                     <CashFlowCard
                       widgetId={item.i}
                       isEditing={isEditing}
-                      meta={item.meta}
+                      meta={metaToUse}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
                     />
@@ -600,7 +715,7 @@ export function Overview() {
                     <SpendingCard
                       widgetId={item.i}
                       isEditing={isEditing}
-                      meta={item.meta}
+                      meta={metaToUse}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
                     />
@@ -621,7 +736,7 @@ export function Overview() {
                     <SummaryCard
                       widgetId={item.i}
                       isEditing={isEditing}
-                      meta={item.meta}
+                      meta={metaToUse}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
                     />
@@ -629,7 +744,7 @@ export function Overview() {
                     <CalendarCard
                       widgetId={item.i}
                       isEditing={isEditing}
-                      meta={item.meta}
+                      meta={metaToUse}
                       firstDayOfWeekIdx={firstDayOfWeekIdx}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
@@ -638,13 +753,22 @@ export function Overview() {
                     <FormulaCard
                       widgetId={item.i}
                       isEditing={isEditing}
-                      meta={item.meta}
+                      meta={metaToUse}
+                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                      onRemove={() => onRemoveWidget(item.i)}
+                    />
+                  ) : item.type === 'category-spending-card' ? (
+                    <CategorySpendingCard
+                      widgetId={item.i}
+                      isEditing={isEditing}
+                      meta={metaToUse}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
                     />
                   ) : null}
                 </div>
-              ))}
+              );
+              })}
             </ResponsiveGridLayout>
           </View>
         </div>
