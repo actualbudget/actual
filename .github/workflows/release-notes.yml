@@ -34,3 +34,5 @@ jobs:
       - name: Generate release notes
         if: startsWith(github.head_ref, 'release/') == true
         uses: actualbudget/actions/release-notes/generate@main
+        with:
+          token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
