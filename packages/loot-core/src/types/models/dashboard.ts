@@ -82,6 +82,16 @@ export type MarkdownWidget = AbstractWidget<
   { content: string; text_align?: 'left' | 'right' | 'center' }
 >;
 
+export type CategorySpendingWidget = AbstractWidget<
+  'category-spending-card',
+  {
+    name?: string;
+    timeFrame?: TimeFrame;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+  } | null
+>;
+
 type SpecializedWidget =
   | NetWorthWidget
   | CashFlowWidget
@@ -90,7 +100,8 @@ type SpecializedWidget =
   | MarkdownWidget
   | SummaryWidget
   | CalendarWidget
-  | FormulaWidget;
+  | FormulaWidget
+  | CategorySpendingWidget;
 export type Widget = SpecializedWidget | CustomReportWidget;
 export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
 
@@ -126,7 +137,7 @@ export type SummaryWidget = AbstractWidget<
 >;
 
 export type BaseSummaryContent = {
-  type: 'sum' | 'avgPerMonth' | 'avgPerYear' | 'avgPerTransact';
+  type: 'sum' | 'avgPerMonth' | 'avgPerYear' | 'avgPerTransact' | 'avgPerDay';
   fontSize?: number;
 };
 

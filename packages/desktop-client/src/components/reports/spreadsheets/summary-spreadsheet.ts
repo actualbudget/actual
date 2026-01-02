@@ -113,7 +113,8 @@ export function summarySpreadsheet(
 
     if (
       summaryContent.type === 'avgPerMonth' ||
-      summaryContent.type === 'avgPerYear'
+      summaryContent.type === 'avgPerYear' ||
+      summaryContent.type === 'avgPerDay'
     ) {
       query = query.groupBy(['date']);
     }
@@ -163,6 +164,18 @@ export function summarySpreadsheet(
         setData({
           ...dateRanges,
           ...calculatePerYear(data.data, startDay, endDay),
+        });
+        break;
+      }
+
+      case 'avgPerDay': {
+        const totalDays = d.differenceInDays(endDay, startDay) + 1;
+        const totalAmount = data.data.reduce((sum, day) => sum + day.amount, 0);
+        setData({
+          ...dateRanges,
+          total: totalDays > 0 ? totalAmount / totalDays : 0,
+          dividend: totalAmount,
+          divisor: totalDays,
         });
         break;
       }
