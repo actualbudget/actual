@@ -13,7 +13,7 @@ export const MONTHLY_DASHBOARD_STATE: NewWidget[] = [
       name: 'Total Income',
       content: JSON.stringify({
         type: 'sum',
-        fontSize: 10,
+        fontSize: 7,
       }),
       timeFrame: {
         start: '2024-01-01',
@@ -56,7 +56,7 @@ export const MONTHLY_DASHBOARD_STATE: NewWidget[] = [
       name: 'Total Expenses',
       content: JSON.stringify({
         type: 'sum',
-        fontSize: 20,
+        fontSize: 7,
       }),
       timeFrame: {
         start: '2024-01-01',
@@ -93,7 +93,7 @@ export const MONTHLY_DASHBOARD_STATE: NewWidget[] = [
       name: 'Net Savings',
       content: JSON.stringify({
         type: 'sum',
-        fontSize: 18,
+        fontSize: 12,
       }),
       timeFrame: {
         start: '2024-01-01',
@@ -125,7 +125,7 @@ export const MONTHLY_DASHBOARD_STATE: NewWidget[] = [
       name: 'Avg Per Day',
       content: JSON.stringify({
         type: 'avgPerDay',
-        fontSize: 18,
+        fontSize: 12,
       }),
       timeFrame: {
         start: '2024-01-01',
@@ -162,7 +162,7 @@ export const MONTHLY_DASHBOARD_STATE: NewWidget[] = [
       name: 'Avg Per Transaction',
       content: JSON.stringify({
         type: 'avgPerTransact',
-        fontSize: 18,
+        fontSize: 12,
       }),
       timeFrame: {
         start: '2024-01-01',
@@ -200,7 +200,7 @@ export const MONTHLY_DASHBOARD_STATE: NewWidget[] = [
       timeFrame: {
         start: '2024-01-01',
         end: '2024-12-31',
-        mode: 'lastMonth',
+        mode: 'sliding-window',
       },
     },
   },
@@ -222,7 +222,7 @@ export const MONTHLY_DASHBOARD_STATE: NewWidget[] = [
   {
     type: 'category-spending-card',
     width: 12,
-    height: 4,
+    height: 5,
     x: 0,
     y: 5,
     meta: {
@@ -323,7 +323,7 @@ export const YEARLY_DASHBOARD_STATE: NewWidget[] = [
       name: 'Avg Per Month',
       content: JSON.stringify({
         type: 'avgPerMonth',
-        fontSize: 20,
+        fontSize: 10,
       }),
       timeFrame: {
         start: '2024-01-01',
@@ -360,7 +360,7 @@ export const YEARLY_DASHBOARD_STATE: NewWidget[] = [
       name: 'Avg Per Transaction',
       content: JSON.stringify({
         type: 'avgPerTransact',
-        fontSize: 20,
+        fontSize: 10,
       }),
       timeFrame: {
         start: '2024-01-01',
@@ -438,46 +438,23 @@ export const YEARLY_DASHBOARD_STATE: NewWidget[] = [
       mode: 'average',
     },
   },
-  // Fourth row: Calendar and savings rate
+  // Fourth row: Net worth change and tips
   {
-    type: 'calendar-card',
-    width: 8,
-    height: 4,
+    type: 'summary-card',
+    width: 6,
+    height: 3,
     x: 0,
     y: 6,
     meta: {
-      name: 'Transaction Calendar',
-      timeFrame: {
-        start: '2024-01-01',
-        end: '2024-03-31',
-        mode: 'sliding-window',
-      },
-      conditions: [
-        {
-          field: 'transfer',
-          op: 'is',
-          value: false,
-        },
-      ],
-      conditionsOp: 'and',
-    },
-  },
-  {
-    type: 'summary-card',
-    width: 4,
-    height: 2,
-    x: 8,
-    y: 6,
-    meta: {
-      name: 'Recent Net Worth Change',
+      name: 'Net Worth Change (YTD)',
       content: JSON.stringify({
         type: 'sum',
-        fontSize: 32,
+        fontSize: 20,
       }),
       timeFrame: {
         start: '2024-01-01',
-        end: '2024-03-31',
-        mode: 'sliding-window',
+        end: '2024-12-31',
+        mode: 'yearToDate',
       },
       conditions: [],
       conditionsOp: 'and',
@@ -485,13 +462,13 @@ export const YEARLY_DASHBOARD_STATE: NewWidget[] = [
   },
   {
     type: 'markdown-card',
-    width: 4,
-    height: 2,
-    x: 8,
-    y: 8,
+    width: 6,
+    height: 3,
+    x: 6,
+    y: 6,
     meta: {
       content:
-        '## Dashboard Tips\n\nYou can add new widgets or edit existing widgets by using the buttons at the top of the page. Choose a widget type and customize it to fit your needs.\n\n**Moving cards:** Drag any card by its header to reposition it.\n\n**Deleting cards:** Click the three-dot menu on any card and select "Remove".',
+        '## Dashboard Tips\n\nYou can add new widgets or edit existing widgets by using the buttons at the top of the page. Choose a widget type and customize it to fit your needs.\n\n**Moving cards:** Drag any card by its header to reposition it.\n\n**Deleting cards:** Click the three-dot menu on any card and select "Remove".\n\n**View Modes:** Switch between Monthly and Yearly views using the buttons at the top.',
     },
   },
 ];

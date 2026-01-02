@@ -663,7 +663,7 @@ export function Overview() {
               isResizable={currentBreakpoint === 'desktop' && isEditing}
             >
               {desktopLayout.map(item => {
-                // Only override meta with month date range in monthly view
+                // Override meta with date range based on view mode
                 let metaToUse = item.meta;
                 if (viewMode === 'monthly') {
                   if (item.type === 'spending-card') {
@@ -672,6 +672,22 @@ export function Overview() {
                       ...item.meta,
                       compare: selectedMonth,
                       compareTo: monthUtils.subMonths(selectedMonth, 1),
+                      isLive: false,
+                    };
+                  } else {
+                    metaToUse = item.meta ? {
+                      ...item.meta,
+                      timeFrame: monthDateRange,
+                    } : { timeFrame: monthDateRange };
+                  }
+                } else if (viewMode === 'yearly') {
+                  // In yearly view, also override timeFrame to use selected year
+                  if (item.type === 'spending-card') {
+                    const year = selectedMonth.slice(0, 4);
+                    metaToUse = {
+                      ...item.meta,
+                      compare: `${year}-12`,
+                      compareTo: `${year}-11`,
                       isLive: false,
                     };
                   } else {

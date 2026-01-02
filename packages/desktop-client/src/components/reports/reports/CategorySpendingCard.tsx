@@ -84,13 +84,20 @@ export function CategorySpendingCard({
 
   const data = useReport('category-spending', getGraphData);
 
-  // Get top categories sorted by amount
+  // Get top categories sorted by amount with their colors from legend
   const sortedCategories = useMemo(() => {
-    if (!data?.groupedData) return [];
-    return [...data.groupedData]
+    if (!data?.data || !data?.legend) return [];
+    return [...data.data]
       .filter(item => item.totalDebts < 0)
       .sort((a, b) => a.totalDebts - b.totalDebts)
-      .slice(0, 10);
+      .slice(0, 10)
+      .map(item => {
+        const legendItem = data.legend.find(l => l.id === item.id);
+        return {
+          ...item,
+          color: legendItem?.color || theme.reportsBlue,
+        };
+      });
   }, [data]);
 
   const totalSpent = useMemo(() => {
