@@ -1,3 +1,5 @@
+import { logger } from '../log';
+
 let openedDb: null | ReturnType<typeof _openDatabase> = _openDatabase();
 
 // The web version uses IndexedDB to store data
@@ -26,10 +28,10 @@ function _openDatabase() {
       }
     };
 
-    openRequest.onblocked = e => console.log('blocked', e);
+    openRequest.onblocked = e => logger.log('blocked', e);
 
     openRequest.onerror = () => {
-      console.log('openRequest error');
+      logger.log('openRequest error');
       reject(new Error('indexeddb-failure: Could not open IndexedDB'));
     };
 
@@ -43,7 +45,7 @@ function _openDatabase() {
 
       db.onerror = function (event) {
         const error = (event.target as IDBOpenDBRequest)?.error;
-        console.log('Database error: ' + error);
+        logger.log('Database error: ' + error);
 
         if (event.target && error) {
           if (error.name === 'QuotaExceededError') {

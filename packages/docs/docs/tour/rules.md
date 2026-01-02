@@ -9,4 +9,4 @@ set the payee to "Amazon" and the category to "Books". Rules enable you to autom
 
 For detailed information, please consult the manual section on [rules](/docs/budgeting/rules/).
 
-![](/img/a-tour-of-actual/tour-rules-overview.png)
+![](/img/a-tour-of-actual/tour-rules-overview.webp)

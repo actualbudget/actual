@@ -41,6 +41,15 @@ function getImportFix(sourceCode, importName, moduleName) {
   );
 
   if (existingImport) {
+    const hasImportAlready = existingImport.specifiers.some(
+      spec =>
+        spec.type === 'ImportSpecifier' && spec.imported.name === importName,
+    );
+
+    if (hasImportAlready) {
+      return null;
+    }
+
     if (existingImport.specifiers.length === 0) {
       const importStatement = `import { ${importName} } from '${moduleName}';\n`;
       return fixer =>
@@ -62,7 +71,8 @@ function getImportFix(sourceCode, importName, moduleName) {
     if (firstImport) {
       return fixer => fixer.insertTextAfter(targetNode, `\n${importStatement}`);
     } else {
-      return fixer => fixer.insertTextBefore(targetNode, importStatement);
+      return fixer =>
+        fixer.insertTextBefore(targetNode, `${importStatement}\n`);
     }
   }
 }

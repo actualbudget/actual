@@ -1,5 +1,11 @@
 // @ts-strict-ignore
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -880,6 +886,9 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
     totalAmount: totalOverspending,
   } = useOverspentCategories({ month });
 
+  const amountsByCategoryRef = useRef(amountsByCategory);
+  amountsByCategoryRef.current = amountsByCategory;
+
   const categoryGroupsToShow = useMemo(
     () =>
       categoryGroups
@@ -903,7 +912,7 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
             options: {
               title: category.name,
               month,
-              amount: amountsByCategory.get(category.id),
+              amount: amountsByCategoryRef.current.get(category.id),
               categoryId: category.id,
               onSubmit: (amount, fromCategoryId) => {
                 onBudgetAction(month, 'cover-overspending', {
@@ -931,7 +940,6 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
       );
     },
     [
-      amountsByCategory,
       categoriesById,
       dispatch,
       month,
