@@ -250,7 +250,7 @@ export function CategorySpendingCard({
                         marginLeft: 10,
                       }}
                     >
-                      {format(Math.abs(category.totalDebts), 'financial')}
+                      + {format(category.totalDebts, 'financial')}
                     </Block>
                   </PrivacyFilter>
                 </View>

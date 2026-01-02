@@ -96,10 +96,10 @@ export function SummaryCard({
   const getTooltipContent = () => {
     const widgetName = meta?.name || '';
     if (widgetName.includes('Avg Per Day')) {
-      return 'Divides total expenses by the number of days in the period. Shows your daily burn rate.';
+      return t('reports.tooltip.avgPerDay');
     }
     if (widgetName.includes('Avg Per Transaction')) {
-      return 'Divides total expenses by the number of transactions. Shows your typical transaction size.';
+      return t('reports.tooltip.avgPerTransaction');
     }
     return null;
   };

@@ -22,11 +22,13 @@ import {
   MONTHLY_DASHBOARD_STATE,
   YEARLY_DASHBOARD_STATE,
 } from 'loot-core/shared/dashboard';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 import * as monthUtils from 'loot-core/shared/months';
 import {
   type CustomReportWidget,
   type ExportImportDashboard,
   type MarkdownWidget,
+  type NewWidget,
   type Widget,
 } from 'loot-core/types/models';
 
@@ -108,31 +110,75 @@ export function Overview() {
   const { data: customReports, isLoading: isCustomReportsLoading } =
     useReports();
   const { data: widgets, isLoading: isWidgetsLoading } = useDashboard();
+  const categories = useCategories();
 
   // Always use predefined dashboard states based on view mode
   // This ensures monthly and yearly views show different, correct widgets
   // Monthly view includes category-spending-card (pie chart), yearly view has full dashboard
   // Note: User customizations are saved when they edit widgets, but view mode determines base layout
   const filteredWidgets = useMemo(() => {
+    // Find the starting balance category ID
+    const startingBalanceCategory = categories?.list?.find(
+      cat => cat.name === 'Starting Balances',
+    );
+    const startingBalanceCategoryId = startingBalanceCategory?.id;
+
+    // Helper function to process widget conditions
+    const processWidgetConditions = (widget: NewWidget) => {
+      if (
+        widget.meta &&
+        'conditions' in widget.meta &&
+        widget.meta.conditions
+      ) {
+        return {
+          ...widget,
+          meta: {
+            ...widget.meta,
+            conditions: widget.meta.conditions.map((condition: any) => {
+              // Replace the fragile text-based category filter with ID-based filter
+              if (
+                condition.field === 'category' &&
+                condition.op === 'doesNotContain' &&
+                condition.value === 'Starting Balances' &&
+                startingBalanceCategoryId
+              ) {
+                return {
+                  field: 'category',
+                  op: 'notOneOf',
+                  value: [startingBalanceCategoryId],
+                };
+              }
+              return condition;
+            }),
+          },
+        };
+      }
+      return widget;
+    };
+
     // Always use predefined dashboard states based on view mode
     // In monthly view, use MONTHLY_DASHBOARD_STATE (includes pie chart)
     // In yearly view, use YEARLY_DASHBOARD_STATE (full dashboard)
     if (viewMode === 'monthly') {
       // Use our custom monthly dashboard with category-spending-card
-      return MONTHLY_DASHBOARD_STATE.map((widget, index) => ({
-        ...widget,
-        id: `monthly-widget-${index}`,
-        tombstone: false,
-      })) as Widget[];
+      return MONTHLY_DASHBOARD_STATE.map(processWidgetConditions).map(
+        (widget, index) => ({
+          ...widget,
+          id: `monthly-widget-${index}`,
+          tombstone: false,
+        }),
+      ) as Widget[];
     } else {
       // Use the yearly dashboard state
-      return YEARLY_DASHBOARD_STATE.map((widget, index) => ({
-        ...widget,
-        id: `yearly-widget-${index}`,
-        tombstone: false,
-      })) as Widget[];
+      return YEARLY_DASHBOARD_STATE.map(processWidgetConditions).map(
+        (widget, index) => ({
+          ...widget,
+          id: `yearly-widget-${index}`,
+          tombstone: false,
+        }),
+      ) as Widget[];
     }
-  }, [viewMode]);
+  }, [viewMode, categories]);
 
   const customReportMap = useMemo(
     () => new Map(customReports.map(report => [report.id, report])),
@@ -697,44 +743,35 @@ export function Overview() {
               isResizable={currentBreakpoint === 'desktop' && isEditing}
             >
               {desktopLayout.map(item => {
-                // Override meta with date range based on view mode
-                let metaToUse = item.meta;
-                if (viewMode === 'monthly') {
-                  if (item.type === 'spending-card') {
-                    // Spending card uses compare/compareTo instead of timeFrame
-                    metaToUse = {
+                // Helper functions for meta overrides based on widget type and view mode
+                const getTimeFrameMeta = () => {
+                  if (viewMode === 'monthly' || viewMode === 'yearly') {
+                    return item.meta
+                      ? { ...item.meta, timeFrame: monthDateRange }
+                      : { timeFrame: monthDateRange };
+                  }
+                  return item.meta;
+                };
+
+                const getSpendingCardMeta = () => {
+                  if (viewMode === 'monthly') {
+                    return {
                       ...item.meta,
                       compare: selectedMonth,
                       compareTo: monthUtils.subMonths(selectedMonth, 1),
                       isLive: false,
                     };
-                  } else {
-                    metaToUse = item.meta
-                      ? {
-                          ...item.meta,
-                          timeFrame: monthDateRange,
-                        }
-                      : { timeFrame: monthDateRange };
-                  }
-                } else if (viewMode === 'yearly') {
-                  // In yearly view, also override timeFrame to use selected year
-                  if (item.type === 'spending-card') {
+                  } else if (viewMode === 'yearly') {
                     const year = selectedMonth.slice(0, 4);
-                    metaToUse = {
+                    return {
                       ...item.meta,
                       compare: `${year}-12`,
                       compareTo: `${year}-11`,
                       isLive: false,
                     };
-                  } else {
-                    metaToUse = item.meta
-                      ? {
-                          ...item.meta,
-                          timeFrame: monthDateRange,
-                        }
-                      : { timeFrame: monthDateRange };
                   }
-                }
+                  return item.meta;
+                };
 
                 return (
                   <div key={item.i}>
@@ -743,7 +780,11 @@ export function Overview() {
                         widgetId={item.i}
                         isEditing={isEditing}
                         accounts={accounts}
-                        meta={metaToUse as any}
+                        meta={
+                          getTimeFrameMeta() as React.ComponentProps<
+                            typeof NetWorthCard
+                          >['meta']
+                        }
                         onMetaChange={newMeta => onMetaChange(item, newMeta)}
                         onRemove={() => onRemoveWidget(item.i)}
                       />
@@ -753,7 +794,11 @@ export function Overview() {
                         widgetId={item.i}
                         isEditing={isEditing}
                         accounts={accounts}
-                        meta={metaToUse as any}
+                        meta={
+                          getTimeFrameMeta() as React.ComponentProps<
+                            typeof CrossoverCard
+                          >['meta']
+                        }
                         onMetaChange={newMeta => onMetaChange(item, newMeta)}
                         onRemove={() => onRemoveWidget(item.i)}
                       />
@@ -761,7 +806,11 @@ export function Overview() {
                       <CashFlowCard
                         widgetId={item.i}
                         isEditing={isEditing}
-                        meta={metaToUse as any}
+                        meta={
+                          getTimeFrameMeta() as React.ComponentProps<
+                            typeof CashFlowCard
+                          >['meta']
+                        }
                         onMetaChange={newMeta => onMetaChange(item, newMeta)}
                         onRemove={() => onRemoveWidget(item.i)}
                       />
@@ -769,14 +818,22 @@ export function Overview() {
                       <SpendingCard
                         widgetId={item.i}
                         isEditing={isEditing}
-                        meta={metaToUse as any}
+                        meta={
+                          getSpendingCardMeta() as React.ComponentProps<
+                            typeof SpendingCard
+                          >['meta']
+                        }
                         onMetaChange={newMeta => onMetaChange(item, newMeta)}
                         onRemove={() => onRemoveWidget(item.i)}
                       />
                     ) : item.type === 'markdown-card' ? (
                       <MarkdownCard
                         isEditing={isEditing}
-                        meta={item.meta}
+                        meta={
+                          item.meta as React.ComponentProps<
+                            typeof MarkdownCard
+                          >['meta']
+                        }
                         onMetaChange={newMeta => onMetaChange(item, newMeta)}
                         onRemove={() => onRemoveWidget(item.i)}
                       />
@@ -790,7 +847,11 @@ export function Overview() {
                       <SummaryCard
                         widgetId={item.i}
                         isEditing={isEditing}
-                        meta={metaToUse as any}
+                        meta={
+                          getTimeFrameMeta() as React.ComponentProps<
+                            typeof SummaryCard
+                          >['meta']
+                        }
                         onMetaChange={newMeta => onMetaChange(item, newMeta)}
                         onRemove={() => onRemoveWidget(item.i)}
                       />
@@ -798,7 +859,11 @@ export function Overview() {
                       <CalendarCard
                         widgetId={item.i}
                         isEditing={isEditing}
-                        meta={metaToUse as any}
+                        meta={
+                          getTimeFrameMeta() as React.ComponentProps<
+                            typeof CalendarCard
+                          >['meta']
+                        }
                         firstDayOfWeekIdx={firstDayOfWeekIdx}
                         onMetaChange={newMeta => onMetaChange(item, newMeta)}
                         onRemove={() => onRemoveWidget(item.i)}
@@ -807,7 +872,11 @@ export function Overview() {
                       <FormulaCard
                         widgetId={item.i}
                         isEditing={isEditing}
-                        meta={metaToUse as any}
+                        meta={
+                          getTimeFrameMeta() as React.ComponentProps<
+                            typeof FormulaCard
+                          >['meta']
+                        }
                         onMetaChange={newMeta => onMetaChange(item, newMeta)}
                         onRemove={() => onRemoveWidget(item.i)}
                       />
@@ -815,7 +884,11 @@ export function Overview() {
                       <CategorySpendingCard
                         widgetId={item.i}
                         isEditing={isEditing}
-                        meta={metaToUse as any}
+                        meta={
+                          getTimeFrameMeta() as React.ComponentProps<
+                            typeof CategorySpendingCard
+                          >['meta']
+                        }
                         onMetaChange={newMeta =>
                           onMetaChange(item, newMeta as Widget['meta'])
                         }
