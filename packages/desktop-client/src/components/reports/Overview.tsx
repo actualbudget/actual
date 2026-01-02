@@ -417,14 +417,14 @@ export function Overview() {
                   onPress={() => setViewMode('monthly')}
                   style={{ fontSize: 14, padding: '6px 12px' }}
                 >
-                  Monthly
+                  <Trans>Monthly</Trans>
                 </Button>
                 <Button
                   variant={viewMode === 'yearly' ? 'primary' : 'normal'}
                   onPress={() => setViewMode('yearly')}
                   style={{ fontSize: 14, padding: '6px 12px' }}
                 >
-                  Yearly
+                  <Trans>Yearly</Trans>
                 </Button>
               </View>
               
