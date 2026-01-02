@@ -157,14 +157,14 @@ export function SummaryCard({
                 placement="right"
                 style={{ maxWidth: 250 }}
               >
-                <SvgInformationOutline 
-                  style={{ 
-                    width: 16, 
-                    height: 16, 
+                <SvgInformationOutline
+                  style={{
+                    width: 16,
+                    height: 16,
                     color: 'currentColor',
                     opacity: 0.6,
-                    cursor: 'help'
-                  }} 
+                    cursor: 'help',
+                  }}
                 />
               </Tooltip>
             )}

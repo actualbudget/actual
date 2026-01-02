@@ -64,7 +64,6 @@
     "react-grid-layout": "^1.5.2",
     "react-hotkeys-hook": "^5.2.1",
     "react-i18next": "^16.3.3",
-    "react-is": "^19.0.0",
     "react-markdown": "^10.1.0",
     "react-modal": "3.16.3",
     "react-redux": "^9.2.0",

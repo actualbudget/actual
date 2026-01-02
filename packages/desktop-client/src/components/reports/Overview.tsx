@@ -7,10 +7,17 @@ import { useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { SvgDotsHorizontalTriple, SvgArrowLeft, SvgArrowRight } from '@actual-app/components/icons/v1';
+import {
+  SvgDotsHorizontalTriple,
+  SvgArrowLeft,
+  SvgArrowRight,
+} from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import * as monthUtils from 'loot-core/shared/months';
-import { MONTHLY_DASHBOARD_STATE, YEARLY_DASHBOARD_STATE } from 'loot-core/shared/dashboard';
+import {
+  MONTHLY_DASHBOARD_STATE,
+  YEARLY_DASHBOARD_STATE,
+} from 'loot-core/shared/dashboard';
 import { Popover } from '@actual-app/components/popover';
 import { breakpoints } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
@@ -76,8 +83,8 @@ export function Overview() {
   const [currentBreakpoint, setCurrentBreakpoint] = useState<
     'mobile' | 'desktop'
   >('desktop');
-  const [selectedMonth, setSelectedMonth] = useState<string>(() => 
-    monthUtils.subMonths(monthUtils.currentMonth(), 1)
+  const [selectedMonth, setSelectedMonth] = useState<string>(() =>
+    monthUtils.subMonths(monthUtils.currentMonth(), 1),
   );
   const [viewMode, setViewMode] = useState<'monthly' | 'yearly'>('monthly');
 
@@ -102,22 +109,28 @@ export function Overview() {
     useReports();
   const { data: widgets, isLoading: isWidgetsLoading } = useDashboard();
 
-  // Use predefined dashboard states based on view mode
-  // In monthly view, use MONTHLY_DASHBOARD_STATE (6 widgets)
-  // In yearly view, use YEARLY_DASHBOARD_STATE (full dashboard)
+  // Always use predefined dashboard states based on view mode
+  // This ensures monthly and yearly views show different, correct widgets
+  // Monthly view includes category-spending-card (pie chart), yearly view has full dashboard
+  // Note: User customizations are saved when they edit widgets, but view mode determines base layout
   const filteredWidgets = useMemo(() => {
+    // Always use predefined dashboard states based on view mode
+    // In monthly view, use MONTHLY_DASHBOARD_STATE (includes pie chart)
+    // In yearly view, use YEARLY_DASHBOARD_STATE (full dashboard)
     if (viewMode === 'monthly') {
-      // Use our custom monthly dashboard with 6 widgets
+      // Use our custom monthly dashboard with category-spending-card
       return MONTHLY_DASHBOARD_STATE.map((widget, index) => ({
         ...widget,
         id: `monthly-widget-${index}`,
-      }));
+        tombstone: false,
+      })) as Widget[];
     } else {
       // Use the yearly dashboard state
       return YEARLY_DASHBOARD_STATE.map((widget, index) => ({
         ...widget,
         id: `yearly-widget-${index}`,
-      }));
+        tombstone: false,
+      })) as Widget[];
     }
   }, [viewMode]);
 
@@ -408,10 +421,19 @@ export function Overview() {
               marginRight: 15,
             }}
           >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}
+            >
               <PageHeader title={t('Reports')} />
-              
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginRight: 15 }}>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 5,
+                  marginRight: 15,
+                }}
+              >
                 <Button
                   variant={viewMode === 'monthly' ? 'primary' : 'normal'}
                   onPress={() => setViewMode('monthly')}
@@ -427,31 +449,43 @@ export function Overview() {
                   <Trans>Yearly</Trans>
                 </Button>
               </View>
-              
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+
+              <View
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}
+              >
                 <Button
                   variant="bare"
-                  onPress={() => setSelectedMonth(
-                    viewMode === 'yearly'
-                      ? monthUtils.subMonths(selectedMonth, 12)
-                      : monthUtils.subMonths(selectedMonth, 1)
-                  )}
+                  onPress={() =>
+                    setSelectedMonth(
+                      viewMode === 'yearly'
+                        ? monthUtils.subMonths(selectedMonth, 12)
+                        : monthUtils.subMonths(selectedMonth, 1),
+                    )
+                  }
                 >
                   <SvgArrowLeft style={{ width: 20, height: 20 }} />
                 </Button>
-                <span style={{ fontSize: 16, fontWeight: 500, minWidth: 150, textAlign: 'center' }}>
-                  {viewMode === 'yearly' 
+                <span
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 500,
+                    minWidth: 150,
+                    textAlign: 'center',
+                  }}
+                >
+                  {viewMode === 'yearly'
                     ? selectedMonth.slice(0, 4)
-                    : monthUtils.format(selectedMonth, 'MMMM yyyy')
-                  }
+                    : monthUtils.format(selectedMonth, 'MMMM yyyy')}
                 </span>
                 <Button
                   variant="bare"
-                  onPress={() => setSelectedMonth(
-                    viewMode === 'yearly'
-                      ? monthUtils.addMonths(selectedMonth, 12)
-                      : monthUtils.addMonths(selectedMonth, 1)
-                  )}
+                  onPress={() =>
+                    setSelectedMonth(
+                      viewMode === 'yearly'
+                        ? monthUtils.addMonths(selectedMonth, 12)
+                        : monthUtils.addMonths(selectedMonth, 1),
+                    )
+                  }
                 >
                   <SvgArrowRight style={{ width: 20, height: 20 }} />
                 </Button>
@@ -675,10 +709,12 @@ export function Overview() {
                       isLive: false,
                     };
                   } else {
-                    metaToUse = item.meta ? {
-                      ...item.meta,
-                      timeFrame: monthDateRange,
-                    } : { timeFrame: monthDateRange };
+                    metaToUse = item.meta
+                      ? {
+                          ...item.meta,
+                          timeFrame: monthDateRange,
+                        }
+                      : { timeFrame: monthDateRange };
                   }
                 } else if (viewMode === 'yearly') {
                   // In yearly view, also override timeFrame to use selected year
@@ -691,99 +727,103 @@ export function Overview() {
                       isLive: false,
                     };
                   } else {
-                    metaToUse = item.meta ? {
-                      ...item.meta,
-                      timeFrame: monthDateRange,
-                    } : { timeFrame: monthDateRange };
+                    metaToUse = item.meta
+                      ? {
+                          ...item.meta,
+                          timeFrame: monthDateRange,
+                        }
+                      : { timeFrame: monthDateRange };
                   }
                 }
 
                 return (
-                <div key={item.i}>
-                  {item.type === 'net-worth-card' ? (
-                    <NetWorthCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      accounts={accounts}
-                      meta={metaToUse}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                    />
-                  ) : item.type === 'crossover-card' &&
-                    crossoverReportEnabled ? (
-                    <CrossoverCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      accounts={accounts}
-                      meta={metaToUse}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                    />
-                  ) : item.type === 'cash-flow-card' ? (
-                    <CashFlowCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      meta={metaToUse}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                    />
-                  ) : item.type === 'spending-card' ? (
-                    <SpendingCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      meta={metaToUse}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                    />
-                  ) : item.type === 'markdown-card' ? (
-                    <MarkdownCard
-                      isEditing={isEditing}
-                      meta={item.meta}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                    />
-                  ) : item.type === 'custom-report' ? (
-                    <CustomReportListCards
-                      isEditing={isEditing}
-                      report={customReportMap.get(item.meta.id)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                    />
-                  ) : item.type === 'summary-card' ? (
-                    <SummaryCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      meta={metaToUse}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                    />
-                  ) : item.type === 'calendar-card' ? (
-                    <CalendarCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      meta={metaToUse}
-                      firstDayOfWeekIdx={firstDayOfWeekIdx}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                    />
-                  ) : item.type === 'formula-card' && formulaMode ? (
-                    <FormulaCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      meta={metaToUse}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                    />
-                  ) : item.type === 'category-spending-card' ? (
-                    <CategorySpendingCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      meta={metaToUse}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                    />
-                  ) : null}
-                </div>
-              );
+                  <div key={item.i}>
+                    {item.type === 'net-worth-card' ? (
+                      <NetWorthCard
+                        widgetId={item.i}
+                        isEditing={isEditing}
+                        accounts={accounts}
+                        meta={metaToUse as any}
+                        onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                        onRemove={() => onRemoveWidget(item.i)}
+                      />
+                    ) : item.type === 'crossover-card' &&
+                      crossoverReportEnabled ? (
+                      <CrossoverCard
+                        widgetId={item.i}
+                        isEditing={isEditing}
+                        accounts={accounts}
+                        meta={metaToUse as any}
+                        onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                        onRemove={() => onRemoveWidget(item.i)}
+                      />
+                    ) : item.type === 'cash-flow-card' ? (
+                      <CashFlowCard
+                        widgetId={item.i}
+                        isEditing={isEditing}
+                        meta={metaToUse as any}
+                        onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                        onRemove={() => onRemoveWidget(item.i)}
+                      />
+                    ) : item.type === 'spending-card' ? (
+                      <SpendingCard
+                        widgetId={item.i}
+                        isEditing={isEditing}
+                        meta={metaToUse as any}
+                        onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                        onRemove={() => onRemoveWidget(item.i)}
+                      />
+                    ) : item.type === 'markdown-card' ? (
+                      <MarkdownCard
+                        isEditing={isEditing}
+                        meta={item.meta}
+                        onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                        onRemove={() => onRemoveWidget(item.i)}
+                      />
+                    ) : item.type === 'custom-report' ? (
+                      <CustomReportListCards
+                        isEditing={isEditing}
+                        report={customReportMap.get(item.meta.id)}
+                        onRemove={() => onRemoveWidget(item.i)}
+                      />
+                    ) : item.type === 'summary-card' ? (
+                      <SummaryCard
+                        widgetId={item.i}
+                        isEditing={isEditing}
+                        meta={metaToUse as any}
+                        onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                        onRemove={() => onRemoveWidget(item.i)}
+                      />
+                    ) : item.type === 'calendar-card' ? (
+                      <CalendarCard
+                        widgetId={item.i}
+                        isEditing={isEditing}
+                        meta={metaToUse as any}
+                        firstDayOfWeekIdx={firstDayOfWeekIdx}
+                        onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                        onRemove={() => onRemoveWidget(item.i)}
+                      />
+                    ) : item.type === 'formula-card' && formulaMode ? (
+                      <FormulaCard
+                        widgetId={item.i}
+                        isEditing={isEditing}
+                        meta={metaToUse as any}
+                        onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                        onRemove={() => onRemoveWidget(item.i)}
+                      />
+                    ) : item.type === 'category-spending-card' ? (
+                      <CategorySpendingCard
+                        widgetId={item.i}
+                        isEditing={isEditing}
+                        meta={metaToUse as any}
+                        onMetaChange={newMeta =>
+                          onMetaChange(item, newMeta as Widget['meta'])
+                        }
+                        onRemove={() => onRemoveWidget(item.i)}
+                      />
+                    ) : null}
+                  </div>
+                );
               })}
             </ResponsiveGridLayout>
           </View>

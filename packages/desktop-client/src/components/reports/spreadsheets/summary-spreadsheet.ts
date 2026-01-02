@@ -170,7 +170,10 @@ export function summarySpreadsheet(
 
       case 'avgPerDay': {
         const totalDays = d.differenceInDays(endDay, startDay) + 1;
-        const totalAmount = data.data.reduce((sum, day) => sum + day.amount, 0);
+        const totalAmount = data.data.reduce(
+          (sum: number, day: { amount: number }) => sum + day.amount,
+          0,
+        );
         setData({
           ...dateRanges,
           total: totalDays > 0 ? totalAmount / totalDays : 0,

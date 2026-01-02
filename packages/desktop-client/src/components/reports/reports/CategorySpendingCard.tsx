@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -58,7 +58,9 @@ export function CategorySpendingCard({
 
   // Default to current month if no timeFrame provided
   const startDate = meta?.timeFrame?.start || monthUtils.currentMonth();
-  const endDate = meta?.timeFrame?.end || monthUtils.lastDayOfMonth(monthUtils.currentMonth());
+  const endDate =
+    meta?.timeFrame?.end ||
+    monthUtils.lastDayOfMonth(monthUtils.currentMonth());
 
   const getGraphData = useMemo(() => {
     return createCustomSpreadsheet({
@@ -80,7 +82,15 @@ export function CategorySpendingCard({
       accounts,
       graphType: 'DonutGraph',
     });
-  }, [startDate, endDate, categories, meta?.conditions, meta?.conditionsOp, payees, accounts]);
+  }, [
+    startDate,
+    endDate,
+    categories,
+    meta?.conditions,
+    meta?.conditionsOp,
+    payees,
+    accounts,
+  ]);
 
   const data = useReport('category-spending', getGraphData);
 
@@ -92,7 +102,7 @@ export function CategorySpendingCard({
       .sort((a, b) => a.totalDebts - b.totalDebts)
       .slice(0, 10)
       .map(item => {
-        const legendItem = data.legend.find(l => l.id === item.id);
+        const legendItem = data.legend?.find(l => l.id === item.id);
         return {
           ...item,
           color: legendItem?.color || theme.reportsBlue,
@@ -101,14 +111,17 @@ export function CategorySpendingCard({
   }, [data]);
 
   const totalSpent = useMemo(() => {
-    return sortedCategories.reduce((sum, cat) => sum + Math.abs(cat.totalDebts), 0);
+    return sortedCategories.reduce(
+      (sum, cat) => sum + Math.abs(cat.totalDebts),
+      0,
+    );
   }, [sortedCategories]);
 
   return (
     <ReportCard
       isEditing={isEditing}
       disableClick={nameMenuOpen}
-      to={`/reports/custom`}
+      to="/reports/custom"
       menuItems={[
         {
           name: 'rename',
@@ -179,12 +192,14 @@ export function CategorySpendingCard({
                 groupBy="Category"
                 balanceTypeOp="totalDebts"
                 viewLabels={false}
-                showTooltip={true}
+                showTooltip
               />
             </View>
 
             {/* Category List - 2/3 width */}
-            <View style={{ flex: 2, padding: '0 20px 20px 10px', overflow: 'auto' }}>
+            <View
+              style={{ flex: 2, padding: '0 20px 20px 10px', overflow: 'auto' }}
+            >
               {sortedCategories.map((category, index) => (
                 <View
                   key={category.id}
@@ -193,10 +208,20 @@ export function CategorySpendingCard({
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     padding: '8px 0',
-                    borderBottom: index < sortedCategories.length - 1 ? `1px solid ${theme.tableBorder}` : 'none',
+                    borderBottom:
+                      index < sortedCategories.length - 1
+                        ? `1px solid ${theme.tableBorder}`
+                        : 'none',
                   }}
                 >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 10,
+                      flex: 1,
+                    }}
+                  >
                     <View
                       style={{
                         width: 12,
@@ -232,8 +257,14 @@ export function CategorySpendingCard({
                 </View>
               ))}
               {sortedCategories.length === 0 && (
-                <View style={{ padding: 20, textAlign: 'center', color: theme.tableTextLight }}>
-                  {t('No spending data')}
+                <View
+                  style={{
+                    padding: 20,
+                    textAlign: 'center',
+                    color: theme.tableTextLight,
+                  }}
+                >
+                  <Trans>No spending data</Trans>
                 </View>
               )}
             </View>
