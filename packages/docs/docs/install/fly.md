@@ -32,14 +32,14 @@ Note: the exact commands you'll need to run may have changed, check the website 
    ```powershell
    iwr https://fly.io/install.ps1 -useb | iex
    ```
-   ![](/img/fly/windows-install-1.png)
+   ![](/img/fly/windows-install-1.webp)
 2. Flyctl should start installing
 
-   ![](/img/fly/windows-install-2.png)
+   ![](/img/fly/windows-install-2.webp)
 
 3. Once done you should get a message saying `Run flyctl --help to get started`:
 
-   ![](/img/fly/windows-install-3.png)
+   ![](/img/fly/windows-install-3.webp)
 
 </details>
 
@@ -52,15 +52,15 @@ Additionally, you might get an error such as `command not found: fly` when you t
 
 1. In the Finder, choose "Go → Utilities" from the menu bar.
 
-   ![](/img/fly/macos-install-1@2x.png)
+   ![](/img/fly/macos-install-1@2x.webp)
 
 2. Scroll down in the list until you find "Terminal." Double-click on it to open it.
 
-   ![](/img/fly/macos-install-2@2x.png)
+   ![](/img/fly/macos-install-2@2x.webp)
 
 3. A window should pop up that will look a bit like this. Note that some of the text may be different, or you may see the last line ending with a `$` instead of a `%`. Both of those are normal.
 
-   ![](/img/fly/macos-install-3@2x.png)
+   ![](/img/fly/macos-install-3@2x.webp)
 
 4. Type or paste the following command to start the install. Make sure you press the `Enter` key on your keyboard after you've typed it in.
 
@@ -68,11 +68,11 @@ Additionally, you might get an error such as `command not found: fly` when you t
     curl -L https://fly.io/install.sh | sh
    ```
 
-   ![](/img/fly/macos-install-4@2x.png)
+   ![](/img/fly/macos-install-4@2x.webp)
 
 5. Once that has finished, you should see something like this:
 
-   ![](/img/fly/macos-install-5@2x.png)
+   ![](/img/fly/macos-install-5@2x.webp)
 
 </details>
 
@@ -120,12 +120,12 @@ provided by the Fly command above earlier.
 
 If you forget the URL, you can always find it by opening [https://fly.io/dashboard](https://fly.io/dashboard) in a browser. Click on the application you created:
 
-![](/img/fly/fly-dash.png)
+![](/img/fly/fly-dash.webp)
 
 Once you are in there, you should see Hostname section under Application Information - click the
 link
 
-![](/img/fly/fly-dash-2.png)
+![](/img/fly/fly-dash-2.webp)
 
 This will now open Actual so we can start configuring it.
 
@@ -133,15 +133,15 @@ This will now open Actual so we can start configuring it.
 
 1. Set a password - remember this, you will need it in the future.
 
-   ![](/img/fly/actual-config-1@2x.png)
+   ![](/img/fly/actual-config-1@2x.webp)
 
 2. You'll see a welcome screen. Either click "Import my budget" to [import your budget from YNAB or the subscription version of Actual](../migration/index.md), or click "Start fresh" to create a blank budget file.
 
-   ![](/img/fly/actual-config-2@2x.png)
+   ![](/img/fly/actual-config-2@2x.webp)
 
 3. If everything went well you should then be taken to your very first budget.
 
-   ![](/img/fly/actual-register.png)
+   ![](/img/fly/actual-register.webp)
 
 Actual is now up and running. Congratulations! Consider checking out [our tour](../tour/index.md) next.
 

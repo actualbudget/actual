@@ -21,14 +21,14 @@ Before we get started, check the settings for your Credit Card accounts to make 
   - Show "cleared" checkboxes
   - Show reconciled transactions
 
-    <img alt="Show running balance" src="/img/credit-cards/CC-014.png" />
+    <img alt="Show running balance" src="/img/credit-cards/CC-014.webp" />
 
 - Check that the _pills_ showing "Cleared total" and "Uncleared total" are showing under the account name.
   - To show the pills, hover over the account balance under the account name and press the expand >> arrows.
 
-    <img alt="Account page Balance Expand Arows" src="/img/credit-cards/CC-01.png" />
+    <img alt="Account page Balance Expand Arows" src="/img/credit-cards/CC-01.webp" />
     <br />
-    <img alt="Account Page Balances Expanded" src="/img/credit-cards/CC-02.png" />
+    <img alt="Account Page Balances Expanded" src="/img/credit-cards/CC-02.webp" />
 
 <br />
 
@@ -101,9 +101,9 @@ One day you won't need to add any extra to pay the credit card bill in full! Hap
 
 At he beginning of July we budget for the expected Minimum Payments as part of our necessary expenses. After all of our expenses are accounted for, we have $202.29 leftover and we decide to add $200 extra to our Citibank Credit Card. We add $200 to our $90 expected Minimum Payment. The $2.29 we Hold for next Month.
 
-<img alt="Budget after necessary expenses" src="/img/credit-cards/CC-03.png" />
+<img alt="Budget after necessary expenses" src="/img/credit-cards/CC-03.webp" />
 <br />
-<img alt="Budget after adding extra" src="/img/credit-cards/CC-04.png" />
+<img alt="Budget after adding extra" src="/img/credit-cards/CC-04.webp" />
 
 <br />
 
@@ -124,7 +124,7 @@ The Citibank Statement arrives. We need the following information from the summa
 
 Following [Cards with Debt and No New Purchases](#debt-no-new) we enter a transaction into the Citibank account for the Interest & Fees and categorize it to **Citi Card Debt**. We reconcile the account, agreeing with Citibank that our New Balance is $2564.00.
 
-<img alt="Citibank Cleared Transactions" src="/img/credit-cards/CC-05.png" />
+<img alt="Citibank Cleared Transactions" src="/img/credit-cards/CC-05.webp" />
 
 <br />
 
@@ -132,17 +132,17 @@ Our **Budgeted** amount of 290.00 is larger than the Minimum Payment of $90.00, 
 
 You may notice that the Citibank Balance matches the **Citi Card Debt** Balance. The Interest & Fees we added to the debt were canceled by our **Budgeted** amount that included them.
 
-<img alt="Citibank July" src="/img/credit-cards/CC-06.png" />
+<img alt="Citibank July" src="/img/credit-cards/CC-06.webp" />
 <br />
-<img alt="Budget July" src="/img/credit-cards/CC-07.png" />
+<img alt="Budget July" src="/img/credit-cards/CC-07.webp" />
 
 <br />
 
 On the 1st of August we set our budget and start with our Minimum Payments of $90 for the Citibank card and $50 for the DEMO card. After we funded all of our necessary expenses we added an extra $200 payment for the DEMO card this month.
 
-<img alt="August Initial Budget" src="/img/credit-cards/CC-08.png" />
+<img alt="August Initial Budget" src="/img/credit-cards/CC-08.webp" />
 <br />
-<img alt="August Budget After Extra" src="/img/credit-cards/CC-09.png" />
+<img alt="August Budget After Extra" src="/img/credit-cards/CC-09.webp" />
 
 <br />
 
@@ -163,7 +163,7 @@ We'll follow [Cards with New Purchases and Original Debt](#debt-with-new) above 
 
 First, we'll enter the Interest & Fees transaction of $32.75, categorize it to **DEMO Card Debt** and start to reconcile our account. When our cleared transactions match the statement New Balance, our DEMO account looks like this:
 
-<img alt="DEMO Credit Card Reconcile" src="/img/credit-cards/CC-010.png" />
+<img alt="DEMO Credit Card Reconcile" src="/img/credit-cards/CC-010.webp" />
 
 <br />
 
@@ -182,7 +182,7 @@ Our cleared new purchases add up to $846.11 and match our statement, so we're go
   <br /> The difference between the Account Balance of -2190.96 and the Category Balance of -968.25 (2190.96 - 968.25 = 1222.71)
 - We send DEMO Bank $1,222.71 and use _Make Transfer_ to transfer that amount from the Checking account we used to pay the bill. Our DEMO Account now looks like this:
 
-<img alt="DEMO Credit Card Payment" src="/img/credit-cards/CC-011.png" />
+<img alt="DEMO Credit Card Payment" src="/img/credit-cards/CC-011.webp" />
 
 <br />
 
@@ -190,13 +190,13 @@ We complete the Reconciliation and we are done with this account!
 
 For our Citibank card this month we'll pay the **Budgeted** expected Minimum Payment of $90.00.
 
-<img alt="Citibank August Payment" src="/img/credit-cards/CC-012.png" />
+<img alt="Citibank August Payment" src="/img/credit-cards/CC-012.webp" />
 
 <br />
 
 We have reduced our original debt to DEMO Bank to $968.25 and Citibank to $2,247.00. You can notice that for this snapshot in time, our credit card balances match our outstanding debt in the Budget.
 
-<img alt="August Budget Snapshot" src="/img/credit-cards/CC-013.png" />
+<img alt="August Budget Snapshot" src="/img/credit-cards/CC-013.webp" />
 
 <br />
 

@@ -11,10 +11,10 @@ These features are still in active development and therefore it is highly recomm
 
 In order to view the currently available experimental features go to `Settings -> Show advanced settings -> Experimental features`.
 
-![Experimental features](/img/experimental/setting.png)
+![Experimental features](/img/experimental/setting.webp)
 
 You will need to agree to the disclaimer, and then you will be able to see the available experimental features.
 
-![available features](/img/experimental/available.png)
+![available features](/img/experimental/available.webp)
 
 _The features listed in image above are just some examples of experimental features. The actual experimental features available will differ._

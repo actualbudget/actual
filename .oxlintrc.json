@@ -4,8 +4,8 @@
   "jsPlugins": ["./packages/eslint-plugin-actual/lib/index.js"],
   "env": {
     "browser": true,
-    "jest": true,
-    "node": true
+    "node": true,
+    "vitest": true
   },
   "globals": {
     "vi": "readonly",

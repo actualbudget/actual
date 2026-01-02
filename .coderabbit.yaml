@@ -3,3 +3,6 @@ issue_enrichment:
     enabled: false
 reviews:
   review_status: false
+  finishing_touches:
+    docstrings:
+      enabled: false
