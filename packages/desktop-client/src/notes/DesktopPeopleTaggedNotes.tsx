@@ -5,19 +5,19 @@ import { View } from '@actual-app/components/view';
 
 import { usePeopleCSS } from '@desktop-client/hooks/usePeopleCSS';
 
-type DesktopPeopleNotesProps = {
+type DesktopPeopleTaggedNotesProps = {
   content: string;
   onPress?: (content: string) => void;
   person: string;
   separator: string;
 };
 
-export function DesktopPeopleNotes({
+export function DesktopPeopleTaggedNotes({
   content,
   onPress,
   person,
   separator,
-}: DesktopPeopleNotesProps) {
+}: DesktopPeopleTaggedNotesProps) {
   const getPeopleCSS = usePeopleCSS();
   return (
     <View style={{ display: 'inline' }}>

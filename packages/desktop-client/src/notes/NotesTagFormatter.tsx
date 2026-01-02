@@ -3,11 +3,11 @@ import React from 'react';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
 import { DesktopLinkedNotes } from './DesktopLinkedNotes';
-import { DesktopPeopleNotes } from './DesktopPeopleNotes';
+import { DesktopPeopleTaggedNotes } from './DesktopPeopleTaggedNotes';
 import { DesktopTaggedNotes } from './DesktopTaggedNotes';
 import { parseNotes } from './linkParser';
 import { MobileLinkedNotes } from './MobileLinkedNotes';
-import { MobilePeopleNotes } from './MobilePeopleNotes';
+import { MobilePeopleTaggedNotes } from './MobilePeopleTaggedNotes';
 import { MobileTaggedNotes } from './MobileTaggedNotes';
 
 type NotesTagFormatterProps = {
@@ -67,7 +67,7 @@ export function NotesTagFormatter({
           case 'person':
             if (isNarrowWidth) {
               return (
-                <MobilePeopleNotes
+                <MobilePeopleTaggedNotes
                   key={index}
                   content={segment.content}
                   person={segment.person}
@@ -76,7 +76,7 @@ export function NotesTagFormatter({
               );
             }
             return (
-              <DesktopPeopleNotes
+              <DesktopPeopleTaggedNotes
                 key={index}
                 onPress={onNotesPersonClick}
                 content={segment.content}

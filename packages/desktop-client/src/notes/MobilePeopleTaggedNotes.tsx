@@ -4,17 +4,17 @@ import { Text } from '@actual-app/components/text';
 
 import { usePeopleCSS } from '@desktop-client/hooks/usePeopleCSS';
 
-type MobilePeopleNotesProps = {
+type MobilePeopleTaggedNotesProps = {
   content: string;
   person: string;
   separator: string;
 };
 
-export function MobilePeopleNotes({
+export function MobilePeopleTaggedNotes({
   content,
   person,
   separator,
-}: MobilePeopleNotesProps) {
+}: MobilePeopleTaggedNotesProps) {
   const getPeopleCSS = usePeopleCSS();
   return (
     <>
