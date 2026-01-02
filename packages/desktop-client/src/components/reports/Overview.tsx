@@ -13,16 +13,16 @@ import {
   SvgArrowRight,
 } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
-import * as monthUtils from 'loot-core/shared/months';
-import {
-  MONTHLY_DASHBOARD_STATE,
-  YEARLY_DASHBOARD_STATE,
-} from 'loot-core/shared/dashboard';
 import { Popover } from '@actual-app/components/popover';
 import { breakpoints } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
+import {
+  MONTHLY_DASHBOARD_STATE,
+  YEARLY_DASHBOARD_STATE,
+} from 'loot-core/shared/dashboard';
+import * as monthUtils from 'loot-core/shared/months';
 import {
   type CustomReportWidget,
   type ExportImportDashboard,
@@ -34,13 +34,13 @@ import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { LoadingIndicator } from './LoadingIndicator';
 import { CalendarCard } from './reports/CalendarCard';
 import { CashFlowCard } from './reports/CashFlowCard';
+import { CategorySpendingCard } from './reports/CategorySpendingCard';
 import { CrossoverCard } from './reports/CrossoverCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
 import { FormulaCard } from './reports/FormulaCard';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
-import { CategorySpendingCard } from './reports/CategorySpendingCard';
 import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
 

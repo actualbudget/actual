@@ -1,27 +1,26 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { Block } from '@actual-app/components/block';
 
-import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
+import { DonutGraph } from '@desktop-client/components/reports/graphs/DonutGraph';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { DonutGraph } from '@desktop-client/components/reports/graphs/DonutGraph';
 import { createCustomSpreadsheet } from '@desktop-client/components/reports/spreadsheets/custom-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 
 type CategorySpendingCardProps = {
   widgetId: string;
@@ -41,7 +40,7 @@ type CategorySpendingCardProps = {
 };
 
 export function CategorySpendingCard({
-  widgetId,
+  widgetId: _widgetId,
   isEditing,
   meta = {},
   onMetaChange,
