@@ -329,6 +329,11 @@ export function TransactionList({
   const [upcomingLength = '7'] = useSyncedPref(
     'upcomingScheduledTransactionLength',
   );
+  const [promptConvertToSchedule = 'true'] = useSyncedPref(
+    'promptConvertToSchedule',
+  );
+  const isPromptConvertToScheduleEnabled =
+    String(promptConvertToSchedule) === 'true';
 
   const transactionsLatest = useRef<readonly TransactionEntity[]>([]);
   useLayoutEffect(() => {
@@ -382,7 +387,11 @@ export function TransactionList({
 
       const parentTransaction = newTransactions.find(t => !t.is_child);
 
-      if (parentTransaction && isFutureTransaction(parentTransaction)) {
+      if (
+        isPromptConvertToScheduleEnabled &&
+        parentTransaction &&
+        isFutureTransaction(parentTransaction)
+      ) {
         const transactionWithSubtransactions = {
           ...parentTransaction,
           subtransactions: newTransactions.filter(
@@ -410,7 +419,12 @@ export function TransactionList({
       await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
       onRefetch();
     },
-    [isLearnCategoriesEnabled, onRefetch, promptToConvertToSchedule],
+    [
+      isLearnCategoriesEnabled,
+      isPromptConvertToScheduleEnabled,
+      onRefetch,
+      promptToConvertToSchedule,
+    ],
   );
 
   const onSave = useCallback(
@@ -440,7 +454,10 @@ export function TransactionList({
         }
       };
 
-      if (isFutureTransaction(transaction)) {
+      if (
+        isPromptConvertToScheduleEnabled &&
+        isFutureTransaction(transaction)
+      ) {
         const originalTransaction = transactionsLatest.current.find(
           t => t.id === transaction.id,
         );
@@ -465,7 +482,13 @@ export function TransactionList({
 
       await saveTransaction();
     },
-    [isLearnCategoriesEnabled, onChange, onRefetch, promptToConvertToSchedule],
+    [
+      isLearnCategoriesEnabled,
+      isPromptConvertToScheduleEnabled,
+      onChange,
+      onRefetch,
+      promptToConvertToSchedule,
+    ],
   );
 
   const onAddSplit = useCallback(

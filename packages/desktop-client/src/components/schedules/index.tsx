@@ -14,6 +14,7 @@ import { type ScheduleItemAction, SchedulesTable } from './SchedulesTable';
 import { Search } from '@desktop-client/components/common/Search';
 import { Page } from '@desktop-client/components/Page';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -22,6 +23,17 @@ export function Schedules() {
 
   const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
+  const [promptConvertToSchedule = 'true', setPromptConvertToSchedule] =
+    useSyncedPref('promptConvertToSchedule');
+
+  const isPromptConvertToScheduleEnabled =
+    String(promptConvertToSchedule) === 'true';
+
+  const onTogglePromptConvertToSchedule = useCallback(() => {
+    setPromptConvertToSchedule(
+      isPromptConvertToScheduleEnabled ? 'false' : 'true',
+    );
+  }, [isPromptConvertToScheduleEnabled, setPromptConvertToSchedule]);
 
   const onEdit = useCallback(
     (id: ScheduleEntity['id']) => {
@@ -139,6 +151,13 @@ export function Schedules() {
           </Button>
           <Button onPress={onChangeUpcomingLength}>
             <Trans>Change upcoming length</Trans>
+          </Button>
+          <Button onPress={onTogglePromptConvertToSchedule}>
+            {isPromptConvertToScheduleEnabled ? (
+              <Trans>Disable convert to schedule prompt</Trans>
+            ) : (
+              <Trans>Enable convert to schedule prompt</Trans>
+            )}
           </Button>
         </View>
         <Button variant="primary" onPress={onAdd}>

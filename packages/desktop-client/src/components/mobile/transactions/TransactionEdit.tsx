@@ -574,6 +574,11 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const [upcomingLength = '7'] = useSyncedPref(
       'upcomingScheduledTransactionLength',
     );
+    const [promptConvertToSchedule = 'true'] = useSyncedPref(
+      'promptConvertToSchedule',
+    );
+    const isPromptConvertToScheduleEnabled =
+      String(promptConvertToSchedule) === 'true';
     const transactions = useMemo(
       () =>
         unserializedTransactions.map(t =>
@@ -685,7 +690,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       const today = monthUtils.currentDay();
       const isFuture = unserializedTransaction.date > today;
 
-      if (isFuture) {
+      if (isPromptConvertToScheduleEnabled && isFuture) {
         const upcomingDays = getUpcomingDays(upcomingLength, today);
         const daysUntilTransaction = monthUtils.differenceInCalendarDays(
           unserializedTransaction.date,
@@ -767,6 +772,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       }
     }, [
       isAdding,
+      isPromptConvertToScheduleEnabled,
       dispatch,
       navigate,
       onSave,
