@@ -935,6 +935,7 @@ export type TransactionForRules = TransactionEntity & {
   balance?: number;
   _category_name?: string;
   _account_name?: string;
+  parent_amount?: number;
 };
 
 export async function prepareTransactionForRules(

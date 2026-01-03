@@ -12,6 +12,8 @@ import { Action } from './action';
 import { Condition } from './condition';
 import { integerToAmount } from '../../shared/util';
 
+import { type TransactionForRules } from '../transactions/transaction-rules';
+
 function execNonSplitActions(actions: Action[], transaction) {
   const update = transaction;
   actions.forEach(action => action.exec(update));
@@ -33,7 +35,7 @@ function execSplitActions(actions: Action[], transaction) {
     ungroupTransaction(transaction),
     transaction.id,
   );
-  let newTransactions = data;
+  let newTransactions: TransactionForRules[] = data;
 
   // Add empty splits, and apply non-set-amount actions.
   // This also populates any fixed-amount splits.
