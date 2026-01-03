@@ -6,11 +6,11 @@ import {
   splitTransaction,
   ungroupTransaction,
 } from '../../shared/transactions';
+import { integerToAmount } from '../../shared/util';
 import { type RuleEntity } from '../../types/models';
 
 import { Action } from './action';
 import { Condition } from './condition';
-import { integerToAmount } from '../../shared/util';
 
 import { type TransactionForRules } from '../transactions/transaction-rules';
 
