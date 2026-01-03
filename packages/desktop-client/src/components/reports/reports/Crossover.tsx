@@ -57,6 +57,7 @@ type CrossoverData = {
       investmentIncome: number;
       expenses: number;
       nestEgg: number;
+      adjustedExpenses?: number;
       isProjection?: boolean;
     }>;
     start: string;
@@ -129,6 +130,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const [projectionType, setProjectionType] = useState<'trend' | 'hampel'>(
     'hampel',
   );
+  const [expenseAdjustmentFactor, setExpenseAdjustmentFactor] = useState(1.0);
   const [showHiddenCategories, setShowHiddenCategories] = useState(false);
   const [selectionsInitialized, setSelectionsInitialized] = useState(false);
 
@@ -162,6 +164,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     setSwr(widget?.meta?.safeWithdrawalRate ?? 0.04);
     setEstimatedReturn(widget?.meta?.estimatedReturn ?? null);
     setProjectionType(widget?.meta?.projectionType ?? 'hampel');
+    setExpenseAdjustmentFactor(widget?.meta?.expenseAdjustmentFactor ?? 1.0);
     setShowHiddenCategories(widget?.meta?.showHiddenCategories ?? false);
 
     setSelectionsInitialized(true);
@@ -291,6 +294,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         safeWithdrawalRate: swr,
         estimatedReturn,
         projectionType,
+        expenseAdjustmentFactor,
         showHiddenCategories,
         timeFrame: { start, end, mode },
       },
@@ -332,6 +336,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         safeWithdrawalRate: swr,
         estimatedReturn,
         projectionType,
+        expenseAdjustmentFactor,
       });
       await crossoverSpreadsheet(spreadsheet, setData);
     },
@@ -341,6 +346,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
       swr,
       estimatedReturn,
       projectionType,
+      expenseAdjustmentFactor,
       expenseCategoryIds,
       selectedIncomeAccountIds,
     ],
@@ -721,6 +727,72 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                     ['hampel', t('Hampel Filtered Median')],
                   ]}
                   style={{ width: 200, marginBottom: 12 }}
+                />
+              </View>
+
+              <View style={{ marginBottom: 12 }}>
+                <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <Text>{t('Target Income (% of expenses)')}</Text>
+                    <Tooltip
+                      content={
+                        <View style={{ maxWidth: 300 }}>
+                          <Text>
+                            <Trans>
+                              Your target retirement income as a percentage of
+                              projected expenses.
+                              <br />
+                              <br />
+                              100% means you need retirement income equal to
+                              your current projected expenses.
+                              <br />
+                              Values above 100% mean you plan to spend more in
+                              retirement.
+                              <br />
+                              Values below 100% mean you plan to spend less in
+                              retirement.
+                              <br />
+                              <br />
+                              The graph shows both the projected expenses (solid
+                              red line) and your target income (dashed red
+                              line).
+                            </Trans>
+                          </Text>
+                        </View>
+                      }
+                      placement="right top"
+                      style={{
+                        ...styles.tooltip,
+                      }}
+                    >
+                      <SvgQuestion height={12} width={12} cursor="pointer" />
+                    </Tooltip>
+                  </View>
+                </div>
+                <Input
+                  type="number"
+                  min={0}
+                  max={1000}
+                  step={1}
+                  value={
+                    expenseAdjustmentFactor == null
+                      ? ''
+                      : Number((expenseAdjustmentFactor * 100).toFixed(0))
+                  }
+                  onChange={e =>
+                    setExpenseAdjustmentFactor(
+                      isNaN(e.target.valueAsNumber)
+                        ? 1.0
+                        : e.target.valueAsNumber / 100,
+                    )
+                  }
+                  style={{ width: 120, marginBottom: 12 }}
                 />
               </View>
 
