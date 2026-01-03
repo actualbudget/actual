@@ -1,5 +1,7 @@
 // @ts-strict-ignore
 import * as fs from 'fs';
+import { logger } from '../log';
+
 import * as path from 'path';
 
 import promiseRetry from 'promise-retry';
@@ -125,13 +127,13 @@ export const writeFile: T.WriteFile = async (filepath, contents) => {
           // @ts-expect-error contents type needs refining
           fs.writeFile(filepath, contents, 'utf8', err => {
             if (err) {
-              console.error(
+              logger.error(
                 `Failed to write to ${filepath}. Attempted ${attempt} times. Something is locking the file - potentially a virus scanner or backup software.`,
               );
               reject(err);
             } else {
               if (attempt > 1) {
-                console.info(
+                logger.info(
                   `Successfully recovered from file lock. It took ${attempt} retries`,
                 );
               }
@@ -150,7 +152,7 @@ export const writeFile: T.WriteFile = async (filepath, contents) => {
 
     return undefined;
   } catch (err) {
-    console.error(`Unable to recover from file lock on file ${filepath}`);
+    logger.error(`Unable to recover from file lock on file ${filepath}`);
     throw err;
   }
 };
