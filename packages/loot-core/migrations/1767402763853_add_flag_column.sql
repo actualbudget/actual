@@ -1,0 +1,6 @@
+BEGIN TRANSACTION;
+
+ALTER TABLE transactions ADD COLUMN flag TEXT;
+
+COMMIT;
+

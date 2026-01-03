@@ -159,6 +159,7 @@ export type DbTransaction = {
   category?: DbCategory['id'] | null;
   description?: string | null;
   notes?: string | null;
+  flag?: string | null;
   financial_id?: string | null;
   error?: string | null;
   imported_description?: string | null;
