@@ -109,6 +109,31 @@ Please refer to the [official documentation](https://doc.traefik.io/traefik/user
 
 ## NGINX
 
+### Note on Cross-Origin Isolation & Header Collisions
+
+Actual Budget requires a "Secure Context" and specific headers (`COOP/COEP`) to enable `SharedArrayBuffer` for its underlying SQLite engine. While the application attempts to set these headers automatically, implementing a manual Nginx configuration as suggested above can lead to **duplicate headers** (e.g., `require-corp, require-corp`).
+
+Modern browsers will invalidate security policies if headers are duplicated, resulting in a `SharedArrayBufferMissing` fatal error.
+
+To resolve the "additional security mechanisms" mentioned in the note above, use the `proxy_hide_header` directive to ensure Nginx acts as the single source of truth:
+
+```nginx
+location / {
+    proxy_pass http://actual_server:5006;
+
+    # Prevents header duplication between Upstream and Proxy
+    proxy_hide_header Cross-Origin-Embedder-Policy;
+    proxy_hide_header Cross-Origin-Opener-Policy;
+
+    # Explicitly set mandatory security headers
+    add_header Cross-Origin-Embedder-Policy "require-corp" always;
+    add_header Cross-Origin-Opener-Policy "same-origin" always;
+    add_header Origin-Agent-Cluster "?1" always;
+    
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+```
 The SSL certificate is issued by Let's Encrypt. The [Certbot](https://certbot.eff.org/instructions) tool provides options for automatic updating upon expiration.
 At the very least you will need to adapt `server_name` and the `ssl_certificate/ssl_certificate_key` paths to match your setup.
 Please refer to their [official documentation](https://nginx.org/en/docs/) for further details.
