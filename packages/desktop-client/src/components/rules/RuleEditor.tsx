@@ -650,15 +650,19 @@ function ActionEditor({
             ) : null}
           </View>
           {options.method === 'formula' && (
-            <Button
-              variant="bare"
+            <View
               style={{
                 padding: 5,
                 backgroundColor: theme.buttonPrimaryBackground,
                 height: 24,
                 width: 24,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 4,
               }}
-              aria-label={t('Formula mode')}
+              aria-label={t('Formula mode indicator')}
+              role="img"
             >
               <span
                 style={{
@@ -669,7 +673,7 @@ function ActionEditor({
               >
                 ƒ
               </span>
-            </Button>
+            </View>
           )}
         </>
       ) : op === 'link-schedule' ? (
