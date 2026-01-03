@@ -43,7 +43,9 @@ function execSplitActions(actions: Action[], transaction) {
       const { data } = addSplitTransaction(newTransactions, transaction.id);
       newTransactions = data;
     }
-    newTransactions[splitTransactionIndex].parent_amount = integerToAmount(transaction.amount);
+    newTransactions[splitTransactionIndex].parent_amount = integerToAmount(
+      transaction.amount,
+    );
     action.exec(newTransactions[splitTransactionIndex]);
   });
 

@@ -313,7 +313,7 @@ export class Action {
         today: currentDay(),
         account_name: transaction._account_name || '',
         category_name: transaction._category_name || '',
-        parent_amount: transaction.parent_amount || 0
+        parent_amount: transaction.parent_amount || 0,
       };
 
       for (const key of Object.keys(fieldValues)) {
