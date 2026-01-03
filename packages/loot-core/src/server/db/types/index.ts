@@ -238,8 +238,15 @@ export type DbCustomReport = {
   tombstone: 1 | 0;
 };
 
+export type DbDashboardPage = {
+  id: string;
+  name: string;
+  tombstone: 1 | 0;
+};
+
 export type DbDashboard = {
   id: string;
+  dashboard_page_id: string;
   type: string;
   width: number;
   height: number;

@@ -27,8 +27,8 @@ type ReportCardProps = {
   disableClick?: boolean;
   to?: string;
   children: ReactNode;
-  menuItems?: ComponentProps<typeof Menu>['items'];
-  onMenuSelect?: ComponentProps<typeof Menu>['onMenuSelect'];
+  menuItems?: ComponentProps<typeof Menu<string>>['items'];
+  onMenuSelect?: ComponentProps<typeof Menu<string>>['onMenuSelect'];
   size?: number;
   style?: CSSProperties;
 };

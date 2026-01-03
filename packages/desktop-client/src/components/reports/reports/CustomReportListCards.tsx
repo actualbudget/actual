@@ -18,6 +18,7 @@ import { MissingReportCard } from './MissingReportCard';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { calculateHasWarning } from '@desktop-client/components/reports/util';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -30,12 +31,14 @@ type CustomReportListCardsProps = {
   isEditing?: boolean;
   report?: CustomReportEntity;
   onRemove: () => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function CustomReportListCards({
   isEditing,
   report,
   onRemove,
+  onCopy,
 }: CustomReportListCardsProps) {
   // It's possible for a dashboard to reference a non-existing
   // custom report
@@ -52,6 +55,7 @@ export function CustomReportListCards({
       isEditing={isEditing}
       report={report}
       onRemove={onRemove}
+      onCopy={onCopy}
     />
   );
 }
@@ -60,6 +64,7 @@ function CustomReportListCardsInner({
   isEditing,
   report,
   onRemove,
+  onCopy,
 }: Omit<CustomReportListCardsProps, 'report'> & {
   report: CustomReportEntity;
 }) {
@@ -70,6 +75,9 @@ function CustomReportListCardsInner({
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [earliestTransaction, setEarliestTransaction] = useState('');
   const [latestTransaction, setLatestTransaction] = useState('');
+
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
 
   const payees = usePayees();
   const accounts = useAccounts();
@@ -138,8 +146,10 @@ function CustomReportListCardsInner({
           name: 'remove',
           text: t('Remove'),
         },
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'remove':
             onRemove();
