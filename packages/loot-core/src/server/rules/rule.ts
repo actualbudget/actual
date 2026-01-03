@@ -10,6 +10,7 @@ import { type RuleEntity } from '../../types/models';
 
 import { Action } from './action';
 import { Condition } from './condition';
+import { integerToAmount } from '../../shared/util';
 
 function execNonSplitActions(actions: Action[], transaction) {
   const update = transaction;
@@ -42,6 +43,7 @@ function execSplitActions(actions: Action[], transaction) {
       const { data } = addSplitTransaction(newTransactions, transaction.id);
       newTransactions = data;
     }
+    newTransactions[splitTransactionIndex].parent_amount = integerToAmount(transaction.amount);
     action.exec(newTransactions[splitTransactionIndex]);
   });
 

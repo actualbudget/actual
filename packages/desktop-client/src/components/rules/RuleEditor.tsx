@@ -629,49 +629,36 @@ function ActionEditor({
               minWidth: options.method === 'fixed-percent' ? 45 : 70,
             }}
           >
-            {options.method !== 'remainder' &&
-              (hasFormula ? (
-                <FormulaActionEditor
-                  value={options?.formula || ''}
-                  onChange={v => onChange('formula', v, { formula: true })}
-                />
-              ) : (
-                <GenericInput
-                  key={inputKey}
-                  // @ts-expect-error fix this
-                  field={field}
-                  op={op}
-                  type="number"
-                  numberFormatType={
-                    options.method === 'fixed-percent'
-                      ? 'percentage'
-                      : 'currency'
-                  }
-                  value={value}
-                  onChange={v => onChange('value', v)}
-                />
-              ))}
+            {options.method === 'formula' ? (
+              <FormulaActionEditor
+                value={options?.formula || '='}
+                onChange={v => onChange('formula', v, { formula: true })}
+              />
+            ) : options.method !== 'remainder' ? (
+              <GenericInput
+                key={inputKey}
+                // @ts-expect-error fix this
+                field={field}
+                op={op}
+                type="number"
+                numberFormatType={
+                  options.method === 'fixed-percent' ? 'percentage' : 'currency'
+                }
+                value={value}
+                onChange={v => onChange('value', v)}
+              />
+            ) : null}
           </View>
-          {isFormulaEnabled && options.method !== 'remainder' && (
+          {options.method === 'formula' && (
             <Button
               variant="bare"
-              isDisabled={templated}
               style={{
                 padding: 5,
-                backgroundColor: hasFormula
-                  ? theme.buttonPrimaryBackground
-                  : undefined,
+                backgroundColor: theme.buttonPrimaryBackground,
                 height: 24,
                 width: 24,
               }}
-              aria-label={
-                hasFormula ? t('Disable formula') : t('Enable formula')
-              }
-              onPress={() =>
-                hasFormula
-                  ? onChange('formula', undefined)
-                  : onChange('formula', options.formula || value || '=')
-              }
+              aria-label={t('Formula mode')}
             >
               <span
                 style={{

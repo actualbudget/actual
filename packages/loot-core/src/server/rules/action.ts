@@ -180,38 +180,45 @@ export class Action {
         }
         break;
       case 'set-split-amount':
-        if (this.options?.formula && this.options.method !== 'remainder') {
-          try {
+        switch (this.options.method) {
+          case 'fixed-amount':
+            object.amount = this.value;
+            break;
+          case 'formula':
             if (!object._ruleErrors) {
               object._ruleErrors = [];
             }
-            const result = this.executeFormulaSync(
-              this.options.formula,
-              object,
-            );
-            const numValue =
-              typeof result === 'number' ? result : parseFloat(String(result));
-
-            if (isNaN(numValue)) {
+            if (!this.options?.formula) {
               object._ruleErrors.push(
-                `Formula for split amount must produce a numeric value. Got: ${JSON.stringify(result)}`,
+                'Formula method selected but no formula specified',
               );
-            } else if (this.options.method === 'fixed-amount') {
-              object.amount = numValue;
-            } else if (this.options.method === 'fixed-percent') {
-              //this.value will be used in rule.ts to calculate the percentages.
-              this.value = numValue;
+              break;
             }
-          } catch (err) {
-            if (!object._ruleErrors) {
-              object._ruleErrors = [];
+            try {
+              const result = this.executeFormulaSync(
+                this.options.formula,
+                object,
+              );
+              const numValue =
+                typeof result === 'number'
+                  ? result
+                  : parseFloat(String(result));
+
+              if (isNaN(numValue)) {
+                object._ruleErrors.push(
+                  `Formula for split amount must produce a numeric value. Got: ${JSON.stringify(result)}`,
+                );
+              } else {
+                object.amount = numValue;
+              }
+            } catch (err) {
+              object._ruleErrors.push(
+                `Error executing formula for split amount: ${err instanceof Error ? err.message : String(err)}`,
+              );
             }
-            object._ruleErrors.push(
-              `Error executing formula for split amount: ${err instanceof Error ? err.message : String(err)}`,
-            );
-          }
-        } else if (this.options?.method === 'fixed-amount') {
-          object.amount = this.value;
+            break;
+          default:
+            break;
         }
         break;
       case 'link-schedule':
@@ -306,6 +313,7 @@ export class Action {
         today: currentDay(),
         account_name: transaction._account_name || '',
         category_name: transaction._category_name || '',
+        parent_amount: transaction.parent_amount || 0
       };
 
       for (const key of Object.keys(fieldValues)) {

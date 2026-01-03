@@ -109,7 +109,7 @@ function SetSplitAmountActionExpression({
       <Text>{friendlyOp(op)}</Text>{' '}
       <Text style={valueStyle}>{getAllocationMethods()[method]}</Text>
       {method !== 'remainder' && ': '}
-      {options?.formula ? (
+      {options?.method === 'formula' ? (
         <>
           <Text>{t('formula ')}</Text>
           <Text style={valueStyle}>{options.formula}</Text>

@@ -874,16 +874,7 @@ describe('Rule', () => {
               op: 'set-split-amount',
               field: 'amount',
               value: 0,
-              options: {
-                splitIndex: 1,
-                method: 'fixed-amount',
-                formula: '=300',
-              },
-            },
-            {
-              op: 'set-split-amount',
-              field: 'amount',
-              options: { splitIndex: 2, method: 'remainder' },
+              options: { splitIndex: 1, method: 'formula', formula: '=300' },
             },
           ],
         });
@@ -896,37 +887,6 @@ describe('Rule', () => {
         });
       });
 
-      test('fixed-percent with formula calculates percentage', () => {
-        const rule = new Rule({
-          conditionsOp: 'and',
-          conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
-          actions: [
-            {
-              op: 'set-split-amount',
-              field: 'amount',
-              value: 0,
-              options: {
-                splitIndex: 1,
-                method: 'fixed-percent',
-                formula: '=.25',
-              },
-            },
-            {
-              op: 'set-split-amount',
-              field: 'amount',
-              options: { splitIndex: 2, method: 'remainder' },
-            },
-          ],
-        });
-
-        // 25% of 200 = 50, remainder = 150
-        expect(
-          rule.exec({ imported_payee: 'James', amount: 200 }),
-        ).toMatchObject({
-          subtransactions: [{ amount: 50 }, { amount: 150 }],
-        });
-      });
-
       test('fixed-percent formula calculates 50/50 split', () => {
         const rule = new Rule({
           conditionsOp: 'and',
@@ -936,30 +896,16 @@ describe('Rule', () => {
               op: 'set-split-amount',
               field: 'amount',
               value: 0,
-              options: {
-                splitIndex: 1,
-                method: 'fixed-percent',
-                formula: '=.50',
-              },
-            },
-            {
-              op: 'set-split-amount',
-              field: 'amount',
-              value: 0,
-              options: {
-                splitIndex: 2,
-                method: 'fixed-percent',
-                formula: '=.50',
-              },
+              options: { splitIndex: 1, method: 'formula', formula: '=parent_amount * 0.5' },
             },
           ],
         });
 
-        // Both splits get 50% of 200 = 100 each
+        // Fixed amount 10000 (100 in formula = $100.00 = 10000 cents), remainder = 10000
         expect(
-          rule.exec({ imported_payee: 'James', amount: 200 }),
+          rule.exec({ imported_payee: 'James', amount: 20000 }),
         ).toMatchObject({
-          subtransactions: [{ amount: 100 }, { amount: 100 }],
+          subtransactions: [{ amount: 10000 }, { amount: 10000 }],
         });
       });
 
@@ -972,21 +918,13 @@ describe('Rule', () => {
               op: 'set-split-amount',
               field: 'amount',
               value: 0,
-              options: {
-                splitIndex: 1,
-                method: 'fixed-amount',
-                formula: '=100',
-              },
+              options: { splitIndex: 1, method: 'formula', formula: '=100' },
             },
             {
               op: 'set-split-amount',
               field: 'amount',
               value: 0,
-              options: {
-                splitIndex: 2,
-                method: 'fixed-amount',
-                formula: '=100',
-              },
+              options: { splitIndex: 2, method: 'formula', formula: '=100' },
             },
           ],
         });
