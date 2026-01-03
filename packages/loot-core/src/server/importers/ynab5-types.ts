@@ -8,6 +8,13 @@ export type Budget = {
   transactions: Transaction[];
   subtransactions: Subtransaction[];
   months: Month[];
+  payee_locations?: PayeeLocationsData;
+};
+
+export type PayeeLocationsData = {
+  data: {
+    payee_locations: PayeeLocation[];
+  };
 };
 
 export type Account = {
@@ -23,6 +30,14 @@ export type Payee = {
   name: string;
   deleted: boolean;
   transfer_acct?: string;
+};
+
+export type PayeeLocation = {
+  id: string;
+  payee_id: string;
+  latitude: string;
+  longitude: string;
+  deleted: boolean;
 };
 
 export type CategoryGroup = {
