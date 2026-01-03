@@ -1,6 +1,105 @@
-version: '3.8'
 services:
-  actual-development:
+  # Actual sync-server
+  server:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile # Dockerfile already has yarn dependencies
+    environment:
+      NODE_ENV: development
+      ACTUAL_DATA_DIR: /data
+      ACTUAL_PORT: 5006
+    networks:
+      - actual-net
+    ports:
+      - '${ACTUAL_PORT:-5006}:${ACTUAL_PORT:-5006}'
     volumes:
-      - ..:/workspaces:cached
-    command: /bin/sh -c "while sleep 1000; do :; done"
+      - ..:/workspaces # Mount host files within container
+      - server_data:/data # Persist data for the sync-server between sessions
+      # Use the container version of the following directories
+      - server_cache_1:/workspaces/.yarn
+      - server_cache_2:/workspaces/node_modules
+      - server_cache_3:/workspaces/packages/desktop-client/node_modules
+      - server_cache_4:/workspaces/packages/desktop-client/public
+      - server_cache_5:/workspaces/packages/loot-core/lib-dist
+      - server_cache_6:/workspaces/packages/plugins-service/dist
+      - server_cache_7:/workspaces/packages/sync-server/build
+      - server_cache_8:/workspaces/packages/sync-server/node_modules
+    command: yarn start:server
+    restart: unless-stopped
+    healthcheck:
+      test: curl -f http://localhost:${ACTUAL_PORT:-5006}/health || exit 1
+      interval: 3s
+      retries: 200
+      start_period: 1s
+      timeout: 10s
+
+  # Actual browser client
+  browser:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    networks:
+      - actual-net
+    ports:
+      - '3001:3001'
+    volumes:
+      - ..:/workspaces # Mount host files within container
+      # Use the container version of the following directories
+      - browser_cache_1:/workspaces/.yarn
+      - browser_cache_2:/workspaces/node_modules
+      - browser_cache_3:/workspaces/packages/desktop-client/node_modules
+      - browser_cache_4:/workspaces/packages/desktop-client/public
+      - browser_cache_5:/workspaces/packages/loot-core/lib-dist
+      - browser_cache_6:/workspaces/packages/plugins-service/dist
+      - browser_cache_7:/workspaces/packages/sync-server/build
+      - browser_cache_8:/workspaces/packages/sync-server/node_modules
+    environment:
+      NODE_ENV: development
+      BROWSER: none
+    depends_on:
+      - server
+    # depends_on:
+    #   server:
+    #     condition: service_healthy
+    command: yarn start:browser
+    restart: 'no'
+
+networks:
+  actual-net:
+    driver: bridge
+
+volumes:
+  browser_cache_1:
+    driver: local
+  browser_cache_2:
+    driver: local
+  browser_cache_3:
+    driver: local
+  browser_cache_4:
+    driver: local
+  browser_cache_5:
+    driver: local
+  browser_cache_6:
+    driver: local
+  browser_cache_7:
+    driver: local
+  browser_cache_8:
+    driver: local
+  server_data:
+    driver: local
+  server_cache_1:
+    driver: local
+  server_cache_2:
+    driver: local
+  server_cache_3:
+    driver: local
+  server_cache_4:
+    driver: local
+  server_cache_5:
+    driver: local
+  server_cache_6:
+    driver: local
+  server_cache_7:
+    driver: local
+  server_cache_8:
+    driver: local
