@@ -16,6 +16,7 @@ import { AccountAutocomplete } from '@desktop-client/components/autocomplete/Acc
 import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import { FilterAutocomplete } from '@desktop-client/components/autocomplete/FilterAutocomplete';
+import { GroupAutocomplete } from '@desktop-client/components/autocomplete/GroupAutocomplete';
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
 import { ReportAutocomplete } from '@desktop-client/components/autocomplete/ReportAutocomplete';
 import { Checkbox } from '@desktop-client/components/forms';
@@ -34,7 +35,7 @@ type GenericInputProps = {
   | ((
       | {
           type: 'id';
-          field: 'payee' | 'category';
+          field: 'payee' | 'category' | 'group';
         }
       | {
           type: 'id';
@@ -258,6 +259,19 @@ export const GenericInput = ({
                     }),
                   );
                 },
+              }}
+            />
+          );
+          break;
+
+        case 'group':
+          content = (
+            <GroupAutocomplete
+              {...multiProps}
+              openOnFocus
+              inputProps={{
+                ref,
+                ...(showPlaceholder ? { placeholder: t('nothing') } : null),
               }}
             />
           );

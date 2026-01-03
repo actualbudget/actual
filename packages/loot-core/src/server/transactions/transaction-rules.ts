@@ -451,6 +451,8 @@ export function conditionsToAQL(
       } else {
         op = 'false';
       }
+    } else if (field === 'group') {
+      field = 'category.group';
     }
 
     const apply = (field, aqlOp, value) => {
