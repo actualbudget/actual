@@ -431,12 +431,17 @@ export function ImportTransactionsModal({
           setParseDateFormat(null);
         }
 
-        // Reverse the transactions because it's very common for them to
-        // be ordered ascending, but we show transactions descending by
-        // date. This is purely cosmetic.
-        const reversedTransactions =
-          transactions.reverse() as ImportTransaction[];
-        setParsedTransactions(reversedTransactions);
+        // If the transactions appear to be ordered date ascending, reverse
+        // them (as we show transactions descending by date).
+        // This is purely cosmetic.
+        const parsedTransactions = transactions as ImportTransaction[];
+        if (
+          parsedTransactions.length > 1 &&
+          parsedTransactions[0].date <
+            parsedTransactions[parsedTransactions.length - 1].date
+        )
+          parsedTransactions.reverse();
+        setParsedTransactions(parsedTransactions);
       }
 
       setLoadingState(null);
