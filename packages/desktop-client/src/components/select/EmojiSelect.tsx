@@ -70,6 +70,23 @@ export function EmojiSelect({
   const [searchQuery, setSearchQuery] = useState('');
   const [hoveredEmoji, setHoveredEmoji] = useState<EmojiData | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+  const [isCaretVisible, setIsCaretVisible] = useState(true);
+  // The search bar is "visual-only" (focus stays on the table cell input), so we
+  // implement our own selection model (anchor + active caret) to behave like a
+  // normal text input.
+  const [selection, setSelection] = useState<{
+    start: number;
+    end: number;
+  } | null>(null);
+  const selectionRef = useRef<{ start: number; end: number } | null>(null);
+  const selectionAnchorRef = useRef<number | null>(null);
+  const isDraggingSelectionRef = useRef(false);
+  const searchQueryRef = useRef('');
+  const [caretIndex, setCaretIndex] = useState(0);
+  const caretIndexRef = useRef(0);
+  const [caretLeft, setCaretLeft] = useState(0);
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const searchTextRef = useRef<HTMLSpanElement | null>(null);
   const innerRef = useRef<HTMLInputElement | null>(null);
   const emojiGridRef = useRef<HTMLDivElement | null>(null);
   const popoverContentRef = useRef<HTMLDivElement | null>(null);
@@ -111,9 +128,53 @@ export function EmojiSelect({
       return;
     }
 
+    // Defer opening until after refs are assigned so Popover can position.
     const raf = requestAnimationFrame(() => setOpen(true));
     return () => cancelAnimationFrame(raf);
   }, [externalIsOpen]);
+
+  // Blink caret while the picker is open (visual only; focus stays in table)
+  useEffect(() => {
+    if (!open) {
+      selectionRef.current = null;
+      selectionAnchorRef.current = null;
+      setSelection(null);
+      return;
+    }
+
+    setIsCaretVisible(true);
+    const interval = setInterval(() => {
+      setIsCaretVisible(v => !v);
+    }, 530);
+
+    return () => clearInterval(interval);
+  }, [open]);
+
+  useEffect(() => {
+    searchQueryRef.current = searchQuery;
+
+    // Keep caret within bounds whenever the query changes
+    const len = Array.from(searchQuery).length;
+    if (caretIndexRef.current > len) {
+      caretIndexRef.current = len;
+      setCaretIndex(len);
+    }
+
+    // Clamp selection within bounds, or clear if empty.
+    if (selectionRef.current) {
+      const start = Math.max(0, Math.min(selectionRef.current.start, len));
+      const end = Math.max(0, Math.min(selectionRef.current.end, len));
+      if (start === end) {
+        selectionRef.current = null;
+        setSelection(null);
+        selectionAnchorRef.current = null;
+      } else {
+        const next = { start, end };
+        selectionRef.current = next;
+        setSelection(next);
+      }
+    }
+  }, [searchQuery]);
 
   // When a table cell becomes exposed, immediately focus our trigger input.
   useLayoutEffect(() => {
@@ -146,6 +207,75 @@ export function EmojiSelect({
     }
     return emojis;
   }, []);
+
+  const setSelectionRange = useCallback((start: number, end: number) => {
+    const len = Array.from(searchQueryRef.current).length;
+    const s = Math.max(0, Math.min(start, len));
+    const e = Math.max(0, Math.min(end, len));
+    if (s === e) {
+      selectionRef.current = null;
+      selectionAnchorRef.current = null;
+      setSelection(null);
+      return;
+    }
+    const next = { start: s, end: e };
+    selectionRef.current = next;
+    setSelection(next);
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    selectionRef.current = null;
+    selectionAnchorRef.current = null;
+    setSelection(null);
+  }, []);
+
+  const setCaretIndexSafe = useCallback((next: number) => {
+    const len = Array.from(searchQueryRef.current).length;
+    const clamped = Math.max(0, Math.min(next, len));
+    caretIndexRef.current = clamped;
+    setCaretIndex(clamped);
+  }, []);
+
+  const replaceAllOrInsertAtCaret = useCallback(
+    (text: string, { replaceSelection }: { replaceSelection: boolean }) => {
+      const activeSelection = replaceSelection ? selectionRef.current : null;
+      const range = activeSelection
+        ? {
+            start: Math.min(activeSelection.start, activeSelection.end),
+            end: Math.max(activeSelection.start, activeSelection.end),
+          }
+        : null;
+      const caretAtCall = caretIndexRef.current;
+
+      setSearchQuery(current => {
+        const chars = Array.from(current);
+        const insertChars = Array.from(text);
+        const shouldReplace = replaceSelection && !!range;
+
+        let nextChars: string[];
+        let nextCaret: number;
+
+        if (shouldReplace) {
+          nextChars = chars
+            .slice(0, range.start)
+            .concat(insertChars, chars.slice(range.end));
+          nextCaret = range.start + insertChars.length;
+        } else {
+          const idx = Math.max(0, Math.min(caretAtCall, chars.length));
+          nextChars = chars.slice();
+          nextChars.splice(idx, 0, ...insertChars);
+          nextCaret = idx + insertChars.length;
+        }
+
+        caretIndexRef.current = nextCaret;
+        setCaretIndex(nextCaret);
+        return nextChars.join('');
+      });
+      clearSelection();
+      setIsSearchActive(true);
+    },
+    [clearSelection],
+  );
 
   // Filter emojis based on search query
   const filteredEmojis = useMemo(() => {
@@ -184,7 +314,182 @@ export function EmojiSelect({
   // Reset focused index when search changes
   useEffect(() => {
     setFocusedIndex(null);
-  }, [searchQuery]);
+    clearSelection();
+  }, [searchQuery, clearSelection]);
+
+  // Capture common text-field shortcuts while the picker is open so app-level and
+  // table-level handlers don't swallow them before we can update `searchQuery`.
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const handler = (e: globalThis.KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.altKey) {
+        return;
+      }
+
+      const key = e.key.toLowerCase();
+      if (key !== 'a' && key !== 'c' && key !== 'x' && key !== 'v') {
+        return;
+      }
+
+      const target = e.target as Node | null;
+      const inPicker =
+        (target && popoverContentRef.current?.contains(target)) ||
+        target === innerRef.current;
+
+      if (!inPicker) {
+        return;
+      }
+
+      // Keep behavior identical to a normal input: prevent app shortcuts and
+      // treat these keys as operating on the search bar.
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      if (key === 'a') {
+        const len = Array.from(searchQueryRef.current).length;
+        if (len > 0) {
+          selectionAnchorRef.current = 0;
+          setSelectionRange(0, len);
+          setCaretIndexSafe(len);
+        }
+        setIsSearchActive(true);
+        return;
+      }
+
+      if (key === 'c') {
+        const activeSelection = selectionRef.current;
+        if (activeSelection) {
+          const start = Math.min(activeSelection.start, activeSelection.end);
+          const end = Math.max(activeSelection.start, activeSelection.end);
+          const selectedText = Array.from(searchQueryRef.current)
+            .slice(start, end)
+            .join('');
+          if (selectedText) {
+            void navigator?.clipboard?.writeText(selectedText);
+          }
+        }
+        return;
+      }
+
+      if (key === 'x') {
+        const activeSelection = selectionRef.current;
+        if (!activeSelection) {
+          return;
+        }
+        const start = Math.min(activeSelection.start, activeSelection.end);
+        const end = Math.max(activeSelection.start, activeSelection.end);
+        const selectedText = Array.from(searchQueryRef.current)
+          .slice(start, end)
+          .join('');
+        if (selectedText) {
+          void navigator?.clipboard?.writeText(selectedText);
+        }
+        setSearchQuery(current => {
+          const chars = Array.from(current);
+          caretIndexRef.current = start;
+          setCaretIndex(start);
+          return chars.slice(0, start).concat(chars.slice(end)).join('');
+        });
+        clearSelection();
+        setIsSearchActive(true);
+        return;
+      }
+
+      // key === 'v'
+      void navigator?.clipboard
+        ?.readText()
+        .then(text => {
+          if (!text) {
+            return;
+          }
+          replaceAllOrInsertAtCaret(text, { replaceSelection: true });
+        })
+        .catch(() => undefined);
+    };
+
+    window.addEventListener('keydown', handler, true);
+    return () => window.removeEventListener('keydown', handler, true);
+  }, [
+    open,
+    clearSelection,
+    replaceAllOrInsertAtCaret,
+    setCaretIndexSafe,
+    setSelectionRange,
+  ]);
+
+  const hasSelection = !!selection && selection.start !== selection.end;
+  const selectionMin = selection ? Math.min(selection.start, selection.end) : 0;
+  const selectionMax = selection ? Math.max(selection.start, selection.end) : 0;
+
+  const getCaretIndexFromClientX = useCallback((clientX: number) => {
+    const container = searchTextRef.current;
+    const text = searchQueryRef.current;
+    const len = Array.from(text).length;
+    if (!container || !text) {
+      return len;
+    }
+
+    const spans = Array.from(
+      container.querySelectorAll('[data-search-char-index]'),
+    ) as HTMLSpanElement[];
+    if (spans.length === 0) {
+      return 0;
+    }
+
+    for (const el of spans) {
+      const idxAttr = el.getAttribute('data-search-char-index');
+      const idx = idxAttr ? Number(idxAttr) : NaN;
+      if (Number.isNaN(idx)) {
+        continue;
+      }
+      const rect = el.getBoundingClientRect();
+      const mid = rect.left + rect.width / 2;
+      if (clientX < mid) {
+        return idx;
+      }
+    }
+
+    return spans.length;
+  }, []);
+
+  // Measure caret X offset so we can render it as an overlay (no layout shift).
+  useLayoutEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const container = searchTextRef.current;
+    if (!container) {
+      return;
+    }
+
+    const raf = requestAnimationFrame(() => {
+      const containerRect = container.getBoundingClientRect();
+      const spans = Array.from(
+        container.querySelectorAll('[data-search-char-index]'),
+      ) as HTMLSpanElement[];
+
+      if (spans.length === 0) {
+        setCaretLeft(0);
+        return;
+      }
+
+      const idx = Math.max(0, Math.min(caretIndexRef.current, spans.length));
+      if (idx === spans.length) {
+        const lastRect = spans[spans.length - 1].getBoundingClientRect();
+        setCaretLeft(lastRect.right - containerRect.left);
+      } else {
+        const rect = spans[idx].getBoundingClientRect();
+        setCaretLeft(rect.left - containerRect.left);
+      }
+    });
+
+    return () => cancelAnimationFrame(raf);
+  }, [open, searchQuery, caretIndex]);
 
   const handleRemove = useCallback(() => {
     onSelect(null);
@@ -201,15 +506,31 @@ export function EmojiSelect({
       } else if (key === 'ArrowLeft') {
         newIndex = Math.max(currentIndex - 1, 0);
       } else if (key === 'ArrowDown') {
-        newIndex = Math.min(
-          currentIndex + emojisPerRow,
-          filteredEmojis.length - 1,
-        );
+        // If we're starting from no selection (currentIndex === -1), go to top-left (index 0)
+        if (currentIndex === -1) {
+          newIndex = 0;
+        } else {
+          newIndex = Math.min(
+            currentIndex + emojisPerRow,
+            filteredEmojis.length - 1,
+          );
+        }
       } else if (key === 'ArrowUp') {
+        // If we're in the top row of the emoji grid, move "up" into the search
+        // bar (caret at end) instead of wrapping within the grid.
+        if (currentIndex >= 0 && currentIndex < emojisPerRow) {
+          setFocusedIndex(null);
+          setIsSearchActive(true);
+          clearSelection();
+          selectionAnchorRef.current = null;
+          setCaretIndexSafe(Array.from(searchQueryRef.current).length);
+          return;
+        }
         newIndex = Math.max(currentIndex - emojisPerRow, 0);
       }
 
       setFocusedIndex(newIndex);
+      clearSelection();
 
       // Scroll focused emoji into view
       if (emojiGridRef.current && newIndex >= 0) {
@@ -219,7 +540,13 @@ export function EmojiSelect({
         emojiElement?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       }
     },
-    [emojisPerRow, filteredEmojis.length, focusedIndex],
+    [
+      clearSelection,
+      emojisPerRow,
+      filteredEmojis.length,
+      focusedIndex,
+      setCaretIndexSafe,
+    ],
   );
 
   const handleEmojiSelect = useCallback(
@@ -230,47 +557,94 @@ export function EmojiSelect({
     [closePicker, onSelect],
   );
 
-  // Basic search input handling (for commit 4 - advanced features come in commit 5)
-  const handleSearchKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>): boolean => {
-      // Basic text input: allow printable characters
-      if (e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
-        e.preventDefault();
-        e.stopPropagation();
-        setSearchQuery(current => current + e.key);
-        return true;
+  const applySearchInputKey = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>) => {
+      // Keep focus in the cell input (like other pickers) so the table navigator
+      // doesn't close editing when focus moves to the popover (which is portaled).
+      if (e.metaKey || e.ctrlKey || e.altKey) {
+        return false;
       }
 
-      // Backspace
       if (e.key === 'Backspace') {
         e.preventDefault();
         e.stopPropagation();
+        const activeSelection = selectionRef.current;
+        const range = activeSelection
+          ? {
+              start: Math.min(activeSelection.start, activeSelection.end),
+              end: Math.max(activeSelection.start, activeSelection.end),
+            }
+          : null;
+        const caretAtCall = caretIndexRef.current;
         setSearchQuery(current => {
-          if (current.length === 0) {
+          const chars = Array.from(current);
+          if (range) {
+            caretIndexRef.current = range.start;
+            setCaretIndex(range.start);
+            return chars
+              .slice(0, range.start)
+              .concat(chars.slice(range.end))
+              .join('');
+          }
+          const idx = Math.max(0, Math.min(caretAtCall, chars.length));
+          if (idx === 0) {
             return current;
           }
-          return current.slice(0, -1);
+          chars.splice(idx - 1, 1);
+          caretIndexRef.current = idx - 1;
+          setCaretIndex(idx - 1);
+          return chars.join('');
         });
+        clearSelection();
+        setIsSearchActive(true);
         return true;
       }
 
-      // Delete
       if (e.key === 'Delete') {
         e.preventDefault();
         e.stopPropagation();
-        // For now, same as backspace (advanced caret handling in commit 5)
+        const activeSelection = selectionRef.current;
+        const range = activeSelection
+          ? {
+              start: Math.min(activeSelection.start, activeSelection.end),
+              end: Math.max(activeSelection.start, activeSelection.end),
+            }
+          : null;
+        const caretAtCall = caretIndexRef.current;
         setSearchQuery(current => {
-          if (current.length === 0) {
+          const chars = Array.from(current);
+          if (range) {
+            caretIndexRef.current = range.start;
+            setCaretIndex(range.start);
+            return chars
+              .slice(0, range.start)
+              .concat(chars.slice(range.end))
+              .join('');
+          }
+          const idx = Math.max(0, Math.min(caretAtCall, chars.length));
+          if (idx >= chars.length) {
             return current;
           }
-          return current.slice(0, -1);
+          chars.splice(idx, 1);
+          // caret stays at idx
+          return chars.join('');
         });
+        clearSelection();
+        setIsSearchActive(true);
+        return true;
+      }
+
+      if (e.key.length === 1) {
+        // Printable character (includes space)
+        e.preventDefault();
+        e.stopPropagation();
+        replaceAllOrInsertAtCaret(e.key, { replaceSelection: true });
         return true;
       }
 
       return false;
     },
-    [],
+    [clearSelection, replaceAllOrInsertAtCaret],
   );
 
   // Keyboard navigation for emoji grid (arrow keys, enter)
@@ -325,17 +699,107 @@ export function EmojiSelect({
         }
       }
 
-      if (open && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
-        e.preventDefault();
-        e.stopPropagation();
-        handleNavigate(e.key);
-        return;
-      }
-
-      // Basic search input handling (typing characters, backspace, delete)
       if (open) {
-        const handled = handleSearchKeyDown(e);
+        // If the user is actively editing the search, arrow keys should behave
+        // like a normal text input (caret movement + shift-selection).
+        if (
+          isSearchActive &&
+          (e.key === 'ArrowLeft' ||
+            e.key === 'ArrowRight' ||
+            e.key === 'ArrowUp' ||
+            e.key === 'ArrowDown')
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const len = Array.from(searchQueryRef.current).length;
+          const activeSelection = selectionRef.current;
+          const hasActiveSelection =
+            !!activeSelection && activeSelection.start !== activeSelection.end;
+
+          const collapseSelectionTo = (idx: number) => {
+            clearSelection();
+            selectionAnchorRef.current = idx;
+            setCaretIndexSafe(idx);
+          };
+
+          const ensureAnchor = () => {
+            if (selectionAnchorRef.current == null) {
+              selectionAnchorRef.current = caretIndexRef.current;
+            }
+            return selectionAnchorRef.current;
+          };
+
+          const extendSelectionTo = (idx: number) => {
+            const anchor = ensureAnchor();
+            setSelectionRange(anchor, idx);
+            setCaretIndexSafe(idx);
+          };
+
+          // If there's an existing selection and shift isn't held, collapse it
+          // (left -> start, right -> end; up/down -> start/end of input).
+          if (hasActiveSelection && !e.shiftKey) {
+            const min = Math.min(activeSelection.start, activeSelection.end);
+            const max = Math.max(activeSelection.start, activeSelection.end);
+            if (e.key === 'ArrowLeft') {
+              collapseSelectionTo(min);
+            } else if (e.key === 'ArrowRight') {
+              collapseSelectionTo(max);
+            } else if (e.key === 'ArrowUp') {
+              collapseSelectionTo(0);
+            } else if (e.key === 'ArrowDown') {
+              collapseSelectionTo(len);
+            }
+            return;
+          }
+
+          // Shift-selection
+          if (e.shiftKey) {
+            if (e.key === 'ArrowUp') {
+              extendSelectionTo(0);
+            } else if (e.key === 'ArrowDown') {
+              extendSelectionTo(len);
+            } else if (e.key === 'ArrowLeft') {
+              extendSelectionTo(caretIndexRef.current - 1);
+            } else if (e.key === 'ArrowRight') {
+              extendSelectionTo(caretIndexRef.current + 1);
+            }
+            return;
+          }
+
+          // Plain caret movement
+          clearSelection();
+          selectionAnchorRef.current = null;
+          if (e.key === 'ArrowDown' && caretIndexRef.current >= len) {
+            // Hand off into the emoji grid once the caret is already at the end.
+            setIsSearchActive(false);
+            setFocusedIndex(0);
+            return;
+          }
+          if (e.key === 'ArrowUp') {
+            setCaretIndexSafe(0);
+          } else if (e.key === 'ArrowDown') {
+            setCaretIndexSafe(len);
+          } else {
+            setCaretIndexSafe(
+              caretIndexRef.current + (e.key === 'ArrowLeft' ? -1 : 1),
+            );
+          }
+          return;
+        }
+
+        // Search input handling (typing characters, backspace, delete)
+        const handled = applySearchInputKey(e);
         if (handled) {
+          return;
+        }
+
+        // Emoji grid navigation
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsSearchActive(false);
+          handleNavigate(e.key);
           return;
         }
       }
@@ -351,7 +815,7 @@ export function EmojiSelect({
         setOpen(true);
       }
     },
-    [closePicker, embedded, focusedIndex, filteredEmojis, handleEmojiSelect, handleNavigate, handleSearchKeyDown, inputProps, open, shouldSaveFromKeyProp],
+    [closePicker, clearSelection, embedded, focusedIndex, filteredEmojis, handleEmojiSelect, handleNavigate, isSearchActive, applySearchInputKey, setCaretIndexSafe, setSelectionRange, inputProps, open, shouldSaveFromKeyProp],
   );
 
   const maybeWrapPopover = (content: ReactNode) => {
@@ -531,16 +995,134 @@ export function EmojiSelect({
             padding: '8px',
           }}
         >
-          <Input
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            onKeyDown={handleSearchKeyDown}
-            placeholder="Search emojis..."
+          {/* Visually match focused picker inputs (purple outline + caret),
+              but keep actual focus in the table cell input to avoid closing
+              editing (popover is portaled). */}
+          <View
             style={{
+              outline: 0,
+              backgroundColor: theme.tableBackground,
+              color: theme.formInputText,
+              margin: 0,
+              padding: 5,
+              borderRadius: 4,
+              border: '1px solid ' + theme.formInputBorderSelected,
+              boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
               width: '100%',
+              cursor: 'text',
+              userSelect: 'none',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 0,
               ...styles.smallText,
             }}
-          />
+            onMouseDown={e => {
+              e.preventDefault();
+              innerRef.current?.focus();
+              setIsSearchActive(true);
+
+              const clickedIndex = getCaretIndexFromClientX(e.clientX);
+
+              if (e.shiftKey) {
+                // Shift+click selects between the existing caret (anchor) and click.
+                if (selectionAnchorRef.current == null) {
+                  selectionAnchorRef.current = caretIndexRef.current;
+                }
+                setSelectionRange(selectionAnchorRef.current, clickedIndex);
+                setCaretIndexSafe(clickedIndex);
+              } else {
+                // Plain click moves caret and clears selection.
+                clearSelection();
+                selectionAnchorRef.current = clickedIndex;
+                setCaretIndexSafe(clickedIndex);
+              }
+
+              // Click-drag selection
+              const dragAnchor = selectionAnchorRef.current ?? clickedIndex;
+              isDraggingSelectionRef.current = true;
+              const onMove = (ev: MouseEvent) => {
+                if (!isDraggingSelectionRef.current) {
+                  return;
+                }
+                const idx = getCaretIndexFromClientX(ev.clientX);
+                selectionAnchorRef.current = dragAnchor;
+                setSelectionRange(dragAnchor, idx);
+                setCaretIndexSafe(idx);
+              };
+              const onUp = () => {
+                isDraggingSelectionRef.current = false;
+                window.removeEventListener('mousemove', onMove, true);
+                window.removeEventListener('mouseup', onUp, true);
+              };
+              window.addEventListener('mousemove', onMove, true);
+              window.addEventListener('mouseup', onUp, true);
+            }}
+          >
+            {searchQuery ? (
+              <span
+                ref={searchTextRef}
+                style={{
+                  display: 'inline-block',
+                  position: 'relative',
+                  lineHeight: '16px',
+                }}
+              >
+                {Array.from(searchQuery).map((ch, i) => (
+                  <span key={i} data-search-char-index={i}>
+                    <span
+                      style={
+                        hasSelection && i >= selectionMin && i < selectionMax
+                          ? {
+                              backgroundColor:
+                                theme.formInputBackgroundSelection,
+                              color: theme.formInputTextSelected,
+                            }
+                          : undefined
+                      }
+                    >
+                      {ch}
+                    </span>
+                  </span>
+                ))}
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    left: caretLeft,
+                    top: '50%',
+                    transform: 'translate(-0.5px, -50%)',
+                    width: 1,
+                    height: 16,
+                    backgroundColor: theme.formInputText,
+                    opacity: isCaretVisible ? 1 : 0,
+                    pointerEvents: 'none',
+                  }}
+                />
+              </span>
+            ) : (
+              <>
+                {/* Fake caret (blinking) at the start of the placeholder */}
+                <span
+                  style={{
+                    // Zero-width caret so it doesn't shift placeholder text
+                    width: 0,
+                    height: 16,
+                    borderLeft: '1px solid ' + theme.formInputText,
+                    opacity: isCaretVisible ? 1 : 0,
+                    flexShrink: 0,
+                    marginRight: 0,
+                  }}
+                />
+                <span style={{ color: theme.formInputTextPlaceholder }}>
+                  <Trans>Search emojis...</Trans>
+                </span>
+              </>
+            )}
+          </View>
         </View>
 
         {/* Emoji grid */}
