@@ -2,7 +2,7 @@
 title: 'Desktop app'
 ---
 
-The simplest way to get started with Actual is by [downloading the desktop app](/download). This app bundles Actual's full budgeting capabilities into a streamlined application that’s perfect for users looking for a smooth, hassle-free experience.
+The simplest way to get started with Actual is by [downloading the desktop app](/download). This app bundles Actual's full budgeting capabilities into a streamlined application that's perfect for users looking for a smooth, hassle-free experience.
 
 ## Who should use the desktop app?
 
@@ -16,7 +16,7 @@ If you prefer not to worry about setting up or configuring a server, the desktop
 
 ## Who shouldn't use the desktop app?
 
-If you’re already running your own server, the Web client remains your best option. Running the desktop app alongside an existing server can lead to version mismatches — the server might expect a different release than that provided by the desktop app, potentially causing unexpected issues.
+If you're already running your own server, the Web client remains your best option. Running the desktop app alongside an existing server can lead to version mismatches — the server might expect a different release than that provided by the desktop app, potentially causing unexpected issues.
 
 ## Setting up the desktop app local server
 
@@ -24,17 +24,17 @@ Setting up the desktop app local server is straightforward. Follow these steps:
 
 In the server selection area, click **Change** as shown below:
 
-![](/img/install/change-server.png)
+![](/img/install/change-server.webp)
 <br />
 
 The server runs on `localhost` by default and mostly uses the default [server configuration](./../config/index.md). You can modify the port if necessary.
 
 Click **Start** to run the server.
 
-![](/img/install/configure-server.png)
+![](/img/install/configure-server.webp)
 <br />
 
-Upon starting the server, you’ll be prompted to create a password (if you haven’t already). Sign in to complete the configuration.
+Upon starting the server, you'll be prompted to create a password (if you haven't already). Sign in to complete the configuration.
 
 ## Exposing your local server to the internet
 

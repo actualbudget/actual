@@ -108,7 +108,7 @@ export function Accounts() {
               marginTop: 13,
               marginBottom: 5,
             }}
-            titleAccount={true}
+            titleAccount
           />
         )}
 
@@ -139,7 +139,7 @@ export function Accounts() {
               marginTop: 13,
               marginBottom: 5,
             }}
-            titleAccount={true}
+            titleAccount
           />
         )}
 

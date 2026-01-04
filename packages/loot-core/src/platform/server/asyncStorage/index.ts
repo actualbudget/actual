@@ -4,7 +4,9 @@ import { getDatabase } from '../indexeddb';
 
 import type * as T from './index-types';
 
-export const init: T.Init = function () {};
+export const init: T.Init = function () {
+  // No need to initialise in the browser
+};
 
 export const getItem: T.GetItem = async function (key) {
   const db = await getDatabase();

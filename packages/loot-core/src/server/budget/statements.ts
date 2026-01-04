@@ -3,7 +3,6 @@ import { type DbSchedule } from '../db';
 
 import { GOAL_PREFIX, TEMPLATE_PREFIX } from './template-notes';
 
-/* eslint-disable actual/typography */
 export async function resetCategoryGoalDefsWithNoTemplates(): Promise<void> {
   await db.run(
     `
@@ -17,8 +16,6 @@ export async function resetCategoryGoalDefsWithNoTemplates(): Promise<void> {
     `,
   );
 }
-
-/* eslint-enable actual/typography */
 
 export type CategoryWithTemplateNote = {
   id: string;

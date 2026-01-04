@@ -1,7 +1,7 @@
 # Rule Action Templating
 
 :::warning
-This is an **experimental feature**. That means we’re still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [open an issue](https://github.com/actualbudget/actual/issues) or post a message in the Discord.
+This is an **experimental feature**. That means we're still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [open an issue](https://github.com/actualbudget/actual/issues) or post a message in the Discord.
 :::
 :::warning
 All functionality described here may not be available in the latest stable release. See [Experimental Features](/docs/experimental/) for instructions to enable experimental features. Use the `edge` images for the latest implementation.
@@ -23,11 +23,11 @@ Actual uses [handlebars](https://handlebarsjs.com/) under the hood to process th
 
 You can toggle between the normal and template input modes by clicking the icon to the right of the action input box.
 
-![How to enable rule action templating](/img/experimental/rule-templating/enable-rule-templating.png)
+![How to enable rule action templating](/img/experimental/rule-templating/enable-rule-templating.webp)
 
 When the template input mode is active you can type your template into the input box as below. This example removes the string " 12345" from an imported payee and sets the payee to this new value.
 
-![How to enable rule action templating 2](/img/experimental/rule-templating/enable-rule-templating-2.png)
+![How to enable rule action templating 2](/img/experimental/rule-templating/enable-rule-templating-2.webp)
 
 ## Variables
 

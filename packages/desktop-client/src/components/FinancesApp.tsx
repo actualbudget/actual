@@ -354,7 +354,7 @@ export function FinancesApp() {
                     element={
                       <ProtectedRoute
                         permission={Permissions.ADMINISTRATOR}
-                        validateOwner={true}
+                        validateOwner
                         element={<UserAccessPage />}
                       />
                     }

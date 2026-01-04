@@ -212,6 +212,9 @@ export class CategoryTemplateContext {
           newBudget = await CategoryTemplateContext.runAverage(template, this);
           break;
         }
+        default: {
+          break;
+        }
       }
 
       available = available - newBudget;
@@ -591,6 +594,8 @@ export class CategoryTemplateContext {
         dateShiftFunction = (date, numPeriods) =>
           monthUtils.addMonths(date, numPeriods * 12);
         break;
+      default:
+        throw new Error(`Unrecognized periodic period: ${period}`);
     }
 
     //shift the starting date until its in our month or in the future

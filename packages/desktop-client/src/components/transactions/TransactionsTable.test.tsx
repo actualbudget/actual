@@ -208,7 +208,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
                 <TransactionTable
                   {...props}
                   transactions={transactions}
-                  loadMoreTransactions={() => {}}
+                  loadMoreTransactions={vi.fn()}
                   // @ts-ignore TODO:
                   commonPayees={[]}
                   payees={payees}
@@ -218,8 +218,8 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
                   onAdd={onAdd}
                   onAddSplit={onAddSplit}
                   onCreatePayee={onCreatePayee}
-                  showSelection={true}
-                  allowSplitTransaction={true}
+                  showSelection
+                  allowSplitTransaction
                 />
               </SplitsExpandedProvider>
             </SelectedProviderWithItems>
@@ -699,7 +699,7 @@ describe('Transactions', () => {
     expectToBeEditingField(container, 'category', 2);
   });
 
-  test('dropdown hovers but doesn’t change value', async () => {
+  test("dropdown hovers but doesn't change value", async () => {
     const { container, getTransactions } = renderTransactions();
 
     const input = await editField(container, 'category', 2);

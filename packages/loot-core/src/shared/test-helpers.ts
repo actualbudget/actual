@@ -1,3 +1,5 @@
+import { logger } from '../platform/server/log';
+
 export let tracer: null | ReturnType<typeof execTracer> = null;
 
 function timeout<T extends Promise<unknown>>(promise: T, n: number) {
@@ -35,12 +37,12 @@ export function execTracer<T>() {
       if (!hasStarted) {
         return;
       } else if (log) {
-        console.log(`--- event(${name}, ${JSON.stringify(data)}) ---`);
+        logger.log(`--- event(${name}, ${JSON.stringify(data)}) ---`);
       }
 
       if (ended) {
         throw new Error(
-          `Tracer received event but didn’t expect it: ${name} with data: ${JSON.stringify(
+          `Tracer received event but didn't expect it: ${name} with data: ${JSON.stringify(
             data,
           )}`,
         );
@@ -48,7 +50,7 @@ export function execTracer<T>() {
         if (waitingFor.name !== name) {
           waitingFor.reject(
             new Error(
-              `Event traced “${name}” but expected “${waitingFor.name}”`,
+              `Event traced "${name}" but expected "${waitingFor.name}"`,
             ),
           );
         } else {
@@ -74,9 +76,9 @@ export function execTracer<T>() {
 
     expectWait(name: string, data?: T) {
       if (!hasStarted) {
-        throw new Error(`Expected “${name}” but tracer hasn’t started yet`);
+        throw new Error(`Expected "${name}" but tracer hasn't started yet`);
       } else if (log) {
-        console.log(`--- expectWait(${name}) ---`);
+        logger.log(`--- expectWait(${name}) ---`);
       }
 
       const promise = this.wait(name);
@@ -106,16 +108,16 @@ export function execTracer<T>() {
 
     expectNow(name: string, data?: T) {
       if (!hasStarted) {
-        throw new Error(`Expected “${name}” but tracer hasn’t started yet`);
+        throw new Error(`Expected "${name}" but tracer hasn't started yet`);
       } else if (log) {
-        console.log(`--- expectNow(${name}) ---`);
+        logger.log(`--- expectNow(${name}) ---`);
       }
 
       const entry = queue.shift();
 
       if (!entry) {
         throw new Error(
-          `Expected event “${name}” but none found - has it happened yet?`,
+          `Expected event "${name}" but none found - has it happened yet?`,
         );
       } else if (entry.name === name) {
         if (typeof data === 'function') {
@@ -125,7 +127,7 @@ export function execTracer<T>() {
         }
       } else {
         throw new Error(
-          `Event traced “${queue[0].name}” but expected “${name}”`,
+          `Event traced "${queue[0].name}" but expected "${name}"`,
         );
       }
     },

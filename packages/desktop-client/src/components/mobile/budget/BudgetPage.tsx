@@ -1,5 +1,11 @@
 // @ts-strict-ignore
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -330,7 +336,7 @@ export function BudgetPage() {
 
   // const onOpenMonthActionMenu = () => {
   //   const options = [
-  //     'Copy last month’s budget',
+  //     'Copy last month's budget',
   //     'Set budgets to zero',
   //     'Set budgets to 3 month average',
   //     budgetType === 'tracking' && 'Apply to all future budgets',
@@ -486,7 +492,7 @@ export function BudgetPage() {
             name: 'notes',
             options: {
               id: `budget-${month}`,
-              name: monthUtils.format(month, 'MMMM ‘yy', locale),
+              name: monthUtils.format(month, "MMMM ''yy", locale),
               onSave: onSaveNotes,
             },
           },
@@ -836,6 +842,9 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
     totalAmount: totalOverspending,
   } = useOverspentCategories({ month });
 
+  const amountsByCategoryRef = useRef(amountsByCategory);
+  amountsByCategoryRef.current = amountsByCategory;
+
   const categoryGroupsToShow = useMemo(
     () =>
       categoryGroups
@@ -859,7 +868,7 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
             options: {
               title: category.name,
               month,
-              amount: amountsByCategory.get(category.id),
+              amount: amountsByCategoryRef.current.get(category.id),
               categoryId: category.id,
               onSubmit: (amount, fromCategoryId) => {
                 onBudgetAction(month, 'cover-overspending', {
@@ -887,7 +896,6 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
       );
     },
     [
-      amountsByCategory,
       categoriesById,
       dispatch,
       month,
@@ -1016,7 +1024,7 @@ function MonthSelector({
         data-month={month}
       >
         <Text style={styles.underlinedText}>
-          {monthUtils.format(month, 'MMMM ‘yy', locale)}
+          {monthUtils.format(month, "MMMM ''yy", locale)}
         </Text>
       </Button>
       <Button

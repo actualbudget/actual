@@ -228,7 +228,7 @@ describe('checkTemplates', () => {
       expected: {
         sticky: true,
         message: 'There were errors interpreting some templates:',
-        pre: 'Category 1: Schedule “Non-existent Schedule” does not exist',
+        pre: 'Category 1: Schedule "Non-existent Schedule" does not exist',
       },
     },
     {

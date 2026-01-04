@@ -215,6 +215,7 @@ const sidebars = {
             'experimental/goal-templates',
             'experimental/monthly-cleanup',
             'experimental/rule-templating',
+            'experimental/formulas',
             'experimental/pluggyai',
             'experimental/crossover-point-report',
           ],

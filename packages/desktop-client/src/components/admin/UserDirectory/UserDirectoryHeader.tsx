@@ -20,7 +20,7 @@ export function UserDirectoryHeader() {
   return (
     <TableHeader style={{}}>
       <SelectCell
-        exposed={true}
+        exposed
         focused={false}
         selected={selectedItems.size > 0}
         onSelect={e =>

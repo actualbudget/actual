@@ -4,7 +4,7 @@ The settings screens in Actual provide you with a number of options for managing
 
 You can access the Settings screen by clicking the down arrow by your budget name or going to the sidebar and clicking More > Settings.
 
-![](/img/using-actual/settings-1.png)
+![](/img/using-actual/settings-1.webp)
 
 ### Formatting
 
@@ -14,23 +14,23 @@ The formatting options allow you to select the following:
 - Your preferred number format
 - Your preferred first day of the week
 
-![](/img/using-actual/settings-formatting.png)
+![](/img/using-actual/settings-formatting.webp)
 
 ### Encryption
 
 End-to-end encryption allows you to encrypt the data on your remote server with a password. If you don't trust the server's owners, enable this setting to fully encrypt the data. Read more about this feature on the [Syncing Across Devices page.](../getting-started/sync/#end-to-end-encryption)
 
-![](/img/using-actual/settings-encryption.png)
+![](/img/using-actual/settings-encryption.webp)
 
 ### Export
 
 This section allows you to download a `.zip` archive of all of your server data for easy backup or migration.
 
-![](/img/using-actual/settings-export.png)
+![](/img/using-actual/settings-export.webp)
 
 ## Advanced Settings
 
-![](/img/using-actual/settings-advanced.png)
+![](/img/using-actual/settings-advanced.webp)
 
 ### Budget ID
 
@@ -46,7 +46,7 @@ Actual's sync function is quite complicated and is is covered in detail [here](.
 
 ### Repair Split Transactions
 
-If you are experiencing bugs relating to split transactions and the “Reset budget cache” button above does not help, this tool may fix them.
+If you are experiencing bugs relating to split transactions and the "Reset budget cache" button above does not help, this tool may fix them.
 
 ### Experimental Features
 

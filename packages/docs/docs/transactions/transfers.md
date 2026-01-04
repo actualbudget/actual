@@ -4,13 +4,13 @@ If you want to transfer money between accounts, you will want to do it in a way 
 
 When you create a transfer in Actual, those two transactions are linked and updating one always automatically updates the other. For example, if you typed something into the **Notes** column it would appear in both transactions.
 
-![](/img/transfers/transfer-complete.png)
+![](/img/transfers/transfer-complete.webp)
 
 ## Creating a transfer
 
 In the **Payee** field of a transaction, choose the account in the dropdown you want to transfer to/from. You can press **Make Transfer** if you want to just see a list of accounts and hide other payees.
 
-![](/img/transfers/payees-dropdown.png)
+![](/img/transfers/payees-dropdown.webp)
 
 :::caution
 A transaction in the corresponding account will automatically be created.
@@ -30,11 +30,11 @@ This process will only apply when the below conditions are met
 
 Make a transfer of existing transactions in the same way you [bulk-edit transactions](bulk-editing.md).
 
-![](/img/transfers/make-transfer-tooltip.png)
+![](/img/transfers/make-transfer-tooltip.webp)
 
-1. Go to a multi-account view like “All accounts” so that you can see all transactions.
+1. Go to a multi-account view like "All accounts" so that you can see all transactions.
 2. Identify the transactions that you wish to change and select the tick box in the left hand column (by the date column).
-3. Go to the drop down top right (the arrow below “2 transactions”)
+3. Go to the drop down top right (the arrow below "2 transactions")
 4. If the transactions are valid to be converted to a transfer, you can click **Make transfer**.
 
 ## Deleting a transfer

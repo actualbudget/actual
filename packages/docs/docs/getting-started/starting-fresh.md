@@ -178,7 +178,7 @@ This way, you add small buffers in each category as prices rise; the same goes f
 Adding some extra, albeit small, paddings along the way means you are better suited when this happens.
 The only certainty we have in this day and age is that price increases will occur.
 
-![](/img/getting-started/spreadsheet.png)
+![](/img/getting-started/spreadsheet.webp)
 
 We can now see the budget numbers to be used for the month of August in the Average column
 
@@ -200,16 +200,16 @@ If you have a lot of cash withdrawals during a month, you will be better off usi
 2. In the Budget view, you enter the same amount in the *Budgeted* columns as found in the *Spent* columns
    for all the months you have entered or imported your data.
 
-![](/img/getting-started/actual-intro-with-budget-numbers.png)
+![](/img/getting-started/actual-intro-with-budget-numbers.webp)
 
 You have two easy ways to populate the various budget values when this is done.
 You can apply the last three months' average on all budget categories:
 
-![](/img/getting-started/actual-intro-set-budget-to-3-months-average.png)
+![](/img/getting-started/actual-intro-set-budget-to-3-months-average.webp)
 
 You can also set specific categories to various averages:
 
-![](/img/getting-started/actual-intro-set-budget-category-average.png)
+![](/img/getting-started/actual-intro-set-budget-category-average.webp)
 
 ### What to do if you do not want to, or can't, use historical data
 
