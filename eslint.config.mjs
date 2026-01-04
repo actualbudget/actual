@@ -1,4 +1,5 @@
 import tsparser from '@typescript-eslint/parser';
+import pluginTypescript from '@typescript-eslint/eslint-plugin';
 import pluginPerfectionist from 'eslint-plugin-perfectionist';
 import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
 import { defineConfig } from 'eslint/config';
@@ -40,6 +41,9 @@ export default defineConfig(
     },
     languageOptions: {
       parser: tsparser,
+    },
+    plugins: {
+      '@typescript-eslint': pluginTypescript,
     },
   },
   {
@@ -94,6 +98,14 @@ export default defineConfig(
         },
       ],
 
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'inline-type-imports',
+        },
+      ],
+
       'object-shorthand': ['warn', 'properties'],
 
       'no-restricted-syntax': [
@@ -132,6 +144,18 @@ export default defineConfig(
     files: ['packages/docs/**/*'],
     rules: {
       'no-restricted-syntax': 'off',
+    },
+  },
+  {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'inline-type-imports',
+        },
+      ],
     },
   },
 );
