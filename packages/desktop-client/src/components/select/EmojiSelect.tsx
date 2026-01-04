@@ -2,6 +2,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type ComponentProps,
@@ -9,6 +10,10 @@ import {
   type ReactNode,
 } from 'react';
 import { Trans } from 'react-i18next';
+
+import data, { type EmojiMartData } from '@emoji-mart/data';
+
+const emojiData = data as EmojiMartData;
 
 import { Button } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
@@ -21,6 +26,22 @@ import { View } from '@actual-app/components/view';
 function defaultShouldSaveFromKey(e: KeyboardEvent<HTMLInputElement>) {
   return e.key === 'Enter';
 }
+
+type EmojiData = {
+  id: string;
+  name: string;
+  native: string;
+  keywords?: string[];
+  shortcodes?: string;
+};
+
+type EmojiMartEmoji = {
+  id: string;
+  name: string;
+  skins?: Array<{ native?: string }>;
+  keywords?: string[];
+  shortcodes?: string;
+};
 
 type EmojiSelectProps = {
   value: string | null;
@@ -46,8 +67,29 @@ export function EmojiSelect({
   onSelect,
 }: EmojiSelectProps) {
   const [open, setOpen] = useState(embedded);
+  const [hoveredEmoji, setHoveredEmoji] = useState<EmojiData | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const innerRef = useRef<HTMLInputElement | null>(null);
+  const emojiGridRef = useRef<HTMLDivElement | null>(null);
   const popoverContentRef = useRef<HTMLDivElement | null>(null);
+
+  // Grid layout constants
+  const emojisPerRow = 7;
+  const emojiSize = 24;
+  const emojiGap = 4;
+  const maxVisibleRows = 3;
+  const gridPaddingY = 8; // 4px top + 4px bottom
+  // Ensure 3 full rows are visible *inside* the grid, accounting for padding.
+  const maxHeight =
+    maxVisibleRows * emojiSize + (maxVisibleRows - 1) * emojiGap + gridPaddingY;
+  // Fix width so hover (footer text) doesn't cause popover resizing/flicker
+  const gridContentWidth =
+    emojisPerRow * emojiSize +
+    (emojisPerRow - 1) * emojiGap +
+    // grid padding left+right
+    8;
+  // Keep things tight (user requested) but still leave a small margin.
+  const popoverWidth = Math.max(225, gridContentWidth + 12);
 
   const closePicker = useCallback(() => {
     if (!embedded) {
@@ -80,10 +122,101 @@ export function EmojiSelect({
     }
   }, [embedded, externalIsOpen]);
 
+  // Flatten all emojis into a single list
+  const allEmojis = useMemo(() => {
+    const emojis: EmojiData[] = [];
+    if (emojiData && emojiData.emojis) {
+      Object.values(emojiData.emojis).forEach(emoji => {
+        const e = emoji as EmojiMartEmoji;
+        // Get the base emoji (first skin tone or default)
+        const baseSkin = e.skins?.[0];
+        if (baseSkin?.native) {
+          emojis.push({
+            id: e.id,
+            name: e.name,
+            native: baseSkin.native,
+            keywords: e.keywords || [],
+            shortcodes: e.shortcodes,
+          });
+        }
+      });
+    }
+    return emojis;
+  }, []);
+
+  // For commit 3, no search yet - just return all emojis
+  const filteredEmojis = allEmojis;
+
   const handleRemove = useCallback(() => {
     onSelect(null);
     closePicker();
   }, [closePicker, onSelect]);
+
+  const handleNavigate = useCallback(
+    (key: string) => {
+      const currentIndex = focusedIndex ?? -1;
+      let newIndex = currentIndex;
+
+      if (key === 'ArrowRight') {
+        newIndex = Math.min(currentIndex + 1, filteredEmojis.length - 1);
+      } else if (key === 'ArrowLeft') {
+        newIndex = Math.max(currentIndex - 1, 0);
+      } else if (key === 'ArrowDown') {
+        newIndex = Math.min(
+          currentIndex + emojisPerRow,
+          filteredEmojis.length - 1,
+        );
+      } else if (key === 'ArrowUp') {
+        newIndex = Math.max(currentIndex - emojisPerRow, 0);
+      }
+
+      setFocusedIndex(newIndex);
+
+      // Scroll focused emoji into view
+      if (emojiGridRef.current && newIndex >= 0) {
+        const emojiElement = emojiGridRef.current.querySelector(
+          `[data-emoji-index="${newIndex}"]`,
+        ) as HTMLElement | null;
+        emojiElement?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    },
+    [emojisPerRow, filteredEmojis.length, focusedIndex],
+  );
+
+  const handleEmojiSelect = useCallback(
+    (emoji: EmojiData) => {
+      onSelect(emoji.native);
+      closePicker();
+    },
+    [closePicker, onSelect],
+  );
+
+  // Keyboard navigation for emoji grid (arrow keys, enter)
+  const handleGridKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      if (
+        e.key === 'ArrowDown' ||
+        e.key === 'ArrowUp' ||
+        e.key === 'ArrowLeft' ||
+        e.key === 'ArrowRight'
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleNavigate(e.key);
+      } else if (e.key === 'Enter') {
+        if (
+          focusedIndex !== null &&
+          focusedIndex >= 0 &&
+          focusedIndex < filteredEmojis.length
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleEmojiSelect(filteredEmojis[focusedIndex]);
+        }
+      }
+    },
+    [focusedIndex, filteredEmojis, handleEmojiSelect, handleNavigate],
+  );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
@@ -94,6 +227,26 @@ export function EmojiSelect({
           }
           closePicker();
         }
+        return;
+      }
+
+      if (open && e.key === 'Enter') {
+        if (
+          focusedIndex !== null &&
+          focusedIndex >= 0 &&
+          focusedIndex < filteredEmojis.length
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleEmojiSelect(filteredEmojis[focusedIndex]);
+          return;
+        }
+      }
+
+      if (open && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleNavigate(e.key);
         return;
       }
 
@@ -108,7 +261,7 @@ export function EmojiSelect({
         setOpen(true);
       }
     },
-    [closePicker, embedded, inputProps, open, shouldSaveFromKeyProp],
+    [closePicker, embedded, focusedIndex, filteredEmojis, handleEmojiSelect, handleNavigate, inputProps, open, shouldSaveFromKeyProp],
   );
 
   const maybeWrapPopover = (content: ReactNode) => {
@@ -124,7 +277,12 @@ export function EmojiSelect({
         isOpen={open}
         isNonModal
         onOpenChange={() => closePicker()}
-        style={styles.popover}
+        style={{
+          ...styles.popover,
+          width: popoverWidth,
+          minWidth: popoverWidth,
+          maxWidth: popoverWidth,
+        }}
         data-testid="emoji-select-popover"
       >
         {content}
@@ -231,6 +389,10 @@ export function EmojiSelect({
             e.preventDefault();
             innerRef.current?.focus();
           }}
+          onMouseLeave={() => {
+            setHoveredEmoji(null);
+            setFocusedIndex(null);
+          }}
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -273,16 +435,113 @@ export function EmojiSelect({
             </Button>
           </View>
 
-          <View style={{ padding: '8px' }}>
-            <View
-              style={{
-                padding: '8px',
-                color: theme.menuAutoCompleteText,
-                ...styles.smallText,
-              }}
-            >
-              <Trans>Emoji picker</Trans>
-            </View>
+          {/* Emoji grid */}
+          <View
+            ref={emojiGridRef}
+            onKeyDown={handleGridKeyDown}
+            tabIndex={0}
+            style={{
+              maxHeight: `${maxHeight}px`,
+              overflowY: 'auto',
+              padding: '4px',
+              display: 'grid',
+              gridTemplateColumns: `repeat(${emojisPerRow}, ${emojiSize}px)`,
+              gap: `${emojiGap}px`,
+              justifyContent: 'center',
+              outline: 'none',
+            }}
+            onMouseMove={e => {
+              const el = (e.target as HTMLElement).closest(
+                'button[data-emoji-index]',
+              ) as HTMLButtonElement | null;
+              if (!el) {
+                return;
+              }
+
+              const idxRaw = el.getAttribute('data-emoji-index');
+              const idx = idxRaw ? Number(idxRaw) : NaN;
+              if (
+                !Number.isFinite(idx) ||
+                idx < 0 ||
+                idx >= filteredEmojis.length
+              ) {
+                return;
+              }
+
+              const emoji = filteredEmojis[idx];
+              setHoveredEmoji(emoji);
+              setFocusedIndex(idx);
+            }}
+            onMouseLeave={() => {
+              setHoveredEmoji(null);
+              setFocusedIndex(null);
+            }}
+          >
+            {filteredEmojis.map((emoji, index) => (
+              <button
+                key={`${emoji.id}-${index}`}
+                data-emoji-index={index}
+                type="button"
+                onClick={() => handleEmojiSelect(emoji)}
+                onMouseEnter={() => setHoveredEmoji(emoji)}
+                onMouseLeave={() => setHoveredEmoji(null)}
+                style={{
+                  width: `${emojiSize}px`,
+                  height: `${emojiSize}px`,
+                  fontSize: `${emojiSize}px`,
+                  lineHeight: `${emojiSize}px`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor:
+                    focusedIndex === index
+                      ? theme.menuItemBackgroundHover
+                      : 'transparent',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  padding: 0,
+                  transition: 'background-color 0.1s',
+                }}
+                onFocus={() => setFocusedIndex(index)}
+                onBlur={() => {
+                  // Only clear focus if not moving to another emoji
+                  if (focusedIndex === index) {
+                    setFocusedIndex(null);
+                  }
+                }}
+              >
+                {emoji.native}
+              </button>
+            ))}
+          </View>
+
+          {/* Footer with hovered emoji shortcode */}
+          <View
+            style={{
+              padding: '0 8px',
+              backgroundColor: theme.menuAutoCompleteBackground,
+              color: theme.menuAutoCompleteText,
+              ...styles.verySmallText,
+              textAlign: 'center',
+              height: '28px',
+              minHeight: '28px',
+              boxSizing: 'border-box',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {hoveredEmoji
+              ? `${hoveredEmoji.native} :${hoveredEmoji.id}:`
+              : focusedIndex !== null &&
+                  focusedIndex >= 0 &&
+                  focusedIndex < filteredEmojis.length
+                ? `${filteredEmojis[focusedIndex].native} :${filteredEmojis[focusedIndex].id}:`
+                : ''}
           </View>
         </View>,
       )}
