@@ -72,6 +72,17 @@ function makeNonChild<T extends GenericTransactionEntity>(
   } as unknown as T;
 }
 
+function makeTransactionWithChildCategory<T extends GenericTransactionEntity>(
+  parent: T,
+  data: Partial<TransactionEntity>,
+) {
+  return {
+    ...parent,
+    is_parent: false,
+    category: data.category || null,
+  } as unknown as T;
+}
+
 export function recalculateSplit(trans: TransactionEntity) {
   // Calculate the new total of split transactions and make sure
   // that it equals the parent amount
@@ -375,6 +386,21 @@ export function makeAsNonChildTransactions(
     t =>
       !newNonChildTransactions.some(updatedTrans => updatedTrans.id === t.id),
   );
+  if (
+    childTransactions.length === 1 &&
+    childTransactionsToUpdate.length === 1 &&
+    childTransactionsToUpdate[0].id === childTransactions[0].id
+  ) {
+    return {
+      updated: [
+        makeTransactionWithChildCategory(
+          parentTransaction,
+          childTransactionsToUpdate[0],
+        ),
+      ],
+      deleted: [childTransactionsToUpdate[0]],
+    };
+  }
 
   const nonChildTransactionsToUpdate =
     remainingChildTransactions.length === 1
