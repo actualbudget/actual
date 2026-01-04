@@ -102,7 +102,7 @@ export default defineConfig(
         'error',
         {
           prefer: 'type-imports',
-          fixStyle: 'inline-type-imports',
+          disallowTypeAnnotations: false,
         },
       ],
 
