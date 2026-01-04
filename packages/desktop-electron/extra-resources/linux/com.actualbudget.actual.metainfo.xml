@@ -21,6 +21,7 @@
   <launchable type="desktop-id">com.actualbudget.actual.desktop</launchable>
   <url type="homepage">https://actualbudget.org/</url>
   <url type="bugtracker">https://github.com/actualbudget/actual/issues</url>
+  <url type="vcs-browser">https://github.com/actualbudget/actual</url>
   <recommends>
     <control>keyboard</control>
     <control>pointing</control>
