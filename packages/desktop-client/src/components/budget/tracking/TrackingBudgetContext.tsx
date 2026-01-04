@@ -1,14 +1,31 @@
-// @ts-strict-ignore
 import React, { type ReactNode, createContext, useContext } from 'react';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-const Context = createContext(null);
-
-type TrackingBudgetProviderProps = {
+type TrackingBudgetContextDefinition = {
   summaryCollapsed: boolean;
-  onBudgetAction: (month: string, action: string, arg: unknown) => void;
+  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onToggleSummaryCollapse: () => void;
+  currentMonth: string;
+};
+
+const TrackingBudgetContext = createContext<TrackingBudgetContextDefinition>({
+  summaryCollapsed: false,
+  onBudgetAction: () => {
+    throw new Error('Unitialised context method called: onBudgetAction');
+  },
+  onToggleSummaryCollapse: () => {
+    throw new Error(
+      'Unitialised context method called: onToggleSummaryCollapse',
+    );
+  },
+  currentMonth: 'unknown',
+});
+
+type TrackingBudgetProviderProps = Omit<
+  TrackingBudgetContextDefinition,
+  'currentMonth'
+> & {
   children: ReactNode;
 };
 export function TrackingBudgetProvider({
@@ -20,7 +37,7 @@ export function TrackingBudgetProvider({
   const currentMonth = monthUtils.currentMonth();
 
   return (
-    <Context.Provider
+    <TrackingBudgetContext.Provider
       value={{
         currentMonth,
         summaryCollapsed,
@@ -29,10 +46,10 @@ export function TrackingBudgetProvider({
       }}
     >
       {children}
-    </Context.Provider>
+    </TrackingBudgetContext.Provider>
   );
 }
 
 export function useTrackingBudget() {
-  return useContext(Context);
+  return useContext(TrackingBudgetContext);
 }
