@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { SvgFlag } from '@actual-app/components/icons/v1';
 import { SvgArrowsSynchronize } from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
 import {
@@ -92,6 +93,35 @@ const TransactionRow = memo(function TransactionRow({
             return (
               <Field key={i} width={100}>
                 {transaction.date}
+              </Field>
+            );
+          case 'flag':
+            return (
+              <Field
+                key={i}
+                width={45}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  fontSize: '18px',
+                  color: transaction.flag
+                    ? theme.tableText
+                    : theme.tableTextSubdued,
+                  opacity: transaction.flag ? 1 : 0.5,
+                }}
+              >
+                {transaction.flag ? (
+                  <span>{transaction.flag}</span>
+                ) : (
+                  <SvgFlag
+                    style={{
+                      width: 14,
+                      height: 14,
+                      color: theme.tableTextSubdued,
+                    }}
+                  />
+                )}
               </Field>
             );
           case 'imported_payee':
@@ -231,6 +261,12 @@ export function SimpleTransactionsTable({
                 return (
                   <Field key={i} width={100}>
                     <Trans>Date</Trans>
+                  </Field>
+                );
+              case 'flag':
+                return (
+                  <Field key={i} width={45} style={{ textAlign: 'center' }}>
+                    {/* Empty header for flag column */}
                   </Field>
                 );
               case 'imported_payee':

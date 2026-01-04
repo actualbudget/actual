@@ -28,6 +28,7 @@ import {
   SvgArrowDown,
   SvgArrowUp,
   SvgCheveronDown,
+  SvgFlag,
 } from '@actual-app/components/icons/v1';
 import {
   SvgArrowsSynchronize,
@@ -95,6 +96,7 @@ import {
   type StatusTypes,
 } from '@desktop-client/components/schedules/StatusBadge';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
+import { EmojiSelect } from '@desktop-client/components/select/EmojiSelect';
 import {
   Cell,
   CellButton,
@@ -227,6 +229,17 @@ const TransactionHeader = memo(
           icon={field === 'date' ? ascDesc : 'clickable'}
           onClick={() =>
             onSort('date', selectAscDesc(field, ascDesc, 'date', 'desc'))
+          }
+        />
+        <HeaderCell
+          value=""
+          width={45}
+          alignItems="center"
+          marginLeft={-5}
+          id="flag"
+          icon={field === 'flag' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('flag', selectAscDesc(field, ascDesc, 'flag', 'asc'))
           }
         />
         {showAccount && (
@@ -462,14 +475,62 @@ function HeaderCell({
       unexposedContent={({ value: cellValue }) =>
         onClick ? (
           <Button variant="bare" onPress={onClick} style={style}>
-            <UnexposedCellContent value={cellValue} />
-            {icon === 'asc' && (
-              <SvgArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
-            )}
-            {icon === 'desc' && (
-              <SvgArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
+            {id === 'flag' ? (
+              <>
+                <SvgFlag
+                  style={{
+                    width: 14,
+                    height: 14,
+                    color: theme.tableHeaderText,
+                  }}
+                />
+                {icon === 'asc' && (
+                  <SvgArrowDown
+                    width={10}
+                    height={10}
+                    style={{ marginLeft: 5 }}
+                  />
+                )}
+                {icon === 'desc' && (
+                  <SvgArrowUp
+                    width={10}
+                    height={10}
+                    style={{ marginLeft: 5 }}
+                  />
+                )}
+              </>
+            ) : (
+              <>
+                <UnexposedCellContent value={cellValue} />
+                {icon === 'asc' && (
+                  <SvgArrowDown
+                    width={10}
+                    height={10}
+                    style={{ marginLeft: 5 }}
+                  />
+                )}
+                {icon === 'desc' && (
+                  <SvgArrowUp
+                    width={10}
+                    height={10}
+                    style={{ marginLeft: 5 }}
+                  />
+                )}
+              </>
             )}
           </Button>
+        ) : id === 'flag' ? (
+          <View
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <SvgFlag
+              style={{ width: 14, height: 14, color: theme.tableHeaderText }}
+            />
+          </View>
         ) : (
           <Text style={style}>{cellValue}</Text>
         )
@@ -1313,6 +1374,73 @@ const Transaction = memo(function Transaction({
               inputProps={{ onBlur, onKeyDown, style: inputStyle }}
               shouldSaveFromKey={shouldSaveFromKey}
               clearOnBlur
+              onUpdate={onUpdate}
+              onSelect={onSave}
+            />
+          )}
+        </CustomCell>
+      )}
+
+      {!isChild && (
+        <CustomCell
+          name="flag"
+          width={45}
+          textAlign="center"
+          exposed={focusedField === 'flag'}
+          value={transaction.flag || null}
+          valueStyle={{
+            fontSize: transaction.flag ? '18px' : '14px',
+            color: transaction.flag ? theme.tableText : theme.tableTextSubdued,
+            opacity: transaction.flag ? 1 : 0.5,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          onExpose={name => !isPreview && onEdit(id, name)}
+          onUpdate={value => {
+            onUpdate('flag', value);
+          }}
+          formatter={value => (value ? String(value) : '')}
+          unexposedContent={({ value, formatter }) => {
+            const displayValue = formatter ? formatter(value) : value || '';
+            return (
+              <View
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: '100%',
+                  height: '100%',
+                }}
+              >
+                {displayValue ? (
+                  <span style={{ fontSize: '18px' }}>{displayValue}</span>
+                ) : (
+                  <SvgFlag
+                    style={{
+                      width: 14,
+                      height: 14,
+                      color: theme.tableTextSubdued,
+                      opacity: 1.0,
+                    }}
+                  />
+                )}
+              </View>
+            );
+          }}
+        >
+          {({
+            onBlur,
+            onKeyDown,
+            onUpdate,
+            onSave,
+            shouldSaveFromKey,
+            inputStyle,
+          }) => (
+            <EmojiSelect
+              value={transaction.flag || null}
+              isOpen={focusedField === 'flag'}
+              shouldSaveFromKey={shouldSaveFromKey}
+              inputProps={{ onBlur, onKeyDown, style: inputStyle }}
               onUpdate={onUpdate}
               onSelect={onSave}
             />
@@ -2574,6 +2702,7 @@ export const TransactionTable = forwardRef(
       const fields = [
         'select',
         'date',
+        'flag',
         'account',
         'payee',
         'notes',
@@ -2592,6 +2721,7 @@ export const TransactionTable = forwardRef(
       const fields = [
         'select',
         'date',
+        'flag',
         'account',
         'payee',
         'notes',
