@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import initSqlJS, { type Database } from '@jlongster/sql.js';
+import { logger } from '../log';
 
 import { normalise } from './normalise';
 import { unicodeLike } from './unicodeLike';
@@ -87,7 +88,7 @@ export function runQuery(
       }
       return rows;
     } catch (e) {
-      console.log(sql);
+      logger.log(sql);
       throw e;
     }
   } else {

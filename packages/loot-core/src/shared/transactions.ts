@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { logger } from '../platform/server/log';
 
 import { type TransactionEntity } from '../types/models';
 
@@ -179,7 +180,7 @@ function replaceTransactions(
   if (trans.is_parent || trans.is_child) {
     const parentIndex = findParentIndex(transactions, idx);
     if (parentIndex == null) {
-      console.log('Cannot find parent index');
+      logger.log('Cannot find parent index');
       return {
         data: [],
         diff: { added: [], deleted: [], updated: [] },
