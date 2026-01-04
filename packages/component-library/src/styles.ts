@@ -39,24 +39,29 @@ export const styles: Record<string, any> = {
   veryLargeText: {
     fontSize: 30,
     fontWeight: 600,
+    letterSpacing: '-0.02em',
   },
   largeText: {
     fontSize: 20,
-    fontWeight: 700,
-    letterSpacing: 0.5,
+    fontWeight: 600,
+    letterSpacing: '-0.01em',
   },
   mediumText: {
     fontSize: 15,
     fontWeight: 500,
+    letterSpacing: '-0.01em',
   },
   smallText: {
     fontSize: 13,
+    letterSpacing: '-0.005em',
   },
   verySmallText: {
     fontSize: 12,
+    letterSpacing: '0',
   },
   tinyText: {
     fontSize: 10,
+    letterSpacing: '0.01em',
   },
   page: {
     flex: 1,

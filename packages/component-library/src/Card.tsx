@@ -15,10 +15,10 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
           marginTop: 15,
           marginLeft: 5,
           marginRight: 5,
-          borderRadius: 6,
+          borderRadius: 8,
           backgroundColor: theme.cardBackground,
-          borderColor: theme.cardBorder,
-          boxShadow: '0 1px 2px #9594A8',
+          border: `1px solid ${theme.cardBorder}`,
+          boxShadow: theme.cardShadow,
           ...props.style,
         }}
       >

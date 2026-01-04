@@ -290,6 +290,7 @@ export const Row = forwardRef<HTMLDivElement, RowProps>(function Row(
         height: height || ROW_HEIGHT,
         flex: '0 0 ' + (height || ROW_HEIGHT) + 'px',
         userSelect: 'text',
+        transition: 'background-color 0.1s ease',
         ...(collapsed && { marginTop: -1 }),
         ...style,
       }}

@@ -106,6 +106,7 @@ const _getHoveredStyles = (variant: ButtonVariant): CSSProperties => ({
   backgroundColor: backgroundColorHover[variant],
   color: textColorHover[variant],
   cursor: 'pointer',
+  ...(variant === 'primary' && { transform: 'translateY(-1px)' }),
 });
 
 const _getActiveStyles = (
@@ -157,7 +158,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           backgroundColor: backgroundColor[variantWithDisabled],
           border: _getBorder(variant, variantWithDisabled),
           color: textColor[variantWithDisabled],
-          transition: 'box-shadow .25s',
+          transition:
+            'background-color 0.15s ease, box-shadow 0.2s ease, transform 0.15s ease, color 0.15s ease',
           WebkitAppRegion: 'no-drag',
           ...styles.smallText,
           '&[data-hovered]': _getHoveredStyles(variant),
