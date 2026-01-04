@@ -36,13 +36,17 @@ export const up = async function () {
 };
 
 export const down = async function () {
-  await getAccountDb().exec(
-    `
-    DROP INDEX IF EXISTS idx_api_token_budgets_token_id;
-    DROP INDEX IF EXISTS idx_api_tokens_prefix;
-    DROP INDEX IF EXISTS idx_api_tokens_user_id;
-    DROP TABLE IF EXISTS api_token_budgets;
-    DROP TABLE IF EXISTS api_tokens;
-    `,
-  );
+  const accountDb = getAccountDb();
+
+  accountDb.transaction(() => {
+    accountDb.exec(
+      `
+      DROP INDEX IF EXISTS idx_api_token_budgets_token_id;
+      DROP INDEX IF EXISTS idx_api_tokens_prefix;
+      DROP INDEX IF EXISTS idx_api_tokens_user_id;
+      DROP TABLE IF EXISTS api_token_budgets;
+      DROP TABLE IF EXISTS api_tokens;
+      `,
+    );
+  });
 };
