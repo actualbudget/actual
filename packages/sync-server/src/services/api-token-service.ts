@@ -3,15 +3,15 @@ import crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getAccountDb } from '../account-db.js';
-import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
+import { getAccountDb } from '../account-db';
+import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user';
 
 // ============================================
 // Database Row Types (internal use)
 // ============================================
 
 /** Raw row from api_tokens table */
-interface ApiTokenRow {
+type ApiTokenRow = {
   id: string;
   user_id: string;
   name: string;
@@ -24,13 +24,13 @@ interface ApiTokenRow {
 }
 
 /** Raw row from api_token_budgets table */
-interface ApiTokenBudgetRow {
+type ApiTokenBudgetRow = {
   token_id: string;
   file_id: string;
 }
 
 /** Database wrapper type */
-interface WrappedDatabase {
+type WrappedDatabase = {
   all<T = unknown>(sql: string, params?: unknown[]): T[];
   first<T = unknown>(sql: string, params?: unknown[]): T | null;
   mutate(
@@ -45,7 +45,7 @@ interface WrappedDatabase {
 // ============================================
 
 /** Result returned when creating a new token */
-export interface CreateTokenResult {
+export type CreateTokenResult = {
   id: string;
   token: string; // Only exposed at creation time
   prefix: string;
@@ -56,14 +56,14 @@ export interface CreateTokenResult {
 }
 
 /** Result returned when validating a token successfully */
-export interface ValidateTokenResult {
+export type ValidateTokenResult = {
   userId: string;
   tokenId: string;
   budgetIds: string[];
 }
 
 /** Token information returned when listing tokens */
-export interface TokenListItem {
+export type TokenListItem = {
   id: string;
   name: string;
   prefix: string;
@@ -75,7 +75,7 @@ export interface TokenListItem {
 }
 
 /** API Token Service interface */
-export interface ApiTokenService {
+export type ApiTokenService = {
   createToken(
     userId: string,
     name: string,
@@ -213,7 +213,7 @@ export const apiTokenService: ApiTokenService = {
 
     // Look up token by prefix
     const tokenRow = accountDb.first<ApiTokenRow>(
-      `SELECT id, user_id, token_hash, expires_at, enabled
+      `SELECT id, user_id, token_hash, expires_at, enabled, last_used_at
        FROM api_tokens
        WHERE token_prefix = ?`,
       [prefix],
@@ -242,11 +242,15 @@ export const apiTokenService: ApiTokenService = {
       return null;
     }
 
-    // Update last used timestamp
-    accountDb.mutate(`UPDATE api_tokens SET last_used_at = ? WHERE id = ?`, [
-      now,
-      tokenRow.id,
-    ]);
+    // Update last used timestamp (throttled to reduce write load)
+    const shouldUpdateLastUsed =
+      !tokenRow.last_used_at || now - tokenRow.last_used_at > 60;
+    if (shouldUpdateLastUsed) {
+      accountDb.mutate(`UPDATE api_tokens SET last_used_at = ? WHERE id = ?`, [
+        now,
+        tokenRow.id,
+      ]);
+    }
 
     // Get budget scopes
     const budgetRows = accountDb.all<ApiTokenBudgetRow>(
