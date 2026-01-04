@@ -21,13 +21,13 @@ type ApiTokenRow = {
   last_used_at: number | null;
   expires_at: number;
   enabled: number; // SQLite stores booleans as 0/1
-}
+};
 
 /** Raw row from api_token_budgets table */
 type ApiTokenBudgetRow = {
   token_id: string;
   file_id: string;
-}
+};
 
 /** Database wrapper type */
 type WrappedDatabase = {
@@ -38,7 +38,7 @@ type WrappedDatabase = {
     params?: unknown[],
   ): { changes: number; insertId: number | bigint };
   transaction<T>(fn: () => T): T;
-}
+};
 
 // ============================================
 // Public API Types (exported)
@@ -53,14 +53,14 @@ export type CreateTokenResult = {
   budgetIds: string[];
   createdAt: number;
   expiresAt: number;
-}
+};
 
 /** Result returned when validating a token successfully */
 export type ValidateTokenResult = {
   userId: string;
   tokenId: string;
   budgetIds: string[];
-}
+};
 
 /** Token information returned when listing tokens */
 export type TokenListItem = {
@@ -72,7 +72,7 @@ export type TokenListItem = {
   expiresAt: number;
   enabled: boolean;
   budgetIds: string[];
-}
+};
 
 /** API Token Service interface */
 export type ApiTokenService = {
@@ -88,7 +88,7 @@ export type ApiTokenService = {
   setTokenEnabled(tokenId: string, userId: string, enabled: boolean): boolean;
   getTokenBudgets(tokenId: string): string[];
   hasAccessToBudget(tokenId: string, budgetId: string, userId: string): boolean;
-}
+};
 
 // ============================================
 // Constants

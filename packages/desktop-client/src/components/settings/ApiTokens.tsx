@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { type KeyboardEvent, useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -138,7 +138,7 @@ function CreateTokenModal({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
       onClose();
     }
@@ -250,7 +250,7 @@ function ShowTokenModal({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
       onClose();
     }
