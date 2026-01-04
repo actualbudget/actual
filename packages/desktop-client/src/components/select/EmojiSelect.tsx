@@ -67,6 +67,7 @@ export function EmojiSelect({
   onSelect,
 }: EmojiSelectProps) {
   const [open, setOpen] = useState(embedded);
+  const [searchQuery, setSearchQuery] = useState('');
   const [hoveredEmoji, setHoveredEmoji] = useState<EmojiData | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const innerRef = useRef<HTMLInputElement | null>(null);
@@ -94,6 +95,7 @@ export function EmojiSelect({
   const closePicker = useCallback(() => {
     if (!embedded) {
       setOpen(false);
+      setSearchQuery('');
     }
   }, [embedded]);
 
@@ -105,6 +107,7 @@ export function EmojiSelect({
 
     if (!externalIsOpen) {
       setOpen(false);
+      setSearchQuery('');
       return;
     }
 
@@ -144,8 +147,44 @@ export function EmojiSelect({
     return emojis;
   }, []);
 
-  // For commit 3, no search yet - just return all emojis
-  const filteredEmojis = allEmojis;
+  // Filter emojis based on search query
+  const filteredEmojis = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return allEmojis;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    return allEmojis.filter(emoji => {
+      // Search by ID (shortcode)
+      if (emoji.id.toLowerCase().includes(query)) {
+        return true;
+      }
+
+      // Search by name
+      if (emoji.name.toLowerCase().includes(query)) {
+        return true;
+      }
+
+      // Search by keywords
+      if (
+        emoji.keywords?.some(keyword => keyword.toLowerCase().includes(query))
+      ) {
+        return true;
+      }
+
+      // Search by shortcode format (e.g., ":grinning:")
+      if (`:${emoji.id}:`.toLowerCase().includes(query)) {
+        return true;
+      }
+
+      return false;
+    });
+  }, [allEmojis, searchQuery]);
+
+  // Reset focused index when search changes
+  useEffect(() => {
+    setFocusedIndex(null);
+  }, [searchQuery]);
 
   const handleRemove = useCallback(() => {
     onSelect(null);
@@ -189,6 +228,49 @@ export function EmojiSelect({
       closePicker();
     },
     [closePicker, onSelect],
+  );
+
+  // Basic search input handling (for commit 4 - advanced features come in commit 5)
+  const handleSearchKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>): boolean => {
+      // Basic text input: allow printable characters
+      if (e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        setSearchQuery(current => current + e.key);
+        return true;
+      }
+
+      // Backspace
+      if (e.key === 'Backspace') {
+        e.preventDefault();
+        e.stopPropagation();
+        setSearchQuery(current => {
+          if (current.length === 0) {
+            return current;
+          }
+          return current.slice(0, -1);
+        });
+        return true;
+      }
+
+      // Delete
+      if (e.key === 'Delete') {
+        e.preventDefault();
+        e.stopPropagation();
+        // For now, same as backspace (advanced caret handling in commit 5)
+        setSearchQuery(current => {
+          if (current.length === 0) {
+            return current;
+          }
+          return current.slice(0, -1);
+        });
+        return true;
+      }
+
+      return false;
+    },
+    [],
   );
 
   // Keyboard navigation for emoji grid (arrow keys, enter)
@@ -250,6 +332,14 @@ export function EmojiSelect({
         return;
       }
 
+      // Basic search input handling (typing characters, backspace, delete)
+      if (open) {
+        const handled = handleSearchKeyDown(e);
+        if (handled) {
+          return;
+        }
+      }
+
       if (!open && shouldSaveFromKeyProp(e)) {
         // Let the table handle Enter if we're not open.
         inputProps?.onKeyDown?.(e);
@@ -261,7 +351,7 @@ export function EmojiSelect({
         setOpen(true);
       }
     },
-    [closePicker, embedded, focusedIndex, filteredEmojis, handleEmojiSelect, handleNavigate, inputProps, open, shouldSaveFromKeyProp],
+    [closePicker, embedded, focusedIndex, filteredEmojis, handleEmojiSelect, handleNavigate, handleSearchKeyDown, inputProps, open, shouldSaveFromKeyProp],
   );
 
   const maybeWrapPopover = (content: ReactNode) => {
@@ -431,11 +521,29 @@ export function EmojiSelect({
                 ...styles.smallText,
               }}
             >
-              <Trans>Remove</Trans>
-            </Button>
-          </View>
+            <Trans>Remove</Trans>
+          </Button>
+        </View>
 
-          {/* Emoji grid */}
+        {/* Search bar */}
+        <View
+          style={{
+            padding: '8px',
+          }}
+        >
+          <Input
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            placeholder="Search emojis..."
+            style={{
+              width: '100%',
+              ...styles.smallText,
+            }}
+          />
+        </View>
+
+        {/* Emoji grid */}
           <View
             ref={emojiGridRef}
             onKeyDown={handleGridKeyDown}
