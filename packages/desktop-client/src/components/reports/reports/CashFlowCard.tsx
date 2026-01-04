@@ -227,7 +227,7 @@ export function CashFlowCard({
                 <Bar
                   dataKey="income"
                   fill={chartTheme.colors.blue}
-                  barSize={14}
+                  barSize={60}
                   {...animationProps}
                 >
                   <LabelList
@@ -240,7 +240,7 @@ export function CashFlowCard({
                 <Bar
                   dataKey="expenses"
                   fill={chartTheme.colors.red}
-                  barSize={14}
+                  barSize={60}
                   {...animationProps}
                 >
                   <LabelList
