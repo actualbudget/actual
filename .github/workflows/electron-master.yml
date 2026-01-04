@@ -171,8 +171,8 @@ jobs:
       - name: Calculate AppImage SHA256
         id: appimage_sha256
         run: |
-          APPIMAGE_X64_SHA256=$(sha256sum Actual-linux-x86_64.AppImage | awk '{ print $1 }')
-          APPIMAGE_ARM64_SHA256=$(sha256sum Actual-linux-arm64.AppImage | awk '{ print $1 }')
+          APPIMAGE_X64_SHA256=$(sha256sum packages/desktop-electron/dist/Actual-linux-x86_64.AppImage | awk '{ print $1 }')
+          APPIMAGE_ARM64_SHA256=$(sha256sum packages/desktop-electron/dist/Actual-linux-arm64.AppImage | awk '{ print $1 }')
           echo "APPIMAGE_X64_SHA256=$APPIMAGE_X64_SHA256" >> "$GITHUB_ENV"
           echo "APPIMAGE_ARM64_SHA256=$APPIMAGE_ARM64_SHA256" >> "$GITHUB_ENV"
 
