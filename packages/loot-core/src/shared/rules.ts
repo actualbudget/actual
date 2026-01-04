@@ -117,6 +117,7 @@ export function getAllocationMethods() {
   return {
     'fixed-amount': t('a fixed amount'),
     'fixed-percent': t('a fixed percent of the remainder'),
+    formula: t('based on a formula'),
     remainder: t('an equal portion of the remainder'),
   };
 }
