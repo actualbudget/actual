@@ -11,6 +11,7 @@ export function getLiveRange(
   latestTransaction: string,
   includeCurrentInterval: boolean,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  financialYearStart?: SyncedPrefs['financialYearStart'],
 ): [string, string, TimeFrame['mode']] {
   let dateStart = earliestTransaction;
   let dateEnd = latestTransaction;
@@ -57,6 +58,26 @@ export function getLiveRange(
         monthUtils.prevYear(monthUtils.currentDate(), 'yyyy-MM-dd'),
       );
       break;
+    }
+    case 'currentFinancialYear': {
+      [dateStart, dateEnd] = validateRange(
+        earliestTransaction,
+        latestTransaction,
+        monthUtils.financialYearStart(new Date(), financialYearStart),
+        monthUtils.currentMonth(),
+      );
+      break;  
+    }
+    case 'lastFinancialYear': {
+      const dayInCorrectYear = new Date();
+      dayInCorrectYear.setFullYear(dayInCorrectYear.getFullYear() - 1);
+      [dateStart, dateEnd] = validateRange(
+        earliestTransaction,
+        latestTransaction,
+        monthUtils.financialYearStart(dayInCorrectYear, financialYearStart),
+        monthUtils.financialYearEnd(dayInCorrectYear, financialYearStart),
+      );
+      break;  
     }
     case 'allTime': {
       dateStart = earliestTransaction;

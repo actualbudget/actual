@@ -67,6 +67,7 @@ export function createSpendingSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
+          false,
         ),
       ).then(({ data }) => data),
       aqlQuery(
@@ -77,6 +78,7 @@ export function createSpendingSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
+          false,
         ),
       ).then(({ data }) => data),
     ]);
@@ -90,6 +92,7 @@ export function createSpendingSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
+          false,
         ),
       ).then(({ data }) => data),
       aqlQuery(
@@ -100,6 +103,7 @@ export function createSpendingSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
+          false,
         ),
       ).then(({ data }) => data),
     ]);

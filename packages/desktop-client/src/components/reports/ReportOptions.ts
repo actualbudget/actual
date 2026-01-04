@@ -74,10 +74,13 @@ export type dateRangeProps = {
   key: string;
   name: number | string;
   type?: string;
+  // These determine which date ranges are available for the configured interval
   Daily: boolean;
   Weekly: boolean;
   Monthly: boolean;
   Yearly: boolean;
+  // If true, the date range will be exact dates, otherwise it will contain the whole period of the interval
+  useExactDates: boolean;
 };
 
 const dateRangeOptions: dateRangeProps[] = [
@@ -90,6 +93,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Weekly: true,
     Monthly: false,
     Yearly: false,
+    useExactDates: false,
   },
   {
     description: t('Last week'),
@@ -100,6 +104,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Weekly: true,
     Monthly: false,
     Yearly: false,
+    useExactDates: false,
   },
   {
     description: t('This month'),
@@ -110,6 +115,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Weekly: true,
     Monthly: true,
     Yearly: false,
+    useExactDates: false,
   },
   {
     description: t('Last month'),
@@ -120,6 +126,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Weekly: true,
     Monthly: true,
     Yearly: false,
+    useExactDates: false,
   },
   {
     description: t('Last 3 months'),
@@ -130,6 +137,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Weekly: true,
     Monthly: true,
     Yearly: false,
+    useExactDates: false,
   },
   {
     description: t('Last 6 months'),
@@ -140,6 +148,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Weekly: false,
     Monthly: true,
     Yearly: false,
+    useExactDates: false,
   },
   {
     description: t('Last 12 months'),
@@ -150,6 +159,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Weekly: false,
     Monthly: true,
     Yearly: false,
+    useExactDates: false,
   },
   {
     description: t('Year to date'),
@@ -160,6 +170,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Weekly: true,
     Monthly: true,
     Yearly: true,
+    useExactDates: false,
   },
   {
     description: t('Last year'),
@@ -170,6 +181,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Weekly: true,
     Monthly: true,
     Yearly: true,
+    useExactDates: false,
   },
   {
     description: t('Prior year to date'),
@@ -180,6 +192,29 @@ const dateRangeOptions: dateRangeProps[] = [
     Weekly: true,
     Monthly: true,
     Yearly: true,
+    useExactDates: false,
+  },
+  {
+    description: t('Current financial year'),
+    key: 'Current financial year',
+    name: 'currentFinancialYear',
+    type: 'Month',
+    Daily: false,
+    Weekly: true,
+    Monthly: true,
+    Yearly: true,
+    useExactDates: true,
+  },
+  {
+    description: t('Last financial year'),
+    key: 'Last financial year',
+    name: 'lastFinancialYear',
+    type: 'Month',
+    Daily: false,
+    Weekly: true,
+    Monthly: true,
+    Yearly: true,
+    useExactDates: true,
   },
   {
     description: t('All time'),
@@ -190,6 +225,7 @@ const dateRangeOptions: dateRangeProps[] = [
     Weekly: true,
     Monthly: true,
     Yearly: true,
+    useExactDates: false,
   },
 ];
 

@@ -47,7 +47,8 @@ export type SyncedPrefs = Partial<
     | `ofx-fallback-missing-payee-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
     | `flags.${FeatureFlag}`
-    | `learn-categories`,
+    | `learn-categories`
+    | `financialYearStart`,
     string
   >
 >;
