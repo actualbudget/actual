@@ -27,10 +27,6 @@ For example:
 
 - [ ] Run [this GitHub Action](https://github.com/actualbudget/actual/actions/workflows/generate-release-pr.yml) to generate a release PR (for a regular monthly release, leave the arguments set to their default values).
 - [ ] Open the generated PR and ensure the release notes workflow has started to collate the release notes into a comment in the PR. You may need to push an empty commit in order to trigger CI.
-
-### Docs
-
-- [ ] Open the release PR `release/vYY.MM.xx`
 - [ ] After the release notes workflows in the PR has been run, copy the collated notes into a new blog post using a previous release as a template. The release notes will also need adding to the `docs/releases.md` file.
 - [ ] Fix spelling as needed.
 
