@@ -11,7 +11,7 @@ const CONFIG = {
   PR_CONTRIBUTION_POINTS: {
     Features: 5,
     Enhancements: 2,
-    Bugfix: 2,
+    Bugfix: 3,
     Maintenance: 2,
     Unknown: 2,
   },
