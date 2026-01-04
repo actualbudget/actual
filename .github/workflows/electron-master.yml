@@ -112,16 +112,28 @@ jobs:
             !packages/desktop-electron/dist/Actual-windows.exe
             packages/desktop-electron/dist/*.AppImage
             packages/desktop-electron/dist/*.flatpak
-      - name: Retrieve AppImage SHA256 for Flathub
+
+    outputs:
+      version: ${{ steps.process_version.outputs.version }}
+
+  calculate-appimage-sha256:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: actual-electron-ubuntu-22.04
+
+      - name: Calculate AppImage SHA256
         id: appimage_sha256
         run: |
-          APPIMAGE_X64_SHA256=$(sha256sum packages/desktop-electron/dist/Actual-linux-x86_64.AppImage | awk '{ print $1 }')
-          APPIMAGE_ARM64_SHA256=$(sha256sum packages/desktop-electron/dist/Actual-linux-arm64.AppImage | awk '{ print $1 }')
+          APPIMAGE_X64_SHA256=$(sha256sum Actual-linux-x86_64.AppImage | awk '{ print $1 }')
+          APPIMAGE_ARM64_SHA256=$(sha256sum Actual-linux-arm64.AppImage | awk '{ print $1 }')
           echo "appimage_x64_sha256=$APPIMAGE_X64_SHA256" >> "$GITHUB_OUTPUT"
           echo "appimage_arm64_sha256=$APPIMAGE_ARM64_SHA256" >> "$GITHUB_OUTPUT"
 
     outputs:
-      version: ${{ steps.process_version.outputs.version }}
       appimage_x64_sha256: ${{ steps.appimage_sha256.outputs.appimage_x64_sha256 }}
       appimage_arm64_sha256: ${{ steps.appimage_sha256.outputs.appimage_arm64_sha256 }}
 
@@ -168,7 +180,7 @@ jobs:
             -Force
 
   publish-flathub:
-    needs: build
+    needs: [build, calculate-appimage-sha256]
     runs-on: ubuntu-22.04
     if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
     steps:
@@ -181,11 +193,11 @@ jobs:
       - name: Update manifest with new SHA256
         run: |
           # Replace x86_64 entry
-          sed -i "/x86_64.AppImage/{n;s|sha256:.*|sha256: ${{ needs.build.outputs.appimage_x64_sha256 }}|}" com.actualbudget.actual.yml
+          sed -i "/x86_64.AppImage/{n;s|sha256:.*|sha256: ${{ needs.calculate-appimage-sha256.outputs.appimage_x64_sha256 }}|}" com.actualbudget.actual.yml
           sed -i "/x86_64.AppImage/s|url:.*|url: https://github.com/actualbudget/actual/releases/download/v${{ needs.build.outputs.version }}/Actual-linux-x86_64.AppImage|" com.actualbudget.actual.yml
 
           # Replace arm64 entry
-          sed -i "/arm64.AppImage/{n;s|sha256:.*|sha256: ${{ needs.build.outputs.appimage_arm64_sha256 }}|}" com.actualbudget.actual.yml
+          sed -i "/arm64.AppImage/{n;s|sha256:.*|sha256: ${{ needs.calculate-appimage-sha256.outputs.appimage_arm64_sha256 }}|}" com.actualbudget.actual.yml
           sed -i "/arm64.AppImage/s|url:.*|url: https://github.com/actualbudget/actual/releases/download/v${{ needs.build.outputs.version }}/Actual-linux-arm64.AppImage|" com.actualbudget.actual.yml
 
           cat com.actualbudget.actual.yml
