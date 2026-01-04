@@ -17,7 +17,7 @@ export function FinancialYearSettings() {
     <Setting
       primaryAction={
         <DateSelect
-          value={financialYearStart ?? '2025-01-01'}
+          value={financialYearStart ?? `${new Date().getFullYear()}-01-01`}
           onSelect={date => setFinancialYearStartPref(date)}
           dateFormat="dd MMMM"
         />

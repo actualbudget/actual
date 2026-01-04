@@ -74,7 +74,6 @@ export function GetCardData({
   firstDayOfWeekIdx,
   financialYearStart,
   showTooltip,
-  useExactDates,
 }: {
   report: CustomReportEntity;
   payees: PayeeEntity[];
@@ -85,9 +84,9 @@ export function GetCardData({
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
   financialYearStart?: SyncedPrefs['financialYearStart'];
   showTooltip?: boolean;
-  useExactDates?: boolean;
 }) {
   const { isNarrowWidth } = useResponsive();
+  let useExactDates = false;
 
   let startDate = report.startDate;
   let endDate = report.endDate;
@@ -103,6 +102,9 @@ export function GetCardData({
     );
     startDate = dateStart || report.startDate;
     endDate = dateEnd || report.startDate;
+    useExactDates =
+      ReportOptions.dateRange.find(f => f.key === report.dateRange)
+        ?.useExactDates ?? false;
   }
 
   const fromDate = convertFromDate(report.interval);
@@ -141,7 +143,7 @@ export function GetCardData({
       balanceTypeOp: ReportOptions.balanceTypeMap.get(report.balanceType),
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
-      useExactDates: useExactDates ?? false,
+      useExactDates,
     });
   }, [
     report,
@@ -171,7 +173,7 @@ export function GetCardData({
       graphType: report.graphType,
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
-      useExactDates: useExactDates ?? false,
+      useExactDates,
     });
   }, [
     report,

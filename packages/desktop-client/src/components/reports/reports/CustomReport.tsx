@@ -272,7 +272,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     interval === 'Daily'
       ? 0
       : ReportOptions.dateRange.filter(f => f[interval as keyof dateRangeProps])
-          .length - 3;
+          .length - 5;
 
   const [intervals, setIntervals] = useState(
     monthUtils.rangeInclusive(startDate, endDate),
@@ -414,6 +414,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     includeCurrentInterval,
     locale,
     savedStatus,
+    financialYearStart,
   ]);
 
   useEffect(() => {
