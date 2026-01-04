@@ -10,7 +10,8 @@ import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function FinancialYearSettings() {
-  const [financialYearStart, setFinancialYearStartPref] = useSyncedPref('financialYearStart');
+  const [financialYearStart, setFinancialYearStartPref] =
+    useSyncedPref('financialYearStart');
 
   return (
     <Setting
@@ -24,7 +25,8 @@ export function FinancialYearSettings() {
     >
       <Text>
         <Trans>
-          <strong>Financial year start</strong> is the first day of the financial year.
+          <strong>Financial year start</strong> is the first day of the
+          financial year.
         </Trans>
       </Text>
     </Setting>

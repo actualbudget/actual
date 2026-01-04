@@ -66,7 +66,7 @@ export function getLiveRange(
         monthUtils.financialYearStart(new Date(), financialYearStart),
         monthUtils.currentMonth(),
       );
-      break;  
+      break;
     }
     case 'lastFinancialYear': {
       const dayInCorrectYear = new Date();
@@ -77,7 +77,7 @@ export function getLiveRange(
         monthUtils.financialYearStart(dayInCorrectYear, financialYearStart),
         monthUtils.financialYearEnd(dayInCorrectYear, financialYearStart),
       );
-      break;  
+      break;
     }
     case 'allTime': {
       dateStart = earliestTransaction;

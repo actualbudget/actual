@@ -141,9 +141,16 @@ export function GetCardData({
       balanceTypeOp: ReportOptions.balanceTypeMap.get(report.balanceType),
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
-      useExactDates,
+      useExactDates: useExactDates ?? false,
     });
-  }, [report, categories, startDate, endDate, firstDayOfWeekIdx, useExactDates]);
+  }, [
+    report,
+    categories,
+    startDate,
+    endDate,
+    firstDayOfWeekIdx,
+    useExactDates,
+  ]);
   const getGraphData = useMemo(() => {
     return createCustomSpreadsheet({
       startDate,
@@ -164,7 +171,7 @@ export function GetCardData({
       graphType: report.graphType,
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
-      useExactDates,
+      useExactDates: useExactDates ?? false,
     });
   }, [
     report,

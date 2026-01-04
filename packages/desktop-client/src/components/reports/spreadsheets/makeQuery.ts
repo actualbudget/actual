@@ -30,8 +30,12 @@ export function makeQuery(
     //Apply month range filters
     .filter({
       $and: [
-        useExactDates ? { date: { $gte: startDate } } : { date: { $transform: intervalFilter, $gte: startDate } },
-        useExactDates ? { date: { $lte: endDate } } : { date: { $transform: intervalFilter, $lte: endDate } },
+        useExactDates
+          ? { date: { $gte: startDate } }
+          : { date: { $transform: intervalFilter, $gte: startDate } },
+        useExactDates
+          ? { date: { $lte: endDate } }
+          : { date: { $transform: intervalFilter, $lte: endDate } },
       ],
     })
     //Show assets or debts

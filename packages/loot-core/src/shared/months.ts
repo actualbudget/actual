@@ -403,21 +403,36 @@ export function nameForMonth(month: DateLike, locale?: Locale): string {
   return d.format(_parse(month), "MMMM ''yy", { locale });
 }
 
-function _financialYearStartDate(date: DateLike, financialYearStart?: SyncedPrefs['financialYearStart']): Date {
+function _financialYearStartDate(
+  date: DateLike,
+  financialYearStart?: SyncedPrefs['financialYearStart'],
+): Date {
   const parsed = _parse(date);
   const startOfYear = _parse(financialYearStart ?? '01-01');
-  const year = parsed.getMonth() > startOfYear.getMonth() || (parsed.getMonth() === startOfYear.getMonth() && parsed.getDate() >= startOfYear.getDate())
-    ? parsed.getFullYear()
-    : parsed.getFullYear() - 1;
-  
+  const year =
+    parsed.getMonth() > startOfYear.getMonth() ||
+    (parsed.getMonth() === startOfYear.getMonth() &&
+      parsed.getDate() >= startOfYear.getDate())
+      ? parsed.getFullYear()
+      : parsed.getFullYear() - 1;
+
   return new Date(year, startOfYear.getMonth(), startOfYear.getDate());
 }
 
-export function financialYearStart(date: DateLike, financialYearStart?: SyncedPrefs['financialYearStart']): string {
-  return d.format(_financialYearStartDate(date, financialYearStart), 'yyyy-MM-dd');
+export function financialYearStart(
+  date: DateLike,
+  financialYearStart?: SyncedPrefs['financialYearStart'],
+): string {
+  return d.format(
+    _financialYearStartDate(date, financialYearStart),
+    'yyyy-MM-dd',
+  );
 }
 
-export function financialYearEnd(date: DateLike, financialYearStart?: SyncedPrefs['financialYearStart']): string {
+export function financialYearEnd(
+  date: DateLike,
+  financialYearStart?: SyncedPrefs['financialYearStart'],
+): string {
   const end = _financialYearStartDate(date, financialYearStart);
   end.setFullYear(end.getFullYear() + 1);
   end.setDate(end.getDate() - 1);
