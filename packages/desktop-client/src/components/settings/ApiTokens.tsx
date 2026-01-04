@@ -8,17 +8,22 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { type ApiToken, type ApiTokenCreateResult } from 'loot-core/server/auth/app';
+import {
+  type ApiToken,
+  type ApiTokenCreateResult,
+} from 'loot-core/server/auth/app';
 
 import { Setting } from './UI';
 
 import { useServerURL } from '@desktop-client/components/ServerContext';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
-
-
-function formatDate(timestamp: number | null | undefined, t: (key: string) => string): string {
+function formatDate(
+  timestamp: number | null | undefined,
+  t: (key: string) => string,
+): string {
   if (timestamp === null || timestamp === undefined || timestamp === -1) {
     return t('Never');
   }
@@ -33,18 +38,27 @@ function TokenRow({
   onRevoke: (id: string) => void;
 }) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const [revoking, setRevoking] = useState(false);
 
-  const handleRevoke = async () => {
-    if (
-      window.confirm(
-        t('Are you sure you want to revoke this token? This cannot be undone.'),
-      )
-    ) {
-      setRevoking(true);
-      await onRevoke(token.id);
-      setRevoking(false);
-    }
+  const handleRevoke = () => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'confirm-delete',
+          options: {
+            message: t(
+              'Are you sure you want to revoke this token? This cannot be undone.',
+            ),
+            onConfirm: async () => {
+              setRevoking(true);
+              await onRevoke(token.id);
+              setRevoking(false);
+            },
+          },
+        },
+      }),
+    );
   };
 
   return (
@@ -124,8 +138,18 @@ function CreateTokenModal({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
   return (
     <View
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-token-title"
+      onKeyDown={handleKeyDown}
       style={{
         position: 'fixed',
         top: 0,
@@ -150,7 +174,10 @@ function CreateTokenModal({
         }}
         onClick={e => e.stopPropagation()}
       >
-        <Text style={{ fontSize: 18, fontWeight: 600, marginBottom: 15 }}>
+        <Text
+          id="create-token-title"
+          style={{ fontSize: 18, fontWeight: 600, marginBottom: 15 }}
+        >
           <Trans>Create API Token</Trans>
         </Text>
 
@@ -223,8 +250,18 @@ function ShowTokenModal({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
   return (
     <View
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="show-token-title"
+      onKeyDown={handleKeyDown}
       style={{
         position: 'fixed',
         top: 0,
@@ -247,7 +284,10 @@ function ShowTokenModal({
           maxWidth: '90%',
         }}
       >
-        <Text style={{ fontSize: 18, fontWeight: 600, marginBottom: 15 }}>
+        <Text
+          id="show-token-title"
+          style={{ fontSize: 18, fontWeight: 600, marginBottom: 15 }}
+        >
           <Trans>Token Created</Trans>
         </Text>
 
