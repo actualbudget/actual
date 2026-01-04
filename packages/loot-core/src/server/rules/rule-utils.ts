@@ -30,6 +30,7 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   doesNotContain: 0,
   matches: 0,
   hasTags: 0,
+  hasPeople: 0,
   onBudget: 0,
   offBudget: 0,
 };

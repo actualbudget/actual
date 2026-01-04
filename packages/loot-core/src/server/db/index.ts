@@ -807,21 +807,51 @@ function toSqlQueryParameters(params: unknown[]) {
   return params.map(() => '?').join(',');
 }
 
-export function getTags() {
+export function getTags(type?: DbTag['type']) {
+  if (type) {
+    return all<DbTag>(
+      `
+      SELECT id, tag, type, color, description
+      FROM tags
+      WHERE tombstone = 0 AND type = ?
+      ORDER BY tag
+    `,
+      [type],
+    );
+  }
   return all<DbTag>(`
-    SELECT id, tag, color, description
+    SELECT id, tag, type, color, description
     FROM tags
     WHERE tombstone = 0
     ORDER BY tag
   `);
 }
 
-export function getAllTags() {
+export function getAllTags(type?: DbTag['type']) {
+  if (type) {
+    return all<DbTag>(
+      `
+      SELECT id, tag, type, color, description
+      FROM tags
+      WHERE type = ?
+      ORDER BY tag
+    `,
+      [type],
+    );
+  }
   return all<DbTag>(`
-    SELECT id, tag, color, description
+    SELECT id, tag, type, color, description
     FROM tags
     ORDER BY tag
   `);
+}
+
+export function getPeople() {
+  return getTags('PERSON');
+}
+
+export function getAllPeople() {
+  return getAllTags('PERSON');
 }
 
 export function insertTag(tag): Promise<DbTag['id']> {
@@ -844,5 +874,16 @@ export function findTags() {
     WHERE tombstone = 0 AND notes LIKE ?
   `,
     ['%#%'],
+  );
+}
+
+export function findPeople() {
+  return all<{ notes: string }>(
+    `
+    SELECT notes
+    FROM transactions
+    WHERE tombstone = 0 AND notes LIKE ?
+  `,
+    ['%@%'],
   );
 }

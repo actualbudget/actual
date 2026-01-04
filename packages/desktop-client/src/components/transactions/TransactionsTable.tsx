@@ -871,6 +871,7 @@ type TransactionProps = {
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;
+  onNotesPersonClick: (person: string) => void;
   splitError?: ReactNode;
   listContainerRef?: RefObject<HTMLDivElement>;
   showSelection?: boolean;
@@ -918,6 +919,7 @@ const Transaction = memo(function Transaction({
   onNavigateToTransferAccount,
   onNavigateToSchedule,
   onNotesTagClick,
+  onNotesPersonClick,
   splitError,
   listContainerRef,
   showSelection,
@@ -1395,7 +1397,11 @@ const Transaction = memo(function Transaction({
         value={notes ?? (isPreview ? schedule?.name : null) ?? ''}
         valueStyle={valueStyle}
         formatter={value =>
-          NotesTagFormatter({ notes: value, onNotesTagClick })
+          NotesTagFormatter({
+            notes: value,
+            onNotesTagClick,
+            onNotesPersonClick,
+          })
         }
         onExpose={name => !isPreview && onEdit(id, name)}
         inputProps={{
@@ -1787,6 +1793,7 @@ type NewTransactionProps = {
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;
+  onNotesPersonClick: (person: string) => void;
   onSave: (
     tx: TransactionEntity,
     subTxs: TransactionEntity[] | null,
@@ -1832,6 +1839,7 @@ function NewTransaction({
   onNavigateToTransferAccount,
   onNavigateToSchedule,
   onNotesTagClick,
+  onNotesPersonClick,
   balance,
   showHiddenCategories,
 }: NewTransactionProps) {
@@ -1901,6 +1909,7 @@ function NewTransaction({
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
           onNotesTagClick={onNotesTagClick}
+          onNotesPersonClick={onNotesPersonClick}
           balance={balance ?? 0}
           showSelection
           allowSplitTransaction
@@ -1999,6 +2008,7 @@ type TransactionTableInnerProps = {
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;
+  onNotesPersonClick: (person: string) => void;
   sortField: string;
   ascDesc: 'asc' | 'desc';
   onCreateRule: (ids: RuleEntity['id'][]) => void;
@@ -2052,6 +2062,7 @@ function TransactionTableInner({
     onNavigateToTransferAccount: onNavigateToTransferAccountProp,
     onNavigateToSchedule: onNavigateToScheduleProp,
     onNotesTagClick: onNotesTagClickProp,
+    onNotesPersonClick: onNotesPersonClickProp,
   } = props;
 
   const onNavigateToTransferAccount = useCallback(
@@ -2076,6 +2087,14 @@ function TransactionTableInner({
       onNotesTagClickProp(noteTag);
     },
     [onCloseAddTransactionProp, onNotesTagClickProp],
+  );
+
+  const onNotesPersonClick = useCallback(
+    (person: string) => {
+      onCloseAddTransactionProp();
+      onNotesPersonClickProp(person);
+    },
+    [onCloseAddTransactionProp, onNotesPersonClickProp],
   );
 
   useEffect(() => {
@@ -2183,6 +2202,7 @@ function TransactionTableInner({
         onNavigateToTransferAccount={onNavigateToTransferAccount}
         onNavigateToSchedule={onNavigateToSchedule}
         onNotesTagClick={onNotesTagClick}
+        onNotesPersonClick={onNotesPersonClick}
         splitError={
           hasSplitError && (
             <TransactionError
@@ -2262,6 +2282,7 @@ function TransactionTableInner({
               onNavigateToTransferAccount={onNavigateToTransferAccount}
               onNavigateToSchedule={onNavigateToSchedule}
               onNotesTagClick={onNotesTagClick}
+              onNotesPersonClick={onNotesPersonClick}
               onDistributeRemainder={props.onDistributeRemainder}
               showHiddenCategories={showHiddenCategories}
             />
@@ -2348,6 +2369,7 @@ export type TransactionTableProps = {
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;
+  onNotesPersonClick: (person: string) => void;
   onSort: (field: string, ascDesc: 'asc' | 'desc') => void;
   sortField: string;
   ascDesc: 'asc' | 'desc';

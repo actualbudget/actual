@@ -94,6 +94,7 @@ export type RuleConditionEntity =
       | 'doesNotContain'
       | 'matches'
       | 'hasTags'
+      | 'hasPeople'
     >
   | BaseConditionEntity<
       'payee',

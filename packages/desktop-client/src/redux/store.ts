@@ -35,6 +35,10 @@ import {
   reducer as payeesSliceReducer,
 } from '@desktop-client/payees/payeesSlice';
 import {
+  name as peopleSliceName,
+  reducer as peopleSliceReducer,
+} from '@desktop-client/people/peopleSlice';
+import {
   name as prefsSliceName,
   reducer as prefsSliceReducer,
 } from '@desktop-client/prefs/prefsSlice';
@@ -62,6 +66,7 @@ const rootReducer = combineReducers({
   [prefsSliceName]: prefsSliceReducer,
   [transactionsSliceName]: transactionsSliceReducer,
   [tagsSliceName]: tagsSliceReducer,
+  [peopleSliceName]: peopleSliceReducer,
   [usersSliceName]: usersSliceReducer,
 });
 

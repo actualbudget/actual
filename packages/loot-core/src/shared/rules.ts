@@ -38,6 +38,7 @@ const TYPE_INFO = {
       'doesNotContain',
       'notOneOf',
       'hasTags',
+      'hasPeople',
     ],
     nullable: true,
   },
@@ -181,6 +182,8 @@ export function friendlyOp(op, type?) {
       return t('contains');
     case 'hasTags':
       return t('has tags');
+    case 'hasPeople':
+      return t('has people');
     case 'matches':
       return t('matches');
     case 'doesNotContain':

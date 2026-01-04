@@ -324,9 +324,12 @@ export type DbViewSchedule = {
   _actions: JsonString;
 };
 
+export type DbTagType = 'TAG' | 'PERSON';
+
 export type DbTag = {
   id: string;
   tag: string;
+  type: DbTagType;
   color?: string | null;
   description?: string | null;
   tombstone: 1 | 0;

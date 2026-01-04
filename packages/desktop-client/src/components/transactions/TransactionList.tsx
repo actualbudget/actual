@@ -591,6 +591,18 @@ export function TransactionList({
     [onApplyFilter],
   );
 
+  const onNotesPersonClick = useCallback(
+    (person: string) => {
+      onApplyFilter({
+        field: 'notes',
+        op: 'hasPeople',
+        value: person,
+        type: 'string',
+      });
+    },
+    [onApplyFilter],
+  );
+
   return (
     <TransactionTable
       ref={tableRef}
@@ -625,6 +637,7 @@ export function TransactionList({
       onNavigateToTransferAccount={onNavigateToTransferAccount}
       onNavigateToSchedule={onNavigateToSchedule}
       onNotesTagClick={onNotesTagClick}
+      onNotesPersonClick={onNotesPersonClick}
       onSort={onSort}
       sortField={sortField}
       ascDesc={ascDesc}
