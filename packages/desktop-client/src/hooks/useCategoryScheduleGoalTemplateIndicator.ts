@@ -5,6 +5,7 @@ import { type Locale } from 'date-fns';
 import { type TFunction } from 'i18next';
 
 import * as monthUtils from 'loot-core/shared/months';
+import { getUpcomingDays } from 'loot-core/shared/schedules';
 import {
   type CategoryEntity,
   type ScheduleEntity,
@@ -13,6 +14,7 @@ import {
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
 import { useLocale } from './useLocale';
 import { type ScheduleStatusType } from './useSchedules';
+import { useSyncedPref } from './useSyncedPref';
 
 type UseCategoryScheduleGoalTemplateProps = {
   category: CategoryEntity;
@@ -39,6 +41,10 @@ export function useCategoryScheduleGoalTemplateIndicator({
   const { t } = useTranslation();
   const locale = useLocale();
 
+  const [upcomingScheduledTransactionLength] = useSyncedPref(
+    'upcomingScheduledTransactionLength',
+  );
+  const upcomingDays = getUpcomingDays(upcomingScheduledTransactionLength);
   const { schedules, statuses: scheduleStatuses } =
     useCategoryScheduleGoalTemplates({
       category,
@@ -50,9 +56,16 @@ export function useCategoryScheduleGoalTemplateIndicator({
         const status = scheduleStatuses.get(schedule.id);
         return status === 'upcoming' || status === 'due' || status === 'missed';
       })
-      .filter(
-        schedule => monthUtils.monthFromDate(schedule.next_date) === month,
-      )
+      .filter(schedule => {
+        const indicatorStartDate = monthUtils.subDays(
+          schedule.next_date,
+          upcomingDays,
+        );
+        return (
+          monthUtils.monthFromDate(schedule.next_date) === month ||
+          monthUtils.monthFromDate(indicatorStartDate) === month
+        );
+      })
       .sort((a, b) => {
         // Display missed schedules first, then due, then upcoming.
         const aStatus = scheduleStatuses.get(a.id);
@@ -87,7 +100,7 @@ export function useCategoryScheduleGoalTemplateIndicator({
       ),
       description,
     };
-  }, [locale, month, scheduleStatuses, schedules, t]);
+  }, [locale, month, scheduleStatuses, schedules, t, upcomingDays]);
 }
 
 function getScheduleStatusDescription({
