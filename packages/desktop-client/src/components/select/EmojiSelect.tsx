@@ -109,12 +109,22 @@ export function EmojiSelect({
   // Keep things tight (user requested) but still leave a small margin.
   const popoverWidth = Math.max(225, gridContentWidth + 12);
 
+  const clearSelection = useCallback(() => {
+    selectionRef.current = null;
+    selectionAnchorRef.current = null;
+    setSelection(null);
+  }, []);
+
   const closePicker = useCallback(() => {
     if (!embedded) {
       setOpen(false);
       setSearchQuery('');
     }
-  }, [embedded]);
+    clearSelection();
+    setIsSearchActive(false);
+    setHoveredEmoji(null);
+    setFocusedIndex(null);
+  }, [clearSelection, embedded]);
 
   // Sync with external isOpen prop if provided (e.g. table cells)
   useEffect(() => {
@@ -221,12 +231,6 @@ export function EmojiSelect({
     const next = { start: s, end: e };
     selectionRef.current = next;
     setSelection(next);
-  }, []);
-
-  const clearSelection = useCallback(() => {
-    selectionRef.current = null;
-    selectionAnchorRef.current = null;
-    setSelection(null);
   }, []);
 
   const setCaretIndexSafe = useCallback((next: number) => {
