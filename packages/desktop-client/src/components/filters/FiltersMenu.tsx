@@ -491,7 +491,7 @@ export function FilterButton<T extends RuleConditionEntity>({
             // Separador como item especial
             {
               name: '__separator__',
-              text: '', 
+              text: '',
               type: 'divider', // Tal vez funcione, si no, el componente lo ignorará
             },
             ...translatedFilterFields
