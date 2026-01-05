@@ -12,11 +12,11 @@ You can export your data from Actual at any time. To do so:
 
 1. Login to your budget, click 'More' > 'Settings'
 
-   ![](/img/backup-restore/sidebar-settings@2x.png)
+   ![](/img/backup-restore/sidebar-settings@2x.webp)
 
 2. Scroll down to the Export section and click Export Data
 
-   ![](/img/backup-restore/settings-export.png)
+   ![](/img/backup-restore/settings-export.webp)
 
 3. Save the file somewhere on your computer - that is it -- you're done.
 

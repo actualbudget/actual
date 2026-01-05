@@ -47,22 +47,7 @@ export default defineConfig(
       perfectionist: pluginPerfectionist,
     },
     rules: {
-      'no-restricted-properties': [
-        'error',
-        {
-          object: 'require',
-          property: 'ensure',
-          message:
-            'Please use import() instead. More info: https://facebook.github.io/create-react-app/docs/code-splitting',
-        },
-        {
-          object: 'System',
-          property: 'import',
-          message:
-            'Please use import() instead. More info: https://facebook.github.io/create-react-app/docs/code-splitting',
-        },
-      ],
-
+      // TODO: https://github.com/oxc-project/oxc/issues/17076
       'perfectionist/sort-imports': [
         'warn',
         {
@@ -93,26 +78,6 @@ export default defineConfig(
           newlinesBetween: 'always',
         },
       ],
-
-      'object-shorthand': ['warn', 'properties'],
-
-      'no-restricted-syntax': [
-        'warn',
-        {
-          // forbid React.* as they are legacy https://twitter.com/dan_abramov/status/1308739731551858689
-          selector:
-            ":matches(MemberExpression[object.name='React'], TSQualifiedName[left.name='React'])",
-          message:
-            'Using default React import is discouraged, please use named exports directly instead.',
-        },
-        {
-          // forbid <a> in favor of <Link>
-          selector: 'JSXOpeningElement[name.name="a"]',
-          message: 'Using <a> is discouraged, please use <Link> instead.',
-        },
-      ],
-
-      'prefer-const': 'warn',
     },
   },
   {
@@ -126,12 +91,6 @@ export default defineConfig(
         { preferPathOverBaseUrl: true },
       ],
       'typescript-paths/absolute-import': ['error', { enableAlias: false }],
-    },
-  },
-  {
-    files: ['packages/docs/**/*'],
-    rules: {
-      'no-restricted-syntax': 'off',
     },
   },
 );
