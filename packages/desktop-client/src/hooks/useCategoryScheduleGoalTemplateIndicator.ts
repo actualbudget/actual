@@ -57,14 +57,15 @@ export function useCategoryScheduleGoalTemplateIndicator({
         return status === 'upcoming' || status === 'due' || status === 'missed';
       })
       .filter(schedule => {
+        if (monthUtils.monthFromDate(schedule.next_date) === month) {
+          return true;
+        }
+
         const indicatorStartDate = monthUtils.subDays(
           schedule.next_date,
           upcomingDays,
         );
-        return (
-          monthUtils.monthFromDate(schedule.next_date) === month ||
-          monthUtils.monthFromDate(indicatorStartDate) === month
-        );
+        return monthUtils.monthFromDate(indicatorStartDate) === month;
       })
       .sort((a, b) => {
         // Display missed schedules first, then due, then upcoming.
