@@ -40,6 +40,10 @@ export function Schedules() {
     dispatch(pushModal({ modal: { name: 'schedules-discover' } }));
   }, [dispatch]);
 
+  const onImportWallos = useCallback(() => {
+    dispatch(pushModal({ modal: { name: 'import-wallos' } }));
+  }, [dispatch]);
+
   const onChangeUpcomingLength = useCallback(() => {
     dispatch(pushModal({ modal: { name: 'schedules-upcoming-length' } }));
   }, [dispatch]);
@@ -136,6 +140,9 @@ export function Schedules() {
         >
           <Button onPress={onDiscover}>
             <Trans>Find schedules</Trans>
+          </Button>
+          <Button onPress={onImportWallos}>
+            <Trans>Import from Wallos</Trans>
           </Button>
           <Button onPress={onChangeUpcomingLength}>
             <Trans>Change upcoming length</Trans>

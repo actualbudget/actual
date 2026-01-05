@@ -37,6 +37,7 @@ import { undoable } from '../undo';
 import { RSchedule } from '../util/rschedule';
 
 import { findSchedules } from './find-schedules';
+import type { WallosScheduleImportItem } from './wallos-import-types';
 
 // Utilities
 
@@ -524,6 +525,108 @@ async function advanceSchedulesService(syncSuccess) {
   }
 }
 
+// Wallos Import Functions
+
+/**
+ * Check for potential duplicate schedules based on name and amount
+ */
+async function checkWallosDuplicates(
+  subscriptions: Array<{ id: string; name: string; amount: number }>,
+): Promise<
+  Array<{
+    subscriptionId: string;
+    isDuplicate: boolean;
+    existingScheduleId?: string;
+    existingScheduleName?: string;
+  }>
+> {
+  const { data: existingSchedules } = await aqlQuery(
+    q('schedules').filter({ tombstone: false }).select('*'),
+  );
+
+  return subscriptions.map(sub => {
+    // Check for duplicates by name (case-insensitive) and similar amount
+    const duplicate = existingSchedules.find((schedule: ScheduleEntity) => {
+      const nameMatch =
+        schedule.name?.toLowerCase().trim() === sub.name.toLowerCase().trim();
+
+      // Check amount - allow for some variation (within 5%)
+      const schedAmount =
+        typeof schedule._amount === 'number'
+          ? schedule._amount
+          : schedule._amount?.num1 || 0;
+      const amountDiff = Math.abs(schedAmount - sub.amount);
+      const amountMatch = amountDiff <= Math.abs(sub.amount) * 0.05;
+
+      return nameMatch && amountMatch;
+    });
+
+    return {
+      subscriptionId: sub.id,
+      isDuplicate: !!duplicate,
+      existingScheduleId: duplicate?.id,
+      existingScheduleName: duplicate?.name,
+    };
+  });
+}
+
+/**
+ * Import Wallos subscriptions as schedules
+ */
+async function importWallosSchedules(
+  items: WallosScheduleImportItem[],
+): Promise<{
+  successCount: number;
+  errors: Array<{ name: string; error: string }>;
+}> {
+  const errors: Array<{ name: string; error: string }> = [];
+  let successCount = 0;
+
+  for (const item of items) {
+    try {
+      const conditions = [
+        {
+          op: 'isapprox',
+          field: 'date',
+          value: item.date,
+        },
+        {
+          op: 'isapprox',
+          field: 'amount',
+          value: item.amount,
+        },
+        {
+          op: 'is',
+          field: 'account',
+          value: item.accountId,
+        },
+        {
+          op: 'is',
+          field: 'payee',
+          value: item.payeeId,
+        },
+      ];
+
+      await createSchedule({
+        schedule: {
+          name: item.name,
+          posts_transaction: false,
+        },
+        conditions,
+      });
+
+      successCount++;
+    } catch (err) {
+      errors.push({
+        name: item.name,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+
+  return { successCount, errors };
+}
+
 export type SchedulesHandlers = {
   'schedule/create': typeof createSchedule;
   'schedule/update': typeof updateSchedule;
@@ -533,6 +636,8 @@ export type SchedulesHandlers = {
   'schedule/force-run-service': typeof advanceSchedulesService;
   'schedule/discover': typeof discoverSchedules;
   'schedule/get-upcoming-dates': typeof getUpcomingDates;
+  'schedule/check-wallos-duplicates': typeof checkWallosDuplicates;
+  'schedule/import-wallos': typeof importWallosSchedules;
 };
 
 // Expose functions to the client
@@ -552,6 +657,8 @@ app.method(
 );
 app.method('schedule/discover', discoverSchedules);
 app.method('schedule/get-upcoming-dates', getUpcomingDates);
+app.method('schedule/check-wallos-duplicates', checkWallosDuplicates);
+app.method('schedule/import-wallos', mutator(undoable(importWallosSchedules)));
 
 app.service(trackJSONPaths);
 

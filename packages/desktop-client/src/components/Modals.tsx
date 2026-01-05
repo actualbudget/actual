@@ -73,6 +73,7 @@ import { TransferOwnership } from './modals/TransferOwnership';
 import { UnmigrateBudgetAutomationsModal } from './modals/UnmigrateBudgetAutomationsModal';
 import { CategoryLearning } from './payees/CategoryLearning';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
+import { ImportWallosModal } from './schedules/ImportWallosModal';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleEditModal } from './schedules/ScheduleEditModal';
 import { ScheduleLink } from './schedules/ScheduleLink';
@@ -236,6 +237,9 @@ export function Modals() {
 
         case 'schedules-discover':
           return <DiscoverSchedules key={key} />;
+
+        case 'import-wallos':
+          return <ImportWallosModal key={key} />;
 
         case 'schedules-upcoming-length':
           return <UpcomingLength key={key} />;
