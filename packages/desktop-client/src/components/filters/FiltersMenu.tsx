@@ -475,15 +475,33 @@ export function FilterButton<T extends RuleConditionEntity>({
       >
         <Menu
           onMenuSelect={name => {
+            // Ignorar el clic en el separador
+            if (name === '__separator__') return;
             dispatch({ type: 'configure', field: name });
           }}
-          items={translatedFilterFields
-            .filter(f => (exclude ? !exclude.includes(f[0]) : true))
-            .sort()
-            .map(([name, text]) => ({
-              name,
-              text: titleFirst(text),
-            }))}
+          items={[
+            ...translatedFilterFields
+              .filter(f => (exclude ? !exclude.includes(f[0]) : true))
+              .filter(f => f[0] !== 'saved')
+              .sort()
+              .map(([name, text]) => ({
+                name,
+                text: titleFirst(text),
+              })),
+            // Separador como item especial
+            {
+              name: '__separator__',
+              text: '', 
+              type: 'divider', // Tal vez funcione, si no, el componente lo ignorará
+            },
+            ...translatedFilterFields
+              .filter(f => (exclude ? !exclude.includes(f[0]) : true))
+              .filter(f => f[0] === 'saved')
+              .map(([name, text]) => ({
+                name,
+                text: titleFirst(text),
+              })),
+          ]}
         />
       </Popover>
 
