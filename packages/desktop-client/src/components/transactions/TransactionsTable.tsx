@@ -44,6 +44,7 @@ import { View } from '@actual-app/components/view';
 import { format as formatDate, parseISO } from 'date-fns';
 
 import * as monthUtils from 'loot-core/shared/months';
+import { q } from 'loot-core/shared/query';
 import { getStatusLabel } from 'loot-core/shared/schedules';
 import {
   addSplitTransaction,
@@ -110,7 +111,10 @@ import {
   UnexposedCellContent,
   useTableNavigator,
 } from '@desktop-client/components/table';
-import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
+import {
+  SchedulesProvider,
+  useCachedSchedules,
+} from '@desktop-client/hooks/useCachedSchedules';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import {
   DisplayPayeeProvider,
@@ -521,6 +525,7 @@ function PayeeCell({
   const transferAccount = transferAccountsByTransaction[transaction.id];
 
   const displayPayee = useDisplayPayee({ transaction });
+  const allSchedulesQuery = useMemo(() => q('schedules').select('*'), []);
 
   return transaction.is_parent ? (
     <Cell
@@ -569,12 +574,14 @@ function PayeeCell({
             color: theme.pageTextSubdued,
           }}
         >
-          <PayeeIcons
-            transaction={transaction}
-            transferAccount={transferAccount}
-            onNavigateToTransferAccount={onNavigateToTransferAccount}
-            onNavigateToSchedule={onNavigateToSchedule}
-          />
+          <SchedulesProvider query={allSchedulesQuery}>
+            <PayeeIcons
+              transaction={transaction}
+              transferAccount={transferAccount}
+              onNavigateToTransferAccount={onNavigateToTransferAccount}
+              onNavigateToSchedule={onNavigateToSchedule}
+            />
+          </SchedulesProvider>
           <SvgSplit
             style={{
               color: 'inherit',
@@ -662,12 +669,14 @@ function PayeeCell({
 
         return (
           <>
-            <PayeeIcons
-              transaction={transaction}
-              transferAccount={transferAccount}
-              onNavigateToTransferAccount={onNavigateToTransferAccount}
-              onNavigateToSchedule={onNavigateToSchedule}
-            />
+            <SchedulesProvider query={allSchedulesQuery}>
+              <PayeeIcons
+                transaction={transaction}
+                transferAccount={transferAccount}
+                onNavigateToTransferAccount={onNavigateToTransferAccount}
+                onNavigateToSchedule={onNavigateToSchedule}
+              />
+            </SchedulesProvider>
             <div
               style={{
                 overflow: 'hidden',
