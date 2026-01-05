@@ -475,7 +475,6 @@ export function FilterButton<T extends RuleConditionEntity>({
       >
         <Menu
           onMenuSelect={name => {
-            // Ignorar el clic en el separador
             if (name === '__separator__') return;
             dispatch({ type: 'configure', field: name });
           }}
@@ -488,11 +487,10 @@ export function FilterButton<T extends RuleConditionEntity>({
                 name,
                 text: titleFirst(text),
               })),
-            // Separador como item especial
             {
               name: '__separator__',
-              text: '',
-              type: 'divider', // Tal vez funcione, si no, el componente lo ignorará
+              text: '', 
+              type: 'divider',
             },
             ...translatedFilterFields
               .filter(f => (exclude ? !exclude.includes(f[0]) : true))
