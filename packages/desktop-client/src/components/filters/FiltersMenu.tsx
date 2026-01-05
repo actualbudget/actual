@@ -475,7 +475,6 @@ export function FilterButton<T extends RuleConditionEntity>({
       >
         <Menu
           onMenuSelect={name => {
-            if (name === '__separator__') return;
             dispatch({ type: 'configure', field: name });
           }}
           items={[
@@ -487,11 +486,9 @@ export function FilterButton<T extends RuleConditionEntity>({
                 name,
                 text: titleFirst(text),
               })),
-            {
-              name: '__separator__',
-              text: '', 
-              type: 'divider',
-            },
+
+            Menu.line,
+
             ...translatedFilterFields
               .filter(f => (exclude ? !exclude.includes(f[0]) : true))
               .filter(f => f[0] === 'saved')
