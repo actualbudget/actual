@@ -156,7 +156,7 @@ function Notification({
     x: 0,
     y: yOffset,
     opacity: stackOpacity,
-    scale: scale,
+    scale,
   }));
 
   // Update scale, opacity, and y-position when index changes
@@ -199,7 +199,7 @@ function Notification({
         bottom: 0,
         left: 0,
         right: 0,
-        zIndex: zIndex,
+        zIndex,
         // Combine translateX, translateY and scale transforms
         transform: to(
           [spring.x, spring.y, spring.scale],
@@ -229,12 +229,13 @@ function Notification({
             : error
               ? theme.errorBackground
               : theme.warningBackground,
-          borderTop: `3px solid ${positive
-            ? theme.noticeBorder
-            : error
-              ? theme.errorBorder
-              : theme.warningBorder
-            }`,
+          borderTop: `3px solid ${
+            positive
+              ? theme.noticeBorder
+              : error
+                ? theme.errorBorder
+                : theme.warningBorder
+          }`,
           ...styles.shadowLarge,
           maxWidth: 550,
           '& a': { color: 'currentColor' },
@@ -294,12 +295,13 @@ function Notification({
                 }}
                 className={css({
                   backgroundColor: 'transparent',
-                  border: `1px solid ${positive
-                    ? theme.noticeBorder
-                    : error
-                      ? theme.errorBorder
-                      : theme.warningBorder
-                    }`,
+                  border: `1px solid ${
+                    positive
+                      ? theme.noticeBorder
+                      : error
+                        ? theme.errorBorder
+                        : theme.warningBorder
+                  }`,
                   color: 'currentColor',
                   ...styles.mediumText,
                   flexShrink: 0,
@@ -320,21 +322,21 @@ function Notification({
 
           {pre
             ? pre.split('\n\n').map((text, idx) => (
-              <View
-                key={idx}
-                style={{
-                  whiteSpace: 'pre-wrap',
-                  fontFamily: 'monospace',
-                  fontSize: 12,
-                  backgroundColor: 'rgba(0, 0, 0, .05)',
-                  padding: 10,
-                  borderRadius: 4,
-                  width: '100%',
-                }}
-              >
-                {text}
-              </View>
-            ))
+                <View
+                  key={idx}
+                  style={{
+                    whiteSpace: 'pre-wrap',
+                    fontFamily: 'monospace',
+                    fontSize: 12,
+                    backgroundColor: 'rgba(0, 0, 0, .05)',
+                    padding: 10,
+                    borderRadius: 4,
+                    width: '100%',
+                  }}
+                >
+                  {text}
+                </View>
+              ))
             : null}
         </SpaceBetween>
       </View>
