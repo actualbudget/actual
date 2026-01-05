@@ -447,6 +447,7 @@ export const CategoryMonth = memo(function CategoryMonth({
           style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
         >
           <span
+            role="button"
             ref={triggerBalanceMenuRef}
             onClick={() => !category.is_income && setBalanceMenuOpen(true)}
           >

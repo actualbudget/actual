@@ -470,6 +470,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
       >
         <span
+          role="button"
           onClick={() => {
             resetBalancePosition(-6, -4);
             setBalanceMenuOpen(true);
@@ -584,6 +585,7 @@ export function IncomeCategoryMonth({
           }}
         >
           <span
+            role="button"
             onClick={() => {
               resetIncomePosition(-6, -4);
               setIncomeMenuOpen(true);
