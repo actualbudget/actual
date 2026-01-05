@@ -118,7 +118,7 @@
     "react/exhaustive-deps": [
       "warn",
       {
-        "additionalHooks": "(useQuery|useEffectAfterMount)"
+        "additionalHooks": "(^useQuery$|^useEffectAfterMount$)"
       }
     ],
     "react/jsx-curly-brace-presence": "warn",
