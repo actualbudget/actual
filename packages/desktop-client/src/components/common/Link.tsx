@@ -52,7 +52,6 @@ const ExternalLink = ({
 }: ExternalLinkProps) => {
   return (
     // we can't use <ExternalLink /> here for obvious reasons
-    // eslint-disable-next-line no-restricted-syntax
     <a
       href={to ?? ''}
       target="_blank"
