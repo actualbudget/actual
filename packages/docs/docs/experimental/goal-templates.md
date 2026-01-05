@@ -171,21 +171,14 @@ This is especially useful for budget categories that have month to month variati
 You can budget the same amount per month, but save up from one month to the next without having to worry about building up more funds than you need.
 
 The last variation of the simple template is sometimes referred to as a "refill".
-With this style, when there is a positive previous balance, the template budgets whatever it takes to hit a "full" amount.
-
-:::note
-
-In categories with a negative balance and "Rollover overspending", the `#template up to X` template will not budget more than the "up to X" amount. If you wish to fully fund a category with a negative rollover balance, use the `#template X up to X` template. 
-
-:::
+With this style the template budgets whatever it takes to hit a "full" amount.
 
 Here is how it works:
 
 | Syntax                    | Previous Balance | Budgeted Amount | New Balance |
 | ------------------------- | :--------------: | :-------------: | :---------: |
 | `#template up to 150`     |       $ 10       |      $ 140      |    $ 150    |
-| `#template up to 150`     |      $ -20       |      $ 150      |    $ 130    |
-| `#template 500 up to 150` |      $ -20       |      $ 170      |    $ 150    |
+| `#template up to 150`     |      $ -20       |      $ 170      |    $ 150    |
 
 Cool, right? This is another way to gracefully handle categories that have month to month variation.
 This will always give you the same amount available each month no matter what you spend the previous month and not ever build up more funds than you need.
@@ -195,7 +188,7 @@ They are simple enough to use easily, but are robust enough to make budgeting mu
 **Notes**:
 
 - A single category with two templates that use `up to` is not supported.
-- If a category contains an `up to X`, the whole category will be subject to that limit even if there are other templates and priorities.
+- If a category contains an `up to X`, the whole category will be subject to that limit even if there are other templates and priorities. This excludes remainders which will run after the limit is applied
  
 #### All Variations
 
