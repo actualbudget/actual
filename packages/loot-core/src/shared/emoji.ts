@@ -36,7 +36,7 @@ function buildEmojiCache(): Map<string, string> {
 }
 
 /**
- * Converts an emoji shortcode (e.g., ":grinning:") to its native emoji character.
+ * Converts an emoji shortcode (e.g., ":red_circle:") to its native emoji character.
  * Returns the original string if the shortcode is not found.
  */
 export function shortcodeToNative(shortcode: string | null): string {
@@ -50,7 +50,7 @@ export function shortcodeToNative(shortcode: string | null): string {
 }
 
 /**
- * Converts a native emoji character to its shortcode (e.g., "😀" -> ":grinning:").
+ * Converts a native emoji character to its shortcode (e.g., "🔴" -> ":red_circle:").
  * If the input is already a shortcode, returns it with colons.
  * Returns the original string if the emoji is not found.
  */
@@ -59,8 +59,10 @@ export function nativeToShortcode(emoji: string | null): string {
     return '';
   }
 
-  // Check if it's already a shortcode (contains colons or doesn't look like emoji)
-  if (emoji.includes(':') || !/[^\x00-\x7F]/.test(emoji)) {
+  const hasNonAscii = Array.from(emoji).some(
+    char => (char.codePointAt(0) ?? 0) > 127,
+  );
+  if (emoji.includes(':') || !hasNonAscii) {
     // Already a shortcode, ensure it has colons
     const id = emoji.replace(/^:/, '').replace(/:$/, '');
     return `:${id}:`;
@@ -72,7 +74,7 @@ export function nativeToShortcode(emoji: string | null): string {
 }
 
 /**
- * Normalizes a flag value to shortcode format (e.g., ":grinning:").
+ * Normalizes a flag value to shortcode format (e.g., ":red_circle:").
  * If the input is already a shortcode, ensures it has colons.
  * If the input is a native emoji, converts it back to shortcode.
  *
@@ -86,25 +88,20 @@ export function normalizeFlagToShortcode(
     return null;
   }
 
-  // If it already looks like a shortcode (contains colons), ensure it has proper format
   if (flag.includes(':')) {
-    // Remove existing colons and add them back
     const id = flag.replace(/^:/, '').replace(/:$/, '');
     return id ? `:${id}:` : null;
   }
 
-  // If it's alphanumeric with underscores/dashes (likely a shortcode without colons)
   if (/^[a-zA-Z0-9_-]+$/.test(flag)) {
     return `:${flag}:`;
   }
 
-  // If it's a unicode emoji, try to convert it back to shortcode
   const cache = buildEmojiCache();
   const shortcode = cache.get(flag);
   if (shortcode) {
     return `:${shortcode}:`;
   }
 
-  // If we can't convert it, return as-is (shouldn't happen if database stores shortcodes)
   return flag;
 }

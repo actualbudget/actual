@@ -16,10 +16,10 @@ import {
   parseISO,
 } from 'date-fns';
 
+import { shortcodeToNative } from 'loot-core/shared/emoji';
 import * as monthUtils from 'loot-core/shared/months';
 import { type TransactionEntity } from 'loot-core/types/models';
 
-import { shortcodeToNative } from 'loot-core/shared/emoji';
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import {
   Cell,
@@ -109,7 +109,7 @@ const TransactionRow = memo(function TransactionRow({
                   color: transaction.flag
                     ? theme.tableText
                     : theme.tableTextSubdued,
-                  opacity: transaction.flag ? 1 : 0.5,
+                  opacity: 1,
                 }}
               >
                 {transaction.flag ? (

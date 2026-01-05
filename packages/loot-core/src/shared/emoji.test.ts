@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { shortcodeToNative } from './emoji';
 
-// Mock the emoji-mart data
 vi.mock('@emoji-mart/data', () => ({
   default: {
     emojis: {
@@ -16,12 +15,12 @@ vi.mock('@emoji-mart/data', () => ({
         name: 'Hundred Points',
         skins: [{ native: '💯' }],
       },
-      'red_circle': {
+      red_circle: {
         id: 'red_circle',
         name: 'Red Circle',
         skins: [{ native: '🔴' }],
       },
-      'thumbs_up': {
+      thumbs_up: {
         id: 'thumbs_up',
         name: 'Thumbs Up',
         skins: [{ native: '👍' }],
@@ -32,7 +31,6 @@ vi.mock('@emoji-mart/data', () => ({
 
 describe('emojiUtils', () => {
   beforeEach(() => {
-    // Clear the cache before each test to ensure fresh state
     vi.resetModules();
   });
 
@@ -71,9 +69,7 @@ describe('emojiUtils', () => {
     });
 
     it('handles multiple colons correctly', () => {
-      // Should strip outer colons but preserve inner ones if any
       expect(shortcodeToNative(':thumbs_up:')).toBe('👍');
     });
   });
 });
-

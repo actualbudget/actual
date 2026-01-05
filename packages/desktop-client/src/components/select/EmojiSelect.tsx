@@ -9,20 +9,20 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from 'react';
-import { Trans } from 'react-i18next';
-
-import data, { type EmojiMartData } from '@emoji-mart/data';
-
-const emojiData = data as EmojiMartData;
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { Input } from '@actual-app/components/input';
 import { SvgFlag } from '@actual-app/components/icons/v1';
+import { Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import data, { type EmojiMartData } from '@emoji-mart/data';
+
 import { shortcodeToNative as shortcodeToNativeUtil } from 'loot-core/shared/emoji';
+
+const emojiData = data as EmojiMartData;
 
 function defaultShouldSaveFromKey(e: KeyboardEvent<HTMLInputElement>) {
   return e.key === 'Enter';
@@ -67,6 +67,7 @@ export function EmojiSelect({
   onUpdate: _onUpdate,
   onSelect,
 }: EmojiSelectProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(embedded);
   const [searchQuery, setSearchQuery] = useState('');
   const [hoveredEmoji, setHoveredEmoji] = useState<EmojiData | null>(null);
@@ -307,7 +308,7 @@ export function EmojiSelect({
         return true;
       }
 
-      // Search by shortcode format (e.g., ":grinning:")
+      // Search by shortcode format
       if (`:${emoji.id}:`.toLowerCase().includes(query)) {
         return true;
       }
@@ -556,7 +557,6 @@ export function EmojiSelect({
 
   const handleEmojiSelect = useCallback(
     (emoji: EmojiData) => {
-      // Save shortcode (e.g., ":grinning:") instead of native emoji
       onSelect(`:${emoji.id}:`);
       closePicker();
     },
@@ -808,7 +808,12 @@ export function EmojiSelect({
         }
 
         // Emoji grid navigation
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        if (
+          e.key === 'ArrowDown' ||
+          e.key === 'ArrowUp' ||
+          e.key === 'ArrowLeft' ||
+          e.key === 'ArrowRight'
+        ) {
           e.preventDefault();
           e.stopPropagation();
           setIsSearchActive(false);
@@ -828,7 +833,22 @@ export function EmojiSelect({
         setOpen(true);
       }
     },
-    [closePicker, clearSelection, embedded, focusedIndex, filteredEmojis, handleEmojiSelect, handleNavigate, isSearchActive, applySearchInputKey, setCaretIndexSafe, setSelectionRange, inputProps, open, shouldSaveFromKeyProp],
+    [
+      closePicker,
+      clearSelection,
+      embedded,
+      focusedIndex,
+      filteredEmojis,
+      handleEmojiSelect,
+      handleNavigate,
+      isSearchActive,
+      applySearchInputKey,
+      setCaretIndexSafe,
+      setSelectionRange,
+      inputProps,
+      open,
+      shouldSaveFromKeyProp,
+    ],
   );
 
   const maybeWrapPopover = (content: ReactNode) => {
@@ -919,7 +939,7 @@ export function EmojiSelect({
           position: 'relative',
           zIndex: 1,
         }}
-        aria-label="Flag"
+        aria-label={t('Flag')}
       />
 
       {showPlaceholder && (
@@ -999,147 +1019,147 @@ export function EmojiSelect({
                 ...styles.smallText,
               }}
             >
-            <Trans>Remove</Trans>
-          </Button>
-        </View>
+              <Trans>Remove</Trans>
+            </Button>
+          </View>
 
-        {/* Search bar */}
-        <View
-          style={{
-            padding: '8px',
-          }}
-        >
-          {/* Visually match focused picker inputs (purple outline + caret),
-              but keep actual focus in the table cell input to avoid closing
-              editing (popover is portaled). */}
+          {/* Search bar */}
           <View
             style={{
-              outline: 0,
-              backgroundColor: theme.tableBackground,
-              color: theme.formInputText,
-              margin: 0,
-              padding: 5,
-              borderRadius: 4,
-              border: '1px solid ' + theme.formInputBorderSelected,
-              boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
-              width: '100%',
-              cursor: 'text',
-              userSelect: 'none',
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 0,
-              ...styles.smallText,
-            }}
-            onMouseDown={e => {
-              e.preventDefault();
-              innerRef.current?.focus();
-              setIsSearchActive(true);
-
-              const clickedIndex = getCaretIndexFromClientX(e.clientX);
-
-              if (e.shiftKey) {
-                // Shift+click selects between the existing caret (anchor) and click.
-                if (selectionAnchorRef.current == null) {
-                  selectionAnchorRef.current = caretIndexRef.current;
-                }
-                setSelectionRange(selectionAnchorRef.current, clickedIndex);
-                setCaretIndexSafe(clickedIndex);
-              } else {
-                // Plain click moves caret and clears selection.
-                clearSelection();
-                selectionAnchorRef.current = clickedIndex;
-                setCaretIndexSafe(clickedIndex);
-              }
-
-              // Click-drag selection
-              const dragAnchor = selectionAnchorRef.current ?? clickedIndex;
-              isDraggingSelectionRef.current = true;
-              const onMove = (ev: MouseEvent) => {
-                if (!isDraggingSelectionRef.current) {
-                  return;
-                }
-                const idx = getCaretIndexFromClientX(ev.clientX);
-                selectionAnchorRef.current = dragAnchor;
-                setSelectionRange(dragAnchor, idx);
-                setCaretIndexSafe(idx);
-              };
-              const onUp = () => {
-                isDraggingSelectionRef.current = false;
-                window.removeEventListener('mousemove', onMove, true);
-                window.removeEventListener('mouseup', onUp, true);
-              };
-              window.addEventListener('mousemove', onMove, true);
-              window.addEventListener('mouseup', onUp, true);
+              padding: '8px',
             }}
           >
-            {searchQuery ? (
-              <span
-                ref={searchTextRef}
-                style={{
-                  display: 'inline-block',
-                  position: 'relative',
-                  lineHeight: '16px',
-                }}
-              >
-                {Array.from(searchQuery).map((ch, i) => (
-                  <span key={i} data-search-char-index={i}>
-                    <span
-                      style={
-                        hasSelection && i >= selectionMin && i < selectionMax
-                          ? {
-                              backgroundColor:
-                                theme.formInputBackgroundSelection,
-                              color: theme.formInputTextSelected,
-                            }
-                          : undefined
-                      }
-                    >
-                      {ch}
-                    </span>
-                  </span>
-                ))}
-                <span
-                  aria-hidden="true"
-                  style={{
-                    position: 'absolute',
-                    left: caretLeft,
-                    top: '50%',
-                    transform: 'translate(-0.5px, -50%)',
-                    width: 1,
-                    height: 16,
-                    backgroundColor: theme.formInputText,
-                    opacity: isCaretVisible ? 1 : 0,
-                    pointerEvents: 'none',
-                  }}
-                />
-              </span>
-            ) : (
-              <>
-                {/* Fake caret (blinking) at the start of the placeholder */}
-                <span
-                  style={{
-                    // Zero-width caret so it doesn't shift placeholder text
-                    width: 0,
-                    height: 16,
-                    borderLeft: '1px solid ' + theme.formInputText,
-                    opacity: isCaretVisible ? 1 : 0,
-                    flexShrink: 0,
-                    marginRight: 0,
-                  }}
-                />
-                <span style={{ color: theme.formInputTextPlaceholder }}>
-                  <Trans>Search emojis...</Trans>
-                </span>
-              </>
-            )}
-          </View>
-        </View>
+            {/* Visually match focused picker inputs (purple outline + caret),
+              but keep actual focus in the table cell input to avoid closing
+              editing (popover is portaled). */}
+            <View
+              style={{
+                outline: 0,
+                backgroundColor: theme.tableBackground,
+                color: theme.formInputText,
+                margin: 0,
+                padding: 5,
+                borderRadius: 4,
+                border: '1px solid ' + theme.formInputBorderSelected,
+                boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
+                width: '100%',
+                cursor: 'text',
+                userSelect: 'none',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 0,
+                ...styles.smallText,
+              }}
+              onMouseDown={e => {
+                e.preventDefault();
+                innerRef.current?.focus();
+                setIsSearchActive(true);
 
-        {/* Emoji grid */}
+                const clickedIndex = getCaretIndexFromClientX(e.clientX);
+
+                if (e.shiftKey) {
+                  // Shift+click selects between the existing caret (anchor) and click.
+                  if (selectionAnchorRef.current == null) {
+                    selectionAnchorRef.current = caretIndexRef.current;
+                  }
+                  setSelectionRange(selectionAnchorRef.current, clickedIndex);
+                  setCaretIndexSafe(clickedIndex);
+                } else {
+                  // Plain click moves caret and clears selection.
+                  clearSelection();
+                  selectionAnchorRef.current = clickedIndex;
+                  setCaretIndexSafe(clickedIndex);
+                }
+
+                // Click-drag selection
+                const dragAnchor = selectionAnchorRef.current ?? clickedIndex;
+                isDraggingSelectionRef.current = true;
+                const onMove = (ev: MouseEvent) => {
+                  if (!isDraggingSelectionRef.current) {
+                    return;
+                  }
+                  const idx = getCaretIndexFromClientX(ev.clientX);
+                  selectionAnchorRef.current = dragAnchor;
+                  setSelectionRange(dragAnchor, idx);
+                  setCaretIndexSafe(idx);
+                };
+                const onUp = () => {
+                  isDraggingSelectionRef.current = false;
+                  window.removeEventListener('mousemove', onMove, true);
+                  window.removeEventListener('mouseup', onUp, true);
+                };
+                window.addEventListener('mousemove', onMove, true);
+                window.addEventListener('mouseup', onUp, true);
+              }}
+            >
+              {searchQuery ? (
+                <span
+                  ref={searchTextRef}
+                  style={{
+                    display: 'inline-block',
+                    position: 'relative',
+                    lineHeight: '16px',
+                  }}
+                >
+                  {Array.from(searchQuery).map((ch, i) => (
+                    <span key={i} data-search-char-index={i}>
+                      <span
+                        style={
+                          hasSelection && i >= selectionMin && i < selectionMax
+                            ? {
+                                backgroundColor:
+                                  theme.formInputBackgroundSelection,
+                                color: theme.formInputTextSelected,
+                              }
+                            : undefined
+                        }
+                      >
+                        {ch}
+                      </span>
+                    </span>
+                  ))}
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      left: caretLeft,
+                      top: '50%',
+                      transform: 'translate(-0.5px, -50%)',
+                      width: 1,
+                      height: 16,
+                      backgroundColor: theme.formInputText,
+                      opacity: isCaretVisible ? 1 : 0,
+                      pointerEvents: 'none',
+                    }}
+                  />
+                </span>
+              ) : (
+                <>
+                  {/* Fake caret (blinking) at the start of the placeholder */}
+                  <span
+                    style={{
+                      // Zero-width caret so it doesn't shift placeholder text
+                      width: 0,
+                      height: 16,
+                      borderLeft: '1px solid ' + theme.formInputText,
+                      opacity: isCaretVisible ? 1 : 0,
+                      flexShrink: 0,
+                      marginRight: 0,
+                    }}
+                  />
+                  <span style={{ color: theme.formInputTextPlaceholder }}>
+                    <Trans>Search emojis...</Trans>
+                  </span>
+                </>
+              )}
+            </View>
+          </View>
+
+          {/* Emoji grid */}
           <View
             ref={emojiGridRef}
             onKeyDown={handleGridKeyDown}

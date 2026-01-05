@@ -44,6 +44,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { format as formatDate, parseISO } from 'date-fns';
 
+import { shortcodeToNative } from 'loot-core/shared/emoji';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { getStatusLabel } from 'loot-core/shared/schedules';
@@ -97,7 +98,6 @@ import {
 } from '@desktop-client/components/schedules/StatusBadge';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import { EmojiSelect } from '@desktop-client/components/select/EmojiSelect';
-import { shortcodeToNative } from 'loot-core/shared/emoji';
 import {
   Cell,
   CellButton,
@@ -1425,7 +1425,6 @@ const Transaction = memo(function Transaction({
             onUpdate('flag', value);
           }}
           formatter={value => {
-            // Convert shortcode (e.g., ":grinning:") to native emoji for display
             return shortcodeToNative(value);
           }}
           unexposedContent={({ value, formatter }) => {
@@ -1450,7 +1449,7 @@ const Transaction = memo(function Transaction({
                       width: 14,
                       height: 14,
                       color: theme.tableTextSubdued,
-                      opacity: 1.0,
+                      opacity: 1,
                     }}
                   />
                 )}

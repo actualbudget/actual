@@ -1,4 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import {
+  forwardRef,
+  useState,
+  useEffect,
+  type RefObject,
+  type ReactNode,
+} from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -11,6 +17,7 @@ import {
   generateTransaction,
 } from 'loot-core/mocks';
 import { initServer } from 'loot-core/platform/client/fetch';
+import { shortcodeToNative } from 'loot-core/shared/emoji';
 import {
   addSplitTransaction,
   realizeTempTransactions,
@@ -29,7 +36,6 @@ import {
 import { TransactionTable } from './TransactionsTable';
 
 import { AuthProvider } from '@desktop-client/auth/AuthProvider';
-import { shortcodeToNative } from 'loot-core/shared/emoji';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
 import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
@@ -47,23 +53,24 @@ vi.mock('../../hooks/useFeatureFlag', () => ({
   useFeatureFlag: () => false,
 }));
 
-// Mock react-aria-components to avoid dependency issues
 vi.mock('react-aria-components', async importOriginal => {
-  const actual = await importOriginal<typeof import('react-aria-components')>();
+  const actual = await importOriginal<Record<string, unknown>>();
   return {
     ...actual,
-    Button: ({ children, onPress, ...props }: any) => (
-      <button onClick={onPress} {...props}>
-        {children}
-      </button>
-    ),
-    Input: React.forwardRef(({ ...props }: any, ref: any) => (
-      <input ref={ref} {...props} />
+    Button: (props: Record<string, unknown>) => {
+      const { children, onPress, ...rest } = props;
+      return (
+        <button onClick={onPress as () => void} {...rest}>
+          {children as ReactNode}
+        </button>
+      );
+    },
+    Input: forwardRef((props: Record<string, unknown>, ref: unknown) => (
+      <input ref={ref as RefObject<HTMLInputElement>} {...props} />
     )),
   };
 });
 
-// Mock @emoji-mart/data for EmojiSelect component
 vi.mock('@emoji-mart/data', () => ({
   default: {
     emojis: {

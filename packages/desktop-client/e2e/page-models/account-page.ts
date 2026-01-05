@@ -264,10 +264,14 @@ export class AccountPage {
       await this.selectInputText(flagInput);
       await flagInput.pressSequentially(transaction.flag);
       await flagInput.press('Enter');
-      await this.page.waitForSelector('[data-testid="emoji-select-popover"]', {
-        state: 'hidden',
-        timeout: 2000,
-      }).catch(() => { /* Ignore error if popover is already closed */ });
+      await this.page
+        .waitForSelector('[data-testid="emoji-select-popover"]', {
+          state: 'hidden',
+          timeout: 2000,
+        })
+        .catch(() => {
+          // Ignore error if popover is already closed
+        });
     }
   }
 

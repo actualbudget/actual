@@ -1,4 +1,4 @@
-import React from 'react';
+import { forwardRef, type RefObject, type ReactNode } from 'react';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -8,7 +8,6 @@ import { EmojiSelect } from './EmojiSelect';
 
 import { TestProvider } from '@desktop-client/redux/mock';
 
-// Mock emoji-mart data - must be defined inside factory function due to hoisting
 vi.mock('@emoji-mart/data', () => ({
   default: {
     emojis: {
@@ -24,13 +23,13 @@ vi.mock('@emoji-mart/data', () => ({
         keywords: ['100', 'hundred', 'points', 'score'],
         skins: [{ native: '💯' }],
       },
-      'red_circle': {
+      red_circle: {
         id: 'red_circle',
         name: 'Red Circle',
         keywords: ['red', 'circle', 'round'],
         skins: [{ native: '🔴' }],
       },
-      'thumbs_up': {
+      thumbs_up: {
         id: 'thumbs_up',
         name: 'Thumbs Up',
         keywords: ['thumbs', 'up', 'like', 'yes'],
@@ -40,54 +39,61 @@ vi.mock('@emoji-mart/data', () => ({
   },
 }));
 
-// Mock react-i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
-  Trans: ({ children }: any) => children,
+  Trans: ({ children }: unknown) => children,
 }));
 
-// Mock react-aria-components to avoid dependency issues
 vi.mock('react-aria-components', async importOriginal => {
-  const actual = await importOriginal<typeof import('react-aria-components')>();
+  const actual = await importOriginal<Record<string, unknown>>();
   return {
     ...actual,
-    Button: ({ children, onPress, ...props }: any) => (
-      <button onClick={onPress} {...props}>
-        {children}
-      </button>
-    ),
-    Input: React.forwardRef(({ ...props }: any, ref: any) => (
-      <input ref={ref} {...props} />
+    Button: (props: Record<string, unknown>) => {
+      const { children, onPress, ...rest } = props;
+      return (
+        <button onClick={onPress as () => void} {...rest}>
+          {children as ReactNode}
+        </button>
+      );
+    },
+    Input: forwardRef((props: Record<string, unknown>, ref: unknown) => (
+      <input ref={ref as RefObject<HTMLInputElement>} {...props} />
     )),
   };
 });
 
-// Mock Button component to avoid react-aria dependency issues
 vi.mock('@actual-app/components/button', () => ({
-  Button: ({ children, onPress, ...props }: any) => (
+  Button: ({ children, onPress, ...props }: unknown) => (
     <button onClick={onPress} {...props}>
       {children}
     </button>
   ),
 }));
 
-// Mock Input component
 vi.mock('@actual-app/components/input', () => ({
-  Input: React.forwardRef(({ ...props }: any, ref: any) => (
+  Input: forwardRef(({ ...props }: unknown, ref: unknown) => (
     <input ref={ref} {...props} />
   )),
 }));
 
-// Mock Popover component to avoid portal issues in tests
 vi.mock('@actual-app/components/popover', () => ({
-  Popover: ({ children, isOpen, triggerRef, isNonModal, ...props }: any) => {
+  Popover: ({
+    children,
+    isOpen,
+    _triggerRef,
+    _isNonModal,
+    ...props
+  }: unknown) => {
     if (!isOpen) {
       return null;
     }
-    // Filter out isNonModal to avoid React warning
-    const { isNonModal: _, ...restProps } = props;
+    const propsObj = props as {
+      onOpenChange?: unknown;
+      [key: string]: unknown;
+    };
+    const { onOpenChange: _, ...restProps } = propsObj;
     return (
       <div data-testid="emoji-select-popover" {...restProps}>
         {children}
@@ -119,7 +125,6 @@ describe('EmojiSelect', () => {
       </TestProvider>,
     );
 
-    // The input should be rendered (it's the trigger)
     const input = screen.getByRole('textbox');
     expect(input).toBeInTheDocument();
   });
@@ -127,7 +132,7 @@ describe('EmojiSelect', () => {
   it('opens picker when isOpen is true', () => {
     render(
       <TestProvider>
-        <EmojiSelect {...defaultProps} isOpen={true} />
+        <EmojiSelect {...defaultProps} isOpen />
       </TestProvider>,
     );
 
@@ -142,7 +147,6 @@ describe('EmojiSelect', () => {
     );
 
     const input = screen.getByRole('textbox');
-    // The value should be converted to native emoji for display
     expect(input).toHaveValue('😀');
   });
 
@@ -150,11 +154,10 @@ describe('EmojiSelect', () => {
     const onSelect = vi.fn();
     render(
       <TestProvider>
-        <EmojiSelect {...defaultProps} isOpen={true} onSelect={onSelect} />
+        <EmojiSelect {...defaultProps} isOpen onSelect={onSelect} />
       </TestProvider>,
     );
 
-    // Wait for emojis to render
     await waitFor(() => {
       expect(screen.getByText('😀')).toBeInTheDocument();
     });
@@ -164,7 +167,6 @@ describe('EmojiSelect', () => {
 
     await userEvent.click(emojiButton!);
 
-    // Should call onSelect with shortcode format
     expect(onSelect).toHaveBeenCalledWith(':grinning:');
   });
 
@@ -174,7 +176,7 @@ describe('EmojiSelect', () => {
       <TestProvider>
         <EmojiSelect
           {...defaultProps}
-          isOpen={true}
+          isOpen
           value=":grinning:"
           onSelect={onSelect}
         />
@@ -195,19 +197,13 @@ describe('EmojiSelect', () => {
   it('filters emojis when search query is entered', async () => {
     render(
       <TestProvider>
-        <EmojiSelect {...defaultProps} isOpen={true} />
+        <EmojiSelect {...defaultProps} isOpen />
       </TestProvider>,
     );
 
-    // Wait for picker to render
     await waitFor(() => {
       expect(screen.getByTestId('emoji-select-popover')).toBeInTheDocument();
     });
-
-    // Find the search input (it's a visual-only element, so we need to find it differently)
-    // The search bar is rendered as a View with role="textbox" or similar
-    // For now, we'll test that emojis are filtered by checking if certain emojis appear/disappear
-    // This is a simplified test - in a real scenario, you'd need to interact with the search bar
   });
 
   it('handles keyboard navigation with arrow keys', async () => {
@@ -216,16 +212,10 @@ describe('EmojiSelect', () => {
       <TestProvider>
         <EmojiSelect
           {...defaultProps}
-          isOpen={true}
+          isOpen
           onSelect={onSelect}
           inputProps={{
             ...defaultProps.inputProps,
-            onKeyDown: vi.fn(e => {
-              // Simulate arrow down key
-              if (e.key === 'ArrowDown') {
-                // The component should handle this internally
-              }
-            }),
           }}
         />
       </TestProvider>,
@@ -237,20 +227,13 @@ describe('EmojiSelect', () => {
 
     const input = screen.getByRole('textbox');
     await userEvent.type(input, '{ArrowDown}');
-
-    // The component should handle keyboard navigation internally
-    // This test verifies the component doesn't crash on keyboard input
   });
 
   it('closes picker on Escape key', async () => {
     const onSelect = vi.fn();
     const { rerender } = render(
       <TestProvider>
-        <EmojiSelect
-          {...defaultProps}
-          isOpen={true}
-          onSelect={onSelect}
-        />
+        <EmojiSelect {...defaultProps} isOpen onSelect={onSelect} />
       </TestProvider>,
     );
 
@@ -261,14 +244,15 @@ describe('EmojiSelect', () => {
     const input = screen.getByRole('textbox');
     await userEvent.type(input, '{Escape}');
 
-    // After escape, the picker should close (isOpen becomes false)
     rerender(
       <TestProvider>
         <EmojiSelect {...defaultProps} isOpen={false} onSelect={onSelect} />
       </TestProvider>,
     );
 
-    expect(screen.queryByTestId('emoji-select-popover')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('emoji-select-popover'),
+    ).not.toBeInTheDocument();
   });
 
   it('displays placeholder flag icon when value is null', () => {
@@ -285,13 +269,11 @@ describe('EmojiSelect', () => {
   it('handles embedded mode correctly', async () => {
     render(
       <TestProvider>
-        <EmojiSelect {...defaultProps} embedded={true} />
+        <EmojiSelect {...defaultProps} embedded />
       </TestProvider>,
     );
 
     // In embedded mode, the picker should be open by default
-    // When embedded, content is rendered directly (no Popover wrapper)
-    // Check for the Remove button which is part of the picker content
     await waitFor(() => {
       expect(screen.getByText('Remove')).toBeInTheDocument();
     });
@@ -305,8 +287,6 @@ describe('EmojiSelect', () => {
     );
 
     const input = screen.getByRole('textbox');
-    // The shortcode should be converted to native emoji
     expect(input).toHaveValue('💯');
   });
 });
-
