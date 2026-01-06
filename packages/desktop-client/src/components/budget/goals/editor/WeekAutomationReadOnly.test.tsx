@@ -98,4 +98,33 @@ describe('WeekAutomationReadOnly', () => {
       expect(screen.getByText(/every week/i)).toBeInTheDocument();
     });
   });
+
+  describe('Bug 4: Currency-aware amount conversion', () => {
+    it('displays correct amount for USD (2 decimal places)', () => {
+      renderComponent({
+        type: 'periodic',
+        directive: 'template',
+        priority: 1,
+        amount: 100.50, // $100.50 stored as dollars
+        period: { period: 'week', amount: 1 },
+        starting: '2025-01-01',
+      });
+
+      // Should show $100.50, not $1.01 (if treating as cents) or $10050 (wrong conversion)
+      expect(screen.getByText(/100\.50/)).toBeInTheDocument();
+    });
+
+    it('displays correct amount for whole dollar amounts', () => {
+      renderComponent({
+        type: 'periodic',
+        directive: 'template',
+        priority: 1,
+        amount: 819.54, // From user's bug report
+        period: { period: 'week', amount: 2 },
+        starting: '2025-12-14',
+      });
+
+      expect(screen.getByText(/819\.54/)).toBeInTheDocument();
+    });
+  });
 });
