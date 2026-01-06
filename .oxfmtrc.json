@@ -5,6 +5,7 @@
   "arrowParens": "avoid",
   "printWidth": 80,
   "ignorePatterns": [
+    "packages/loot-core/drizzle/**/*",
     "packages/docs/*" // TOOD: fixme; temporary
   ]
 }
