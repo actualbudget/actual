@@ -34,7 +34,7 @@ import { useSelector, useDispatch } from '@desktop-client/redux';
 const MAX_VISIBLE_NOTIFICATIONS = 3; // Maximum number of notifications visible in the stack
 const SCALE_MULTIPLIER = 0.05; // Scale reduction per stacked notification
 const OPACITY_MULTIPLIER = 0.2; // Opacity reduction per stacked notification
-const MIN_OPACITY = 0.2; // Minimum opacity for stacked notifications
+const MIN_OPACITY = 1; // Minimum opacity for stacked notifications
 const Y_OFFSET_PER_LEVEL = -20; // Vertical offset in pixels per stacked notification
 const BASE_Z_INDEX = 10; // Base z-index for notification stacking
 
@@ -229,13 +229,12 @@ function Notification({
             : error
               ? theme.errorBackground
               : theme.warningBackground,
-          borderTop: `3px solid ${
-            positive
-              ? theme.noticeBorder
-              : error
-                ? theme.errorBorder
-                : theme.warningBorder
-          }`,
+          borderTop: `3px solid ${positive
+            ? theme.noticeBorder
+            : error
+              ? theme.errorBorder
+              : theme.warningBorder
+            }`,
           ...styles.shadowLarge,
           maxWidth: 550,
           '& a': { color: 'currentColor' },
@@ -295,13 +294,12 @@ function Notification({
                 }}
                 className={css({
                   backgroundColor: 'transparent',
-                  border: `1px solid ${
-                    positive
-                      ? theme.noticeBorder
-                      : error
-                        ? theme.errorBorder
-                        : theme.warningBorder
-                  }`,
+                  border: `1px solid ${positive
+                    ? theme.noticeBorder
+                    : error
+                      ? theme.errorBorder
+                      : theme.warningBorder
+                    }`,
                   color: 'currentColor',
                   ...styles.mediumText,
                   flexShrink: 0,
@@ -322,21 +320,21 @@ function Notification({
 
           {pre
             ? pre.split('\n\n').map((text, idx) => (
-                <View
-                  key={idx}
-                  style={{
-                    whiteSpace: 'pre-wrap',
-                    fontFamily: 'monospace',
-                    fontSize: 12,
-                    backgroundColor: 'rgba(0, 0, 0, .05)',
-                    padding: 10,
-                    borderRadius: 4,
-                    width: '100%',
-                  }}
-                >
-                  {text}
-                </View>
-              ))
+              <View
+                key={idx}
+                style={{
+                  whiteSpace: 'pre-wrap',
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                  backgroundColor: 'rgba(0, 0, 0, .05)',
+                  padding: 10,
+                  borderRadius: 4,
+                  width: '100%',
+                }}
+              >
+                {text}
+              </View>
+            ))
             : null}
         </SpaceBetween>
       </View>
