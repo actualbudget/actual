@@ -40,6 +40,7 @@ import {
   useDeleteCategoryMutation,
   useCreateCategoryGroupMutation,
   useUpdateCategoryGroupMutation,
+  useDeleteCategoryGroupMutation,
   useBudgetActions,
 } from '@desktop-client/budget';
 import { prewarmMonth } from '@desktop-client/components/budget/util';
@@ -93,7 +94,7 @@ export function BudgetPage() {
   const deleteCategory = useDeleteCategoryMutation();
   const createCategoryGroup = useCreateCategoryGroupMutation();
   const updateCategoryGroup = useUpdateCategoryGroupMutation();
-  const deleteCategoryGroup = useDeleteCategoryMutation();
+  const deleteCategoryGroup = useDeleteCategoryGroupMutation();
 
   useEffect(() => {
     async function init() {
