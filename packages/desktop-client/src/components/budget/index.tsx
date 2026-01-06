@@ -205,6 +205,10 @@ export function Budget() {
   const onDeleteGroup = async id => {
     const group = categoryGroups.find(g => g.id === id);
 
+    if (!group) {
+      return;
+    }
+
     let mustTransfer = false;
     for (const category of group.categories) {
       if (await send('must-category-transfer', { id: category.id })) {
