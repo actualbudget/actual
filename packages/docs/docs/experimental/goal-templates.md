@@ -188,7 +188,7 @@ They are simple enough to use easily, but are robust enough to make budgeting mu
 **Notes**:
 
 - **No more than one** template that uses `up to` is allowed in any single category.
-- If a category contains an `up to X`, the whole category will be subject to that limit even if there are other templates and priorities. This excludes remainders which will run after the limit is applied.
+- If a category contains an `up to X`, the whole category will be subject to that limit even if there are other templates and priorities.
  
 #### All Variations
 
