@@ -6,6 +6,8 @@ import { load } from 'migrate';
 
 import { config } from './load-config';
 
+type MigrationCallback = (err?: Error) => void;
+
 export async function run(direction: 'up' | 'down' = 'up'): Promise<void> {
   console.log(
     `Checking if there are any migrations to run for direction "${direction}"...`,
@@ -17,7 +19,6 @@ export async function run(direction: 'up' | 'down' = 'up'): Promise<void> {
   try {
     // Load all script files in the migrations directory
     const files = await readdir(migrationsDir);
-    type MigrationCallback = (err?: Error) => void;
     const migrationsModules: Record<
       string,
       {
