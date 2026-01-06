@@ -1,17 +1,17 @@
 {
   "name": "@actual-app/sync-server",
   "version": "26.1.0",
-  "license": "MIT",
   "description": "actual syncing server",
+  "license": "MIT",
   "bin": {
     "actual-server": "./build/bin/actual-server.js"
   },
-  "type": "module",
   "files": [
     "build",
-    "README.md",
-    "LICENSE"
+    "LICENSE",
+    "README.md"
   ],
+  "type": "module",
   "scripts": {
     "start": "yarn build && node build/app",
     "start-monitor": "nodemon --exec 'yarn build && node build/app' --ignore './build/**/*' --ext 'ts,js' build/app",

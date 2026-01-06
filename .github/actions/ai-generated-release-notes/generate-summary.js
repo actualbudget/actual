@@ -71,7 +71,7 @@ try {
         console.log('Generated summary:', summary);
 
         const result = {
-          summary: summary,
+          summary,
           prNumber: prDetails.number,
           author: prDetails.author,
         };

@@ -35,14 +35,15 @@ function readMigrations(ref) {
 }
 
 spawnSync('git', ['fetch', 'origin', 'master']);
-let masterMigrations = readMigrations('origin/master');
-let headMigrations = readMigrations('HEAD');
+const masterMigrations = readMigrations('origin/master');
+const headMigrations = readMigrations('HEAD');
 
-let latestMasterMigration = masterMigrations[masterMigrations.length - 1].date;
-let newMigrations = headMigrations.filter(
+const latestMasterMigration =
+  masterMigrations[masterMigrations.length - 1].date;
+const newMigrations = headMigrations.filter(
   migration => !masterMigrations.find(m => m.name === migration.name),
 );
-let badMigrations = newMigrations.filter(
+const badMigrations = newMigrations.filter(
   migration => migration.date <= latestMasterMigration,
 );
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
@@ -35,9 +35,7 @@ export function NotesTagFormatter({
 
         switch (segment.type) {
           case 'text':
-            return (
-              <React.Fragment key={index}>{segment.content}</React.Fragment>
-            );
+            return <Fragment key={index}>{segment.content}</Fragment>;
 
           case 'tag':
             if (isNarrowWidth) {
