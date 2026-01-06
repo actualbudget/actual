@@ -52,8 +52,8 @@
     "vrt:docker": "./bin/run-vrt",
     "rebuild-electron": "./node_modules/.bin/electron-rebuild -m ./packages/loot-core",
     "rebuild-node": "yarn workspace loot-core rebuild",
-    "lint": "oxfmt --check . && oxlint --deny-warnings && eslint . --max-warnings 0",
-    "lint:fix": "oxfmt . && oxlint --deny-warnings --fix && eslint . --max-warnings 0 --fix",
+    "lint": "oxfmt --check . && oxlint --deny-warnings",
+    "lint:fix": "oxfmt . && oxlint --deny-warnings --fix",
     "install:server": "yarn workspaces focus @actual-app/sync-server --production",
     "typecheck": "yarn tsc --incremental && tsc-strict",
     "jq": "./node_modules/node-jq/bin/jq",
@@ -63,7 +63,6 @@
     "@octokit/rest": "^22.0.1",
     "@types/node": "^22.19.1",
     "@types/prompts": "^2.4.9",
-    "@typescript-eslint/parser": "^8.50.0",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
     "eslint-plugin-perfectionist": "^4.15.1",
@@ -93,8 +92,7 @@
       "oxfmt --no-error-on-unmatched-pattern"
     ],
     "*.{js,mjs,jsx,ts,tsx}": [
-      "oxlint --deny-warnings --fix",
-      "eslint --max-warnings 0 --fix --no-warn-ignored"
+      "oxlint --deny-warnings --fix"
     ]
   },
   "browserslist": [
