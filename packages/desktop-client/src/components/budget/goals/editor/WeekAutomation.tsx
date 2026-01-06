@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
+import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 import type { PeriodicTemplate } from 'loot-core/types/models/templates';
 
 import {
@@ -17,19 +18,24 @@ type WeekAutomationProps = {
 export const WeekAutomation = ({ template, dispatch }: WeekAutomationProps) => {
   const { t } = useTranslation();
 
+  // Template amounts are stored as dollars (floats) by the parser,
+  // convert to cents (integers) for AmountInput
+  const amountInCents = amountToInteger(template.amount ?? 0);
+
   return (
     <FormField style={{ flex: 1 }}>
       <FormLabel title={t('Amount')} htmlFor="amount-field" />
       <AmountInput
         id="amount-field"
         key="amount-input"
-        value={template.amount ?? 0}
+        value={amountInCents}
         zeroSign="+"
-        onUpdate={(value: number) =>
+        onUpdate={(valueInCents: number) =>
           dispatch(
             updateTemplate({
               type: 'periodic',
-              amount: value,
+              // Convert back to dollars for storage
+              amount: integerToAmount(valueInCents),
             }),
           )
         }
