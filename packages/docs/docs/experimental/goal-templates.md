@@ -53,12 +53,12 @@ In the budget month menu you will see the following options:
 
 You can also apply selections of templates if you want.
 
-- **Single Category**: Use the "Overwrite with template" option shown below from the budget field drop down to apply templates to just that category.
+- **Single Category**: Use the "Overwrite with template" option shown below from the budget field drop-down menu to apply templates to just that category.
   This will overwrite any existing budgeted amount.
 
 ![Apply templates to single category](/img/goal-template/apply-template-category.png)
 
-- **Apply templates to a single category group**: Use the "Overwrite with templates" option shown below from the category group drop down to apply all templates to categories in a specific group.
+- **Apply templates to a single category group**: Use the "Overwrite with templates" option shown below from the category group drop-down menu to apply all templates to categories in a specific group.
   It will apply to the month furthest to the left in your budget view if viewing multiple months.
   This will overwrite any existing budgets in the categories in the group.
 
@@ -167,7 +167,7 @@ Here are some examples of how this is used
 | `#template 50 up to 100` |       $ 20       |      $ 50       |    $ 70     |
 
 Isn't that neat?
-This is especially useful for budget categories that have month to month variation in spending such as groceries.
+This is especially useful for budget categories that have month-to-month variation in spending such as groceries.
 You can budget the same amount per month, but save up from one month to the next without having to worry about building up more funds than you need.
 
 The last variation of the simple template is sometimes referred to as a "refill".
@@ -180,7 +180,7 @@ Here is how it works:
 | `#template up to 150`  |       $ 10       |      $ 140      |    $ 150    |
 | `#template up to 150`  |      $ -20       |      $ 170      |    $ 150    |
 
-Cool, right? This is another way to gracefully handle categories that have month to month variation.
+Cool, right? This is another way to gracefully handle categories that have month-to-month variation.
 This will always give you the same amount available each month no matter what you spend the previous month and not ever build up more funds than you need.
 This variation along with the previous variation, are probably the most used templates.
 They are simple enough to use easily, but are robust enough to make budgeting much simpler.
@@ -270,7 +270,7 @@ Below is a table of the variations of the By template.
 | `#template 500 by 2025-03 repeat every year`                       | Break down large, less-frequent expenses into manageable monthly expenses | Annual insurance premium                                                                                                       |
 | `#template 500 by 2025-03 repeat every 2 years`                    | Break down large, less-frequent expenses into manageable monthly expenses | Domain name renewal                                                                                                            |
 | `#template 500 by 2024-12 spend from 2024-03`                      | Budget 500 by December. Any spending between March and December is OK     | Christmas presents, overseas holiday, or any other expenses where spending will start before the target period ends. |
-| `#template 500 by 2024-12 spend from 2024-03 repeat every year`    | Budget 500 by December. Any spending is OK starting in March and repeat this template every year  | Christmas presents, etc |
+| `#template 500 by 2024-12 spend from 2024-03 repeat every year`    | Budget 500 by December. Any spending is OK starting in March and repeat this template every year  | Christmas presents, etc. |
 | `#template 500 by 2024-12 spend from 2024-03 repeat every 2 years` | Budget 500 by December. Any spending is OK starting in March and repeat this template in 2026 (skip 2025) | Christmas travel every other year |
 
 ### Periodic Type
@@ -387,7 +387,7 @@ There is one additional option to the Schedule template, the "Full" flag.
 The "Full" flag tells the template to not build up funds over time and budget the full schedule amount in the needed month.
 This is useful for small schedules that you don't need to build up over time since the amount is small.
 This can also help make stacking Schedule templates easier to track.
-Below is an example of using the "Full" flag assuming a once per year schedule for $ 15 called "Simplefin" due in May.
+Below is an example of using the "Full" flag assuming a once-per-year schedule for $ 15 called "Simplefin" due in May.
 
 | Syntax                              | Budgeted Amount |              Note               |
 | ----------------------------------- | :-------------: | :-----------------------------: |
