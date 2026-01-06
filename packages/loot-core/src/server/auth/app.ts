@@ -20,7 +20,6 @@ export type AuthHandlers = {
   'enable-openid': typeof enableOpenId;
   'get-openid-config': typeof getOpenIdConfig;
   'enable-password': typeof enablePassword;
-  'save-server-prefs': typeof saveServerPrefs;
 };
 
 export const app = createApp<AuthHandlers>();
@@ -36,7 +35,6 @@ app.method('subscribe-set-token', setToken);
 app.method('enable-openid', enableOpenId);
 app.method('get-openid-config', getOpenIdConfig);
 app.method('enable-password', enablePassword);
-app.method('save-server-prefs', saveServerPrefs);
 
 async function didBootstrap() {
   return Boolean(await asyncStorage.getItem('did-bootstrap'));
@@ -220,34 +218,6 @@ async function changePassword({ password }: { password: string }) {
     await post(serverConfig.SIGNUP_SERVER + '/change-password', {
       token: userToken,
       password,
-    });
-  } catch (err) {
-    if (err instanceof PostError) {
-      return {
-        error: err.reason || 'network-failure',
-      };
-    }
-
-    throw err;
-  }
-
-  return {};
-}
-
-async function saveServerPrefs({ prefs }: { prefs: Record<string, string> }) {
-  const userToken = await asyncStorage.getItem('user-token');
-  if (!userToken) {
-    return { error: 'not-logged-in' };
-  }
-
-  try {
-    const serverConfig = getServer();
-    if (!serverConfig) {
-      throw new Error('No sync server configured.');
-    }
-    await post(serverConfig.SIGNUP_SERVER + '/server-prefs', {
-      token: userToken,
-      prefs,
     });
   } catch (err) {
     if (err instanceof PostError) {
