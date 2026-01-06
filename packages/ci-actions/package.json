@@ -2,10 +2,10 @@
   "name": "@actual-app/ci-actions",
   "private": true,
   "type": "module",
-  "devDependencies": {
-    "vitest": "^4.0.9"
-  },
   "scripts": {
     "test": "vitest --run"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.9"
   }
 }

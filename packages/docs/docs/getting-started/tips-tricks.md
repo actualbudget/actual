@@ -48,7 +48,7 @@ through the list of available commands. You can also quickly move to any of the 
 
 - <Key mod="ctrl" k="B" /> Initiate bank sync.
 - <Key mod="ctrl" k="I" /> ( i ) Import transactions.
-- <Key k="t" /> Add new transaction with date picker open, or open date picker and set date for selected transactions.
+- <Key k="t" /> Add new transaction with date picker open.
 - <Key k="f" /> Show only selected transactions. If no transaction is selected, it brings up the Filter dropdown menu.
 
 #### Selection shortcuts
@@ -75,7 +75,7 @@ Transaction(s) must be selected for the following shortcuts, or as noted.
 See [Bulk Actions](/docs/transactions/bulk-editing.md) for guidance on working with multiple transactions.
 :::
 
-- <Key k="t" /> Open date picker and set date for selected transactions or open a new transaction if none are selected.
+- <Key k="e" /> Open date picker and set date for selected transactions.
 - <Key k="p" /> Set payee for selected transactions.
 - <Key k="n" /> Set notes for selected transactions.
 - <Key k="c" /> Set category for selected transactions.

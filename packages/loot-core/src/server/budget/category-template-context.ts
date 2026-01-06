@@ -548,7 +548,7 @@ export class CategoryTemplateContext {
         templateContext.currency.decimalPlaces,
       );
     } else {
-      return templateContext.limitAmount;
+      return templateContext.limitAmount - templateContext.fromLastMonth;
     }
   }
 
