@@ -928,18 +928,11 @@ describe('Transactions', () => {
     let input = expectToBeEditingField(container, 'date', 0, true);
     await userEvent.type(input, '[Tab]');
     input = expectToBeEditingField(container, 'account', 0, true);
-    // The first escape closes the dropdown
+
     await userEvent.type(input, '[Escape]');
     expect(
       container.querySelector('[data-testid="new-transaction"]'),
-    ).toBeTruthy();
-
-    // TODO: Fix this
-    // Now it should close the new transaction form
-    // await userEvent.type(input, '[Escape]');
-    // expect(
-    //   container.querySelector('[data-testid="new-transaction"]')
-    // ).toBeNull();
+    ).toBeNull();
 
     // The cancel button should also close the new transaction form
     updateProps({ isAdding: true });
