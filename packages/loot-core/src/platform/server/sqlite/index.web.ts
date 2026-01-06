@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import initSqlJS, { type Database } from '@jlongster/sql.js';
+
 import { logger } from '../log';
 
 import { normalise } from './normalise';
