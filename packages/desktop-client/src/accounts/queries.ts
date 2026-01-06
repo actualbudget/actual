@@ -14,7 +14,7 @@ export const accountQueries = {
         return accounts;
       },
       placeholderData: [],
-      // Manually invalidated when categories change
+      // Manually invalidated when accounts change
       staleTime: Infinity,
     }),
   listOnBudget: () =>
