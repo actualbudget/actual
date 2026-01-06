@@ -794,7 +794,7 @@ function ConditionsList({
       });
     }
 
-    // (remove the inflow and outflow pseudo-fields since they’d be a pain to get right)
+    // (remove the inflow and outflow pseudo-fields since they'd be a pain to get right)
     let fields = conditionFields
       .map(f => f[0])
       .filter(f => f !== 'amount-inflow' && f !== 'amount-outflow');
@@ -1152,7 +1152,7 @@ export function RuleEditor({
 
             if (field === 'field') {
               a.type = FIELD_TYPES.get(a.field);
-              a.value = null;
+              a.value = value === 'date' ? '' : null;
               a.options = {
                 ...a.options,
                 template: undefined,
@@ -1336,6 +1336,8 @@ export function RuleEditor({
           overflow: 'auto',
           maxHeight: 'calc(100% - 300px)',
           minHeight: 100,
+          position: 'relative',
+          zIndex: 2,
         }}
       >
         <View style={{ flexShrink: 0 }}>
@@ -1485,7 +1487,14 @@ export function RuleEditor({
       </View>
 
       <SelectedProvider instance={selectedInst}>
-        <View style={{ padding: '20px', flex: 1 }}>
+        <View
+          style={{
+            padding: '20px',
+            flex: 1,
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
           <SpaceBetween
             gap={5}
             style={{

@@ -2,12 +2,12 @@ import type { AccountEntity } from './account';
 import type { PayeeEntity } from './payee';
 import type { RuleConditionEntity, RuleEntity } from './rule';
 
-export interface RecurPattern {
+export type RecurPattern = {
   value: number;
   type: 'SU' | 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'day';
-}
+};
 
-export interface RecurConfig {
+export type RecurConfig = {
   frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
   interval?: number;
   patterns?: RecurPattern[];
@@ -17,9 +17,9 @@ export interface RecurConfig {
   endOccurrences?: number;
   endDate?: string;
   weekendSolveMode?: 'before' | 'after';
-}
+};
 
-export interface ScheduleEntity {
+export type ScheduleEntity = {
   id: string;
   name?: string;
   rule: RuleEntity['id'];
@@ -37,7 +37,7 @@ export interface ScheduleEntity {
   _date: RecurConfig | string;
   _conditions: RuleConditionEntity[];
   _actions: Array<{ op: unknown }>;
-}
+};
 
 export type DiscoverScheduleEntity = {
   id: ScheduleEntity['id'];

@@ -1,5 +1,7 @@
 // @ts-strict-ignore
 import { APIError } from '../../../server/errors';
+import { logger } from '../log';
+
 import { runHandler, isMutating } from '../../../server/mutators';
 import { captureException } from '../../exceptions';
 
@@ -65,7 +67,7 @@ export const init: T.Init = function (_socketName, handlers) {
         },
       );
     } else {
-      console.warn('Unknown method: ' + name);
+      logger.warn('Unknown method: ' + name);
       captureException(new Error('Unknown server method: ' + name));
       process.parentPort.postMessage({
         type: 'reply',
@@ -85,4 +87,6 @@ export const send: T.Send = function (name, args) {
   process.parentPort.postMessage({ type: 'push', name, args });
 };
 
-export const resetEvents: T.ResetEvents = function () {};
+export const resetEvents: T.ResetEvents = function () {
+  // resetEvents is used in tests to mock the server
+};

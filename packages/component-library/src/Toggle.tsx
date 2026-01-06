@@ -36,6 +36,7 @@ export const Toggle = ({
         })}
         type="checkbox"
       />
+      {/* oxlint-disable-next-line eslint-plugin-jsx-a11y(label-has-associated-control) */}
       <label
         data-toggle-container
         data-on={isOn}
@@ -62,7 +63,6 @@ export const Toggle = ({
           data-on={isOn}
           className={css(
             {
-              // eslint-disable-next-line actual/typography
               content: '" "',
               position: 'absolute',
               top: '2px',

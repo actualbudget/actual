@@ -1,0 +1,9 @@
+issue_enrichment:
+  auto_enrich:
+    enabled: false
+reviews:
+  review_status: false
+  high_level_summary: false
+  finishing_touches:
+    docstrings:
+      enabled: false

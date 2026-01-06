@@ -300,6 +300,11 @@ export function KeyboardShortcutModal() {
             description: t('Set amount for selected transactions'),
           },
           {
+            id: 'set-date-for-selected-transactions',
+            shortcut: 'E',
+            description: t('Set date for selected transactions'),
+          },
+          {
             id: 'toggle-cleared-for-selected-transactions',
             shortcut: 'L',
             description: t('Toggle cleared for selected transactions'),

@@ -247,8 +247,18 @@ export const CategoryMonth = memo(function CategoryMonth({
           opacity: 0,
           transition: 'opacity .25s',
         },
-        '&:hover .hover-visible': {
+        '&:hover .hover-visible, & .force-visible .hover-visible': {
           opacity: 1,
+        },
+        '& .hover-expand': {
+          maxWidth: 0,
+          overflow: 'hidden',
+          transition: 'max-width 0s .25s',
+        },
+        '&:hover .hover-expand, & .hover-expand.force-visible': {
+          maxWidth: '300px',
+          overflow: 'visible',
+          transition: 'max-width 0s linear 0s',
         },
       }}
     >
@@ -260,6 +270,7 @@ export const CategoryMonth = memo(function CategoryMonth({
       >
         {!editing && (
           <View
+            className={`hover-expand ${menuOpen ? 'force-visible' : ''}`}
             style={{
               flexDirection: 'row',
               flexShrink: 0,
@@ -283,7 +294,6 @@ export const CategoryMonth = memo(function CategoryMonth({
                 width={14}
                 height={14}
                 className="hover-visible"
-                style={menuOpen && { opacity: 1 }}
               />
             </Button>
 
@@ -299,7 +309,7 @@ export const CategoryMonth = memo(function CategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: `Budget set to last month’s budget.`,
+                    message: `Budget set to last month's budget.`,
                   });
                 }}
                 onSetMonthsAverage={numberOfMonths => {
@@ -437,6 +447,7 @@ export const CategoryMonth = memo(function CategoryMonth({
           style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
         >
           <span
+            role="button"
             ref={triggerBalanceMenuRef}
             onClick={() => !category.is_income && setBalanceMenuOpen(true)}
           >

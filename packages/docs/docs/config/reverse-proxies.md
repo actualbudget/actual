@@ -38,14 +38,15 @@ services:
     volumes:
       - ./actual-data:/data
 ```
+
 Caddyfile:
+
 ```
 budget.example.org {
     encode gzip zstd
     reverse_proxy actual_server:5006
 }
 ```
-
 
 ## Traefik
 
@@ -108,6 +109,31 @@ Please refer to the [official documentation](https://doc.traefik.io/traefik/user
 
 ## NGINX
 
+### Note on Cross-Origin Isolation & Header Collisions
+
+Actual Budget requires a "Secure Context" and specific headers (`COOP/COEP`) to enable `SharedArrayBuffer` for its underlying SQLite engine. While the application attempts to set these headers automatically, implementing a manual Nginx configuration as suggested above can lead to **duplicate headers** (e.g., `require-corp, require-corp`).
+
+Modern browsers will invalidate security policies if headers are duplicated, resulting in a `SharedArrayBufferMissing` fatal error.
+
+To resolve the "additional security mechanisms" mentioned in the note above, use the `proxy_hide_header` directive to ensure Nginx acts as the single source of truth:
+
+```nginx
+location / {
+    proxy_pass http://actual_server:5006;
+
+    # Prevents header duplication between Upstream and Proxy
+    proxy_hide_header Cross-Origin-Embedder-Policy;
+    proxy_hide_header Cross-Origin-Opener-Policy;
+
+    # Explicitly set mandatory security headers
+    add_header Cross-Origin-Embedder-Policy "require-corp" always;
+    add_header Cross-Origin-Opener-Policy "same-origin" always;
+    add_header Origin-Agent-Cluster "?1" always;
+    
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+```
 The SSL certificate is issued by Let's Encrypt. The [Certbot](https://certbot.eff.org/instructions) tool provides options for automatic updating upon expiration.
 At the very least you will need to adapt `server_name` and the `ssl_certificate/ssl_certificate_key` paths to match your setup.
 Please refer to their [official documentation](https://nginx.org/en/docs/) for further details.
@@ -181,13 +207,14 @@ ngrok http --url=your-custom-domain.ngrok-free.app 5006
 If running Actual on your PC, you may find it helpful to run this command when your computer starts up. There are many ways to do this. The below is not a complete list:
 
 - On Windows, you can use the [Task Scheduler](https://www.technipages.com/scheduled-task-windows/)
-  - Create a *Basic Task*, give it a name then set the trigger to *At system startup*
-  - Under *Action*, select the program as ngrok.exe, and add arguments ```http --url=your-custom-domain.ngrok-free.app 5006```.
-  - Once complete, you can choose to run this silently in the background by navigating to *properties*, selecting *Run whether user is logged on or not*, and ticking the *Hidden* box.
+  - Create a _Basic Task_, give it a name then set the trigger to _At system startup_
+  - Under _Action_, select the program as ngrok.exe, and add arguments `http --url=your-custom-domain.ngrok-free.app 5006`.
+  - Once complete, you can choose to run this silently in the background by navigating to _properties_, selecting _Run whether user is logged on or not_, and ticking the _Hidden_ box.
 
 - On Linux, you can use [systemd](https://systemd.io/)
   - Navigate to the directory: `/etc/systemd/system/` and create a service file `expose-actual-server.service`
   - Add the following content (and change to suit your needs):
+
     ```
     [Unit]
     Description=Run my Bash script at startup
@@ -201,4 +228,5 @@ If running Actual on your PC, you may find it helpful to run this command when y
     [Install]
     WantedBy=multi-user.target
     ```
-  - Enable the service with ```sudo systemctl enable expose-actual-server.service```
+
+  - Enable the service with `sudo systemctl enable expose-actual-server.service`

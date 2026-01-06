@@ -66,6 +66,7 @@ export function DesktopLinkedNotes({
   return (
     <>
       <span
+        role="button"
         className={linkStyles}
         onMouseDown={e => e.stopPropagation()}
         onClick={handleClick}

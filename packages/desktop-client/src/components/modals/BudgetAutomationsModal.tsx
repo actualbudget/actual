@@ -148,8 +148,8 @@ function BudgetAutomationMigrationWarning({
       <SpaceBetween direction="vertical" style={{ minHeight: 'unset' }}>
         <View>
           <Trans>
-            This category uses notes-based automations (formerly “budget
-            templates”). We have automatically imported your existing
+            This category uses notes-based automations (formerly "budget
+            templates"). We have automatically imported your existing
             automations below. Please review them for accuracy and hit save to
             complete the migration.
           </Trans>

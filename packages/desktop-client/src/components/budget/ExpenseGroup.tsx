@@ -91,7 +91,7 @@ export function ExpenseGroup({
 
   return (
     <Row
-      collapsed={true}
+      collapsed
       style={{
         fontWeight: 600,
         opacity: group.hidden ? 0.33 : undefined,

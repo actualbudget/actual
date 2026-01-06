@@ -77,7 +77,7 @@ export const Modal = ({
     <ReactAriaModalOverlay
       data-testid={`${name}-modal`}
       isDismissable
-      defaultOpen={true}
+      defaultOpen
       onOpenChange={isOpen => !isOpen && handleOnClose?.()}
       style={{
         position: 'fixed',
@@ -315,6 +315,7 @@ export function ModalHeader({
   return (
     <View
       role="heading"
+      aria-level={1}
       style={{
         justifyContent: 'center',
         alignItems: 'center',

@@ -8,10 +8,9 @@ You can set schedules to recur on specific dates or frequencies and tailor them 
 
 By combining automation with proactive planning, schedules enable you to maintain control over your budget and avoid unexpected surprises.
 
-![Schedules overview screen](/img/schedules/schedules-overview.png)
+![Schedules overview screen](/img/schedules/schedules-overview.webp)
 
 ## The Schedules Overview Screen
-
 
 Most of the columns in the Schedules overview screen are self-explanatory.
 
@@ -19,7 +18,6 @@ However, if there is ~ (tilde) in front of the _Amount_ column, it indicates tha
 This is useful for transactions that may vary slightly each time, such as utility bills or subscriptions that change based on usage.
 
 See [Creating a Schedule](#creating-a-schedule) for more information on how to set up approximate amounts.
-
 
 ## What are Schedules?
 
@@ -35,7 +33,6 @@ Schedules can be created from scratch or existing transactions, and they can be 
 needs. You can also use rules to automatically categorize and add notes to scheduled transactions, making it easier
 to keep track of your budget.
 
-
 ## Adjusting the Upcoming Length of Schedules
 
 You can control how far in advance scheduled transactions _appear_ in the Schedule and Account register views as _upcoming_. This setting determines the number of days before the scheduled date that a transaction will be displayed as upcoming in the account ledger, helping you plan and avoid surprises.
@@ -44,18 +41,18 @@ For example, in the image at the top of this page, the upcoming length is set to
 
 By clicking on the **Change upcoming length** button, you can select how far in advance you want to see forthcoming transactions (e.g., 1 day, 1 week, 2 weeks, 1 month, End of the current month, or Custom length).
 
-![Change upcoming length](/img/schedules/schedules-upcoming-length-dialog.png)
+![Change upcoming length](/img/schedules/schedules-upcoming-length-dialog.webp)
 
 If you change the upcoming length to _1 week_, only transactions scheduled within the next week will appear as forthcoming.
 The _Monthly movie subscription_, _the Mortgage_, and the _Water melon subscription_ will now show as upcoming transactions.
 
-![Change upcoming length](/img/schedules/schedules-upcoming-new-list.png)
+![Change upcoming length](/img/schedules/schedules-upcoming-new-list.webp)
 
 This flexibility allows you to customize your view — whether you want to see all upcoming transactions for the month or just those in the immediate future. Adjusting the upcoming length can help you focus on the most relevant transactions and keep your budget organized.
 
 Changing the upcoming length only affects how schedules are displayed in your ledger; it does not impact how your budget data is stored or calculated. You can adjust this setting at any time to fit your preferences. If we change the upcoming length to _1 month_ the Account register will also reflect this change:
 
-![Accont Register View with future schedules](/img/schedules/schedules-account-register.png)
+![Accont Register View with future schedules](/img/schedules/schedules-account-register.webp)
 
 ## Creating a Schedule
 
@@ -71,19 +68,16 @@ Some of the available options to tailor schedules to your needs are:
    a. "Last" day of month can be selected by selecting "Add specific days", and selecting "Last" from the day drop-down list.
    c. If you select 31st, approximately every other month will be skipped.
 
-
-![Example of adding a schedule for a mortgage](/img/schedules/schedules-add.png)
+![Example of adding a schedule for a mortgage](/img/schedules/schedules-add.webp)
 
 The example above shows a mortgage payment schedule which is to be executed on the 10th of July.
 Since a mortgage payment is a recurring transaction, the **Repeats** checkbox should be enabled. By enabling _Repeats_ the **Date** field now let you enter a frequency for your transaction.
 You can also enter more than one date by hitting the **+** button next to the date field.
 This is useful for transactions that occur on multiple days of the month, such as a bi-weekly payments.
 
-![Example of changing the frequencey of a schedule](/img/schedules/schedules-add-repeat.png)
-
+![Example of changing the frequencey of a schedule](/img/schedules/schedules-add-repeat.webp)
 
 The **Move schedule** checkbox allows you to move the schedule either before or after a weekend, if the selected date falls on a weekend.
-
 
 :::note
 Schedules do not account for holidays.
@@ -91,7 +85,7 @@ Schedules do not account for holidays.
 
 The **Amount** field allows you to enter the amount of the transaction.
 
-![Example of amount field](/img/schedules/schedules-amount.png)
+![Example of amount field](/img/schedules/schedules-amount.webp)
 
 Next to the amount field, you can select if the amount is the exact number, an approximate value, or a range between two amounts. This is useful if you want to track a range of expected amounts for a transaction, such as a utility bill that may vary slightly each month.
 
@@ -102,11 +96,9 @@ This means that the transaction will be automatically entered into the account r
 
 It may also be useful to link the schedule to transactions.
 
-![Example of pre-adding a transaction](/img/schedules/schedules-add-with-repeat-and-autoadd.png)
+![Example of pre-adding a transaction](/img/schedules/schedules-add-with-repeat-and-autoadd.webp)
 
-
-Once a schedule is started, Actual will search the transaction history for entries that match the schedule.  You can then select the matches, and will have the option to link those transactions to the current schedule. You can click on the **Find matching transactions** button to have Actual look for matches.
-
+Once a schedule is started, Actual will search the transaction history for entries that match the schedule. You can then select the matches, and will have the option to link those transactions to the current schedule. You can click on the **Find matching transactions** button to have Actual look for matches.
 
 ## Let Actual Find Scheduled Transactions
 
@@ -114,12 +106,11 @@ Instead of manually entering each schedule, you can let Actual find and suggest 
 
 Click the **Find schedules** button in the bottom left corner of the Schedules page to let Actual automatically search for transactions that appear to be recurring.
 
-![Example of finding schedules](/img/schedules/schedules-find-matches.png)
+![Example of finding schedules](/img/schedules/schedules-find-matches.webp)
 
 Select the suggested schedules you want to add, and click the **Create schedule** button. Actual will then create schedules based on the selected transactions. You may need to adjust the dates and other settings for the schedules to fit your needs after they have been created.
 
 If a schedule you expect does not appear, it may be because the payees on the transactions do not match. Ensure all transactions for a schedule use the same payee name.
-
 
 ## Creating Schedules From Transactions
 
@@ -131,20 +122,17 @@ Navigate to the Accounts page, find the transaction you wish to create a schedul
 2. Once selected, go to the drop-down menu on the top right of the page.
 3. Click on **Link schedule**.
 
-![Example of transaction overivew](/img/schedules/schedules-from-transactions.png)
+![Example of transaction overivew](/img/schedules/schedules-from-transactions.webp)
 
 In the Pop up that appears click "Create New"
 
-
-![Rule associated with the mortgage schedule](/img/schedules/schedules-from-transactions-link-schedule.png)
+![Rule associated with the mortgage schedule](/img/schedules/schedules-from-transactions-link-schedule.webp)
 
 You are now presented with the same dialog as when creating a new schedule from scratch.
 All fields will populate from the transaction,
 Adjust any additional fields, and then click Add.
 
-![Rule associated with the mortgage schedule](/img/schedules/schedules-from-transaction-add-as-usual.png)
-
-
+![Rule associated with the mortgage schedule](/img/schedules/schedules-from-transaction-add-as-usual.webp)
 
 ## Managing Schedules
 
@@ -152,8 +140,7 @@ Once you have created a schedule, you can edit it by clicking on the schedule li
 
 If you click on the ellipsis at the end of the schedule line, you will see various options to manage the schedule.
 
-![Example of managing a schedule](/img/schedules/schedules-manage.png)
-
+![Example of managing a schedule](/img/schedules/schedules-manage.webp)
 
 ## How Actual Finds Schedules
 
@@ -170,26 +157,23 @@ You can resolve this issue in one of two ways.
 1. Skip the next schedule by selecting the upcoming scheduled transaction and choosing the "Skip Scheduled Date" from the menu options.
 2. Accept that the date doesn't match and leave it as is so the schedule doesn't prompt a second transaction.
 
-
 ## How To Use Rules With Schedules
 
 Many times it's desired to add notes to the scheduled transactions or to assign categories automatically. This is done with the [Rules](/docs/budgeting/rules) tool. The tool can be reached directly from the Schedules page by clicking on the **Edit as a rule** button in the edit dialog of a schedule.
 
 When you edit a schedule, the **Edit as rule** button will appear in the dialog
 
-![Example of editing a scheudle](/img/schedules/schedules-edit-as-rule.png)
-
+![Example of editing a scheudle](/img/schedules/schedules-edit-as-rule.webp)
 
 Click on **Edit as Rule** to further customize the automatic entry.
 
 We can see that the rule is already populated with the information from the schedule. The **If these conditions are met** area will have the date and frequency of the schedule, as well as the account it is linked to.
 The only thing you would like to add is the category and notes for the transaction.
 
-![Rule associated with the mortgage schedule](/img/schedules/schedules-add-rule.png)
+![Rule associated with the mortgage schedule](/img/schedules/schedules-add-rule.webp)
 
 Next you can select all the matching transactions that you want to apply this rule to. This is done by clicking on the checkbox next to the _Date_ header. Then click on the **Apply actions** button in the dialog.
 
-![Rule associated with the mortgage schedule](/img/schedules/schedules-rule-apply-action.png)
+![Rule associated with the mortgage schedule](/img/schedules/schedules-rule-apply-action.webp)
 
 Save the rule and any time this scheduled transaction gets entered into the register it can be automatically categorized with a helpful note.
-

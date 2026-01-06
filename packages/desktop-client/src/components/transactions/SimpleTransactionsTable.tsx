@@ -75,7 +75,7 @@ const TransactionRow = memo(function TransactionRow({
   return (
     <Row style={{ color: theme.tableText }}>
       <SelectCell
-        exposed={true}
+        exposed
         focused={false}
         onSelect={e => {
           dispatchSelected({
@@ -105,7 +105,7 @@ const TransactionRow = memo(function TransactionRow({
               <Cell
                 key={i}
                 width="flex"
-                exposed={true}
+                exposed
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -215,7 +215,7 @@ export function SimpleTransactionsTable({
       headers={
         <>
           <SelectCell
-            exposed={true}
+            exposed
             focused={false}
             selected={selectedItems.size > 0}
             width={20}

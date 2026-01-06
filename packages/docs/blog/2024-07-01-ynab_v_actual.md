@@ -18,16 +18,18 @@ Lets see how Actual stacks up!
 <!--truncate-->
 
 ## Introduction
+
 I will structure this comparison as follows.
 First I will go over some of the fundamentals individually, then at the end have a quick comparison of some of the smaller features.
 I will go in depth in the basics like how Actual is installed and run, how the budgeting basics compare, and then the other exciting features.
 Along with this blog post you can look around at our [documentation](../../docs), or our [main feature list](../../#features).
 
 ### tl;dr
-* Actual uses **envelope budgeting**, same as YNAB.
-* Actual is **free** for the base app and all updates. Hosting or optional bank syncing may have a fee depending on how you set up Actual.
-* Actual can run on all devices **online or offline**, and can sync between devices if you set up a sync server.
-* Your **data is yours** if you use Actual Budget, where with YNAB you have no control over your data
+
+- Actual uses **envelope budgeting**, same as YNAB.
+- Actual is **free** for the base app and all updates. Hosting or optional bank syncing may have a fee depending on how you set up Actual.
+- Actual can run on all devices **online or offline**, and can sync between devices if you set up a sync server.
+- Your **data is yours** if you use Actual Budget, where with YNAB you have no control over your data
 
 ## Running the Applications
 
@@ -54,11 +56,13 @@ The easiest to start is to install the desktop application or try [the web demo]
 Long term you should consider also hosting your own sync server. Considerations for the sync server are added below.
 
 #### Desktop Application
+
 The desktop application can be found at our [github release page](https://github.com/actualbudget/actual/releases/latest).
 Download the file that matches your operating system.
 The `.exe` for Windows, the `.dmg` for Mac, or one of the Linux options.
 
 #### Web version
+
 You can try out Actual using the [web demo](https://app.actualbudget.org) on any device.
 This link can be used long term if you are exclusively on mobile and don't have a sync server.
 The data will be stored on your device and we wont have any access to it.
@@ -81,6 +85,7 @@ Other options include hosting your own with docker or node.js, or using some oth
 ## Core Feature Comparison
 
 ### Budgeting
+
 The core budgeting style is where Actual and YNAB are the most similar.
 Both use envelope style budgeting, sometimes referred to zero-sum budgeting.
 This means that all your funds are assigned to categories, or "jobs" in YNAB vernacular.
@@ -92,9 +97,10 @@ Just like you are used to.
 Here is a snippet of what Actual looks like in the budgeting view.
 Its similar to YNAB, but each have a unique style.
 
-![](/img/homepage/actual-main-budget.png)
+![](/img/homepage/actual-main-budget.webp)
 
 #### Credit Cards
+
 This is the one place where YNAB and Actual differ in budgeting.
 YNAB automagically handles credit cards for you.
 Some users prefer this approach while others find it annoying.
@@ -107,7 +113,6 @@ Principal and interest payments, get categorized into this category.
 If you use credit cards, but don't carry any debt, then don't worry, you don't have to do anything special.
 Envelope budgeting handles that process natively by using funds budgeted in your categories and paying off your balance.
 
-
 ### Reports
 
 YNAB has a few simple reports but nothing especially exciting.
@@ -119,7 +124,7 @@ All reports can be viewed on mobile.
 Here is an example of the kind of granularity you can achieve with these custom reports.
 This report is viewing how much was spent on food, by week, in both the `Food` and `Restaurant` categories over the last few months.
 
-![](/img/blog/actualvynab-report.png)
+![](/img/blog/actualvynab-report.webp)
 
 ### Bank Syncing
 
@@ -152,7 +157,7 @@ This means that if you have a multi month goal to save $500 in the next 10 month
 If you budget more than you needed, the goal will adjust each month so that the amount you need in the current month is always accurate.
 Here is an example of what these indications looks like for a goal met(green), goal incomplete(yellow), or overspent(red) category.
 
-![](/img/goal-template/templates-colors.png)
+![](/img/goal-template/templates-colors.webp)
 
 These goals can also be used to automate your budgeting each month, same as YNAB.
 One extra feature that YNAB does not have with their goals is the ability to prioritize certain categories.
@@ -168,27 +173,27 @@ Goal templates is under active development so expect it to be even better as tim
 This will be a rapid fire view of feature comparison. For a full view of these features you can read up [in our documentation](../../docs).
 Don't worry the docs aren't too long to read. I will also be including the already mentioned features.
 
-|Feature | Actual | YNAB | Notes |
-|:---|:---:|:---:|:---:|
-| Cost | FREE | $109/yr |The base application of Actual is free. This does not include if you choose to use a hosting service or bank sync provider  |
-| Works On All Devices    | ✅  | ✅  | Actual is still in the process of reaching full feature parity between mobile and desktop, but it is nearly there |
-| Desktop App |✅ |❌ |Actual includes automated backups in the desktop app |
-| You Own Your Data |✅  |❌  |Actual can't see your data since it never leaves you devices or server|
-| Offline Use    | ✅  | ❌ | |
-| Sync Between Devices |✅ |✅ | Requires a server for Actual to sync between devices, where YNAB has this out of the box |
-| Envelope Budgeting |✅ |✅ | |
-| Traditional Budgeting |✅ |❌ | Actual does have the option for a non-envelope style budget, but we think you should stick with envelope budgeting |
-| Multiple budget files |✅  |✅  | |
-| Dark Theme |✅ |✅ | Actual has two dark themes. A regular "Dark", and "Midnight" for those who love black |
-| Scheduled Transactions |✅ |✅ | |
-| Bank Sync |✅ |✅ | May not be free for Actual. YNAB only supports North America while Actual supports both North America and Europe and requires a sync server |
-| Open Source |✅ |❌ | |
-| Transaction Rules |✅ |✅ |YNAB is limited to just rules to modify the payee, while Actual's Rules can modify much more if desired|
-| Custom Reports |✅ |❌ | |
-| Flexible Goals |✅ |✅ |Actual has more options for Goals but less in the way of goal status indication |
-
+| Feature                | Actual |  YNAB   |                                                                    Notes                                                                    |
+| :--------------------- | :----: | :-----: | :-----------------------------------------------------------------------------------------------------------------------------------------: |
+| Cost                   |  FREE  | $109/yr |         The base application of Actual is free. This does not include if you choose to use a hosting service or bank sync provider          |
+| Works On All Devices   |   ✅   |   ✅    |              Actual is still in the process of reaching full feature parity between mobile and desktop, but it is nearly there              |
+| Desktop App            |   ✅   |   ❌    |                                            Actual includes automated backups in the desktop app                                             |
+| You Own Your Data      |   ✅   |   ❌    |                                   Actual can't see your data since it never leaves you devices or server                                    |
+| Offline Use            |   ✅   |   ❌    |                                                                                                                                             |
+| Sync Between Devices   |   ✅   |   ✅    |                          Requires a server for Actual to sync between devices, where YNAB has this out of the box                           |
+| Envelope Budgeting     |   ✅   |   ✅    |                                                                                                                                             |
+| Traditional Budgeting  |   ✅   |   ❌    |             Actual does have the option for a non-envelope style budget, but we think you should stick with envelope budgeting              |
+| Multiple budget files  |   ✅   |   ✅    |                                                                                                                                             |
+| Dark Theme             |   ✅   |   ✅    |                            Actual has two dark themes. A regular "Dark", and "Midnight" for those who love black                            |
+| Scheduled Transactions |   ✅   |   ✅    |                                                                                                                                             |
+| Bank Sync              |   ✅   |   ✅    | May not be free for Actual. YNAB only supports North America while Actual supports both North America and Europe and requires a sync server |
+| Open Source            |   ✅   |   ❌    |                                                                                                                                             |
+| Transaction Rules      |   ✅   |   ✅    |                   YNAB is limited to just rules to modify the payee, while Actual's Rules can modify much more if desired                   |
+| Custom Reports         |   ✅   |   ❌    |                                                                                                                                             |
+| Flexible Goals         |   ✅   |   ✅    |                               Actual has more options for Goals but less in the way of goal status indication                               |
 
 ## Conclusion
+
 I hope this comparison was useful to those considering the two budgeting apps.
 The two apps are different and have their own pros and cons.
 

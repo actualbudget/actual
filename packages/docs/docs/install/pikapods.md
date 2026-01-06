@@ -2,7 +2,6 @@
 title: 'PikaPods'
 ---
 
-
 [PikaPods](https://www.pikapods.com/) offers one click "instant open source app hosting", allowing you to run Actual for about $ 1.50 per month (as of November 2025).
 
 Using PikaPods is also a simple way to support the development of Actual Budget, as PikaPods will share some of its revenues with Actual for customers using their Actual Budget Pods.
@@ -26,7 +25,7 @@ If you are technically inclined, just [Click here to create an account and run A
 
 You can leave the resources at their lowest setting (although you will need a non-zero amount of storage for your budget files).
 
-_Your browser does most of Actual's computation,_ so purchasing more resources for the server won’t necessarily result in a better experience.
+_Your browser does most of Actual's computation,_ so purchasing more resources for the server won't necessarily result in a better experience.
 
 After setting up your Pod, head over to our [Starting Fresh](/docs/getting-started/starting-fresh) guide to get started with
 Actual Budget.
@@ -35,38 +34,33 @@ Actual Budget.
 
 [Click here to go to PikaPods setup for Actual](https://www.pikapods.com/pods?run=actual).
 
-
 You will be greeted with the following screen.
 
-![image PikaPods register](/img/pikapods-setup/pikapods-1-register-login.png)
+![image PikaPods register](/img/pikapods-setup/pikapods-1-register-login.webp)
 
 Click on the **register** link inside the blue banner, which will take you to the user registration screen.
-
 
 ## The user registration screen
 
 A working email address is required, as PikaPods will send an email with a link you need to click on to complete the signup process.
 
-![Image Pikapods email](/img/pikapods-setup/pikapods-2-register-name.png)
-
+![Image Pikapods email](/img/pikapods-setup/pikapods-2-register-name.webp)
 
 ## Verification email
 
 Click the green button **Activate and Login**. You are now registered as a PikaPods customer. You will be returned to the login screen.
 
-![Image Pikapods email registration](/img/pikapods-setup/pikapods-4-email-activation.png)
-
+![Image Pikapods email registration](/img/pikapods-setup/pikapods-4-email-activation.webp)
 
 ## Login screen
 
 Enter _your_ registration email address and password.
 
-![Image Pikapods login](/img/pikapods-setup/pikapods-5-login-screen.png)
-
+![Image Pikapods login](/img/pikapods-setup/pikapods-5-login-screen.webp)
 
 ## Naming your Pod
 
-Simply put, *a Pod is a very tiny computer running in the cloud*. Typically, a Pod only runs one application - like Actual Budget Server.
+Simply put, _a Pod is a very tiny computer running in the cloud_. Typically, a Pod only runs one application - like Actual Budget Server.
 
 :::info
 
@@ -80,11 +74,9 @@ In 1), you enter a name for your Pod. This name really does not matter unless yo
 
 In 2), you decide which region your Pod should run - choose the most suitable region.
 
-![Image pikapods basic](/img/pikapods-setup/pikapods-6-add-pod-basics.png)
-
+![Image pikapods basic](/img/pikapods-setup/pikapods-6-add-pod-basics.webp)
 
 ## Assigning storage to your Pod
-
 
 The minimum storage you can assign to your Pod is 10 GB (gigabytes). We promise you that this is more than enough for your budget purposes.
 
@@ -92,9 +84,7 @@ Example: It takes about 33 megabytes of storage for about 1,200 transactions, 18
 
 Your Pod will be created when you click on the green **ADD POD** button. This step takes less than one minute.
 
-![Image pikapods add resources](/img/pikapods-setup/pikapods-7-add-pod-resoruces.png)
-
-
+![Image pikapods add resources](/img/pikapods-setup/pikapods-7-add-pod-resoruces.webp)
 
 ## Your Pod is now ready to be used
 
@@ -102,9 +92,7 @@ Click on the green **OPEN POD** button to be taken to your Pod.
 
 The address for your Actual Budget is found in the Domain field. In the screenshot example, this is `https://berserk-bullmastiff.pikapod.net/budget/`. Yours will be something completely different.
 
-
-![Image pikapod pod url](/img/pikapods-setup/pikapods-8-running-pod.png)
-
+![Image pikapod pod url](/img/pikapods-setup/pikapods-8-running-pod.webp)
 
 ## Setting a password for your Actual Budget
 
@@ -116,8 +104,7 @@ Keep your Actual Budget password safe, as it cannot be retrieved. If you forget 
 
 :::
 
-
-![Image connecting to Actual](/img/a-tour-of-actual/server-connecting-first-time.png)
+![Image connecting to Actual](/img/a-tour-of-actual/server-connecting-first-time.webp)
 <br />
 <br />
 
@@ -141,8 +128,6 @@ Browser version and OS/browser combination may affect how to install a PWA. Plea
 
 For other browsers or browser/OS combinations, most search engines or the browser's documentation will describe how to install a PWA. PC Magazine had an [article in March 2025](https://www.pcmag.com/explainers/how-to-use-progessive-web-apps) with some good information.
 
-
 ## Getting started with Actual Budget
 
 Go to our [Starting Fresh](/docs/getting-started/starting-fresh) guide to get started with Actual Budget.
-
