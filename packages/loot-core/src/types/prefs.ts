@@ -153,5 +153,5 @@ export type GlobalPrefsJson = Partial<{
 export type AuthMethods = 'password' | 'openid';
 
 export type ServerPrefs = Partial<{
-  'flags.plugins': string; // "true" or "false"
+  'flags.plugins': 'true' | 'false';
 }>;
