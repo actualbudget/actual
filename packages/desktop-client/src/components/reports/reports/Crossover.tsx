@@ -128,7 +128,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const [swr, setSwr] = useState(0.04);
   const [estimatedReturn, setEstimatedReturn] = useState<number | null>(null);
   const [projectionType, setProjectionType] = useState<
-    'trend' | 'hampel' | 'median' | 'mean'
+    'hampel' | 'median' | 'mean'
   >('hampel');
   const [expenseAdjustmentFactor, setExpenseAdjustmentFactor] = useState(1.0);
   const [showHiddenCategories, setShowHiddenCategories] = useState(false);
@@ -727,12 +727,9 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                 <Select
                   value={projectionType}
                   onChange={value =>
-                    setProjectionType(
-                      value as 'trend' | 'hampel' | 'median' | 'mean',
-                    )
+                    setProjectionType(value as 'hampel' | 'median' | 'mean')
                   }
                   options={[
-                    ['trend', t('Linear Trend')],
                     ['hampel', t('Hampel Filtered Median')],
                     ['median', t('Median')],
                     ['mean', t('Mean')],
