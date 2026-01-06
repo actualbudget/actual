@@ -292,7 +292,7 @@ export function useUpdateCategoryGroupMutation() {
     mutationFn: async ({ group }: UpdateCategoryGroupPayload) => {
       const { grouped: categoryGroups } = queryClient.getQueryData(
         categoryQueries.list().queryKey,
-      );
+      ) ?? { grouped: [] };
       if (
         categoryGroups.find(
           g =>
