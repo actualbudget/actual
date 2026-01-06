@@ -119,12 +119,16 @@ async function deleteDashboardPage(id: string) {
     throw new Error('Cannot delete the last dashboard page');
   }
 
+  const deleting_widgets = await db.all<Pick<db.DbDashboard, 'id'>>(
+    'SELECT id FROM dashboard WHERE dashboard_page_id = ? AND tombstone = 0',
+    [id],
+  );
+
   await batchMessages(async () => {
     await db.delete_('dashboard_pages', id);
     // Tombstone all widgets for this dashboard
-    await db.runQuery(
-      'UPDATE dashboard SET tombstone = 1 WHERE dashboard_page_id = ?',
-      [id],
+    await Promise.all(
+      deleting_widgets.map(({ id }) => db.delete_('dashboard', id)),
     );
   });
 }

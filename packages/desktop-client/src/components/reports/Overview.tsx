@@ -425,11 +425,27 @@ export function Overview({ dashboard }: OverviewProps) {
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 gap: 5,
-                alignItems: 'center',
+                alignItems: 'stretch',
               }}
             >
               {currentBreakpoint === 'desktop' && (
                 <>
+                  {/* Dashboard Selector */}
+                  <DashboardSelector
+                    dashboards={dashboard_pages}
+                    currentDashboard={dashboard}
+                  />
+
+                  <View
+                    style={{
+                      height: 'auto',
+                      borderLeft: `1.5px solid ${theme.pillBorderDark}`,
+                      borderRadius: 0.75,
+                      marginLeft: 7,
+                      marginRight: 7,
+                    }}
+                  />
+
                   <DialogTrigger>
                     <Button variant="primary" isDisabled={isImporting}>
                       <Trans>Add new widget</Trans>
@@ -524,12 +540,6 @@ export function Overview({ dashboard }: OverviewProps) {
                       </Dialog>
                     </Popover>
                   </DialogTrigger>
-
-                  {/* Dashboard Selector */}
-                  <DashboardSelector
-                    dashboards={dashboard_pages}
-                    currentDashboard={dashboard}
-                  />
 
                   {/* The Editing Button */}
                   {isEditing ? (
