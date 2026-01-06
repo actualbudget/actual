@@ -12,7 +12,6 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { logger } from 'loot-core/platform/server/log';
 import {
   parseWallosFile,
   toRecurConfig,
@@ -483,7 +482,9 @@ export function ImportWallosModal() {
         .map(sub => {
           const accountId = sub.selectedAccountId;
           if (!accountId) {
-            logger.warn(`Skipping subscription "${sub.name}": missing account`);
+            console.warn(
+              `Skipping subscription "${sub.name}": missing account`,
+            );
             return null;
           }
 
@@ -492,7 +493,7 @@ export function ImportWallosModal() {
             payeeId = payeeIdMap.get(sub.matchedPayeeName) ?? null;
           }
           if (!payeeId) {
-            logger.warn(`Skipping subscription "${sub.name}": missing payee`);
+            console.warn(`Skipping subscription "${sub.name}": missing payee`);
             return null;
           }
 
