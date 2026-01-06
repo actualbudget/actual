@@ -71,7 +71,7 @@
     ],
     "typescript/consistent-type-definitions": ["warn", "type"],
     "typescript/consistent-type-imports": [
-      "warn",
+      "error",
       {
         "prefer": "type-imports",
         "fixStyle": "inline-type-imports"
