@@ -528,7 +528,27 @@ async function advanceSchedulesService(syncSuccess) {
 // Wallos Import Functions
 
 /**
- * Check for potential duplicate schedules based on name and amount
+ * Check for potential duplicate schedules based on name and amount.
+ *
+ * Compares each subscription against existing schedules to detect
+ * potential duplicates. Matches are based on:
+ * - Exact name match (case-insensitive, trimmed)
+ * - Similar amount (within 5% tolerance)
+ *
+ * @param subscriptions - Array of subscriptions to check
+ * @returns Promise resolving to array of duplicate check results
+ *
+ * @example
+ * const results = await checkWallosDuplicates([
+ *   { id: "uuid1", name: "Netflix", amount: -1599 },
+ *   { id: "uuid2", name: "Spotify", amount: -999 }
+ * ]);
+ * // results[0] = {
+ * //   subscriptionId: "uuid1",
+ * //   isDuplicate: true,
+ * //   existingScheduleId: "schedule-123",
+ * //   existingScheduleName: "Netflix"
+ * // }
  */
 async function checkWallosDuplicates(
   subscriptions: Array<{ id: string; name: string; amount: number }>,
@@ -571,7 +591,27 @@ async function checkWallosDuplicates(
 }
 
 /**
- * Import Wallos subscriptions as schedules
+ * Import Wallos subscriptions as schedules.
+ * Creates new schedules in Actual Budget from parsed Wallos subscription data.
+ * Each subscription becomes a schedule with date, amount, account, and payee conditions.
+ *
+ * Schedules are created with `posts_transaction: false` by default,
+ * meaning they won't automatically create transactions.
+ *
+ * @param items - Array of import items with all required data
+ * @returns Promise resolving to import result with success count and errors
+ *
+ * @example
+ * const result = await importWallosSchedules([
+ *   {
+ *     name: "Netflix",
+ *     amount: -1599,
+ *     accountId: "account-123",
+ *     payeeId: "payee-456",
+ *     date: { frequency: 'monthly', interval: 1, start: '2024-01-15', endMode: 'never' }
+ *   }
+ * ]);
+ * // result = { successCount: 1, errors: [] }
  */
 async function importWallosSchedules(
   items: WallosScheduleImportItem[],

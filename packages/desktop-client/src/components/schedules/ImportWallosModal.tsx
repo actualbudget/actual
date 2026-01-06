@@ -12,6 +12,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
+import { logger } from 'loot-core/platform/server/log';
 import {
   parseWallosFile,
   toRecurConfig,
@@ -19,6 +20,8 @@ import {
 } from 'loot-core/server/importers/wallos';
 import { format as monthUtilFormat } from 'loot-core/shared/months';
 import { getRecurringDescription } from 'loot-core/shared/schedules';
+
+import { ROW_HEIGHT } from './SchedulesTable';
 
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
@@ -49,18 +52,31 @@ import {
 import { createPayee } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
-const ROW_HEIGHT = 43;
-
+/**
+ * Represents a Wallos subscription with UI state for import.
+ * Extends ParsedWallosSubscription with fields for tracking user selections
+ * and duplicate detection status during the import workflow.
+ */
 type ImportedSubscription = ParsedWallosSubscription & {
+  /** The account selected for this subscription */
   selectedAccountId: string | null;
+  /** The payee selected/matched for this subscription */
   selectedPayeeId: string | null;
+  /** Name to use for creating a new payee if no existing payee matched */
   matchedPayeeName: string | null;
+  /** Whether a potential duplicate schedule exists */
   isDuplicate: boolean;
 };
 
+/**
+ * Props for the ImportWallosTable component.
+ */
 type ImportWallosTableProps = {
+  /** Array of subscriptions to display */
   subscriptions: ImportedSubscription[];
+  /** Callback when account selection changes */
   onAccountChange: (subId: string, accountId: string | null) => void;
+  /** Callback when payee selection changes */
   onPayeeChange: (
     subId: string,
     payeeId: string | null,
@@ -68,6 +84,16 @@ type ImportWallosTableProps = {
   ) => void;
 };
 
+/**
+ * Table component for displaying and selecting Wallos subscriptions to import.
+ *
+ * Features:
+ * - Multi-select with checkboxes
+ * - Per-row account and payee selection
+ * - Duplicate warning indicators
+ * - Recurrence and amount display
+ * - Highlights rows missing required account selection
+ */
 function ImportWallosTable({
   subscriptions,
   onAccountChange,
@@ -268,6 +294,30 @@ function ImportWallosTable({
   );
 }
 
+/**
+ * Modal component for importing subscriptions from Wallos as scheduled transactions.
+ *
+ * Workflow:
+ * 1. User selects Wallos JSON export file
+ * 2. File is parsed and checked for duplicates
+ * 3. Accounts are auto-matched by Payment Method or Notes field
+ * 4. Payees are auto-matched by name, or marked for creation
+ * 5. User reviews and selects subscriptions to import
+ * 6. If new payees are needed, shows confirmation step
+ * 7. Creates payees and schedules
+ *
+ * Features:
+ * - JSON file import with validation
+ * - Automatic account matching via Payment Method or Notes
+ * - Payee matching and auto-creation
+ * - Duplicate detection with warnings
+ * - Two-step flow: selection → payee confirmation (if needed) → import
+ * - Error handling and user feedback
+ *
+ * @example
+ * // Triggered from schedules page via:
+ * // pushModal('import-wallos')
+ */
 export function ImportWallosModal() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -433,9 +483,7 @@ export function ImportWallosModal() {
         .map(sub => {
           const accountId = sub.selectedAccountId;
           if (!accountId) {
-            console.warn(
-              `Skipping subscription "${sub.name}": missing account`,
-            );
+            logger.warn(`Skipping subscription "${sub.name}": missing account`);
             return null;
           }
 
@@ -444,7 +492,7 @@ export function ImportWallosModal() {
             payeeId = payeeIdMap.get(sub.matchedPayeeName) ?? null;
           }
           if (!payeeId) {
-            console.warn(`Skipping subscription "${sub.name}": missing payee`);
+            logger.warn(`Skipping subscription "${sub.name}": missing payee`);
             return null;
           }
 

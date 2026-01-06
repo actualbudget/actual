@@ -13,18 +13,34 @@ export type { ParsedWallosSubscription, WallosExportResponse };
 
 /**
  * Parse a Wallos JSON export file into a structured format.
- * Supports both formats:
- * - Plain array: [{ Name: "...", ... }, ...]
- * - Wrapped: { success: true, subscriptions: [...] }
+ *
+ * Supports two export formats from Wallos:
+ * - Plain array: `[{ Name: "...", ... }, ...]`
+ * - Wrapped object: `{ success: true, subscriptions: [...] }`
  *
  * @param content - JSON string content of the Wallos export file
+ * @returns Array of parsed subscriptions with normalized fields
+ * @throws {Error} If the JSON is invalid or doesn't match expected format
+ *
+ * @example
+ * const json = await file.text();
+ * const subscriptions = parseWallosFile(json);
+ * // subscriptions[0] = {
+ * //   id: "uuid-...",
+ * //   name: "Netflix",
+ * //   amount: -1599, // in cents, negative for expense
+ * //   nextPaymentDate: "2024-01-15",
+ * //   frequency: "monthly",
+ * //   interval: 1,
+ * //   ...
+ * // }
  */
 export function parseWallosFile(content: string): ParsedWallosSubscription[] {
   const data = JSON.parse(content);
 
   let subscriptions: WallosSubscription[];
 
-  // Handle both formats: plain array or wrapped object
+  // Handle plain array or wrapped object
   if (Array.isArray(data)) {
     subscriptions = data;
   } else if (data.success && Array.isArray(data.subscriptions)) {
@@ -39,7 +55,16 @@ export function parseWallosFile(content: string): ParsedWallosSubscription[] {
 }
 
 /**
- * Parse a single Wallos subscription into our internal format
+ * Parse a single Wallos subscription into our internal format.
+ *
+ * Normalizes fields:
+ * - Generates UUID for tracking
+ * - Converts price to integer cents (always negative for expenses)
+ * - Parses payment cycle into frequency/interval
+ * - Derives active state from State and Active fields
+ *
+ * @param sub - Raw Wallos subscription object
+ * @returns Parsed subscription with normalized fields
  */
 function parseSubscription(sub: WallosSubscription): ParsedWallosSubscription {
   const { frequency, interval } = parsePaymentCycle(sub['Payment Cycle']);
@@ -62,8 +87,22 @@ function parseSubscription(sub: WallosSubscription): ParsedWallosSubscription {
 }
 
 /**
- * Parse Wallos "Payment Cycle" string into frequency and interval
- * Examples: "Monthly", "Every 2 Weeks", "Yearly", "Every 3 Months", "Daily", "Weekly"
+ * Parse Wallos "Payment Cycle" string into frequency and interval.
+ *
+ * Supports various formats:
+ * - Simple: "Daily", "Weekly", "Monthly", "Yearly", "Annually"
+ * - Interval: "Every 2 Weeks", "Every 3 Months", "Every 2 Years"
+ * - Special: "Biweekly", "Bi-weekly", "Quarterly", "Semi-annual"
+ *
+ * @param cycle - Payment cycle string from Wallos
+ * @returns Object with frequency ('daily' | 'weekly' | 'monthly' | 'yearly') and interval number
+ *
+ * @example
+ * parsePaymentCycle("Monthly") // { frequency: "monthly", interval: 1 }
+ * parsePaymentCycle("Every 2 Weeks") // { frequency: "weekly", interval: 2 }
+ * parsePaymentCycle("Every 3 Months") // { frequency: "monthly", interval: 3 }
+ * parsePaymentCycle("Biweekly") // { frequency: "weekly", interval: 2 }
+ * parsePaymentCycle("Quarterly") // { frequency: "monthly", interval: 3 }
  */
 function parsePaymentCycle(cycle: string): {
   frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -141,8 +180,21 @@ function parsePaymentCycle(cycle: string): {
 }
 
 /**
- * Parse a price string with currency symbol into an integer (cents)
- * Examples: "$9.99", "€9,99", "9.99 USD", "£19,99"
+ * Parse a price string with currency symbol into an integer (cents).
+ *
+ * Handles multiple formats:
+ * - US/UK: "$9.99", "9.99 USD", "£19.99"
+ * - European: "€9,99", "9,99 EUR"
+ * - Thousands separators: "$1,234.56", "€1.234,56"
+ *
+ * @param priceStr - Price string with optional currency symbol
+ * @returns Amount in integer cents (e.g., "9.99" → 999), or 0 if parsing fails
+ *
+ * @example
+ * parsePrice("$9.99")    // 999
+ * parsePrice("€9,99")    // 999
+ * parsePrice("1.234,56") // 123456
+ * parsePrice("")   // 0
  */
 function parsePrice(priceStr: string): number {
   if (!priceStr) {
@@ -180,7 +232,27 @@ function parsePrice(priceStr: string): number {
 }
 
 /**
- * Convert a parsed Wallos subscription to Actual's RecurConfig format
+ * Convert a parsed Wallos subscription to Actual's RecurConfig format.
+ *
+ * Maps the subscription's frequency, interval, and next payment date
+ * into a recurrence configuration suitable for creating schedules.
+ *
+ * @param sub - Parsed Wallos subscription
+ * @returns Recurrence configuration for Actual Budget
+ *
+ * @example
+ * const config = toRecurConfig({
+ *   frequency: 'monthly',
+ *   interval: 1,
+ *   nextPaymentDate: '2024-01-15',
+ *   ...
+ * });
+ * // config = {
+ * //   frequency: 'monthly',
+ * //   interval: 1,
+ * //   start: '2024-01-15',
+ * //   endMode: 'never'
+ * // }
  */
 export function toRecurConfig(sub: ParsedWallosSubscription): RecurConfig {
   return {
@@ -192,7 +264,23 @@ export function toRecurConfig(sub: ParsedWallosSubscription): RecurConfig {
 }
 
 /**
- * Build conditions array for creating a schedule
+ * Build conditions array for creating a schedule from a Wallos subscription.
+ *
+ * Constructs the rule conditions needed to create a schedule,
+ * including date recurrence, amount, account, and optionally payee.
+ *
+ * @param sub - Parsed Wallos subscription
+ * @param accountId - Account ID to associate with the schedule
+ * @param payeeId - Payee ID (optional, null if none)
+ * @returns Array of condition objects for the schedule rule
+ *
+ * @example
+ * const conditions = buildScheduleConditions(
+ *   subscription,
+ *   'account-123',
+ *   'payee-456'
+ * );
+ * // Returns conditions for: date, amount, account, payee
  */
 export function buildScheduleConditions(
   sub: ParsedWallosSubscription,
