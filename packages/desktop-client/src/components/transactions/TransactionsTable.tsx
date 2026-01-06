@@ -525,7 +525,6 @@ function PayeeCell({
   const transferAccount = transferAccountsByTransaction[transaction.id];
 
   const displayPayee = useDisplayPayee({ transaction });
-  const allSchedulesQuery = useMemo(() => q('schedules').select('*'), []);
 
   return transaction.is_parent ? (
     <Cell
@@ -574,14 +573,12 @@ function PayeeCell({
             color: theme.pageTextSubdued,
           }}
         >
-          <SchedulesProvider query={allSchedulesQuery}>
-            <PayeeIcons
-              transaction={transaction}
-              transferAccount={transferAccount}
-              onNavigateToTransferAccount={onNavigateToTransferAccount}
-              onNavigateToSchedule={onNavigateToSchedule}
-            />
-          </SchedulesProvider>
+          <PayeeIcons
+            transaction={transaction}
+            transferAccount={transferAccount}
+            onNavigateToTransferAccount={onNavigateToTransferAccount}
+            onNavigateToSchedule={onNavigateToSchedule}
+          />
           <SvgSplit
             style={{
               color: 'inherit',
@@ -669,14 +666,12 @@ function PayeeCell({
 
         return (
           <>
-            <SchedulesProvider query={allSchedulesQuery}>
-              <PayeeIcons
-                transaction={transaction}
-                transferAccount={transferAccount}
-                onNavigateToTransferAccount={onNavigateToTransferAccount}
-                onNavigateToSchedule={onNavigateToSchedule}
-              />
-            </SchedulesProvider>
+            <PayeeIcons
+              transaction={transaction}
+              transferAccount={transferAccount}
+              onNavigateToTransferAccount={onNavigateToTransferAccount}
+              onNavigateToSchedule={onNavigateToSchedule}
+            />
             <div
               style={{
                 overflow: 'hidden',
@@ -2995,43 +2990,47 @@ export const TransactionTable = forwardRef(
       [props.transactions, newTransactions],
     );
 
+    const allSchedulesQuery = useMemo(() => q('schedules').select('*'), []);
+
     return (
       <DisplayPayeeProvider transactions={displayPayeeTransactions}>
-        <TransactionTableInner
-          tableRef={mergedRef}
-          listContainerRef={listContainerRef}
-          {...props}
-          transactions={transactionsWithExpandedSplits}
-          transactionMap={transactionMap}
-          transactionsByParent={transactionsByParent}
-          transferAccountsByTransaction={transferAccountsByTransaction}
-          selectedItems={selectedItems}
-          isExpanded={splitsExpanded.isExpanded}
-          onSave={onSave}
-          onDelete={onDelete}
-          onBatchDelete={onBatchDelete}
-          onBatchDuplicate={onBatchDuplicate}
-          onBatchLinkSchedule={onBatchLinkSchedule}
-          onBatchUnlinkSchedule={onBatchUnlinkSchedule}
-          onCreateRule={onCreateRule}
-          onScheduleAction={onScheduleAction}
-          onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
-          onSplit={onSplit}
-          onCheckNewEnter={onCheckNewEnter}
-          onCheckEnter={onCheckEnter}
-          onAddTemporary={onAddTemporary}
-          onAddAndCloseTemporary={onAddAndCloseTemporary}
-          onAddSplit={onAddSplit}
-          onDistributeRemainder={onDistributeRemainder}
-          onCloseAddTransaction={onCloseAddTransaction}
-          onToggleSplit={onToggleSplit}
-          newTransactions={newTransactions ?? []}
-          tableNavigator={tableNavigator}
-          newNavigator={newNavigator}
-          showSelection={props.showSelection}
-          allowSplitTransaction={props.allowSplitTransaction}
-          showHiddenCategories={showHiddenCategories}
-        />
+        <SchedulesProvider query={allSchedulesQuery}>
+          <TransactionTableInner
+            tableRef={mergedRef}
+            listContainerRef={listContainerRef}
+            {...props}
+            transactions={transactionsWithExpandedSplits}
+            transactionMap={transactionMap}
+            transactionsByParent={transactionsByParent}
+            transferAccountsByTransaction={transferAccountsByTransaction}
+            selectedItems={selectedItems}
+            isExpanded={splitsExpanded.isExpanded}
+            onSave={onSave}
+            onDelete={onDelete}
+            onBatchDelete={onBatchDelete}
+            onBatchDuplicate={onBatchDuplicate}
+            onBatchLinkSchedule={onBatchLinkSchedule}
+            onBatchUnlinkSchedule={onBatchUnlinkSchedule}
+            onCreateRule={onCreateRule}
+            onScheduleAction={onScheduleAction}
+            onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
+            onSplit={onSplit}
+            onCheckNewEnter={onCheckNewEnter}
+            onCheckEnter={onCheckEnter}
+            onAddTemporary={onAddTemporary}
+            onAddAndCloseTemporary={onAddAndCloseTemporary}
+            onAddSplit={onAddSplit}
+            onDistributeRemainder={onDistributeRemainder}
+            onCloseAddTransaction={onCloseAddTransaction}
+            onToggleSplit={onToggleSplit}
+            newTransactions={newTransactions ?? []}
+            tableNavigator={tableNavigator}
+            newNavigator={newNavigator}
+            showSelection={props.showSelection}
+            allowSplitTransaction={props.allowSplitTransaction}
+            showHiddenCategories={showHiddenCategories}
+          />
+        </SchedulesProvider>
       </DisplayPayeeProvider>
     );
   },
