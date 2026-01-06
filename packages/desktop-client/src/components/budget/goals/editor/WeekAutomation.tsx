@@ -8,6 +8,7 @@ import {
   updateTemplate,
 } from '@desktop-client/components/budget/goals/actions';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { AmountInput } from '@desktop-client/components/util/AmountInput';
 
 type WeekAutomationProps = {
@@ -17,10 +18,12 @@ type WeekAutomationProps = {
 
 export const WeekAutomation = ({ template, dispatch }: WeekAutomationProps) => {
   const { t } = useTranslation();
+  const format = useFormat();
+  const { decimalPlaces } = format.currency;
 
   // Template amounts are stored as dollars (floats) by the parser,
-  // convert to cents (integers) for AmountInput
-  const amountInCents = amountToInteger(template.amount ?? 0);
+  // convert to cents (integers) using currency-aware conversion
+  const amountInCents = amountToInteger(template.amount ?? 0, decimalPlaces);
 
   return (
     <FormField style={{ flex: 1 }}>
@@ -34,8 +37,8 @@ export const WeekAutomation = ({ template, dispatch }: WeekAutomationProps) => {
           dispatch(
             updateTemplate({
               type: 'periodic',
-              // Convert back to dollars for storage
-              amount: integerToAmount(valueInCents),
+              // Convert back to dollars for storage using currency-aware conversion
+              amount: integerToAmount(valueInCents, decimalPlaces),
             }),
           )
         }
