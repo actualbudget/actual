@@ -317,54 +317,60 @@ export function ImportWallosModal() {
         const file = (e.target as HTMLInputElement).files?.[0];
         if (!file) return;
 
-        const content = await file.text();
-        const parsed = parseWallosFile(content);
+        try {
+          const content = await file.text();
+          const parsed = parseWallosFile(content);
 
-        // Check for duplicates
-        const duplicateCheck = await send(
-          'schedule/check-wallos-duplicates',
-          parsed.map(s => ({ id: s.id, name: s.name, amount: s.amount })),
-        );
-
-        const duplicateMap = new Map(
-          duplicateCheck.map(d => [d.subscriptionId, d.isDuplicate]),
-        );
-
-        // Try to match payees by name
-        const imported: ImportedSubscription[] = parsed.map(sub => {
-          const matchedPayee = payees.find(
-            p => p.name.toLowerCase().trim() === sub.name.toLowerCase().trim(),
+          // Check for duplicates
+          const duplicateCheck = await send(
+            'schedule/check-wallos-duplicates',
+            parsed.map(s => ({ id: s.id, name: s.name, amount: s.amount })),
           );
 
-          // Try to match account by Payment Method or Notes
-          const matchedAccount = accounts.find(a => {
-            const accountName = a.name.toLowerCase().trim();
-            const paymentMethod = sub.paymentMethod?.toLowerCase().trim();
-            const notes = sub.notes?.toLowerCase().trim();
-            return (
-              (paymentMethod && accountName === paymentMethod) ||
-              (notes && accountName === notes)
+          const duplicateMap = new Map(
+            duplicateCheck.map(d => [d.subscriptionId, d.isDuplicate]),
+          );
+
+          // Try to match payees by name
+          const imported: ImportedSubscription[] = parsed.map(sub => {
+            const matchedPayee = payees.find(
+              p => p.name.toLowerCase().trim() === sub.name.toLowerCase().trim(),
             );
+
+            // Try to match account by Payment Method or Notes
+            const matchedAccount = accounts.find(a => {
+              const accountName = a.name.toLowerCase().trim();
+              const paymentMethod = sub.paymentMethod?.toLowerCase().trim();
+              const notes = sub.notes?.toLowerCase().trim();
+              return (
+                (paymentMethod && accountName === paymentMethod) ||
+                (notes && accountName === notes)
+              );
+            });
+
+            return {
+              ...sub,
+              selectedAccountId: matchedAccount?.id || null,
+              selectedPayeeId: matchedPayee?.id || null,
+              matchedPayeeName: matchedPayee ? null : sub.name,
+              isDuplicate: duplicateMap.get(sub.id) || false,
+            };
           });
 
-          return {
-            ...sub,
-            selectedAccountId: matchedAccount?.id || null,
-            selectedPayeeId: matchedPayee?.id || null,
-            matchedPayeeName: matchedPayee ? null : sub.name,
-            isDuplicate: duplicateMap.get(sub.id) || false,
-          };
-        });
+          // Sort by next payment date ascending (soonest first)
+          imported.sort(
+            (a, b) =>
+              new Date(a.nextPaymentDate).getTime() -
+              new Date(b.nextPaymentDate).getTime(),
+          );
 
-        // Sort by next payment date ascending (soonest first)
-        imported.sort(
-          (a, b) =>
-            new Date(a.nextPaymentDate).getTime() -
-            new Date(b.nextPaymentDate).getTime(),
-        );
-
-        setSubscriptions(imported);
-        setError(null);
+          setSubscriptions(imported);
+          setError(null);
+        } catch (err) {
+          setError(
+            err instanceof Error ? err.message : t('Failed to parse file'),
+          );
+        }
       };
 
       input.click();
@@ -421,21 +427,45 @@ export function ImportWallosModal() {
         payeeIdMap.set(name, result);
       }
 
-      // Build import items
-      const importItems = selected.map(sub => {
-        let payeeId = sub.selectedPayeeId;
-        if (!payeeId && sub.matchedPayeeName) {
-          payeeId = payeeIdMap.get(sub.matchedPayeeName) || null;
-        }
+      // Build import items, filtering out any with missing required fields
+      const importItems = selected
+        .map(sub => {
+          const accountId = sub.selectedAccountId;
+          if (!accountId) {
+            console.warn(
+              `Skipping subscription "${sub.name}": missing account`,
+            );
+            return null;
+          }
 
-        return {
-          name: sub.name,
-          amount: sub.amount,
-          accountId: sub.selectedAccountId!,
-          payeeId: payeeId!,
-          date: toRecurConfig(sub),
-        };
-      });
+          let payeeId = sub.selectedPayeeId;
+          if (!payeeId && sub.matchedPayeeName) {
+            payeeId = payeeIdMap.get(sub.matchedPayeeName) ?? null;
+          }
+          if (!payeeId) {
+            console.warn(`Skipping subscription "${sub.name}": missing payee`);
+            return null;
+          }
+
+          return {
+            name: sub.name,
+            amount: sub.amount,
+            accountId,
+            payeeId,
+            date: toRecurConfig(sub),
+          };
+        })
+        .filter(
+          (
+            item,
+          ): item is {
+            name: string;
+            amount: number;
+            accountId: string;
+            payeeId: string;
+            date: ReturnType<typeof toRecurConfig>;
+          } => item !== null,
+        );
 
       const result = await send('schedule/import-wallos', importItems);
 

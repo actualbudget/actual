@@ -142,16 +142,33 @@ function parsePaymentCycle(cycle: string): {
 
 /**
  * Parse a price string with currency symbol into an integer (cents)
- * Examples: "$9.99", "€9.99", "9.99 USD", "£19.99"
+ * Examples: "$9.99", "€9,99", "9.99 USD", "£19,99"
  */
 function parsePrice(priceStr: string): number {
   if (!priceStr) {
     return 0;
   }
+  // Normalize the price string to handle different formats
+  let cleanedPrice = priceStr.trim();
 
-  // Remove everything except digits and decimal point
-  const cleanedPrice = priceStr.replace(/[^\d.]/g, '').trim();
+  // Detect European format (comma as decimal separator)
+  // European: "1.234,56" or "1234,56"
+  // US/UK: "1,234.56" or "1234.56"
+  if (cleanedPrice.includes(',')) {
+    const lastComma = cleanedPrice.lastIndexOf(',');
+    const lastDot = cleanedPrice.lastIndexOf('.');
 
+    if (lastComma > lastDot) {
+      // European format: comma is decimal separator
+      cleanedPrice = cleanedPrice.replace(/\./g, '').replace(',', '.');
+    } else {
+      // US format: comma is thousands separator
+      cleanedPrice = cleanedPrice.replace(/,/g, '');
+    }
+  }
+
+  // Remove remaining non-numeric characters (currency symbols, etc.)
+  cleanedPrice = cleanedPrice.replace(/[^\d.]/g, '');
   const numericValue = parseFloat(cleanedPrice);
 
   if (isNaN(numericValue)) {
