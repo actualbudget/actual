@@ -28,8 +28,11 @@ export const WeekAutomationReadOnly = ({
   const format = useFormat();
 
   // Template amounts are stored as dollars (floats) by the parser,
-  // convert to cents (integers) for display
-  const amountInCents = amountToInteger(template.amount ?? 0);
+  // convert to cents (integers) using currency-aware conversion
+  const amountInCents = amountToInteger(
+    template.amount ?? 0,
+    format.currency.decimalPlaces,
+  );
   const periodText = getPeriodText(template.period);
 
   return (
