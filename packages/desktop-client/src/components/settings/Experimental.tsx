@@ -159,6 +159,9 @@ export function ExperimentalFeatures() {
     (goalTemplatesEnabled &&
       localStorage.getItem('devEnableGoalTemplatesUI') === 'true');
 
+  const showServerPrefs =
+    localStorage.getItem('devEnableServerPrefs') === 'true';
+
   return (
     <Setting
       primaryAction={
@@ -202,13 +205,15 @@ export function ExperimentalFeatures() {
             <FeatureToggle flag="forceReload">
               <Trans>Force reload app button</Trans>
             </FeatureToggle>
-            <ServerFeatureToggle
-              prefName="flags.plugins"
-              disableToggle
-              feedbackLink="https://github.com/actualbudget/actual/issues/5950"
-            >
-              <Trans>Client-Side plugins (soon)</Trans>
-            </ServerFeatureToggle>
+            {showServerPrefs && (
+              <ServerFeatureToggle
+                prefName="flags.plugins"
+                disableToggle
+                feedbackLink="https://github.com/actualbudget/actual/issues/5950"
+              >
+                <Trans>Client-Side plugins (soon)</Trans>
+              </ServerFeatureToggle>
+            )}
           </View>
         ) : (
           <Link
