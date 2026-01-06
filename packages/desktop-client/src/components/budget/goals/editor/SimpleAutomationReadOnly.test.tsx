@@ -19,21 +19,19 @@ describe('SimpleAutomationReadOnly', () => {
     );
   };
 
-  describe('Bug 3: Dollar to cents conversion', () => {
-    it('displays $100.00 when monthly is 100 (dollars)', () => {
+  describe('amount conversion', () => {
+    it('converts dollar amounts to cents for display', () => {
       renderComponent({
         type: 'simple',
         directive: 'template',
         priority: 1,
-        monthly: 100, // Parser stores this as dollars
+        monthly: 100,
       });
 
-      // BUG: Currently shows $1.00 because it treats 100 as cents
-      // Should show $100.00
       expect(screen.getByText(/100\.00/)).toBeInTheDocument();
     });
 
-    it('displays $50.25 when monthly is 50.25 (dollars)', () => {
+    it('displays decimal amounts correctly', () => {
       renderComponent({
         type: 'simple',
         directive: 'template',

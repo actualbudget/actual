@@ -19,7 +19,7 @@ describe('WeekAutomationReadOnly', () => {
     );
   };
 
-  describe('Bug 1: Period display', () => {
+  describe('period display', () => {
     it('displays "every 2 weeks" for biweekly template', () => {
       renderComponent({
         type: 'periodic',
@@ -30,7 +30,6 @@ describe('WeekAutomationReadOnly', () => {
         starting: '2025-01-01',
       });
 
-      // BUG: Currently shows "each week" instead of "every 2 weeks"
       expect(screen.getByText(/every 2 weeks/i)).toBeInTheDocument();
     });
 
@@ -101,27 +100,26 @@ describe('WeekAutomationReadOnly', () => {
     });
   });
 
-  describe('Bug 4: Currency-aware amount conversion', () => {
-    it('displays correct amount for USD (2 decimal places)', () => {
+  describe('amount conversion', () => {
+    it('converts dollar amounts to cents for display', () => {
       renderComponent({
         type: 'periodic',
         directive: 'template',
         priority: 1,
-        amount: 100.5, // $100.50 stored as dollars
+        amount: 100.5,
         period: { period: 'week', amount: 1 },
         starting: '2025-01-01',
       });
 
-      // Should show $100.50, not $1.01 (if treating as cents) or $10050 (wrong conversion)
       expect(screen.getByText(/100\.50/)).toBeInTheDocument();
     });
 
-    it('displays correct amount for whole dollar amounts', () => {
+    it('displays decimal amounts correctly', () => {
       renderComponent({
         type: 'periodic',
         directive: 'template',
         priority: 1,
-        amount: 819.54, // From user's bug report
+        amount: 819.54,
         period: { period: 'week', amount: 2 },
         starting: '2025-12-14',
       });
