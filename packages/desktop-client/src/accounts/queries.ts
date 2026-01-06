@@ -20,7 +20,7 @@ export const accountQueries = {
   listOnBudget: () =>
     queryOptions<AccountEntity[]>({
       ...accountQueries.list(),
-      select: accounts => accounts.filter(account => !!!account.offbudget),
+      select: accounts => accounts.filter(account => !account.offbudget),
     }),
   listOffBudget: () =>
     queryOptions<AccountEntity[]>({
