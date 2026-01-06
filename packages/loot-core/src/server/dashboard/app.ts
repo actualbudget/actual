@@ -211,7 +211,7 @@ async function addDashboardWidget(
 
   await db.insertWithSchema('dashboard', {
     ...widgetWithoutDashboardPageId,
-    dashboard_page_id: dashboard_page_id,
+    dashboard_page_id,
   });
 }
 
