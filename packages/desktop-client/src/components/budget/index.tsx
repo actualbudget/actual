@@ -69,7 +69,7 @@ export function Budget() {
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
   const [initialized, setInitialized] = useState(false);
-  const { grouped: categoryGroups } = useCategories();
+  const { grouped: categoryGroups, list: categories } = useCategories();
 
   useEffect(() => {
     async function run() {
@@ -144,9 +144,8 @@ export function Budget() {
   };
 
   const onSaveCategory = async category => {
-    const cats = await send('get-categories');
     const exists =
-      cats.grouped
+      categoryGroups
         .filter(g => g.id === category.group)[0]
         .categories.filter(
           c => c.name.toUpperCase() === category.name.toUpperCase(),
@@ -271,10 +270,9 @@ export function Budget() {
   };
 
   const onReorderCategory = async sortInfo => {
-    const cats = await send('get-categories');
-    const moveCandidate = cats.list.filter(c => c.id === sortInfo.id)[0];
+    const moveCandidate = categories.filter(c => c.id === sortInfo.id)[0];
     const exists =
-      cats.grouped
+      categoryGroups
         .filter(g => g.id === sortInfo.groupId)[0]
         .categories.filter(
           c => c.name.toUpperCase() === moveCandidate.name.toUpperCase(),
