@@ -14,7 +14,7 @@ import type {
   CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { categoryQueries } from '.';
+import { categoryQueries } from './queries';
 
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';

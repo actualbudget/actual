@@ -647,7 +647,7 @@ export function ImportTransactionsModal({
       });
     }
 
-    await importTransactions.mutate(
+    importTransactions.mutate(
       {
         accountId,
         transactions: finalTransactions,
@@ -686,7 +686,7 @@ export function ImportTransactionsModal({
     );
 
     // Retreive the transactions that would be updated (along with the existing trx)
-    await importPreviewTransactions.mutate(
+    importPreviewTransactions.mutate(
       {
         accountId,
         transactions: previewTransactionsToImport,

@@ -66,7 +66,6 @@ export function CreateLocalAccountModal() {
     setBalanceError(balanceError);
 
     if (!nameError && !balanceError) {
-      dispatch(closeModal());
       createAccount.mutate(
         {
           name,
@@ -75,6 +74,7 @@ export function CreateLocalAccountModal() {
         },
         {
           onSuccess: id => {
+            dispatch(closeModal());
             navigate('/accounts/' + id);
           },
         },
