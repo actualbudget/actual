@@ -175,10 +175,10 @@ With this style the template budgets whatever it takes to hit a "full" amount.
 
 Here is how it works:
 
-| Syntax                    | Previous Balance | Budgeted Amount | New Balance |
-| ------------------------- | :--------------: | :-------------: | :---------: |
-| `#template up to 150`     |       $ 10       |      $ 140      |    $ 150    |
-| `#template up to 150`     |      $ -20       |      $ 170      |    $ 150    |
+| Syntax                 | Previous Balance | Budgeted Amount | New Balance |
+| ---------------------- | :--------------: | :-------------: | :---------: |
+| `#template up to 150`  |       $ 10       |      $ 140      |    $ 150    |
+| `#template up to 150`  |      $ -20       |      $ 170      |    $ 150    |
 
 Cool, right? This is another way to gracefully handle categories that have month to month variation.
 This will always give you the same amount available each month no matter what you spend the previous month and not ever build up more funds than you need.
@@ -187,8 +187,8 @@ They are simple enough to use easily, but are robust enough to make budgeting mu
 
 **Notes**:
 
-- A single category with two templates that use `up to` is not supported.
-- If a category contains an `up to X`, the whole category will be subject to that limit even if there are other templates and priorities. This excludes remainders which will run after the limit is applied
+- **No more than one** template that uses `up to` is allowed in any single category.
+- If a category contains an `up to X`, the whole category will be subject to that limit even if there are other templates and priorities. This excludes remainders which will run after the limit is applied.
  
 #### All Variations
 
@@ -269,9 +269,9 @@ Below is a table of the variations of the By template.
 | `#template 500 by 2025-03 repeat every 6 months`                   | Break down large, less-frequent expenses into manageable monthly expenses | Biannual credit card fees                                                                                                      |
 | `#template 500 by 2025-03 repeat every year`                       | Break down large, less-frequent expenses into manageable monthly expenses | Annual insurance premium                                                                                                       |
 | `#template 500 by 2025-03 repeat every 2 years`                    | Break down large, less-frequent expenses into manageable monthly expenses | Domain name renewal                                                                                                            |
-| `#template 500 by 2024-12 spend from 2024-03`                      | Budget 500 by December. Any spending between March and December is OK.    | Christmas presents, overseas holiday, or any other expenses where spending will start before the target period ends. |
-| `#template 500 by 2024-12 spend from 2024-03 repeat every year`    |                                                                           |
-| `#template 500 by 2024-12 spend from 2024-03 repeat every 2 years` |                                                                           |
+| `#template 500 by 2024-12 spend from 2024-03`                      | Budget 500 by December. Any spending between March and December is OK     | Christmas presents, overseas holiday, or any other expenses where spending will start before the target period ends. |
+| `#template 500 by 2024-12 spend from 2024-03 repeat every year`    | Budget 500 by December. Any spending is OK starting in March and repeat this template every year  | Christmas presents, etc |
+| `#template 500 by 2024-12 spend from 2024-03 repeat every 2 years` | Budget 500 by December. Any spending is OK starting in March and repeat this template in 2026 (skip 2025) | Christmas travel every other year |
 
 ### Periodic Type
 
@@ -316,7 +316,7 @@ Below is a table of the variations of the Periodic template.
 **Notes**:
 
 - The starting date must be in YYYY-MM-DD format.
-- A single category with two templates that use `up to` is not supported.
+- **No more than one** `up to` template is allowed in a single category.
 - All limit variations described in the [Simple template](#simple-type) are supported.
 - If any single template contains an `up to`, the whole category will be subject to that limit even if there are other templates and priorities.
 
@@ -463,28 +463,28 @@ All of the examples below use the case of 100 leftover when the remainder pass i
 1. Add all remaining funds to a single category.
 
 | Category | Template line         | Amount applied |
-| -------- | --------------------- | -------------- |
+| -------- | --------------------- | :------------: |
 | Savings  | `#template remainder` | 100            |
 
 2. Split funds evenly between two categories.
 
 | Category      | Template line         | Amount applied |
-| ------------- | --------------------- | -------------- |
+| ------------- | --------------------- | :------------: |
 | Savings       | `#template remainder` | 50             |
 | Vacation Fund | `#template remainder` | 50             |
 
 3. Split funds with one category receiving extra.
 
 | Category      | Template line           | Amount applied |
-| ------------- | ----------------------- | -------------- |
+| ------------- | ----------------------- | :------------: |
 | Savings       | `#template remainder 2` | 66.66          |
 | Vacation Fund | `#template remainder`   | 33.34          |
 
 4. Spread funds over many categories, but some have limits.
 
 | Category        | Template line                    | Amount applied |
-| --------------- | -------------------------------- | -------------- |
-| Snack Fund      | `#template remainder 3 up to 40` | 40             |
+| --------------- | -------------------------------- | :------------: |
+| Snack Fund      | `#template remainder 3 up to 40` | 40.00          |
 | Vacation Fund   | `#template remainder`            | 21.66          |
 | Investment Fund | `#template remainder 2`          | 38.34          |
 
@@ -515,35 +515,35 @@ All examples assume that 400 was carried over from the previous month
 In this case, a balance greater than or equal to 500 will set the balance green, marking a met goal.
 If you run the template, you get the following:
 
-| Template Line(s) | Amount budgeted | Balance(color) |
-| :--------------- | :-------------: | -------------: |
-| `#goal 500`      |        0        |    400(yellow) |
+| Template Line(s) | Amount budgeted | Balance (color) |
+| :--------------- | :-------------: | :-------------: |
+| `#goal 500`      |        0        |    400 (yellow) |
 
 If you were able to budget 100 this month, you would then hit your goal and get a green indication.
 
-| Template Line(s) | Amount budgeted | Balance(color) |
-| :--------------- | :-------------: | -------------: |
-| `#goal 500`      |       100       |     500(green) |
+| Template Line(s) | Amount budgeted | Balance (color) |
+| :--------------- | :-------------: | :-------------: |
+| `#goal 500`      |       100       |     500 (green) |
 
 **2. I'm saving for a purchase, but I will budget 50 a month until I reach my goal.**
 In this example, a template is used to automatically budget 50 into the category when templates are run.
 The `#goal` line will override the goal indication from the `#template` line, and only go green when a balance of 500 is reached.
 If you run templates, you get the following:
 
-| Template Line(s)                  | Amount budgeted | Balance(indication color) |
-| :-------------------------------- | :-------------: | ------------------------: |
-| `#template 50` <br /> `#goal 500` |       50        |               450(yellow) |
+| Template Line(s)                  | Amount budgeted | Balance (color) |
+| :-------------------------------- | :-------------: | :-------------: |
+| `#template 50` <br /> `#goal 500` |       50        |    450 (yellow) |
 
 If you have some extra funds after templates are run and can budget that last 50, you get the following:
 
-| Template Line(s)                  | Amount budgeted | Balance(indication color) |
-| :-------------------------------- | :-------------: | ------------------------: |
-| `#template 50` <br /> `#goal 500` |       100       |                500(green) |
+| Template Line(s)                  | Amount budgeted | Balance (color) |
+| :-------------------------------- | :-------------: | :-------------: |
+| `#template 50` <br /> `#goal 500` |       100       |   500 (green)   |
 
 #### Notes on The Goal Directive
 
 - The `#goal` templates are run the same way as the regular `#templates`.
-- If there is a `#goal` directive in a category, the goal indicator for that category will be based on the goal, not the templates.
+- If there is a `#goal` directive in a category, the goal indicator for that category balance will be based on the goal, not the templates.
 - The `#goal` directive will not budget any funds.
 - A `#goal` line can be stacked with `#templates` to automatically budget the category (via the templates) but override how the category goal is indicated (the goal template).
 - There is no priority on a `#goal`.
