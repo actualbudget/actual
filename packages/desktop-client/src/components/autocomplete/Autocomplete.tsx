@@ -561,9 +561,8 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                     // Handle escape ourselves
                     if (e.key === 'Escape') {
                       e.nativeEvent['preventDownshiftDefault'] = true;
-                      const isDropdownOpen = highlightedIndex !== null;
 
-                      if (!embedded && isDropdownOpen) {
+                      if (!embedded && isOpen) {
                         e.stopPropagation();
                       }
 

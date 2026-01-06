@@ -930,6 +930,7 @@ describe('Transactions', () => {
     input = expectToBeEditingField(container, 'account', 0, true);
 
     await userEvent.type(input, '[Escape]');
+    await userEvent.type(input, '[Escape]');
     expect(
       container.querySelector('[data-testid="new-transaction"]'),
     ).toBeNull();
