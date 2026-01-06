@@ -334,7 +334,8 @@ export function ImportWallosModal() {
           // Try to match payees by name
           const imported: ImportedSubscription[] = parsed.map(sub => {
             const matchedPayee = payees.find(
-              p => p.name.toLowerCase().trim() === sub.name.toLowerCase().trim(),
+              p =>
+                p.name.toLowerCase().trim() === sub.name.toLowerCase().trim(),
             );
 
             // Try to match account by Payment Method or Notes
