@@ -8,8 +8,8 @@ import {
   updateTemplate,
 } from '@desktop-client/components/budget/goals/actions';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { useFormat } from '@desktop-client/hooks/useFormat';
 import { AmountInput } from '@desktop-client/components/util/AmountInput';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type WeekAutomationProps = {
   template: PeriodicTemplate;

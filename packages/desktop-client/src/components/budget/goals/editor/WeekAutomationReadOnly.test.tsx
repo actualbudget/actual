@@ -4,12 +4,14 @@ import { Provider } from 'react-redux';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 
-import { store } from '@desktop-client/redux/store';
-
 import { WeekAutomationReadOnly } from './WeekAutomationReadOnly';
 
+import { store } from '@desktop-client/redux/store';
+
 describe('WeekAutomationReadOnly', () => {
-  const renderComponent = (template: Parameters<typeof WeekAutomationReadOnly>[0]['template']) => {
+  const renderComponent = (
+    template: Parameters<typeof WeekAutomationReadOnly>[0]['template'],
+  ) => {
     return render(
       <Provider store={store}>
         <WeekAutomationReadOnly template={template} />
@@ -105,7 +107,7 @@ describe('WeekAutomationReadOnly', () => {
         type: 'periodic',
         directive: 'template',
         priority: 1,
-        amount: 100.50, // $100.50 stored as dollars
+        amount: 100.5, // $100.50 stored as dollars
         period: { period: 'week', amount: 1 },
         starting: '2025-01-01',
       });

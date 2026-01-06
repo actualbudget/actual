@@ -4,9 +4,9 @@ import { Provider } from 'react-redux';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 
-import { store } from '@desktop-client/redux/store';
-
 import { SimpleAutomationReadOnly } from './SimpleAutomationReadOnly';
+
+import { store } from '@desktop-client/redux/store';
 
 describe('SimpleAutomationReadOnly', () => {
   const renderComponent = (
