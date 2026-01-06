@@ -685,8 +685,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
       const today = monthUtils.currentDay();
       const isFuture = unserializedTransaction.date > today;
+      const isLinkedToSchedule = !!unserializedTransaction.schedule;
 
-      if (isFuture) {
+      if (isFuture && !isLinkedToSchedule) {
         const upcomingDays = getUpcomingDays(upcomingLength, today);
         const daysUntilTransaction = monthUtils.differenceInCalendarDays(
           unserializedTransaction.date,
