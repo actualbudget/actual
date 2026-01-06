@@ -50,7 +50,7 @@ export type CrossoverParams = {
   incomeAccountIds: AccountEntity['id'][]; // selected accounts for both historical returns and projections
   safeWithdrawalRate: number; // annual percent, e.g. 0.04 for 4%
   estimatedReturn?: number | null; // optional annual return to project future balances
-  projectionType: 'trend' | 'hampel'; // expense projection method
+  projectionType: 'trend' | 'hampel' | 'median'; // expense projection method
   expenseAdjustmentFactor?: number; // multiplier for expenses (default 1.0)
 };
 
@@ -317,7 +317,7 @@ function recalculate(
     // Calculate expense projection parameters based on projection type
     let expenseSlope = 0;
     let expenseIntercept = lastExpense;
-    let hampelFilteredExpense = 0;
+    let flatExpense = 0;
 
     const y: number[] = months.map(m => expenseMap.get(m) || 0);
 
@@ -336,7 +336,10 @@ function recalculate(
       }
     } else if (params.projectionType === 'hampel') {
       // Hampel filtered median calculation
-      hampelFilteredExpense = calculateHampelFilteredMedian(y);
+      flatExpense = calculateHampelFilteredMedian(y);
+    } else if (params.projectionType === 'median') {
+      // Plain median calculation without filtering
+      flatExpense = calculateMedian(y);
     }
 
     for (let i = 1; i <= maxProjectionMonths; i++) {
@@ -355,8 +358,8 @@ function recalculate(
           expenseIntercept + expenseSlope * (months.length - 1 + i),
         );
       } else {
-        // Hampel filtered median - flat projection
-        projectedExpenses = Math.max(0, hampelFilteredExpense);
+        // median projections
+        projectedExpenses = Math.max(0, flatExpense);
       }
 
       // Calculate adjusted expenses
