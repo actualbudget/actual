@@ -156,10 +156,8 @@ export function useSaveCategoryMutation() {
         categoryQueries.list(),
       );
 
-      const { categories: categoriesInGroup } = categoryGroups.find(
-        g => g.id === category.group,
-      ) ?? { categories: [] };
-
+      const group = categoryGroups.find(g => g.id === category.group);
+      const categoriesInGroup = group?.categories ?? [];
       const exists = categoriesInGroup.some(c =>
         category.id === 'new'
           ? true
@@ -308,10 +306,8 @@ export function useReorderCategoryMutation() {
         await queryClient.ensureQueryData(categoryQueries.list());
 
       const moveCandidate = categories.filter(c => c.id === id)[0];
-      const { categories: categoriesInGroup } = categoryGroups.find(
-        g => g.id === groupId,
-      ) ?? { categories: [] };
-
+      const group = categoryGroups.find(g => g.id === groupId);
+      const categoriesInGroup = group?.categories ?? [];
       const exists = categoriesInGroup.some(
         c =>
           c.id !== moveCandidate.id &&
