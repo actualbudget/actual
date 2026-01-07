@@ -100,10 +100,12 @@ function Notification({
   notification,
   onRemove,
   index,
+  isInteractive,
 }: {
   notification: NotificationWithId;
   onRemove: () => void;
   index: number;
+  isInteractive: boolean;
 }) {
   const { t } = useTranslation();
   const {
@@ -148,7 +150,7 @@ function Notification({
   const scale = 1.0 - index * SCALE_MULTIPLIER;
   const stackOpacity = Math.max(MIN_OPACITY, 1.0 - index * OPACITY_MULTIPLIER);
   const zIndex = BASE_Z_INDEX - index;
-  const isInteractive = index === 0;
+
   const yOffset = index * Y_OFFSET_PER_LEVEL;
 
   const [isSwiped, setIsSwiped] = useState(false);
@@ -392,6 +394,7 @@ export function Notifications({ style }: { style?: CSSProperties }) {
             key={note.id}
             notification={note}
             index={index}
+            isInteractive={index === 0}
             onRemove={() => {
               if (note.onClose) {
                 note.onClose();
