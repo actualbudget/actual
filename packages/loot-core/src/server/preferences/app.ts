@@ -8,9 +8,9 @@ import {
 } from '../../types/prefs';
 import { createApp } from '../app';
 import * as db from '../db';
+import { PostError } from '../errors';
 import { getDefaultDocumentDir } from '../main';
 import { mutator } from '../mutators';
-import { PostError } from '../errors';
 import { post } from '../post';
 import {
   getPrefs as _getMetadataPrefs,
