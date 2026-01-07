@@ -21,6 +21,12 @@ function calculateMedian(values: number[]): number {
     : sorted[mid];
 }
 
+function calculateMean(values: number[]): number {
+  if (values.length === 0) return 0;
+  const sum = values.reduce((acc, val) => acc + val, 0);
+  return sum / values.length;
+}
+
 function calculateMAD(values: number[], median: number): number {
   const deviations = values.map(v => Math.abs(v - median));
   return calculateMedian(deviations);
@@ -50,7 +56,7 @@ export type CrossoverParams = {
   incomeAccountIds: AccountEntity['id'][]; // selected accounts for both historical returns and projections
   safeWithdrawalRate: number; // annual percent, e.g. 0.04 for 4%
   estimatedReturn?: number | null; // optional annual return to project future balances
-  projectionType: 'trend' | 'hampel' | 'median'; // expense projection method
+  projectionType: 'trend' | 'hampel' | 'median' | 'mean'; // expense projection method
   expenseAdjustmentFactor?: number; // multiplier for expenses (default 1.0)
 };
 
@@ -340,6 +346,9 @@ function recalculate(
     } else if (params.projectionType === 'median') {
       // Plain median calculation without filtering
       flatExpense = calculateMedian(y);
+    } else if (params.projectionType === 'mean') {
+      // Mean (average) calculation
+      flatExpense = calculateMean(y);
     }
 
     for (let i = 1; i <= maxProjectionMonths; i++) {

@@ -165,7 +165,7 @@ export function CrossoverCard({
 
   const swr = meta?.safeWithdrawalRate ?? 0.04;
   const estimatedReturn = meta?.estimatedReturn ?? null;
-  const projectionType: 'trend' | 'hampel' | 'median' =
+  const projectionType: 'trend' | 'hampel' | 'median' | 'mean' =
     meta?.projectionType ?? 'hampel';
   const expenseAdjustmentFactor = meta?.expenseAdjustmentFactor ?? 1.0;
 
