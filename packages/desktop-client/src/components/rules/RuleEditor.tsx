@@ -1224,20 +1224,47 @@ export function RuleEditor({
     send('rule-apply-actions', {
       transactions: selectedTransactions,
       actions: getUnparsedActions(actionSplits),
-    }).then(content => {
-      // This makes it refetch the transactions
-      content.errors.forEach(error => {
+    })
+      .then(content => {
+        // This makes it refetch the transactions
+        if (!content) {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: t(
+                  'Failed to apply rule actions. There may be an error in the rule configuration.',
+                ),
+              },
+            }),
+          );
+          return;
+        }
+        content.errors.forEach(error => {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: error,
+              },
+            }),
+          );
+        });
+        setActionSplits([...actionSplits]);
+      })
+      .catch(error => {
         dispatch(
           addNotification({
             notification: {
               type: 'error',
-              message: error,
+              message: t(
+                'An error occurred while applying rule actions: {{error}}',
+                { error: error.message || String(error) },
+              ),
             },
           }),
         );
       });
-      setActionSplits([...actionSplits]);
-    });
   }
 
   async function onSave() {
