@@ -24,7 +24,7 @@ import { addNotification } from '@desktop-client/notifications/notificationsSlic
 import { useDispatch } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
 
-const sendOrThrow: typeof send = async (name, args) => {
+const sendThrow: typeof send = async (name, args) => {
   const { error, data } = await sendCatch(name, args);
   if (error) {
     throw error;
@@ -92,7 +92,7 @@ export function useCreateCategoryMutation() {
       isIncome,
       isHidden,
     }: CreateCategoryPayload) => {
-      const id = await sendOrThrow('category-create', {
+      const id = await sendThrow('category-create', {
         name,
         groupId,
         isIncome,
@@ -124,7 +124,7 @@ export function useUpdateCategoryMutation() {
 
   return useMutation({
     mutationFn: async ({ category }: UpdateCategoryPayload) => {
-      await sendOrThrow('category-update', category);
+      await sendThrow('category-update', category);
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -204,12 +204,12 @@ export function useDeleteCategoryMutation() {
     id: CategoryEntity['id'];
     transferId?: CategoryEntity['id'];
   }) => {
-    await sendOrThrow('category-delete', { id, transferId });
+    await sendThrow('category-delete', { id, transferId });
   };
 
   return useMutation({
     mutationFn: async ({ id }: DeleteCategoryPayload) => {
-      const mustTransfer = await sendOrThrow('must-category-transfer', { id });
+      const mustTransfer = await sendThrow('must-category-transfer', { id });
 
       if (mustTransfer) {
         dispatch(
@@ -273,7 +273,7 @@ export function useMoveCategoryMutation() {
 
   return useMutation({
     mutationFn: async ({ id, groupId, targetId }: MoveCategoryPayload) => {
-      await sendOrThrow('category-move', { id, groupId, targetId });
+      await sendThrow('category-move', { id, groupId, targetId });
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -339,7 +339,7 @@ export function useCreateCategoryGroupMutation() {
 
   return useMutation({
     mutationFn: async ({ name }: CreateCategoryGroupPayload) => {
-      const id = await sendOrThrow('category-group-create', { name });
+      const id = await sendThrow('category-group-create', { name });
       return id;
     },
     onSuccess: () => invalidateQueries(queryClient),
@@ -388,7 +388,7 @@ export function useUpdateCategoryGroupMutation() {
       // Strip off the categories field if it exist. It's not a real db
       // field but groups have this extra field in the client most of the time
       const { categories: _, ...groupNoCategories } = group;
-      await sendOrThrow('category-group-update', groupNoCategories);
+      await sendThrow('category-group-update', groupNoCategories);
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -446,7 +446,7 @@ export function useDeleteCategoryGroupMutation() {
 
       let mustTransfer = false;
       for (const category of categories) {
-        if (await sendOrThrow('must-category-transfer', { id: category.id })) {
+        if (await sendThrow('must-category-transfer', { id: category.id })) {
           mustTransfer = true;
           break;
         }
@@ -460,7 +460,7 @@ export function useDeleteCategoryGroupMutation() {
               options: {
                 group: id,
                 onDelete: async transferCategory => {
-                  await sendOrThrow('category-group-delete', {
+                  await sendThrow('category-group-delete', {
                     id,
                     transferId: transferCategory,
                   });
@@ -470,7 +470,7 @@ export function useDeleteCategoryGroupMutation() {
           }),
         );
       } else {
-        await sendOrThrow('category-group-delete', { id });
+        await sendThrow('category-group-delete', { id });
       }
     },
     onSuccess: () => invalidateQueries(queryClient),
@@ -498,7 +498,7 @@ export function useMoveCategoryGroupMutation() {
 
   return useMutation({
     mutationFn: async ({ id, targetId }: MoveCategoryGroupPayload) => {
-      await sendOrThrow('category-group-move', { id, targetId });
+      await sendThrow('category-group-move', { id, targetId });
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -698,51 +698,51 @@ export function useBudgetActions() {
     mutationFn: async ({ month, type, args }: ApplyBudgetActionPayload) => {
       switch (type) {
         case 'budget-amount':
-          await sendOrThrow('budget/budget-amount', {
+          await sendThrow('budget/budget-amount', {
             month,
             category: args.category,
             amount: args.amount,
           });
           return null;
         case 'copy-last':
-          await sendOrThrow('budget/copy-previous-month', { month });
+          await sendThrow('budget/copy-previous-month', { month });
           return null;
         case 'set-zero':
-          await sendOrThrow('budget/set-zero', { month });
+          await sendThrow('budget/set-zero', { month });
           return null;
         case 'set-3-avg':
-          await sendOrThrow('budget/set-3month-avg', { month });
+          await sendThrow('budget/set-3month-avg', { month });
           return null;
         case 'set-6-avg':
-          await sendOrThrow('budget/set-6month-avg', { month });
+          await sendThrow('budget/set-6month-avg', { month });
           return null;
         case 'set-12-avg':
-          await sendOrThrow('budget/set-12month-avg', { month });
+          await sendThrow('budget/set-12month-avg', { month });
           return null;
         case 'check-templates':
-          return await sendOrThrow('budget/check-templates');
+          return await sendThrow('budget/check-templates');
         case 'apply-goal-template':
-          return await sendOrThrow('budget/apply-goal-template', { month });
+          return await sendThrow('budget/apply-goal-template', { month });
         case 'overwrite-goal-template':
-          return await sendOrThrow('budget/overwrite-goal-template', { month });
+          return await sendThrow('budget/overwrite-goal-template', { month });
         case 'apply-single-category-template':
-          return await sendOrThrow('budget/apply-single-template', {
+          return await sendThrow('budget/apply-single-template', {
             month,
             category: args.category,
           });
         case 'cleanup-goal-template':
-          return await sendOrThrow('budget/cleanup-goal-template', { month });
+          return await sendThrow('budget/cleanup-goal-template', { month });
         case 'hold':
-          await sendOrThrow('budget/hold-for-next-month', {
+          await sendThrow('budget/hold-for-next-month', {
             month,
             amount: args.amount,
           });
           return null;
         case 'reset-hold':
-          await sendOrThrow('budget/reset-hold', { month });
+          await sendThrow('budget/reset-hold', { month });
           return null;
         case 'cover-overspending':
-          await sendOrThrow('budget/cover-overspending', {
+          await sendThrow('budget/cover-overspending', {
             month,
             to: args.to,
             from: args.from,
@@ -751,14 +751,14 @@ export function useBudgetActions() {
           });
           return null;
         case 'transfer-available':
-          await sendOrThrow('budget/transfer-available', {
+          await sendThrow('budget/transfer-available', {
             month,
             amount: args.amount,
             category: args.category,
           });
           return null;
         case 'cover-overbudgeted':
-          await sendOrThrow('budget/cover-overbudgeted', {
+          await sendThrow('budget/cover-overbudgeted', {
             month,
             category: args.category,
             amount: args.amount,
@@ -766,7 +766,7 @@ export function useBudgetActions() {
           });
           return null;
         case 'transfer-category':
-          await sendOrThrow('budget/transfer-category', {
+          await sendThrow('budget/transfer-category', {
             month,
             amount: args.amount,
             from: args.from,
@@ -775,7 +775,7 @@ export function useBudgetActions() {
           });
           return null;
         case 'carryover': {
-          await sendOrThrow('budget/set-carryover', {
+          await sendThrow('budget/set-carryover', {
             startMonth: month,
             category: args.category,
             flag: args.flag,
@@ -783,36 +783,36 @@ export function useBudgetActions() {
           return null;
         }
         case 'reset-income-carryover':
-          await sendOrThrow('budget/reset-income-carryover', { month });
+          await sendThrow('budget/reset-income-carryover', { month });
           return null;
         case 'apply-multiple-templates':
-          return await sendOrThrow('budget/apply-multiple-templates', {
+          return await sendThrow('budget/apply-multiple-templates', {
             month,
             categoryIds: args.categories,
           });
         case 'set-single-3-avg':
-          await sendOrThrow('budget/set-n-month-avg', {
+          await sendThrow('budget/set-n-month-avg', {
             month,
             N: 3,
             category: args.category,
           });
           return null;
         case 'set-single-6-avg':
-          await sendOrThrow('budget/set-n-month-avg', {
+          await sendThrow('budget/set-n-month-avg', {
             month,
             N: 6,
             category: args.category,
           });
           return null;
         case 'set-single-12-avg':
-          await sendOrThrow('budget/set-n-month-avg', {
+          await sendThrow('budget/set-n-month-avg', {
             month,
             N: 12,
             category: args.category,
           });
           return null;
         case 'copy-single-last':
-          await sendOrThrow('budget/copy-single-month', {
+          await sendThrow('budget/copy-single-month', {
             month,
             category: args.category,
           });
