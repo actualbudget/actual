@@ -86,9 +86,9 @@ test.describe('Transactions', () => {
     });
 
     test('by payee', async () => {
-      accountPage = await navigation.goToAccountPage('Capital One Checking')
+      accountPage = await navigation.goToAccountPage('Capital One Checking');
       const filterTooltip = await accountPage.filterBy('Payee');
-      const filtersMenuTooltip = page.getByTestId('filters-menu-tooltip')
+      const filtersMenuTooltip = page.getByTestId('filters-menu-tooltip');
       await expect(filterTooltip.locator).toMatchThemeScreenshots();
 
       // Type in the autocomplete box
@@ -110,8 +110,12 @@ test.describe('Transactions', () => {
       await accountPage.removeFilter(0);
 
       accountPage.filterBy('Payee');
-      await filtersMenuTooltip.getByRole('button', { name: 'contains' }).click();
-      const textInput = filtersMenuTooltip.getByRole('textbox', { name: 'nothing' });
+      await filtersMenuTooltip
+        .getByRole('button', { name: 'contains' })
+        .click();
+      const textInput = filtersMenuTooltip.getByRole('textbox', {
+        name: 'nothing',
+      });
 
       await textInput.fill('De');
       await filterTooltip.applyButton.click();
@@ -125,21 +129,23 @@ test.describe('Transactions', () => {
       await accountPage.removeFilter(0);
 
       accountPage.filterBy('Payee');
-      await filtersMenuTooltip.getByRole('button', { name: 'contains' }).click();
+      await filtersMenuTooltip
+        .getByRole('button', { name: 'contains' })
+        .click();
 
       await textInput.fill('l');
       await filterTooltip.applyButton.click();
       // Assert that both Payees contain the letter 'l'
       for (let i = 0; i < 2; i++) {
-        await expect(accountPage.getNthTransaction(i).payee).toHaveText(
-          /l/,
-        );
+        await expect(accountPage.getNthTransaction(i).payee).toHaveText(/l/);
       }
 
       await accountPage.removeFilter(0);
 
       accountPage.filterBy('Payee');
-      await filtersMenuTooltip.getByRole('button', { name: 'does not contain' }).click();
+      await filtersMenuTooltip
+        .getByRole('button', { name: 'does not contain' })
+        .click();
 
       await textInput.fill('l');
       await filterTooltip.applyButton.click();

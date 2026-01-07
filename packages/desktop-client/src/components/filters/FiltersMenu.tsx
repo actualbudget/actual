@@ -128,7 +128,8 @@ function ConfigureField<T extends RuleConditionEntity>({
   }, [value, field, subfield, dateFormat]);
 
   // For ops that filter based on payeeId, those use PayeeFilter, otherwise we use GenericInput
-  const isPayeeIdOp = (op: T["op"]) => ['is', 'is not', 'one of', 'not one of'].includes(op);
+  const isPayeeIdOp = (op: T['op']) =>
+    ['is', 'is not', 'one of', 'not one of'].includes(op);
 
   return (
     <FocusScope>
