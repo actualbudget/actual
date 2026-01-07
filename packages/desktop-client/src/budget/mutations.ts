@@ -218,9 +218,9 @@ export function useDeleteCategoryMutation() {
               name: 'confirm-category-delete',
               options: {
                 category: id,
-                onDelete: transferCategory => {
+                onDelete: async transferCategory => {
                   if (id !== transferCategory) {
-                    deleteCategory({ id, transferId: transferCategory });
+                    await deleteCategory({ id, transferId: transferCategory });
                   }
                 },
               },
@@ -228,7 +228,7 @@ export function useDeleteCategoryMutation() {
           }),
         );
       } else {
-        deleteCategory({ id });
+        await deleteCategory({ id });
       }
     },
     onSuccess: () => invalidateQueries(queryClient),
