@@ -152,17 +152,20 @@ export function useSaveCategoryMutation() {
 
   return useMutation({
     mutationFn: async ({ category }: SaveCategoryPayload) => {
-      const { grouped: categoryGroups = [] } =
-        await queryClient.ensureQueryData(categoryQueries.list());
+      const { grouped: categoryGroups } = await queryClient.ensureQueryData(
+        categoryQueries.list(),
+      );
 
-      const exists =
-        categoryGroups
-          .filter(g => g.id === category.group)[0]
-          .categories.filter(
-            c => c.name.toUpperCase() === category.name.toUpperCase(),
-          )
-          .filter(c => (category.id === 'new' ? true : c.id !== category.id))
-          .length > 0;
+      const { categories: categoriesInGroup } = categoryGroups.find(
+        g => g.id === category.group,
+      ) ?? { categories: [] };
+
+      const exists = categoriesInGroup.some(c =>
+        category.id === 'new'
+          ? true
+          : c.id !== category.id &&
+            c.name.toUpperCase() === category.name.toUpperCase(),
+      );
 
       if (exists) {
         dispatchCategoryNameAlreadyExistsNotification(
@@ -301,16 +304,19 @@ export function useReorderCategoryMutation() {
 
   return useMutation({
     mutationFn: async ({ id, groupId, targetId }: ReoderCategoryPayload) => {
-      const { grouped: categoryGroups = [], list: categories = [] } =
+      const { grouped: categoryGroups, list: categories } =
         await queryClient.ensureQueryData(categoryQueries.list());
+
       const moveCandidate = categories.filter(c => c.id === id)[0];
-      const exists =
-        categoryGroups
-          .filter(g => g.id === groupId)[0]
-          .categories.filter(
-            c => c.name.toUpperCase() === moveCandidate.name.toUpperCase(),
-          )
-          .filter(c => c.id !== moveCandidate.id).length > 0;
+      const { categories: categoriesInGroup } = categoryGroups.find(
+        g => g.id === groupId,
+      ) ?? { categories: [] };
+
+      const exists = categoriesInGroup.some(
+        c =>
+          c.id !== moveCandidate.id &&
+          c.name.toUpperCase() === moveCandidate.name.toUpperCase(),
+      );
 
       if (exists) {
         dispatchCategoryNameAlreadyExistsNotification(
@@ -366,16 +372,19 @@ export function useUpdateCategoryGroupMutation() {
       const { grouped: categoryGroups } = await queryClient.ensureQueryData(
         categoryQueries.list(),
       );
-      if (
-        categoryGroups.find(
-          g =>
-            g.id !== group.id &&
-            g.name.toUpperCase() === group.name.toUpperCase(),
-        )
-      ) {
+
+      const exists = categoryGroups.some(
+        g =>
+          g.id !== group.id &&
+          g.name.toUpperCase() === group.name.toUpperCase(),
+      );
+
+      if (exists) {
         dispatchErrorNotification(
           dispatch,
-          t('A category group with this name already exists.'),
+          t('A category group with name "{{name}}" already exists.', {
+            name: group.name,
+          }),
         );
         return;
       }
