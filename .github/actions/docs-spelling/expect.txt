@@ -178,6 +178,7 @@ UZS
 VLOOKUP
 vrt
 VUB
+Wallos
 websecure
 WEEKNUM
 Widiba
