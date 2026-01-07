@@ -1279,10 +1279,22 @@ const Transaction = memo(function Transaction({
 
       {isChild && (
         <Field
-          /* Checkmark blank placeholder for Child transaction */
+          /* Date blank placeholder for Child transaction */
           width={110}
           style={{
             width: 110,
+            backgroundColor: theme.tableRowBackgroundHover,
+            border: 0, // known z-order issue, bottom border for parent transaction hidden
+          }}
+        />
+      )}
+
+      {isChild && (
+        <Field
+          /* Flag blank placeholder for Child transaction */
+          width={45}
+          style={{
+            width: 45,
             backgroundColor: theme.tableRowBackgroundHover,
             border: 0, // known z-order issue, bottom border for parent transaction hidden
           }}
@@ -1296,6 +1308,18 @@ const Transaction = memo(function Transaction({
             flex: 1,
             backgroundColor: theme.tableRowBackgroundHover,
             border: 0,
+          }}
+        />
+      )}
+
+      {isChild && (
+        <Field
+          /* Flag blank spacer for account Child transaction */
+          width={20}
+          style={{
+            width: 20,
+            backgroundColor: theme.tableRowBackgroundHover,
+            border: 0, // known z-order issue, bottom border for parent transaction hidden
           }}
         />
       )}
