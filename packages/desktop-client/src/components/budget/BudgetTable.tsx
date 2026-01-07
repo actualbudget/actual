@@ -42,7 +42,7 @@ type BudgetTableProps = {
   ) => void;
   onReorderCategory: (params: {
     id: CategoryEntity['id'];
-    groupId?: CategoryGroupEntity['id'];
+    groupId: CategoryGroupEntity['id'];
     targetId: CategoryEntity['id'] | null;
   }) => void;
   onReorderGroup: (params: {

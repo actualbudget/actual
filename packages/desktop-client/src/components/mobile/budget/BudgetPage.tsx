@@ -36,12 +36,12 @@ import { BudgetTable, PILL_STYLE } from './BudgetTable';
 import { sync } from '@desktop-client/app/appSlice';
 import {
   useCreateCategoryMutation,
-  useUpdateCategoryMutation,
   useDeleteCategoryMutation,
   useCreateCategoryGroupMutation,
-  useUpdateCategoryGroupMutation,
   useDeleteCategoryGroupMutation,
   useBudgetActions,
+  useSaveCategoryMutation,
+  useSaveCategoryGroupMutation,
 } from '@desktop-client/budget';
 import { prewarmMonth } from '@desktop-client/components/budget/util';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
@@ -90,10 +90,10 @@ export function BudgetPage() {
   const dispatch = useDispatch();
   const applyBudgetAction = useBudgetActions();
   const createCategory = useCreateCategoryMutation();
-  const updateCategory = useUpdateCategoryMutation();
+  const saveCategory = useSaveCategoryMutation();
   const deleteCategory = useDeleteCategoryMutation();
   const createCategoryGroup = useCreateCategoryGroupMutation();
-  const updateCategoryGroup = useUpdateCategoryGroupMutation();
+  const saveCategoryGroup = useSaveCategoryGroupMutation();
   const deleteCategoryGroup = useDeleteCategoryGroupMutation();
 
   useEffect(() => {
@@ -151,8 +151,16 @@ export function BudgetPage() {
           options: {
             onValidate: name => (!name ? 'Name is required.' : null),
             onSubmit: async name => {
-              dispatch(collapseModals({ rootModalName: 'budget-page-menu' }));
-              createCategoryGroup.mutate({ name });
+              createCategoryGroup.mutate(
+                { name },
+                {
+                  onSettled: () => {
+                    dispatch(
+                      collapseModals({ rootModalName: 'budget-page-menu' }),
+                    );
+                  },
+                },
+              );
             },
           },
         },
@@ -169,15 +177,23 @@ export function BudgetPage() {
             options: {
               onValidate: name => (!name ? 'Name is required.' : null),
               onSubmit: async name => {
-                dispatch(
-                  collapseModals({ rootModalName: 'category-group-menu' }),
+                createCategory.mutate(
+                  {
+                    name,
+                    groupId,
+                    isIncome,
+                    isHidden: false,
+                  },
+                  {
+                    onSettled: () => {
+                      dispatch(
+                        collapseModals({
+                          rootModalName: 'category-group-menu',
+                        }),
+                      );
+                    },
+                  },
                 );
-                createCategory.mutate({
-                  name,
-                  groupId,
-                  isIncome,
-                  isHidden: false,
-                });
               },
             },
           },
@@ -189,9 +205,9 @@ export function BudgetPage() {
 
   const onSaveGroup = useCallback(
     group => {
-      updateCategoryGroup.mutate({ group });
+      saveCategoryGroup.mutate({ group });
     },
-    [updateCategoryGroup],
+    [saveCategoryGroup],
   );
 
   const onApplyBudgetTemplatesInGroup = useCallback(
@@ -208,47 +224,17 @@ export function BudgetPage() {
   );
 
   const onDeleteGroup = useCallback(
-    async groupId => {
-      const group = categoryGroups?.find(g => g.id === groupId);
-
-      if (!group) {
-        return;
-      }
-
-      let mustTransfer = false;
-      for (const category of group.categories ?? []) {
-        if (await send('must-category-transfer', { id: category.id })) {
-          mustTransfer = true;
-          break;
-        }
-      }
-
-      if (mustTransfer) {
-        dispatch(
-          pushModal({
-            modal: {
-              name: 'confirm-category-delete',
-              options: {
-                group: groupId,
-                onDelete: transferCategory => {
-                  dispatch(
-                    collapseModals({ rootModalName: 'category-group-menu' }),
-                  );
-                  deleteCategoryGroup.mutate({
-                    id: groupId,
-                    transferId: transferCategory,
-                  });
-                },
-              },
-            },
-          }),
-        );
-      } else {
-        dispatch(collapseModals({ rootModalName: 'category-group-menu' }));
-        deleteCategoryGroup.mutate({ id: groupId });
-      }
+    groupId => {
+      deleteCategoryGroup.mutate(
+        { id: groupId },
+        {
+          onSettled: () => {
+            dispatch(collapseModals({ rootModalName: 'category-group-menu' }));
+          },
+        },
+      );
     },
-    [categoryGroups, dispatch, deleteCategoryGroup],
+    [deleteCategoryGroup, dispatch],
   );
 
   const onToggleGroupVisibility = useCallback(
@@ -265,45 +251,23 @@ export function BudgetPage() {
 
   const onSaveCategory = useCallback(
     category => {
-      updateCategory.mutate({ category });
+      saveCategory.mutate({ category });
     },
-    [updateCategory],
+    [saveCategory],
   );
 
   const onDeleteCategory = useCallback(
-    async categoryId => {
-      const mustTransfer = await send('must-category-transfer', {
-        id: categoryId,
-      });
-
-      if (mustTransfer) {
-        dispatch(
-          pushModal({
-            modal: {
-              name: 'confirm-category-delete',
-              options: {
-                category: categoryId,
-                onDelete: transferCategory => {
-                  if (categoryId !== transferCategory) {
-                    dispatch(
-                      collapseModals({ rootModalName: 'category-menu' }),
-                    );
-                    deleteCategory.mutate({
-                      id: categoryId,
-                      transferId: transferCategory,
-                    });
-                  }
-                },
-              },
-            },
-          }),
-        );
-      } else {
-        dispatch(collapseModals({ rootModalName: 'category-menu' }));
-        deleteCategory.mutate({ id: categoryId });
-      }
+    categoryId => {
+      deleteCategory.mutate(
+        { id: categoryId },
+        {
+          onSettled: () => {
+            dispatch(collapseModals({ rootModalName: 'category-menu' }));
+          },
+        },
+      );
     },
-    [dispatch, deleteCategory],
+    [deleteCategory, dispatch],
   );
 
   const onToggleCategoryVisibility = useCallback(

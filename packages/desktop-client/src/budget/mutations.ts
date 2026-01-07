@@ -1,9 +1,16 @@
 import { useTranslation } from 'react-i18next';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  type QueryClient,
+  type QueryKey,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { type TFunction } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { type send, sendCatch } from 'loot-core/platform/client/fetch';
+import { logger } from 'loot-core/platform/server/log';
 import { type IntegerAmount } from 'loot-core/shared/util';
 import {
   type CategoryEntity,
@@ -12,11 +19,61 @@ import {
 
 import { categoryQueries } from '.';
 
+import { pushModal } from '@desktop-client/modals/modalsSlice';
 import {
-  addGenericErrorNotification,
   addNotification,
 } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { type AppDispatch } from '@desktop-client/redux/store';
+
+const sendOrThrow: typeof send = async (name, args) => {
+  const { error, data } = await sendCatch(name, args);
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
+function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
+  queryClient.invalidateQueries({
+    queryKey: queryKey ?? categoryQueries.lists(),
+  });
+}
+
+function dispatchErrorNotification(
+  dispatch: AppDispatch,
+  message: string,
+  error?: Error,
+) {
+  dispatch(
+    addNotification({
+      notification: {
+        id: uuidv4(),
+        type: 'error',
+        message,
+        pre: error ? error.message : undefined,
+      },
+    }),
+  );
+}
+
+function dispatchCategoryNameAlreadyExistsNotification(
+  dispatch: AppDispatch,
+  t: TFunction,
+  name: CategoryEntity['name'],
+) {
+  dispatch(
+    addNotification({
+      notification: {
+        type: 'error',
+        message: t(
+          'Category "{{name}}" already exists in group (it may be hidden)',
+          { name },
+        ),
+      },
+    }),
+  );
+}
 
 type CreateCategoryPayload = {
   name: CategoryEntity['name'];
@@ -30,24 +87,6 @@ export function useCreateCategoryMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateCategoryLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: categoryQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({
       name,
@@ -55,7 +94,7 @@ export function useCreateCategoryMutation() {
       isIncome,
       isHidden,
     }: CreateCategoryPayload) => {
-      const id = await send('category-create', {
+      const id = await sendOrThrow('category-create', {
         name,
         groupId,
         isIncome,
@@ -63,11 +102,13 @@ export function useCreateCategoryMutation() {
       });
       return id;
     },
-    onSuccess: invalidateCategoryLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error creating category:', error);
+      logger.error('Error creating category:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error creating the category. Please try again.'),
+        error,
       );
       throw error;
     },
@@ -83,42 +124,74 @@ export function useUpdateCategoryMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateCategoryLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: categoryQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({ category }: UpdateCategoryPayload) => {
-      await send('category-update', category);
+      await sendOrThrow('category-update', category);
     },
-    onSuccess: invalidateCategoryLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error updating category:', error);
+      logger.error('Error updating category:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error updating the category. Please try again.'),
+        error,
       );
       throw error;
     },
   });
 }
 
+type SaveCategoryPayload = {
+  category: CategoryEntity;
+};
+
+export function useSaveCategoryMutation() {
+  const createCategory = useCreateCategoryMutation();
+  const updateCategory = useUpdateCategoryMutation();
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ category }: SaveCategoryPayload) => {
+      const { grouped: categoryGroups } = await queryClient.ensureQueryData(
+        categoryQueries.list(),
+      );
+
+      const exists =
+        categoryGroups
+          .filter(g => g.id === category.group)[0]
+          .categories.filter(
+            c => c.name.toUpperCase() === category.name.toUpperCase(),
+          )
+          .filter(c => (category.id === 'new' ? true : c.id !== category.id))
+          .length > 0;
+
+      if (exists) {
+        dispatchCategoryNameAlreadyExistsNotification(
+          dispatch,
+          t,
+          category.name,
+        );
+        return;
+      }
+
+      if (category.id === 'new') {
+        createCategory.mutate({
+          name: category.name,
+          groupId: category.group,
+          isIncome: category.is_income,
+          isHidden: category.hidden,
+        });
+      } else {
+        updateCategory.mutate({ category });
+      }
+    },
+  });
+}
+
 type DeleteCategoryPayload = {
   id: CategoryEntity['id'];
-  transferId?: CategoryEntity['id'] | null;
 };
 
 export function useDeleteCategoryMutation() {
@@ -126,46 +199,61 @@ export function useDeleteCategoryMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateCategoryLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: categoryQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
+  const deleteCategory = async ({
+    id,
+    transferId,
+  }: {
+    id: CategoryEntity['id'];
+    transferId?: CategoryEntity['id'];
+  }) => {
+    await sendOrThrow('category-delete', { id, transferId });
   };
 
   return useMutation({
-    mutationFn: async ({ id, transferId }: DeleteCategoryPayload) => {
-      const { error } = await send('category-delete', { id, transferId });
-      if (error) {
-        throw new Error(error, { cause: error });
+    mutationFn: async ({ id }: DeleteCategoryPayload) => {
+      const mustTransfer = await sendOrThrow('must-category-transfer', { id });
+
+      if (mustTransfer) {
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'confirm-category-delete',
+              options: {
+                category: id,
+                onDelete: transferCategory => {
+                  if (id !== transferCategory) {
+                    deleteCategory({ id, transferId: transferCategory });
+                  }
+                },
+              },
+            },
+          }),
+        );
+      } else {
+        deleteCategory({ id });
       }
     },
-    onSuccess: invalidateCategoryLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error deleting category:', error);
+      logger.error('Error deleting category:', error);
 
       if (error) {
         switch (error.cause) {
           case 'category-type':
             dispatchErrorNotification(
+              dispatch,
               t(
                 'A category must be transferred to another of the same type (expense or income)',
               ),
+              error,
             );
             break;
           default:
-            dispatch(addGenericErrorNotification());
+            dispatchErrorNotification(
+              dispatch,
+              t('There was an error deleting the category. Please try again.'),
+              error,
+            );
         }
       }
 
@@ -185,35 +273,58 @@ export function useMoveCategoryMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateCategoryLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: categoryQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({ id, groupId, targetId }: MoveCategoryPayload) => {
-      await send('category-move', { id, groupId, targetId });
+      await sendOrThrow('category-move', { id, groupId, targetId });
     },
-    onSuccess: invalidateCategoryLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error moving category:', error);
+      logger.error('Error moving category:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error moving the category. Please try again.'),
+        error,
       );
       throw error;
+    },
+  });
+}
+
+type ReoderCategoryPayload = {
+  id: CategoryEntity['id'];
+  groupId: CategoryGroupEntity['id'];
+  targetId: CategoryEntity['id'] | null;
+};
+
+export function useReorderCategoryMutation() {
+  const moveCategory = useMoveCategoryMutation();
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({ id, groupId, targetId }: ReoderCategoryPayload) => {
+      const { grouped: categoryGroups, list: categories } =
+        await queryClient.ensureQueryData(categoryQueries.list());
+      const moveCandidate = categories.filter(c => c.id === id)[0];
+      const exists =
+        categoryGroups
+          .filter(g => g.id === groupId)[0]
+          .categories.filter(
+            c => c.name.toUpperCase() === moveCandidate.name.toUpperCase(),
+          )
+          .filter(c => c.id !== moveCandidate.id).length > 0;
+
+      if (exists) {
+        dispatchCategoryNameAlreadyExistsNotification(
+          dispatch,
+          t,
+          moveCandidate.name,
+        );
+        return;
+      }
+
+      moveCategory.mutate({ id, groupId, targetId });
     },
   });
 }
@@ -227,34 +338,18 @@ export function useCreateCategoryGroupMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateCategoryLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: categoryQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({ name }: CreateCategoryGroupPayload) => {
-      const id = await send('category-group-create', { name });
+      const id = await sendOrThrow('category-group-create', { name });
       return id;
     },
-    onSuccess: invalidateCategoryLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error creating category group:', error);
+      logger.error('Error creating category group:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error creating the category group. Please try again.'),
+        error,
       );
       throw error;
     },
@@ -269,30 +364,11 @@ export function useUpdateCategoryGroupMutation() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { t } = useTranslation();
-
-  const invalidateCategoryLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: categoryQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({ group }: UpdateCategoryGroupPayload) => {
-      const { grouped: categoryGroups } = queryClient.getQueryData(
-        categoryQueries.list().queryKey,
-      ) ?? { grouped: [] };
+      const { grouped: categoryGroups } = await queryClient.ensureQueryData(
+        categoryQueries.list(),
+      );
       if (
         categoryGroups.find(
           g =>
@@ -301,6 +377,7 @@ export function useUpdateCategoryGroupMutation() {
         )
       ) {
         dispatchErrorNotification(
+          dispatch,
           t('A category group with this name already exists.'),
         );
         return;
@@ -309,56 +386,96 @@ export function useUpdateCategoryGroupMutation() {
       // Strip off the categories field if it exist. It's not a real db
       // field but groups have this extra field in the client most of the time
       const { categories: _, ...groupNoCategories } = group;
-      await send('category-group-update', groupNoCategories);
+      await sendOrThrow('category-group-update', groupNoCategories);
     },
-    onSuccess: invalidateCategoryLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error updating category group:', error);
+      logger.error('Error updating category group:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error updating the category group. Please try again.'),
+        error,
       );
       throw error;
     },
   });
 }
 
+type SaveCategoryGroupPayload = {
+  group: CategoryGroupEntity;
+};
+
+export function useSaveCategoryGroupMutation() {
+  const createCategoryGroup = useCreateCategoryGroupMutation();
+  const updateCategoryGroup = useUpdateCategoryGroupMutation();
+
+  return useMutation({
+    mutationFn: async ({ group }: SaveCategoryGroupPayload) => {
+      if (group.id === 'new') {
+        createCategoryGroup.mutate({ name: group.name });
+      } else {
+        updateCategoryGroup.mutate({ group });
+      }
+    },
+  });
+}
+
+type DeleteCategoryGroupPayload = {
+  id: CategoryGroupEntity['id'];
+};
+
 export function useDeleteCategoryGroupMutation() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateCategoryLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: categoryQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
-  type DeleteCategoryGroupPayload = {
-    id: CategoryGroupEntity['id'];
-    transferId?: CategoryGroupEntity['id'] | null;
-  };
-
   return useMutation({
-    mutationFn: async ({ id, transferId }: DeleteCategoryGroupPayload) => {
-      await send('category-group-delete', { id, transferId });
+    mutationFn: async ({ id }: DeleteCategoryGroupPayload) => {
+      const { grouped: categoryGroups } = await queryClient.ensureQueryData(
+        categoryQueries.list(),
+      );
+      const group = categoryGroups.find(g => g.id === id);
+
+      if (!group) {
+        return;
+      }
+
+      let mustTransfer = false;
+      for (const category of group.categories) {
+        if (await sendOrThrow('must-category-transfer', { id: category.id })) {
+          mustTransfer = true;
+          break;
+        }
+      }
+
+      if (mustTransfer) {
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'confirm-category-delete',
+              options: {
+                group: id,
+                onDelete: async transferCategory => {
+                  await sendOrThrow('category-group-delete', {
+                    id,
+                    transferId: transferCategory,
+                  });
+                },
+              },
+            },
+          }),
+        );
+      } else {
+        await sendOrThrow('category-group-delete', { id });
+      }
     },
-    onSuccess: invalidateCategoryLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error deleting category group:', error);
+      logger.error('Error deleting category group:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error deleting the category group. Please try again.'),
+        error,
       );
       throw error;
     },
@@ -375,35 +492,37 @@ export function useMoveCategoryGroupMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateCategoryLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: categoryQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({ id, targetId }: MoveCategoryGroupPayload) => {
-      await send('category-group-move', { id, targetId });
+      await sendOrThrow('category-group-move', { id, targetId });
     },
-    onSuccess: invalidateCategoryLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error moving category group:', error);
+      logger.error('Error moving category group:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error moving the category group. Please try again.'),
+        error,
       );
       throw error;
+    },
+  });
+}
+
+type ReorderCategoryGroupPayload = {
+  id: CategoryGroupEntity['id'];
+  targetId: CategoryGroupEntity['id'] | null;
+};
+
+export function useReorderCategoryGroupMutation() {
+  const moveCategoryGroup = useMoveCategoryGroupMutation();
+
+  return useMutation({
+    mutationFn: async (sortInfo: ReorderCategoryGroupPayload) => {
+      moveCategoryGroup.mutate({
+        id: sortInfo.id,
+        targetId: sortInfo.targetId,
+      });
     },
   });
 }
@@ -575,51 +694,51 @@ export function useBudgetActions() {
     mutationFn: async ({ month, type, args }: ApplyBudgetActionPayload) => {
       switch (type) {
         case 'budget-amount':
-          await send('budget/budget-amount', {
+          await sendOrThrow('budget/budget-amount', {
             month,
             category: args.category,
             amount: args.amount,
           });
           return null;
         case 'copy-last':
-          await send('budget/copy-previous-month', { month });
+          await sendOrThrow('budget/copy-previous-month', { month });
           return null;
         case 'set-zero':
-          await send('budget/set-zero', { month });
+          await sendOrThrow('budget/set-zero', { month });
           return null;
         case 'set-3-avg':
-          await send('budget/set-3month-avg', { month });
+          await sendOrThrow('budget/set-3month-avg', { month });
           return null;
         case 'set-6-avg':
-          await send('budget/set-6month-avg', { month });
+          await sendOrThrow('budget/set-6month-avg', { month });
           return null;
         case 'set-12-avg':
-          await send('budget/set-12month-avg', { month });
+          await sendOrThrow('budget/set-12month-avg', { month });
           return null;
         case 'check-templates':
-          return await send('budget/check-templates');
+          return await sendOrThrow('budget/check-templates');
         case 'apply-goal-template':
-          return await send('budget/apply-goal-template', { month });
+          return await sendOrThrow('budget/apply-goal-template', { month });
         case 'overwrite-goal-template':
-          return await send('budget/overwrite-goal-template', { month });
+          return await sendOrThrow('budget/overwrite-goal-template', { month });
         case 'apply-single-category-template':
-          return await send('budget/apply-single-template', {
+          return await sendOrThrow('budget/apply-single-template', {
             month,
             category: args.category,
           });
         case 'cleanup-goal-template':
-          return await send('budget/cleanup-goal-template', { month });
+          return await sendOrThrow('budget/cleanup-goal-template', { month });
         case 'hold':
-          await send('budget/hold-for-next-month', {
+          await sendOrThrow('budget/hold-for-next-month', {
             month,
             amount: args.amount,
           });
           return null;
         case 'reset-hold':
-          await send('budget/reset-hold', { month });
+          await sendOrThrow('budget/reset-hold', { month });
           return null;
         case 'cover-overspending':
-          await send('budget/cover-overspending', {
+          await sendOrThrow('budget/cover-overspending', {
             month,
             to: args.to,
             from: args.from,
@@ -628,14 +747,14 @@ export function useBudgetActions() {
           });
           return null;
         case 'transfer-available':
-          await send('budget/transfer-available', {
+          await sendOrThrow('budget/transfer-available', {
             month,
             amount: args.amount,
             category: args.category,
           });
           return null;
         case 'cover-overbudgeted':
-          await send('budget/cover-overbudgeted', {
+          await sendOrThrow('budget/cover-overbudgeted', {
             month,
             category: args.category,
             amount: args.amount,
@@ -643,7 +762,7 @@ export function useBudgetActions() {
           });
           return null;
         case 'transfer-category':
-          await send('budget/transfer-category', {
+          await sendOrThrow('budget/transfer-category', {
             month,
             amount: args.amount,
             from: args.from,
@@ -652,7 +771,7 @@ export function useBudgetActions() {
           });
           return null;
         case 'carryover': {
-          await send('budget/set-carryover', {
+          await sendOrThrow('budget/set-carryover', {
             startMonth: month,
             category: args.category,
             flag: args.flag,
@@ -660,36 +779,36 @@ export function useBudgetActions() {
           return null;
         }
         case 'reset-income-carryover':
-          await send('budget/reset-income-carryover', { month });
+          await sendOrThrow('budget/reset-income-carryover', { month });
           return null;
         case 'apply-multiple-templates':
-          return await send('budget/apply-multiple-templates', {
+          return await sendOrThrow('budget/apply-multiple-templates', {
             month,
             categoryIds: args.categories,
           });
         case 'set-single-3-avg':
-          await send('budget/set-n-month-avg', {
+          await sendOrThrow('budget/set-n-month-avg', {
             month,
             N: 3,
             category: args.category,
           });
           return null;
         case 'set-single-6-avg':
-          await send('budget/set-n-month-avg', {
+          await sendOrThrow('budget/set-n-month-avg', {
             month,
             N: 6,
             category: args.category,
           });
           return null;
         case 'set-single-12-avg':
-          await send('budget/set-n-month-avg', {
+          await sendOrThrow('budget/set-n-month-avg', {
             month,
             N: 12,
             category: args.category,
           });
           return null;
         case 'copy-single-last':
-          await send('budget/copy-single-month', {
+          await sendOrThrow('budget/copy-single-month', {
             month,
             category: args.category,
           });
@@ -708,17 +827,11 @@ export function useBudgetActions() {
       }
     },
     onError: error => {
-      console.error('Error applying budget action:', error);
-      dispatch(
-        addNotification({
-          notification: {
-            id: uuidv4(),
-            type: 'error',
-            message: t(
-              'There was an error applying the budget action. Please try again.',
-            ),
-          },
-        }),
+      logger.error('Error applying budget action:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error applying the budget action. Please try again.'),
+        error,
       );
       throw error;
     },
