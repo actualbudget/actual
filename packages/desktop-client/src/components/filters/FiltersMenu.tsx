@@ -484,9 +484,9 @@ export function FilterButton<T extends RuleConditionEntity>({
                 name,
                 text: titleFirst(text),
               })),
-            
+
             Menu.line,
-            
+
             {
               name: 'saved',
               text: titleFirst(mapField('saved')),
