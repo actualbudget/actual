@@ -21,14 +21,14 @@ type PrefsState = {
   local: MetadataPrefs;
   global: GlobalPrefs;
   synced: SyncedPrefs;
-  serverPrefs: ServerPrefs;
+  server: ServerPrefs;
 };
 
 const initialState: PrefsState = {
   local: {},
   global: {},
   synced: {},
-  serverPrefs: {},
+  server: {},
 };
 
 export const loadPrefs = createAppAsyncThunk(
@@ -176,14 +176,14 @@ const prefsSlice = createSlice({
       state.synced = { ...state.synced, ...action.payload };
     },
     mergeServerPrefs(state, action: PayloadAction<MergeServerPrefsPayload>) {
-      state.serverPrefs = { ...state.serverPrefs, ...action.payload };
+      state.server = { ...state.server, ...action.payload };
     },
   },
   extraReducers: builder => {
     builder.addCase(resetApp, state => ({
       ...initialState,
       global: state.global || initialState.global,
-      serverPrefs: state.serverPrefs || initialState.serverPrefs,
+      server: state.server || initialState.server,
     }));
     builder.addCase(getUserData.fulfilled, (state, action) => {
       if (!action.payload || typeof action.payload !== 'object') {
@@ -198,8 +198,8 @@ const prefsSlice = createSlice({
         return state;
       }
 
-      state.serverPrefs = {
-        ...state.serverPrefs,
+      state.server = {
+        ...state.server,
         ...serverPrefs,
       };
     });

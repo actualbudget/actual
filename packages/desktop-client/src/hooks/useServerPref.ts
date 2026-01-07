@@ -25,7 +25,7 @@ export function useServerPref<K extends keyof ServerPrefs>(
     [dispatch, prefName],
   );
 
-  const pref = useSelector(state => state.prefs.serverPrefs[prefName]);
+  const pref = useSelector(state => state.prefs.server[prefName]);
 
   return [pref, setPref];
 }
