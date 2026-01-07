@@ -9,7 +9,7 @@ const CONFIG = {
   POINTS_PER_ISSUE_CLOSING_ACTION: 1,
   POINTS_PER_RELEASE_PR: 4, // Awarded to whoever merges the release PR
   PR_CONTRIBUTION_POINTS: {
-    Features: 5,
+    Features: 2,
     Enhancements: 2,
     Bugfix: 3,
     Maintenance: 2,
