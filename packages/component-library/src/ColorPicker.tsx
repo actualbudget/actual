@@ -65,7 +65,7 @@ const DEFAULT_COLOR_SET = [
   '#BFBFBF', //gray
   '#FFAEAE', //colors repeat from above with a lighter tint
   '#FFCCFF',
-  '#F2EBFF', //this is now purple100
+  '#E4D4FF', //this is now purple125
   '#B0B0FF',
   '#D8FFFF',
   '#CFE5CF',
