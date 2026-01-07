@@ -20,9 +20,7 @@ import {
 import { categoryQueries } from '.';
 
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import {
-  addNotification,
-} from '@desktop-client/notifications/notificationsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
 
