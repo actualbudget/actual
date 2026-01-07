@@ -175,14 +175,14 @@ export function useSaveCategoryMutation() {
       }
 
       if (category.id === 'new') {
-        createCategory.mutate({
+        await createCategory.mutateAsync({
           name: category.name,
           groupId: category.group,
           isIncome: !!category.is_income,
           isHidden: !!category.hidden,
         });
       } else {
-        updateCategory.mutate({ category });
+        await updateCategory.mutateAsync({ category });
       }
     },
   });
@@ -323,7 +323,7 @@ export function useReorderCategoryMutation() {
         return;
       }
 
-      moveCategory.mutate({ id, groupId, targetId });
+      await moveCategory.mutateAsync({ id, groupId, targetId });
     },
   });
 }
@@ -414,9 +414,9 @@ export function useSaveCategoryGroupMutation() {
   return useMutation({
     mutationFn: async ({ group }: SaveCategoryGroupPayload) => {
       if (group.id === 'new') {
-        createCategoryGroup.mutate({ name: group.name });
+        await createCategoryGroup.mutateAsync({ name: group.name });
       } else {
-        updateCategoryGroup.mutate({ group });
+        await updateCategoryGroup.mutateAsync({ group });
       }
     },
   });
@@ -523,7 +523,7 @@ export function useReorderCategoryGroupMutation() {
 
   return useMutation({
     mutationFn: async (sortInfo: ReorderCategoryGroupPayload) => {
-      moveCategoryGroup.mutate({
+      await moveCategoryGroup.mutateAsync({
         id: sortInfo.id,
         targetId: sortInfo.targetId,
       });
