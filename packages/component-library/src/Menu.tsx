@@ -102,7 +102,12 @@ export function Menu<const NameType = string>({
 
   function selectItem() {
     const item = items[hoveredIndex || 0];
-    if (hoveredIndex !== null && item !== Menu.line && !isLabel(item) && !item.disabled) {
+    if (
+      hoveredIndex !== null &&
+      item !== Menu.line &&
+      !isLabel(item) &&
+      !item.disabled
+    ) {
       onMenuSelect?.(item.name);
     }
   }
@@ -195,9 +200,9 @@ export function Menu<const NameType = string>({
               ...(item.disabled && { color: theme.buttonBareDisabledText }),
               ...(!item.disabled &&
                 hoveredIndex === idx && {
-                backgroundColor: theme.menuItemBackgroundHover,
-                color: theme.menuItemTextHover,
-              }),
+                  backgroundColor: theme.menuItemBackgroundHover,
+                  color: theme.menuItemTextHover,
+                }),
               ...(!isLabel(item) && getItemStyle?.(item)),
             }}
             onHoverStart={() => setHoveredIndex(idx)}
