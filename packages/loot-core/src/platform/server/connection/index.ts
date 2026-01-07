@@ -1,9 +1,8 @@
 // @ts-strict-ignore
 import { APIError } from '../../../server/errors';
-import { logger } from '../log';
-
 import { runHandler, isMutating } from '../../../server/mutators';
 import { captureException } from '../../exceptions';
+import { logger } from '../log';
 
 import type * as T from './index-types';
 

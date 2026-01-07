@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const https = require('https');
 const fs = require('fs');
+const https = require('https');
 
 const commentBody = process.env.GITHUB_EVENT_COMMENT_BODY;
 const prDetailsJson = process.env.PR_DETAILS;
