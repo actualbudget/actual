@@ -562,7 +562,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                     if (e.key === 'Escape') {
                       e.nativeEvent['preventDownshiftDefault'] = true;
 
-                      if (!embedded) {
+                      if (!embedded && isOpen) {
                         e.stopPropagation();
                       }
 

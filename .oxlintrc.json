@@ -1,7 +1,11 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "import", "jsx-a11y"],
-  "jsPlugins": ["./packages/eslint-plugin-actual/lib/index.js"],
+  "jsPlugins": [
+    "./packages/eslint-plugin-actual/lib/index.js",
+    "eslint-plugin-typescript-paths",
+    "eslint-plugin-perfectionist"
+  ],
   "env": {
     "browser": true,
     "node": true,
@@ -19,12 +23,49 @@
     "jsx-a11y/prefer-tag-over-role": "off",
     "jsx-a11y/tabindex-no-positive": "off",
 
+    // Import sorting
+    // TODO replace once oxfmt supports this: https://github.com/oxc-project/oxc/issues/17076
+    "perfectionist/sort-imports": [
+      "warn",
+      {
+        "groups": [
+          "react",
+          "builtin",
+          "external",
+          "loot-core",
+          "parent",
+          "sibling",
+          "index",
+          "desktop-client"
+        ],
+        "customGroups": [
+          {
+            "groupName": "react",
+            "elementNamePattern": "^react(-.*)?$"
+          },
+          {
+            "groupName": "loot-core",
+            "elementNamePattern": "^loot-core"
+          },
+          {
+            "groupName": "desktop-client",
+            "elementNamePattern": "^@desktop-client"
+          }
+        ],
+        "newlinesBetween": "always"
+      }
+    ],
+
     // Actual rules
     "actual/typography": "warn",
     "actual/no-untranslated-strings": "error",
     "actual/prefer-trans-over-t": "error",
     "actual/prefer-if-statement": "warn",
     "actual/prefer-logger-over-console": "error",
+    "actual/object-shorthand-properties": "warn",
+    "actual/prefer-const": "warn",
+    "actual/no-anchor-tag": "warn",
+    "actual/no-react-default-import": "warn",
 
     // JSX A11y rules
     "jsx-a11y/no-autofocus": [
@@ -408,6 +449,22 @@
       ],
       "rules": {
         "import/no-default-export": "off"
+      }
+    },
+    {
+      "files": ["packages/docs/**/*"],
+      "rules": {
+        "actual/no-anchor-tag": "off"
+      }
+    },
+    {
+      "files": ["packages/desktop-client/**/*.{js,ts,jsx,tsx}"],
+      "rules": {
+        "typescript-paths/absolute-parent-import": [
+          "error",
+          { "preferPathOverBaseUrl": true }
+        ],
+        "typescript-paths/absolute-import": ["error", { "enableAlias": false }]
       }
     },
     // TODO: enable these

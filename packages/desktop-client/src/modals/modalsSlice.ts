@@ -9,13 +9,13 @@ import {
   type CategoryGroupEntity,
   type GoCardlessToken,
   type NewRuleEntity,
+  type NewUserEntity,
+  type NoteEntity,
   type RuleEntity,
   type ScheduleEntity,
   type TransactionEntity,
-  type UserEntity,
   type UserAccessEntity,
-  type NewUserEntity,
-  type NoteEntity,
+  type UserEntity,
 } from 'loot-core/types/models';
 import { type Template } from 'loot-core/types/models/templates';
 
@@ -203,8 +203,15 @@ export type Modal =
         name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>;
         onSubmit: (
           name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>,
-          value: string | number,
-          mode?: 'prepend' | 'append' | 'replace' | null,
+          value:
+            | string
+            | number
+            | {
+                useRegex: boolean;
+                find: string;
+                replace: string;
+              },
+          mode?: 'prepend' | 'append' | 'replace' | 'findAndReplace' | null,
         ) => void;
         onClose?: () => void;
       };

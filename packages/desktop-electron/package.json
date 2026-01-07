@@ -1,9 +1,9 @@
 {
   "name": "desktop-electron",
-  "author": "Actual",
-  "productName": "Actual",
+  "version": "26.1.0",
   "description": "A simple and powerful personal finance system",
-  "version": "25.12.0",
+  "author": "Actual",
+  "main": "build/desktop-electron/index.js",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
@@ -13,7 +13,24 @@
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
     "e2e": "npx playwright test"
   },
-  "main": "build/desktop-electron/index.js",
+  "dependencies": {
+    "@actual-app/sync-server": "workspace:*",
+    "better-sqlite3": "^12.4.1",
+    "fs-extra": "^11.3.2",
+    "promise-retry": "^2.0.1"
+  },
+  "devDependencies": {
+    "@electron/notarize": "3.1.1",
+    "@electron/rebuild": "4.0.1",
+    "@playwright/test": "1.56.1",
+    "@types/copyfiles": "^2",
+    "@types/fs-extra": "^11",
+    "copyfiles": "^2.4.1",
+    "cross-env": "^10.1.0",
+    "electron": "38.3.0",
+    "electron-builder": "26.0.12",
+    "typescript": "^5.9.3"
+  },
   "build": {
     "appId": "com.actualbudget.actual",
     "files": [
@@ -106,22 +123,5 @@
     },
     "npmRebuild": false
   },
-  "dependencies": {
-    "@actual-app/sync-server": "workspace:*",
-    "better-sqlite3": "^12.4.1",
-    "fs-extra": "^11.3.2",
-    "promise-retry": "^2.0.1"
-  },
-  "devDependencies": {
-    "@electron/notarize": "3.1.1",
-    "@electron/rebuild": "4.0.1",
-    "@playwright/test": "1.56.1",
-    "@types/copyfiles": "^2",
-    "@types/fs-extra": "^11",
-    "copyfiles": "^2.4.1",
-    "cross-env": "^10.1.0",
-    "electron": "38.3.0",
-    "electron-builder": "26.0.12",
-    "typescript": "^5.9.3"
-  }
+  "productName": "Actual"
 }
