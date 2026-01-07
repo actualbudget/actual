@@ -91,6 +91,7 @@ function ConfigureField<T extends RuleConditionEntity>({
 }: ConfigureFieldProps<T>) {
   const { t } = useTranslation();
   const format = useFormat();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [subfield, setSubfield] = useState(initialSubfield);
   const inputRef = useRef<AmountInputRef>(null);
   const prevOp = useRef<T['op'] | null>(null);
@@ -118,11 +119,13 @@ function ConfigureField<T extends RuleConditionEntity>({
       typeof value === 'string' &&
       /^\d{4}-\d{2}$/.test(value)
     ) {
-      const [year, month] = value.split('-');
-      return `${month}/${year}`;
+      const date = parseDate(value, 'yyyy-MM', new Date());
+      if (isDateValid(date)) {
+        return formatDate(date, getMonthYearFormat(dateFormat));
+      }
     }
     return value;
-  }, [value, field, subfield]);
+  }, [value, field, subfield, dateFormat]);
 
   return (
     <FocusScope>

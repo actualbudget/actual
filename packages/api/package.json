@@ -1,17 +1,14 @@
 {
   "name": "@actual-app/api",
-  "version": "25.12.0",
-  "license": "MIT",
+  "version": "26.1.0",
   "description": "An API for Actual",
-  "engines": {
-    "node": ">=20"
-  },
+  "license": "MIT",
+  "files": [
+    "@types",
+    "dist"
+  ],
   "main": "dist/index.js",
   "types": "@types/index.d.ts",
-  "files": [
-    "dist",
-    "@types"
-  ],
   "scripts": {
     "build:app": "yarn workspace loot-core build:api",
     "build:crdt": "yarn workspace @actual-app/crdt build",
@@ -33,5 +30,8 @@
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
     "vitest": "^4.0.9"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

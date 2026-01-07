@@ -26,6 +26,7 @@ jobs:
           - windows-latest
           - macos-latest
     runs-on: ${{ matrix.os }}
+    if: github.event.repository.fork == false
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - if: ${{ startsWith(matrix.os, 'windows') }}
