@@ -84,6 +84,74 @@ test.describe('Transactions', () => {
       );
       await expect(page).toMatchThemeScreenshots();
     });
+
+    test('by payee', async () => {
+      accountPage = await navigation.goToAccountPage('Capital One Checking')
+      const filterTooltip = await accountPage.filterBy('Payee');
+      const filtersMenuTooltip = page.getByTestId('filters-menu-tooltip')
+      await expect(filterTooltip.locator).toMatchThemeScreenshots();
+
+      // Type in the autocomplete box
+      const autocomplete = filtersMenuTooltip.getByLabel('Payee');
+      await expect(autocomplete).toMatchThemeScreenshots();
+
+      // Open the textbox, autoopen is currently broken for anything that's not "is not"
+      await autocomplete.click();
+
+      await page.getByTestId('Kroger-payee-item').click();
+      await filterTooltip.applyButton.click();
+
+      // Assert that all Payees are Kroger
+      for (let i = 0; i < 10; i++) {
+        await expect(accountPage.getNthTransaction(i).payee).toHaveText(
+          'Kroger',
+        );
+      }
+      await accountPage.removeFilter(0);
+
+      accountPage.filterBy('Payee');
+      await filtersMenuTooltip.getByRole('button', { name: 'contains' }).click();
+      const textInput = filtersMenuTooltip.getByRole('textbox', { name: 'nothing' });
+
+      await textInput.fill('De');
+      await filterTooltip.applyButton.click();
+      // Assert that all Payees are Deposit
+      for (let i = 0; i < 9; i++) {
+        await expect(accountPage.getNthTransaction(i).payee).toHaveText(
+          'Deposit',
+        );
+      }
+
+      await accountPage.removeFilter(0);
+
+      accountPage.filterBy('Payee');
+      await filtersMenuTooltip.getByRole('button', { name: 'contains' }).click();
+
+      await textInput.fill('l');
+      await filterTooltip.applyButton.click();
+      // Assert that both Payees contain the letter 'l'
+      for (let i = 0; i < 2; i++) {
+        await expect(accountPage.getNthTransaction(i).payee).toHaveText(
+          /l/,
+        );
+      }
+
+      await accountPage.removeFilter(0);
+
+      accountPage.filterBy('Payee');
+      await filtersMenuTooltip.getByRole('button', { name: 'does not contain' }).click();
+
+      await textInput.fill('l');
+      await filterTooltip.applyButton.click();
+      // Assert that all Payees DO NOT contain the letter 'l'
+      for (let i = 0; i < 19; i++) {
+        await expect(accountPage.getNthTransaction(i).payee).not.toHaveText(
+          /l/,
+        );
+      }
+
+      await expect(page).toMatchThemeScreenshots();
+    });
   });
 
   test('creates a test transaction', async () => {
