@@ -4,10 +4,12 @@ import {
   useQueryClient,
   useMutation,
   type QueryClient,
+  type QueryKey,
 } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 
 import { send } from 'loot-core/platform/client/fetch';
+import { logger } from 'loot-core/platform/server/log';
 import { type SyncResponseWithErrors } from 'loot-core/server/accounts/app';
 import {
   type SyncServerGoCardlessAccount,
@@ -34,6 +36,37 @@ import { useDispatch, useSelector } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
 import { setNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
+const sendThrow: typeof send = async function (name, args) {
+  const { data, error } = await send(name, args, { catchErrors: true });
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
+const invalidateQueries = (queryClient: QueryClient, queryKey?: QueryKey) => {
+  queryClient.invalidateQueries({
+    queryKey: queryKey ?? accountQueries.lists(),
+  });
+};
+
+const dispatchErrorNotification = (
+  dispatch: AppDispatch,
+  message: string,
+  error?: Error,
+) => {
+  dispatch(
+    addNotification({
+      notification: {
+        id: uuidv4(),
+        type: 'error',
+        message,
+        pre: error ? error.message : undefined,
+      },
+    }),
+  );
+};
+
 type CreateAccountPayload = {
   name: string;
   balance: number;
@@ -45,38 +78,22 @@ export function useCreateAccountMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateAccountLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: accountQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({ name, balance, offBudget }: CreateAccountPayload) => {
-      const id = await send('account-create', {
+      const id = await sendThrow('account-create', {
         name,
         balance,
         offBudget,
       });
       return id;
     },
-    onSuccess: invalidateAccountLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error creating account:', error);
+      logger.error('Error creating account:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error creating the account. Please try again.'),
+        error,
       );
       throw error;
     },
@@ -95,24 +112,6 @@ export function useCloseAccountMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateAccountLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: accountQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({
       id,
@@ -120,18 +119,20 @@ export function useCloseAccountMutation() {
       categoryId,
       forced,
     }: CloseAccountPayload) => {
-      await send('account-close', {
+      await sendThrow('account-close', {
         id,
         transferAccountId: transferAccountId || undefined,
         categoryId: categoryId || undefined,
         forced,
       });
     },
-    onSuccess: invalidateAccountLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error closing account:', error);
+      logger.error('Error closing account:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error closing the account. Please try again.'),
+        error,
       );
       throw error;
     },
@@ -147,33 +148,17 @@ export function useReopenAccountMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateAccountLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: accountQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({ id }: ReopenAccountPayload) => {
-      await send('account-reopen', { id });
+      await sendThrow('account-reopen', { id });
     },
-    onSuccess: invalidateAccountLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error re-opening account:', error);
+      logger.error('Error re-opening account:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error re-opening the account. Please try again.'),
+        error,
       );
       throw error;
     },
@@ -189,34 +174,18 @@ export function useUpdateAccountMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateAccountLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: accountQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({ account }: UpdateAccountPayload) => {
-      await send('account-update', account);
+      await sendThrow('account-update', account);
       return account;
     },
-    onSuccess: invalidateAccountLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error updating account:', error);
+      logger.error('Error updating account:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error updating the account. Please try again.'),
+        error,
       );
       throw error;
     },
@@ -233,36 +202,20 @@ export function useMoveAccountMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateAccountLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: accountQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({ id, targetId }: MoveAccountPayload) => {
-      await send('account-move', { id, targetId });
+      await sendThrow('account-move', { id, targetId });
       // TODO: Change to a call to queryClient.invalidateQueries
       // once payees have been moved to react-query.
       dispatch(markPayeesDirty());
     },
-    onSuccess: invalidateAccountLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error moving account:', error);
+      logger.error('Error moving account:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error moving the account. Please try again.'),
+        error,
       );
       throw error;
     },
@@ -279,30 +232,12 @@ export function useImportPreviewTransactionsMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateAccountLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: accountQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({
       accountId,
       transactions,
     }: ImportPreviewTransactionsPayload) => {
-      const { errors = [], updatedPreview } = await send(
+      const { errors = [], updatedPreview } = await sendThrow(
         'transactions-import',
         {
           accountId,
@@ -324,13 +259,15 @@ export function useImportPreviewTransactionsMutation() {
 
       return updatedPreview;
     },
-    onSuccess: invalidateAccountLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error importing preview transactions to account:', error);
+      logger.error('Error importing preview transactions to account:', error);
       dispatchErrorNotification(
+        dispatch,
         t(
           'There was an error importing preview transactions to the account. Please try again.',
         ),
+        error,
       );
       throw error;
     },
@@ -348,24 +285,6 @@ export function useImportTransactionsMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateAccountLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: accountQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({
       accountId,
@@ -373,7 +292,7 @@ export function useImportTransactionsMutation() {
       reconcile,
     }: ImportTransactionsPayload) => {
       if (!reconcile) {
-        await send('api/transactions-add', {
+        await sendThrow('api/transactions-add', {
           accountId,
           transactions,
         });
@@ -385,7 +304,7 @@ export function useImportTransactionsMutation() {
         errors = [],
         added,
         updated,
-      } = await send('transactions-import', {
+      } = await sendThrow('transactions-import', {
         accountId,
         transactions,
         isPreview: false,
@@ -417,13 +336,15 @@ export function useImportTransactionsMutation() {
 
       return added.length > 0 || updated.length > 0;
     },
-    onSuccess: invalidateAccountLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error importing transactions to account:', error);
+      logger.error('Error importing transactions to account:', error);
       dispatchErrorNotification(
+        dispatch,
         t(
           'There was an error importing transactions to the account. Please try again.',
         ),
+        error,
       );
       throw error;
     },
@@ -439,34 +360,18 @@ export function useUnlinkAccountMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateAccountLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: accountQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({ id }: UnlinkAccountPayload) => {
-      await send('account-unlink', { id });
+      await sendThrow('account-unlink', { id });
       dispatch(markAccountSuccess({ id }));
     },
-    onSuccess: invalidateAccountLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error unlinking account:', error);
+      logger.error('Error unlinking account:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error unlinking the account. Please try again.'),
+        error,
       );
       throw error;
     },
@@ -491,24 +396,6 @@ export function useLinkAccountMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateAccountLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: accountQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({
       requisitionId,
@@ -518,7 +405,7 @@ export function useLinkAccountMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountPayload) => {
-      await send('gocardless-accounts-link', {
+      await sendThrow('gocardless-accounts-link', {
         requisitionId,
         account,
         upgradingId,
@@ -530,11 +417,13 @@ export function useLinkAccountMutation() {
       // once payees have been moved to react-query.
       dispatch(markPayeesDirty());
     },
-    onSuccess: invalidateAccountLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error linking account:', error);
+      logger.error('Error linking account:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error linking the account. Please try again.'),
+        error,
       );
       throw error;
     },
@@ -550,24 +439,6 @@ export function useLinkAccountSimpleFinMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateAccountLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: accountQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({
       externalAccount,
@@ -576,7 +447,7 @@ export function useLinkAccountSimpleFinMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountSimpleFinPayload) => {
-      await send('simplefin-accounts-link', {
+      await sendThrow('simplefin-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
@@ -587,13 +458,15 @@ export function useLinkAccountSimpleFinMutation() {
       // once payees have been moved to react-query.
       dispatch(markPayeesDirty());
     },
-    onSuccess: invalidateAccountLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error linking account to SimpleFIN:', error);
+      logger.error('Error linking account to SimpleFIN:', error);
       dispatchErrorNotification(
+        dispatch,
         t(
           'There was an error linking the account to SimpleFIN. Please try again.',
         ),
+        error,
       );
       throw error;
     },
@@ -609,24 +482,6 @@ export function useLinkAccountPluggyAiMutation() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const invalidateAccountLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: accountQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
-
   return useMutation({
     mutationFn: async ({
       externalAccount,
@@ -635,7 +490,7 @@ export function useLinkAccountPluggyAiMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountPluggyAiPayload) => {
-      await send('pluggyai-accounts-link', {
+      await sendThrow('pluggyai-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
@@ -647,13 +502,15 @@ export function useLinkAccountPluggyAiMutation() {
       // once payees have been moved to react-query.
       dispatch(markPayeesDirty());
     },
-    onSuccess: invalidateAccountLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error linking account to PluggyAI:', error);
+      logger.error('Error linking account to PluggyAI:', error);
       dispatchErrorNotification(
+        dispatch,
         t(
           'There was an error linking the account to PluggyAI. Please try again.',
         ),
+        error,
       );
       throw error;
     },
@@ -668,24 +525,6 @@ export function useSyncAccountsMutation() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { t } = useTranslation();
-
-  const invalidateAccountLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: accountQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
 
   const accounts = useAccounts();
   const accountState = useSelector(state => state.account);
@@ -745,9 +584,9 @@ export function useSyncAccountsMutation() {
       const updatedAccounts: Array<AccountEntity['id']> = [];
 
       if (simpleFinAccounts.length > 0) {
-        console.log('Using SimpleFin batch sync');
+        logger.log('Using SimpleFin batch sync');
 
-        const res = await send('simplefin-batch-sync', {
+        const res = await sendThrow('simplefin-batch-sync', {
           ids: simpleFinAccounts.map(a => a.id),
         });
 
@@ -774,7 +613,7 @@ export function useSyncAccountsMutation() {
         const accountId = accountIdsToSync[idx];
 
         // Perform sync operation
-        const res = await send('accounts-bank-sync', {
+        const res = await sendThrow('accounts-bank-sync', {
           ids: [accountId],
         });
 
@@ -809,11 +648,13 @@ export function useSyncAccountsMutation() {
       dispatch(setAccountsSyncing({ ids: [] }));
       return isSyncSuccess;
     },
-    onSuccess: invalidateAccountLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error syncing accounts:', error);
+      logger.error('Error syncing accounts:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error syncing accounts. Please try again.'),
+        error,
       );
       throw error;
     },
@@ -877,9 +718,7 @@ function handleSyncResponse(
   resMatchedTransactions.push(...matchedTransactions);
   resUpdatedAccounts.push(...updatedAccounts);
 
-  queryClient.invalidateQueries({
-    queryKey: accountQueries.lists(),
-  });
+  invalidateQueries(queryClient);
 
   return newTransactions.length > 0 || matchedTransactions.length > 0;
 }
@@ -892,24 +731,6 @@ export function useSyncAndDownloadMutation() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { t } = useTranslation();
-
-  const invalidateAccountLists = () => {
-    queryClient.invalidateQueries({
-      queryKey: accountQueries.lists(),
-    });
-  };
-
-  const dispatchErrorNotification = (message: string) => {
-    dispatch(
-      addNotification({
-        notification: {
-          id: uuidv4(),
-          type: 'error',
-          message,
-        },
-      }),
-    );
-  };
 
   const syncAccounts = useSyncAccountsMutation();
 
@@ -940,11 +761,13 @@ export function useSyncAndDownloadMutation() {
       }
       return { hasUpdated: hasDownloaded };
     },
-    onSuccess: invalidateAccountLists,
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      console.error('Error syncing accounts:', error);
+      logger.error('Error syncing accounts:', error);
       dispatchErrorNotification(
+        dispatch,
         t('There was an error syncing accounts. Please try again.'),
+        error,
       );
       throw error;
     },
