@@ -87,19 +87,10 @@ function RedactedContent({ children }: RedactedContentProps) {
         null,
       );
 
-      const textNodes: Text[] = [];
       let node: Text | null;
       while ((node = walker.nextNode() as Text | null)) {
-        textNodes.push(node);
-      }
-
-      for (const textNode of textNodes) {
-        const original = textNode.textContent || '';
-        // Keep only alphanumeric characters to create a continuous squiggle
-        // Remove spaces and special characters completely
-        const redacted = original.replace(/[^a-zA-Z0-9]/g, '*');
-        if (redacted !== original) {
-          textNode.textContent = redacted;
+        if (node.textContent) {
+          node.textContent = node.textContent.replace(/[^a-zA-Z0-9]/g, '*');
         }
       }
     }
