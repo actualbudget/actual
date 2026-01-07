@@ -152,9 +152,8 @@ export function useSaveCategoryMutation() {
 
   return useMutation({
     mutationFn: async ({ category }: SaveCategoryPayload) => {
-      const { grouped: categoryGroups } = await queryClient.ensureQueryData(
-        categoryQueries.list(),
-      );
+      const { grouped: categoryGroups = [] } =
+        await queryClient.ensureQueryData(categoryQueries.list());
 
       const exists =
         categoryGroups
@@ -178,8 +177,8 @@ export function useSaveCategoryMutation() {
         createCategory.mutate({
           name: category.name,
           groupId: category.group,
-          isIncome: category.is_income,
-          isHidden: category.hidden,
+          isIncome: !!category.is_income,
+          isHidden: !!category.hidden,
         });
       } else {
         updateCategory.mutate({ category });
@@ -302,7 +301,7 @@ export function useReorderCategoryMutation() {
 
   return useMutation({
     mutationFn: async ({ id, groupId, targetId }: ReoderCategoryPayload) => {
-      const { grouped: categoryGroups, list: categories } =
+      const { grouped: categoryGroups = [], list: categories = [] } =
         await queryClient.ensureQueryData(categoryQueries.list());
       const moveCandidate = categories.filter(c => c.id === id)[0];
       const exists =
@@ -438,8 +437,10 @@ export function useDeleteCategoryGroupMutation() {
         return;
       }
 
+      const categories = group.categories ?? [];
+
       let mustTransfer = false;
-      for (const category of group.categories) {
+      for (const category of categories) {
         if (await sendOrThrow('must-category-transfer', { id: category.id })) {
           mustTransfer = true;
           break;
