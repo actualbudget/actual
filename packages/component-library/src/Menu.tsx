@@ -186,7 +186,7 @@ export function Menu<const NameType = string>({
 
         return (
           <Button
-            excludeFromTabOrder={true}
+            excludeFromTabOrder
             key={String(item.name)}
             variant="bare"
             slot={slot}
