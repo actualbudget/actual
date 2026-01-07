@@ -22,6 +22,7 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { shortcodeToNative as shortcodeToNativeUtil } from './emojiUtils';
 
 function defaultShouldSaveFromKey(e: KeyboardEvent<HTMLInputElement>) {
   return e.key === 'Enter';
@@ -555,7 +556,8 @@ export function EmojiSelect({
 
   const handleEmojiSelect = useCallback(
     (emoji: EmojiData) => {
-      onSelect(emoji.native);
+      // Save shortcode (e.g., ":grinning:") instead of native emoji
+      onSelect(`:${emoji.id}:`);
       closePicker();
     },
     [closePicker, onSelect],
@@ -848,7 +850,8 @@ export function EmojiSelect({
     );
   };
 
-  const displayValue = value || '';
+  // Convert shortcode to native emoji for display
+  const displayValue = shortcodeToNativeUtil(value);
   const showPlaceholder = !value;
 
   return (

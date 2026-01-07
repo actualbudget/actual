@@ -97,6 +97,7 @@ import {
 } from '@desktop-client/components/schedules/StatusBadge';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import { EmojiSelect } from '@desktop-client/components/select/EmojiSelect';
+import { shortcodeToNative } from '@desktop-client/components/select/emojiUtils';
 import {
   Cell,
   CellButton,
@@ -1399,9 +1400,14 @@ const Transaction = memo(function Transaction({
           onUpdate={value => {
             onUpdate('flag', value);
           }}
-          formatter={value => (value ? String(value) : '')}
+          formatter={value => {
+            // Convert shortcode (e.g., ":grinning:") to native emoji for display
+            return shortcodeToNative(value);
+          }}
           unexposedContent={({ value, formatter }) => {
-            const displayValue = formatter ? formatter(value) : value || '';
+            const displayValue = formatter
+              ? formatter(value)
+              : shortcodeToNative(value);
             return (
               <View
                 style={{
