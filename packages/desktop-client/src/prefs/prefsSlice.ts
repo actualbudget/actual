@@ -5,6 +5,7 @@ import { parseNumberFormat, setNumberFormat } from 'loot-core/shared/util';
 import {
   type GlobalPrefs,
   type MetadataPrefs,
+  type ServerPrefs,
   type SyncedPrefs,
 } from 'loot-core/types/prefs';
 
@@ -12,6 +13,7 @@ import { resetApp } from '@desktop-client/app/appSlice';
 import { setI18NextLanguage } from '@desktop-client/i18n';
 import { closeModal } from '@desktop-client/modals/modalsSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
+import { getUserData } from '@desktop-client/users/usersSlice';
 
 const sliceName = 'prefs';
 
@@ -19,12 +21,14 @@ type PrefsState = {
   local: MetadataPrefs;
   global: GlobalPrefs;
   synced: SyncedPrefs;
+  serverPrefs: ServerPrefs;
 };
 
 const initialState: PrefsState = {
   local: {},
   global: {},
   synced: {},
+  serverPrefs: {},
 };
 
 export const loadPrefs = createAppAsyncThunk(
@@ -125,6 +129,23 @@ export const saveSyncedPrefs = createAppAsyncThunk(
   },
 );
 
+type SaveServerPrefsPayload = {
+  prefs: ServerPrefs;
+};
+
+export const saveServerPrefs = createAppAsyncThunk(
+  `${sliceName}/saveServerPrefs`,
+  async ({ prefs }: SaveServerPrefsPayload, { dispatch }) => {
+    const result = await send('save-server-prefs', { prefs });
+    if (result && 'error' in result) {
+      return { error: result.error };
+    }
+
+    dispatch(mergeServerPrefs(prefs));
+    return {};
+  },
+);
+
 type SetPrefsPayload = {
   local: MetadataPrefs;
   global: GlobalPrefs;
@@ -134,6 +155,7 @@ type SetPrefsPayload = {
 type MergeLocalPrefsPayload = MetadataPrefs;
 type MergeGlobalPrefsPayload = GlobalPrefs;
 type MergeSyncedPrefsPayload = SyncedPrefs;
+type MergeServerPrefsPayload = ServerPrefs;
 
 const prefsSlice = createSlice({
   name: sliceName,
@@ -153,12 +175,34 @@ const prefsSlice = createSlice({
     mergeSyncedPrefs(state, action: PayloadAction<MergeSyncedPrefsPayload>) {
       state.synced = { ...state.synced, ...action.payload };
     },
+    mergeServerPrefs(state, action: PayloadAction<MergeServerPrefsPayload>) {
+      state.serverPrefs = { ...state.serverPrefs, ...action.payload };
+    },
   },
   extraReducers: builder => {
     builder.addCase(resetApp, state => ({
       ...initialState,
       global: state.global || initialState.global,
+      serverPrefs: state.serverPrefs || initialState.serverPrefs,
     }));
+    builder.addCase(getUserData.fulfilled, (state, action) => {
+      if (!action.payload || typeof action.payload !== 'object') {
+        return state;
+      }
+
+      const { serverPrefs } = action.payload as {
+        serverPrefs?: ServerPrefs | null;
+      };
+
+      if (!serverPrefs) {
+        return state;
+      }
+
+      state.serverPrefs = {
+        ...state.serverPrefs,
+        ...serverPrefs,
+      };
+    });
   },
 });
 
@@ -171,7 +215,13 @@ export const actions = {
   loadGlobalPrefs,
   saveGlobalPrefs,
   saveSyncedPrefs,
+  saveServerPrefs,
 };
 
-export const { mergeGlobalPrefs, mergeLocalPrefs, mergeSyncedPrefs, setPrefs } =
-  actions;
+export const {
+  mergeGlobalPrefs,
+  mergeLocalPrefs,
+  mergeServerPrefs,
+  mergeSyncedPrefs,
+  setPrefs,
+} = actions;

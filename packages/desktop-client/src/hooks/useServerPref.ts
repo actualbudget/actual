@@ -2,8 +2,8 @@ import { useCallback } from 'react';
 
 import { type ServerPrefs } from 'loot-core/types/prefs';
 
+import { saveServerPrefs } from '@desktop-client/prefs/prefsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
-import { saveServerPrefs } from '@desktop-client/serverPrefs/serverPrefsSlice';
 
 type SetServerPrefAction<K extends keyof ServerPrefs> = (
   value: ServerPrefs[K],
@@ -25,7 +25,7 @@ export function useServerPref<K extends keyof ServerPrefs>(
     [dispatch, prefName],
   );
 
-  const pref = useSelector(state => state.serverPrefs[prefName]);
+  const pref = useSelector(state => state.prefs.serverPrefs[prefName]);
 
   return [pref, setPref];
 }
