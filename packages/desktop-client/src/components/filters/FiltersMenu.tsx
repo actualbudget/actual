@@ -69,7 +69,6 @@ const filterFields = [
   'amount',
   'cleared',
   'reconciled',
-  'saved',
   'transfer',
 ].map(field => [field, mapField(field)]);
 
@@ -480,22 +479,18 @@ export function FilterButton<T extends RuleConditionEntity>({
           items={[
             ...translatedFilterFields
               .filter(f => (exclude ? !exclude.includes(f[0]) : true))
-              .filter(f => f[0] !== 'saved')
               .sort()
               .map(([name, text]) => ({
                 name,
                 text: titleFirst(text),
               })),
-
+            
             Menu.line,
-
-            ...translatedFilterFields
-              .filter(f => (exclude ? !exclude.includes(f[0]) : true))
-              .filter(f => f[0] === 'saved')
-              .map(([name, text]) => ({
-                name,
-                text: titleFirst(text),
-              })),
+            
+            {
+              name: 'saved',
+              text: titleFirst(mapField('saved')),
+            },
           ]}
         />
       </Popover>
