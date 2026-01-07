@@ -26,7 +26,8 @@ test.describe('Help menu', () => {
 
   test('Check the help menu visuals', async () => {
     await page.getByRole('button', { name: 'Help' }).click();
-    expect(page.getByText('Keyboard shortcuts')).toBeVisible();
+    await expect(page.locator('[data-popover]')).toBeVisible();
+    await expect(page.getByText('Keyboard shortcuts')).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
     await page.keyboard.press('Escape');
   });
@@ -57,7 +58,7 @@ test.describe('Help menu', () => {
     await backButton.click();
     await expect(searchBox).toHaveValue('');
 
-    await keyboardShortcutsModal.getByText('General').click();
+    await keyboardShortcutsModal.getByText('Global').click();
     await expect(
       keyboardShortcutsModal.getByText('Open the help menu'),
     ).toBeVisible();

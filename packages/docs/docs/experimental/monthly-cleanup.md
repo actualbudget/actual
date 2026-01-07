@@ -6,7 +6,7 @@ This is an **experimental feature**. That means we're still working on finishing
 
 Create a template by adding a note to a category and adding a line that begins with `#cleanup`.
 
-![](/img/monthly-cleanup/cleanup-02.png)
+![](/img/monthly-cleanup/cleanup-02.webp)
 
 You are welcome to have other lines in your note including goal templates, but the #cleanup line must match the syntax.
 
@@ -40,7 +40,7 @@ Local groups can be defined to target certain categories for more refined contro
 
 The feature works sequentially in the following manner after pressing the **End of month cleanup** button .
 
-![](/img/monthly-cleanup/cleanup-01.png)
+![](/img/monthly-cleanup/cleanup-01.webp)
 
 1. Local groups are applied first. Overspent categories are not automatically filled at this step and the group source funds will be distributed.
 1. Any `#cleanup source` entries will be found and all extra money in those categories will be returned to **To Budget**.

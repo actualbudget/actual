@@ -12,10 +12,13 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import debounce from 'lodash/debounce';
 
+import { amountToInteger } from 'loot-core/shared/util';
+
 import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
@@ -50,6 +53,7 @@ export function FormulaResult({
   const [fontSize, setFontSize] = useState<number>(initialFontSize);
   const refDiv = useRef<HTMLDivElement>(null);
   const previousFontSizeRef = useRef<number>(initialFontSize);
+  const format = useFormat();
 
   // Format the display value - just show what we got
   const displayValue = useMemo(() => {
@@ -57,10 +61,15 @@ export function FormulaResult({
       return error;
     } else if (value === null || value === undefined) {
       return '';
+    } else if (typeof value === 'number') {
+      return format(
+        amountToInteger(value, format.currency.decimalPlaces),
+        'financial',
+      );
     } else {
       return String(value);
     }
-  }, [error, value]);
+  }, [error, value, format]);
 
   const calculateFontSize = useCallback(() => {
     if (!refDiv.current) return;

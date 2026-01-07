@@ -68,11 +68,11 @@ module.exports = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      image: 'img/og.png',
+      image: 'img/og.webp',
       navbar: {
         logo: {
           alt: 'Actual Open Source',
-          src: 'img/actual.png',
+          src: 'img/actual.webp',
         },
         items: [
           {
@@ -190,6 +190,16 @@ module.exports = {
     }),
   plugins: [
     [
+      '@docusaurus/plugin-ideal-image',
+      {
+        quality: 70,
+        max: 1030, // max resized image's size.
+        min: 640, // min resized image's size. if original is lower, use that size.
+        steps: 2, // the max number of images generated between min and max (inclusive)
+        disableInDev: false
+      },
+    ],
+    [
       require.resolve('@easyops-cn/docusaurus-search-local'),
       /** @type {import("@easyops-cn/docusaurus-search-local").PluginOptions} */
       ({
@@ -199,7 +209,6 @@ module.exports = {
         language: 'en',
       }),
     ],
-    ['@docusaurus/plugin-ideal-image', { disableInDev: false }],
     '@r74tech/docusaurus-plugin-panzoom',
   ],
 };

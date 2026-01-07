@@ -50,7 +50,8 @@ bundle.mobile.js.map
 !.yarn/versions
 
 # VSCode
-.vscode
+.vscode/*
+!.vscode/settings.default.json
 
 # IntelliJ IDEA
 .idea
