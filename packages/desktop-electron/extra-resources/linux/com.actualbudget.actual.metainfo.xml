@@ -21,6 +21,7 @@
   <launchable type="desktop-id">com.actualbudget.actual.desktop</launchable>
   <url type="homepage">https://actualbudget.org/</url>
   <url type="bugtracker">https://github.com/actualbudget/actual/issues</url>
+  <url type="vcs-browser">https://github.com/actualbudget/actual</url>
   <recommends>
     <control>keyboard</control>
     <control>pointing</control>
@@ -68,6 +69,9 @@
       </description>
     </release>
   </releases>
-  <developer_name>Actual Core Contributors</developer_name>
+
+  <developer id="com.actualbudget">
+    <name>Actual Core Contributors</name>
+  </developer>
   <update_contact>dev@actualbudget.org</update_contact>
 </component>
