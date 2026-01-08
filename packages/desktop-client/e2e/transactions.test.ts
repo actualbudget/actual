@@ -95,7 +95,7 @@ test.describe('Transactions', () => {
       const autocomplete = filtersMenuTooltip.getByLabel('Payee');
       await expect(autocomplete).toMatchThemeScreenshots();
 
-      // Open the textbox, autoopen is currently broken for anything that's not "is not"
+      // Open the textbox, auto-open is currently broken for anything that's not "is not"
       await autocomplete.click();
 
       await page.getByTestId('Kroger-payee-item').click();
@@ -109,13 +109,11 @@ test.describe('Transactions', () => {
       }
       await accountPage.removeFilter(0);
 
-      accountPage.filterBy('Payee');
+      await accountPage.filterBy('Payee');
       await filtersMenuTooltip
         .getByRole('button', { name: 'contains' })
         .click();
-      const textInput = filtersMenuTooltip.getByRole('textbox', {
-        name: 'nothing',
-      });
+      const textInput = filtersMenuTooltip.getByPlaceholder('nothing');
 
       await textInput.fill('De');
       await filterTooltip.applyButton.click();
@@ -128,7 +126,7 @@ test.describe('Transactions', () => {
 
       await accountPage.removeFilter(0);
 
-      accountPage.filterBy('Payee');
+      await accountPage.filterBy('Payee');
       await filtersMenuTooltip
         .getByRole('button', { name: 'contains' })
         .click();
@@ -142,7 +140,7 @@ test.describe('Transactions', () => {
 
       await accountPage.removeFilter(0);
 
-      accountPage.filterBy('Payee');
+      await accountPage.filterBy('Payee');
       await filtersMenuTooltip
         .getByRole('button', { name: 'does not contain' })
         .click();
