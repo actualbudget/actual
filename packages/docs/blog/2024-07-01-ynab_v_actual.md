@@ -97,7 +97,7 @@ Just like you are used to.
 Here is a snippet of what Actual looks like in the budgeting view.
 Its similar to YNAB, but each have a unique style.
 
-![](/img/homepage/actual-main-budget.png)
+![](/img/homepage/actual-main-budget.webp)
 
 #### Credit Cards
 
@@ -124,7 +124,7 @@ All reports can be viewed on mobile.
 Here is an example of the kind of granularity you can achieve with these custom reports.
 This report is viewing how much was spent on food, by week, in both the `Food` and `Restaurant` categories over the last few months.
 
-![](/img/blog/actualvynab-report.png)
+![](/img/blog/actualvynab-report.webp)
 
 ### Bank Syncing
 
@@ -157,7 +157,7 @@ This means that if you have a multi month goal to save $500 in the next 10 month
 If you budget more than you needed, the goal will adjust each month so that the amount you need in the current month is always accurate.
 Here is an example of what these indications looks like for a goal met(green), goal incomplete(yellow), or overspent(red) category.
 
-![](/img/goal-template/templates-colors.png)
+![](/img/goal-template/templates-colors.webp)
 
 These goals can also be used to automate your budgeting each month, same as YNAB.
 One extra feature that YNAB does not have with their goals is the ability to prioritize certain categories.

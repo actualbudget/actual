@@ -82,6 +82,7 @@ export type CrossoverWidget = AbstractWidget<
     estimatedReturn?: number | null; // annual
     projectionType?: 'trend' | 'hampel'; // expense projection method
     showHiddenCategories?: boolean; // show hidden categories in selector
+    expenseAdjustmentFactor?: number; // multiplier for expenses (default 1.0)
   } | null
 >;
 export type MarkdownWidget = AbstractWidget<

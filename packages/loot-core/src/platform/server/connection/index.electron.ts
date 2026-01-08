@@ -2,6 +2,7 @@
 import { APIError } from '../../../server/errors';
 import { runHandler, isMutating } from '../../../server/mutators';
 import { captureException } from '../../exceptions';
+import { logger } from '../log';
 
 import type * as T from './index-types';
 
@@ -65,7 +66,7 @@ export const init: T.Init = function (_socketName, handlers) {
         },
       );
     } else {
-      console.warn('Unknown method: ' + name);
+      logger.warn('Unknown method: ' + name);
       captureException(new Error('Unknown server method: ' + name));
       process.parentPort.postMessage({
         type: 'reply',
