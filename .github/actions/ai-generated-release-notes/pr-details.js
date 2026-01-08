@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import { Octokit } from '@octokit/rest';
 import fs from 'fs';
+
+import { Octokit } from '@octokit/rest';
 
 const token = process.env.GITHUB_TOKEN;
 const repo = process.env.GITHUB_REPOSITORY;

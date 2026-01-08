@@ -38,7 +38,9 @@ Cloudflare
 CMCIFRPAXXX
 COBADEFF
 CODEOWNERS
+COEP
 commerzbank
+COOP
 Copiar
 COUNTA
 COUNTBLANK
@@ -176,6 +178,7 @@ UZS
 VLOOKUP
 vrt
 VUB
+Wallos
 websecure
 WEEKNUM
 Widiba

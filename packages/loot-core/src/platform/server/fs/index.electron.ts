@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import * as fs from 'fs';
-import { logger } from '../log';
-
 import * as path from 'path';
 
 import promiseRetry from 'promise-retry';
+
+import { logger } from '../log';
 
 import type * as T from '.';
 
