@@ -104,6 +104,7 @@ export default defineConfig(({ mode }) => {
       visualizer({ template: 'raw-data', filename: `${outDir}/stats.json` }),
     ],
     optimizeDeps: {
+      exclude: ['@electric-sql/pglite'],
       include: [
         'buffer',
         'process',

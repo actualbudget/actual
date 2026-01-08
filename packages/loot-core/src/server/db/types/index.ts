@@ -121,13 +121,13 @@ export type DbSchedule = {
   tombstone: 1 | 0;
 };
 
-export type DbScheduleJsonPath = {
-  schedule_id: DbSchedule['id'];
-  payee: string;
-  account: string;
-  amount: string;
-  date: string;
-};
+// type DbScheduleJsonPath = {
+//   schedule_id: DbSchedule['id'];
+//   payee: string;
+//   account: string;
+//   amount: string;
+//   date: string;
+// };
 
 export type DbScheduleNextDate = {
   id: string;

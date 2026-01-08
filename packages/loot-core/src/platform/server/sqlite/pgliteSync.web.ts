@@ -6,6 +6,7 @@ import * as dbUtil from '../../../server/db/util';
 import * as pglite from '../pglite';
 
 import * as sqlite from '.';
+import { logger } from '../log';
 
 // These have been renamed in the PGlite schema so that
 // they match the rest of the schema which is snake_case.
@@ -56,6 +57,11 @@ async function insertOrUpdateRow(
   const pgliteDb = await pglite.openDatabase();
   // Get from sqlite.
   const sqliteDb = db.getDatabase();
+  if (!sqliteDb) {
+    logger.warn('No sqlite database found for pglite sync');
+    return;
+  }
+
   const [row] = await sqlite.runQuery<Record<string, unknown>>(
     sqliteDb,
     `SELECT * FROM ${table} WHERE ${primaryKeyColumn} = ?`,

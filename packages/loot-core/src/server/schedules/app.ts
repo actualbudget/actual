@@ -217,12 +217,6 @@ export async function createSchedule({
     actions: [{ op: 'link-schedule', value: scheduleId }],
   });
 
-  await db.insertWithSchema('schedules', {
-    ...schedule,
-    id: scheduleId,
-    rule: ruleId,
-  });
-
   const now = Date.now();
   await db.insertWithUUID('schedules_next_date', {
     schedule_id: scheduleId,
@@ -230,6 +224,12 @@ export async function createSchedule({
     local_next_date_ts: now,
     base_next_date: nextDateRepr,
     base_next_date_ts: now,
+  });
+
+  await db.insertWithSchema('schedules', {
+    ...schedule,
+    id: scheduleId,
+    rule: ruleId,
   });
 
   return scheduleId;
