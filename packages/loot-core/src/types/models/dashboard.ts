@@ -91,7 +91,8 @@ type SpecializedWidget =
   | MarkdownWidget
   | SummaryWidget
   | CalendarWidget
-  | FormulaWidget;
+  | FormulaWidget
+  | SankeyWidget;
 export type Widget = SpecializedWidget | CustomReportWidget;
 export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
 
@@ -169,5 +170,16 @@ export type FormulaWidget = AbstractWidget<
         timeFrame?: TimeFrame;
       }
     >;
+  } | null
+>;
+
+export type SankeyWidget = AbstractWidget<
+  'sankey-card',
+  {
+    name?: string;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+    mode?: 'budgeted' | 'spent' | 'difference';
   } | null
 >;
