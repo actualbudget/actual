@@ -40,6 +40,7 @@ type Transaction = {
   amount: number;
   category?: string;
   date: string;
+  flag?: string;
   id?: string;
   notes?: string;
   payee: string;

@@ -44,7 +44,6 @@ CREATE TABLE transactions
    amount INTEGER,
    description TEXT,
    notes TEXT,
-   flag TEXT,
    date INTEGER,
    financial_id TEXT,
    type TEXT,

@@ -29,6 +29,7 @@ import {
 import { TransactionTable } from './TransactionsTable';
 
 import { AuthProvider } from '@desktop-client/auth/AuthProvider';
+import { shortcodeToNative } from '@desktop-client/components/select/emojiUtils';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
 import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
@@ -44,6 +45,42 @@ vi.mock('../../hooks/useSyncedPref', () => ({
 }));
 vi.mock('../../hooks/useFeatureFlag', () => ({
   useFeatureFlag: () => false,
+}));
+
+// Mock react-aria-components to avoid dependency issues
+vi.mock('react-aria-components', async importOriginal => {
+  const actual = await importOriginal<typeof import('react-aria-components')>();
+  return {
+    ...actual,
+    Button: ({ children, onPress, ...props }: any) => (
+      <button onClick={onPress} {...props}>
+        {children}
+      </button>
+    ),
+    Input: React.forwardRef(({ ...props }: any, ref: any) => (
+      <input ref={ref} {...props} />
+    )),
+  };
+});
+
+// Mock @emoji-mart/data for EmojiSelect component
+vi.mock('@emoji-mart/data', () => ({
+  default: {
+    emojis: {
+      grinning: {
+        id: 'grinning',
+        name: 'Grinning Face',
+        keywords: ['face', 'grin', 'smile', 'happy'],
+        skins: [{ native: '😀' }],
+      },
+      '100': {
+        id: '100',
+        name: 'Hundred Points',
+        keywords: ['100', 'hundred', 'points', 'score'],
+        skins: [{ native: '💯' }],
+      },
+    },
+  },
 }));
 
 const accounts = [generateAccount('Bank of America')];
@@ -444,6 +481,9 @@ describe('Transactions', () => {
     getTransactions().forEach((transaction, idx) => {
       expect(queryField(container, 'date', 'div', idx).textContent).toBe(
         prettyDate(transaction.date),
+      );
+      expect(queryField(container, 'flag', 'div', idx).textContent).toBe(
+        transaction.flag ? shortcodeToNative(transaction.flag) : '',
       );
       expect(queryField(container, 'account', 'div', idx).textContent).toBe(
         accounts.find(acct => acct.id === transaction.account)?.name,
@@ -927,7 +967,7 @@ describe('Transactions', () => {
     // new transaction form
     let input = expectToBeEditingField(container, 'date', 0, true);
     await userEvent.type(input, '[Tab]');
-    input = expectToBeEditingField(container, 'account', 0, true);
+    input = expectToBeEditingField(container, 'flag', 0, true);
 
     await userEvent.type(input, '[Escape]');
     await userEvent.type(input, '[Escape]');
@@ -1110,10 +1150,10 @@ describe('Transactions', () => {
       {
         account: accounts[0].id,
         amount: -2777,
-        category: undefined,
         cleared: false,
         date: '2017-01-01',
         error: null,
+        flag: null,
         id: expect.any(String),
         is_parent: true,
         notes: 'Notes',

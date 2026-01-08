@@ -127,6 +127,7 @@ function _generateTransaction(
     notes: 'Notes',
     account: data.account,
     date: data.date || monthUtils.currentDay(),
+    flag: data.flag || null,
     sort_order: data.sort_order != null ? data.sort_order : 1,
     cleared: false,
     ...(data.category && { category: data.category }),
@@ -153,6 +154,7 @@ export function generateTransaction(
         amount: trans.amount - splitAmount,
         account: parent.account,
         date: parent.date,
+        flag: parent.flag,
         is_child: true,
       },
       {
@@ -160,6 +162,7 @@ export function generateTransaction(
         amount: splitAmount,
         account: parent.account,
         date: parent.date,
+        flag: parent.flag,
         is_child: true,
       },
     );

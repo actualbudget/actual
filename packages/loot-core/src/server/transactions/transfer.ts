@@ -63,6 +63,7 @@ export async function addTransfer(transaction, transferredAccount) {
     amount: -transaction.amount,
     payee: fromPayee,
     date: transaction.date,
+    flag: transaction.flag || null,
     transfer_id: transaction.id,
     notes: transaction.notes || null,
     schedule: transaction.schedule,
@@ -127,6 +128,7 @@ export async function updateTransfer(transaction, transferredAccount) {
     // user moved this transaction into another account
     payee: payee.id,
     date: transaction.date,
+    flag: transaction.flag,
     notes: transaction.notes,
     amount: -transaction.amount,
     schedule: transaction.schedule,

@@ -35,6 +35,7 @@ export async function exportToCSV(
     ({
       account,
       date,
+      flag,
       payee,
       notes,
       category,
@@ -44,6 +45,7 @@ export async function exportToCSV(
     }) => ({
       Account: accountNamesById[account],
       Date: date,
+      Flag: flag,
       Payee: payeeNamesById[payee],
       Notes: notes,
       Category: categoryNamesById[category],
@@ -63,6 +65,7 @@ export async function exportQueryToCSV(query) {
         { Id: 'id' },
         { Account: 'account.name' },
         { Date: 'date' },
+        { Flag: 'flag' },
         { Payee: 'payee.name' },
         { ParentId: 'parent_id' },
         { IsParent: 'is_parent' },
@@ -96,6 +99,7 @@ export async function exportQueryToCSV(query) {
     return {
       Account: trans.Account,
       Date: trans.Date,
+      Flag: trans.Flag,
       Payee: trans.Payee,
       Notes: trans.IsParent
         ? '(SPLIT INTO ' +
