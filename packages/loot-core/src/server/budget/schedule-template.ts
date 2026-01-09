@@ -276,7 +276,7 @@ export async function runSchedule(
 
   const isPayMonthOf = c =>
     c.full ||
-    ((c.target_frequency === 'monthly' || c.target_frequency === undefined) &&
+    ((c.target_frequency === 'monthly' || !c.target_frequency) &&
       c.target_interval === 1 &&
       c.num_months === 0) ||
     (c.target_frequency === 'weekly' && c.target_interval <= 4) ||
