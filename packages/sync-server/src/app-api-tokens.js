@@ -1,6 +1,7 @@
 import express from 'express';
 
 import { apiTokenService } from './services/api-token-service';
+import { countUserAccess } from './services/user-service';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
@@ -40,6 +41,27 @@ app.post('/', async (req, res) => {
       reason: 'invalid-budget-ids',
       details: 'budgetIds must be an array',
     });
+  }
+
+  // Validate each budgetId is a non-empty string and user has access
+  for (const budgetId of budgetIds) {
+    if (typeof budgetId !== 'string' || budgetId.trim() === '') {
+      return res.status(400).send({
+        status: 'error',
+        reason: 'invalid-budget-id',
+        details: 'Each budgetId must be a non-empty string',
+      });
+    }
+
+    // Check that user has access to this budget
+    const accessCount = countUserAccess(budgetId, userId);
+    if (accessCount === 0) {
+      return res.status(403).send({
+        status: 'error',
+        reason: 'forbidden-budget',
+        details: `You do not have access to budget: ${budgetId}`,
+      });
+    }
   }
 
   if (expiresAt !== null && (typeof expiresAt !== 'number' || expiresAt < 0)) {

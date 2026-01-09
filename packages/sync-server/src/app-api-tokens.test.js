@@ -120,6 +120,72 @@ describe('/api-tokens', () => {
       // Cleanup
       getAccountDb().mutate('DELETE FROM files WHERE id = ?', [budgetId]);
     });
+
+    it('should return 400 if budgetIds contains non-string elements', async () => {
+      const res = await request(app)
+        .post('/')
+        .send({ name: 'Test Token', budgetIds: [123, null] })
+        .set('x-actual-token', sessionToken);
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.body.status).toBe('error');
+      expect(res.body.reason).toBe('invalid-budget-id');
+    });
+
+    it('should return 403 if user does not have access to budget', async () => {
+      // Create a file owned by a different user
+      const otherUserId = uuidv4();
+      const budgetId = uuidv4();
+      createUser(otherUserId, 'otheruser');
+      getAccountDb().mutate('INSERT INTO files (id, owner) VALUES (?, ?)', [
+        budgetId,
+        otherUserId,
+      ]);
+
+      const res = await request(app)
+        .post('/')
+        .send({ name: 'Test Token', budgetIds: [budgetId] })
+        .set('x-actual-token', sessionToken);
+
+      expect(res.statusCode).toEqual(403);
+      expect(res.body.status).toBe('error');
+      expect(res.body.reason).toBe('forbidden-budget');
+
+      // Cleanup
+      getAccountDb().mutate('DELETE FROM files WHERE id = ?', [budgetId]);
+      deleteUser(otherUserId);
+    });
+
+    it('should allow token creation with budget user has access to via user_access', async () => {
+      // Create a file owned by a different user
+      const otherUserId = uuidv4();
+      const budgetId = uuidv4();
+      createUser(otherUserId, 'otheruser');
+      getAccountDb().mutate('INSERT INTO files (id, owner) VALUES (?, ?)', [
+        budgetId,
+        otherUserId,
+      ]);
+      // Grant access to the current user
+      getAccountDb().mutate(
+        'INSERT INTO user_access (user_id, file_id) VALUES (?, ?)',
+        [userId, budgetId],
+      );
+
+      const res = await request(app)
+        .post('/')
+        .send({ name: 'Shared Budget Token', budgetIds: [budgetId] })
+        .set('x-actual-token', sessionToken);
+
+      expect(res.statusCode).toEqual(201);
+      expect(res.body.data.budgetIds).toContain(budgetId);
+
+      // Cleanup
+      getAccountDb().mutate('DELETE FROM user_access WHERE file_id = ?', [
+        budgetId,
+      ]);
+      getAccountDb().mutate('DELETE FROM files WHERE id = ?', [budgetId]);
+      deleteUser(otherUserId);
+    });
   });
 
   describe('GET /', () => {
