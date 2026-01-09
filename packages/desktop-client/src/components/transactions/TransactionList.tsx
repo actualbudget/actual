@@ -9,6 +9,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { getUpcomingDays } from 'loot-core/shared/schedules';
+import { generateSortOrder } from 'loot-core/shared/sort-order';
 import {
   addSplitTransaction,
   applyTransactionDiff,
@@ -264,6 +265,7 @@ type TransactionListProps = Pick<
   | 'showCleared'
   | 'showReconciled'
   | 'showSelection'
+  | 'showSequence'
   | 'sortField'
   | 'transactions'
 > & {
@@ -293,6 +295,7 @@ export function TransactionList({
   payees,
   balances,
   showBalances,
+  showSequence,
   showReconciled,
   showCleared,
   showAccount,
@@ -425,7 +428,10 @@ export function TransactionList({
         if (changes.diff.updated.length > 0) {
           const dateChanged = !!changes.diff.updated[0].date;
           if (dateChanged) {
-            changes.diff.updated[0].sort_order = Date.now();
+            // Use new sort_order format (YYYYMMDDseq) with seq=1
+            // This migrates legacy timestamps to the new format
+            const newDate = changes.diff.updated[0].date;
+            changes.diff.updated[0].sort_order = generateSortOrder(newDate, 1);
             await saveDiff(changes.diff, isLearnCategoriesEnabled);
             onRefetch();
           } else {
@@ -601,6 +607,7 @@ export function TransactionList({
       payees={payees}
       balances={balances}
       showBalances={showBalances}
+      showSequence={showSequence}
       showReconciled={showReconciled}
       showCleared={showCleared}
       showAccount={showAccount}

@@ -17,6 +17,8 @@ export type SerializedTransaction = Omit<TransactionEntity, 'date'> & {
   date: string;
   debit: CurrencyAmount;
   credit: CurrencyAmount;
+  // Virtual field for editing sequence - converted to sort_order on save
+  sequence?: string;
 };
 
 export type TransactionEditFunction = (

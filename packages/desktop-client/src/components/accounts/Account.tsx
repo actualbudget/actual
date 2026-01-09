@@ -216,6 +216,8 @@ type AccountInternalProps = {
   filterConditions: RuleConditionEntity[];
   showBalances?: boolean;
   setShowBalances: (newValue: boolean) => void;
+  showSequence?: boolean;
+  setShowSequence: (newValue: boolean) => void;
   showNetWorthChart: boolean;
   setShowNetWorthChart: (newValue: boolean) => void;
   showCleared?: boolean;
@@ -265,6 +267,7 @@ type AccountInternalState = {
   transactionCount: number;
   transactionsFiltered?: boolean;
   showBalances?: boolean | undefined;
+  showSequence?: boolean | undefined;
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showCleared?: boolean | undefined;
   prevShowCleared?: boolean | undefined;
@@ -316,6 +319,7 @@ class AccountInternal extends PureComponent<
       transactions: [],
       transactionCount: 0,
       showBalances: props.showBalances,
+      showSequence: props.showSequence,
       balances: null,
       showCleared: props.showCleared,
       showReconciled: props.showReconciled,
@@ -536,6 +540,7 @@ class AccountInternal extends PureComponent<
           loading: true,
           search: '',
           showBalances: nextProps.showBalances,
+          showSequence: nextProps.showSequence,
           balances: null,
           showCleared: nextProps.showCleared,
           showReconciled: nextProps.showReconciled,
@@ -780,6 +785,7 @@ class AccountInternal extends PureComponent<
       | 'reopen'
       | 'export'
       | 'toggle-balance'
+      | 'toggle-sequence'
       | 'remove-sorting'
       | 'toggle-cleared'
       | 'toggle-reconciled'
@@ -850,6 +856,12 @@ class AccountInternal extends PureComponent<
           );
         }
         break;
+      case 'toggle-sequence': {
+        const showSeq = !this.state.showSequence;
+        this.props.setShowSequence(showSeq);
+        this.setState({ showSequence: showSeq });
+        break;
+      }
       case 'remove-sorting': {
         this.setState({ sort: null }, () => {
           const filterConditions = this.state.filterConditions;
@@ -1598,6 +1610,13 @@ class AccountInternal extends PureComponent<
       that.currentQuery = that.currentQuery.orderBy({
         [sortField]: sortAscDesc,
       });
+
+      // When sorting by date, also sort by sort_order for proper sequence ordering
+      if (sortField === 'date') {
+        that.currentQuery = that.currentQuery.orderBy({
+          sort_order: sortAscDesc,
+        });
+      }
     };
 
     const sortRootQuery = function (
@@ -1615,6 +1634,13 @@ class AccountInternal extends PureComponent<
       } else {
         that.currentQuery = that.rootQuery.orderBy({
           [sortField]: sortAscDesc,
+        });
+      }
+
+      // When sorting by date, also sort by sort_order for proper sequence ordering
+      if (sortField === 'date') {
+        that.currentQuery = that.currentQuery.orderBy({
+          sort_order: sortAscDesc,
         });
       }
     };
@@ -1722,6 +1748,7 @@ class AccountInternal extends PureComponent<
       reconcileAmount,
       transactionsFiltered,
       showBalances,
+      showSequence,
       balances,
       showCleared,
       showReconciled,
@@ -1790,6 +1817,7 @@ class AccountInternal extends PureComponent<
                 accounts={accounts}
                 transactions={transactions}
                 showBalances={showBalances ?? false}
+                showSequence={this.state.showSequence ?? false}
                 showExtraBalances={showExtraBalances ?? false}
                 showCleared={showCleared ?? false}
                 showReconciled={showReconciled ?? false}
@@ -1855,6 +1883,7 @@ class AccountInternal extends PureComponent<
                   payees={payees}
                   balances={allBalances}
                   showBalances={!!allBalances}
+                  showSequence={!!showSequence}
                   showReconciled={showReconciled}
                   showCleared={!!showCleared}
                   showAccount={
@@ -1981,6 +2010,9 @@ export function Account() {
   const [showBalances, setShowBalances] = useSyncedPref(
     `show-balances-${params.id}`,
   );
+  const [showSequence, setShowSequence] = useSyncedPref(
+    `show-sequence-${params.id}`,
+  );
   const [showNetWorthChart, setShowNetWorthChart] = useSyncedPref(
     `show-account-${params.id}-net-worth-chart`,
   );
@@ -2020,6 +2052,10 @@ export function Account() {
           showBalances={String(showBalances) === 'true'}
           setShowBalances={showBalances =>
             setShowBalances(String(showBalances))
+          }
+          showSequence={String(showSequence) === 'true'}
+          setShowSequence={showSequence =>
+            setShowSequence(String(showSequence))
           }
           showNetWorthChart={String(showNetWorthChart) === 'true'}
           setShowNetWorthChart={val => setShowNetWorthChart(String(val))}

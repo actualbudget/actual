@@ -1,7 +1,13 @@
 // @ts-strict-ignore
 import * as db from '../db';
+import { generateSortOrder, getNextSeqForDate } from '../../shared/sort-order';
 
 import { runRules } from './transaction-rules';
+
+// Convert date string 'YYYY-MM-DD' to integer YYYYMMDD for database queries
+function dateToInt(date: string): number {
+  return parseInt(date.replace(/-/g, ''), 10);
+}
 
 async function getPayee(acct) {
   return db.first<db.DbPayee>('SELECT * FROM payees WHERE transfer_acct = ?', [
@@ -58,6 +64,18 @@ export async function addTransfer(transaction, transferredAccount) {
     [transaction.account],
   );
 
+  // Get the next sequence number for this date
+  const dateInt = dateToInt(transaction.date);
+  const existingTransactions = await db.all<{
+    date: string;
+    sort_order: number | null;
+  }>(
+    `SELECT date, sort_order FROM v_transactions_internal 
+     WHERE date = ? AND tombstone = 0`,
+    [dateInt],
+  );
+  const { seq } = getNextSeqForDate(transaction.date, existingTransactions);
+
   const transferTransaction = {
     account: transferredAccount,
     amount: -transaction.amount,
@@ -67,6 +85,7 @@ export async function addTransfer(transaction, transferredAccount) {
     notes: transaction.notes || null,
     schedule: transaction.schedule,
     cleared: false,
+    sort_order: generateSortOrder(transaction.date, seq),
   };
   const { notes, cleared, schedule } = await runRules(transferTransaction);
   const matchedSchedule = schedule ?? transaction.schedule;

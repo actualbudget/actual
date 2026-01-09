@@ -73,6 +73,7 @@ type AccountHeaderProps = {
   accounts: AccountEntity[];
   transactions: TransactionEntity[];
   showBalances: boolean;
+  showSequence: boolean;
   showExtraBalances: boolean;
   showCleared: boolean;
   showReconciled: boolean;
@@ -149,6 +150,7 @@ export function AccountHeader({
   accounts,
   transactions,
   showBalances,
+  showSequence,
   showExtraBalances,
   showCleared,
   showReconciled,
@@ -513,8 +515,12 @@ export function AccountHeader({
                       canShowBalances={
                         canCalculateBalance ? canCalculateBalance() : false
                       }
+                      canShowSequence={
+                        canCalculateBalance ? canCalculateBalance() : false
+                      }
                       isSorted={isSorted}
                       showBalances={showBalances}
+                      showSequence={showSequence}
                       showCleared={showCleared}
                       showReconciled={showReconciled}
                       onMenuSelect={onMenuSelect}
@@ -738,6 +744,8 @@ type AccountMenuProps = {
   showNetWorthChart: boolean;
   showBalances: boolean;
   canShowBalances: boolean;
+  showSequence: boolean;
+  canShowSequence: boolean;
   showCleared: boolean;
   showReconciled: boolean;
   isSorted: boolean;
@@ -749,6 +757,7 @@ type AccountMenuProps = {
       | 'reopen'
       | 'export'
       | 'toggle-balance'
+      | 'toggle-sequence'
       | 'remove-sorting'
       | 'toggle-cleared'
       | 'toggle-reconciled'
@@ -762,6 +771,8 @@ function AccountMenu({
   showNetWorthChart,
   showBalances,
   canShowBalances,
+  showSequence,
+  canShowSequence,
   showCleared,
   showReconciled,
   isSorted,
@@ -792,6 +803,16 @@ function AccountMenu({
                 text: showBalances
                   ? t('Hide running balance')
                   : t('Show running balance'),
+              } as const,
+            ]
+          : []),
+        ...(canShowSequence
+          ? [
+              {
+                name: 'toggle-sequence',
+                text: showSequence
+                  ? t('Hide sequence column')
+                  : t('Show sequence column'),
               } as const,
             ]
           : []),

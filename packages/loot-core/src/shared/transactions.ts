@@ -3,7 +3,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../platform/server/log';
 import { type TransactionEntity } from '../types/models';
 
+import {
+  extractDateInt,
+  extractSeq,
+  generateSortOrder,
+  isLegacyTimestamp,
+} from './sort-order';
 import { last, diffItems, applyChanges } from './util';
+
+// Re-export sort-order utilities for use by desktop-client
+export { extractDateInt, extractSeq, generateSortOrder, isLegacyTimestamp };
 
 export function isTemporaryId(id: string) {
   return id.indexOf('temp') !== -1;
@@ -354,10 +363,13 @@ export function splitTransaction(
 export function realizeTempTransactions(
   transactions: TransactionEntity[],
 ): TransactionEntity[] {
+  const parentTemplate = transactions.find(t => !t.is_child);
   const parent = {
-    ...transactions.find(t => !t.is_child),
+    ...parentTemplate,
     id: uuidv4(),
-    sort_order: Date.now(),
+    sort_order: parentTemplate?.date
+      ? generateSortOrder(parentTemplate.date)
+      : Date.now(),
   } as TransactionEntity;
   const children = transactions.filter(t => t.is_child);
   return [

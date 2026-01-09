@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 
 import * as connection from '../../platform/server/connection';
+import { assignBatchSeq } from '../../shared/sort-order';
 import { type Diff } from '../../shared/util';
 import { type PayeeEntity, type TransactionEntity } from '../../types/models';
 import * as db from '../db';
@@ -79,8 +80,46 @@ export async function batchUpdateTransactions({
   // and makes bulk updates much faster
   await batchMessages(async () => {
     if (added) {
+      // Assign sort_order using the new YYYYMMDDseq format for transactions
+      // that don't already have a sort_order value
+      const transactionsNeedingSortOrder = added.filter(
+        t => t.sort_order == null && t.date,
+      );
+      const transactionsWithSortOrder = added.filter(
+        t => t.sort_order != null || !t.date,
+      );
+
+      // Get existing transactions on the same dates to determine next seq
+      const dates = [...new Set(transactionsNeedingSortOrder.map(t => t.date))];
+      let existingTransactions: Array<{
+        date: string;
+        sort_order: number | null;
+      }> = [];
+      if (dates.length > 0) {
+        existingTransactions = await db.all<{
+          date: string;
+          sort_order: number | null;
+        }>(
+          `SELECT date, sort_order FROM v_transactions_internal 
+           WHERE date IN (${dates.map(() => '?').join(',')}) AND tombstone = 0`,
+          dates,
+        );
+      }
+
+      // Assign sort_order to transactions that need it
+      const assignedTransactions = assignBatchSeq(
+        transactionsNeedingSortOrder,
+        existingTransactions,
+      );
+
+      // Combine with transactions that already have sort_order
+      const allTransactions = [
+        ...transactionsWithSortOrder,
+        ...assignedTransactions,
+      ];
+
       addedIds = await Promise.all(
-        added.map(async t => {
+        allTransactions.map(async t => {
           // Offbudget account transactions and parent transactions should not have categories.
           const account = accounts.find(acct => acct.id === t.account);
           if (t.is_parent || account?.offbudget === 1) {

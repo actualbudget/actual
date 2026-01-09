@@ -25,6 +25,7 @@ export type SyncedPrefs = Partial<
     | `side-nav.show-balance-history-${string}`
     | `show-balances-${string}`
     | `show-extra-balances-${string}`
+    | `show-sequence-${string}`
     | `hide-cleared-${string}`
     | `hide-reconciled-${string}`
     // TODO: pull from src/components/modals/ImportTransactions.js

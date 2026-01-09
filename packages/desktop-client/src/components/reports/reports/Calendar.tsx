@@ -651,6 +651,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     payees={payees}
                     balances={null}
                     showBalances={false}
+                    showSequence={false}
                     showReconciled
                     showCleared={false}
                     showAccount

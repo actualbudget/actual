@@ -48,7 +48,10 @@ import { getStatusLabel } from 'loot-core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
+  extractSeq,
+  generateSortOrder,
   groupTransaction,
+  isLegacyTimestamp,
   isPreviewId,
   isTemporaryId,
   splitTransaction,
@@ -140,6 +143,7 @@ type TransactionHeaderProps = {
   showAccount: boolean;
   showCategory: boolean;
   showBalance: boolean;
+  showSequence: boolean;
   showCleared: boolean;
   scrollWidth: number;
   showSelection: boolean;
@@ -154,6 +158,7 @@ const TransactionHeader = memo(
     showAccount,
     showCategory,
     showBalance,
+    showSequence,
     showCleared,
     scrollWidth,
     onSort,
@@ -225,6 +230,15 @@ const TransactionHeader = memo(
             onSort('date', selectAscDesc(field, ascDesc, 'date', 'desc'))
           }
         />
+        {showSequence && (
+          <HeaderCell
+            value={t('#')}
+            width={30}
+            alignItems="flex-start"
+            marginRight={-5}
+            id="sequence"
+          />
+        )}
         {showAccount && (
           <HeaderCell
             value={t('Account')}
@@ -822,6 +836,68 @@ function PayeeIcons({
   );
 }
 
+type SequenceCellProps = {
+  transaction: SerializedTransaction;
+  allTransactions: TransactionEntity[] | undefined;
+  date: string;
+  focusedField: string | undefined;
+  valueStyle: CSSProperties | null;
+  isPreview: boolean;
+  id: TransactionEntity['id'];
+  onEdit: (id: TransactionEntity['id'], field: string) => void;
+  onUpdate: TransactionUpdateFunction;
+};
+
+function SequenceCell({
+  transaction,
+  allTransactions,
+  date,
+  focusedField,
+  valueStyle,
+  isPreview,
+  id,
+  onEdit,
+  onUpdate,
+}: SequenceCellProps) {
+  const { t } = useTranslation();
+
+  const sameDateCount = (allTransactions ?? []).filter(
+    trans => trans.date === date && !trans.is_child,
+  ).length;
+  const currentSeq = extractSeq(transaction.sort_order);
+  const isLegacy = isLegacyTimestamp(transaction.sort_order);
+  const displayValue = isLegacy ? '' : String(currentSeq || '');
+
+  const title = isLegacy
+    ? t('Click to assign sequence')
+    : t('Sequence: {{seq}}/{{total}}', {
+        seq: currentSeq,
+        total: sameDateCount,
+      });
+
+  return (
+    <InputCell
+      name="sequence"
+      width={30}
+      exposed={focusedField === 'sequence'}
+      focused={focusedField === 'sequence'}
+      value={displayValue}
+      valueStyle={valueStyle ?? undefined}
+      textAlign="left"
+      title={title}
+      onExpose={name => !isPreview && onEdit(id, name)}
+      style={styles.tnum}
+      inputProps={{
+        value: displayValue,
+        onUpdate: onUpdate.bind(null, 'sequence'),
+        type: 'text',
+        inputMode: 'numeric',
+        pattern: '[0-9]*',
+      }}
+    />
+  );
+}
+
 type TransactionProps = {
   allTransactions?: TransactionEntity[];
   transaction: TransactionEntity;
@@ -832,6 +908,7 @@ type TransactionProps = {
   editing: boolean;
   showAccount?: boolean;
   showBalance?: boolean;
+  showSequence?: boolean;
   showCleared?: boolean;
   showZeroInDeposit?: boolean;
   style?: CSSProperties;
@@ -886,6 +963,7 @@ const Transaction = memo(function Transaction({
   editing,
   showAccount,
   showBalance,
+  showSequence,
   showCleared,
   showZeroInDeposit,
   style,
@@ -1012,6 +1090,26 @@ const Transaction = memo(function Transaction({
   };
 
   const onUpdateAfterConfirm: TransactionUpdateFunction = (name, value) => {
+    // Handle sequence field specially - convert to sort_order
+    if ((name as string) === 'sequence') {
+      const strValue = String(value).trim();
+      // If empty or invalid, default to 0; otherwise use the entered value
+      const seqValue = strValue === '' ? 0 : parseInt(strValue, 10);
+      if (!isNaN(seqValue) && seqValue >= 0) {
+        // Use the transaction's date to generate the new sort_order
+        const date = transaction.date || originalTransaction.date;
+        const newSortOrder = generateSortOrder(date, seqValue);
+        const deserialized = deserializeTransaction(
+          transaction,
+          originalTransaction,
+        );
+        deserialized.sort_order = newSortOrder;
+        setTransaction(serializeTransaction(deserialized, showZeroInDeposit));
+        onSave(deserialized, subtransactions, 'sort_order');
+      }
+      return;
+    }
+
     const newTransaction = { ...transaction, [name]: value };
 
     // Don't change the note to an empty string if it's null (since they are both rendered the same)
@@ -1314,6 +1412,21 @@ const Transaction = memo(function Transaction({
             />
           )}
         </CustomCell>
+      )}
+
+      {/* Sequence number cell - shown after date */}
+      {!isChild && showSequence && (
+        <SequenceCell
+          transaction={transaction}
+          allTransactions={allTransactions}
+          date={date}
+          focusedField={focusedField}
+          valueStyle={valueStyle}
+          isPreview={isPreview}
+          id={id}
+          onEdit={onEdit}
+          onUpdate={onUpdate}
+        />
       )}
 
       {!isChild && showAccount && (
@@ -1973,6 +2086,7 @@ type TransactionTableInnerProps = {
   payees: PayeeEntity[];
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances: boolean;
+  showSequence: boolean;
   showReconciled: boolean;
   showCleared: boolean;
   showAccount: boolean;
@@ -2107,6 +2221,7 @@ function TransactionTableInner({
       showCleared,
       showAccount,
       showBalances,
+      showSequence,
       balances,
       hideFraction,
       isNew,
@@ -2152,6 +2267,7 @@ function TransactionTableInner({
         subtransactions={childTransactions}
         showAccount={showAccount}
         showBalance={showBalances}
+        showSequence={showSequence}
         showCleared={showCleared}
         selected={selected}
         highlighted={false}
@@ -2219,6 +2335,7 @@ function TransactionTableInner({
           showAccount={props.showAccount}
           showCategory={props.showCategory}
           showBalance={props.showBalances}
+          showSequence={props.showSequence}
           showCleared={props.showCleared}
           scrollWidth={scrollWidth}
           onSort={props.onSort}
@@ -2322,6 +2439,7 @@ export type TransactionTableProps = {
   payees: PayeeEntity[];
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances: boolean;
+  showSequence: boolean;
   showReconciled: boolean;
   showCleared: boolean;
   showAccount: boolean;
@@ -2569,6 +2687,7 @@ export const TransactionTable = forwardRef(
       const fields = [
         'select',
         'date',
+        'sequence',
         'account',
         'payee',
         'notes',
@@ -2587,6 +2706,7 @@ export const TransactionTable = forwardRef(
       const fields = [
         'select',
         'date',
+        'sequence',
         'account',
         'payee',
         'notes',
@@ -2605,7 +2725,8 @@ export const TransactionTable = forwardRef(
         : fields.filter(
             f =>
               (props.showAccount || f !== 'account') &&
-              (props.showCategory || f !== 'category'),
+              (props.showCategory || f !== 'category') &&
+              (props.showSequence || f !== 'sequence'),
           );
 
       if (item?.id && isPreviewId(item.id)) {
