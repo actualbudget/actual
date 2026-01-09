@@ -208,6 +208,7 @@ function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
       case 'yearly':
         monthlyAmount = schedule.target / schedule.target_interval / 12;
         break;
+      case undefined:
       case 'monthly':
         monthlyAmount = schedule.target / schedule.target_interval;
         break;
@@ -275,17 +276,21 @@ export async function runSchedule(
 
   const isPayMonthOf = c =>
     c.full ||
-    (c.target_frequency === 'monthly' &&
+    ((c.target_frequency === 'monthly' || c.target_frequency === undefined) &&
       c.target_interval === 1 &&
       c.num_months === 0) ||
     (c.target_frequency === 'weekly' && c.target_interval <= 4) ||
     (c.target_frequency === 'daily' && c.target_interval <= 31) ||
     isReflectBudget();
 
+  const getNumSubMonthly = c =>
+    c.target_frequency === 'weekly' || c.target_frequency === 'daily';
+
   const t_payMonthOf = t.t.filter(isPayMonthOf);
   const t_sinking = t.t
     .filter(c => !isPayMonthOf(c))
     .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
+  const numSubMonthly = t.t.filter(getNumSubMonthly).length;
   const totalPayMonthOf = getPayMonthOfTotal(t_payMonthOf);
   const totalSinking = getSinkingTotal(t_sinking);
   const totalSinkingBaseContribution =
@@ -303,7 +308,8 @@ export async function runSchedule(
     balance >= totalSinking + totalPayMonthOf ||
     (lastMonthGoal < totalSinking + totalPayMonthOf &&
       lastMonthGoal !== 0 &&
-      balance >= lastMonthGoal)
+      balance >= lastMonthGoal &&
+      numSubMonthly > 0)
   ) {
     to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);
   } else {
