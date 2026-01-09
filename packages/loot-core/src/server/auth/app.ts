@@ -450,7 +450,7 @@ async function createApiToken(params: {
       throw new Error('No sync server configured.');
     }
 
-    const res = await post(
+    const data = await post(
       serverConfig.BASE_SERVER + '/api-tokens',
       {
         name: params.name,
@@ -462,11 +462,11 @@ async function createApiToken(params: {
       },
     );
 
-    if (res.status === 'ok') {
-      return { data: res.data };
+    return { data };
+  } catch (err) {
+    if (err instanceof PostError) {
+      return { error: err.reason || 'network-failure' };
     }
-    return { error: res.reason || 'unknown-error' };
-  } catch {
     return { error: 'network-failure' };
   }
 }
