@@ -4,6 +4,52 @@ import * as winston from 'winston';
 import { validateSession } from './validate-user';
 
 /**
+ * Middleware to enforce API token budget scopes.
+ * If authenticated via API token with budget scopes, only allows access to those budgets.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+const validateBudgetScopeMiddleware = (req, res, next) => {
+  // Only enforce for API token auth
+  if (res.locals.auth_method !== 'api_token') {
+    return next();
+  }
+
+  const budgetIds = res.locals.budget_ids;
+
+  // If no scopes defined (empty array), token has access to all user's budgets
+  if (!budgetIds || budgetIds.length === 0) {
+    return next();
+  }
+
+  // Get file ID from various sources
+  const fileId =
+    req.headers['x-actual-file-id'] ||
+    req.body?.fileId ||
+    req.query?.fileId ||
+    req.params?.fileId;
+
+  // If no file ID in request, allow (some endpoints don't require a file)
+  if (!fileId) {
+    return next();
+  }
+
+  // Check if the file is in the allowed budget scopes
+  if (budgetIds.includes(fileId)) {
+    return next();
+  }
+
+  // File is not in token's scopes - deny access
+  res.status(403).send({
+    status: 'error',
+    reason: 'token-scope-error',
+    details: 'The API token does not have access to this budget',
+  });
+};
+
+/**
  * @param {Error} err
  * @param {import('express').Request} req
  * @param {import('express').Response} res
@@ -61,4 +107,9 @@ const requestLoggerMiddleware = expressWinston.logger({
   ),
 });
 
-export { validateSessionMiddleware, errorMiddleware, requestLoggerMiddleware };
+export {
+  validateSessionMiddleware,
+  validateBudgetScopeMiddleware,
+  errorMiddleware,
+  requestLoggerMiddleware,
+};
