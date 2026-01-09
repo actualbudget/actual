@@ -20,7 +20,7 @@ type ScheduleTemplateTarget = {
   target: number;
   next_date_string: string;
   target_interval: number;
-  target_frequency: string;
+  target_frequency: string | undefined;
   num_months: number;
   completed: number;
   full: boolean;
@@ -208,7 +208,6 @@ function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
       case 'yearly':
         monthlyAmount = schedule.target / schedule.target_interval / 12;
         break;
-      case undefined:
       case 'monthly':
         monthlyAmount = schedule.target / schedule.target_interval;
         break;
@@ -239,6 +238,8 @@ function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
         monthlyAmount = schedule.target / intervalMonths;
         break;
       default:
+        // default to same math as monthly for now for non-reoccuring
+        monthlyAmount = schedule.target / schedule.target_interval;
         break;
     }
     total += monthlyAmount;
@@ -283,14 +284,14 @@ export async function runSchedule(
     (c.target_frequency === 'daily' && c.target_interval <= 31) ||
     isReflectBudget();
 
-  const getNumSubMonthly = c =>
+  const isSubMonthly = c =>
     c.target_frequency === 'weekly' || c.target_frequency === 'daily';
 
   const t_payMonthOf = t.t.filter(isPayMonthOf);
   const t_sinking = t.t
     .filter(c => !isPayMonthOf(c))
     .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
-  const numSubMonthly = t.t.filter(getNumSubMonthly).length;
+  const numSubMonthly = t.t.filter(isSubMonthly).length;
   const totalPayMonthOf = getPayMonthOfTotal(t_payMonthOf);
   const totalSinking = getSinkingTotal(t_sinking);
   const totalSinkingBaseContribution =
