@@ -31,6 +31,7 @@ import * as simpleSync from './sync-simple';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
+  validateBudgetScopeMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares';
 import {
@@ -43,6 +44,7 @@ import type { GroupId } from './util/paths';
 
 const app = express();
 app.use(validateSessionMiddleware);
+app.use(validateBudgetScopeMiddleware);
 app.use(errorMiddleware);
 app.use(requestLoggerMiddleware);
 app.use(
