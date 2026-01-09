@@ -81,7 +81,7 @@ function TokenRow({
         </Text>
         <Text style={{ fontSize: 11, color: theme.pageTextSubdued }}>
           <Trans>Created:</Trans> {formatDate(token.createdAt, t)}
-          {token.lastUsedAt && (
+          {token.lastUsedAt != null && (
             <>
               {' · '}
               <Trans>Last used:</Trans> {formatDate(token.lastUsedAt, t)}
