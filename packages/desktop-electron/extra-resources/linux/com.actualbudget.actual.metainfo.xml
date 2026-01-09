@@ -2,7 +2,7 @@
 <component type="desktop">
   <id>com.actualbudget.actual</id>
   <name>Actual Budget</name>
-  <summary>Your Finances - made simple</summary>
+  <summary>Your Finances made simple</summary>
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
   <content_rating type="oars-1.0" />
