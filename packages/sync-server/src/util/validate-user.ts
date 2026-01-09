@@ -19,8 +19,12 @@ export async function validateSession(req: Request, res: Response) {
   // Also check Authorization header for Bearer tokens
   if (!token) {
     const authHeader = req.headers['authorization'];
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      token = authHeader.slice(7);
+    if (typeof authHeader === 'string') {
+      const trimmed = authHeader.trim();
+      // RFC 7235: Auth scheme is case-insensitive
+      if (trimmed.toLowerCase().startsWith('bearer ')) {
+        token = trimmed.slice(7).trim();
+      }
     }
   }
 
