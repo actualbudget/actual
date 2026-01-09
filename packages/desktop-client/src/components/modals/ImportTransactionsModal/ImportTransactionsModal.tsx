@@ -152,16 +152,15 @@ function getInitialMappings(transactions) {
 
 function parseCategoryFields(trans, categories) {
   let match = null;
-  categories.forEach(category => {
+  for (const category of categories) {
+    // If trans.category is already a valid category ID, short-circuit.
     if (category.id === trans.category) {
-      // Return the ID if trans.category is already a valid category ID
-      match = category.id;
-      return;
+      return category.id;
     }
     if (category.name === trans.category) {
       match = category.id;
     }
-  });
+  }
   return match;
 }
 
@@ -169,12 +168,24 @@ function collectNewCategories(
   transactions: ImportTransaction[],
   categories: CategoryEntity[],
   fieldMappings: FieldMapping | null,
+  reconcile: boolean,
 ): string[] {
   const newCategoryNames = new Map<string, string>();
 
+  // Precompute sets for fast existence checks
+  const categoryIds = new Set(categories.map(cat => cat.id));
+  const normalizedCategoryNames = new Set(
+    categories.map(cat => cat.name?.trim().toLowerCase()).filter(Boolean),
+  );
+
   for (const trans of transactions) {
-    // Skip transactions that won't be imported
-    if (trans.isMatchedTransaction || trans.ignored || !trans.selected) {
+    // Skip transactions using the same predicate as onImport:
+    // - matched transactions (existing transaction added to show update changes)
+    // - unselected transactions that are not ignored by the reconciliation algorithm (only when reconciliation is enabled)
+    if (
+      trans.isMatchedTransaction ||
+      (reconcile && !trans.selected && !trans.ignored)
+    ) {
       continue;
     }
 
@@ -199,14 +210,11 @@ function collectNewCategories(
       continue;
     }
 
-    // Check if it's an existing category (by ID or normalized name)
-    const existingCategory = categories.find(
-      cat =>
-        cat.id === categoryValue ||
-        cat.name?.trim().toLowerCase() === normalized,
-    );
+    // Check if it's an existing category (by ID or normalized name) using precomputed sets
+    const isExistingCategory =
+      categoryIds.has(categoryValue) || normalizedCategoryNames.has(normalized);
 
-    if (!existingCategory && !newCategoryNames.has(normalized)) {
+    if (!isExistingCategory && !newCategoryNames.has(normalized)) {
       // Store the first-seen trimmed name, keyed by normalized value
       newCategoryNames.set(normalized, trimmed);
     }
@@ -667,7 +675,7 @@ export function ImportTransactionsModal({
             mapping.originalName.trim().toLowerCase(),
             newCategoryId,
           );
-        } catch (error) {
+        } catch {
           errors.push(mapping.originalName);
         }
       }
@@ -710,6 +718,7 @@ export function ImportTransactionsModal({
         transactions,
         categories.list,
         fieldMappings,
+        reconcile,
       );
 
       if (newCategories.length > 0) {
@@ -732,7 +741,7 @@ export function ImportTransactionsModal({
                         shouldContinue: true,
                         mappings: categoryMappingMap,
                       });
-                    } catch (error) {
+                    } catch {
                       // Error notification is already dispatched by handleCategoryMappings
                       resolve({ shouldContinue: false, mappings: undefined });
                     }
@@ -828,7 +837,10 @@ export function ImportTransactionsModal({
         // Create a transaction object with trimmed category for parseCategoryFields
         const transWithTrimmedCategory = {
           ...trans,
-          category: trans.category?.trim(),
+          category:
+            typeof trans.category === 'string'
+              ? trans.category.trim()
+              : trans.category,
         };
         category_id = parseCategoryFields(
           transWithTrimmedCategory,
