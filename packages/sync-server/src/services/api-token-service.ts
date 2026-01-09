@@ -110,12 +110,15 @@ const BCRYPT_ROUNDS = 12 as const;
  * Format: act_<32 random chars>
  */
 function generateToken(): string {
-  const randomBytes = crypto.randomBytes(TOKEN_RANDOM_BYTES);
-  const randomPart = randomBytes
-    .toString('base64url')
-    .replace(/[^a-zA-Z0-9]/g, '')
-    .slice(0, TOKEN_LENGTH);
-  return `${TOKEN_PREFIX}${randomPart}`;
+  let randomPart = '';
+
+  // Loop until we have enough alphanumeric characters (extremely rare to need multiple iterations)
+  while (randomPart.length < TOKEN_LENGTH) {
+    const bytes = crypto.randomBytes(TOKEN_RANDOM_BYTES);
+    randomPart += bytes.toString('base64url').replace(/[^a-zA-Z0-9]/g, '');
+  }
+
+  return `${TOKEN_PREFIX}${randomPart.slice(0, TOKEN_LENGTH)}`;
 }
 
 /**
