@@ -1,6 +1,9 @@
 import { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
+
+import { Block } from '@actual-app/components/block';
+import { View } from '@actual-app/components/view';
 
 import { LoadingIndicator } from './LoadingIndicator';
 import { Overview } from './Overview';
@@ -12,18 +15,18 @@ export function ReportsDashboardRouter() {
   const { t } = useTranslation();
   const { dashboardId } = useParams<{ dashboardId?: string }>();
   const navigate = useNavigate();
-  const { data: dashboard_pages = [], isLoading } = useDashboardPages();
+  const { data: dashboard_pages, isLoading } = useDashboardPages();
 
   // Redirect to first dashboard if no dashboardId in URL
   useEffect(() => {
     if (!dashboardId && !isLoading && dashboard_pages.length > 0) {
-      navigate(`/reports/${dashboard_pages[0].id}`, { replace: true });
+      navigate(`/reports/${dashboard_pages[0].id}`);
     }
   }, [dashboardId, isLoading, dashboard_pages, navigate]);
 
   // Show loading while we're fetching dashboards or redirecting
   if (isLoading || (!dashboardId && dashboard_pages.length > 0)) {
-    return <LoadingIndicator />;
+    return <LoadingIndicator message={t('Loading dashboards...')} />;
   }
 
   // If we have a dashboardId, render Overview with it
@@ -33,7 +36,20 @@ export function ReportsDashboardRouter() {
       return <Overview dashboard={dashboard} />;
     } else {
       // Invalid dashboardId - show error
-      return <LoadingIndicator message={t('Dashboard not found')} />;
+      return (
+        <View
+          style={{
+            flex: 1,
+            gap: 20,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Block style={{ marginBottom: 20, fontSize: 18 }}>
+            <Trans>Dashboard not found</Trans>
+          </Block>
+        </View>
+      );
     }
   }
 

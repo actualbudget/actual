@@ -1,4 +1,4 @@
-import React, { createRef, useRef, useState, useEffect } from 'react';
+import React, { createRef, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -10,8 +10,12 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
-import { type CustomReportEntity } from 'loot-core/types/models';
+import {
+  type CustomReportEntity,
+  type DashboardEntity,
+} from 'loot-core/types/models';
 
+import { LoadingIndicator } from './LoadingIndicator';
 import { SaveReportChoose } from './SaveReportChoose';
 import { SaveReportDelete } from './SaveReportDelete';
 import { SaveReportMenu } from './SaveReportMenu';
@@ -49,16 +53,30 @@ type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
           savedReport?: CustomReportEntity;
         },
   ) => void;
+  dashboardPages: readonly DashboardEntity[];
 };
+
+export function SaveReportWrapper<
+  T extends CustomReportEntity = CustomReportEntity,
+>(props: Omit<SaveReportProps<T>, 'dashboardPages'>) {
+  const { t } = useTranslation();
+  const { data: dashboard_pages, isLoading } = useDashboardPages();
+
+  if (isLoading) {
+    return <LoadingIndicator message={t('Loading dashboards...')} />;
+  }
+
+  return <SaveReport {...props} dashboardPages={dashboard_pages} />;
+}
 
 export function SaveReport({
   customReportItems,
   report,
   savedStatus,
   onReportChange,
+  dashboardPages,
 }: SaveReportProps) {
   const { data: listReports } = useReports();
-  const { data: dashboard_pages } = useDashboardPages();
   const triggerRef = useRef(null);
   const [deleteMenuOpen, setDeleteMenuOpen] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
@@ -69,13 +87,9 @@ export function SaveReport({
   const [newName, setNewName] = useState(report.name ?? '');
   const inputRef = createRef<HTMLInputElement>();
   const { t } = useTranslation();
-  const [saveDashboardId, setSaveDashboardId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!saveDashboardId && dashboard_pages && dashboard_pages.length) {
-      setSaveDashboardId(dashboard_pages[0].id);
-    }
-  }, [saveDashboardId, dashboard_pages]);
+  const [saveDashboardId, setSaveDashboardId] = useState<string | null>(
+    dashboardPages.length > 0 ? dashboardPages[0].id : null,
+  );
 
   async function onApply(cond: string) {
     const chooseSavedReport = listReports.find(r => cond === r.id);
@@ -272,11 +286,7 @@ export function SaveReport({
                     value={saveDashboardId}
                     onChange={v => setSaveDashboardId(v)}
                     defaultLabel={t('None')}
-                    options={
-                      dashboard_pages
-                        ? dashboard_pages.map(d => [d.id, d.name])
-                        : []
-                    }
+                    options={dashboardPages.map(d => [d.id, d.name])}
                     style={{ marginTop: 10, width: 300 }}
                   />
                 </FormField>
