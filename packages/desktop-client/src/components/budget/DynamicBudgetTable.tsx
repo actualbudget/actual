@@ -86,6 +86,7 @@ const DynamicBudgetTable = ({
     {
       preventDefault: true,
       scopes: ['app'],
+      useKey: true,
     },
     [_onMonthSelect, startMonth],
   );
@@ -97,6 +98,7 @@ const DynamicBudgetTable = ({
     {
       preventDefault: true,
       scopes: ['app'],
+      useKey: true,
     },
     [_onMonthSelect, startMonth],
   );
@@ -117,6 +119,7 @@ const DynamicBudgetTable = ({
     {
       preventDefault: true,
       scopes: ['app'],
+      useKey: true,
     },
     [_onMonthSelect, startMonth, numMonths],
   );

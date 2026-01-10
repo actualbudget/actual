@@ -147,6 +147,7 @@ export function Overview() {
     closeNotifications,
     {
       scopes: ['app'],
+      useKey: true,
     },
     [closeNotifications],
   );

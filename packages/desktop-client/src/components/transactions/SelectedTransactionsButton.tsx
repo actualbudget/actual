@@ -226,6 +226,7 @@ export function SelectedTransactionsButton({
 
   const hotKeyOptions = {
     enabled: types.trans,
+    useKey: true,
     scopes: ['app'],
   };
   useHotkeys('f', () => onShow(selectedIds), hotKeyOptions, [
@@ -269,6 +270,7 @@ export function SelectedTransactionsButton({
     () =>
       !types.trans || linked ? onViewSchedule() : onLinkSchedule(selectedIds),
     {
+      useKey: true,
       scopes: ['app'],
     },
     [onLinkSchedule, onViewSchedule, linked, selectedIds],

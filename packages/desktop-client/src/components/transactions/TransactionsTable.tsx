@@ -169,6 +169,7 @@ const TransactionHeader = memo(
       () => dispatchSelected({ type: 'select-all' }),
       {
         preventDefault: true,
+        useKey: true,
         scopes: ['app'],
       },
       [dispatchSelected],
