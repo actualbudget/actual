@@ -245,4 +245,49 @@ test.describe('Transactions', () => {
 
     await expect(page).toMatchThemeScreenshots();
   });
+
+  test('creates a transaction with a flag', async () => {
+    await accountPage.createSingleTransaction({
+      payee: 'Home Depot',
+      notes: 'Notes field',
+      category: 'Food',
+      debit: '12.34',
+      flag: ':1234:',
+    });
+
+    const transaction = accountPage.getNthTransaction(0);
+    await expect(transaction.payee).toHaveText('Home Depot');
+    await expect(transaction.notes).toHaveText('Notes field');
+    await expect(transaction.category).toHaveText('Food');
+    await expect(transaction.debit).toHaveText('12.34');
+    await expect(transaction.credit).toHaveText('');
+    await expect(transaction.flag).toBeVisible();
+    await expect(page).toMatchThemeScreenshots();
+  });
+
+  test('exports transactions to CSV', async () => {
+    await accountPage.createSingleTransaction({
+      payee: 'Test Payee',
+      notes: 'Test notes',
+      category: 'Food',
+      debit: '50.00',
+      flag: ':red_circle:',
+    });
+
+    await accountPage.accountMenuButton.click();
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Export' }).click();
+    const download = await downloadPromise;
+
+    const path = await download.path();
+    expect(path).toBeTruthy();
+
+    const fs = await import('fs/promises');
+    const csvContent = await fs.readFile(path!, 'utf-8');
+
+    expect(csvContent).toContain('Flag');
+    expect(csvContent).toContain(':red_circle:');
+
+    await fs.unlink(path!);
+  });
 });

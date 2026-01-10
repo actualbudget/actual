@@ -703,6 +703,13 @@ export function EmojiSelect({
           handleEmojiSelect(filteredEmojis[focusedIndex]);
           return;
         }
+        // If no emoji is focused but there are filtered results, select the first one on Enter
+        if (filteredEmojis.length > 0) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleEmojiSelect(filteredEmojis[0]);
+          return;
+        }
       }
 
       if (open) {
