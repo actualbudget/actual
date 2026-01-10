@@ -1,0 +1,66 @@
+[
+  {
+    "name": "Demo Theme",
+    "repo": "actualbudget/demo-theme"
+  },
+  {
+    "name": "Ocean Blue",
+    "repo": "actualbudget/demo-theme"
+  },
+  {
+    "name": "Forest Green",
+    "repo": "actualbudget/demo-theme"
+  },
+  {
+    "name": "Sunset Orange",
+    "repo": "actualbudget/demo-theme"
+  },
+  {
+    "name": "Lavender Dreams",
+    "repo": "actualbudget/demo-theme"
+  },
+  {
+    "name": "Monokai Pro",
+    "repo": "actualbudget/demo-theme"
+  },
+  {
+    "name": "Solarized Light",
+    "repo": "actualbudget/demo-theme"
+  },
+  {
+    "name": "Solarized Dark",
+    "repo": "actualbudget/demo-theme"
+  },
+  {
+    "name": "Nord",
+    "repo": "actualbudget/demo-theme"
+  },
+  {
+    "name": "Gruvbox",
+    "repo": "actualbudget/demo-theme"
+  },
+  {
+    "name": "Royal Midnight",
+    "repo": "actualbudget/demo-theme"
+  },
+  {
+    "name": "Tropical Sunset",
+    "repo": "actualbudget/demo-theme"
+  },
+  {
+    "name": "Classic Gray",
+    "repo": "actualbudget/demo-theme"
+  },
+  {
+    "name": "Berry Bliss",
+    "repo": "actualbudget/demo-theme"
+  },
+  {
+    "name": "High Contrast",
+    "repo": "actualbudget/demo-theme"
+  },
+  {
+    "name": "Slate",
+    "repo": "actualbudget/demo-theme"
+  }
+]

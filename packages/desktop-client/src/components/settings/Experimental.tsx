@@ -205,6 +205,12 @@ export function ExperimentalFeatures() {
             <FeatureToggle flag="forceReload">
               <Trans>Force reload app button</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="customThemes"
+              feedbackLink="https://github.com/actualbudget/actual/issues/6607"
+            >
+              <Trans>Custom themes</Trans>
+            </FeatureToggle>
             {showServerPrefs && (
               <ServerFeatureToggle
                 prefName="flags.plugins"
