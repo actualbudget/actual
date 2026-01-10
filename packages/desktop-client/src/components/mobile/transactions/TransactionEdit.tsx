@@ -797,8 +797,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const onTotalAmountUpdate = useCallback(
       (value: number) => {
         if (transaction.amount !== value) {
-          // @ts-expect-error - fix me
-          onUpdateInner(transaction, 'amount', value.toString());
+          onUpdateInner(transaction, 'amount', value);
         }
       },
       [onUpdateInner, transaction],
@@ -1434,8 +1433,7 @@ function TransactionEditUnconnected({
               newTransaction[field] === 0 ||
               newTransaction[field] === false
             ) {
-              // @ts-expect-error - fix me
-              newTransaction[field] = diff[field];
+              (newTransaction as Record<string, unknown>)[field] = diff[field];
             }
           });
 
