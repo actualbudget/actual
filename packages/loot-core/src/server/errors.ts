@@ -144,3 +144,13 @@ export class TokenScopeError extends AuthError {
     this.name = 'TokenScopeError';
   }
 }
+
+export class MultipleAuthMethodsError extends AuthError {
+  constructor() {
+    super(
+      'multiple-auth-methods',
+      'Cannot specify both password and token. Use one authentication method.',
+    );
+    this.name = 'MultipleAuthMethodsError';
+  }
+}
