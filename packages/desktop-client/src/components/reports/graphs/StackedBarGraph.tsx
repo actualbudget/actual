@@ -209,7 +209,6 @@ export function StackedBarGraph({
           <div>
             {!compact && <div style={{ marginTop: '15px' }} />}
             <BarChart
-              responsive
               width={width}
               height={height}
               data={data.intervalData}
