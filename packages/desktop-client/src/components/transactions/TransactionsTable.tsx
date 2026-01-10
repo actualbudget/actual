@@ -97,7 +97,7 @@ import {
 } from '@desktop-client/components/schedules/StatusBadge';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import { EmojiSelect } from '@desktop-client/components/select/EmojiSelect';
-import { shortcodeToNative } from '@desktop-client/components/select/emojiUtils';
+import { shortcodeToNative } from 'loot-core/shared/emoji';
 import {
   Cell,
   CellButton,

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { shortcodeToNative } from './emojiUtils';
+import { shortcodeToNative } from './emoji';
 
 // Mock the emoji-mart data
 vi.mock('@emoji-mart/data', () => ({

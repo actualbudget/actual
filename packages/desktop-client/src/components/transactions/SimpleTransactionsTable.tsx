@@ -19,6 +19,7 @@ import {
 import * as monthUtils from 'loot-core/shared/months';
 import { type TransactionEntity } from 'loot-core/types/models';
 
+import { shortcodeToNative } from 'loot-core/shared/emoji';
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import {
   Cell,
@@ -27,7 +28,6 @@ import {
   SelectCell,
   Table,
 } from '@desktop-client/components/table';
-import { shortcodeToNative } from '@desktop-client/components/select/emojiUtils';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCategory } from '@desktop-client/hooks/useCategory';

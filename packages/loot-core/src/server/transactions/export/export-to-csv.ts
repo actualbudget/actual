@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import { stringify as csvStringify } from 'csv-stringify/sync';
 
+import { normalizeFlagToShortcode } from '../../../shared/emoji';
 import { integerToAmount } from '../../../shared/util';
 import { aqlQuery } from '../../aql';
 
@@ -45,7 +46,7 @@ export async function exportToCSV(
     }) => ({
       Account: accountNamesById[account],
       Date: date,
-      Flag: flag,
+      Flag: normalizeFlagToShortcode(flag),
       Payee: payeeNamesById[payee],
       Notes: notes,
       Category: categoryNamesById[category],
@@ -99,7 +100,7 @@ export async function exportQueryToCSV(query) {
     return {
       Account: trans.Account,
       Date: trans.Date,
-      Flag: trans.Flag,
+      Flag: normalizeFlagToShortcode(trans.Flag),
       Payee: trans.Payee,
       Notes: trans.IsParent
         ? '(SPLIT INTO ' +

@@ -19228,6 +19228,7 @@ __metadata:
     "@actual-app/api": "workspace:^"
     "@actual-app/crdt": "workspace:^"
     "@actual-app/web": "workspace:^"
+    "@emoji-mart/data": "npm:^1.2.1"
     "@jlongster/sql.js": "npm:^1.6.7"
     "@reduxjs/toolkit": "npm:^2.11.2"
     "@rschedule/core": "npm:^1.5.0"

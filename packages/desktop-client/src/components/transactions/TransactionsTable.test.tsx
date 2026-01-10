@@ -29,7 +29,7 @@ import {
 import { TransactionTable } from './TransactionsTable';
 
 import { AuthProvider } from '@desktop-client/auth/AuthProvider';
-import { shortcodeToNative } from '@desktop-client/components/select/emojiUtils';
+import { shortcodeToNative } from 'loot-core/shared/emoji';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
 import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
