@@ -43,6 +43,7 @@ import { app as toolsApp } from './tools/app';
 import { app as transactionsApp } from './transactions/app';
 import * as rules from './transactions/transaction-rules';
 import { undo, redo } from './undo';
+import { MultipleAuthMethodsError } from './errors';
 
 // handlers
 
@@ -261,9 +262,7 @@ export async function init(config: InitConfig) {
 
     // Validate that only one auth method is provided
     if (config.password && config.token) {
-      throw new Error(
-        'Cannot specify both password and token. Use one authentication method.',
-      );
+      throw new MultipleAuthMethodsError();
     }
 
     if (config.token) {
