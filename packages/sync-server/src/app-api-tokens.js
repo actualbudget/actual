@@ -6,6 +6,7 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares';
+import { TOKEN_EXPIRATION_NEVER } from './util/validate-user';
 
 const app = express();
 
@@ -25,7 +26,9 @@ app.post('/', async (req, res) => {
   }
 
   const userId = res.locals.user_id;
-  const { name, budgetIds = [], expiresAt = null } = req.body || {};
+  const { name, budgetIds = [] } = req.body || {};
+  // Normalize expiresAt: null/undefined -> TOKEN_EXPIRATION_NEVER (-1)
+  const expiresAt = req.body?.expiresAt ?? TOKEN_EXPIRATION_NEVER;
 
   if (!name || typeof name !== 'string' || name.trim() === '') {
     return res.status(400).send({
@@ -64,7 +67,10 @@ app.post('/', async (req, res) => {
     }
   }
 
-  if (expiresAt !== null && (typeof expiresAt !== 'number' || expiresAt < 0)) {
+  if (
+    expiresAt !== TOKEN_EXPIRATION_NEVER &&
+    (typeof expiresAt !== 'number' || expiresAt < 0)
+  ) {
     return res.status(400).send({
       status: 'error',
       reason: 'invalid-expires-at',
