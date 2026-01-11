@@ -1,4 +1,6 @@
+import { useSyncedPref } from './useSyncedPref';
+
 export function useUnitOfMeasurementFormat() {
-  // @TODO - Get unit of measurement format preferences in the future
-  return 'imperial';
+  const [unitOfMeasurementFormat] = useSyncedPref('unitOfMeasurementFormat');
+  return unitOfMeasurementFormat || 'imperial';
 }

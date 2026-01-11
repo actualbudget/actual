@@ -206,16 +206,29 @@ async function importPayeeLocations(
       continue;
     }
 
+    // Validate latitude/longitude before attempting import
+    const latitude = parseFloat(location.latitude);
+    const longitude = parseFloat(location.longitude);
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+      logger.log(
+        `Skipping location with invalid coordinates for payee ${actualPayeeId}: lat=${location.latitude}, lng=${location.longitude}`,
+      );
+      continue;
+    }
+
     try {
       // Create the payee location in Actual
       await send('payee-location-create', {
         payee_id: actualPayeeId,
-        latitude: parseFloat(location.latitude),
-        longitude: parseFloat(location.longitude),
+        latitude,
+        longitude,
       });
     } catch (error) {
+      const err = error as Error | unknown;
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       logger.error(
-        `Failed to import location for payee ${actualPayeeId}: ${error.message}`,
+        `Failed to import location for payee ${actualPayeeId} at (${latitude}, ${longitude}): ${errorMessage}`,
       );
     }
   }
@@ -584,9 +597,7 @@ export function parseFile(buffer: Buffer): YNAB5.Budget {
     const budgetEntry = entries.find(
       entry =>
         entry.entryName.toLowerCase().endsWith('budget.json') ||
-        entry.entryName.toLowerCase().endsWith('data.json') ||
-        entry.entryName.toLowerCase() === 'budget.json' ||
-        entry.entryName.toLowerCase() === 'data.json',
+        entry.entryName.toLowerCase().endsWith('data.json'),
     );
 
     if (!budgetEntry) {
