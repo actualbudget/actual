@@ -46,6 +46,10 @@
     "./platform/server/sqlite": "./src/platform/server/sqlite/index.web.ts",
     "./server/budget/types/*": "./src/server/budget/types/*.d.ts",
     "./server/*": "./src/server/*.ts",
+    "./shared/location": {
+      "node": "./src/shared/location.electron.ts",
+      "default": "./src/shared/location.web.ts"
+    },
     "./shared/*": "./src/shared/*.ts",
     "./types/models": "./src/types/models/index.d.ts",
     "./types/*": "./src/types/*.d.ts",

@@ -741,6 +741,34 @@ handlers['api/payees-merge'] = withMutation(async function ({
   return handlers['payees-merge']({ targetId, mergeIds });
 });
 
+handlers['api/payee-location-create'] = withMutation(async function ({
+  payee_id,
+  latitude,
+  longitude,
+}) {
+  checkFileOpen();
+  return handlers['payee-location-create']({ payee_id, latitude, longitude });
+});
+
+handlers['api/payee-locations-get'] = async function ({ payee_id }) {
+  checkFileOpen();
+  return handlers['payee-locations-get']({ payee_id });
+};
+
+handlers['api/payee-location-delete'] = withMutation(async function ({ id }) {
+  checkFileOpen();
+  return handlers['payee-location-delete']({ id });
+});
+
+handlers['api/payees-get-nearby'] = async function ({
+  latitude,
+  longitude,
+  maxDistance,
+}) {
+  checkFileOpen();
+  return handlers['payees-get-nearby']({ latitude, longitude, maxDistance });
+};
+
 handlers['api/rules-get'] = async function () {
   checkFileOpen();
   return handlers['rules-get']();
