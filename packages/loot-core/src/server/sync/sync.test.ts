@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import { getClock, Timestamp } from '@actual-app/crdt';
+import { vi } from 'vitest';
 
 import * as db from '../db';
 import * as prefs from '../prefs';
@@ -343,5 +344,50 @@ describe('Sync projections', () => {
 
     // Apply the messages that deletes it
     await applyMessages(secondMessages);
+  });
+
+  test('unknown sync errors should include error details', async () => {
+    prefs.loadPrefs();
+    prefs.savePrefs({ groupId: 'group' });
+
+    // Mock the encoder to throw an unknown error
+    const testError = new Error('Test sync error');
+    (testError as Error & { stack: string }).stack = 'Test error stack trace';
+    
+    vi.spyOn(encoder, 'encode').mockRejectedValue(testError);
+
+    // Capture emitted events
+    const events: unknown[] = [];
+    const { app } = await import('../main-app');
+    const originalEmit = app.events.emit;
+    app.events.emit = vi.fn((eventName: string, data: unknown) => {
+      if (eventName === 'sync') {
+        events.push(data);
+      }
+      return originalEmit.call(app.events, eventName, data);
+    });
+
+    const result = await fullSync();
+    
+    // Should return an error
+    expect(isError(result)).toBe(true);
+    if (isError(result)) {
+      expect(result.error.message).toBe('Test sync error');
+    }
+
+    // Should have emitted error event with details
+    const errorEvent = events.find((e: { type: string }) => e.type === 'error');
+    expect(errorEvent).toBeDefined();
+    expect(errorEvent).toMatchObject({
+      type: 'error',
+      meta: {
+        message: 'Test sync error',
+        stack: expect.stringContaining('Test error stack trace'),
+      },
+    });
+
+    // Restore mocks
+    app.events.emit = originalEmit;
+    vi.restoreAllMocks();
   });
 });

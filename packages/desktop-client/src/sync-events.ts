@@ -360,11 +360,20 @@ export function listenForSyncEvent(store: AppStore) {
           break;
         default:
           console.trace('unknown error', event);
+          // Include error details if available to help with debugging
+          let errorDetails = '';
+          if (event.meta?.message) {
+            errorDetails = '\n\nError: ' + event.meta.message;
+            if (event.meta.stack) {
+              console.error('Sync error stack:', event.meta.stack);
+            }
+          }
           notif = {
-            message: t(
-              'We had problems syncing your changes. Please report this as a bug by [opening a GitHub issue]({{githubIssueLink}}).',
-              { githubIssueLink },
-            ),
+            message:
+              t(
+                'We had problems syncing your changes. Please report this as a bug by [opening a GitHub issue]({{githubIssueLink}}).',
+                { githubIssueLink },
+              ) + errorDetails,
           };
       }
 

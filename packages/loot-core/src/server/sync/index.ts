@@ -560,7 +560,7 @@ export const fullSync = once(async function (): Promise<
   try {
     messages = await _fullSync(null, 0, null);
   } catch (e) {
-    logger.log(e);
+    logger.error('Sync error:', e);
 
     if (e instanceof SyncError) {
       if (e.reason === 'out-of-sync') {
@@ -590,7 +590,7 @@ export const fullSync = once(async function (): Promise<
         app.events.emit('sync', { type: 'error', meta: e.meta });
       }
     } else if (e instanceof PostError) {
-      logger.log(e);
+      logger.error('Sync post error:', e);
       if (e.reason === 'unauthorized') {
         app.events.emit('sync', { type: 'unauthorized' });
 
@@ -602,9 +602,22 @@ export const fullSync = once(async function (): Promise<
         app.events.emit('sync', { type: 'error', subtype: e.reason });
       }
     } else {
+      // Unknown error type - log full details for debugging
+      logger.error('Unknown sync error:', {
+        message: e.message,
+        stack: e.stack,
+        error: e,
+      });
       captureException(e);
-      // TODO: Send the message to the client and allow them to expand & view it
-      app.events.emit('sync', { type: 'error' });
+
+      // Send error details to the client to help with debugging
+      app.events.emit('sync', {
+        type: 'error',
+        meta: {
+          message: e.message,
+          stack: e.stack,
+        },
+      });
     }
 
     return { error: { message: e.message, reason: e.reason, meta: e.meta } };
