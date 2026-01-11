@@ -2,6 +2,8 @@ name: Release notes
 
 on:
   pull_request:
+    branches:
+      - master
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
