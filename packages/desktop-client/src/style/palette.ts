@@ -1,6 +1,3 @@
-// oxlint-disable-next-line eslint/no-restricted-imports
-// import * as oldColors from './colors';
-
 // Only for use in contextual color definitions
 export const gray50 = '#f6f8fa';
 export const gray80 = '#f0f4f6';
