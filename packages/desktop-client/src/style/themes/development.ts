@@ -198,10 +198,10 @@ export const reportsGray = colorPalette.gray400;
 export const reportsLabel = colorPalette.navy900;
 export const reportsInnerLabel = colorPalette.navy800;
 
-export const noteTagBackground = colorPalette.purple100;
+export const noteTagBackground = colorPalette.purple125;
 export const noteTagBackgroundHover = colorPalette.purple150;
-export const noteTagDefault = colorPalette.purple700;
-export const noteTagText = colorPalette.purple700;
+export const noteTagDefault = colorPalette.purple125;
+export const noteTagText = colorPalette.black;
 
 export const budgetCurrentMonth = tableBackground;
 export const budgetOtherMonth = colorPalette.gray50;

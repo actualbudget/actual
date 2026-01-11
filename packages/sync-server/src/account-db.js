@@ -227,6 +227,33 @@ export function getUserPermission(userId) {
   return role;
 }
 
+export function getServerPrefs() {
+  const accountDb = getAccountDb();
+  const rows = accountDb.all('SELECT key, value FROM server_prefs') || [];
+
+  return rows.reduce((prefs, row) => {
+    prefs[row.key] = row.value;
+    return prefs;
+  }, {});
+}
+
+export function setServerPrefs(prefs) {
+  const accountDb = getAccountDb();
+
+  if (!prefs) {
+    return;
+  }
+
+  accountDb.transaction(() => {
+    Object.entries(prefs).forEach(([key, value]) => {
+      accountDb.mutate(
+        'INSERT INTO server_prefs (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value',
+        [key, value],
+      );
+    });
+  });
+}
+
 export function clearExpiredSessions() {
   const clearThreshold = Math.floor(Date.now() / 1000) - 3600;
 

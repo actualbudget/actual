@@ -393,6 +393,8 @@ const ChildTransactionEdit = forwardRef<
     const { t } = useTranslation();
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
+    const [hideFraction, _] = useSyncedPref('hideFraction');
+
     const prettyPayee = getPrettyPayee({
       t,
       transaction,
@@ -458,7 +460,7 @@ const ChildTransactionEdit = forwardRef<
                   onClearActiveEdit();
                 }
               }}
-              autoDecimals
+              autoDecimals={!hideFraction}
             />
           </View>
         </View>
