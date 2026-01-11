@@ -1,9 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router';
-
-import { isNonProductionEnvironment } from 'loot-core/shared/environment';
 
 import {
   Modal,
@@ -21,7 +18,6 @@ type ManageRulesModalProps = Extract<
 export function ManageRulesModal({ payeeId }: ManageRulesModalProps) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
-  const location = useLocation();
 
   return (
     <Modal name="manage-rules" isLoading={loading}>
