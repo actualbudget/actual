@@ -177,9 +177,7 @@ describe('validateThemeCss', () => {
       }`,
       },
     ])('should reject CSS with $description', ({ css }) => {
-      expect(() => validateThemeCss(css)).toThrow(
-        'Theme CSS contains forbidden at-rules (@import, @media, etc.). Only CSS variable declarations are allowed.',
-      );
+      expect(() => validateThemeCss(css)).toThrow(/forbidden at-rules/);
     });
   });
 
@@ -457,6 +455,328 @@ describe('validateThemeCss', () => {
       }`,
       },
     ])('should reject CSS with $description', ({ css }) => {
+      expect(() => validateThemeCss(css)).toThrow();
+    });
+  });
+
+  describe('invalid CSS - function calls (security)', () => {
+    describe('var() function - should reject all var() references', () => {
+      it.each([
+        {
+          description: 'simple var() call',
+          css: `:root {
+        --color-primary: var(--other-var);
+      }`,
+        },
+        {
+          description: 'var() with fallback',
+          css: `:root {
+        --color-primary: var(--other-var, #007bff);
+      }`,
+        },
+        {
+          description: 'var() with whitespace',
+          css: `:root {
+        --color-primary: var( --other-var );
+      }`,
+        },
+        {
+          description: 'nested var() calls',
+          css: `:root {
+        --color-primary: var(--var1, var(--var2));
+      }`,
+        },
+        {
+          description: 'var() in uppercase',
+          css: `:root {
+        --color-primary: VAR(--other-var);
+      }`,
+        },
+        {
+          description: 'var() with mixed case',
+          css: `:root {
+        --color-primary: VaR(--other-var);
+      }`,
+        },
+      ])('should reject CSS with $description', ({ css }) => {
+        expect(() => validateThemeCss(css)).toThrow(
+          /Only simple CSS values are allowed/,
+        );
+      });
+    });
+
+    describe('other function calls - should reject all except rgb/rgba/hsl/hsla', () => {
+      it.each([
+        {
+          description: 'calc() function',
+          css: `:root {
+        --spacing: calc(10px + 5px);
+      }`,
+        },
+        {
+          description: 'min() function',
+          css: `:root {
+        --width: min(100px, 50%);
+      }`,
+        },
+        {
+          description: 'max() function',
+          css: `:root {
+        --width: max(100px, 50%);
+      }`,
+        },
+        {
+          description: 'clamp() function',
+          css: `:root {
+        --width: clamp(100px, 50%, 200px);
+      }`,
+        },
+        {
+          description: 'linear-gradient() function',
+          css: `:root {
+        --bg: linear-gradient(red, blue);
+      }`,
+        },
+        {
+          description: 'rgba() with calc inside (nested function)',
+          css: `:root {
+        --color: rgba(calc(255), 0, 0, 1);
+      }`,
+        },
+        {
+          description: 'attr() function',
+          css: `:root {
+        --content: attr(data-value);
+      }`,
+        },
+        {
+          description: 'counter() function',
+          css: `:root {
+        --counter: counter(my-counter);
+      }`,
+        },
+        {
+          description:
+            'url() function (already tested but included for completeness)',
+          css: `:root {
+        --bg: url("image.png");
+      }`,
+        },
+      ])('should reject CSS with $description', ({ css }) => {
+        expect(() => validateThemeCss(css)).toThrow();
+      });
+    });
+
+    it('should allow rgb() function', () => {
+      const css = `:root {
+        --color-primary: rgb(0, 123, 255);
+      }`;
+
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+
+    it('should allow rgba() function', () => {
+      const css = `:root {
+        --color-primary: rgba(0, 123, 255, 0.5);
+      }`;
+
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+
+    it('should allow hsl() function', () => {
+      const css = `:root {
+        --color-primary: hsl(210, 100%, 50%);
+      }`;
+
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+
+    it('should allow hsla() function', () => {
+      const css = `:root {
+        --color-primary: hsla(210, 100%, 50%, 0.5);
+      }`;
+
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+  });
+
+  describe('invalid CSS - additional at-rules', () => {
+    it.each([
+      {
+        description: '@namespace',
+        css: `:root {
+        @namespace url("http://www.w3.org/1999/xhtml");
+        --color-primary: #007bff;
+      }`,
+      },
+      {
+        description: '@page',
+        css: `:root {
+        @page {
+          margin: 1cm;
+        }
+        --color-primary: #007bff;
+      }`,
+      },
+      {
+        description: '@layer',
+        css: `:root {
+        @layer base {
+          --color-primary: #007bff;
+        }
+      }`,
+      },
+      {
+        description: '@container',
+        css: `:root {
+        @container (max-width: 600px) {
+          --color-primary: #007bff;
+        }
+      }`,
+      },
+      {
+        description: '@scope',
+        css: `:root {
+        @scope (.parent) {
+          --color-primary: #007bff;
+        }
+      }`,
+      },
+      {
+        description: '@starting-style',
+        css: `:root {
+        @starting-style {
+          --color-primary: #007bff;
+        }
+      }`,
+      },
+      {
+        description: '@property',
+        css: `:root {
+        @property --custom-color {
+          syntax: '<color>';
+          inherits: false;
+        }
+        --color-primary: #007bff;
+      }`,
+      },
+      {
+        description: '@font-palette-values',
+        css: `:root {
+        @font-palette-values {
+          --color-primary: #007bff;
+        }
+      }`,
+      },
+    ])('should reject CSS with $description', ({ css }) => {
+      expect(() => validateThemeCss(css)).toThrow(/forbidden at-rules/);
+    });
+  });
+
+  describe('invalid CSS - parsing edge cases and potential vulnerabilities', () => {
+    it.each([
+      {
+        description: 'quoted strings in value (should be rejected)',
+        css: `:root {
+        --color-primary: "red";
+      }`,
+      },
+      {
+        description: 'single-quoted strings in value (should be rejected)',
+        css: `:root {
+        --color-primary: 'red';
+      }`,
+      },
+      {
+        description: 'value with multiple spaces',
+        css: `:root {
+        --spacing: 10px  20px;
+      }`,
+      },
+      {
+        description: 'value with comma-separated values',
+        css: `:root {
+        --font-family: Arial, sans-serif;
+      }`,
+      },
+      {
+        description: 'property name with invalid characters',
+        css: `:root {
+        --color[primary]: #007bff;
+      }`,
+      },
+      {
+        description: 'property name ending with dash',
+        css: `:root {
+        --color-primary-: #007bff;
+      }`,
+      },
+      {
+        description: 'value starting with special character',
+        css: `:root {
+        --value: !important;
+      }`,
+      },
+      {
+        description: 'value with backslash escapes',
+        css: `:root {
+        --value: \\00;
+      }`,
+      },
+      {
+        description: 'unicode escape sequences',
+        css: `:root {
+        --value: \\6A\\61\\76\\61\\73\\63\\72\\69\\70\\74;
+      }`,
+      },
+      {
+        description: 'value with newline characters',
+        css: `:root {
+        --value: 10px\n20px;
+      }`,
+      },
+      {
+        description: 'value with tab characters',
+        css: `:root {
+        --value: 10px\t20px;
+      }`,
+      },
+      {
+        description: 'empty property name',
+        css: `:root {
+        --: #007bff;
+      }`,
+      },
+      {
+        description: 'property with only dashes',
+        css: `:root {
+        ----: #007bff;
+      }`,
+      },
+      {
+        description: 'multiple colons in declaration',
+        css: `:root {
+        --color-primary: rgb(255: 0: 0);
+      }`,
+      },
+    ])('should reject CSS with $description', ({ css }) => {
+      expect(() => validateThemeCss(css)).toThrow();
+    });
+
+    it('should handle CSS with valid values containing spaces in allowed contexts', () => {
+      // RGB values with spaces are allowed
+      const css = `:root {
+        --color-primary: rgb( 0 , 123 , 255 );
+      }`;
+
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+
+    it('should reject CSS with value containing parentheses outside allowed functions', () => {
+      const css = `:root {
+        --value: (something);
+      }`;
+
       expect(() => validateThemeCss(css)).toThrow();
     });
   });

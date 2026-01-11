@@ -91,122 +91,57 @@ export async function fetchDirectCss(url: string): Promise<string> {
 }
 
 /**
- * Validate that a CSS property value doesn't contain dangerous content.
- * Checks for XSS vectors like javascript: URLs, external URLs, script tags, etc.
+ * Validate that a CSS property value only contains allowed content (allowlist approach).
+ * Only simple, safe CSS values are allowed - no functions (except rgb/rgba/hsl/hsla), no URLs, no complex constructs.
+ * Explicitly rejects var() and other function calls to prevent variable references and complex expressions.
  */
 function validatePropertyValue(value: string, property: string): void {
   if (!value || value.length === 0) {
     return; // Empty values are allowed
   }
 
-  // Check for dangerous protocols (case-insensitive)
-  const dangerousProtocols = [
-    /javascript\s*:/i,
-    /vbscript\s*:/i,
-    /data\s*:\s*text\/(html|xml)/i,
-    /data\s*:\s*image\/svg\+xml/i, // SVG can contain script
-  ];
+  const trimmedValue = value.trim();
 
-  for (const pattern of dangerousProtocols) {
-    if (pattern.test(value)) {
-      throw new Error(
-        // oxlint-disable-next-line eslint/no-script-url
-        `Dangerous content detected in property "${property}": CSS property values cannot contain ${pattern.source.includes('javascript') ? 'javascript:' : pattern.source.includes('vbscript') ? 'vbscript:' : 'data:'} URLs.`,
-      );
-    }
-  }
+  // Allowlist: Only allow specific safe CSS value patterns
+  // 1. Hex colors: #RGB, #RRGGBB, or #RRGGBBAA (3, 6, or 8 hex digits)
+  const hexColorPattern = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?([0-9a-fA-F]{2})?$/;
 
-  // Check for url() functions - reject ALL url() functions (local, remote, relative, absolute)
-  // This prevents any potential XSS vectors through URLs
-  // Match url() with various quote styles and whitespace
-  // Pattern matches: url(...), url("..."), url('...'), url(`...`)
-  if (/url\s*\(/i.test(value)) {
-    throw new Error(
-      `URL function detected in property "${property}": CSS property values cannot contain url() functions (local, remote, or relative URLs are not allowed).`,
-    );
-  }
+  // 2. RGB/RGBA functions: rgb(...) or rgba(...) with simple numeric/percentage values
+  // Allow optional whitespace and support both integers and decimals
+  const rgbRgbaPattern =
+    /^rgba?\(\s*\d+%?\s*,\s*\d+%?\s*,\s*\d+%?\s*(,\s*[\d.]+)?\s*\)$/;
 
-  // Check for dangerous protocols outside of url() functions (if any slip through)
-  if (/javascript\s*:/i.test(value)) {
-    throw new Error(
-      `JavaScript URL detected in property "${property}": CSS property values cannot contain javascript: protocol.`,
-    );
-  }
-  if (/vbscript\s*:/i.test(value)) {
-    throw new Error(
-      `VBScript URL detected in property "${property}": CSS property values cannot contain vbscript: protocol.`,
-    );
-  }
-  if (/data\s*:\s*text\/(html|xml)/i.test(value)) {
-    throw new Error(
-      `Dangerous data URL detected in property "${property}": CSS property values cannot contain data:text/html or data:text/xml URLs.`,
-    );
-  }
-  // Check for external URLs (http://, https://, //)
-  if (/(https?:\/\/|\/\/)/i.test(value)) {
-    throw new Error(
-      `External URL detected in property "${property}": CSS property values cannot contain external URLs (http://, https://, //).`,
-    );
+  // 3. HSL/HSLA functions: hsl(...) or hsla(...) with simple numeric/percentage values
+  const hslHslaPattern =
+    /^hsla?\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*(,\s*[\d.]+)?\s*\)$/;
+
+  // 4. Length values with units: number (including decimals) followed by valid CSS unit
+  const lengthPattern =
+    /^[\d.]+(px|em|rem|%|vh|vw|vmin|vmax|cm|mm|in|pt|pc|ex|ch)$/;
+
+  // 5. Unitless numbers (integers or decimals)
+  const numberPattern = /^[\d.]+$/;
+
+  // 6. CSS keywords: common safe keywords
+  const keywordPattern =
+    /^(inherit|initial|unset|revert|transparent|none|auto|normal)$/i;
+
+  // Check if value matches any allowed pattern
+  if (
+    hexColorPattern.test(trimmedValue) ||
+    rgbRgbaPattern.test(trimmedValue) ||
+    hslHslaPattern.test(trimmedValue) ||
+    lengthPattern.test(trimmedValue) ||
+    numberPattern.test(trimmedValue) ||
+    keywordPattern.test(trimmedValue)
+  ) {
+    return; // Value is allowed
   }
 
-  // Check for expression() function (IE XSS vector)
-  if (/expression\s*\(/i.test(value)) {
-    throw new Error(
-      `Expression function detected in property "${property}": CSS property values cannot contain expression() functions.`,
-    );
-  }
-
-  // Check for script tags
-  if (/<script[\s>]/i.test(value)) {
-    throw new Error(
-      `Script tag detected in property "${property}": CSS property values cannot contain <script> tags.`,
-    );
-  }
-
-  // Check for event handlers (onerror, onclick, etc.)
-  if (/\bon\w+\s*=/i.test(value)) {
-    throw new Error(
-      `Event handler detected in property "${property}": CSS property values cannot contain event handlers (onclick, onerror, etc.).`,
-    );
-  }
-
-  // Check for encoded JavaScript URLs (hex encoded)
-  // Look for patterns like \6a\61\76\61\73\63\72\69\70\74\3a (javascript:)
-  const encodedJsPattern =
-    /\\[0-9a-f]{1,2}[\s\\]*[0-9a-f]{1,2}[\s\\]*[0-9a-f]{1,2}[\s\\]*[0-9a-f]{1,2}[\s\\]*[0-9a-f]{1,2}[\s\\]*[0-9a-f]{1,2}[\s\\]*[0-9a-f]{1,2}[\s\\]*[0-9a-f]{1,2}[\s\\]*[0-9a-f]{1,2}[\s\\]*[0-9a-f]{1,2}[\s\\]*[0-9a-f]{1,2}/i;
-  if (encodedJsPattern.test(value)) {
-    // Decode and check if it's javascript:
-    try {
-      // Simple hex decode check for common patterns
-      const potentialJs = value
-        .replace(/\\([0-9a-f]{1,2})/gi, (_, hex) =>
-          String.fromCharCode(parseInt(hex, 16)),
-        )
-        .toLowerCase();
-
-      // oxlint-disable-next-line eslint/no-script-url
-      if (potentialJs.includes('javascript:')) {
-        throw new Error(
-          `Encoded JavaScript URL detected in property "${property}": CSS property values cannot contain encoded javascript: URLs.`,
-        );
-      }
-    } catch {
-      // If decoding fails, still throw error if pattern matches
-      throw new Error(
-        `Suspicious encoded content detected in property "${property}": CSS property values cannot contain encoded URLs.`,
-      );
-    }
-  }
-
-  // Check for URL-encoded dangerous protocols (%3A is :, %6A is j, etc.)
-  // Check for javascript%3A or similar
-  const urlEncodedJsPattern =
-    /javascript\s*%3[aA]|%6[1aA]\s*%76\s*%61\s*%73\s*%63\s*%72\s*%69\s*%70\s*%74\s*%3[aA]/i;
-  if (urlEncodedJsPattern.test(value)) {
-    throw new Error(
-      `URL-encoded JavaScript protocol detected in property "${property}": CSS property values cannot contain encoded javascript: URLs.`,
-    );
-  }
+  // If none of the allowlist patterns match, reject the value
+  throw new Error(
+    `Invalid value "${trimmedValue}" for property "${property}". Only simple CSS values are allowed (colors, lengths, numbers, or keywords). Functions (including var()), URLs, and other complex constructs are not permitted.`,
+  );
 }
 
 /**
@@ -273,11 +208,12 @@ export function validateThemeCss(css: string): string {
   const rootContent = cleaned.substring(contentStart, contentEnd).trim();
 
   // Check for forbidden at-rules
-  if (
-    /@(import|media|keyframes|font-face|supports|charset)/i.test(rootContent)
-  ) {
+  // Comprehensive list of CSS at-rules that should not be allowed
+  // This includes @import, @media, @keyframes, @font-face, @supports, @charset,
+  // @namespace, @page, @layer, @container, @scope, and any other at-rules
+  if (/@[a-z-]+/i.test(rootContent)) {
     throw new Error(
-      'Theme CSS contains forbidden at-rules (@import, @media, etc.). Only CSS variable declarations are allowed.',
+      'Theme CSS contains forbidden at-rules (@import, @media, @keyframes, etc.). Only CSS variable declarations are allowed inside :root { ... }.',
     );
   }
 
@@ -306,6 +242,41 @@ export function validateThemeCss(css: string): string {
     if (!property.startsWith('--')) {
       throw new Error(
         `Invalid property "${property}". Only CSS custom properties (starting with --) are allowed.`,
+      );
+    }
+
+    // Validate property name format
+    // CSS custom property names must:
+    // - Start with --
+    // - Not be empty (not just --)
+    // - Not end with a dash
+    // - Contain only valid characters (letters, digits, underscore, dash, but not at start/end positions)
+    if (property === '--' || property === '-') {
+      throw new Error(
+        `Invalid property "${property}". Property name cannot be empty or contain only dashes.`,
+      );
+    }
+
+    // Check for invalid characters in property name (no brackets, spaces, special chars except dash/underscore)
+    // Property name after -- should only contain: letters, digits, underscore, and dashes (not consecutive dashes at start/end)
+    const propertyNameAfterDashes = property.substring(2);
+    if (propertyNameAfterDashes.length === 0) {
+      throw new Error(
+        `Invalid property "${property}". Property name cannot be empty after "--".`,
+      );
+    }
+
+    // Check for invalid characters (no brackets, no special characters except underscore and dash)
+    if (!/^[a-zA-Z0-9_-]+$/.test(propertyNameAfterDashes)) {
+      throw new Error(
+        `Invalid property "${property}". Property name contains invalid characters. Only letters, digits, underscores, and dashes are allowed.`,
+      );
+    }
+
+    // Check that property doesn't end with a dash (after the -- prefix)
+    if (property.endsWith('-')) {
+      throw new Error(
+        `Invalid property "${property}". Property name cannot end with a dash.`,
       );
     }
 
