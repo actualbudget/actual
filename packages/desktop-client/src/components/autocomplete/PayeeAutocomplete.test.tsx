@@ -108,6 +108,7 @@ async function clickAutocomplete(autocomplete: HTMLElement) {
 vi.mock('../../hooks/usePayees', () => ({
   useCommonPayees: vi.fn(),
   usePayees: vi.fn().mockReturnValue([]),
+  useNearbyPayees: vi.fn().mockReturnValue([]),
 }));
 
 function firstOrIncorrect(id: string | null): string {
