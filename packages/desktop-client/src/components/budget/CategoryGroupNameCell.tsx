@@ -153,20 +153,20 @@ export function CategoryGroupNameCell({
                         { name: 'rename', text: t('Rename') },
                         ...(!categoryGroup.is_income
                           ? [
-                            {
-                              name: 'toggle-visibility',
-                              text: categoryGroup.hidden ? 'Show' : 'Hide',
-                            },
-                            { name: 'delete', text: t('Delete') },
-                          ]
+                              {
+                                name: 'toggle-visibility',
+                                text: categoryGroup.hidden ? 'Show' : 'Hide',
+                              },
+                              { name: 'delete', text: t('Delete') },
+                            ]
                           : []),
                         ...(isGoalTemplatesEnabled
                           ? [
-                            {
-                              name: 'apply-multiple-category-template',
-                              text: t('Overwrite with templates'),
-                            },
-                          ]
+                              {
+                                name: 'apply-multiple-category-template',
+                                text: t('Overwrite with templates'),
+                              },
+                            ]
                           : []),
                       ]}
                     />

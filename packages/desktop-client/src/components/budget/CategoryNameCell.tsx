@@ -126,11 +126,11 @@ export function CategoryNameCell({
                         { name: 'rename', text: t('Rename') },
                         ...(!categoryGroup?.hidden
                           ? [
-                            {
-                              name: 'toggle-visibility',
-                              text: category.hidden ? t('Show') : t('Hide'),
-                            },
-                          ]
+                              {
+                                name: 'toggle-visibility',
+                                text: category.hidden ? t('Show') : t('Hide'),
+                              },
+                            ]
                           : []),
                         { name: 'delete', text: t('Delete') },
                       ]}
