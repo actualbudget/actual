@@ -299,17 +299,29 @@ async function downloadPluggyAiTransactions(
 async function downloadTrueLayerTransactions(
   acctId: AccountEntity['id'],
   since: string,
+  isNewAccount: boolean,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
   logger.log('Pulling transactions from TrueLayer');
 
+  // For new accounts, try to get up to 2 years of history (730 days)
+  // TrueLayer will return whatever is available based on bank limits
+  let startDate = since;
+  if (isNewAccount) {
+    const twoYearsAgo = monthUtils.subDays(monthUtils.currentDay(), 730);
+    startDate = twoYearsAgo;
+    logger.log(
+      `New account detected, requesting extended history from ${startDate}`,
+    );
+  }
+
   const res = await post(
     getServer().TRUELAYER_SERVER + '/transactions',
     {
       accountId: acctId,
-      startDate: since,
+      startDate,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -1035,7 +1047,11 @@ export async function syncAccount(
   } else if (acctRow.account_sync_source === 'pluggyai') {
     download = await downloadPluggyAiTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'truelayer') {
-    download = await downloadTrueLayerTransactions(acctId, syncStartDate);
+    download = await downloadTrueLayerTransactions(
+      acctId,
+      syncStartDate,
+      newAccount,
+    );
   } else if (acctRow.account_sync_source === 'goCardless') {
     download = await downloadGoCardlessTransactions(
       userId,
