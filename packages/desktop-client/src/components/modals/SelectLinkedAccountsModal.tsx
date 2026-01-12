@@ -169,9 +169,7 @@ export function SelectLinkedAccountsModal({
             ? customSettings.date
             : undefined;
         const startingBalance =
-          customSettings?.balance !== undefined && customSettings.balance !== 0
-            ? customSettings.balance
-            : undefined;
+          customSettings?.balance != null ? customSettings.balance : undefined;
 
         if (propsWithSortedExternalAccounts.syncSource === 'simpleFin') {
           dispatch(
