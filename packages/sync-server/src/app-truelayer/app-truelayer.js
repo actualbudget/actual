@@ -90,10 +90,14 @@ app.post('/status', async (req, res) => {
 app.post(
   '/create-web-token',
   handleError(async (req, res) => {
-    const { origin } = req.headers;
+    // Use the sync server's own host for the redirect URI
+    // req.get('host') returns the Host header (e.g., 'localhost:5006')
+    const protocol = req.protocol || 'http';
+    const host = req.get('host');
+    const serverUrl = `${protocol}://${host}`;
 
     const { link, authId } = await truelayerService.createAuthLink({
-      host: origin,
+      host: serverUrl,
     });
 
     res.send({
