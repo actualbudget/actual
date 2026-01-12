@@ -1,0 +1,219 @@
+import path from 'path';
+
+import express from 'express';
+
+import {
+  requestLoggerMiddleware,
+  validateSessionMiddleware,
+} from '../util/middlewares.js';
+
+import * as errors from './errors.js';
+import * as truelayerService from './services/truelayer-service.js';
+
+const app = express();
+app.use(requestLoggerMiddleware);
+
+// OAuth callback endpoint - serves static HTML page
+app.get('/link', function (req, res) {
+  res.sendFile('link.html', { root: path.resolve('./src/app-truelayer') });
+});
+
+export { app as handlers };
+app.use(express.json());
+app.use(validateSessionMiddleware);
+
+/**
+ * Error handler wrapper for async routes
+ */
+function handleError(handler) {
+  return async (req, res, next) => {
+    try {
+      await handler(req, res);
+    } catch (error) {
+      // Map our custom errors to appropriate responses
+      if (error instanceof errors.AuthorizationNotLinkedError) {
+        res.send({
+          status: 'ok',
+          authStatus: 'pending',
+        });
+      } else if (error instanceof errors.InvalidTrueLayerTokenError) {
+        res.send({
+          status: 'error',
+          reason: 'invalid-token',
+          error_code: 'INVALID_TOKEN',
+        });
+      } else if (error instanceof errors.AccessDeniedError) {
+        res.send({
+          status: 'error',
+          reason: 'access-denied',
+          error_code: 'ACCESS_DENIED',
+        });
+      } else if (error instanceof errors.NotFoundError) {
+        res.send({
+          status: 'error',
+          reason: 'not-found',
+          error_code: 'NOT_FOUND',
+        });
+      } else if (error instanceof errors.RateLimitError) {
+        res.send({
+          status: 'error',
+          reason: 'rate-limit',
+          error_code: 'RATE_LIMIT',
+        });
+      } else {
+        // Generic error
+        res.send({
+          status: 'error',
+          reason: error.message || 'Unknown error',
+          error_code: 'INTERNAL_ERROR',
+        });
+      }
+    }
+  };
+}
+
+/**
+ * Check if TrueLayer is configured
+ */
+app.post('/status', async (req, res) => {
+  res.send({
+    status: 'ok',
+    data: {
+      configured: truelayerService.isConfigured(),
+    },
+  });
+});
+
+/**
+ * Create OAuth authorization link
+ */
+app.post(
+  '/create-web-token',
+  handleError(async (req, res) => {
+    const { origin } = req.headers;
+
+    const { link, authId } = await truelayerService.createAuthLink({
+      host: origin,
+    });
+
+    res.send({
+      status: 'ok',
+      data: {
+        link,
+        authId,
+      },
+    });
+  }),
+);
+
+/**
+ * Get accounts (polling endpoint)
+ * Returns accounts once OAuth is complete
+ */
+app.post(
+  '/get-accounts',
+  handleError(async (req, res) => {
+    const { authId } = req.body || {};
+
+    const { accounts, tokens } =
+      await truelayerService.getAccountsWithAuth(authId);
+
+    res.send({
+      status: 'ok',
+      data: {
+        accounts,
+        // Don't send tokens to client for security
+        // They're stored server-side in the session
+      },
+    });
+  }),
+);
+
+/**
+ * OAuth callback handler
+ * Called by TrueLayer after user authorizes
+ */
+app.get('/callback', async (req, res) => {
+  const { code, state, error } = req.query;
+
+  try {
+    if (error) {
+      // OAuth error from TrueLayer
+      res.redirect(
+        `/truelayer/link?error=${encodeURIComponent(error)}&state=${state}`,
+      );
+      return;
+    }
+
+    if (!code || !state) {
+      res.redirect('/truelayer/link?error=missing_parameters');
+      return;
+    }
+
+    // Process the callback (exchange code, fetch accounts)
+    await truelayerService.handleCallback(state, code, error);
+
+    // Redirect to link page which will close the window
+    res.redirect(`/truelayer/link?success=true&state=${state}`);
+  } catch (err) {
+    res.redirect(
+      `/truelayer/link?error=${encodeURIComponent(err.message)}&state=${state}`,
+    );
+  }
+});
+
+/**
+ * Get transactions for a specific account
+ */
+app.post(
+  '/transactions',
+  handleError(async (req, res) => {
+    const { accountId, accessToken, startDate, endDate } = req.body || {};
+
+    // TODO: Get access token from stored session instead of requiring it in request
+    // For now, this is a simplified implementation
+
+    const transactions = await truelayerService.getTransactions(
+      accessToken,
+      accountId,
+      startDate,
+      endDate,
+    );
+
+    res.send({
+      status: 'ok',
+      data: {
+        transactions: {
+          all: transactions,
+          booked: transactions.filter(t => t.booked),
+          pending: transactions.filter(t => !t.booked),
+        },
+      },
+    });
+  }),
+);
+
+/**
+ * Refresh access token
+ */
+app.post(
+  '/refresh-token',
+  handleError(async (req, res) => {
+    const { refreshToken } = req.body || {};
+
+    const tokens = await truelayerService.refreshAccessToken(refreshToken);
+
+    res.send({
+      status: 'ok',
+      data: {
+        access_token: tokens.access_token,
+        expires_in: tokens.expires_in,
+      },
+    });
+  }),
+);
+
+// Cleanup expired sessions periodically (every 5 minutes)
+setInterval(() => {
+  truelayerService.cleanupExpiredSessions();
+}, 5 * 60 * 1000);
