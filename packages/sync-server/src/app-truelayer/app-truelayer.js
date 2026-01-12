@@ -18,6 +18,37 @@ app.get('/link', function (req, res) {
   res.sendFile('link.html', { root: path.resolve('./src/app-truelayer') });
 });
 
+// OAuth callback handler - must be before validateSessionMiddleware
+// Called by TrueLayer after user authorizes (no auth token in request)
+app.get('/callback', async (req, res) => {
+  const { code, state, error } = req.query;
+
+  try {
+    if (error) {
+      // OAuth error from TrueLayer
+      res.redirect(
+        `/truelayer/link?error=${encodeURIComponent(error)}&state=${state}`,
+      );
+      return;
+    }
+
+    if (!code || !state) {
+      res.redirect('/truelayer/link?error=missing_parameters');
+      return;
+    }
+
+    // Process the callback (exchange code, fetch accounts)
+    await truelayerService.handleCallback(state, code, error);
+
+    // Redirect to link page which will close the window
+    res.redirect(`/truelayer/link?success=true&state=${state}`);
+  } catch (err) {
+    res.redirect(
+      `/truelayer/link?error=${encodeURIComponent(err.message)}&state=${state}`,
+    );
+  }
+});
+
 export { app as handlers };
 app.use(express.json());
 app.use(validateSessionMiddleware);
@@ -132,39 +163,6 @@ app.post(
     });
   }),
 );
-
-/**
- * OAuth callback handler
- * Called by TrueLayer after user authorizes
- */
-app.get('/callback', async (req, res) => {
-  const { code, state, error } = req.query;
-
-  try {
-    if (error) {
-      // OAuth error from TrueLayer
-      res.redirect(
-        `/truelayer/link?error=${encodeURIComponent(error)}&state=${state}`,
-      );
-      return;
-    }
-
-    if (!code || !state) {
-      res.redirect('/truelayer/link?error=missing_parameters');
-      return;
-    }
-
-    // Process the callback (exchange code, fetch accounts)
-    await truelayerService.handleCallback(state, code, error);
-
-    // Redirect to link page which will close the window
-    res.redirect(`/truelayer/link?success=true&state=${state}`);
-  } catch (err) {
-    res.redirect(
-      `/truelayer/link?error=${encodeURIComponent(err.message)}&state=${state}`,
-    );
-  }
-});
 
 /**
  * Get transactions for a specific account
