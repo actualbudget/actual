@@ -1,6 +1,6 @@
+import { generateSortOrder, getNextSeqForDate } from '../../shared/sort-order';
 // @ts-strict-ignore
 import * as db from '../db';
-import { generateSortOrder, getNextSeqForDate } from '../../shared/sort-order';
 
 import { runRules } from './transaction-rules';
 
