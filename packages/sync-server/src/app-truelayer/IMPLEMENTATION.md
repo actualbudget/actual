@@ -571,6 +571,3 @@ info accounts balance transactions offline_access
 - [truelayer2firefly Reference Implementation](https://github.com/erwindouna/truelayer2firefly)
 
 ---
-
-**Last Updated**: 2026-01-12
-**Status**: Production Ready ✅
