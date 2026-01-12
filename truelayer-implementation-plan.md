@@ -6,7 +6,7 @@
 
 ## Progress Summary
 
-**Status**: 🚧 Phase 1 - Backend Infrastructure (60% Complete)
+**Status**: ✅ Phase 1 - Backend Infrastructure (100% Complete)
 
 | Component | Status | Commits |
 |-----------|--------|---------|
@@ -14,9 +14,10 @@
 | Type Definitions | ✅ Complete | 4eab4e3 |
 | Service Structure | ✅ Complete | fe7b49f |
 | Service Methods | ✅ Complete | 64a9c3e |
-| Express Routes | ⏳ Next | - |
-| RPC Handlers | ⏳ Pending | - |
-| Sync Integration | ⏳ Pending | - |
+| Express Routes | ✅ Complete | 297560a |
+| Route Registration | ✅ Complete | 77561162d |
+| RPC Handlers | ✅ Complete | 5830c94c7 |
+| Sync Integration | ✅ Complete | 181471a56 |
 | Frontend UI | ⏸️ Phase 2 | - |
 
 **What Works Now:**
@@ -28,13 +29,16 @@
 - ✅ Account and transaction fetching with normalization
 - ✅ Error handling with custom error classes
 - ✅ Session management for OAuth polling
+- ✅ Express router with 7 HTTP endpoints
+- ✅ Routes registered in sync server app
+- ✅ RPC handlers for frontend communication
+- ✅ Transaction sync integration with downloadTrueLayerTransactions
+- ✅ All tests passing (loot-core, sync-server, web)
 
 **Next Steps:**
-1. Create Express router to expose service methods
-2. Register routes in sync server app
-3. Implement RPC handlers in loot-core
-4. Integrate with transaction sync logic
-5. Build frontend UI components
+1. Phase 2: Build frontend UI components (authorization modal, account selection)
+2. Test OAuth flow end-to-end with real TrueLayer credentials
+3. Verify transaction sync with live data
 
 ---
 
@@ -737,43 +741,50 @@ export async function authorizeTrueLayer(dispatch: AppDispatch) {
 
 ## Implementation Checklist
 
-### ✅ Completed (Commits: 7c1ad7f, 4eab4e3, fe7b49f, 64a9c3e)
+### ✅ Phase 1 Complete - Backend Infrastructure (Commits: 7c1ad7f → 181471a56)
 
 **Backend Foundation:**
-- [x] Create `app-truelayer/` directory structure
-- [x] Implement `truelayer-service.js` with OAuth methods
-- [x] Add error classes (6 custom error types)
-- [x] Add secrets to `secrets-service.js`
-- [x] Update server config (TRUELAYER_SERVER endpoint)
-- [x] Create `link.html` OAuth callback page
+- [x] Create `app-truelayer/` directory structure (fe7b49f)
+- [x] Implement `truelayer-service.js` with OAuth methods (64a9c3e)
+- [x] Add error classes (6 custom error types) (fe7b49f)
+- [x] Add secrets to `secrets-service.js` (7c1ad7f)
+- [x] Update server config (TRUELAYER_SERVER endpoint) (7c1ad7f)
+- [x] Create `link.html` OAuth callback page (fe7b49f)
 
 **Types:**
-- [x] Create `truelayer.ts` type definitions
-- [x] Update `BankSyncProviders` union
-- [x] Export types from `index.ts`
+- [x] Create `truelayer.ts` type definitions (4eab4e3)
+- [x] Update `BankSyncProviders` union (7c1ad7f)
+- [x] Export types from `index.ts` (4eab4e3)
 
-### 🚧 In Progress
-
-**Backend (Next Steps):**
-- [ ] Create Express routes in `app-truelayer.js`
-- [ ] Register routes in `app.ts`
+**Express Router:**
+- [x] Create Express routes in `app-truelayer.js` (297560a)
+- [x] Register routes in `app.ts` (77561162d)
+- [x] Implement 7 HTTP endpoints (status, create-web-token, get-accounts, callback, transactions, refresh-token, link)
 
 **RPC Handlers:**
-- [ ] Implement `trueLayerStatus()`
-- [ ] Implement `createTrueLayerWebToken()`
-- [ ] Implement `pollTrueLayerWebToken()`
-- [ ] Implement `stopTrueLayerWebTokenPolling()`
-- [ ] Implement `linkTrueLayerAccount()`
-- [ ] Register all RPC methods
+- [x] Implement `trueLayerStatus()` (5830c94c7)
+- [x] Implement `createTrueLayerWebToken()` (5830c94c7)
+- [x] Implement `pollTrueLayerWebToken()` (5830c94c7)
+- [x] Implement `stopTrueLayerWebTokenPolling()` (5830c94c7)
+- [x] Implement `linkTrueLayerAccount()` (5830c94c7)
+- [x] Register all RPC methods (5830c94c7)
 
 **Sync Logic:**
-- [ ] Add TrueLayer case to `sync.ts`
-- [ ] Implement `downloadTrueLayerTransactions()`
+- [x] Add TrueLayer case to `sync.ts` (181471a56)
+- [x] Implement `downloadTrueLayerTransactions()` (181471a56)
 
-**Frontend (Phase 2):**
+**Testing:**
+- [x] All loot-core tests passing
+- [x] All sync-server tests passing
+- [x] TypeScript compilation successful
+
+### 🚧 Phase 2 - Frontend Integration (Not Started)
+
+**Frontend (Next Phase):**
 - [ ] Create TrueLayer authorization modal
 - [ ] Add account selection integration
 - [ ] Add UI components for configuration
+- [ ] Add TrueLayer option to bank sync settings
 
 ---
 
