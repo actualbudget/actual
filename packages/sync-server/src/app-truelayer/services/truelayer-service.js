@@ -237,11 +237,13 @@ function normalizeAccounts(truelayerAccounts) {
 function normalizeTransactions(truelayerTransactions) {
   return truelayerTransactions.map(tx => {
     // TrueLayer provides merchant info in different fields:
-    // - merchant_name: Available for some debit transactions
-    // - meta.provider_merchant_name: Available for most transactions
-    // - description: Always available as fallback
-    const payeeName = tx.merchant_name
-      || tx.meta?.provider_merchant_name
+    // - meta.provider_merchant_name: Usually the cleanest name (e.g., "Amazon", "Tesco")
+    // - merchant_name: Available for some transactions but often less clean
+    // - description: Raw transaction description (fallback)
+    //
+    // We prefer provider_merchant_name as it's typically cleaner and more consistent
+    const payeeName = tx.meta?.provider_merchant_name
+      || tx.merchant_name
       || tx.description;
 
     return {
