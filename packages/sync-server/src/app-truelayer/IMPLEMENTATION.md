@@ -359,17 +359,11 @@ case 'truelayer-external-msg':
 
 ---
 
-## Phase 3: Testing & Bug Fixes
+## Testing & Bug Fixes
 
-### Issues Discovered and Fixed
+### Listing mistakes to help others to learn from them
 
-#### 1. OAuth Redirect URI Mismatch
-
-**Issue**: Code used `/link` but actual callback handler was `/callback`
-**Impact**: "Invalid redirect_uri" error from TrueLayer
-**Fix**: Updated `createAuthLink` to use `/callback` for redirect_uri
-
-#### 2. Port Configuration
+#### 1. Port Configuration
 
 **Issue**: Used `req.headers.origin` (frontend port 3001) instead of sync server port (5006)
 **Impact**: OAuth redirect pointed to wrong server
@@ -381,19 +375,19 @@ const host = req.get('host');  // e.g., 'localhost:5006'
 const serverUrl = `${protocol}://${host}`;
 ```
 
-#### 3. Callback Authentication Bypass
+#### 2. Callback Authentication Bypass
 
 **Issue**: `/callback` route required authentication, but OAuth redirects don't include tokens
 **Impact**: 401 Unauthorized on callback
 **Fix**: Moved callback route definition BEFORE `validateSessionMiddleware`
 
-#### 4. Missing AuthId in Response
+#### 3. Missing AuthId in Response
 
 **Issue**: Frontend expected `data.authId` but only `accounts` was returned
 **Impact**: SQL error "Invalid field type undefined" when linking
 **Fix**: Added authId to `/get-accounts` response payload
 
-#### 5. Token Persistence
+#### 4. Token Persistence
 
 **Issue**: Tokens stored in-memory Maps were lost on server restart
 **Impact**: "not-found" error when syncing after restart
@@ -402,9 +396,9 @@ const serverUrl = `${protocol}://${host}`;
 - secretsService for persistence across restarts
 - Auto-refresh when token expires
 
-#### 6. Payee Name Quality
+#### 5. Payee Name Quality
 
-**Issue**: Raw descriptions like "P*7261085699" instead of "EBAY Commerce UK Ltd"
+**Issue**: Raw descriptions like "P*7285734930229" instead of "EBAY Commerce UK Ltd"
 **Impact**: Poor user experience with unclear transaction names
 **Fix**: Prioritize `meta.provider_merchant_name` over `merchant_name`:
 
@@ -414,13 +408,13 @@ const payeeName = tx.meta?.provider_merchant_name  // Best
   || tx.description;  // Fallback
 ```
 
-#### 7. Transaction History Limit
+#### 6. Transaction History Limit
 
 **Issue**: Only 90 days of history on first sync
 **Impact**: Users missing historical transactions
-**Fix**: Request 2 years on `newAccount === true`, bank returns what it can
+**Fix**: Request 2 years on `newAccount === true`, bank returns what it can according to SCA rules
 
-#### 8. Starting Balance Calculation
+#### 7. Starting Balance Calculation
 
 **Issue**: Starting balance was always 0
 **Root Cause**: `running_balance` field is optional (not provided by all banks)
