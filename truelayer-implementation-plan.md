@@ -2,6 +2,41 @@
 
 **Based on**: GoCardless pattern analysis + TrueLayer OAuth documentation
 **Reference**: https://github.com/erwindouna/truelayer2firefly
+**Branch**: `feat/truelayer-bank-sync`
+
+## Progress Summary
+
+**Status**: 🚧 Phase 1 - Backend Infrastructure (60% Complete)
+
+| Component | Status | Commits |
+|-----------|--------|---------|
+| Secrets & Config | ✅ Complete | 7c1ad7f |
+| Type Definitions | ✅ Complete | 4eab4e3 |
+| Service Structure | ✅ Complete | fe7b49f |
+| Service Methods | ✅ Complete | 64a9c3e |
+| Express Routes | ⏳ Next | - |
+| RPC Handlers | ⏳ Pending | - |
+| Sync Integration | ⏳ Pending | - |
+| Frontend UI | ⏸️ Phase 2 | - |
+
+**What Works Now:**
+- ✅ TrueLayer secrets management configured
+- ✅ Provider type system recognizes 'truelayer'
+- ✅ Server configuration includes TRUELAYER_SERVER endpoint
+- ✅ Complete type definitions for TrueLayer API
+- ✅ OAuth flow implementation (createAuthLink, token exchange, refresh)
+- ✅ Account and transaction fetching with normalization
+- ✅ Error handling with custom error classes
+- ✅ Session management for OAuth polling
+
+**Next Steps:**
+1. Create Express router to expose service methods
+2. Register routes in sync server app
+3. Implement RPC handlers in loot-core
+4. Integrate with transaction sync logic
+5. Build frontend UI components
+
+---
 
 ## Architecture Overview
 
@@ -702,21 +737,28 @@ export async function authorizeTrueLayer(dispatch: AppDispatch) {
 
 ## Implementation Checklist
 
-### Backend (Prioritize First)
-- [ ] Create `app-truelayer/` directory structure
-- [ ] Implement `truelayer-service.js` with OAuth methods
-- [ ] Add error classes
+### ✅ Completed (Commits: 7c1ad7f, 4eab4e3, fe7b49f, 64a9c3e)
+
+**Backend Foundation:**
+- [x] Create `app-truelayer/` directory structure
+- [x] Implement `truelayer-service.js` with OAuth methods
+- [x] Add error classes (6 custom error types)
+- [x] Add secrets to `secrets-service.js`
+- [x] Update server config (TRUELAYER_SERVER endpoint)
+- [x] Create `link.html` OAuth callback page
+
+**Types:**
+- [x] Create `truelayer.ts` type definitions
+- [x] Update `BankSyncProviders` union
+- [x] Export types from `index.ts`
+
+### 🚧 In Progress
+
+**Backend (Next Steps):**
 - [ ] Create Express routes in `app-truelayer.js`
 - [ ] Register routes in `app.ts`
-- [ ] Add secrets to `secrets-service.js`
-- [ ] Update server config
 
-### Types
-- [ ] Create `truelayer.ts` type definitions
-- [ ] Update `BankSyncProviders` union
-- [ ] Export types from `index.ts`
-
-### RPC Handlers
+**RPC Handlers:**
 - [ ] Implement `trueLayerStatus()`
 - [ ] Implement `createTrueLayerWebToken()`
 - [ ] Implement `pollTrueLayerWebToken()`
@@ -724,11 +766,11 @@ export async function authorizeTrueLayer(dispatch: AppDispatch) {
 - [ ] Implement `linkTrueLayerAccount()`
 - [ ] Register all RPC methods
 
-### Sync Logic
+**Sync Logic:**
 - [ ] Add TrueLayer case to `sync.ts`
 - [ ] Implement `downloadTrueLayerTransactions()`
 
-### Frontend (Phase 2)
+**Frontend (Phase 2):**
 - [ ] Create TrueLayer authorization modal
 - [ ] Add account selection integration
 - [ ] Add UI components for configuration
