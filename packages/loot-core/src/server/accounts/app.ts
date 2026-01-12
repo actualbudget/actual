@@ -16,7 +16,9 @@ import {
   type TransactionEntity,
   type SyncServerSimpleFinAccount,
   type SyncServerPluggyAiAccount,
+  type SyncServerTrueLayerAccount,
   type GoCardlessToken,
+  type TrueLayerAuthSession,
   type ImportTransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
@@ -46,6 +48,7 @@ export type AccountHandlers = {
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
+  'truelayer-accounts-link': typeof linkTrueLayerAccount;
   'account-create': typeof createAccount;
   'account-close': typeof closeAccount;
   'account-reopen': typeof reopenAccount;
@@ -57,10 +60,14 @@ export type AccountHandlers = {
   'gocardless-status': typeof goCardlessStatus;
   'simplefin-status': typeof simpleFinStatus;
   'pluggyai-status': typeof pluggyAiStatus;
+  'truelayer-status': typeof trueLayerStatus;
   'simplefin-accounts': typeof simpleFinAccounts;
   'pluggyai-accounts': typeof pluggyAiAccounts;
   'gocardless-get-banks': typeof getGoCardlessBanks;
   'gocardless-create-web-token': typeof createGoCardlessWebToken;
+  'truelayer-create-web-token': typeof createTrueLayerWebToken;
+  'truelayer-poll-web-token': typeof pollTrueLayerWebToken;
+  'truelayer-poll-web-token-stop': typeof stopTrueLayerWebTokenPolling;
   'accounts-bank-sync': typeof accountsBankSync;
   'simplefin-batch-sync': typeof simpleFinBatchSync;
   'transactions-import': typeof importTransactions;
@@ -313,6 +320,76 @@ async function linkPluggyAiAccount({
   );
 
   await connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions'],
+  });
+
+  return 'ok';
+}
+
+async function linkTrueLayerAccount({
+  authId,
+  account,
+  upgradingId,
+  offBudget = false,
+}: {
+  authId: string;
+  account: SyncServerTrueLayerAccount;
+  upgradingId?: AccountEntity['id'] | undefined;
+  offBudget?: boolean | undefined;
+}) {
+  let id;
+
+  const institution = {
+    name: account.institution ?? t('Unknown'),
+  };
+
+  const bank = await link.findOrCreateBank(institution, authId);
+
+  if (upgradingId) {
+    const accRow = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      [upgradingId],
+    );
+
+    if (!accRow) {
+      throw new Error(`Account with ID ${upgradingId} not found.`);
+    }
+
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: account.account_id,
+      bank: bank.id,
+      account_sync_source: 'truelayer',
+    });
+  } else {
+    id = uuidv4();
+    await db.insertWithUUID('accounts', {
+      id,
+      account_id: account.account_id,
+      mask: account.mask,
+      name: account.name,
+      official_name: account.official_name,
+      bank: bank.id,
+      offbudget: offBudget ? 1 : 0,
+      account_sync_source: 'truelayer',
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id,
+    });
+  }
+
+  await bankSync.syncAccount(
+    undefined,
+    undefined,
+    id,
+    account.account_id,
+    bank.bank_id,
+  );
+
+  connection.send('sync-event', {
     type: 'success',
     tables: ['transactions'],
   });
@@ -688,6 +765,27 @@ async function pluggyAiStatus() {
   );
 }
 
+async function trueLayerStatus() {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  return post(
+    serverConfig.TRUELAYER_SERVER + '/status',
+    {},
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+}
+
 async function simpleFinAccounts() {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -794,6 +892,112 @@ async function createGoCardlessWebToken({
     logger.error(error);
     return { error: 'failed' };
   }
+}
+
+async function createTrueLayerWebToken() {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  try {
+    return await post(
+      serverConfig.TRUELAYER_SERVER + '/create-web-token',
+      {},
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+  } catch (error) {
+    logger.error(error);
+    return { error: 'failed' };
+  }
+}
+
+let stopTrueLayerPolling = false;
+
+async function pollTrueLayerWebToken({ authId }: { authId: string }) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return { error: 'unknown' };
+
+  const startTime = Date.now();
+  stopTrueLayerPolling = false;
+
+  async function getData(
+    cb: (
+      data:
+        | { status: 'timeout' }
+        | { status: 'unknown'; message?: string }
+        | { status: 'success'; data: TrueLayerAuthSession },
+    ) => void,
+  ) {
+    if (stopTrueLayerPolling) {
+      return;
+    }
+
+    if (Date.now() - startTime >= 1000 * 60 * 10) {
+      cb({ status: 'timeout' });
+      return;
+    }
+
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('Failed to get server config.');
+    }
+
+    const data = await post(
+      serverConfig.TRUELAYER_SERVER + '/get-accounts',
+      {
+        authId,
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+
+    if (data) {
+      if (data.error_code) {
+        logger.error('Failed linking TrueLayer account:', data);
+        cb({ status: 'unknown', message: data.error_type });
+      } else if (data.authStatus === 'pending') {
+        setTimeout(() => getData(cb), 3000);
+      } else {
+        cb({ status: 'success', data });
+      }
+    } else {
+      setTimeout(() => getData(cb), 3000);
+    }
+  }
+
+  return new Promise(resolve => {
+    getData(data => {
+      if (data.status === 'success') {
+        resolve({ data: data.data });
+        return;
+      }
+
+      if (data.status === 'timeout') {
+        resolve({ error: data.status });
+        return;
+      }
+
+      resolve({
+        error: data.status,
+        message: data.message,
+      });
+    });
+  });
+}
+
+async function stopTrueLayerWebTokenPolling() {
+  stopTrueLayerPolling = true;
+  return 'ok';
 }
 
 type SyncResponse = {
@@ -1220,6 +1424,7 @@ app.method('account-properties', getAccountProperties);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
+app.method('truelayer-accounts-link', linkTrueLayerAccount);
 app.method('account-create', mutator(undoable(createAccount)));
 app.method('account-close', mutator(closeAccount));
 app.method('account-reopen', mutator(undoable(reopenAccount)));
@@ -1231,10 +1436,14 @@ app.method('gocardless-poll-web-token-stop', stopGoCardlessWebTokenPolling);
 app.method('gocardless-status', goCardlessStatus);
 app.method('simplefin-status', simpleFinStatus);
 app.method('pluggyai-status', pluggyAiStatus);
+app.method('truelayer-status', trueLayerStatus);
 app.method('simplefin-accounts', simpleFinAccounts);
 app.method('pluggyai-accounts', pluggyAiAccounts);
 app.method('gocardless-get-banks', getGoCardlessBanks);
 app.method('gocardless-create-web-token', createGoCardlessWebToken);
+app.method('truelayer-create-web-token', createTrueLayerWebToken);
+app.method('truelayer-poll-web-token', pollTrueLayerWebToken);
+app.method('truelayer-poll-web-token-stop', stopTrueLayerWebTokenPolling);
 app.method('accounts-bank-sync', accountsBankSync);
 app.method('simplefin-batch-sync', simpleFinBatchSync);
 app.method('transactions-import', mutator(undoable(importTransactions)));
