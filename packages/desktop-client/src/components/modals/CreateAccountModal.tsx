@@ -29,6 +29,8 @@ import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
+import { useTrueLayerStatus } from '@desktop-client/hooks/useTrueLayerStatus';
+import { authorizeBank as authorizeTrueLayerBank } from '@desktop-client/truelayer';
 import {
   type Modal as ModalType,
   pushModal,
@@ -55,6 +57,9 @@ export function CreateAccountModal({
     boolean | null
   >(null);
   const [isPluggyAiSetupComplete, setIsPluggyAiSetupComplete] = useState<
+    boolean | null
+  >(null);
+  const [isTrueLayerSetupComplete, setIsTrueLayerSetupComplete] = useState<
     boolean | null
   >(null);
   const { hasPermission } = useAuth();
@@ -141,6 +146,19 @@ export function CreateAccountModal({
     }
 
     setLoadingSimpleFinAccounts(false);
+  };
+
+  const onConnectTrueLayer = () => {
+    if (!isTrueLayerSetupComplete) {
+      onTrueLayerInit();
+      return;
+    }
+
+    if (upgradingAccountId == null) {
+      authorizeTrueLayerBank(dispatch);
+    } else {
+      authorizeTrueLayerBank(dispatch);
+    }
   };
 
   const onConnectPluggyAi = async () => {
@@ -258,6 +276,19 @@ export function CreateAccountModal({
     );
   };
 
+  const onTrueLayerInit = () => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'truelayer-init',
+          options: {
+            onSuccess: () => setIsTrueLayerSetupComplete(true),
+          },
+        },
+      }),
+    );
+  };
+
   const onGoCardlessReset = () => {
     send('secret-set', {
       name: 'gocardless_secretId',
@@ -305,6 +336,20 @@ export function CreateAccountModal({
     });
   };
 
+  const onTrueLayerReset = () => {
+    send('secret-set', {
+      name: 'truelayer_clientId',
+      value: null,
+    }).then(() => {
+      send('secret-set', {
+        name: 'truelayer_clientSecret',
+        value: null,
+      }).then(() => {
+        setIsTrueLayerSetupComplete(false);
+      });
+    });
+  };
+
   const onCreateLocalAccount = () => {
     dispatch(pushModal({ modal: { name: 'add-local-account' } }));
   };
@@ -323,6 +368,11 @@ export function CreateAccountModal({
   useEffect(() => {
     setIsPluggyAiSetupComplete(configuredPluggyAi);
   }, [configuredPluggyAi]);
+
+  const { configuredTrueLayer } = useTrueLayerStatus();
+  useEffect(() => {
+    setIsTrueLayerSetupComplete(configuredTrueLayer);
+  }, [configuredTrueLayer]);
 
   let title = t('Add account');
   const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
@@ -516,6 +566,69 @@ export function CreateAccountModal({
                         style={{
                           flexDirection: 'row',
                           gap: 10,
+                          marginTop: '18px',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <ButtonWithLoading
+                          isDisabled={syncServerStatus !== 'online'}
+                          style={{
+                            padding: '10px 0',
+                            fontSize: 15,
+                            fontWeight: 600,
+                            flex: 1,
+                          }}
+                          onPress={onConnectTrueLayer}
+                        >
+                          {isTrueLayerSetupComplete
+                            ? t('Link bank account with TrueLayer')
+                            : t('Set up TrueLayer for bank sync')}
+                        </ButtonWithLoading>
+                        {isTrueLayerSetupComplete && (
+                          <DialogTrigger>
+                            <Button
+                              variant="bare"
+                              aria-label={t('TrueLayer menu')}
+                            >
+                              <SvgDotsHorizontalTriple
+                                width={15}
+                                height={15}
+                                style={{ transform: 'rotateZ(90deg)' }}
+                              />
+                            </Button>
+                            <Popover>
+                              <Dialog>
+                                <Menu
+                                  onMenuSelect={item => {
+                                    if (item === 'reconfigure') {
+                                      onTrueLayerReset();
+                                    }
+                                  }}
+                                  items={[
+                                    {
+                                      name: 'reconfigure',
+                                      text: t('Reset TrueLayer credentials'),
+                                    },
+                                  ]}
+                                />
+                              </Dialog>
+                            </Popover>
+                          </DialogTrigger>
+                        )}
+                      </View>
+                      <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                        <Trans>
+                          <strong>Link a UK bank account</strong> to
+                          automatically download transactions. TrueLayer
+                          provides reliable, up-to-date information from
+                          hundreds of UK banks.
+                        </Trans>
+                      </Text>
+
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          gap: 10,
                           alignItems: 'center',
                         }}
                       >
@@ -581,6 +694,7 @@ export function CreateAccountModal({
 
                   {(!isGoCardlessSetupComplete ||
                     !isSimpleFinSetupComplete ||
+                    !isTrueLayerSetupComplete ||
                     !isPluggyAiSetupComplete) &&
                     !canSetSecrets && (
                       <Warning>
@@ -591,6 +705,7 @@ export function CreateAccountModal({
                         {[
                           isGoCardlessSetupComplete ? '' : 'GoCardless',
                           isSimpleFinSetupComplete ? '' : 'SimpleFIN',
+                          isTrueLayerSetupComplete ? '' : 'TrueLayer',
                           isPluggyAiSetupComplete ? '' : 'Pluggy.ai',
                         ]
                           .filter(Boolean)
