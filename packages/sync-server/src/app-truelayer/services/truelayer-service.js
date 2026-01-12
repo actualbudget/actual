@@ -173,6 +173,41 @@ export async function getAccounts(accessToken) {
 }
 
 /**
+ * Get account balance
+ * @param {string} accessToken - Access token
+ * @param {string} accountId - Account ID
+ * @returns {Promise<Object>} Account balance
+ */
+export async function getBalance(accessToken, accountId) {
+  debug(`Fetching balance for account ${accountId}`);
+
+  const response = await fetch(`https://api.truelayer.com/data/v1/accounts/${accountId}/balance`, {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    debug('Get balance failed:', error);
+
+    if (response.status === 401) {
+      throw new errors.InvalidTrueLayerTokenError();
+    } else if (response.status === 429) {
+      throw new errors.RateLimitError();
+    } else {
+      throw new errors.ServiceError(error);
+    }
+  }
+
+  const data = await response.json();
+  debug(`Retrieved balance:`, data);
+
+  // Return the current balance (first result)
+  return data.results?.[0] || null;
+}
+
+/**
  * Get transactions for a specific account
  * @param {string} accessToken - Access token
  * @param {string} accountId - Account ID

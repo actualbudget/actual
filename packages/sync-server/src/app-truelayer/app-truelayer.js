@@ -177,16 +177,22 @@ app.post(
     const accessToken =
       await truelayerService.getAccessTokenForAccount(accountId);
 
-    const transactions = await truelayerService.getTransactions(
-      accessToken,
-      accountId,
-      startDate,
-      endDate,
-    );
+    // Fetch both transactions and current balance in parallel
+    const [transactions, balance] = await Promise.all([
+      truelayerService.getTransactions(
+        accessToken,
+        accountId,
+        startDate,
+        endDate,
+      ),
+      truelayerService.getBalance(accessToken, accountId),
+    ]);
 
-    // Calculate starting balance from the oldest transaction
-    // startingBalance = balanceAfter - transactionAmount
+    // Calculate starting balance
+    // Method 1: If transactions have running_balance, use the oldest transaction
+    // Method 2: Otherwise, use current balance and subtract all transactions
     let startingBalance = 0;
+
     if (transactions.length > 0) {
       // Sort by date to find the oldest transaction
       const sortedTransactions = [...transactions].sort(
@@ -194,11 +200,23 @@ app.post(
       );
       const oldestTransaction = sortedTransactions[0];
 
-      // If we have balance information, calculate starting balance
+      // Method 1: Use running_balance if available
       if (oldestTransaction.balanceAfterTransaction) {
         const balanceAfter = oldestTransaction.balanceAfterTransaction.amount;
         const transactionAmount = oldestTransaction.transactionAmount.amount;
         startingBalance = balanceAfter - transactionAmount;
+      }
+      // Method 2: Calculate from current balance
+      else if (balance && balance.current !== undefined) {
+        // Convert current balance to integer (multiply by 100 for cents)
+        let calculatedBalance = Math.round(balance.current * 100);
+
+        // Subtract all transactions to get starting balance
+        for (const trans of transactions) {
+          calculatedBalance -= Math.round(trans.transactionAmount.amount * 100);
+        }
+
+        startingBalance = calculatedBalance;
       }
     }
 
@@ -211,6 +229,14 @@ app.post(
           pending: transactions.filter(t => !t.booked),
         },
         startingBalance,
+        balances: balance
+          ? {
+              current: Math.round(balance.current * 100),
+              available: balance.available
+                ? Math.round(balance.available * 100)
+                : undefined,
+            }
+          : undefined,
       },
     });
   }),
