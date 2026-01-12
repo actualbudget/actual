@@ -16,7 +16,10 @@ import {
 } from './ExpenseGroupListItem';
 
 import { moveCategoryGroup } from '@desktop-client/budget/budgetSlice';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDispatch } from '@desktop-client/redux';
+
+const DRAG_TYPE = 'mobile-expense-group-list/category-group-id';
 
 type ExpenseGroupListProps = {
   categoryGroups: CategoryGroupEntity[];
@@ -44,14 +47,14 @@ export function ExpenseGroupList({
   onToggleCollapse,
 }: ExpenseGroupListProps) {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
 
+  const { reorderCategoryGroup } = useReorderCategoryGroup();
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: keys =>
       [...keys].map(
         key =>
           ({
-            'text/plain': key as CategoryGroupEntity['id'],
+            [DRAG_TYPE]: key as CategoryGroupEntity['id'],
           }) as DragItem,
       ),
     renderDropIndicator: target => {
@@ -70,7 +73,7 @@ export function ExpenseGroupList({
       );
     },
     renderDragPreview: items => {
-      const draggedGroupId = items[0]['text/plain'];
+      const draggedGroupId = items[0][DRAG_TYPE];
       const group = categoryGroups.find(c => c.id === draggedGroupId);
       if (!group) {
         throw new Error(
@@ -92,49 +95,11 @@ export function ExpenseGroupList({
     },
     onReorder: e => {
       const [key] = e.keys;
-      const groupIdToMove = key as CategoryGroupEntity['id'];
-      const groupToMove = categoryGroups.find(c => c.id === groupIdToMove);
-
-      if (!groupToMove) {
-        throw new Error(
-          `Internal error: category group with ID ${groupIdToMove} not found.`,
-        );
-      }
-
-      const targetGroupId = e.target.key as CategoryGroupEntity['id'];
-
-      if (e.target.dropPosition === 'before') {
-        dispatch(
-          moveCategoryGroup({
-            id: groupToMove.id,
-            targetId: targetGroupId,
-          }),
-        );
-      } else if (e.target.dropPosition === 'after') {
-        const targetGroupIndex = categoryGroups.findIndex(
-          c => c.id === targetGroupId,
-        );
-
-        if (targetGroupIndex === -1) {
-          throw new Error(
-            `Internal error: category group with ID ${targetGroupId} not found.`,
-          );
-        }
-
-        const nextToTargetCategory = categoryGroups[targetGroupIndex + 1];
-
-        dispatch(
-          moveCategoryGroup({
-            id: groupToMove.id,
-            // Due to the way `moveCategory` works, we use the category next to the
-            // actual target category here because `moveCategory` always shoves the
-            // category *before* the target category.
-            // On the other hand, using `null` as `targetId` moves the category
-            // to the end of the list.
-            targetId: nextToTargetCategory?.id || null,
-          }),
-        );
-      }
+      reorderCategoryGroup({
+        id: key as CategoryGroupEntity['id'],
+        targetId: e.target.key as CategoryGroupEntity['id'],
+        dropPosition: e.target.dropPosition,
+      });
     },
   });
 
@@ -173,4 +138,61 @@ export function ExpenseGroupList({
       )}
     </GridList>
   );
+}
+
+function useReorderCategoryGroup() {
+  const dispatch = useDispatch();
+  const { list: categoryGroups } = useCategories();
+  const reorderCategoryGroup = ({
+    id,
+    targetId,
+    dropPosition,
+  }: {
+    id: CategoryGroupEntity['id'];
+    targetId: CategoryGroupEntity['id'];
+    dropPosition: 'on' | 'before' | 'after';
+  }) => {
+    const groupToMove = categoryGroups.find(c => c.id === id);
+
+    if (!groupToMove) {
+      throw new Error(
+        `Internal error: category group with ID ${id} not found.`,
+      );
+    }
+
+    if (dropPosition === 'before') {
+      dispatch(
+        moveCategoryGroup({
+          id: groupToMove.id,
+          targetId,
+        }),
+      );
+    } else if (dropPosition === 'after') {
+      const targetGroupIndex = categoryGroups.findIndex(c => c.id === targetId);
+
+      if (targetGroupIndex === -1) {
+        throw new Error(
+          `Internal error: category group with ID ${targetId} not found.`,
+        );
+      }
+
+      const nextToTargetCategory = categoryGroups[targetGroupIndex + 1];
+
+      dispatch(
+        moveCategoryGroup({
+          id: groupToMove.id,
+          // Due to the way `moveCategory` works, we use the category next to the
+          // actual target category here because `moveCategory` always shoves the
+          // category *before* the target category.
+          // On the other hand, using `null` as `targetId` moves the category
+          // to the end of the list.
+          targetId: nextToTargetCategory?.id || null,
+        }),
+      );
+    }
+  };
+
+  return {
+    reorderCategoryGroup,
+  };
 }
