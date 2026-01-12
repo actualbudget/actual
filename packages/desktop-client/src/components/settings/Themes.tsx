@@ -172,6 +172,7 @@ export function ThemeSettings() {
             <ThemeInstaller
               onInstall={handleInstall}
               onClose={handleInstallerClose}
+              installedTheme={installedTheme}
             />
           )}
         </View>

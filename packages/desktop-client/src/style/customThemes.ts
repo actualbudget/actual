@@ -117,10 +117,10 @@ function validatePropertyValue(value: string, property: string): void {
 
   // 4. Length values with units: number (including decimals) followed by valid CSS unit
   const lengthPattern =
-    /^[\d.]+(px|em|rem|%|vh|vw|vmin|vmax|cm|mm|in|pt|pc|ex|ch)$/;
+    /^(\d+\.?\d*|\d*\.\d+)(px|em|rem|%|vh|vw|vmin|vmax|cm|mm|in|pt|pc|ex|ch)$/;
 
   // 5. Unitless numbers (integers or decimals)
-  const numberPattern = /^[\d.]+$/;
+  const numberPattern = /^(\d+\.?\d*|\d*\.\d+)$/;
 
   // 6. CSS keywords: common safe keywords
   const keywordPattern =
@@ -163,10 +163,7 @@ export function validateThemeCss(css: string): string {
     );
   }
 
-  // Find the matching closing brace for :root's opening brace
-  let braceCount = 0;
-  let contentStart = -1;
-  let contentEnd = -1;
+  // Find the opening brace after :root
   const rootStart = cleaned.indexOf(':root');
   const openBrace = cleaned.indexOf('{', rootStart);
 
@@ -176,38 +173,19 @@ export function validateThemeCss(css: string): string {
     );
   }
 
-  contentStart = openBrace + 1;
-  braceCount = 1;
+  // Find the first closing brace (nested blocks will be caught by the check below)
+  const closeBrace = cleaned.indexOf('}', openBrace + 1);
 
-  for (let j = contentStart; j < cleaned.length; j++) {
-    if (cleaned[j] === '{') braceCount++;
-    if (cleaned[j] === '}') {
-      braceCount--;
-      if (braceCount === 0) {
-        contentEnd = j;
-        break;
-      }
-    }
-  }
-
-  if (contentEnd === -1) {
-    throw new Error(
-      'Theme CSS must contain exactly :root { ... } with CSS variable definitions. No other selectors or content allowed.',
-    );
-  }
-
-  // Check that there's nothing after the closing brace
-  const afterRoot = cleaned.substring(contentEnd + 1).trim();
-  if (afterRoot.length > 0) {
+  if (closeBrace === -1) {
     throw new Error(
       'Theme CSS must contain exactly :root { ... } with CSS variable definitions. No other selectors or content allowed.',
     );
   }
 
   // Extract content inside :root { ... }
-  const rootContent = cleaned.substring(contentStart, contentEnd).trim();
+  const rootContent = cleaned.substring(openBrace + 1, closeBrace).trim();
 
-  // Check for forbidden at-rules
+  // Check for forbidden at-rules first (before nested block check, since at-rules with braces would trigger that)
   // Comprehensive list of CSS at-rules that should not be allowed
   // This includes @import, @media, @keyframes, @font-face, @supports, @charset,
   // @namespace, @page, @layer, @container, @scope, and any other at-rules
@@ -221,6 +199,14 @@ export function validateThemeCss(css: string): string {
   if (/\{/.test(rootContent)) {
     throw new Error(
       'Theme CSS contains nested blocks or additional selectors. Only CSS variable declarations are allowed inside :root { ... }.',
+    );
+  }
+
+  // Check that there's nothing after the closing brace
+  const afterRoot = cleaned.substring(closeBrace + 1).trim();
+  if (afterRoot.length > 0) {
+    throw new Error(
+      'Theme CSS must contain exactly :root { ... } with CSS variable definitions. No other selectors or content allowed.',
     );
   }
 

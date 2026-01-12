@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { TextArea } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -33,15 +33,28 @@ const CATALOG_MAX_HEIGHT = 300;
 type ThemeInstallerProps = {
   onInstall: (theme: InstalledTheme) => void;
   onClose: () => void;
+  installedTheme?: InstalledTheme | null;
 };
 
-export function ThemeInstaller({ onInstall, onClose }: ThemeInstallerProps) {
+export function ThemeInstaller({
+  onInstall,
+  onClose,
+  installedTheme,
+}: ThemeInstallerProps) {
   const { t } = useTranslation();
   const [selectedCatalogTheme, setSelectedCatalogTheme] =
     useState<CatalogTheme | null>(null);
   const [pastedCss, setPastedCss] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Initialize pastedCss with installed custom theme CSS if it exists
+  useEffect(() => {
+    // If there's an installed theme with empty repo (custom pasted CSS), restore it
+    if (installedTheme && !installedTheme.repo) {
+      setPastedCss(installedTheme.cssContent);
+    }
+  }, [installedTheme]);
 
   // TODO: inlined for now, but eventually we will fetch this from github directly
   const catalog = customThemeCatalog as CatalogTheme[];
@@ -287,6 +300,7 @@ export function ThemeInstaller({ onInstall, onClose }: ThemeInstallerProps) {
                               <Link
                                 variant="external"
                                 to={normalizeGitHubRepo(theme.repo)}
+                                onClick={e => e.stopPropagation()}
                               >
                                 <Trans>Source</Trans>
                               </Link>

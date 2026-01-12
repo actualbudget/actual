@@ -600,6 +600,78 @@ describe('validateThemeCss', () => {
     });
   });
 
+  describe('valid CSS - CSS keywords', () => {
+    it.each([
+      {
+        description: 'transparent keyword',
+        css: `:root {
+        --color-primary: transparent;
+      }`,
+      },
+      {
+        description: 'initial keyword',
+        css: `:root {
+        --color-primary: initial;
+      }`,
+      },
+      {
+        description: 'inherit keyword',
+        css: `:root {
+        --color-primary: inherit;
+      }`,
+      },
+      {
+        description: 'auto keyword',
+        css: `:root {
+        --spacing: auto;
+      }`,
+      },
+      {
+        description: 'unset keyword',
+        css: `:root {
+        --color-primary: unset;
+      }`,
+      },
+      {
+        description: 'revert keyword',
+        css: `:root {
+        --color-primary: revert;
+      }`,
+      },
+      {
+        description: 'none keyword',
+        css: `:root {
+        --border: none;
+      }`,
+      },
+      {
+        description: 'normal keyword',
+        css: `:root {
+        --font-weight: normal;
+      }`,
+      },
+      {
+        description: 'keywords with mixed case',
+        css: `:root {
+        --color-primary: TRANSPARENT;
+        --color-secondary: InHeRiT;
+        --spacing: AuTo;
+      }`,
+      },
+      {
+        description: 'multiple keywords in different properties',
+        css: `:root {
+        --color-primary: transparent;
+        --color-secondary: initial;
+        --spacing: auto;
+        --border: none;
+      }`,
+      },
+    ])('should allow CSS with $description', ({ css }) => {
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+  });
+
   describe('invalid CSS - additional at-rules', () => {
     it.each([
       {

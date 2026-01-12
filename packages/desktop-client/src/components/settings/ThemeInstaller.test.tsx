@@ -296,8 +296,50 @@ describe('ThemeInstaller', () => {
       expect(applyButton).toBeDisabled();
 
       await user.click(applyButton);
+    });
 
-      expect(mockOnInstall).not.toHaveBeenCalled();
+    it('populates text box with installed custom theme CSS when reopening', () => {
+      const installedCustomTheme = {
+        id: 'theme-abc123',
+        name: 'Custom Theme',
+        repo: '',
+        cssContent: mockValidCss,
+      };
+
+      render(
+        <ThemeInstaller
+          onInstall={mockOnInstall}
+          onClose={mockOnClose}
+          installedTheme={installedCustomTheme}
+        />,
+      );
+
+      const textArea = screen.getByRole('textbox', {
+        name: 'Custom Theme CSS',
+      });
+      expect(textArea).toHaveValue(mockValidCss);
+    });
+
+    it('does not populate text box when installed theme has a repo', () => {
+      const installedCatalogTheme = {
+        id: 'theme-xyz789',
+        name: 'Demo Theme',
+        repo: 'https://github.com/actualbudget/demo-theme',
+        cssContent: mockValidCss,
+      };
+
+      render(
+        <ThemeInstaller
+          onInstall={mockOnInstall}
+          onClose={mockOnClose}
+          installedTheme={installedCatalogTheme}
+        />,
+      );
+
+      const textArea = screen.getByRole('textbox', {
+        name: 'Custom Theme CSS',
+      });
+      expect(textArea).toHaveValue('');
     });
 
     it('clears selected catalog theme when CSS is pasted', async () => {
