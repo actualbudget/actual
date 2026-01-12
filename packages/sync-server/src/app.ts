@@ -16,6 +16,7 @@ import * as pluggai from './app-pluggyai/app-pluggyai';
 import * as secretApp from './app-secrets';
 import * as simpleFinApp from './app-simplefin/app-simplefin';
 import * as syncApp from './app-sync';
+import * as truelayerApp from './app-truelayer/app-truelayer';
 import { config } from './load-config';
 
 const app = express();
@@ -59,6 +60,7 @@ app.use('/account', accountApp.handlers);
 app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
 app.use('/pluggyai', pluggai.handlers);
+app.use('/truelayer', truelayerApp.handlers);
 app.use('/secret', secretApp.handlers);
 
 if (config.get('corsProxy.enabled')) {
