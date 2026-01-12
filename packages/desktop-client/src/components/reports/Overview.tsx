@@ -369,13 +369,13 @@ export function Overview({ dashboard }: OverviewProps) {
   };
 
   const onDeleteDashboard = async (id: string) => {
-    await send('dashboard-delete', id).then(() => {
-      const next_dashboard = dashboard_pages.find(d => d.id !== id);
-      // NOTE: This should hold since invariant dashboard_pages > 1
-      if (next_dashboard) {
-        navigate(`/reports/${next_dashboard.id}`);
-      }
-    });
+    await send('dashboard-delete', id);
+
+    const next_dashboard = dashboard_pages.find(d => d.id !== id);
+    // NOTE: This should hold since invariant dashboard_pages > 1
+    if (next_dashboard) {
+      navigate(`/reports/${next_dashboard.id}`);
+    }
   };
 
   const accounts = useAccounts();

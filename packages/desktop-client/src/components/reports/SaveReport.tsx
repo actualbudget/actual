@@ -60,13 +60,13 @@ export function SaveReportWrapper<
   T extends CustomReportEntity = CustomReportEntity,
 >(props: Omit<SaveReportProps<T>, 'dashboardPages'>) {
   const { t } = useTranslation();
-  const { data: dashboard_pages, isLoading } = useDashboardPages();
+  const { data, isLoading } = useDashboardPages();
 
   if (isLoading) {
     return <LoadingIndicator message={t('Loading dashboards...')} />;
   }
 
-  return <SaveReport {...props} dashboardPages={dashboard_pages} />;
+  return <SaveReport {...props} dashboardPages={data} />;
 }
 
 export function SaveReport({
