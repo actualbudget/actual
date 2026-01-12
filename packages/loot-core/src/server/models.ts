@@ -52,6 +52,11 @@ export function fromDateRepr(number: number) {
   }
 
   const dateString = number.toString();
+  if (dateString.length !== 8) {
+    throw new Error(
+      'fromDateRepr expects an 8-digit number (YYYYMMDD): ' + number,
+    );
+  }
   return (
     dateString.slice(0, 4) +
     '-' +

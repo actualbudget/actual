@@ -1,13 +1,12 @@
-import { generateSortOrder, getNextSeqForDate } from '../../shared/sort-order';
 // @ts-strict-ignore
+import {
+  generateSortOrder,
+  getNextSeqForDate,
+  toDateRepr,
+} from '../../shared/sort-order';
 import * as db from '../db';
 
 import { runRules } from './transaction-rules';
-
-// Convert date string 'YYYY-MM-DD' to integer YYYYMMDD for database queries
-function dateToInt(date: string): number {
-  return parseInt(date.replace(/-/g, ''), 10);
-}
 
 async function getPayee(acct) {
   return db.first<db.DbPayee>('SELECT * FROM payees WHERE transfer_acct = ?', [
@@ -65,16 +64,20 @@ export async function addTransfer(transaction, transferredAccount) {
   );
 
   // Get the next sequence number for this date
-  const dateInt = dateToInt(transaction.date);
+  const dateInt = toDateRepr(transaction.date);
   const existingTransactions = await db.all<{
-    date: string;
     sort_order: number | null;
   }>(
-    `SELECT date, sort_order FROM v_transactions_internal 
+    `SELECT sort_order FROM v_transactions_internal 
      WHERE date = ? AND tombstone = 0`,
     [dateInt],
   );
-  const { seq } = getNextSeqForDate(transaction.date, existingTransactions);
+  // Pass transactions with date for getNextSeqForDate - we already filtered by date in query
+  const transactionsWithDate = existingTransactions.map(t => ({
+    date: transaction.date,
+    sort_order: t.sort_order,
+  }));
+  const { seq } = getNextSeqForDate(transaction.date, transactionsWithDate);
 
   const transferTransaction = {
     account: transferredAccount,

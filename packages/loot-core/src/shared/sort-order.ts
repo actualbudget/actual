@@ -1,7 +1,7 @@
 /**
  * Constants for sort_order format: YYYYMMDDseq
  * - Date portion: 8 digits (YYYYMMDD)
- * - Seq portion: up to 5 digits (1-99999)
+ * - Seq portion: up to 5 digits (0-99999)
  * - Combined: dateInt * 100000 + seq = 13 digits total (same as Date.now())
  * - Example: 2024-01-15 seq 42 = 2024011500042
  */
@@ -11,7 +11,7 @@ export const MAX_SEQ = 99999;
 /**
  * Convert a date string (YYYY-MM-DD) to integer representation (YYYYMMDD)
  */
-function toDateRepr(str: string): number {
+export function toDateRepr(str: string): number {
   if (typeof str !== 'string') {
     throw new Error('toDateRepr not passed a string: ' + str);
   }
@@ -20,7 +20,7 @@ function toDateRepr(str: string): number {
 
 /**
  * Generate a sort_order value from a date and sequence number.
- * Format: YYYYMMDDseq where seq can be 1-99999 (5 digits)
+ * Format: YYYYMMDDseq where seq can be 0-99999 (5 digits)
  * Total: 13 digits, same numeric space as Date.now() timestamps
  *
  * @param date - Date string in 'YYYY-MM-DD' format
@@ -28,6 +28,9 @@ function toDateRepr(str: string): number {
  * @returns Combined sort_order value
  */
 export function generateSortOrder(date: string, seq: number = 1): number {
+  if (seq < 0 || seq > MAX_SEQ) {
+    throw new Error(`seq must be between 0 and ${MAX_SEQ}, got: ${seq}`);
+  }
   const dateInt = toDateRepr(date);
   return dateInt * SEQ_MULTIPLIER + seq;
 }
@@ -131,8 +134,8 @@ export function validateSeq(
     return { isValid: false, error: 'Sequence must be an integer' };
   }
 
-  if (seq < 1) {
-    return { isValid: false, error: 'Sequence must be at least 1' };
+  if (seq < 0) {
+    return { isValid: false, error: 'Sequence must be at least 0' };
   }
 
   if (seq > MAX_SEQ) {
@@ -142,6 +145,10 @@ export function validateSeq(
     };
   }
 
+  // Defensive safeguard: ensure sort_order is within JavaScript's safe integer range.
+  // In practice, with MAX_SEQ=99999 and max date 2099-12-31, the maximum sort_order is
+  // ~2 trillion, well under MAX_SAFE_INTEGER (~9 quadrillion). This check guards against
+  // future changes to these limits.
   const sortOrder = generateSortOrder(date, seq);
   if (sortOrder > Number.MAX_SAFE_INTEGER) {
     return { isValid: false, error: 'Sequence number too large for this date' };

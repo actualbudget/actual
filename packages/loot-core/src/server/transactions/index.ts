@@ -92,24 +92,28 @@ export async function batchUpdateTransactions({
       // Get existing transactions on the same dates to determine next seq
       const dates = [...new Set(transactionsNeedingSortOrder.map(t => t.date))];
       let existingTransactions: Array<{
-        date: string;
         sort_order: number | null;
       }> = [];
       if (dates.length > 0) {
         existingTransactions = await db.all<{
-          date: string;
           sort_order: number | null;
         }>(
-          `SELECT date, sort_order FROM v_transactions_internal 
+          `SELECT sort_order FROM v_transactions_internal 
            WHERE date IN (${dates.map(() => '?').join(',')}) AND tombstone = 0`,
           dates,
         );
       }
 
       // Assign sort_order to transactions that need it
+      // assignBatchSeq extracts dates from sort_order values, so we pass empty date strings
+      // since they won't be used (existing transactions' dates come from their sort_order)
+      const existingWithPlaceholderDate = existingTransactions.map(t => ({
+        date: '',
+        sort_order: t.sort_order,
+      }));
       const assignedTransactions = assignBatchSeq(
         transactionsNeedingSortOrder,
-        existingTransactions,
+        existingWithPlaceholderDate,
       );
 
       // Combine with transactions that already have sort_order
