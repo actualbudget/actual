@@ -10,6 +10,7 @@ import {
   type TransactionEntity,
   type SyncServerSimpleFinAccount,
   type SyncServerPluggyAiAccount,
+  type SyncServerTrueLayerAccount,
   type CategoryEntity,
 } from 'loot-core/types/models';
 
@@ -305,6 +306,30 @@ export const linkAccountPluggyAi = createAppAsyncThunk(
   ) => {
     await send('pluggyai-accounts-link', {
       externalAccount,
+      upgradingId,
+      offBudget,
+    });
+    dispatch(markPayeesDirty());
+    dispatch(markAccountsDirty());
+  },
+);
+
+type LinkAccountTrueLayerPayload = {
+  authId: string;
+  account: SyncServerTrueLayerAccount;
+  upgradingId?: AccountEntity['id'];
+  offBudget?: boolean;
+};
+
+export const linkAccountTrueLayer = createAppAsyncThunk(
+  `${sliceName}/linkAccountTrueLayer`,
+  async (
+    { authId, account, upgradingId, offBudget }: LinkAccountTrueLayerPayload,
+    { dispatch },
+  ) => {
+    await send('truelayer-accounts-link', {
+      authId,
+      account,
       upgradingId,
       offBudget,
     });
