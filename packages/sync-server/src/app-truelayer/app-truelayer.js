@@ -174,7 +174,8 @@ app.post(
     const { accountId, startDate, endDate } = req.body || {};
 
     // Get access token from stored session (with automatic refresh if needed)
-    const accessToken = await truelayerService.getAccessTokenForAccount(accountId);
+    const accessToken =
+      await truelayerService.getAccessTokenForAccount(accountId);
 
     const transactions = await truelayerService.getTransactions(
       accessToken,
@@ -182,6 +183,24 @@ app.post(
       startDate,
       endDate,
     );
+
+    // Calculate starting balance from the oldest transaction
+    // startingBalance = balanceAfter - transactionAmount
+    let startingBalance = 0;
+    if (transactions.length > 0) {
+      // Sort by date to find the oldest transaction
+      const sortedTransactions = [...transactions].sort(
+        (a, b) => new Date(a.date) - new Date(b.date),
+      );
+      const oldestTransaction = sortedTransactions[0];
+
+      // If we have balance information, calculate starting balance
+      if (oldestTransaction.balanceAfterTransaction) {
+        const balanceAfter = oldestTransaction.balanceAfterTransaction.amount;
+        const transactionAmount = oldestTransaction.transactionAmount.amount;
+        startingBalance = balanceAfter - transactionAmount;
+      }
+    }
 
     res.send({
       status: 'ok',
@@ -191,6 +210,7 @@ app.post(
           booked: transactions.filter(t => t.booked),
           pending: transactions.filter(t => !t.booked),
         },
+        startingBalance,
       },
     });
   }),
