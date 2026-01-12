@@ -57,7 +57,7 @@ app.use(validateSessionMiddleware);
  * Error handler wrapper for async routes
  */
 function handleError(handler) {
-  return async (req, res, next) => {
+  return async (req, res) => {
     try {
       await handler(req, res);
     } catch (error) {
@@ -150,8 +150,7 @@ app.post(
   handleError(async (req, res) => {
     const { authId } = req.body || {};
 
-    const { accounts, tokens } =
-      await truelayerService.getAccountsWithAuth(authId);
+    const { accounts } = await truelayerService.getAccountsWithAuth(authId);
 
     res.send({
       status: 'ok',
@@ -263,6 +262,9 @@ app.post(
 );
 
 // Cleanup expired sessions periodically (every 5 minutes)
-setInterval(() => {
-  truelayerService.cleanupExpiredSessions();
-}, 5 * 60 * 1000);
+setInterval(
+  () => {
+    truelayerService.cleanupExpiredSessions();
+  },
+  5 * 60 * 1000,
+);
