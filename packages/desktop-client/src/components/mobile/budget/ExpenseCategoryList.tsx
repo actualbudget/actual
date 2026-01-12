@@ -139,13 +139,19 @@ function useReorderCategory() {
 
     if (!categoryToMove.group) {
       throw new Error(
-        `Internal error: category ${id} is not in a group and cannot be moved.`,
+        `Internal error: Failed to move category ${id} because it is not in a group.`,
       );
     }
 
     const targetCategoryGroupId = categories.find(
       c => c.id === targetId,
     )?.group;
+
+    if (!targetCategoryGroupId) {
+      throw new Error(
+        `Internal error: Failed to move category ${id} because target category ${targetId} is not in a group.`,
+      );
+    }
 
     if (dropPosition === 'before') {
       dispatch(
