@@ -5,6 +5,7 @@ import React, {
   type ComponentPropsWithoutRef,
   useCallback,
 } from 'react';
+import { type DragItem } from 'react-aria';
 import {
   Column,
   Table,
@@ -15,6 +16,8 @@ import {
   ResizableTableContainer,
   ColumnResizer,
   DialogTrigger,
+  useDragAndDrop,
+  DropIndicator,
 } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -43,6 +46,10 @@ import { MonthsContext } from './MonthsContext';
 import { separateGroups } from './util';
 
 import {
+  moveCategory,
+  moveCategoryGroup,
+} from '@desktop-client/budget/budgetSlice';
+import {
   CellValue,
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
@@ -51,6 +58,7 @@ import { useCategoryMutations } from '@desktop-client/hooks/useCategoryMutations
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useDispatch } from '@desktop-client/redux';
 import { type SheetNames } from '@desktop-client/spreadsheet';
 import {
   envelopeBudget,
@@ -361,6 +369,8 @@ export function BudgetCategories({
     [months],
   );
 
+  const { dragAndDropHooks } = useBudgetCategoriesDragAndDrop();
+
   return (
     <View
       style={{
@@ -402,7 +412,7 @@ export function BudgetCategories({
               borderRight: 'none',
             },
           })}
-          // dragAndDropHooks={dragAndDropHooks}
+          dragAndDropHooks={dragAndDropHooks}
         >
           <TableHeader
             data-testid="budget-totals"
@@ -1020,4 +1030,156 @@ function ResizableColumn({ children, ...props }: ResizableColumnProps) {
       )}
     </Column>
   );
+}
+
+function useBudgetCategoriesDragAndDrop() {
+  const { grouped: categoryGroups, list: categories } = useCategories();
+  const dispatch = useDispatch();
+  return useDragAndDrop({
+    getItems: keys =>
+      [...keys].map(
+        key =>
+          ({
+            'text/plain': key as string,
+          }) as DragItem,
+      ),
+    renderDropIndicator: target => {
+      return (
+        <DropIndicator
+          target={target}
+          className={css({
+            '&[data-drop-target]': {
+              height: 4,
+              backgroundColor: theme.tableBorderHover,
+              opacity: 1,
+              borderRadius: 4,
+            },
+          })}
+        />
+      );
+    },
+    onReorder: e => {
+      const [key] = e.keys;
+      const itemId = key as string;
+      const isCategoryGroup = itemId.startsWith('expense-group');
+
+      const targetItemId = e.target.key as string;
+
+      if (isCategoryGroup) {
+        const categoryGroupId = itemId.replace('expense-group-', '');
+        const categoryGroupToMove = categoryGroups.find(
+          c => c.id === categoryGroupId,
+        );
+
+        if (!categoryGroupToMove) {
+          throw new Error(
+            `Internal error: category group with ID ${categoryGroupId} not found.`,
+          );
+        }
+
+        if (!targetItemId.startsWith('expense-group')) {
+          // Cannot drop category group on category
+          return;
+        }
+
+        const targetCategoryGroupId = targetItemId.replace(
+          'expense-group-',
+          '',
+        );
+
+        if (e.target.dropPosition === 'before') {
+          dispatch(
+            moveCategoryGroup({
+              id: categoryGroupToMove.id,
+              targetId: targetCategoryGroupId,
+            }),
+          );
+        } else if (e.target.dropPosition === 'after') {
+          const targetGroupIndex = categoryGroups.findIndex(
+            c => c.id === targetCategoryGroupId,
+          );
+
+          if (targetGroupIndex === -1) {
+            throw new Error(
+              `Internal error: category group with ID ${targetCategoryGroupId} not found.`,
+            );
+          }
+
+          const nextToTargetCategory = categoryGroups[targetGroupIndex + 1];
+
+          dispatch(
+            moveCategoryGroup({
+              id: categoryGroupToMove.id,
+              // Due to the way `moveCategory` works, we use the category next to the
+              // actual target category here because `moveCategory` always shoves the
+              // category *before* the target category.
+              // On the other hand, using `null` as `targetId` moves the category
+              // to the end of the list.
+              targetId: nextToTargetCategory?.id || null,
+            }),
+          );
+        }
+      } else {
+        const categoryId = itemId.replace('expense-category-', '');
+        const categoryToMove = categories.find(c => c.id === categoryId);
+
+        if (!categoryToMove) {
+          throw new Error(
+            `Internal error: category with ID ${categoryId} not found.`,
+          );
+        }
+
+        if (!categoryToMove.group) {
+          throw new Error(
+            `Internal error: category ${categoryId} is not in a group and cannot be moved.`,
+          );
+        }
+
+        if (!targetItemId.startsWith('expense-category')) {
+          // Cannot drop category on category group
+          return;
+        }
+
+        const targetCategoryId = targetItemId.replace('expense-category-', '');
+        const targetCategoryGroupId = categories.find(
+          c => c.id === targetCategoryId,
+        )?.group;
+
+        if (e.target.dropPosition === 'before') {
+          dispatch(
+            moveCategory({
+              id: categoryToMove.id,
+              groupId: targetCategoryGroupId,
+              targetId: targetCategoryId,
+            }),
+          );
+        } else if (e.target.dropPosition === 'after') {
+          const targetCategoryIndex = categories.findIndex(
+            c => c.id === targetCategoryId,
+          );
+
+          if (targetCategoryIndex === -1) {
+            throw new Error(
+              `Internal error: category with ID ${targetCategoryId} not found.`,
+            );
+          }
+
+          const nextToTargetCategory = categories[targetCategoryIndex + 1];
+
+          dispatch(
+            moveCategory({
+              id: categoryToMove.id,
+              groupId: targetCategoryGroupId,
+              // Due to the way `moveCategory` works, we use the category next to the
+              // actual target category here because `moveCategory` always shoves the
+              // category *before* the target category.
+              // On the other hand, using `null` as `targetId` moves the category
+              // to the end of the list.
+              targetId: nextToTargetCategory?.id || null,
+            }),
+          );
+        }
+      }
+    },
+  });
 }
