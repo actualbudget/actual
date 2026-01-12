@@ -179,6 +179,34 @@ export async function getAccounts(accessToken) {
 }
 
 /**
+ * Validate account ID to prevent SSRF/path traversal attacks
+ * @param {string} accountId - Account ID to validate
+ * @throws {Error} If account ID is invalid
+ */
+function validateAccountId(accountId) {
+  if (!accountId || typeof accountId !== 'string') {
+    throw new errors.ServiceError(
+      'Invalid account ID: must be a non-empty string',
+    );
+  }
+
+  // TrueLayer account IDs are UUIDs (with hyphens) or alphanumeric strings
+  // Allow only: letters, numbers, hyphens, underscores
+  const validAccountIdPattern = /^[a-zA-Z0-9_-]+$/;
+
+  if (!validAccountIdPattern.test(accountId)) {
+    throw new errors.ServiceError(
+      'Invalid account ID: contains invalid characters',
+    );
+  }
+
+  // Prevent excessively long IDs (reasonable limit)
+  if (accountId.length > 100) {
+    throw new errors.ServiceError('Invalid account ID: exceeds maximum length');
+  }
+}
+
+/**
  * Get account balance
  * @param {string} accessToken - Access token
  * @param {string} accountId - Account ID
@@ -187,8 +215,12 @@ export async function getAccounts(accessToken) {
 export async function getBalance(accessToken, accountId) {
   debug(`Fetching balance for account ${accountId}`);
 
+  // Validate and sanitize account ID to prevent SSRF/path traversal
+  validateAccountId(accountId);
+  const sanitizedAccountId = encodeURIComponent(accountId);
+
   const response = await fetch(
-    `https://api.truelayer.com/data/v1/accounts/${accountId}/balance`,
+    `https://api.truelayer.com/data/v1/accounts/${sanitizedAccountId}/balance`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -232,8 +264,12 @@ export async function getTransactions(
 ) {
   debug(`Fetching transactions for account ${accountId}`);
 
+  // Validate and sanitize account ID to prevent SSRF/path traversal
+  validateAccountId(accountId);
+  const sanitizedAccountId = encodeURIComponent(accountId);
+
   const url = new URL(
-    `https://api.truelayer.com/data/v1/accounts/${accountId}/transactions`,
+    `https://api.truelayer.com/data/v1/accounts/${sanitizedAccountId}/transactions`,
   );
   if (startDate) url.searchParams.set('from', startDate);
   if (endDate) url.searchParams.set('to', endDate);
