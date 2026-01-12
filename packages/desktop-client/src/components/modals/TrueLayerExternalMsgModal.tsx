@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -153,8 +153,8 @@ export function TrueLayerExternalMsgModal({
             <Paragraph style={{ fontSize: 15 }}>
               <Trans>
                 To link your bank account, you will be redirected to a new page
-                where TrueLayer will ask to connect to your bank. TrueLayer
-                will not be able to withdraw funds from your accounts.
+                where TrueLayer will ask to connect to your bank. TrueLayer will
+                not be able to withdraw funds from your accounts.
               </Trans>
             </Paragraph>
 
