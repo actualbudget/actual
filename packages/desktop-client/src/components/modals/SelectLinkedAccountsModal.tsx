@@ -11,6 +11,7 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
+import { currentDay, subDays } from 'loot-core/shared/months';
 import {
   type AccountEntity,
   type SyncServerGoCardlessAccount,
@@ -61,6 +62,20 @@ function useAddBudgetAccountOptions() {
   };
 
   return { addOnBudgetAccountOption, addOffBudgetAccountOption };
+}
+
+/**
+ * Helper to determine if the chosen account option represents creating a new account.
+ */
+function isNewAccountOption(
+  chosenAccountId: string | undefined,
+  addOnBudgetOptionId: string,
+  addOffBudgetOptionId: string,
+): boolean {
+  return (
+    chosenAccountId === addOnBudgetOptionId ||
+    chosenAccountId === addOffBudgetOptionId
+  );
 }
 
 export type SelectLinkedAccountsModalProps =
@@ -274,22 +289,26 @@ export function SelectLinkedAccountsModal({
     return localAccounts.find(acc => acc.id === chosenId);
   };
 
+  // Memoize default starting settings to avoid repeated calculations
+  const defaultStartingSettings = useMemo<CustomStartingSettings>(
+    () => ({
+      date: subDays(currentDay(), 90),
+      balance: 0,
+    }),
+    [],
+  );
+
   const getCustomStartingDate = (accountId: string) => {
     if (customStartingDates[accountId]) {
       return customStartingDates[accountId];
     }
     // Default to 90 days ago (matches server default)
-    const ninetyDaysAgo = new Date();
-    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-    return {
-      date: ninetyDaysAgo.toISOString().split('T')[0],
-      balance: 0,
-    };
+    return defaultStartingSettings;
   };
 
   const setCustomStartingDate = (
     accountId: string,
-    settings: { date: string; balance: number },
+    settings: CustomStartingSettings,
   ) => {
     setCustomStartingDates(prev => ({
       ...prev,
@@ -393,11 +412,12 @@ export function SelectLinkedAccountsModal({
                 style={{ backgroundColor: theme.tableHeaderBackground }}
                 renderItem={({ item }) => {
                   const chosenAccount = getChosenAccount(item.account_id);
-                  const isNewAccount =
-                    chosenAccount?.id === addOnBudgetAccountOption.id ||
-                    chosenAccount?.id === addOffBudgetAccountOption.id;
                   // Only show starting options for new accounts being created
-                  const shouldShowStartingOptions = isNewAccount;
+                  const shouldShowStartingOptions = isNewAccountOption(
+                    chosenAccount?.id,
+                    addOnBudgetAccountOption.id,
+                    addOffBudgetAccountOption.id,
+                  );
 
                   return (
                     <TableRow
@@ -751,7 +771,13 @@ function StartingOptionsFields({
   );
 }
 
-type AccountCardProps = SharedAccountRowProps;
+type AccountCardProps = SharedAccountRowProps & {
+  customStartingDate: CustomStartingSettings;
+  onSetCustomStartingDate: (
+    accountId: string,
+    settings: CustomStartingSettings,
+  ) => void;
+};
 
 function AccountCard({
   externalAccount,
@@ -760,13 +786,7 @@ function AccountCard({
   onSetLinkedAccount,
   customStartingDate,
   onSetCustomStartingDate,
-}: AccountCardProps & {
-  customStartingDate: CustomStartingSettings;
-  onSetCustomStartingDate: (
-    accountId: string,
-    settings: CustomStartingSettings,
-  ) => void;
-}) {
+}: AccountCardProps) {
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
@@ -780,12 +800,12 @@ function AccountCard({
     addOffBudgetAccountOption,
   );
 
-  const isNewAccount =
-    chosenAccount?.id === addOnBudgetAccountOption.id ||
-    chosenAccount?.id === addOffBudgetAccountOption.id;
-
   // Only show starting date options for new accounts being created
-  const shouldShowStartingOptions = isNewAccount;
+  const shouldShowStartingOptions = isNewAccountOption(
+    chosenAccount?.id,
+    addOnBudgetAccountOption.id,
+    addOffBudgetAccountOption.id,
+  );
 
   return (
     <SpaceBetween
