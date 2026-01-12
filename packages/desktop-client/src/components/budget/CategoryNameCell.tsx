@@ -59,6 +59,17 @@ export function CategoryNameCell({
             ...hoverVisibleStyle,
           })}
         >
+          {/* Hidden drag button */}
+          <Button
+            slot="drag"
+            style={{
+              opacity: 0,
+              width: 1,
+              height: 1,
+              position: 'absolute',
+              overflow: 'hidden',
+            }}
+          />
           {isRenaming ? (
             <View style={{ flex: 1 }}>
               <Input
@@ -115,11 +126,11 @@ export function CategoryNameCell({
                         { name: 'rename', text: t('Rename') },
                         ...(!categoryGroup?.hidden
                           ? [
-                              {
-                                name: 'toggle-visibility',
-                                text: category.hidden ? t('Show') : t('Hide'),
-                              },
-                            ]
+                            {
+                              name: 'toggle-visibility',
+                              text: category.hidden ? t('Show') : t('Hide'),
+                            },
+                          ]
                           : []),
                         { name: 'delete', text: t('Delete') },
                       ]}

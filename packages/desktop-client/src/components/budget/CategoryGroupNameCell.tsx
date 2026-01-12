@@ -4,13 +4,14 @@ import { Cell as ReactAriaCell, DialogTrigger } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgExpandArrow } from '@actual-app/components/icons/v0';
+import { SvgAdd, SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
@@ -68,6 +69,17 @@ export function CategoryGroupNameCell({
           })}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            {/* Hidden drag button */}
+            <Button
+              slot="drag"
+              style={{
+                opacity: 0,
+                width: 1,
+                height: 1,
+                position: 'absolute',
+                overflow: 'hidden',
+              }}
+            />
             <Button
               variant="bare"
               onPress={() => onToggleCollapse(categoryGroup)}
@@ -125,8 +137,6 @@ export function CategoryGroupNameCell({
                         if (type === 'rename') {
                           // onEdit(categoryGroup.id);
                           setIsRenaming(true);
-                        } else if (type === 'add-category') {
-                          onAddCategory(categoryGroup);
                         } else if (type === 'delete') {
                           onDelete(categoryGroup);
                         } else if (type === 'toggle-visibility') {
@@ -140,25 +150,23 @@ export function CategoryGroupNameCell({
                         setIsMenuOpen(false);
                       }}
                       items={[
-                        { name: 'add-category', text: t('Add category') },
                         { name: 'rename', text: t('Rename') },
                         ...(!categoryGroup.is_income
                           ? [
-                              {
-                                name: 'toggle-visibility',
-                                text: categoryGroup.hidden ? 'Show' : 'Hide',
-                              },
-                            ]
+                            {
+                              name: 'toggle-visibility',
+                              text: categoryGroup.hidden ? 'Show' : 'Hide',
+                            },
+                            { name: 'delete', text: t('Delete') },
+                          ]
                           : []),
-                        // onDelete && { name: 'delete', text: t('Delete') },
-                        { name: 'delete', text: t('Delete') },
                         ...(isGoalTemplatesEnabled
                           ? [
-                              {
-                                name: 'apply-multiple-category-template',
-                                text: t('Apply budget templates'),
-                              },
-                            ]
+                            {
+                              name: 'apply-multiple-category-template',
+                              text: t('Overwrite with templates'),
+                            },
+                          ]
                           : []),
                       ]}
                     />
@@ -168,7 +176,30 @@ export function CategoryGroupNameCell({
             )}
           </View>
           {!isRenaming && (
-            <View>
+            <View
+              style={{
+                flexDirection: 'row',
+                flexShrink: 0,
+                alignItems: 'center',
+              }}
+            >
+              <Tooltip content={t('Add category')} disablePointerEvents>
+                <Button
+                  variant="bare"
+                  aria-label={t('Add category')}
+                  className={cx(
+                    css({
+                      color: theme.pageTextLight,
+                    }),
+                    'hover-visible',
+                  )}
+                  onPress={() => {
+                    onAddCategory(categoryGroup);
+                  }}
+                >
+                  <SvgAdd style={{ width: 10, height: 10, flexShrink: 0 }} />
+                </Button>
+              </Tooltip>
               <NotesButton
                 id={categoryGroup.id}
                 defaultColor={theme.pageTextLight}
