@@ -109,13 +109,16 @@ getTransactions(accessToken, accountId, startDate, endDate)
 // When linking account (handleCallback):
 for (const account of accounts) {
   const tokenKey = `truelayer_token_${account.account_id}`;
-  secretsService.set(tokenKey, JSON.stringify({
-    access_token: tokens.access_token,
-    refresh_token: tokens.refresh_token,
-    expires_in: tokens.expires_in,
-    token_type: tokens.token_type,
-    saved_at: Date.now()
-  }));
+  secretsService.set(
+    tokenKey,
+    JSON.stringify({
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+      expires_in: tokens.expires_in,
+      token_type: tokens.token_type,
+      saved_at: Date.now(),
+    }),
+  );
 }
 
 // When retrieving token (getAccessTokenForAccount):
@@ -128,9 +131,10 @@ for (const account of accounts) {
 
 ```javascript
 // Priority order for best merchant names:
-const payeeName = tx.meta?.provider_merchant_name  // Cleanest (e.g., "Amazon")
-  || tx.merchant_name                              // Sometimes available
-  || tx.description;                               // Fallback
+const payeeName =
+  tx.meta?.provider_merchant_name || // Cleanest (e.g., "Amazon")
+  tx.merchant_name || // Sometimes available
+  tx.description; // Fallback
 
 // provider_merchant_name gives better names:
 // "Amazon" instead of "AMAZON* ABC1212341"
@@ -211,7 +215,7 @@ ServiceError → Generic TrueLayer API error
 export type TrueLayerAuthSession = {
   authId: string;
   link?: string;
-  accounts?: SyncServerTrueLayerAccount[];  // Optional for polling response
+  accounts?: SyncServerTrueLayerAccount[]; // Optional for polling response
 };
 
 export type SyncServerTrueLayerAccount = {
@@ -221,7 +225,7 @@ export type SyncServerTrueLayerAccount = {
   name: string;
   type?: string;
   official_name?: string;
-  mask?: string;  // Last 4 digits of account number
+  mask?: string; // Last 4 digits of account number
 };
 ```
 
@@ -232,7 +236,7 @@ export type BankSyncProviders =
   | 'goCardless'
   | 'simpleFin'
   | 'pluggyai'
-  | 'truelayer';  // Added
+  | 'truelayer'; // Added
 ```
 
 ### Phase 3: RPC Handlers
@@ -276,20 +280,22 @@ linkTrueLayerAccount({ authId, account, upgradingId, offBudget })
 async function downloadTrueLayerTransactions(
   acctId: AccountEntity['id'],
   since: string,
-  isNewAccount: boolean  // Added in Phase 3
+  isNewAccount: boolean, // Added in Phase 3
 ) {
   // For new accounts, request extended history
   let startDate = since;
   if (isNewAccount) {
     const twoYearsAgo = monthUtils.subDays(monthUtils.currentDay(), 730);
     startDate = twoYearsAgo;
-    logger.log(`New account detected, requesting extended history from ${startDate}`);
+    logger.log(
+      `New account detected, requesting extended history from ${startDate}`,
+    );
   }
 
   return post(
     getServer().TRUELAYER_SERVER + '/transactions',
     { accountId: acctId, startDate },
-    { 'X-ACTUAL-TOKEN': userToken }
+    { 'X-ACTUAL-TOKEN': userToken },
   );
 }
 
@@ -298,7 +304,7 @@ if (acctRow.account_sync_source === 'truelayer') {
   download = await downloadTrueLayerTransactions(
     acctId,
     syncStartDate,
-    newAccount  // Passed to request extended history
+    newAccount, // Passed to request extended history
   );
 }
 ```
@@ -321,16 +327,18 @@ export async function authorizeBank(dispatch: AppDispatch) {
   _authorize(dispatch, {
     onSuccess: async data => {
       // Open account selection modal with fetched accounts
-      dispatch(pushModal({
-        modal: {
-          name: 'select-linked-accounts',
-          options: {
-            externalAccounts: data.accounts,
-            authId: data.authId,
-            syncSource: 'truelayer',
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'select-linked-accounts',
+            options: {
+              externalAccounts: data.accounts,
+              authId: data.authId,
+              syncSource: 'truelayer',
+            },
           },
-        },
-      }));
+        }),
+      );
     },
   });
 }
@@ -371,7 +379,7 @@ case 'truelayer-external-msg':
 
 ```javascript
 const protocol = req.protocol || 'http';
-const host = req.get('host');  // e.g., 'localhost:5006'
+const host = req.get('host'); // e.g., 'localhost:5006'
 const serverUrl = `${protocol}://${host}`;
 ```
 
@@ -392,20 +400,22 @@ const serverUrl = `${protocol}://${host}`;
 **Issue**: Tokens stored in-memory Maps were lost on server restart
 **Impact**: "not-found" error when syncing after restart
 **Fix**: Dual storage strategy:
+
 - In-memory for fast access during session
 - secretsService for persistence across restarts
 - Auto-refresh when token expires
 
 #### 5. Payee Name Quality
 
-**Issue**: Raw descriptions like "P*7285734930229" instead of "EBAY Commerce UK Ltd"
+**Issue**: Raw descriptions like "P\*7285734930229" instead of "EBAY Commerce UK Ltd"
 **Impact**: Poor user experience with unclear transaction names
 **Fix**: Prioritize `meta.provider_merchant_name` over `merchant_name`:
 
 ```javascript
-const payeeName = tx.meta?.provider_merchant_name  // Best
-  || tx.merchant_name
-  || tx.description;  // Fallback
+const payeeName =
+  tx.meta?.provider_merchant_name || // Best
+  tx.merchant_name ||
+  tx.description; // Fallback
 ```
 
 #### 6. Transaction History Limit
@@ -419,6 +429,7 @@ const payeeName = tx.meta?.provider_merchant_name  // Best
 **Issue**: Starting balance was always 0
 **Root Cause**: `running_balance` field is optional (not provided by all banks)
 **Fix**: Dual-method calculation:
+
 1. Use `running_balance` if available
 2. Otherwise: `currentBalance - sum(all transactions)`
 
@@ -464,8 +475,8 @@ POST /truelayer/refresh-token
 ### Required Secrets
 
 ```javascript
-truelayer_clientId: 'your-client-id'
-truelayer_clientSecret: 'your-client-secret'
+truelayer_clientId: 'your-client-id';
+truelayer_clientSecret: 'your-client-secret';
 ```
 
 ### OAuth Scopes
@@ -508,15 +519,15 @@ info accounts balance transactions offline_access
 
 ## Comparison with GoCardless
 
-| Feature | GoCardless | TrueLayer |
-|---------|-----------|-----------|
-| Authorization | OAuth 2.0 | OAuth 2.0 |
-| Token Lifetime | 24 hours | 1 hour |
-| Requisition ID | Yes | No (uses authId) |
-| Institution Selection | In app | In TrueLayer UI |
-| History Limit | 90 days (bank-dependent) | 90 days (bank-dependent) |
-| Refresh Token | Yes | Yes |
-| Balance API | Yes | Yes |
+| Feature               | GoCardless               | TrueLayer                |
+| --------------------- | ------------------------ | ------------------------ |
+| Authorization         | OAuth 2.0                | OAuth 2.0                |
+| Token Lifetime        | 24 hours                 | 1 hour                   |
+| Requisition ID        | Yes                      | No (uses authId)         |
+| Institution Selection | In app                   | In TrueLayer UI          |
+| History Limit         | 90 days (bank-dependent) | 90 days (bank-dependent) |
+| Refresh Token         | Yes                      | Yes                      |
+| Balance API           | Yes                      | Yes                      |
 
 ---
 
@@ -532,6 +543,7 @@ info accounts balance transactions offline_access
 ### Setup Steps
 
 1. Set secrets in Actual Budget:
+
    ```
    truelayer_clientId: <production-client-id>
    truelayer_clientSecret: <production-client-secret>
