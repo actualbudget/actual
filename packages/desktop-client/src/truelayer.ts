@@ -46,7 +46,7 @@ export async function authorizeBank(dispatch: AppDispatch) {
           modal: {
             name: 'select-linked-accounts',
             options: {
-              externalAccounts: data.accounts,
+              externalAccounts: data.accounts ?? [],
               authId: data.authId,
               syncSource: 'truelayer',
             },
