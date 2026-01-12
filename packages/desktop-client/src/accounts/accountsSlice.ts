@@ -245,13 +245,17 @@ export const unlinkAccount = createAppAsyncThunk(
   },
 );
 
-type LinkAccountPayload = {
+// Shared base type for link account payloads
+type LinkAccountBasePayload = {
+  upgradingId?: AccountEntity['id'];
+  offBudget?: boolean;
+  startingDate?: string;
+  startingBalance?: number;
+};
+
+type LinkAccountPayload = LinkAccountBasePayload & {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
-  upgradingId?: AccountEntity['id'] | undefined;
-  offBudget?: boolean | undefined;
-  startingDate?: string | undefined;
-  startingBalance?: number | undefined;
 };
 
 export const linkAccount = createAppAsyncThunk(
@@ -280,12 +284,8 @@ export const linkAccount = createAppAsyncThunk(
   },
 );
 
-type LinkAccountSimpleFinPayload = {
+type LinkAccountSimpleFinPayload = LinkAccountBasePayload & {
   externalAccount: SyncServerSimpleFinAccount;
-  upgradingId?: AccountEntity['id'] | undefined;
-  offBudget?: boolean | undefined;
-  startingDate?: string | undefined;
-  startingBalance?: number | undefined;
 };
 
 export const linkAccountSimpleFin = createAppAsyncThunk(
@@ -312,12 +312,8 @@ export const linkAccountSimpleFin = createAppAsyncThunk(
   },
 );
 
-type LinkAccountPluggyAiPayload = {
+type LinkAccountPluggyAiPayload = LinkAccountBasePayload & {
   externalAccount: SyncServerPluggyAiAccount;
-  upgradingId?: AccountEntity['id'];
-  offBudget?: boolean;
-  startingDate?: string;
-  startingBalance?: number;
 };
 
 export const linkAccountPluggyAi = createAppAsyncThunk(

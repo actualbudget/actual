@@ -132,7 +132,7 @@ export function SelectLinkedAccountsModal({
     },
   );
   const [customStartingDates, setCustomStartingDates] = useState<
-    Record<string, { date: string; balance: number }>
+    Record<string, CustomStartingSettings>
   >({});
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
@@ -461,6 +461,11 @@ type ExternalAccount =
   | SyncServerSimpleFinAccount
   | SyncServerPluggyAiAccount;
 
+type CustomStartingSettings = {
+  date: string;
+  balance: number;
+};
+
 type SharedAccountRowProps = {
   externalAccount: ExternalAccount;
   chosenAccount: { id: string; name: string } | undefined;
@@ -490,10 +495,10 @@ function getAvailableAccountOptions(
 }
 
 type TableRowProps = SharedAccountRowProps & {
-  customStartingDate: { date: string; balance: number };
+  customStartingDate: CustomStartingSettings;
   onSetCustomStartingDate: (
     accountId: string,
-    settings: { date: string; balance: number },
+    settings: CustomStartingSettings,
   ) => void;
   showStartingOptions: boolean;
 };
@@ -582,40 +587,20 @@ function TableRow({
           chosenAccount?.name
         )}
       </Field>
-      <Field width={120} truncate={false}>
-        {showStartingOptions ? (
-          <Input
-            type="date"
-            value={customStartingDate.date}
-            onChange={e =>
-              onSetCustomStartingDate(externalAccount.account_id, {
-                ...customStartingDate,
-                date: e.target.value,
-              })
-            }
-            style={{ width: '100%' }}
-          />
-        ) : null}
-      </Field>
-      <Field width={120} truncate={false}>
-        {showStartingOptions ? (
-          <AmountInput
-            value={customStartingDate.balance}
-            zeroSign={
-              externalAccount.balance != null && externalAccount.balance < 0
-                ? '-'
-                : '+'
-            }
-            onUpdate={amount =>
-              onSetCustomStartingDate(externalAccount.account_id, {
-                ...customStartingDate,
-                balance: amount,
-              })
-            }
-            style={{ width: '100%' }}
-          />
-        ) : null}
-      </Field>
+      {showStartingOptions ? (
+        <StartingOptionsFields
+          accountId={externalAccount.account_id}
+          externalBalance={externalAccount.balance}
+          customStartingDate={customStartingDate}
+          onSetCustomStartingDate={onSetCustomStartingDate}
+          layout="inline"
+        />
+      ) : (
+        <>
+          <Field width={120} truncate={false} />
+          <Field width={120} truncate={false} />
+        </>
+      )}
       <Field width={150}>
         {chosenAccount ? (
           <Button
@@ -656,6 +641,118 @@ function getInstitutionName(
   return '';
 }
 
+type StartingOptionsFieldsProps = {
+  accountId: string;
+  externalBalance: number | null | undefined;
+  customStartingDate: CustomStartingSettings;
+  onSetCustomStartingDate: (
+    accountId: string,
+    settings: CustomStartingSettings,
+  ) => void;
+  layout: 'inline' | 'stacked';
+};
+
+function StartingOptionsFields({
+  accountId,
+  externalBalance,
+  customStartingDate,
+  onSetCustomStartingDate,
+  layout,
+}: StartingOptionsFieldsProps) {
+  const zeroSign = externalBalance != null && externalBalance < 0 ? '-' : '+';
+
+  if (layout === 'inline') {
+    return (
+      <>
+        <Field width={120} truncate={false}>
+          <Input
+            type="date"
+            value={customStartingDate.date}
+            onChange={e =>
+              onSetCustomStartingDate(accountId, {
+                ...customStartingDate,
+                date: e.target.value,
+              })
+            }
+            style={{ width: '100%' }}
+          />
+        </Field>
+        <Field width={120} truncate={false}>
+          <AmountInput
+            value={customStartingDate.balance}
+            zeroSign={zeroSign}
+            onUpdate={amount =>
+              onSetCustomStartingDate(accountId, {
+                ...customStartingDate,
+                balance: amount,
+              })
+            }
+            style={{ width: '100%' }}
+          />
+        </Field>
+      </>
+    );
+  }
+
+  return (
+    <View
+      style={{
+        marginTop: 8,
+        padding: '12px',
+        backgroundColor: theme.tableHeaderBackground,
+        borderRadius: 4,
+      }}
+    >
+      <View style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <View>
+          <Text
+            style={{
+              marginBottom: 4,
+              fontSize: 13,
+              color: theme.pageTextSubdued,
+            }}
+          >
+            <Trans>Starting date:</Trans>
+          </Text>
+          <Input
+            type="date"
+            value={customStartingDate.date}
+            onChange={e =>
+              onSetCustomStartingDate(accountId, {
+                ...customStartingDate,
+                date: e.target.value,
+              })
+            }
+            style={{ width: '100%' }}
+          />
+        </View>
+        <View>
+          <Text
+            style={{
+              marginBottom: 4,
+              fontSize: 13,
+              color: theme.pageTextSubdued,
+            }}
+          >
+            <Trans>Balance on that date:</Trans>
+          </Text>
+          <AmountInput
+            value={customStartingDate.balance}
+            zeroSign={zeroSign}
+            onUpdate={amount =>
+              onSetCustomStartingDate(accountId, {
+                ...customStartingDate,
+                balance: amount,
+              })
+            }
+            style={{ width: '100%' }}
+          />
+        </View>
+      </View>
+    </View>
+  );
+}
+
 type AccountCardProps = SharedAccountRowProps;
 
 function AccountCard({
@@ -666,10 +763,10 @@ function AccountCard({
   customStartingDate,
   onSetCustomStartingDate,
 }: AccountCardProps & {
-  customStartingDate: { date: string; balance: number };
+  customStartingDate: CustomStartingSettings;
   onSetCustomStartingDate: (
     accountId: string,
-    settings: { date: string; balance: number },
+    settings: CustomStartingSettings,
   ) => void;
 }) {
   const [focusedField, setFocusedField] = useState<string | null>(null);
@@ -789,65 +886,13 @@ function AccountCard({
       )}
 
       {shouldShowStartingOptions && (
-        <View
-          style={{
-            marginTop: 8,
-            padding: '12px',
-            backgroundColor: theme.tableHeaderBackground,
-            borderRadius: 4,
-          }}
-        >
-          <View style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <View>
-              <Text
-                style={{
-                  marginBottom: 4,
-                  fontSize: 13,
-                  color: theme.pageTextSubdued,
-                }}
-              >
-                <Trans>Starting date:</Trans>
-              </Text>
-              <Input
-                type="date"
-                value={customStartingDate.date}
-                onChange={e =>
-                  onSetCustomStartingDate(externalAccount.account_id, {
-                    ...customStartingDate,
-                    date: e.target.value,
-                  })
-                }
-                style={{ width: '100%' }}
-              />
-            </View>
-            <View>
-              <Text
-                style={{
-                  marginBottom: 4,
-                  fontSize: 13,
-                  color: theme.pageTextSubdued,
-                }}
-              >
-                <Trans>Balance on that date:</Trans>
-              </Text>
-              <AmountInput
-                value={customStartingDate.balance}
-                zeroSign={
-                  externalAccount.balance != null && externalAccount.balance < 0
-                    ? '-'
-                    : '+'
-                }
-                onUpdate={amount =>
-                  onSetCustomStartingDate(externalAccount.account_id, {
-                    ...customStartingDate,
-                    balance: amount,
-                  })
-                }
-                style={{ width: '100%' }}
-              />
-            </View>
-          </View>
-        </View>
+        <StartingOptionsFields
+          accountId={externalAccount.account_id}
+          externalBalance={externalAccount.balance}
+          customStartingDate={customStartingDate}
+          onSetCustomStartingDate={onSetCustomStartingDate}
+          layout="stacked"
+        />
       )}
 
       {chosenAccount ? (
