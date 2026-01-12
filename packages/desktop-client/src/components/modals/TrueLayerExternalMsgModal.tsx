@@ -9,7 +9,7 @@ import { View } from '@actual-app/components/view';
 
 import { type TrueLayerAuthSession } from 'loot-core/types/models';
 
-import { Error } from '@desktop-client/components/alerts';
+import { Error as AlertError } from '@desktop-client/components/alerts';
 import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
@@ -28,14 +28,14 @@ function renderError(
   t: ReturnType<typeof useTranslation>['t'],
 ) {
   return (
-    <Error style={{ alignSelf: 'center', marginBottom: 10 }}>
+    <AlertError style={{ alignSelf: 'center', marginBottom: 10 }}>
       {error.code === 'timeout'
         ? t('Timed out. Please try again.')
         : t(
             'An error occurred while linking your account, sorry! The potential issue could be: {{ message }}',
             { message: error.message },
           )}
-    </Error>
+    </AlertError>
   );
 }
 
