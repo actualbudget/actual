@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useState, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -90,6 +89,9 @@ export function TrueLayerExternalMsgModal({
   }
 
   async function onContinue() {
+    if (!data.current) {
+      return;
+    }
     setWaiting('accounts');
     await onSuccess(data.current);
     setWaiting(null);
