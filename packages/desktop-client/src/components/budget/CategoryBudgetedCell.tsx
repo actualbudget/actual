@@ -122,7 +122,7 @@ export function CategoryBudgetedCell({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: t(`Budget set to last month’s budget.`),
+                    message: t(`Budget set to last month's budget.`),
                   });
                   setIsMenuOpen(false);
                 }}

@@ -508,7 +508,7 @@ export function BudgetCategories({
                       onToggleVisibilty={group => {
                         onSaveGroup({
                           ...group,
-                          hidden: !!item.value.hidden ? false : true,
+                          hidden: item.value.hidden ? false : true,
                         });
                       }}
                       onApplyBudgetTemplatesInGroup={group =>

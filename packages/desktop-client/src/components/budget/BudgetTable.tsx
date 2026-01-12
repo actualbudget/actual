@@ -22,8 +22,6 @@ import {
   separateGroups,
 } from './util';
 
-import { type BudgetComponents } from '.';
-
 import { type DropPosition } from '@desktop-client/components/sort';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
