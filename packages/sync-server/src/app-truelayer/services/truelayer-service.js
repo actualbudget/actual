@@ -236,15 +236,18 @@ function normalizeAccounts(truelayerAccounts) {
  */
 function normalizeTransactions(truelayerTransactions) {
   return truelayerTransactions.map(tx => {
-    // Log full transaction to see what fields are available
-    if (tx.amount > 0 && !tx.merchant_name) {
-      debug('Incoming transaction with no merchant_name:', JSON.stringify(tx, null, 2));
-    }
+    // TrueLayer provides merchant info in different fields:
+    // - merchant_name: Available for some debit transactions
+    // - meta.provider_merchant_name: Available for most transactions
+    // - description: Always available as fallback
+    const payeeName = tx.merchant_name
+      || tx.meta?.provider_merchant_name
+      || tx.description;
 
     return {
       transactionId: tx.transaction_id,
       date: tx.timestamp.split('T')[0], // ISO → YYYY-MM-DD
-      payeeName: tx.merchant_name || tx.description,
+      payeeName,
       notes: tx.description,
       booked: tx.transaction_type !== 'PENDING',
       transactionAmount: {
