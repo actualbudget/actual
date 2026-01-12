@@ -8,32 +8,33 @@
 
 **Status**: ✅ Phase 1 & 2 Complete - TrueLayer Integration Ready
 
-| Component | Status | Commits |
-|-----------|--------|---------|
-| **Phase 1: Backend** | | |
-| Secrets & Config | ✅ Complete | 7c1ad7f |
-| Type Definitions | ✅ Complete | 4eab4e3 |
-| Service Structure | ✅ Complete | fe7b49f |
-| Service Methods | ✅ Complete | 64a9c3e |
-| Express Routes | ✅ Complete | 297560a |
-| Route Registration | ✅ Complete | 77561162d |
-| RPC Handlers | ✅ Complete | 5830c94c7 |
-| Sync Integration | ✅ Complete | 181471a56 |
-| **Phase 2: Frontend** | | |
-| Status Hook | ✅ Complete | TBD |
-| Authorization Helper | ✅ Complete | TBD |
-| Initialization Modal | ✅ Complete | TBD |
-| External Message Modal | ✅ Complete | TBD |
-| Link Component | ✅ Complete | TBD |
-| Modal Registration | ✅ Complete | TBD |
-| CreateAccountModal | ✅ Complete | TBD |
-| BankSync Component | ✅ Complete | TBD |
-| Account Linking | ✅ Complete | TBD |
-| Modal Type Definitions | ✅ Complete | TBD |
+| Component              | Status      | Commits   |
+| ---------------------- | ----------- | --------- |
+| **Phase 1: Backend**   |             |           |
+| Secrets & Config       | ✅ Complete | 7c1ad7f   |
+| Type Definitions       | ✅ Complete | 4eab4e3   |
+| Service Structure      | ✅ Complete | fe7b49f   |
+| Service Methods        | ✅ Complete | 64a9c3e   |
+| Express Routes         | ✅ Complete | 297560a   |
+| Route Registration     | ✅ Complete | 77561162d |
+| RPC Handlers           | ✅ Complete | 5830c94c7 |
+| Sync Integration       | ✅ Complete | 181471a56 |
+| **Phase 2: Frontend**  |             |           |
+| Status Hook            | ✅ Complete | TBD       |
+| Authorization Helper   | ✅ Complete | TBD       |
+| Initialization Modal   | ✅ Complete | TBD       |
+| External Message Modal | ✅ Complete | TBD       |
+| Link Component         | ✅ Complete | TBD       |
+| Modal Registration     | ✅ Complete | TBD       |
+| CreateAccountModal     | ✅ Complete | TBD       |
+| BankSync Component     | ✅ Complete | TBD       |
+| Account Linking        | ✅ Complete | TBD       |
+| Modal Type Definitions | ✅ Complete | TBD       |
 
 **What Works Now:**
 
 **Backend (Phase 1):**
+
 - ✅ TrueLayer secrets management configured
 - ✅ Provider type system recognizes 'truelayer'
 - ✅ Server configuration includes TRUELAYER_SERVER endpoint
@@ -48,6 +49,7 @@
 - ✅ Transaction sync integration with downloadTrueLayerTransactions
 
 **Frontend (Phase 2):**
+
 - ✅ useTrueLayerStatus hook for configuration checking
 - ✅ authorizeBank function following GoCardless pattern
 - ✅ TrueLayerInitialiseModal for client ID/secret setup
@@ -61,11 +63,13 @@
 - ✅ Modal type definitions in modalsSlice
 
 **Testing:**
+
 - ✅ All tests passing (loot-core: 58s, sync-server: 21.8s, web: 37s)
 - ✅ TypeScript compilation successful
 - ✅ No test failures
 
 **Next Steps:**
+
 1. End-to-end testing with real TrueLayer credentials
 2. Test OAuth flow in browser with actual UK bank
 3. Verify transaction sync with live data
@@ -192,14 +196,20 @@ export async function createAuthLink({ host }) {
   // 3. Build OAuth URL
   const authUrl = new URL('https://auth.truelayer.com/');
   authUrl.searchParams.set('response_type', 'code');
-  authUrl.searchParams.set('client_id', secretsService.get('truelayer_clientId'));
-  authUrl.searchParams.set('scope', 'info accounts balance transactions offline_access');
+  authUrl.searchParams.set(
+    'client_id',
+    secretsService.get('truelayer_clientId'),
+  );
+  authUrl.searchParams.set(
+    'scope',
+    'info accounts balance transactions offline_access',
+  );
   authUrl.searchParams.set('redirect_uri', `${host}/truelayer/callback`);
   authUrl.searchParams.set('state', state);
 
   return {
     link: authUrl.toString(),
-    authId: state
+    authId: state,
   };
 }
 
@@ -220,8 +230,8 @@ export async function exchangeCodeForToken(code, redirectUri) {
       client_id: secretsService.get('truelayer_clientId'),
       client_secret: secretsService.get('truelayer_clientSecret'),
       redirect_uri: redirectUri,
-      code: code
-    })
+      code: code,
+    }),
   });
 
   return response.json();
@@ -231,8 +241,8 @@ export async function exchangeCodeForToken(code, redirectUri) {
 export async function getAccounts(accessToken) {
   const response = await fetch('https://api.truelayer.com/data/v1/accounts', {
     headers: {
-      'Authorization': `Bearer ${accessToken}`
-    }
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 
   const data = await response.json();
@@ -240,15 +250,22 @@ export async function getAccounts(accessToken) {
   return normalizeAccounts(data.results);
 }
 
-export async function getTransactions(accessToken, accountId, startDate, endDate) {
-  const url = new URL(`https://api.truelayer.com/data/v1/accounts/${accountId}/transactions`);
+export async function getTransactions(
+  accessToken,
+  accountId,
+  startDate,
+  endDate,
+) {
+  const url = new URL(
+    `https://api.truelayer.com/data/v1/accounts/${accountId}/transactions`,
+  );
   url.searchParams.set('from', startDate);
   url.searchParams.set('to', endDate);
 
   const response = await fetch(url, {
     headers: {
-      'Authorization': `Bearer ${accessToken}`
-    }
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 
   const data = await response.json();
@@ -263,8 +280,8 @@ export async function refreshAccessToken(refreshToken) {
       grant_type: 'refresh_token',
       client_id: secretsService.get('truelayer_clientId'),
       client_secret: secretsService.get('truelayer_clientSecret'),
-      refresh_token: refreshToken
-    })
+      refresh_token: refreshToken,
+    }),
   });
 
   return response.json();
@@ -278,7 +295,7 @@ function normalizeAccounts(truelayerAccounts) {
     mask: account.account_number?.number?.slice(-4) || '',
     institution: account.provider?.display_name || 'Unknown',
     balance: 0, // Will be fetched separately
-    type: account.account_type
+    type: account.account_type,
   }));
 }
 
@@ -291,12 +308,14 @@ function normalizeTransactions(truelayerTransactions) {
     booked: tx.transaction_type !== 'PENDING',
     transactionAmount: {
       amount: tx.amount,
-      currency: tx.currency
+      currency: tx.currency,
     },
-    balanceAfterTransaction: tx.running_balance ? {
-      amount: tx.running_balance.amount,
-      currency: tx.running_balance.currency
-    } : undefined
+    balanceAfterTransaction: tx.running_balance
+      ? {
+          amount: tx.running_balance.amount,
+          currency: tx.running_balance.currency,
+        }
+      : undefined,
   }));
 }
 ```
@@ -473,7 +492,7 @@ export const SecretName = {
   pluggyai_clientId: 'pluggyai_clientId',
   pluggyai_clientSecret: 'pluggyai_clientSecret',
   pluggyai_itemIds: 'pluggyai_itemIds',
-  truelayer_clientId: 'truelayer_clientId',       // Add this
+  truelayer_clientId: 'truelayer_clientId', // Add this
   truelayer_clientSecret: 'truelayer_clientSecret', // Add this
 };
 ```
@@ -518,13 +537,11 @@ async function trueLayerStatus() {
   return post(
     serverConfig.TRUELAYER_SERVER + '/status',
     {},
-    { ...getHeadersWithUserToken(userToken) }
+    { ...getHeadersWithUserToken(userToken) },
   ).catch(handleRequestError);
 }
 
-async function createTrueLayerWebToken(
-  args: { institutionId: string }
-) {
+async function createTrueLayerWebToken(args: { institutionId: string }) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
     return { error: 'unauthorized' };
@@ -535,11 +552,9 @@ async function createTrueLayerWebToken(
     throw new Error('Failed to get server config.');
   }
 
-  return post(
-    serverConfig.TRUELAYER_SERVER + '/create-web-token',
-    args,
-    { ...getHeadersWithUserToken(userToken) }
-  ).catch(handleRequestError);
+  return post(serverConfig.TRUELAYER_SERVER + '/create-web-token', args, {
+    ...getHeadersWithUserToken(userToken),
+  }).catch(handleRequestError);
 }
 
 let truelayerPolling: NodeJS.Timeout | null = null;
@@ -564,7 +579,7 @@ async function pollTrueLayerWebToken(args: { authId: string }) {
         const result = await post(
           serverConfig.TRUELAYER_SERVER + '/get-accounts',
           { authId: args.authId },
-          { ...getHeadersWithUserToken(userToken) }
+          { ...getHeadersWithUserToken(userToken) },
         );
 
         // If successful, stop polling and resolve
@@ -618,13 +633,13 @@ async function linkTrueLayerAccount({
   // authId is used as bank_id (similar to requisitionId in GoCardless)
   const bank = await link.findOrCreateBank(
     institution,
-    externalAccount.account_id  // Using account_id as unique identifier
+    externalAccount.account_id, // Using account_id as unique identifier
   );
 
   if (upgradingId) {
     const accRow = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
-      [upgradingId]
+      [upgradingId],
     );
 
     if (!accRow) {
@@ -661,7 +676,7 @@ async function linkTrueLayerAccount({
     undefined,
     id,
     externalAccount.account_id,
-    bank.bank_id
+    bank.bank_id,
   );
 
   connection.send('sync-event', {
@@ -699,7 +714,7 @@ async function downloadTrueLayerTransactions(
   accountId: string,
   bankId: string,
   startDate?: string,
-  endDate?: string
+  endDate?: string,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
@@ -716,9 +731,9 @@ async function downloadTrueLayerTransactions(
     {
       accountId,
       startDate,
-      endDate
+      endDate,
     },
-    { ...getHeadersWithUserToken(userToken) }
+    { ...getHeadersWithUserToken(userToken) },
   );
 }
 
@@ -729,7 +744,7 @@ if (account.account_sync_source === 'truelayer') {
     accountId,
     bankId,
     startDate,
-    endDate
+    endDate,
   );
 }
 ```
@@ -760,10 +775,10 @@ export async function authorizeTrueLayer(dispatch: AppDispatch) {
           },
           onSuccess: () => {
             // Show account selection
-          }
-        }
-      }
-    })
+          },
+        },
+      },
+    }),
   );
 }
 ```
@@ -775,6 +790,7 @@ export async function authorizeTrueLayer(dispatch: AppDispatch) {
 ### ✅ Phase 1 Complete - Backend Infrastructure (Commits: 7c1ad7f → 181471a56)
 
 **Backend Foundation:**
+
 - [x] Create `app-truelayer/` directory structure (fe7b49f)
 - [x] Implement `truelayer-service.js` with OAuth methods (64a9c3e)
 - [x] Add error classes (6 custom error types) (fe7b49f)
@@ -783,16 +799,19 @@ export async function authorizeTrueLayer(dispatch: AppDispatch) {
 - [x] Create `link.html` OAuth callback page (fe7b49f)
 
 **Types:**
+
 - [x] Create `truelayer.ts` type definitions (4eab4e3)
 - [x] Update `BankSyncProviders` union (7c1ad7f)
 - [x] Export types from `index.ts` (4eab4e3)
 
 **Express Router:**
+
 - [x] Create Express routes in `app-truelayer.js` (297560a)
 - [x] Register routes in `app.ts` (77561162d)
 - [x] Implement 7 HTTP endpoints (status, create-web-token, get-accounts, callback, transactions, refresh-token, link)
 
 **RPC Handlers:**
+
 - [x] Implement `trueLayerStatus()` (5830c94c7)
 - [x] Implement `createTrueLayerWebToken()` (5830c94c7)
 - [x] Implement `pollTrueLayerWebToken()` (5830c94c7)
@@ -801,10 +820,12 @@ export async function authorizeTrueLayer(dispatch: AppDispatch) {
 - [x] Register all RPC methods (5830c94c7)
 
 **Sync Logic:**
+
 - [x] Add TrueLayer case to `sync.ts` (181471a56)
 - [x] Implement `downloadTrueLayerTransactions()` (181471a56)
 
 **Testing:**
+
 - [x] All loot-core tests passing
 - [x] All sync-server tests passing
 - [x] TypeScript compilation successful
@@ -812,6 +833,7 @@ export async function authorizeTrueLayer(dispatch: AppDispatch) {
 ### ✅ Phase 2 - Frontend Integration (100% Complete)
 
 **Frontend Components:**
+
 - [x] Create useTrueLayerStatus hook
 - [x] Create authorizeBank helper function
 - [x] Create TrueLayerInitialiseModal component
