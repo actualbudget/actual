@@ -15,7 +15,7 @@
     "vi": "readonly",
     "backend": "readonly",
     "importScripts": "readonly",
-    "FS": "readonly" // TODO: remove this
+    "FS": "readonly"
   },
   "rules": {
     // TODO fix all these and re-enable
@@ -103,13 +103,7 @@
     "jsx-a11y/scope": "warn",
 
     // Typescript rules
-    "typescript/ban-ts-comment": [
-      "warn",
-      {
-        // TODO: remove this
-        "ts-ignore": "allow-with-description"
-      }
-    ],
+    "typescript/ban-ts-comment": ["warn"],
     "typescript/consistent-type-definitions": ["warn", "type"],
     "typescript/consistent-type-imports": [
       "warn",
@@ -190,7 +184,7 @@
 
     // ESLint rules
     "eslint/array-callback-return": "warn",
-    // "eslint/curly": ["warn", "multi-line", "consistent"], // TODO: re-enable? this rule is really slow
+    "eslint/curly": ["warn", "multi-line", "consistent"],
     "eslint/default-case": [
       "warn",
       {

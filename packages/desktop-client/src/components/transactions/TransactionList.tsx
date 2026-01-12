@@ -76,9 +76,9 @@ async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
   const remoteDiff = await saveDiff(diff, learnCategories);
   onChange(
     // TODO:
-    // @ts-ignore testing
+    // @ts-expect-error - fix me
     applyTransactionDiff(changes.newTransaction, remoteDiff),
-    // @ts-ignore testing
+    // @ts-expect-error - fix me
     applyChanges(remoteDiff, changes.data),
   );
 }
