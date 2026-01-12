@@ -859,24 +859,37 @@ type SyncError =
       internal?: string;
     };
 
+/**
+ * Type guard to check if an error is a BankSyncError.
+ * Handles both class instances and plain objects with the BankSyncError shape.
+ */
+function isBankSyncError(err: unknown): err is BankSyncError {
+  return (
+    err instanceof BankSyncError ||
+    (typeof err === 'object' &&
+      err !== null &&
+      'type' in err &&
+      err.type === 'BankSyncError')
+  );
+}
+
+/**
+ * Converts a sync error into a standardized SyncError response object.
+ */
 function handleSyncError(
   err: Error | PostError | BankSyncError,
   acct: db.DbAccount,
 ): SyncError {
-  // TODO: refactor bank sync logic to use BankSyncError properly
-  // oxlint-disable-next-line typescript/no-explicit-any
-  if (err instanceof BankSyncError || (err as any)?.type === 'BankSyncError') {
-    const error = err as BankSyncError;
-
+  if (isBankSyncError(err)) {
     const syncError = {
       type: 'SyncError',
       accountId: acct.id,
       message: 'Failed syncing account "' + acct.name + '."',
-      category: error.category,
-      code: error.code,
+      category: err.category,
+      code: err.code,
     };
 
-    if (error.category === 'RATE_LIMIT_EXCEEDED') {
+    if (err.category === 'RATE_LIMIT_EXCEEDED') {
       return {
         ...syncError,
         message: `Failed syncing account ${acct.name}. Rate limit exceeded. Please try again later.`,
