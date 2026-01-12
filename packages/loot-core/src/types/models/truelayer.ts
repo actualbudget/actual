@@ -55,5 +55,6 @@ export type SyncServerTrueLayerAccount = {
 
 export type TrueLayerAuthSession = {
   authId: string;
-  link: string;
+  link?: string;
+  accounts?: SyncServerTrueLayerAccount[];
 };

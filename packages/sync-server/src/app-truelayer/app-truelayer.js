@@ -156,6 +156,7 @@ app.post(
     res.send({
       status: 'ok',
       data: {
+        authId,
         accounts,
         // Don't send tokens to client for security
         // They're stored server-side in the session
@@ -170,10 +171,10 @@ app.post(
 app.post(
   '/transactions',
   handleError(async (req, res) => {
-    const { accountId, accessToken, startDate, endDate } = req.body || {};
+    const { accountId, startDate, endDate } = req.body || {};
 
-    // TODO: Get access token from stored session instead of requiring it in request
-    // For now, this is a simplified implementation
+    // Get access token from stored session
+    const accessToken = truelayerService.getAccessTokenForAccount(accountId);
 
     const transactions = await truelayerService.getTransactions(
       accessToken,

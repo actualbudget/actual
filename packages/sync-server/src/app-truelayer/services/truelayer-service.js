@@ -9,6 +9,9 @@ const debug = createDebug('actual:truelayer');
 // In-memory store for OAuth state (in production, use database)
 const authSessions = new Map();
 
+// Mapping from account_id to authId for token lookup
+const accountAuthMapping = new Map();
+
 /**
  * Check if TrueLayer is configured with client credentials
  * @returns {boolean}
@@ -285,6 +288,11 @@ export async function handleCallback(authId, code, error) {
   session.tokens = tokens;
   session.accounts = accounts;
 
+  // Store account_id → authId mapping for transaction requests
+  for (const account of accounts) {
+    accountAuthMapping.set(account.account_id, authId);
+  }
+
   debug('Authorization successful, stored', accounts.length, 'accounts');
 
   return { accounts, tokens };
@@ -315,6 +323,25 @@ export async function getAccountsWithAuth(authId) {
     accounts: session.accounts,
     tokens: session.tokens
   };
+}
+
+/**
+ * Get access token for an account
+ * @param {string} accountId - Account ID
+ * @returns {string} Access token
+ */
+export function getAccessTokenForAccount(accountId) {
+  const authId = accountAuthMapping.get(accountId);
+  if (!authId) {
+    throw new errors.NotFoundError('Account not found or not linked');
+  }
+
+  const session = authSessions.get(authId);
+  if (!session || session.status !== 'linked') {
+    throw new errors.NotFoundError('Authorization session not found or not linked');
+  }
+
+  return session.tokens.access_token;
 }
 
 /**
