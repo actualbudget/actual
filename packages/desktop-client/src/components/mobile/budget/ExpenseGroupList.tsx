@@ -51,7 +51,7 @@ export function ExpenseGroupList({
       [...keys].map(
         key =>
           ({
-            'text/plain': key as CategoryEntity['id'],
+            'text/plain': key as CategoryGroupEntity['id'],
           }) as DragItem,
       ),
     renderDropIndicator: target => {
@@ -61,7 +61,7 @@ export function ExpenseGroupList({
           className={css({
             '&[data-drop-target]': {
               height: 4,
-              backgroundColor: theme.tableBorderSeparator,
+              backgroundColor: theme.tableBorderHover,
               opacity: 1,
               borderRadius: 4,
             },
@@ -101,7 +101,7 @@ export function ExpenseGroupList({
         );
       }
 
-      const targetGroupId = e.target.key as CategoryEntity['id'];
+      const targetGroupId = e.target.key as CategoryGroupEntity['id'];
 
       if (e.target.dropPosition === 'before') {
         dispatch(

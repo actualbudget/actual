@@ -54,7 +54,7 @@ export function ExpenseCategoryList({
           className={css({
             '&[data-drop-target]': {
               height: 4,
-              backgroundColor: theme.tableBorderSeparator,
+              backgroundColor: theme.tableBorderHover,
               opacity: 1,
               borderRadius: 4,
             },
@@ -80,12 +80,15 @@ export function ExpenseCategoryList({
       }
 
       const targetCategoryId = e.target.key as CategoryEntity['id'];
+      const targetCategoryGroupId = categories.find(
+        c => c.id === targetCategoryId,
+      )?.group;
 
       if (e.target.dropPosition === 'before') {
         dispatch(
           moveCategory({
             id: categoryToMove.id,
-            groupId: categoryToMove.group,
+            groupId: targetCategoryGroupId,
             targetId: targetCategoryId,
           }),
         );
@@ -105,7 +108,7 @@ export function ExpenseCategoryList({
         dispatch(
           moveCategory({
             id: categoryToMove.id,
-            groupId: categoryToMove.group,
+            groupId: targetCategoryGroupId,
             // Due to the way `moveCategory` works, we use the category next to the
             // actual target category here because `moveCategory` always shoves the
             // category *before* the target category.
