@@ -30,13 +30,13 @@ import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 import { useTrueLayerStatus } from '@desktop-client/hooks/useTrueLayerStatus';
-import { authorizeBank as authorizeTrueLayerBank } from '@desktop-client/truelayer';
 import {
   type Modal as ModalType,
   pushModal,
 } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { authorizeBank as authorizeTrueLayerBank } from '@desktop-client/truelayer';
 
 type CreateAccountModalProps = Extract<
   ModalType,
@@ -705,7 +705,7 @@ export function CreateAccountModal({
                         {[
                           isGoCardlessSetupComplete ? '' : 'GoCardless',
                           isSimpleFinSetupComplete ? '' : 'SimpleFIN',
-                          isTrueLayerSetupComplete ? '' : 'TrueLayer',
+                          isTrueLayerSetupComplete ? '' : t('TrueLayer'),
                           isPluggyAiSetupComplete ? '' : 'Pluggy.ai',
                         ]
                           .filter(Boolean)
