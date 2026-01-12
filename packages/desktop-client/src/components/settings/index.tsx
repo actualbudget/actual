@@ -23,7 +23,7 @@ import { ExportBudget } from './Export';
 import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
 import { RepairTransactions } from './RepairTransactions';
-import { ForceReload, ResetCache, ResetSync } from './Reset';
+import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
@@ -176,7 +176,6 @@ export function Settings() {
   const [budgetName] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
-  const isForceReloadEnabled = useFeatureFlag('forceReload');
   const [_, setDefaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
 
   const onCloseBudget = () => {
@@ -253,7 +252,6 @@ export function Settings() {
         <ExportBudget />
         <AdvancedToggle>
           <AdvancedAbout />
-          {isForceReloadEnabled && <ForceReload />}
           <ResetCache />
           <ResetSync />
           <RepairTransactions />

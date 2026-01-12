@@ -174,6 +174,7 @@ async function getUser() {
         userId = null,
         displayName = null,
         loginMethod = null,
+        prefs: serverPrefs,
       } = {},
     } = JSON.parse(res) || {};
 
@@ -195,6 +196,7 @@ async function getUser() {
       displayName,
       loginMethod,
       tokenExpired,
+      serverPrefs,
     };
   } catch (e) {
     logger.log(e);

@@ -126,6 +126,10 @@ function ConfigureField<T extends RuleConditionEntity>({
     return value;
   }, [value, field, subfield, dateFormat]);
 
+  // For ops that filter based on payeeId, those use PayeeFilter, otherwise we use GenericInput
+  const isPayeeIdOp = (op: T['op']) =>
+    ['is', 'is not', 'one of', 'not one of'].includes(op);
+
   return (
     <FocusScope>
       <View style={{ marginBottom: 10 }}>
@@ -260,7 +264,7 @@ function ConfigureField<T extends RuleConditionEntity>({
           });
         }}
       >
-        {type !== 'boolean' && field !== 'payee' && (
+        {type !== 'boolean' && (field !== 'payee' || !isPayeeIdOp(op)) && (
           <GenericInput
             ref={inputRef}
             // @ts-expect-error - fix me
@@ -292,7 +296,7 @@ function ConfigureField<T extends RuleConditionEntity>({
           />
         )}
 
-        {field === 'payee' && (
+        {field === 'payee' && isPayeeIdOp(op) && (
           <PayeeFilter
             // @ts-expect-error - fix me
             value={formattedValue}
