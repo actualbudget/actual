@@ -202,9 +202,6 @@ export function ExperimentalFeatures() {
             >
               <Trans>Crossover Report</Trans>
             </FeatureToggle>
-            <FeatureToggle flag="forceReload">
-              <Trans>Force reload app button</Trans>
-            </FeatureToggle>
             <FeatureToggle
               flag="customThemes"
               feedbackLink="https://github.com/actualbudget/actual/issues/6607"

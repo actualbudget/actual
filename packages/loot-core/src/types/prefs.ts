@@ -5,7 +5,6 @@ export type FeatureFlag =
   | 'formulaMode'
   | 'currency'
   | 'crossoverReport'
-  | 'forceReload'
   | 'customThemes';
 
 /**
