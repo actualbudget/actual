@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+
 import createDebug from 'debug';
 
 import { secretsService } from '../../services/secrets-service.js';
@@ -32,7 +33,9 @@ export async function createAuthLink({ host }) {
   debug('Creating auth link for host:', host);
 
   if (!isConfigured()) {
-    throw new Error('TrueLayer is not configured. Please set client credentials.');
+    throw new Error(
+      'TrueLayer is not configured. Please set client credentials.',
+    );
   }
 
   const clientId = secretsService.get('truelayer_clientId');
@@ -44,14 +47,17 @@ export async function createAuthLink({ host }) {
   authSessions.set(authId, {
     created: Date.now(),
     status: 'pending',
-    redirectUri: `${host}/truelayer/callback`
+    redirectUri: `${host}/truelayer/callback`,
   });
 
   // Build OAuth URL
   const authUrl = new URL('https://auth.truelayer.com/');
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('client_id', clientId);
-  authUrl.searchParams.set('scope', 'info accounts balance transactions offline_access');
+  authUrl.searchParams.set(
+    'scope',
+    'info accounts balance transactions offline_access',
+  );
   authUrl.searchParams.set('redirect_uri', `${host}/truelayer/callback`);
   authUrl.searchParams.set('state', authId);
 
@@ -59,7 +65,7 @@ export async function createAuthLink({ host }) {
 
   return {
     link: authUrl.toString(),
-    authId
+    authId,
   };
 }
 
@@ -78,15 +84,15 @@ export async function exchangeCodeForToken(code, redirectUri) {
   const response = await fetch('https://auth.truelayer.com/connect/token', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
       grant_type: 'authorization_code',
       client_id: clientId,
       client_secret: clientSecret,
       redirect_uri: redirectUri,
-      code: code
-    })
+      code,
+    }),
   });
 
   if (!response.ok) {
@@ -116,14 +122,14 @@ export async function refreshAccessToken(refreshToken) {
   const response = await fetch('https://auth.truelayer.com/connect/token', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
       grant_type: 'refresh_token',
       client_id: clientId,
       client_secret: clientSecret,
-      refresh_token: refreshToken
-    })
+      refresh_token: refreshToken,
+    }),
   });
 
   if (!response.ok) {
@@ -145,8 +151,8 @@ export async function getAccounts(accessToken) {
 
   const response = await fetch('https://api.truelayer.com/data/v1/accounts', {
     headers: {
-      'Authorization': `Bearer ${accessToken}`
-    }
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 
   if (!response.ok) {
@@ -181,11 +187,14 @@ export async function getAccounts(accessToken) {
 export async function getBalance(accessToken, accountId) {
   debug(`Fetching balance for account ${accountId}`);
 
-  const response = await fetch(`https://api.truelayer.com/data/v1/accounts/${accountId}/balance`, {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`
-    }
-  });
+  const response = await fetch(
+    `https://api.truelayer.com/data/v1/accounts/${accountId}/balance`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
 
   if (!response.ok) {
     const error = await response.text();
@@ -215,17 +224,24 @@ export async function getBalance(accessToken, accountId) {
  * @param {string} endDate - End date (YYYY-MM-DD)
  * @returns {Promise<Array>} Normalized transactions
  */
-export async function getTransactions(accessToken, accountId, startDate, endDate) {
+export async function getTransactions(
+  accessToken,
+  accountId,
+  startDate,
+  endDate,
+) {
   debug(`Fetching transactions for account ${accountId}`);
 
-  const url = new URL(`https://api.truelayer.com/data/v1/accounts/${accountId}/transactions`);
+  const url = new URL(
+    `https://api.truelayer.com/data/v1/accounts/${accountId}/transactions`,
+  );
   if (startDate) url.searchParams.set('from', startDate);
   if (endDate) url.searchParams.set('to', endDate);
 
   const response = await fetch(url, {
     headers: {
-      'Authorization': `Bearer ${accessToken}`
-    }
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 
   if (!response.ok) {
@@ -260,7 +276,7 @@ function normalizeAccounts(truelayerAccounts) {
     mask: account.account_number?.number?.slice(-4) || '',
     institution: account.provider?.display_name || 'Unknown',
     balance: 0, // Will be fetched separately if needed
-    type: account.account_type
+    type: account.account_type,
   }));
 }
 
@@ -277,9 +293,8 @@ function normalizeTransactions(truelayerTransactions) {
     // - description: Raw transaction description (fallback)
     //
     // We prefer provider_merchant_name as it's typically cleaner and more consistent
-    const payeeName = tx.meta?.provider_merchant_name
-      || tx.merchant_name
-      || tx.description;
+    const payeeName =
+      tx.meta?.provider_merchant_name || tx.merchant_name || tx.description;
 
     return {
       transactionId: tx.transaction_id,
@@ -289,12 +304,14 @@ function normalizeTransactions(truelayerTransactions) {
       booked: tx.transaction_type !== 'PENDING',
       transactionAmount: {
         amount: tx.amount,
-        currency: tx.currency
+        currency: tx.currency,
       },
-      balanceAfterTransaction: tx.running_balance ? {
-        amount: tx.running_balance.amount,
-        currency: tx.running_balance.currency
-      } : undefined
+      balanceAfterTransaction: tx.running_balance
+        ? {
+            amount: tx.running_balance.amount,
+            currency: tx.running_balance.currency,
+          }
+        : undefined,
     };
   });
 }
@@ -342,13 +359,16 @@ export async function handleCallback(authId, code, error) {
 
     // Store tokens for this account using secrets service for persistence across restarts
     const tokenKey = `truelayer_token_${account.account_id}`;
-    secretsService.set(tokenKey, JSON.stringify({
-      access_token: tokens.access_token,
-      refresh_token: tokens.refresh_token,
-      expires_in: tokens.expires_in,
-      token_type: tokens.token_type,
-      saved_at: Date.now()
-    }));
+    secretsService.set(
+      tokenKey,
+      JSON.stringify({
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        expires_in: tokens.expires_in,
+        token_type: tokens.token_type,
+        saved_at: Date.now(),
+      }),
+    );
   }
 
   debug('Authorization successful, stored', accounts.length, 'accounts');
@@ -379,7 +399,7 @@ export async function getAccountsWithAuth(authId) {
 
   return {
     accounts: session.accounts,
-    tokens: session.tokens
+    tokens: session.tokens,
   };
 }
 
@@ -412,11 +432,11 @@ export async function getAccessTokenForAccount(accountId) {
   // Check if token needs refresh (expires_in is in seconds)
   // Tokens are stored with a timestamp when saved
   if (tokens.saved_at) {
-    const expiresAt = tokens.saved_at + (tokens.expires_in * 1000);
+    const expiresAt = tokens.saved_at + tokens.expires_in * 1000;
     const now = Date.now();
 
     // Refresh if token expires in less than 5 minutes
-    if (now >= expiresAt - (5 * 60 * 1000)) {
+    if (now >= expiresAt - 5 * 60 * 1000) {
       debug('Access token expired or expiring soon, refreshing...');
       const newTokens = await refreshAccessToken(tokens.refresh_token);
 
@@ -426,7 +446,7 @@ export async function getAccessTokenForAccount(accountId) {
         refresh_token: newTokens.refresh_token || tokens.refresh_token,
         expires_in: newTokens.expires_in,
         token_type: newTokens.token_type,
-        saved_at: Date.now()
+        saved_at: Date.now(),
       };
 
       secretsService.set(tokenKey, JSON.stringify(tokens));
