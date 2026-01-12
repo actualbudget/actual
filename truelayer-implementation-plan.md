@@ -6,10 +6,11 @@
 
 ## Progress Summary
 
-**Status**: ✅ Phase 1 - Backend Infrastructure (100% Complete)
+**Status**: ✅ Phase 1 & 2 Complete - TrueLayer Integration Ready
 
 | Component | Status | Commits |
 |-----------|--------|---------|
+| **Phase 1: Backend** | | |
 | Secrets & Config | ✅ Complete | 7c1ad7f |
 | Type Definitions | ✅ Complete | 4eab4e3 |
 | Service Structure | ✅ Complete | fe7b49f |
@@ -18,9 +19,21 @@
 | Route Registration | ✅ Complete | 77561162d |
 | RPC Handlers | ✅ Complete | 5830c94c7 |
 | Sync Integration | ✅ Complete | 181471a56 |
-| Frontend UI | ⏸️ Phase 2 | - |
+| **Phase 2: Frontend** | | |
+| Status Hook | ✅ Complete | TBD |
+| Authorization Helper | ✅ Complete | TBD |
+| Initialization Modal | ✅ Complete | TBD |
+| External Message Modal | ✅ Complete | TBD |
+| Link Component | ✅ Complete | TBD |
+| Modal Registration | ✅ Complete | TBD |
+| CreateAccountModal | ✅ Complete | TBD |
+| BankSync Component | ✅ Complete | TBD |
+| Account Linking | ✅ Complete | TBD |
+| Modal Type Definitions | ✅ Complete | TBD |
 
 **What Works Now:**
+
+**Backend (Phase 1):**
 - ✅ TrueLayer secrets management configured
 - ✅ Provider type system recognizes 'truelayer'
 - ✅ Server configuration includes TRUELAYER_SERVER endpoint
@@ -33,12 +46,30 @@
 - ✅ Routes registered in sync server app
 - ✅ RPC handlers for frontend communication
 - ✅ Transaction sync integration with downloadTrueLayerTransactions
-- ✅ All tests passing (loot-core, sync-server, web)
+
+**Frontend (Phase 2):**
+- ✅ useTrueLayerStatus hook for configuration checking
+- ✅ authorizeBank function following GoCardless pattern
+- ✅ TrueLayerInitialiseModal for client ID/secret setup
+- ✅ TrueLayerExternalMsgModal for OAuth flow
+- ✅ TrueLayerLink component for OAuth callback
+- ✅ Modal registration in Modals.tsx
+- ✅ TrueLayer integration in CreateAccountModal (UK bank accounts)
+- ✅ BankSync component updated to display 'TrueLayer'
+- ✅ linkAccountTrueLayer action in accountsSlice
+- ✅ SelectLinkedAccountsModal supports TrueLayer accounts
+- ✅ Modal type definitions in modalsSlice
+
+**Testing:**
+- ✅ All tests passing (loot-core: 58s, sync-server: 21.8s, web: 37s)
+- ✅ TypeScript compilation successful
+- ✅ No test failures
 
 **Next Steps:**
-1. Phase 2: Build frontend UI components (authorization modal, account selection)
-2. Test OAuth flow end-to-end with real TrueLayer credentials
+1. End-to-end testing with real TrueLayer credentials
+2. Test OAuth flow in browser with actual UK bank
 3. Verify transaction sync with live data
+4. Create pull request for code review
 
 ---
 
@@ -778,13 +809,21 @@ export async function authorizeTrueLayer(dispatch: AppDispatch) {
 - [x] All sync-server tests passing
 - [x] TypeScript compilation successful
 
-### 🚧 Phase 2 - Frontend Integration (Not Started)
+### ✅ Phase 2 - Frontend Integration (100% Complete)
 
-**Frontend (Next Phase):**
-- [ ] Create TrueLayer authorization modal
-- [ ] Add account selection integration
-- [ ] Add UI components for configuration
-- [ ] Add TrueLayer option to bank sync settings
+**Frontend Components:**
+- [x] Create useTrueLayerStatus hook
+- [x] Create authorizeBank helper function
+- [x] Create TrueLayerInitialiseModal component
+- [x] Create TrueLayerExternalMsgModal component
+- [x] Create TrueLayerLink component
+- [x] Register modals in Modals.tsx
+- [x] Add TrueLayer to CreateAccountModal
+- [x] Update BankSync component
+- [x] Add linkAccountTrueLayer to accountsSlice
+- [x] Update SelectLinkedAccountsModal for TrueLayer
+- [x] Add modal type definitions to modalsSlice
+- [x] Run and verify all tests pass
 
 ---
 
