@@ -14,12 +14,14 @@ import {
   type SyncServerGoCardlessAccount,
   type SyncServerPluggyAiAccount,
   type SyncServerSimpleFinAccount,
+  type SyncServerTrueLayerAccount,
 } from 'loot-core/types/models';
 
 import {
   linkAccount,
   linkAccountPluggyAi,
   linkAccountSimpleFin,
+  linkAccountTrueLayer,
   unlinkAccount,
 } from '@desktop-client/accounts/accountsSlice';
 import {
@@ -64,20 +66,30 @@ export type SelectLinkedAccountsModalProps =
       requisitionId: string;
       externalAccounts: SyncServerGoCardlessAccount[];
       syncSource: 'goCardless';
+      authId?: undefined;
     }
   | {
       requisitionId?: undefined;
       externalAccounts: SyncServerSimpleFinAccount[];
       syncSource: 'simpleFin';
+      authId?: undefined;
     }
   | {
       requisitionId?: undefined;
       externalAccounts: SyncServerPluggyAiAccount[];
       syncSource: 'pluggyai';
+      authId?: undefined;
+    }
+  | {
+      requisitionId?: undefined;
+      authId: string;
+      externalAccounts: SyncServerTrueLayerAccount[];
+      syncSource: 'truelayer';
     };
 
 export function SelectLinkedAccountsModal({
   requisitionId = undefined,
+  authId = undefined,
   externalAccounts,
   syncSource,
 }: SelectLinkedAccountsModalProps) {
@@ -106,10 +118,16 @@ export function SelectLinkedAccountsModal({
             requisitionId: requisitionId!,
             externalAccounts: toSort as SyncServerGoCardlessAccount[],
           };
+        case 'truelayer':
+          return {
+            syncSource: 'truelayer',
+            authId: authId!,
+            externalAccounts: toSort as SyncServerTrueLayerAccount[],
+          };
         default:
           throw new Error(`Unrecognized sync source: ${syncSource}`);
       }
-    }, [externalAccounts, syncSource, requisitionId]);
+    }, [externalAccounts, syncSource, requisitionId, authId]);
 
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
@@ -175,6 +193,22 @@ export function SelectLinkedAccountsModal({
           dispatch(
             linkAccountPluggyAi({
               externalAccount:
+                propsWithSortedExternalAccounts.externalAccounts[
+                  externalAccountIndex
+                ],
+              upgradingId:
+                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+                chosenLocalAccountId !== addOffBudgetAccountOption.id
+                  ? chosenLocalAccountId
+                  : undefined,
+              offBudget,
+            }),
+          );
+        } else if (propsWithSortedExternalAccounts.syncSource === 'truelayer') {
+          dispatch(
+            linkAccountTrueLayer({
+              authId: propsWithSortedExternalAccounts.authId,
+              account:
                 propsWithSortedExternalAccounts.externalAccounts[
                   externalAccountIndex
                 ],
@@ -407,7 +441,8 @@ export function SelectLinkedAccountsModal({
 type ExternalAccount =
   | SyncServerGoCardlessAccount
   | SyncServerSimpleFinAccount
-  | SyncServerPluggyAiAccount;
+  | SyncServerPluggyAiAccount
+  | SyncServerTrueLayerAccount;
 
 type SharedAccountRowProps = {
   externalAccount: ExternalAccount;
@@ -546,7 +581,8 @@ function getInstitutionName(
   externalAccount:
     | SyncServerGoCardlessAccount
     | SyncServerSimpleFinAccount
-    | SyncServerPluggyAiAccount,
+    | SyncServerPluggyAiAccount
+    | SyncServerTrueLayerAccount,
 ) {
   if (typeof externalAccount?.institution === 'string') {
     return externalAccount?.institution ?? '';
