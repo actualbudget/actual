@@ -41,7 +41,7 @@ export async function createAuthLink({ host }) {
   authSessions.set(authId, {
     created: Date.now(),
     status: 'pending',
-    redirectUri: `${host}/truelayer/link`
+    redirectUri: `${host}/truelayer/callback`
   });
 
   // Build OAuth URL
@@ -49,7 +49,7 @@ export async function createAuthLink({ host }) {
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('client_id', clientId);
   authUrl.searchParams.set('scope', 'info accounts balance transactions offline_access');
-  authUrl.searchParams.set('redirect_uri', `${host}/truelayer/link`);
+  authUrl.searchParams.set('redirect_uri', `${host}/truelayer/callback`);
   authUrl.searchParams.set('state', authId);
 
   debug('Generated auth URL:', authUrl.toString());
