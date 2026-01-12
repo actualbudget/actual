@@ -173,8 +173,8 @@ app.post(
   handleError(async (req, res) => {
     const { accountId, startDate, endDate } = req.body || {};
 
-    // Get access token from stored session
-    const accessToken = truelayerService.getAccessTokenForAccount(accountId);
+    // Get access token from stored session (with automatic refresh if needed)
+    const accessToken = await truelayerService.getAccessTokenForAccount(accountId);
 
     const transactions = await truelayerService.getTransactions(
       accessToken,

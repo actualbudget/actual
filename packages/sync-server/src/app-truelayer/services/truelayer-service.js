@@ -235,21 +235,28 @@ function normalizeAccounts(truelayerAccounts) {
  * @returns {Array} Normalized transactions
  */
 function normalizeTransactions(truelayerTransactions) {
-  return truelayerTransactions.map(tx => ({
-    transactionId: tx.transaction_id,
-    date: tx.timestamp.split('T')[0], // ISO → YYYY-MM-DD
-    payeeName: tx.merchant_name || tx.description,
-    notes: tx.description,
-    booked: tx.transaction_type !== 'PENDING',
-    transactionAmount: {
-      amount: tx.amount,
-      currency: tx.currency
-    },
-    balanceAfterTransaction: tx.running_balance ? {
-      amount: tx.running_balance.amount,
-      currency: tx.running_balance.currency
-    } : undefined
-  }));
+  return truelayerTransactions.map(tx => {
+    // Log full transaction to see what fields are available
+    if (tx.amount > 0 && !tx.merchant_name) {
+      debug('Incoming transaction with no merchant_name:', JSON.stringify(tx, null, 2));
+    }
+
+    return {
+      transactionId: tx.transaction_id,
+      date: tx.timestamp.split('T')[0], // ISO → YYYY-MM-DD
+      payeeName: tx.merchant_name || tx.description,
+      notes: tx.description,
+      booked: tx.transaction_type !== 'PENDING',
+      transactionAmount: {
+        amount: tx.amount,
+        currency: tx.currency
+      },
+      balanceAfterTransaction: tx.running_balance ? {
+        amount: tx.running_balance.amount,
+        currency: tx.running_balance.currency
+      } : undefined
+    };
+  });
 }
 
 /**
@@ -289,8 +296,19 @@ export async function handleCallback(authId, code, error) {
   session.accounts = accounts;
 
   // Store account_id → authId mapping for transaction requests
+  // Also store tokens persistently using secrets service
   for (const account of accounts) {
     accountAuthMapping.set(account.account_id, authId);
+
+    // Store tokens for this account using secrets service for persistence across restarts
+    const tokenKey = `truelayer_token_${account.account_id}`;
+    secretsService.set(tokenKey, JSON.stringify({
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+      expires_in: tokens.expires_in,
+      token_type: tokens.token_type,
+      saved_at: Date.now()
+    }));
   }
 
   debug('Authorization successful, stored', accounts.length, 'accounts');
@@ -326,22 +344,57 @@ export async function getAccountsWithAuth(authId) {
 }
 
 /**
- * Get access token for an account
+ * Get access token for an account, refreshing if needed
  * @param {string} accountId - Account ID
- * @returns {string} Access token
+ * @returns {Promise<string>} Access token
  */
-export function getAccessTokenForAccount(accountId) {
+export async function getAccessTokenForAccount(accountId) {
+  // Try in-memory first
   const authId = accountAuthMapping.get(accountId);
-  if (!authId) {
+
+  if (authId) {
+    const session = authSessions.get(authId);
+    if (session && session.status === 'linked') {
+      return session.tokens.access_token;
+    }
+  }
+
+  // Fallback to persistent storage
+  const tokenKey = `truelayer_token_${accountId}`;
+  const tokenData = secretsService.get(tokenKey);
+
+  if (!tokenData) {
     throw new errors.NotFoundError('Account not found or not linked');
   }
 
-  const session = authSessions.get(authId);
-  if (!session || session.status !== 'linked') {
-    throw new errors.NotFoundError('Authorization session not found or not linked');
+  let tokens = JSON.parse(tokenData);
+
+  // Check if token needs refresh (expires_in is in seconds)
+  // Tokens are stored with a timestamp when saved
+  if (tokens.saved_at) {
+    const expiresAt = tokens.saved_at + (tokens.expires_in * 1000);
+    const now = Date.now();
+
+    // Refresh if token expires in less than 5 minutes
+    if (now >= expiresAt - (5 * 60 * 1000)) {
+      debug('Access token expired or expiring soon, refreshing...');
+      const newTokens = await refreshAccessToken(tokens.refresh_token);
+
+      // Update stored tokens
+      tokens = {
+        access_token: newTokens.access_token,
+        refresh_token: newTokens.refresh_token || tokens.refresh_token,
+        expires_in: newTokens.expires_in,
+        token_type: newTokens.token_type,
+        saved_at: Date.now()
+      };
+
+      secretsService.set(tokenKey, JSON.stringify(tokens));
+      debug('Access token refreshed and saved');
+    }
   }
 
-  return session.tokens.access_token;
+  return tokens.access_token;
 }
 
 /**
