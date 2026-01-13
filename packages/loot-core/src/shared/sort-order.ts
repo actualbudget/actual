@@ -31,6 +31,9 @@ export function generateSortOrder(date: string, seq: number = 1): number {
   if (seq < 0 || seq > MAX_SEQ) {
     throw new Error(`seq must be between 0 and ${MAX_SEQ}, got: ${seq}`);
   }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new Error(`date must be in YYYY-MM-DD format, got: ${date}`);
+  }
   const dateInt = toDateRepr(date);
   return dateInt * SEQ_MULTIPLIER + seq;
 }
