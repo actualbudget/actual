@@ -616,7 +616,7 @@ export function CreateAccountModal({
                           <strong>
                             Link a <em>European</em> bank account
                           </strong>{' '}
-                          to automatically download transactions. Enable Bankin
+                          to automatically download transactions. Enable Banking
                           provides reliable, up-to-date information from
                           hundreds of banks.
                         </Trans>

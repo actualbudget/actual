@@ -37,7 +37,7 @@ export const EnableBankingInitialiseModal = ({
     t('It is required to provide both the secret id and secret key.'),
   );
 
-  const onSecretKey = file => {
+  const onSecretKey = (file: File) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       setSecretKey(reader.result as string);
@@ -47,7 +47,6 @@ export const EnableBankingInitialiseModal = ({
   };
 
   const onSubmit = async (close: () => void) => {
-    console.log('here we go.');
     if (!applicationId || !secretKey) {
       setIsValid(false);
       setError(

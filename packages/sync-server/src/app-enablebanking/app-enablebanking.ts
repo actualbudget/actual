@@ -131,13 +131,11 @@ post('/transactions', async (req: Request) => {
 
   const currentBalance =
     await enableBankingservice.getCurrentBalance(account_id);
-  console.log('current balance', currentBalance);
 
   const startingBalance = transactions.reduce(
     (acc, t) => acc - t.amount,
     currentBalance,
   );
-  console.log('starting balance', startingBalance);
 
   return {
     transactions,

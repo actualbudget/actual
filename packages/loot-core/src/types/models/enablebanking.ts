@@ -33,6 +33,7 @@ export type EnableBankingResponse<T extends keyof EnableBankingEndpoints> =
 export type EnableBankingErrorCode =
   | 'ENABLEBANKING_SECRETS_INVALID'
   | 'ENABLEBANKING_APPLICATION_INACTIVE'
+  | 'ENABLEBANKING_NOT_CONFIGURED'
   | 'INTERNAL_ERROR'
   | 'ENABLEBANKING_SESSION_CLOSED'
   | 'BAD_REQUEST'

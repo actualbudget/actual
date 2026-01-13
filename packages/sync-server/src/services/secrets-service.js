@@ -16,7 +16,7 @@ export const SecretName = {
   pluggyai_clientSecret: 'pluggyai_clientSecret',
   pluggyai_itemIds: 'pluggyai_itemIds',
   enablebanking_applicationId: 'enablebanking_applicationId',
-  enablebaanking_secret: 'enablebanking_secret',
+  enablebanking_secret: 'enablebanking_secret',
 };
 
 class SecretsDb {

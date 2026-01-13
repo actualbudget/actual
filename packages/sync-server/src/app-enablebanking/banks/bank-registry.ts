@@ -2,11 +2,14 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import createDebug from 'debug';
 import fg from 'fast-glob';
 
 import { BankProcessor } from '../models/bank-processor.js';
 
 import { FallbackBankProcessor } from './fallback.bank.js';
+
+const debug = createDebug('actual:enablebanking:registry');
 
 class ProcessorRegistry {
   private map = new Map<string, new () => BankProcessor>();
@@ -18,7 +21,7 @@ class ProcessorRegistry {
   get(id: string) {
     const Ctor: (new () => BankProcessor) | undefined = this.map.get(id);
     if (!Ctor) {
-      console.log(`Enable Banking: No dedicated processor found for '${id}'`);
+      debug('No dedicated processor found for %s', id);
       return new FallbackBankProcessor();
     }
 
@@ -26,14 +29,12 @@ class ProcessorRegistry {
       !(Ctor.prototype instanceof FallbackBankProcessor) ||
       typeof Ctor != 'function'
     ) {
-      console.log(typeof Ctor);
+      debug('Unsafe ctor type: %s', typeof Ctor);
       console.warn(`Enable Banking: Unsafe ctor for '${id}', using fallback.`);
       return new FallbackBankProcessor();
     }
     const processor = new Ctor();
-    console.debug(
-      `Enable Banking: Using '${processor.name}' to process '${id}'.`,
-    );
+    debug('Using %s to process %s', processor.name, id);
     return processor;
   }
   list() {

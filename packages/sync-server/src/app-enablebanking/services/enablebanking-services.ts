@@ -37,10 +37,62 @@ function isDefined<T>(value: T | undefined): asserts value is T {
   }
 }
 
+// Session entry with expiration timestamp
+type SessionEntry = {
+  sessionId: string;
+  expiresAt: number;
+};
+
+// TTL for auth sessions (15 minutes)
+const SESSION_TTL_MS = 15 * 60 * 1000;
+
+// Cleanup interval (5 minutes)
+const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
+
+class SessionStore {
+  private sessions = new Map<string, SessionEntry>();
+  private cleanupTimer: ReturnType<typeof setInterval> | null = null;
+
+  constructor() {
+    // Start periodic cleanup
+    this.cleanupTimer = setInterval(() => this.cleanup(), CLEANUP_INTERVAL_MS);
+  }
+
+  set(state: string, sessionId: string): void {
+    this.sessions.set(state, {
+      sessionId,
+      expiresAt: Date.now() + SESSION_TTL_MS,
+    });
+  }
+
+  get(state: string): string | undefined {
+    const entry = this.sessions.get(state);
+    if (!entry) return undefined;
+
+    // Check if expired
+    if (Date.now() > entry.expiresAt) {
+      this.sessions.delete(state);
+      return undefined;
+    }
+
+    return entry.sessionId;
+  }
+
+  private cleanup(): void {
+    const now = Date.now();
+    for (const [state, entry] of this.sessions) {
+      if (now > entry.expiresAt) {
+        this.sessions.delete(state);
+      }
+    }
+  }
+}
+
+const sessionStore = new SessionStore();
+
 export const enableBankingservice = {
   HOSTNAME: 'https://api.enablebanking.com/',
 
-  _activeAuths: new Map<string, string>(),
   setupSecrets: async (applicationId: string, secretKey: string) => {
     // Check if we can get a jwt with provided data.
     let jwt: string;
@@ -53,14 +105,14 @@ export const enableBankingservice = {
     // Check if jwt is recognized by Enable Banking
     await enableBankingservice.getApplication(jwt);
     secretsService.set(SecretName.enablebanking_applicationId, applicationId);
-    secretsService.set(SecretName.enablebaanking_secret, secretKey);
+    secretsService.set(SecretName.enablebanking_secret, secretKey);
     return true;
   },
   secretsAreSetup: () => {
     const applicationId = secretsService.get(
       SecretName.enablebanking_applicationId,
     );
-    const secret = secretsService.get(SecretName.enablebaanking_secret);
+    const secret = secretsService.get(SecretName.enablebanking_secret);
     return !(applicationId == null || secret == null);
   },
   isConfigured: async () => {
@@ -75,7 +127,7 @@ export const enableBankingservice = {
     const applicationId = secretsService.get(
       SecretName.enablebanking_applicationId,
     );
-    const secretKey = secretsService.get(SecretName.enablebaanking_secret);
+    const secretKey = secretsService.get(SecretName.enablebanking_secret);
     if (!applicationId || !secretKey) {
       throw new EnableBankingSetupError();
     }
@@ -197,19 +249,20 @@ export const enableBankingservice = {
   },
 
   authorizeSession: async (state: string, code: string) => {
-    if (enableBankingservice.getSessionIdFromState(state)) {
-      return enableBankingservice.getSessionIdFromState(state);
+    const existingSessionId = sessionStore.get(state);
+    if (existingSessionId) {
+      return existingSessionId;
     }
     const { data } = await enableBankingservice.getClient().POST('/sessions', {
       body: { code },
     });
     isDefined(data);
-    enableBankingservice._activeAuths.set(state, data.session_id);
+    sessionStore.set(state, data.session_id);
     return data.session_id;
   },
 
   getSessionIdFromState: (state: string): string | undefined => {
-    return enableBankingservice._activeAuths.get(state);
+    return sessionStore.get(state);
   },
 
   getAccounts: async (
@@ -289,9 +342,6 @@ export const enableBankingservice = {
     const registry = await getLoadedRegistry();
 
     const bankProcessor = registry.get(bank_id ?? 'fallback');
-    console.log(
-      `Enable Banking: Processing ${transactions.length} transactions from ${date_from} to ${date_to} with ${bankProcessor.name}`,
-    );
     if (bankProcessor.debug) {
       console.debug(
         `--- Debugging '${bankProcessor.name}': showing first 5 transactions with processed transactions.---`,

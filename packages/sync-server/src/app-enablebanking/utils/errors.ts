@@ -1,5 +1,6 @@
 import { inspect } from 'util';
 
+import createDebug from 'debug';
 import { Request, Response } from 'express';
 
 import { components } from '../models/enablebanking-openapi.js';
@@ -9,6 +10,8 @@ import {
   EnableBankingResponse,
   EnableBankingEndpoints,
 } from '../models/enablebanking.js';
+
+const debug = createDebug('actual:enablebanking:errors');
 
 export type ErrorResponse = components['schemas']['ErrorResponse'];
 
@@ -37,9 +40,12 @@ function makeErrorClass(error_code: EnableBankingErrorCode) {
   };
 }
 
-export class EnableBankingSetupError extends Error {
+export class EnableBankingSetupError extends EnableBankingError {
   constructor(message?: string) {
-    super(message ?? 'The Enable Banking secrets are not setup yet.');
+    super(
+      'ENABLEBANKING_NOT_CONFIGURED',
+      message ?? 'The Enable Banking secrets are not setup yet.',
+    );
   }
 }
 
@@ -126,10 +132,10 @@ export async function handleEnableBankingError(response: globalThis.Response) {
   if (response.status === 200) {
     return await response.json();
   }
-  console.log(response);
+  debug('Enable Banking API error response: %o', response);
   //TODO
   const errorResponse = (await response.json()) as ErrorResponse;
-  console.log(errorResponse);
+  debug('Enable Banking API error response body: %o', errorResponse);
 
   switch (errorResponse.error) {
     case 'CLOSED_SESSION':
@@ -137,7 +143,7 @@ export async function handleEnableBankingError(response: globalThis.Response) {
       throw new ClosedSessionError();
   }
 
-  console.log(response.status, errorResponse);
+  debug('Unhandled error: %d %o', response.status, errorResponse);
   throw new Error('Not Implemented');
 }
 
@@ -160,8 +166,8 @@ export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
       })
       .catch(err => {
         if (!(err instanceof EnableBankingError)) {
-          console.log(
-            'Error in Enable Banking',
+          debug(
+            'Error in Enable Banking %s: %s',
             req.originalUrl,
             inspect(err, { depth: null }),
           );
@@ -171,7 +177,7 @@ export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
               'Something went wrong while using the Enable Banking API.',
           );
         }
-        console.log('Returning error', err.data());
+        debug('Returning error: %o', err.data());
         res.send({
           status: 'ok',
           data: { error: err.data() },

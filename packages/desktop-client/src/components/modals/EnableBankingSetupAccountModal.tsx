@@ -40,6 +40,9 @@ function renderError(
     ENABLEBANKING_APPLICATION_INACTIVE: t(
       'Your Enable Banking application is inactive. Please reconfigure.',
     ),
+    ENABLEBANKING_NOT_CONFIGURED: t(
+      'Enable Banking is not configured. Please set up your credentials first.',
+    ),
     INTERNAL_ERROR: t('An internal error occurred. Please try again.'),
   };
 
@@ -221,7 +224,7 @@ const AspspSelector = ({
               any way. Make sure you’ve read and understand Enable Banking’s{' '}
               <Link
                 variant="external"
-                to="https://gocardless.com/privacy/"
+                to="https://enablebanking.com/privacy/"
                 linkColor="purple"
               >
                 Privacy Policy
