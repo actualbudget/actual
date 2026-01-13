@@ -1,4 +1,4 @@
-import { forwardRef, type RefObject, type ReactNode } from 'react';
+import { forwardRef, type FocusEvent, type ReactNode } from 'react';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -43,7 +43,7 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
-  Trans: ({ children }: unknown) => children,
+  Trans: ({ children }: { children?: ReactNode }) => children,
 }));
 
 vi.mock('react-aria-components', async importOriginal => {
@@ -58,14 +58,18 @@ vi.mock('react-aria-components', async importOriginal => {
         </button>
       );
     },
-    Input: forwardRef((props: Record<string, unknown>, ref: unknown) => (
-      <input ref={ref as RefObject<HTMLInputElement>} {...props} />
-    )),
   };
 });
 
 vi.mock('@actual-app/components/button', () => ({
-  Button: ({ children, onPress, ...props }: unknown) => (
+  Button: ({
+    children,
+    onPress,
+    ...props
+  }: {
+    children: ReactNode;
+    onPress: () => void;
+  }) => (
     <button onClick={onPress} {...props}>
       {children}
     </button>
@@ -73,29 +77,114 @@ vi.mock('@actual-app/components/button', () => ({
 }));
 
 vi.mock('@actual-app/components/input', () => ({
-  Input: forwardRef(({ ...props }: unknown, ref: unknown) => (
-    <input ref={ref} {...props} />
-  )),
+  Input: forwardRef<HTMLInputElement, Record<string, unknown>>((props, ref) => {
+    const {
+      onBlur,
+      onFocus,
+      onKeyUp,
+      onKeyDown,
+      onChange,
+      onUpdate,
+      onEnter,
+      onEscape,
+      onChangeValue,
+      ...rest
+    } = props;
+    return (
+      <input
+        ref={ref}
+        {...rest}
+        onBlur={e => {
+          if (typeof onUpdate === 'function') {
+            onUpdate(e.currentTarget.value, e);
+          }
+          if (typeof onBlur === 'function') {
+            onBlur(e);
+          }
+        }}
+        onFocus={e => {
+          if (typeof onFocus === 'function') {
+            onFocus(e);
+          }
+        }}
+        onKeyUp={e => {
+          if (typeof onKeyUp === 'function') {
+            onKeyUp(e);
+          }
+          if (e.key === 'Enter' && typeof onEnter === 'function') {
+            onEnter(e.currentTarget.value, e);
+          }
+          if (e.key === 'Escape' && typeof onEscape === 'function') {
+            onEscape(e.currentTarget.value, e);
+          }
+        }}
+        onKeyDown={e => {
+          if (typeof onKeyDown === 'function') {
+            onKeyDown(e);
+          }
+        }}
+        onChange={e => {
+          if (typeof onChangeValue === 'function') {
+            onChangeValue(e.currentTarget.value, e);
+          }
+          if (typeof onChange === 'function') {
+            onChange(e);
+          }
+        }}
+      />
+    );
+  }),
 }));
 
 vi.mock('@actual-app/components/popover', () => ({
   Popover: ({
     children,
     isOpen,
-    _triggerRef,
-    _isNonModal,
+    onOpenChange,
+    triggerRef,
+    isNonModal,
     ...props
-  }: unknown) => {
+  }: {
+    children: ReactNode;
+    isOpen: boolean;
+    onOpenChange?: (isOpen: boolean) => void;
+    triggerRef?: unknown;
+    isNonModal?: boolean;
+    [key: string]: unknown;
+  }) => {
     if (!isOpen) {
       return null;
     }
     const propsObj = props as {
-      onOpenChange?: unknown;
-      [key: string]: unknown;
+      onBlur?: (e: FocusEvent<HTMLDivElement>) => void;
     };
-    const { onOpenChange: _, ...restProps } = propsObj;
     return (
-      <div data-testid="emoji-select-popover" {...restProps}>
+      <div
+        data-testid="emoji-select-popover"
+        {...props}
+        onBlur={e => {
+          // For non-modal popovers, close when focus leaves
+          if (isNonModal && onOpenChange) {
+            const relatedTarget = e.relatedTarget as Node | null;
+            const popoverElement = e.currentTarget;
+            if (
+              relatedTarget &&
+              !popoverElement.contains(relatedTarget) &&
+              triggerRef &&
+              typeof triggerRef === 'object' &&
+              triggerRef !== null &&
+              'current' in triggerRef &&
+              triggerRef.current &&
+              !(triggerRef.current as Node).contains(relatedTarget)
+            ) {
+              onOpenChange(false);
+            }
+          }
+          if (typeof propsObj.onBlur === 'function') {
+            propsObj.onBlur(e);
+          }
+        }}
+      >
         {children}
       </div>
     );
@@ -224,12 +313,15 @@ describe('EmojiSelect', () => {
     await userEvent.keyboard('{Control>}a{/Control}');
     await userEvent.keyboard('{Backspace}');
 
-    await waitFor(() => {
-      expect(screen.getByText('😀')).toBeInTheDocument();
-      expect(screen.getByText('💯')).toBeInTheDocument();
-      expect(screen.getByText('🔴')).toBeInTheDocument();
-      expect(screen.getByText('👍')).toBeInTheDocument();
-    }, { timeout: 2000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText('😀')).toBeInTheDocument();
+        expect(screen.getByText('💯')).toBeInTheDocument();
+        expect(screen.getByText('🔴')).toBeInTheDocument();
+        expect(screen.getByText('👍')).toBeInTheDocument();
+      },
+      { timeout: 2000 },
+    );
   });
 
   it('normalizes search query by removing colons and converting underscores to spaces', async () => {
@@ -312,9 +404,9 @@ describe('EmojiSelect', () => {
       expect(screen.getByTestId('emoji-select-popover')).toBeInTheDocument();
     });
 
-    const emojiButtons = screen.getAllByRole('button').filter(button =>
-      button.hasAttribute('data-emoji-index'),
-    );
+    const emojiButtons = screen
+      .getAllByRole('button')
+      .filter(button => button.hasAttribute('data-emoji-index'));
 
     expect(emojiButtons.length).toBeGreaterThan(0);
 

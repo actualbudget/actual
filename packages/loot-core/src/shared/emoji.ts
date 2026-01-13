@@ -43,7 +43,7 @@ export function shortcodeToNative(shortcode: string | null): string {
     return '';
   }
 
-  const id = shortcode.replace(/^:+/, '').replace(/:+$/, '');
+  const id = shortcode.replace(/^:+|:+$/g, '');
   const cache = buildEmojiCache();
   return cache.get(id) || shortcode; // Fallback to shortcode if not found
 }

@@ -252,16 +252,16 @@ test.describe('Transactions', () => {
       notes: 'Notes field',
       category: 'Food',
       debit: '12.34',
-      flag: ':1234:',
+      flag: ':red_circle:',
     });
-
     const transaction = accountPage.getNthTransaction(0);
     await expect(transaction.payee).toHaveText('Home Depot');
     await expect(transaction.notes).toHaveText('Notes field');
     await expect(transaction.category).toHaveText('Food');
     await expect(transaction.debit).toHaveText('12.34');
     await expect(transaction.credit).toHaveText('');
-    await expect(transaction.flag).toBeVisible();
+    await expect(transaction.flag).toContainText('🔴');
+    await expect(transaction.flag.locator('svg')).toHaveCount(0);
     await expect(page).toMatchThemeScreenshots();
   });
 
@@ -280,14 +280,17 @@ test.describe('Transactions', () => {
     const download = await downloadPromise;
 
     const path = await download.path();
-    expect(path).toBeTruthy();
+    if (!path) {
+      throw new Error('Expected Playwright download to have a file path');
+    }
 
     const fs = await import('fs/promises');
-    const csvContent = await fs.readFile(path!, 'utf-8');
-
-    expect(csvContent).toContain('Flag');
-    expect(csvContent).toContain(':red_circle:');
-
-    await fs.unlink(path!);
+    try {
+      const csvContent = await fs.readFile(path, 'utf-8');
+      expect(csvContent).toContain('Flag');
+      expect(csvContent).toContain(':red_circle:');
+    } finally {
+      await fs.unlink(path);
+    }
   });
 });

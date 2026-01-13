@@ -34,5 +34,6 @@ global.afterEach(() => {
 });
 
 if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
+  // eslint-disable-next-line no-extend-native, no-empty-function
   Element.prototype.scrollIntoView = () => {};
 }

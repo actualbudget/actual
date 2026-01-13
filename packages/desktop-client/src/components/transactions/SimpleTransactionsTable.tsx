@@ -101,15 +101,17 @@ const TransactionRow = memo(function TransactionRow({
               <Field
                 key={i}
                 width={45}
+                truncate={false}
                 style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
                   fontSize: '18px',
                   color: transaction.flag
                     ? theme.tableText
                     : theme.tableTextSubdued,
-                  opacity: 1,
+                }}
+                contentStyle={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
                 }}
               >
                 {transaction.flag ? (
@@ -212,6 +214,7 @@ export function SimpleTransactionsTable({
   fields = ['date', 'payee', 'amount'],
   style,
 }: SimpleTransactionsTableProps) {
+  const { t } = useTranslation();
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const selectedItems = useSelectedItems();
@@ -266,7 +269,12 @@ export function SimpleTransactionsTable({
                 );
               case 'flag':
                 return (
-                  <Field key={i} width={45} style={{ textAlign: 'center' }}>
+                  <Field
+                    key={i}
+                    width={45}
+                    style={{ textAlign: 'center' }}
+                    aria-label={t('Flag')}
+                  >
                     {/* Empty header for flag column */}
                   </Field>
                 );

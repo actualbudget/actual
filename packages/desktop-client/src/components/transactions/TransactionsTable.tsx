@@ -238,6 +238,7 @@ const TransactionHeader = memo(
           alignItems="center"
           marginLeft={-5}
           id="flag"
+          ariaLabel={t('Flag')}
           icon={field === 'flag' ? ascDesc : 'clickable'}
           onClick={() =>
             onSort('flag', selectAscDesc(field, ascDesc, 'flag', 'asc'))
@@ -441,6 +442,7 @@ type HeaderCellProps = {
   id: string;
   icon?: 'asc' | 'desc' | 'clickable';
   onClick?: () => void;
+  ariaLabel?: string;
 } & Pick<CSSProperties, 'width' | 'alignItems' | 'marginLeft' | 'marginRight'>;
 
 function HeaderCell({
@@ -452,6 +454,7 @@ function HeaderCell({
   marginRight,
   icon,
   onClick,
+  ariaLabel,
 }: HeaderCellProps) {
   const style = {
     whiteSpace: 'nowrap' as CSSProperties['whiteSpace'],
@@ -475,7 +478,12 @@ function HeaderCell({
       }}
       unexposedContent={({ value: cellValue }) =>
         onClick ? (
-          <Button variant="bare" onPress={onClick} style={style}>
+          <Button
+            variant="bare"
+            onPress={onClick}
+            style={style}
+            aria-label={ariaLabel}
+          >
             {id === 'flag' ? (
               <>
                 <SvgFlag
@@ -1314,7 +1322,7 @@ const Transaction = memo(function Transaction({
 
       {isChild && (
         <Field
-          /* Flag blank spacer for account Child transaction */
+          /* Spacing before checkmark for Child transaction */
           width={20}
           style={{
             width: 20,
@@ -1412,7 +1420,7 @@ const Transaction = memo(function Transaction({
           width={45}
           textAlign="center"
           exposed={focusedField === 'flag'}
-          value={transaction.flag || null}
+          value={transaction.flag || undefined}
           valueStyle={{
             fontSize: transaction.flag ? '18px' : '14px',
             color: transaction.flag ? theme.tableText : theme.tableTextSubdued,
@@ -1428,9 +1436,7 @@ const Transaction = memo(function Transaction({
             return shortcodeToNative(value);
           }}
           unexposedContent={({ value, formatter }) => {
-            const displayValue = formatter
-              ? formatter(value)
-              : shortcodeToNative(value);
+            const displayValue = value && formatter ? formatter(value) : null;
             return (
               <View
                 style={{
@@ -1457,21 +1463,15 @@ const Transaction = memo(function Transaction({
             );
           }}
         >
-          {({
-            onBlur,
-            onKeyDown,
-            onUpdate,
-            onSave,
-            shouldSaveFromKey,
-            inputStyle,
-          }) => (
+          {({ onBlur, onKeyDown, onSave, shouldSaveFromKey, inputStyle }) => (
             <EmojiSelect
               value={transaction.flag || null}
               isOpen={focusedField === 'flag'}
               shouldSaveFromKey={shouldSaveFromKey}
               inputProps={{ onBlur, onKeyDown, style: inputStyle }}
-              onUpdate={onUpdate}
-              onSelect={onSave}
+              onSelect={value => {
+                onSave(value ?? '');
+              }}
             />
           )}
         </CustomCell>

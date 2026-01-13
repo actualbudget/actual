@@ -52,7 +52,6 @@ type EmojiSelectProps = {
   shouldSaveFromKey?: (e: KeyboardEvent<HTMLInputElement>) => boolean;
   clearOnBlur?: boolean;
   inputProps?: ComponentProps<typeof Input>;
-  onUpdate?: (emoji: string | null) => void;
   onSelect: (emoji: string | null) => void;
 };
 
@@ -64,7 +63,6 @@ export function EmojiSelect({
   shouldSaveFromKey: shouldSaveFromKeyProp = defaultShouldSaveFromKey,
   clearOnBlur = true,
   inputProps,
-  onUpdate: _onUpdate,
   onSelect,
 }: EmojiSelectProps) {
   const { t } = useTranslation();
@@ -73,6 +71,7 @@ export function EmojiSelect({
   const [hoveredEmoji, setHoveredEmoji] = useState<EmojiData | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const [isCaretVisible, setIsCaretVisible] = useState(true);
+  const [isExternallyOpening, setIsExternallyOpening] = useState(false);
   // The search bar is "visual-only" (focus stays on the table cell input).
   // Implement selection model (anchor + active caret) to behave like a text input.
   const [selection, setSelection] = useState<{
@@ -82,6 +81,8 @@ export function EmojiSelect({
   const selectionRef = useRef<{ start: number; end: number } | null>(null);
   const selectionAnchorRef = useRef<number | null>(null);
   const isDraggingSelectionRef = useRef(false);
+  const dragMoveHandlerRef = useRef<((ev: MouseEvent) => void) | null>(null);
+  const dragUpHandlerRef = useRef<(() => void) | null>(null);
   const searchQueryRef = useRef('');
   const [caretIndex, setCaretIndex] = useState(0);
   const caretIndexRef = useRef(0);
@@ -97,8 +98,10 @@ export function EmojiSelect({
   const emojiGap = 4;
   const maxVisibleRows = 3;
   const gridPaddingY = 8;
-  const maxHeight = maxVisibleRows * emojiSize + (maxVisibleRows - 1) * emojiGap + gridPaddingY;
-  const gridContentWidth = emojisPerRow * emojiSize + (emojisPerRow - 1) * emojiGap + 8;
+  const maxHeight =
+    maxVisibleRows * emojiSize + (maxVisibleRows - 1) * emojiGap + gridPaddingY;
+  const gridContentWidth =
+    emojisPerRow * emojiSize + (emojisPerRow - 1) * emojiGap + 8;
   const popoverWidth = Math.max(225, gridContentWidth + 12);
 
   const clearSelection = useCallback(() => {
@@ -126,12 +129,35 @@ export function EmojiSelect({
     if (!externalIsOpen) {
       setOpen(false);
       setSearchQuery('');
+      setIsExternallyOpening(false);
       return;
     }
 
-    const raf = requestAnimationFrame(() => setOpen(true));
+    setIsExternallyOpening(true);
+    const raf = requestAnimationFrame(() => {
+      setOpen(true);
+      setIsExternallyOpening(false);
+    });
     return () => cancelAnimationFrame(raf);
   }, [externalIsOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (dragMoveHandlerRef.current) {
+        window.removeEventListener(
+          'mousemove',
+          dragMoveHandlerRef.current,
+          true,
+        );
+        dragMoveHandlerRef.current = null;
+      }
+      if (dragUpHandlerRef.current) {
+        window.removeEventListener('mouseup', dragUpHandlerRef.current, true);
+        dragUpHandlerRef.current = null;
+      }
+      isDraggingSelectionRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!open) {
@@ -498,6 +524,10 @@ export function EmojiSelect({
 
   const handleNavigate = useCallback(
     (key: string) => {
+      if (filteredEmojis.length === 0) {
+        return;
+      }
+
       const currentIndex = focusedIndex ?? -1;
       let newIndex = currentIndex;
 
@@ -673,6 +703,12 @@ export function EmojiSelect({
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
+      if (isExternallyOpening) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
       if (e.key === 'Escape') {
         if (open) {
           if (!embedded) {
@@ -828,6 +864,7 @@ export function EmojiSelect({
       inputProps,
       open,
       shouldSaveFromKeyProp,
+      isExternallyOpening,
     ],
   );
 
@@ -1007,7 +1044,6 @@ export function EmojiSelect({
               padding: '8px',
             }}
           >
-            {}
             <View
               style={{
                 outline: 0,
@@ -1062,9 +1098,25 @@ export function EmojiSelect({
                 };
                 const onUp = () => {
                   isDraggingSelectionRef.current = false;
-                  window.removeEventListener('mousemove', onMove, true);
-                  window.removeEventListener('mouseup', onUp, true);
+                  if (dragMoveHandlerRef.current) {
+                    window.removeEventListener(
+                      'mousemove',
+                      dragMoveHandlerRef.current,
+                      true,
+                    );
+                    dragMoveHandlerRef.current = null;
+                  }
+                  if (dragUpHandlerRef.current) {
+                    window.removeEventListener(
+                      'mouseup',
+                      dragUpHandlerRef.current,
+                      true,
+                    );
+                    dragUpHandlerRef.current = null;
+                  }
                 };
+                dragMoveHandlerRef.current = onMove;
+                dragUpHandlerRef.current = onUp;
                 window.addEventListener('mousemove', onMove, true);
                 window.addEventListener('mouseup', onUp, true);
               }}
@@ -1179,6 +1231,7 @@ export function EmojiSelect({
                 key={`${emoji.id}-${index}`}
                 data-emoji-index={index}
                 type="button"
+                aria-label={`${emoji.name} emoji (${emoji.id})`}
                 onClick={() => handleEmojiSelect(emoji)}
                 onMouseEnter={() => setHoveredEmoji(emoji)}
                 onMouseLeave={() => setHoveredEmoji(null)}
@@ -1212,7 +1265,6 @@ export function EmojiSelect({
             ))}
           </View>
 
-          {}
           <View
             style={{
               padding: '0 8px',

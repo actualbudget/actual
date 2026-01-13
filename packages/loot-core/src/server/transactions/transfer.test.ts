@@ -219,4 +219,63 @@ describe('Transfer', () => {
     expect(child.transfer_id).not.toBe(parent.transfer_id);
     expect(child.payee).toBe(transferOne.id);
   });
+
+  test('flag propagation in transfers', async () => {
+    await prepareDatabase();
+
+    const transferTwo = await db.first<db.DbPayee>(
+      "SELECT * FROM payees WHERE transfer_acct = 'two'",
+    );
+
+    // Create a transfer with a flag
+    let transaction: Transaction = {
+      account: 'one',
+      amount: 5000,
+      payee: transferTwo.id,
+      date: '2017-01-01',
+      flag: ':grinning:',
+    };
+    transaction.id = await db.insertTransaction(transaction);
+    await transfer.onInsert(transaction);
+
+    // Verify the flag is propagated to the linked transaction
+    transaction = await db.getTransaction(transaction.id);
+    expect(transaction.transfer_id).toBeDefined();
+    expect(transaction.flag).toBe(':grinning:');
+
+    const linkedTransaction = await db.getTransaction(transaction.transfer_id!);
+    expect(linkedTransaction.flag).toBe(':grinning:');
+
+    // Update the flag on one side and verify it's synchronized
+    transaction = {
+      ...transaction,
+      flag: ':thumbs_up:',
+    };
+    await db.updateTransaction(transaction);
+    await transfer.onUpdate(transaction);
+
+    transaction = await db.getTransaction(transaction.id);
+    expect(transaction.flag).toBe(':thumbs_up:');
+
+    const updatedLinkedTransaction = await db.getTransaction(
+      transaction.transfer_id!,
+    );
+    expect(updatedLinkedTransaction.flag).toBe(':thumbs_up:');
+
+    // Remove the flag and verify it's removed from both sides
+    transaction = {
+      ...transaction,
+      flag: null,
+    };
+    await db.updateTransaction(transaction);
+    await transfer.onUpdate(transaction);
+
+    transaction = await db.getTransaction(transaction.id);
+    expect(transaction.flag).toBeNull();
+
+    const clearedLinkedTransaction = await db.getTransaction(
+      transaction.transfer_id!,
+    );
+    expect(clearedLinkedTransaction.flag).toBeNull();
+  });
 });
