@@ -69,7 +69,6 @@ const filterFields = [
   'amount',
   'cleared',
   'reconciled',
-  'saved',
   'transfer',
 ].map(field => [field, mapField(field)]);
 
@@ -91,6 +90,7 @@ function ConfigureField<T extends RuleConditionEntity>({
 }: ConfigureFieldProps<T>) {
   const { t } = useTranslation();
   const format = useFormat();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [subfield, setSubfield] = useState(initialSubfield);
   const inputRef = useRef<AmountInputRef>(null);
   const prevOp = useRef<T['op'] | null>(null);
@@ -118,11 +118,17 @@ function ConfigureField<T extends RuleConditionEntity>({
       typeof value === 'string' &&
       /^\d{4}-\d{2}$/.test(value)
     ) {
-      const [year, month] = value.split('-');
-      return `${month}/${year}`;
+      const date = parseDate(value, 'yyyy-MM', new Date());
+      if (isDateValid(date)) {
+        return formatDate(date, getMonthYearFormat(dateFormat));
+      }
     }
     return value;
-  }, [value, field, subfield]);
+  }, [value, field, subfield, dateFormat]);
+
+  // For ops that filter based on payeeId, those use PayeeFilter, otherwise we use GenericInput
+  const isPayeeIdOp = (op: T['op']) =>
+    ['is', 'is not', 'one of', 'not one of'].includes(op);
 
   return (
     <FocusScope>
@@ -258,7 +264,7 @@ function ConfigureField<T extends RuleConditionEntity>({
           });
         }}
       >
-        {type !== 'boolean' && field !== 'payee' && (
+        {type !== 'boolean' && (field !== 'payee' || !isPayeeIdOp(op)) && (
           <GenericInput
             ref={inputRef}
             // @ts-expect-error - fix me
@@ -290,7 +296,7 @@ function ConfigureField<T extends RuleConditionEntity>({
           />
         )}
 
-        {field === 'payee' && (
+        {field === 'payee' && isPayeeIdOp(op) && (
           <PayeeFilter
             // @ts-expect-error - fix me
             value={formattedValue}
@@ -477,13 +483,22 @@ export function FilterButton<T extends RuleConditionEntity>({
           onMenuSelect={name => {
             dispatch({ type: 'configure', field: name });
           }}
-          items={translatedFilterFields
-            .filter(f => (exclude ? !exclude.includes(f[0]) : true))
-            .sort()
-            .map(([name, text]) => ({
-              name,
-              text: titleFirst(text),
-            }))}
+          items={[
+            ...translatedFilterFields
+              .filter(f => (exclude ? !exclude.includes(f[0]) : true))
+              .sort()
+              .map(([name, text]) => ({
+                name,
+                text: titleFirst(text),
+              })),
+
+            Menu.line,
+
+            {
+              name: 'saved',
+              text: titleFirst(mapField('saved')),
+            },
+          ]}
         />
       </Popover>
 

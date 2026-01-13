@@ -7,11 +7,11 @@
   "bugs": {
     "url": "https://github.com/actualbudget/actual/issues/"
   },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git@github.com:actualbudget/actual.git"
   },
-  "license": "MIT",
   "workspaces": {
     "packages": [
       "packages/*"
@@ -52,8 +52,8 @@
     "vrt:docker": "./bin/run-vrt",
     "rebuild-electron": "./node_modules/.bin/electron-rebuild -m ./packages/loot-core",
     "rebuild-node": "yarn workspace loot-core rebuild",
-    "lint": "oxfmt --check . && oxlint --deny-warnings && eslint . --max-warnings 0",
-    "lint:fix": "oxfmt . && oxlint --deny-warnings --fix && eslint . --max-warnings 0 --fix",
+    "lint": "oxfmt --check . && oxlint --deny-warnings",
+    "lint:fix": "oxfmt . && oxlint --deny-warnings --fix",
     "install:server": "yarn workspaces focus @actual-app/sync-server --production",
     "typecheck": "yarn tsc --incremental && tsc-strict",
     "jq": "./node_modules/node-jq/bin/jq",
@@ -63,7 +63,6 @@
     "@octokit/rest": "^22.0.1",
     "@types/node": "^22.19.1",
     "@types/prompts": "^2.4.9",
-    "@typescript-eslint/parser": "^8.50.0",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
     "eslint-plugin-perfectionist": "^4.15.1",
@@ -75,8 +74,8 @@
     "minimatch": "^10.1.1",
     "node-jq": "^6.3.1",
     "npm-run-all": "^4.1.5",
-    "oxfmt": "^0.17.0",
-    "oxlint": "^1.32.0",
+    "oxfmt": "^0.22.0",
+    "oxlint": "^1.37.0",
     "p-limit": "^7.2.0",
     "prompts": "^2.4.2",
     "source-map-support": "^0.5.21",
@@ -88,22 +87,21 @@
     "rollup": "4.40.1",
     "socks": ">=2.8.3"
   },
-  "engines": {
-    "node": ">=22",
-    "yarn": "^4.9.1"
-  },
   "lint-staged": {
     "*.{js,mjs,jsx,ts,tsx,md,json,yml,yaml}": [
       "oxfmt --no-error-on-unmatched-pattern"
     ],
     "*.{js,mjs,jsx,ts,tsx}": [
-      "oxlint --deny-warnings --fix",
-      "eslint --max-warnings 0 --fix --no-warn-ignored"
+      "oxlint --deny-warnings --fix"
     ]
   },
-  "packageManager": "yarn@4.10.3",
   "browserslist": [
     "electron >= 35.0",
     "defaults"
-  ]
+  ],
+  "engines": {
+    "node": ">=22",
+    "yarn": "^4.9.1"
+  },
+  "packageManager": "yarn@4.10.3"
 }

@@ -4,8 +4,8 @@
 // 1. Identify the migrations in packages/loot-core/migrations/* on `master` and HEAD
 // 2. Make sure that any new migrations on HEAD are dated after the latest migration on `master`.
 
-const path = require('path');
 const { spawnSync } = require('child_process');
+const path = require('path');
 
 const migrationsDir = path.join(
   __dirname,
@@ -35,14 +35,15 @@ function readMigrations(ref) {
 }
 
 spawnSync('git', ['fetch', 'origin', 'master']);
-let masterMigrations = readMigrations('origin/master');
-let headMigrations = readMigrations('HEAD');
+const masterMigrations = readMigrations('origin/master');
+const headMigrations = readMigrations('HEAD');
 
-let latestMasterMigration = masterMigrations[masterMigrations.length - 1].date;
-let newMigrations = headMigrations.filter(
+const latestMasterMigration =
+  masterMigrations[masterMigrations.length - 1].date;
+const newMigrations = headMigrations.filter(
   migration => !masterMigrations.find(m => m.name === migration.name),
 );
-let badMigrations = newMigrations.filter(
+const badMigrations = newMigrations.filter(
   migration => migration.date <= latestMasterMigration,
 );
 

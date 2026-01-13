@@ -108,6 +108,7 @@ export function ActionableGridListItem<T extends object>({
       >
         {/* Main content */}
         <div
+          role="button"
           style={{
             display: 'flex',
             alignItems: 'center',
