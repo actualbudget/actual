@@ -470,16 +470,9 @@
     // TODO: enable these
     {
       "files": [
-        "packages/desktop-client/src/components/admin/UserAccess/UserAccess.tsx",
-        "packages/desktop-client/src/components/admin/UserDirectory/UserDirectory.tsx",
-        "packages/desktop-client/src/components/budget/BudgetCategories.tsx",
-        "packages/desktop-client/src/components/budget/envelope/BalanceMovementMenu.tsx",
         "packages/desktop-client/src/components/ManageRules.tsx",
         "packages/desktop-client/src/components/mobile/budget/ExpenseGroupList.tsx",
-        "packages/desktop-client/src/components/modals/EditFieldModal.tsx",
         "packages/desktop-client/src/components/reports/reports/Calendar.tsx",
-        "packages/desktop-client/src/components/schedules/ScheduleLink.tsx",
-        "packages/desktop-client/src/components/ServerContext.tsx",
         "packages/desktop-client/src/components/table.tsx"
       ],
       "rules": {
