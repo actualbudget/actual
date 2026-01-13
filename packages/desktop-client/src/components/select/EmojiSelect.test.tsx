@@ -232,6 +232,67 @@ describe('EmojiSelect', () => {
     }, { timeout: 2000 });
   });
 
+  it('normalizes search query by removing colons and converting underscores to spaces', async () => {
+    render(
+      <TestProvider>
+        <EmojiSelect {...defaultProps} isOpen />
+      </TestProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('emoji-select-popover')).toBeInTheDocument();
+    });
+
+    const input = screen.getByRole('textbox');
+    await userEvent.click(input);
+
+    await userEvent.keyboard('thumbs up');
+    await waitFor(() => {
+      expect(screen.getByText('👍')).toBeInTheDocument();
+      expect(screen.queryByText('🔴')).not.toBeInTheDocument();
+    });
+
+    await userEvent.keyboard('{Control>}a{/Control}');
+    await userEvent.keyboard('{Backspace}');
+    await userEvent.keyboard('thumbsup');
+    await waitFor(() => {
+      expect(screen.getByText('👍')).toBeInTheDocument();
+      expect(screen.queryByText('🔴')).not.toBeInTheDocument();
+    });
+
+    await userEvent.keyboard('{Control>}a{/Control}');
+    await userEvent.keyboard('{Backspace}');
+    await userEvent.keyboard('thumbs_up');
+    await waitFor(() => {
+      expect(screen.getByText('👍')).toBeInTheDocument();
+      expect(screen.queryByText('🔴')).not.toBeInTheDocument();
+    });
+
+    await userEvent.keyboard('{Control>}a{/Control}');
+    await userEvent.keyboard('{Backspace}');
+    await userEvent.keyboard(':thumbs_up:');
+    await waitFor(() => {
+      expect(screen.getByText('👍')).toBeInTheDocument();
+      expect(screen.queryByText('🔴')).not.toBeInTheDocument();
+    });
+
+    await userEvent.keyboard('{Control>}a{/Control}');
+    await userEvent.keyboard('{Backspace}');
+    await userEvent.keyboard(':thumbs:up:');
+    await waitFor(() => {
+      expect(screen.getByText('👍')).toBeInTheDocument();
+      expect(screen.queryByText('🔴')).not.toBeInTheDocument();
+    });
+
+    await userEvent.keyboard('{Control>}a{/Control}');
+    await userEvent.keyboard('{Backspace}');
+    await userEvent.keyboard('::thumbs_up::');
+    await waitFor(() => {
+      expect(screen.getByText('👍')).toBeInTheDocument();
+      expect(screen.queryByText('🔴')).not.toBeInTheDocument();
+    });
+  });
+
   it('handles keyboard navigation with arrow keys', async () => {
     const onSelect = vi.fn();
     render(

@@ -265,38 +265,56 @@ export function EmojiSelect({
     [clearSelection],
   );
 
+  // Normalize search query: remove colons, convert underscores to spaces, then remove all spaces for flexible matching
+  const normalizeSearchQuery = useCallback((query: string): string => {
+    return query
+      .toLowerCase()
+      .replace(/:/g, '') // Remove all colons
+      .replace(/_/g, ' ') // Convert underscores to spaces
+      .replace(/\s+/g, '') // Remove all spaces for flexible matching
+      .trim();
+  }, []);
+
+  // Filter emojis based on search query
   const filteredEmojis = useMemo(() => {
     if (!searchQuery.trim()) {
       return allEmojis;
     }
 
-    const query = searchQuery.toLowerCase().trim();
+    const normalizedQuery = normalizeSearchQuery(searchQuery);
     return allEmojis.filter(emoji => {
-      // Search by ID (shortcode)
-      if (emoji.id.toLowerCase().includes(query)) {
+      // Normalize emoji ID: convert underscores to spaces, then remove all spaces
+      const normalizedId = emoji.id
+        .toLowerCase()
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, '');
+
+      // Search by normalized ID
+      if (normalizedId.includes(normalizedQuery)) {
         return true;
       }
 
-      // Search by name
-      if (emoji.name.toLowerCase().includes(query)) {
+      // Normalize emoji name: remove all spaces
+      const normalizedName = emoji.name.toLowerCase().replace(/\s+/g, '');
+
+      // Search by normalized name
+      if (normalizedName.includes(normalizedQuery)) {
         return true;
       }
 
-      // Search by keywords
+      // Search by keywords (also normalize)
       if (
-        emoji.keywords?.some(keyword => keyword.toLowerCase().includes(query))
+        emoji.keywords?.some(keyword => {
+          const normalizedKeyword = keyword.toLowerCase().replace(/\s+/g, '');
+          return normalizedKeyword.includes(normalizedQuery);
+        })
       ) {
-        return true;
-      }
-
-      // Search by shortcode format
-      if (`:${emoji.id}:`.toLowerCase().includes(query)) {
         return true;
       }
 
       return false;
     });
-  }, [allEmojis, searchQuery]);
+  }, [allEmojis, searchQuery, normalizeSearchQuery]);
 
   useEffect(() => {
     setFocusedIndex(null);
