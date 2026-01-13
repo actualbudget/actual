@@ -4,10 +4,8 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
-  | 'payPeriodsEnabled'
   | 'crossoverReport'
-  | 'plugins'
-  | 'forceReload';
+  | 'payPeriodsEnabled';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -24,7 +22,6 @@ export type SyncedPrefs = Partial<
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
     | 'defaultCurrencyCode'
-    | 'plugins'
     | `show-account-${string}-net-worth-chart`
     | 'showPayPeriods'
     | 'payPeriodFrequency'
@@ -157,3 +154,7 @@ export type GlobalPrefsJson = Partial<{
 }>;
 
 export type AuthMethods = 'password' | 'openid';
+
+export type ServerPrefs = Partial<{
+  'flags.plugins': 'true' | 'false';
+}>;

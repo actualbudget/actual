@@ -13,6 +13,7 @@ import {
 } from '../../types/prefs';
 import { createApp } from '../app';
 import * as db from '../db';
+import { PostError } from '../errors';
 import { getDefaultDocumentDir } from '../main';
 import { mutator } from '../mutators';
 import { post } from '../post';
@@ -30,6 +31,7 @@ export type PreferencesHandlers = {
   'load-global-prefs': typeof loadGlobalPrefs;
   'save-prefs': typeof saveMetadataPrefs;
   'load-prefs': typeof loadMetadataPrefs;
+  'save-server-prefs': typeof saveServerPrefs;
 };
 
 export const app = createApp<PreferencesHandlers>();
@@ -40,6 +42,7 @@ app.method('save-global-prefs', saveGlobalPrefs);
 app.method('load-global-prefs', loadGlobalPrefs);
 app.method('save-prefs', saveMetadataPrefs);
 app.method('load-prefs', loadMetadataPrefs);
+app.method('save-server-prefs', saveServerPrefs);
 
 /**
  * Loads pay period configuration from synced preferences and updates the shared config.
@@ -252,4 +255,32 @@ async function saveMetadataPrefs(prefsToSet: MetadataPrefs) {
 
 async function loadMetadataPrefs(): Promise<MetadataPrefs> {
   return _getMetadataPrefs();
+}
+
+async function saveServerPrefs({ prefs }: { prefs: Record<string, string> }) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    return { error: 'not-logged-in' };
+  }
+
+  try {
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('No sync server configured.');
+    }
+    await post(serverConfig.SIGNUP_SERVER + '/server-prefs', {
+      token: userToken,
+      prefs,
+    });
+  } catch (err) {
+    if (err instanceof PostError) {
+      return {
+        error: err.reason || 'network-failure',
+      };
+    }
+
+    throw err;
+  }
+
+  return {};
 }
