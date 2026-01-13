@@ -240,6 +240,9 @@ export function assignBatchSeq<
       seqByDate.set(trans.date, state);
     }
 
+    // Note: When at limit (extremely unlikely with normal use - would require 99,999+
+    // transactions on a single day), all remaining transactions on this date will share
+    // the same sort_order value (MAX_SEQ), resulting in undefined ordering among them.
     const seq = state.current;
     const atLimit = state.atLimit || seq >= MAX_SEQ;
 
