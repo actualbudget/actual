@@ -106,19 +106,6 @@ function UserAccessContent({ isModal }: ManageUserAccessContentProps) {
     return loadedAccess;
   }, [cloudFileId, dispatch, t]);
 
-  const loadOwner = useCallback(async () => {
-    const file = (await send('get-user-file-info', cloudFileId as string)) ?? {
-      usersWithAccess: [],
-    };
-    const owner = file?.usersWithAccess.filter(user => user.owner);
-
-    if (owner.length > 0) {
-      return owner[0];
-    }
-
-    return null;
-  }, [cloudFileId]);
-
   useEffect(() => {
     async function loadData() {
       try {
@@ -133,7 +120,7 @@ function UserAccessContent({ isModal }: ManageUserAccessContentProps) {
     return () => {
       undo.setUndoState('openModal', null);
     };
-  }, [loadAccess, loadOwner]);
+  }, [loadAccess]);
 
   function loadMore() {
     setPage(page => page + 1);
