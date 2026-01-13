@@ -104,9 +104,9 @@ export async function batchUpdateTransactions({
         );
       }
 
-      // Assign sort_order to transactions that need it
-      // assignBatchSeq extracts dates from sort_order values, so we pass empty date strings
-      // since they won't be used (existing transactions' dates come from their sort_order)
+      // Assign sort_order to transactions that need it.
+      // For existing transactions, assignBatchSeq derives dates from their sort_order values,
+      // so the date field is unused and we pass empty strings as placeholders.
       const existingWithPlaceholderDate = existingTransactions.map(t => ({
         date: '',
         sort_order: t.sort_order,
