@@ -127,9 +127,9 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
   const [swr, setSwr] = useState(0.04);
   const [estimatedReturn, setEstimatedReturn] = useState<number | null>(null);
-  const [projectionType, setProjectionType] = useState<'trend' | 'hampel'>(
-    'hampel',
-  );
+  const [projectionType, setProjectionType] = useState<
+    'hampel' | 'median' | 'mean'
+  >('hampel');
   const [expenseAdjustmentFactor, setExpenseAdjustmentFactor] = useState(1.0);
   const [showHiddenCategories, setShowHiddenCategories] = useState(false);
   const [selectionsInitialized, setSelectionsInitialized] = useState(false);
@@ -704,6 +704,13 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                               <br />
                               Hampel Filtered Median: Filters out outliers
                               before calculating the median expense.
+                              <br />
+                              <br />
+                              Median: Uses the median of all historical expenses
+                              without filtering.
+                              <br />
+                              <br />
+                              Mean: Uses the average of all historical expenses.
                             </Trans>
                           </Text>
                         </View>
@@ -720,11 +727,12 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                 <Select
                   value={projectionType}
                   onChange={value =>
-                    setProjectionType(value as 'trend' | 'hampel')
+                    setProjectionType(value as 'hampel' | 'median' | 'mean')
                   }
                   options={[
-                    ['trend', t('Linear Trend')],
                     ['hampel', t('Hampel Filtered Median')],
+                    ['median', t('Median')],
+                    ['mean', t('Mean')],
                   ]}
                   style={{ width: 200, marginBottom: 12 }}
                 />
