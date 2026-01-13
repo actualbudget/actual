@@ -233,7 +233,11 @@ export function SaveReport({
         >
           {!report.id ? <Trans>Unsaved report</Trans> : report.name}&nbsp;
         </Text>
-        {savedStatus === 'modified' && <Text><Trans>(modified)</Trans>&nbsp;</Text>}
+        {savedStatus === 'modified' && (
+          <Text>
+            <Trans>(modified)</Trans>&nbsp;
+          </Text>
+        )}
         <SvgExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
       </Button>
 
