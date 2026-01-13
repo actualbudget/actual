@@ -261,13 +261,13 @@ export function getRecurringDescription(
 export function recurConfigToRSchedule(config) {
   const base: IRuleOptions = {
     start: monthUtils.parseDate(config.start),
-    // @ts-ignore: issues with https://gitlab.com/john.carroll.p/rschedule/-/issues/86
+    // @ts-expect-error: issues with https://gitlab.com/john.carroll.p/rschedule/-/issues/86
     frequency: config.frequency.toUpperCase(),
     byHourOfDay: [12],
   };
 
   if (config.interval) {
-    // @ts-ignore: issues with https://gitlab.com/john.carroll.p/rschedule/-/issues/86
+    // @ts-expect-error: issues with https://gitlab.com/john.carroll.p/rschedule/-/issues/86
     base.interval = config.interval;
   }
 
