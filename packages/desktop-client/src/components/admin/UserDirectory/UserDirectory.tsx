@@ -4,8 +4,6 @@ import {
   useEffect,
   useCallback,
   useMemo,
-  type SetStateAction,
-  type Dispatch,
   type CSSProperties,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -37,7 +35,6 @@ import { signOut } from '@desktop-client/users/usersSlice';
 
 type ManageUserDirectoryContentProps = {
   isModal: boolean;
-  setLoading?: Dispatch<SetStateAction<boolean>>;
 };
 
 function useGetUserDirectoryErrors() {
@@ -81,10 +78,7 @@ function useGetUserDirectoryErrors() {
   return { getUserDirectoryErrors };
 }
 
-function UserDirectoryContent({
-  isModal,
-  setLoading,
-}: ManageUserDirectoryContentProps) {
+function UserDirectoryContent({ isModal }: ManageUserDirectoryContentProps) {
   const { t } = useTranslation();
 
   const [allUsers, setAllUsers] = useState([]);
@@ -120,8 +114,6 @@ function UserDirectoryContent({
   );
 
   const loadUsers = useCallback(async () => {
-    setLoading(true);
-
     const loadedUsers = (await send('users-get')) ?? [];
     if ('error' in loadedUsers) {
       dispatch(
@@ -135,19 +127,16 @@ function UserDirectoryContent({
           },
         }),
       );
-      setLoading(false);
       return;
     }
 
     setAllUsers(loadedUsers);
-    setLoading(false);
     return loadedUsers;
-  }, [dispatch, getUserDirectoryErrors, setLoading, t]);
+  }, [dispatch, getUserDirectoryErrors, t]);
 
   useEffect(() => {
     async function loadData() {
       await loadUsers();
-      setLoading(false);
     }
 
     loadData();
@@ -155,14 +144,13 @@ function UserDirectoryContent({
     return () => {
       undo.setUndoState('openModal', null);
     };
-  }, [setLoading, loadUsers]);
+  }, [loadUsers]);
 
   function loadMore() {
     setPage(page => page + 1);
   }
 
   const onDeleteSelected = useCallback(async () => {
-    setLoading(true);
     const res = await send('user-delete-all', [...selectedInst.items]);
 
     const error = res['error'];
@@ -202,15 +190,7 @@ function UserDirectoryContent({
 
     await loadUsers();
     selectedInst.dispatch({ type: 'select-none' });
-    setLoading(false);
-  }, [
-    setLoading,
-    selectedInst,
-    loadUsers,
-    dispatch,
-    t,
-    getUserDirectoryErrors,
-  ]);
+  }, [selectedInst, loadUsers, dispatch, t, getUserDirectoryErrors]);
 
   const onEditUser = useCallback(
     user => {
@@ -222,14 +202,13 @@ function UserDirectoryContent({
               user,
               onSave: async () => {
                 await loadUsers();
-                setLoading(false);
               },
             },
           },
         }),
       );
     },
-    [dispatch, loadUsers, setLoading],
+    [dispatch, loadUsers],
   );
 
   function onAddUser() {
@@ -248,7 +227,6 @@ function UserDirectoryContent({
             user,
             onSave: async () => {
               await loadUsers();
-              setLoading(false);
             },
           },
         },
@@ -370,14 +348,10 @@ function EmptyMessage({ text, style }: EmptyMessageProps) {
 
 type ManageUsersProps = {
   isModal: boolean;
-  setLoading?: Dispatch<SetStateAction<boolean>>;
 };
 
-export function UserDirectory({
-  isModal,
-  setLoading = () => {},
-}: ManageUsersProps) {
-  return <UserDirectoryContent isModal={isModal} setLoading={setLoading} />;
+export function UserDirectory({ isModal }: ManageUsersProps) {
+  return <UserDirectoryContent isModal={isModal} />;
 }
 
 type UsersListProps = {
