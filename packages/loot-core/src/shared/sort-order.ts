@@ -249,7 +249,7 @@ export function assignBatchSeq<
     if (isLegacyTimestamp(trans.sort_order)) continue;
 
     const dateInt = extractDateInt(trans.sort_order);
-    const date = `${Math.floor(dateInt / 10000)}-${String(Math.floor((dateInt % 10000) / 100)).padStart(2, '0')}-${String(dateInt % 100).padStart(2, '0')}`;
+    const date = fromDateRepr(dateInt);
     const seq = extractSeq(trans.sort_order);
 
     const existing = seqByDate.get(date);
