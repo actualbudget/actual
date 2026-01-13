@@ -132,7 +132,17 @@ export const CONDITION_TYPES = {
       }
 
       if (op === 'hasTags') {
-        return value;
+        return (
+          value
+            // Trim extra spaces
+            .trim()
+            // Replace multiple spaces with a single space
+            .replace(/\s\s+/g, ' ')
+            // Replace already added # to avoid ##tag
+            .replace(/(?<!#)#(\w+)/g, '$1')
+            .split(' ')
+            .map(v => `#${v}`)
+        );
       }
 
       return value.toLowerCase();
@@ -346,7 +356,7 @@ export class Condition {
         if (fieldValue === null) {
           return false;
         }
-        return String(fieldValue).indexOf(this.value) !== -1;
+        return this.value.some(tag => String(fieldValue).indexOf(tag) !== -1);
 
       case 'notOneOf':
         if (fieldValue === null) {
