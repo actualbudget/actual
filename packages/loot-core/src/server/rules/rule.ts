@@ -8,11 +8,10 @@ import {
 } from '../../shared/transactions';
 import { integerToAmount } from '../../shared/util';
 import { type RuleEntity } from '../../types/models';
+import { type TransactionForRules } from '../transactions/transaction-rules';
 
 import { Action } from './action';
 import { Condition } from './condition';
-
-import { type TransactionForRules } from '../transactions/transaction-rules';
 
 function execNonSplitActions(actions: Action[], transaction) {
   const update = transaction;
