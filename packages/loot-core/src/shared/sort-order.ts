@@ -19,6 +19,29 @@ export function toDateRepr(str: string): number {
 }
 
 /**
+ * Convert an integer date representation (YYYYMMDD) to string (YYYY-MM-DD)
+ */
+export function fromDateRepr(number: number): string {
+  if (typeof number !== 'number') {
+    throw new Error('fromDateRepr not passed a number: ' + number);
+  }
+
+  const dateString = number.toString();
+  if (dateString.length !== 8) {
+    throw new Error(
+      'fromDateRepr expects an 8-digit number (YYYYMMDD): ' + number,
+    );
+  }
+  return (
+    dateString.slice(0, 4) +
+    '-' +
+    dateString.slice(4, 6) +
+    '-' +
+    dateString.slice(6)
+  );
+}
+
+/**
  * Generate a sort_order value from a date and sequence number.
  * Format: YYYYMMDDseq where seq can be 0-99999 (5 digits)
  * Total: 13 digits, same numeric space as Date.now() timestamps

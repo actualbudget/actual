@@ -434,10 +434,9 @@ export function TransactionList({
             // Use new sort_order format (YYYYMMDDseq) with next available seq
             // This migrates legacy timestamps to the new format
             const newDate = changes.diff.updated[0].date!;
-            const { seq: nextSeq } = getNextSeqForDate(
-              newDate,
-              [...transactionsLatest.current],
-            );
+            const { seq: nextSeq } = getNextSeqForDate(newDate, [
+              ...transactionsLatest.current,
+            ]);
             changes.diff.updated[0].sort_order = generateSortOrder(
               newDate,
               nextSeq,

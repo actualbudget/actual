@@ -38,33 +38,8 @@ export function requiredFields<T extends object, K extends keyof T>(
   });
 }
 
-export function toDateRepr(str: string) {
-  if (typeof str !== 'string') {
-    throw new Error('toDateRepr not passed a string: ' + str);
-  }
-
-  return parseInt(str.replace(/-/g, ''));
-}
-
-export function fromDateRepr(number: number) {
-  if (typeof number !== 'number') {
-    throw new Error('fromDateRepr not passed a number: ' + number);
-  }
-
-  const dateString = number.toString();
-  if (dateString.length !== 8) {
-    throw new Error(
-      'fromDateRepr expects an 8-digit number (YYYYMMDD): ' + number,
-    );
-  }
-  return (
-    dateString.slice(0, 4) +
-    '-' +
-    dateString.slice(4, 6) +
-    '-' +
-    dateString.slice(6)
-  );
-}
+// Re-export from shared module for backward compatibility
+export { toDateRepr, fromDateRepr } from '../shared/sort-order';
 
 export const accountModel = {
   validate(account: Partial<DbAccount>, { update }: { update?: boolean } = {}) {
