@@ -381,8 +381,13 @@ export function TransactionList({
       newTransactions = realizeTempTransactions(newTransactions);
 
       const parentTransaction = newTransactions.find(t => !t.is_child);
+      const isLinkedToSchedule = !!parentTransaction?.schedule;
 
-      if (parentTransaction && isFutureTransaction(parentTransaction)) {
+      if (
+        parentTransaction &&
+        isFutureTransaction(parentTransaction) &&
+        !isLinkedToSchedule
+      ) {
         const transactionWithSubtransactions = {
           ...parentTransaction,
           subtransactions: newTransactions.filter(
@@ -440,7 +445,8 @@ export function TransactionList({
         }
       };
 
-      if (isFutureTransaction(transaction)) {
+      const isLinkedToSchedule = !!transaction.schedule;
+      if (isFutureTransaction(transaction) && !isLinkedToSchedule) {
         const originalTransaction = transactionsLatest.current.find(
           t => t.id === transaction.id,
         );
