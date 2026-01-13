@@ -241,6 +241,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   }
 
   const latestInterval = data.intervalData[data.intervalData.length - 1];
+  const endingBalance = latestInterval?.balance ?? 0;
 
   const title = widget?.meta?.name || t('Budget Analysis');
   const onSaveWidgetName = async (newName: string) => {
@@ -382,19 +383,19 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                   }}
                 >
                   <View>
-                    {latestInterval && (
+                    {data && (
                       <>
                         <AlignedText
                           style={{ marginBottom: 5, minWidth: 210 }}
                           left={
                             <Block>
-                              <Trans>Budgeted:</Trans>
+                              <Trans>Total budgeted:</Trans>
                             </Block>
                           }
                           right={
                             <Text style={{ fontWeight: 600 }}>
                               <PrivacyFilter>
-                                {format(latestInterval.budgeted, 'financial')}
+                                {format(data.totalBudgeted, 'financial')}
                               </PrivacyFilter>
                             </Text>
                           }
@@ -403,13 +404,28 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                           style={{ marginBottom: 5, minWidth: 210 }}
                           left={
                             <Block>
-                              <Trans>Spent:</Trans>
+                              <Trans>Total spent:</Trans>
                             </Block>
                           }
                           right={
                             <Text style={{ fontWeight: 600 }}>
                               <PrivacyFilter>
-                                {format(latestInterval.spent, 'financial')}
+                                {format(data.totalSpent, 'financial')}
+                              </PrivacyFilter>
+                            </Text>
+                          }
+                        />
+                        <AlignedText
+                          style={{ marginBottom: 5, minWidth: 210 }}
+                          left={
+                            <Block>
+                              <Trans>Total overspending adj:</Trans>
+                            </Block>
+                          }
+                          right={
+                            <Text style={{ fontWeight: 600 }}>
+                              <PrivacyFilter>
+                                {format(data.totalOverspendingAdjustment, 'financial')}
                               </PrivacyFilter>
                             </Text>
                           }
@@ -419,13 +435,13 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                             style={{ marginBottom: 5, minWidth: 210 }}
                             left={
                               <Block>
-                                <Trans>Balance:</Trans>
+                                <Trans>Ending balance:</Trans>
                               </Block>
                             }
                             right={
                               <Text style={{ fontWeight: 600 }}>
                                 <PrivacyFilter>
-                                  {format(latestInterval.balance, 'financial')}
+                                  {format(endingBalance, 'financial')}
                                 </PrivacyFilter>
                               </Text>
                             }
@@ -446,14 +462,25 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
               <View style={{ marginTop: 30 }}>
                 <Trans>
                   <Paragraph>
-                    <strong>How is the Budget Balance calculated?</strong>
+                    <strong>Understanding the Chart</strong>
+                    <br />
+                    • <strong>Budgeted</strong> (blue): The amount you allocated each month
+                    <br />
+                    • <strong>Spent</strong> (red): Your actual spending
+                    <br />
+                    • <strong>Overspending Adjustment</strong> (orange): Amounts from categories without rollover that were reset
+                    <br />
+                    • <strong>Balance</strong> (gray): Your cumulative budget performance, starting with any prior balance. Respects category rollover settings from your budget.
                   </Paragraph>
                   <Paragraph>
-                    The balance tracks your budget performance over time. It
-                    starts with the previous interval&apos;s balance, adds the
-                    budgeted amount for the current interval, and subtracts
-                    actual spending. A positive balance indicates under-spending
-                    while a negative balance shows over-spending.
+                    <strong>Understanding the Budget Summary</strong>
+                    <br />
+                    The balance starts from the month before your selected period.
+                    Budgeted, spent, and overspending adjustments show totals over the period.
+                    Ending balance shows the final balance at period end.
+                  </Paragraph>
+                  <Paragraph>
+                    Hint: You can use the icon in the header to toggle between line and bar chart views.
                   </Paragraph>
                 </Trans>
               </View>

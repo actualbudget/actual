@@ -29,6 +29,7 @@ type BudgetAnalysisIntervalData = {
   budgeted: number;
   spent: number;
   balance: number;
+  overspendingAdjustment: number;
 };
 
 type BudgetAnalysisGraphProps = {
@@ -56,6 +57,7 @@ export function BudgetAnalysisGraph({
   const budgetedLabel = t('Budgeted');
   const spentLabel = t('Spent');
   const balanceLabel = t('Balance');
+  const overspendingLabel = t('Overspending Adjustment');
 
   const graphData = data.intervalData;
 
@@ -119,6 +121,12 @@ export function BudgetAnalysisGraph({
               name={spentLabel}
               animationDuration={1000}
             />
+            <Bar
+              dataKey="overspendingAdjustment"
+              fill={theme.errorText}
+              name={overspendingLabel}
+              animationDuration={1000}
+            />
             {showBalance && (
               <Line
                 type="monotone"
@@ -164,6 +172,15 @@ export function BudgetAnalysisGraph({
               stroke={theme.reportsRed}
               strokeWidth={2}
               name={spentLabel}
+              dot={false}
+              animationDuration={1000}
+            />
+            <Line
+              type="monotone"
+              dataKey="overspendingAdjustment"
+              stroke={theme.errorText}
+              strokeWidth={2}
+              name={overspendingLabel}
               dot={false}
               animationDuration={1000}
             />

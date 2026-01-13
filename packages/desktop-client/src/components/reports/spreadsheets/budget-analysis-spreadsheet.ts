@@ -10,12 +10,16 @@ type BudgetAnalysisIntervalData = {
   budgeted: number;
   spent: number;
   balance: number;
+  overspendingAdjustment: number;
 };
 
 type BudgetAnalysisData = {
   intervalData: BudgetAnalysisIntervalData[];
   startDate: string;
   endDate: string;
+  totalBudgeted: number;
+  totalSpent: number;
+  totalOverspendingAdjustment: number;
 };
 
 type createBudgetAnalysisSpreadsheetProps = {
@@ -74,7 +78,33 @@ export function createBudgetAnalysisSpreadsheet({
     const intervalData: BudgetAnalysisIntervalData[] = [];
 
     // Track running balance that respects carryover flags
+    // Get the balance from the month before the start period to initialize properly
     let runningBalance = 0;
+    const monthBeforeStart = monthUtils.subMonths(monthUtils.getMonth(startDate), 1);
+    const prevMonthData = await send('envelope-budget-month', { month: monthBeforeStart });
+
+    // Calculate the carryover from the previous month
+    for (const cat of categoriesToInclude) {
+      const balanceCell = prevMonthData.find((cell: { name: string }) =>
+        cell.name.endsWith(`leftover-${cat.id}`)
+      );
+      const carryoverCell = prevMonthData.find((cell: { name: string }) =>
+        cell.name.endsWith(`carryover-${cat.id}`)
+      );
+
+      const catBalance = (balanceCell?.value as number) || 0;
+      const hasCarryover = Boolean(carryoverCell?.value);
+
+      // Add to running balance if it would carry over
+      if (catBalance > 0 || (catBalance < 0 && hasCarryover)) {
+        runningBalance += catBalance;
+      }
+    }
+
+    // Track totals across all months
+    let totalBudgeted = 0;
+    let totalSpent = 0;
+    let totalOverspendingAdjustment = 0;
 
     // Process each month
     for (const month of intervals) {
@@ -84,6 +114,7 @@ export function createBudgetAnalysisSpreadsheet({
 
       let budgeted = 0;
       let spent = 0;
+      let overspendingAdjustment = 0;
 
       // Track what will carry over to next month
       let carryoverToNextMonth = 0;
@@ -117,17 +148,27 @@ export function createBudgetAnalysisSpreadsheet({
         // - Balance is negative AND carryover is enabled
         if (catBalance > 0 || (catBalance < 0 && hasCarryover)) {
           carryoverToNextMonth += catBalance;
+        } else if (catBalance < 0 && !hasCarryover) {
+          // If balance is negative and carryover is NOT enabled,
+          // this is an overspending adjustment (balance is zeroed out)
+          overspendingAdjustment += Math.abs(catBalance);
         }
       }
 
       // This month's balance = budgeted + spent + running balance from previous month
       const monthBalance = budgeted + spent + runningBalance;
 
+      // Update totals
+      totalBudgeted += budgeted;
+      totalSpent += Math.abs(spent);
+      totalOverspendingAdjustment += overspendingAdjustment;
+
       intervalData.push({
         date: month,
         budgeted,
         spent: Math.abs(spent), // Display as positive
         balance: monthBalance,
+        overspendingAdjustment,
       });
 
       // Update running balance for next month
@@ -138,6 +179,9 @@ export function createBudgetAnalysisSpreadsheet({
       intervalData,
       startDate,
       endDate,
+      totalBudgeted,
+      totalSpent,
+      totalOverspendingAdjustment,
     });
   };
 }
