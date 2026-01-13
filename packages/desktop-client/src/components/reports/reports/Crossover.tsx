@@ -698,10 +698,6 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                               How past expenses are projected into the future.
                               <br />
                               <br />
-                              Linear Trend: Projects expenses using a linear
-                              regression of historical data.
-                              <br />
-                              <br />
                               Hampel Filtered Median: Filters out outliers
                               before calculating the median expense.
                               <br />
