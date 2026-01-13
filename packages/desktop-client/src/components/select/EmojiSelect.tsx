@@ -73,9 +73,8 @@ export function EmojiSelect({
   const [hoveredEmoji, setHoveredEmoji] = useState<EmojiData | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const [isCaretVisible, setIsCaretVisible] = useState(true);
-  // The search bar is "visual-only" (focus stays on the table cell input), so we
-  // implement our own selection model (anchor + active caret) to behave like a
-  // normal text input.
+  // The search bar is "visual-only" (focus stays on the table cell input).
+  // Implement selection model (anchor + active caret) to behave like a text input.
   const [selection, setSelection] = useState<{
     start: number;
     end: number;
@@ -93,22 +92,13 @@ export function EmojiSelect({
   const emojiGridRef = useRef<HTMLDivElement | null>(null);
   const popoverContentRef = useRef<HTMLDivElement | null>(null);
 
-  // Grid layout constants
   const emojisPerRow = 7;
   const emojiSize = 24;
   const emojiGap = 4;
   const maxVisibleRows = 3;
-  const gridPaddingY = 8; // 4px top + 4px bottom
-  // Ensure 3 full rows are visible *inside* the grid, accounting for padding.
-  const maxHeight =
-    maxVisibleRows * emojiSize + (maxVisibleRows - 1) * emojiGap + gridPaddingY;
-  // Fix width so hover (footer text) doesn't cause popover resizing/flicker
-  const gridContentWidth =
-    emojisPerRow * emojiSize +
-    (emojisPerRow - 1) * emojiGap +
-    // grid padding left+right
-    8;
-  // Keep things tight (user requested) but still leave a small margin.
+  const gridPaddingY = 8;
+  const maxHeight = maxVisibleRows * emojiSize + (maxVisibleRows - 1) * emojiGap + gridPaddingY;
+  const gridContentWidth = emojisPerRow * emojiSize + (emojisPerRow - 1) * emojiGap + 8;
   const popoverWidth = Math.max(225, gridContentWidth + 12);
 
   const clearSelection = useCallback(() => {
@@ -128,7 +118,6 @@ export function EmojiSelect({
     setFocusedIndex(null);
   }, [clearSelection, embedded]);
 
-  // Sync with external isOpen prop if provided (e.g. table cells)
   useEffect(() => {
     if (externalIsOpen === undefined) {
       return;
@@ -140,12 +129,10 @@ export function EmojiSelect({
       return;
     }
 
-    // Defer opening until after refs are assigned so Popover can position.
     const raf = requestAnimationFrame(() => setOpen(true));
     return () => cancelAnimationFrame(raf);
   }, [externalIsOpen]);
 
-  // Blink caret while the picker is open (visual only; focus stays in table)
   useEffect(() => {
     if (!open) {
       selectionRef.current = null;
@@ -165,14 +152,12 @@ export function EmojiSelect({
   useEffect(() => {
     searchQueryRef.current = searchQuery;
 
-    // Keep caret within bounds whenever the query changes
     const len = Array.from(searchQuery).length;
     if (caretIndexRef.current > len) {
       caretIndexRef.current = len;
       setCaretIndex(len);
     }
 
-    // Clamp selection within bounds, or clear if empty.
     if (selectionRef.current) {
       const start = Math.max(0, Math.min(selectionRef.current.start, len));
       const end = Math.max(0, Math.min(selectionRef.current.end, len));
@@ -188,7 +173,6 @@ export function EmojiSelect({
     }
   }, [searchQuery]);
 
-  // When a table cell becomes exposed, immediately focus our trigger input.
   useLayoutEffect(() => {
     if (embedded) {
       return;
@@ -198,13 +182,11 @@ export function EmojiSelect({
     }
   }, [embedded, externalIsOpen]);
 
-  // Flatten all emojis into a single list
   const allEmojis = useMemo(() => {
     const emojis: EmojiData[] = [];
     if (emojiData && emojiData.emojis) {
       Object.values(emojiData.emojis).forEach(emoji => {
         const e = emoji as EmojiMartEmoji;
-        // Get the base emoji (first skin tone or default)
         const baseSkin = e.skins?.[0];
         if (baseSkin?.native) {
           emojis.push({
@@ -283,7 +265,6 @@ export function EmojiSelect({
     [clearSelection],
   );
 
-  // Filter emojis based on search query
   const filteredEmojis = useMemo(() => {
     if (!searchQuery.trim()) {
       return allEmojis;
@@ -317,14 +298,11 @@ export function EmojiSelect({
     });
   }, [allEmojis, searchQuery]);
 
-  // Reset focused index when search changes
   useEffect(() => {
     setFocusedIndex(null);
     clearSelection();
   }, [searchQuery, clearSelection]);
 
-  // Capture common text-field shortcuts while the picker is open so app-level and
-  // table-level handlers don't swallow them before we can update `searchQuery`.
   useEffect(() => {
     if (!open) {
       return;
@@ -349,8 +327,6 @@ export function EmojiSelect({
         return;
       }
 
-      // Keep behavior identical to a normal input: prevent app shortcuts and
-      // treat these keys as operating on the search bar.
       e.preventDefault();
       e.stopPropagation();
       e.stopImmediatePropagation();
@@ -405,16 +381,17 @@ export function EmojiSelect({
         return;
       }
 
-      // key === 'v'
-      void navigator?.clipboard
-        ?.readText()
-        .then(text => {
-          if (!text) {
-            return;
-          }
-          replaceAllOrInsertAtCaret(text, { replaceSelection: true });
-        })
-        .catch(() => undefined);
+      if (key === 'v') {
+        void navigator?.clipboard
+          ?.readText()
+          .then(text => {
+            if (!text) {
+              return;
+            }
+            replaceAllOrInsertAtCaret(text, { replaceSelection: true });
+          })
+          .catch(() => undefined);
+      }
     };
 
     window.addEventListener('keydown', handler, true);
@@ -462,7 +439,6 @@ export function EmojiSelect({
     return spans.length;
   }, []);
 
-  // Measure caret X offset so we can render it as an overlay (no layout shift).
   useLayoutEffect(() => {
     if (!open) {
       return;
@@ -632,7 +608,6 @@ export function EmojiSelect({
             return current;
           }
           chars.splice(idx, 1);
-          // caret stays at idx
           return chars.join('');
         });
         clearSelection();
@@ -641,7 +616,6 @@ export function EmojiSelect({
       }
 
       if (e.key.length === 1) {
-        // Printable character (includes space)
         e.preventDefault();
         e.stopPropagation();
         replaceAllOrInsertAtCaret(e.key, { replaceSelection: true });
@@ -653,7 +627,6 @@ export function EmojiSelect({
     [clearSelection, replaceAllOrInsertAtCaret],
   );
 
-  // Keyboard navigation for emoji grid (arrow keys, enter)
   const handleGridKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
       if (
@@ -703,7 +676,7 @@ export function EmojiSelect({
           handleEmojiSelect(filteredEmojis[focusedIndex]);
           return;
         }
-        // If no emoji is focused but there are filtered results, select the first one on Enter
+
         if (filteredEmojis.length > 0) {
           e.preventDefault();
           e.stopPropagation();
@@ -713,8 +686,6 @@ export function EmojiSelect({
       }
 
       if (open) {
-        // If the user is actively editing the search, arrow keys should behave
-        // like a normal text input (caret movement + shift-selection).
         if (
           isSearchActive &&
           (e.key === 'ArrowLeft' ||
@@ -749,8 +720,6 @@ export function EmojiSelect({
             setCaretIndexSafe(idx);
           };
 
-          // If there's an existing selection and shift isn't held, collapse it
-          // (left -> start, right -> end; up/down -> start/end of input).
           if (hasActiveSelection && !e.shiftKey) {
             const min = Math.min(activeSelection.start, activeSelection.end);
             const max = Math.max(activeSelection.start, activeSelection.end);
@@ -766,7 +735,6 @@ export function EmojiSelect({
             return;
           }
 
-          // Shift-selection
           if (e.shiftKey) {
             if (e.key === 'ArrowUp') {
               extendSelectionTo(0);
@@ -780,11 +748,9 @@ export function EmojiSelect({
             return;
           }
 
-          // Plain caret movement
           clearSelection();
           selectionAnchorRef.current = null;
           if (e.key === 'ArrowDown' && caretIndexRef.current >= len) {
-            // Hand off into the emoji grid once the caret is already at the end.
             setIsSearchActive(false);
             setFocusedIndex(0);
             return;
@@ -801,13 +767,11 @@ export function EmojiSelect({
           return;
         }
 
-        // Search input handling (typing characters, backspace, delete)
         const handled = applySearchInputKey(e);
         if (handled) {
           return;
         }
 
-        // Emoji grid navigation
         if (
           e.key === 'ArrowDown' ||
           e.key === 'ArrowUp' ||
@@ -823,13 +787,11 @@ export function EmojiSelect({
       }
 
       if (!open && shouldSaveFromKeyProp(e)) {
-        // Let the table handle Enter if we're not open.
         inputProps?.onKeyDown?.(e);
         return;
       }
 
       if (!open) {
-        // Any other key opens the picker.
         setOpen(true);
       }
     },
@@ -877,7 +839,6 @@ export function EmojiSelect({
     );
   };
 
-  // Convert shortcode to native emoji for display
   const displayValue = shortcodeToNativeUtil(value);
   const showPlaceholder = !value;
 
@@ -973,7 +934,6 @@ export function EmojiSelect({
           innerRef={popoverContentRef}
           tabIndex={-1}
           onMouseDownCapture={e => {
-            // Keep focus pinned to the cell input so the table stays in edit mode.
             e.preventDefault();
             innerRef.current?.focus();
           }}
@@ -1029,9 +989,7 @@ export function EmojiSelect({
               padding: '8px',
             }}
           >
-            {/* Visually match focused picker inputs (purple outline + caret),
-              but keep actual focus in the table cell input to avoid closing
-              editing (popover is portaled). */}
+            {}
             <View
               style={{
                 outline: 0,
@@ -1062,20 +1020,17 @@ export function EmojiSelect({
                 const clickedIndex = getCaretIndexFromClientX(e.clientX);
 
                 if (e.shiftKey) {
-                  // Shift+click selects between the existing caret (anchor) and click.
                   if (selectionAnchorRef.current == null) {
                     selectionAnchorRef.current = caretIndexRef.current;
                   }
                   setSelectionRange(selectionAnchorRef.current, clickedIndex);
                   setCaretIndexSafe(clickedIndex);
                 } else {
-                  // Plain click moves caret and clears selection.
                   clearSelection();
                   selectionAnchorRef.current = clickedIndex;
                   setCaretIndexSafe(clickedIndex);
                 }
 
-                // Click-drag selection
                 const dragAnchor = selectionAnchorRef.current ?? clickedIndex;
                 isDraggingSelectionRef.current = true;
                 const onMove = (ev: MouseEvent) => {
@@ -1229,7 +1184,6 @@ export function EmojiSelect({
                 }}
                 onFocus={() => setFocusedIndex(index)}
                 onBlur={() => {
-                  // Only clear focus if not moving to another emoji
                   if (focusedIndex === index) {
                     setFocusedIndex(null);
                   }
@@ -1240,7 +1194,7 @@ export function EmojiSelect({
             ))}
           </View>
 
-          {/* Footer with hovered emoji shortcode */}
+          {}
           <View
             style={{
               padding: '0 8px',
