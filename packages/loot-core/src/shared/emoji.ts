@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import data, { type EmojiMartData } from '@emoji-mart/data';
 
 const emojiData = data as EmojiMartData;
@@ -44,7 +43,7 @@ export function shortcodeToNative(shortcode: string | null): string {
     return '';
   }
 
-  const id = shortcode.replace(/^:/, '').replace(/:$/, '');
+  const id = shortcode.replace(/^:+/, '').replace(/:+$/, '');
   const cache = buildEmojiCache();
   return cache.get(id) || shortcode; // Fallback to shortcode if not found
 }

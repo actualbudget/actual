@@ -204,6 +204,32 @@ describe('EmojiSelect', () => {
     await waitFor(() => {
       expect(screen.getByTestId('emoji-select-popover')).toBeInTheDocument();
     });
+
+    expect(screen.getByText('😀')).toBeInTheDocument();
+    expect(screen.getByText('💯')).toBeInTheDocument();
+    expect(screen.getByText('🔴')).toBeInTheDocument();
+    expect(screen.getByText('👍')).toBeInTheDocument();
+
+    const input = screen.getByRole('textbox');
+    await userEvent.click(input);
+    await userEvent.keyboard('red_circle');
+
+    await waitFor(() => {
+      expect(screen.getByText('🔴')).toBeInTheDocument();
+      expect(screen.queryByText('💯')).not.toBeInTheDocument();
+      expect(screen.queryByText('😀')).not.toBeInTheDocument();
+      expect(screen.queryByText('👍')).not.toBeInTheDocument();
+    });
+
+    await userEvent.keyboard('{Control>}a{/Control}');
+    await userEvent.keyboard('{Backspace}');
+
+    await waitFor(() => {
+      expect(screen.getByText('😀')).toBeInTheDocument();
+      expect(screen.getByText('💯')).toBeInTheDocument();
+      expect(screen.getByText('🔴')).toBeInTheDocument();
+      expect(screen.getByText('👍')).toBeInTheDocument();
+    }, { timeout: 2000 });
   });
 
   it('handles keyboard navigation with arrow keys', async () => {
@@ -225,8 +251,28 @@ describe('EmojiSelect', () => {
       expect(screen.getByTestId('emoji-select-popover')).toBeInTheDocument();
     });
 
+    const emojiButtons = screen.getAllByRole('button').filter(button =>
+      button.hasAttribute('data-emoji-index'),
+    );
+
+    expect(emojiButtons.length).toBeGreaterThan(0);
+
     const input = screen.getByRole('textbox');
-    await userEvent.type(input, '{ArrowDown}');
+
+    await userEvent.click(input);
+    expect(onSelect).not.toHaveBeenCalled();
+
+    await userEvent.keyboard('{ArrowDown}');
+    expect(onSelect).not.toHaveBeenCalled();
+
+    await userEvent.keyboard('{ArrowDown}');
+    expect(onSelect).not.toHaveBeenCalled();
+
+    await userEvent.keyboard('{Enter}');
+
+    expect(onSelect).toHaveBeenCalled();
+    const callArgs = onSelect.mock.calls[0][0];
+    expect(callArgs).toMatch(/^:[a-z0-9_]+:$/);
   });
 
   it('closes picker on Escape key', async () => {

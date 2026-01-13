@@ -68,8 +68,14 @@ describe('emojiUtils', () => {
       expect(shortcodeToNative('grinning:')).toBe('😀');
     });
 
-    it('handles multiple colons correctly', () => {
+    it('converts standard shortcode to emoji', () => {
       expect(shortcodeToNative(':thumbs_up:')).toBe('👍');
+    });
+
+    it('handles multiple colons correctly', () => {
+      expect(shortcodeToNative('::thumbs_up::')).toBe('👍');
+      expect(shortcodeToNative(':::thumbs_up:::')).toBe('👍');
+      expect(shortcodeToNative(':thumbs:up:')).toBe(':thumbs:up:');
     });
   });
 });
