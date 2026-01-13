@@ -186,17 +186,8 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         conditionsOp,
         startDate,
         endDate,
-        interval: isConcise ? 'Monthly' : 'Daily',
-        firstDayOfWeekIdx,
       }),
-    [
-      conditions,
-      conditionsOp,
-      startDate,
-      endDate,
-      isConcise,
-      firstDayOfWeekIdx,
-    ],
+    [conditions, conditionsOp, startDate, endDate],
   );
 
   const data = useReport('default', getGraphData);

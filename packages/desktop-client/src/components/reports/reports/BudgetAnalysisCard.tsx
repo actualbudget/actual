@@ -62,7 +62,6 @@ export function BudgetAnalysisCard({
       conditionsOp: meta?.conditionsOp,
       startDate,
       endDate,
-      interval: 'Monthly', // Always use Monthly for the card display
     });
   }, [meta?.conditions, meta?.conditionsOp, startDate, endDate]);
 
