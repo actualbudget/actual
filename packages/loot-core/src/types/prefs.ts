@@ -5,9 +5,7 @@ export type FeatureFlag =
   | 'formulaMode'
   | 'currency'
   | 'crossoverReport'
-  | 'budgetAnalysisReport'
-  | 'plugins'
-  | 'forceReload';
+  | 'budgetAnalysisReport';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -24,7 +22,6 @@ export type SyncedPrefs = Partial<
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
     | 'defaultCurrencyCode'
-    | 'plugins'
     | `show-account-${string}-net-worth-chart`
     | `side-nav.show-balance-history-${string}`
     | `show-balances-${string}`
@@ -154,3 +151,7 @@ export type GlobalPrefsJson = Partial<{
 }>;
 
 export type AuthMethods = 'password' | 'openid';
+
+export type ServerPrefs = Partial<{
+  'flags.plugins': 'true' | 'false';
+}>;

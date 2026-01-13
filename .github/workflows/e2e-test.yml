@@ -2,6 +2,17 @@ name: E2E Tests
 
 on:
   pull_request:
+    paths:
+      - 'packages/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.github/workflows/e2e-test.yml'
+      - '!packages/sync-server/**' # Sync server changes don't affect E2E tests
+      - '!packages/api/**' # API changes don't affect E2E tests
+      - '!packages/ci-actions/**' # CI actions changes don't affect E2E tests
+      - '!packages/docs/**' # Docs changes don't affect E2E tests
+      - '!packages/eslint-plugin-actual/**' # Eslint plugin changes don't affect E2E tests
+  merge_group:
 
 env:
   GITHUB_PR_NUMBER: ${{github.event.pull_request.number}}
@@ -11,42 +22,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  netlify:
-    name: Wait for Netlify build to finish
-    runs-on: ubuntu-latest
-    outputs:
-      netlify_url: ${{ steps.netlify.outputs.url }}
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - name: Set up environment
-        uses: ./.github/actions/setup
-      - name: Wait for Netlify build to finish
-        id: netlify
-        env:
-          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./.github/actions/netlify-wait-for-build
-
   functional:
-    name: Functional
-    needs: netlify
+    name: Functional (shard ${{ matrix.shard }}/5)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5]
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-jammy
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
       - name: Trust the repository directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - name: Run E2E Tests on Netlify URL
-        run: yarn e2e
-        env:
-          E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
+      - name: Run E2E Tests
+        run: yarn e2e --shard=${{ matrix.shard }}/5
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: always()
         with:
-          name: desktop-client-test-results
+          name: desktop-client-test-results-shard-${{ matrix.shard }}
           path: packages/desktop-client/test-results/
           retention-days: 30
           overwrite: true
@@ -60,6 +58,8 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
       - name: Trust the repository directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Run Desktop app E2E Tests
@@ -74,23 +74,68 @@ jobs:
           overwrite: true
 
   vrt:
-    name: Visual regression
-    needs: netlify
+    name: Visual regression (shard ${{ matrix.shard }}/5)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5]
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-jammy
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Set up environment
         uses: ./.github/actions/setup
-      - name: Run VRT Tests on Netlify URL
-        run: yarn vrt
-        env:
-          E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
+        with:
+          download-translations: 'false'
+      - name: Run VRT Tests
+        run: yarn vrt --shard=${{ matrix.shard }}/5
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: always()
         with:
-          name: desktop-client-test-results
-          path: packages/desktop-client/test-results/
+          name: vrt-blob-report-${{ matrix.shard }}
+          path: packages/desktop-client/blob-report/
+          retention-days: 1
+          overwrite: true
+
+  merge-vrt:
+    name: Merge VRT Reports
+    needs: vrt
+    runs-on: ubuntu-latest
+    if: ${{ !cancelled() }}
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-jammy
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Download all blob reports
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          path: packages/desktop-client/all-blob-reports
+          pattern: vrt-blob-report-*
+          merge-multiple: true
+      - name: Merge reports
+        id: merge-reports
+        run: yarn workspace @actual-app/web run playwright merge-reports --reporter html ./all-blob-reports
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        id: playwright-report-vrt
+        with:
+          name: html-report--attempt-${{ github.run_attempt }}
+          path: packages/desktop-client/playwright-report
           retention-days: 30
           overwrite: true
+      - name: Save VRT metadata for comment workflow
+        if: github.event_name == 'pull_request'
+        run: |
+          mkdir -p vrt-metadata
+          echo "${{ github.event.pull_request.number }}" > vrt-metadata/pr-number.txt
+          echo "${{ needs.vrt.result }}" > vrt-metadata/vrt-result.txt
+          echo "${{ steps.playwright-report-vrt.outputs.artifact-url }}" > vrt-metadata/artifact-url.txt
+      - name: Upload VRT metadata
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: vrt-comment-metadata
+          path: vrt-metadata/
+          retention-days: 1

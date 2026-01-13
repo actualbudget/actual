@@ -4,6 +4,8 @@ import * as path from 'path';
 
 import promiseRetry from 'promise-retry';
 
+import { logger } from '../log';
+
 import type * as T from '.';
 
 export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
@@ -105,7 +107,7 @@ export const readFile: T.ReadFile = (
     encoding = null;
   }
   // `any` as cannot refine return with two function overrides
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   return new Promise<any>((resolve, reject) => {
     fs.readFile(filepath, encoding, (err, data) => {
       if (err) {
@@ -125,13 +127,13 @@ export const writeFile: T.WriteFile = async (filepath, contents) => {
           // @ts-expect-error contents type needs refining
           fs.writeFile(filepath, contents, 'utf8', err => {
             if (err) {
-              console.error(
+              logger.error(
                 `Failed to write to ${filepath}. Attempted ${attempt} times. Something is locking the file - potentially a virus scanner or backup software.`,
               );
               reject(err);
             } else {
               if (attempt > 1) {
-                console.info(
+                logger.info(
                   `Successfully recovered from file lock. It took ${attempt} retries`,
                 );
               }
@@ -150,7 +152,7 @@ export const writeFile: T.WriteFile = async (filepath, contents) => {
 
     return undefined;
   } catch (err) {
-    console.error(`Unable to recover from file lock on file ${filepath}`);
+    logger.error(`Unable to recover from file lock on file ${filepath}`);
     throw err;
   }
 };

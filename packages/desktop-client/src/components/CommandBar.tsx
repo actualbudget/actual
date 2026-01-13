@@ -185,7 +185,7 @@ export function CommandBar() {
       items: navigationItems,
       onSelect: ({ id }) => {
         const item = navigationItems.find(item => item.id === id);
-        if (!!item) handleNavigate(item.path);
+        if (item) handleNavigate(item.path);
       },
     },
     {
@@ -342,7 +342,7 @@ export function CommandBar() {
                             'var(--color-menuItemBackgroundHover)',
                           color: 'var(--color-menuItemTextHover)',
                         },
-                      // eslint-disable-next-line actual/typography
+
                       "&[data-selected='true']": {
                         backgroundColor: 'var(--color-menuItemBackgroundHover)',
                         color: 'var(--color-menuItemTextHover)',

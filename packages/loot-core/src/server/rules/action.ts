@@ -3,11 +3,14 @@ import * as dateFns from 'date-fns';
 import * as Handlebars from 'handlebars';
 import { HyperFormula } from 'hyperformula';
 
+import { amountToInteger } from 'loot-core/shared/util';
+
 import { logger } from '../../platform/server/log';
 import { parseDate, format, currentDay } from '../../shared/months';
 import { FIELD_TYPES } from '../../shared/rules';
-import { TransactionForRules } from '../transactions/transaction-rules';
+import { type TransactionForRules } from '../transactions/transaction-rules';
 
+import { CustomFunctionsPlugin } from './customFunctions';
 import { assert } from './rule-utils';
 
 const ACTION_OPS = [
@@ -96,7 +99,7 @@ export class Action {
                     : parseFloat(String(result));
 
                 if (isNaN(numValue)) {
-                  const error = `Formula for “${this.field}” must produce a numeric value. Got: ${JSON.stringify(result)}`;
+                  const error = `Formula for "${this.field}" must produce a numeric value. Got: ${JSON.stringify(result)}`;
                   object._ruleErrors.push(error);
                 } else {
                   object[this.field] = numValue;
@@ -108,7 +111,7 @@ export class Action {
                 if (parsed && dateFns.isValid(parsed)) {
                   object[this.field] = format(parsed, 'yyyy-MM-dd');
                 } else {
-                  const error = `Formula for “${this.field}” must produce a valid date. Got: ${JSON.stringify(result)}`;
+                  const error = `Formula for "${this.field}" must produce a valid date. Got: ${JSON.stringify(result)}`;
                   object._ruleErrors.push(error);
                 }
                 break;
@@ -124,9 +127,12 @@ export class Action {
                 object[this.field] = String(result);
                 break;
               }
+              default: {
+                break;
+              }
             }
           } catch (err) {
-            const error = `Error executing formula for “${this.field}”: ${err instanceof Error ? err.message : String(err)}`;
+            const error = `Error executing formula for "${this.field}": ${err instanceof Error ? err.message : String(err)}`;
             object._ruleErrors.push(error);
             break;
           }
@@ -151,7 +157,7 @@ export class Action {
               } else {
                 // Keep original string; log for diagnostics but avoid hard crash
                 logger.error(
-                  `rules: invalid date produced by template for field “${this.field}”:`,
+                  `rules: invalid date produced by template for field "${this.field}":`,
                   object[this.field],
                 );
                 // Make it stick like a sore thumb
@@ -161,6 +167,8 @@ export class Action {
             }
             case 'boolean':
               object[this.field] = object[this.field] === 'true';
+              break;
+            default:
               break;
           }
         } else {
@@ -177,6 +185,7 @@ export class Action {
             object.amount = this.value;
             break;
           default:
+            break;
         }
         break;
       case 'link-schedule':
@@ -196,6 +205,7 @@ export class Action {
         object['tombstone'] = 1;
         break;
       default:
+        break;
     }
   }
 
@@ -248,6 +258,8 @@ export class Action {
     }
 
     try {
+      HyperFormula.registerFunctionPlugin(CustomFunctionsPlugin);
+
       hfInstance = HyperFormula.buildEmpty({
         licenseKey: 'gpl-v3',
       });
@@ -270,57 +282,33 @@ export class Action {
         category_name: transaction._category_name || '',
       };
 
-      let row = 1;
       for (const key of Object.keys(fieldValues)) {
-        hfInstance.setCellContents({ sheet: sheetId, col: 0, row }, [['']]);
-        hfInstance.addNamedExpression(key, `=Sheet1!$A$${row + 1}`);
-
-        row++;
+        let cellValue: string | number | boolean;
+        if (
+          fieldValues[key] === undefined ||
+          fieldValues[key] === null ||
+          typeof fieldValues[key] === 'object'
+        ) {
+          cellValue = '';
+        } else {
+          cellValue = fieldValues[key];
+        }
+        hfInstance.addNamedExpression(key, cellValue);
       }
 
       hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [
         [formula],
       ]);
 
-      const parserCache = (
-        hfInstance as unknown as {
-          _parser: { cache: { cache: Map<string, { ast: unknown }> } };
-        }
-      )._parser.cache.cache;
-      const cacheEntry = parserCache.get(formula);
-      const usedVariables = new Set<string>();
-
-      if (cacheEntry && cacheEntry.ast) {
-        const extractedVars = this.extractVariablesFromAST(cacheEntry.ast);
-        for (const variable of extractedVars) {
-          usedVariables.add(variable);
-        }
-      }
-
-      row = 1;
-      for (const [, value] of Object.entries(fieldValues)) {
-        let cellValue: string | number | boolean;
-        if (
-          value === undefined ||
-          value === null ||
-          typeof value === 'object'
-        ) {
-          cellValue = '';
-        } else {
-          cellValue = value;
-        }
-
-        hfInstance.setCellContents({ sheet: sheetId, col: 0, row }, [
-          [cellValue],
-        ]);
-        row++;
-      }
-
       const cellAddress = { sheet: sheetId, col: 0, row: 0 };
       const cellValue = hfInstance.getCellValue(cellAddress);
 
       if (cellValue && typeof cellValue === 'object' && 'type' in cellValue) {
         throw new Error(`Formula error: ${cellValue.message}`);
+      }
+
+      if (typeof cellValue === 'number') {
+        return amountToInteger(Math.round(cellValue * 100) / 100);
       }
 
       return cellValue;

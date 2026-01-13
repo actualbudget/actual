@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { useLocation } from 'react-router';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -405,12 +405,10 @@ export function Modals() {
       }
     })
     .map((modal, idx) => (
-      <React.Fragment key={`${modalStack[idx].name}-${idx}`}>
-        {modal}
-      </React.Fragment>
+      <Fragment key={`${modalStack[idx].name}-${idx}`}>{modal}</Fragment>
     ));
 
   // fragment needed per TS types
-  // eslint-disable-next-line react/jsx-no-useless-fragment
+  // oxlint-disable-next-line react/jsx-no-useless-fragment
   return <>{modals}</>;
 }

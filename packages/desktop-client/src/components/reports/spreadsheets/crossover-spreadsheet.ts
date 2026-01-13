@@ -51,6 +51,7 @@ export type CrossoverParams = {
   safeWithdrawalRate: number; // annual percent, e.g. 0.04 for 4%
   estimatedReturn?: number | null; // optional annual return to project future balances
   projectionType: 'trend' | 'hampel'; // expense projection method
+  expenseAdjustmentFactor?: number; // multiplier for expenses (default 1.0)
 };
 
 export function createCrossoverSpreadsheet({
@@ -61,6 +62,7 @@ export function createCrossoverSpreadsheet({
   safeWithdrawalRate,
   estimatedReturn,
   projectionType,
+  expenseAdjustmentFactor,
 }: CrossoverParams) {
   return async (
     _spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -80,6 +82,7 @@ export function createCrossoverSpreadsheet({
         historicalReturn: null,
         yearsToRetire: null,
         targetMonthlyIncome: null,
+        targetNestEgg: null,
       });
       return;
     }
@@ -167,6 +170,7 @@ export function createCrossoverSpreadsheet({
           safeWithdrawalRate,
           estimatedReturn,
           projectionType,
+          expenseAdjustmentFactor,
         },
         expenses,
         historicalBalances,
@@ -185,6 +189,7 @@ function recalculate(
     | 'safeWithdrawalRate'
     | 'estimatedReturn'
     | 'projectionType'
+    | 'expenseAdjustmentFactor'
   >,
   expenses: MonthlyAgg[],
   historicalAccounts: Array<{
@@ -231,12 +236,16 @@ function recalculate(
     x: string;
     investmentIncome: number;
     expenses: number;
+    nestEgg: number;
+    adjustedExpenses?: number;
     isProjection?: boolean;
   }> = [];
 
   let lastBalance = 0;
   let lastExpense = 0;
   let crossoverIndex: number | null = null;
+  const adjustmentFactor = params.expenseAdjustmentFactor ?? 1.0;
+
   months.forEach((month, idx) => {
     const balance = historicalBalances[idx]; // Use historical balances for data generation
     const monthlyIncome = balance * monthlySWR;
@@ -245,15 +254,15 @@ function recalculate(
       x: d.format(d.parseISO(month + '-01'), 'MMM yyyy'),
       investmentIncome: Math.round(monthlyIncome),
       expenses: spend,
+      nestEgg: balance,
     });
     lastBalance = balance;
     lastExpense = spend;
 
-    if (crossoverIndex == null && Math.round(monthlyIncome) >= spend) {
-      crossoverIndex = idx;
-    } else if (crossoverIndex != null && Math.round(monthlyIncome) < spend) {
-      crossoverIndex = null;
-    }
+    // Note: We don't check for crossover in historical data to avoid triggering
+    // a crossover detection when expenses drop below the investment income for
+    // a short time. Crossover is determined based on projected expenses, not
+    // actual historical expenses.
   });
 
   // If estimatedReturn provided, project future months until investment income exceeds expenses
@@ -295,7 +304,7 @@ function recalculate(
     }
   }
 
-  if (months.length > 0 && crossoverIndex == null) {
+  if (months.length > 0) {
     // If no explicit return provided, use the calculated default
     if (monthlyReturn == null) {
       // not quite right.  Need a better approximation
@@ -310,26 +319,24 @@ function recalculate(
     let expenseIntercept = lastExpense;
     let hampelFilteredExpense = 0;
 
-    if (expenseMap.size >= 2) {
-      const y: number[] = months.map(m => expenseMap.get(m) || 0);
+    const y: number[] = months.map(m => expenseMap.get(m) || 0);
 
-      if (params.projectionType === 'trend') {
-        // Linear trend calculation: y = a + b * t
-        const x: number[] = months.map((_m, i) => i);
-        const n = x.length;
-        const sumX = x.reduce((a, b) => a + b, 0);
-        const sumY = y.reduce((a, b) => a + b, 0);
-        const sumXY = x.reduce((a, xi, idx) => a + xi * y[idx], 0);
-        const sumX2 = x.reduce((a, xi) => a + xi * xi, 0);
-        const denom = n * sumX2 - sumX * sumX;
-        if (denom !== 0) {
-          expenseSlope = (n * sumXY - sumX * sumY) / denom;
-          expenseIntercept = (sumY - expenseSlope * sumX) / n;
-        }
-      } else if (params.projectionType === 'hampel') {
-        // Hampel filtered median calculation
-        hampelFilteredExpense = calculateHampelFilteredMedian(y);
+    if (params.projectionType === 'trend') {
+      // Linear trend calculation: y = a + b * t
+      const x: number[] = months.map((_m, i) => i);
+      const n = x.length;
+      const sumX = x.reduce((a, b) => a + b, 0);
+      const sumY = y.reduce((a, b) => a + b, 0);
+      const sumXY = x.reduce((a, xi, idx) => a + xi * y[idx], 0);
+      const sumX2 = x.reduce((a, xi) => a + xi * xi, 0);
+      const denom = n * sumX2 - sumX * sumX;
+      if (denom !== 0) {
+        expenseSlope = (n * sumXY - sumX * sumY) / denom;
+        expenseIntercept = (sumY - expenseSlope * sumX) / n;
       }
+    } else if (params.projectionType === 'hampel') {
+      // Hampel filtered median calculation
+      hampelFilteredExpense = calculateHampelFilteredMedian(y);
     }
 
     for (let i = 1; i <= maxProjectionMonths; i++) {
@@ -352,16 +359,22 @@ function recalculate(
         projectedExpenses = Math.max(0, hampelFilteredExpense);
       }
 
+      // Calculate adjusted expenses
+      const adjustedProjectedExpenses = projectedExpenses * adjustmentFactor;
+
       data.push({
         x: d.format(monthCursor, 'MMM yyyy'),
         investmentIncome: Math.round(projectedIncome),
         expenses: Math.round(projectedExpenses),
+        nestEgg: Math.round(projectedBalance),
+        adjustedExpenses: Math.round(adjustedProjectedExpenses),
         isProjection: true,
       });
 
+      // Check crossover against ADJUSTED expenses
       if (
         crossoverIndex == null &&
-        Math.round(projectedIncome) >= Math.round(projectedExpenses)
+        Math.round(projectedIncome) >= Math.round(adjustedProjectedExpenses)
       ) {
         crossoverIndex = months.length + (i - 1);
         break;
@@ -371,6 +384,7 @@ function recalculate(
   // Calculate years to retire based on crossover point
   let yearsToRetire: number | null = null;
   let targetMonthlyIncome: number | null = null;
+  let targetNestEgg: number | null = null;
 
   if (crossoverIndex != null && crossoverIndex < data.length) {
     const crossoverData = data[crossoverIndex];
@@ -379,7 +393,12 @@ function recalculate(
       const crossoverDate = d.parse(crossoverData.x, 'MMM yyyy', currentDate);
       const monthsDiff = d.differenceInMonths(crossoverDate, currentDate);
       yearsToRetire = monthsDiff > 0 ? monthsDiff / 12 : 0;
-      targetMonthlyIncome = crossoverData.expenses;
+      targetMonthlyIncome = crossoverData.adjustedExpenses ?? null;
+      // Calculate target nest egg: target monthly income / monthly safe withdrawal rate
+      targetNestEgg =
+        targetMonthlyIncome != null
+          ? Math.round(targetMonthlyIncome / monthlySWR)
+          : null;
     }
   }
 
@@ -406,5 +425,7 @@ function recalculate(
     yearsToRetire,
     // Target monthly income at crossover point
     targetMonthlyIncome,
+    // Target nest egg at crossover point
+    targetNestEgg,
   };
 }

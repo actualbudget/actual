@@ -70,7 +70,7 @@ const payees: PayeeEntity[] = [
 ];
 vi.mock('../../hooks/usePayees', async importOriginal => {
   const actual =
-    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+    // oxlint-disable-next-line typescript/consistent-type-imports
     await importOriginal<typeof import('../../hooks/usePayees')>();
   return {
     ...actual,
@@ -208,7 +208,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
                 <TransactionTable
                   {...props}
                   transactions={transactions}
-                  loadMoreTransactions={() => {}}
+                  loadMoreTransactions={vi.fn()}
                   // @ts-ignore TODO:
                   commonPayees={[]}
                   payees={payees}
@@ -218,8 +218,8 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
                   onAdd={onAdd}
                   onAddSplit={onAddSplit}
                   onCreatePayee={onCreatePayee}
-                  showSelection={true}
-                  allowSplitTransaction={true}
+                  showSelection
+                  allowSplitTransaction
                 />
               </SplitsExpandedProvider>
             </SelectedProviderWithItems>
@@ -699,7 +699,7 @@ describe('Transactions', () => {
     expectToBeEditingField(container, 'category', 2);
   });
 
-  test('dropdown hovers but doesn’t change value', async () => {
+  test("dropdown hovers but doesn't change value", async () => {
     const { container, getTransactions } = renderTransactions();
 
     const input = await editField(container, 'category', 2);
@@ -928,18 +928,12 @@ describe('Transactions', () => {
     let input = expectToBeEditingField(container, 'date', 0, true);
     await userEvent.type(input, '[Tab]');
     input = expectToBeEditingField(container, 'account', 0, true);
-    // The first escape closes the dropdown
+
+    await userEvent.type(input, '[Escape]');
     await userEvent.type(input, '[Escape]');
     expect(
       container.querySelector('[data-testid="new-transaction"]'),
-    ).toBeTruthy();
-
-    // TODO: Fix this
-    // Now it should close the new transaction form
-    // await userEvent.type(input, '[Escape]');
-    // expect(
-    //   container.querySelector('[data-testid="new-transaction"]')
-    // ).toBeNull();
+    ).toBeNull();
 
     // The cancel button should also close the new transaction form
     updateProps({ isAdding: true });

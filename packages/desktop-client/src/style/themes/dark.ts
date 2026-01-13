@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-restricted-imports
+// oxlint-disable-next-line eslint/no-restricted-imports
 import * as colorPalette from '@desktop-client/style/palette';
 
 export const pageBackground = colorPalette.gray900;

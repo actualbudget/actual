@@ -2,21 +2,21 @@ import ipaddr from 'ipaddr.js';
 import request from 'supertest';
 import { vi, describe, it, expect, beforeEach, beforeAll } from 'vitest';
 
-import { handlers as app, clearAllowlistCache } from './app-cors-proxy.js';
-import { config } from './load-config.js';
-import { validateSession } from './util/validate-user.js';
+import { handlers as app, clearAllowlistCache } from './app-cors-proxy';
+import { config } from './load-config';
+import { validateSession } from './util/validate-user';
 
-vi.mock('./load-config.js', () => ({
+vi.mock('./load-config', () => ({
   config: {
     get: vi.fn(),
   },
 }));
 
-vi.mock('./util/middlewares.js', () => ({
+vi.mock('./util/middlewares', () => ({
   requestLoggerMiddleware: (req, res, next) => next(),
 }));
 
-vi.mock('./util/validate-user.js', () => ({
+vi.mock('./util/validate-user', () => ({
   validateSession: vi.fn(),
 }));
 
@@ -173,9 +173,9 @@ describe('app-cors-proxy', () => {
 
     clearAllowlistCache();
 
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(vi.fn());
+    vi.spyOn(console, 'warn').mockImplementation(vi.fn());
+    vi.spyOn(console, 'error').mockImplementation(vi.fn());
   });
 
   describe('CORS preflight', () => {

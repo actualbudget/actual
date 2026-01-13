@@ -4,7 +4,8 @@ import IndexedDBBackend from 'absurd-sql/dist/indexeddb-backend';
 
 import * as connection from '../connection';
 import * as idb from '../indexeddb';
-import { _getModule, SqlJsModule } from '../sqlite';
+import { logger } from '../log';
+import { _getModule, type SqlJsModule } from '../sqlite';
 
 import { join } from './path-join';
 
@@ -191,7 +192,7 @@ async function _copySqlFile(
     tofile.close();
     fromfile.close();
     _removeFile(toDbPath);
-    console.error('Failed to copy database file', error);
+    logger.error('Failed to copy database file', error);
     return false;
   } finally {
     tofile.close();

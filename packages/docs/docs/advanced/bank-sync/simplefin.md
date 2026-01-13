@@ -9,13 +9,11 @@ Server Version 24.10.0 or higher are required for this feature.
 
 1. Create an account with SimpleFIN Bridge - https://beta-bridge.simplefin.org/ , by clicking "Get Started" and entering your email address.
 
-    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-01.png)
-
+   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-01.webp)
 
 2. You will receive an email with the login link, after a few minutes. Click this link to log into your account dashboard.
 
-    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-02.png)
-
+   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-02.webp)
 
 3. Accept the terms, on first login, and then you will be taken to "My Account".
 
@@ -27,50 +25,49 @@ Server Version 24.10.0 or higher are required for this feature.
 
    _This is only for you to easily identify it in the SimpleFIN connections overview._
 
-    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-03.png)
+   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-03.webp)
 
 6. Save the generated Setup Token someplace safe (one-time use only).
 
-    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-04.png)
+   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-04.webp)
 
-7. Back in Actual, click on “+ Add account” at the bottom of the sidebar.
+7. Back in Actual, click on "+ Add account" at the bottom of the sidebar.
 
-    ![](/img/connecting-your-bank/connecting-your-bank-02.png)
+   ![](/img/connecting-your-bank/connecting-your-bank-02.webp)
 
-8. Click “Link bank account with SimpleFIN”.
+8. Click "Link bank account with SimpleFIN".
 
-    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-05.png)
+   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-05.webp)
 
 9. You will be asked to enter your SimpleFIN setup token. The keys from this value will be saved on the server, so you will only need to enter it once.
 
-    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-06.png)
+   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-06.webp)
 
 ### Link Accounts with SimpleFIN
 
 1. Add the link to your accounts in actual (Existing or New).
-
    - **_For an existing account, click on that account, select the ... (kebab menu) in the top right, and choose Link Account_**
 
-     ![](/img/connecting-your-bank/connecting-your-bank-01.png)
+     ![](/img/connecting-your-bank/connecting-your-bank-01.webp)
 
    - **_To create a new account with bank syncing click on the '+ Add account' link in the left menu at the bottom_**
 
-     ![](/img/connecting-your-bank/connecting-your-bank-02.png)
+     ![](/img/connecting-your-bank/connecting-your-bank-02.webp)
 
 2. Select the Link bank account with SimpleFIN button.
 
-   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-07.png)
+   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-07.webp)
 
 3. A Link Accounts box will pop up. To link a SimpleFIN account to an Actual account, click the "Setup bank-sync" button in the same row.
    - The "Bank Account To Sync" column contains the names of the accounts found via SimpleFIN
    - The "Account in Actual" column contains the name of the Actual account it is linked to.
    - You can also click in the "Account in Actual" column, instead of clicking the "Setup bank-sync" button.
 
-   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-08.png)
+   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-08.webp)
 
 4. Either select an existing Actual account to link to, or create a new one.
 
-   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-09.png)
+   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-09.webp)
 
 5. When you've mapped all your accounts that you wish to, click the "Link Account" button.
 
@@ -91,4 +88,3 @@ To reset your SimpleFIN setup token:
 3. Click "Reset SimpleFIN credentials".
 
 You will then need to obtain a new setup token from SimpleFIN and enter it into Actual.
-

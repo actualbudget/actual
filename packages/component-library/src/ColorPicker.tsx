@@ -1,11 +1,11 @@
-import { ChangeEvent, ReactNode } from 'react';
+import { type ChangeEvent, type ReactNode } from 'react';
 import {
   ColorPicker as AriaColorPicker,
-  ColorPickerProps as AriaColorPickerProps,
+  type ColorPickerProps as AriaColorPickerProps,
   Dialog,
   DialogTrigger,
   ColorSwatch as AriaColorSwatch,
-  ColorSwatchProps,
+  type ColorSwatchProps,
   ColorSwatchPicker as AriaColorSwatchPicker,
   ColorSwatchPickerItem,
   ColorField,
@@ -32,7 +32,6 @@ function ColorSwatch(props: ColorSwatchProps) {
   );
 }
 
-// colors from https://materialui.co/colors
 const DEFAULT_COLOR_SET = [
   '#690CB0',
   '#D32F2F',
@@ -54,12 +53,32 @@ const DEFAULT_COLOR_SET = [
   '#5D4037',
   '#616161',
   '#455A64',
+  '#FF6666', //red
+  '#FF99FF', //magenta
+  '#C39DDF', //purple
+  '#6666FF', //blue
+  '#B2FFFF', //cyan
+  '#99cb99', //green
+  '#FFFF7F', //yellow
+  '#FFAB66', //orange
+  '#D4B89C', //brown
+  '#BFBFBF', //gray
+  '#FFAEAE', //colors repeat from above with a lighter tint
+  '#FFCCFF',
+  '#E4D4FF', //this is now purple125
+  '#B0B0FF',
+  '#D8FFFF',
+  '#CFE5CF',
+  '#FFFFB2',
+  '#FFD5B3',
+  '#E4D3C3',
+  '#DADADA',
 ];
 
-interface ColorSwatchPickerProps {
+type ColorSwatchPickerProps = {
   columns?: number;
   colorset?: string[];
-}
+};
 
 function ColorSwatchPicker({
   columns = 5,
@@ -89,7 +108,6 @@ function ColorSwatchPicker({
             cursor: 'pointer',
 
             '&[data-selected]::after': {
-              // eslint-disable-next-line actual/typography
               content: '""',
               position: 'absolute',
               inset: 0,
@@ -123,11 +141,11 @@ function ColorSwatchPicker({
 }
 const isColor = (value: string) => /^#[0-9a-fA-F]{6}$/.test(value);
 
-interface ColorPickerProps extends AriaColorPickerProps {
+type ColorPickerProps = {
   children?: ReactNode;
   columns?: number;
   colorset?: string[];
-}
+} & AriaColorPickerProps;
 
 export function ColorPicker({
   children,

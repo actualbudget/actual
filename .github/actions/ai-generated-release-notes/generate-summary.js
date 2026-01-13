@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const https = require('https');
 const fs = require('fs');
+const https = require('https');
 
 const commentBody = process.env.GITHUB_EVENT_COMMENT_BODY;
 const prDetailsJson = process.env.PR_DETAILS;
@@ -71,7 +71,7 @@ try {
         console.log('Generated summary:', summary);
 
         const result = {
-          summary: summary,
+          summary,
           prNumber: prDetails.number,
           author: prDetails.author,
         };

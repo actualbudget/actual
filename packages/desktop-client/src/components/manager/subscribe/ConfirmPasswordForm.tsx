@@ -53,7 +53,7 @@ export function ConfirmPasswordForm({
       }}
     >
       <BigInput
-        autoFocus={true}
+        autoFocus
         placeholder={t('Password')}
         type={showPassword ? 'text' : 'password'}
         value={password1}
@@ -130,7 +130,7 @@ export function ConfirmOldPasswordForm({
       }}
     >
       <BigInput
-        autoFocus={true}
+        autoFocus
         placeholder={t('Password')}
         type={showPassword ? 'text' : 'password'}
         value={password}

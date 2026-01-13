@@ -16,11 +16,12 @@ Depending on your usage, savings accounts can be on or off the budget. If you're
 
 You can add an account to your budget at any time, however when you first install Actual you can use the `Add Account` button in the middle of the screen.
 
-![](/img/add-account/AddAccount.png)
+![](/img/add-account/AddAccount.webp)
 
 You can also add an account using the `+ Add account` button in the sidebar.
 
 Two successive screens will appear with boxes asking you to fill in a few options
+
 - Create a Local Account or Link to a supported bank syncing provider (See [Connecting Your Bank](https://actualbudget.org/docs/advanced/bank-sync))
 - Give your account a name
 - Is the account on budget or off budget
@@ -30,9 +31,9 @@ Two successive screens will appear with boxes asking you to fill in a few option
 Off budget means that the balance is not reflected when you assign money to categories in your budget register
 :::
 
-![](/img/add-account/CreateAccount1.png)
+![](/img/add-account/CreateAccount1.webp)
 
-![](/img/add-account/CreateAccount@2x.png)
+![](/img/add-account/CreateAccount@2x.webp)
 
 Here you can see how that looks when the options are completed.
 
@@ -40,7 +41,7 @@ Here you can see how that looks when the options are completed.
 If you select the Off budget checkbox then change the account type, the Off budget checkbox will reset and will need to be re-selected each time the account type is changed.
 :::
 
-![](/img/add-account/NewBudget.png)
+![](/img/add-account/NewBudget.webp)
 
 You can now see the account in the sidebar of Actual
 
@@ -60,11 +61,11 @@ You can still access this account under **Closed Accounts** in the sidebar, and 
 
 Click the account name in the sidebar of Actual
 
-![](/img/add-account/SidebarAccountList@2x.png)
+![](/img/add-account/SidebarAccountList@2x.webp)
 
 Hovering your cursor close to the account name at the top will reveal two icons.
 The page icon allows you to write a note about this account, and the pencil icon allows you to rename the account.
 
 After editing a note for the account or its name, hit 'Enter' to save your changes.
 
-![](/img/add-account/AccountNameEdit.png)
+![](/img/add-account/AccountNameEdit.webp)

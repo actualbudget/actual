@@ -1,11 +1,11 @@
-import React, {
+import {
   forwardRef,
-  useEffect,
-  useState,
-  useRef,
   memo,
-  useMemo,
   useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
@@ -25,9 +25,9 @@ import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import {
   format as formatDate,
+  isValid as isValidDate,
   parse as parseDate,
   parseISO,
-  isValid as isValidDate,
 } from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -36,22 +36,23 @@ import * as Platform from 'loot-core/shared/platform';
 import { q } from 'loot-core/shared/query';
 import { getStatusLabel, getUpcomingDays } from 'loot-core/shared/schedules';
 import {
-  ungroupTransactions,
-  updateTransaction,
-  realizeTempTransactions,
-  splitTransaction,
   addSplitTransaction,
   deleteTransaction,
   makeChild,
+  realizeTempTransactions,
+  splitTransaction,
+  ungroupTransactions,
+  updateTransaction,
 } from 'loot-core/shared/transactions';
 import {
-  titleFirst,
-  integerToCurrency,
-  integerToAmount,
   amountToInteger,
-  getChangedValues,
+  applyFindReplace,
   diffItems,
+  getChangedValues,
   groupById,
+  integerToAmount,
+  integerToCurrency,
+  titleFirst,
 } from 'loot-core/shared/util';
 import {
   type AccountEntity,
@@ -65,8 +66,8 @@ import { FocusableAmountInput } from './FocusableAmountInput';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   FieldLabel,
-  TapField,
   InputField,
+  TapField,
   ToggleField,
 } from '@desktop-client/components/mobile/MobileForms';
 import { getPrettyPayee } from '@desktop-client/components/mobile/utils';
@@ -88,7 +89,7 @@ import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 import { setLastTransaction } from '@desktop-client/transactions/transactionsSlice';
 
 function getFieldName(transactionId: TransactionEntity['id'], field: string) {
@@ -392,6 +393,8 @@ const ChildTransactionEdit = forwardRef<
     const { t } = useTranslation();
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
+    const [hideFraction, _] = useSyncedPref('hideFraction');
+
     const prettyPayee = getPrettyPayee({
       t,
       transaction,
@@ -457,7 +460,7 @@ const ChildTransactionEdit = forwardRef<
                   onClearActiveEdit();
                 }
               }}
-              autoDecimals={true}
+              autoDecimals={!hideFraction}
             />
           </View>
         </View>
@@ -884,7 +887,20 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     options: {
                       name,
                       onSubmit: (name, value) => {
-                        onUpdateInner(transactionToEdit, name, value);
+                        if (typeof value === 'object' && 'useRegex' in value) {
+                          onUpdateInner(
+                            transactionToEdit,
+                            name,
+                            applyFindReplace(
+                              transactionToEdit.notes,
+                              value.find,
+                              value.replace,
+                              value.useRegex,
+                            ),
+                          );
+                        } else {
+                          onUpdateInner(transactionToEdit, name, value);
+                        }
                       },
                       onClose: () => {
                         onClearActiveEdit();
@@ -1290,10 +1306,12 @@ function TransactionEditUnconnected({
   lastTransaction,
   dateFormat,
 }: TransactionEditUnconnectedProps) {
+  const { t } = useTranslation();
   const { transactionId } = useParams();
   const { state: locationState } = useLocation();
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
   const [fetchedTransactions, setFetchedTransactions] = useState<
     TransactionEntity[]
@@ -1526,11 +1544,109 @@ function TransactionEditUnconnected({
     [transactions],
   );
 
-  if (
-    categories.length === 0 ||
-    accounts.length === 0 ||
-    transactions.length === 0
-  ) {
+  if (accounts.length === 0) {
+    return (
+      <Page
+        header={
+          <MobilePageHeader
+            title={t('New Transaction')}
+            leftContent={<MobileBackButton />}
+          />
+        }
+        padding={0}
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20,
+            backgroundColor: theme.mobilePageBackground,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 15,
+              textAlign: 'center',
+              marginBottom: 20,
+              lineHeight: '1.5em',
+            }}
+          >
+            <Trans>
+              To add a transaction, you need to{' '}
+              <strong>create an account first</strong>. You can add an account
+              from the accounts page.
+            </Trans>
+          </Text>
+          <Button
+            variant="primary"
+            onPress={() => {
+              dispatch(
+                pushModal({
+                  modal: { name: 'add-account', options: {} },
+                }),
+              );
+            }}
+          >
+            <Trans>Add account</Trans>
+          </Button>
+        </View>
+      </Page>
+    );
+  }
+
+  if (categories.length === 0) {
+    return (
+      <Page
+        header={
+          <MobilePageHeader
+            title={t('New Transaction')}
+            leftContent={<MobileBackButton />}
+          />
+        }
+        padding={0}
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20,
+            backgroundColor: theme.mobilePageBackground,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 15,
+              textAlign: 'center',
+              marginBottom: 20,
+              lineHeight: '1.5em',
+            }}
+          >
+            <Trans>
+              To add a transaction, you need to{' '}
+              <strong>create a category first</strong>. You can add categories
+              from the budget page.
+            </Trans>
+          </Text>
+          <Button
+            variant="primary"
+            onPress={() => {
+              navigate('/budget');
+            }}
+          >
+            <Trans>Go to budget</Trans>
+          </Button>
+        </View>
+      </Page>
+    );
+  }
+
+  // This check ensures the component only renders after the transaction state
+  // has been properly initialized. When creating a new transaction (transactionId === 'new'),
+  // the transaction is created in a useEffect that runs after the component mounts.
+  // Returning null here acts as a loading state until that initialization completes.
+  if (transactions.length === 0) {
     return null;
   }
 

@@ -104,9 +104,27 @@ type UpdateCategoryGroupPayload = {
 
 export const updateCategoryGroup = createAppAsyncThunk(
   `${sliceName}/updateCategoryGroup`,
-  async ({ group }: UpdateCategoryGroupPayload) => {
+  async ({ group }: UpdateCategoryGroupPayload, { dispatch }) => {
     // Strip off the categories field if it exist. It's not a real db
     // field but groups have this extra field in the client most of the time
+    const categoryGroups = await send('get-categories');
+    if (
+      categoryGroups.grouped.find(
+        g =>
+          g.id !== group.id &&
+          g.name.toUpperCase() === group.name.toUpperCase(),
+      )
+    ) {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t('A category group with this name already exists.'),
+          },
+        }),
+      );
+      return;
+    }
     const { categories: _, ...groupNoCategories } = group;
     await send('category-group-update', groupNoCategories);
   },
@@ -335,6 +353,7 @@ type ApplyBudgetActionPayload =
         to: CategoryEntity['id'];
         from: CategoryEntity['id'];
         amount?: IntegerAmount;
+        currencyCode: string;
       };
     }
   | {
@@ -351,6 +370,7 @@ type ApplyBudgetActionPayload =
       args: {
         category: CategoryEntity['id'];
         amount?: IntegerAmount;
+        currencyCode: string;
       };
     }
   | {
@@ -360,6 +380,7 @@ type ApplyBudgetActionPayload =
         amount: number;
         from: CategoryEntity['id'];
         to: CategoryEntity['id'];
+        currencyCode: string;
       };
     }
   | {
@@ -499,6 +520,7 @@ export const applyBudgetAction = createAppAsyncThunk(
           to: args.to,
           from: args.from,
           amount: args.amount,
+          currencyCode: args.currencyCode,
         });
         break;
       case 'transfer-available':
@@ -513,6 +535,7 @@ export const applyBudgetAction = createAppAsyncThunk(
           month,
           category: args.category,
           amount: args.amount,
+          currencyCode: args.currencyCode,
         });
         break;
       case 'transfer-category':
@@ -521,6 +544,7 @@ export const applyBudgetAction = createAppAsyncThunk(
           amount: args.amount,
           from: args.from,
           to: args.to,
+          currencyCode: args.currencyCode,
         });
         break;
       case 'carryover': {

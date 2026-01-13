@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-restricted-imports
+// oxlint-disable-next-line eslint/no-restricted-imports
 import * as oldColors from './colors';
 
 // Only for use in contextual color definitions
@@ -71,6 +71,7 @@ export const red800 = oldColors.r2;
 export const red900 = oldColors.r1;
 export const purple50 = oldColors.p11;
 export const purple100 = oldColors.p10;
+export const purple125 = '#e4d4ff';
 export const purple150 = oldColors.p9;
 export const purple200 = oldColors.p8;
 export const purple300 = oldColors.p7;

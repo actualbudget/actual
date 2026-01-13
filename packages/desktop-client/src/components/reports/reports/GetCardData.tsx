@@ -183,7 +183,7 @@ export function GetCardData({
         balanceType={report.balanceType}
         groupBy={report.groupBy}
         interval={report.interval}
-        compact={true}
+        compact
         style={{ height: 'auto', flex: 1 }}
         intervalsCount={intervals.length}
         showTooltip={!isNarrowWidth && showTooltip}

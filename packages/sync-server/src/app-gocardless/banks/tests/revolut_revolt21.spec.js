@@ -1,4 +1,4 @@
-import RevolutRevolt21 from '../revolut_revolt21.js';
+import RevolutRevolt21 from '../revolut_revolt21';
 
 describe('RevolutRevolt21', () => {
   describe('#normalizeTransaction', () => {

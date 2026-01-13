@@ -7,14 +7,14 @@ import {
   listLoginMethods,
   getUserInfo,
   getActiveLoginMethod,
-} from './account-db.js';
-import { isValidRedirectUrl, loginWithOpenIdSetup } from './accounts/openid.js';
-import { changePassword, loginWithPassword } from './accounts/password.js';
-import {
-  errorMiddleware,
-  requestLoggerMiddleware,
-} from './util/middlewares.js';
-import { validateAuthHeader, validateSession } from './util/validate-user.js';
+  getServerPrefs,
+  setServerPrefs,
+  isAdmin,
+} from './account-db';
+import { isValidRedirectUrl, loginWithOpenIdSetup } from './accounts/openid';
+import { changePassword, loginWithPassword } from './accounts/password';
+import { errorMiddleware, requestLoggerMiddleware } from './util/middlewares';
+import { validateAuthHeader, validateSession } from './util/validate-user';
 
 const app = express();
 app.use(express.json());
@@ -131,6 +131,31 @@ app.post('/change-password', (req, res) => {
   res.send({ status: 'ok', data: {} });
 });
 
+app.post('/server-prefs', (req, res) => {
+  const session = validateSession(req, res);
+  if (!session) return;
+
+  if (!isAdmin(session.user_id)) {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'permission-not-found',
+    });
+    return;
+  }
+
+  const { prefs } = req.body || {};
+
+  if (!prefs || typeof prefs !== 'object') {
+    res.status(400).send({ status: 'error', reason: 'invalid-prefs' });
+    return;
+  }
+
+  setServerPrefs(prefs);
+
+  res.send({ status: 'ok', data: {} });
+});
+
 app.get('/validate', (req, res) => {
   const session = validateSession(req, res);
   if (session) {
@@ -149,6 +174,7 @@ app.get('/validate', (req, res) => {
         userId: session?.user_id,
         displayName: user?.display_name,
         loginMethod: session?.auth_method,
+        prefs: getServerPrefs(),
       },
     });
   }
