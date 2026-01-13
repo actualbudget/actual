@@ -50,6 +50,8 @@ export function makeChild<T extends GenericTransactionEntity>(
       parent.starting_balance_flag != null
         ? parent.starting_balance_flag
         : null,
+    sort_order:
+      'sort_order' in data ? data.sort_order : (parent.sort_order ?? null),
     is_child: true,
     parent_id: parent.id,
     error: null,
@@ -65,7 +67,7 @@ function makeNonChild<T extends GenericTransactionEntity>(
     ...data,
     cleared: parent.cleared != null ? parent.cleared : null,
     reconciled: parent.reconciled != null ? parent.reconciled : null,
-    sort_order: parent.sort_order || null,
+    sort_order: parent.sort_order ?? null,
     starting_balance_flag: null,
     is_child: false,
     parent_id: null,

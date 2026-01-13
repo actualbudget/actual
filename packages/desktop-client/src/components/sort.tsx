@@ -8,6 +8,7 @@ import React, {
   useState,
 } from 'react';
 import type { Context } from 'react';
+import { type DropPosition as AriaDropPosition } from 'react-aria';
 import { useDrag, useDrop } from 'react-dnd';
 
 import { theme } from '@actual-app/components/theme';
@@ -151,7 +152,9 @@ export const DropHighlightPosContext: Context<ItemPosition> =
   createContext(null);
 
 type DropHighlightProps = {
-  pos: DropPosition;
+  // Supports legacy ('top'/'bottom') and react-aria ('before'/'after'/'on') positions
+  // 'on' is not used in our UI but is included for type compatibility
+  pos: DropPosition | AriaDropPosition | null;
   offset?: {
     top?: number;
     bottom?: number;
@@ -160,15 +163,17 @@ type DropHighlightProps = {
 export function DropHighlight({ pos, offset }: DropHighlightProps) {
   const itemPos = useContext(DropHighlightPosContext);
 
-  if (pos == null) {
+  // 'on' position is not supported for highlight (used for dropping onto items, not between)
+  if (pos == null || pos === 'on') {
     return null;
   }
 
   const topOffset = (itemPos === 'first' ? 2 : 0) + (offset?.top || 0);
   const bottomOffset = (itemPos === 'last' ? 2 : 0) + (offset?.bottom || 0);
 
-  const posStyle =
-    pos === 'top' ? { top: -2 + topOffset } : { bottom: -1 + bottomOffset };
+  // Support both legacy ('top'/'bottom') and aria ('before'/'after') position names
+  const isTop = pos === 'top' || pos === 'before';
+  const posStyle = isTop ? { top: topOffset } : { bottom: bottomOffset };
 
   return (
     <View
