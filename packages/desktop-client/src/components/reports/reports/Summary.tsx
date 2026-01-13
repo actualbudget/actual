@@ -380,6 +380,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
               ['avgPerMonth', t('Average per month')],
               ['avgPerYear', t('Average per year')],
               ['avgPerTransact', t('Average per transaction')],
+              ['avgPerDay', t('Average per day')],
               ['percentage', t('Percentage')],
             ]}
             value={content.type ?? 'sum'}
@@ -389,6 +390,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                 | 'avgPerMonth'
                 | 'avgPerYear'
                 | 'avgPerTransact'
+                | 'avgPerDay'
                 | 'percentage',
             ) =>
               setContent(
@@ -516,7 +518,13 @@ function SummaryInner({ widget }: SummaryInnerProps) {
 }
 
 type OperatorProps = {
-  type: 'sum' | 'avgPerMonth' | 'avgPerYear' | 'avgPerTransact' | 'percentage';
+  type:
+    | 'sum'
+    | 'avgPerMonth'
+    | 'avgPerYear'
+    | 'avgPerTransact'
+    | 'avgPerDay'
+    | 'percentage';
   dividendFilterObject: FilterObject;
   divisorFilterObject: FilterObject;
   fromRange: string;
