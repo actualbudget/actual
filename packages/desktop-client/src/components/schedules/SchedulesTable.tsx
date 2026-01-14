@@ -26,6 +26,7 @@ import {
   Table,
   TableHeader,
 } from '@desktop-client/components/table';
+import { TNum } from '@desktop-client/components/TNum';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
@@ -175,7 +176,7 @@ export function ScheduleAmountCell({
           ~
         </View>
       )}
-      <Text
+      <TNum
         style={{
           flex: 1,
           color: num > 0 ? theme.noticeTextLight : theme.tableText,
@@ -192,7 +193,7 @@ export function ScheduleAmountCell({
         <PrivacyFilter>
           {num > 0 ? `+${currencyAmount}` : `${currencyAmount}`}
         </PrivacyFilter>
-      </Text>
+      </TNum>
     </Cell>
   );
 }
