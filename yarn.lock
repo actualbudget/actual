@@ -9874,6 +9874,7 @@ __metadata:
     "@octokit/rest": "npm:^22.0.1"
     "@types/node": "npm:^22.19.1"
     "@types/prompts": "npm:^2.4.9"
+    baseline-browser-mapping: "npm:^2.9.14"
     cross-env: "npm:^10.1.0"
     eslint: "npm:^9.39.2"
     eslint-plugin-perfectionist: "npm:^4.15.1"
@@ -10633,6 +10634,15 @@ __metadata:
   bin:
     baseline-browser-mapping: dist/cli.js
   checksum: 10/4154199589f9d5ca0cf80962494f34967e5bcbe2a3df234f4eb4b7a1766b263062ed47640686ab1d949f1156f5153bdc382ff7815368e365bc86916dc099d61b
+  languageName: node
+  linkType: hard
+
+"baseline-browser-mapping@npm:^2.9.14":
+  version: 2.9.14
+  resolution: "baseline-browser-mapping@npm:2.9.14"
+  bin:
+    baseline-browser-mapping: dist/cli.js
+  checksum: 10/a329881e5f673c0834843640e9c954c478f643fb983449c99850392e48cf52dfb1dc3de8d81c6a6a2802c86310833accc5e3deb6bef5fb6e329989e28ca5489b
   languageName: node
   linkType: hard
 
