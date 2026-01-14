@@ -24,6 +24,7 @@ import { calculateTimeRange } from '@desktop-client/components/reports/reportRan
 import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
+import { TNum } from '@desktop-client/components/TNum';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
@@ -167,7 +168,7 @@ export function NetWorthCard({
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  {format(data.netWorth, 'financial')}
+                  <TNum>{format(data.netWorth, 'financial')}</TNum>
                 </PrivacyFilter>
               </Block>
               <PrivacyFilter activationFilters={[!isCardHovered]}>

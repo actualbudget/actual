@@ -40,6 +40,7 @@ import { calculateTimeRange } from '@desktop-client/components/reports/reportRan
 import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
+import { TNum } from '@desktop-client/components/TNum';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
@@ -346,7 +347,9 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
           <View
             style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
           >
-            <PrivacyFilter>{format(data.netWorth, 'financial')}</PrivacyFilter>
+            <PrivacyFilter>
+              <TNum>{format(data.netWorth, 'financial')}</TNum>
+            </PrivacyFilter>
           </View>
           <PrivacyFilter>
             <Change amount={data.totalChange} />

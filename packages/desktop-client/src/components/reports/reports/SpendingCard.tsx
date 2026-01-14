@@ -19,6 +19,7 @@ import { calculateSpendingReportTimeRange } from '@desktop-client/components/rep
 import { createSpendingSpreadsheet } from '@desktop-client/components/reports/spreadsheets/spending-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
+import { TNum } from '@desktop-client/components/TNum';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type SpendingCardProps = {
@@ -146,9 +147,11 @@ export function SpendingCard({
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  {data &&
-                    (difference && difference > 0 ? '+' : '') +
-                      format(difference || 0, 'financial')}
+                  <TNum>
+                    {data &&
+                      (difference && difference > 0 ? '+' : '') +
+                        format(difference || 0, 'financial')}
+                  </TNum>
                 </PrivacyFilter>
               </Block>
             </View>

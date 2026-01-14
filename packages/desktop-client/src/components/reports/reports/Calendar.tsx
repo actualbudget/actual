@@ -58,6 +58,7 @@ import {
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { type TableHandleRef } from '@desktop-client/components/table';
+import { TNum } from '@desktop-client/components/TNum';
 import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
@@ -868,7 +869,7 @@ function CalendarWithHeader({
             aria-label={t('Income')}
           >
             <PrivacyFilter>
-              {format(calendar.totalIncome, 'financial')}
+              <TNum>{format(calendar.totalIncome, 'financial')}</TNum>
             </PrivacyFilter>
           </View>
           <SvgArrowThickDown
@@ -886,7 +887,7 @@ function CalendarWithHeader({
             aria-label={t('Expenses')}
           >
             <PrivacyFilter>
-              {format(calendar.totalExpense, 'financial')}
+              <TNum>{format(calendar.totalExpense, 'financial')}</TNum>
             </PrivacyFilter>
           </View>
         </View>
@@ -979,7 +980,9 @@ function CalendarCardHeader({
               <Trans>Income:</Trans>
             </View>
             <View style={{ color: chartTheme.colors.blue }}>
-              <PrivacyFilter>{format(totalIncome, 'financial')}</PrivacyFilter>
+              <PrivacyFilter>
+                <TNum>{format(totalIncome, 'financial')}</TNum>
+              </PrivacyFilter>
             </View>
 
             <View
@@ -991,7 +994,9 @@ function CalendarCardHeader({
               <Trans>Expenses:</Trans>
             </View>
             <View style={{ color: chartTheme.colors.red }}>
-              <PrivacyFilter>{format(totalExpense, 'financial')}</PrivacyFilter>
+              <PrivacyFilter>
+                <TNum>{format(totalExpense, 'financial')}</TNum>
+              </PrivacyFilter>
             </View>
           </View>
         </View>

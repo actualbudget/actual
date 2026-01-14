@@ -40,6 +40,7 @@ import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndi
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { TNum } from '@desktop-client/components/TNum';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -918,9 +919,12 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                 <span>
                   <Trans>Target Monthly Income</Trans>:{' '}
                   <PrivacyFilter>
-                    {targetMonthlyIncome != null && !isNaN(targetMonthlyIncome)
-                      ? format(targetMonthlyIncome, 'financial')
-                      : t('N/A')}
+                    {targetMonthlyIncome != null &&
+                    !isNaN(targetMonthlyIncome) ? (
+                      <TNum>{format(targetMonthlyIncome, 'financial')}</TNum>
+                    ) : (
+                      t('N/A')
+                    )}
                   </PrivacyFilter>
                 </span>
               </View>
@@ -932,9 +936,11 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                 <span>
                   <Trans>Target Life Savings</Trans>:{' '}
                   <PrivacyFilter>
-                    {targetNestEgg != null && !isNaN(targetNestEgg)
-                      ? format(targetNestEgg, 'financial')
-                      : t('N/A')}
+                    {targetNestEgg != null && !isNaN(targetNestEgg) ? (
+                      <TNum>{format(targetNestEgg, 'financial')}</TNum>
+                    ) : (
+                      t('N/A')
+                    )}
                   </PrivacyFilter>
                 </span>
               </View>

@@ -32,6 +32,7 @@ import { calculateTimeRange } from '@desktop-client/components/reports/reportRan
 import { simpleCashFlow } from '@desktop-client/components/reports/spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
+import { TNum } from '@desktop-client/components/TNum';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type CustomLabelProps = {
@@ -87,14 +88,15 @@ function CustomLabel({
       >
         {name}
       </text>
-      <text
+      <TNum
+        as="text"
         x={x + barWidth + valueXOffsets[position]}
         y={yOffset + 26}
         textAnchor={anchorValue[position]}
         fill={theme.tableText}
       >
         <PrivacyFilter>{format(value, 'financial')}</PrivacyFilter>
-      </text>
+      </TNum>
     </>
   );
 }

@@ -43,6 +43,7 @@ import {
 } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
+import { TNum } from '@desktop-client/components/TNum';
 import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -253,7 +254,7 @@ export function CalendarCard({
                           <View style={{ color: chartTheme.colors.blue }}>
                             {totalIncome !== 0 ? (
                               <PrivacyFilter>
-                                {format(totalIncome, 'financial')}
+                                <TNum>{format(totalIncome, 'financial')}</TNum>
                               </PrivacyFilter>
                             ) : (
                               ''
@@ -274,7 +275,7 @@ export function CalendarCard({
                           <View style={{ color: chartTheme.colors.red }}>
                             {totalExpense !== 0 ? (
                               <PrivacyFilter>
-                                {format(totalExpense, 'financial')}
+                                <TNum>{format(totalExpense, 'financial')}</TNum>
                               </PrivacyFilter>
                             ) : (
                               ''
@@ -518,7 +519,7 @@ function CalendarCardInner({
                   style={{ flexShrink: 0 }}
                 />
                 <PrivacyFilter>
-                  {format(calendar.totalIncome, 'financial')}
+                  <TNum>{format(calendar.totalIncome, 'financial')}</TNum>
                 </PrivacyFilter>
               </>
             ) : (
@@ -541,7 +542,7 @@ function CalendarCardInner({
                   style={{ flexShrink: 0 }}
                 />
                 <PrivacyFilter>
-                  {format(calendar.totalExpense, 'financial')}
+                  <TNum>{format(calendar.totalExpense, 'financial')}</TNum>
                 </PrivacyFilter>
               </>
             ) : (

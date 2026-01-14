@@ -59,6 +59,7 @@ import {
   calculateHasWarning,
   fromDateRepr,
 } from '@desktop-client/components/reports/util';
+import { TNum } from '@desktop-client/components/TNum';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -944,11 +945,11 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
                     <AlignedText
                       left={<Block>{balanceType}:</Block>}
                       right={
-                        <Text>
+                        <TNum>
                           <PrivacyFilter>
                             {format(data[balanceTypeOp], 'financial')}
                           </PrivacyFilter>
-                        </Text>
+                        </TNum>
                       }
                     />
                   </View>

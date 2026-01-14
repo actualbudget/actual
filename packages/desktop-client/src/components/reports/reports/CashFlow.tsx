@@ -35,6 +35,7 @@ import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndi
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { cashFlowByDate } from '@desktop-client/components/reports/spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { TNum } from '@desktop-client/components/TNum';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -326,11 +327,11 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
               </Block>
             }
             right={
-              <Text style={{ fontWeight: 600 }}>
+              <TNum style={{ fontWeight: 600 }}>
                 <PrivacyFilter>
                   {format(totalIncome, 'financial')}
                 </PrivacyFilter>
-              </Text>
+              </TNum>
             }
           />
 
@@ -342,11 +343,11 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
               </Block>
             }
             right={
-              <Text style={{ fontWeight: 600 }}>
+              <TNum style={{ fontWeight: 600 }}>
                 <PrivacyFilter>
                   {format(totalExpenses, 'financial')}
                 </PrivacyFilter>
-              </Text>
+              </TNum>
             }
           />
 
@@ -358,11 +359,11 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
               </Block>
             }
             right={
-              <Text style={{ fontWeight: 600 }}>
+              <TNum style={{ fontWeight: 600 }}>
                 <PrivacyFilter>
                   {format(totalTransfers, 'financial')}
                 </PrivacyFilter>
-              </Text>
+              </TNum>
             }
           />
           <Text style={{ fontWeight: 600 }}>
