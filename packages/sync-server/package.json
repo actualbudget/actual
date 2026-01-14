@@ -62,7 +62,7 @@
     "@types/supertest": "^6.0.3",
     "http-proxy-middleware": "^3.0.5",
     "nodemon": "^3.1.11",
-    "supertest": "^7.1.4",
+    "supertest": "^7.2.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16"
   }
