@@ -310,6 +310,7 @@ export type Modal =
         onCopyLastMonthAverage: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
         onApplyBudgetTemplate: () => void;
+        onEditNotes: (id: NoteEntity['id'], month: string) => void;
       };
     }
   | {
@@ -321,6 +322,7 @@ export type Modal =
         onCopyLastMonthAverage: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
         onApplyBudgetTemplate: () => void;
+        onEditNotes: (id: NoteEntity['id'], month: string) => void;
       };
     }
   | {
@@ -516,6 +518,12 @@ export type Modal =
       options: {
         message: string;
         onConfirm: () => void;
+      };
+    }
+  | {
+      name: 'copy-widget-to-dashboard';
+      options: {
+        onSelect: (dashboardId: string) => void;
       };
     }
   | {
