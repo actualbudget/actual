@@ -39,6 +39,7 @@ import {
   Table,
   TableHeader,
 } from '@desktop-client/components/table';
+import { TNum } from '@desktop-client/components/TNum';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { closeModal } from '@desktop-client/modals/modalsSlice';
@@ -488,9 +489,13 @@ function TableRow({
       </Field>
       <Field width={80}>
         <PrivacyFilter>
-          {externalAccount.balance != null
-            ? format(externalAccount.balance.toString(), 'financial')
-            : t('Unknown')}
+          {externalAccount.balance != null ? (
+            <TNum>
+              {format(externalAccount.balance.toString(), 'financial')}
+            </TNum>
+          ) : (
+            t('Unknown')
+          )}
         </PrivacyFilter>
       </Field>
       <Field
@@ -621,9 +626,13 @@ function AccountCard({
       >
         <Trans>Balance:</Trans>{' '}
         <PrivacyFilter>
-          {externalAccount.balance != null
-            ? format(externalAccount.balance.toString(), 'financial')
-            : t('Unknown')}
+          {externalAccount.balance != null ? (
+            <TNum>
+              {format(externalAccount.balance.toString(), 'financial')}
+            </TNum>
+          ) : (
+            t('Unknown')
+          )}
         </PrivacyFilter>
       </View>
 
