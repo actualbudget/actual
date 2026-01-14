@@ -28,7 +28,7 @@
     "@fontsource/redacted-script": "^5.2.8",
     "@juggle/resize-observer": "^3.4.0",
     "@lezer/highlight": "^1.2.3",
-    "@playwright/test": "1.56.1",
+    "@playwright/test": "1.57.0",
     "@rollup/plugin-inject": "^5.0.5",
     "@swc/core": "^1.15.8",
     "@swc/helpers": "^0.5.18",
