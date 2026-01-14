@@ -4,8 +4,9 @@ import inject from '@rollup/plugin-inject';
 import basicSsl from '@vitejs/plugin-basic-ssl';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
+import type { PreRenderedAsset } from 'rollup';
 /// <reference types="vitest" />
-import { defineConfig, loadEnv, type Plugin, type UserConfig } from 'vite';
+import { defineConfig, loadEnv, type Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 
@@ -121,7 +122,7 @@ export default defineConfig(async ({ mode }) => {
       chunkSizeWarningLimit: 1500,
       rollupOptions: {
         output: {
-          assetFileNames: assetInfo => {
+          assetFileNames: (assetInfo: PreRenderedAsset) => {
             const info = assetInfo.name?.split('.') ?? [];
             let extType = info[info.length - 1];
             if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
@@ -221,5 +222,5 @@ export default defineConfig(async ({ mode }) => {
       },
       maxWorkers: 2,
     },
-  } satisfies UserConfig;
+  };
 });
