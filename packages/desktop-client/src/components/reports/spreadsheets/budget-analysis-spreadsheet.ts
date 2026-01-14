@@ -27,12 +27,14 @@ type BudgetAnalysisData = {
 
 type createBudgetAnalysisSpreadsheetProps = {
   conditions?: RuleConditionEntity[];
+  conditionsOp?: 'and' | 'or';
   startDate: string;
   endDate: string;
 };
 
 export function createBudgetAnalysisSpreadsheet({
   conditions = [],
+  conditionsOp = 'and',
   startDate,
   endDate,
 }: createBudgetAnalysisSpreadsheetProps) {
@@ -48,11 +50,16 @@ export function createBudgetAnalysisSpreadsheet({
       cond => !cond.customName && cond.field === 'category',
     );
 
+    // Base set: expense categories only (exclude income and hidden)
+    const baseCategories = allCategories.filter(
+      (cat: CategoryEntity) => !cat.is_income && !cat.hidden,
+    );
+
     let categoriesToInclude: CategoryEntity[];
     if (categoryConditions.length > 0) {
-      // Apply the filter conditions to determine which categories to include
-      categoriesToInclude = allCategories.filter((cat: CategoryEntity) => {
-        return categoryConditions.every(cond => {
+      // Evaluate each condition to get sets of matching categories
+      const conditionResults = categoryConditions.map(cond => {
+        return baseCategories.filter((cat: CategoryEntity) => {
           if (cond.op === 'is') {
             return cond.value === cat.id;
           } else if (cond.op === 'isNot') {
@@ -65,11 +72,39 @@ export function createBudgetAnalysisSpreadsheet({
           return false;
         });
       });
+
+      // Combine results based on conditionsOp
+      if (conditionsOp === 'or') {
+        // OR: Union of all matching categories
+        const categoryIds = new Set(
+          conditionResults.flat().map(cat => cat.id),
+        );
+        categoriesToInclude = baseCategories.filter(cat =>
+          categoryIds.has(cat.id),
+        );
+      } else {
+        // AND: Intersection of all matching categories
+        if (conditionResults.length === 0) {
+          categoriesToInclude = [];
+        } else {
+          const firstSet = new Set(conditionResults[0].map(cat => cat.id));
+          for (let i = 1; i < conditionResults.length; i++) {
+            const currentIds = new Set(conditionResults[i].map(cat => cat.id));
+            // Keep only categories that are in both sets
+            for (const id of firstSet) {
+              if (!currentIds.has(id)) {
+                firstSet.delete(id);
+              }
+            }
+          }
+          categoriesToInclude = baseCategories.filter(cat =>
+            firstSet.has(cat.id),
+          );
+        }
+      }
     } else {
-      // No category filter, get all expense categories (exclude income)
-      categoriesToInclude = allCategories.filter(
-        (cat: CategoryEntity) => !cat.is_income && !cat.hidden,
-      );
+      // No category filter, use all expense categories
+      categoriesToInclude = baseCategories;
     }
 
     // Get monthly intervals (Budget Analysis only supports monthly)
