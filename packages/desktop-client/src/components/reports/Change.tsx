@@ -15,16 +15,15 @@ export function Change({
   style?: CSSProperties;
 }) {
   const format = useFormat();
+  const textStyle = {
+    ...styles.smallText,
+    color: amount < 0 ? theme.errorText : theme.noticeTextLight,
+    ...style,
+  };
 
   return (
-    <Block
-      style={{
-        ...styles.smallText,
-        color: amount < 0 ? theme.errorText : theme.noticeTextLight,
-        ...style,
-      }}
-    >
-      <TNum>
+    <Block style={textStyle}>
+      <TNum style={textStyle}>
         {amount >= 0 ? '+' : ''}
         {format(amount, 'financial')}
       </TNum>
