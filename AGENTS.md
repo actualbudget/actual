@@ -259,6 +259,10 @@ Always run `yarn typecheck` before committing.
 - Generate i18n files: `yarn generate:i18n`
 - Custom ESLint rules enforce translation usage
 
+### 5. Financial Number Typography
+
+- Wrap standalone financial numbers with `TNum` or apply `styles.tnum` directly if wrapping is not possible
+
 ## Code Style & Conventions
 
 ### TypeScript Guidelines

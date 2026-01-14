@@ -81,6 +81,12 @@ When reviewing tests, encourage the use of real implementations over mocks:
 
 Over-mocking makes tests brittle and less reliable. Real implementations provide better confidence that code works correctly.
 
+## Financial Number Typography
+
+Standalone financial numbers should have tabular number styles applied.
+
+- Standalone financial numbers should be wrapped with `TNum` or `styles.tnum` should be applied directly if wrapping is not possible
+
 ## Related Documentation
 
 - See [AGENTS.md](./AGENTS.md) for general development guidelines
