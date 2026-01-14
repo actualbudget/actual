@@ -191,7 +191,7 @@ __metadata:
     react-error-boundary: "npm:^6.0.3"
     react-grid-layout: "npm:^1.5.3"
     react-hotkeys-hook: "npm:^5.2.1"
-    react-i18next: "npm:^16.3.3"
+    react-i18next: "npm:^16.5.1"
     react-markdown: "npm:^10.1.0"
     react-modal: "npm:3.16.3"
     react-redux: "npm:^9.2.0"
@@ -1778,7 +1778,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.3, @babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.24.5, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.25.9, @babel/runtime@npm:^7.26.10, @babel/runtime@npm:^7.27.6, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.3, @babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.24.5, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.25.9, @babel/runtime@npm:^7.26.10, @babel/runtime@npm:^7.9.2":
   version: 7.28.4
   resolution: "@babel/runtime@npm:7.28.4"
   checksum: 10/6c9a70452322ea80b3c9b2a412bcf60771819213a67576c8cec41e88a95bb7bf01fc983754cda35dc19603eef52df22203ccbf7777b9d6316932f9fb77c25163
@@ -23142,11 +23142,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-i18next@npm:^16.3.3":
-  version: 16.3.3
-  resolution: "react-i18next@npm:16.3.3"
+"react-i18next@npm:^16.5.1":
+  version: 16.5.3
+  resolution: "react-i18next@npm:16.5.3"
   dependencies:
-    "@babel/runtime": "npm:^7.27.6"
+    "@babel/runtime": "npm:^7.28.4"
     html-parse-stringify: "npm:^3.0.1"
     use-sync-external-store: "npm:^1.6.0"
   peerDependencies:
@@ -23160,7 +23160,7 @@ __metadata:
       optional: true
     typescript:
       optional: true
-  checksum: 10/84e40b97cee012bc525f5c1959dbd80a681d4904530c0c8e887dbbca1cfa84e061d5a52cf93c055e85bdeb2b2ac627a9c6c5e9bca5e05eda31367fb9f135caf4
+  checksum: 10/691482229be7e5b04d0b1bfc38aa1c97fbd54aa4b16f159ee99745e0538aa2b67259853c9c742d79c5e5b245b790eddadadd09f1e4fb30991aaf5e37a733cffd
   languageName: node
   linkType: hard
 
