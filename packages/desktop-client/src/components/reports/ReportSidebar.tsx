@@ -31,6 +31,8 @@ import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
 
 import { Information } from '@desktop-client/components/alerts';
+import { DateSelect } from '@desktop-client/components/select/DateSelect';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type ReportSidebarProps = {
@@ -53,6 +55,7 @@ type ReportSidebarProps = {
   setShowUncategorized: (value: boolean) => void;
   setTrimIntervals: (value: boolean) => void;
   setIncludeCurrentInterval: (value: boolean) => void;
+  setUseAbsoluteDates: (value: boolean) => void;
   setSelectedCategories: (value: CategoryEntity[]) => void;
   onChangeDates: (
     dateStart: string,
@@ -89,6 +92,7 @@ export function ReportSidebar({
   setIncludeCurrentInterval,
   setShowUncategorized,
   setTrimIntervals,
+  setUseAbsoluteDates,
   setSelectedCategories,
   onChangeDates,
   onReportChange,
@@ -102,6 +106,7 @@ export function ReportSidebar({
 }: ReportSidebarProps) {
   const { t } = useTranslation();
   const locale = useLocale();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -415,6 +420,12 @@ export function ReportSidebar({
                     !customReportItems.trimIntervals,
                   );
                   setTrimIntervals(!customReportItems.trimIntervals);
+                } else if (type === 'use-absolute-dates') {
+                  setSessionReport(
+                    'useAbsoluteDates',
+                    !customReportItems.useAbsoluteDates,
+                  );
+                  setUseAbsoluteDates(!customReportItems.useAbsoluteDates);
                 }
               }}
               items={[
@@ -460,6 +471,15 @@ export function ReportSidebar({
                     'Trim empty intervals at the start and end of the report',
                   ),
                   toggle: customReportItems.trimIntervals,
+                },
+                {
+                  name: 'use-absolute-dates',
+                  text: t('Use absolute dates'),
+                  tooltip: t(
+                    'Use absolute dates for From/To instead of intervals',
+                  ),
+                  toggle: customReportItems.useAbsoluteDates,
+                  disabled: !customReportItems.isDateStatic,
                 },
               ]}
             />
@@ -559,29 +579,55 @@ export function ReportSidebar({
               <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
                 <Trans>From:</Trans>
               </Text>
-              <Select
-                onChange={newValue =>
-                  onChangeDates(
-                    ...validateStart(
-                      earliestTransaction,
-                      latestTransaction,
-                      newValue,
-                      customReportItems.endDate,
+              {customReportItems.useAbsoluteDates ? (
+                <DateSelect
+                  value={customReportItems.startDate}
+                  dateFormat={dateFormat}
+                  onSelect={newValue => {
+                    if (newValue) {
+                      onChangeDates(
+                        ...validateStart(
+                          earliestTransaction,
+                          latestTransaction,
+                          newValue,
+                          customReportItems.endDate,
+                          customReportItems.interval,
+                          firstDayOfWeekIdx,
+                          true,
+                        ),
+                      );
+                    }
+                  }}
+                />
+              ) : (
+                <Select
+                  onChange={newValue =>
+                    onChangeDates(
+                      ...validateStart(
+                        earliestTransaction,
+                        latestTransaction,
+                        newValue,
+                        customReportItems.endDate,
+                        customReportItems.interval,
+                        firstDayOfWeekIdx,
+                        false,
+                      ),
+                    )
+                  }
+                  value={customReportItems.startDate}
+                  defaultLabel={monthUtils.format(
+                    customReportItems.startDate,
+                    ReportOptions.intervalFormat.get(
                       customReportItems.interval,
-                      firstDayOfWeekIdx,
-                    ),
-                  )
-                }
-                value={customReportItems.startDate}
-                defaultLabel={monthUtils.format(
-                  customReportItems.startDate,
-                  ReportOptions.intervalFormat.get(
-                    customReportItems.interval,
-                  ) || '',
-                  locale,
-                )}
-                options={allIntervals.map(({ name, pretty }) => [name, pretty])}
-              />
+                    ) || '',
+                    locale,
+                  )}
+                  options={allIntervals.map(({ name, pretty }) => [
+                    name,
+                    pretty,
+                  ])}
+                />
+              )}
             </View>
             <View
               style={{
@@ -593,29 +639,55 @@ export function ReportSidebar({
               <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
                 <Trans>To:</Trans>
               </Text>
-              <Select
-                onChange={newValue =>
-                  onChangeDates(
-                    ...validateEnd(
-                      earliestTransaction,
-                      latestTransaction,
-                      customReportItems.startDate,
-                      newValue,
+              {customReportItems.useAbsoluteDates ? (
+                <DateSelect
+                  value={customReportItems.endDate}
+                  dateFormat={dateFormat}
+                  onSelect={newValue => {
+                    if (newValue) {
+                      onChangeDates(
+                        ...validateEnd(
+                          earliestTransaction,
+                          latestTransaction,
+                          customReportItems.startDate,
+                          newValue,
+                          customReportItems.interval,
+                          firstDayOfWeekIdx,
+                          true,
+                        ),
+                      );
+                    }
+                  }}
+                />
+              ) : (
+                <Select
+                  onChange={newValue =>
+                    onChangeDates(
+                      ...validateEnd(
+                        earliestTransaction,
+                        latestTransaction,
+                        customReportItems.startDate,
+                        newValue,
+                        customReportItems.interval,
+                        firstDayOfWeekIdx,
+                        false,
+                      ),
+                    )
+                  }
+                  value={customReportItems.endDate}
+                  defaultLabel={monthUtils.format(
+                    customReportItems.endDate,
+                    ReportOptions.intervalFormat.get(
                       customReportItems.interval,
-                      firstDayOfWeekIdx,
-                    ),
-                  )
-                }
-                value={customReportItems.endDate}
-                defaultLabel={monthUtils.format(
-                  customReportItems.endDate,
-                  ReportOptions.intervalFormat.get(
-                    customReportItems.interval,
-                  ) || '',
-                  locale,
-                )}
-                options={allIntervals.map(({ name, pretty }) => [name, pretty])}
-              />
+                    ) || '',
+                    locale,
+                  )}
+                  options={allIntervals.map(({ name, pretty }) => [
+                    name,
+                    pretty,
+                  ])}
+                />
+              )}
             </View>
           </>
         )}

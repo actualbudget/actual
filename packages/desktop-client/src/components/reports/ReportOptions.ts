@@ -29,6 +29,7 @@ export const defaultReport: CustomReportEntity = {
   includeCurrentInterval: true,
   showUncategorized: true,
   trimIntervals: false,
+  useAbsoluteDates: false,
   graphType: 'BarGraph',
   conditions: [],
   conditionsOp: 'and',
