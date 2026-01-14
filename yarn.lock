@@ -168,7 +168,7 @@ __metadata:
     cross-env: "npm:^10.1.0"
     date-fns: "npm:^4.1.0"
     downshift: "npm:9.0.10"
-    hyperformula: "npm:^3.1.0"
+    hyperformula: "npm:^3.1.1"
     i18next: "npm:^25.6.2"
     i18next-parser: "npm:^9.3.0"
     i18next-resources-to-backend: "npm:^1.2.1"
@@ -18089,13 +18089,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hyperformula@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "hyperformula@npm:3.1.0"
+"hyperformula@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "hyperformula@npm:3.1.1"
   dependencies:
     chevrotain: "npm:^6.5.0"
     tiny-emitter: "npm:^2.1.0"
-  checksum: 10/d0c03ae7398a2fe3717b07194402df327b7ae9d9c09678f422a68dce2a4a90e29c4d3e3ba3776928a7ab64cbcfee3e13e8c6972b6cfe7b0a68189e39a4e3071a
+  checksum: 10/18cce5efc128ed18a713cc6a5f8a28e155e817f1ffcee5157dabd43a2ff5ecd620cf58a5f29a0b857db39631ba62a258a3670072a22da1c7fdd64143dea16729
   languageName: node
   linkType: hard
 
