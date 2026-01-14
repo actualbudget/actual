@@ -58,7 +58,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/express-actuator": "^1.8.3",
-    "@types/node": "^22.19.1",
+    "@types/node": "^22.19.3",
     "@types/supertest": "^6.0.3",
     "http-proxy-middleware": "^3.0.5",
     "nodemon": "^3.1.11",

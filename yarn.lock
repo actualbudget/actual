@@ -101,7 +101,7 @@ __metadata:
     "@types/cors": "npm:^2.8.19"
     "@types/express": "npm:^5.0.6"
     "@types/express-actuator": "npm:^1.8.3"
-    "@types/node": "npm:^22.19.1"
+    "@types/node": "npm:^22.19.3"
     "@types/supertest": "npm:^6.0.3"
     bcrypt: "npm:^6.0.0"
     better-sqlite3: "npm:^12.6.0"
@@ -9129,7 +9129,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^22.19.1, @types/node@npm:^22.7.7":
+"@types/node@npm:^22.19.3":
+  version: 22.19.6
+  resolution: "@types/node@npm:22.19.6"
+  dependencies:
+    undici-types: "npm:~6.21.0"
+  checksum: 10/a5bac443b2c7ca4ceb4a381618c37012d71add696e98351be698aa81e00f20a09fb4aee5bc07f11472080e663602b18ed02233f45242cde9b4eda13140629258
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^22.7.7":
   version: 22.19.1
   resolution: "@types/node@npm:22.19.1"
   dependencies:
@@ -10077,7 +10086,7 @@ __metadata:
   resolution: "actual@workspace:."
   dependencies:
     "@octokit/rest": "npm:^22.0.1"
-    "@types/node": "npm:^22.19.1"
+    "@types/node": "npm:^22.19.3"
     "@types/prompts": "npm:^2.4.9"
     cross-env: "npm:^10.1.0"
     eslint: "npm:^9.39.2"
@@ -18906,7 +18915,7 @@ __metadata:
     "@types/better-sqlite3": "npm:^7.6.13"
     "@types/emscripten": "npm:^1.41.5"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
-    "@types/node": "npm:^22.19.1"
+    "@types/node": "npm:^22.19.3"
     "@types/pegjs": "npm:^0.10.6"
     absurd-sql: "npm:0.0.54"
     adm-zip: "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch"
@@ -21877,7 +21886,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "plugins-service@workspace:packages/plugins-service"
   dependencies:
-    "@types/node": "npm:^22.19.1"
+    "@types/node": "npm:^22.19.3"
     cross-env: "npm:^10.1.0"
     typescript: "npm:^5.9.3"
     vite: "npm:^7.3.1"

@@ -61,7 +61,7 @@
   },
   "devDependencies": {
     "@octokit/rest": "^22.0.1",
-    "@types/node": "^22.19.1",
+    "@types/node": "^22.19.3",
     "@types/prompts": "^2.4.9",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
