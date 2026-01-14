@@ -276,10 +276,6 @@ async function countContributorPoints() {
               userStats.points += CONFIG.POINTS_PER_ISSUE_TRIAGE_ACTION;
             }
 
-            if (event.event === 'closed') {
-              console.log(event.state_reason);
-            }
-
             if (
               event.event === 'closed' &&
               ['not_planned', 'duplicate'].includes(event.state_reason)
