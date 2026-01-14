@@ -30,7 +30,7 @@
     "@lezer/highlight": "^1.2.3",
     "@playwright/test": "1.56.1",
     "@rollup/plugin-inject": "^5.0.5",
-    "@swc/core": "^1.15.2",
+    "@swc/core": "^1.15.8",
     "@swc/helpers": "^0.5.17",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
