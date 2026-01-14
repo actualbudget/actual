@@ -52,7 +52,7 @@
             "elementNamePattern": "^@desktop-client"
           }
         ],
-        "newlinesBetween": "always"
+        "newlinesBetween": 1
       }
     ],
 
