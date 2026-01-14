@@ -19034,7 +19034,7 @@ __metadata:
     stream-browserify: "npm:^3.0.0"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.9.3"
-    ua-parser-js: "npm:^2.0.6"
+    ua-parser-js: "npm:^2.0.7"
     uuid: "npm:^13.0.0"
     vite: "npm:^7.3.1"
     vite-plugin-node-polyfills: "npm:^0.24.0"
@@ -26977,16 +26977,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ua-parser-js@npm:^2.0.6":
-  version: 2.0.6
-  resolution: "ua-parser-js@npm:2.0.6"
+"ua-parser-js@npm:^2.0.7":
+  version: 2.0.8
+  resolution: "ua-parser-js@npm:2.0.8"
   dependencies:
     detect-europe-js: "npm:^0.1.2"
     is-standalone-pwa: "npm:^0.1.1"
     ua-is-frozen: "npm:^0.1.2"
   bin:
     ua-parser-js: script/cli.js
-  checksum: 10/b0049d3b272979049c7df6af2ec2ce032e4351316b10c33699f6e3f0bec701336f67530cc3ccb363c554b1bb5047b75d2f46575699afacd6e541762ca3861f4d
+  checksum: 10/862ad2e3b083d8ffbb325d6e7c78924aa86f751829301173457afdf44ff911c95c5478d8a1bd31cf80555dd6aae946b3194d20615a91550794f20dad7ac998b5
   languageName: node
   linkType: hard
 
