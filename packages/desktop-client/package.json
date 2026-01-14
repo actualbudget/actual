@@ -53,7 +53,7 @@
     "date-fns": "^4.1.0",
     "downshift": "9.0.10",
     "hyperformula": "^3.1.1",
-    "i18next": "^25.6.2",
+    "i18next": "^25.7.4",
     "i18next-parser": "^9.3.0",
     "i18next-resources-to-backend": "^1.2.1",
     "inter-ui": "^3.19.3",

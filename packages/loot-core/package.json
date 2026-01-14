@@ -101,7 +101,7 @@
     "cross-env": "^10.1.0",
     "fake-indexeddb": "^6.2.5",
     "fast-check": "4.3.0",
-    "i18next": "^25.6.2",
+    "i18next": "^25.7.4",
     "jest-diff": "^30.2.0",
     "jsverify": "^0.8.4",
     "mockdate": "^3.0.5",
