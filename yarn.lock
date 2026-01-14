@@ -99,7 +99,7 @@ __metadata:
     "@types/better-sqlite3": "npm:^7.6.13"
     "@types/convict": "npm:^6"
     "@types/cors": "npm:^2.8.19"
-    "@types/express": "npm:^5.0.5"
+    "@types/express": "npm:^5.0.6"
     "@types/express-actuator": "npm:^1.8.3"
     "@types/node": "npm:^22.19.3"
     "@types/supertest": "npm:^6.0.3"
@@ -113,7 +113,7 @@ __metadata:
     express-rate-limit: "npm:^8.2.1"
     express-winston: "npm:^4.2.0"
     http-proxy-middleware: "npm:^3.0.5"
-    ipaddr.js: "npm:^2.2.0"
+    ipaddr.js: "npm:^2.3.0"
     jws: "npm:^4.0.1"
     migrate: "npm:^2.1.0"
     nodemon: "npm:^3.1.11"
@@ -3503,12 +3503,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron/rebuild@npm:4.0.1":
-  version: 4.0.1
-  resolution: "@electron/rebuild@npm:4.0.1"
+"@electron/rebuild@npm:4.0.2":
+  version: 4.0.2
+  resolution: "@electron/rebuild@npm:4.0.2"
   dependencies:
     "@malept/cross-spawn-promise": "npm:^2.0.0"
-    chalk: "npm:^4.0.0"
     debug: "npm:^4.1.1"
     detect-libc: "npm:^2.0.1"
     got: "npm:^11.7.0"
@@ -3521,9 +3520,12 @@ __metadata:
     semver: "npm:^7.3.5"
     tar: "npm:^6.0.5"
     yargs: "npm:^17.0.1"
+  dependenciesMeta:
+    electron:
+      built: true
   bin:
     electron-rebuild: lib/cli.js
-  checksum: 10/ba50ea1bc7502dccae85f72d11b828d216fe45bb754b01044b2d4b2267bc995746d3dc80ad79077c00141387374a4bff43541ba75ad10c57caf70f3f4854f4ee
+  checksum: 10/41e1d7f6d68292f0a97425fc0d2b12fe0beb6b2f2ed47ceb3741bc90ce3704eca373cde95613c0aaca2c39dd97c9cc2d2afb8f6541c18266627165b2ecc202d7
   languageName: node
   linkType: hard
 
@@ -8961,7 +8963,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express@npm:*, @types/express@npm:^5.0.5":
+"@types/express@npm:*":
   version: 5.0.5
   resolution: "@types/express@npm:5.0.5"
   dependencies:
@@ -8981,6 +8983,17 @@ __metadata:
     "@types/qs": "npm:*"
     "@types/serve-static": "npm:^1"
   checksum: 10/c309fdb79fb8569b5d8d8f11268d0160b271f8b38f0a82c20a0733e526baf033eb7a921cd51d54fe4333c616de9e31caf7d4f3ef73baaf212d61f23f460b0369
+  languageName: node
+  linkType: hard
+
+"@types/express@npm:^5.0.6":
+  version: 5.0.6
+  resolution: "@types/express@npm:5.0.6"
+  dependencies:
+    "@types/body-parser": "npm:*"
+    "@types/express-serve-static-core": "npm:^5.0.0"
+    "@types/serve-static": "npm:^2"
+  checksum: 10/da2cc3de1b1a4d7f20ed3fb6f0a8ee08e99feb3c2eb5a8d643db77017d8d0e70fee9e95da38a73f51bcdf5eda3bb6435073c0271dc04fb16fda92e55daf911fa
   languageName: node
   linkType: hard
 
@@ -9431,6 +9444,16 @@ __metadata:
     "@types/node": "npm:*"
     "@types/send": "npm:<1"
   checksum: 10/d9be72487540b9598e7d77260d533f241eb2e5db5181bb885ef2d6bc4592dad1c9e8c0e27f465d59478b2faf90edd2d535e834f20fbd9dd3c0928d43dc486404
+  languageName: node
+  linkType: hard
+
+"@types/serve-static@npm:^2":
+  version: 2.2.0
+  resolution: "@types/serve-static@npm:2.2.0"
+  dependencies:
+    "@types/http-errors": "npm:*"
+    "@types/node": "npm:*"
+  checksum: 10/f2bad1304c7d0d3b7221faff3e490c40129d3803f4fb1b2fb84f31f561071c5e6a4b876c41bbbe82d5645034eea936e946bcaaf993dac1093ce68b56effad6e0
   languageName: node
   linkType: hard
 
@@ -13744,7 +13767,7 @@ __metadata:
   dependencies:
     "@actual-app/sync-server": "workspace:*"
     "@electron/notarize": "npm:3.1.1"
-    "@electron/rebuild": "npm:4.0.1"
+    "@electron/rebuild": "npm:4.0.2"
     "@playwright/test": "npm:1.57.0"
     "@types/copyfiles": "npm:^2"
     "@types/fs-extra": "npm:^11"
@@ -15372,12 +15395,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-check@npm:4.3.0":
-  version: 4.3.0
-  resolution: "fast-check@npm:4.3.0"
+"fast-check@npm:4.5.3":
+  version: 4.5.3
+  resolution: "fast-check@npm:4.5.3"
   dependencies:
     pure-rand: "npm:^7.0.0"
-  checksum: 10/5f51abb65f4752b61e85e445fb061fe3b2571984c4f2ee77dccf1d95d023380db9405245d49103548c738f1e979a62bd8c9a5a96b675f1d259f3ec4b19076505
+  checksum: 10/005117cc3fbaf8f5bbe153f8f989337d36b85953cefae1973ab0c51e9e259a7a0456155e742716f8609ab74c4e18ee9fb9dcd618c52a9014cd4bd3952a296188
   languageName: node
   linkType: hard
 
@@ -17512,10 +17535,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ipaddr.js@npm:^2.1.0, ipaddr.js@npm:^2.2.0":
+"ipaddr.js@npm:^2.1.0":
   version: 2.2.0
   resolution: "ipaddr.js@npm:2.2.0"
   checksum: 10/9e1cdd9110b3bca5d910ab70d7fb1933e9c485d9b92cb14ef39f30c412ba3fe02a553921bf696efc7149cc653453c48ccf173adb996ec27d925f1f340f872986
+  languageName: node
+  linkType: hard
+
+"ipaddr.js@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "ipaddr.js@npm:2.3.0"
+  checksum: 10/be3d01bc2e20fc2dc5349b489ea40883954b816ce3e57aa48ad943d4e7c4ace501f28a7a15bde4b96b6b97d0fbb28d599ff2f87399f3cda7bd728889402eed3b
   languageName: node
   linkType: hard
 
@@ -19029,7 +19059,7 @@ __metadata:
     date-fns: "npm:^4.1.0"
     deep-equal: "npm:^2.2.3"
     fake-indexeddb: "npm:^6.2.5"
-    fast-check: "npm:4.3.0"
+    fast-check: "npm:4.5.3"
     handlebars: "npm:^4.7.8"
     i18next: "npm:^25.7.4"
     jest-diff: "npm:^30.2.0"

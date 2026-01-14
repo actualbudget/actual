@@ -100,7 +100,7 @@
     "buffer": "^6.0.3",
     "cross-env": "^10.1.0",
     "fake-indexeddb": "^6.2.5",
-    "fast-check": "4.3.0",
+    "fast-check": "4.5.3",
     "i18next": "^25.7.4",
     "jest-diff": "^30.2.0",
     "jsverify": "^0.8.4",
