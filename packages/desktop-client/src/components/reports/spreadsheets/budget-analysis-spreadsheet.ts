@@ -76,9 +76,7 @@ export function createBudgetAnalysisSpreadsheet({
       // Combine results based on conditionsOp
       if (conditionsOp === 'or') {
         // OR: Union of all matching categories
-        const categoryIds = new Set(
-          conditionResults.flat().map(cat => cat.id),
-        );
+        const categoryIds = new Set(conditionResults.flat().map(cat => cat.id));
         categoriesToInclude = baseCategories.filter(cat =>
           categoryIds.has(cat.id),
         );
