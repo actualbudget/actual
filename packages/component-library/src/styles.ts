@@ -94,7 +94,6 @@ export const styles: Record<string, any> = {
     // tnum: Tabular numbers
     // ss01: Open digits
     // ss04: Disambiguation w/o zero
-    //eslint-disable-next-line actual/typography
     fontFeatureSettings: '"tnum", "ss01", "ss04"',
   },
   notFixed: { fontFeatureSettings: '' },
