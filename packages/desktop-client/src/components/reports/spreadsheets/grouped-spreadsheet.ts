@@ -32,6 +32,7 @@ export function createGroupedSpreadsheet({
   showHiddenCategories,
   showUncategorized,
   trimIntervals,
+  useAbsoluteDates,
   balanceTypeOp,
   sortByOp,
   firstDayOfWeekIdx,
@@ -62,6 +63,7 @@ export function createGroupedSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
+          useAbsoluteDates,
         ),
       ).then(({ data }) => data),
       aqlQuery(
@@ -72,6 +74,7 @@ export function createGroupedSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
+          useAbsoluteDates,
         ),
       ).then(({ data }) => data),
     ]);
