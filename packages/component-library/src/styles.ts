@@ -91,7 +91,10 @@ export const styles: Record<string, any> = {
   },
   shadowLarge,
   tnum: {
-    fontFeatureSettings: '"tnum"',
+    // tnum: Tabular numbers
+    // ss01: Open digits
+    // ss04: Disambiguation w/o zero
+    fontFeatureSettings: '"tnum", "ss01", "ss04"',
   },
   notFixed: { fontFeatureSettings: '' },
   text: {

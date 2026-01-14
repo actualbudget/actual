@@ -287,6 +287,7 @@ function ExpenseGroupCells({
   const columnWidth = getColumnWidth({ show3Columns });
 
   const amountStyle: CSSProperties = {
+    ...styles.tnum,
     width: columnWidth,
     fontSize: 12,
     fontWeight: '500',

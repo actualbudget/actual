@@ -1,3 +1,4 @@
+// oxlint-disable-next-line typescript/ban-ts-comment
 // @ts-ignore: bundle not available until we build it
 import * as bundle from './app/bundle.api.js';
 

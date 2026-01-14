@@ -111,7 +111,9 @@ export function SchedulesListItem({
               <Text style={{ color: theme.pageTextSubdued }}>
                 <Trans>Amount:</Trans>
               </Text>
-              <Text style={{ color: theme.pageText }}>{amountStr}</Text>
+              <Text style={{ ...styles.tnum, color: theme.pageText }}>
+                {amountStr}
+              </Text>
             </SpaceBetween>
             {schedule.next_date && (
               <SpaceBetween gap={4} direction="horizontal">
