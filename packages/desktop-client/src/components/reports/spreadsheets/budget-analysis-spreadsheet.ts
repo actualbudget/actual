@@ -27,14 +27,12 @@ type BudgetAnalysisData = {
 
 type createBudgetAnalysisSpreadsheetProps = {
   conditions?: RuleConditionEntity[];
-  conditionsOp?: string;
   startDate: string;
   endDate: string;
 };
 
 export function createBudgetAnalysisSpreadsheet({
   conditions = [],
-  conditionsOp,
   startDate,
   endDate,
 }: createBudgetAnalysisSpreadsheetProps) {
@@ -43,8 +41,7 @@ export function createBudgetAnalysisSpreadsheet({
     setData: (data: BudgetAnalysisData) => void,
   ) => {
     // Get all categories
-    const { grouped: categoryGroups, list: allCategories } =
-      await send('get-categories');
+    const { list: allCategories } = await send('get-categories');
 
     // Filter categories based on conditions
     const categoryConditions = conditions.filter(
