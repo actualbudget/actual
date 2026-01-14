@@ -17,6 +17,7 @@ import {
 
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
+import { TNum } from '@desktop-client/components/TNum';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -108,7 +109,9 @@ export function CrossoverGraph({
                   <Trans>Monthly investment income:</Trans>
                 </div>
                 <div>
-                  {format(payload[0].payload.investmentIncome, 'financial')}
+                  <TNum>
+                    {format(payload[0].payload.investmentIncome, 'financial')}
+                  </TNum>
                 </div>
               </View>
               <View
@@ -120,7 +123,11 @@ export function CrossoverGraph({
                 <div>
                   <Trans>Monthly expenses:</Trans>
                 </div>
-                <div>{format(payload[0].payload.expenses, 'financial')}</div>
+                <div>
+                  <TNum>
+                    {format(payload[0].payload.expenses, 'financial')}
+                  </TNum>
+                </div>
               </View>
               {payload[0].payload.adjustedExpenses != null && (
                 <View
@@ -133,7 +140,9 @@ export function CrossoverGraph({
                     <Trans>Target income:</Trans>
                   </div>
                   <div>
-                    {format(payload[0].payload.adjustedExpenses, 'financial')}
+                    <TNum>
+                      {format(payload[0].payload.adjustedExpenses, 'financial')}
+                    </TNum>
                   </div>
                 </View>
               )}
@@ -146,7 +155,9 @@ export function CrossoverGraph({
                 <div>
                   <Trans>Life savings:</Trans>
                 </div>
-                <div>{format(payload[0].payload.nestEgg, 'financial')}</div>
+                <div>
+                  <TNum>{format(payload[0].payload.nestEgg, 'financial')}</TNum>
+                </div>
               </View>
             </div>
           </div>

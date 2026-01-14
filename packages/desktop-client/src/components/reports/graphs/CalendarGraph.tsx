@@ -19,6 +19,7 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { chartTheme } from '@desktop-client/components/reports/chart-theme';
+import { TNum } from '@desktop-client/components/TNum';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
@@ -143,7 +144,7 @@ export function CalendarGraph({
                       >
                         {day.incomeValue !== 0 ? (
                           <PrivacyFilter>
-                            {format(day.incomeValue, 'financial')}
+                            <TNum>{format(day.incomeValue, 'financial')}</TNum>
                           </PrivacyFilter>
                         ) : (
                           ''
@@ -172,7 +173,7 @@ export function CalendarGraph({
                       >
                         {day.expenseValue !== 0 ? (
                           <PrivacyFilter>
-                            {format(day.expenseValue, 'financial')}
+                            <TNum>{format(day.expenseValue, 'financial')}</TNum>
                           </PrivacyFilter>
                         ) : (
                           ''

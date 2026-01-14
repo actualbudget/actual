@@ -21,6 +21,7 @@ import { computePadding } from './util/computePadding';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
+import { TNum } from '@desktop-client/components/TNum';
 import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -94,10 +95,14 @@ const CustomTooltip = ({
             {payload[0].payload.months[compare]?.cumulative ? (
               <AlignedText
                 left={t('Compare:')}
-                right={format(
-                  payload[0].payload.months[compare]?.cumulative * -1,
-                  'financial',
-                )}
+                right={
+                  <TNum>
+                    {format(
+                      payload[0].payload.months[compare]?.cumulative * -1,
+                      'financial',
+                    )}
+                  </TNum>
+                }
               />
             ) : null}
             {['cumulative'].includes(balanceTypeOp) && (
@@ -109,19 +114,25 @@ const CustomTooltip = ({
                       ? t('Budgeted:')
                       : t('To:')
                 }
-                right={format(Math.round(comparison), 'financial')}
+                right={
+                  <TNum>{format(Math.round(comparison), 'financial')}</TNum>
+                }
               />
             )}
             {payload[0].payload.months[compare]?.cumulative ? (
               <AlignedText
                 left={t('Difference:')}
-                right={format(
-                  Math.round(
-                    payload[0].payload.months[compare]?.cumulative * -1 -
-                      comparison,
-                  ),
-                  'financial',
-                )}
+                right={
+                  <TNum>
+                    {format(
+                      Math.round(
+                        payload[0].payload.months[compare]?.cumulative * -1 -
+                          comparison,
+                      ),
+                      'financial',
+                    )}
+                  </TNum>
+                }
               />
             ) : null}
           </div>

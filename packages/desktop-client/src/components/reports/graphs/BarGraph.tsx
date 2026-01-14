@@ -31,6 +31,7 @@ import { useRechartsAnimation } from '@desktop-client/components/reports/chart-t
 import { Container } from '@desktop-client/components/reports/Container';
 import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
+import { TNum } from '@desktop-client/components/TNum';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
@@ -96,34 +97,50 @@ const CustomTooltip = ({
             {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Assets:')}
-                right={format(payload[0].payload.totalAssets, 'financial')}
+                right={
+                  <TNum>
+                    {format(payload[0].payload.totalAssets, 'financial')}
+                  </TNum>
+                }
               />
             )}
             {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Debts:')}
-                right={format(payload[0].payload.totalDebts, 'financial')}
+                right={
+                  <TNum>
+                    {format(payload[0].payload.totalDebts, 'financial')}
+                  </TNum>
+                }
               />
             )}
             {['netAssets'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Assets:')}
-                right={format(payload[0].payload.netAssets, 'financial')}
+                right={
+                  <TNum>
+                    {format(payload[0].payload.netAssets, 'financial')}
+                  </TNum>
+                }
               />
             )}
             {['netDebts'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Debts:')}
-                right={format(payload[0].payload.netDebts, 'financial')}
+                right={
+                  <TNum>
+                    {format(payload[0].payload.netDebts, 'financial')}
+                  </TNum>
+                }
               />
             )}
             {['totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net:')}
                 right={
-                  <strong>
+                  <TNum as="strong">
                     {format(payload[0].payload.totalTotals, 'financial')}
-                  </strong>
+                  </TNum>
                 }
               />
             )}
