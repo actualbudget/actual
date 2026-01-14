@@ -64,7 +64,7 @@
   },
   "dependencies": {
     "@jlongster/sql.js": "^1.6.7",
-    "@reduxjs/toolkit": "^2.10.1",
+    "@reduxjs/toolkit": "^2.11.2",
     "@rschedule/core": "^1.5.0",
     "@rschedule/json-tools": "^1.5.0",
     "@rschedule/standard-date-adapter": "^1.5.0",
