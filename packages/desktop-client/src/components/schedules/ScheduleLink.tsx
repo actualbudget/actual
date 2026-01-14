@@ -149,7 +149,6 @@ export function ScheduleLink({
               allowCompleted={false}
               filter={filter}
               minimal
-              onAction={() => {}}
               onSelect={id => {
                 onSelect(id);
                 close();

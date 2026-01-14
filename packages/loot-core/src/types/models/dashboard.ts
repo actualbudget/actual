@@ -1,6 +1,12 @@
 import { type CustomReportEntity } from './reports';
 import { type RuleConditionEntity } from './rule';
 
+export type DashboardEntity = {
+  id: string;
+  name: string;
+  tombstone: boolean;
+};
+
 export type TimeFrame = {
   start: string;
   end: string;
@@ -19,6 +25,7 @@ type AbstractWidget<
   Meta extends Record<string, unknown> | null = null,
 > = {
   id: string;
+  dashboard_page_id: string;
   type: T;
   x: number;
   y: number;
@@ -106,7 +113,7 @@ type SpecializedWidget =
   | CalendarWidget
   | FormulaWidget;
 export type Widget = SpecializedWidget | CustomReportWidget;
-export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
+export type NewWidget = Omit<Widget, 'id' | 'tombstone' | 'dashboard_page_id'>;
 
 // Exported/imported (json) widget definition
 export type ExportImportCustomReportWidget = Omit<

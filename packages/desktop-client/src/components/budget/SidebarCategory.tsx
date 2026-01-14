@@ -27,16 +27,23 @@ type SidebarCategoryProps = {
   categoryGroup?: CategoryGroupEntity;
   dragPreview?: boolean;
   dragging?: boolean;
-  editing: boolean;
   goalsShown?: boolean;
   style?: CSSProperties;
   borderColor?: string;
   isLast?: boolean;
   onEditName: (id: CategoryEntity['id']) => void;
   onSave: (category: CategoryEntity) => void;
-  onDelete: (id: CategoryEntity['id']) => void;
   onHideNewCategory?: () => void;
-};
+} & (
+  | {
+      editing: true;
+      onDelete?: never;
+    }
+  | {
+      editing: boolean;
+      onDelete: (id: CategoryEntity['id']) => void;
+    }
+);
 
 export function SidebarCategory({
   innerRef,

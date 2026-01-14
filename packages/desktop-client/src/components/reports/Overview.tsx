@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components';
 import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -10,18 +10,22 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { theme } from '@actual-app/components/theme';
 import { breakpoints } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
-import {
-  type CustomReportWidget,
-  type ExportImportDashboard,
-  type MarkdownWidget,
-  type Widget,
+import type {
+  CustomReportWidget,
+  DashboardEntity,
+  ExportImportDashboard,
+  MarkdownWidget,
+  Widget,
 } from 'loot-core/types/models';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
+import { DashboardHeader } from './DashboardHeader';
+import { DashboardSelector } from './DashboardSelector';
 import { LoadingIndicator } from './LoadingIndicator';
 import { BudgetAnalysisCard } from './reports/BudgetAnalysisCard';
 import { CalendarCard } from './reports/CalendarCard';
@@ -36,13 +40,12 @@ import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
 
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
-import {
-  MobilePageHeader,
-  Page,
-  PageHeader,
-} from '@desktop-client/components/Page';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useDashboard } from '@desktop-client/hooks/useDashboard';
+import {
+  useDashboard,
+  useDashboardPages,
+} from '@desktop-client/hooks/useDashboard';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useReports } from '@desktop-client/hooks/useReports';
@@ -60,7 +63,11 @@ function isCustomReportWidget(widget: Widget): widget is CustomReportWidget {
   return widget.type === 'custom-report';
 }
 
-export function Overview() {
+type OverviewProps = {
+  dashboard: DashboardEntity;
+};
+
+export function Overview({ dashboard }: OverviewProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
@@ -78,11 +85,15 @@ export function Overview() {
 
   const { data: customReports, isLoading: isCustomReportsLoading } =
     useReports();
-  const { data: widgets, isLoading: isWidgetsLoading } = useDashboard();
 
   const customReportMap = useMemo(
     () => new Map(customReports.map(report => [report.id, report])),
     [customReports],
+  );
+  const { data: dashboard_pages = [] } = useDashboardPages();
+
+  const { data: widgets, isLoading: isWidgetsLoading } = useDashboard(
+    dashboard.id,
   );
 
   const isLoading = isCustomReportsLoading || isWidgetsLoading;
@@ -181,7 +192,7 @@ export function Overview() {
 
   const onResetDashboard = async () => {
     setIsImporting(true);
-    await send('dashboard-reset');
+    await send('dashboard-reset', dashboard.id);
     setIsImporting(false);
 
     onDispatchSucessNotification(
@@ -217,6 +228,7 @@ export function Overview() {
       width: 4,
       height: 2,
       meta,
+      dashboard_page_id: dashboard.id,
     });
   };
 
@@ -290,7 +302,10 @@ export function Overview() {
 
     closeNotifications();
     setIsImporting(true);
-    const res = await send('dashboard-import', { filepath });
+    const res = await send('dashboard-import', {
+      filepath,
+      dashboardPageId: dashboard.id,
+    });
     setIsImporting(false);
 
     if ('error' in res) {
@@ -348,6 +363,23 @@ export function Overview() {
     });
   };
 
+  const onCopyWidget = (widgetId: string, targetDashboardId: string) => {
+    send('dashboard-copy-widget', {
+      widgetId,
+      targetDashboardPageId: targetDashboardId,
+    });
+  };
+
+  const onDeleteDashboard = async (id: string) => {
+    await send('dashboard-delete', id);
+
+    const next_dashboard = dashboard_pages.find(d => d.id !== id);
+    // NOTE: This should hold since invariant dashboard_pages > 1
+    if (next_dashboard) {
+      navigate(`/reports/${next_dashboard.id}`);
+    }
+  };
+
   const accounts = useAccounts();
 
   if (isLoading) {
@@ -358,26 +390,69 @@ export function Overview() {
     <Page
       header={
         isNarrowWidth ? (
-          <MobilePageHeader title={t('Reports')} />
+          <View>
+            <MobilePageHeader
+              title={
+                <View
+                  style={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <Trans>Reports</Trans>: {dashboard.name}
+                </View>
+              }
+            />
+            <View
+              style={{
+                padding: '5px',
+                borderBottom: '1px solid ' + theme.pillBorder,
+              }}
+            >
+              <DashboardSelector
+                dashboards={dashboard_pages}
+                currentDashboard={dashboard}
+              />
+            </View>
+          </View>
         ) : (
           <View
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
               marginRight: 15,
+              alignItems: 'center',
             }}
           >
-            <PageHeader title={t('Reports')} />
+            <DashboardHeader dashboard={dashboard} />
 
             <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 gap: 5,
+                alignItems: 'stretch',
               }}
             >
               {currentBreakpoint === 'desktop' && (
                 <>
+                  {/* Dashboard Selector */}
+                  <DashboardSelector
+                    dashboards={dashboard_pages}
+                    currentDashboard={dashboard}
+                  />
+
+                  <View
+                    style={{
+                      height: 'auto',
+                      borderLeft: `1.5px solid ${theme.pillBorderDark}`,
+                      borderRadius: 0.75,
+                      marginLeft: 7,
+                      marginRight: 7,
+                    }}
+                  />
+
                   <DialogTrigger>
                     <Button variant="primary" isDisabled={isImporting}>
                       <Trans>Add new widget</Trans>
@@ -481,6 +556,7 @@ export function Overview() {
                     </Popover>
                   </DialogTrigger>
 
+                  {/* The Editing Button */}
                   {isEditing ? (
                     <Button
                       isDisabled={isImporting}
@@ -497,6 +573,7 @@ export function Overview() {
                     </Button>
                   )}
 
+                  {/* The Menu */}
                   <DialogTrigger>
                     <Button variant="bare" aria-label={t('Menu')}>
                       <SvgDotsHorizontalTriple
@@ -520,6 +597,9 @@ export function Overview() {
                               case 'import':
                                 onImport();
                                 break;
+                              case 'delete':
+                                onDeleteDashboard(dashboard.id);
+                                break;
                               default:
                                 throw new Error(
                                   `Unrecognized menu option: ${item}`,
@@ -542,6 +622,13 @@ export function Overview() {
                               name: 'export',
                               text: t('Export'),
                               disabled: isImporting,
+                            },
+                            Menu.line,
+                            {
+                              name: 'delete',
+                              text: t('Delete dashboard'),
+                              disabled:
+                                isImporting || dashboard_pages.length <= 1,
                             },
                           ]}
                         />
@@ -587,6 +674,9 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
+                      }
                     />
                   ) : item.type === 'crossover-card' &&
                     crossoverReportEnabled ? (
@@ -597,6 +687,9 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
+                      }
                     />
                   ) : item.type === 'cash-flow-card' ? (
                     <CashFlowCard
@@ -605,6 +698,9 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
+                      }
                     />
                   ) : item.type === 'spending-card' ? (
                     <SpendingCard
@@ -613,6 +709,9 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
+                      }
                     />
                   ) : item.type === 'budget-analysis-card' &&
                     budgetAnalysisReportEnabled ? (
@@ -629,12 +728,18 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
+                      }
                     />
                   ) : item.type === 'custom-report' ? (
                     <CustomReportListCards
                       isEditing={isEditing}
                       report={customReportMap.get(item.meta.id)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
+                      }
                     />
                   ) : item.type === 'summary-card' ? (
                     <SummaryCard
@@ -643,6 +748,9 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
+                      }
                     />
                   ) : item.type === 'calendar-card' ? (
                     <CalendarCard
@@ -652,6 +760,9 @@ export function Overview() {
                       firstDayOfWeekIdx={firstDayOfWeekIdx}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
+                      }
                     />
                   ) : item.type === 'formula-card' && formulaMode ? (
                     <FormulaCard
@@ -660,6 +771,9 @@ export function Overview() {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
+                      }
                     />
                   ) : null}
                 </div>

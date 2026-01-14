@@ -109,7 +109,6 @@ export function EditFieldModal({
           value={formatDate(parseISO(today), dateFormat)}
           dateFormat={dateFormat}
           embedded
-          onUpdate={() => {}}
           onSelect={date => {
             onSelect(dayFromDate(parseDate(date, 'yyyy-MM-dd', new Date())));
             close();
