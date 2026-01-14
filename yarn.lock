@@ -3463,12 +3463,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron/rebuild@npm:4.0.1":
-  version: 4.0.1
-  resolution: "@electron/rebuild@npm:4.0.1"
+"@electron/rebuild@npm:4.0.2":
+  version: 4.0.2
+  resolution: "@electron/rebuild@npm:4.0.2"
   dependencies:
     "@malept/cross-spawn-promise": "npm:^2.0.0"
-    chalk: "npm:^4.0.0"
     debug: "npm:^4.1.1"
     detect-libc: "npm:^2.0.1"
     got: "npm:^11.7.0"
@@ -3481,9 +3480,12 @@ __metadata:
     semver: "npm:^7.3.5"
     tar: "npm:^6.0.5"
     yargs: "npm:^17.0.1"
+  dependenciesMeta:
+    electron:
+      built: true
   bin:
     electron-rebuild: lib/cli.js
-  checksum: 10/ba50ea1bc7502dccae85f72d11b828d216fe45bb754b01044b2d4b2267bc995746d3dc80ad79077c00141387374a4bff43541ba75ad10c57caf70f3f4854f4ee
+  checksum: 10/41e1d7f6d68292f0a97425fc0d2b12fe0beb6b2f2ed47ceb3741bc90ce3704eca373cde95613c0aaca2c39dd97c9cc2d2afb8f6541c18266627165b2ecc202d7
   languageName: node
   linkType: hard
 
@@ -13665,7 +13667,7 @@ __metadata:
   dependencies:
     "@actual-app/sync-server": "workspace:*"
     "@electron/notarize": "npm:3.1.1"
-    "@electron/rebuild": "npm:4.0.1"
+    "@electron/rebuild": "npm:4.0.2"
     "@playwright/test": "npm:1.56.1"
     "@types/copyfiles": "npm:^2"
     "@types/fs-extra": "npm:^11"
