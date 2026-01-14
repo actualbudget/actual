@@ -29,4 +29,9 @@ CustomFunctionsPlugin.implementedFunctions = {
       },
     ],
   },
+
+export const customFunctionsTranslations = {
+  enUS: {
+    INTEGER_TO_AMOUNT: 'INTEGER_TO_AMOUNT',
+  },
 };

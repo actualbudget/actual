@@ -2,6 +2,7 @@
 import * as dateFns from 'date-fns';
 import * as Handlebars from 'handlebars';
 import { HyperFormula } from 'hyperformula';
+import enUS from 'hyperformula/i18n/languages/enUS';
 
 import { amountToInteger } from 'loot-core/shared/util';
 
@@ -10,8 +11,17 @@ import { parseDate, format, currentDay } from '../../shared/months';
 import { FIELD_TYPES } from '../../shared/rules';
 import { type TransactionForRules } from '../transactions/transaction-rules';
 
-import { CustomFunctionsPlugin } from './customFunctions';
+import {
+  CustomFunctionsPlugin,
+  customFunctionsTranslations,
+} from './customFunctions';
 import { assert } from './rule-utils';
+
+HyperFormula.registerLanguage('enUS', enUS);
+HyperFormula.registerFunctionPlugin(
+  CustomFunctionsPlugin,
+  customFunctionsTranslations,
+);
 
 const ACTION_OPS = [
   'set',
@@ -258,10 +268,9 @@ export class Action {
     }
 
     try {
-      HyperFormula.registerFunctionPlugin(CustomFunctionsPlugin);
-
       hfInstance = HyperFormula.buildEmpty({
         licenseKey: 'gpl-v3',
+        language: 'enUS',
       });
 
       const sheetName = hfInstance.addSheet('Sheet1');
