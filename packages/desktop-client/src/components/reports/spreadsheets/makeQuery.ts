@@ -30,10 +30,7 @@ export function makeQuery(
     //Apply month range filters
     .filter({
       $and: useAbsoluteDates
-        ? [
-            { date: { $gte: startDate } },
-            { date: { $lte: endDate } },
-          ]
+        ? [{ date: { $gte: startDate } }, { date: { $lte: endDate } }]
         : [
             { date: { $transform: intervalFilter, $gte: startDate } },
             { date: { $transform: intervalFilter, $lte: endDate } },
