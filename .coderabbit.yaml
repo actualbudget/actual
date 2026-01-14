@@ -10,6 +10,7 @@ reviews:
       enabled: false
   pre_merge_checks:
     docstrings:
+      mode: off
       enabled: false
     custom_checks:
       - mode: error

@@ -169,7 +169,7 @@ Custom ESLint rules specific to Actual.
 
 - `no-untranslated-strings`: Enforces i18n usage
 - `prefer-trans-over-t`: Prefers Trans component over t() function
-- `prefer-logger-over-console`: Enforces using logger instead of console
+- `prefer-logger-over-console`: Enforces using logger instead of console in `packages/loot-core/`
 - `typography`: Typography rules
 - `prefer-if-statement`: Prefers explicit if statements
 
@@ -328,7 +328,6 @@ Always maintain newlines between import groups.
 
 **Never:**
 
-- Use `console.*` (use logger instead - enforced by ESLint)
 - Import from `uuid` without destructuring: use `import { v4 as uuidv4 } from 'uuid'`
 - Import colors directly - use theme instead
 - Import `@actual-app/web/*` in `loot-core`
@@ -541,7 +540,6 @@ Before committing changes, ensure:
 - [ ] `yarn typecheck` passes
 - [ ] `yarn lint:fix` has been run
 - [ ] Relevant tests pass
-- [ ] No new console.\* usage (use logger)
 - [ ] User-facing strings are translated
 - [ ] Prefer `type` over `interface`
 - [ ] Named exports used (not default exports)

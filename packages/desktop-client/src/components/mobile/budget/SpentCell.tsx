@@ -5,6 +5,7 @@ import {
   SvgArrowsSynchronize,
   SvgCalendar3,
 } from '@actual-app/components/icons/v2';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -76,6 +77,7 @@ export function SpentCell({
                 maxFontSizePx={12}
                 mode="oneline"
                 style={{
+                  ...styles.tnum,
                   ...makeAmountGrey(value),
                   maxWidth: columnWidth,
                   textAlign: 'right',

@@ -4,8 +4,6 @@ import React, {
   useEffect,
   useCallback,
   useMemo,
-  type SetStateAction,
-  type Dispatch,
   type CSSProperties,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -38,13 +36,9 @@ import { useDispatch } from '@desktop-client/redux';
 
 type ManageUserAccessContentProps = {
   isModal: boolean;
-  setLoading?: Dispatch<SetStateAction<boolean>>;
 };
 
-function UserAccessContent({
-  isModal,
-  setLoading,
-}: ManageUserAccessContentProps) {
+function UserAccessContent({ isModal }: ManageUserAccessContentProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [allAccess, setAllAccess] = useState([]);
@@ -76,7 +70,6 @@ function UserAccessContent({
   );
 
   const loadAccess = useCallback(async () => {
-    setLoading(true);
     const data: Awaited<ReturnType<Handlers['access-get-available-users']>> =
       await send('access-get-available-users', cloudFileId as string);
 
@@ -111,20 +104,7 @@ function UserAccessContent({
 
     setAllAccess(loadedAccess);
     return loadedAccess;
-  }, [cloudFileId, dispatch, setLoading, t]);
-
-  const loadOwner = useCallback(async () => {
-    const file = (await send('get-user-file-info', cloudFileId as string)) ?? {
-      usersWithAccess: [],
-    };
-    const owner = file?.usersWithAccess.filter(user => user.owner);
-
-    if (owner.length > 0) {
-      return owner[0];
-    }
-
-    return null;
-  }, [cloudFileId]);
+  }, [cloudFileId, dispatch, t]);
 
   useEffect(() => {
     async function loadData() {
@@ -132,8 +112,6 @@ function UserAccessContent({
         await loadAccess();
       } catch (error) {
         console.error('Error loading user access data:', error);
-      } finally {
-        setLoading(false);
       }
     }
 
@@ -142,7 +120,7 @@ function UserAccessContent({
     return () => {
       undo.setUndoState('openModal', null);
     };
-  }, [setLoading, loadAccess, loadOwner]);
+  }, [loadAccess]);
 
   function loadMore() {
     setPage(page => page + 1);
@@ -213,7 +191,6 @@ function UserAccessContent({
           style={{ width: 16, height: 16 }}
           onToggleSave={async () => {
             await loadAccess();
-            setLoading(false);
           }}
         />
       </View>
@@ -223,14 +200,10 @@ function UserAccessContent({
 
 type ManageUsersProps = {
   isModal: boolean;
-  setLoading?: Dispatch<SetStateAction<boolean>>;
 };
 
-export function UserAccess({
-  isModal,
-  setLoading = () => {},
-}: ManageUsersProps) {
-  return <UserAccessContent isModal={isModal} setLoading={setLoading} />;
+export function UserAccess({ isModal }: ManageUsersProps) {
+  return <UserAccessContent isModal={isModal} />;
 }
 
 type UsersAccessListProps = {

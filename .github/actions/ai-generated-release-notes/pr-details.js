@@ -36,11 +36,13 @@ async function getPRDetails() {
     console.log('- PR Number:', pr.number);
     console.log('- PR Author:', pr.user.login);
     console.log('- PR Title:', pr.title);
+    console.log('- Base Branch:', pr.base.ref);
 
     const result = {
       number: pr.number,
       author: pr.user.login,
       title: pr.title,
+      baseBranch: pr.base.ref,
     };
 
     setOutput('result', JSON.stringify(result));

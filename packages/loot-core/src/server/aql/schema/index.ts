@@ -182,8 +182,14 @@ export const schema = {
     goal: f('integer'),
     long_goal: f('integer'),
   },
+  dashboard_pages: {
+    id: f('id'),
+    name: f('string'),
+    tombstone: f('boolean'),
+  },
   dashboard: {
     id: f('id'),
+    dashboard_page_id: f('id', { ref: 'dashboard_pages' }),
     type: f('string', { required: true }),
     width: f('integer', { required: true }),
     height: f('integer', { required: true }),
