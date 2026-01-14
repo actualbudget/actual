@@ -15,6 +15,17 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
       },
     );
   }
+
+  fixed(ast: ProcedureAst, state: InterpreterState) {
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('FIXED'),
+      (number: number, decimals: number = 0) => {
+        return Number(number).toFixed(decimals);
+      },
+    );
+  }
 }
 
 CustomFunctionsPlugin.implementedFunctions = {
@@ -29,9 +40,22 @@ CustomFunctionsPlugin.implementedFunctions = {
       },
     ],
   },
+  FIXED: {
+    method: 'fixed',
+    parameters: [
+      { argumentType: FunctionArgumentType.NUMBER },
+      {
+        argumentType: FunctionArgumentType.NUMBER,
+        optionalArg: true,
+        defaultValue: 0,
+      },
+    ],
+  },
+};
 
 export const customFunctionsTranslations = {
   enUS: {
     INTEGER_TO_AMOUNT: 'INTEGER_TO_AMOUNT',
+    FIXED: 'FIXED',
   },
 };
