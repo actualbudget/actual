@@ -55,6 +55,7 @@ import {
 import { FormulaActionEditor } from './FormulaActionEditor';
 
 import { StatusBadge } from '@desktop-client/components/schedules/StatusBadge';
+import { TNum } from '@desktop-client/components/TNum';
 import { SimpleTransactionsTable } from '@desktop-client/components/transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '@desktop-client/components/util/AmountInput';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
@@ -421,7 +422,8 @@ function ScheduleDescription({ id }) {
 
         <Text style={{ flexShrink: 0 }}>
           <Text> — </Text>
-          <Trans>Amount:</Trans> {formatAmount(schedule._amount, format)}
+          <Trans>Amount:</Trans>{' '}
+          <TNum>{formatAmount(schedule._amount, format)}</TNum>
         </Text>
 
         <Text style={{ flexShrink: 0 }}>
