@@ -49,7 +49,7 @@
     "@types/react": "^19.2.5",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "vitest": "^4.0.9"
+    "vitest": "^4.0.17"
   },
   "peerDependencies": {
     "react": ">=18.2",
