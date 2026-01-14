@@ -8,6 +8,7 @@ coverage
 test-results
 playwright-report
 blob-report
+.vitest-attachments/
 
 # production
 build

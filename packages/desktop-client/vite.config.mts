@@ -2,6 +2,7 @@ import * as path from 'path';
 
 import inject from '@rollup/plugin-inject';
 import basicSsl from '@vitejs/plugin-basic-ssl';
+import { playwright } from '@vitest/browser-playwright';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 /// <reference types="vitest" />
@@ -209,17 +210,46 @@ export default defineConfig(async ({ mode }) => {
       visualizer({ template: 'raw-data' }),
       !!env.HTTPS && basicSsl(),
     ],
+    // @ts-expect-error - test is not a valid property of UserConfig
     test: {
-      include: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
-      environment: 'jsdom',
       globals: true,
-      setupFiles: './src/setupTests.js',
       testTimeout: 10000,
       onConsoleLog(log: string, type: 'stdout' | 'stderr'): boolean | void {
         // print only console.error
         return type === 'stderr';
       },
       maxWorkers: 2,
+      projects: [
+        {
+          extends: true,
+          test: {
+            include: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+            exclude: ['src/**/*.browser.test.{ts,tsx}'],
+            name: 'jsdom',
+            environment: 'jsdom',
+            globals: true,
+            setupFiles: './src/setupTests.js',
+          },
+        },
+        {
+          extends: true,
+          test: {
+            include: ['src/**/*.browser.test.{ts,tsx}'],
+            name: 'browser',
+            globals: true,
+            browser: {
+              enabled: true,
+              provider: playwright({
+                contextOptions: {
+                  viewport: { width: 1280, height: 720 },
+                  // deviceScaleFactor: 2,
+                },
+              }),
+              instances: [{ browser: 'chromium', headless: true }],
+            },
+          },
+        },
+      ],
     },
   } satisfies UserConfig;
 });
