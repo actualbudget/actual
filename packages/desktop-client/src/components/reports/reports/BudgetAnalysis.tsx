@@ -425,7 +425,10 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                           right={
                             <Text style={{ fontWeight: 600 }}>
                               <PrivacyFilter>
-                                {format(data.totalOverspendingAdjustment, 'financial')}
+                                {format(
+                                  data.totalOverspendingAdjustment,
+                                  'financial',
+                                )}
                               </PrivacyFilter>
                             </Text>
                           }
@@ -463,24 +466,26 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                 <Trans>
                   <Paragraph>
                     <strong>Understanding the Chart</strong>
-                    <br />
-                    • <strong>Budgeted</strong> (blue): The amount you allocated each month
-                    <br />
-                    • <strong>Spent</strong> (red): Your actual spending
-                    <br />
-                    • <strong>Overspending Adjustment</strong> (orange): Amounts from categories without rollover that were reset
-                    <br />
-                    • <strong>Balance</strong> (gray): Your cumulative budget performance, starting with any prior balance. Respects category rollover settings from your budget.
+                    <br />• <strong>Budgeted</strong> (blue): The amount you
+                    allocated each month
+                    <br />• <strong>Spent</strong> (red): Your actual spending
+                    <br />• <strong>Overspending Adjustment</strong> (orange):
+                    Amounts from categories without rollover that were reset
+                    <br />• <strong>Balance</strong> (gray): Your cumulative
+                    budget performance, starting with any prior balance.
+                    Respects category rollover settings from your budget.
                   </Paragraph>
                   <Paragraph>
                     <strong>Understanding the Budget Summary</strong>
                     <br />
-                    The balance starts from the month before your selected period.
-                    Budgeted, spent, and overspending adjustments show totals over the period.
-                    Ending balance shows the final balance at period end.
+                    The balance starts from the month before your selected
+                    period. Budgeted, spent, and overspending adjustments show
+                    totals over the period. Ending balance shows the final
+                    balance at period end.
                   </Paragraph>
                   <Paragraph>
-                    Hint: You can use the icon in the header to toggle between line and bar chart views.
+                    Hint: You can use the icon in the header to toggle between
+                    line and bar chart views.
                   </Paragraph>
                 </Trans>
               </View>

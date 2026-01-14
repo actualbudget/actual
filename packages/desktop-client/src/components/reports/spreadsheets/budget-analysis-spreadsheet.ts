@@ -1,7 +1,10 @@
 // @ts-strict-ignore
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { type CategoryEntity, type RuleConditionEntity } from 'loot-core/types/models';
+import {
+  type CategoryEntity,
+  type RuleConditionEntity,
+} from 'loot-core/types/models';
 
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
@@ -40,7 +43,8 @@ export function createBudgetAnalysisSpreadsheet({
     setData: (data: BudgetAnalysisData) => void,
   ) => {
     // Get all categories
-    const { grouped: categoryGroups, list: allCategories } = await send('get-categories');
+    const { grouped: categoryGroups, list: allCategories } =
+      await send('get-categories');
 
     // Filter categories based on conditions
     const categoryConditions = conditions.filter(
@@ -66,7 +70,9 @@ export function createBudgetAnalysisSpreadsheet({
       });
     } else {
       // No category filter, get all expense categories (exclude income)
-      categoriesToInclude = allCategories.filter((cat: CategoryEntity) => !cat.is_income && !cat.hidden);
+      categoriesToInclude = allCategories.filter(
+        (cat: CategoryEntity) => !cat.is_income && !cat.hidden,
+      );
     }
 
     // Get monthly intervals (Budget Analysis only supports monthly)
@@ -80,16 +86,21 @@ export function createBudgetAnalysisSpreadsheet({
     // Track running balance that respects carryover flags
     // Get the balance from the month before the start period to initialize properly
     let runningBalance = 0;
-    const monthBeforeStart = monthUtils.subMonths(monthUtils.getMonth(startDate), 1);
-    const prevMonthData = await send('envelope-budget-month', { month: monthBeforeStart });
+    const monthBeforeStart = monthUtils.subMonths(
+      monthUtils.getMonth(startDate),
+      1,
+    );
+    const prevMonthData = await send('envelope-budget-month', {
+      month: monthBeforeStart,
+    });
 
     // Calculate the carryover from the previous month
     for (const cat of categoriesToInclude) {
       const balanceCell = prevMonthData.find((cell: { name: string }) =>
-        cell.name.endsWith(`leftover-${cat.id}`)
+        cell.name.endsWith(`leftover-${cat.id}`),
       );
       const carryoverCell = prevMonthData.find((cell: { name: string }) =>
-        cell.name.endsWith(`carryover-${cat.id}`)
+        cell.name.endsWith(`carryover-${cat.id}`),
       );
 
       const catBalance = (balanceCell?.value as number) || 0;
@@ -123,16 +134,16 @@ export function createBudgetAnalysisSpreadsheet({
       for (const cat of categoriesToInclude) {
         // Find the budget, spent, balance, and carryover flag for this category
         const budgetCell = monthData.find((cell: { name: string }) =>
-          cell.name.endsWith(`budget-${cat.id}`)
+          cell.name.endsWith(`budget-${cat.id}`),
         );
         const spentCell = monthData.find((cell: { name: string }) =>
-          cell.name.endsWith(`sum-amount-${cat.id}`)
+          cell.name.endsWith(`sum-amount-${cat.id}`),
         );
         const balanceCell = monthData.find((cell: { name: string }) =>
-          cell.name.endsWith(`leftover-${cat.id}`)
+          cell.name.endsWith(`leftover-${cat.id}`),
         );
         const carryoverCell = monthData.find((cell: { name: string }) =>
-          cell.name.endsWith(`carryover-${cat.id}`)
+          cell.name.endsWith(`carryover-${cat.id}`),
         );
 
         const catBudgeted = (budgetCell?.value as number) || 0;
