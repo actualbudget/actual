@@ -196,7 +196,7 @@ __metadata:
     react-modal: "npm:3.16.3"
     react-redux: "npm:^9.2.0"
     react-router: "npm:7.12.0"
-    react-simple-pull-to-refresh: "npm:^1.3.3"
+    react-simple-pull-to-refresh: "npm:^1.3.4"
     react-spring: "npm:10.0.0"
     react-swipeable: "npm:^7.0.2"
     react-virtualized-auto-sizer: "npm:^1.0.26"
@@ -23405,13 +23405,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-simple-pull-to-refresh@npm:^1.3.3":
-  version: 1.3.3
-  resolution: "react-simple-pull-to-refresh@npm:1.3.3"
+"react-simple-pull-to-refresh@npm:^1.3.4":
+  version: 1.3.4
+  resolution: "react-simple-pull-to-refresh@npm:1.3.4"
   peerDependencies:
-    react: ^16.10.2 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.10.2 || ^17.0.0 || ^18.0.0
-  checksum: 10/b485d938e7f1bbac31cf89ddf5cab179941a4876dcee2067181519fa1cef303ebd12b3445dfe4fcff9a871f9ca9cde7289ec0967164a6a084f3d5ab2346ae2f7
+    react: ^16.10.2 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.10.2 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10/e89dffd516b20a2d4f794134e2b9c5af4f32557c0c760ed1f42b11c46f9a44f26abc6abe41f72fb3c8dc80ee8559116a9d3f7e996901019582ed99b71e8c7983
   languageName: node
   linkType: hard
 
