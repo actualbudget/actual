@@ -389,7 +389,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                           style={{ marginBottom: 5, minWidth: 210 }}
                           left={
                             <Block>
-                              <Trans>Total budgeted:</Trans>
+                              <Trans>Budgeted:</Trans>
                             </Block>
                           }
                           right={
@@ -404,7 +404,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                           style={{ marginBottom: 5, minWidth: 210 }}
                           left={
                             <Block>
-                              <Trans>Total spent:</Trans>
+                              <Trans>Spent:</Trans>
                             </Block>
                           }
                           right={
@@ -419,7 +419,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                           style={{ marginBottom: 5, minWidth: 210 }}
                           left={
                             <Block>
-                              <Trans>Total overspending adj:</Trans>
+                              <Trans>Overspending adj:</Trans>
                             </Block>
                           }
                           right={
