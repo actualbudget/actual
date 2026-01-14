@@ -11,6 +11,7 @@ import { q } from 'loot-core/shared/query';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { indexCashFlow, runAll } from '@desktop-client/components/reports/util';
+import { TNum } from '@desktop-client/components/TNum';
 import { type FormatType } from '@desktop-client/hooks/useFormat';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
@@ -221,25 +222,31 @@ function recalculate(
           <div style={{ lineHeight: 1.5 }}>
             <AlignedText
               left={t('Income:')}
-              right={format(income, 'financial')}
+              right={<TNum>{format(income, 'financial')}</TNum>}
             />
             <AlignedText
               left={t('Expenses:')}
-              right={format(expense, 'financial')}
+              right={<TNum>{format(expense, 'financial')}</TNum>}
             />
             <AlignedText
               left={t('Change:')}
-              right={<strong>{format(income + expense, 'financial')}</strong>}
+              right={
+                <TNum as="strong">{format(income + expense, 'financial')}</TNum>
+              }
             />
             {creditTransfers + debitTransfers !== 0 && (
               <AlignedText
                 left={t('Transfers:')}
-                right={format(creditTransfers + debitTransfers, 'financial')}
+                right={
+                  <TNum>
+                    {format(creditTransfers + debitTransfers, 'financial')}
+                  </TNum>
+                }
               />
             )}
             <AlignedText
               left={t('Balance:')}
-              right={format(balance, 'financial')}
+              right={<TNum>{format(balance, 'financial')}</TNum>}
             />
           </div>
         </div>

@@ -4,6 +4,7 @@ import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 
+import { TNum } from '@desktop-client/components/TNum';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 export function Change({
@@ -23,8 +24,10 @@ export function Change({
         ...style,
       }}
     >
-      {amount >= 0 ? '+' : ''}
-      {format(amount, 'financial')}
+      <TNum>
+        {amount >= 0 ? '+' : ''}
+        {format(amount, 'financial')}
+      </TNum>
     </Block>
   );
 }

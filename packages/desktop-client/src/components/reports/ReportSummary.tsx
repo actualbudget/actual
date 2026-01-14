@@ -15,6 +15,7 @@ import {
 import { ReportOptions } from './ReportOptions';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { TNum } from '@desktop-client/components/TNum';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
@@ -117,7 +118,7 @@ export function ReportSummary({
               ? t('TOTAL DEPOSITS')
               : t('NET {{net}}', { net })}
         </Text>
-        <Text
+        <TNum
           style={{
             ...styles.veryLargeText,
             alignItems: 'center',
@@ -128,7 +129,7 @@ export function ReportSummary({
           <PrivacyFilter>
             {format(data[balanceTypeOp], 'financial')}
           </PrivacyFilter>
-        </Text>
+        </TNum>
         <Text style={{ fontWeight: 600 }}>
           <Trans>For this time period</Trans>
         </Text>
@@ -156,7 +157,7 @@ export function ReportSummary({
               ? t('AVERAGE DEPOSIT')
               : t('AVERAGE NET')}
         </Text>
-        <Text
+        <TNum
           style={{
             ...styles.veryLargeText,
             alignItems: 'center',
@@ -167,7 +168,7 @@ export function ReportSummary({
           <PrivacyFilter>
             {!isNaN(average) && format(average, 'financial')}
           </PrivacyFilter>
-        </Text>
+        </TNum>
         <Text style={{ fontWeight: 600 }}>
           <Trans>
             Per{' '}
