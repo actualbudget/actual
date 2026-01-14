@@ -98,6 +98,7 @@ export const CONDITION_TYPES = {
       'doesNotContain',
       'notOneOf',
       'hasTags',
+      'hasPeople',
     ],
     nullable: true,
     parse(op, value, fieldName) {
@@ -122,7 +123,8 @@ export const CONDITION_TYPES = {
         op === 'contains' ||
         op === 'matches' ||
         op === 'doesNotContain' ||
-        op === 'hasTags'
+        op === 'hasTags' ||
+        op === 'hasPeople'
       ) {
         assert(
           value.length > 0,
@@ -131,7 +133,7 @@ export const CONDITION_TYPES = {
         );
       }
 
-      if (op === 'hasTags') {
+      if (op === 'hasTags' || op === 'hasPeople') {
         return value;
       }
 
@@ -347,6 +349,16 @@ export class Condition {
           return false;
         }
         return String(fieldValue).indexOf(this.value) !== -1;
+
+      case 'hasPeople':
+        if (fieldValue === null) {
+          return false;
+        }
+        // Case-insensitive match for people tags
+        return (
+          String(fieldValue).toLowerCase().indexOf(this.value.toLowerCase()) !==
+          -1
+        );
 
       case 'notOneOf':
         if (fieldValue === null) {

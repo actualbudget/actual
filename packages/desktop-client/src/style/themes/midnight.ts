@@ -205,6 +205,11 @@ export const noteTagBackgroundHover = colorPalette.purple600;
 export const noteTagDefault = colorPalette.purple700;
 export const noteTagText = colorPalette.purple100;
 
+export const notePeopleBackground = colorPalette.blue800;
+export const notePeopleBackgroundHover = colorPalette.blue600;
+export const notePeopleDefault = colorPalette.blue700;
+export const notePeopleText = colorPalette.blue100;
+
 export const budgetOtherMonth = colorPalette.gray700;
 export const budgetCurrentMonth = tableBackground;
 export const budgetHeaderOtherMonth = colorPalette.gray800;

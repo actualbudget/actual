@@ -3,19 +3,23 @@ import React, { Fragment } from 'react';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
 import { DesktopLinkedNotes } from './DesktopLinkedNotes';
+import { DesktopPeopleTaggedNotes } from './DesktopPeopleTaggedNotes';
 import { DesktopTaggedNotes } from './DesktopTaggedNotes';
 import { parseNotes } from './linkParser';
 import { MobileLinkedNotes } from './MobileLinkedNotes';
+import { MobilePeopleTaggedNotes } from './MobilePeopleTaggedNotes';
 import { MobileTaggedNotes } from './MobileTaggedNotes';
 
 type NotesTagFormatterProps = {
   notes: string;
   onNotesTagClick?: (tag: string) => void;
+  onNotesPersonClick?: (person: string) => void;
 };
 
 export function NotesTagFormatter({
   notes,
   onNotesTagClick,
+  onNotesPersonClick,
 }: NotesTagFormatterProps) {
   const { isNarrowWidth } = useResponsive();
 
@@ -54,6 +58,27 @@ export function NotesTagFormatter({
                 onPress={onNotesTagClick}
                 content={segment.content}
                 tag={segment.tag}
+                separator={separator}
+              />
+            );
+
+          case 'person':
+            if (isNarrowWidth) {
+              return (
+                <MobilePeopleTaggedNotes
+                  key={index}
+                  content={segment.content}
+                  person={segment.person}
+                  separator={separator}
+                />
+              );
+            }
+            return (
+              <DesktopPeopleTaggedNotes
+                key={index}
+                onPress={onNotesPersonClick}
+                content={segment.content}
+                person={segment.person}
                 separator={separator}
               />
             );

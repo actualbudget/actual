@@ -23,15 +23,15 @@ app.method('tags-update', mutator(undoable(updateTag)));
 app.method('tags-find', mutator(findTags));
 
 async function getTags(): Promise<TagEntity[]> {
-  return await db.getTags();
+  return await db.getTags('TAG');
 }
 
 async function createTag({
   tag,
   color = null,
   description = null,
-}: Omit<TagEntity, 'id'>): Promise<TagEntity> {
-  const allTags = await db.getAllTags();
+}: Omit<TagEntity, 'id' | 'type'>): Promise<TagEntity> {
+  const allTags = await db.getAllTags('TAG');
 
   const { id: tagId = null } = allTags.find(t => t.tag === tag) || {};
   if (tagId) {
@@ -42,16 +42,17 @@ async function createTag({
       description,
       tombstone: 0,
     });
-    return { id: tagId, tag, color, description };
+    return { id: tagId, tag, type: 'TAG', color, description };
   }
 
   const id = await db.insertTag({
     tag: tag.trim(),
+    type: 'TAG',
     color: color ? color.trim() : null,
     description,
   });
 
-  return { id, tag, color, description };
+  return { id, tag, type: 'TAG', color, description };
 }
 
 async function deleteTag(tag: TagEntity): Promise<TagEntity['id']> {

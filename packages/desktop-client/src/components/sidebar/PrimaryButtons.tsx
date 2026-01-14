@@ -11,6 +11,7 @@ import {
   SvgStoreFront,
   SvgTag,
   SvgTuning,
+  SvgUser,
   SvgWallet,
 } from '@actual-app/components/icons/v1';
 import { SvgCalendar3 } from '@actual-app/components/icons/v2';
@@ -84,6 +85,12 @@ export function PrimaryButtons() {
             title={t('Tags')}
             Icon={SvgTag}
             to="/tags"
+            indent={15}
+          />
+          <SecondaryItem
+            title={t('People')}
+            Icon={SvgUser}
+            to="/people"
             indent={15}
           />
           <SecondaryItem
