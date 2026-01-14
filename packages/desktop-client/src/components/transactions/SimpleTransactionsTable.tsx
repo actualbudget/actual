@@ -8,7 +8,6 @@ import React, {
 import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgArrowsSynchronize } from '@actual-app/components/icons/v2';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import {
   format as formatDate,
@@ -26,6 +25,7 @@ import {
   SelectCell,
   Table,
 } from '@desktop-client/components/table';
+import { TNum } from '@desktop-client/components/TNum';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCategory } from '@desktop-client/hooks/useCategory';
@@ -154,12 +154,8 @@ const TransactionRow = memo(function TransactionRow({
             );
           case 'amount':
             return (
-              <Field
-                key={i}
-                width={75}
-                style={{ textAlign: 'right', ...styles.tnum }}
-              >
-                {format(transaction.amount, 'financial')}
+              <Field key={i} width={75} style={{ textAlign: 'right' }}>
+                <TNum>{format(transaction.amount, 'financial')}</TNum>
               </Field>
             );
           default:
