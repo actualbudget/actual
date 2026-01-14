@@ -513,9 +513,7 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
   },
   FIXED: {
     name: 'FIXED',
-    description: t(
-      'Formats a number to a fixed amount of decimal places.',
-    ),
+    description: t('Formats a number to a fixed amount of decimal places.'),
     parameters: [
       { name: 'number', description: 'Number' },
       { name: 'decimals', description: 'Decimals' },
