@@ -1841,7 +1841,7 @@ class AccountInternal extends PureComponent<
               <View style={{ flex: 1 }}>
                 <TransactionList
                   headerContent={undefined}
-                  // @ts-ignore TODO
+                  // @ts-expect-error - fix me
                   tableRef={this.table}
                   account={account}
                   transactions={transactions}
