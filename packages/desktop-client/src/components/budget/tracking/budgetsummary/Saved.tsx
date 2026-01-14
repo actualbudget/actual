@@ -12,6 +12,7 @@ import { css } from '@emotion/css';
 import { useTrackingSheetValue } from '@desktop-client/components/budget/tracking/TrackingBudgetComponents';
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { TNum } from '@desktop-client/components/TNum';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
 
@@ -48,22 +49,17 @@ export function Saved({ projected, style }: SavedProps) {
             <AlignedText
               left={t('Projected savings:')}
               right={
-                <Text
-                  style={{
-                    ...makeAmountFullStyle(budgetedSaved),
-                    ...styles.tnum,
-                  }}
-                >
+                <TNum style={makeAmountFullStyle(budgetedSaved)}>
                   {format(budgetedSaved, 'financial-with-sign')}
-                </Text>
+                </TNum>
               }
             />
             <AlignedText
               left={t('Difference:')}
               right={
-                <Text style={{ ...makeAmountFullStyle(diff), ...styles.tnum }}>
+                <TNum style={makeAmountFullStyle(diff)}>
                   {format(diff, 'financial-with-sign')}
-                </Text>
+                </TNum>
               }
             />
           </>
@@ -74,7 +70,6 @@ export function Saved({ projected, style }: SavedProps) {
         }}
       >
         <View
-          style={{ ...styles.tnum }}
           className={css({
             fontSize: 25,
             color: projected
@@ -84,7 +79,9 @@ export function Saved({ projected, style }: SavedProps) {
                 : theme.upcomingText,
           })}
         >
-          <PrivacyFilter>{format(saved, 'financial')}</PrivacyFilter>
+          <PrivacyFilter>
+            <TNum>{format(saved, 'financial')}</TNum>
+          </PrivacyFilter>
         </View>
       </Tooltip>
     </View>

@@ -30,6 +30,7 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { groupById } from 'loot-core/shared/util';
+import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { BudgetTable, PILL_STYLE } from './BudgetTable';
 
@@ -46,6 +47,7 @@ import {
 import { prewarmMonth } from '@desktop-client/components/budget/util';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
+import { TNum } from '@desktop-client/components/TNum';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
@@ -719,7 +721,15 @@ function UncategorizedTransactionsBanner(props) {
         >
           <Trans count={transactions.length}>
             You have {{ count: transactions.length }} uncategorized transactions
-            ({{ amount: format(totalUncategorizedAmount, 'financial') }})
+            (
+            <TNum>
+              {
+                {
+                  amount: format(totalUncategorizedAmount, 'financial'),
+                } as TransObjectLiteral
+              }
+            </TNum>
+            )
           </Trans>
           <Button
             onPress={() => navigate('/categories/uncategorized')}
@@ -961,7 +971,14 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
             <Text>
               <Trans count={numberOfOverspentCategories}>
                 You have {{ count: numberOfOverspentCategories }} overspent
-                categories ({{ amount: format(totalOverspending, 'financial') }}
+                categories (
+                <TNum>
+                  {
+                    {
+                      amount: format(totalOverspending, 'financial'),
+                    } as TransObjectLiteral
+                  }
+                </TNum>
                 )
               </Trans>
             </Text>

@@ -15,6 +15,7 @@ import {
   useEnvelopeSheetValue,
 } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { TNum } from '@desktop-client/components/TNum';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
@@ -52,7 +53,7 @@ export function ToBudgetAmount({
   const isNegative = num < 0;
 
   return (
-    <View style={{ alignItems: 'center', ...styles.tnum, ...style }}>
+    <View style={{ alignItems: 'center', ...style }}>
       <Block>{isNegative ? t('Overbudgeted:') : t('To Budget:')}</Block>
       <View>
         <Tooltip
@@ -95,7 +96,7 @@ export function ToBudgetAmount({
                 amountStyle,
               ])}
             >
-              {format(num, 'financial')}
+              <TNum>{format(num, 'financial')}</TNum>
             </Block>
           </PrivacyFilter>
         </Tooltip>
