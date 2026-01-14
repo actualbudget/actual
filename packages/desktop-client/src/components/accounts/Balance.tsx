@@ -18,6 +18,7 @@ import {
   CellValue,
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
+import { TNum } from '@desktop-client/components/TNum';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
@@ -47,10 +48,10 @@ function DetailedBalance({
     >
       {name}{' '}
       <PrivacyFilter>
-        <Text style={{ fontWeight: 600 }}>
+        <TNum style={{ fontWeight: 600 }}>
           {!isExactBalance && '~ '}
           {format(balance, 'financial')}
-        </Text>
+        </TNum>
       </PrivacyFilter>
     </Text>
   );
