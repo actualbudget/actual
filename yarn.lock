@@ -141,6 +141,7 @@ __metadata:
     "@codemirror/state": "npm:^6.5.3"
     "@codemirror/view": "npm:^6.38.7"
     "@emotion/css": "npm:^11.13.5"
+    "@fontsource-variable/inter": "npm:^5.2.8"
     "@fontsource/redacted-script": "npm:^5.2.8"
     "@juggle/resize-observer": "npm:^3.4.0"
     "@lezer/highlight": "npm:^1.2.3"
@@ -172,7 +173,6 @@ __metadata:
     i18next: "npm:^25.7.4"
     i18next-parser: "npm:^9.3.0"
     i18next-resources-to-backend: "npm:^1.2.1"
-    inter-ui: "npm:^3.19.3"
     jsdom: "npm:^27.4.0"
     lodash: "npm:^4.17.21"
     loot-core: "workspace:*"
@@ -4151,6 +4151,13 @@ __metadata:
     "@exodus/crypto":
       optional: true
   checksum: 10/aed2f77fbdfbadfc686ee66be68c192dd9138677daa65d368b8aaee006432518fec1098b4319073692d9cce52c50e0269b700801c1cb13a694f8dd04a2e1c5ec
+  languageName: node
+  linkType: hard
+
+"@fontsource-variable/inter@npm:^5.2.8":
+  version: 5.2.8
+  resolution: "@fontsource-variable/inter@npm:5.2.8"
+  checksum: 10/7f45ab415f0d3c43f31129dd9972dcbfb60ebe51801891b9a88a7ba395d4be664c507b0027138f42307b9ffe91bdd564fcae98bce5b244046274f4aceae07382
   languageName: node
   linkType: hard
 
@@ -17465,13 +17472,6 @@ __metadata:
   version: 0.2.4
   resolution: "inline-style-parser@npm:0.2.4"
   checksum: 10/80814479d1f3c9cbd102f9de4cd6558cf43cc2e48640e81c4371c3634f1e8b6dfeb2f21063cfa31d46cc83e834c20cd59ed9eeed9bfd45ef5bc02187ad941faf
-  languageName: node
-  linkType: hard
-
-"inter-ui@npm:^3.19.3":
-  version: 3.19.3
-  resolution: "inter-ui@npm:3.19.3"
-  checksum: 10/48bf4ef8c121f5b6aabdd691c00abb83c18f14692dbe633b50981f07f931ee13932d0e2d2d119f20452ac305414381f2e2ad3ba8b72aac923eeec6ad06d02d1b
   languageName: node
   linkType: hard
 
