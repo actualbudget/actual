@@ -39,7 +39,7 @@ jobs:
             We would love to review your PR! Before we can do that, please make sure:
 
             - ✅ All CI checks pass
-            - ✅ The PR is moved from draft to open
+            - ✅ The PR is moved from draft to open (if applicable)
             - ✅ The "[WIP]" prefix is removed from the PR title
             - ✅ All CodeRabbit code review comments are resolved (if you disagree with anything - reply to the bot with your reasoning so we can read through it). The bot will eventually approve the PR.
 
