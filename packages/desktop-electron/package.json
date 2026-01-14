@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@actual-app/sync-server": "workspace:*",
-    "better-sqlite3": "^12.4.1",
+    "better-sqlite3": "^12.5.0",
     "fs-extra": "^11.3.2",
     "promise-retry": "^2.0.1"
   },
