@@ -22,7 +22,7 @@
     "@codemirror/autocomplete": "^6.20.0",
     "@codemirror/lang-javascript": "^6.2.4",
     "@codemirror/language": "^6.12.1",
-    "@codemirror/state": "^6.5.2",
+    "@codemirror/state": "^6.5.3",
     "@codemirror/view": "^6.38.7",
     "@emotion/css": "^11.13.5",
     "@fontsource/redacted-script": "^5.2.8",
