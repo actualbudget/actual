@@ -282,7 +282,6 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                     }}
                     editing
                     onSave={_onSaveCategory}
-                    onDelete={async () => {}}
                     onHideNewCategory={onHideNewCategory}
                     onEditName={onEditName!}
                   />

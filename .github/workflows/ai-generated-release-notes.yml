@@ -41,8 +41,21 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
 
-      - name: Check if release notes file already exists
+      - name: Check if PR targets master branch
         if: steps.check-first-comment.outputs.result == 'true' && steps.pr-details.outputs.result != 'null'
+        id: check-base-branch
+        run: |
+          BASE_BRANCH=$(echo '${{ steps.pr-details.outputs.result }}' | jq -r '.baseBranch')
+          echo "Base branch: $BASE_BRANCH"
+          if [ "$BASE_BRANCH" = "master" ]; then
+            echo "targets_master=true" >> $GITHUB_OUTPUT
+          else
+            echo "targets_master=false" >> $GITHUB_OUTPUT
+            echo "PR does not target master branch, skipping release notes generation"
+          fi
+
+      - name: Check if release notes file already exists
+        if: steps.check-first-comment.outputs.result == 'true' && steps.pr-details.outputs.result != 'null' && steps.check-base-branch.outputs.targets_master == 'true'
         id: check-release-notes-exists
         run: node .github/actions/ai-generated-release-notes/check-release-notes-exists.js
         env:
