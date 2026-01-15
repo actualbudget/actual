@@ -2,13 +2,6 @@ import { theme } from '@actual-app/components/theme';
 
 import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
 
-const colorFades = {
-  blueFadeStart: 'rgba(229, 245, 255, 1)',
-  blueFadeEnd: 'rgba(229, 245, 255, 0)',
-  redFadeStart: 'rgba(255, 243, 242, 1)',
-  redFadeEnd: 'rgba(255, 243, 242, 0)',
-};
-
 // Typography
 const sansSerif =
   'Inter Variable, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, Helvetica, Arial, sans-serif';
@@ -45,15 +38,14 @@ const axisBaseStyles = {
 
 export const chartTheme = {
   colors: {
-    ...colorFades,
-    red: theme.reportsRed,
-    blue: theme.reportsBlue,
+    red: theme.reportsNumberNegative,
+    blue: theme.reportsChartFill,
   },
   area: {
     style: {
       labels: baseLabelStyles,
       data: {
-        stroke: theme.reportsBlue,
+        stroke: theme.reportsChartFill,
         strokeWidth: 2,
         strokeLinejoin: 'round',
         strokeLinecap: 'round',
@@ -84,7 +76,7 @@ export const chartTheme = {
   bar: {
     style: {
       labels: baseLabelStyles,
-      data: { fill: theme.reportsBlue, stroke: 'none' },
+      data: { fill: theme.reportsChartFill, stroke: 'none' },
     },
   },
   line: {
@@ -92,7 +84,7 @@ export const chartTheme = {
       labels: baseLabelStyles,
       data: {
         fill: 'none',
-        stroke: theme.reportsBlue,
+        stroke: theme.reportsChartFill,
         strokeWidth: 2,
         strokeLinejoin: 'round',
         strokeLinecap: 'round',
