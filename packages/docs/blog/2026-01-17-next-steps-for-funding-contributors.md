@@ -1,6 +1,6 @@
 ---
 title: Next Steps for Funding Contributors
-description: Expanding upon our successful contributor compensation system, we're exploring new ways to reward broader project involvement—including feature work, bug fixes, and active community participation—while ensuring transparency, fairness, and ongoing support in funding for all meaningful contributions.
+description: Expanding upon our successful contributor compensation system, we're exploring new ways to reward broader project involvement — including feature work, bug fixes, and active community participation — while ensuring transparency, fairness, and ongoing support in funding for all meaningful contributions.
 date: 2026-01-17T10:00
 slug: next-steps-for-funding-contributors
 tags: [announcement]
