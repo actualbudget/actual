@@ -209,7 +209,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
                   {...props}
                   transactions={transactions}
                   loadMoreTransactions={vi.fn()}
-                  // @ts-ignore TODO:
+                  // @ts-expect-error TODO: fix me
                   commonPayees={[]}
                   payees={payees}
                   addNotification={console.log}

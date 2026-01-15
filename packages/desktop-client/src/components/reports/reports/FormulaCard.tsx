@@ -8,6 +8,7 @@ import { type FormulaWidget } from 'loot-core/types/models';
 import { FormulaResult } from '@desktop-client/components/reports/FormulaResult';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormulaExecution } from '@desktop-client/hooks/useFormulaExecution';
 import { useThemeColors } from '@desktop-client/hooks/useThemeColors';
 
@@ -17,6 +18,7 @@ type FormulaCardProps = {
   meta?: FormulaWidget['meta'];
   onMetaChange: (newMeta: FormulaWidget['meta']) => void;
   onRemove: () => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function FormulaCard({
@@ -25,9 +27,12 @@ export function FormulaCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onCopy,
 }: FormulaCardProps) {
   const { t } = useTranslation();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
   const themeColors = useThemeColors();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -81,8 +86,10 @@ export function FormulaCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);

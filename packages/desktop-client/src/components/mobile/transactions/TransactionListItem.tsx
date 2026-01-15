@@ -299,6 +299,7 @@ export function TransactionListItem({
                 <Text
                   style={{
                     ...textStyle,
+                    ...styles.tnum,
                     ...makeAmountFullStyle(amount),
                   }}
                 >
@@ -309,6 +310,7 @@ export function TransactionListItem({
                     style={{
                       fontSize: 11,
                       fontWeight: '400',
+                      ...styles.tnum,
                       ...makeBalanceAmountStyle(runningBalance),
                     }}
                   >
