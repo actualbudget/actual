@@ -211,7 +211,9 @@ export function ManageRules({
       undo.setUndoState('openModal', null);
     };
   });
-  useEffect(() => init(), []);
+  useEffect(() => {
+    return init();
+  }, []);
 
   function loadMore() {
     setPage(page => page + 1);
