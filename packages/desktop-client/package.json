@@ -47,6 +47,7 @@
     "@use-gesture/react": "^10.3.1",
     "@vitejs/plugin-basic-ssl": "^2.1.3",
     "@vitejs/plugin-react": "^5.1.2",
+    "@vitest/browser-playwright": "^4.0.17",
     "auto-text-size": "^0.2.3",
     "babel-plugin-react-compiler": "^1.0.0",
     "cmdk": "^1.1.1",
@@ -93,8 +94,9 @@
     "uuid": "^13.0.0",
     "vite": "^7.3.1",
     "vite-plugin-pwa": "^1.2.0",
-    "vite-tsconfig-paths": "^5.1.4",
+    "vite-tsconfig-paths": "^6.0.4",
     "vitest": "^4.0.16",
+    "vitest-browser-react": "^2.0.2",
     "xml2js": "^0.6.2"
   }
 }

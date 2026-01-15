@@ -96,3 +96,48 @@ Run locally:
 ```sh
 E2E_START_URL=https://my-remote-server.com yarn vrt
 ```
+
+## Browser Tests (Vitest Browser Mode)
+
+Browser tests (`.browser.test.tsx` files) use Vitest's browser mode to test React components with visual regression screenshots. These tests generate screenshots that can vary significantly by environment (fonts, rendering, DPI, etc.).
+
+**IMPORTANT: For consistent screenshot quality, always run browser tests in Docker.**
+
+### Running Browser Tests in Docker
+
+From the project root:
+
+```sh
+# Run all browser tests
+yarn test:browser:docker
+
+# Run a specific browser test file
+yarn test:browser:docker AuthSettings.browser
+
+# Run with update flag to update snapshots
+yarn test:browser:docker AuthSettings.browser --update
+```
+
+From the `packages/desktop-client` directory:
+
+```sh
+# Run all browser tests
+yarn test:browser:docker
+
+# Run a specific browser test file
+yarn test:browser:docker AuthSettings.browser
+
+# Run with update flag
+yarn test:browser:docker AuthSettings.browser --update
+```
+
+### Why Docker?
+
+Running browser tests locally will produce inconsistent screenshots due to:
+
+- System-specific font rendering
+- Different DPI/display scaling
+- OS-specific rendering differences
+- Font availability variations
+
+Docker ensures all tests run in the same standardized environment (`mcr.microsoft.com/playwright:v1.56.0-jammy`), producing consistent, reproducible screenshots.

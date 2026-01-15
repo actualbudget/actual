@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Run browser tests (vitest browser mode) in Docker for consistent screenshot quality
+# Browser tests generate screenshots that vary by environment (fonts, rendering, etc.)
+# Running in Docker ensures consistent results across different machines
+#
+# Usage:
+#   yarn test:browser                          # Run all browser tests
+#   yarn test:browser AuthSettings.browser     # Run specific test file
+#   yarn test:browser --update                 # Update snapshots
+
+if [ ! -d "node_modules" ] || [ "$(ls -A node_modules)" = "" ]; then
+    yarn
+fi
+
+TEST_ARGS=""
+
+# Loop through all arguments
+while [ $# -gt 0 ]; do
+    TEST_ARGS="$TEST_ARGS $1"
+    shift
+done
+
+echo "Running browser tests in Docker for consistent screenshot quality..."
+echo "Test args: $TEST_ARGS"
+echo ""
+
+MSYS_NO_PATHCONV=1 docker run --rm --network host -v "$(pwd)":/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.57.0-jammy /bin/bash \
+  -c "yarn workspace @actual-app/web test --project=browser $TEST_ARGS"

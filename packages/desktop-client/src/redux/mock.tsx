@@ -37,6 +37,7 @@ import {
   name as prefsSliceName,
   reducer as prefsSliceReducer,
 } from '@desktop-client/prefs/prefsSlice';
+import { ThemeStyle } from '@desktop-client/style';
 import {
   name as tagsSliceName,
   reducer as tagsSliceReducer,
@@ -76,4 +77,13 @@ export function resetMockStore() {
 
 export function TestProvider({ children }: { children: ReactNode }) {
   return <Provider store={mockStore}>{children}</Provider>;
+}
+
+export function BrowserTestProvider({ children }: { children: ReactNode }) {
+  return (
+    <TestProvider>
+      <ThemeStyle />
+      {children}
+    </TestProvider>
+  );
 }

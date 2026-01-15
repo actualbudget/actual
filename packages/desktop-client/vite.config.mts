@@ -240,13 +240,32 @@ export default defineConfig(async ({ mode }) => {
             globals: true,
             browser: {
               enabled: true,
-              provider: playwright({
-                contextOptions: {
-                  viewport: { width: 1280, height: 720 },
-                  // deviceScaleFactor: 2,
+              provider: playwright(),
+              instances: [
+                {
+                  browser: 'chromium',
+                  headless: true,
+                  contextOptions: {
+                    // Large viewport to accommodate 1200px wide elements
+                    viewport: { width: 1920, height: 1080 },
+                    // deviceScaleFactor: 3 means screenshots will be 3x the CSS size
+                    // So a 1200px element will produce a 3600px wide screenshot
+                    deviceScaleFactor: 3,
+                  },
                 },
-              }),
-              instances: [{ browser: 'chromium', headless: true }],
+              ],
+            },
+            expect: {
+              toMatchScreenshot: {
+                comparatorOptions: {
+                  threshold: 0.2,
+                },
+                // Set default screenshot scale to 'device' to respect deviceScaleFactor: 3
+                // This should make screenshots use device pixels instead of CSS pixels
+                screenshotOptions: {
+                  scale: 'device', // Use device pixels - respects deviceScaleFactor: 3
+                },
+              },
             },
           },
         },
