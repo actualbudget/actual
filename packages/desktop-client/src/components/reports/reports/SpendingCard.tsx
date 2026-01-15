@@ -139,11 +139,12 @@ export function SpendingCard({
                   ...styles.mediumText,
                   fontWeight: 500,
                   marginBottom: 5,
-                  color: !difference
-                    ? 'inherit'
-                    : difference <= 0
-                      ? theme.noticeTextLight
-                      : theme.errorText,
+                  color:
+                    difference === 0 || difference == null
+                      ? theme.reportsNumberNeutral
+                      : difference > 0
+                        ? theme.reportsNumberPositive
+                        : theme.reportsNumberNegative,
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>

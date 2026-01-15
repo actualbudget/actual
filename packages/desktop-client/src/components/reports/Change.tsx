@@ -22,11 +22,20 @@ export function Change({
   };
 
   return (
-    <Block style={textStyle}>
-      <FinancialText style={textStyle}>
-        {amount >= 0 ? '+' : ''}
-        {format(amount, 'financial')}
-      </FinancialText>
+    <Block
+      style={{
+        ...styles.smallText,
+        color:
+          amount === 0
+            ? theme.reportsNumberNeutral
+            : amount < 0
+              ? theme.reportsNumberNegative
+              : theme.reportsNumberPositive,
+        ...style,
+      }}
+    >
+      {amount >= 0 ? '+' : ''}
+      {format(amount, 'financial')}
     </Block>
   );
 }

@@ -46,8 +46,8 @@ type ReportTableRowProps = {
 };
 
 const getAmountColor = (amount: number) => {
-  if (amount === 0) return undefined;
-  return amount > 0 ? theme.noticeText : theme.errorText;
+  if (amount === 0) return theme.reportsNumberNeutral;
+  return amount > 0 ? theme.reportsNumberPositive : theme.reportsNumberNegative;
 };
 
 export const ReportTableRow = memo(

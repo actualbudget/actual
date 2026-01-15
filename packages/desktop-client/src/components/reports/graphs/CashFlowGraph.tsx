@@ -16,11 +16,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import {
-  chartTheme,
-  useRechartsAnimation,
-} from '@desktop-client/components/reports/chart-theme';
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
@@ -204,14 +200,14 @@ export function CashFlowGraph({
           <Bar
             dataKey="income"
             stackId="a"
-            fill={chartTheme.colors.blue}
+            fill={theme.reportsNumberPositive}
             maxBarSize={MAX_BAR_SIZE}
             {...animationProps}
           />
           <Bar
             dataKey="expenses"
             stackId="a"
-            fill={chartTheme.colors.red}
+            fill={theme.reportsNumberNegative}
             maxBarSize={MAX_BAR_SIZE}
             {...animationProps}
           />
