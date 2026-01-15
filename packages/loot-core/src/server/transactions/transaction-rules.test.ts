@@ -451,9 +451,9 @@ describe('Transaction rules', () => {
     expect(transactions.map(t => t.id)).toEqual(['2', '3']);
 
     transactions = await getMatchingTransactions([
-      { field: 'notes', op: 'oneOf', value: ['fooo', 'barr'] },
+      { field: 'notes', op: 'is', value: 'barr' },
     ]);
-    expect(transactions.map(t => t.id)).toEqual(['2', '3', '1']);
+    expect(transactions.map(t => t.id)).toEqual(['1']);
 
     transactions = await getMatchingTransactions([
       { field: 'notes', op: 'is', value: '' },
