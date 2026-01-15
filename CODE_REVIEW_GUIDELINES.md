@@ -85,4 +85,4 @@ Over-mocking makes tests brittle and less reliable. Real implementations provide
 
 - See [AGENTS.md](./AGENTS.md) for general development guidelines
 - See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines
-- Community documentation: https://actualbudget.org/docs/contributing/
+- Community documentation: [https://actualbudget.org/docs/contributing/](https://actualbudget.org/docs/contributing/)
