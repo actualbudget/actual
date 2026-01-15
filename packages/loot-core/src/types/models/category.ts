@@ -7,6 +7,7 @@ export type CategoryEntity = {
   group: CategoryGroupEntity['id'];
   goal_def?: string;
   template_settings?: { source: 'notes' | 'ui' };
+  currency?: string; // Primary currency for this category (undefined/null = base currency)
   sort_order?: number;
   tombstone?: boolean;
   hidden?: boolean;

@@ -35,7 +35,7 @@ export type ServerHandlers = {
     dailyAverage: number;
   } | null>;
 
-  'exchange-rates-fetch': (arg: {
+  'exchange-rates-fetch': (arg?: {
     fromCurrency?: string;
     toCurrencies?: string[];
   }) => Promise<{ success: boolean }>;

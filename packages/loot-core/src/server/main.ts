@@ -138,39 +138,40 @@ handlers['exchange-rates-fetch'] = async function ({
 }: {
   fromCurrency?: string;
   toCurrencies?: string[];
-}) {
-  // Auto-determine currencies if not provided
+} = {}) {
+  // If no currencies specified, fetch all used currencies
   if (!fromCurrency || !toCurrencies || toCurrencies.length === 0) {
+    const usedCurrencies = await exchangeRateService.getUsedCurrencies();
+
+    // Get default currency as base
     const defaultCurrency = await db.first<{ value: string }>(
       'SELECT value FROM preferences WHERE id = ?',
       ['defaultCurrencyCode'],
     );
-    const baseCurrency = fromCurrency || defaultCurrency?.value;
-    if (!baseCurrency) {
-      return { success: false };
+
+    if (!fromCurrency && !defaultCurrency?.value) {
+      // No base currency configured, nothing to fetch
+      return { success: true };
     }
 
-    // Get all unique account currencies that differ from base
-    const accounts = await db.all<db.DbAccount>(
-      'SELECT DISTINCT currency_code FROM accounts WHERE currency_code IS NOT NULL AND currency_code != ? AND tombstone = 0',
-      [baseCurrency],
-    );
-    const currencies =
+    const baseCurrency = fromCurrency || defaultCurrency.value;
+
+    // Fetch rates from base to all other used currencies
+    const targetCurrencies =
       toCurrencies && toCurrencies.length > 0
         ? toCurrencies
-        : accounts
-            .map(a => a.currency_code)
-            .filter((c): c is string => c != null);
+        : usedCurrencies.filter(c => c !== baseCurrency);
 
-    if (currencies.length === 0) {
-      return { success: true }; // No currencies to fetch
+    if (targetCurrencies.length > 0) {
+      await exchangeRateService.fetchAndCacheRates(
+        baseCurrency,
+        targetCurrencies,
+      );
     }
-
-    await exchangeRateService.fetchAndCacheRates(baseCurrency, currencies);
-    return { success: true };
+  } else {
+    await exchangeRateService.fetchAndCacheRates(fromCurrency, toCurrencies);
   }
 
-  await exchangeRateService.fetchAndCacheRates(fromCurrency, toCurrencies);
   return { success: true };
 };
 

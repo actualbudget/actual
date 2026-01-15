@@ -43,8 +43,11 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
     initialValue: 0,
     run: () => {
       // Making this sync is faster!
+      // Use COALESCE(base_amount, amount) to support multi-currency:
+      // - For base currency transactions, base_amount is NULL, use amount
+      // - For foreign currency transactions, base_amount has the converted value
       const rows = db.runQuery<{ amount: number }>(
-        `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
+        `SELECT SUM(COALESCE(base_amount, amount)) as amount FROM v_transactions_internal_alive t
            LEFT JOIN accounts a ON a.id = t.account
          WHERE t.date >= ${start} AND t.date <= ${end}
            AND category = '${cat.id}' AND a.offbudget = 0`,

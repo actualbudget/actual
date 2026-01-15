@@ -89,6 +89,7 @@ export const schema = {
     group: f('id', { ref: 'category_groups' }),
     goal_def: f('string'),
     template_settings: f('json', { default: { source: 'notes' } }),
+    currency: f('string'), // Primary currency for category (NULL = base currency)
     sort_order: f('float'),
     tombstone: f('boolean'),
   },
