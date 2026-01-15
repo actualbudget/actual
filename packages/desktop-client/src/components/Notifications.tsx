@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import React, {
   useState,
+  useEffectEvent,
   useEffect,
   useMemo,
-  useRef,
   type SetStateAction,
   type CSSProperties,
 } from 'react';
@@ -123,24 +123,17 @@ function Notification({
 
   const [loading, setLoading] = useState(false);
   const [overlayLoading, setOverlayLoading] = useState(false);
-  const onRemoveRef = useRef(onRemove);
 
-  useEffect(() => {
-    onRemoveRef.current = onRemove;
-  }, [onRemove]);
-
-  useEffect(() => {
+  const connected = useEffectEvent(() => {
     if (type === 'error' && internal) {
       console.error('Internal error:', internal);
     }
 
     if (!sticky) {
-      const timeoutId = setTimeout(() => {
-        onRemoveRef.current();
-      }, timeout || 6500);
-      return () => clearTimeout(timeoutId);
+      setTimeout(onRemove, timeout || 6500);
     }
-  }, [internal, sticky, timeout, type]);
+  });
+  useEffect(() => connected(), []);
 
   const positive = type === 'message';
   const error = type === 'error';

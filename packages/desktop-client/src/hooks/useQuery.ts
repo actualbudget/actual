@@ -1,10 +1,4 @@
-import {
-  useState,
-  useMemo,
-  useEffect,
-  useRef,
-  type DependencyList,
-} from 'react';
+import { useState, useMemo, useEffect, type DependencyList } from 'react';
 
 import { type Query } from 'loot-core/shared/query';
 
@@ -22,14 +16,8 @@ export function useQuery<Response = unknown>(
 ): UseQueryResult<Response> {
   // Memo the resulting query. We don't care if the function
   // that creates the query changes, only the resulting query.
-  const makeQueryRef = useRef(makeQuery);
-
-  useEffect(() => {
-    makeQueryRef.current = makeQuery;
-  }, [makeQuery]);
-
   // oxlint-disable-next-line react-hooks/exhaustive-deps -- caller owns deps
-  const query = useMemo(() => makeQueryRef.current(), dependencies);
+  const query = useMemo(makeQuery, dependencies);
 
   const [data, setData] = useState<ReadonlyArray<Response> | null>(null);
   const [isLoading, setIsLoading] = useState(true);

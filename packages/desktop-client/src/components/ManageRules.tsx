@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 import React, {
   useState,
+  useEffectEvent,
   useEffect,
-  useCallback,
   useMemo,
   type SetStateAction,
   type Dispatch,
@@ -167,17 +167,15 @@ export function ManageRules({
             ),
           )
     ).slice(0, 100 + page * 50);
-  }, [allRules, filter, filterData, page]);
+  }, [allRules, filter, filterData, page, schedules]);
+
   const selectedInst = useSelected('manage-rules', filteredRules, []);
   const [hoveredRule, setHoveredRule] = useState(null);
 
-  const onSearchChange = useCallback(
-    (value: string) => {
-      setFilter(value);
-      setPage(0);
-    },
-    [setFilter],
-  );
+  const onSearchChange = (value: string) => {
+    setFilter(value);
+    setPage(0);
+  };
 
   async function loadRules() {
     setLoading(true);
@@ -195,7 +193,7 @@ export function ManageRules({
     return loadedRules;
   }
 
-  useEffect(() => {
+  const init = useEffectEvent(() => {
     async function loadData() {
       await loadRules();
       setLoading(false);
@@ -212,13 +210,14 @@ export function ManageRules({
     return () => {
       undo.setUndoState('openModal', null);
     };
-  }, []);
+  });
+  useEffect(() => init(), []);
 
   function loadMore() {
     setPage(page => page + 1);
   }
 
-  const onDeleteSelected = useCallback(async () => {
+  const onDeleteSelected = async () => {
     setLoading(true);
 
     const { someDeletionsFailed } = await send('rule-delete-all', [
@@ -234,7 +233,7 @@ export function ManageRules({
     await loadRules();
     selectedInst.dispatch({ type: 'select-none' });
     setLoading(false);
-  }, [selectedInst]);
+  };
 
   async function onDeleteRule(id: string) {
     setLoading(true);
@@ -243,7 +242,7 @@ export function ManageRules({
     setLoading(false);
   }
 
-  const onEditRule = useCallback(rule => {
+  const onEditRule = rule => {
     dispatch(
       pushModal({
         modal: {
@@ -258,7 +257,7 @@ export function ManageRules({
         },
       }),
     );
-  }, []);
+  };
 
   function onCreateRule() {
     const rule: NewRuleEntity = {
@@ -298,9 +297,9 @@ export function ManageRules({
     );
   }
 
-  const onHover = useCallback(id => {
+  const onHover = id => {
     setHoveredRule(id);
-  }, []);
+  };
 
   return (
     <SelectedProvider instance={selectedInst}>

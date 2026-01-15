@@ -76,7 +76,7 @@ export function ReportTableTotals({
       ];
       setScrollWidthTotals(parent > 0 && child > 0 ? parent - child : 0);
     }
-  });
+  }, [totalScrollRef]);
 
   const metadata: GroupedEntity = {
     id: '',

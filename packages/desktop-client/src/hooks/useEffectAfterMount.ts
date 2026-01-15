@@ -13,15 +13,10 @@ export function useEffectAfterMount(
   deps?: DependencyList | undefined,
 ) {
   const isFirstRender = useRef(true);
-  const effectRef = useRef(effect);
-
-  useEffect(() => {
-    effectRef.current = effect;
-  }, [effect]);
 
   useEffect(() => {
     if (!isFirstRender.current) {
-      return effectRef.current();
+      return effect();
     }
     isFirstRender.current = false;
     // oxlint-disable-next-line react-hooks/exhaustive-deps -- caller owns deps

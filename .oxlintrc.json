@@ -376,23 +376,9 @@
   },
   "overrides": [
     {
-      // TODO: fix the issues in these files
-      "files": [
-        "packages/desktop-client/src/components/budget/BudgetSummaries.tsx",
-        "packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx",
-        "packages/desktop-client/src/components/budget/index.tsx",
-        "packages/desktop-client/src/components/budget/MobileBudget.tsx",
-        "packages/desktop-client/src/components/FinancesApp.tsx",
-        "packages/desktop-client/src/components/ManageRules.tsx",
-        "packages/desktop-client/src/components/modals/ImportTransactionsModal/ImportTransactionsModal.tsx",
-        "packages/desktop-client/src/components/payees/PayeeTable.tsx",
-        "packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTable.tsx",
-        "packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTableTotals.tsx",
-        "packages/desktop-client/src/components/reports/reports/CustomReport.tsx",
-        "packages/desktop-client/src/components/select/DateSelect.tsx"
-      ],
+      "files": ["packages/desktop-electron/**/*"],
       "rules": {
-        "react/exhaustive-deps": "off"
+        "react/rules-of-hooks": "off"
       }
     },
     {
