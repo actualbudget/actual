@@ -553,6 +553,10 @@ When creating pull requests:
 
 - **AI-Generated PRs**: If you create a PR using AI assistance, add the **"AI generated"** label to the pull request. This helps maintainers understand the nature of the contribution.
 
+## Code Review Guidelines
+
+When performing code reviews (especially for LLM agents): **see [CODE_REVIEW_GUIDELINES.md](./CODE_REVIEW_GUIDELINES.md)** for specific guidelines.
+
 ## Performance Considerations
 
 - **Bundle Size**: Check with rollup-plugin-visualizer
