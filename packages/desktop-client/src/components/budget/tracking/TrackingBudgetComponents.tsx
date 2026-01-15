@@ -344,7 +344,8 @@ export const CategoryMonth = memo(function CategoryMonth({
                     });
                     showUndoNotification({
                       message: t(
-                        `Budget set to ${numberOfMonths}-month average.`,
+                        'Budget set to {{numberOfMonths}}-month average.',
+                        { numberOfMonths },
                       ),
                     });
                   }}
