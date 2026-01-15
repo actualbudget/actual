@@ -16,7 +16,6 @@ type ItemContentProps = {
   activeStyle: CSSProperties;
   children: ReactNode;
   forceActive?: boolean;
-  end?: boolean;
 };
 
 export function ItemContent({
@@ -25,7 +24,6 @@ export function ItemContent({
   onClick,
   activeStyle,
   forceActive,
-  end,
   children,
 }: ItemContentProps) {
   return onClick ? (
@@ -45,13 +43,7 @@ export function ItemContent({
       {children}
     </View>
   ) : (
-    <Link
-      variant="internal"
-      to={to}
-      style={style}
-      activeStyle={activeStyle}
-      end={end}
-    >
+    <Link variant="internal" to={to} style={style} activeStyle={activeStyle}>
       {children}
     </Link>
   );

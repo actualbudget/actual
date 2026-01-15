@@ -26,7 +26,6 @@ type ItemProps = {
   onClick?: MouseEventHandler<HTMLDivElement>;
   forceHover?: boolean;
   forceActive?: boolean;
-  end?: boolean;
 };
 
 export function Item({
@@ -39,7 +38,6 @@ export function Item({
   indent = 0,
   forceHover = false,
   forceActive = false,
-  end,
 }: ItemProps) {
   const hoverStyle = {
     backgroundColor: theme.sidebarItemBackgroundHover,
@@ -81,7 +79,6 @@ export function Item({
         }}
         to={to}
         onClick={onClick}
-        end={end}
       >
         {content}
       </ItemContent>

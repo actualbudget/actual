@@ -23,7 +23,6 @@ type ButtonLinkProps = Omit<ComponentProps<typeof Button>, 'variant'> & {
   buttonVariant?: ComponentProps<typeof Button>['variant'];
   to?: string;
   activeStyle?: CSSProperties;
-  end?: boolean;
 };
 
 type InternalLinkProps = {
@@ -32,7 +31,6 @@ type InternalLinkProps = {
   activeStyle?: CSSProperties;
   children?: ReactNode;
   isDisabled?: boolean;
-  end?: boolean;
 };
 
 const externalLinkColors = {
@@ -90,16 +88,10 @@ const TextLink = ({ style, onClick, children, ...props }: TextLinkProps) => {
   );
 };
 
-const ButtonLink = ({
-  to,
-  style,
-  activeStyle,
-  end = true,
-  ...props
-}: ButtonLinkProps) => {
+const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
   const navigate = useNavigate();
   const path = to ?? '';
-  const match = useMatch({ path, end });
+  const match = useMatch({ path, end: false });
   return (
     <Button
       className={() =>
@@ -127,10 +119,9 @@ const InternalLink = ({
   activeStyle,
   children,
   isDisabled,
-  end = true,
 }: InternalLinkProps) => {
   const path = to ?? '';
-  const match = useMatch({ path, end });
+  const match = useMatch({ path, end: false });
 
   return (
     <NavLink
