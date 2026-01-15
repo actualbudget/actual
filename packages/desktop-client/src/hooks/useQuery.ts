@@ -1,4 +1,10 @@
-import { useState, useMemo, useEffect, useRef, type DependencyList } from 'react';
+import {
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  type DependencyList,
+} from 'react';
 
 import { type Query } from 'loot-core/shared/query';
 
