@@ -1,4 +1,3 @@
-/* oxlint-disable react-hooks/rules-of-hooks */
 import path from 'node:path';
 
 import {
@@ -18,7 +17,7 @@ type ElectronFixtures = {
 // Create the extended test with fixtures
 export const test = base.extend<ElectronFixtures>({
   // oxlint-disable-next-line no-empty-pattern
-  electronApp: async ({}, use, testInfo: TestInfo) => {
+  electronApp: async ({}, runFixture, testInfo: TestInfo) => {
     const uniqueTestId = testInfo.testId.replace(/[^\w-]/g, '-');
     const testDataDir = path.join('e2e/data/', uniqueTestId);
 
@@ -36,15 +35,15 @@ export const test = base.extend<ElectronFixtures>({
       },
     });
 
-    await use(app);
+    await runFixture(app);
 
     // Cleanup after tests
     await app.close();
     await remove(testDataDir);
   },
 
-  electronPage: async ({ electronApp }, use) => {
+  electronPage: async ({ electronApp }, runFixture) => {
     const page = await electronApp.firstWindow();
-    await use(page);
+    await runFixture(page);
   },
 });
