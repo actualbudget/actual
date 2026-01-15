@@ -13,10 +13,15 @@ export function useEffectAfterMount(
   deps?: DependencyList | undefined,
 ) {
   const isFirstRender = useRef(true);
+  const effectRef = useRef(effect);
+
+  useEffect(() => {
+    effectRef.current = effect;
+  }, [effect]);
 
   useEffect(() => {
     if (!isFirstRender.current) {
-      return effect();
+      return effectRef.current();
     }
     isFirstRender.current = false;
   }, deps);

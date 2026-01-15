@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, type DependencyList } from 'react';
+import { useState, useMemo, useEffect, useRef, type DependencyList } from 'react';
 
 import { type Query } from 'loot-core/shared/query';
 
@@ -16,8 +16,13 @@ export function useQuery<Response = unknown>(
 ): UseQueryResult<Response> {
   // Memo the resulting query. We don't care if the function
   // that creates the query changes, only the resulting query.
-  // Safe to ignore the eslint warning here.
-  const query = useMemo(makeQuery, dependencies);
+  const makeQueryRef = useRef(makeQuery);
+
+  useEffect(() => {
+    makeQueryRef.current = makeQuery;
+  }, [makeQuery]);
+
+  const query = useMemo(() => makeQueryRef.current(), dependencies);
 
   const [data, setData] = useState<ReadonlyArray<Response> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
