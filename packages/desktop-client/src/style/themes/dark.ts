@@ -217,3 +217,5 @@ export const tooltipBackground = colorPalette.navy800;
 export const tooltipBorder = colorPalette.navy700;
 
 export const calendarCellBackground = colorPalette.navy900;
+
+export const overlayBackground = 'rgba(0, 0, 0, 0.3)';
