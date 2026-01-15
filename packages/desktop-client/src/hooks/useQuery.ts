@@ -28,7 +28,10 @@ export function useQuery<Response = unknown>(
     makeQueryRef.current = makeQuery;
   }, [makeQuery]);
 
-  const query = useMemo(() => makeQueryRef.current(), dependencies);
+  const query = useMemo(
+    () => makeQueryRef.current(),
+    [...dependencies],
+  );
 
   const [data, setData] = useState<ReadonlyArray<Response> | null>(null);
   const [isLoading, setIsLoading] = useState(true);

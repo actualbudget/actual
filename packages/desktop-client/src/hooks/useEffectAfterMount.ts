@@ -24,5 +24,5 @@ export function useEffectAfterMount(
       return effectRef.current();
     }
     isFirstRender.current = false;
-  }, deps);
+  }, [...(deps ?? [])]);
 }
