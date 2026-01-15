@@ -3,6 +3,7 @@ import React, {
   useState,
   useEffect,
   useMemo,
+  useRef,
   type SetStateAction,
   type CSSProperties,
 } from 'react';
@@ -122,6 +123,11 @@ function Notification({
 
   const [loading, setLoading] = useState(false);
   const [overlayLoading, setOverlayLoading] = useState(false);
+  const onRemoveRef = useRef(onRemove);
+
+  useEffect(() => {
+    onRemoveRef.current = onRemove;
+  }, [onRemove]);
 
   useEffect(() => {
     if (type === 'error' && internal) {
@@ -129,16 +135,19 @@ function Notification({
     }
 
     if (!sticky) {
-      setTimeout(onRemove, timeout || 6500);
+      const timeoutId = setTimeout(() => {
+        onRemoveRef.current();
+      }, timeout || 6500);
+      return () => clearTimeout(timeoutId);
     }
-  }, []);
+  }, [internal, sticky, timeout, type]);
 
   const positive = type === 'message';
   const error = type === 'error';
 
   const processedMessage = useMemo(
     () => compileMessage(message, messageActions, setOverlayLoading, onRemove),
-    [message, messageActions],
+    [message, messageActions, onRemove, setOverlayLoading],
   );
 
   const { isNarrowWidth } = useResponsive();

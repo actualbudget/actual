@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -90,12 +90,17 @@ export function Modals() {
   const dispatch = useDispatch();
   const { modalStack } = useModalState();
   const [budgetId] = useMetadataPref('id');
+  const modalStackRef = useRef(modalStack);
 
   useEffect(() => {
-    if (modalStack.length > 0) {
+    modalStackRef.current = modalStack;
+  }, [modalStack]);
+
+  useEffect(() => {
+    if (modalStackRef.current.length > 0) {
       dispatch(closeModal());
     }
-  }, [location]);
+  }, [dispatch, location]);
 
   const modals = modalStack
     .map((modal, idx) => {
