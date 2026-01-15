@@ -28,7 +28,8 @@ export function useQuery<Response = unknown>(
     makeQueryRef.current = makeQuery;
   }, [makeQuery]);
 
-  const query = useMemo(() => makeQueryRef.current(), [...dependencies]);
+  // oxlint-disable-next-line react-hooks/exhaustive-deps -- caller owns deps
+  const query = useMemo(() => makeQueryRef.current(), dependencies);
 
   const [data, setData] = useState<ReadonlyArray<Response> | null>(null);
   const [isLoading, setIsLoading] = useState(true);

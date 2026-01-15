@@ -19,10 +19,11 @@ export function useEffectAfterMount(
     effectRef.current = effect;
   }, [effect]);
 
+  // oxlint-disable-next-line react-hooks/exhaustive-deps -- caller owns deps
   useEffect(() => {
     if (!isFirstRender.current) {
       return effectRef.current();
     }
     isFirstRender.current = false;
-  }, [...(deps ?? [])]);
+  }, deps);
 }
