@@ -3,7 +3,7 @@ issue_enrichment:
     enabled: false
 reviews:
   request_changes_workflow: true
-  review_status: true
+  review_status: false
   high_level_summary: false
   finishing_touches:
     docstrings:
