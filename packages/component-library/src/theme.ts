@@ -202,4 +202,5 @@ export const theme = {
   tooltipBackground: 'var(--color-tooltipBackground)',
   tooltipBorder: 'var(--color-tooltipBorder)',
   calendarCellBackground: 'var(--color-calendarCellBackground)',
+  overlayBackground: 'var(--color-overlayBackground)',
 };
