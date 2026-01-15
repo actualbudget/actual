@@ -2,15 +2,18 @@
 import React from 'react';
 
 import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 
 import { type CategoryGroupEntity } from 'loot-core/types/models';
 
+import { CURRENCY_COLUMN_WIDTH } from './constants';
 import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';
 
 import { useBudgetComponents } from '.';
 
 import { Row } from '@desktop-client/components/table';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type IncomeGroupProps = {
   group: CategoryGroupEntity;
@@ -32,6 +35,11 @@ export function IncomeGroup({
   onShowNewCategory,
 }: IncomeGroupProps) {
   const { IncomeGroupComponent: MonthComponent } = useBudgetComponents();
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  const showCurrencyColumn = enableMultiCurrencyOnBudget === 'true';
+
   return (
     <Row
       collapsed
@@ -53,6 +61,17 @@ export function IncomeGroup({
         onToggleCollapse={onToggleCollapse}
         onShowNewCategory={onShowNewCategory}
       />
+      {showCurrencyColumn && (
+        <View
+          style={{
+            width: CURRENCY_COLUMN_WIDTH,
+            flexShrink: 0,
+            borderTopWidth: 1,
+            borderBottomWidth: 1,
+            borderColor: theme.tableBorder,
+          }}
+        />
+      )}
       <RenderMonths>
         {({ month }) => <MonthComponent month={month} group={group} />}
       </RenderMonths>

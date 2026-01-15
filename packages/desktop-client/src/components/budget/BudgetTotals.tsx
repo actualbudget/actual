@@ -14,12 +14,14 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { CURRENCY_COLUMN_WIDTH } from './constants';
 import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';
 
 import { useBudgetComponents } from '.';
 
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type BudgetTotalsProps = {
   toggleHiddenCategories: () => void;
@@ -38,6 +40,11 @@ export const BudgetTotals = memo(function BudgetTotals({
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
+
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  const showCurrencyColumn = enableMultiCurrencyOnBudget === 'true';
 
   const cycleExpandedState = () => {
     const nextState = (categoryExpandedState + 1) % 3;
@@ -179,6 +186,19 @@ export const BudgetTotals = memo(function BudgetTotals({
           />
         </Popover>
       </View>
+      {showCurrencyColumn && (
+        <View
+          style={{
+            width: CURRENCY_COLUMN_WIDTH,
+            color: theme.pageTextLight,
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <Trans>Currency</Trans>
+        </View>
+      )}
       <RenderMonths>
         <MonthComponent />
       </RenderMonths>

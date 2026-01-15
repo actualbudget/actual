@@ -3,10 +3,12 @@ import React, { memo, type ComponentProps } from 'react';
 
 import { View } from '@actual-app/components/view';
 
+import { CURRENCY_COLUMN_WIDTH } from './constants';
 import { MonthPicker } from './MonthPicker';
 import { getScrollbarWidth } from './util';
 
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type BudgetPageHeaderProps = {
   startMonth: string;
@@ -19,13 +21,22 @@ export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
   ({ startMonth, onMonthSelect, numMonths, monthBounds }) => {
     const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
     const categoryExpandedState = categoryExpandedStatePref ?? 0;
+    const [enableMultiCurrencyOnBudget] = useSyncedPref(
+      'enableMultiCurrencyOnBudget',
+    );
+    const currencyColumnWidth =
+      enableMultiCurrencyOnBudget === 'true' ? CURRENCY_COLUMN_WIDTH : 0;
     const offsetMultipleMonths = numMonths === 1 ? 4 : 0;
 
     return (
       <View
         style={{
           marginLeft:
-            200 + 100 * categoryExpandedState + 5 - offsetMultipleMonths,
+            200 +
+            100 * categoryExpandedState +
+            currencyColumnWidth +
+            5 -
+            offsetMultipleMonths,
           flexShrink: 0,
         }}
       >

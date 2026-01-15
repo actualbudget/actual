@@ -12,7 +12,9 @@ import { uncategorizedTransactions } from '@desktop-client/queries';
 
 type BudgetType<SheetName extends SheetNames> = Record<
   string,
-  SheetFields<SheetName> | ((id: string) => SheetFields<SheetName>)
+  | SheetFields<SheetName>
+  | ((id: string) => SheetFields<SheetName>)
+  | ((id: string) => string) // For dynamic fields like per-currency bindings
 >;
 
 const accountParametrizedField = parametrizedField<'account'>();
@@ -200,6 +202,22 @@ export const envelopeBudget = {
   catCarryover: envelopeParametrizedField('carryover'),
   catGoal: envelopeParametrizedField('goal'),
   catLongGoal: envelopeParametrizedField('long-goal'),
+
+  // Per-currency bindings for multi-currency support
+  toBudgetByCurrency: (currencyCode: string) =>
+    `to-budget-${currencyCode}` as const,
+  totalBudgetedByCurrency: (currencyCode: string) =>
+    `total-budgeted-${currencyCode}` as const,
+  availableFundsByCurrency: (currencyCode: string) =>
+    `available-funds-${currencyCode}` as const,
+  lastMonthOverspentByCurrency: (currencyCode: string) =>
+    `last-month-overspent-${currencyCode}` as const,
+  forNextMonthByCurrency: (currencyCode: string) =>
+    `buffered-${currencyCode}` as const,
+  totalSpentByCurrency: (currencyCode: string) =>
+    `total-spent-${currencyCode}` as const,
+  totalBalanceByCurrency: (currencyCode: string) =>
+    `total-leftover-${currencyCode}` as const,
 } satisfies BudgetType<'envelope-budget'>;
 
 export const trackingBudget = {
@@ -224,4 +242,14 @@ export const trackingBudget = {
   catCarryover: trackingParametrizedField('carryover'),
   catGoal: trackingParametrizedField('goal'),
   catLongGoal: trackingParametrizedField('long-goal'),
+
+  // Per-currency bindings for multi-currency support
+  totalBudgetedByCurrency: (currencyCode: string) =>
+    `total-budgeted-${currencyCode}` as const,
+  totalSavedByCurrency: (currencyCode: string) =>
+    `total-saved-${currencyCode}` as const,
+  totalSpentByCurrency: (currencyCode: string) =>
+    `total-spent-${currencyCode}` as const,
+  totalLeftoverByCurrency: (currencyCode: string) =>
+    `total-leftover-${currencyCode}` as const,
 } satisfies BudgetType<'tracking-budget'>;

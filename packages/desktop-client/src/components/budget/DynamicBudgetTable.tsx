@@ -10,8 +10,10 @@ import * as monthUtils from 'loot-core/shared/months';
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import { BudgetPageHeader } from './BudgetPageHeader';
 import { BudgetTable } from './BudgetTable';
+import { CURRENCY_COLUMN_WIDTH } from './constants';
 
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 function getNumPossibleMonths(width: number, categoryWidth: number) {
   const estimatedTableWidth = width - categoryWidth;
@@ -50,13 +52,19 @@ const DynamicBudgetTable = ({
   const { setDisplayMax } = useBudgetMonthCount();
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  const currencyColumnWidth =
+    enableMultiCurrencyOnBudget === 'true' ? CURRENCY_COLUMN_WIDTH : 0;
 
   const numPossible = getNumPossibleMonths(
     width,
-    200 + 100 * categoryExpandedState,
+    200 + 100 * categoryExpandedState + currencyColumnWidth,
   );
   const numMonths = Math.min(numPossible, maxMonths);
-  const maxWidth = 200 + 100 * categoryExpandedState + 500 * numMonths;
+  const maxWidth =
+    200 + 100 * categoryExpandedState + currencyColumnWidth + 500 * numMonths;
 
   useEffect(() => {
     setDisplayMax(numPossible);

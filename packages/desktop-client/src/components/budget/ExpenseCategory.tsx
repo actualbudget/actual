@@ -9,6 +9,7 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
+import { CategoryCurrencyCell } from './CategoryCurrencyCell';
 import { RenderMonths } from './RenderMonths';
 import { SidebarCategory } from './SidebarCategory';
 
@@ -24,6 +25,7 @@ import {
 } from '@desktop-client/components/sort';
 import { Row } from '@desktop-client/components/table';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type ExpenseCategoryProps = {
   cat: CategoryEntity;
@@ -76,6 +78,11 @@ export function ExpenseCategory({
 
   const { ExpenseCategoryComponent: MonthComponent } = useBudgetComponents();
 
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  const showCurrencyColumn = enableMultiCurrencyOnBudget === 'true';
+
   return (
     <Row
       innerRef={dropRef}
@@ -103,6 +110,10 @@ export function ExpenseCategory({
           onSave={onSave}
           onDelete={onDelete}
         />
+
+        {showCurrencyColumn && (
+          <CategoryCurrencyCell category={cat} onSave={onSave} />
+        )}
 
         <RenderMonths>
           {({ month }) => (

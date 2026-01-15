@@ -12,6 +12,28 @@ import * as budgetActions from './actions';
 import * as envelopeBudget from './envelope';
 import * as report from './report';
 
+export function getOnBudgetCurrencies(defaultCurrencyCode: string): string[] {
+  const rows = db.runQuery<{ currency_code: string }>(
+    `SELECT DISTINCT COALESCE(currency_code, ?) as currency_code
+     FROM accounts
+     WHERE offbudget = 0 AND closed = 0 AND tombstone = 0`,
+    [defaultCurrencyCode],
+    true,
+  );
+
+  const currencies = new Set<string>();
+  currencies.add(defaultCurrencyCode);
+  for (const row of rows) {
+    currencies.add(row.currency_code);
+  }
+
+  // Return default first, then others sorted
+  const others = Array.from(currencies)
+    .filter(c => c !== defaultCurrencyCode)
+    .sort();
+  return [defaultCurrencyCode, ...others];
+}
+
 export function getBudgetType() {
   const meta = sheet.get().meta();
   return meta.budgetType || 'envelope';
@@ -234,6 +256,27 @@ export async function createBudget(months) {
   );
   const categories = groups.flatMap(group => group.categories);
 
+  // Fetch multi-currency preferences
+  const defaultCurrencyPref = db.runQuery<{ value: string }>(
+    'SELECT value FROM preferences WHERE id = ?',
+    ['defaultCurrencyCode'],
+    true,
+  )[0];
+  const enableMultiCurrencyOnBudgetPref = db.runQuery<{ value: string }>(
+    'SELECT value FROM preferences WHERE id = ?',
+    ['enableMultiCurrencyOnBudget'],
+    true,
+  )[0];
+  const defaultCurrencyCode = defaultCurrencyPref?.value || null;
+  const enableMultiCurrencyOnBudget =
+    enableMultiCurrencyOnBudgetPref?.value === 'true';
+
+  // Get on-budget currencies if multi-currency is enabled
+  const currencies =
+    enableMultiCurrencyOnBudget && defaultCurrencyCode
+      ? getOnBudgetCurrencies(defaultCurrencyCode)
+      : [];
+
   sheet.startTransaction();
   const meta = sheet.get().meta();
   meta.createdMonths = meta.createdMonths || new Set();
@@ -268,9 +311,18 @@ export async function createBudget(months) {
           categories,
           prevSheetName,
           sheetName,
+          start,
+          end,
+          currencies,
+          defaultCurrencyCode,
         );
       } else {
-        report.createSummary(groups, sheetName);
+        report.createSummary(
+          groups,
+          sheetName,
+          currencies,
+          defaultCurrencyCode,
+        );
       }
 
       meta.createdMonths.add(month);

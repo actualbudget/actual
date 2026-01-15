@@ -344,10 +344,9 @@ class ExchangeRateService {
       ['defaultCurrencyCode'],
     );
 
+    // If no default currency is set, return empty array (multi-currency not enabled)
     if (!defaultCurrency?.value) {
-      throw new Error(
-        'defaultCurrencyCode preference must be set to use multi-currency features',
-      );
+      return [];
     }
 
     const defaultCurrencyCode = defaultCurrency.value;

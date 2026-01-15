@@ -149,6 +149,7 @@ handlers['exchange-rates-fetch'] = async function ({
       ['defaultCurrencyCode'],
     );
 
+    // If no default currency and no explicit fromCurrency, skip fetching
     if (!fromCurrency && !defaultCurrency?.value) {
       // No base currency configured, nothing to fetch
       return { success: true };

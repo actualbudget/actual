@@ -25,8 +25,10 @@ import {
   ModalTitle,
 } from '@desktop-client/components/common/Modal';
 import { Notes } from '@desktop-client/components/Notes';
+import { CurrencySelect } from '@desktop-client/components/select/CurrencySelect';
 import { useCategory } from '@desktop-client/hooks/useCategory';
 import { useCategoryGroup } from '@desktop-client/hooks/useCategoryGroup';
+import { useMultiCurrency } from '@desktop-client/hooks/useMultiCurrency';
 import { useNotes } from '@desktop-client/hooks/useNotes';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
@@ -47,6 +49,9 @@ export function CategoryMenuModal({
   const category = useCategory(categoryId);
   const categoryGroup = useCategoryGroup(category?.group);
   const originalNotes = useNotes(category.id);
+  const { isMultiCurrencyEnabled } = useMultiCurrency();
+
+  const [currency, setCurrency] = useState(category?.currency || '');
 
   const onRename = newName => {
     if (newName && newName !== category.name) {
@@ -67,6 +72,14 @@ export function CategoryMenuModal({
 
   const _onDelete = () => {
     onDelete?.(category.id);
+  };
+
+  const onCurrencyChange = (newCurrency: string) => {
+    setCurrency(newCurrency);
+    onSave?.({
+      ...category,
+      currency: newCurrency || null,
+    });
   };
 
   const buttonStyle: CSSProperties = {
@@ -111,6 +124,42 @@ export function CategoryMenuModal({
               flexDirection: 'column',
             }}
           >
+            {isMultiCurrencyEnabled && (
+              <View
+                style={{
+                  marginBottom: 10,
+                  flexDirection: 'column',
+                  gap: 5,
+                }}
+              >
+                <View
+                  style={{
+                    ...styles.smallText,
+                    color: theme.pageTextSubdued,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {t('Primary Currency')}
+                </View>
+                <CurrencySelect
+                  value={currency}
+                  onChange={onCurrencyChange}
+                  includeNoneOption
+                  style={{ width: '100%' }}
+                />
+                <View
+                  style={{
+                    ...styles.verySmallText,
+                    color: theme.pageTextSubdued,
+                    fontStyle: 'italic',
+                  }}
+                >
+                  {t(
+                    'Default currency for this category. Leave empty to use base currency.',
+                  )}
+                </View>
+              </View>
+            )}
             <View
               style={{
                 overflowY: 'auto',

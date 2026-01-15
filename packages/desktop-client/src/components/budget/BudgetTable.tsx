@@ -13,7 +13,8 @@ import {
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
-import { MonthsProvider, type MonthBounds } from './MonthsContext';
+import { CURRENCY_COLUMN_WIDTH } from './constants';
+import { type MonthBounds, MonthsProvider } from './MonthsContext';
 import {
   findSortDown,
   findSortUp,
@@ -26,6 +27,7 @@ import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type BudgetTableProps = {
   type: string;
@@ -79,6 +81,12 @@ export function BudgetTable(props: BudgetTableProps) {
   );
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  const showCurrencyColumn = enableMultiCurrencyOnBudget === 'true';
+  const currencyColumnWidth = showCurrencyColumn ? CURRENCY_COLUMN_WIDTH : 0;
+
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
   );
@@ -245,7 +253,11 @@ export function BudgetTable(props: BudgetTableProps) {
           paddingRight: 5 + getScrollbarWidth(),
         }}
       >
-        <View style={{ width: 200 + 100 * categoryExpandedState }} />
+        <View
+          style={{
+            width: 200 + 100 * categoryExpandedState + currencyColumnWidth,
+          }}
+        />
         <MonthsProvider
           startMonth={prewarmStartMonth}
           numMonths={numMonths}

@@ -1,8 +1,12 @@
 // @ts-strict-ignore
 import React, { type ComponentProps } from 'react';
 
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
+
 import { type CategoryEntity } from 'loot-core/types/models';
 
+import { CURRENCY_COLUMN_WIDTH } from './constants';
 import { RenderMonths } from './RenderMonths';
 import { SidebarCategory } from './SidebarCategory';
 
@@ -17,6 +21,7 @@ import {
 } from '@desktop-client/components/sort';
 import { Row } from '@desktop-client/components/table';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type IncomeCategoryProps = {
   cat: CategoryEntity;
@@ -61,6 +66,11 @@ export function IncomeCategory({
 
   const { IncomeCategoryComponent: MonthComponent } = useBudgetComponents();
 
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  const showCurrencyColumn = enableMultiCurrencyOnBudget === 'true';
+
   return (
     <Row
       innerRef={dropRef}
@@ -84,6 +94,17 @@ export function IncomeCategory({
         onSave={onSave}
         onDelete={onDelete}
       />
+      {showCurrencyColumn && (
+        <View
+          style={{
+            width: CURRENCY_COLUMN_WIDTH,
+            flexShrink: 0,
+            borderTopWidth: 1,
+            borderBottomWidth: isLast ? 0 : 1,
+            borderColor: theme.tableBorder,
+          }}
+        />
+      )}
       <RenderMonths>
         {({ month }) => (
           <MonthComponent

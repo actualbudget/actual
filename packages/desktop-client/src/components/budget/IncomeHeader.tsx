@@ -4,11 +4,13 @@ import { Trans } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 
+import { CURRENCY_COLUMN_WIDTH } from './constants';
 import { RenderMonths } from './RenderMonths';
 
 import { useBudgetComponents } from '.';
 
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type IncomeHeaderProps = {
   onShowNewGroup: () => void;
@@ -17,12 +19,17 @@ type IncomeHeaderProps = {
 export function IncomeHeader({ onShowNewGroup }: IncomeHeaderProps) {
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  const currencyColumnWidth =
+    enableMultiCurrencyOnBudget === 'true' ? CURRENCY_COLUMN_WIDTH : 0;
   const { IncomeHeaderComponent: MonthComponent } = useBudgetComponents();
   return (
     <View style={{ flexDirection: 'row', flex: 1 }}>
       <View
         style={{
-          width: 200 + 100 * categoryExpandedState,
+          width: 200 + 100 * categoryExpandedState + currencyColumnWidth,
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
         }}

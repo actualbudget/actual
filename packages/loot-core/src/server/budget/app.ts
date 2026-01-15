@@ -303,10 +303,13 @@ async function updateCategory(
 ): Promise<{ error: { type: 'category-exists' } } | object> {
   try {
     await db.updateCategory(
-      categoryModel.toDb({
-        ...category,
-        name: category.name.trim(),
-      }),
+      categoryModel.toDb(
+        {
+          ...category,
+          name: category.name.trim(),
+        },
+        { update: true },
+      ),
     );
   } catch (e) {
     if (

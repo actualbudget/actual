@@ -1,6 +1,6 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useState, useRef, useLayoutEffect, useContext } from 'react';
 
-import { useSheetName } from './useSheetName';
+import { SheetNameContext, useSheetName } from './useSheetName';
 import { useSpreadsheet } from './useSpreadsheet';
 
 import {
@@ -77,6 +77,41 @@ export function useSheetValue<
   }, [spreadsheet, sheetName, memoizedBinding]);
 
   return result.value;
+}
+
+/**
+ * A less strictly typed version of useSheetValue that accepts any string field name.
+ * Use this for dynamic field names like per-currency bindings that aren't in the
+ * static SheetFields type.
+ */
+export function useDynamicSheetValue(
+  fieldName: string,
+  initialValue: number = 0,
+): number | null {
+  const spreadsheet = useSpreadsheet();
+  const sheetName = useContext(SheetNameContext) || '__global';
+  const [value, setValue] = useState<number | null>(initialValue);
+
+  useLayoutEffect(() => {
+    let isMounted = true;
+
+    const binding = { name: fieldName, value: initialValue, query: undefined };
+    const unbind = spreadsheet.bind(sheetName, binding, newResult => {
+      if (!isMounted) {
+        return;
+      }
+      if (typeof newResult.value === 'number') {
+        setValue(newResult.value);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      unbind();
+    };
+  }, [spreadsheet, sheetName, fieldName, initialValue]);
+
+  return value;
 }
 
 type MemoKey<

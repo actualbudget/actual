@@ -88,11 +88,17 @@ export function createCategoryGroup(group, sheetName) {
   });
 }
 
-export function createSummary(groups, sheetName) {
+export function createSummary(
+  groups,
+  sheetName,
+  currencies: string[] = [],
+  defaultCurrencyCode: string | null = null,
+) {
   const incomeGroup = groups.filter(group => group.is_income)[0];
   const expenseGroups = groups.filter(
     group => !group.is_income && !group.hidden,
   );
+  const categories = groups.flatMap(group => group.categories || []);
 
   sheet.get().createDynamic(sheetName, 'total-budgeted', {
     initialValue: 0,
@@ -140,6 +146,50 @@ export function createSummary(groups, sheetName) {
       return safeNumber(income - -spent);
     },
   });
+
+  // Per-currency budget totals (only when multi-currency is enabled)
+  if (currencies.length > 0 && defaultCurrencyCode) {
+    const expenseCategories = categories.filter(cat => !cat.is_income);
+
+    for (const currencyCode of currencies) {
+      const isDefault = currencyCode === defaultCurrencyCode;
+
+      // Categories for this currency (null/undefined currency = default)
+      const currencyCategories = expenseCategories.filter(cat =>
+        isDefault
+          ? !cat.currency || cat.currency === defaultCurrencyCode
+          : cat.currency === currencyCode,
+      );
+
+      // Total budgeted for this currency
+      sheet.get().createDynamic(sheetName, `total-budgeted-${currencyCode}`, {
+        initialValue: 0,
+        dependencies: currencyCategories.map(cat => `budget-${cat.id}`),
+        run: sumAmounts,
+      });
+
+      // Total spent for this currency
+      sheet.get().createDynamic(sheetName, `total-spent-${currencyCode}`, {
+        initialValue: 0,
+        dependencies: currencyCategories.map(cat => `sum-amount-${cat.id}`),
+        run: sumAmounts,
+      });
+
+      // Total saved for this currency
+      sheet.get().createDynamic(sheetName, `total-saved-${currencyCode}`, {
+        initialValue: 0,
+        dependencies: ['total-budget-income', `total-budgeted-${currencyCode}`],
+        run: (income, budgeted) => (isDefault ? income - budgeted : -budgeted),
+      });
+
+      // Total leftover for this currency
+      sheet.get().createDynamic(sheetName, `total-leftover-${currencyCode}`, {
+        initialValue: 0,
+        dependencies: currencyCategories.map(cat => `leftover-${cat.id}`),
+        run: sumAmounts,
+      });
+    }
+  }
 }
 
 export function handleCategoryChange(months, oldValue, newValue) {

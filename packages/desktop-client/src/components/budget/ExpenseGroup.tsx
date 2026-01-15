@@ -9,6 +9,7 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
+import { CURRENCY_COLUMN_WIDTH } from './constants';
 import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';
 
@@ -24,6 +25,7 @@ import {
 } from '@desktop-client/components/sort';
 import { Row, ROW_HEIGHT } from '@desktop-client/components/table';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type ExpenseGroupProps = {
   group: ComponentProps<typeof SidebarGroup>['group'];
@@ -89,6 +91,11 @@ export function ExpenseGroup({
 
   const { ExpenseGroupComponent: MonthComponent } = useBudgetComponents();
 
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  const showCurrencyColumn = enableMultiCurrencyOnBudget === 'true';
+
   return (
     <Row
       collapsed
@@ -142,6 +149,9 @@ export function ExpenseGroup({
           onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
           onShowNewCategory={onShowNewCategory}
         />
+        {showCurrencyColumn && (
+          <View style={{ width: CURRENCY_COLUMN_WIDTH, flexShrink: 0 }} />
+        )}
         <RenderMonths>
           {({ month }) => <MonthComponent month={month} group={group} />}
         </RenderMonths>

@@ -18,7 +18,7 @@ function unresolveName(name) {
   return { sheet: null, name };
 }
 
-const SheetNameContext = createContext<string | undefined>(undefined);
+export const SheetNameContext = createContext<string | undefined>(undefined);
 
 type SheetNameProviderProps = PropsWithChildren<{ name: string }>;
 

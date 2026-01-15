@@ -10,6 +10,7 @@ import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { getCurrency } from 'loot-core/shared/currencies';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
@@ -20,6 +21,8 @@ import { SidebarCategoryButtons } from './SidebarCategoryButtons';
 import { InputCell } from '@desktop-client/components/table';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useMultiCurrency } from '@desktop-client/hooks/useMultiCurrency';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type SidebarCategoryProps = {
   innerRef: Ref<HTMLDivElement>;
@@ -63,6 +66,15 @@ export function SidebarCategory({
   const { t } = useTranslation();
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
+  const { isMultiCurrencyEnabled } = useMultiCurrency();
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  // Hide badge when currency column is shown (on desktop with multi-currency on budget)
+  const showCurrencyBadge =
+    isMultiCurrencyEnabled &&
+    category.currency &&
+    enableMultiCurrencyOnBudget !== 'true';
 
   const temporary = category.id === 'new';
   const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
@@ -84,6 +96,18 @@ export function SidebarCategory({
       onContextMenu={handleContextMenu}
     >
       <TextOneLine data-testid="category-name">{category.name}</TextOneLine>
+      {showCurrencyBadge && (
+        <View
+          style={{
+            marginLeft: 5,
+            fontSize: 11,
+            color: theme.pageTextSubdued,
+            fontWeight: 500,
+          }}
+        >
+          {getCurrency(category.currency).code}
+        </View>
+      )}
       <View style={{ flexShrink: 0, marginLeft: 5 }}>
         <Button
           variant="bare"

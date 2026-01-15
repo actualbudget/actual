@@ -92,14 +92,28 @@ export async function batchUpdateTransactions({
     'SELECT * FROM accounts WHERE tombstone = 0',
   );
 
-  // Get default currency for base_amount calculations (optional for backwards compatibility)
+  // Get multi-currency settings for base_amount calculations
+  const multiCurrencyEnabled = await db.first<{ value: string }>(
+    'SELECT value FROM preferences WHERE id = ?',
+    ['enableMultiCurrency'],
+  );
+
   const defaultCurrency = await db.first<{ value: string }>(
     'SELECT value FROM preferences WHERE id = ?',
     ['defaultCurrencyCode'],
   );
 
+  // Only enforce defaultCurrencyCode when multi-currency is enabled
+  if (multiCurrencyEnabled?.value === 'true' && !defaultCurrency?.value) {
+    throw new Error(
+      'defaultCurrencyCode preference must be set when multi-currency is enabled',
+    );
+  }
+
   // base_amount calculations are only needed if multi-currency is configured
-  const baseCurrency = defaultCurrency?.value;
+  // When multi-currency is disabled, baseCurrency will be undefined and base_amount logic is skipped
+  const baseCurrency =
+    multiCurrencyEnabled?.value === 'true' ? defaultCurrency?.value : undefined;
 
   // Build account currency map for efficient lookups
   const accountCurrencyMap = new Map<string, string | null>();

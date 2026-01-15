@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
@@ -17,6 +18,9 @@ import {
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { useFormat } from '@desktop-client/hooks/useFormat';
+import { useOnBudgetCurrencies } from '@desktop-client/hooks/useOnBudgetCurrencies';
+import { useDynamicSheetValue } from '@desktop-client/hooks/useSheetValue';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type ToBudgetAmountProps = {
@@ -28,6 +32,60 @@ type ToBudgetAmountProps = {
   isTotalsListTooltipDisabled?: boolean;
 };
 
+type ToBudgetCurrencyAmountProps = {
+  currencyCode: string;
+  onClick: () => void;
+  onContextMenu?: MouseEventHandler;
+  amountStyle?: CSSProperties;
+};
+
+function ToBudgetCurrencyAmount({
+  currencyCode,
+  onClick,
+  onContextMenu,
+  amountStyle,
+}: ToBudgetCurrencyAmountProps) {
+  const sheetValue = useDynamicSheetValue(
+    envelopeBudget.toBudgetByCurrency(currencyCode),
+    0,
+  );
+  const format = useFormat();
+  const num = typeof sheetValue === 'number' ? sheetValue : 0;
+  const isNegative = num < 0;
+
+  return (
+    <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
+      <Text style={{ fontSize: 11, color: theme.pageTextSubdued }}>
+        {currencyCode}:
+      </Text>
+      <PrivacyFilter>
+        <Block
+          onClick={onClick}
+          onContextMenu={onContextMenu}
+          className={css([
+            styles.largeText,
+            {
+              fontWeight: 400,
+              userSelect: 'none',
+              cursor: 'pointer',
+              color: isNegative ? theme.errorText : theme.pageTextPositive,
+              borderBottom: '1px solid transparent',
+              ':hover': {
+                borderColor: isNegative
+                  ? theme.errorBorder
+                  : theme.pageTextPositive,
+              },
+            },
+            amountStyle,
+          ])}
+        >
+          {format(num, 'financial', currencyCode)}
+        </Block>
+      </PrivacyFilter>
+    </View>
+  );
+}
+
 export function ToBudgetAmount({
   prevMonthName,
   style,
@@ -37,6 +95,13 @@ export function ToBudgetAmount({
   onContextMenu,
 }: ToBudgetAmountProps) {
   const { t } = useTranslation();
+  const currencies = useOnBudgetCurrencies();
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  const isMultiCurrency =
+    enableMultiCurrencyOnBudget === 'true' && currencies.length > 1;
+
   const sheetName = useEnvelopeSheetName(envelopeBudget.toBudget);
   const sheetValue = useEnvelopeSheetValue({
     name: envelopeBudget.toBudget,
@@ -52,6 +117,25 @@ export function ToBudgetAmount({
   const num = availableValue ?? 0;
   const isNegative = num < 0;
   const isPositive = num > 0;
+
+  if (isMultiCurrency) {
+    return (
+      <View style={{ alignItems: 'center', ...styles.tnum, ...style }}>
+        <Block>{t('To Budget:')}</Block>
+        <View style={{ gap: 2, marginTop: 4 }}>
+          {currencies.map(currencyCode => (
+            <ToBudgetCurrencyAmount
+              key={currencyCode}
+              currencyCode={currencyCode}
+              onClick={onClick}
+              onContextMenu={onContextMenu}
+              amountStyle={amountStyle}
+            />
+          ))}
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={{ alignItems: 'center', ...style }}>
