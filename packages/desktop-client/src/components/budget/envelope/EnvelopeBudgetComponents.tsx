@@ -488,7 +488,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             border: 'none',
             background: 'transparent',
             padding: 0,
-            font: 'inherit',
           }}
         >
           <BalanceWithCarryover
@@ -609,7 +608,6 @@ export function IncomeCategoryMonth({
               border: 'none',
               background: 'transparent',
               padding: 0,
-              font: 'inherit',
               paddingRight: styles.monthRightPadding,
             }}
           >

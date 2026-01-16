@@ -454,7 +454,6 @@ export const CategoryMonth = memo(function CategoryMonth({
               border: 'none',
               background: 'transparent',
               padding: 0,
-              font: 'inherit',
             }}
           >
             <BalanceWithCarryover

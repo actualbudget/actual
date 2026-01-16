@@ -117,7 +117,7 @@ export function ReportCard({
             border: 'none',
             background: 'transparent',
             padding: 0,
-            font: 'inherit',
+            textAlign: 'left',
             ':hover': {
               cursor: 'pointer',
             },
