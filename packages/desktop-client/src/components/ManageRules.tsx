@@ -1,11 +1,11 @@
 // @ts-strict-ignore
 import React, {
-  useState,
-  useEffectEvent,
   useEffect,
+  useEffectEvent,
   useMemo,
-  type SetStateAction,
+  useState,
   type Dispatch,
+  type SetStateAction,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -19,11 +19,11 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { q } from 'loot-core/shared/query';
-import { mapField, friendlyOp } from 'loot-core/shared/rules';
+import { friendlyOp, mapField } from 'loot-core/shared/rules';
 import { describeSchedule } from 'loot-core/shared/schedules';
 import {
-  type RuleEntity,
   type NewRuleEntity,
+  type RuleEntity,
   type ScheduleEntity,
 } from 'loot-core/types/models';
 
@@ -38,8 +38,8 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import {
-  useSelected,
   SelectedProvider,
+  useSelected,
 } from '@desktop-client/hooks/useSelected';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { getPayees } from '@desktop-client/payees/payeesSlice';

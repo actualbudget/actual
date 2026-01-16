@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import React, { useCallback, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 import { Select } from '@actual-app/components/select';
@@ -18,15 +18,15 @@ import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import {
-  themeOptions,
-  useTheme,
-  usePreferredDarkTheme,
   darkThemeOptions,
+  themeOptions,
+  usePreferredDarkTheme,
+  useTheme,
 } from '@desktop-client/style';
 import {
-  type InstalledTheme,
   parseInstalledTheme,
   serializeInstalledTheme,
+  type InstalledTheme,
 } from '@desktop-client/style/customThemes';
 
 const INSTALL_NEW_VALUE = '__install_new__';

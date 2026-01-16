@@ -2,7 +2,7 @@
 import React, { useState, type CSSProperties } from 'react';
 
 import { theme } from '@actual-app/components/theme';
-import { PieChart, Pie, Cell, Sector, Tooltip } from 'recharts';
+import { Cell, Pie, PieChart, Sector, Tooltip } from 'recharts';
 
 import {
   type balanceTypeOpType,

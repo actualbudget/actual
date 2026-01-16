@@ -1,11 +1,11 @@
 import React, {
   memo,
-  useMemo,
   useCallback,
+  useMemo,
   type CSSProperties,
   type ReactNode,
 } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgArrowsSynchronize } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
@@ -30,10 +30,10 @@ import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCategory } from '@desktop-client/hooks/useCategory';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import {
-  useSelectedItems,
   useSelectedDispatch,
+  useSelectedItems,
 } from '@desktop-client/hooks/useSelected';
 
 function serializeTransaction(

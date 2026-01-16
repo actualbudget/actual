@@ -1,4 +1,4 @@
-import React, { type ComponentProps, useMemo } from 'react';
+import React, { useMemo, type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SvgDownAndRightArrow } from '@actual-app/components/icons/v2';
@@ -14,14 +14,14 @@ import { type CategoryEntity } from 'loot-core/types/models';
 import { ParsedDate } from './ParsedDate';
 import {
   applyFieldMappings,
-  type FieldMapping,
   formatDate,
-  type ImportTransaction,
   parseAmountFields,
+  type FieldMapping,
+  type ImportTransaction,
 } from './utils';
 
 import { Checkbox } from '@desktop-client/components/forms';
-import { Row, Field } from '@desktop-client/components/table';
+import { Field, Row } from '@desktop-client/components/table';
 
 type TransactionProps = {
   transaction: ImportTransaction;

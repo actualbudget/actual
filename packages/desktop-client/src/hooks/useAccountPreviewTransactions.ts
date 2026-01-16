@@ -2,9 +2,9 @@ import { useCallback, useMemo } from 'react';
 
 import { groupById, type IntegerAmount } from 'loot-core/shared/util';
 import {
-  type ScheduleEntity,
   type AccountEntity,
   type PayeeEntity,
+  type ScheduleEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
 

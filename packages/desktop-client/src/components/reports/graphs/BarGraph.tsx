@@ -6,15 +6,15 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
-  BarChart,
   Bar,
+  BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   ReferenceLine,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  LabelList,
 } from 'recharts';
 
 import {
@@ -33,7 +33,7 @@ import { getCustomTick } from '@desktop-client/components/reports/getCustomTick'
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 

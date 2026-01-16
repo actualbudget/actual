@@ -1,10 +1,10 @@
 import React, {
-  type ChangeEvent,
-  type KeyboardEvent,
   useEffect,
   useMemo,
   useRef,
   useState,
+  type ChangeEvent,
+  type KeyboardEvent,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 

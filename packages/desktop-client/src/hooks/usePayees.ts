@@ -7,7 +7,7 @@ import {
   getPayees,
   getPayeesById,
 } from '@desktop-client/payees/payeesSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 export function useCommonPayees() {
   const dispatch = useDispatch();

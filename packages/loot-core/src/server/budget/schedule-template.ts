@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
 import {
-  getNextDate,
-  getDateWithSkippedWeekend,
   extractScheduleConds,
+  getDateWithSkippedWeekend,
+  getNextDate,
 } from '../../shared/schedules';
 import { type CategoryEntity } from '../../types/models';
 import {

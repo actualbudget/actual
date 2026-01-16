@@ -1,13 +1,13 @@
 import {
-  type ReactNode,
+  useEffect,
+  useRef,
   useState,
   type ComponentProps,
   type ComponentType,
-  type SVGProps,
   type CSSProperties,
   type KeyboardEvent,
-  useEffect,
-  useRef,
+  type ReactNode,
+  type SVGProps,
 } from 'react';
 
 import { Button } from './Button';

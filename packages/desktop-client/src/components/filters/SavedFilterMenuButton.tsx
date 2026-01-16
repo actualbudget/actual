@@ -9,8 +9,8 @@ import { View } from '@actual-app/components/view';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import {
-  type TransactionFilterEntity,
   type RuleConditionEntity,
+  type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
 import { FilterMenu } from './FilterMenu';

@@ -1,17 +1,17 @@
 // @ts-strict-ignore
 import React, { type ComponentProps, type CSSProperties } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
-  AreaChart,
   Area,
+  AreaChart,
   CartesianGrid,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
 } from 'recharts';
 
 import { type SpendingEntity } from 'loot-core/types/models';

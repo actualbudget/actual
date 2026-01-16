@@ -1,9 +1,9 @@
 // oxlint-disable eslint/no-script-url
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import {
-  validateThemeCss,
   parseInstalledTheme,
+  validateThemeCss,
   type InstalledTheme,
 } from './customThemes';
 

@@ -1,9 +1,9 @@
 import React, {
-  useState,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
-  useCallback,
+  useState,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
@@ -21,7 +21,7 @@ import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { type TimeFrame, type NetWorthWidget } from 'loot-core/types/models';
+import { type NetWorthWidget, type TimeFrame } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';

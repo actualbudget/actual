@@ -21,7 +21,7 @@ import {
   useRechartsAnimation,
 } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 

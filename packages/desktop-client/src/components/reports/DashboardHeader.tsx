@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgPencil1 } from '@actual-app/components/icons/v2';
