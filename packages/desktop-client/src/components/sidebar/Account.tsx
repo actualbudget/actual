@@ -73,7 +73,7 @@ type AccountProps<FieldName extends SheetFields<'account'>> = {
   onDragChange?: OnDragChangeCallback<{ id: string }>;
   onDrop?: OnDropCallback;
   titleAccount?: boolean;
-  end?: boolean;
+  isExactPathMatch?: boolean;
 };
 
 export function Account<FieldName extends SheetFields<'account'>>({
@@ -90,7 +90,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
   onDragChange,
   onDrop,
   titleAccount,
-  end,
+  isExactPathMatch,
 }: AccountProps<FieldName>) {
   const isTestEnv = useIsTestEnv();
   const { t } = useTranslation();
@@ -147,7 +147,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
             variant="internal"
             to={to}
             isDisabled={isEditing}
-            end={end}
+            isExactPathMatch={isExactPathMatch}
             style={{
               ...accountNameStyle,
               ...style,

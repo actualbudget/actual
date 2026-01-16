@@ -96,7 +96,7 @@ export function Accounts() {
           to="/accounts"
           query={bindings.allAccountBalance()}
           style={{ fontWeight, marginTop: 15 }}
-          end
+          isExactPathMatch
         />
 
         {onBudgetAccounts.length > 0 && (

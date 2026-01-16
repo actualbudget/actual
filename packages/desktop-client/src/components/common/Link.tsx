@@ -31,7 +31,7 @@ type InternalLinkProps = {
   activeStyle?: CSSProperties;
   children?: ReactNode;
   isDisabled?: boolean;
-  end?: boolean;
+  isExactPathMatch?: boolean;
 };
 
 const externalLinkColors = {
@@ -120,10 +120,10 @@ const InternalLink = ({
   activeStyle,
   children,
   isDisabled,
-  end = false,
+  isExactPathMatch = false,
 }: InternalLinkProps) => {
   const path = to ?? '';
-  const match = useMatch({ path, end });
+  const match = useMatch({ path, end: isExactPathMatch });
 
   return (
     <NavLink
