@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import React, {
   useState,
+  useEffectEvent,
   useEffect,
   useMemo,
   type SetStateAction,
@@ -123,7 +124,7 @@ function Notification({
   const [loading, setLoading] = useState(false);
   const [overlayLoading, setOverlayLoading] = useState(false);
 
-  useEffect(() => {
+  const connected = useEffectEvent(() => {
     if (type === 'error' && internal) {
       console.error('Internal error:', internal);
     }
@@ -131,14 +132,15 @@ function Notification({
     if (!sticky) {
       setTimeout(onRemove, timeout || 6500);
     }
-  }, []);
+  });
+  useEffect(() => connected(), []);
 
   const positive = type === 'message';
   const error = type === 'error';
 
   const processedMessage = useMemo(
     () => compileMessage(message, messageActions, setOverlayLoading, onRemove),
-    [message, messageActions],
+    [message, messageActions, onRemove, setOverlayLoading],
   );
 
   const { isNarrowWidth } = useResponsive();

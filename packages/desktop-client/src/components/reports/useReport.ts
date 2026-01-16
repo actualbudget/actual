@@ -14,6 +14,6 @@ export function useReport<T>(
 
   useEffect(() => {
     getData(spreadsheet, results => setResults(results));
-  }, [getData]);
+  }, [getData, spreadsheet]);
   return results;
 }
