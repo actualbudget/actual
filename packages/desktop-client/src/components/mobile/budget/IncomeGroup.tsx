@@ -279,6 +279,7 @@ function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
                   maxFontSizePx={12}
                   mode="oneline"
                   style={{
+                    ...styles.tnum,
                     width: columnWidth,
                     justifyContent: 'center',
                     alignItems: 'flex-end',
@@ -309,6 +310,7 @@ function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
                 maxFontSizePx={12}
                 mode="oneline"
                 style={{
+                  ...styles.tnum,
                   width: columnWidth,
                   justifyContent: 'center',
                   alignItems: 'flex-end',
