@@ -680,6 +680,7 @@ function PayeeItem({
           paddingLeft: paddingLeftOverFromIcon,
           border: 'none',
           font: 'inherit',
+          textAlign: 'left',
           ...narrowStyle,
         }),
       )}

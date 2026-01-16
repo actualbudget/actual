@@ -288,6 +288,7 @@ function AccountItem({
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
           border: 'none',
+          textAlign: 'left',
           font: 'inherit',
           ...narrowStyle,
         }),
