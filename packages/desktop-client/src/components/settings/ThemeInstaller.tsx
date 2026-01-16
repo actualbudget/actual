@@ -171,7 +171,7 @@ export function ThemeInstaller({
       <Text style={{ marginBottom: 8, color: themeStyle.pageTextSubdued }}>
         <Trans>Choose from catalog:</Trans>
       </Text>
-      {catalogError && (
+      {catalogError ? (
         <Text
           style={{
             color: themeStyle.errorText,
@@ -183,191 +183,179 @@ export function ThemeInstaller({
             Failed to load theme catalog. You can still paste custom CSS below.
           </Trans>
         </Text>
-      )}
-      <View
-        style={{
-          height: CATALOG_MAX_HEIGHT,
-          marginBottom: 16,
-        }}
-      >
-        {catalogLoading ? (
-          <View
-            style={{
-              height: '100%',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <AnimatedLoading
+      ) : (
+        <View
+          style={{
+            height: CATALOG_MAX_HEIGHT,
+            marginBottom: 16,
+          }}
+        >
+          {catalogLoading ? (
+            <View
               style={{
-                width: 24,
-                height: 24,
-                color: themeStyle.pageText,
+                height: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
-            />
-          </View>
-        ) : (
-          <AutoSizer>
-            {({ width, height }) => {
-              if (width === 0 || height === 0) {
-                return null;
-              }
+            >
+              <AnimatedLoading
+                style={{
+                  width: 24,
+                  height: 24,
+                  color: themeStyle.pageText,
+                }}
+              />
+            </View>
+          ) : (
+            <AutoSizer>
+              {({ width, height }) => {
+                if (width === 0 || height === 0) {
+                  return null;
+                }
 
-              const catalogItems = catalog ?? [];
-              const itemsPerRow = getItemsPerRow(width);
-              const rows: CatalogTheme[][] = [];
-              for (let i = 0; i < catalogItems.length; i += itemsPerRow) {
-                rows.push(catalogItems.slice(i, i + itemsPerRow));
-              }
+                const catalogItems = catalog ?? [];
+                const itemsPerRow = getItemsPerRow(width);
+                const rows: CatalogTheme[][] = [];
+                for (let i = 0; i < catalogItems.length; i += itemsPerRow) {
+                  rows.push(catalogItems.slice(i, i + itemsPerRow));
+                }
 
-              if (rows.length === 0) {
                 return (
-                  <View
-                    style={{
-                      height: '100%',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Text style={{ color: themeStyle.pageTextSubdued }}>
-                      <Trans>No themes available in catalog</Trans>
-                    </Text>
-                  </View>
-                );
-              }
+                  <FixedSizeList
+                    width={width}
+                    height={height}
+                    itemCount={rows.length}
+                    itemSize={THEME_ITEM_HEIGHT + THEME_ITEM_GAP}
+                    itemKey={index => `row-${index}`}
+                    renderRow={({ index, style }) => {
+                      const rowThemes = rows[index];
+                      return (
+                        <div
+                          style={{
+                            ...style,
+                            display: 'flex',
+                            gap: THEME_ITEM_GAP,
+                            padding: '0 4px',
+                          }}
+                        >
+                          {rowThemes.map((theme, themeIndex) => {
+                            const isSelected =
+                              selectedCatalogTheme?.name === theme.name &&
+                              selectedCatalogTheme?.repo === theme.repo;
 
-              return (
-                <FixedSizeList
-                  width={width}
-                  height={height}
-                  itemCount={rows.length}
-                  itemSize={THEME_ITEM_HEIGHT + THEME_ITEM_GAP}
-                  itemKey={index => `row-${index}`}
-                  renderRow={({ index, style }) => {
-                    const rowThemes = rows[index];
-                    return (
-                      <div
-                        style={{
-                          ...style,
-                          display: 'flex',
-                          gap: THEME_ITEM_GAP,
-                          padding: '0 4px',
-                        }}
-                      >
-                        {rowThemes.map((theme, themeIndex) => {
-                          const isSelected =
-                            selectedCatalogTheme?.name === theme.name &&
-                            selectedCatalogTheme?.repo === theme.repo;
+                            const isLoadingSelected = isLoading && isSelected;
 
-                          const isLoadingSelected = isLoading && isSelected;
-
-                          return (
-                            <Button
-                              key={`${theme.name}-${index}-${themeIndex}`}
-                              variant="bare"
-                              aria-label={theme.name}
-                              onPress={() => handleCatalogThemeClick(theme)}
-                              style={{
-                                width: THEME_ITEM_WIDTH,
-                                height: THEME_ITEM_HEIGHT,
-                                padding: 8,
-                                borderRadius: 6,
-                                border: `2px solid ${
-                                  isSelected
-                                    ? themeStyle.buttonPrimaryBackground
-                                    : themeStyle.tableBorder
-                                }`,
-                                backgroundColor: isSelected
-                                  ? themeStyle.tableRowBackgroundHover
-                                  : 'transparent',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                gap: 8,
-                                flexShrink: 0,
-                                position: 'relative',
-                              }}
-                            >
-                              <View
+                            return (
+                              <Button
+                                key={`${theme.name}-${index}-${themeIndex}`}
+                                variant="bare"
+                                aria-label={theme.name}
+                                onPress={() => handleCatalogThemeClick(theme)}
                                 style={{
-                                  position: 'absolute',
-                                  top: 0,
-                                  left: 0,
-                                  right: 0,
-                                  bottom: 0,
+                                  width: THEME_ITEM_WIDTH,
+                                  height: THEME_ITEM_HEIGHT,
+                                  padding: 8,
                                   borderRadius: 6,
-                                  backgroundColor: themeStyle.overlayBackground,
+                                  border: `2px solid ${
+                                    isSelected
+                                      ? themeStyle.buttonPrimaryBackground
+                                      : themeStyle.tableBorder
+                                  }`,
+                                  backgroundColor: isSelected
+                                    ? themeStyle.tableRowBackgroundHover
+                                    : 'transparent',
+                                  flexDirection: 'column',
                                   alignItems: 'center',
-                                  justifyContent: 'center',
-                                  zIndex: 1,
-                                  opacity: isLoadingSelected ? 1 : 0,
-                                  pointerEvents: isLoadingSelected
-                                    ? 'auto'
-                                    : 'none',
-                                  transition: 'opacity 0.2s ease-in-out',
+                                  gap: 8,
+                                  flexShrink: 0,
+                                  position: 'relative',
                                 }}
                               >
-                                <AnimatedLoading
+                                <View
                                   style={{
-                                    width: 24,
-                                    height: 24,
-                                    color: themeStyle.pageText,
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    borderRadius: 6,
+                                    backgroundColor:
+                                      themeStyle.overlayBackground,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    zIndex: 1,
+                                    opacity: isLoadingSelected ? 1 : 0,
+                                    pointerEvents: isLoadingSelected
+                                      ? 'auto'
+                                      : 'none',
+                                    transition: 'opacity 0.2s ease-in-out',
+                                  }}
+                                >
+                                  <AnimatedLoading
+                                    style={{
+                                      width: 24,
+                                      height: 24,
+                                      color: themeStyle.pageText,
+                                    }}
+                                  />
+                                </View>
+                                <img
+                                  src={getThemeScreenshotUrl(theme.repo)}
+                                  alt={theme.name}
+                                  style={{
+                                    width: '100%',
+                                    height: 60,
+                                    objectFit: 'cover',
+                                    borderRadius: 4,
                                   }}
                                 />
-                              </View>
-                              <img
-                                src={getThemeScreenshotUrl(theme.repo)}
-                                alt={theme.name}
-                                style={{
-                                  width: '100%',
-                                  height: 60,
-                                  objectFit: 'cover',
-                                  borderRadius: 4,
-                                }}
-                              />
-                              <Text
-                                style={{
-                                  fontSize: 12,
-                                  fontWeight: 500,
-                                  textAlign: 'center',
-                                }}
-                              >
-                                {theme.name}
-                              </Text>
-
-                              <SpaceBetween
-                                direction="horizontal"
-                                align="center"
-                                gap={4}
-                                style={{ fontSize: 10 }}
-                              >
                                 <Text
-                                  style={{ color: themeStyle.pageTextSubdued }}
+                                  style={{
+                                    fontSize: 12,
+                                    fontWeight: 500,
+                                    textAlign: 'center',
+                                  }}
                                 >
-                                  {t('by')}{' '}
-                                  <Text style={{ fontWeight: 'bold' }}>
-                                    {extractRepoOwner(theme.repo)}
-                                  </Text>
+                                  {theme.name}
                                 </Text>
-                                <Link
-                                  variant="external"
-                                  to={normalizeGitHubRepo(theme.repo)}
-                                  onClick={e => e.stopPropagation()}
+
+                                <SpaceBetween
+                                  direction="horizontal"
+                                  align="center"
+                                  gap={4}
+                                  style={{ fontSize: 10 }}
                                 >
-                                  <Trans>Source</Trans>
-                                </Link>
-                              </SpaceBetween>
-                            </Button>
-                          );
-                        })}
-                      </div>
-                    );
-                  }}
-                />
-              );
-            }}
-          </AutoSizer>
-        )}
-      </View>
+                                  <Text
+                                    style={{
+                                      color: themeStyle.pageTextSubdued,
+                                    }}
+                                  >
+                                    {t('by')}{' '}
+                                    <Text style={{ fontWeight: 'bold' }}>
+                                      {extractRepoOwner(theme.repo)}
+                                    </Text>
+                                  </Text>
+                                  <Link
+                                    variant="external"
+                                    to={normalizeGitHubRepo(theme.repo)}
+                                    onClick={e => e.stopPropagation()}
+                                  >
+                                    <Trans>Source</Trans>
+                                  </Link>
+                                </SpaceBetween>
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      );
+                    }}
+                  />
+                );
+              }}
+            </AutoSizer>
+          )}
+        </View>
+      )}
 
       {/* Paste CSS Input */}
       <View
