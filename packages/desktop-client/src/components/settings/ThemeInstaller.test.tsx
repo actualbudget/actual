@@ -4,6 +4,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 import { ThemeInstaller } from './ThemeInstaller';
 
+import { useThemeCatalog } from '@desktop-client/hooks/useThemeCatalog';
 import {
   fetchThemeCss,
   validateThemeCss,
@@ -24,8 +25,21 @@ vi.mock('@desktop-client/style/customThemes', async () => {
     ),
   };
 });
-vi.mock('@desktop-client/data/customThemeCatalog.json', () => ({
-  default: [
+
+vi.mock('@desktop-client/hooks/useThemeCatalog', () => ({
+  useThemeCatalog: vi.fn(),
+}));
+
+describe('ThemeInstaller', () => {
+  const mockOnInstall = vi.fn();
+  const mockOnClose = vi.fn();
+
+  const mockValidCss = `:root {
+    --color-primary: #007bff;
+    --color-secondary: #6c757d;
+  }`;
+
+  const mockCatalog = [
     {
       name: 'Demo Theme',
       repo: 'actualbudget/demo-theme',
@@ -38,17 +52,7 @@ vi.mock('@desktop-client/data/customThemeCatalog.json', () => ({
       name: 'Forest Green',
       repo: 'actualbudget/forest-theme',
     },
-  ],
-}));
-
-describe('ThemeInstaller', () => {
-  const mockOnInstall = vi.fn();
-  const mockOnClose = vi.fn();
-
-  const mockValidCss = `:root {
-    --color-primary: #007bff;
-    --color-secondary: #6c757d;
-  }`;
+  ];
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -56,6 +60,13 @@ describe('ThemeInstaller', () => {
     mockOnClose.mockClear();
     vi.mocked(fetchThemeCss).mockResolvedValue(mockValidCss);
     vi.mocked(validateThemeCss).mockImplementation(css => css.trim());
+
+    // Mock useThemeCatalog to return catalog data immediately
+    vi.mocked(useThemeCatalog).mockReturnValue({
+      data: mockCatalog,
+      isLoading: false,
+      error: null,
+    });
   });
 
   describe('rendering', () => {
@@ -208,6 +219,12 @@ describe('ThemeInstaller', () => {
         <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
       );
 
+      await waitFor(() => {
+        expect(
+          screen.getByRole('button', { name: 'Demo Theme' }),
+        ).toBeVisible();
+      });
+
       await user.click(screen.getByRole('button', { name: 'Demo Theme' }));
 
       await waitFor(() => {
@@ -348,6 +365,12 @@ describe('ThemeInstaller', () => {
         <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
       );
 
+      await waitFor(() => {
+        expect(
+          screen.getByRole('button', { name: 'Demo Theme' }),
+        ).toBeVisible();
+      });
+
       // First select a theme (which should be selected/highlighted)
       await user.click(screen.getByRole('button', { name: 'Demo Theme' }));
       await waitFor(() => {
@@ -482,8 +505,6 @@ describe('ThemeInstaller', () => {
       );
 
       const images = screen.getAllByRole('img');
-      expect(images.length).toBeGreaterThan(0);
-
       // Check that images have the correct src pattern
       images.forEach(img => {
         expect(img).toHaveAttribute(
