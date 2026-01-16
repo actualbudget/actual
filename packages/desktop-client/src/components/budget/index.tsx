@@ -1,5 +1,11 @@
 // @ts-strict-ignore
-import React, { useMemo, useState, useEffect, type ComponentType } from 'react';
+import React, {
+  useMemo,
+  useState,
+  useEffect,
+  useEffectEvent,
+  type ComponentType,
+} from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
@@ -54,7 +60,7 @@ export function Budget() {
   const [initialized, setInitialized] = useState(false);
   const { grouped: categoryGroups } = useCategories();
 
-  useEffect(() => {
+  const init = useEffectEvent(() => {
     async function run() {
       const { start, end } = await send('get-budget-bounds');
       setBounds({ start, end });
@@ -70,15 +76,17 @@ export function Budget() {
     }
 
     run();
-  }, []);
+  });
+  useEffect(() => init(), []);
 
-  useEffect(() => {
+  const loadBoundBudgets = useEffectEvent(() => {
     send('get-budget-bounds').then(({ start, end }) => {
       if (bounds.start !== start || bounds.end !== end) {
         setBounds({ start, end });
       }
     });
-  }, []);
+  });
+  useEffect(() => loadBoundBudgets(), []);
 
   const onMonthSelect = async (month, numDisplayed) => {
     setStartMonthPref(month);

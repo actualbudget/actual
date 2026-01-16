@@ -42,6 +42,7 @@ import { installPolyfills } from '@desktop-client/polyfills';
 import { loadGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
 import { useDispatch, useSelector, useStore } from '@desktop-client/redux';
 import {
+  CustomThemeStyle,
   hasHiddenScrollbars,
   ThemeStyle,
   useTheme,
@@ -242,6 +243,7 @@ export function App() {
                       <AppInner />
                     </ErrorBoundary>
                     <ThemeStyle />
+                    <CustomThemeStyle />
                     <ErrorBoundary FallbackComponent={FatalError}>
                       <Modals />
                     </ErrorBoundary>

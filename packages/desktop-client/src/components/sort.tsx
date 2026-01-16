@@ -68,7 +68,7 @@ export function useDraggable<T>({
 
   useLayoutEffect(() => {
     _onDragChange.current = onDragChange;
-  });
+  }, [onDragChange]);
 
   return { dragRef };
 }
@@ -95,6 +95,7 @@ export function useDroppable<T extends { id: string }>({
   onLongHover,
 }: UseDroppableArgs) {
   const ref = useRef(null);
+  const onLongHoverRef = useRef(onLongHover);
   const [dropPos, setDropPos] = useState<DropPosition | null>(null);
 
   const [{ isOver }, dropRef] = useDrop<
@@ -123,12 +124,20 @@ export function useDroppable<T extends { id: string }>({
   const handleDropRef = useDragRef(dropRef);
 
   useEffect(() => {
-    let timeout;
-    if (onLongHover && isOver) {
-      timeout = setTimeout(onLongHover, 700);
+    onLongHoverRef.current = onLongHover;
+  }, [onLongHover]);
+
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    if (onLongHoverRef.current && isOver) {
+      timeout = setTimeout(() => onLongHoverRef.current?.(), 700);
     }
 
-    return () => timeout && clearTimeout(timeout);
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
   }, [isOver]);
 
   return {

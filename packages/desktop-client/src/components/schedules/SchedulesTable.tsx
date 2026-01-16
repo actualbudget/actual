@@ -45,11 +45,21 @@ type SchedulesTableProps = {
   filter: string;
   allowCompleted: boolean;
   onSelect: (id: ScheduleEntity['id']) => void;
-  onAction: (actionName: ScheduleItemAction, id: ScheduleEntity['id']) => void;
   style: CSSProperties;
-  minimal?: boolean;
   tableStyle?: CSSProperties;
-};
+} & (
+  | {
+      minimal: true;
+      onAction?: never;
+    }
+  | {
+      minimal?: false;
+      onAction: (
+        actionName: ScheduleItemAction,
+        id: ScheduleEntity['id'],
+      ) => void;
+    }
+);
 
 type CompletedScheduleItem = { id: 'show-completed' };
 type SchedulesTableItem = ScheduleEntity | CompletedScheduleItem;
@@ -366,7 +376,7 @@ export function SchedulesTable({
         filterIncludes(dateStr)
       );
     });
-  }, [payees, accounts, schedules, filter, statuses]);
+  }, [payees, accounts, schedules, filter, statuses, format, dateFormat]);
 
   const items: readonly SchedulesTableItem[] = useMemo(() => {
     const unCompletedSchedules = filteredSchedules.filter(s => !s.completed);

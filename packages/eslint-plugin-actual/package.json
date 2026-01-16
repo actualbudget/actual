@@ -11,16 +11,10 @@
     "requireindex": "^1.2.0"
   },
   "devDependencies": {
-    "eslint": "^9.39.2",
-    "eslint-plugin-eslint-plugin": "^7.2.0",
-    "eslint-plugin-node": "^11.1.0",
     "eslint-vitest-rule-tester": "^3.0.1",
     "loupe": "^3.2.1",
     "strip-literal": "^3.1.0",
     "tinyspy": "^4.0.4",
-    "vitest": "^4.0.9"
-  },
-  "peerDependencies": {
-    "eslint": ">=7"
+    "vitest": "^4.0.16"
   }
 }

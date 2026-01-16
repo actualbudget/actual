@@ -1,13 +1,14 @@
 // @ts-strict-ignore
 import React, {
   useState,
+  useEffectEvent,
   useEffect,
   useMemo,
   type SetStateAction,
   type CSSProperties,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { animated, useSpring } from 'react-spring';
+import { animated, useSpring, to } from 'react-spring';
 import { useSwipeable } from 'react-swipeable';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -29,6 +30,14 @@ import {
   type NotificationWithId,
 } from '@desktop-client/notifications/notificationsSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
+
+// Notification stacking configuration
+const MAX_VISIBLE_NOTIFICATIONS = 3; // Maximum number of notifications visible in the stack
+const SCALE_MULTIPLIER = 0.05; // Scale reduction per stacked notification
+const OPACITY_MULTIPLIER = 0.2; // Opacity reduction per stacked notification
+const MIN_OPACITY = 1; // Minimum opacity for stacked notifications
+const Y_OFFSET_PER_LEVEL = -20; // Vertical offset in pixels per stacked notification
+const BASE_Z_INDEX = 10; // Base z-index for notification stacking
 
 function compileMessage(
   message: string,
@@ -91,9 +100,13 @@ function compileMessage(
 function Notification({
   notification,
   onRemove,
+  index,
+  isInteractive,
 }: {
   notification: NotificationWithId;
   onRemove: () => void;
+  index: number;
+  isInteractive: boolean;
 }) {
   const { t } = useTranslation();
   const {
@@ -111,7 +124,7 @@ function Notification({
   const [loading, setLoading] = useState(false);
   const [overlayLoading, setOverlayLoading] = useState(false);
 
-  useEffect(() => {
+  const connected = useEffectEvent(() => {
     if (type === 'error' && internal) {
       console.error('Internal error:', internal);
     }
@@ -119,14 +132,15 @@ function Notification({
     if (!sticky) {
       setTimeout(onRemove, timeout || 6500);
     }
-  }, []);
+  });
+  useEffect(() => connected(), []);
 
   const positive = type === 'message';
   const error = type === 'error';
 
   const processedMessage = useMemo(
     () => compileMessage(message, messageActions, setOverlayLoading, onRemove),
-    [message, messageActions],
+    [message, messageActions, onRemove, setOverlayLoading],
   );
 
   const { isNarrowWidth } = useResponsive();
@@ -134,8 +148,25 @@ function Notification({
     ? { minHeight: styles.mobileMinHeight }
     : {};
 
+  // Calculate stacking properties based on index (scales for any number of notifications)
+  const scale = 1.0 - index * SCALE_MULTIPLIER;
+  const stackOpacity = Math.max(MIN_OPACITY, 1.0 - index * OPACITY_MULTIPLIER);
+  const zIndex = BASE_Z_INDEX - index;
+
+  const yOffset = index * Y_OFFSET_PER_LEVEL;
+
   const [isSwiped, setIsSwiped] = useState(false);
-  const [spring, api] = useSpring(() => ({ x: 0, opacity: 1 }));
+  const [spring, api] = useSpring(() => ({
+    x: 0,
+    y: yOffset,
+    opacity: stackOpacity,
+    scale,
+  }));
+
+  // Update scale, opacity, and y-position when index changes
+  useEffect(() => {
+    api.start({ scale, opacity: stackOpacity, y: yOffset });
+  }, [index, scale, stackOpacity, yOffset, api]);
 
   const swipeHandlers = useSwipeable({
     onSwiping: ({ deltaX }) => {
@@ -168,24 +199,34 @@ function Notification({
     <animated.div
       role="alert"
       style={{
-        ...spring,
-        marginTop: 10,
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex,
+        // Combine translateX, translateY and scale transforms
+        transform: to(
+          [spring.x, spring.y, spring.scale],
+          (x, y, s) => `translateX(${x}px) translateY(${y}px) scale(${s})`,
+        ),
+        opacity: spring.opacity,
+        pointerEvents: isInteractive ? 'auto' : 'none',
         color: positive
           ? theme.noticeText
           : error
             ? theme.errorTextDark
             : theme.warningTextDark,
         // Prevents scrolling conflicts
-        touchAction: 'none',
+        touchAction: isInteractive ? 'none' : 'auto',
       }}
-      {...swipeHandlers}
+      {...(isInteractive ? swipeHandlers : {})}
     >
-      <SpaceBetween
-        wrap={false}
+      <View
         style={{
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          position: 'relative',
           padding: '14px 14px',
+          paddingRight: 40,
+          borderRadius: 8,
           ...styles.mediumText,
           backgroundColor: positive
             ? theme.noticeBackgroundLight
@@ -204,19 +245,85 @@ function Notification({
           '& a': { color: 'currentColor' },
         }}
       >
-        <SpaceBetween direction="vertical" style={{ alignItems: 'flex-start' }}>
+        {/* Close button in top right corner */}
+        <Button
+          variant="bare"
+          aria-label={t('Close')}
+          style={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            padding: 8,
+            color: 'currentColor',
+            opacity: 0.7,
+          }}
+          onPress={onRemove}
+        >
+          <SvgDelete style={{ width: 10, height: 10 }} />
+        </Button>
+
+        {/* Content and action button layout */}
+        <SpaceBetween
+          direction="vertical"
+          gap={10}
+          style={{ alignItems: 'flex-start' }}
+        >
           {title && (
             <View
               style={{
                 ...styles.mediumText,
                 fontWeight: 700,
-                marginBottom: 10,
+                paddingRight: 20,
               }}
             >
               {title}
             </View>
           )}
-          <View>{processedMessage}</View>
+
+          {/* Message and button on same row */}
+          <SpaceBetween
+            wrap={false}
+            gap={10}
+            style={{ width: '100%', alignItems: 'flex-start' }}
+          >
+            <View style={{ flex: 1, minWidth: 0 }}>{processedMessage}</View>
+            {button && (
+              <ButtonWithLoading
+                variant="bare"
+                isLoading={loading}
+                onPress={async () => {
+                  setLoading(true);
+                  await button.action();
+                  onRemove();
+                  setLoading(false);
+                }}
+                className={css({
+                  backgroundColor: 'transparent',
+                  border: `1px solid ${
+                    positive
+                      ? theme.noticeBorder
+                      : error
+                        ? theme.errorBorder
+                        : theme.warningBorder
+                  }`,
+                  color: 'currentColor',
+                  ...styles.mediumText,
+                  flexShrink: 0,
+                  '&[data-hovered], &[data-pressed]': {
+                    backgroundColor: positive
+                      ? theme.noticeBackground
+                      : error
+                        ? theme.errorBackground
+                        : theme.warningBackground,
+                  },
+                  ...narrowStyle,
+                })}
+              >
+                {button.title}
+              </ButtonWithLoading>
+            )}
+          </SpaceBetween>
+
           {pre
             ? pre.split('\n\n').map((text, idx) => (
                 <View
@@ -228,57 +335,15 @@ function Notification({
                     backgroundColor: 'rgba(0, 0, 0, .05)',
                     padding: 10,
                     borderRadius: 4,
+                    width: '100%',
                   }}
                 >
                   {text}
                 </View>
               ))
             : null}
-          {button && (
-            <ButtonWithLoading
-              variant="bare"
-              isLoading={loading}
-              onPress={async () => {
-                setLoading(true);
-                await button.action();
-                onRemove();
-                setLoading(false);
-              }}
-              className={css({
-                backgroundColor: 'transparent',
-                border: `1px solid ${
-                  positive
-                    ? theme.noticeBorder
-                    : error
-                      ? theme.errorBorder
-                      : theme.warningBorder
-                }`,
-                color: 'currentColor',
-                ...styles.mediumText,
-                flexShrink: 0,
-                '&[data-hovered], &[data-pressed]': {
-                  backgroundColor: positive
-                    ? theme.noticeBackground
-                    : error
-                      ? theme.errorBackground
-                      : theme.warningBackground,
-                },
-                ...narrowStyle,
-              })}
-            >
-              {button.title}
-            </ButtonWithLoading>
-          )}
         </SpaceBetween>
-        <Button
-          variant="bare"
-          aria-label={t('Close')}
-          style={{ padding: 10, color: 'currentColor' }}
-          onPress={onRemove}
-        >
-          <SvgDelete style={{ width: 10, height: 10 }} />
-        </Button>
-      </SpaceBetween>
+      </View>
       {overlayLoading && (
         <View
           style={{
@@ -306,6 +371,13 @@ export function Notifications({ style }: { style?: CSSProperties }) {
   const { isNarrowWidth } = useResponsive();
   const notifications = useSelector(state => state.notifications.notifications);
   const notificationInset = useSelector(state => state.notifications.inset);
+
+  // Only show the last N notifications (newest first) for z-axis stacking
+  // Reverse so newest notification (last in array) becomes index 0 (front)
+  const visibleNotifications = notifications
+    .slice(-MAX_VISIBLE_NOTIFICATIONS)
+    .reverse();
+
   return (
     <View
       style={{
@@ -318,18 +390,22 @@ export function Notifications({ style }: { style?: CSSProperties }) {
         ...style,
       }}
     >
-      {notifications.map(note => (
-        <Notification
-          key={note.id}
-          notification={note}
-          onRemove={() => {
-            if (note.onClose) {
-              note.onClose();
-            }
-            dispatch(removeNotification({ id: note.id }));
-          }}
-        />
-      ))}
+      <View style={{ position: 'relative' }}>
+        {visibleNotifications.map((note, index) => (
+          <Notification
+            key={note.id}
+            notification={note}
+            index={index}
+            isInteractive={index === 0}
+            onRemove={() => {
+              if (note.onClose) {
+                note.onClose();
+              }
+              dispatch(removeNotification({ id: note.id }));
+            }}
+          />
+        ))}
+      </View>
     </View>
   );
 }
