@@ -126,7 +126,7 @@ function EditableBudgetName() {
         ref={triggerRef}
         variant="bare"
         style={{
-          color: theme.buttonNormalBorder,
+          color: theme.sidebarBudgetName,
           fontSize: 16,
           fontWeight: 500,
           marginLeft: -5,
