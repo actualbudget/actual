@@ -219,12 +219,6 @@ describe('ThemeInstaller', () => {
         <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
       );
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: 'Demo Theme' }),
-        ).toBeVisible();
-      });
-
       await user.click(screen.getByRole('button', { name: 'Demo Theme' }));
 
       await waitFor(() => {
@@ -365,12 +359,6 @@ describe('ThemeInstaller', () => {
         <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
       );
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: 'Demo Theme' }),
-        ).toBeVisible();
-      });
-
       // First select a theme (which should be selected/highlighted)
       await user.click(screen.getByRole('button', { name: 'Demo Theme' }));
       await waitFor(() => {
@@ -505,6 +493,8 @@ describe('ThemeInstaller', () => {
       );
 
       const images = screen.getAllByRole('img');
+      expect(images.length).toBeGreaterThan(0);
+
       // Check that images have the correct src pattern
       images.forEach(img => {
         expect(img).toHaveAttribute(
