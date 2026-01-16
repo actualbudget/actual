@@ -8,6 +8,7 @@ import {
   type SheetNames,
 } from '.';
 
+import { createMonthDateFilter } from '@desktop-client/hooks/usePayPeriodTranslation';
 import { uncategorizedTransactions } from '@desktop-client/queries';
 
 type BudgetType<SheetName extends SheetNames> = Record<
@@ -93,10 +94,7 @@ export function categoryBalance(
   return {
     name: categoryParametrizedField('balance')(categoryId),
     query: q('transactions')
-      .filter({
-        category: categoryId,
-        date: { $transform: '$month', $eq: month },
-      })
+      .filter(createMonthDateFilter(month, categoryId))
       .options({ splits: 'inline' })
       .calculate({ $sum: '$amount' }),
   } satisfies Binding<'category', 'balance'>;
@@ -110,8 +108,7 @@ export function categoryBalanceCleared(
     name: categoryParametrizedField('balanceCleared')(categoryId),
     query: q('transactions')
       .filter({
-        category: categoryId,
-        date: { $transform: '$month', $eq: month },
+        ...createMonthDateFilter(month, categoryId),
         cleared: true,
       })
       .options({ splits: 'inline' })
@@ -127,8 +124,7 @@ export function categoryBalanceUncleared(
     name: categoryParametrizedField('balanceUncleared')(categoryId),
     query: q('transactions')
       .filter({
-        category: categoryId,
-        date: { $transform: '$month', $eq: month },
+        ...createMonthDateFilter(month, categoryId),
         cleared: false,
       })
       .options({ splits: 'inline' })
