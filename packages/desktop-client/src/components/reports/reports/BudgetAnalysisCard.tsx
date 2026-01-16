@@ -17,6 +17,7 @@ import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { createBudgetAnalysisSpreadsheet } from '@desktop-client/components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type BudgetAnalysisCardProps = {
@@ -25,6 +26,7 @@ type BudgetAnalysisCardProps = {
   meta?: BudgetAnalysisWidget['meta'];
   onMetaChange: (newMeta: BudgetAnalysisWidget['meta']) => void;
   onRemove: () => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function BudgetAnalysisCard({
@@ -33,12 +35,16 @@ export function BudgetAnalysisCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onCopy,
 }: BudgetAnalysisCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
 
   const timeFrame = meta?.timeFrame ?? {
     start: monthUtils.subMonths(monthUtils.currentMonth(), 5),
@@ -86,8 +92,10 @@ export function BudgetAnalysisCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);

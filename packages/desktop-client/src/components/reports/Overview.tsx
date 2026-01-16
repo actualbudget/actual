@@ -721,6 +721,9 @@ export function Overview({ dashboard }: OverviewProps) {
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
+                      }
                     />
                   ) : item.type === 'markdown-card' ? (
                     <MarkdownCard
