@@ -107,8 +107,8 @@ export function ActionableGridListItem<T extends object>({
         }}
       >
         {/* Main content */}
-        <div
-          role="button"
+        <button
+          type="button"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -116,11 +116,13 @@ export function ActionableGridListItem<T extends object>({
             backgroundColor: theme.tableBackground,
             minWidth: '100%',
             padding: 16,
+            border: 'none',
+            font: 'inherit',
           }}
           onClick={handleAction}
         >
           {children}
-        </div>
+        </button>
 
         {/* Actions that appear when swiped */}
         {hasActions && (

@@ -5,7 +5,7 @@ import React, {
 } from 'react';
 
 import { type CSSProperties } from '@actual-app/components/styles';
-import { View } from '@actual-app/components/view';
+import { type View } from '@actual-app/components/view';
 
 import { Link } from '@desktop-client/components/common/Link';
 
@@ -27,21 +27,24 @@ export function ItemContent({
   children,
 }: ItemContentProps) {
   return onClick ? (
-    <View
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       style={{
         ...style,
         touchAction: 'auto',
         userSelect: 'none',
         userDrag: 'none',
         cursor: 'pointer',
+        border: 'none',
+        background: 'transparent',
+        padding: 0,
+        font: 'inherit',
         ...(forceActive ? activeStyle : {}),
       }}
       onClick={onClick}
     >
       {children}
-    </View>
+    </button>
   ) : (
     <Link variant="internal" to={to} style={style} activeStyle={activeStyle}>
       {children}

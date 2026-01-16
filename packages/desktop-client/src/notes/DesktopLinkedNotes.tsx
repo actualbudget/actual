@@ -22,6 +22,10 @@ const linkStyles = css({
   color: theme.pageTextLink,
   textDecoration: 'underline',
   cursor: 'pointer',
+  border: 'none',
+  background: 'transparent',
+  padding: 0,
+  font: 'inherit',
   '&:hover': {
     color: theme.pageTextLinkLight,
   },
@@ -65,14 +69,14 @@ export function DesktopLinkedNotes({
 
   return (
     <>
-      <span
-        role="button"
+      <button
+        type="button"
         className={linkStyles}
         onMouseDown={e => e.stopPropagation()}
         onClick={handleClick}
       >
         {displayText}
-      </span>
+      </button>
       {separator}
     </>
   );

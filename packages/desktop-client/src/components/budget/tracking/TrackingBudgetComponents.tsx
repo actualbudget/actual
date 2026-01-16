@@ -446,10 +446,16 @@ export const CategoryMonth = memo(function CategoryMonth({
           width="flex"
           style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
         >
-          <span
-            role="button"
+          <button
+            type="button"
             ref={triggerBalanceMenuRef}
             onClick={() => !category.is_income && setBalanceMenuOpen(true)}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              padding: 0,
+              font: 'inherit',
+            }}
           >
             <BalanceWithCarryover
               isDisabled={category.is_income}
@@ -459,7 +465,7 @@ export const CategoryMonth = memo(function CategoryMonth({
               budgeted={trackingBudget.catBudgeted(category.id)}
               longGoal={trackingBudget.catLongGoal(category.id)}
             />
-          </span>
+          </button>
 
           <Popover
             triggerRef={triggerBalanceMenuRef}

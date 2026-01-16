@@ -107,19 +107,23 @@ export function ReportCard({
   if (to) {
     return (
       <Layout {...layoutProps}>
-        <View
-          role="button"
+        <button
+          type="button"
           onClick={isEditing || disableClick ? undefined : () => navigate(to)}
           style={{
             height: '100%',
             width: '100%',
+            border: 'none',
+            background: 'transparent',
+            padding: 0,
+            font: 'inherit',
             ':hover': {
               cursor: 'pointer',
             },
           }}
         >
           {content}
-        </View>
+        </button>
       </Layout>
     );
   }

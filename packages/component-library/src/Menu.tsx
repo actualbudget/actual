@@ -152,7 +152,7 @@ export function Menu<const NameType = string>({
     <View
       className={className}
       style={{ outline: 'none', borderRadius: 4, overflow: 'hidden', ...style }}
-      tabIndex={1}
+      tabIndex={0}
       onKeyDown={onKeyDown}
       innerRef={elRef}
     >
