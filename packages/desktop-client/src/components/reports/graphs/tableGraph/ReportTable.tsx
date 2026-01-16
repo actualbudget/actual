@@ -1,6 +1,5 @@
 import React, {
   type RefObject,
-  useCallback,
   useLayoutEffect,
   useRef,
   type UIEventHandler,
@@ -83,7 +82,7 @@ export function ReportTable({
     }
   });
 
-  const renderRow = useCallback(({ item, mode, style }: renderRowProps) => {
+  const renderRow = ({ item, mode, style }: renderRowProps) => {
     return (
       <ReportTableRow
         item={item}
@@ -102,42 +101,39 @@ export function ReportTable({
         interval={interval}
       />
     );
-  }, []);
+  };
 
-  const renderTotals = useCallback(
-    ({
-      metadata,
-      mode,
-      totalsStyle,
-      testStyle,
-      scrollWidthTotals,
-    }: renderTotalsProps) => {
-      return (
-        <ReportTableRow
-          item={metadata}
-          balanceTypeOp={balanceTypeOp}
-          groupBy={groupBy}
-          mode={mode}
-          filters={filters}
-          startDate={data.startDate}
-          endDate={data.endDate}
-          intervalsCount={intervalsCount}
-          compact={compact}
-          style={totalsStyle}
-          compactStyle={compactStyle}
-          showHiddenCategories={showHiddenCategories}
-          showOffBudget={showOffBudget}
-          totalStyle={testStyle}
-          totalScrollRef={totalScrollRef}
-          handleScroll={handleScroll}
-          height={32 + scrollWidthTotals}
-          interval={interval}
-          colorized
-        />
-      );
-    },
-    [],
-  );
+  const renderTotals = ({
+    metadata,
+    mode,
+    totalsStyle,
+    testStyle,
+    scrollWidthTotals,
+  }: renderTotalsProps) => {
+    return (
+      <ReportTableRow
+        item={metadata}
+        balanceTypeOp={balanceTypeOp}
+        groupBy={groupBy}
+        mode={mode}
+        filters={filters}
+        startDate={data.startDate}
+        endDate={data.endDate}
+        intervalsCount={intervalsCount}
+        compact={compact}
+        style={totalsStyle}
+        compactStyle={compactStyle}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
+        totalStyle={testStyle}
+        totalScrollRef={totalScrollRef}
+        handleScroll={handleScroll}
+        height={32 + scrollWidthTotals}
+        interval={interval}
+        colorized
+      />
+    );
+  };
 
   return (
     <View>
