@@ -222,18 +222,12 @@ export function createCustomSpreadsheet({
 
           stacked[item.name] = stackAmounts;
 
-          perIntervalNetAssets =
-            netAmounts > 0
-              ? perIntervalNetAssets + netAmounts
-              : perIntervalNetAssets;
-          perIntervalNetDebts =
-            netAmounts < 0
-              ? perIntervalNetDebts + netAmounts
-              : perIntervalNetDebts;
           perIntervalTotals += netAmounts;
 
           return null;
         });
+        perIntervalNetAssets = perIntervalTotals > 0 ? perIntervalTotals : 0;
+        perIntervalNetDebts = perIntervalTotals < 0 ? perIntervalTotals : 0;
         totalAssets += perIntervalAssets;
         totalDebts += perIntervalDebts;
         netAssets += perIntervalNetAssets;
