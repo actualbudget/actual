@@ -35,14 +35,14 @@ import { BudgetTable, PILL_STYLE } from './BudgetTable';
 
 import { sync } from '@desktop-client/app/appSlice';
 import {
-  applyBudgetAction,
-  createCategory,
-  createCategoryGroup,
-  deleteCategory,
-  deleteCategoryGroup,
-  updateCategory,
-  updateCategoryGroup,
-} from '@desktop-client/budget/budgetSlice';
+  useCreateCategoryMutation,
+  useDeleteCategoryMutation,
+  useCreateCategoryGroupMutation,
+  useDeleteCategoryGroupMutation,
+  useBudgetActions,
+  useSaveCategoryMutation,
+  useSaveCategoryGroupMutation,
+} from '@desktop-client/budget';
 import { prewarmMonth } from '@desktop-client/components/budget/util';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
@@ -88,6 +88,13 @@ export function BudgetPage() {
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');
   const dispatch = useDispatch();
+  const applyBudgetAction = useBudgetActions();
+  const createCategory = useCreateCategoryMutation();
+  const saveCategory = useSaveCategoryMutation();
+  const deleteCategory = useDeleteCategoryMutation();
+  const createCategoryGroup = useCreateCategoryGroupMutation();
+  const saveCategoryGroup = useSaveCategoryGroupMutation();
+  const deleteCategoryGroup = useDeleteCategoryGroupMutation();
 
   useEffect(() => {
     async function init() {
@@ -104,9 +111,9 @@ export function BudgetPage() {
 
   const onBudgetAction = useCallback(
     async (month, type, args) => {
-      dispatch(applyBudgetAction({ month, type, args }));
+      applyBudgetAction.mutate({ month, type, args });
     },
-    [dispatch],
+    [applyBudgetAction],
   );
 
   const onShowBudgetSummary = useCallback(() => {
@@ -144,14 +151,22 @@ export function BudgetPage() {
           options: {
             onValidate: name => (!name ? 'Name is required.' : null),
             onSubmit: async name => {
-              dispatch(collapseModals({ rootModalName: 'budget-page-menu' }));
-              dispatch(createCategoryGroup({ name }));
+              createCategoryGroup.mutate(
+                { name },
+                {
+                  onSettled: () => {
+                    dispatch(
+                      collapseModals({ rootModalName: 'budget-page-menu' }),
+                    );
+                  },
+                },
+              );
             },
           },
         },
       }),
     );
-  }, [dispatch]);
+  }, [dispatch, createCategoryGroup]);
 
   const onOpenNewCategoryModal = useCallback(
     (groupId, isIncome) => {
@@ -162,11 +177,22 @@ export function BudgetPage() {
             options: {
               onValidate: name => (!name ? 'Name is required.' : null),
               onSubmit: async name => {
-                dispatch(
-                  collapseModals({ rootModalName: 'category-group-menu' }),
-                );
-                dispatch(
-                  createCategory({ name, groupId, isIncome, isHidden: false }),
+                createCategory.mutate(
+                  {
+                    name,
+                    groupId,
+                    isIncome,
+                    isHidden: false,
+                  },
+                  {
+                    onSettled: () => {
+                      dispatch(
+                        collapseModals({
+                          rootModalName: 'category-group-menu',
+                        }),
+                      );
+                    },
+                  },
                 );
               },
             },
@@ -174,75 +200,41 @@ export function BudgetPage() {
         }),
       );
     },
-    [dispatch],
+    [dispatch, createCategory],
   );
 
   const onSaveGroup = useCallback(
     group => {
-      dispatch(updateCategoryGroup({ group }));
+      saveCategoryGroup.mutate({ group });
     },
-    [dispatch],
+    [saveCategoryGroup],
   );
 
   const onApplyBudgetTemplatesInGroup = useCallback(
     async categories => {
-      dispatch(
-        applyBudgetAction({
-          month: startMonth,
-          type: 'apply-multiple-templates',
-          args: {
-            categories,
-          },
-        }),
-      );
+      applyBudgetAction.mutate({
+        month: startMonth,
+        type: 'apply-multiple-templates',
+        args: {
+          categories,
+        },
+      });
     },
-    [dispatch, startMonth],
+    [applyBudgetAction, startMonth],
   );
 
   const onDeleteGroup = useCallback(
-    async groupId => {
-      const group = categoryGroups?.find(g => g.id === groupId);
-
-      if (!group) {
-        return;
-      }
-
-      let mustTransfer = false;
-      for (const category of group.categories ?? []) {
-        if (await send('must-category-transfer', { id: category.id })) {
-          mustTransfer = true;
-          break;
-        }
-      }
-
-      if (mustTransfer) {
-        dispatch(
-          pushModal({
-            modal: {
-              name: 'confirm-category-delete',
-              options: {
-                group: groupId,
-                onDelete: transferCategory => {
-                  dispatch(
-                    collapseModals({ rootModalName: 'category-group-menu' }),
-                  );
-                  dispatch(
-                    deleteCategoryGroup({
-                      id: groupId,
-                      transferId: transferCategory,
-                    }),
-                  );
-                },
-              },
-            },
-          }),
-        );
-      } else {
-        dispatch(collapseModals({ rootModalName: 'category-group-menu' }));
-        dispatch(deleteCategoryGroup({ id: groupId }));
-      }
+    groupId => {
+      deleteCategoryGroup.mutate(
+        { id: groupId },
+        {
+          onSettled: () => {
+            dispatch(collapseModals({ rootModalName: 'category-group-menu' }));
+          },
+        },
+      );
     },
-    [categoryGroups, dispatch],
+    [deleteCategoryGroup, dispatch],
   );
 
   const onToggleGroupVisibility = useCallback(
@@ -259,47 +251,23 @@ export function BudgetPage() {
 
   const onSaveCategory = useCallback(
     category => {
-      dispatch(updateCategory({ category }));
+      saveCategory.mutate({ category });
     },
-    [dispatch],
+    [saveCategory],
   );
 
   const onDeleteCategory = useCallback(
-    async categoryId => {
-      const mustTransfer = await send('must-category-transfer', {
-        id: categoryId,
-      });
-
-      if (mustTransfer) {
-        dispatch(
-          pushModal({
-            modal: {
-              name: 'confirm-category-delete',
-              options: {
-                category: categoryId,
-                onDelete: transferCategory => {
-                  if (categoryId !== transferCategory) {
-                    dispatch(
-                      collapseModals({ rootModalName: 'category-menu' }),
-                    );
-                    dispatch(
-                      deleteCategory({
-                        id: categoryId,
-                        transferId: transferCategory,
-                      }),
-                    );
-                  }
-                },
-              },
-            },
-          }),
-        );
-      } else {
-        dispatch(collapseModals({ rootModalName: 'category-menu' }));
-        dispatch(deleteCategory({ id: categoryId }));
-      }
+    categoryId => {
+      deleteCategory.mutate(
+        { id: categoryId },
+        {
+          onSettled: () => {
+            dispatch(collapseModals({ rootModalName: 'category-menu' }));
+          },
+        },
+      );
     },
-    [dispatch],
+    [deleteCategory, dispatch],
   );
 
   const onToggleCategoryVisibility = useCallback(

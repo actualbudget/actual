@@ -42,7 +42,7 @@ type BudgetTableProps = {
   ) => void;
   onReorderCategory: (params: {
     id: CategoryEntity['id'];
-    groupId?: CategoryGroupEntity['id'];
+    groupId: CategoryGroupEntity['id'];
     targetId: CategoryEntity['id'] | null;
   }) => void;
   onReorderGroup: (params: {
@@ -71,7 +71,7 @@ export function BudgetTable(props: BudgetTableProps) {
     onBudgetAction,
   } = props;
 
-  const { grouped: categoryGroups = [] } = useCategories();
+  const { grouped: categoryGroups } = useCategories();
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
   const [showHiddenCategories, setShowHiddenCategoriesPef] = useLocalPref(
@@ -118,20 +118,17 @@ export function BudgetTable(props: BudgetTableProps) {
         });
       }
     } else {
-      let targetGroup;
+      const group = categoryGroups.find(({ categories = [] }) =>
+        categories.some(cat => cat.id === targetId),
+      );
 
-      for (const group of categoryGroups) {
-        if (group.categories?.find(cat => cat.id === targetId)) {
-          targetGroup = group;
-          break;
-        }
+      if (group) {
+        onReorderCategory({
+          id,
+          groupId: group.id,
+          ...findSortDown(group.categories || [], dropPos, targetId),
+        });
       }
-
-      onReorderCategory({
-        id,
-        groupId: targetGroup?.id,
-        ...findSortDown(targetGroup?.categories || [], dropPos, targetId),
-      });
     }
   };
 
