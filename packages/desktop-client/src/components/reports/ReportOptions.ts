@@ -8,7 +8,11 @@ import {
   type sortByOpType,
 } from 'loot-core/types/models';
 
-const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5) + '-01';
+const startDate = monthUtils.dayFromDate(
+  monthUtils.getMonthStartDate(
+    monthUtils.subMonths(monthUtils.currentMonth(), 5),
+  ),
+);
 const endDate = monthUtils.currentDay();
 
 export const defaultReport: CustomReportEntity = {

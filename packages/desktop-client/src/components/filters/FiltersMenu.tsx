@@ -69,7 +69,6 @@ const filterFields = [
   'amount',
   'cleared',
   'reconciled',
-  'saved',
   'transfer',
 ].map(field => [field, mapField(field)]);
 
@@ -126,6 +125,10 @@ function ConfigureField<T extends RuleConditionEntity>({
     }
     return value;
   }, [value, field, subfield, dateFormat]);
+
+  // For ops that filter based on payeeId, those use PayeeFilter, otherwise we use GenericInput
+  const isPayeeIdOp = (op: T['op']) =>
+    ['is', 'is not', 'one of', 'not one of'].includes(op);
 
   return (
     <FocusScope>
@@ -261,7 +264,7 @@ function ConfigureField<T extends RuleConditionEntity>({
           });
         }}
       >
-        {type !== 'boolean' && field !== 'payee' && (
+        {type !== 'boolean' && (field !== 'payee' || !isPayeeIdOp(op)) && (
           <GenericInput
             ref={inputRef}
             // @ts-expect-error - fix me
@@ -293,7 +296,7 @@ function ConfigureField<T extends RuleConditionEntity>({
           />
         )}
 
-        {field === 'payee' && (
+        {field === 'payee' && isPayeeIdOp(op) && (
           <PayeeFilter
             // @ts-expect-error - fix me
             value={formattedValue}
@@ -480,13 +483,22 @@ export function FilterButton<T extends RuleConditionEntity>({
           onMenuSelect={name => {
             dispatch({ type: 'configure', field: name });
           }}
-          items={translatedFilterFields
-            .filter(f => (exclude ? !exclude.includes(f[0]) : true))
-            .sort()
-            .map(([name, text]) => ({
-              name,
-              text: titleFirst(text),
-            }))}
+          items={[
+            ...translatedFilterFields
+              .filter(f => (exclude ? !exclude.includes(f[0]) : true))
+              .sort()
+              .map(([name, text]) => ({
+                name,
+                text: titleFirst(text),
+              })),
+
+            Menu.line,
+
+            {
+              name: 'saved',
+              text: titleFirst(mapField('saved')),
+            },
+          ]}
         />
       </Popover>
 

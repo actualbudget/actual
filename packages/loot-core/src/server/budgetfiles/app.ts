@@ -48,7 +48,6 @@ export type BudgetFileHandlers = {
   'unique-budget-name': typeof handleUniqueBudgetName;
   'get-budgets': typeof getBudgets;
   'get-remote-files': typeof getRemoteFiles;
-  'get-user-file-info': typeof getUserFileInfo;
   'reset-budget-cache': typeof resetBudgetCache;
   'upload-budget': typeof uploadBudget;
   'download-budget': typeof downloadBudget;
@@ -73,7 +72,6 @@ app.method('validate-budget-name', handleValidateBudgetName);
 app.method('unique-budget-name', handleUniqueBudgetName);
 app.method('get-budgets', getBudgets);
 app.method('get-remote-files', getRemoteFiles);
-app.method('get-user-file-info', getUserFileInfo);
 app.method('reset-budget-cache', mutator(resetBudgetCache));
 app.method('upload-budget', uploadBudget);
 app.method('download-budget', downloadBudget);
@@ -143,10 +141,6 @@ async function getBudgets() {
 
 async function getRemoteFiles() {
   return cloudStorage.listRemoteFiles();
-}
-
-async function getUserFileInfo(fileId: string) {
-  return cloudStorage.getRemoteFile(fileId);
 }
 
 async function resetBudgetCache() {

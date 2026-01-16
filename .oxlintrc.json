@@ -15,7 +15,7 @@
     "vi": "readonly",
     "backend": "readonly",
     "importScripts": "readonly",
-    "FS": "readonly" // TODO: remove this
+    "FS": "readonly"
   },
   "rules": {
     // TODO fix all these and re-enable
@@ -103,13 +103,7 @@
     "jsx-a11y/scope": "warn",
 
     // Typescript rules
-    "typescript/ban-ts-comment": [
-      "warn",
-      {
-        // TODO: remove this
-        "ts-ignore": "allow-with-description"
-      }
-    ],
+    "typescript/ban-ts-comment": ["warn"],
     "typescript/consistent-type-definitions": ["warn", "type"],
     "typescript/consistent-type-imports": [
       "warn",
@@ -190,7 +184,7 @@
 
     // ESLint rules
     "eslint/array-callback-return": "warn",
-    // "eslint/curly": ["warn", "multi-line", "consistent"], // TODO: re-enable? this rule is really slow
+    "eslint/curly": ["warn", "multi-line", "consistent"],
     "eslint/default-case": [
       "warn",
       {
@@ -470,16 +464,9 @@
     // TODO: enable these
     {
       "files": [
-        "packages/desktop-client/src/components/admin/UserAccess/UserAccess.tsx",
-        "packages/desktop-client/src/components/admin/UserDirectory/UserDirectory.tsx",
-        "packages/desktop-client/src/components/budget/BudgetCategories.tsx",
-        "packages/desktop-client/src/components/budget/envelope/BalanceMovementMenu.tsx",
         "packages/desktop-client/src/components/ManageRules.tsx",
         "packages/desktop-client/src/components/mobile/budget/ExpenseGroupList.tsx",
-        "packages/desktop-client/src/components/modals/EditFieldModal.tsx",
         "packages/desktop-client/src/components/reports/reports/Calendar.tsx",
-        "packages/desktop-client/src/components/schedules/ScheduleLink.tsx",
-        "packages/desktop-client/src/components/ServerContext.tsx",
         "packages/desktop-client/src/components/table.tsx"
       ],
       "rules": {

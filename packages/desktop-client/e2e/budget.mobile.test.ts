@@ -350,8 +350,8 @@ budgetTypes.forEach(budgetType => {
       await expect(budgetedButton).toHaveText(
         amountToCurrency(amountToTemplate),
       );
-      const notification = page.getByRole('alert').first();
-      await expect(notification).toContainText(templateNotes);
+      const templateNotification = page.getByRole('alert').nth(1);
+      await expect(templateNotification).toContainText(templateNotes);
       await expect(page).toMatchThemeScreenshots();
     });
 

@@ -402,38 +402,6 @@ export async function listRemoteFiles(): Promise<RemoteFile[]> {
     .filter(Boolean);
 }
 
-export async function getRemoteFile(
-  fileId: string,
-): Promise<RemoteFile | null> {
-  const userToken = await asyncStorage.getItem('user-token');
-  if (!userToken) {
-    return null;
-  }
-
-  let res;
-  try {
-    res = await fetchJSON(getServer().SYNC_SERVER + '/get-user-file-info', {
-      headers: {
-        'X-ACTUAL-TOKEN': userToken,
-        'X-ACTUAL-FILE-ID': fileId,
-      },
-    });
-  } catch (e) {
-    logger.log('Unexpected error fetching file from server', e);
-    return null;
-  }
-
-  if (res.status === 'error') {
-    logger.log('Error fetching file from server', res);
-    return null;
-  }
-
-  return {
-    ...res.data,
-    hasKey: encryption.hasKey(res.data.encryptKeyId),
-  };
-}
-
 export async function download(cloudFileId) {
   const userToken = await asyncStorage.getItem('user-token');
   const syncServer = getServer().SYNC_SERVER;
