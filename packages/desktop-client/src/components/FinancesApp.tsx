@@ -1,5 +1,10 @@
 // @ts-strict-ignore
-import React, { type ReactElement, useEffect, useRef } from 'react';
+import React, {
+  type ReactElement,
+  useEffect,
+  useEffectEvent,
+  useRef,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Route, Routes, Navigate, useLocation, useHref } from 'react-router';
 
@@ -97,15 +102,13 @@ export function FinancesApp() {
 
   const multiuserEnabled = useMultiuserEnabled();
 
-  useEffect(() => {
+  const init = useEffectEvent(() => {
     // Wait a little bit to make sure the sync button will get the
     // sync start event. This can be improved later.
     setTimeout(async () => {
       await dispatch(sync());
     }, 100);
-  }, []);
 
-  useEffect(() => {
     async function run() {
       await global.Actual.waitForUpdateReadyForDownload(); // This will only resolve when an update is ready
       dispatch(
@@ -130,7 +133,9 @@ export function FinancesApp() {
     }
 
     run();
-  }, []);
+  });
+
+  useEffect(() => init(), []);
 
   useEffect(() => {
     dispatch(getLatestAppVersion());

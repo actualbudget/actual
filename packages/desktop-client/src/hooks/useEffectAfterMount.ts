@@ -19,5 +19,6 @@ export function useEffectAfterMount(
       return effect();
     }
     isFirstRender.current = false;
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- caller owns deps
   }, deps);
 }

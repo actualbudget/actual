@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type CSSProperties,
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
@@ -56,7 +62,7 @@ export function LoggedInUser({
   const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
   const hasSyncedPrefs = useSelector(state => state.prefs.synced);
 
-  const initializeUserData = async () => {
+  const initializeUserData = useCallback(async () => {
     try {
       await dispatch(getUserData());
     } catch (error) {
@@ -64,11 +70,11 @@ export function LoggedInUser({
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     initializeUserData();
-  }, []);
+  }, [initializeUserData]);
 
   useEffect(() => {
     return listen('sync-event', ({ type }) => {
@@ -89,7 +95,7 @@ export function LoggedInUser({
         setLoading(false);
       }
     });
-  }, [userData]);
+  }, [initializeUserData, userData]);
 
   async function onCloseBudget() {
     await dispatch(closeBudget());
