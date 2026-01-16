@@ -30,6 +30,7 @@ import {
   PageHeader,
 } from '@desktop-client/components/Page';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { Change } from '@desktop-client/components/reports/Change';
 import { BudgetAnalysisGraph } from '@desktop-client/components/reports/graphs/BudgetAnalysisGraph';
 import { Header } from '@desktop-client/components/reports/Header';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
@@ -410,7 +411,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                           right={
                             <Text style={{ fontWeight: 600 }}>
                               <PrivacyFilter>
-                                {format(data.totalSpent, 'financial')}
+                                {format(-data.totalSpent, 'financial')}
                               </PrivacyFilter>
                             </Text>
                           }
@@ -444,7 +445,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                             right={
                               <Text style={{ fontWeight: 600 }}>
                                 <PrivacyFilter>
-                                  {format(endingBalance, 'financial')}
+                                  <Change amount={endingBalance} />
                                 </PrivacyFilter>
                               </Text>
                             }

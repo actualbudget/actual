@@ -1,7 +1,9 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
+import { AlignedText } from '@actual-app/components/aligned-text';
 import { type CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { css } from '@emotion/css';
 import {
   Bar,
   CartesianGrid,
@@ -16,7 +18,7 @@ import {
 import * as monthUtils from 'loot-core/shared/months';
 
 import { Container } from '@desktop-client/components/reports/Container';
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
 /**
@@ -32,6 +34,16 @@ type BudgetAnalysisIntervalData = {
   overspendingAdjustment: number;
 };
 
+type PayloadItem = {
+  payload: {
+    date: string;
+    budgeted: number;
+    spent: number;
+    balance: number;
+    overspendingAdjustment: number;
+  };
+};
+
 type BudgetAnalysisGraphProps = {
   style?: CSSProperties;
   data: {
@@ -41,6 +53,124 @@ type BudgetAnalysisGraphProps = {
   showBalance?: boolean;
   isConcise?: boolean;
 };
+
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: PayloadItem[];
+  isConcise: boolean;
+  format: (value: unknown, type?: FormatType) => string;
+  showBalance: boolean;
+};
+
+function CustomTooltip({
+  active,
+  payload,
+  isConcise,
+  format,
+  showBalance,
+}: CustomTooltipProps) {
+  const locale = useLocale();
+  const { t } = useTranslation();
+
+  if (!active || !payload || !Array.isArray(payload) || !payload[0]) {
+    return null;
+  }
+
+  const [{ payload: data }] = payload;
+
+  return (
+    <div
+      className={css({
+        pointerEvents: 'none',
+        borderRadius: 2,
+        boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+        backgroundColor: theme.menuBackground,
+        color: theme.menuItemText,
+        padding: 10,
+      })}
+    >
+      <div>
+        <div style={{ marginBottom: 10 }}>
+          <strong>
+            {monthUtils.format(
+              data.date,
+              isConcise ? 'MMMM yyyy' : 'MMMM dd, yyyy',
+              locale,
+            )}
+          </strong>
+        </div>
+        <div style={{ lineHeight: 1.5 }}>
+          <AlignedText
+            left={
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span
+                  style={{
+                    width: 10,
+                    height: 10,
+                    backgroundColor: theme.reportsBlue,
+                    display: 'inline-block',
+                  }}
+                />
+                <Trans>Budgeted:</Trans>
+              </span>
+            }
+            right={format(data.budgeted, 'financial')}
+          />
+          <AlignedText
+            left={
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span
+                  style={{
+                    width: 10,
+                    height: 10,
+                    backgroundColor: theme.reportsRed,
+                    display: 'inline-block',
+                  }}
+                />
+                <Trans>Spent:</Trans>
+              </span>
+            }
+            right={format(-data.spent, 'financial')}
+          />
+          <AlignedText
+            left={
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span
+                  style={{
+                    width: 10,
+                    height: 10,
+                    backgroundColor: theme.errorText,
+                    display: 'inline-block',
+                  }}
+                />
+                {t('Overspending Adjustment:')}
+              </span>
+            }
+            right={format(data.overspendingAdjustment, 'financial')}
+          />
+          {showBalance && (
+            <AlignedText
+              left={
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span
+                    style={{
+                      width: 10,
+                      height: 10,
+                      backgroundColor: theme.pageTextLight,
+                      display: 'inline-block',
+                    }}
+                  />
+                  <Trans>Balance:</Trans>
+                </span>
+              }
+              right={<strong>{format(data.balance, 'financial')}</strong>}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function BudgetAnalysisGraph({
   style,
@@ -60,15 +190,6 @@ export function BudgetAnalysisGraph({
   const overspendingLabel = t('Overspending Adjustment');
 
   const graphData = data.intervalData;
-
-  const tooltipContentStyle = {
-    pointerEvents: 'none' as const,
-    zIndex: 1000,
-    borderRadius: 2,
-    boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-    color: theme.menuItemText,
-    backgroundColor: theme.menuBackground,
-  };
 
   const formatDate = (date: string) => {
     if (isConcise) {
@@ -105,8 +226,13 @@ export function BudgetAnalysisGraph({
             />
             <Tooltip
               cursor={{ fill: 'transparent' }}
-              formatter={(value: number) => format(value, 'financial')}
-              contentStyle={tooltipContentStyle}
+              content={
+                <CustomTooltip
+                  isConcise={isConcise}
+                  format={format}
+                  showBalance={showBalance}
+                />
+              }
               isAnimationActive={false}
             />
             <Bar
@@ -153,8 +279,13 @@ export function BudgetAnalysisGraph({
             />
             <Tooltip
               cursor={{ fill: 'transparent' }}
-              formatter={(value: number) => format(value, 'financial')}
-              contentStyle={tooltipContentStyle}
+              content={
+                <CustomTooltip
+                  isConcise={isConcise}
+                  format={format}
+                  showBalance={showBalance}
+                />
+              }
               isAnimationActive={false}
             />
             <Line
