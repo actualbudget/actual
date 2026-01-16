@@ -10,7 +10,7 @@ const CATALOG_URL =
  */
 export function useThemeCatalog() {
   const [data, setData] = useState<CatalogTheme[] | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
