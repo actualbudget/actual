@@ -45,6 +45,7 @@ export const PayeeTable = forwardRef<
       if (typeof ref !== 'function') {
         ref.current.scrollTo(firstSelected, 'center');
       }
+      // oxlint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const onHover = useCallback(id => {

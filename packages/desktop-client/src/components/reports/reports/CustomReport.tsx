@@ -397,6 +397,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
 
     run();
     // omitted `conditions` and `conditionsOp` from dependencies to avoid infinite loops
+    // oxlint-disable-next-line react/exhaustive-deps
   }, [
     interval,
     dateRange,

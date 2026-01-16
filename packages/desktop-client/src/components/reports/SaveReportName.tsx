@@ -44,7 +44,7 @@ export function SaveReportName({
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, []);
+  }, [inputRef]);
 
   return (
     <>
