@@ -23,6 +23,7 @@ type BudgetAnalysisData = {
   totalBudgeted: number;
   totalSpent: number;
   totalOverspendingAdjustment: number;
+  finalOverspendingAdjustment: number;
 };
 
 type createBudgetAnalysisSpreadsheetProps = {
@@ -147,6 +148,9 @@ export function createBudgetAnalysisSpreadsheet({
     let totalSpent = 0;
     let totalOverspendingAdjustment = 0;
 
+    // Track overspending from previous month to apply in next month
+    let overspendingFromPrevMonth = 0;
+
     // Process each month
     for (const month of intervals) {
       // Get budget values from the server for this month
@@ -155,7 +159,7 @@ export function createBudgetAnalysisSpreadsheet({
 
       let budgeted = 0;
       let spent = 0;
-      let overspendingAdjustment = 0;
+      let overspendingThisMonth = 0;
 
       // Track what will carry over to next month
       let carryoverToNextMonth = 0;
@@ -191,29 +195,34 @@ export function createBudgetAnalysisSpreadsheet({
           carryoverToNextMonth += catBalance;
         } else if (catBalance < 0 && !hasCarryover) {
           // If balance is negative and carryover is NOT enabled,
-          // this is an overspending adjustment (balance is zeroed out)
-          overspendingAdjustment += Math.abs(catBalance);
+          // this will be zeroed out and becomes next month's overspending adjustment
+          overspendingThisMonth += catBalance; // Keep as negative
         }
       }
 
-      // This month's balance = budgeted + spent + running balance from previous month
+      // Apply overspending adjustment from previous month (negative value)
+      const overspendingAdjustment = overspendingFromPrevMonth;
+
+      // This month's balance = budgeted + spent + running balance + overspending adjustment
       const monthBalance = budgeted + spent + runningBalance;
 
       // Update totals
       totalBudgeted += budgeted;
       totalSpent += Math.abs(spent);
-      totalOverspendingAdjustment += overspendingAdjustment;
+      totalOverspendingAdjustment += Math.abs(overspendingAdjustment);
 
       intervalData.push({
         date: month,
         budgeted,
         spent: Math.abs(spent), // Display as positive
         balance: monthBalance,
-        overspendingAdjustment,
+        overspendingAdjustment: Math.abs(overspendingAdjustment), // Display as positive
       });
 
       // Update running balance for next month
       runningBalance = carryoverToNextMonth;
+      // Save this month's overspending to apply in next month
+      overspendingFromPrevMonth = overspendingThisMonth;
     }
 
     setData({
@@ -223,6 +232,7 @@ export function createBudgetAnalysisSpreadsheet({
       totalBudgeted,
       totalSpent,
       totalOverspendingAdjustment,
+      finalOverspendingAdjustment: overspendingFromPrevMonth,
     });
   };
 }
