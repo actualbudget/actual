@@ -278,7 +278,7 @@ async function countContributorPoints() {
 
             if (
               event.event === 'closed' &&
-              event.state_reason === 'not_planned'
+              ['not_planned', 'duplicate'].includes(event.state_reason)
             ) {
               const closer = event.actor.login;
               const userStats = stats.get(closer);
