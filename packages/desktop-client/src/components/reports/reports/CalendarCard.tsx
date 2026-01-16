@@ -1,12 +1,12 @@
 import React, {
-  useState,
+  useCallback,
+  useEffect,
   useMemo,
   useRef,
-  type Ref,
-  useEffect,
+  useState,
   type Dispatch,
+  type Ref,
   type SetStateAction,
-  useCallback,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -38,12 +38,12 @@ import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import {
-  type CalendarDataType,
   calendarSpreadsheet,
+  type CalendarDataType,
 } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Trans } from 'react-i18next';
-import { useTransition, animated } from 'react-spring';
+import { animated, useTransition } from 'react-spring';
 
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';

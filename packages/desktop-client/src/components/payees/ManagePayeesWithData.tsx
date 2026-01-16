@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { send, listen } from 'loot-core/platform/client/fetch';
+import { listen, send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type UndoState } from 'loot-core/server/undo';
 import { applyChanges, type Diff } from 'loot-core/shared/util';

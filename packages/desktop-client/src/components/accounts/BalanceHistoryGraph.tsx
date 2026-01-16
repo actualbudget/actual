@@ -1,7 +1,7 @@
 import React, {
-  useState,
   useEffect,
   useMemo,
+  useState,
   type CSSProperties,
   type Ref,
 } from 'react';
@@ -12,8 +12,8 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { subMonths, format, eachMonthOfInterval } from 'date-fns';
-import { AreaChart, Area, YAxis, Tooltip as RechartsTooltip } from 'recharts';
+import { eachMonthOfInterval, format, subMonths } from 'date-fns';
+import { Area, AreaChart, Tooltip as RechartsTooltip, YAxis } from 'recharts';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { integerToCurrency } from 'loot-core/shared/util';

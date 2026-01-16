@@ -1,6 +1,6 @@
 import React, {
-  type MouseEventHandler,
   type ComponentProps,
+  type MouseEventHandler,
   type ReactNode,
 } from 'react';
 import { NavLink, useMatch } from 'react-router';

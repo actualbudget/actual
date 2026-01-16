@@ -10,7 +10,7 @@ import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
-import { runAll, indexCashFlow } from '@desktop-client/components/reports/util';
+import { indexCashFlow, runAll } from '@desktop-client/components/reports/util';
 import { type FormatType } from '@desktop-client/hooks/useFormat';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 

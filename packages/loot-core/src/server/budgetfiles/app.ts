@@ -2,7 +2,7 @@
 import * as CRDT from '@actual-app/crdt';
 
 import { createTestBudget } from '../../mocks/budget';
-import { captureException, captureBreadcrumb } from '../../platform/exceptions';
+import { captureBreadcrumb, captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
 import * as fs from '../../platform/server/fs';
@@ -20,7 +20,7 @@ import { mutator } from '../mutators';
 import * as prefs from '../prefs';
 import { getServer } from '../server-config';
 import * as sheet from '../sheet';
-import { setSyncingMode, initialFullSync, clearFullSyncTimeout } from '../sync';
+import { clearFullSyncTimeout, initialFullSync, setSyncingMode } from '../sync';
 import * as syncMigrations from '../sync/migrate';
 import * as rules from '../transactions/transaction-rules';
 import { clearUndo } from '../undo';
@@ -32,9 +32,9 @@ import {
 } from '../util/budget-name';
 
 import {
-  getAvailableBackups,
-  makeBackup as _makeBackup,
   loadBackup as _loadBackup,
+  makeBackup as _makeBackup,
+  getAvailableBackups,
   startBackupService,
   stopBackupService,
 } from './backups';

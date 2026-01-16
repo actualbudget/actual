@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';

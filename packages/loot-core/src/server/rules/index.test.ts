@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import {
+  Action,
+  Condition,
+  iterateIds,
   parseDateString,
   rankRules,
-  iterateIds,
-  Condition,
-  Action,
   Rule,
   RuleIndexer,
 } from '.';

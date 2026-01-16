@@ -6,14 +6,14 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { type CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
-import { parse, getDay } from 'date-fns';
+import { getDay, parse } from 'date-fns';
 import {
-  AreaChart,
   Area,
+  AreaChart,
   CartesianGrid,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
 } from 'recharts';
 
 import { computePadding } from './util/computePadding';

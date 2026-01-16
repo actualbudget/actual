@@ -1,13 +1,13 @@
 // @ts-strict-ignore
 import React, {
-  type Ref,
+  useCallback,
+  useEffect,
   useRef,
   useState,
-  useEffect,
+  type CSSProperties,
   type FocusEventHandler,
   type KeyboardEvent,
-  type CSSProperties,
-  useCallback,
+  type Ref,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 

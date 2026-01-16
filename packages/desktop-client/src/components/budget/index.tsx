@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import React, {
-  useMemo,
-  useState,
   useEffect,
   useEffectEvent,
+  useMemo,
+  useState,
   type ComponentType,
 } from 'react';
 

@@ -1,8 +1,8 @@
 import {
-  looselyParseAmount,
-  getNumberFormat,
-  setNumberFormat,
   currencyToAmount,
+  getNumberFormat,
+  looselyParseAmount,
+  setNumberFormat,
   stringToInteger,
   titleFirst,
 } from './util';

@@ -6,7 +6,7 @@ import { HyperFormula } from 'hyperformula';
 import { amountToInteger } from 'loot-core/shared/util';
 
 import { logger } from '../../platform/server/log';
-import { parseDate, format, currentDay } from '../../shared/months';
+import { currentDay, format, parseDate } from '../../shared/months';
 import { FIELD_TYPES } from '../../shared/rules';
 import { type TransactionForRules } from '../transactions/transaction-rules';
 

@@ -1,7 +1,7 @@
 // @ts-strict-ignore
-import React, { type FormEvent, useState, type CSSProperties } from 'react';
+import React, { useState, type CSSProperties, type FormEvent } from 'react';
 import { Form } from 'react-aria-components';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { FormError } from '@actual-app/components/form-error';
@@ -28,8 +28,8 @@ import {
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import {
-  type Modal as ModalType,
   pushModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 

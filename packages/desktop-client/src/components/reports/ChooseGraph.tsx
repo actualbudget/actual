@@ -1,4 +1,4 @@
-import React, { type UIEvent, useRef, type CSSProperties } from 'react';
+import React, { useRef, type CSSProperties, type UIEvent } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 

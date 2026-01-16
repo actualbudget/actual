@@ -1,6 +1,6 @@
 import React, {
-  type CSSProperties,
   type ComponentPropsWithoutRef,
+  type CSSProperties,
 } from 'react';
 import { mergeProps } from 'react-aria';
 import { ListBoxItem } from 'react-aria-components';
@@ -25,12 +25,12 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import {
   PressResponder,
-  usePress,
   useLongPress,
+  usePress,
 } from '@react-aria/interactions';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
-import { type IntegerAmount, integerToCurrency } from 'loot-core/shared/util';
+import { integerToCurrency, type IntegerAmount } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type TransactionEntity,
