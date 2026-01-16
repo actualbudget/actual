@@ -35,7 +35,9 @@ export function getBudgetRange(start: string, end: string) {
   start = monthUtils.subMonths(start, 3);
   end = monthUtils.addMonths(end, 12);
 
-  return { start, end, range: monthUtils.rangeInclusive(start, end) };
+  const range = monthUtils.rangeInclusive(start, end);
+
+  return { start, end, range };
 }
 
 export function createCategory(cat, sheetName, prevSheetName, start, end) {
@@ -52,8 +54,7 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
         true,
       );
       const row = rows[0];
-      const amount = row ? row.amount : 0;
-      return amount || 0;
+      return row ? row.amount || 0 : 0;
     },
   });
 
@@ -87,7 +88,7 @@ function handleAccountChange(months, oldValue, newValue) {
   }
 }
 
-function handleTransactionChange(transaction, changedFields) {
+function handleTransactionChange(transaction, changedFields, createdMonths) {
   if (
     (changedFields.has('date') ||
       changedFields.has('acct') ||
@@ -98,12 +99,29 @@ function handleTransactionChange(transaction, changedFields) {
     transaction.date &&
     transaction.category
   ) {
-    const month = monthUtils.monthFromDate(db.fromDateRepr(transaction.date));
-    const sheetName = monthUtils.sheetForMonth(month);
+    const date = db.fromDateRepr(transaction.date);
+    const calendarMonth = monthUtils.dayFromDate(date).slice(0, 7);
 
+    const sheetName = monthUtils.sheetForMonth(calendarMonth);
     sheet
       .get()
       .recompute(resolveName(sheetName, 'sum-amount-' + transaction.category));
+
+    const config = monthUtils.getPayPeriodConfig();
+    if (config) {
+      const payPeriod = monthUtils.getPayPeriodFromDate(
+        monthUtils.parseDate(date),
+        config,
+      );
+      if (createdMonths.has(payPeriod) && payPeriod !== calendarMonth) {
+        const sheetName = monthUtils.sheetForMonth(payPeriod);
+        sheet
+          .get()
+          .recompute(
+            resolveName(sheetName, 'sum-amount-' + transaction.category),
+          );
+      }
+    }
   }
 }
 
@@ -167,9 +185,9 @@ export function triggerBudgetChanges(oldValues, newValues) {
           );
 
           if (oldValue) {
-            handleTransactionChange(oldValue, changed);
+            handleTransactionChange(oldValue, changed, createdMonths);
           }
-          handleTransactionChange(newValue, changed);
+          handleTransactionChange(newValue, changed, createdMonths);
         } else if (table === 'category_mapping') {
           handleCategoryMappingChange(createdMonths, oldValue, newValue);
         } else if (table === 'categories') {
@@ -247,7 +265,6 @@ export async function createBudget(months) {
       const { start, end } = monthUtils.bounds(month);
       const sheetName = monthUtils.sheetForMonth(month);
       const prevSheetName = monthUtils.sheetForMonth(prevMonth);
-
       categories.forEach(cat => {
         createCategory(cat, sheetName, prevSheetName, start, end);
       });

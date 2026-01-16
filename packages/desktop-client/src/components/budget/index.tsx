@@ -6,6 +6,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
+import { applyPayPeriodPrefs } from 'loot-core/shared/pay-periods';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
@@ -24,6 +25,7 @@ import {
 } from '@desktop-client/budget/budgetSlice';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useCategoryActions } from '@desktop-client/hooks/useCategoryActions';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
@@ -45,6 +47,10 @@ export function Budget() {
     end: startMonth,
   });
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+  const payPeriodFeatureFlagEnabled = useFeatureFlag('payPeriodsEnabled');
+  const [payPeriodFrequency] = useSyncedPref('payPeriodFrequency');
+  const [payPeriodStartDate] = useSyncedPref('payPeriodStartDate');
+  const [payPeriodViewEnabled] = useSyncedPref('showPayPeriods');
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
   const [initialized, setInitialized] = useState(false);
@@ -69,6 +75,92 @@ export function Budget() {
 
     run();
   }, []);
+
+  // Wire pay period config from synced prefs into month utils
+  useEffect(() => {
+    if (!payPeriodFeatureFlagEnabled) {
+      applyPayPeriodPrefs({
+        showPayPeriods: 'false',
+        payPeriodFrequency: 'monthly',
+        payPeriodStartDate: monthUtils.currentMonth(),
+      });
+      return;
+    }
+
+    // Use the existing validation function that handles type safety
+    applyPayPeriodPrefs({
+      showPayPeriods: payPeriodViewEnabled,
+      payPeriodFrequency,
+      payPeriodStartDate,
+    });
+  }, [
+    payPeriodFeatureFlagEnabled,
+    payPeriodViewEnabled,
+    payPeriodFrequency,
+    payPeriodStartDate,
+  ]);
+
+  // Reset view to current month when toggling between pay periods and calendar months
+  useEffect(() => {
+    if (!payPeriodFeatureFlagEnabled) {
+      return;
+    }
+
+    // Skip initial mount
+    if (!initialized) {
+      return;
+    }
+
+    if (payPeriodViewEnabled === 'false') {
+      // When pay periods are disabled, reset to current calendar month
+      // This ensures we don't have a pay period ID in startMonthPref
+      const calendarMonth = monthUtils.currentMonth();
+      setStartMonthPref(calendarMonth);
+    } else if (payPeriodViewEnabled === 'true') {
+      // When pay periods are enabled, reset to current pay period
+      // This ensures we navigate to the correct pay period, not a stale calendar month
+      const currentPayPeriod = monthUtils.currentMonth();
+      setStartMonthPref(currentPayPeriod);
+    }
+  }, [
+    payPeriodFeatureFlagEnabled,
+    payPeriodViewEnabled,
+    setStartMonthPref,
+    initialized,
+  ]);
+
+  // Refresh budget bounds when pay period config changes or when toggling pay periods on
+  useEffect(() => {
+    // Skip if feature flag is disabled
+    if (!payPeriodFeatureFlagEnabled) {
+      return;
+    }
+
+    // Skip initial mount - only trigger on actual changes
+    const isInitialMount = !initialized;
+    if (isInitialMount) {
+      return;
+    }
+
+    // Determine if we should refresh:
+    // 1. Toggling pay periods on (to ensure pay period sheets exist)
+    // 2. Config changes while pay periods are enabled (frequency or start date)
+    const shouldRefresh =
+      payPeriodViewEnabled === 'true' &&
+      (payPeriodFrequency || payPeriodStartDate);
+
+    if (shouldRefresh) {
+      send('get-budget-bounds').then(({ start, end }) => {
+        setBounds({ start, end });
+      });
+    }
+  }, [
+    payPeriodFeatureFlagEnabled,
+    payPeriodViewEnabled,
+    payPeriodFrequency,
+    payPeriodStartDate,
+    initialized,
+  ]);
 
   useEffect(() => {
     send('get-budget-bounds').then(({ start, end }) => {
@@ -140,6 +232,22 @@ export function Budget() {
     onReorderGroup,
   } = useCategoryActions();
 
+  // Derive the month to render based on pay period view toggle
+  const derivedStartMonth = useMemo(() => {
+    const config = monthUtils.getPayPeriodConfig();
+    const usePayPeriods = config?.enabled;
+
+    if (!usePayPeriods) return startMonth;
+
+    // If already a pay period id, keep it
+    const mm = parseInt(startMonth.slice(5, 7));
+    if (Number.isFinite(mm) && mm >= 13) return startMonth;
+
+    // For calendar months, use the current year for pay periods
+    const currentYear = parseInt(startMonth.slice(0, 4));
+    return String(currentYear) + '-13';
+  }, [startMonth, payPeriodViewEnabled]);
+
   if (!initialized || !categoryGroups) {
     return null;
   }
@@ -154,8 +262,8 @@ export function Budget() {
       >
         <AutoSizingBudgetTable
           type={budgetType}
-          prewarmStartMonth={startMonth}
-          startMonth={startMonth}
+          prewarmStartMonth={derivedStartMonth}
+          startMonth={derivedStartMonth}
           monthBounds={bounds}
           maxMonths={maxMonths}
           onMonthSelect={onMonthSelect}
@@ -180,8 +288,8 @@ export function Budget() {
       >
         <AutoSizingBudgetTable
           type={budgetType}
-          prewarmStartMonth={startMonth}
-          startMonth={startMonth}
+          prewarmStartMonth={derivedStartMonth}
+          startMonth={derivedStartMonth}
           monthBounds={bounds}
           maxMonths={maxMonths}
           onMonthSelect={onMonthSelect}
@@ -200,7 +308,7 @@ export function Budget() {
   }
 
   return (
-    <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
+    <SheetNameProvider name={monthUtils.sheetForMonth(derivedStartMonth)}>
       {/*
         In a previous iteration, the wrapper needs `overflow: hidden` for
         some reason. Without it at certain dimensions the width/height
