@@ -357,8 +357,7 @@ function SplitTransactionButton({
   ...props
 }: SplitTransactionButtonProps) {
   return (
-    <button
-      type="button"
+    <View
       // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
       // event handler they set on this element. When this code runs
       // in WebKit on touch-enabled devices, taps on this element end
@@ -374,13 +373,14 @@ function SplitTransactionButton({
       // there's some "fast path" logic that can be triggered in various
       // ways to force WebKit to bail on the content observation process.
       // One of those ways is setting `role="button"` (or a number of
-      // other aria roles) on the element. Now we use a semantic button
-      // element instead which provides the same fast path behavior.
+      // other aria roles) on the element, which is what we're doing here.
       //
       // ref:
       // * https://github.com/WebKit/WebKit/blob/447d90b0c52b2951a69df78f06bb5e6b10262f4b/LayoutTests/fast/events/touch/ios/content-observation/400ms-hover-intent.html
       // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
       // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
+      // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
+      role="button"
       style={{
         backgroundColor: highlighted
           ? theme.menuAutoCompleteBackgroundHover
@@ -393,9 +393,6 @@ function SplitTransactionButton({
         fontWeight: 500,
         color: theme.noticeTextMenu,
         padding: '6px 8px',
-        border: 'none',
-        font: 'inherit',
-        display: 'flex',
         ':active': {
           backgroundColor: 'rgba(100, 100, 100, .25)',
         },
@@ -412,7 +409,7 @@ function SplitTransactionButton({
         )}
       </Text>
       <Trans>Split Transaction</Trans>
-    </button>
+    </View>
   );
 }
 

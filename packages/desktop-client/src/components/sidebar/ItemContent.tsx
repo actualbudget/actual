@@ -12,7 +12,7 @@ import { Link } from '@desktop-client/components/common/Link';
 type ItemContentProps = {
   style: ComponentProps<typeof View>['style'];
   to: string;
-  onClick: MouseEventHandler<HTMLDivElement>;
+  onClick: MouseEventHandler<HTMLButtonElement>;
   activeStyle: CSSProperties;
   children: ReactNode;
   forceActive?: boolean;
@@ -33,7 +33,6 @@ export function ItemContent({
         ...style,
         touchAction: 'auto',
         userSelect: 'none',
-        userDrag: 'none',
         cursor: 'pointer',
         border: 'none',
         background: 'transparent',
