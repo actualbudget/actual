@@ -381,7 +381,6 @@ describe('CategoryTemplateContext', () => {
         amount: 1000,
         from: '2023-11',
         month: '2023-12',
-        //@ts-ignore this is what the template expects
         repeat: 3,
         directive: 'template',
         priority: 1,

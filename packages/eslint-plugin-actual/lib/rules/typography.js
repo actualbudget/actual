@@ -30,8 +30,9 @@ module.exports = {
         !value.includes('\u2019') &&
         !value.includes('\u201C') &&
         !value.includes('\u201D')
-      )
+      ) {
         return;
+      }
 
       let rawText = context.getSourceCode().getText(node);
       const originalRawText = rawText;
