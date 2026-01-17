@@ -6,8 +6,8 @@ import { View } from '@actual-app/components/view';
 
 import {
   Modal,
-  ModalHeader,
   ModalCloseButton,
+  ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { BudgetFileSelection } from '@desktop-client/components/manager/BudgetFileSelection';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';

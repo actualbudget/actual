@@ -9,9 +9,9 @@ import {
   getScheduledAmount,
 } from 'loot-core/shared/schedules';
 import {
-  type TransactionEntity,
-  type ScheduleEntity,
   type RecurConfig,
+  type ScheduleEntity,
+  type TransactionEntity,
 } from 'loot-core/types/models';
 
 import { updateScheduleConditions } from '@desktop-client/components/schedules/schedule-edit-utils';

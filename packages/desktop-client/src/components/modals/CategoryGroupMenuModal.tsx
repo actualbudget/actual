@@ -1,14 +1,14 @@
 // @ts-strict-ignore
-import React, { type ComponentProps, useRef, useState } from 'react';
+import React, { useRef, useState, type ComponentProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
-  SvgDotsHorizontalTriple,
   SvgAdd,
-  SvgTrash,
   SvgCheveronDown,
   SvgCheveronUp,
+  SvgDotsHorizontalTriple,
+  SvgTrash,
 } from '@actual-app/components/icons/v1';
 import {
   SvgNotesPaper,

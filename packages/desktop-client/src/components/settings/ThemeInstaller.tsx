@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { TextArea } from 'react-aria-components';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { Button } from '@actual-app/components/button';
@@ -14,14 +14,14 @@ import { Link } from '@desktop-client/components/common/Link';
 import { FixedSizeList } from '@desktop-client/components/FixedSizeList';
 import { useThemeCatalog } from '@desktop-client/hooks/useThemeCatalog';
 import {
+  extractRepoOwner,
+  fetchThemeCss,
+  generateThemeId,
+  getThemeScreenshotUrl,
+  normalizeGitHubRepo,
+  validateThemeCss,
   type CatalogTheme,
   type InstalledTheme,
-  fetchThemeCss,
-  validateThemeCss,
-  generateThemeId,
-  normalizeGitHubRepo,
-  getThemeScreenshotUrl,
-  extractRepoOwner,
 } from '@desktop-client/style/customThemes';
 
 // Theme item fixed dimensions

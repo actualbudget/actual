@@ -1,4 +1,4 @@
-import { type ComponentProps, forwardRef } from 'react';
+import { forwardRef, type ComponentProps } from 'react';
 
 import { theme } from './theme';
 import { View } from './View';

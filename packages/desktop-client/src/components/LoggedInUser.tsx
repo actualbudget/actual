@@ -1,8 +1,8 @@
 import React, {
-  useState,
+  useCallback,
   useEffect,
   useRef,
-  useCallback,
+  useState,
   type CSSProperties,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -28,7 +28,7 @@ import { Permissions } from '@desktop-client/auth/types';
 import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 import { getUserData, signOut } from '@desktop-client/users/usersSlice';
 
 type LoggedInUserProps = {

@@ -6,13 +6,13 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
-  BarChart,
   Bar,
+  BarChart,
   CartesianGrid,
+  LabelList,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  LabelList,
 } from 'recharts';
 
 import {

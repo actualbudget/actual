@@ -1,4 +1,4 @@
-import { type Ref, useEffect, useState } from 'react';
+import { useEffect, useState, type Ref } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';

@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { merkle, getClock, Timestamp } from '@actual-app/crdt';
+import { getClock, merkle, Timestamp } from '@actual-app/crdt';
 import jsc, { type Arbitrary } from 'jsverify';
 
 import * as db from '../db';

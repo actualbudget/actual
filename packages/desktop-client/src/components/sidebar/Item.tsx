@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import React, {
   type ComponentType,
+  type CSSProperties,
   type MouseEventHandler,
   type ReactNode,
   type SVGProps,
-  type CSSProperties,
 } from 'react';
 
 import { Block } from '@actual-app/components/block';

@@ -1,11 +1,11 @@
 // @ts-strict-ignore
 import React, {
-  type ComponentType,
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
   useCallback,
+  type ComponentPropsWithoutRef,
+  type ComponentType,
+  type CSSProperties,
 } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgArrowThinRight } from '@actual-app/components/icons/v1';

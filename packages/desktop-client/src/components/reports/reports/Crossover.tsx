@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -18,9 +18,9 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import {
+  type CategoryEntity,
   type CrossoverWidget,
   type TimeFrame,
-  type CategoryEntity,
 } from 'loot-core/types/models';
 
 import { Link } from '@desktop-client/components/common/Link';

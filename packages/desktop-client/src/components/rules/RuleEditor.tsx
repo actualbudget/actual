@@ -1,19 +1,19 @@
 // @ts-strict-ignore
 import {
-  useState,
   useEffect,
-  useRef,
   useMemo,
+  useRef,
+  useState,
   type CSSProperties,
   type ReactNode,
 } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
-  SvgDelete,
   SvgAdd,
+  SvgDelete,
   SvgSubtract,
 } from '@actual-app/components/icons/v0';
 import {
@@ -35,21 +35,21 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
-  mapField,
+  FIELD_TYPES,
   friendlyOp,
+  getAllocationMethods,
   getFieldError,
+  getValidOps,
+  isValidOp,
+  makeValue,
+  mapField,
   parse,
   unparse,
-  makeValue,
-  FIELD_TYPES,
-  getAllocationMethods,
-  isValidOp,
-  getValidOps,
 } from 'loot-core/shared/rules';
 import {
-  type RuleEntity,
   type NewRuleEntity,
   type RuleActionEntity,
+  type RuleEntity,
 } from 'loot-core/types/models';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
@@ -67,14 +67,14 @@ import {
   type ScheduleStatusType,
 } from '@desktop-client/hooks/useSchedules';
 import {
-  useSelected,
   SelectedProvider,
+  useSelected,
 } from '@desktop-client/hooks/useSelected';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { getPayees } from '@desktop-client/payees/payeesSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
-import { enableUndo, disableUndo } from '@desktop-client/undo';
+import { disableUndo, enableUndo } from '@desktop-client/undo';
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));

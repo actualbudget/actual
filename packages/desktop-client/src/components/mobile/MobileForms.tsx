@@ -1,8 +1,8 @@
 import React, {
   type ComponentPropsWithoutRef,
   type ComponentPropsWithRef,
-  type ReactNode,
   type CSSProperties,
+  type ReactNode,
 } from 'react';
 
 import { Button } from '@actual-app/components/button';

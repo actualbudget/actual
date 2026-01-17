@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import {
   Children,
-  type ComponentPropsWithRef,
-  type ReactNode,
   useLayoutEffect,
   useRef,
+  type ComponentPropsWithRef,
+  type ReactNode,
 } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';

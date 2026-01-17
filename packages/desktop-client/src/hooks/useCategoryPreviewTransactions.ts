@@ -2,8 +2,8 @@ import { useCallback, useMemo } from 'react';
 
 import * as monthUtils from 'loot-core/shared/months';
 import {
-  type ScheduleEntity,
   type CategoryEntity,
+  type ScheduleEntity,
 } from 'loot-core/types/models';
 
 import { useCategory } from './useCategory';

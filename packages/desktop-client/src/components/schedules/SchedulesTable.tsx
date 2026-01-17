@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useRef, useMemo, type CSSProperties } from 'react';
+import React, { useMemo, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -20,11 +20,11 @@ import { StatusBadge } from './StatusBadge';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import {
+  Cell,
+  Field,
+  Row,
   Table,
   TableHeader,
-  Row,
-  Field,
-  Cell,
 } from '@desktop-client/components/table';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
@@ -34,8 +34,8 @@ import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
-  type ScheduleStatusType,
   type ScheduleStatuses,
+  type ScheduleStatusType,
 } from '@desktop-client/hooks/useSchedules';
 
 type SchedulesTableProps = {

@@ -11,10 +11,10 @@ import * as monthUtils from '../shared/months';
 
 import * as encryption from './encryption';
 import {
-  HTTPError,
-  PostError,
   FileDownloadError,
   FileUploadError,
+  HTTPError,
+  PostError,
 } from './errors';
 import { runMutator } from './mutators';
 import { post } from './post';

@@ -1,9 +1,9 @@
-import React, { type ReactNode, type CSSProperties } from 'react';
+import React, { type CSSProperties, type ReactNode } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type GroupedEntity, type DataEntity } from 'loot-core/types/models';
+import { type DataEntity, type GroupedEntity } from 'loot-core/types/models';
 
 import { RenderTableRow } from './RenderTableRow';
 import { type renderRowProps } from './ReportTable';

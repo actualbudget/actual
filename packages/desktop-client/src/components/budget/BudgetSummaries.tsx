@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useSpring, animated } from 'react-spring';
+import { animated, useSpring } from 'react-spring';
 
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
