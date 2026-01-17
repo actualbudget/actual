@@ -10,5 +10,13 @@
   {
     "name": "Miami Beach",
     "repo": "Juulz/miami-beach"
+  },
+  {
+    "name": "Simple Dark",
+    "repo": "Juulz/simple-dark"
+  },
+  {
+    "name": "Matrix",
+    "repo": "MatissJanis/actualbudget-matrix-theme"
   }
 ]

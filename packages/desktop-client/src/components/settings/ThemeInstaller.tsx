@@ -5,6 +5,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { baseInputStyle } from '@actual-app/components/input';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme as themeStyle } from '@actual-app/components/theme';
@@ -44,6 +45,7 @@ export function ThemeInstaller({
   const { t } = useTranslation();
   const [selectedCatalogTheme, setSelectedCatalogTheme] =
     useState<CatalogTheme | null>(null);
+  const [erroringTheme, setErroringTheme] = useState<CatalogTheme | null>(null);
   const [pastedCss, setPastedCss] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +77,21 @@ export function ThemeInstaller({
     );
   }, []);
 
+  // Helper function to check if a catalog theme matches an installed theme
+  const isCatalogThemeInstalled = useCallback(
+    (catalogTheme: CatalogTheme): boolean => {
+      if (!installedTheme) return false;
+      try {
+        const normalizedRepo = normalizeGitHubRepo(catalogTheme.repo);
+        const themeId = generateThemeId(normalizedRepo);
+        return themeId === installedTheme.id;
+      } catch {
+        return false;
+      }
+    },
+    [installedTheme],
+  );
+
   const installTheme = useCallback(
     async (options: {
       css: string | Promise<string>;
@@ -82,8 +99,10 @@ export function ThemeInstaller({
       repo: string;
       id: string;
       errorMessage: string;
+      catalogTheme?: CatalogTheme | null;
     }) => {
       setError(null);
+      setErroringTheme(null);
       setIsLoading(true);
 
       try {
@@ -98,8 +117,17 @@ export function ThemeInstaller({
           cssContent: validatedCss,
         };
         onInstall(installedTheme);
+        // Only set selectedCatalogTheme on success if it's a catalog theme
+        if (options.catalogTheme) {
+          setSelectedCatalogTheme(options.catalogTheme);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : options.errorMessage);
+        // Track which theme failed and clear selection
+        if (options.catalogTheme) {
+          setErroringTheme(options.catalogTheme);
+        }
+        setSelectedCatalogTheme(null);
       } finally {
         setIsLoading(false);
       }
@@ -109,7 +137,6 @@ export function ThemeInstaller({
 
   const handleCatalogThemeClick = useCallback(
     async (theme: CatalogTheme) => {
-      setSelectedCatalogTheme(theme);
       setPastedCss('');
 
       const normalizedRepo = normalizeGitHubRepo(theme.repo);
@@ -119,6 +146,7 @@ export function ThemeInstaller({
         repo: normalizedRepo,
         id: generateThemeId(normalizedRepo),
         errorMessage: t('Failed to load theme'),
+        catalogTheme: theme,
       });
     },
     [installTheme, t],
@@ -127,6 +155,7 @@ export function ThemeInstaller({
   const handlePastedCssChange = useCallback((value: string) => {
     setPastedCss(value);
     setSelectedCatalogTheme(null);
+    setErroringTheme(null);
     setError(null);
   }, []);
 
@@ -239,6 +268,10 @@ export function ThemeInstaller({
                           }}
                         >
                           {rowThemes.map((theme, themeIndex) => {
+                            const isActive = isCatalogThemeInstalled(theme);
+                            const hasError =
+                              erroringTheme?.name === theme.name &&
+                              erroringTheme?.repo === theme.repo;
                             const isSelected =
                               selectedCatalogTheme?.name === theme.name &&
                               selectedCatalogTheme?.repo === theme.repo;
@@ -257,13 +290,17 @@ export function ThemeInstaller({
                                   padding: 8,
                                   borderRadius: 6,
                                   border: `2px solid ${
-                                    isSelected
-                                      ? themeStyle.buttonPrimaryBackground
-                                      : themeStyle.tableBorder
+                                    hasError
+                                      ? themeStyle.errorText
+                                      : isActive
+                                        ? themeStyle.buttonPrimaryBackground
+                                        : themeStyle.tableBorder
                                   }`,
-                                  backgroundColor: isSelected
-                                    ? themeStyle.tableRowBackgroundHover
-                                    : 'transparent',
+                                  backgroundColor: hasError
+                                    ? themeStyle.errorBackground
+                                    : isActive
+                                      ? themeStyle.tableRowBackgroundHover
+                                      : 'transparent',
                                   flexDirection: 'column',
                                   alignItems: 'center',
                                   gap: 8,
@@ -375,6 +412,7 @@ export function ThemeInstaller({
           aria-label={t('Custom Theme CSS')}
           style={{
             height: 120,
+            ...baseInputStyle,
           }}
         />
         <View
