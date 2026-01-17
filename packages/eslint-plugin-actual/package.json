@@ -1,23 +1,20 @@
 {
   "name": "eslint-plugin-actual",
   "private": true,
+  "type": "commonjs",
   "main": "./lib/index.js",
   "exports": "./lib/index.js",
-  "type": "commonjs",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest --run"
   },
   "dependencies": {
     "requireindex": "^1.2.0"
   },
   "devDependencies": {
-    "eslint": "^9.27.0",
-    "eslint-plugin-eslint-plugin": "^6.4.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-vitest-rule-tester": "^2.2.0",
-    "vitest": "^3.2.4"
-  },
-  "peerDependencies": {
-    "eslint": ">=7"
+    "eslint-vitest-rule-tester": "^3.0.1",
+    "loupe": "^3.2.1",
+    "strip-literal": "^3.1.0",
+    "tinyspy": "^4.0.4",
+    "vitest": "^4.0.16"
   }
 }

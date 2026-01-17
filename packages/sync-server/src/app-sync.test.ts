@@ -5,9 +5,9 @@ import fs from 'node:fs';
 import { SyncProtoBuf } from '@actual-app/crdt';
 import request from 'supertest';
 
-import { getAccountDb } from './account-db.js';
-import { handlers as app } from './app-sync.js';
-import { getPathForUserFile } from './util/paths.js';
+import { getAccountDb } from './account-db';
+import { handlers as app } from './app-sync';
+import { getPathForUserFile } from './util/paths';
 
 const ADMIN_ROLE = 'ADMIN';
 
@@ -16,6 +16,10 @@ const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
     'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, ?, ?, ?)',
     [userId, userName, `${userName} display`, enabled, owner, role],
   );
+};
+
+const deleteUser = (userId: string) => {
+  getAccountDb().mutate('DELETE FROM users WHERE id = ?', [userId]);
 };
 
 describe('/user-get-key', () => {
@@ -536,6 +540,8 @@ describe('/list-user-files', () => {
 
   it('returns a list of user files for an authenticated user', async () => {
     createUser('fileListAdminId', 'admin', ADMIN_ROLE, 1);
+    onTestFinished(() => deleteUser('fileListAdminId'));
+
     const fileId1 = crypto.randomBytes(16).toString('hex');
     const fileId2 = crypto.randomBytes(16).toString('hex');
     const fileName1 = 'file1.txt';
@@ -704,6 +710,88 @@ describe('/delete-user-file', () => {
     expect(res.body).toEqual({ status: 'ok' });
 
     // Verify that the file is marked as deleted
+    const rows = accountDb.all('SELECT deleted FROM files WHERE id = ?', [
+      fileId,
+    ]);
+    expect(rows[0].deleted).toBe(1);
+  });
+
+  it('returns 403 if the user is not the owner and not an admin', async () => {
+    const accountDb = getAccountDb();
+    const fileId = crypto.randomBytes(16).toString('hex');
+
+    // Insert a file owned by another user
+    accountDb.mutate(
+      'INSERT OR IGNORE INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
+      [fileId, 'differentUser'],
+    );
+
+    // Try to delete with a non-admin, non-owner user
+    const res = await request(app)
+      .post('/delete-user-file')
+      .set('x-actual-token', 'valid-token-user')
+      .send({ fileId });
+
+    expect(res.statusCode).toEqual(403);
+    expect(res.body).toEqual({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'file-delete-not-allowed',
+    });
+
+    // Verify that the file is NOT deleted
+    const rows = accountDb.all('SELECT deleted FROM files WHERE id = ?', [
+      fileId,
+    ]);
+    expect(rows[0].deleted).toBe(0);
+  });
+
+  it('allows the file owner to delete the file', async () => {
+    const accountDb = getAccountDb();
+    const fileId = crypto.randomBytes(16).toString('hex');
+
+    // Insert a file owned by genericUser
+    accountDb.mutate(
+      'INSERT OR IGNORE INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
+      [fileId, 'genericUser'],
+    );
+
+    // Delete with the owner user
+    const res = await request(app)
+      .post('/delete-user-file')
+      .set('x-actual-token', 'valid-token-user')
+      .send({ fileId });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({ status: 'ok' });
+
+    // Verify that the file is deleted
+    const rows = accountDb.all('SELECT deleted FROM files WHERE id = ?', [
+      fileId,
+    ]);
+    expect(rows[0].deleted).toBe(1);
+  });
+
+  it('allows an admin to delete any file', async () => {
+    const accountDb = getAccountDb();
+    const fileId = crypto.randomBytes(16).toString('hex');
+
+    // Insert a file owned by another user
+    accountDb.mutate(
+      'INSERT OR IGNORE INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
+      [fileId, 'someOtherUser'],
+    );
+
+    // Delete with an admin user
+    const res = await request(app)
+      .post('/delete-user-file')
+      .set('x-actual-token', 'valid-token-admin')
+      .send({ fileId });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({ status: 'ok' });
+
+    // Verify that the file is deleted
     const rows = accountDb.all('SELECT deleted FROM files WHERE id = ?', [
       fileId,
     ]);

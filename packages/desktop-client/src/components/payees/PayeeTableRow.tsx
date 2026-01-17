@@ -1,6 +1,6 @@
 // @ts-strict-ignore
-import { memo, useRef, useMemo, type CSSProperties } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { memo, useMemo, useRef, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   SvgArrowThinRight,
@@ -9,11 +9,12 @@ import {
 } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 
 import { type PayeeEntity } from 'loot-core/types/models';
+
+import { PayeeRuleCountLabel } from './PayeeRuleCountLabel';
 
 import {
   Cell,
@@ -38,8 +39,6 @@ type RuleButtonProps = {
 };
 
 function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
-  const count = ruleCount;
-
   return (
     <Cell
       name="rule-count"
@@ -62,13 +61,7 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
         onEdit={onEdit}
         onSelect={onClick}
       >
-        <Text style={{ paddingRight: 5 }}>
-          {ruleCount > 0 ? (
-            <Trans count={ruleCount}>{{ count }} associated rules</Trans>
-          ) : (
-            <Trans>Create rule</Trans>
-          )}
-        </Text>
+        <PayeeRuleCountLabel count={ruleCount} style={{ paddingRight: 5 }} />
         <SvgArrowThinRight style={{ width: 8, height: 8 }} />
       </CellButton>
     </Cell>
@@ -241,9 +234,6 @@ export const PayeeTableRow = memo(
         <CustomCell
           width={20}
           exposed={!payee.transfer_acct}
-          onBlur={() => {}}
-          onUpdate={() => {}}
-          onClick={() => {}}
           style={{
             display: 'flex',
             justifyContent: 'center',

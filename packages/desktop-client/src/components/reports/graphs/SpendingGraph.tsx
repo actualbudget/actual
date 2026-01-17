@@ -1,24 +1,24 @@
 // @ts-strict-ignore
 import React, { type ComponentProps, type CSSProperties } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
-  AreaChart,
   Area,
+  AreaChart,
   CartesianGrid,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
 } from 'recharts';
 
 import { type SpendingEntity } from 'loot-core/types/models';
 
 import { computePadding } from './util/computePadding';
 
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
@@ -63,7 +63,7 @@ const CustomTooltip = ({
   if (active && payload && payload.length) {
     const comparison = ['average', 'budget'].includes(selection)
       ? payload[0].payload[selection] * -1
-      : payload[0].payload.months[selection]?.cumulative * -1;
+      : (payload[0].payload.months[selection]?.cumulative ?? 0) * -1;
     return (
       <div
         className={css({
@@ -149,6 +149,7 @@ export function SpendingGraph({
   compareTo,
 }: SpendingGraphProps) {
   const privacyMode = usePrivacyMode();
+  const animationProps = useRechartsAnimation({ isAnimationActive: false });
   const balanceTypeOp = 'cumulative';
   const format = useFormat();
 
@@ -215,116 +216,115 @@ export function SpendingGraph({
     >
       {(width, height) =>
         data.intervalData && (
-          <ResponsiveContainer>
-            <div>
-              {!compact && <div style={{ marginTop: '5px' }} />}
-              <AreaChart
-                width={width}
-                height={height}
-                data={data.intervalData}
-                margin={{
-                  top: 0,
-                  right: 0,
-                  left: computePadding(
-                    data.intervalData
-                      .map(item => getVal(item, maxYAxis ? compare : selection))
-                      .filter(value => value !== undefined),
-                    (value: number) => format(value, 'financial-no-decimals'),
-                  ),
-                  bottom: 0,
-                }}
-              >
-                {compact ? null : (
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                )}
-                {compact ? null : (
-                  <XAxis
-                    dataKey={val => getDate(val)}
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                  />
-                )}
-                {compact ? null : (
-                  <YAxis
-                    dataKey={val => getVal(val, maxYAxis ? compare : selection)}
-                    domain={[0, 'auto']}
-                    tickFormatter={tickFormatter}
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                    tickSize={0}
-                  />
-                )}
-                <Tooltip
-                  content={
-                    <CustomTooltip
-                      balanceTypeOp={balanceTypeOp}
-                      selection={selection}
-                      compare={compare}
-                      format={format}
-                    />
-                  }
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
+          <div>
+            {!compact && <div style={{ marginTop: '5px' }} />}
+            <AreaChart
+              responsive
+              width={width}
+              height={height}
+              data={data.intervalData}
+              margin={{
+                top: 0,
+                right: 0,
+                left: computePadding(
+                  data.intervalData
+                    .map(item => getVal(item, maxYAxis ? compare : selection))
+                    .filter(value => value !== undefined),
+                  (value: number) => format(value, 'financial-no-decimals'),
+                ),
+                bottom: 0,
+              }}
+            >
+              {compact ? null : (
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              )}
+              {compact ? null : (
+                <XAxis
+                  dataKey={val => getDate(val)}
+                  tick={{ fill: theme.pageText }}
+                  tickLine={{ stroke: theme.pageText }}
                 />
-                <defs>
-                  <linearGradient
-                    id={`fill${balanceTypeOp}`}
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset={gradientOffset()}
-                      stopColor={theme.reportsGreen}
-                      stopOpacity={0.2}
-                    />
-                  </linearGradient>
-                  <linearGradient
-                    id={`stroke${balanceTypeOp}`}
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset={gradientOffset()}
-                      stopColor={theme.reportsGreen}
-                      stopOpacity={1}
-                    />
-                  </linearGradient>
-                </defs>
+              )}
+              {compact ? null : (
+                <YAxis
+                  dataKey={val => getVal(val, maxYAxis ? compare : selection)}
+                  domain={[0, 'auto']}
+                  tickFormatter={tickFormatter}
+                  tick={{ fill: theme.pageText }}
+                  tickLine={{ stroke: theme.pageText }}
+                  tickSize={0}
+                />
+              )}
+              <Tooltip
+                content={
+                  <CustomTooltip
+                    balanceTypeOp={balanceTypeOp}
+                    selection={selection}
+                    compare={compare}
+                    format={format}
+                  />
+                }
+                formatter={numberFormatterTooltip}
+                isAnimationActive={false}
+              />
+              <defs>
+                <linearGradient
+                  id={`fill${balanceTypeOp}`}
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop
+                    offset={gradientOffset()}
+                    stopColor={theme.reportsGreen}
+                    stopOpacity={0.2}
+                  />
+                </linearGradient>
+                <linearGradient
+                  id={`stroke${balanceTypeOp}`}
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop
+                    offset={gradientOffset()}
+                    stopColor={theme.reportsGreen}
+                    stopOpacity={1}
+                  />
+                </linearGradient>
+              </defs>
 
-                <Area
-                  type="linear"
-                  dot={false}
-                  activeDot={{
-                    fill: theme.reportsGreen,
-                    fillOpacity: 1,
-                    r: 10,
-                  }}
-                  animationDuration={0}
-                  dataKey={val => getVal(val, compare)}
-                  stroke={`url(#stroke${balanceTypeOp})`}
-                  strokeWidth={3}
-                  fill={`url(#fill${balanceTypeOp})`}
-                  fillOpacity={1}
-                />
-                <Area
-                  type="linear"
-                  dot={false}
-                  activeDot={false}
-                  animationDuration={0}
-                  dataKey={val => getVal(val, selection)}
-                  stroke={theme.reportsGray}
-                  strokeDasharray="10 10"
-                  strokeWidth={3}
-                  fill={theme.reportsGray}
-                  fillOpacity={0.2}
-                />
-              </AreaChart>
-            </div>
-          </ResponsiveContainer>
+              <Area
+                type="linear"
+                dot={false}
+                activeDot={{
+                  fill: theme.reportsGreen,
+                  fillOpacity: 1,
+                  r: 10,
+                }}
+                {...animationProps}
+                dataKey={val => getVal(val, compare)}
+                stroke={`url(#stroke${balanceTypeOp})`}
+                strokeWidth={3}
+                fill={`url(#fill${balanceTypeOp})`}
+                fillOpacity={1}
+              />
+              <Area
+                type="linear"
+                dot={false}
+                activeDot={false}
+                {...animationProps}
+                dataKey={val => getVal(val, selection)}
+                stroke={theme.reportsGray}
+                strokeDasharray="10 10"
+                strokeWidth={3}
+                fill={theme.reportsGray}
+                fillOpacity={0.2}
+              />
+            </AreaChart>
+          </div>
         )
       }
     </Container>

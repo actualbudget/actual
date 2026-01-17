@@ -1,10 +1,10 @@
 import {
-  type Ref,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
+  type Ref,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router';
@@ -52,8 +52,8 @@ import { Header } from '@desktop-client/components/reports/Header';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import {
-  type CalendarDataType,
   calendarSpreadsheet,
+  type CalendarDataType,
 } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
@@ -63,7 +63,7 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -106,19 +106,14 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
-  const [initialStart, initialEnd, initialMode] = calculateTimeRange(
-    widget?.meta?.timeFrame,
-    {
-      start: monthUtils.dayFromDate(monthUtils.currentMonth()),
-      end: monthUtils.currentDay(),
-      mode: 'full',
-    },
+  const [start, setStart] = useState(
+    monthUtils.dayFromDate(monthUtils.currentMonth()),
   );
-  const [start, setStart] = useState(initialStart);
-  const [end, setEnd] = useState(initialEnd);
-  const [mode, setMode] = useState(initialMode);
+  const [end, setEnd] = useState(monthUtils.currentDay());
+  const [mode, setMode] = useState<TimeFrame['mode']>('full');
   const [query, setQuery] = useState<Query | undefined>(undefined);
   const [dirty, setDirty] = useState(false);
+  const [latestTransaction, setLatestTransaction] = useState('');
 
   const { transactions: transactionsGrouped, loadMore: loadMoreTransactions } =
     useTransactions({ query });
@@ -260,36 +255,72 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
   useEffect(() => {
     async function run() {
-      try {
-        const trans = await send('get-earliest-transaction');
-        const currentMonth = monthUtils.currentMonth();
-        let earliestMonth = trans
-          ? monthUtils.monthFromDate(parseISO(fromDateRepr(trans.date)))
+      const earliestTransaction = await send('get-earliest-transaction');
+      setEarliestTransaction(
+        earliestTransaction
+          ? earliestTransaction.date
+          : monthUtils.currentDay(),
+      );
+
+      const latestTransaction = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
+      );
+
+      const currentMonth = monthUtils.currentMonth();
+      let earliestMonth = earliestTransaction
+        ? monthUtils.monthFromDate(
+            parseISO(fromDateRepr(earliestTransaction.date)),
+          )
+        : currentMonth;
+      const latestTransactionMonth = latestTransaction
+        ? monthUtils.monthFromDate(
+            parseISO(fromDateRepr(latestTransaction.date)),
+          )
+        : currentMonth;
+
+      const latestMonth =
+        latestTransactionMonth > currentMonth
+          ? latestTransactionMonth
           : currentMonth;
 
-        // Make sure the month selects are at least populates with a
-        // year's worth of months. We can undo this when we have fancier
-        // date selects.
-        const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
-        if (earliestMonth > yearAgo) {
-          earliestMonth = yearAgo;
-        }
-
-        const allMonths = monthUtils
-          .rangeInclusive(earliestMonth, monthUtils.currentMonth())
-          .map(month => ({
-            name: month,
-            pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
-          }))
-          .reverse();
-
-        setAllMonths(allMonths);
-      } catch (error) {
-        console.error('Error fetching earliest transaction:', error);
+      // Make sure the month selects are at least populates with a
+      // year's worth of months. We can undo this when we have fancier
+      // date selects.
+      const yearAgo = monthUtils.subMonths(latestMonth, 12);
+      if (earliestMonth > yearAgo) {
+        earliestMonth = yearAgo;
       }
+
+      const allMonths = monthUtils
+        .rangeInclusive(earliestMonth, latestMonth)
+        .map(month => ({
+          name: month,
+          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
+        }))
+        .reverse();
+
+      setAllMonths(allMonths);
     }
     run();
   }, [locale]);
+
+  useEffect(() => {
+    if (latestTransaction) {
+      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+        widget?.meta?.timeFrame,
+        {
+          start: monthUtils.dayFromDate(monthUtils.currentMonth()),
+          end: monthUtils.currentDay(),
+          mode: 'full',
+        },
+        latestTransaction,
+      );
+      setStart(initialStart);
+      setEnd(initialEnd);
+      setMode(initialMode);
+    }
+  }, [latestTransaction, widget?.meta?.timeFrame]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -477,7 +508,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     },
   );
 
-  const [earliestTransaction, _] = useState('');
+  const [earliestTransaction, setEarliestTransaction] = useState('');
 
   return (
     <Page
@@ -512,6 +543,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
           start={start}
           end={end}
           earliestTransaction={earliestTransaction}
+          latestTransaction={latestTransaction}
           firstDayOfWeekIdx={firstDayOfWeekIdx}
           mode={mode}
           onChangeDates={onChangeDates}
@@ -521,7 +553,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
           onDeleteFilter={onDeleteFilter}
           conditionsOp={conditionsOp}
           onConditionsOpChange={onConditionsOpChange}
-          show1Month={true}
+          show1Month
         >
           {widget && (
             <Button variant="primary" onPress={onSaveWidget}>
@@ -619,9 +651,9 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     payees={payees}
                     balances={null}
                     showBalances={false}
-                    showReconciled={true}
+                    showReconciled
                     showCleared={false}
-                    showAccount={true}
+                    showAccount
                     isAdding={false}
                     isNew={() => false}
                     isMatched={() => false}
@@ -704,7 +736,11 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     )}
                   </Button>
                   <View
-                    style={{ height: '100%', width: '100%', overflow: 'auto' }}
+                    style={{
+                      height: '100%',
+                      width: '100%',
+                      overflow: 'auto',
+                    }}
                   >
                     <TransactionListMobile
                       isLoading={false}

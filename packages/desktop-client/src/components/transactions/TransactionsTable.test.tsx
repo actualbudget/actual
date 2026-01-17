@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  generateTransaction,
   generateAccount,
   generateCategoryGroups,
+  generateTransaction,
 } from 'loot-core/mocks';
 import { initServer } from 'loot-core/platform/client/fetch';
 import {
@@ -70,11 +70,18 @@ const payees: PayeeEntity[] = [
 ];
 vi.mock('../../hooks/usePayees', async importOriginal => {
   const actual =
-    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+    // oxlint-disable-next-line typescript/consistent-type-imports
     await importOriginal<typeof import('../../hooks/usePayees')>();
   return {
     ...actual,
     usePayees: () => payees,
+    usePayeesById: () => {
+      const payeesById: Record<string, PayeeEntity> = {};
+      payees.forEach(payee => {
+        payeesById[payee.id] = payee;
+      });
+      return payeesById;
+    },
   };
 });
 
@@ -201,8 +208,8 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
                 <TransactionTable
                   {...props}
                   transactions={transactions}
-                  loadMoreTransactions={() => {}}
-                  // @ts-ignore TODO:
+                  loadMoreTransactions={vi.fn()}
+                  // @ts-expect-error TODO: fix me
                   commonPayees={[]}
                   payees={payees}
                   addNotification={console.log}
@@ -211,8 +218,8 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
                   onAdd={onAdd}
                   onAddSplit={onAddSplit}
                   onCreatePayee={onCreatePayee}
-                  showSelection={true}
-                  allowSplitTransaction={true}
+                  showSelection
+                  allowSplitTransaction
                 />
               </SplitsExpandedProvider>
             </SelectedProviderWithItems>
@@ -609,7 +616,7 @@ describe('Transactions', () => {
       .getByTestId('autocomplete')
       .querySelectorAll('[data-testid$="category-item"]');
     expect(items.length).toBe(3);
-  });
+  }, 30000);
 
   test('dropdown selects an item with keyboard', async () => {
     const { container, getTransactions } = renderTransactions();
@@ -692,7 +699,7 @@ describe('Transactions', () => {
     expectToBeEditingField(container, 'category', 2);
   });
 
-  test('dropdown hovers but doesn’t change value', async () => {
+  test("dropdown hovers but doesn't change value", async () => {
     const { container, getTransactions } = renderTransactions();
 
     const input = await editField(container, 'category', 2);
@@ -921,18 +928,12 @@ describe('Transactions', () => {
     let input = expectToBeEditingField(container, 'date', 0, true);
     await userEvent.type(input, '[Tab]');
     input = expectToBeEditingField(container, 'account', 0, true);
-    // The first escape closes the dropdown
+
+    await userEvent.type(input, '[Escape]');
     await userEvent.type(input, '[Escape]');
     expect(
       container.querySelector('[data-testid="new-transaction"]'),
-    ).toBeTruthy();
-
-    // TODO: Fix this
-    // Now it should close the new transaction form
-    // await userEvent.type(input, '[Escape]');
-    // expect(
-    //   container.querySelector('[data-testid="new-transaction"]')
-    // ).toBeNull();
+    ).toBeNull();
 
     // The cancel button should also close the new transaction form
     updateProps({ isAdding: true });
@@ -940,6 +941,72 @@ describe('Transactions', () => {
       '[data-testid="new-transaction"] [data-testid="cancel-button"]',
     )[0];
     await userEvent.click(cancelButton);
+    expect(container.querySelector('[data-testid="new-transaction"]')).toBe(
+      null,
+    );
+  });
+
+  test('ctrl/cmd+enter adds transaction and closes form', async () => {
+    const { container, getTransactions, updateProps } = renderTransactions({
+      onCloseAddTransaction: () => {
+        updateProps({ isAdding: false });
+      },
+    });
+
+    expect(getTransactions().length).toBe(5);
+    updateProps({ isAdding: true });
+    expect(
+      container.querySelector('[data-testid="new-transaction"]'),
+    ).toBeTruthy();
+
+    let input = await editNewField(container, 'notes');
+    await userEvent.clear(input);
+    await userEvent.type(input, 'test transaction');
+
+    input = await editNewField(container, 'debit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '50.00');
+
+    await userEvent.keyboard('{Control>}{Enter}{/Control}');
+
+    expect(getTransactions().length).toBe(6);
+    expect(getTransactions()[0].amount).toBe(-5000);
+    expect(getTransactions()[0].notes).toBe('test transaction');
+
+    expect(container.querySelector('[data-testid="new-transaction"]')).toBe(
+      null,
+    );
+  });
+
+  test('ctrl/cmd+click on add button adds transaction and closes form', async () => {
+    const { container, getTransactions, updateProps } = renderTransactions({
+      onCloseAddTransaction: () => {
+        updateProps({ isAdding: false });
+      },
+    });
+
+    expect(getTransactions().length).toBe(5);
+    updateProps({ isAdding: true });
+    expect(
+      container.querySelector('[data-testid="new-transaction"]'),
+    ).toBeTruthy();
+
+    let input = await editNewField(container, 'notes');
+    await userEvent.clear(input);
+    await userEvent.type(input, 'test transaction');
+
+    input = await editNewField(container, 'debit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '50.00');
+    await userEvent.tab();
+
+    const addButton = container.querySelector('[data-testid="add-button"]')!;
+    fireEvent.click(addButton, { ctrlKey: true });
+
+    expect(getTransactions().length).toBe(6);
+    expect(getTransactions()[0].amount).toBe(-5000);
+    expect(getTransactions()[0].notes).toBe('test transaction');
+
     expect(container.querySelector('[data-testid="new-transaction"]')).toBe(
       null,
     );

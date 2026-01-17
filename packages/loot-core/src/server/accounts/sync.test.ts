@@ -1,13 +1,13 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
-import { SyncedPrefs } from '../../types/prefs';
+import { type SyncedPrefs } from '../../types/prefs';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
 import { post } from '../post';
 import { getServer } from '../server-config';
-import { loadRules, insertRule } from '../transactions/transaction-rules';
+import { insertRule, loadRules } from '../transactions/transaction-rules';
 
-import { reconcileTransactions, addTransactions } from './sync';
+import { addTransactions, reconcileTransactions } from './sync';
 
 vi.mock('../../shared/months', async () => ({
   ...(await vi.importActual('../../shared/months')),
@@ -389,7 +389,7 @@ describe('Account sync', () => {
     ]);
   });
 
-  test('reconcile does not merge transactions with different ‘imported_id’ values', async () => {
+  test("reconcile does not merge transactions with different 'imported_id' values", async () => {
     const { id } = await prepareDatabase();
 
     let payees = await getAllPayees();

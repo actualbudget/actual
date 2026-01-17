@@ -1,7 +1,7 @@
 import murmurhash from 'murmurhash';
 import { v4 as uuidv4 } from 'uuid';
 
-import { TrieNode } from './merkle';
+import { type TrieNode } from './merkle';
 
 /**
  * Hybrid Unique Logical Clock (HULC) timestamp generator
@@ -57,7 +57,7 @@ export function deserializeClock(clock: string): Clock {
   let data;
   try {
     data = JSON.parse(clock);
-  } catch (e) {
+  } catch {
     data = {
       timestamp: '1970-01-01T00:00:00.000Z-0000-' + makeClientId(),
       merkle: {},

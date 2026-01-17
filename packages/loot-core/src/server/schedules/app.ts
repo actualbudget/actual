@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { captureBreadcrumb } from '../../platform/exceptions';
 import * as connection from '../../platform/server/connection';
+import { logger } from '../../platform/server/log';
 import { currentDay, dayFromDate, parseDate } from '../../shared/months';
 import { q } from '../../shared/query';
 import {
@@ -16,7 +17,7 @@ import {
   getStatus,
   recurConfigToRSchedule,
 } from '../../shared/schedules';
-import { ScheduleEntity } from '../../types/models';
+import { type ScheduleEntity } from '../../types/models';
 import { addTransactions } from '../accounts/sync';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
@@ -279,7 +280,7 @@ export async function updateSchedule({
       await updateRule({ id: rule.id, conditions: newConditions });
 
       // Annoyingly, sometimes it has `type` and sometimes it doesn't
-      const stripType = ({ type, ...fields }) => fields;
+      const stripType = ({ type: _type, ...fields }) => fields;
 
       // Update `next_date` if the user forced it, or if the account
       // or date changed. We check account because we don't update
@@ -448,6 +449,7 @@ async function advanceSchedulesService(syncSuccess) {
       .filter({ completed: false, '_account.closed': false })
       .select('*'),
   );
+
   const { data: hasTransData } = await aqlQuery(
     getHasTransactionsQuery(schedules),
   );
@@ -478,7 +480,7 @@ async function advanceSchedulesService(syncSuccess) {
         if (schedule._date.frequency) {
           try {
             await setNextDate({ id: schedule.id });
-          } catch (err) {
+          } catch {
             // This might error if the rule is corrupted and it can't
             // find the rule
           }
@@ -558,8 +560,12 @@ app.events.on('sync', ({ type }) => {
     type === 'success' || type === 'error' || type === 'unauthorized';
 
   if (completeEvent && prefs.getPrefs()) {
-    const { lastScheduleRun } = prefs.getPrefs();
+    if (!db.getDatabase()) {
+      logger.info('database is not available, skipping schedule service');
+      return;
+    }
 
+    const { lastScheduleRun } = prefs.getPrefs();
     if (lastScheduleRun !== currentDay()) {
       runMutator(() => advanceSchedulesService(type === 'success'));
 

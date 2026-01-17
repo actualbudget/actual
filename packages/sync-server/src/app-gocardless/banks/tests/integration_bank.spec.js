@@ -1,16 +1,10 @@
 import {
   mockExtendAccountsAboutInstitutions,
   mockInstitution,
-} from '../../services/tests/fixtures.js';
-import IntegrationBank from '../integration-bank.js';
+} from '../../services/tests/fixtures';
+import IntegrationBank from '../integration-bank';
 
 describe('IntegrationBank', () => {
-  let consoleSpy;
-
-  beforeEach(() => {
-    consoleSpy = vi.spyOn(console, 'debug');
-  });
-
   describe('normalizeAccount', () => {
     const account = mockExtendAccountsAboutInstitutions[0];
 
@@ -42,16 +36,6 @@ describe('IntegrationBank', () => {
         type: 'checking',
       });
     });
-
-    it('normalizeAccount logs available account properties', () => {
-      IntegrationBank.normalizeAccount(account);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Available account properties for new institution integration',
-        {
-          account: JSON.stringify(account),
-        },
-      );
-    });
   });
 
   describe('sortTransactions', () => {
@@ -72,40 +56,31 @@ describe('IntegrationBank', () => {
         transactionAmount: { amount: '100', currency: 'EUR' },
       },
     ];
-    const sortedTransactions = [
-      {
-        date: '2022-01-03',
-        bookingDate: '2022-01-03',
-        transactionAmount: { amount: '100', currency: 'EUR' },
-      },
-      {
-        date: '2022-01-02',
-        bookingDate: '2022-01-02',
-        transactionAmount: { amount: '100', currency: 'EUR' },
-      },
-      {
-        date: '2022-01-01',
-        bookingDate: '2022-01-01',
-        transactionAmount: { amount: '100', currency: 'EUR' },
-      },
-    ];
 
     it('should return transactions sorted by bookingDate', () => {
       const sortedTransactions = IntegrationBank.sortTransactions(transactions);
-      expect(sortedTransactions).toEqual(sortedTransactions);
-    });
-
-    it('sortTransactions logs available transactions properties', () => {
-      IntegrationBank.sortTransactions(transactions);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
-        { top10Transactions: JSON.stringify(sortedTransactions.slice(0, 10)) },
-      );
+      expect(sortedTransactions).toEqual([
+        {
+          date: '2022-01-03',
+          bookingDate: '2022-01-03',
+          transactionAmount: { amount: '100', currency: 'EUR' },
+        },
+        {
+          date: '2022-01-02',
+          bookingDate: '2022-01-02',
+          transactionAmount: { amount: '100', currency: 'EUR' },
+        },
+        {
+          date: '2022-01-01',
+          bookingDate: '2022-01-01',
+          transactionAmount: { amount: '100', currency: 'EUR' },
+        },
+      ]);
     });
   });
 
   describe('calculateStartingBalance', () => {
-    /** @type {import('../../gocardless-node.types.js').Transaction[]} */
+    /** @type {import('../../gocardless-node.types').Transaction[]} */
     const transactions = [
       {
         bookingDate: '2022-01-01',
@@ -121,7 +96,7 @@ describe('IntegrationBank', () => {
       },
     ];
 
-    /** @type {import('../../gocardless-node.types.js').Balance[]} */
+    /** @type {import('../../gocardless-node.types').Balance[]} */
     const balances = [
       {
         balanceAmount: { amount: '1000.00', currency: 'EUR' },
@@ -140,17 +115,6 @@ describe('IntegrationBank', () => {
         balances,
       );
       expect(startingBalance).toEqual(70000);
-    });
-
-    it('logs available transactions and balances properties', () => {
-      IntegrationBank.calculateStartingBalance(transactions, balances);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Available (first 10) transactions properties for new integration of institution in calculateStartingBalance function',
-        {
-          balances: JSON.stringify(balances),
-          top10SortedTransactions: JSON.stringify(transactions.slice(0, 10)),
-        },
-      );
     });
   });
 });

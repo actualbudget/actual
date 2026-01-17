@@ -1,12 +1,12 @@
 import { useCallback } from 'react';
 import {
+  useLocation,
+  // oxlint-disable-next-line eslint/no-restricted-imports
+  useNavigate as useNavigateReactRouter,
   type Location,
   type NavigateFunction,
   type NavigateOptions,
   type To,
-  useLocation,
-  // eslint-disable-next-line no-restricted-imports
-  useNavigate as useNavigateReactRouter,
 } from 'react-router';
 
 export function useNavigate(): NavigateFunction {

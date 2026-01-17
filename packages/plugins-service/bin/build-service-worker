@@ -1,0 +1,28 @@
+#!/bin/bash -e
+
+cd `dirname "$0"`
+ROOT=`pwd -P`
+VITE_ARGS=""
+
+DESKTOP_DIR="$ROOT"/../../desktop-client
+SERVICE_WORKER_DIR="$DESKTOP_DIR"/service-worker
+
+# Clean out previous build files
+rm -f ../dist/*
+rm -rf "$DESKTOP_DIR"/service-worker
+
+if [ $NODE_ENV == 'development' ]; then
+  if [ "$OSTYPE" == "msys" ]; then
+    # Ensure symlinks are created as native Windows symlinks.
+    export MSYS=winsymlinks:nativestrict
+  fi
+  ln -snf "$ROOT"/../dist/ "$DESKTOP_DIR"/service-worker
+fi
+
+yarn vite build --config ../vite.config.mts --mode $NODE_ENV $VITE_ARGS
+
+if [ $NODE_ENV == 'production' ]; then
+  # In production, just copy the built files
+  mkdir -p "$SERVICE_WORKER_DIR"
+  cp -r ../dist/* "$DESKTOP_DIR"/service-worker
+fi

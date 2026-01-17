@@ -2,7 +2,7 @@
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { captureException, captureBreadcrumb } from '../../exceptions';
+import { captureBreadcrumb, captureException } from '../../exceptions';
 import * as undo from '../undo';
 
 import type * as T from './index-types';
@@ -199,6 +199,12 @@ export const unlisten: T.Unlisten = function (name) {
   listeners.set(name, []);
 };
 
-export const initServer: T.InitServer = async function () {};
-export const serverPush: T.ServerPush = async function () {};
-export const clearServer: T.ClearServer = async function () {};
+export const initServer: T.InitServer = async function () {
+  // initServer is used in tests to mock the server
+};
+export const serverPush: T.ServerPush = async function () {
+  // serverPush is used in tests to mock the server
+};
+export const clearServer: T.ClearServer = async function () {
+  // clearServer is used in tests to mock the server
+};

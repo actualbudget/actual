@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTransition, animated } from 'react-spring';
+import { animated, useTransition } from 'react-spring';
 
 import { Block } from '@actual-app/components/block';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
@@ -22,7 +22,6 @@ export function AppBackground({ isLoading }: AppBackgroundProps) {
     from: { opacity: 0, transform: 'translateY(-100px)' },
     enter: { opacity: 1, transform: 'translateY(0)' },
     leave: { opacity: 0, transform: 'translateY(100px)' },
-    unique: true,
   });
 
   return (

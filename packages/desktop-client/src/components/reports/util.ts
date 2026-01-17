@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import type { Query } from 'loot-core/shared/query';
 import type {
-  RuleConditionEntity,
-  CategoryEntity,
   AccountEntity,
+  CategoryEntity,
   PayeeEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
@@ -113,6 +113,8 @@ export function calculateHasWarning(
         if (!categoryIds.has(value)) {
           return true;
         }
+        break;
+      default:
         break;
     }
   }

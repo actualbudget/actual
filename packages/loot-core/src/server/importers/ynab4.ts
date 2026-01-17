@@ -5,15 +5,15 @@
 // entire backend bundle from the API
 import { send } from '@actual-app/api/injected';
 import * as actual from '@actual-app/api/methods';
-import { amountToInteger } from '@actual-app/api/utils';
 import AdmZip from 'adm-zip';
 import normalizePathSep from 'slash';
 import { v4 as uuidv4 } from 'uuid';
 
+import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
-import { groupBy, sortByKey } from '../../shared/util';
+import { amountToInteger, groupBy, sortByKey } from '../../shared/util';
 
-import * as YNAB4 from './ynab4-types';
+import type * as YNAB4 from './ynab4-types';
 
 // Importer
 
@@ -111,7 +111,6 @@ async function importPayees(
     if (!payee.isTombstone) {
       const id = await actual.createPayee({
         name: payee.name,
-        category: entityIdMap.get(payee.autoFillCategoryId) || null,
         transfer_acct: entityIdMap.get(payee.targetAccountId) || null,
       });
 
@@ -326,7 +325,7 @@ function findLatestDevice(zipped: AdmZip, entries: AdmZip.IZipEntry[]): string {
       let data;
       try {
         data = JSON.parse(contents);
-      } catch (e) {
+      } catch {
         return null;
       }
 
@@ -349,22 +348,22 @@ function findLatestDevice(zipped: AdmZip, entries: AdmZip.IZipEntry[]): string {
 export async function doImport(data: YNAB4.YFull) {
   const entityIdMap = new Map<string, string>();
 
-  console.log('Importing Accounts...');
+  logger.log('Importing Accounts...');
   await importAccounts(data, entityIdMap);
 
-  console.log('Importing Categories...');
+  logger.log('Importing Categories...');
   await importCategories(data, entityIdMap);
 
-  console.log('Importing Payees...');
+  logger.log('Importing Payees...');
   await importPayees(data, entityIdMap);
 
-  console.log('Importing Transactions...');
+  logger.log('Importing Transactions...');
   await importTransactions(data, entityIdMap);
 
-  console.log('Importing Budgets...');
+  logger.log('Importing Budgets...');
   await importBudgets(data, entityIdMap);
 
-  console.log('Setting up...');
+  logger.log('Setting up...');
 }
 
 export function getBudgetName(filepath) {
@@ -430,13 +429,13 @@ export function parseFile(buffer: Buffer): YNAB4.YFull {
   try {
     contents = zipped.readFile(getFile(entries, yfullPath)).toString('utf8');
   } catch (e) {
-    console.log(e);
+    logger.log(e);
     throw new Error('Error reading Budget.yfull file');
   }
 
   try {
     return JSON.parse(contents);
-  } catch (e) {
+  } catch {
     throw new Error('Error parsing Budget.yfull file');
   }
 }

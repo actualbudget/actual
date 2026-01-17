@@ -17,7 +17,7 @@ import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useOffBudgetAccounts } from '@desktop-client/hooks/useOffBudgetAccounts';
 import { useOnBudgetAccounts } from '@desktop-client/hooks/useOnBudgetAccounts';
 import { useUpdatedAccounts } from '@desktop-client/hooks/useUpdatedAccounts';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 const fontWeight = 600;
@@ -108,7 +108,7 @@ export function Accounts() {
               marginTop: 13,
               marginBottom: 5,
             }}
-            titleAccount={true}
+            titleAccount
           />
         )}
 
@@ -139,7 +139,7 @@ export function Accounts() {
               marginTop: 13,
               marginBottom: 5,
             }}
-            titleAccount={true}
+            titleAccount
           />
         )}
 

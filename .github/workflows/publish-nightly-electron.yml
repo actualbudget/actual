@@ -1,0 +1,139 @@
+name: Publish nightly desktop app
+
+# Publish nightly version of desktop app - Runs every day at midnight
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-22.04
+          - windows-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    if: github.event.repository.fork == false
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - if: ${{ startsWith(matrix.os, 'windows') }}
+        run: pip.exe install setuptools
+
+      - if: ${{ ! startsWith(matrix.os, 'windows') }}
+        run: |
+          mkdir .venv
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python3 -m pip install setuptools
+
+      - if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        name: Setup Flatpak dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install flatpak -y
+          sudo apt-get install flatpak-builder -y
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install org.freedesktop.Sdk//24.08 -y
+          sudo flatpak install org.freedesktop.Platform//24.08 -y
+          sudo flatpak install org.electronjs.Electron2.BaseApp//24.08 -y
+          sudo flatpak install org.flatpak.Builder -y
+
+          METAINFO_FILE="packages/desktop-electron/extra-resources/linux/com.actualbudget.actual.metainfo.xml"
+          TODAY=$(date +%Y-%m-%d)
+          VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/desktop-electron/package.json --type nightly)
+          sed -i "s/%RELEASE_VERSION%/$VERSION/g; s/%RELEASE_DATE%/$TODAY/g" "$METAINFO_FILE"
+          flatpak run --command=flatpak-builder-lint org.flatpak.Builder appstream "$METAINFO_FILE"
+      - name: Set up environment
+        uses: ./.github/actions/setup
+
+      - name: Update package versions
+        run: |
+          # Get new nightly version
+          NEW_DESKTOP_APP_VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/desktop-electron/package.json --type nightly)
+
+          # Set package version
+          npm version $NEW_DESKTOP_APP_VERSION --no-git-tag-version --workspace=desktop-electron --no-workspaces-update
+
+      - name: Build Electron for Mac
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        run: ./bin/package-electron
+        env:
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: Build Electron
+        if: ${{ ! startsWith(matrix.os, 'macos') }}
+        run: ./bin/package-electron
+
+      - name: Upload Linux x64 AppImage
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: Actual-linux-x86_64.AppImage
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-linux-x86_64.AppImage
+
+      - name: Upload Linux arm64 AppImage
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: Actual-linux-arm64.AppImage
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-linux-arm64.AppImage
+
+      - name: Upload Windows x32 exe
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: Actual-windows-ia32.exe
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-windows-ia32.exe
+
+      - name: Upload Windows x64 exe
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: Actual-windows-x64.exe
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-windows-x64.exe
+
+      - name: Upload Windows arm64 exe
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: Actual-windows-arm64.exe
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-windows-arm64.exe
+
+      - name: Upload Mac x64 dmg
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: Actual-mac-x64.dmg
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-mac-x64.dmg
+
+      - name: Upload Mac arm64 dmg
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: Actual-mac-arm64.dmg
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-mac-arm64.dmg
+
+      - name: Upload Windows Store Build
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: actual-electron-${{ matrix.os }}-appx
+          path: |
+            packages/desktop-electron/dist/*.appx

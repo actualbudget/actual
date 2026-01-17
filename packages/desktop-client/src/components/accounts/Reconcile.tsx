@@ -1,4 +1,4 @@
-import React, { useEffect, type FormEvent, useState } from 'react';
+import React, { useEffect, useState, type FormEvent } from 'react';
 import { Form } from 'react-aria-components';
 import { Trans } from 'react-i18next';
 
@@ -15,7 +15,7 @@ import { t } from 'i18next';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { type Query } from 'loot-core/shared/query';
-import { tsToRelativeTime, amountToInteger } from 'loot-core/shared/util';
+import { amountToInteger, tsToRelativeTime } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
@@ -105,7 +105,9 @@ export function ReconcilingMessage({
         )}
         <View style={{ marginLeft: 15 }}>
           <Button variant="primary" onPress={onDone}>
-            <Trans>Done reconciling</Trans>
+            {targetDiff === 0
+              ? t('Lock transactions')
+              : t('Exit reconciliation')}
           </Button>
         </View>
         {targetDiff !== 0 && (

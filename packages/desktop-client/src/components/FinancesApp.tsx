@@ -1,7 +1,12 @@
 // @ts-strict-ignore
-import React, { type ReactElement, useEffect, useRef } from 'react';
+import React, {
+  useEffect,
+  useEffectEvent,
+  useRef,
+  type ReactElement,
+} from 'react';
 import { useTranslation } from 'react-i18next';
-import { Route, Routes, Navigate, useLocation, useHref } from 'react-router';
+import { Navigate, Route, Routes, useHref, useLocation } from 'react-router';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
@@ -10,35 +15,34 @@ import { View } from '@actual-app/components/view';
 import * as undo from 'loot-core/platform/client/undo';
 
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
-import { BankSync } from './banksync';
 import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
 import { GlobalKeys } from './GlobalKeys';
+import { MobileBankSyncAccountEditPage } from './mobile/banksync/MobileBankSyncAccountEditPage';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
-import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
 import { UserDirectoryPage } from './responsive/wide';
-import { ScrollProvider } from './ScrollProvider';
 import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { ManageTagsPage } from './tags/ManageTagsPage';
 import { Titlebar } from './Titlebar';
 
-import { sync } from '@desktop-client/app/appSlice';
+import { getLatestAppVersion, sync } from '@desktop-client/app/appSlice';
 import { ProtectedRoute } from '@desktop-client/auth/ProtectedRoute';
 import { Permissions } from '@desktop-client/auth/types';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { ScrollProvider } from '@desktop-client/hooks/useScrollListener';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
-import { getIsOutdated, getLatestVersion } from '@desktop-client/util/versions';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -88,23 +92,25 @@ export function FinancesApp() {
   const accounts = useAccounts();
   const isAccountsLoaded = useSelector(state => state.account.isAccountsLoaded);
 
+  const versionInfo = useSelector(state => state.app.versionInfo);
+  const [notifyWhenUpdateIsAvailable] = useGlobalPref(
+    'notifyWhenUpdateIsAvailable',
+  );
   const [lastUsedVersion, setLastUsedVersion] = useLocalPref(
     'flags.updateNotificationShownForVersion',
   );
 
   const multiuserEnabled = useMultiuserEnabled();
 
-  useEffect(() => {
+  const init = useEffectEvent(() => {
     // Wait a little bit to make sure the sync button will get the
     // sync start event. This can be improved later.
     setTimeout(async () => {
       await dispatch(sync());
     }, 100);
-  }, []);
 
-  useEffect(() => {
     async function run() {
-      await global.Actual.waitForUpdateReadyForDownload();
+      await global.Actual.waitForUpdateReadyForDownload(); // This will only resolve when an update is ready
       dispatch(
         addNotification({
           notification: {
@@ -127,14 +133,20 @@ export function FinancesApp() {
     }
 
     run();
-  }, []);
+  });
+
+  useEffect(() => init(), []);
 
   useEffect(() => {
-    async function run() {
-      const latestVersion = await getLatestVersion();
-      const isOutdated = await getIsOutdated(latestVersion);
+    dispatch(getLatestAppVersion());
+  }, [dispatch]);
 
-      if (isOutdated && lastUsedVersion !== latestVersion) {
+  useEffect(() => {
+    if (notifyWhenUpdateIsAvailable && versionInfo) {
+      if (
+        versionInfo.isOutdated &&
+        lastUsedVersion !== versionInfo.latestVersion
+      ) {
         dispatch(
           addNotification({
             notification: {
@@ -148,7 +160,7 @@ export function FinancesApp() {
                     )
                   : t(
                       'Version {{latestVersion}} of Actual was recently released.',
-                      { latestVersion },
+                      { latestVersion: versionInfo.latestVersion },
                     ),
               sticky: true,
               id: 'update-notification',
@@ -159,16 +171,21 @@ export function FinancesApp() {
                 },
               },
               onClose: () => {
-                setLastUsedVersion(latestVersion);
+                setLastUsedVersion(versionInfo.latestVersion);
               },
             },
           }),
         );
       }
     }
-
-    run();
-  }, [lastUsedVersion, setLastUsedVersion]);
+  }, [
+    dispatch,
+    lastUsedVersion,
+    notifyWhenUpdateIsAvailable,
+    setLastUsedVersion,
+    t,
+    versionInfo,
+  ]);
 
   const scrollableRef = useRef<HTMLDivElement>(null);
 
@@ -247,14 +264,29 @@ export function FinancesApp() {
 
                 <Route
                   path="/schedules"
+                  element={<NarrowAlternate name="Schedules" />}
+                />
+                <Route
+                  path="/schedules/:id"
                   element={
-                    <NarrowNotSupported>
-                      <WideComponent name="Schedules" />
-                    </NarrowNotSupported>
+                    <WideNotSupported>
+                      <NarrowAlternate name="ScheduleEdit" />
+                    </WideNotSupported>
                   }
                 />
 
-                <Route path="/payees" element={<ManagePayeesPage />} />
+                <Route
+                  path="/payees"
+                  element={<NarrowAlternate name="Payees" />}
+                />
+                <Route
+                  path="/payees/:id"
+                  element={
+                    <WideNotSupported>
+                      <NarrowAlternate name="PayeeEdit" />
+                    </WideNotSupported>
+                  }
+                />
                 <Route
                   path="/rules"
                   element={<NarrowAlternate name="Rules" />}
@@ -263,7 +295,18 @@ export function FinancesApp() {
                   path="/rules/:id"
                   element={<NarrowAlternate name="RuleEdit" />}
                 />
-                <Route path="/bank-sync" element={<BankSync />} />
+                <Route
+                  path="/bank-sync"
+                  element={<NarrowAlternate name="BankSync" />}
+                />
+                <Route
+                  path="/bank-sync/account/:accountId/edit"
+                  element={
+                    <WideNotSupported redirectTo="/bank-sync">
+                      <MobileBankSyncAccountEditPage />
+                    </WideNotSupported>
+                  }
+                />
                 <Route path="/tags" element={<ManageTagsPage />} />
                 <Route path="/settings" element={<Settings />} />
 
@@ -325,7 +368,7 @@ export function FinancesApp() {
                     element={
                       <ProtectedRoute
                         permission={Permissions.ADMINISTRATOR}
-                        validateOwner={true}
+                        validateOwner
                         element={<UserAccessPage />}
                       />
                     }
@@ -341,7 +384,10 @@ export function FinancesApp() {
               <Route path="/accounts" element={<MobileNavTabs />} />
               <Route path="/settings" element={<MobileNavTabs />} />
               <Route path="/reports" element={<MobileNavTabs />} />
+              <Route path="/bank-sync" element={<MobileNavTabs />} />
               <Route path="/rules" element={<MobileNavTabs />} />
+              <Route path="/payees" element={<MobileNavTabs />} />
+              <Route path="/schedules" element={<MobileNavTabs />} />
               <Route path="*" element={null} />
             </Routes>
           </ScrollProvider>

@@ -4,8 +4,15 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
 
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import {
+  amountToInteger,
+  integerToCurrency,
+  type IntegerAmount,
+} from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
@@ -17,13 +24,15 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 
 type CoverMenuProps = {
   showToBeBudgeted?: boolean;
+  initialAmount?: IntegerAmount | null;
   categoryId?: CategoryEntity['id'];
-  onSubmit: (categoryId: CategoryEntity['id']) => void;
+  onSubmit: (amount: IntegerAmount, categoryId: CategoryEntity['id']) => void;
   onClose: () => void;
 };
 
 export function CoverMenu({
   showToBeBudgeted = true,
+  initialAmount = 0,
   categoryId,
   onSubmit,
   onClose,
@@ -44,9 +53,13 @@ export function CoverMenu({
       : categoryGroups;
   }, [categoryId, showToBeBudgeted, originalCategoryGroups]);
 
+  const _initialAmount = integerToCurrency(Math.abs(initialAmount ?? 0));
+  const [amount, setAmount] = useState<string | null>(null);
+
   function _onSubmit() {
-    if (fromCategoryId) {
-      onSubmit(fromCategoryId);
+    const parsedAmount = evalArithmetic(amount || '');
+    if (parsedAmount && fromCategoryId) {
+      onSubmit(amountToInteger(parsedAmount), fromCategoryId);
     }
     onClose();
   }
@@ -60,26 +73,27 @@ export function CoverMenu({
     >
       <View style={{ padding: 10 }}>
         <View style={{ marginBottom: 5 }}>
-          <Trans>Cover from a category:</Trans>
+          <Trans>Cover this amount:</Trans>
+        </View>
+        <View>
+          <InitialFocus>
+            <Input defaultValue={_initialAmount} onUpdate={setAmount} />
+          </InitialFocus>
+        </View>
+        <View style={{ margin: '10px 0 5px 0' }}>
+          <Trans>From:</Trans>
         </View>
 
-        <InitialFocus<HTMLInputElement>>
-          {node => (
-            <CategoryAutocomplete
-              categoryGroups={filteredCategoryGroups}
-              value={null}
-              openOnFocus={true}
-              onSelect={(id: string | undefined) =>
-                setFromCategoryId(id || null)
-              }
-              inputProps={{
-                ref: node,
-                placeholder: t('(none)'),
-              }}
-              showHiddenCategories={false}
-            />
-          )}
-        </InitialFocus>
+        <CategoryAutocomplete
+          categoryGroups={filteredCategoryGroups}
+          value={null}
+          openOnFocus
+          onSelect={(id: string | undefined) => setFromCategoryId(id || null)}
+          inputProps={{
+            placeholder: t('(none)'),
+          }}
+          showHiddenCategories={false}
+        />
 
         <View
           style={{

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import { fetch } from '../platform/server/fetch';
+import { logger } from '../platform/server/log';
 import * as Platform from '../shared/platform';
 
 import { PostError } from './errors';
@@ -56,7 +57,7 @@ export async function post(
     });
     clearTimeout(timeoutId);
     text = await res.text();
-  } catch (err) {
+  } catch {
     throw new PostError('network-failure');
   }
 
@@ -66,13 +67,13 @@ export async function post(
 
   try {
     responseData = JSON.parse(text);
-  } catch (err) {
+  } catch {
     // Something seriously went wrong. TODO handle errors
     throw new PostError('parse-json', { meta: text });
   }
 
   if (responseData.status !== 'ok') {
-    console.log(
+    logger.log(
       'API call failed: ' +
         url +
         '\nData: ' +
@@ -108,7 +109,7 @@ export async function del(url, data, headers = {}, timeout = null) {
     });
     clearTimeout(timeoutId);
     text = await res.text();
-  } catch (err) {
+  } catch {
     throw new PostError('network-failure');
   }
 
@@ -116,13 +117,13 @@ export async function del(url, data, headers = {}, timeout = null) {
 
   try {
     res = JSON.parse(text);
-  } catch (err) {
+  } catch {
     // Something seriously went wrong. TODO handle errors
     throw new PostError('parse-json', { meta: text });
   }
 
   if (res.status !== 'ok') {
-    console.log(
+    logger.log(
       'API call failed: ' +
         url +
         '\nData: ' +
@@ -156,7 +157,7 @@ export async function patch(url, data, headers = {}, timeout = null) {
     });
     clearTimeout(timeoutId);
     text = await res.text();
-  } catch (err) {
+  } catch {
     throw new PostError('network-failure');
   }
 
@@ -164,13 +165,13 @@ export async function patch(url, data, headers = {}, timeout = null) {
 
   try {
     res = JSON.parse(text);
-  } catch (err) {
+  } catch {
     // Something seriously went wrong. TODO handle errors
     throw new PostError('parse-json', { meta: text });
   }
 
   if (res.status !== 'ok') {
-    console.log(
+    logger.log(
       'API call failed: ' +
         url +
         '\nData: ' +
@@ -197,7 +198,7 @@ export async function postBinary(url, data, headers) {
         ...headers,
       },
     });
-  } catch (err) {
+  } catch {
     throw new PostError('network-failure');
   }
 

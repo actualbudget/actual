@@ -4,19 +4,20 @@ import { v4 as uuidv4 } from 'uuid';
 import { captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
+import { logger } from '../../platform/server/log';
 import { isNonProductionEnvironment } from '../../shared/environment';
 import { dayFromDate } from '../../shared/months';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
 import {
-  AccountEntity,
-  CategoryEntity,
-  SyncServerGoCardlessAccount,
-  TransactionEntity,
-  SyncServerSimpleFinAccount,
-  SyncServerPluggyAiAccount,
+  type AccountEntity,
+  type CategoryEntity,
   type GoCardlessToken,
-  ImportTransactionEntity,
+  type ImportTransactionEntity,
+  type SyncServerGoCardlessAccount,
+  type SyncServerPluggyAiAccount,
+  type SyncServerSimpleFinAccount,
+  type TransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
@@ -552,7 +553,7 @@ async function checkSecret(name: string) {
       },
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     return { error: 'failed' };
   }
 }
@@ -604,7 +605,7 @@ async function pollGoCardlessWebToken({
 
     if (data) {
       if (data.error_code) {
-        console.error('Failed linking gocardless account:', data);
+        logger.error('Failed linking gocardless account:', data);
         cb({ status: 'unknown', message: data.error_type });
       } else {
         cb({ status: 'success', data });
@@ -723,7 +724,7 @@ async function simpleFinAccounts() {
       },
       60000,
     );
-  } catch (error) {
+  } catch {
     return { error_code: 'TIMED_OUT' };
   }
 }
@@ -749,7 +750,7 @@ async function pluggyAiAccounts() {
       },
       60000,
     );
-  } catch (error) {
+  } catch {
     return { error_code: 'TIMED_OUT' };
   }
 }
@@ -805,7 +806,7 @@ async function createGoCardlessWebToken({
       },
     );
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     return { error: 'failed' };
   }
 }
@@ -864,14 +865,14 @@ function handleSyncError(
   acct: db.DbAccount,
 ): SyncError {
   // TODO: refactor bank sync logic to use BankSyncError properly
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   if (err instanceof BankSyncError || (err as any)?.type === 'BankSyncError') {
     const error = err as BankSyncError;
 
     const syncError = {
       type: 'SyncError',
       accountId: acct.id,
-      message: 'Failed syncing account “' + acct.name + '.”',
+      message: 'Failed syncing account "' + acct.name + '."',
       category: error.category,
       code: error.code,
     };
@@ -891,7 +892,7 @@ function handleSyncError(
       accountId: acct.id,
       message: err.reason
         ? err.reason
-        : `Account “${acct.name}” is not linked properly. Please link it again.`,
+        : `Account "${acct.name}" is not linked properly. Please link it again.`,
     };
   }
 
@@ -938,7 +939,7 @@ async function accountsBankSync({
   for (const acct of accounts) {
     if (acct.bankId && acct.account_id) {
       try {
-        console.group('Bank Sync operation for account:', acct.name);
+        logger.group('Bank Sync operation for account:', acct.name);
         const syncResponse = await bankSync.syncAccount(
           userId as string,
           userKey as string,
@@ -957,10 +958,10 @@ async function accountsBankSync({
         errors.push(handleSyncError(error, acct));
         captureException({
           ...error,
-          message: 'Failed syncing account “' + acct.name + '.”',
+          message: 'Failed syncing account "' + acct.name + '."',
         } as Error);
       } finally {
-        console.groupEnd();
+        logger.groupEnd();
       }
     }
   }
@@ -1007,7 +1008,7 @@ async function simpleFinBatchSync({
     };
   }> = [];
 
-  console.group('Bank Sync operation for all SimpleFin accounts');
+  logger.group('Bank Sync operation for all SimpleFin accounts');
   try {
     const syncResponses: Array<{
       accountId: AccountEntity['id'];
@@ -1026,7 +1027,7 @@ async function simpleFinBatchSync({
     for (const syncResponse of syncResponses) {
       const account = accounts.find(a => a.id === syncResponse.accountId);
       if (!account) {
-        console.error(
+        logger.error(
           `Invalid account ID found in response: ${syncResponse.accountId}. Proceeding to the next account...`,
         );
         continue;
@@ -1042,7 +1043,7 @@ async function simpleFinBatchSync({
           handleSyncError(
             {
               type: 'BankSyncError',
-              reason: 'Failed syncing account “' + account.name + '.”',
+              reason: 'Failed syncing account "' + account.name + '."',
               category: syncResponse.res.error_type,
               code: syncResponse.res.error_code,
             } as BankSyncError,
@@ -1089,7 +1090,7 @@ async function simpleFinBatchSync({
     });
   }
 
-  console.groupEnd();
+  logger.groupEnd();
 
   return retVal;
 }
@@ -1218,7 +1219,7 @@ async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
         },
       );
     } catch (error) {
-      console.log({ error });
+      logger.log({ error });
     }
   }
 

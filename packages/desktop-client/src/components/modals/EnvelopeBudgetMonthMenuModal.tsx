@@ -66,7 +66,7 @@ export function EnvelopeBudgetMonthMenuModal({
     setShowMore(!showMore);
   };
 
-  const displayMonth = monthUtils.format(month, 'MMMM ‘yy', locale);
+  const displayMonth = monthUtils.format(month, "MMMM ''yy", locale);
   const { t } = useTranslation();
 
   return (
@@ -96,7 +96,9 @@ export function EnvelopeBudgetMonthMenuModal({
               }}
             >
               <Notes
-                notes={originalNotes?.length > 0 ? originalNotes : 'No notes'}
+                notes={
+                  originalNotes?.length > 0 ? originalNotes : t('No notes')
+                }
                 editable={false}
                 focused={false}
                 getStyle={() => ({
@@ -168,7 +170,7 @@ export function EnvelopeBudgetMonthMenuModal({
                   close();
                   showUndoNotification({
                     message: t(
-                      '{{displayMonth}} budgets have all been set to last month’s budgeted amounts.',
+                      "{{displayMonth}} budgets have all been set to last month's budgeted amounts.",
                       { displayMonth },
                     ),
                   });

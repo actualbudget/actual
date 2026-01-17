@@ -1,0 +1,12 @@
+.key {
+  display: inline-block;
+  border-radius: 0.25rem;
+  padding-inline: 0.25rem;
+  /* "Disabmiguation" */
+  font-feature-settings: 'ss02' on;
+  background-color: var(--ifm-color-primary-contrast-background);
+}
+
+[data-theme='dark'] .key {
+  background-color: var(--ifm-color-secondary-contrast-background);
+}

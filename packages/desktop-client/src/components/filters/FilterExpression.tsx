@@ -8,8 +8,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { mapField, friendlyOp } from 'loot-core/shared/rules';
-import { integerToCurrency } from 'loot-core/shared/util';
+import { friendlyOp, mapField } from 'loot-core/shared/rules';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { FilterEditor } from './FiltersMenu';
@@ -90,7 +89,7 @@ export function FilterExpression<T extends RuleConditionEntity>({
                 <Value
                   value={value}
                   field={field}
-                  inline={true}
+                  inline
                   valueIsRaw={
                     op === 'contains' ||
                     op === 'matches' ||
@@ -139,11 +138,7 @@ export function FilterExpression<T extends RuleConditionEntity>({
         <FilterEditor
           field={originalField}
           op={op}
-          value={
-            field === 'amount' && typeof value === 'number'
-              ? integerToCurrency(value)
-              : value
-          }
+          value={value}
           options={options}
           onSave={onChange}
           onClose={() => setEditing(false)}

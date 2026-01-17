@@ -3,9 +3,9 @@ import { type NavigateFunction } from 'react-router';
 import * as monthUtils from 'loot-core/shared/months';
 import {
   type AccountEntity,
+  type balanceTypeOpType,
   type CategoryEntity,
   type CategoryGroupEntity,
-  type balanceTypeOpType,
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 

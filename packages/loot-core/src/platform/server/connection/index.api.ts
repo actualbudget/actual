@@ -1,6 +1,8 @@
 import type * as T from './index-types';
 
-export const init: T.Init = function () {};
+export const init: T.Init = function () {
+  // Nothing
+};
 
 export const send: T.Send = function () {
   // Nothing

@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type ChangeEvent, type ReactNode, useState } from 'react';
+import React, { useState, type ChangeEvent, type ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
@@ -53,7 +53,7 @@ export function ConfirmPasswordForm({
       }}
     >
       <BigInput
-        autoFocus={true}
+        autoFocus
         placeholder={t('Password')}
         type={showPassword ? 'text' : 'password'}
         value={password1}
@@ -130,7 +130,7 @@ export function ConfirmOldPasswordForm({
       }}
     >
       <BigInput
-        autoFocus={true}
+        autoFocus
         placeholder={t('Password')}
         type={showPassword ? 'text' : 'password'}
         value={password}

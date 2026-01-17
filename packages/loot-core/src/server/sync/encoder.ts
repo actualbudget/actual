@@ -1,11 +1,12 @@
 // @ts-strict-ignore
-import { Timestamp, SyncProtoBuf } from '@actual-app/crdt';
+import { SyncProtoBuf, Timestamp } from '@actual-app/crdt';
 
+import { logger } from '../../platform/server/log';
 import * as encryption from '../encryption';
 import { SyncError } from '../errors';
 import * as prefs from '../prefs';
 
-import { Message } from './index';
+import { type Message } from './index';
 
 function coerceBuffer(value) {
   // The web encryption APIs give us back raw Uint8Array... but our
@@ -102,7 +103,7 @@ export async function decode(
           authTag: coerceBuffer(binary.getAuthtag()),
         });
       } catch (e) {
-        console.log(e);
+        logger.log(e);
         throw new SyncError('decrypt-failure', {
           isMissingKey: e.message === 'missing-key',
         });

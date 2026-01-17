@@ -1,13 +1,13 @@
 // @ts-strict-ignore
 import { patchFetchForSqlJS } from '../../../mocks/util';
 
-// eslint-disable-next-line no-restricted-imports
+// oxlint-disable-next-line eslint/no-restricted-imports
 import {
+  execQuery,
   init,
   openDatabase,
-  transaction,
-  execQuery,
   runQuery,
+  transaction,
 } from './index.web';
 
 beforeAll(async () => {

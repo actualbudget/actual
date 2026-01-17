@@ -4,15 +4,15 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import {
   type AccountEntity,
-  type PayeeEntity,
-  type CategoryEntity,
-  type RuleConditionEntity,
-  type CategoryGroupEntity,
   type balanceTypeOpType,
-  type sortByOpType,
+  type CategoryEntity,
+  type CategoryGroupEntity,
   type DataEntity,
   type GroupedEntity,
   type IntervalEntity,
+  type PayeeEntity,
+  type RuleConditionEntity,
+  type sortByOpType,
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
@@ -22,12 +22,17 @@ import { filterHiddenItems } from './filterHiddenItems';
 import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
 import { sortData } from './sortData';
+import {
+  determineIntervalRange,
+  trimIntervalDataToRange,
+  trimIntervalsToRange,
+} from './trimIntervals';
 
 import {
   categoryLists,
   groupBySelections,
-  type QueryDataEntity,
   ReportOptions,
+  type QueryDataEntity,
   type UncategorizedEntity,
 } from '@desktop-client/components/reports/ReportOptions';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
@@ -44,6 +49,7 @@ export type createCustomSpreadsheetProps = {
   showOffBudget: boolean;
   showHiddenCategories: boolean;
   showUncategorized: boolean;
+  trimIntervals: boolean;
   groupBy?: string;
   balanceTypeOp?: balanceTypeOpType;
   sortByOp?: sortByOpType;
@@ -65,6 +71,7 @@ export function createCustomSpreadsheet({
   showOffBudget,
   showHiddenCategories,
   showUncategorized,
+  trimIntervals,
   groupBy = '',
   balanceTypeOp = 'totalDebts',
   sortByOp = 'desc',
@@ -148,6 +155,7 @@ export function createCustomSpreadsheet({
 
     const groupsByCategory =
       groupByLabel === 'category' || groupByLabel === 'categoryGroup';
+
     const intervalData = intervals.reduce(
       (arr: IntervalEntity[], intervalItem, index) => {
         let perIntervalAssets = 0;
@@ -211,22 +219,15 @@ export function createCustomSpreadsheet({
           if (balanceTypeOp === 'totalTotals') {
             stackAmounts += netAmounts;
           }
-          if (stackAmounts !== 0) {
-            stacked[item.name] = stackAmounts; // TODO: not sure yet
-          }
 
-          perIntervalNetAssets =
-            netAmounts > 0
-              ? perIntervalNetAssets + netAmounts
-              : perIntervalNetAssets;
-          perIntervalNetDebts =
-            netAmounts < 0
-              ? perIntervalNetDebts + netAmounts
-              : perIntervalNetDebts;
+          stacked[item.name] = stackAmounts;
+
           perIntervalTotals += netAmounts;
 
           return null;
         });
+        perIntervalNetAssets = perIntervalTotals > 0 ? perIntervalTotals : 0;
+        perIntervalNetDebts = perIntervalTotals < 0 ? perIntervalTotals : 0;
         totalAssets += perIntervalAssets;
         totalDebts += perIntervalDebts;
         netAssets += perIntervalNetAssets;
@@ -270,16 +271,36 @@ export function createCustomSpreadsheet({
       });
       return { ...calc };
     });
+
+    // First, filter rows so trimming reflects the visible dataset
     const calcDataFiltered = calcData.filter(i =>
       filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
     );
+
+    // Determine interval range across filtered groups and main intervalData
+    const { startIndex, endIndex } = determineIntervalRange(
+      calcDataFiltered,
+      intervalData,
+      trimIntervals,
+      balanceTypeOp,
+    );
+
+    // Trim only if enabled
+    const trimmedIntervalData = trimIntervals
+      ? trimIntervalDataToRange(intervalData, startIndex, endIndex)
+      : intervalData;
+
+    if (trimIntervals) {
+      // Keep group data in sync with the trimmed range
+      trimIntervalsToRange(calcDataFiltered, startIndex, endIndex);
+    }
 
     const sortedCalcDataFiltered = [...calcDataFiltered].sort(
       sortData({ balanceTypeOp, sortByOp }),
     );
 
     const legend = calculateLegend(
-      intervalData,
+      trimmedIntervalData,
       sortedCalcDataFiltered,
       groupBy,
       graphType,
@@ -288,7 +309,7 @@ export function createCustomSpreadsheet({
 
     setData({
       data: sortedCalcDataFiltered,
-      intervalData,
+      intervalData: trimmedIntervalData,
       legend,
       startDate,
       endDate,

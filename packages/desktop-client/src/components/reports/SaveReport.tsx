@@ -1,20 +1,28 @@
 import React, { createRef, useRef, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { Popover } from '@actual-app/components/popover';
+import { Select } from '@actual-app/components/select';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
-import { type CustomReportEntity } from 'loot-core/types/models';
+import {
+  type CustomReportEntity,
+  type DashboardEntity,
+} from 'loot-core/types/models';
 
+import { LoadingIndicator } from './LoadingIndicator';
 import { SaveReportChoose } from './SaveReportChoose';
 import { SaveReportDelete } from './SaveReportDelete';
 import { SaveReportMenu } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
 
+import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { useDashboardPages } from '@desktop-client/hooks/useDashboard';
 import { useReports } from '@desktop-client/hooks/useReports';
 
 type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
@@ -45,13 +53,28 @@ type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
           savedReport?: CustomReportEntity;
         },
   ) => void;
+  dashboardPages: readonly DashboardEntity[];
 };
+
+export function SaveReportWrapper<
+  T extends CustomReportEntity = CustomReportEntity,
+>(props: Omit<SaveReportProps<T>, 'dashboardPages'>) {
+  const { t } = useTranslation();
+  const { data, isLoading } = useDashboardPages();
+
+  if (isLoading) {
+    return <LoadingIndicator message={t('Loading dashboards...')} />;
+  }
+
+  return <SaveReport {...props} dashboardPages={data} />;
+}
 
 export function SaveReport({
   customReportItems,
   report,
   savedStatus,
   onReportChange,
+  dashboardPages,
 }: SaveReportProps) {
   const { data: listReports } = useReports();
   const triggerRef = useRef(null);
@@ -63,6 +86,10 @@ export function SaveReport({
   const [err, setErr] = useState('');
   const [newName, setNewName] = useState(report.name ?? '');
   const inputRef = createRef<HTMLInputElement>();
+  const { t } = useTranslation();
+  const [saveDashboardId, setSaveDashboardId] = useState<string | null>(
+    dashboardPages.length > 0 ? dashboardPages[0].id : null,
+  );
 
   async function onApply(cond: string) {
     const chooseSavedReport = listReports.find(r => cond === r.id);
@@ -82,6 +109,11 @@ export function SaveReport({
         name: newName,
       };
 
+      if (!saveDashboardId) {
+        setErr(t('Please select a dashboard to save the report'));
+        return;
+      }
+
       const response = await sendCatch('report/create', newSavedReport);
 
       if (response.error) {
@@ -89,13 +121,12 @@ export function SaveReport({
         setNameMenuOpen(true);
         return;
       }
-
-      // Add to dashboard
       await send('dashboard-add-widget', {
         type: 'custom-report',
         width: 4,
         height: 2,
         meta: { id: response.data },
+        dashboard_page_id: saveDashboardId,
       });
 
       setNameMenuOpen(false);
@@ -109,7 +140,7 @@ export function SaveReport({
       return;
     }
 
-    const { name, id, ...props } = customReportItems;
+    const { name: _name, id: _id, ...props } = customReportItems;
 
     const updatedReport = {
       ...report,
@@ -202,7 +233,11 @@ export function SaveReport({
         >
           {!report.id ? <Trans>Unsaved report</Trans> : report.name}&nbsp;
         </Text>
-        {savedStatus === 'modified' && <Text>(modified)&nbsp;</Text>}
+        {savedStatus === 'modified' && (
+          <Text>
+            <Trans>(modified)</Trans>&nbsp;
+          </Text>
+        )}
         <SvgExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
       </Button>
 
@@ -225,14 +260,44 @@ export function SaveReport({
         onOpenChange={() => setNameMenuOpen(false)}
         style={{ width: 325 }}
       >
-        <SaveReportName
-          menuItem={menuItem}
-          name={newName}
-          setName={setNewName}
-          inputRef={inputRef}
-          onAddUpdate={onAddUpdate}
-          err={err}
-        />
+        <View>
+          <SaveReportName
+            menuItem={menuItem}
+            name={newName}
+            setName={setNewName}
+            inputRef={inputRef}
+            onAddUpdate={onAddUpdate}
+            err={err}
+          />
+
+          {menuItem === 'save-report' && (
+            <View>
+              <SpaceBetween
+                style={{
+                  padding: 15,
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                }}
+              >
+                <FormField style={{ flex: 1 }}>
+                  <FormLabel
+                    title={t('Dashboard')}
+                    htmlFor="dashboard-select"
+                    style={{ userSelect: 'none' }}
+                  />
+                  <Select
+                    id="dashboard-select"
+                    value={saveDashboardId}
+                    onChange={v => setSaveDashboardId(v)}
+                    defaultLabel={t('None')}
+                    options={dashboardPages.map(d => [d.id, d.name])}
+                    style={{ marginTop: 10, width: 300 }}
+                  />
+                </FormField>
+              </SpaceBetween>
+            </View>
+          )}
+        </View>
       </Popover>
 
       <Popover

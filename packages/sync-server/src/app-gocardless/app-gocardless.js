@@ -1,23 +1,22 @@
 import path from 'path';
-import { inspect } from 'util';
 
 import { isAxiosError } from 'axios';
 import express from 'express';
 
-import { sha256String } from '../util/hash.js';
+import { sha256String } from '../util/hash';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
-} from '../util/middlewares.js';
+} from '../util/middlewares';
 
 import {
   AccountNotLinkedToRequisition,
   GenericGoCardlessError,
   RateLimitError,
   RequisitionNotLinked,
-} from './errors.js';
-import { goCardlessService } from './services/gocardless-service.js';
-import { handleError } from './util/handle-error.js';
+} from './errors';
+import { goCardlessService } from './services/gocardless-service';
+import { handleError } from './util/handle-error';
 
 const app = express();
 app.use(requestLoggerMiddleware);
@@ -244,7 +243,7 @@ app.post(
           });
           break;
         case error instanceof GenericGoCardlessError:
-          console.log('Something went wrong', inspect(error, { depth: null }));
+          console.log('Something went wrong', error.message);
           sendErrorResponse({
             error_type: 'SYNC_ERROR',
             error_code: 'NORDIGEN_ERROR',
@@ -253,7 +252,8 @@ app.post(
         case isAxiosError(error):
           console.log(
             'Something went wrong',
-            inspect(error.response?.data || error, { depth: null }),
+            error.message,
+            error.response?.data?.summary || error.response?.data?.detail || '',
           );
           sendErrorResponse({
             error_type: 'SYNC_ERROR',
@@ -261,7 +261,7 @@ app.post(
           });
           break;
         default:
-          console.log('Something went wrong', inspect(error, { depth: null }));
+          console.log('Something went wrong', error.message || String(error));
           sendErrorResponse({
             error_type: 'UNKNOWN',
             error_code: 'UNKNOWN',

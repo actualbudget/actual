@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -19,8 +19,8 @@ import * as d from 'date-fns';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import {
-  type SpendingWidget,
   type RuleConditionEntity,
+  type SpendingWidget,
 } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
@@ -100,22 +100,32 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
 
   useEffect(() => {
     async function run() {
-      const trans = await send('get-earliest-transaction');
+      const earliestTrans = await send('get-earliest-transaction');
+      const latestTrans = await send('get-latest-transaction');
 
-      let earliestMonth = trans
-        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
-        : monthUtils.currentMonth();
+      const currentMonth = monthUtils.currentMonth();
+      let earliestMonth = earliestTrans
+        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(earliestTrans.date)))
+        : currentMonth;
+      const latestTransactionMonth = latestTrans
+        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(latestTrans.date)))
+        : currentMonth;
+
+      const latestMonth =
+        latestTransactionMonth > currentMonth
+          ? latestTransactionMonth
+          : currentMonth;
 
       // Make sure the month selects are at least populates with a
       // year's worth of months. We can undo this when we have fancier
       // date selects.
-      const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
+      const yearAgo = monthUtils.subMonths(latestMonth, 12);
       if (earliestMonth > yearAgo) {
         earliestMonth = yearAgo;
       }
 
       const allMonths = monthUtils
-        .rangeInclusive(earliestMonth, monthUtils.currentMonth())
+        .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
           pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
@@ -353,6 +363,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 height: 28,
                 backgroundColor: theme.pillBorderDark,
                 marginRight: 10,
+                marginLeft: 10,
               }}
             />
 
@@ -629,12 +640,12 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                   <Trans>
                     <Paragraph>
                       <strong>
-                        How are “Average” and “Spent Average MTD” calculated?
+                        How are "Average" and "Spent Average MTD" calculated?
                       </strong>
                     </Paragraph>
                     <Paragraph>
                       They are both the average cumulative spending by day for
-                      the three months before the selected “compare” month.
+                      the three months before the selected "compare" month.
                     </Paragraph>
                   </Trans>
                 </View>

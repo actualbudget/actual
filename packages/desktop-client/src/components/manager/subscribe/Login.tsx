@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 
@@ -7,7 +7,7 @@ import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
-import { ResponsiveInput } from '@actual-app/components/input';
+import { BigInput, ResponsiveInput } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
@@ -19,7 +19,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
 import { type OpenIdConfig } from 'loot-core/types/models';
 
-import { useBootstrapped, Title } from './common';
+import { Title, useBootstrapped } from './common';
 import { OpenIdForm } from './OpenIdForm';
 
 import { Link } from '@desktop-client/components/common/Link';
@@ -66,8 +66,8 @@ function PasswordLogin({ setError, dispatch }) {
         gap: '1rem',
       }}
     >
-      <ResponsiveInput
-        autoFocus={true}
+      <BigInput
+        autoFocus
         placeholder={t('Password')}
         type="password"
         onChangeValue={setPassword}
@@ -159,7 +159,7 @@ function OpenIdLogin({ setError }) {
           >
             {warnMasterCreation && askForPassword && (
               <ResponsiveInput
-                autoFocus={true}
+                autoFocus
                 placeholder={t('Enter server password')}
                 type="password"
                 onChangeValue={newValue => {

@@ -1,9 +1,9 @@
 {
   "name": "desktop-electron",
-  "author": "Actual",
-  "productName": "Actual",
+  "version": "26.1.0",
   "description": "A simple and powerful personal finance system",
-  "version": "25.9.0",
+  "author": "Actual",
+  "main": "build/desktop-electron/index.js",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
@@ -13,7 +13,24 @@
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
     "e2e": "npx playwright test"
   },
-  "main": "build/desktop-electron/index.js",
+  "dependencies": {
+    "@actual-app/sync-server": "workspace:*",
+    "better-sqlite3": "^12.5.0",
+    "fs-extra": "^11.3.3",
+    "promise-retry": "^2.0.1"
+  },
+  "devDependencies": {
+    "@electron/notarize": "3.1.1",
+    "@electron/rebuild": "4.0.2",
+    "@playwright/test": "1.57.0",
+    "@types/copyfiles": "^2",
+    "@types/fs-extra": "^11",
+    "copyfiles": "^2.4.1",
+    "cross-env": "^10.1.0",
+    "electron": "38.3.0",
+    "electron-builder": "26.0.12",
+    "typescript": "^5.9.3"
+  },
   "build": {
     "appId": "com.actualbudget.actual",
     "files": [
@@ -34,9 +51,6 @@
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "artifactName": "${productName}-mac-${arch}.${ext}",
-      "notarize": {
-        "teamId": "79ANZ983YF"
-      },
       "target": [
         {
           "target": "dmg",
@@ -49,14 +63,35 @@
     },
     "linux": {
       "target": [
-        "flatpak",
-        "AppImage"
+        {
+          "target": "flatpak",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
       ],
-      "artifactName": "${productName}-linux-${arch}.${ext}"
+      "artifactName": "${productName}-linux-${arch}.${ext}",
+      "extraResources": [
+        "extra-resources/linux"
+      ],
+      "desktop": {
+        "entry": {
+          "Categories": "Finance;Office",
+          "Keywords": "Budget;Finance;Money;Expenses;Savings;"
+        }
+      },
+      "executableName": "actual"
     },
     "flatpak": {
-      "runtimeVersion": "23.08",
-      "baseVersion": "23.08"
+      "runtimeVersion": "24.08",
+      "baseVersion": "24.08"
     },
     "win": {
       "target": [
@@ -77,7 +112,7 @@
           ]
         }
       ],
-      "icon": "icons/icon.ico",
+      "icon": "icons/icon.png",
       "artifactName": "${productName}-windows-${arch}.${ext}"
     },
     "appx": {
@@ -88,22 +123,5 @@
     },
     "npmRebuild": false
   },
-  "dependencies": {
-    "@actual-app/sync-server": "workspace:*",
-    "better-sqlite3": "^12.2.0",
-    "fs-extra": "^11.3.0",
-    "promise-retry": "^2.0.1"
-  },
-  "devDependencies": {
-    "@electron/notarize": "2.5.0",
-    "@electron/rebuild": "3.7.2",
-    "@playwright/test": "1.52.0",
-    "@types/copyfiles": "^2",
-    "@types/fs-extra": "^11",
-    "copyfiles": "^2.4.1",
-    "cross-env": "^7.0.3",
-    "electron": "30.5.1",
-    "electron-builder": "24.13.3",
-    "typescript": "^5.9.2"
-  }
+  "productName": "Actual"
 }

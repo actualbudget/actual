@@ -1,12 +1,15 @@
 import { type Template } from 'loot-core/types/models/templates';
 
 import { type Action } from './actions';
-import { type ReducerState, type DisplayTemplateType } from './constants';
+import { type DisplayTemplateType, type ReducerState } from './constants';
 
 export const DEFAULT_PRIORITY = 1;
 
 export const getInitialState = (template: Template | null): ReducerState => {
-  const type = template?.type;
+  if (!template) {
+    throw new Error('Template cannot be null');
+  }
+  const type = template.type;
   switch (type) {
     case 'simple':
       return {
@@ -33,6 +36,8 @@ export const getInitialState = (template: Template | null): ReducerState => {
       throw new Error('Goal is not yet supported');
     case 'remainder':
       throw new Error('Remainder is not yet supported');
+    case 'limit':
+      throw new Error('Limit is not yet supported');
     case 'average':
     case 'copy':
       return {

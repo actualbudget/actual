@@ -7,7 +7,7 @@ test.describe('Help menu', () => {
   let page: Page;
   let configurationPage: ConfigurationPage;
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
     configurationPage = new ConfigurationPage(page);
 
@@ -20,13 +20,14 @@ test.describe('Help menu', () => {
     await page.mouse.move(0, 0);
   });
 
-  test.afterAll(async () => {
-    await page.close();
+  test.afterEach(async () => {
+    await page?.close();
   });
 
   test('Check the help menu visuals', async () => {
     await page.getByRole('button', { name: 'Help' }).click();
-    expect(page.getByText('Keyboard shortcuts')).toBeVisible();
+    await expect(page.locator('[data-popover]')).toBeVisible();
+    await expect(page.getByText('Keyboard shortcuts')).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
     await page.keyboard.press('Escape');
   });
@@ -57,7 +58,7 @@ test.describe('Help menu', () => {
     await backButton.click();
     await expect(searchBox).toHaveValue('');
 
-    await keyboardShortcutsModal.getByText('General').click();
+    await keyboardShortcutsModal.getByText('Global').click();
     await expect(
       keyboardShortcutsModal.getByText('Open the help menu'),
     ).toBeVisible();

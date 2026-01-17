@@ -21,8 +21,8 @@ import {
 import { Search } from '@desktop-client/components/common/Search';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import {
-  type Modal as ModalType,
   pushModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -51,7 +51,7 @@ export function ScheduleLink({
     statuses,
   } = useSchedules({ query: schedulesQuery });
 
-  const searchInput = useRef(null);
+  const searchInput = useRef<HTMLInputElement | null>(null);
 
   async function onSelect(scheduleId: string) {
     if (ids?.length > 0) {
@@ -105,15 +105,20 @@ export function ScheduleLink({
                 { count: ids?.length ?? 0 },
               )}
             </Text>
-            <InitialFocus>
-              <Search
-                inputRef={searchInput}
-                isInModal
-                width={300}
-                placeholder={t('Filter schedules…')}
-                value={filter}
-                onChange={setFilter}
-              />
+            <InitialFocus<HTMLInputElement>>
+              {node => (
+                <Search
+                  ref={r => {
+                    node.current = r;
+                    searchInput.current = r;
+                  }}
+                  isInModal
+                  width={300}
+                  placeholder={t('Filter schedules…')}
+                  value={filter}
+                  onChange={setFilter}
+                />
+              )}
             </InitialFocus>
             {ids.length === 1 && (
               <Button
@@ -143,8 +148,7 @@ export function ScheduleLink({
               isLoading={isSchedulesLoading}
               allowCompleted={false}
               filter={filter}
-              minimal={true}
-              onAction={() => {}}
+              minimal
               onSelect={id => {
                 onSelect(id);
                 close();

@@ -7,11 +7,15 @@ import { filterEmptyRows } from './filterEmptyRows';
 import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
 import { sortData } from './sortData';
+import {
+  determineIntervalRange,
+  trimGroupedDataIntervals,
+} from './trimIntervals';
 
 import {
   categoryLists,
-  type QueryDataEntity,
   ReportOptions,
+  type QueryDataEntity,
 } from '@desktop-client/components/reports/ReportOptions';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
@@ -27,6 +31,7 @@ export function createGroupedSpreadsheet({
   showOffBudget,
   showHiddenCategories,
   showUncategorized,
+  trimIntervals,
   balanceTypeOp,
   sortByOp,
   firstDayOfWeekIdx,
@@ -141,6 +146,25 @@ export function createGroupedSpreadsheet({
     const groupedDataFiltered = groupedData.filter(i =>
       filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
     );
+
+    // Determine interval range across all groups and their nested categories
+    const allGroupsForTrimming: GroupedEntity[] = [];
+    groupedDataFiltered.forEach(group => {
+      allGroupsForTrimming.push(group);
+      if (group.categories) {
+        allGroupsForTrimming.push(...group.categories);
+      }
+    });
+
+    const { startIndex, endIndex } = determineIntervalRange(
+      allGroupsForTrimming,
+      groupedDataFiltered.length > 0 ? groupedDataFiltered[0].intervalData : [],
+      trimIntervals,
+      balanceTypeOp,
+    );
+
+    // Trim all groupedData intervals (including nested categories) based on the range
+    trimGroupedDataIntervals(groupedDataFiltered, startIndex, endIndex);
 
     const sortedGroupedDataFiltered = [...groupedDataFiltered]
       .sort(sortData({ balanceTypeOp, sortByOp }))

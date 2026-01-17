@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -25,8 +25,8 @@ import {
   FormLabel,
 } from '@desktop-client/components/forms';
 import {
-  type Modal as ModalType,
   popModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -210,7 +210,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
 
   return (
     <>
-      <Stack direction="row" style={{ marginTop: 10 }}>
+      <SpaceBetween style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title={t('Username')} htmlFor="name-field" />
           <Input
@@ -221,7 +221,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
               borderColor: theme.buttonMenuBorder,
             }}
           />
-          <label
+          <Text
             style={{
               ...styles.verySmallText,
               color: theme.pageTextLight,
@@ -229,7 +229,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
             }}
           >
             <Trans>The username registered within the OpenID provider.</Trans>
-          </label>
+          </Text>
         </FormField>
         <View
           style={{
@@ -252,9 +252,9 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
             <Trans>Enabled</Trans>
           </label>
         </View>
-      </Stack>
+      </SpaceBetween>
       {isOwner && (
-        <label
+        <Text
           style={{
             ...styles.verySmallText,
             color: theme.errorText,
@@ -264,9 +264,9 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
           <Trans>
             Change this username with caution; it is the server owner.
           </Trans>
-        </label>
+        </Text>
       )}
-      <Stack direction="row" style={{ marginTop: 10 }}>
+      <SpaceBetween style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title={t('Display Name')} htmlFor="displayname-field" />
           <Input
@@ -302,8 +302,8 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
             </Trans>
           </View>
         </FormField>
-      </Stack>
-      <Stack direction="row" style={{ marginTop: 10, width: '100px' }}>
+      </SpaceBetween>
+      <SpaceBetween style={{ marginTop: 10, width: '100px' }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title={t('Role')} htmlFor="role-field" />
           <Select
@@ -317,27 +317,24 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
             }}
           />
         </FormField>
-      </Stack>
+      </SpaceBetween>
       <RoleDescription />
 
-      <Stack
-        direction="row"
-        justify="flex-end"
-        align="center"
-        style={{ marginTop: 20 }}
+      <SpaceBetween
+        gap={10}
+        style={{
+          marginTop: 20,
+          justifyContent: 'flex-end',
+        }}
       >
         {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
-        <Button
-          variant="bare"
-          style={{ marginRight: 10 }}
-          onPress={() => dispatch(popModal())}
-        >
+        <Button variant="bare" onPress={() => dispatch(popModal())}>
           <Trans>Cancel</Trans>
         </Button>
         <Button variant="primary" onPress={onSave}>
           {isExistingUser ? t('Save') : t('Add')}
         </Button>
-      </Stack>
+      </SpaceBetween>
     </>
   );
 }
@@ -368,7 +365,7 @@ const RoleDescription = () => {
         </Trans>
       </Text>
       <View style={{ paddingTop: 5 }}>
-        <label
+        <Text
           style={{
             ...styles.altMenuHeaderText,
             ...styles.verySmallText,
@@ -376,7 +373,7 @@ const RoleDescription = () => {
           }}
         >
           <Trans>Basic</Trans>
-        </label>
+        </Text>
         <Text
           style={{
             ...styles.verySmallText,
@@ -401,7 +398,7 @@ const RoleDescription = () => {
         </Text>
       </View>
       <View style={{ paddingTop: 10 }}>
-        <label
+        <Text
           style={{
             ...styles.altMenuHeaderText,
             ...styles.verySmallText,
@@ -409,7 +406,7 @@ const RoleDescription = () => {
           }}
         >
           <Trans>Admin</Trans>
-        </label>
+        </Text>
         <Text
           style={{
             ...styles.verySmallText,

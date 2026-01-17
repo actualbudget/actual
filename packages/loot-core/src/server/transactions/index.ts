@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 
 import * as connection from '../../platform/server/connection';
-import { Diff } from '../../shared/util';
-import { PayeeEntity, TransactionEntity } from '../../types/models';
+import { type Diff } from '../../shared/util';
+import { type PayeeEntity, type TransactionEntity } from '../../types/models';
 import * as db from '../db';
 import { incrFetch, whereIn } from '../db/util';
 import { batchMessages } from '../sync';
@@ -31,7 +31,7 @@ async function getTransactionsByIds(
   return incrFetch(
     (query, params) => db.selectWithSchema('transactions', query, params),
     ids,
-    // eslint-disable-next-line actual/typography
+
     id => `id = '${id}'`,
     where => `SELECT * FROM v_transactions_internal WHERE ${where}`,
   );
@@ -83,7 +83,7 @@ export async function batchUpdateTransactions({
         added.map(async t => {
           // Offbudget account transactions and parent transactions should not have categories.
           const account = accounts.find(acct => acct.id === t.account);
-          if (t.is_parent || account.offbudget === 1) {
+          if (t.is_parent || account?.offbudget === 1) {
             t.category = null;
           }
           return db.insertTransaction(t);
@@ -110,7 +110,7 @@ export async function batchUpdateTransactions({
             // Moving transactions off budget should always clear the
             // category. Parent transactions should not have categories.
             const account = accounts.find(acct => acct.id === t.account);
-            if (t.is_parent || account.offbudget === 1) {
+            if (t.is_parent || account?.offbudget === 1) {
               t.category = null;
             }
           }
@@ -189,5 +189,8 @@ export async function batchUpdateTransactions({
     added: resultAdded,
     updated: runTransfers ? transfersUpdated : resultUpdated,
     deleted: allDeleted,
+    errors: ((added || []) as Partial<TransactionEntity>[])
+      .concat(updated || [])
+      .flatMap(t => t._ruleErrors || []),
   };
 }

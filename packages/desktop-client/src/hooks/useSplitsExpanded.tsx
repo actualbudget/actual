@@ -1,12 +1,12 @@
 import React, {
   createContext,
-  useMemo,
-  useEffect,
   useContext,
+  useEffect,
+  useMemo,
   useReducer,
+  useRef,
   type Dispatch,
   type ReactNode,
-  useRef,
 } from 'react';
 
 type SplitMode = 'collapse' | 'expand';
@@ -156,6 +156,8 @@ export function SplitsExpandedProvider({
           };
         case 'finish-switch-mode':
           return { ...state, transitionId: null };
+        default:
+          throw new Error('Unrecognized action');
       }
     },
     previousState.current || {

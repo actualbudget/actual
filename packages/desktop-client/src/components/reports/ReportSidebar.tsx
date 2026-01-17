@@ -16,9 +16,9 @@ import * as monthUtils from 'loot-core/shared/months';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
-  type TimeFrame,
   type CustomReportEntity,
   type sortByOpType,
+  type TimeFrame,
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
@@ -26,7 +26,7 @@ import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
 import { ModeButton } from './ModeButton';
-import { type dateRangeProps, ReportOptions } from './ReportOptions';
+import { ReportOptions, type dateRangeProps } from './ReportOptions';
 import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
 
@@ -51,6 +51,7 @@ type ReportSidebarProps = {
   setShowOffBudget: (value: boolean) => void;
   setShowHiddenCategories: (value: boolean) => void;
   setShowUncategorized: (value: boolean) => void;
+  setTrimIntervals: (value: boolean) => void;
   setIncludeCurrentInterval: (value: boolean) => void;
   setSelectedCategories: (value: CategoryEntity[]) => void;
   onChangeDates: (
@@ -63,6 +64,7 @@ type ReportSidebarProps = {
   defaultItems: (item: string) => void;
   defaultModeItems: (graph: string, item: string) => void;
   earliestTransaction: string;
+  latestTransaction: string;
   firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'];
   isComplexCategoryCondition?: boolean;
 };
@@ -86,6 +88,7 @@ export function ReportSidebar({
   setShowHiddenCategories,
   setIncludeCurrentInterval,
   setShowUncategorized,
+  setTrimIntervals,
   setSelectedCategories,
   onChangeDates,
   onReportChange,
@@ -93,6 +96,7 @@ export function ReportSidebar({
   defaultItems,
   defaultModeItems,
   earliestTransaction,
+  latestTransaction,
   firstDayOfWeekIdx,
   isComplexCategoryCondition = false,
 }: ReportSidebarProps) {
@@ -110,6 +114,7 @@ export function ReportSidebar({
       ...getLiveRange(
         cond,
         earliestTransaction,
+        latestTransaction,
         customReportItems.includeCurrentInterval,
         firstDayOfWeekIdx,
       ),
@@ -404,6 +409,12 @@ export function ReportSidebar({
                     !customReportItems.showUncategorized,
                   );
                   setShowUncategorized(!customReportItems.showUncategorized);
+                } else if (type === 'trim-intervals') {
+                  setSessionReport(
+                    'trimIntervals',
+                    !customReportItems.trimIntervals,
+                  );
+                  setTrimIntervals(!customReportItems.trimIntervals);
                 }
               }}
               items={[
@@ -441,6 +452,14 @@ export function ReportSidebar({
                   text: t('Show uncategorized'),
                   tooltip: t('Show uncategorized transactions'),
                   toggle: customReportItems.showUncategorized,
+                },
+                {
+                  name: 'trim-intervals',
+                  text: t('Trim intervals'),
+                  tooltip: t(
+                    'Trim empty intervals at the start and end of the report',
+                  ),
+                  toggle: customReportItems.trimIntervals,
                 },
               ]}
             />
@@ -545,6 +564,7 @@ export function ReportSidebar({
                   onChangeDates(
                     ...validateStart(
                       earliestTransaction,
+                      latestTransaction,
                       newValue,
                       customReportItems.endDate,
                       customReportItems.interval,
@@ -578,6 +598,7 @@ export function ReportSidebar({
                   onChangeDates(
                     ...validateEnd(
                       earliestTransaction,
+                      latestTransaction,
                       customReportItems.startDate,
                       newValue,
                       customReportItems.interval,

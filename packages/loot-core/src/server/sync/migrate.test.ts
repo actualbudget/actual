@@ -9,7 +9,7 @@ import * as db from '../db';
 
 import { listen, unlisten } from './migrate';
 
-import { Message, addSyncListener, sendMessages } from './index';
+import { addSyncListener, sendMessages, type Message } from './index';
 
 beforeEach(() => {
   listen();
@@ -35,12 +35,14 @@ const messageArb: fc.Arbitrary<Message> = fc
       .map(v => convertInputType(v, tableSchema[field].type));
 
     const timestamp = fc
-      .date({
-        min: new Date('2020-01-01T00:00:00.000Z'),
-        max: new Date('2020-05-01T00:00:00.000Z'),
-      })
-      .noBias()
-      .noShrink()
+      .noShrink(
+        fc.noBias(
+          fc.date({
+            min: new Date('2020-01-01T00:00:00.000Z'),
+            max: new Date('2020-05-01T00:00:00.000Z'),
+          }),
+        ),
+      )
       .map(date => date.toISOString() + '-0000-0123456789ABCDEF')
       .map(Timestamp.parse);
 
@@ -103,13 +105,12 @@ describe('sync migrations', () => {
               { isChild: number; parent_id: string | null; id: string }
             >;
             if (
-              ts &&
-              [...ts.values()].find(
+              !ts ||
+              ![...ts.values()].find(
                 t =>
                   t.isChild === 1 && t.parent_id == null && t.id.includes('/'),
               )
             ) {
-            } else {
               tracer.event('applied');
             }
           });

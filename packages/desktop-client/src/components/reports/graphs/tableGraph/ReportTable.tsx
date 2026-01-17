@@ -1,8 +1,7 @@
 import React, {
-  type RefObject,
-  useCallback,
   useLayoutEffect,
   useRef,
+  type RefObject,
   type UIEventHandler,
 } from 'react';
 
@@ -11,9 +10,9 @@ import { type CSSProperties } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import {
-  type GroupedEntity,
-  type DataEntity,
   type balanceTypeOpType,
+  type DataEntity,
+  type GroupedEntity,
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
@@ -83,7 +82,7 @@ export function ReportTable({
     }
   });
 
-  const renderRow = useCallback(({ item, mode, style }: renderRowProps) => {
+  const renderRow = ({ item, mode, style }: renderRowProps) => {
     return (
       <ReportTableRow
         item={item}
@@ -102,42 +101,39 @@ export function ReportTable({
         interval={interval}
       />
     );
-  }, []);
+  };
 
-  const renderTotals = useCallback(
-    ({
-      metadata,
-      mode,
-      totalsStyle,
-      testStyle,
-      scrollWidthTotals,
-    }: renderTotalsProps) => {
-      return (
-        <ReportTableRow
-          item={metadata}
-          balanceTypeOp={balanceTypeOp}
-          groupBy={groupBy}
-          mode={mode}
-          filters={filters}
-          startDate={data.startDate}
-          endDate={data.endDate}
-          intervalsCount={intervalsCount}
-          compact={compact}
-          style={totalsStyle}
-          compactStyle={compactStyle}
-          showHiddenCategories={showHiddenCategories}
-          showOffBudget={showOffBudget}
-          totalStyle={testStyle}
-          totalScrollRef={totalScrollRef}
-          handleScroll={handleScroll}
-          height={32 + scrollWidthTotals}
-          interval={interval}
-          colorized={true}
-        />
-      );
-    },
-    [],
-  );
+  const renderTotals = ({
+    metadata,
+    mode,
+    totalsStyle,
+    testStyle,
+    scrollWidthTotals,
+  }: renderTotalsProps) => {
+    return (
+      <ReportTableRow
+        item={metadata}
+        balanceTypeOp={balanceTypeOp}
+        groupBy={groupBy}
+        mode={mode}
+        filters={filters}
+        startDate={data.startDate}
+        endDate={data.endDate}
+        intervalsCount={intervalsCount}
+        compact={compact}
+        style={totalsStyle}
+        compactStyle={compactStyle}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
+        totalStyle={testStyle}
+        totalScrollRef={totalScrollRef}
+        handleScroll={handleScroll}
+        height={32 + scrollWidthTotals}
+        interval={interval}
+        colorized
+      />
+    );
+  };
 
   return (
     <View>

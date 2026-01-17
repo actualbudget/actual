@@ -1,8 +1,10 @@
 import React, {
+  useEffect,
   useRef,
+  useState,
   type ComponentProps,
-  type ReactNode,
   type CSSProperties,
+  type ReactNode,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -25,8 +27,8 @@ type ReportCardProps = {
   disableClick?: boolean;
   to?: string;
   children: ReactNode;
-  menuItems?: ComponentProps<typeof Menu>['items'];
-  onMenuSelect?: ComponentProps<typeof Menu>['onMenuSelect'];
+  menuItems?: ComponentProps<typeof Menu<string>>['items'];
+  onMenuSelect?: ComponentProps<typeof Menu<string>>['onMenuSelect'];
   size?: number;
   style?: CSSProperties;
 };
@@ -43,11 +45,18 @@ export function ReportCard({
 }: ReportCardProps) {
   const ref = useRef(null);
   const isInViewport = useIsInViewport(ref);
+  const [hasRendered, setHasRendered] = useState(false);
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
   const containerProps = {
     flex: isNarrowWidth ? '1 1' : `0 0 calc(${size * 100}% / 3 - 20px)`,
   };
+
+  useEffect(() => {
+    if (isInViewport && !hasRendered) {
+      setHasRendered(true);
+    }
+  }, [isInViewport, hasRendered]);
 
   const layoutProps = {
     isEditing,
@@ -91,7 +100,7 @@ export function ReportCard({
       {/* we render the content only if it is in the viewport
       this reduces the amount of concurrent server api calls and thus
       has a better performance */}
-      {isInViewport ? children : null}
+      {isInViewport || hasRendered ? children : null}
     </View>
   );
 

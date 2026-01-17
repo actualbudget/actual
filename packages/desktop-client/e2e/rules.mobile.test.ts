@@ -30,7 +30,7 @@ test.describe('Mobile Rules', () => {
   });
 
   test.afterEach(async () => {
-    await page.close();
+    await page?.close();
   });
 
   test('checks the page visuals', async () => {
@@ -59,8 +59,10 @@ test.describe('Mobile Rules', () => {
   });
 
   test('clicking on a rule opens edit form', async () => {
-    const ruleCount = await rulesPage.getRuleCount();
-    expect(ruleCount).toBeGreaterThan(0);
+    await expect(async () => {
+      const ruleCount = await rulesPage.getRuleCount();
+      expect(ruleCount).toBeGreaterThan(0);
+    }).toPass();
 
     await rulesPage.clickRule(0);
 

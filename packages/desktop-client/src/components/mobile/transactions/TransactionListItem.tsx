@@ -1,6 +1,6 @@
 import React, {
-  type CSSProperties,
   type ComponentPropsWithoutRef,
+  type CSSProperties,
 } from 'react';
 import { mergeProps } from 'react-aria';
 import { ListBoxItem } from 'react-aria-components';
@@ -25,12 +25,12 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import {
   PressResponder,
-  usePress,
   useLongPress,
+  usePress,
 } from '@react-aria/interactions';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
-import { integerToCurrency } from 'loot-core/shared/util';
+import { integerToCurrency, type IntegerAmount } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type TransactionEntity,
@@ -38,7 +38,10 @@ import {
 
 import { lookupName, Status } from './TransactionEdit';
 
-import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import {
+  makeAmountFullStyle,
+  makeBalanceAmountStyle,
+} from '@desktop-client/components/budget/util';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -71,14 +74,19 @@ const getScheduleIconStyle = ({ isPreview }: { isPreview: boolean }) => ({
   color: isPreview ? theme.pageTextLight : theme.menuItemText,
 });
 
-type TransactionListItemProps = ComponentPropsWithoutRef<
-  typeof ListBoxItem<TransactionEntity>
+type TransactionListItemProps = Omit<
+  ComponentPropsWithoutRef<typeof ListBoxItem<TransactionEntity>>,
+  'onPress'
 > & {
+  showRunningBalance?: boolean;
+  runningBalance?: IntegerAmount;
   onPress: (transaction: TransactionEntity) => void;
   onLongPress: (transaction: TransactionEntity) => void;
 };
 
 export function TransactionListItem({
+  showRunningBalance,
+  runningBalance,
   onPress,
   onLongPress,
   ...props
@@ -285,15 +293,30 @@ export function TransactionListItem({
                   </TextOneLine>
                 )}
               </View>
-              <View style={{ justifyContent: 'center' }}>
+              <View
+                style={{ justifyContent: 'center', alignItems: 'flex-end' }}
+              >
                 <Text
                   style={{
                     ...textStyle,
+                    ...styles.tnum,
                     ...makeAmountFullStyle(amount),
                   }}
                 >
                   {integerToCurrency(amount)}
                 </Text>
+                {showRunningBalance && runningBalance !== undefined && (
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      fontWeight: '400',
+                      ...styles.tnum,
+                      ...makeBalanceAmountStyle(runningBalance),
+                    }}
+                  >
+                    {integerToCurrency(runningBalance)}
+                  </Text>
+                )}
               </View>
             </View>
           </Button>
@@ -315,7 +338,10 @@ function PayeeIcons({ transaction, transferAccount }: PayeeIconsProps) {
   const isPreview = isPreviewId(id);
   const schedule = schedules.find(s => s.id === scheduleId);
   const isScheduleRecurring =
-    schedule && schedule._date && !!schedule._date.frequency;
+    schedule &&
+    schedule._date &&
+    typeof schedule._date === 'object' &&
+    !!schedule._date.frequency;
 
   if (isSchedulesLoading) {
     return null;

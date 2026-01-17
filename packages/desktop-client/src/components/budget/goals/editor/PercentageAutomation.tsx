@@ -1,19 +1,19 @@
 import { useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
 
 import type {
-  CategoryGroupEntity,
   CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
 import type { PercentageTemplate } from 'loot-core/types/models/templates';
 
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import {
-  type Action,
   updateTemplate,
+  type Action,
 } from '@desktop-client/components/budget/goals/actions';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { PercentInput } from '@desktop-client/components/util/PercentInput';
@@ -33,12 +33,7 @@ export const PercentageAutomation = ({
 
   return (
     <>
-      <Stack
-        direction="row"
-        align="center"
-        spacing={10}
-        style={{ marginTop: 10 }}
-      >
+      <SpaceBetween gap={50} style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title={t('Category')} htmlFor="category-field" />
           <CategoryAutocomplete
@@ -75,13 +70,8 @@ export const PercentageAutomation = ({
             }
           />
         </FormField>
-      </Stack>
-      <Stack
-        direction="row"
-        align="center"
-        spacing={10}
-        style={{ marginTop: 10 }}
-      >
+      </SpaceBetween>
+      <SpaceBetween gap={50}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title={t('Percentage of')} htmlFor="previous-field" />
           <Select
@@ -109,7 +99,7 @@ export const PercentageAutomation = ({
           />
         </FormField>
         <View style={{ flex: 1 }} />
-      </Stack>
+      </SpaceBetween>
     </>
   );
 };

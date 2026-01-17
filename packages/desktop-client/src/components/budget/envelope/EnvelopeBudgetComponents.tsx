@@ -1,10 +1,10 @@
 import React, {
-  type ComponentProps,
-  type CSSProperties,
   memo,
   useRef,
+  type ComponentProps,
+  type CSSProperties,
 } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
@@ -19,13 +19,9 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import * as monthUtils from 'loot-core/shared/months';
-import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
-import {
-  type CategoryGroupEntity,
-  type CategoryEntity,
-} from 'loot-core/types/models';
+
+import { type CategoryGroupMonthProps, type CategoryMonthProps } from '..';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
@@ -38,13 +34,14 @@ import {
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
 import {
-  Row,
   Field,
+  Row,
   SheetCell,
   type SheetCellProps,
 } from '@desktop-client/components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSheetName } from '@desktop-client/hooks/useSheetName';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
@@ -152,14 +149,10 @@ export function IncomeHeaderMonth() {
   );
 }
 
-type ExpenseGroupMonthProps = {
-  month: string;
-  group: CategoryGroupEntity;
-};
 export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   month,
   group,
-}: ExpenseGroupMonthProps) {
+}: CategoryGroupMonthProps) {
   const { id } = group;
 
   return (
@@ -210,14 +203,6 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   );
 });
 
-type ExpenseCategoryMonthProps = {
-  month: string;
-  category: CategoryEntity;
-  editing: boolean;
-  onEdit: (id: CategoryEntity['id'] | null, month?: string) => void;
-  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-  onShowActivity: (id: CategoryEntity['id'], month: string) => void;
-};
 export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   month,
   category,
@@ -225,8 +210,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   onEdit,
   onBudgetAction,
   onShowActivity,
-}: ExpenseCategoryMonthProps) {
+}: CategoryMonthProps) {
   const { t } = useTranslation();
+  const format = useFormat();
 
   const budgetMenuTriggerRef = useRef(null);
   const balanceMenuTriggerRef = useRef(null);
@@ -274,8 +260,18 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           opacity: 0,
           transition: 'opacity .25s',
         },
-        '&:hover .hover-visible': {
+        '&:hover .hover-visible, & .force-visible .hover-visible': {
           opacity: 1,
+        },
+        '& .hover-expand': {
+          maxWidth: 0,
+          overflow: 'hidden',
+          transition: 'max-width 0s .25s',
+        },
+        '&:hover .hover-expand, & .hover-expand.force-visible': {
+          maxWidth: '300px',
+          overflow: 'visible',
+          transition: 'max-width 0s linear 0s',
         },
       }}
     >
@@ -292,6 +288,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       >
         {!editing && (
           <View
+            className={`hover-expand ${budgetMenuOpen ? 'force-visible' : ''}`}
             style={{
               flexDirection: 'row',
               flexShrink: 1,
@@ -317,7 +314,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                 width={14}
                 height={14}
                 className="hover-visible"
-                style={budgetMenuOpen ? { opacity: 1 } : {}}
               />
             </Button>
 
@@ -336,7 +332,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: t(`Budget set to last month‘s budget.`),
+                    message: t(`Budget set to last month's budget.`),
                   });
                 }}
                 onSetMonthsAverage={numberOfMonths => {
@@ -392,12 +388,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             binding: envelopeBudget.catBudgeted(category.id),
             type: 'financial',
             getValueStyle: makeAmountGrey,
-            formatExpr: expr => {
-              return integerToCurrency(expr);
-            },
-            unformatExpr: expr => {
-              return amountToInteger(evalArithmetic(expr, 0) ?? 0);
-            },
+            formatExpr: format.forEdit,
+            unformatExpr: format.fromEdit,
           }}
           inputProps={{
             onBlur: () => {
@@ -407,10 +399,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               backgroundColor: theme.tableBackground,
             },
           }}
-          onSave={amount => {
+          onSave={(parsedIntegerAmount: number | null) => {
             onBudgetAction(month, 'budget-amount', {
               category: category.id,
-              amount,
+              amount: parsedIntegerAmount ?? 0,
             });
           }}
         />
@@ -478,6 +470,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
       >
         <span
+          role="button"
           onClick={() => {
             resetBalancePosition(-6, -4);
             setBalanceMenuOpen(true);
@@ -550,20 +543,13 @@ export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
   );
 }
 
-type IncomeCategoryMonthProps = {
-  category: CategoryEntity;
-  isLast: boolean;
-  month: string;
-  onShowActivity: (id: CategoryEntity['id'], month: string) => void;
-  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-};
 export function IncomeCategoryMonth({
   category,
   isLast,
   month,
   onShowActivity,
   onBudgetAction,
-}: IncomeCategoryMonthProps) {
+}: CategoryMonthProps) {
   const incomeMenuTriggerRef = useRef(null);
   const {
     setMenuOpen: setIncomeMenuOpen,
@@ -599,6 +585,7 @@ export function IncomeCategoryMonth({
           }}
         >
           <span
+            role="button"
             onClick={() => {
               resetIncomePosition(-6, -4);
               setIncomeMenuOpen(true);

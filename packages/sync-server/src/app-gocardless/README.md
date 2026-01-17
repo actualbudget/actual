@@ -20,7 +20,6 @@ If the default bank integration does not work for you, you can integrate a new b
    You should do it based on the data which you found in the logs.
 
    Example logs which help you to fill:
-
    - `normalizeAccount` function:
 
      ```log
@@ -175,7 +174,7 @@ Please follow the following patterns when implementing a custom normalizeTransac
 E.g.
 
 ```js
-import Fallback from './integration-bank.js';
+import Fallback from './integration-bank';
 
 export default {
   ...

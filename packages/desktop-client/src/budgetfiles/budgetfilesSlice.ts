@@ -320,9 +320,9 @@ export const downloadBudget = createAppAsyncThunk(
         const opts = {
           hasExistingKey: Boolean(
             error.meta &&
-              typeof error.meta === 'object' &&
-              'isMissingKey' in error.meta &&
-              error.meta.isMissingKey,
+            typeof error.meta === 'object' &&
+            'isMissingKey' in error.meta &&
+            error.meta.isMissingKey,
           ),
           cloudFileId,
           onSuccess: () => {
@@ -337,7 +337,7 @@ export const downloadBudget = createAppAsyncThunk(
       } else if (error.reason === 'file-exists') {
         alert(
           t(
-            'A file with id “{{id}}” already exists with the name “{{name}}”. ' +
+            'A file with id "{{id}}" already exists with the name "{{name}}". ' +
               'This file will be replaced. This probably happened because files were manually ' +
               'moved around outside of Actual.',
             {
@@ -498,7 +498,7 @@ function sortFiles(arr: File[]) {
     let i = name1 < name2 ? -1 : name1 > name2 ? 1 : 0;
     if (i === 0) {
       const xId = x.state === 'remote' ? x.cloudFileId : x.id;
-      const yId = x.state === 'remote' ? x.cloudFileId : x.id;
+      const yId = y.state === 'remote' ? y.cloudFileId : y.id;
       i = xId < yId ? -1 : xId > yId ? 1 : 0;
     }
     return i;

@@ -13,6 +13,7 @@ type Actual = {
   IS_DEV: boolean;
   ACTUAL_VERSION: string;
   openURLInBrowser: (url: string) => void;
+  openInFileManager: (filepath: string) => void;
   saveFile: (
     contents: string | Buffer,
     filename: string,
@@ -27,7 +28,6 @@ type Actual = {
     newDirectory: string,
   ) => Promise<void>;
   applyAppUpdate: () => Promise<void>;
-  updateAppMenu: (budgetId: string) => void;
   ipcConnect: (callback: (client) => void) => void;
   getServerSocket: () => Promise<Worker | null>;
   setTheme: (theme: string) => void;
@@ -45,12 +45,9 @@ type Actual = {
 };
 
 declare global {
-  interface Window {
-    __navigate?: import('react-router').NavigateFunction;
-  }
-
-  // eslint-disable-next-line no-var
   var Actual: Actual;
-  // eslint-disable-next-line no-var
+
   var IS_TESTING: boolean;
+
+  var currentMonth: string | null;
 }

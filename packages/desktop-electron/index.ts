@@ -1,23 +1,23 @@
 import fs from 'fs';
-import { createServer, Server } from 'http';
+import { createServer, type Server } from 'http';
 import path from 'path';
 
 import {
-  net,
   app,
-  ipcMain,
   BrowserWindow,
-  Menu,
   dialog,
-  shell,
+  ipcMain,
+  Menu,
+  net,
   powerMonitor,
   protocol,
+  shell,
   utilityProcess,
-  UtilityProcess,
-  OpenDialogSyncOptions,
-  SaveDialogOptions,
-  Env,
-  ForkOptions,
+  type Env,
+  type ForkOptions,
+  type OpenDialogSyncOptions,
+  type SaveDialogOptions,
+  type UtilityProcess,
 } from 'electron';
 import { copy, exists, mkdir, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
@@ -29,7 +29,6 @@ import {
   get as getWindowState,
   listen as listenToWindowState,
 } from './window-state';
-
 import './security';
 
 const BUILD_ROOT = `${__dirname}/..`;
@@ -141,7 +140,7 @@ async function loadGlobalPrefs() {
         'utf8',
       ),
     );
-  } catch (e) {
+  } catch {
     logMessage('info', 'Could not load global state - using defaults');
     state = {};
   }
@@ -346,6 +345,7 @@ async function createWindow() {
       contextIsolation: true,
       preload: __dirname + '/preload.js',
     },
+    autoHideMenuBar: true, // Alt key shows the menu
   });
 
   win.setBackgroundColor('#E8ECF0');
@@ -368,7 +368,6 @@ async function createWindow() {
 
   win.on('closed', () => {
     clientWin = null;
-    updateMenu();
     unlistenToState();
   });
 
@@ -409,12 +408,7 @@ async function createWindow() {
     }
   });
 
-  if (process.platform === 'win32') {
-    Menu.setApplicationMenu(null);
-    win.setMenu(getMenu(isDev, createWindow));
-  } else {
-    Menu.setApplicationMenu(getMenu(isDev, createWindow));
-  }
+  Menu.setApplicationMenu(getMenu());
 
   clientWin = win;
 
@@ -428,37 +422,6 @@ async function createWindow() {
 
 function isExternalUrl(url: string) {
   return !url.includes('localhost:') && !url.includes('app://');
-}
-
-function updateMenu(budgetId?: string) {
-  const isBudgetOpen = !!budgetId;
-  const menu = getMenu(isDev, createWindow, budgetId);
-  const file = menu.items.filter(item => item.label === 'File')[0];
-  const fileItems = file.submenu?.items || [];
-  fileItems
-    .filter(item => item.label === 'Load Backup...')
-    .forEach(item => {
-      item.enabled = isBudgetOpen;
-    });
-
-  const tools = menu.items.filter(item => item.label === 'Tools')[0];
-  tools.submenu?.items.forEach(item => {
-    item.enabled = isBudgetOpen;
-  });
-
-  const edit = menu.items.filter(item => item.label === 'Edit')[0];
-  const editItems = edit.submenu?.items || [];
-  editItems
-    .filter(item => item.label === 'Undo' || item.label === 'Redo')
-    .map(item => (item.enabled = isBudgetOpen));
-
-  if (process.platform === 'win32') {
-    if (clientWin) {
-      clientWin.setMenu(menu);
-    }
-  } else {
-    Menu.setApplicationMenu(menu);
-  }
 }
 
 app.setAppUserModelId('com.actualbudget.actual');
@@ -643,27 +606,16 @@ ipcMain.handle('open-external-url', (event, url) => {
   shell.openExternal(url);
 });
 
+ipcMain.handle('open-in-file-manager', (event, filepath) => {
+  shell.showItemInFolder(filepath);
+});
+
 ipcMain.on('message', (_event, msg) => {
   if (!serverProcess) {
     return;
   }
 
   serverProcess.postMessage(msg.args);
-});
-
-ipcMain.on('screenshot', () => {
-  if (isDev) {
-    const width = 1100;
-
-    // This is for the main screenshot inside the frame
-    if (clientWin) {
-      clientWin.setSize(width, Math.floor(width * (427 / 623)));
-    }
-  }
-});
-
-ipcMain.on('update-menu', (_event, budgetId?: string) => {
-  updateMenu(budgetId);
 });
 
 ipcMain.on('set-theme', (_event, theme: string) => {

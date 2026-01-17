@@ -1,6 +1,6 @@
 // @ts-strict-ignore
-import React, { type ReactNode } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';

@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useRef, useState, useMemo, type CSSProperties } from 'react';
+import React, { useMemo, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -14,27 +14,28 @@ import { View } from '@actual-app/components/view';
 import { format as monthUtilFormat } from 'loot-core/shared/months';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { getScheduledAmount } from 'loot-core/shared/schedules';
-import { integerToCurrency } from 'loot-core/shared/util';
 import { type ScheduleEntity } from 'loot-core/types/models';
 
 import { StatusBadge } from './StatusBadge';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import {
+  Cell,
+  Field,
+  Row,
   Table,
   TableHeader,
-  Row,
-  Field,
-  Cell,
 } from '@desktop-client/components/table';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
-  type ScheduleStatusType,
   type ScheduleStatuses,
+  type ScheduleStatusType,
 } from '@desktop-client/hooks/useSchedules';
 
 type SchedulesTableProps = {
@@ -44,11 +45,21 @@ type SchedulesTableProps = {
   filter: string;
   allowCompleted: boolean;
   onSelect: (id: ScheduleEntity['id']) => void;
-  onAction: (actionName: ScheduleItemAction, id: ScheduleEntity['id']) => void;
   style: CSSProperties;
-  minimal?: boolean;
   tableStyle?: CSSProperties;
-};
+} & (
+  | {
+      minimal: true;
+      onAction?: never;
+    }
+  | {
+      minimal?: false;
+      onAction: (
+        actionName: ScheduleItemAction,
+        id: ScheduleEntity['id'],
+      ) => void;
+    }
+);
 
 type CompletedScheduleItem = { id: 'show-completed' };
 type SchedulesTableItem = ScheduleEntity | CompletedScheduleItem;
@@ -129,9 +140,10 @@ export function ScheduleAmountCell({
   op: ScheduleEntity['_amountOp'];
 }) {
   const { t } = useTranslation();
+  const format = useFormat();
 
   const num = getScheduledAmount(amount);
-  const currencyAmount = integerToCurrency(Math.abs(num || 0));
+  const currencyAmount = format(Math.abs(num || 0), 'financial');
   const isApprox = op === 'isapprox' || op === 'isbetween';
 
   return (
@@ -192,7 +204,10 @@ function ScheduleRow({
   minimal,
   statuses,
   dateFormat,
-}: { schedule: ScheduleEntity; dateFormat: string } & Pick<
+}: {
+  schedule: ScheduleEntity;
+  dateFormat: string;
+} & Pick<
   SchedulesTableProps,
   'onSelect' | 'onAction' | 'minimal' | 'statuses'
 >) {
@@ -273,9 +288,11 @@ function ScheduleRow({
       <ScheduleAmountCell amount={schedule._amount} op={schedule._amountOp} />
       {!minimal && (
         <Field width={80} style={{ textAlign: 'center' }}>
-          {schedule._date && schedule._date.frequency && (
-            <SvgCheck style={{ width: 13, height: 13 }} />
-          )}
+          {schedule._date &&
+            typeof schedule._date === 'object' &&
+            schedule._date.frequency && (
+              <SvgCheck style={{ width: 13, height: 13 }} />
+            )}
         </Field>
       )}
       {!minimal && (
@@ -316,9 +333,12 @@ export function SchedulesTable({
   tableStyle,
 }: SchedulesTableProps) {
   const { t } = useTranslation();
+  const format = useFormat();
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [showCompleted, setShowCompleted] = useState(false);
+  const [showCompleted = false, setShowCompleted] = useLocalPref(
+    'schedules.showCompleted',
+  );
 
   const payees = usePayees();
   const accounts = useAccounts();
@@ -342,7 +362,7 @@ export function SchedulesTable({
           ? '~'
           : '') +
         (amount > 0 ? '+' : '') +
-        integerToCurrency(Math.abs(amount || 0));
+        format(Math.abs(amount || 0), 'financial');
       const dateStr = schedule.next_date
         ? monthUtilFormat(schedule.next_date, dateFormat)
         : null;
@@ -356,7 +376,7 @@ export function SchedulesTable({
         filterIncludes(dateStr)
       );
     });
-  }, [payees, accounts, schedules, filter, statuses]);
+  }, [payees, accounts, schedules, filter, statuses, format, dateFormat]);
 
   const items: readonly SchedulesTableItem[] = useMemo(() => {
     const unCompletedSchedules = filteredSchedules.filter(s => !s.completed);

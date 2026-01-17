@@ -1,11 +1,11 @@
-import { parseISO, isValid as isDateValid } from 'date-fns';
+import { isValid as isDateValid, parseISO } from 'date-fns';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { currentDay } from 'loot-core/shared/months';
 import {
   amountToInteger,
+  integerToCurrencyWithDecimal,
   type CurrencyAmount,
-  integerToCurrency,
 } from 'loot-core/shared/util';
 import {
   type AccountEntity,
@@ -53,16 +53,17 @@ export function serializeTransaction(
     // stops the UI from crashing, but this is a serious problem with
     // the data. This allows the user to go through and see empty
     // dates and manually fix them.
-    console.error(`Date ‘${date}’ is not valid.`);
+    console.error(`Date '${date}' is not valid.`);
     // TODO: the fact that the date type is not nullable but we are setting it to null needs to be changed
     date = null as unknown as string;
   }
 
+  // Convert with decimals here so the value doesn't lose decimals and formatter will show or hide them.
   return {
     ...transaction,
     date,
-    debit: debit != null ? integerToCurrency(debit) : '',
-    credit: credit != null ? integerToCurrency(credit) : '',
+    debit: debit != null ? integerToCurrencyWithDecimal(debit) : '',
+    credit: credit != null ? integerToCurrencyWithDecimal(credit) : '',
   };
 }
 

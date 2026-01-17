@@ -1,15 +1,17 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, type RefCallback, useRef } from 'react';
+import React, { useRef, type CSSProperties, type RefCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgExpandArrow } from '@actual-app/components/icons/v0';
+import { SvgAdd, SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { css, cx } from '@emotion/css';
 
 import {
   type CategoryEntity,
@@ -30,8 +32,8 @@ type SidebarGroupProps = {
   innerRef?: RefCallback<HTMLDivElement>;
   style?: CSSProperties;
   onEdit?: (id: CategoryGroupEntity['id']) => void;
-  onSave?: (group: CategoryGroupEntity) => Promise<void>;
-  onDelete?: (id: CategoryGroupEntity['id']) => Promise<void>;
+  onSave?: (group: CategoryGroupEntity) => void;
+  onDelete?: (id: CategoryGroupEntity['id']) => void;
   onApplyBudgetTemplatesInGroup?: (
     categories: Array<CategoryEntity['id']>,
   ) => void;
@@ -132,8 +134,6 @@ export function SidebarGroup({
                 onMenuSelect={type => {
                   if (type === 'rename') {
                     onEdit(group.id);
-                  } else if (type === 'add-category') {
-                    onShowNewCategory(group.id);
                   } else if (type === 'delete') {
                     onDelete(group.id);
                   } else if (type === 'toggle-visibility') {
@@ -146,7 +146,6 @@ export function SidebarGroup({
                   setMenuOpen(false);
                 }}
                 items={[
-                  { name: 'add-category', text: t('Add category') },
                   { name: 'rename', text: t('Rename') },
                   !group.is_income && {
                     name: 'toggle-visibility',
@@ -157,7 +156,7 @@ export function SidebarGroup({
                     ? [
                         {
                           name: 'apply-multiple-category-template',
-                          text: t('Apply budget templates'),
+                          text: t('Overwrite with templates'),
                         },
                       ]
                     : []),
@@ -166,7 +165,31 @@ export function SidebarGroup({
             </Popover>
           </View>
           <View style={{ flex: 1 }} />
-          <View style={{ flexShrink: 0 }}>
+          <View
+            style={{
+              flexShrink: 0,
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
+          >
+            <Tooltip content={t('Add category')} disablePointerEvents>
+              <Button
+                variant="bare"
+                aria-label={t('Add category')}
+                className={cx(
+                  css({
+                    color: theme.pageTextLight,
+                  }),
+                  'hover-visible',
+                )}
+                onPress={() => {
+                  onShowNewCategory?.(group.id);
+                }}
+              >
+                <SvgAdd style={{ width: 10, height: 10, flexShrink: 0 }} />
+              </Button>
+            </Tooltip>
+
             <NotesButton
               id={group.id}
               style={dragPreview && { color: 'currentColor' }}

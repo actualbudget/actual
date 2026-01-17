@@ -24,12 +24,13 @@ export default defineConfig({
       // print only console.error
       return type === 'stderr';
     },
+    maxWorkers: 2,
   },
   resolve: {
     alias: [
       {
         find: /^@actual-app\/crdt(\/.*)?$/,
-        replacement: path.resolve('../crdt/src$1'),
+        replacement: path.resolve(path.join(__dirname, '../crdt/src$1')),
       },
     ],
     extensions: resolveExtensions,

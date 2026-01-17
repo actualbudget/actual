@@ -1,29 +1,27 @@
 import React, {
-  useContext,
-  useState,
-  useRef,
   useCallback,
+  useContext,
   useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
-import { useSpring, animated } from 'react-spring';
+import { animated, useSpring } from 'react-spring';
 
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { addMonths, subMonths } from 'loot-core/shared/months';
 
-import { type BudgetSummary as EnvelopeBudgetSummary } from './envelope/budgetsummary/BudgetSummary';
 import { MonthsContext } from './MonthsContext';
-import { type BudgetSummary as TrackingBudgetSummary } from './tracking/budgetsummary/BudgetSummary';
+
+import { useBudgetComponents } from '.';
 
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
-type BudgetSummariesProps = {
-  SummaryComponent: typeof TrackingBudgetSummary | typeof EnvelopeBudgetSummary;
-};
-
-export function BudgetSummaries({ SummaryComponent }: BudgetSummariesProps) {
+export function BudgetSummaries() {
   const { months } = useContext(MonthsContext);
+  const [firstMonth] = months;
 
   const [widthState, setWidthState] = useState(0);
   const [styles, spring] = useSpring(() => ({
@@ -37,15 +35,18 @@ export function BudgetSummaries({ SummaryComponent }: BudgetSummariesProps) {
     }, []),
   );
 
-  const prevMonth0 = useRef(months[0]);
-  const allMonths = [...months];
-  allMonths.unshift(subMonths(months[0], 1));
-  allMonths.push(addMonths(months[months.length - 1], 1));
+  const prevMonth0 = useRef(firstMonth);
+  const allMonths = useMemo(() => {
+    const all = [...months];
+    all.unshift(subMonths(firstMonth, 1));
+    all.push(addMonths(months[months.length - 1], 1));
+    return all;
+  }, [months, firstMonth]);
   const monthWidth = widthState / months.length;
 
   useLayoutEffect(() => {
     const prevMonth = prevMonth0.current;
-    const reversed = prevMonth > months[0];
+    const reversed = prevMonth > firstMonth;
     const offsetX = monthWidth;
     let from = reversed ? -offsetX * 2 : 0;
 
@@ -55,15 +56,17 @@ export function BudgetSummaries({ SummaryComponent }: BudgetSummariesProps) {
 
     const to = -offsetX;
     spring.start({ from: { x: from }, x: to });
-  }, [months[0]]);
+  }, [spring, firstMonth, monthWidth, allMonths]);
 
   useLayoutEffect(() => {
-    prevMonth0.current = months[0];
-  }, [months[0]]);
+    prevMonth0.current = firstMonth;
+  }, [firstMonth]);
 
   useLayoutEffect(() => {
     spring.start({ from: { x: -monthWidth }, to: { x: -monthWidth } });
-  }, [monthWidth]);
+  }, [spring, monthWidth]);
+
+  const { SummaryComponent } = useBudgetComponents();
 
   return (
     <div

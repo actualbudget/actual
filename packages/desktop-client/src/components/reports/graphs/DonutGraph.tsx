@@ -2,11 +2,13 @@
 import React, { useState, type CSSProperties } from 'react';
 
 import { theme } from '@actual-app/components/theme';
-import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
+import { Cell, Pie, PieChart, Sector, Tooltip } from 'recharts';
 
 import {
   type balanceTypeOpType,
   type DataEntity,
+  type GroupedEntity,
+  type IntervalEntity,
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
@@ -15,6 +17,7 @@ import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -236,6 +239,7 @@ export function DonutGraph({
   showTooltip = true,
 }: DonutGraphProps) {
   const format = useFormat();
+  const animationProps = useRechartsAnimation({ isAnimationActive: false });
 
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
   const splitData = groupBy === 'Interval' ? 'intervalData' : 'data';
@@ -245,7 +249,7 @@ export function DonutGraph({
   const accounts = useAccounts();
   const [pointer, setPointer] = useState('');
 
-  const getVal = (obj: DataEntity) => {
+  const getVal = (obj: GroupedEntity | IntervalEntity) => {
     if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
       return -1 * obj[balanceTypeOp];
     } else {
@@ -262,88 +266,92 @@ export function DonutGraph({
 
         return (
           data[splitData] && (
-            <ResponsiveContainer>
-              <div>
-                {!compact && <div style={{ marginTop: '15px' }} />}
-                <PieChart
-                  width={width}
-                  height={height}
-                  style={{ cursor: pointer }}
-                >
-                  <Pie
-                    activeIndex={activeIndex}
-                    activeShape={
-                      width < 220 || height < 130
-                        ? undefined
-                        : compact
-                          ? props => (
-                              <ActiveShapeMobileWithFormat
-                                {...props}
-                                format={format}
-                              />
-                            )
-                          : props => (
-                              <ActiveShapeWithFormat
-                                {...props}
-                                format={format}
-                              />
-                            )
-                    }
-                    dataKey={val => getVal(val)}
-                    nameKey={yAxis}
-                    isAnimationActive={false}
-                    data={data[splitData]}
-                    innerRadius={Math.min(width, height) * 0.2}
-                    fill="#8884d8"
-                    labelLine={false}
-                    label={e =>
-                      viewLabels && !compact ? customLabel(e) : <div />
-                    }
-                    startAngle={90}
-                    endAngle={-270}
-                    onMouseLeave={() => setPointer('')}
-                    onMouseEnter={(_, index) => {
-                      if (canDeviceHover()) {
-                        setActiveIndex(index);
-                        if (!['Group', 'Interval'].includes(groupBy)) {
-                          setPointer('pointer');
-                        }
+            <div>
+              {!compact && <div style={{ marginTop: '15px' }} />}
+              <PieChart
+                responsive
+                width={width}
+                height={height}
+                style={{ cursor: pointer }}
+              >
+                <Pie
+                  activeShape={
+                    width < 220 || height < 130
+                      ? undefined
+                      : compact
+                        ? props => (
+                            <ActiveShapeMobileWithFormat
+                              {...props}
+                              format={format}
+                            />
+                          )
+                        : props => (
+                            <ActiveShapeWithFormat {...props} format={format} />
+                          )
+                  }
+                  dataKey={val => getVal(val)}
+                  nameKey={yAxis}
+                  {...animationProps}
+                  data={
+                    data[splitData]?.map(item => ({
+                      ...item,
+                    })) ?? []
+                  }
+                  innerRadius={Math.min(width, height) * 0.2}
+                  fill="#8884d8"
+                  labelLine={false}
+                  label={e =>
+                    viewLabels && !compact ? customLabel(e) : <div />
+                  }
+                  startAngle={90}
+                  endAngle={-270}
+                  onMouseLeave={() => setPointer('')}
+                  onMouseEnter={(_, index) => {
+                    if (canDeviceHover()) {
+                      setActiveIndex(index);
+                      if (!['Group', 'Interval'].includes(groupBy)) {
+                        setPointer('pointer');
                       }
-                    }}
-                    onClick={(item, index) => {
-                      if (!canDeviceHover()) {
-                        setActiveIndex(index);
-                      }
+                    }
+                  }}
+                  onClick={(item, index) => {
+                    if (!canDeviceHover()) {
+                      setActiveIndex(index);
+                    }
 
-                      if (
-                        !['Group', 'Interval'].includes(groupBy) &&
-                        (canDeviceHover() || activeIndex === index) &&
-                        ((compact && showTooltip) || !compact)
-                      ) {
-                        showActivity({
-                          navigate,
-                          categories,
-                          accounts,
-                          balanceTypeOp,
-                          filters,
-                          showHiddenCategories,
-                          showOffBudget,
-                          type: 'totals',
-                          startDate: data.startDate,
-                          endDate: data.endDate,
-                          field: groupBy.toLowerCase(),
-                          id: item.id,
-                        });
-                      }
-                    }}
-                  >
-                    {data.legend.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </div>
-            </ResponsiveContainer>
+                    if (
+                      !['Group', 'Interval'].includes(groupBy) &&
+                      (canDeviceHover() || activeIndex === index) &&
+                      ((compact && showTooltip) || !compact)
+                    ) {
+                      showActivity({
+                        navigate,
+                        categories,
+                        accounts,
+                        balanceTypeOp,
+                        filters,
+                        showHiddenCategories,
+                        showOffBudget,
+                        type: 'totals',
+                        startDate: data.startDate,
+                        endDate: data.endDate,
+                        field: groupBy.toLowerCase(),
+                        id: item.id,
+                      });
+                    }
+                  }}
+                >
+                  {data.legend.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  content={() => null}
+                  defaultIndex={activeIndex}
+                  active
+                />
+              </PieChart>
+            </div>
           )
         );
       }}

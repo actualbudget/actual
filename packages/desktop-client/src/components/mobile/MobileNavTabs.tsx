@@ -1,18 +1,19 @@
 import React, {
+  useCallback,
+  useState,
   type ComponentProps,
   type ComponentType,
   type CSSProperties,
-  useCallback,
-  useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
-import { useSpring, animated, config } from 'react-spring';
+import { animated, config, useSpring } from 'react-spring';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
   SvgAdd,
   SvgCog,
+  SvgCreditCard,
   SvgPiggyBank,
   SvgReports,
   SvgStoreFront,
@@ -25,7 +26,9 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { useDrag } from '@use-gesture/react';
 
-import { useScrollListener } from '@desktop-client/components/ScrollProvider';
+import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
+import { useScrollListener } from '@desktop-client/hooks/useScrollListener';
+import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 const COLUMN_COUNT = 3;
 const PILL_HEIGHT = 15;
@@ -40,6 +43,9 @@ export const MOBILE_NAV_HEIGHT = ROW_HEIGHT + PILL_HEIGHT;
 export function MobileNavTabs() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+  const syncServerStatus = useSyncServerStatus();
+  const isTestEnv = useIsTestEnv();
+  const isUsingServer = syncServerStatus !== 'no-server' || isTestEnv;
   const [navbarState, setNavbarState] = useState<'default' | 'open' | 'hidden'>(
     'default',
   );
@@ -64,7 +70,7 @@ export function MobileNavTabs() {
         config: canceled ? config.wobbly : config.stiff,
       });
     },
-    [api, OPEN_FULL_Y],
+    [api],
   );
 
   const openDefault = useCallback(
@@ -76,7 +82,7 @@ export function MobileNavTabs() {
         config: { ...config.stiff, velocity },
       });
     },
-    [api, OPEN_DEFAULT_Y],
+    [api],
   );
 
   const hide = useCallback(
@@ -88,7 +94,7 @@ export function MobileNavTabs() {
         config: { ...config.stiff, velocity },
       });
     },
-    [api, HIDDEN_Y],
+    [api],
   );
 
   const navTabs = [
@@ -117,14 +123,14 @@ export function MobileNavTabs() {
       Icon: SvgReports,
     },
     {
-      name: t('Schedules (Soon)'),
-      path: '/schedules/soon',
+      name: t('Schedules'),
+      path: '/schedules',
       style: navTabStyle,
       Icon: SvgCalendar3,
     },
     {
-      name: t('Payees (Soon)'),
-      path: '/payees/soon',
+      name: t('Payees'),
+      path: '/payees',
       style: navTabStyle,
       Icon: SvgStoreFront,
     },
@@ -134,6 +140,16 @@ export function MobileNavTabs() {
       style: navTabStyle,
       Icon: SvgTuning,
     },
+    ...(isUsingServer
+      ? [
+          {
+            name: t('Bank Sync'),
+            path: '/bank-sync',
+            style: navTabStyle,
+            Icon: SvgCreditCard,
+          },
+        ]
+      : []),
     {
       name: t('Settings'),
       path: '/settings',

@@ -6,17 +6,17 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
-  ComposedChart,
-  Line,
   Bar,
   CartesianGrid,
+  ComposedChart,
+  Line,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
 } from 'recharts';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -89,6 +89,7 @@ export function BarLineGraph({
   showTooltip = true,
 }: BarLineGraphProps) {
   const format = useFormat();
+  const animationProps = useRechartsAnimation();
   const tickFormatter = tick => {
     return `${format(Math.round(tick), 'financial')}`; // Formats the tick values as strings with commas
   };
@@ -102,32 +103,39 @@ export function BarLineGraph({
     >
       {(width, height) =>
         data && (
-          <ResponsiveContainer>
-            <div>
-              {!compact && <div style={{ marginTop: '15px' }} />}
-              <ComposedChart
-                width={width}
-                height={height}
-                data={data.data}
-                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
-              >
-                {showTooltip && (
-                  <Tooltip
-                    content={<CustomTooltip />}
-                    formatter={numberFormatterTooltip}
-                    isAnimationActive={false}
-                  />
-                )}
-                {!compact && <CartesianGrid strokeDasharray="3 3" />}
-                {!compact && <XAxis dataKey="x" />}
-                {!compact && (
-                  <YAxis dataKey="y" tickFormatter={tickFormatter} />
-                )}
-                <Bar type="monotone" dataKey="y" fill="#8884d8" />
-                <Line type="monotone" dataKey="y" stroke="#8884d8" />
-              </ComposedChart>
-            </div>
-          </ResponsiveContainer>
+          <div>
+            {!compact && <div style={{ marginTop: '15px' }} />}
+            <ComposedChart
+              responsive
+              width={width}
+              height={height}
+              data={data.data}
+              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+            >
+              {showTooltip && (
+                <Tooltip
+                  content={<CustomTooltip />}
+                  formatter={numberFormatterTooltip}
+                  isAnimationActive={false}
+                />
+              )}
+              {!compact && <CartesianGrid strokeDasharray="3 3" />}
+              {!compact && <XAxis dataKey="x" />}
+              {!compact && <YAxis dataKey="y" tickFormatter={tickFormatter} />}
+              <Bar
+                type="monotone"
+                dataKey="y"
+                fill="#8884d8"
+                {...animationProps}
+              />
+              <Line
+                type="monotone"
+                dataKey="y"
+                stroke="#8884d8"
+                {...animationProps}
+              />
+            </ComposedChart>
+          </div>
         )
       }
     </Container>

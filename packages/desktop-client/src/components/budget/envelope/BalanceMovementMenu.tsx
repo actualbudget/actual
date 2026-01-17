@@ -5,21 +5,24 @@ import { CoverMenu } from './CoverMenu';
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 import { TransferMenu } from './TransferMenu';
 
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type BalanceMovementMenuProps = {
   categoryId: string;
   month: string;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-  onClose?: () => void;
+  onClose: () => void;
 };
 
 export function BalanceMovementMenu({
   categoryId,
   month,
   onBudgetAction,
-  onClose = () => {},
+  onClose,
 }: BalanceMovementMenuProps) {
+  const format = useFormat();
+
   const catBalance =
     useEnvelopeSheetValue(envelopeBudget.catBalance(categoryId)) ?? 0;
 
@@ -56,13 +59,14 @@ export function BalanceMovementMenu({
         <TransferMenu
           categoryId={categoryId}
           initialAmount={catBalance}
-          showToBeBudgeted={true}
+          showToBeBudgeted
           onClose={onClose}
           onSubmit={(amount, toCategoryId) => {
             onBudgetAction(month, 'transfer-category', {
               amount,
               from: categoryId,
               to: toCategoryId,
+              currencyCode: format.currency.code,
             });
           }}
         />
@@ -71,11 +75,14 @@ export function BalanceMovementMenu({
       {menu === 'cover' && (
         <CoverMenu
           categoryId={categoryId}
+          initialAmount={catBalance}
           onClose={onClose}
-          onSubmit={fromCategoryId => {
+          onSubmit={(amount, fromCategoryId) => {
             onBudgetAction(month, 'cover-overspending', {
               to: categoryId,
               from: fromCategoryId,
+              amount,
+              currencyCode: format.currency.code,
             });
           }}
         />

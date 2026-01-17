@@ -1,22 +1,23 @@
 import {
-  type CSSProperties,
-  type Dispatch,
   useEffect,
   useMemo,
   useReducer,
   useRef,
   useState,
+  type CSSProperties,
+  type Dispatch,
 } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgAdd, SvgSubtract } from '@actual-app/components/icons/v0';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Select } from '@actual-app/components/select';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -32,6 +33,7 @@ import {
 
 import { DateSelect } from './DateSelect';
 
+import { Modal } from '@desktop-client/components/common/Modal';
 import { Checkbox } from '@desktop-client/components/forms';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
@@ -256,30 +258,34 @@ function SchedulePreview({
     content = <Text>{previewDates}</Text>;
   } else {
     content = (
-      <View>
+      <View style={{ width: '100%' }}>
         <Text style={{ fontWeight: 600 }}>
           <Trans>Upcoming dates</Trans>
         </Text>
-        <Stack direction="row" spacing={4} style={{ marginTop: 10 }}>
+        <SpaceBetween gap={20} style={{ marginTop: 10 }}>
           {previewDates.map((d, idx) => (
-            <View key={idx}>
+            <View key={idx} style={{ flex: 1 }}>
               <Text>{monthUtils.format(d, dateFormat, locale)}</Text>
               <Text>{monthUtils.format(d, 'EEEE', locale)}</Text>
             </View>
           ))}
-        </Stack>
+        </SpaceBetween>
       </View>
     );
   }
 
   return (
-    <Stack
-      direction="column"
-      spacing={1}
-      style={{ marginTop: 15, color: theme.tableText }}
+    <SpaceBetween
+      direction="vertical"
+      gap={5}
+      style={{
+        marginTop: 15,
+        color: theme.tableText,
+        alignItems: 'flex-start',
+      }}
     >
       {content}
-    </Stack>
+    </SpaceBetween>
   );
 }
 
@@ -299,13 +305,14 @@ function MonthlyPatterns({
   const { DAY_OF_WEEK_OPTIONS } = useDayOfWeekOptions();
 
   return (
-    <Stack spacing={2} style={{ marginTop: 10 }}>
+    <SpaceBetween direction="vertical" gap={10} style={{ marginTop: 10 }}>
       {config.patterns.map((recurrence, idx) => (
         <View
           key={idx}
           style={{
             display: 'flex',
             flexDirection: 'row',
+            width: '100%',
           }}
         >
           <Select
@@ -365,7 +372,7 @@ function MonthlyPatterns({
           </Button>
         </View>
       ))}
-    </Stack>
+    </SpaceBetween>
   );
 }
 
@@ -477,13 +484,7 @@ function RecurringScheduleTooltip({
           />
         )}
       </div>
-      <Stack
-        direction="row"
-        align="center"
-        justify="flex-start"
-        style={{ marginTop: 10 }}
-        spacing={1}
-      >
+      <SpaceBetween style={{ marginTop: 10 }} gap={5}>
         <Text style={{ whiteSpace: 'nowrap' }}>
           <Trans>Repeat every</Trans>
         </Text>
@@ -503,7 +504,6 @@ function RecurringScheduleTooltip({
           options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
           value={config.frequency}
           onChange={value => updateField('frequency', value)}
-          style={{ marginRight: 5 }}
         />
         {config.frequency === 'monthly' &&
         (config.patterns == null || config.patterns.length === 0) ? (
@@ -516,13 +516,16 @@ function RecurringScheduleTooltip({
             <Trans>Add specific days</Trans>
           </Button>
         ) : null}
-      </Stack>
+      </SpaceBetween>
       {config.frequency === 'monthly' &&
         config.patterns &&
         config.patterns.length > 0 && (
           <MonthlyPatterns config={config} dispatch={dispatch} />
         )}
-      <Stack direction="column" style={{ marginTop: 5 }}>
+      <SpaceBetween
+        direction="vertical"
+        style={{ marginTop: 5, alignItems: 'flex-start' }}
+      >
         <View
           style={{
             marginTop: 5,
@@ -571,7 +574,7 @@ function RecurringScheduleTooltip({
             </label>
           </Trans>
         </View>
-      </Stack>
+      </SpaceBetween>
       <SchedulePreview previewDates={previewDates} />
       <div
         style={{ display: 'flex', marginTop: 15, justifyContent: 'flex-end' }}
@@ -603,6 +606,7 @@ export function RecurringSchedulePicker({
   onChange,
 }: RecurringSchedulePickerProps) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
   const triggerRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
@@ -618,6 +622,14 @@ export function RecurringSchedulePicker({
     [locale, value, dateFormat],
   );
 
+  const tooltip = (
+    <RecurringScheduleTooltip
+      config={value}
+      onClose={() => setIsOpen(false)}
+      onSave={onSave}
+    />
+  );
+
   return (
     <View>
       <Button
@@ -628,19 +640,30 @@ export function RecurringSchedulePicker({
         {value ? recurringDescription : t('No recurring date')}
       </Button>
 
-      <Popover
-        triggerRef={triggerRef}
-        style={{ padding: 10, minWidth: 380, width: 'auto', maxWidth: '100%' }}
-        placement="bottom start"
-        isOpen={isOpen}
-        onOpenChange={() => setIsOpen(false)}
-      >
-        <RecurringScheduleTooltip
-          config={value}
+      {isNarrowWidth ? (
+        <Modal
+          name="recurring-schedule-picker"
+          isOpen={isOpen}
           onClose={() => setIsOpen(false)}
-          onSave={onSave}
-        />
-      </Popover>
+        >
+          {tooltip}
+        </Modal>
+      ) : (
+        <Popover
+          triggerRef={triggerRef}
+          style={{
+            padding: 10,
+            minWidth: 380,
+            width: 'auto',
+            maxWidth: '100%',
+          }}
+          placement="bottom start"
+          isOpen={isOpen}
+          onOpenChange={() => setIsOpen(false)}
+        >
+          {tooltip}
+        </Popover>
+      )}
     </View>
   );
 }

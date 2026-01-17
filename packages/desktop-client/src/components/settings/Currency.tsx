@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
@@ -7,7 +7,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { currencies } from 'loot-core/shared/currencies';
+import { currencies, getCurrency } from 'loot-core/shared/currencies';
 
 import { Column, Setting } from './UI';
 
@@ -21,32 +21,43 @@ export function CurrencySettings() {
     () =>
       new Map<string, string>([
         ['', t('None')],
+        ['AED', t('UAE Dirham')],
+        ['ARS', t('Argentinian Peso')],
         ['AUD', t('Australian Dollar')],
         ['BRL', t('Brazilian Real')],
+        ['BYN', t('Belarusian Ruble')],
         ['CAD', t('Canadian Dollar')],
         ['CHF', t('Swiss Franc')],
         ['CNY', t('Yuan Renminbi')],
+        ['COP', t('Colombian Peso')],
+        ['CRC', t('Costa Rican Colón')],
+        ['DKK', t('Danish Krone')],
+        ['EGP', t('Egyptian Pound')],
         ['EUR', t('Euro')],
         ['GBP', t('Pound Sterling')],
+        ['GTQ', t('Guatemalan Quetzal')],
         ['HKD', t('Hong Kong Dollar')],
+        ['IDR', t('Indonesian Rupiah')],
         ['INR', t('Indian Rupee')],
         ['JMD', t('Jamaican Dollar')],
-        // ['JPY', t('Yen')],
+        ['JPY', t('Japanese Yen')],
+        ['LKR', t('Sri Lankan Rupee')],
         ['MDL', t('Moldovan Leu')],
+        ['MYR', t('Malaysian Ringgit')],
         ['PHP', t('Philippine Peso')],
         ['PLN', t('Polish Złoty')],
+        ['QAR', t('Qatari Riyal')],
         ['RON', t('Romanian Leu')],
         ['RSD', t('Serbian Dinar')],
         ['RUB', t('Russian Ruble')],
+        ['SAR', t('Saudi Riyal')],
         ['SEK', t('Swedish Krona')],
         ['SGD', t('Singapore Dollar')],
         ['THB', t('Thai Baht')],
         ['TRY', t('Turkish Lira')],
         ['UAH', t('Ukrainian Hryvnia')],
         ['USD', t('US Dollar')],
-        ['QAR', t('Qatari Riyal')],
-        ['EGP', t('Egyptian Pound')],
-        ['SAR', t('Saudi Riyal')],
+        ['UZS', t('Uzbek Soum')],
       ]),
     [t],
   );
@@ -62,6 +73,8 @@ export function CurrencySettings() {
   const [spaceEnabled, setSpaceEnabledPref] = useSyncedPref(
     'currencySpaceBetweenAmountAndSymbol',
   );
+  const [, setNumberFormatPref] = useSyncedPref('numberFormat');
+  const [, setHideFractionPref] = useSyncedPref('hideFraction');
 
   const selectButtonClassName = css({
     '&[data-hovered]': {
@@ -83,12 +96,31 @@ export function CurrencySettings() {
 
   const handleCurrencyChange = (code: string) => {
     setDefaultCurrencyCodePref(code);
+    if (code !== '') {
+      const cur = getCurrency(code);
+      setNumberFormatPref(cur.numberFormat);
+      setHideFractionPref(cur.decimalPlaces === 0 ? 'true' : 'false');
+      setSpaceEnabledPref(cur.symbolFirst ? 'false' : 'true');
+      setSymbolPositionPref(cur.symbolFirst ? 'before' : 'after');
+    }
   };
 
-  const symbolPositionOptions = [
-    { value: 'before', label: t('Before amount (e.g. $100)') },
-    { value: 'after', label: t('After amount (e.g. 100€)') },
-  ];
+  const symbolPositionOptions = useMemo(() => {
+    const selectedCurrency = getCurrency(selectedCurrencyCode);
+    const symbol = selectedCurrency.symbol || '$';
+    const space = spaceEnabled === 'true' ? ' ' : '';
+
+    return [
+      {
+        value: 'before',
+        label: `${t('Before amount')} (${t('e.g.')} ${symbol}${space}100)`,
+      },
+      {
+        value: 'after',
+        label: `${t('After amount')} (${t('e.g.')} 100${space}${symbol})`,
+      },
+    ];
+  }, [selectedCurrencyCode, spaceEnabled, t]);
 
   return (
     <Setting
@@ -159,7 +191,9 @@ export function CurrencySettings() {
       <Text>
         <Trans>
           <strong>Currency settings</strong> affect how amounts are displayed
-          throughout the application.
+          throughout the application. Changing the currency will affect the
+          number format, symbol position, and whether fractions are shown. These
+          can be adjusted after the currency is set.
         </Trans>
       </Text>
     </Setting>

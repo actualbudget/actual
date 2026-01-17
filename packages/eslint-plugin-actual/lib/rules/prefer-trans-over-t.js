@@ -1,3 +1,5 @@
+const { ensureImport } = require('../utils/import-helpers');
+
 /** @type {import('eslint').Rule.RuleModule} */
 module.exports = {
   meta: {
@@ -8,7 +10,6 @@ module.exports = {
     },
     schema: [],
     messages: {
-      // eslint-disable-next-line actual/typography
       preferTrans: "Prefer <Trans>{{ text }}</Trans> over t('{{ text }}')",
     },
     fixable: 'code',
@@ -126,22 +127,10 @@ module.exports = {
             fix(fixer) {
               const text = node.arguments[0].value;
               const sourceCode = context.getSourceCode();
-              const program = sourceCode.ast;
-
               const fixes = [fixer.replaceText(node, `<Trans>${text}</Trans>`)];
 
-              const firstImport = program.body.find(
-                n => n.type === 'ImportDeclaration',
-              );
-              if (firstImport) {
-                fixes.unshift(
-                  fixer.insertTextAfter(
-                    firstImport,
-                    // eslint-disable-next-line actual/typography
-                    "\nimport { Trans } from 'react-i18next';",
-                  ),
-                );
-              }
+              // Add Trans import if needed
+              ensureImport(fixes, sourceCode, fixer, 'Trans', 'react-i18next');
 
               return fixes;
             },

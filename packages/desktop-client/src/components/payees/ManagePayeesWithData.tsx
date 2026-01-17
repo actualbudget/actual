@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { send, listen } from 'loot-core/platform/client/fetch';
+import { listen, send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type UndoState } from 'loot-core/server/undo';
 import { applyChanges, type Diff } from 'loot-core/shared/util';
@@ -8,6 +8,7 @@ import { type NewRuleEntity, type PayeeEntity } from 'loot-core/types/models';
 
 import { ManagePayees } from './ManagePayees';
 
+import { usePayeeRuleCounts } from '@desktop-client/hooks/usePayeeRuleCounts';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { getPayees, reloadPayees } from '@desktop-client/payees/payeesSlice';
@@ -22,8 +23,8 @@ export function ManagePayeesWithData({
 }: ManagePayeesWithDataProps) {
   const payees = usePayees();
   const dispatch = useDispatch();
+  const { ruleCounts, refetch: refetchRuleCounts } = usePayeeRuleCounts();
 
-  const [ruleCounts, setRuleCounts] = useState({ value: new Map() });
   const [orphans, setOrphans] = useState<Array<Pick<PayeeEntity, 'id'>>>([]);
 
   const refetchOrphanedPayees = useCallback(async () => {
@@ -31,16 +32,9 @@ export function ManagePayeesWithData({
     setOrphans(orphs);
   }, []);
 
-  const refetchRuleCounts = useCallback(async () => {
-    const counts = await send('payees-get-rule-counts');
-    const countsMap = new Map(Object.entries(counts));
-    setRuleCounts({ value: countsMap });
-  }, []);
-
   useEffect(() => {
     async function loadData() {
       await dispatch(getPayees());
-      await refetchRuleCounts();
       await refetchOrphanedPayees();
     }
     loadData();
@@ -119,7 +113,7 @@ export function ManagePayeesWithData({
   return (
     <ManagePayees
       payees={payees}
-      ruleCounts={ruleCounts.value}
+      ruleCounts={ruleCounts}
       orphanedPayees={orphans}
       initialSelectedIds={initialSelectedIds}
       onBatchChange={async (changes: Diff<PayeeEntity>) => {
@@ -141,17 +135,11 @@ export function ManagePayeesWithData({
         }
         filtedOrphans = filtedOrphans.filter(o => !mergeIds.includes(o.id));
 
-        mergeIds.forEach(id => {
-          const count = ruleCounts.value.get(id) || 0;
-          ruleCounts.value.set(
-            targetId,
-            (ruleCounts.value.get(targetId) || 0) + count,
-          );
-        });
+        // Refetch rule counts after merging
+        await refetchRuleCounts();
 
         await dispatch(reloadPayees());
         setOrphans(filtedOrphans);
-        setRuleCounts({ value: ruleCounts.value });
       }}
       onViewRules={onViewRules}
       onCreateRule={onCreateRule}

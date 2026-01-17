@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { logger } from '../../platform/server/log';
 import { handlers } from '../main';
 
 import { importActual } from './actual';
@@ -34,7 +35,7 @@ export async function handleBudgetImport(
       data = importer.parseFile(buffer);
       budgetName = importer.getBudgetName(filepath, data);
     } catch (e) {
-      console.error('failed to parse file', e);
+      logger.error('failed to parse file', e);
     }
     if (!budgetName) {
       return { error: 'not-' + type };
@@ -43,13 +44,13 @@ export async function handleBudgetImport(
     try {
       await handlers['api/start-import']({ budgetName });
     } catch (e) {
-      console.error('failed to start import', e);
+      logger.error('failed to start import', e);
       return { error: 'unknown' };
     }
     await importer.doImport(data);
   } catch (e) {
     await handlers['api/abort-import']();
-    console.error('failed to run import', e);
+    logger.error('failed to run import', e);
     return { error: 'unknown' };
   }
 

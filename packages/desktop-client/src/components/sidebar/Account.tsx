@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, useRef, useState } from 'react';
+import React, { useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -20,15 +20,13 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import * as Platform from 'loot-core/shared/platform';
 import { type AccountEntity } from 'loot-core/types/models';
-
-import { BalanceHistoryGraph } from './BalanceHistoryGraph';
 
 import {
   reopenAccount,
   updateAccount,
 } from '@desktop-client/accounts/accountsSlice';
+import { BalanceHistoryGraph } from '@desktop-client/components/accounts/BalanceHistoryGraph';
 import { Link } from '@desktop-client/components/common/Link';
 import { Notes } from '@desktop-client/components/Notes';
 import {
@@ -41,11 +39,12 @@ import {
 import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
+import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
 import { useNotes } from '@desktop-client/hooks/useNotes';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { openAccountCloseModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { type SheetFields, type Binding } from '@desktop-client/spreadsheet';
+import { type Binding, type SheetFields } from '@desktop-client/spreadsheet';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,
@@ -91,6 +90,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
   onDrop,
   titleAccount,
 }: AccountProps<FieldName>) {
+  const isTestEnv = useIsTestEnv();
   const { t } = useTranslation();
   const type = account
     ? account.closed
@@ -265,6 +265,9 @@ export function Account<FieldName extends SheetFields<'account'>>({
                       setIsEditing(true);
                       break;
                     }
+                    default: {
+                      throw new Error(`Unrecognized menu option: ${type}`);
+                    }
                   }
                   setMenuOpen(false);
                 }}
@@ -282,7 +285,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
     </View>
   );
 
-  if (!needsTooltip || Platform.isPlaywright) {
+  if (!needsTooltip || isTestEnv) {
     return accountRow;
   }
 
@@ -334,7 +337,10 @@ export function Account<FieldName extends SheetFields<'account'>>({
             </Button>
           </SpaceBetween>
           {showBalanceHistory === 'true' && account && (
-            <BalanceHistoryGraph accountId={account.id} />
+            <BalanceHistoryGraph
+              accountId={account.id}
+              style={{ minWidth: 350, minHeight: 70 }}
+            />
           )}
           {accountNote && (
             <Notes

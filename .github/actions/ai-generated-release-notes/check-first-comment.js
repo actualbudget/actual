@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
-import { Octokit } from '@octokit/rest';
 import fs from 'fs';
+
+import { Octokit } from '@octokit/rest';
 
 const token = process.env.GITHUB_TOKEN;
 const repo = process.env.GITHUB_REPOSITORY;
 const issueNumber = process.env.GITHUB_EVENT_ISSUE_NUMBER;
-const commentId = process.env.GITHUB_EVENT_COMMENT_ID;
+const commentId = String(process.env.GITHUB_EVENT_COMMENT_ID);
 
 if (!token || !repo || !issueNumber || !commentId) {
   console.log('Missing required environment variables');
@@ -51,7 +52,7 @@ async function checkFirstComment() {
 
     const isFirstSummaryComment =
       coderabbitSummaryComments.length === 1 &&
-      coderabbitSummaryComments[0].id == commentId;
+      String(coderabbitSummaryComments[0].id) === commentId;
 
     console.log(
       `CodeRabbit summary comments found: ${coderabbitSummaryComments.length}`,

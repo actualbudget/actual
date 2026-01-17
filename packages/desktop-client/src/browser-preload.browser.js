@@ -1,10 +1,9 @@
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
-// eslint-disable-next-line import/no-unresolved
 import { registerSW } from 'virtual:pwa-register';
 
 import * as Platform from 'loot-core/shared/platform';
 
-// eslint-disable-next-line typescript-paths/absolute-parent-import
+// oxlint-disable-next-line typescript-paths/absolute-parent-import
 import packageJson from '../package.json';
 
 const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
@@ -87,9 +86,13 @@ global.Actual = {
       });
   },
 
-  startSyncServer: () => {},
+  startSyncServer: () => {
+    // Only for electron app
+  },
 
-  stopSyncServer: () => {},
+  stopSyncServer: () => {
+    // Only for electron app
+  },
 
   isSyncServerRunning: () => false,
 
@@ -97,9 +100,24 @@ global.Actual = {
     return '';
   },
 
-  restartElectronServer: () => {},
+  restartElectronServer: () => {
+    // Only for electron app
+  },
 
   openFileDialog: async ({ filters = [] }) => {
+    const FILE_ACCEPT_OVERRIDES = {
+      // Safari on iOS requires explicit MIME/UTType values for some extensions to allow selection.
+      qfx: [
+        'application/vnd.intu.qfx',
+        'application/x-qfx',
+        'application/qfx',
+        'application/ofx',
+        'application/x-ofx',
+        'application/octet-stream',
+        'com.intuit.qfx',
+      ],
+    };
+
     return new Promise(resolve => {
       let createdElement = false;
       // Attempt to reuse an already-created file input.
@@ -117,7 +135,15 @@ global.Actual = {
 
       const filter = filters.find(filter => filter.extensions);
       if (filter) {
-        input.accept = filter.extensions.map(ext => '.' + ext).join(',');
+        input.accept = filter.extensions
+          .flatMap(ext => {
+            const normalizedExt = ext.startsWith('.')
+              ? ext.toLowerCase()
+              : `.${ext.toLowerCase()}`;
+            const overrides = FILE_ACCEPT_OVERRIDES[ext.toLowerCase()] ?? [];
+            return [normalizedExt, ...overrides];
+          })
+          .join(',');
       }
 
       input.style.position = 'absolute';
@@ -169,18 +195,26 @@ global.Actual = {
   openURLInBrowser: url => {
     window.open(url, '_blank');
   },
-  onEventFromMain: () => {},
+  openInFileManager: () => {
+    // File manager not available in browser
+  },
+  onEventFromMain: () => {
+    // Only for electron app
+  },
   isUpdateReadyForDownload: () => isUpdateReadyForDownload,
   waitForUpdateReadyForDownload: () => isUpdateReadyForDownloadPromise,
   applyAppUpdate: async () => {
     updateSW();
 
     // Wait for the app to reload
-    await new Promise(() => {});
+    await new Promise(() => {
+      // Do nothing
+    });
   },
-  updateAppMenu: () => {},
 
-  ipcConnect: () => {},
+  ipcConnect: () => {
+    // Only for electron app
+  },
   getServerSocket: async () => {
     return worker;
   },
@@ -189,37 +223,7 @@ global.Actual = {
     window.__actionsForMenu.saveGlobalPrefs({ prefs: { theme } });
   },
 
-  moveBudgetDirectory: () => {},
+  moveBudgetDirectory: () => {
+    // Only for electron app
+  },
 };
-
-function inputFocused(e) {
-  return (
-    e.target.tagName === 'INPUT' ||
-    e.target.tagName === 'TEXTAREA' ||
-    e.target.isContentEditable
-  );
-}
-
-document.addEventListener('keydown', e => {
-  if (e.metaKey || e.ctrlKey) {
-    // Cmd/Ctrl+o
-    if (e.key === 'o') {
-      e.preventDefault();
-      window.__actionsForMenu.closeBudget();
-    }
-    // Cmd/Ctrl+z
-    else if (e.key.toLowerCase() === 'z') {
-      if (inputFocused(e)) {
-        return;
-      }
-      e.preventDefault();
-      if (e.shiftKey) {
-        // Redo
-        window.__actionsForMenu.redo();
-      } else {
-        // Undo
-        window.__actionsForMenu.undo();
-      }
-    }
-  }
-});

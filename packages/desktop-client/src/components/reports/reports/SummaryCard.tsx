@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
 
+import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import {
   type SummaryContent,
@@ -17,6 +18,7 @@ import { calculateTimeRange } from '@desktop-client/components/reports/reportRan
 import { summarySpreadsheet } from '@desktop-client/components/reports/spreadsheets/summary-spreadsheet';
 import { SummaryNumber } from '@desktop-client/components/reports/SummaryNumber';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type SummaryCardProps = {
@@ -25,6 +27,7 @@ type SummaryCardProps = {
   meta?: SummaryWidget['meta'];
   onMetaChange: (newMeta: SummaryWidget['meta']) => void;
   onRemove: () => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function SummaryCard({
@@ -33,15 +36,35 @@ export function SummaryCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onCopy,
 }: SummaryCardProps) {
   const locale = useLocale();
   const { t } = useTranslation();
+  const [latestTransaction, setLatestTransaction] = useState<string>('');
+  const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
-  const [start, end] = calculateTimeRange(meta?.timeFrame, {
-    start: monthUtils.dayFromDate(monthUtils.currentMonth()),
-    end: monthUtils.currentDay(),
-    mode: 'full',
-  });
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
+
+  useEffect(() => {
+    async function fetchLatestTransaction() {
+      const latestTrans = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTrans ? latestTrans.date : monthUtils.currentDay(),
+      );
+    }
+    fetchLatestTransaction();
+  }, []);
+
+  const [start, end] = calculateTimeRange(
+    meta?.timeFrame,
+    {
+      start: monthUtils.dayFromDate(monthUtils.currentMonth()),
+      end: monthUtils.currentDay(),
+      mode: 'full',
+    },
+    latestTransaction,
+  );
 
   const content = useMemo(
     () =>
@@ -73,8 +96,6 @@ export function SummaryCard({
 
   const data = useReport('summary', params);
 
-  const [nameMenuOpen, setNameMenuOpen] = useState(false);
-
   return (
     <ReportCard
       isEditing={isEditing}
@@ -89,8 +110,10 @@ export function SummaryCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -99,8 +122,7 @@ export function SummaryCard({
             onRemove();
             break;
           default:
-            console.warn(`Unrecognized menu selection: ${item}`);
-            break;
+            throw new Error(`Unrecognized menu selection: ${item}`);
         }
       }}
     >
@@ -136,13 +158,6 @@ export function SummaryCard({
               suffix={content.type === 'percentage' ? '%' : ''}
               loading={!data}
               initialFontSize={content.fontSize}
-              fontSizeChanged={newSize => {
-                const newContent = { ...content, fontSize: newSize };
-                onMetaChange({
-                  ...meta,
-                  content: JSON.stringify(newContent),
-                });
-              }}
               animate={isEditing ?? false}
             />
           ) : (

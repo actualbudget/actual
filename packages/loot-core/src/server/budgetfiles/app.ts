@@ -2,25 +2,25 @@
 import * as CRDT from '@actual-app/crdt';
 
 import { createTestBudget } from '../../mocks/budget';
-import { captureException, captureBreadcrumb } from '../../platform/exceptions';
+import { captureBreadcrumb, captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
 import * as fs from '../../platform/server/fs';
 import { logger } from '../../platform/server/log';
 import * as Platform from '../../shared/platform';
-import { Budget } from '../../types/budget';
+import { type Budget } from '../../types/budget';
 import { createApp } from '../app';
 import * as budget from '../budget/base';
 import * as cloudStorage from '../cloud-storage';
 import * as db from '../db';
 import * as mappings from '../db/mappings';
-import { handleBudgetImport, ImportableBudgetType } from '../importers';
+import { handleBudgetImport, type ImportableBudgetType } from '../importers';
 import { app as mainApp } from '../main-app';
 import { mutator } from '../mutators';
 import * as prefs from '../prefs';
 import { getServer } from '../server-config';
 import * as sheet from '../sheet';
-import { setSyncingMode, initialFullSync, clearFullSyncTimeout } from '../sync';
+import { clearFullSyncTimeout, initialFullSync, setSyncingMode } from '../sync';
 import * as syncMigrations from '../sync/migrate';
 import * as rules from '../transactions/transaction-rules';
 import { clearUndo } from '../undo';
@@ -32,9 +32,9 @@ import {
 } from '../util/budget-name';
 
 import {
-  getAvailableBackups,
-  makeBackup as _makeBackup,
   loadBackup as _loadBackup,
+  makeBackup as _makeBackup,
+  getAvailableBackups,
   startBackupService,
   stopBackupService,
 } from './backups';
@@ -47,7 +47,6 @@ export type BudgetFileHandlers = {
   'unique-budget-name': typeof handleUniqueBudgetName;
   'get-budgets': typeof getBudgets;
   'get-remote-files': typeof getRemoteFiles;
-  'get-user-file-info': typeof getUserFileInfo;
   'reset-budget-cache': typeof resetBudgetCache;
   'upload-budget': typeof uploadBudget;
   'download-budget': typeof downloadBudget;
@@ -72,7 +71,6 @@ app.method('validate-budget-name', handleValidateBudgetName);
 app.method('unique-budget-name', handleUniqueBudgetName);
 app.method('get-budgets', getBudgets);
 app.method('get-remote-files', getRemoteFiles);
-app.method('get-user-file-info', getUserFileInfo);
 app.method('reset-budget-cache', mutator(resetBudgetCache));
 app.method('upload-budget', uploadBudget);
 app.method('download-budget', downloadBudget);
@@ -109,7 +107,7 @@ async function getBudgets() {
         try {
           prefs = JSON.parse(await fs.readFile(prefsPath));
         } catch (e) {
-          console.log('Error parsing metadata:', e.stack);
+          logger.log('Error parsing metadata:', e.stack);
           return null;
         }
 
@@ -140,10 +138,6 @@ async function getRemoteFiles() {
   return cloudStorage.listRemoteFiles();
 }
 
-async function getUserFileInfo(fileId: string) {
-  return cloudStorage.getRemoteFile(fileId);
-}
-
 async function resetBudgetCache() {
   // Recomputing everything will update the cache
   await sheet.loadUserBudgets(db);
@@ -165,7 +159,7 @@ async function uploadBudget({ id }: { id?: Budget['id'] } = {}): Promise<{
   try {
     await cloudStorage.upload();
   } catch (e) {
-    console.log(e);
+    logger.log(e);
     if (e.type === 'FileUploadError') {
       return { error: e };
     }
@@ -206,6 +200,7 @@ async function downloadBudget({
   }
 
   const id = result.id;
+  await closeBudget();
   await loadBudget({ id });
   result = await syncBudget();
 
@@ -215,7 +210,7 @@ async function downloadBudget({
   return { id };
 }
 
-// open and sync, but don’t close
+// open and sync, but don't close
 async function syncBudget() {
   setSyncingMode('enabled');
   const result = await initialFullSync();
@@ -262,13 +257,13 @@ async function closeBudget() {
   sheet.unloadSpreadsheet();
 
   clearFullSyncTimeout();
-  await app.stopServices();
+  await mainApp.stopServices();
 
   await db.closeDatabase();
 
   try {
     await asyncStorage.setItem('lastBudget', '');
-  } catch (e) {
+  } catch {
     // This might fail if we are shutting down after failing to load a
     // budget. We want to unload whatever has already been loaded but
     // be resilient to anything failing
@@ -289,7 +284,9 @@ async function deleteBudget({
   // If it's a cloud file, you can delete it from the server by
   // passing its cloud id
   if (cloudFileId) {
-    await cloudStorage.removeFile(cloudFileId).catch(() => {});
+    await cloudStorage.removeFile(cloudFileId).catch(() => {
+      // Ignore errors
+    });
   }
 
   // If a local file exists, you can delete it by passing its local id
@@ -302,7 +299,7 @@ async function deleteBudget({
       await db.closeDatabase();
       const budgetDir = fs.getBudgetDir(id);
       await fs.removeDirRecursively(budgetDir);
-    } catch (e) {
+    } catch {
       return 'fail';
     }
   }
@@ -372,7 +369,7 @@ async function duplicateBudget({
   // load in and validate
   const { error } = await _loadBudget(newId);
   if (error) {
-    console.log('Error duplicating budget: ' + error);
+    logger.log('Error duplicating budget: ' + error);
     return error;
   }
 
@@ -380,7 +377,7 @@ async function duplicateBudget({
     try {
       await cloudStorage.upload();
     } catch (error) {
-      console.warn('Failed to sync duplicated budget to cloud:', error);
+      logger.warn('Failed to sync duplicated budget to cloud:', error);
       // Ignore any errors uploading. If they are offline they should
       // still be able to create files.
     }
@@ -436,14 +433,14 @@ async function createBudget({
   // Load it in
   const { error } = await _loadBudget(id);
   if (error) {
-    console.log('Error creating budget: ' + error);
+    logger.log('Error creating budget: ' + error);
     return { error };
   }
 
   if (!avoidUpload && !testMode) {
     try {
       await cloudStorage.upload();
-    } catch (e) {
+    } catch {
       // Ignore any errors uploading. If they are offline they should
       // still be able to create files.
     }
@@ -543,7 +540,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
   try {
     await updateVersion();
   } catch (e) {
-    console.warn('Error updating', e);
+    logger.warn('Error updating', e);
     let result;
     if (e.message.includes('out-of-sync-migrations')) {
       result = { error: 'out-of-sync-migrations' };
@@ -552,7 +549,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
     } else {
       captureException(e);
       logger.info('Error updating budget ' + id, e);
-      console.log('Error updating budget', e);
+      logger.log('Error updating budget', e);
       result = { error: 'loading-budget' };
     }
 

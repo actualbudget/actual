@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from 'loot-core/platform/client/fetch';
+import { type IntegerAmount } from 'loot-core/shared/util';
 import { type File } from 'loot-core/types/file';
 import {
   type AccountEntity,
@@ -8,13 +9,13 @@ import {
   type CategoryGroupEntity,
   type GoCardlessToken,
   type NewRuleEntity,
+  type NewUserEntity,
+  type NoteEntity,
   type RuleEntity,
   type ScheduleEntity,
   type TransactionEntity,
-  type UserEntity,
   type UserAccessEntity,
-  type NewUserEntity,
-  type NoteEntity,
+  type UserEntity,
 } from 'loot-core/types/models';
 import { type EnableBankingToken } from 'loot-core/types/models/enablebanking';
 import { type Template } from 'loot-core/types/models/templates';
@@ -215,8 +216,15 @@ export type Modal =
         name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>;
         onSubmit: (
           name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>,
-          value: string | number,
-          mode?: 'prepend' | 'append' | 'replace' | null,
+          value:
+            | string
+            | number
+            | {
+                useRegex: boolean;
+                find: string;
+                replace: string;
+              },
+          mode?: 'prepend' | 'append' | 'replace' | 'findAndReplace' | null,
         ) => void;
         onClose?: () => void;
       };
@@ -292,6 +300,7 @@ export type Modal =
         onReopenAccount: (accountId: AccountEntity['id']) => void;
         onEditNotes: (id: NoteEntity['id']) => void;
         onClose?: () => void;
+        onToggleRunningBalance?: () => void;
       };
     }
   | {
@@ -424,10 +433,13 @@ export type Modal =
       name: 'transfer';
       options: {
         title: string;
+        amount: IntegerAmount;
         categoryId?: CategoryEntity['id'];
         month: string;
-        amount: number;
-        onSubmit: (amount: number, toCategoryId: CategoryEntity['id']) => void;
+        onSubmit: (
+          amount: IntegerAmount,
+          toCategoryId: CategoryEntity['id'],
+        ) => void;
         showToBeBudgeted?: boolean;
       };
     }
@@ -435,10 +447,14 @@ export type Modal =
       name: 'cover';
       options: {
         title: string;
+        amount?: IntegerAmount | null;
         categoryId?: CategoryEntity['id'];
         month: string;
         showToBeBudgeted?: boolean;
-        onSubmit: (fromCategoryId: CategoryEntity['id']) => void;
+        onSubmit: (
+          amount: IntegerAmount,
+          fromCategoryId: CategoryEntity['id'],
+        ) => void;
       };
     }
   | {
@@ -469,6 +485,9 @@ export type Modal =
       };
     }
   | {
+      name: 'schedules-page-menu';
+    }
+  | {
       name: 'envelope-budget-month-menu';
       options: {
         month: string;
@@ -496,10 +515,26 @@ export type Modal =
       };
     }
   | {
+      name: 'convert-to-schedule';
+      options: {
+        onConfirm: () => void;
+        onCancel?: () => void;
+        isBeyondWindow?: boolean;
+        daysUntilTransaction?: number;
+        upcomingDays?: number;
+      };
+    }
+  | {
       name: 'confirm-delete';
       options: {
         message: string;
         onConfirm: () => void;
+      };
+    }
+  | {
+      name: 'copy-widget-to-dashboard';
+      options: {
+        onSelect: (dashboardId: string) => void;
       };
     }
   | {
@@ -525,13 +560,13 @@ export type Modal =
   | {
       name: 'enable-openid';
       options: {
-        onSave: () => void;
+        onSave?: () => void;
       };
     }
   | {
       name: 'enable-password-auth';
       options: {
-        onSave: () => void;
+        onSave?: () => void;
       };
     }
   | {

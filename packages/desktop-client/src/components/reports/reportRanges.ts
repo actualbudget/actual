@@ -4,6 +4,7 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 export function validateStart(
   earliest: string,
+  latest: string,
   start: string,
   end: string,
   interval?: string,
@@ -35,6 +36,7 @@ export function validateStart(
   }
   return boundedRange(
     earliest,
+    latest,
     dateStart,
     interval ? end : monthUtils.monthFromDate(end),
     interval,
@@ -44,6 +46,7 @@ export function validateStart(
 
 export function validateEnd(
   earliest: string,
+  latest: string,
   start: string,
   end: string,
   interval?: string,
@@ -75,6 +78,7 @@ export function validateEnd(
   }
   return boundedRange(
     earliest,
+    latest,
     interval ? start : monthUtils.monthFromDate(start),
     dateEnd,
     interval,
@@ -82,8 +86,12 @@ export function validateEnd(
   );
 }
 
-export function validateRange(earliest: string, start: string, end: string) {
-  const latest = monthUtils.currentDay();
+export function validateRange(
+  earliest: string,
+  latest: string,
+  start: string,
+  end: string,
+) {
   if (end > latest) {
     end = latest;
   }
@@ -95,18 +103,20 @@ export function validateRange(earliest: string, start: string, end: string) {
 
 function boundedRange(
   earliest: string,
+  latest: string,
   start: string,
   end: string,
   interval?: string,
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  _firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ): [string, string, 'static'] {
-  let latest: string;
   switch (interval) {
     case 'Daily':
       latest = monthUtils.currentDay();
       break;
     case 'Weekly':
-      latest = monthUtils.currentWeek(firstDayOfWeekIdx);
+      // For weekly views, clamp to today so the current (ongoing) week is included
+      // and reflects data up to the current day.
+      latest = monthUtils.currentDay();
       break;
     case 'Monthly':
       latest = monthUtils.getMonthEnd(monthUtils.currentDay());
@@ -115,7 +125,6 @@ function boundedRange(
       latest = monthUtils.currentDay();
       break;
     default:
-      latest = monthUtils.currentMonth();
       break;
   }
 
@@ -154,8 +163,7 @@ export function getSpecificRange(
   return [dateStart, dateEnd, 'static'];
 }
 
-export function getFullRange(start: string) {
-  const end = monthUtils.currentMonth();
+export function getFullRange(start: string, end: string) {
   return [start, end, 'full'] as const;
 }
 
@@ -169,6 +177,7 @@ export function getLatestRange(offset: number) {
 export function calculateTimeRange(
   timeFrame?: Partial<TimeFrame>,
   defaultTimeFrame?: TimeFrame,
+  latestTransaction?: string,
 ) {
   const start =
     timeFrame?.start ??
@@ -179,7 +188,16 @@ export function calculateTimeRange(
   const mode = timeFrame?.mode ?? defaultTimeFrame?.mode ?? 'sliding-window';
 
   if (mode === 'full') {
-    return getFullRange(start);
+    const latestTransactionMonth = latestTransaction
+      ? monthUtils.monthFromDate(latestTransaction)
+      : null;
+    const currentMonth = monthUtils.currentMonth();
+    const fullEnd =
+      latestTransactionMonth &&
+      monthUtils.isAfter(latestTransactionMonth, currentMonth)
+        ? latestTransactionMonth
+        : currentMonth;
+    return getFullRange(start, fullEnd);
   }
   if (mode === 'sliding-window') {
     const offset = monthUtils.differenceInCalendarMonths(end, start);

@@ -1,18 +1,17 @@
 // @ts-strict-ignore
-import React, { useState, type CSSProperties } from 'react';
+import React, { useMemo, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
-  LineChart,
-  Line,
   CartesianGrid,
+  Line,
+  LineChart,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
 } from 'recharts';
 
 import {
@@ -23,12 +22,13 @@ import {
 
 import { showActivity } from './showActivity';
 
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -58,8 +58,23 @@ const CustomTooltip = ({
   format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
-  if (active && payload && payload.length) {
-    let sumTotals = 0;
+  const { sumTotals, items } = useMemo(() => {
+    return (payload ?? [])
+      .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
+      .reduce(
+        (acc, item) => {
+          acc.sumTotals += item.value;
+          acc.items.push(item);
+          return acc;
+        },
+        {
+          sumTotals: 0,
+          items: [] as PayloadItem[],
+        },
+      );
+  }, [payload]);
+
+  if (active && items.length) {
     return (
       <div
         className={css({
@@ -77,25 +92,22 @@ const CustomTooltip = ({
             <strong>{payload[0].payload.date}</strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {payload
-              .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
-              .map((p: PayloadItem, index: number) => {
-                sumTotals += p.value;
-                return (
-                  (compact ? index < 4 : true) && (
-                    <AlignedText
-                      key={index}
-                      left={p.dataKey}
-                      right={format(p.value, 'financial')}
-                      style={{
-                        color: p.color,
-                        textDecoration:
-                          tooltip === p.dataKey ? 'underline' : 'inherit',
-                      }}
-                    />
-                  )
-                );
-              })}
+            {items.map((p: PayloadItem, index: number) => {
+              return (
+                (compact ? index < 4 : true) && (
+                  <AlignedText
+                    key={index}
+                    left={p.dataKey}
+                    right={format(p.value, 'financial')}
+                    style={{
+                      color: p.color,
+                      textDecoration:
+                        tooltip === p.dataKey ? 'underline' : 'inherit',
+                    }}
+                  />
+                )
+              );
+            })}
             {payload.length > 5 && compact && '...'}
             <AlignedText
               left={t('Total')}
@@ -136,6 +148,7 @@ export function LineGraph({
   showTooltip = true,
   interval,
 }: LineGraphProps) {
+  const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
   const categories = useCategories();
   const accounts = useAccounts();
@@ -178,81 +191,81 @@ export function LineGraph({
     >
       {(width, height) =>
         data && (
-          <ResponsiveContainer>
-            <div>
-              {!compact && <div style={{ marginTop: '15px' }} />}
-              <LineChart
-                width={width}
-                height={height}
-                data={data.intervalData}
-                margin={{ top: 10, right: 10, left: leftMargin, bottom: 10 }}
-                style={{ cursor: pointer }}
-              >
-                {showTooltip && (
-                  <Tooltip
-                    content={
-                      <CustomTooltip
-                        compact={compact}
-                        tooltip={tooltip}
-                        format={format}
-                      />
-                    }
-                    formatter={numberFormatterTooltip}
-                    isAnimationActive={false}
-                  />
-                )}
-                {!compact && <CartesianGrid strokeDasharray="3 3" />}
-                {!compact && (
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                  />
-                )}
-                {!compact && (
-                  <YAxis
-                    tickFormatter={value =>
-                      getCustomTick(
-                        format(value, 'financial-no-decimals'),
-                        privacyMode,
-                      )
-                    }
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                    tickSize={0}
-                  />
-                )}
-                {data.legend.map((entry, index) => {
-                  return (
-                    <Line
-                      key={index}
-                      strokeWidth={2}
-                      type="monotone"
-                      dataKey={entry.name}
-                      stroke={entry.color}
-                      activeDot={{
-                        r: entry.name === tooltip && !compact ? 8 : 3,
-                        onMouseEnter: () => {
-                          setTooltip(entry.name);
-                          if (!['Group', 'Interval'].includes(groupBy)) {
-                            setPointer('pointer');
-                          }
-                        },
-                        onMouseLeave: () => {
-                          setPointer('');
-                          setTooltip('');
-                        },
-                        onClick: (e, payload) =>
-                          ((compact && showTooltip) || !compact) &&
-                          !['Group', 'Interval'].includes(groupBy) &&
-                          onShowActivity(e, entry.id, payload),
-                      }}
+          <div>
+            {!compact && <div style={{ marginTop: '15px' }} />}
+            <LineChart
+              responsive
+              width={width}
+              height={height}
+              data={data.intervalData}
+              margin={{ top: 10, right: 10, left: leftMargin, bottom: 10 }}
+              style={{ cursor: pointer }}
+            >
+              {showTooltip && (
+                <Tooltip
+                  content={
+                    <CustomTooltip
+                      compact={compact}
+                      tooltip={tooltip}
+                      format={format}
                     />
-                  );
-                })}
-              </LineChart>
-            </div>
-          </ResponsiveContainer>
+                  }
+                  formatter={numberFormatterTooltip}
+                  isAnimationActive={false}
+                />
+              )}
+              {!compact && <CartesianGrid strokeDasharray="3 3" />}
+              {!compact && (
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: theme.pageText }}
+                  tickLine={{ stroke: theme.pageText }}
+                />
+              )}
+              {!compact && (
+                <YAxis
+                  tickFormatter={value =>
+                    getCustomTick(
+                      format(value, 'financial-no-decimals'),
+                      privacyMode,
+                    )
+                  }
+                  tick={{ fill: theme.pageText }}
+                  tickLine={{ stroke: theme.pageText }}
+                  tickSize={0}
+                />
+              )}
+              {data.legend.map((entry, index) => {
+                return (
+                  <Line
+                    key={index}
+                    strokeWidth={2}
+                    type="monotone"
+                    dataKey={entry.name}
+                    stroke={entry.color}
+                    {...animationProps}
+                    activeDot={{
+                      r: entry.name === tooltip && !compact ? 8 : 3,
+                      onMouseEnter: () => {
+                        setTooltip(entry.name);
+                        if (!['Group', 'Interval'].includes(groupBy)) {
+                          setPointer('pointer');
+                        }
+                      },
+                      onMouseLeave: () => {
+                        setPointer('');
+                        setTooltip('');
+                      },
+                      onClick: (e, payload) =>
+                        ((compact && showTooltip) || !compact) &&
+                        !['Group', 'Interval'].includes(groupBy) &&
+                        onShowActivity(e, entry.id, payload),
+                    }}
+                  />
+                );
+              })}
+            </LineChart>
+          </div>
         )
       }
     </Container>

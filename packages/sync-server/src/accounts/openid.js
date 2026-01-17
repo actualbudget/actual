@@ -5,15 +5,15 @@ import {
   clearExpiredSessions,
   getAccountDb,
   listLoginMethods,
-} from '../account-db.js';
-import { config } from '../load-config.js';
+} from '../account-db';
+import { config } from '../load-config';
 import {
   getUserByUsername,
   transferAllFilesFromUser,
-} from '../services/user-service.js';
-import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
+} from '../services/user-service';
+import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user';
 
-import { checkPassword } from './password.js';
+import { checkPassword } from './password';
 
 export async function bootstrapOpenId(configParameter) {
   if (!('issuer' in configParameter) && !('discoveryURL' in configParameter)) {
@@ -312,9 +312,9 @@ export async function loginWithOpenIdFinalize(body) {
       expiration = TOKEN_EXPIRATION_NEVER;
     } else if (typeof config.get('token_expiration') === 'number') {
       expiration =
-        Math.floor(Date.now() / 1000) + config.get('token_expiration') * 60;
+        Math.floor(Date.now() / 1000) + config.get('token_expiration');
     } else {
-      expiration = Math.floor(Date.now() / 1000) + 10 * 60;
+      expiration = Math.floor(Date.now() / 1000) + 10 * 60; // Default to 10 minutes
     }
 
     accountDb.mutate(
@@ -366,7 +366,7 @@ export function isValidRedirectUrl(url) {
     } else {
       return false;
     }
-  } catch (err) {
+  } catch {
     return false;
   }
 }

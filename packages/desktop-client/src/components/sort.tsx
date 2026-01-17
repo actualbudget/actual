@@ -1,11 +1,11 @@
 // @ts-strict-ignore
 import React, {
   createContext,
-  useEffect,
-  useRef,
-  useLayoutEffect,
-  useState,
   useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
   type Context,
 } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
@@ -68,7 +68,7 @@ export function useDraggable<T>({
 
   useLayoutEffect(() => {
     _onDragChange.current = onDragChange;
-  });
+  }, [onDragChange]);
 
   return { dragRef };
 }
@@ -76,14 +76,14 @@ export function useDraggable<T>({
 export type OnDropCallback = (
   id: string,
   dropPos: DropPosition,
-  targetId: unknown,
+  targetId: string,
 ) => Promise<void> | void;
 
 type OnLongHoverCallback = () => Promise<void> | void;
 
 type UseDroppableArgs = {
   types: string | string[];
-  id: unknown;
+  id: string;
   onDrop: OnDropCallback;
   onLongHover?: OnLongHoverCallback;
 };
@@ -95,7 +95,8 @@ export function useDroppable<T extends { id: string }>({
   onLongHover,
 }: UseDroppableArgs) {
   const ref = useRef(null);
-  const [dropPos, setDropPos] = useState<DropPosition>(null);
+  const onLongHoverRef = useRef(onLongHover);
+  const [dropPos, setDropPos] = useState<DropPosition | null>(null);
 
   const [{ isOver }, dropRef] = useDrop<
     { item: T },
@@ -123,12 +124,20 @@ export function useDroppable<T extends { id: string }>({
   const handleDropRef = useDragRef(dropRef);
 
   useEffect(() => {
-    let timeout;
-    if (onLongHover && isOver) {
-      timeout = setTimeout(onLongHover, 700);
+    onLongHoverRef.current = onLongHover;
+  }, [onLongHover]);
+
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    if (onLongHoverRef.current && isOver) {
+      timeout = setTimeout(() => onLongHoverRef.current?.(), 700);
     }
 
-    return () => timeout && clearTimeout(timeout);
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
   }, [isOver]);
 
   return {
@@ -137,7 +146,7 @@ export function useDroppable<T extends { id: string }>({
   };
 }
 
-type ItemPosition = 'first' | 'last';
+type ItemPosition = 'first' | 'last' | null;
 export const DropHighlightPosContext: Context<ItemPosition> =
   createContext(null);
 

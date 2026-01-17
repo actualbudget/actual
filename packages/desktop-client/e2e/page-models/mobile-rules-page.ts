@@ -40,17 +40,14 @@ export class MobileRulesPage {
    * Get the nth rule item (0-based index)
    */
   getNthRule(index: number) {
-    return this.page
-      .getByRole('button')
-      .filter({ hasText: /IF|THEN/ })
-      .nth(index);
+    return this.getAllRules().nth(index);
   }
 
   /**
    * Get all visible rule items
    */
   getAllRules() {
-    return this.page.getByRole('button').filter({ hasText: /IF|THEN/ });
+    return this.page.getByRole('grid', { name: 'Rules' }).getByRole('row');
   }
 
   /**
@@ -77,28 +74,6 @@ export class MobileRulesPage {
   }
 
   /**
-   * Check if the search bar has a border
-   */
-  async hasSearchBarBorder() {
-    const searchContainer = this.searchBox.locator('..');
-    const borderStyle = await searchContainer.evaluate(el => {
-      const style = window.getComputedStyle(el);
-      return style.borderBottomWidth;
-    });
-    return borderStyle === '2px';
-  }
-
-  /**
-   * Get the background color of the search box
-   */
-  async getSearchBackgroundColor() {
-    return await this.searchBox.evaluate(el => {
-      const style = window.getComputedStyle(el);
-      return style.backgroundColor;
-    });
-  }
-
-  /**
    * Check if a rule contains specific text
    */
   async ruleContainsText(index: number, text: string) {
@@ -112,7 +87,7 @@ export class MobileRulesPage {
    */
   async getRuleStage(index: number) {
     const rule = this.getNthRule(index);
-    const stageBadge = rule.locator('span').first();
+    const stageBadge = rule.getByTestId('rule-stage-badge');
     return await stageBadge.textContent();
   }
 }

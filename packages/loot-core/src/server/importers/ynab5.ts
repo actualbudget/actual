@@ -7,10 +7,11 @@ import { send } from '@actual-app/api/injected';
 import * as actual from '@actual-app/api/methods';
 import { v4 as uuidv4 } from 'uuid';
 
+import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
-import { sortByKey, groupBy } from '../../shared/util';
+import { groupBy, sortByKey } from '../../shared/util';
 
-import * as YNAB5 from './ynab5-types';
+import type * as YNAB5 from './ynab5-types';
 
 function amountFromYnab(amount: number) {
   // ynabs multiplies amount by 1000 and actual by 100
@@ -345,6 +346,8 @@ async function importTransactions(
             // So we advance to the next subtransaction
             subtransactionIdx++;
             break;
+          default:
+            throw new Error(`Unrecognized orphan transfer comparator result`);
         }
       } while (
         transactionIdx < transactions.length &&
@@ -499,22 +502,22 @@ async function importBudgets(
 export async function doImport(data: YNAB5.Budget) {
   const entityIdMap = new Map<string, string>();
 
-  console.log('Importing Accounts...');
+  logger.log('Importing Accounts...');
   await importAccounts(data, entityIdMap);
 
-  console.log('Importing Categories...');
+  logger.log('Importing Categories...');
   await importCategories(data, entityIdMap);
 
-  console.log('Importing Payees...');
+  logger.log('Importing Payees...');
   await importPayees(data, entityIdMap);
 
-  console.log('Importing Transactions...');
+  logger.log('Importing Transactions...');
   await importTransactions(data, entityIdMap);
 
-  console.log('Importing Budgets...');
+  logger.log('Importing Budgets...');
   await importBudgets(data, entityIdMap);
 
-  console.log('Setting up...');
+  logger.log('Setting up...');
 }
 
 export function parseFile(buffer: Buffer): YNAB5.Budget {

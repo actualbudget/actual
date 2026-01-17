@@ -35,10 +35,10 @@ export async function getLatestVersion(): Promise<string | 'unknown'> {
   }
 }
 
-export async function getIsOutdated(latestVersion: string): Promise<boolean> {
+export function getIsOutdated(latestVersion: string): boolean {
   const clientVersion = window.Actual.ACTUAL_VERSION;
   if (latestVersion === 'unknown') {
-    return Promise.resolve(false);
+    return false;
   }
   return cmpSemanticVersion(clientVersion, latestVersion) < 0;
 }

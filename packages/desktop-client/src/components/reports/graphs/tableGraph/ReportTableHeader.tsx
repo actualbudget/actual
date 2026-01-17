@@ -1,7 +1,7 @@
 import React, {
+  type CSSProperties,
   type RefObject,
   type UIEventHandler,
-  type CSSProperties,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,7 +14,7 @@ import {
 } from 'loot-core/types/models';
 
 import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
-import { Row, Cell } from '@desktop-client/components/table';
+import { Cell, Row } from '@desktop-client/components/table';
 
 type ReportTableHeaderProps = {
   groupBy: string;
@@ -44,7 +44,7 @@ export function ReportTableHeader({
   const { t } = useTranslation();
   return (
     <Row
-      collapsed={true}
+      collapsed
       style={{
         justifyContent: 'center',
         borderBottomWidth: 1,
@@ -90,6 +90,7 @@ export function ReportTableHeader({
                   valueStyle={compactStyle}
                   key={index}
                   value={header.date}
+                  textAlign="right"
                   width="flex"
                 />
               );
@@ -102,6 +103,7 @@ export function ReportTableHeader({
                   }}
                   valueStyle={compactStyle}
                   value={t('Deposits')}
+                  textAlign="right"
                   width="flex"
                 />
                 <Cell
@@ -110,6 +112,7 @@ export function ReportTableHeader({
                   }}
                   valueStyle={compactStyle}
                   value={t('Payments')}
+                  textAlign="right"
                   width="flex"
                 />
               </>
@@ -120,6 +123,7 @@ export function ReportTableHeader({
           }}
           valueStyle={compactStyle}
           value={t('Totals')}
+          textAlign="right"
           width="flex"
         />
         <Cell
@@ -128,6 +132,7 @@ export function ReportTableHeader({
           }}
           valueStyle={compactStyle}
           value={t('Average')}
+          textAlign="right"
           width="flex"
         />
       </View>

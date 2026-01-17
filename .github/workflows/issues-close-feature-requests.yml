@@ -9,16 +9,17 @@ jobs:
     if: ${{ github.event.label.name == 'feature' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions-ecosystem/action-add-labels@v1
+      - uses: actions-ecosystem/action-add-labels@bd52874380e3909a1ac983768df6976535ece7f8 # v1.1.0
         with:
           labels: needs votes
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Add reactions
-        uses: aidan-mundy/react-to-issue@v1.1.1
+        uses: aidan-mundy/react-to-issue@109392cac5159c2df6c47c8ab3b5d6b708852fe5 # v1.1.2
         with:
           issue-number: ${{ github.event.issue.number }}
           reactions: '+1'
       - name: Create comment
-        uses: peter-evans/create-or-update-comment@v3
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |
@@ -28,7 +29,7 @@ jobs:
 
             The enhancement backlog can be found here: https://github.com/actualbudget/actual/issues?q=label%3A%22needs+votes%22+sort%3Areactions-%2B1-desc+
 
-            Don’t forget to upvote the top comment with 👍!
+            Don't forget to upvote the top comment with 👍!
 
             <!-- feature-auto-close-comment -->
       - name: Close Issue

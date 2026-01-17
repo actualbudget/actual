@@ -3,10 +3,10 @@ import type { Template } from '../../types/models/templates';
 import { storeTemplates } from './goal-template';
 import { parse } from './goal-template.pegjs';
 import {
-  CategoryWithTemplateNote,
   getActiveSchedules,
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
+  type CategoryWithTemplateNote,
 } from './statements';
 
 type Notification = {
@@ -52,7 +52,7 @@ export async function checkTemplateNotes(): Promise<Notification> {
         template.type === 'schedule' &&
         !scheduleNames.includes(template.name)
       ) {
-        errors.push(`${name}: Schedule “${template.name}” does not exist`);
+        errors.push(`${name}: Schedule "${template.name}" does not exist`);
       }
     });
   });

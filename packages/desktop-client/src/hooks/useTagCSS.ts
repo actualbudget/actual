@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 
 import { theme as themeStyle } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
@@ -44,16 +44,6 @@ export function useTagCSS() {
   );
 }
 
-function getContrastedColor(hexcolor: string) {
-  // see: https://www.w3.org/TR/AERT/#color-contrast
-  const r = parseInt(hexcolor.substring(1, 3), 16);
-  const g = parseInt(hexcolor.substring(3, 5), 16);
-  const b = parseInt(hexcolor.substring(5, 7), 16);
-  const brightnessDiff = (r * 299 + g * 587 + b * 114) / 1000;
-
-  return brightnessDiff >= 125 ? 'black' : 'white';
-}
-
 function getTagCSSColors(theme: Theme, color?: string | null) {
   if (!color) {
     return [
@@ -63,23 +53,20 @@ function getTagCSSColors(theme: Theme, color?: string | null) {
     ];
   }
 
-  if (theme === 'auto') {
-    theme = window.matchMedia('(prefers-color-scheme: light)').matches
-      ? 'light'
-      : 'dark';
+  // see: https://www.w3.org/TR/AERT/#color-contrast
+  const r = parseInt(color.substring(1, 3), 16);
+  const g = parseInt(color.substring(3, 5), 16);
+  const b = parseInt(color.substring(5, 7), 16);
+  const brightnessDiff = (r * 299 + g * 587 + b * 114) / 1000;
+
+  if (brightnessDiff >= 125) {
+    // !important is used to override the hover text color in button.tsx used to style the tag button
+    return [
+      'black !important',
+      color,
+      `color-mix(in srgb, ${color} 80%, black)`,
+    ];
   }
 
-  if (theme === 'light') {
-    return [
-      `${color} !important`,
-      `color-mix(in srgb, ${color} 15%, white)`,
-      `color-mix(in srgb, ${color} 25%, white)`,
-    ];
-  } else {
-    return [
-      getContrastedColor(color),
-      color,
-      `color-mix(in srgb, ${color} 85%, white)`,
-    ];
-  }
+  return ['white !important', color, `color-mix(in srgb, ${color} 70%, white)`];
 }

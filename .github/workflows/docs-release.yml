@@ -1,0 +1,33 @@
+name: Release Docs to Github Pages
+
+# Release docs on every push to master
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'packages/docs/**'
+      - '.github/workflows/docs-spelling.yml'
+      - '.github/actions/docs-spelling/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy Docs
+    if: github.event.repository.fork == false
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+
+      - name: Docusaurus Deploy
+        run: |
+          GIT_USER=MikesGlitch \
+          GIT_PASS=${{ secrets.DOCS_GITHUB_PAGES_DEPLOY }} \
+          GIT_USER_NAME=github-actions[bot] \
+          GIT_USER_EMAIL=github-actions[bot]@users.noreply.github.com \
+          yarn deploy:docs

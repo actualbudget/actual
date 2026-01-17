@@ -9,8 +9,8 @@ import { View } from '@actual-app/components/view';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import {
-  type TransactionFilterEntity,
   type RuleConditionEntity,
+  type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
 import { FilterMenu } from './FilterMenu';
@@ -48,7 +48,7 @@ export function SavedFilterMenuButton({
   const [menuItem, setMenuItem] = useState('');
   const [name, setName] = useState(filterId?.name ?? '');
   const id = filterId?.id;
-  let savedFilter: SavedFilter;
+  const originalSavedFilter = useRef<SavedFilter | null>(null);
 
   const onFilterMenuSelect = async (item: string) => {
     setMenuItem(item);
@@ -68,7 +68,7 @@ export function SavedFilterMenuButton({
         setErr(null);
         setAdding(false);
         setMenuOpen(false);
-        savedFilter = {
+        originalSavedFilter.current = {
           conditions,
           conditionsOp,
           id: filterId?.id,
@@ -76,7 +76,7 @@ export function SavedFilterMenuButton({
           status: 'saved',
         };
         const response = await sendCatch('filter-update', {
-          state: savedFilter,
+          state: originalSavedFilter.current,
           filters: [...savedFilters],
         });
 
@@ -86,7 +86,7 @@ export function SavedFilterMenuButton({
           return;
         }
 
-        onReloadSavedFilter(savedFilter, 'update');
+        onReloadSavedFilter(originalSavedFilter.current, 'update');
         break;
       case 'save-filter':
         setErr(null);
@@ -96,11 +96,13 @@ export function SavedFilterMenuButton({
         break;
       case 'reload-filter':
         setMenuOpen(false);
-        savedFilter = {
-          ...savedFilter,
-          status: 'saved',
-        };
-        onReloadSavedFilter(savedFilter, 'reload');
+        if (originalSavedFilter.current) {
+          originalSavedFilter.current = {
+            ...originalSavedFilter.current,
+            status: 'saved',
+          };
+          onReloadSavedFilter(originalSavedFilter.current, 'reload');
+        }
         break;
       case 'clear-filter':
         setMenuOpen(false);

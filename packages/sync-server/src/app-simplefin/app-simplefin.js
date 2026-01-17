@@ -2,9 +2,9 @@ import https from 'https';
 
 import express from 'express';
 
-import { handleError } from '../app-gocardless/util/handle-error.js';
-import { SecretName, secretsService } from '../services/secrets-service.js';
-import { requestLoggerMiddleware } from '../util/middlewares.js';
+import { handleError } from '../app-gocardless/util/handle-error';
+import { SecretName, secretsService } from '../services/secrets-service';
+import { requestLoggerMiddleware } from '../util/middlewares';
 
 const app = express();
 export { app as handlers };
@@ -162,8 +162,8 @@ function getAccountResponse(results, accountId, startDate) {
     return;
   }
 
-  const needsAttention = results.sferrors.find(
-    e => e === `Connection to ${account.org.name} may need attention`,
+  const needsAttention = results.sferrors.find(e =>
+    e.startsWith(`Connection to ${account.org.name} may need attention`),
   );
   if (needsAttention) {
     logAccountError(results, accountId, {
@@ -294,7 +294,7 @@ function parseAccessKey(accessKey) {
   let password = null;
   let baseUrl = null;
   if (!accessKey || !accessKey.match(/^.*\/\/.*:.*@.*$/)) {
-    console.log(`Invalid SimpleFIN access key: ${accessKey}`);
+    console.log('Invalid SimpleFIN access key');
     throw new Error(`Invalid access key`);
   }
   [scheme, rest] = accessKey.split('//');

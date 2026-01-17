@@ -74,6 +74,7 @@ export function Saved({ projected, style }: SavedProps) {
         }}
       >
         <View
+          style={{ ...styles.tnum }}
           className={css({
             fontSize: 25,
             color: projected

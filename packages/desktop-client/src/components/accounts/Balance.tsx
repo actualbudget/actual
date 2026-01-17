@@ -39,7 +39,6 @@ function DetailedBalance({
   return (
     <Text
       style={{
-        marginLeft: 15,
         borderRadius: 4,
         padding: '4px 6px',
         color: theme.pillText,
@@ -141,7 +140,7 @@ function FilteredBalance({ filteredAmount }: FilteredBalanceProps) {
     <DetailedBalance
       name={t('Filtered balance:')}
       balance={filteredAmount ?? 0}
-      isExactBalance={true}
+      isExactBalance
     />
   );
 }
@@ -167,10 +166,10 @@ function MoreBalances({ balanceQuery }: MoreBalancesProps) {
   });
 
   return (
-    <View style={{ flexDirection: 'row' }}>
+    <>
       <DetailedBalance name={t('Cleared total:')} balance={cleared ?? 0} />
       <DetailedBalance name={t('Uncleared total:')} balance={uncleared ?? 0} />
-    </View>
+    </>
   );
 }
 
@@ -199,9 +198,11 @@ export function Balances({
     <View
       style={{
         flexDirection: 'row',
+        flexWrap: 'wrap',
         alignItems: 'center',
         marginTop: -5,
         marginLeft: -5,
+        gap: 10,
       }}
     >
       <Button

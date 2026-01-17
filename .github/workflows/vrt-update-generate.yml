@@ -1,0 +1,136 @@
+name: VRT Update - Generate
+# SECURITY: This workflow runs in untrusted fork context with no write permissions.
+# It only generates VRT patch artifacts that are later applied by vrt-update-apply.yml
+# Triggered by commenting "/update-vrt" on a pull request.
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  add-reaction:
+    name: Add 👀 Reaction
+    runs-on: ubuntu-latest
+    # Only run on PR comments containing /update-vrt
+    if: >
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/update-vrt')
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Add 👀 reaction to comment
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'eyes'
+            });
+
+  generate-vrt-updates:
+    name: Generate VRT Updates
+    runs-on: ubuntu-latest
+    # Only run on PR comments containing /update-vrt
+    if: >
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/update-vrt')
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-jammy
+    steps:
+      - name: Get PR details
+        id: pr
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            core.setOutput('head_sha', pr.head.sha);
+            core.setOutput('head_ref', pr.head.ref);
+            core.setOutput('head_repo', pr.head.repo.full_name);
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          ref: ${{ steps.pr.outputs.head_sha }}
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+
+      - name: Run VRT Tests on Desktop app
+        continue-on-error: true
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" -- yarn e2e:desktop --update-snapshots
+
+      - name: Run VRT Tests
+        continue-on-error: true
+        run: yarn vrt --update-snapshots
+
+      - name: Create patch with PNG changes only
+        id: create-patch
+        run: |
+          # Trust the repository directory (required for container environments)
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Stage only PNG files
+          git add "**/*.png"
+
+          # Check if there are any changes
+          if git diff --staged --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No VRT changes to commit"
+            exit 0
+          fi
+
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+          # Create commit and patch
+          git commit -m "Update VRT screenshots"
+          git format-patch -1 HEAD --stdout > vrt-update.patch
+
+          # Validate patch only contains PNG files
+          if grep -E '^(\+\+\+|---) [ab]/' vrt-update.patch | grep -v '\.png$'; then
+            echo "ERROR: Patch contains non-PNG files!"
+            exit 1
+          fi
+
+          echo "Patch created successfully with PNG changes only"
+
+      - name: Upload patch artifact
+        if: steps.create-patch.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: vrt-patch-${{ github.event.issue.number }}
+          path: vrt-update.patch
+          retention-days: 5
+
+      - name: Save PR metadata
+        if: steps.create-patch.outputs.has_changes == 'true'
+        run: |
+          mkdir -p pr-metadata
+          echo "${{ github.event.issue.number }}" > pr-metadata/pr-number.txt
+          echo "${{ steps.pr.outputs.head_ref }}" > pr-metadata/head-ref.txt
+          echo "${{ steps.pr.outputs.head_repo }}" > pr-metadata/head-repo.txt
+
+      - name: Upload PR metadata
+        if: steps.create-patch.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: vrt-metadata-${{ github.event.issue.number }}
+          path: pr-metadata/
+          retention-days: 5

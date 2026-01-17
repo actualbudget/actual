@@ -6,8 +6,8 @@ import { View } from '@actual-app/components/view';
 
 import {
   Modal,
-  ModalHeader,
   ModalCloseButton,
+  ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { BudgetFileSelection } from '@desktop-client/components/manager/BudgetFileSelection';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
@@ -42,7 +42,7 @@ export function BudgetFileSelectionModal() {
               {currentFile?.name}
             </Text>
           </View>
-          <BudgetFileSelection showHeader={false} quickSwitchMode={true} />
+          <BudgetFileSelection showHeader={false} quickSwitchMode />
         </>
       )}
     </Modal>

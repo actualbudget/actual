@@ -1,4 +1,4 @@
-import React, { type ReactNode, type CSSProperties } from 'react';
+import React, { type CSSProperties, type ReactNode } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
@@ -78,6 +78,7 @@ export function MobilePageHeader({
       </View>
       <View
         role="heading"
+        aria-level={1}
         style={{
           textAlign: 'center',
           alignItems: 'center',

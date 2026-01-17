@@ -1,16 +1,16 @@
 import React, {
-  type ChangeEvent,
-  type KeyboardEvent,
   useEffect,
   useMemo,
   useRef,
   useState,
+  type ChangeEvent,
+  type KeyboardEvent,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { ColorPicker } from '@actual-app/components/color-picker';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -21,6 +21,7 @@ import {
   Row,
   useTableNavigator,
 } from '@desktop-client/components/table';
+import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
 import { useDispatch } from '@desktop-client/redux';
@@ -81,8 +82,13 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
     resetInputs();
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => tableNavigator.onEdit('new-tag', 'tag'), []);
+  const isInitialMount = useInitialMount();
+
+  useEffect(() => {
+    if (isInitialMount) {
+      tableNavigator.onEdit('new-tag', 'tag');
+    }
+  }, [isInitialMount, tableNavigator]);
 
   return (
     <View
@@ -110,7 +116,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           backgroundColor: theme.tableBackground,
           gap: 5,
         }}
-        collapsed={true}
+        collapsed
       >
         <InputCell
           width={250}
@@ -160,7 +166,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           alignItems: 'center',
           borderBottom: '1px solid ' + theme.tableBorderHover,
         }}
-        collapsed={true}
+        collapsed
       >
         <Trans>Choose Color:</Trans>
         <ColorPicker
@@ -175,12 +181,13 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
             #{tag}
           </Button>
         </ColorPicker>
-        <Stack
-          direction="row"
-          align="center"
-          justify="flex-end"
-          style={{ marginLeft: 'auto' }}
-          spacing={2}
+        <SpaceBetween
+          gap={10}
+          style={{
+            marginLeft: 'auto',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+          }}
         >
           <Button
             variant="normal"
@@ -201,7 +208,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           >
             <Trans>Add</Trans>
           </Button>
-        </Stack>
+        </SpaceBetween>
       </Row>
     </View>
   );

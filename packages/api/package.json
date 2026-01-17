@@ -1,17 +1,14 @@
 {
   "name": "@actual-app/api",
-  "version": "25.9.0",
-  "license": "MIT",
+  "version": "26.1.0",
   "description": "An API for Actual",
-  "engines": {
-    "node": ">=20"
-  },
+  "license": "MIT",
+  "files": [
+    "@types",
+    "dist"
+  ],
   "main": "dist/index.js",
   "types": "@types/index.d.ts",
-  "files": [
-    "dist",
-    "@types"
-  ],
   "scripts": {
     "build:app": "yarn workspace loot-core build:api",
     "build:crdt": "yarn workspace @actual-app/crdt build",
@@ -19,19 +16,22 @@
     "build:migrations": "cp migrations/*.sql dist/migrations",
     "build:default-db": "cp default-db.sqlite dist/",
     "build": "yarn run clean && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
-    "test": "yarn run build:app && yarn run build:crdt && vitest",
+    "test": "yarn run clean && yarn run build:app && yarn run build:crdt && vitest --run",
     "clean": "rm -rf dist @types"
   },
   "dependencies": {
     "@actual-app/crdt": "workspace:^",
-    "better-sqlite3": "^12.2.0",
+    "better-sqlite3": "^12.5.0",
     "compare-versions": "^6.1.1",
     "node-fetch": "^3.3.2",
-    "uuid": "^11.1.0"
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "tsc-alias": "^1.8.16",
-    "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

@@ -9,7 +9,7 @@ import React, {
   useState,
   type ComponentProps,
   type KeyboardEvent,
-  type RefObject,
+  type Ref,
 } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -20,22 +20,22 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import {
-  type Locale,
+  addDays,
+  format,
+  isValid,
   parse,
   parseISO,
-  format,
   subDays,
-  addDays,
-  isValid,
+  type Locale,
 } from 'date-fns';
 import Pikaday from 'pikaday';
 
 import {
+  currentDate,
   getDayMonthFormat,
   getDayMonthRegex,
   getShortYearFormat,
   getShortYearRegex,
-  currentDate,
 } from 'loot-core/shared/months';
 
 import 'pikaday/css/pikaday.css';
@@ -45,6 +45,7 @@ import DateSelectRight from './DateSelect.right.png';
 
 import { InputField } from '@desktop-client/components/mobile/MobileForms';
 import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 const pickerStyles: CSSProperties = {
@@ -173,7 +174,7 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
           }
         },
       }),
-      [],
+      [onUpdate],
     );
 
     useLayoutEffect(() => {
@@ -202,6 +203,7 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
       return () => {
         picker.current.destroy();
       };
+      // oxlint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -234,7 +236,7 @@ type DateSelectProps = {
   embedded?: boolean;
   dateFormat: string;
   openOnFocus?: boolean;
-  inputRef?: RefObject<HTMLInputElement>;
+  ref?: Ref<HTMLInputElement>;
   shouldSaveFromKey?: (e: KeyboardEvent<HTMLInputElement>) => boolean;
   clearOnBlur?: boolean;
   onUpdate?: (selectedDate: string) => void;
@@ -250,7 +252,7 @@ function DateSelectDesktop({
   embedded,
   dateFormat = 'yyyy-MM-dd',
   openOnFocus = true,
-  inputRef: originalInputRef,
+  ref,
   shouldSaveFromKey = defaultShouldSaveFromKey,
   clearOnBlur = true,
   onUpdate,
@@ -269,13 +271,8 @@ function DateSelectDesktop({
   const picker = useRef(null);
   const [value, setValue] = useState(parsedDefaultValue);
   const [open, setOpen] = useState(embedded || isOpen || false);
-  const inputRef = useRef(null);
-
-  useLayoutEffect(() => {
-    if (originalInputRef) {
-      originalInputRef.current = inputRef.current;
-    }
-  }, []);
+  const innerRef = useRef<HTMLInputElement | null>(null);
+  const mergedRef = useMergedRefs<HTMLInputElement>(innerRef, ref);
 
   // This is confusing, so let me explain: `selectedValue` should be
   // renamed to `currentValue`. It represents the current highlighted
@@ -320,7 +317,7 @@ function DateSelectDesktop({
         setSelectedValue(value);
       }
     }
-  }, [value]);
+  }, [value, onUpdate, dateFormat]);
 
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (
@@ -366,8 +363,8 @@ function DateSelectDesktop({
       onKeyDown?.(e);
     } else if (!open) {
       setOpen(true);
-      if (inputRef.current) {
-        inputRef.current.setSelectionRange(0, 10000);
+      if (innerRef.current) {
+        innerRef.current.setSelectionRange(0, 10000);
       }
     }
   }
@@ -383,7 +380,7 @@ function DateSelectDesktop({
 
     return (
       <Popover
-        triggerRef={inputRef}
+        triggerRef={innerRef}
         placement="bottom start"
         offset={2}
         isOpen={open}
@@ -402,7 +399,7 @@ function DateSelectDesktop({
       <Input
         id={id}
         {...inputProps}
-        ref={inputRef}
+        ref={mergedRef}
         value={value}
         onPointerUp={() => {
           if (!embedded) {

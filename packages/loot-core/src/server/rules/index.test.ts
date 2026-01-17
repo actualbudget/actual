@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import {
+  Action,
+  Condition,
+  iterateIds,
   parseDateString,
   rankRules,
-  iterateIds,
-  Condition,
-  Action,
   Rule,
   RuleIndexer,
 } from '.';
@@ -37,8 +37,8 @@ describe('Condition', () => {
     cond = new Condition('matches', 'notes', '^fo*$', null);
     expect(cond.eval({ notes: null })).toBe(false);
 
-    cond = new Condition('oneOf', 'notes', ['foo'], null);
-    expect(cond.eval({ notes: null })).toBe(false);
+    cond = new Condition('oneOf', 'imported_payee', ['foo'], null);
+    expect(cond.eval({ imported_payee: null })).toBe(false);
 
     ['gt', 'gte', 'lt', 'lte', 'isapprox'].forEach(op => {
       const cond = new Condition(op, 'date', '2020-01-01', null);
@@ -202,11 +202,11 @@ describe('Condition', () => {
     expect(cond.eval({ notes: 'FOO' })).toBe(true);
     expect(cond.eval({ notes: 'foo2' })).toBe(false);
 
-    cond = new Condition('oneOf', 'notes', ['foo', 'bar'], null);
-    expect(cond.eval({ notes: 'foo' })).toBe(true);
-    expect(cond.eval({ notes: 'FOO' })).toBe(true);
-    expect(cond.eval({ notes: 'Bar' })).toBe(true);
-    expect(cond.eval({ notes: 'bar2' })).toBe(false);
+    cond = new Condition('oneOf', 'imported_payee', ['foo', 'bar'], null);
+    expect(cond.eval({ imported_payee: 'foo' })).toBe(true);
+    expect(cond.eval({ imported_payee: 'FOO' })).toBe(true);
+    expect(cond.eval({ imported_payee: 'Bar' })).toBe(true);
+    expect(cond.eval({ imported_payee: 'bar2' })).toBe(false);
 
     cond = new Condition('contains', 'notes', 'foo', null);
     expect(cond.eval({ notes: 'bar foo baz' })).toBe(true);
@@ -328,6 +328,15 @@ describe('Action', () => {
       const item = { notes: 'Sarah', amount: 10 };
       action.exec(item);
       expect(item.notes).toBe('Hey Sarah! You just payed 10');
+    });
+
+    test('should create actions with balance math operations', () => {
+      // This test ensures the template validation doesn't fail when using balance
+      expect(() => {
+        new Action('set', 'notes', '', {
+          template: '{{ floor (div (mul balance (div 7.99 100)) 12) }}',
+        });
+      }).not.toThrow();
     });
 
     test('should not escape text', () => {
@@ -465,6 +474,44 @@ describe('Action', () => {
 
       testHelper('{{concat "Sarah" "Trops"}}', 'SarahTrops');
       testHelper('{{concat "Sarah" "Trops" 12 "Wow"}}', 'SarahTrops12Wow');
+    });
+
+    test('should have access to balance variable', () => {
+      const action = new Action('set', 'notes', '', {
+        template: 'Balance: {{balance}}, Amount: {{amount}}',
+      });
+      const item = { notes: '', amount: 5000, balance: 100000 };
+      action.exec(item);
+      expect(item.notes).toBe('Balance: 100000, Amount: 5000');
+    });
+
+    test('should allow math operations on balance', () => {
+      const action = new Action('set', 'notes', '', {
+        template: 'New balance: {{add balance amount}}',
+      });
+      const item = { notes: '', amount: 5000, balance: 100000 };
+      action.exec(item);
+      expect(item.notes).toBe('New balance: 105000');
+    });
+
+    test('should handle undefined balance gracefully in number fields', () => {
+      const action = new Action('set', 'amount', '', {
+        template: '{{ floor (div (mul balance (div 7.99 100)) 12) }}',
+      });
+      const item = { amount: 0 }; // No balance field
+      action.exec(item);
+      // Should default to 0 instead of NaN when balance is undefined
+      expect(item.amount).toBe(0);
+    });
+
+    test('should calculate with balance in number fields', () => {
+      const action = new Action('set', 'amount', '', {
+        template: '{{ floor (div (mul balance (div 7.99 100)) 12) }}',
+      });
+      const item = { amount: 0, balance: 1200 };
+      action.exec(item);
+      // (1200 * 7.99) / 12 = 7.99 -> floor = 7
+      expect(item.amount).toBe(7);
     });
 
     test('{{debug}} should log the item', () => {
@@ -839,7 +886,9 @@ describe('Rule', () => {
 
     rules = [
       rule('id1', [{ op: 'contains', field: 'notes', value: 'sar' }]),
-      rule('id2', [{ op: 'oneOf', field: 'notes', value: ['jim', 'sar'] }]),
+      rule('id2', [
+        { op: 'oneOf', field: 'imported_payee', value: ['jim', 'sar'] },
+      ]),
       rule('id3', [{ op: 'is', field: 'notes', value: 'James' }]),
       rule('id4', [
         { op: 'is', field: 'notes', value: 'James' },
@@ -1005,12 +1054,19 @@ describe('RuleIndexer', () => {
   });
 
   test('indexing works with the oneOf operator', () => {
-    const indexer = new RuleIndexer({ field: 'notes', method: 'firstchar' });
+    const indexer = new RuleIndexer({
+      field: 'imported_payee',
+      method: 'firstchar',
+    });
 
     const rule = new Rule({
       conditionsOp: 'and',
       conditions: [
-        { op: 'oneOf', field: 'notes', value: ['James', 'Sarah', 'Evy'] },
+        {
+          op: 'oneOf',
+          field: 'imported_payee',
+          value: ['James', 'Sarah', 'Evy'],
+        },
       ],
       actions: [{ op: 'set', field: 'category', value: 'Food' }],
     });
@@ -1018,21 +1074,21 @@ describe('RuleIndexer', () => {
 
     const rule2 = new Rule({
       conditionsOp: 'and',
-      conditions: [{ op: 'is', field: 'notes', value: 'Georgia' }],
+      conditions: [{ op: 'is', field: 'imported_payee', value: 'Georgia' }],
       actions: [{ op: 'set', field: 'category', value: 'Food' }],
     });
     indexer.index(rule2);
 
-    expect(indexer.getApplicableRules({ notes: 'James' })).toEqual(
+    expect(indexer.getApplicableRules({ imported_payee: 'James' })).toEqual(
       new Set([rule]),
     );
-    expect(indexer.getApplicableRules({ notes: 'Evy' })).toEqual(
+    expect(indexer.getApplicableRules({ imported_payee: 'Evy' })).toEqual(
       new Set([rule]),
     );
-    expect(indexer.getApplicableRules({ notes: 'Charlotte' })).toEqual(
+    expect(indexer.getApplicableRules({ imported_payee: 'Charlotte' })).toEqual(
       new Set([]),
     );
-    expect(indexer.getApplicableRules({ notes: 'Georgia' })).toEqual(
+    expect(indexer.getApplicableRules({ imported_payee: 'Georgia' })).toEqual(
       new Set([rule2]),
     );
   });

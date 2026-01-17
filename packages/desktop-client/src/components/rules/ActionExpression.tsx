@@ -6,17 +6,18 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
-  mapField,
   friendlyOp,
   getAllocationMethods,
+  mapField,
 } from 'loot-core/shared/rules';
 import {
-  type SetSplitAmountRuleActionEntity,
+  type AppendNoteRuleActionEntity,
+  type DeleteTransactionRuleActionEntity,
   type LinkScheduleRuleActionEntity,
+  type PrependNoteRuleActionEntity,
   type RuleActionEntity,
   type SetRuleActionEntity,
-  type AppendNoteRuleActionEntity,
-  type PrependNoteRuleActionEntity,
+  type SetSplitAmountRuleActionEntity,
 } from 'loot-core/types/models';
 
 import { ScheduleValue } from './ScheduleValue';
@@ -56,6 +57,8 @@ export function ActionExpression({ style, ...props }: ActionExpressionProps) {
         <PrependNoteActionExpression {...props} />
       ) : props.op === 'append-notes' ? (
         <AppendNoteActionExpression {...props} />
+      ) : props.op === 'delete-transaction' ? (
+        <DeleteTransactionActionExpression {...props} />
       ) : null}
     </View>
   );
@@ -73,7 +76,12 @@ function SetActionExpression({
       <Text>{friendlyOp(op)}</Text>{' '}
       <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
       <Text>{t('to ')}</Text>
-      {options?.template ? (
+      {options?.formula ? (
+        <>
+          <Text>{t('formula ')}</Text>
+          <Text style={valueStyle}>{options.formula}</Text>
+        </>
+      ) : options?.template ? (
         <>
           <Text>{t('template ')}</Text>
           <Text style={valueStyle}>{options.template}</Text>
@@ -138,4 +146,10 @@ function AppendNoteActionExpression({ op, value }: AppendNoteRuleActionEntity) {
       <Value style={valueStyle} value={value} field="notes" />
     </>
   );
+}
+
+function DeleteTransactionActionExpression({
+  op,
+}: DeleteTransactionRuleActionEntity) {
+  return <Text>{friendlyOp(op)}</Text>;
 }

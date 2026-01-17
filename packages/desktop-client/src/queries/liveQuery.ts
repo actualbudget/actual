@@ -38,7 +38,7 @@ export class LiveQuery<TResponse = unknown> {
   private _listeners: Array<Listener<TResponse>>;
   private _supportedSyncTypes: Set<'applied' | 'success'>;
   private _query: Query;
-  private _onError: (error: Error) => void;
+  private _onError?: (error: Error) => void;
 
   get query() {
     return this._query;
@@ -77,7 +77,7 @@ export class LiveQuery<TResponse = unknown> {
     this._data = null;
     this._dependencies = null;
     this._listeners = [];
-    this._onError = onError || (() => {});
+    this._onError = onError;
 
     // TODO: error types?
     this._supportedSyncTypes = options.onlySync
@@ -104,7 +104,7 @@ export class LiveQuery<TResponse = unknown> {
   };
 
   protected onError = (error: Error) => {
-    this._onError(error);
+    this._onError?.(error);
   };
 
   protected onUpdate = (tables: string[]) => {
@@ -180,7 +180,7 @@ export class LiveQuery<TResponse = unknown> {
 
   protected fetchData = async (
     runQuery: () => Promise<{
-      data: Data<TResponse>;
+      data: Data<TResponse> | TResponse;
       dependencies: string[];
     }>,
   ) => {
@@ -205,7 +205,15 @@ export class LiveQuery<TResponse = unknown> {
       // still subscribed (`this.unsubscribeSyncEvent` will exist)
       if (this.inflightRequestId === reqId && this._unsubscribeSyncEvent) {
         const previousData = this.data;
-        this.data = data;
+
+        // For calculate queries, data is a raw value, not an array
+        // Convert it to an array format to maintain consistency
+        if (this._query.state.calculation) {
+          this.data = [data as TResponse];
+        } else {
+          this.data = data as Data<TResponse>;
+        }
+
         this.onData(this.data, previousData);
         this.inflightRequestId = null;
       }

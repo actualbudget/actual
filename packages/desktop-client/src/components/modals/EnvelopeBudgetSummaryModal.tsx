@@ -3,8 +3,12 @@ import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 
-import { format, sheetForMonth, prevMonth } from 'loot-core/shared/months';
-import { groupById, integerToCurrency } from 'loot-core/shared/util';
+import {
+  format as formatMonth,
+  prevMonth,
+  sheetForMonth,
+} from 'loot-core/shared/months';
+import { groupById } from 'loot-core/shared/util';
 
 import { ToBudgetAmount } from '@desktop-client/components/budget/envelope/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '@desktop-client/components/budget/envelope/budgetsummary/TotalsList';
@@ -15,13 +19,14 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import {
   collapseModals,
-  type Modal as ModalType,
   pushModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
@@ -36,10 +41,11 @@ export function EnvelopeBudgetSummaryModal({
   onBudgetAction,
 }: EnvelopeBudgetSummaryModalProps) {
   const { t } = useTranslation();
+  const format = useFormat();
 
   const locale = useLocale();
   const dispatch = useDispatch();
-  const prevMonthName = format(prevMonth(month), 'MMM', locale);
+  const prevMonthName = formatMonth(prevMonth(month), 'MMM', locale);
   const sheetValue =
     useEnvelopeSheetValue({
       name: envelopeBudget.toBudget,
@@ -68,7 +74,7 @@ export function EnvelopeBudgetSummaryModal({
               dispatch(collapseModals({ rootModalName: 'transfer' }));
               showUndoNotification({
                 message: t('Transferred {{amount}} to {{categoryName}}', {
-                  amount: integerToCurrency(amount),
+                  amount: format(amount, 'financial'),
                   categoryName: categoriesById[toCategoryId].name,
                 }),
               });
@@ -88,9 +94,12 @@ export function EnvelopeBudgetSummaryModal({
             title: t('Cover overbudgeted'),
             month,
             showToBeBudgeted: false,
-            onSubmit: categoryId => {
+            amount: sheetValue,
+            onSubmit: (amount, categoryId) => {
               onBudgetAction(month, 'cover-overbudgeted', {
                 category: categoryId,
+                amount,
+                currencyCode: format.currency.code,
               });
               dispatch(collapseModals({ rootModalName: 'cover' }));
               showUndoNotification({
@@ -172,7 +181,7 @@ export function EnvelopeBudgetSummaryModal({
                 ...styles.underlinedText,
               }}
               onClick={() => onClick({ close })}
-              isTotalsListTooltipDisabled={true}
+              isTotalsListTooltipDisabled
             />
           </SheetNameProvider>
         </>

@@ -1,4 +1,5 @@
 import * as fs from '../platform/server/fs';
+import { logger } from '../platform/server/log';
 
 type ServerConfig = {
   BASE_SERVER: string;
@@ -21,7 +22,7 @@ function joinURL(base: string | URL, ...paths: string[]): string {
 export function isValidBaseURL(base: string): boolean {
   try {
     return Boolean(new URL(base));
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -48,7 +49,7 @@ export function getServer(url?: string): ServerConfig | null {
         ENABLEBANKING_SERVER: joinURL(url, '/enablebanking'),
       };
     } catch (error) {
-      console.warn(
+      logger.warn(
         'Unable to parse server URL - using the global config.',
         { config },
         error,

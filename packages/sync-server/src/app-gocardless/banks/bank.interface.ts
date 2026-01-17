@@ -1,8 +1,8 @@
-import { Transaction, Balance } from '../gocardless-node.types.js';
+import { type Balance, type Transaction } from '../gocardless-node.types';
 import {
-  DetailedAccountWithInstitution,
-  NormalizedAccountDetails,
-} from '../gocardless.types.js';
+  type DetailedAccountWithInstitution,
+  type NormalizedAccountDetails,
+} from '../gocardless.types';
 
 type TransactionExtended = Transaction & {
   date?: string;
@@ -12,7 +12,7 @@ type TransactionExtended = Transaction & {
   remittanceInformationStructuredArrayString?: string;
 };
 
-export interface IBank {
+export type IBank = {
   institutionIds: string[];
 
   /**
@@ -48,4 +48,4 @@ export interface IBank {
     sortedTransactions: Transaction[],
     balances: Balance[],
   ) => number;
-}
+};

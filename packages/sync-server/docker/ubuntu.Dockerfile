@@ -1,4 +1,4 @@
-FROM node:20-bookworm AS deps
+FROM node:22-bookworm AS deps
 
 # Install required packages
 RUN apt-get update && apt-get install -y openssl
@@ -16,6 +16,7 @@ COPY packages/desktop-electron/package.json packages/desktop-electron/package.js
 COPY packages/eslint-plugin-actual/package.json packages/eslint-plugin-actual/package.json
 COPY packages/loot-core/package.json packages/loot-core/package.json
 COPY packages/sync-server/package.json packages/sync-server/package.json
+COPY packages/plugins-service/package.json packages/plugins-service/package.json
 
 # Avoiding memory issues with ARMv7
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
@@ -36,7 +37,7 @@ RUN rm -rf ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 COPY packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
 COPY packages/desktop-client/build ./node_modules/@actual-app/web/build
 
-FROM node:20-bookworm-slim AS prod
+FROM node:22-bookworm-slim AS prod
 
 # Minimal runtime dependencies
 RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*

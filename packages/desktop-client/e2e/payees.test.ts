@@ -11,7 +11,7 @@ test.describe('Payees', () => {
   let navigation: Navigation;
   let payeesPage: PayeesPage;
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
     navigation = new Navigation(page);
     configurationPage = new ConfigurationPage(page);
@@ -19,22 +19,20 @@ test.describe('Payees', () => {
     // Navigate to the root URL and create a fresh test file
     await page.goto('/');
     await configurationPage.createTestFile();
-  });
 
-  test.afterAll(async () => {
-    await page.close();
-  });
-
-  test.beforeEach(async () => {
     // Navigate to the Payees page before each test
     payeesPage = await navigation.goToPayeesPage();
+  });
+
+  test.afterEach(async () => {
+    await page?.close();
   });
 
   test('checks the payees page visuals', async () => {
     // This is a simple visual check to ensure the page loads
     await expect(page).toMatchThemeScreenshots();
 
-    // Try searching for “Fast Internet” or “Home Depot,” etc.
+    // Try searching for "Fast Internet" or "Home Depot," etc.
     await payeesPage.searchFor('Fast Internet');
     // Screenshot check after searching
     await expect(page).toMatchThemeScreenshots();

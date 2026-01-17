@@ -11,15 +11,22 @@ import {
   updateTransaction,
 } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
-import { applyChanges, type Diff } from 'loot-core/shared/util';
 import {
-  type PayeeEntity,
+  applyChanges,
+  applyFindReplace,
+  type Diff,
+} from 'loot-core/shared/util';
+import {
   type AccountEntity,
+  type PayeeEntity,
   type ScheduleEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { pushModal } from '@desktop-client/modals/modalsSlice';
+import {
+  pushModal,
+  type Modal as ModalType,
+} from '@desktop-client/modals/modalsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -29,8 +36,15 @@ type BatchEditProps = {
   onSuccess?: (
     ids: Array<TransactionEntity['id']>,
     name: keyof TransactionEntity,
-    value: string | number | boolean | null,
-    mode: 'prepend' | 'append' | 'replace' | null | undefined,
+    value:
+      | Parameters<
+          Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
+        >[1]
+      | boolean
+      | null,
+    mode: Parameters<
+      Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
+    >[2],
   ) => void;
 };
 
@@ -73,8 +87,8 @@ export function useTransactionBatchActions() {
 
     const onChange = async (
       name: keyof TransactionEntity,
-      value: string | number | boolean | null,
-      mode?: 'prepend' | 'append' | 'replace' | null | undefined,
+      value: Parameters<NonNullable<BatchEditProps['onSuccess']>>[2],
+      mode?: Parameters<NonNullable<BatchEditProps['onSuccess']>>[3],
     ) => {
       let transactionsToChange = transactions;
 
@@ -117,6 +131,17 @@ export function useTransactionBatchActions() {
               trans.notes === null ? value : `${trans.notes}${value}`;
           } else if (mode === 'replace') {
             valueToSet = value;
+          } else if (
+            mode === 'findAndReplace' &&
+            typeof value === 'object' &&
+            'useRegex' in value
+          ) {
+            valueToSet = applyFindReplace(
+              trans.notes,
+              value.find,
+              value.replace,
+              value.useRegex,
+            );
           }
         }
         const transaction = {
@@ -280,19 +305,14 @@ export function useTransactionBatchActions() {
       const transactions = data as TransactionEntity[];
 
       const changes = {
-        added: transactions
-          .reduce(
-            (
-              newTransactions: TransactionEntity[],
-              trans: TransactionEntity,
-            ) => {
-              return newTransactions.concat(
-                realizeTempTransactions(ungroupTransaction(trans)),
-              );
-            },
-            [],
-          )
-          .map(({ sort_order, ...trans }: TransactionEntity) => ({ ...trans })),
+        added: transactions.reduce(
+          (newTransactions: TransactionEntity[], trans: TransactionEntity) => {
+            return newTransactions.concat(
+              realizeTempTransactions(ungroupTransaction(trans)),
+            );
+          },
+          [],
+        ),
       };
 
       await send('transactions-batch-update', changes);
@@ -484,15 +504,18 @@ export function useTransactionBatchActions() {
           updated: [
             {
               ...fromTrans,
+              category: null,
               payee: toPayee?.id,
               transfer_id: toTrans.id,
             },
             {
               ...toTrans,
+              category: null,
               payee: fromPayee?.id,
               transfer_id: fromTrans.id,
             },
           ],
+          runTransfers: false,
         };
 
         await send('transactions-batch-update', changes);

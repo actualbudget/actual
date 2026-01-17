@@ -4,10 +4,10 @@ import * as nativeFs from 'fs';
 import * as fetchClient from '../platform/client/fetch';
 import * as sqlite from '../platform/server/sqlite';
 import * as db from '../server/db';
-import * as MigrationsType from '../server/migrate/migrations';
+import type * as MigrationsType from '../server/migrate/migrations';
 import {
-  enableGlobalMutations,
   disableGlobalMutations,
+  enableGlobalMutations,
 } from '../server/mutators';
 import { setServer } from '../server/server-config';
 import * as sheet from '../server/sheet';

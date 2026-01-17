@@ -1,4 +1,4 @@
-import { type ComponentProps, useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, type ComponentProps } from 'react';
 import { Popover as ReactAriaPopover } from 'react-aria-components';
 
 import { css } from '@emotion/css';
@@ -34,6 +34,7 @@ export const Popover = ({
 
   return (
     <ReactAriaPopover
+      data-popover
       ref={ref}
       placement="bottom end"
       offset={1}

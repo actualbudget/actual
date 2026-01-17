@@ -121,14 +121,13 @@ export type DbSchedule = {
   tombstone: 1 | 0;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type DbScheduleJsonPath = {
-  schedule_id: DbSchedule['id'];
-  payee: string;
-  account: string;
-  amount: string;
-  date: string;
-};
+// type DbScheduleJsonPath = {
+//   schedule_id: DbSchedule['id'];
+//   payee: string;
+//   account: string;
+//   amount: string;
+//   date: string;
+// };
 
 export type DbScheduleNextDate = {
   id: string;
@@ -140,14 +139,13 @@ export type DbScheduleNextDate = {
 };
 
 // This is unused in the codebase.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type DbPendingTransaction = {
-  id: string;
-  acct: number;
-  amount: number;
-  description: string;
-  date: string;
-};
+// type DbPendingTransaction = {
+//   id: string;
+//   acct: number;
+//   amount: number;
+//   description: string;
+//   date: string;
+// };
 
 export type DbTransaction = {
   id: string;
@@ -227,7 +225,7 @@ export type DbCustomReport = {
   show_empty: 1 | 0;
   show_offbudget: 1 | 0;
   show_hidden: 1 | 0;
-  show_uncateogorized: 1 | 0;
+  show_uncategorized: 1 | 0;
   selected_categories: string;
   graph_type: string;
   conditions: JsonString;
@@ -240,8 +238,15 @@ export type DbCustomReport = {
   tombstone: 1 | 0;
 };
 
+export type DbDashboardPage = {
+  id: string;
+  name: string;
+  tombstone: 1 | 0;
+};
+
 export type DbDashboard = {
   id: string;
+  dashboard_page_id: string;
   type: string;
   width: number;
   height: number;

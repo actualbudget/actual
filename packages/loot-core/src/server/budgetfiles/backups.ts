@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as connection from '../../platform/server/connection';
 import * as fs from '../../platform/server/fs';
+import { logger } from '../../platform/server/log';
 import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import * as cloudStorage from '../cloud-storage';
@@ -159,7 +160,7 @@ export async function loadBackup(id: string, backupId: string) {
   }
 
   if (backupId === LATEST_BACKUP_FILENAME) {
-    console.log('Reverting backup');
+    logger.log('Reverting backup');
 
     // If reverting back to the latest, copy and delete the latest
     // backup
@@ -177,10 +178,10 @@ export async function loadBackup(id: string, backupId: string) {
     // Re-upload the new file
     try {
       await cloudStorage.upload();
-    } catch (e) {}
+    } catch {}
     prefs.unloadPrefs();
   } else {
-    console.log('Loading backup', backupId);
+    logger.log('Loading backup', backupId);
 
     // This function is only ever called when a budget isn't loaded,
     // so it's safe to load our prefs in. We need to forget about any
@@ -196,7 +197,7 @@ export async function loadBackup(id: string, backupId: string) {
     // Re-upload the new file
     try {
       await cloudStorage.upload();
-    } catch (e) {}
+    } catch {}
 
     prefs.unloadPrefs();
 
@@ -215,7 +216,7 @@ export function startBackupService(id: string) {
   // Make a backup every 15 minutes
   serviceInterval = setInterval(
     async () => {
-      console.log('Making backup');
+      logger.log('Making backup');
       await makeBackup(id);
     },
     1000 * 60 * 15,

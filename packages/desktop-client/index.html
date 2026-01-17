@@ -7,7 +7,6 @@
       content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
     />
     <title>Actual</title>
-    <link rel="canonical" href="/" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -17,8 +16,9 @@
       href="/site.webmanifest"
       crossorigin="use-credentials"
     />
-    <meta name="msapplication-TileColor" content="#8812E1" />
-    <meta name="theme-color" content="#8812E1" />
+    <meta name="msapplication-TileColor" content="#5c3dbb" />
+    <meta name="theme-color" content="#5c3dbb" />
+
     <style type="text/css">
       html,
       body {
@@ -32,7 +32,7 @@
       button,
       input {
         font-family:
-          'Inter var',
+          'Inter Variable',
           -apple-system,
           BlinkMacSystemFont,
           'Segoe UI',
@@ -68,7 +68,7 @@
       textarea {
         font-size: 1em;
         font-family:
-          'Inter var',
+          'Inter Variable',
           -apple-system,
           BlinkMacSystemFont,
           'Segoe UI',
@@ -82,6 +82,7 @@
           'Helvetica',
           'Arial',
           sans-serif;
+        font-feature-settings: 'ss01', 'ss04';
       }
 
       html,
@@ -108,8 +109,12 @@
         min-width: 0;
       }
 
-      .js-focus-visible :focus:not(.focus-visible) {
-        outline: 0;
+      .cm-theme-dark {
+        height: 100%;
+      }
+
+      .cm-theme-light {
+        height: 100%;
       }
     </style>
   </head>

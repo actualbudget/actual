@@ -1,10 +1,10 @@
 import React, {
+  useCallback,
   useEffect,
   useRef,
   useState,
   type ComponentProps,
   type CSSProperties,
-  useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -80,6 +80,7 @@ export function NotesButton({
             css({
               color: defaultColor,
               ...style,
+              padding: 4,
               ...(showPlaceholder && {
                 opacity: hasNotes || isOpen ? 1 : 0.3,
               }),

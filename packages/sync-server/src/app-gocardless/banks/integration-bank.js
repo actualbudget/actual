@@ -1,11 +1,11 @@
 import * as d from 'date-fns';
 
-import { formatPayeeName } from '../../util/payee-name.js';
+import { formatPayeeName } from '../../util/payee-name';
 import {
   amountToInteger,
   printIban,
   sortByBookingDateOrValueDate,
-} from '../utils.js';
+} from '../utils';
 
 const SORTED_BALANCE_TYPE_LIST = [
   'closingBooked',
@@ -17,16 +17,11 @@ const SORTED_BALANCE_TYPE_LIST = [
   'openingBooked',
 ];
 
-/** @type {import('./bank.interface.js').IBank} */
+/** @type {import('./bank.interface').IBank} */
 export default {
   institutionIds: ['IntegrationBank'],
 
   normalizeAccount(account) {
-    console.debug(
-      'Available account properties for new institution integration',
-      { account: JSON.stringify(account) },
-    );
-
     return {
       account_id: account.id,
       institution: account.institution,
@@ -80,24 +75,10 @@ export default {
   },
 
   sortTransactions(transactions = []) {
-    console.debug(
-      'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
-      { top10Transactions: JSON.stringify(transactions.slice(0, 10)) },
-    );
     return sortByBookingDateOrValueDate(transactions);
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {
-    console.debug(
-      'Available (first 10) transactions properties for new integration of institution in calculateStartingBalance function',
-      {
-        balances: JSON.stringify(balances),
-        top10SortedTransactions: JSON.stringify(
-          sortedTransactions.slice(0, 10),
-        ),
-      },
-    );
-
     const currentBalance = balances
       .filter(item => SORTED_BALANCE_TYPE_LIST.includes(item.balanceType))
       .sort(

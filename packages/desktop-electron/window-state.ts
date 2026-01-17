@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import electron, { BrowserWindow } from 'electron';
+import electron, { type BrowserWindow } from 'electron';
 
 type WindowState = Electron.Rectangle & {
   isMaximized?: boolean;
@@ -23,7 +23,7 @@ async function loadState() {
     state = JSON.parse(
       fs.readFileSync(path.join(getDataDir(), 'window.json'), 'utf8'),
     );
-  } catch (e) {
+  } catch {
     console.log('Could not load window state');
   }
 

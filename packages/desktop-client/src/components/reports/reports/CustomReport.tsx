@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -14,12 +14,12 @@ import * as d from 'date-fns';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import {
-  type CategoryEntity,
   type balanceTypeOpType,
+  type CategoryEntity,
   type CustomReportEntity,
   type DataEntity,
-  type sortByOpType,
   type RuleConditionEntity,
+  type sortByOpType,
 } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
@@ -44,8 +44,8 @@ import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ReportLegend } from '@desktop-client/components/reports/ReportLegend';
 import {
-  ReportOptions,
   defaultReport,
+  ReportOptions,
   type dateRangeProps,
 } from '@desktop-client/components/reports/ReportOptions';
 import { ReportSidebar } from '@desktop-client/components/reports/ReportSidebar';
@@ -107,6 +107,9 @@ function useSelectedCategories(
         return categories.filter(
           ({ id }) => !existingCategoryCondition.value.includes(id),
         );
+
+      default:
+        break;
     }
 
     return categories;
@@ -256,6 +259,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const [showUncategorized, setShowUncategorized] = useState(
     loadReport.showUncategorized,
   );
+  const [trimIntervals, setTrimIntervals] = useState(loadReport.trimIntervals);
   const [graphType, setGraphType] = useState(loadReport.graphType);
 
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
@@ -270,6 +274,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     monthUtils.rangeInclusive(startDate, endDate),
   );
   const [earliestTransaction, setEarliestTransaction] = useState('');
+  const [latestTransaction, setLatestTransaction] = useState('');
   const [report, setReport] = useState(loadReport);
   const [savedStatus, setSavedStatus] = useState(
     session.savedStatus ?? (initialReport ? 'saved' : 'new'),
@@ -296,25 +301,16 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
           : monthUtils.currentDay(),
       );
 
+      const latestTransaction = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
+      );
+
       const fromDate =
         interval === 'Weekly'
           ? 'dayFromDate'
           : (((ReportOptions.intervalMap.get(interval) || 'Day').toLowerCase() +
               'FromDate') as 'dayFromDate' | 'monthFromDate' | 'yearFromDate');
-
-      const currentDate =
-        interval === 'Weekly'
-          ? 'currentDay'
-          : (('current' +
-              (ReportOptions.intervalMap.get(interval) || 'Day')) as
-              | 'currentDay'
-              | 'currentMonth'
-              | 'currentYear');
-
-      const currentInterval =
-        interval === 'Weekly'
-          ? monthUtils.currentWeek(firstDayOfWeekIdx)
-          : monthUtils[currentDate]();
 
       const earliestInterval =
         interval === 'Weekly'
@@ -334,16 +330,42 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
               ),
             );
 
+      const latestInterval =
+        interval === 'Weekly'
+          ? monthUtils.weekFromDate(
+              d.parseISO(
+                fromDateRepr(latestTransaction.date || monthUtils.currentDay()),
+              ),
+              firstDayOfWeekIdx,
+            )
+          : monthUtils[fromDate](
+              d.parseISO(
+                fromDateRepr(latestTransaction.date || monthUtils.currentDay()),
+              ),
+            );
+
+      const currentInterval =
+        interval === 'Weekly'
+          ? monthUtils.currentWeek(firstDayOfWeekIdx)
+          : interval === 'Daily'
+            ? monthUtils.currentDay()
+            : interval === 'Yearly'
+              ? monthUtils.currentYear()
+              : monthUtils.currentMonth();
+
+      const maxInterval =
+        latestInterval > currentInterval ? latestInterval : currentInterval;
+
       const allIntervals =
         interval === 'Weekly'
           ? monthUtils.weekRangeInclusive(
               earliestInterval,
-              currentInterval,
+              maxInterval,
               firstDayOfWeekIdx,
             )
           : monthUtils[
               ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
-            ](earliestInterval, currentInterval);
+            ](earliestInterval, maxInterval);
 
       const allIntervalsMap = allIntervals
         .map((inter: string) => ({
@@ -364,6 +386,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
           earliestTransaction
             ? earliestTransaction.date
             : monthUtils.currentDay(),
+          latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
           includeCurrentInterval,
           firstDayOfWeekIdx,
         );
@@ -374,7 +397,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
 
     run();
     // omitted `conditions` and `conditionsOp` from dependencies to avoid infinite loops
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react/exhaustive-deps
   }, [
     interval,
     dateRange,
@@ -428,6 +451,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       showOffBudget,
       showHiddenCategories,
       showUncategorized,
+      trimIntervals,
       balanceTypeOp,
       sortByOp,
       firstDayOfWeekIdx,
@@ -444,6 +468,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     showOffBudget,
     showHiddenCategories,
     showUncategorized,
+    trimIntervals,
     sortByOp,
     firstDayOfWeekIdx,
   ]);
@@ -462,6 +487,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       showOffBudget,
       showHiddenCategories,
       showUncategorized,
+      trimIntervals,
       groupBy,
       balanceTypeOp,
       sortByOp,
@@ -486,6 +512,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     showOffBudget,
     showHiddenCategories,
     showUncategorized,
+    trimIntervals,
     sortByOp,
     graphType,
     firstDayOfWeekIdx,
@@ -512,6 +539,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     showHiddenCategories,
     includeCurrentInterval,
     showUncategorized,
+    trimIntervals,
     graphType,
     conditions,
     conditionsOp,
@@ -657,6 +685,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     setShowHiddenCategories(input.showHiddenCategories);
     setIncludeCurrentInterval(input.includeCurrentInterval);
     setShowUncategorized(input.showUncategorized);
+    setTrimIntervals(input.trimIntervals);
     setGraphType(input.graphType);
     onApplyFilter(null);
     (input.conditions || []).forEach(condition => onApplyFilter(condition));
@@ -797,6 +826,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
             setShowHiddenCategories={setShowHiddenCategories}
             setIncludeCurrentInterval={setIncludeCurrentInterval}
             setShowUncategorized={setShowUncategorized}
+            setTrimIntervals={setTrimIntervals}
             setSelectedCategories={setSelectedCategories}
             onChangeDates={onChangeDates}
             onReportChange={onReportChange}
@@ -804,6 +834,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
             defaultItems={defaultItems}
             defaultModeItems={defaultModeItems}
             earliestTransaction={earliestTransaction}
+            latestTransaction={latestTransaction}
             firstDayOfWeekIdx={firstDayOfWeekIdx}
             isComplexCategoryCondition={isComplexCategoryCondition}
           />

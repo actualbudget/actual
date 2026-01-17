@@ -1,10 +1,10 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
@@ -43,11 +43,12 @@ export function NameFilter({
             onAddUpdate();
           }}
         >
-          <Stack
-            direction="row"
-            justify="flex-end"
-            align="center"
-            style={{ padding: 10 }}
+          <SpaceBetween
+            style={{
+              padding: 10,
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+            }}
           >
             <FormField style={{ flex: 1 }}>
               <FormLabel
@@ -65,13 +66,13 @@ export function NameFilter({
             <Button variant="primary" type="submit" style={{ marginTop: 18 }}>
               {adding ? t('Add') : t('Update')}
             </Button>
-          </Stack>
+          </SpaceBetween>
         </Form>
       )}
       {err && (
-        <Stack direction="row" align="center" style={{ padding: 10 }}>
+        <SpaceBetween style={{ padding: 10, alignItems: 'center' }}>
           <Text style={{ color: theme.errorText }}>{err}</Text>
-        </Stack>
+        </SpaceBetween>
       )}
     </>
   );

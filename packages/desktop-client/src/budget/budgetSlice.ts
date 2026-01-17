@@ -3,6 +3,7 @@ import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
 import { send } from 'loot-core/platform/client/fetch';
+import { type IntegerAmount } from 'loot-core/shared/util';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
@@ -103,9 +104,27 @@ type UpdateCategoryGroupPayload = {
 
 export const updateCategoryGroup = createAppAsyncThunk(
   `${sliceName}/updateCategoryGroup`,
-  async ({ group }: UpdateCategoryGroupPayload) => {
+  async ({ group }: UpdateCategoryGroupPayload, { dispatch }) => {
     // Strip off the categories field if it exist. It's not a real db
     // field but groups have this extra field in the client most of the time
+    const categoryGroups = await send('get-categories');
+    if (
+      categoryGroups.grouped.find(
+        g =>
+          g.id !== group.id &&
+          g.name.toUpperCase() === group.name.toUpperCase(),
+      )
+    ) {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t('A category group with this name already exists.'),
+          },
+        }),
+      );
+      return;
+    }
     const { categories: _, ...groupNoCategories } = group;
     await send('category-group-update', groupNoCategories);
   },
@@ -212,10 +231,28 @@ export const moveCategoryGroup = createAppAsyncThunk(
   },
 );
 
+function translateCategories(
+  categories: CategoryEntity[] | undefined,
+): CategoryEntity[] | undefined {
+  return categories?.map(cat => ({
+    ...cat,
+    name:
+      cat.name?.toLowerCase() === 'starting balances'
+        ? t('Starting Balances')
+        : cat.name,
+  }));
+}
+
 export const getCategories = createAppAsyncThunk(
   `${sliceName}/getCategories`,
   async () => {
     const categories: CategoryViews = await send('get-categories');
+    categories.list = translateCategories(categories.list) as CategoryEntity[];
+    categories.grouped.forEach(group => {
+      group.categories = translateCategories(
+        group.categories,
+      ) as CategoryEntity[];
+    });
     return categories;
   },
   {
@@ -233,6 +270,12 @@ export const reloadCategories = createAppAsyncThunk(
   `${sliceName}/reloadCategories`,
   async () => {
     const categories: CategoryViews = await send('get-categories');
+    categories.list = translateCategories(categories.list) as CategoryEntity[];
+    categories.grouped.forEach(group => {
+      group.categories = translateCategories(
+        group.categories,
+      ) as CategoryEntity[];
+    });
     return categories;
   },
 );
@@ -309,6 +352,8 @@ type ApplyBudgetActionPayload =
       args: {
         to: CategoryEntity['id'];
         from: CategoryEntity['id'];
+        amount?: IntegerAmount;
+        currencyCode: string;
       };
     }
   | {
@@ -324,6 +369,8 @@ type ApplyBudgetActionPayload =
       month: string;
       args: {
         category: CategoryEntity['id'];
+        amount?: IntegerAmount;
+        currencyCode: string;
       };
     }
   | {
@@ -333,6 +380,7 @@ type ApplyBudgetActionPayload =
         amount: number;
         from: CategoryEntity['id'];
         to: CategoryEntity['id'];
+        currencyCode: string;
       };
     }
   | {
@@ -471,6 +519,8 @@ export const applyBudgetAction = createAppAsyncThunk(
           month,
           to: args.to,
           from: args.from,
+          amount: args.amount,
+          currencyCode: args.currencyCode,
         });
         break;
       case 'transfer-available':
@@ -484,6 +534,8 @@ export const applyBudgetAction = createAppAsyncThunk(
         await send('budget/cover-overbudgeted', {
           month,
           category: args.category,
+          amount: args.amount,
+          currencyCode: args.currencyCode,
         });
         break;
       case 'transfer-category':
@@ -492,6 +544,7 @@ export const applyBudgetAction = createAppAsyncThunk(
           amount: args.amount,
           from: args.from,
           to: args.to,
+          currencyCode: args.currencyCode,
         });
         break;
       case 'carryover': {
@@ -556,6 +609,7 @@ export const getCategoriesById = memoizeOne(
         res[cat.id] = cat;
       });
     });
+
     return res;
   },
 );
@@ -584,6 +638,12 @@ function _loadCategories(
   categories: BudgetState['categories'],
 ) {
   state.categories = categories;
+  categories.list = translateCategories(categories.list) as CategoryEntity[];
+  categories.grouped.forEach(group => {
+    group.categories = translateCategories(
+      group.categories,
+    ) as CategoryEntity[];
+  });
   state.isCategoriesLoading = false;
   state.isCategoriesLoaded = true;
   state.isCategoriesDirty = false;

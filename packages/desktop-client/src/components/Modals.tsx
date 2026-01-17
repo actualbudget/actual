@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { useLocation } from 'react-router';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -19,6 +19,8 @@ import { ConfirmCategoryDeleteModal } from './modals/ConfirmCategoryDeleteModal'
 import { ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
 import { ConfirmTransactionEditModal } from './modals/ConfirmTransactionEditModal';
 import { ConfirmUnlinkAccountModal } from './modals/ConfirmUnlinkAccountModal';
+import { ConvertToScheduleModal } from './modals/ConvertToScheduleModal';
+import { CopyWidgetToDashboardModal } from './modals/CopyWidgetToDashboardModal';
 import { CoverModal } from './modals/CoverModal';
 import { CreateAccountModal } from './modals/CreateAccountModal';
 import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
@@ -62,6 +64,7 @@ import { PasswordEnableModal } from './modals/PasswordEnableModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
+import { SchedulesPageMenuModal } from './modals/SchedulesPageMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
@@ -74,7 +77,7 @@ import { UnmigrateBudgetAutomationsModal } from './modals/UnmigrateBudgetAutomat
 import { CategoryLearning } from './payees/CategoryLearning';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
-import { ScheduleDetails } from './schedules/ScheduleDetails';
+import { ScheduleEditModal } from './schedules/ScheduleEditModal';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { UpcomingLength } from './schedules/UpcomingLength';
 
@@ -94,7 +97,8 @@ export function Modals() {
     if (modalStack.length > 0) {
       dispatch(closeModal());
     }
-  }, [location]);
+    // oxlint-disable-next-line react/exhaustive-deps
+  }, [dispatch, location]);
 
   const modals = modalStack
     .map((modal, idx) => {
@@ -142,8 +146,14 @@ export function Modals() {
         case 'confirm-transaction-edit':
           return <ConfirmTransactionEditModal key={key} {...modal.options} />;
 
+        case 'convert-to-schedule':
+          return <ConvertToScheduleModal key={key} {...modal.options} />;
+
         case 'confirm-delete':
           return <ConfirmDeleteModal key={key} {...modal.options} />;
+
+        case 'copy-widget-to-dashboard':
+          return <CopyWidgetToDashboardModal key={key} {...modal.options} />;
 
         case 'load-backup':
           return (
@@ -234,7 +244,7 @@ export function Modals() {
           return <TrackingBudgetSummaryModal key={key} {...modal.options} />;
 
         case 'schedule-edit':
-          return <ScheduleDetails key={key} {...modal.options} />;
+          return <ScheduleEditModal key={key} {...modal.options} />;
 
         case 'schedule-link':
           return <ScheduleLink key={key} {...modal.options} />;
@@ -345,6 +355,9 @@ export function Modals() {
         case 'budget-page-menu':
           return <BudgetPageMenuModal key={key} {...modal.options} />;
 
+        case 'schedules-page-menu':
+          return <SchedulesPageMenuModal key={key} />;
+
         case 'envelope-budget-month-menu':
           return (
             <SheetNameProvider
@@ -407,12 +420,10 @@ export function Modals() {
       }
     })
     .map((modal, idx) => (
-      <React.Fragment key={`${modalStack[idx].name}-${idx}`}>
-        {modal}
-      </React.Fragment>
+      <Fragment key={`${modalStack[idx].name}-${idx}`}>{modal}</Fragment>
     ));
 
   // fragment needed per TS types
-  // eslint-disable-next-line react/jsx-no-useless-fragment
+  // oxlint-disable-next-line react/jsx-no-useless-fragment
   return <>{modals}</>;
 }

@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { getClock, deserializeClock } from '@actual-app/crdt';
+import { deserializeClock, getClock } from '@actual-app/crdt';
 import { v4 as uuidv4 } from 'uuid';
 
 import { expectSnapshotWithDiffer } from '../mocks/util';
@@ -12,10 +12,10 @@ import * as budget from './budget/base';
 import * as db from './db';
 import { handlers } from './main';
 import {
-  runHandler,
-  runMutator,
   disableGlobalMutations,
   enableGlobalMutations,
+  runHandler,
+  runMutator,
 } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
@@ -203,15 +203,16 @@ describe('Budget', () => {
   test('budget updates when changing a category', async () => {
     const spreadsheet = await sheet.loadSpreadsheet(db);
     function captureChangedCells(func) {
-      return new Promise<unknown[]>(async resolve => {
+      return new Promise<unknown[]>(resolve => {
         let changed = [];
         const remove = spreadsheet.addEventListener('change', ({ names }) => {
           changed = changed.concat(names);
         });
-        await func();
-        remove();
-        spreadsheet.onFinish(() => {
-          resolve(changed);
+        func().then(() => {
+          remove();
+          spreadsheet.onFinish(() => {
+            resolve(changed);
+          });
         });
       });
     }

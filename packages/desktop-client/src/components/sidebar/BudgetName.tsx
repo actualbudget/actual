@@ -1,4 +1,4 @@
-import React, { type ReactNode, useRef, useState } from 'react';
+import React, { useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -11,12 +11,14 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { isElectron } from 'loot-core/shared/environment';
 import * as Platform from 'loot-core/shared/platform';
 
 import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type BudgetNameProps = {
@@ -73,6 +75,15 @@ function EditableBudgetName() {
       case 'settings':
         navigate('/settings');
         break;
+      case 'loadBackup':
+        if (isElectron()) {
+          dispatch(
+            pushModal({
+              modal: { name: 'load-backup', options: {} },
+            }),
+          );
+        }
+        break;
       case 'close':
         dispatch(closeBudget());
         break;
@@ -83,8 +94,9 @@ function EditableBudgetName() {
   const items = [
     { name: 'rename', text: t('Rename budget') },
     { name: 'settings', text: t('Settings') },
+    isElectron() ? { name: 'loadBackup', text: t('Load Backup…') } : null,
     { name: 'close', text: t('Switch file') },
-  ];
+  ].filter(item => item !== null);
 
   if (editing) {
     return (
@@ -114,7 +126,7 @@ function EditableBudgetName() {
         ref={triggerRef}
         variant="bare"
         style={{
-          color: theme.buttonNormalBorder,
+          color: theme.sidebarBudgetName,
           fontSize: 16,
           fontWeight: 500,
           marginLeft: -5,

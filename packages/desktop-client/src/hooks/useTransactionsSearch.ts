@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 
 import type { Query } from 'loot-core/shared/query';
 

@@ -1,39 +1,40 @@
 import React, {
-  PureComponent,
-  type RefObject,
   createRef,
+  PureComponent,
+  useEffect,
   useMemo,
   type ReactElement,
-  useEffect,
+  type RefObject,
 } from 'react';
 import { Trans } from 'react-i18next';
-import { Navigate, useParams, useLocation } from 'react-router';
+import { Navigate, useLocation, useParams } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { debounce } from 'debounce';
 import { t } from 'i18next';
+import debounce from 'lodash/debounce';
+import isEqual from 'lodash/isEqual';
 import { v4 as uuidv4 } from 'uuid';
 
-import { send, listen } from 'loot-core/platform/client/fetch';
+import { listen, send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type UndoState } from 'loot-core/server/undo';
 import { currentDay } from 'loot-core/shared/months';
 import { q, type Query } from 'loot-core/shared/query';
 import {
-  updateTransaction,
+  makeAsNonChildTransactions,
+  makeChild,
   realizeTempTransactions,
   ungroupTransaction,
   ungroupTransactions,
-  makeChild,
-  makeAsNonChildTransactions,
+  updateTransaction,
 } from 'loot-core/shared/transactions';
-import { applyChanges, groupById } from 'loot-core/shared/util';
+import { applyChanges, type IntegerAmount } from 'loot-core/shared/util';
 import {
+  type AccountEntity,
   type NewRuleEntity,
   type RuleActionEntity,
-  type AccountEntity,
   type RuleConditionEntity,
   type TransactionEntity,
   type TransactionFilterEntity,
@@ -43,10 +44,10 @@ import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
 
 import {
-  unlinkAccount,
-  reopenAccount,
-  updateAccount,
   markAccountRead,
+  reopenAccount,
+  unlinkAccount,
+  updateAccount,
 } from '@desktop-client/accounts/accountsSlice';
 import { syncAndDownload } from '@desktop-client/app/appSlice';
 import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
@@ -72,6 +73,7 @@ import {
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
 import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
+import { calculateRunningBalancesBottomUp } from '@desktop-client/hooks/useTransactions';
 import {
   openAccountCloseModal,
   pushModal,
@@ -85,7 +87,7 @@ import {
   pagedQuery,
   type PagedQuery,
 } from '@desktop-client/queries/pagedQuery';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
 import { updateNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
@@ -100,12 +102,12 @@ function isTransactionFilterEntity(
 type AllTransactionsProps = {
   account?: AccountEntity | undefined;
   transactions: TransactionEntity[];
-  balances: Record<string, { balance: number }> | null;
+  balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances?: boolean | undefined;
   filtered?: boolean | undefined;
   children: (
     transactions: TransactionEntity[],
-    balances: Record<string, { balance: number }> | null,
+    balances: Record<TransactionEntity['id'], IntegerAmount> | null,
   ) => ReactElement;
 };
 
@@ -137,13 +139,13 @@ function AllTransactions({
 
   transactions ??= [];
 
-  let runningBalance = useMemo(() => {
+  const runningBalance = useMemo(() => {
     if (!showBalances) {
       return 0;
     }
 
     return balances && transactions?.length > 0
-      ? (balances[transactions[0].id]?.balance ?? 0)
+      ? (balances[transactions[0].id] ?? 0)
       : 0;
   }, [showBalances, balances, transactions]);
 
@@ -152,24 +154,13 @@ function AllTransactions({
       return null;
     }
 
-    // Reverse so we can calculate from earliest upcoming schedule.
-    const previewBalances = [...previewTransactions]
-      .reverse()
-      .map(previewTransaction => {
-        if (!previewTransaction.is_child) {
-          return {
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-            balance: (runningBalance += previewTransaction.amount),
-            id: previewTransaction.id,
-          };
-        } else {
-          return {
-            balance: 0,
-            id: previewTransaction.id,
-          };
-        }
-      });
-    return groupById(previewBalances);
+    return Object.fromEntries(
+      calculateRunningBalancesBottomUp(
+        previewTransactions,
+        'all',
+        runningBalance,
+      ),
+    );
   }, [showBalances, previewTransactions, runningBalance]);
 
   const allTransactions = useMemo(() => {
@@ -225,6 +216,8 @@ type AccountInternalProps = {
   filterConditions: RuleConditionEntity[];
   showBalances?: boolean;
   setShowBalances: (newValue: boolean) => void;
+  showNetWorthChart: boolean;
+  setShowNetWorthChart: (newValue: boolean) => void;
   showCleared?: boolean;
   setShowCleared: (newValue: boolean) => void;
   showReconciled: boolean;
@@ -272,7 +265,7 @@ type AccountInternalState = {
   transactionCount: number;
   transactionsFiltered?: boolean;
   showBalances?: boolean | undefined;
-  balances: Record<string, { balance: number }> | null;
+  balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showCleared?: boolean | undefined;
   prevShowCleared?: boolean | undefined;
   showReconciled: boolean;
@@ -535,6 +528,7 @@ class AccountInternal extends PureComponent<
     });
   }
 
+  // oxlint-disable-next-line react/no-unsafe
   UNSAFE_componentWillReceiveProps(nextProps: AccountInternalProps) {
     if (this.props.accountId !== nextProps.accountId) {
       this.setState(
@@ -677,13 +671,17 @@ class AccountInternal extends PureComponent<
       return null;
     }
 
-    const { data } = await aqlQuery(
-      this.paged.query
-        .options({ splits: 'none' })
-        .select([{ balance: { $sumOver: '$amount' } }]),
-    );
+    const { data }: { data: { id: string; balance: number }[] } =
+      await aqlQuery(
+        this.paged.query
+          .options({ splits: 'none' })
+          .select([{ balance: { $sumOver: '$amount' } }]),
+      );
 
-    return groupById<{ id: string; balance: number }>(data);
+    return data.reduce((balances: Record<string, number>, row) => {
+      balances[row.id] = row.balance;
+      return balances;
+    }, {});
   }
 
   onRunRules = async (ids: string[]) => {
@@ -694,13 +692,33 @@ class AccountInternal extends PureComponent<
         ids.includes(trans.id),
       );
       const changedTransactions: TransactionEntity[] = [];
+      const allErrors: string[] = [];
+
       for (const transaction of transactions) {
         const res: TransactionEntity | null = await send('rules-run', {
           transaction,
         });
         if (res) {
           changedTransactions.push(...ungroupTransaction(res));
+
+          // Collect formula errors
+          if (res._ruleErrors && res._ruleErrors.length > 0) {
+            allErrors.push(...res._ruleErrors);
+          }
         }
+      }
+
+      // Show errors if any
+      if (allErrors.length > 0) {
+        this.props.dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: `Formula errors in rules:\n${allErrors.join('\n')}`,
+              sticky: true,
+            },
+          }),
+        );
       }
 
       // If we have changed transactions, update them in the database
@@ -765,7 +783,8 @@ class AccountInternal extends PureComponent<
       | 'toggle-balance'
       | 'remove-sorting'
       | 'toggle-cleared'
-      | 'toggle-reconciled',
+      | 'toggle-reconciled'
+      | 'toggle-net-worth-chart',
   ) => {
     const accountId = this.props.accountId!;
     const account = this.props.accounts.find(
@@ -866,6 +885,13 @@ class AccountInternal extends PureComponent<
           this.setState({ showReconciled: true }, () =>
             this.fetchTransactions(this.state.filterConditions),
           );
+        }
+        break;
+      case 'toggle-net-worth-chart':
+        if (this.props.showNetWorthChart) {
+          this.props.setShowNetWorthChart(false);
+        } else {
+          this.props.setShowNetWorthChart(true);
         }
         break;
       default:
@@ -1045,7 +1071,8 @@ class AccountInternal extends PureComponent<
 
     // sync the reconciliation transaction
     await send('transactions-batch-update', {
-      added: ruledTransactions,
+      added: ruledTransactions.filter(trans => !trans.tombstone),
+      deleted: ruledTransactions.filter(trans => trans.tombstone),
     });
     await this.refetchTransactions();
   };
@@ -1441,6 +1468,12 @@ class AccountInternal extends PureComponent<
     } else {
       // A condition was passed in.
       const condition = conditionOrSavedFilter;
+      const isDuplicate = filterConditions.some(c => isEqual(c, condition));
+
+      if (isDuplicate) {
+        return;
+      }
+
       this.setState({
         filterId: {
           ...this.state.filterId,
@@ -1748,6 +1781,7 @@ class AccountInternal extends PureComponent<
                 tableRef={this.table}
                 isNameEditable={isNameEditable ?? false}
                 workingHard={workingHard ?? false}
+                accountId={accountId}
                 account={account}
                 filterId={filterId}
                 savedFilters={this.props.savedFilters}
@@ -1808,7 +1842,7 @@ class AccountInternal extends PureComponent<
               <View style={{ flex: 1 }}>
                 <TransactionList
                   headerContent={undefined}
-                  // @ts-ignore TODO
+                  // @ts-expect-error - fix me
                   tableRef={this.table}
                   account={account}
                   transactions={transactions}
@@ -1948,6 +1982,9 @@ export function Account() {
   const [showBalances, setShowBalances] = useSyncedPref(
     `show-balances-${params.id}`,
   );
+  const [showNetWorthChart, setShowNetWorthChart] = useSyncedPref(
+    `show-account-${params.id}-net-worth-chart`,
+  );
   const [hideCleared, setHideCleared] = useSyncedPref(
     `hide-cleared-${params.id}`,
   );
@@ -1985,6 +2022,8 @@ export function Account() {
           setShowBalances={showBalances =>
             setShowBalances(String(showBalances))
           }
+          showNetWorthChart={String(showNetWorthChart) === 'true'}
+          setShowNetWorthChart={val => setShowNetWorthChart(String(val))}
           showCleared={String(hideCleared) !== 'true'}
           setShowCleared={val => setHideCleared(String(!val))}
           showReconciled={String(hideReconciled) !== 'true'}

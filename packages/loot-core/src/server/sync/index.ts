@@ -1,20 +1,20 @@
 // @ts-strict-ignore
 import {
-  serializeClock,
   deserializeClock,
   getClock,
-  Timestamp,
   merkle,
+  serializeClock,
+  Timestamp,
 } from '@actual-app/crdt';
 
 import { captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
 import { logger } from '../../platform/server/log';
-import { sequential, once } from '../../shared/async';
-import { setIn, getIn } from '../../shared/util';
+import { once, sequential } from '../../shared/async';
+import { getIn, setIn } from '../../shared/util';
 import { type MetadataPrefs } from '../../types/prefs';
-import { triggerBudgetChanges, setType as setBudgetType } from '../budget/base';
+import { setType as setBudgetType, triggerBudgetChanges } from '../budget/base';
 import * as db from '../db';
 import { PostError, SyncError } from '../errors';
 import { app } from '../main-app';
@@ -233,7 +233,7 @@ function applyMessagesForImport(messages: Message[]): void {
       if (!msg.old) {
         try {
           apply(msg);
-        } catch (e) {
+        } catch {
           apply(msg, true);
         }
 
@@ -560,7 +560,7 @@ export const fullSync = once(async function (): Promise<
   try {
     messages = await _fullSync(null, 0, null);
   } catch (e) {
-    console.log(e);
+    logger.log(e);
 
     if (e instanceof SyncError) {
       if (e.reason === 'out-of-sync') {
@@ -590,7 +590,7 @@ export const fullSync = once(async function (): Promise<
         app.events.emit('sync', { type: 'error', meta: e.meta });
       }
     } else if (e instanceof PostError) {
-      console.log(e);
+      logger.log(e);
       if (e.reason === 'unauthorized') {
         app.events.emit('sync', { type: 'unauthorized' });
 
@@ -625,11 +625,20 @@ async function _fullSync(
   count: number,
   prevDiffTime: number,
 ): Promise<Message[]> {
-  const { cloudFileId, groupId, lastSyncedTimestamp } = prefs.getPrefs() || {};
+  const {
+    id: currentId,
+    cloudFileId,
+    groupId,
+    lastSyncedTimestamp,
+  } = prefs.getPrefs() || {};
 
   clearFullSyncTimeout();
 
-  if (checkSyncingMode('disabled') || checkSyncingMode('offline')) {
+  if (
+    checkSyncingMode('disabled') ||
+    checkSyncingMode('offline') ||
+    !currentId
+  ) {
     return [];
   }
 
@@ -715,7 +724,7 @@ async function _fullSync(
 
       const rebuiltMerkle = rebuildMerkleHash();
 
-      console.log(
+      logger.log(
         count,
         'messages:',
         messages.length,
@@ -748,10 +757,10 @@ async function _fullSync(
           'SELECT * FROM messages_clock',
         );
         if (clocks.length !== 1) {
-          console.log('Bad number of clocks:', clocks.length);
+          logger.log('Bad number of clocks:', clocks.length);
         }
         const hash = deserializeClock(clocks[0].clock).merkle.hash;
-        console.log('Merkle hash in db:', hash);
+        logger.log('Merkle hash in db:', hash);
       }
 
       throw new SyncError('out-of-sync');

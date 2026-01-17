@@ -1,52 +1,26 @@
 import { type Locator, type Page } from '@playwright/test';
 
-type ConditionsEntry = {
-  field: string;
-  op: string;
-  value: string;
-};
-
-type ActionsEntry = {
-  field: string;
-  op?: string;
-  value: string;
-};
-
-type SplitsEntry = {
-  field: string;
-  op?: string;
-  value?: string;
-};
-
-type RuleEntry = {
-  conditionsOp?: string | RegExp;
-  conditions?: ConditionsEntry[];
-  actions?: ActionsEntry[];
-  splits?: Array<SplitsEntry[]>;
-};
+import { EditRuleModal } from './edit-rule-modal';
 
 export class RulesPage {
   readonly page: Page;
   readonly searchBox: Locator;
+  readonly createNewRuleButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.searchBox = page.getByPlaceholder('Filter rules...');
+    this.createNewRuleButton = page.getByRole('button', {
+      name: 'Create new rule',
+    });
   }
 
   /**
-   * Create a new rule
+   * Open the edit rule modal to create a new rule.
    */
-  async createRule(data: RuleEntry) {
-    await this.page
-      .getByRole('button', {
-        name: 'Create new rule',
-      })
-      .click();
-
-    await this._fillRuleFields(data);
-
-    await this.page.getByRole('button', { name: 'Save' }).click();
+  async createNewRule() {
+    await this.createNewRuleButton.click();
+    return new EditRuleModal(this.page.getByTestId('edit-rule-modal'));
   }
 
   /**
@@ -64,87 +38,5 @@ export class RulesPage {
 
   async searchFor(text: string) {
     await this.searchBox.fill(text);
-  }
-
-  async _fillRuleFields(data: RuleEntry) {
-    if (data.conditionsOp) {
-      await this.page
-        .getByTestId('conditions-op')
-        .getByRole('button')
-        .first()
-        .click();
-      await this.page
-        .getByRole('button', { exact: true, name: data.conditionsOp })
-        .click();
-    }
-
-    if (data.conditions) {
-      await this._fillEditorFields(
-        data.conditions,
-        this.page.getByTestId('condition-list'),
-        true,
-      );
-    }
-
-    if (data.actions) {
-      await this._fillEditorFields(
-        data.actions,
-        this.page.getByTestId('action-list'),
-      );
-    }
-
-    if (data.splits) {
-      let idx = data.actions?.length ?? 0;
-      for (const splitActions of data.splits) {
-        await this.page.getByTestId('add-split-transactions').click();
-        await this._fillEditorFields(
-          splitActions,
-          this.page.getByTestId('action-list').nth(idx),
-        );
-        idx++;
-      }
-    }
-  }
-
-  async _fillEditorFields(
-    data: Array<ConditionsEntry | ActionsEntry | SplitsEntry>,
-    rootElement: Locator,
-    fieldFirst = false,
-  ) {
-    for (const [idx, entry] of data.entries()) {
-      const { field, op, value } = entry;
-
-      const row = rootElement.getByTestId('editor-row').nth(idx);
-
-      if (!(await row.isVisible())) {
-        await rootElement.getByRole('button', { name: 'Add entry' }).click();
-      }
-
-      if (op && !fieldFirst) {
-        await row.getByTestId('op-select').getByRole('button').first().click();
-        await this.page.getByRole('button', { name: op, exact: true }).click();
-      }
-
-      if (field) {
-        await row
-          .getByTestId('field-select')
-          .getByRole('button')
-          .first()
-          .click();
-        await this.page
-          .getByRole('button', { name: field, exact: true })
-          .click();
-      }
-
-      if (op && fieldFirst) {
-        await row.getByTestId('op-select').getByRole('button').first().click();
-        await this.page.getByRole('button', { name: op, exact: true }).click();
-      }
-
-      if (value) {
-        await row.getByRole('textbox').fill(value);
-        await this.page.keyboard.press('Enter');
-      }
-    }
   }
 }

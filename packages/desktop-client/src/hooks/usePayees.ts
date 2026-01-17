@@ -2,8 +2,12 @@ import { useEffect } from 'react';
 
 import { useInitialMount } from './useInitialMount';
 
-import { getCommonPayees, getPayees } from '@desktop-client/payees/payeesSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import {
+  getCommonPayees,
+  getPayees,
+  getPayeesById,
+} from '@desktop-client/payees/payeesSlice';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 export function useCommonPayees() {
   const dispatch = useDispatch();
@@ -33,4 +37,9 @@ export function usePayees() {
   }, [dispatch, isInitialMount, isPayeesDirty]);
 
   return useSelector(state => state.payees.payees);
+}
+
+export function usePayeesById() {
+  const payees = usePayees();
+  return getPayeesById(payees);
 }

@@ -5,15 +5,16 @@ import { v4 as uuidv4 } from 'uuid';
 import * as asyncStorage from '../platform/server/asyncStorage';
 import { fetch } from '../platform/server/fetch';
 import * as fs from '../platform/server/fs';
+import { logger } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import * as monthUtils from '../shared/months';
 
 import * as encryption from './encryption';
 import {
-  HTTPError,
-  PostError,
   FileDownloadError,
   FileUploadError,
+  HTTPError,
+  PostError,
 } from './errors';
 import { runMutator } from './mutators';
 import { post } from './post';
@@ -22,13 +23,13 @@ import { getServer } from './server-config';
 
 const UPLOAD_FREQUENCY_IN_DAYS = 7;
 
-export interface UsersWithAccess {
+export type UsersWithAccess = {
   userId: string;
   userName: string;
   displayName: string;
   owner: boolean;
-}
-export interface RemoteFile {
+};
+export type RemoteFile = {
   deleted: boolean;
   fileId: string;
   groupId: string;
@@ -37,7 +38,7 @@ export interface RemoteFile {
   hasKey: boolean;
   owner: string;
   usersWithAccess: UsersWithAccess[];
-}
+};
 
 async function checkHTTPStatus(res) {
   if (res.status !== 200) {
@@ -82,14 +83,14 @@ export async function checkKey(): Promise<{
       fileId: cloudFileId,
     });
   } catch (e) {
-    console.log(e);
+    logger.log(e);
     return { valid: false, error: { reason: 'network' } };
   }
 
   return {
     valid:
       // This == comparison is important, they could be null or undefined
-      // eslint-disable-next-line eqeqeq
+      // oxlint-disable-next-line eslint/eqeqeq
       res.id == encryptKeyId &&
       (encryptKeyId == null || encryption.hasKey(encryptKeyId)),
   };
@@ -194,7 +195,7 @@ export async function importBuffer(fileData, buffer) {
   try {
     zipped = new AdmZip(buffer);
     entries = zipped.getEntries();
-  } catch (err) {
+  } catch {
     throw FileDownloadError('not-zip-file');
   }
   const dbEntry = entries.find(e => e.entryName.includes('db.sqlite'));
@@ -210,7 +211,7 @@ export async function importBuffer(fileData, buffer) {
   let meta;
   try {
     meta = JSON.parse(metaContent.toString('utf8'));
-  } catch (err) {
+  } catch {
     throw FileDownloadError('invalid-meta-file');
   }
 
@@ -294,23 +295,23 @@ export async function upload() {
     res = await fetchJSON(getServer().SYNC_SERVER + '/upload-user-file', {
       method: 'POST',
       headers: {
-        'Content-Length': uploadContent.length,
+        'Content-Length': String(uploadContent.length),
         'Content-Type': 'application/encrypted-file',
         'X-ACTUAL-TOKEN': userToken,
         'X-ACTUAL-FILE-ID': cloudFileId,
         'X-ACTUAL-NAME': encodeURIComponent(budgetName),
-        'X-ACTUAL-FORMAT': 2,
+        'X-ACTUAL-FORMAT': '2',
         ...(uploadMeta
           ? { 'X-ACTUAL-ENCRYPT-META': JSON.stringify(uploadMeta) }
           : null),
         ...(groupId ? { 'X-ACTUAL-GROUP-ID': groupId } : null),
         // TODO: fix me
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any,
+        // oxlint-disable-next-line typescript/no-explicit-any
+      },
       body: uploadContent,
     });
   } catch (err) {
-    console.log('Upload failure', err);
+    logger.log('Upload failure', err);
 
     if (err instanceof PostError) {
       throw FileUploadError(
@@ -356,7 +357,9 @@ export async function possiblyUpload() {
   }
 
   // Don't block on uploading
-  upload().catch(() => {});
+  upload().catch(() => {
+    // Ignore errors
+  });
 }
 
 export async function removeFile(fileId) {
@@ -382,12 +385,12 @@ export async function listRemoteFiles(): Promise<RemoteFile[]> {
       },
     });
   } catch (e) {
-    console.log('Unexpected error fetching file list from server', e);
+    logger.log('Unexpected error fetching file list from server', e);
     return null;
   }
 
   if (res.status === 'error') {
-    console.log('Error fetching file list from server', res);
+    logger.log('Error fetching file list from server', res);
     return null;
   }
 
@@ -397,38 +400,6 @@ export async function listRemoteFiles(): Promise<RemoteFile[]> {
       hasKey: encryption.hasKey(file.encryptKeyId),
     }))
     .filter(Boolean);
-}
-
-export async function getRemoteFile(
-  fileId: string,
-): Promise<RemoteFile | null> {
-  const userToken = await asyncStorage.getItem('user-token');
-  if (!userToken) {
-    return null;
-  }
-
-  let res;
-  try {
-    res = await fetchJSON(getServer().SYNC_SERVER + '/get-user-file-info', {
-      headers: {
-        'X-ACTUAL-TOKEN': userToken,
-        'X-ACTUAL-FILE-ID': fileId,
-      },
-    });
-  } catch (e) {
-    console.log('Unexpected error fetching file from server', e);
-    return null;
-  }
-
-  if (res.status === 'error') {
-    console.log('Error fetching file from server', res);
-    return null;
-  }
-
-  return {
-    ...res.data,
-    hasKey: encryption.hasKey(res.data.encryptKeyId),
-  };
 }
 
 export async function download(cloudFileId) {
@@ -449,7 +420,7 @@ export async function download(cloudFileId) {
       return res.buffer();
     })
     .catch(err => {
-      console.log('Download failure', err);
+      logger.log('Download failure', err);
       throw FileDownloadError('download-failure');
     });
 
@@ -459,7 +430,7 @@ export async function download(cloudFileId) {
       'X-ACTUAL-FILE-ID': cloudFileId,
     },
   }).catch(err => {
-    console.log('Error fetching file info', err);
+    logger.log('Error fetching file info', err);
     throw FileDownloadError('internal', { fileId: cloudFileId });
   });
 
@@ -469,7 +440,7 @@ export async function download(cloudFileId) {
   ]);
 
   if (userFileInfoRes.status !== 'ok') {
-    console.log(
+    logger.log(
       'Could not download file from the server. Are you sure you have the right file ID?',
       userFileInfoRes,
     );

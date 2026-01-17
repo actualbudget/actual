@@ -5,8 +5,8 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
-  type SummaryContent,
   type RuleConditionEntity,
+  type SummaryContent,
 } from 'loot-core/types/models';
 
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
@@ -111,7 +111,10 @@ export function summarySpreadsheet(
 
     let query = makeRootQuery();
 
-    if (summaryContent.type === 'avgPerMonth') {
+    if (
+      summaryContent.type === 'avgPerMonth' ||
+      summaryContent.type === 'avgPerYear'
+    ) {
       query = query.groupBy(['date']);
     }
 
@@ -153,6 +156,14 @@ export function summarySpreadsheet(
       case 'avgPerMonth': {
         const months = getOneDatePerMonth(startDay, endDay);
         setData({ ...dateRanges, ...calculatePerMonth(data.data, months) });
+        break;
+      }
+
+      case 'avgPerYear': {
+        setData({
+          ...dateRanges,
+          ...calculatePerYear(data.data, startDay, endDay),
+        });
         break;
       }
 
@@ -214,6 +225,32 @@ function calculatePerMonth(
     total: averageAmountPerMonth,
     dividend: totalAmount,
     divisor: numMonths,
+  };
+}
+
+function calculatePerYear(
+  data: Array<{
+    date: string;
+    amount: number;
+    count: number;
+  }>,
+  startDate: Date,
+  endDate: Date,
+) {
+  if (!data.length) {
+    return { total: 0, dividend: 0, divisor: 0 };
+  }
+
+  const totalAmount = data.reduce((sum, day) => sum + day.amount, 0);
+  const totalDays = d.differenceInDays(endDate, startDate) + 1;
+  const numYears = totalDays / 365.25;
+
+  const averageAmountPerYear = totalAmount / numYears;
+
+  return {
+    total: averageAmountPerYear,
+    dividend: totalAmount,
+    divisor: numYears,
   };
 }
 

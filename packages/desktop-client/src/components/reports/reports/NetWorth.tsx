@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -15,7 +21,7 @@ import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { type TimeFrame, type NetWorthWidget } from 'loot-core/types/models';
+import { type NetWorthWidget, type TimeFrame } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
@@ -68,6 +74,16 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
+  const getDefaultIntervalForMode = useCallback(
+    (mode: TimeFrame['mode']): 'Daily' | 'Weekly' | 'Monthly' | 'Yearly' => {
+      if (mode === 'lastMonth') {
+        return 'Weekly'; // For a single month, weekly interval provides better granularity than a single monthly data point
+      }
+      return 'Monthly';
+    },
+    [],
+  );
+
   const accounts = useAccounts();
   const {
     conditions,
@@ -86,13 +102,24 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     pretty: string;
   }> | null>(null);
 
-  const [initialStart, initialEnd, initialMode] = calculateTimeRange(
-    widget?.meta?.timeFrame,
+  const [start, setStart] = useState(monthUtils.currentMonth());
+  const [end, setEnd] = useState(monthUtils.currentMonth());
+  const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
+  const [interval, setInterval] = useState(
+    widget?.meta?.interval || getDefaultIntervalForMode(mode),
   );
-  const [start, setStart] = useState(initialStart);
-  const [end, setEnd] = useState(initialEnd);
-  const [mode, setMode] = useState(initialMode);
-  const [interval, setInterval] = useState(widget?.meta?.interval || 'Monthly');
+  // Combined setter: set mode and update interval (unless interval was set in widget meta)
+  const setModeAndInterval = useCallback(
+    (newMode: TimeFrame['mode']) => {
+      setMode(newMode);
+      if (!widget?.meta?.interval) {
+        setInterval(getDefaultIntervalForMode(newMode));
+      }
+    },
+    [widget?.meta?.interval, getDefaultIntervalForMode],
+  );
+
+  const [latestTransaction, setLatestTransaction] = useState('');
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
@@ -125,22 +152,45 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const data = useReport('net_worth', reportParams);
   useEffect(() => {
     async function run() {
-      const trans = await send('get-earliest-transaction');
+      const earliestTransaction = await send('get-earliest-transaction');
+      setEarliestTransaction(
+        earliestTransaction
+          ? earliestTransaction.date
+          : monthUtils.currentDay(),
+      );
+
+      const latestTransaction = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
+      );
+
       const currentMonth = monthUtils.currentMonth();
-      let earliestMonth = trans
-        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
+      let earliestMonth = earliestTransaction
+        ? monthUtils.monthFromDate(
+            d.parseISO(fromDateRepr(earliestTransaction.date)),
+          )
         : currentMonth;
+      const latestTransactionMonth = latestTransaction
+        ? monthUtils.monthFromDate(
+            d.parseISO(fromDateRepr(latestTransaction.date)),
+          )
+        : currentMonth;
+
+      const latestMonth =
+        latestTransactionMonth > currentMonth
+          ? latestTransactionMonth
+          : currentMonth;
 
       // Make sure the month selects are at least populates with a
       // year's worth of months. We can undo this when we have fancier
       // date selects.
-      const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
+      const yearAgo = monthUtils.subMonths(latestMonth, 12);
       if (earliestMonth > yearAgo) {
         earliestMonth = yearAgo;
       }
 
       const allMonths = monthUtils
-        .rangeInclusive(earliestMonth, monthUtils.currentMonth())
+        .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
           pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
@@ -152,10 +202,23 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     run();
   }, [locale]);
 
+  useEffect(() => {
+    if (latestTransaction) {
+      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+        widget?.meta?.timeFrame,
+        undefined,
+        latestTransaction,
+      );
+      setStart(initialStart);
+      setEnd(initialEnd);
+      setModeAndInterval(initialMode);
+    }
+  }, [latestTransaction, widget?.meta?.timeFrame, setModeAndInterval]);
+
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
     setEnd(end);
-    setMode(mode);
+    setModeAndInterval(mode);
   }
 
   async function onSaveWidget() {
@@ -206,7 +269,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     });
   };
 
-  const [earliestTransaction, _] = useState('');
+  const [earliestTransaction, setEarliestTransaction] = useState('');
 
   if (!allMonths || !data) {
     return null;
@@ -244,6 +307,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         start={start}
         end={end}
         earliestTransaction={earliestTransaction}
+        latestTransaction={latestTransaction}
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         onChangeDates={onChangeDates}
@@ -304,8 +368,8 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
           <Paragraph>
             <Trans>
               Net worth shows the balance of all accounts over time, including
-              all of your investments. Your “net worth” is considered to be the
-              amount you’d have if you sold all your assets and paid off as much
+              all of your investments. Your "net worth" is considered to be the
+              amount you'd have if you sold all your assets and paid off as much
               debt as possible. If you hover over the graph, you can also see
               the amount of assets and debt individually.
             </Trans>
@@ -324,6 +388,8 @@ function IntervalSelector({
   interval: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
   onChange: (val: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly') => void;
 }) {
+  const { t } = useTranslation();
+
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -337,7 +403,7 @@ function IntervalSelector({
         ref={triggerRef}
         variant="bare"
         onPress={() => setIsOpen(true)}
-        aria-label="Change interval"
+        aria-label={t('Change interval')}
       >
         <SvgCalendar style={{ width: 12, height: 12 }} />
         <span style={{ marginLeft: 5 }}>{currentLabel}</span>

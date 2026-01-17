@@ -1,11 +1,11 @@
 // @ts-strict-ignore
 import React, {
   Fragment,
+  useMemo,
   type ComponentProps,
   type ComponentPropsWithoutRef,
-  type ReactElement,
   type CSSProperties,
-  useMemo,
+  type ReactElement,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -170,8 +170,11 @@ export function AccountAutocomplete({
   renderAccountItem,
   closeOnBlur,
   hiddenAccounts,
+  inputProps,
   ...props
 }: AccountAutocompleteProps) {
+  const { t } = useTranslation();
+
   const accounts = useAccounts() || [];
 
   //remove closed accounts if needed
@@ -192,11 +195,15 @@ export function AccountAutocomplete({
 
   return (
     <Autocomplete
-      strict={true}
-      highlightFirst={true}
+      strict
+      highlightFirst
       embedded={embedded}
       closeOnBlur={closeOnBlur}
       suggestions={accountSuggestions}
+      inputProps={{
+        ...inputProps,
+        'aria-label': t('Account'),
+      }}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <AccountList
           items={items}

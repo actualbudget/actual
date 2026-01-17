@@ -9,10 +9,10 @@ import * as monthUtils from 'loot-core/shared/months';
 
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import {
-  ModalCloseButton,
   Modal,
-  ModalTitle,
+  ModalCloseButton,
   ModalHeader,
+  ModalTitle,
 } from '@desktop-client/components/common/Modal';
 import { SectionLabel } from '@desktop-client/components/forms';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
@@ -88,8 +88,8 @@ export function CategoryAutocompleteModal({
                 name={month ? monthUtils.sheetForMonth(month) : ''}
               >
                 <CategoryAutocomplete
-                  focused={true}
-                  embedded={true}
+                  focused
+                  embedded
                   closeOnBlur={false}
                   closeOnSelect={closeOnSelect}
                   clearOnSelect={clearOnSelect}

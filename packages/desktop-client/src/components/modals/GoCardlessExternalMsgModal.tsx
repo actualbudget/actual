@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -24,10 +24,12 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { COUNTRY_OPTIONS } from '@desktop-client/components/util/countries';
+import { getCountryFromBrowser } from '@desktop-client/components/util/localeToCountry';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import {
-  type Modal as ModalType,
   pushModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -99,11 +101,21 @@ export function GoCardlessExternalMsgModal({
   const { t } = useTranslation();
 
   const dispatch = useDispatch();
+  const [language] = useGlobalPref('language');
+
+  const browserTimezone =
+    Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+  const browserLocale = language || navigator.language || 'en-US';
+  const detectedCountry = getCountryFromBrowser(
+    browserTimezone,
+    browserLocale,
+    COUNTRY_OPTIONS,
+  );
 
   const [waiting, setWaiting] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
   const [institutionId, setInstitutionId] = useState<string>();
-  const [country, setCountry] = useState<string>();
+  const [country, setCountry] = useState<string | undefined>(detectedCountry);
   const [error, setError] = useState<{
     code: 'unknown' | 'timeout';
     message?: string;
@@ -223,9 +235,9 @@ export function GoCardlessExternalMsgModal({
         <Warning>
           <Trans>
             By enabling bank sync, you will be granting GoCardless (a third
-            party service) read-only access to your entire account’s transaction
+            party service) read-only access to your entire account's transaction
             history. This service is not affiliated with Actual in any way. Make
-            sure you’ve read and understand GoCardless’s{' '}
+            sure you've read and understand GoCardless's{' '}
             <Link
               variant="external"
               to="https://gocardless.com/privacy/"

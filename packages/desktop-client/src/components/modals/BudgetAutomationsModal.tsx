@@ -1,12 +1,12 @@
-import { type CSSProperties, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { uniqueId } from 'lodash';
+import uniqueId from 'lodash/uniqueId';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
@@ -72,9 +72,23 @@ function BudgetAutomationList({
     ]);
   };
 
+  const onSave = useCallback(
+    (index: number) => (template: Template) => {
+      setAutomations(prev =>
+        prev.map((oldAutomation, mapIndex) =>
+          mapIndex === index ? template : oldAutomation,
+        ),
+      );
+    },
+    [setAutomations],
+  );
+
   return (
-    <Stack
-      spacing={4}
+    <SpaceBetween
+      direction="vertical"
+      gap={20}
+      align="stretch"
+      wrap={false}
       style={{
         overflowY: 'scroll',
         ...style,
@@ -83,6 +97,7 @@ function BudgetAutomationList({
       {automations.map((automation, index) => (
         <BudgetAutomation
           key={automationIds[index]}
+          onSave={onSave(index)}
           onDelete={onDelete(index)}
           template={automation}
           categories={categories}
@@ -100,7 +115,7 @@ function BudgetAutomationList({
       <Button onPress={onAdd}>
         <Trans>Add new automation</Trans>
       </Button>
-    </Stack>
+    </SpaceBetween>
   );
 }
 
@@ -130,11 +145,11 @@ function BudgetAutomationMigrationWarning({
 
   return (
     <Warning style={style}>
-      <Stack style={{ minHeight: 'unset' }}>
+      <SpaceBetween direction="vertical" style={{ minHeight: 'unset' }}>
         <View>
           <Trans>
-            This category uses notes-based automations (formerly “budget
-            templates”). We have automatically imported your existing
+            This category uses notes-based automations (formerly "budget
+            templates"). We have automatically imported your existing
             automations below. Please review them for accuracy and hit save to
             complete the migration.
           </Trans>
@@ -156,7 +171,7 @@ function BudgetAutomationMigrationWarning({
             </View>
           </Trans>
         </View>
-      </Stack>
+      </SpaceBetween>
     </Warning>
   );
 }
@@ -209,7 +224,12 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
       }}
     >
       {({ state: { close } }) => (
-        <Stack direction="column" style={{ height: '100%' }}>
+        <SpaceBetween
+          direction="vertical"
+          wrap={false}
+          align="stretch"
+          style={{ height: '100%' }}
+        >
           <ModalHeader
             title={t('Budget automations: {{category}}', {
               category: currentCategory?.name,
@@ -231,7 +251,7 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
               <AnimatedLoading style={{ width: 20, height: 20 }} />
             </View>
           ) : (
-            <Stack>
+            <SpaceBetween align="stretch" direction="vertical">
               {needsMigration && (
                 <BudgetAutomationMigrationWarning categoryId={categoryId} />
               )}
@@ -246,14 +266,15 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
                 schedules={schedules}
                 categories={categories}
               />
-            </Stack>
+            </SpaceBetween>
           )}
           <View style={{ flexGrow: 1 }} />
-          <Stack
-            direction="row"
-            justify="flex-end"
-            align="center"
-            style={{ marginTop: 20 }}
+          <SpaceBetween
+            style={{
+              marginTop: 20,
+              justifyContent: 'flex-end',
+              flexShrink: 0,
+            }}
           >
             {!needsMigration && (
               <Link
@@ -280,8 +301,8 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
             <Button variant="primary" onPress={() => onSave(close)}>
               <Trans>Save</Trans>
             </Button>
-          </Stack>
-        </Stack>
+          </SpaceBetween>
+        </SpaceBetween>
       )}
     </Modal>
   );

@@ -5,17 +5,19 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
-  type CategoryGroupEntity,
   type CategoryEntity,
+  type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { RenderMonths } from './RenderMonths';
 import { SidebarCategory } from './SidebarCategory';
 
+import { useBudgetComponents } from '.';
+
 import {
+  DropHighlight,
   useDraggable,
   useDroppable,
-  DropHighlight,
   type DragState,
   type OnDragChangeCallback,
   type OnDropCallback,
@@ -27,15 +29,14 @@ type ExpenseCategoryProps = {
   cat: CategoryEntity;
   categoryGroup?: CategoryGroupEntity;
   editingCell: { id: string; cell: string } | null;
-  dragState: DragState<CategoryEntity>;
-  MonthComponent: ComponentProps<typeof RenderMonths>['component'];
+  dragState: DragState<CategoryEntity> | DragState<CategoryGroupEntity> | null;
   onEditName?: ComponentProps<typeof SidebarCategory>['onEditName'];
-  onEditMonth?: (id: string, month: string) => void;
+  onEditMonth?: (id: CategoryEntity['id'], month: string) => void;
   onSave?: ComponentProps<typeof SidebarCategory>['onSave'];
   onDelete?: ComponentProps<typeof SidebarCategory>['onDelete'];
   onDragChange: OnDragChangeCallback<CategoryEntity>;
-  onBudgetAction: (month: number, action: string, arg: unknown) => void;
-  onShowActivity: (id: string, month: string) => void;
+  onBudgetAction: (month: string, action: string, arg: unknown) => void;
+  onShowActivity: (id: CategoryEntity['id'], month: string) => void;
   onReorder: OnDropCallback;
 };
 
@@ -44,7 +45,6 @@ export function ExpenseCategory({
   categoryGroup,
   editingCell,
   dragState,
-  MonthComponent,
   onEditName,
   onEditMonth,
   onSave,
@@ -74,10 +74,12 @@ export function ExpenseCategory({
     onDrop: onReorder,
   });
 
+  const { ExpenseCategoryComponent: MonthComponent } = useBudgetComponents();
+
   return (
     <Row
       innerRef={dropRef}
-      collapsed={true}
+      collapsed
       style={{
         backgroundColor: theme.tableBackground,
         opacity: cat.hidden || categoryGroup?.hidden ? 0.5 : undefined,
@@ -102,18 +104,22 @@ export function ExpenseCategory({
           onDelete={onDelete}
         />
 
-        <RenderMonths
-          component={MonthComponent}
-          editingMonth={
-            editingCell && editingCell.id === cat.id && editingCell.cell
-          }
-          args={{
-            category: cat,
-            onEdit: onEditMonth,
-            onBudgetAction,
-            onShowActivity,
-          }}
-        />
+        <RenderMonths>
+          {({ month }) => (
+            <MonthComponent
+              month={month}
+              editing={
+                editingCell &&
+                editingCell.id === cat.id &&
+                editingCell.cell === month
+              }
+              category={cat}
+              onEdit={onEditMonth}
+              onBudgetAction={onBudgetAction}
+              onShowActivity={onShowActivity}
+            />
+          )}
+        </RenderMonths>
       </View>
     </Row>
   );

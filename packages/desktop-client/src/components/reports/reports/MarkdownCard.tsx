@@ -4,21 +4,34 @@ import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 
 import { Menu } from '@actual-app/components/menu';
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import rehypeExternalLinks from 'rehype-external-links';
+import remarkGfm from 'remark-gfm';
 
 import { type MarkdownWidget } from 'loot-core/types/models';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from '@desktop-client/components/reports/constants';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
+import {
+  markdownBaseStyles,
+  remarkBreaks,
+  sequentialNewlinesPlugin,
+} from '@desktop-client/util/markdown';
 
-const markdownStyles = css({
+const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
+
+const markdownStyles = css(markdownBaseStyles, {
   paddingRight: 20,
-  '& h3': styles.mediumText,
+  '& table': {
+    display: 'inline-table',
+    ':not(:last-child)': {
+      marginBottom: '0.75rem',
+    },
+  },
 });
 
 type MarkdownCardProps = {
@@ -26,6 +39,7 @@ type MarkdownCardProps = {
   meta: MarkdownWidget['meta'];
   onMetaChange: (newMeta: MarkdownWidget['meta']) => void;
   onRemove: () => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function MarkdownCard({
@@ -33,10 +47,14 @@ export function MarkdownCard({
   meta,
   onMetaChange,
   onRemove,
+  onCopy,
 }: MarkdownCardProps) {
   const { t } = useTranslation();
 
   const [isVisibleTextArea, setIsVisibleTextArea] = useState(false);
+
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
 
   return (
     <ReportCard
@@ -69,8 +87,10 @@ export function MarkdownCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'text-left':
             onMetaChange({
@@ -136,6 +156,7 @@ export function MarkdownCard({
         ) : (
           <Text className={markdownStyles}>
             <ReactMarkdown
+              remarkPlugins={remarkPlugins}
               rehypePlugins={[
                 [
                   rehypeExternalLinks,

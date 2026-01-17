@@ -1,15 +1,15 @@
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 
 import type { ScheduleEntity } from 'loot-core/types/models';
 import type { ScheduleTemplate } from 'loot-core/types/models/templates';
 
 import {
-  type Action,
   updateTemplate,
+  type Action,
 } from '@desktop-client/components/budget/goals/actions';
 import { Link } from '@desktop-client/components/common/Link';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
@@ -28,12 +28,7 @@ export const ScheduleAutomation = ({
   const { t } = useTranslation();
 
   return schedules.length ? (
-    <Stack
-      direction="row"
-      align="center"
-      spacing={10}
-      style={{ marginTop: 10 }}
-    >
+    <SpaceBetween gap={50} style={{ marginTop: 10 }}>
       <FormField style={{ flex: 1 }}>
         <FormLabel title={t('Schedule')} htmlFor="schedule-field" />
         <Select
@@ -74,7 +69,7 @@ export const ScheduleAutomation = ({
           }
         />
       </FormField>
-    </Stack>
+    </SpaceBetween>
   ) : (
     <Text style={{ marginTop: 10 }}>
       <Trans>

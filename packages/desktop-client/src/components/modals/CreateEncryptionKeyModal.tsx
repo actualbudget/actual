@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -116,7 +116,7 @@ export function CreateEncryptionKeyModal({
                     <li>
                       <Trans>
                         <strong>Important:</strong> if you forget this password{' '}
-                        <em>and</em> you don’t have any local copies of your
+                        <em>and</em> you don't have any local copies of your
                         data, you will lose access to all your data. The data
                         cannot be decrypted without the password.
                       </Trans>
@@ -129,7 +129,7 @@ export function CreateEncryptionKeyModal({
                     </li>
                     <li>
                       <Trans>
-                        If you’ve already downloaded your data on other devices,
+                        If you've already downloaded your data on other devices,
                         you will need to reset them. Actual will automatically
                         take you through this process.
                       </Trans>

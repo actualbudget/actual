@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
-import { Routes, Route, useLocation } from 'react-router';
+import { Route, Routes, useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -20,10 +20,7 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { listen } from 'loot-core/platform/client/fetch';
-import {
-  isDevelopmentEnvironment,
-  isElectron,
-} from 'loot-core/shared/environment';
+import { isDevelopmentEnvironment } from 'loot-core/shared/environment';
 import * as Platform from 'loot-core/shared/platform';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
@@ -38,6 +35,7 @@ import { ThemeSelector } from './ThemeSelector';
 
 import { sync } from '@desktop-client/app/appSlice';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
@@ -279,6 +277,7 @@ export function Titlebar({ style }: TitlebarProps) {
   const { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
+  const isTestEnv = useIsTestEnv();
 
   return isNarrowWidth ? null : (
     <View
@@ -346,13 +345,11 @@ export function Titlebar({ style }: TitlebarProps) {
       <View style={{ flex: 1 }} />
       <SpaceBetween gap={10}>
         <UncategorizedButton />
-        {isDevelopmentEnvironment() && !Platform.isPlaywright && (
-          <ThemeSelector />
-        )}
+        {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
         <PrivacyButton />
         {serverURL ? <SyncButton /> : null}
         <LoggedInUser />
-        {!isElectron() && <HelpMenu />}
+        <HelpMenu />
       </SpaceBetween>
     </View>
   );

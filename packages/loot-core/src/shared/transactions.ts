@@ -1,8 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { logger } from '../platform/server/log';
 import { type TransactionEntity } from '../types/models';
 
-import { last, diffItems, applyChanges } from './util';
+import { applyChanges, diffItems, last } from './util';
 
 export function isTemporaryId(id: string) {
   return id.indexOf('temp') !== -1;
@@ -71,6 +72,17 @@ function makeNonChild<T extends GenericTransactionEntity>(
   } as unknown as T;
 }
 
+function makeTransactionWithChildCategory<T extends GenericTransactionEntity>(
+  parent: T,
+  data: Partial<TransactionEntity>,
+) {
+  return {
+    ...parent,
+    is_parent: false,
+    category: data.category || null,
+  } as unknown as T;
+}
+
 export function recalculateSplit(trans: TransactionEntity) {
   // Calculate the new total of split transactions and make sure
   // that it equals the parent amount
@@ -79,7 +91,7 @@ export function recalculateSplit(trans: TransactionEntity) {
     0,
   );
 
-  const { error, ...rest } = trans;
+  const { error: _error, ...rest } = trans;
   return {
     ...rest,
     error:
@@ -179,7 +191,7 @@ function replaceTransactions(
   if (trans.is_parent || trans.is_child) {
     const parentIndex = findParentIndex(transactions, idx);
     if (parentIndex == null) {
-      console.log('Cannot find parent index');
+      logger.log('Cannot find parent index');
       return {
         data: [],
         diff: { added: [], deleted: [], updated: [] },
@@ -290,7 +302,7 @@ export function deleteTransaction(
       if (trans.id === id) {
         return null;
       } else if (trans.subtransactions?.length === 1) {
-        const { subtransactions, ...rest } = trans;
+        const { subtransactions: _subtransactions, ...rest } = trans;
         return {
           ...rest,
           is_parent: false,
@@ -325,7 +337,7 @@ export function splitTransaction(
       makeChild(trans),
     ];
 
-    const { error, ...rest } = trans;
+    const { error: _error, ...rest } = trans;
 
     return {
       ...rest,
@@ -345,6 +357,7 @@ export function realizeTempTransactions(
   const parent = {
     ...transactions.find(t => !t.is_child),
     id: uuidv4(),
+    sort_order: Date.now(),
   } as TransactionEntity;
   const children = transactions.filter(t => t.is_child);
   return [
@@ -373,6 +386,21 @@ export function makeAsNonChildTransactions(
     t =>
       !newNonChildTransactions.some(updatedTrans => updatedTrans.id === t.id),
   );
+  if (
+    childTransactions.length === 1 &&
+    childTransactionsToUpdate.length === 1 &&
+    childTransactionsToUpdate[0].id === childTransactions[0].id
+  ) {
+    return {
+      updated: [
+        makeTransactionWithChildCategory(
+          parentTransaction,
+          childTransactionsToUpdate[0],
+        ),
+      ],
+      deleted: [childTransactionsToUpdate[0]],
+    };
+  }
 
   const nonChildTransactionsToUpdate =
     remainingChildTransactions.length === 1

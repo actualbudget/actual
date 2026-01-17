@@ -7,11 +7,11 @@
   "bugs": {
     "url": "https://github.com/actualbudget/actual/issues/"
   },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git@github.com:actualbudget/actual.git"
   },
-  "license": "MIT",
   "workspaces": {
     "packages": [
       "packages/*"
@@ -23,83 +23,86 @@
     "start:server-monitor": "yarn workspace @actual-app/sync-server start-monitor",
     "start:server-dev": "NODE_ENV=development BROWSER_OPEN=localhost:5006 yarn npm-run-all --parallel 'start:server-monitor' 'start'",
     "start:desktop": "yarn desktop-dependencies && npm-run-all --parallel 'start:desktop-*'",
-    "desktop-dependencies": "yarn rebuild-electron && yarn workspace loot-core build:browser",
+    "start:docs": "yarn workspace docs start",
+    "desktop-dependencies": "npm-run-all --parallel rebuild-electron build:browser-backend build:plugins-service",
     "start:desktop-node": "yarn workspace loot-core watch:node",
     "start:desktop-client": "yarn workspace @actual-app/web watch",
     "start:desktop-server-client": "yarn workspace @actual-app/web build:browser",
     "start:desktop-electron": "yarn workspace desktop-electron watch",
-    "start:browser": "npm-run-all --parallel 'start:browser-*'",
+    "start:browser": "yarn workspace plugins-service build-dev && npm-run-all --parallel 'start:browser-*'",
+    "start:service-plugins": "yarn workspace plugins-service watch",
     "start:browser-backend": "yarn workspace loot-core watch:browser",
     "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
+    "build:browser-backend": "yarn workspace loot-core build:browser",
     "build:server": "yarn build:browser && yarn workspace @actual-app/sync-server build",
     "build:browser": "./bin/package-browser",
     "build:desktop": "./bin/package-electron",
+    "build:plugins-service": "yarn workspace plugins-service build",
     "build:api": "yarn workspace @actual-app/api build",
+    "build:docs": "yarn workspace docs build",
+    "deploy:docs": "yarn workspace docs deploy",
     "generate:i18n": "yarn workspace @actual-app/web generate:i18n",
     "generate:release-notes": "ts-node ./bin/release-note-generator.ts",
-    "test": "yarn workspaces foreach --all --parallel --verbose run test",
-    "test:debug": "yarn workspaces foreach --all --verbose run test",
-    "e2e": "yarn workspaces foreach --all --exclude desktop-electron --parallel --verbose run e2e",
-    "e2e:desktop": "yarn build:desktop --skip-exe-build && yarn workspace desktop-electron e2e",
+    "test": "lage test --continue",
+    "test:debug": "lage test --no-cache --continue",
+    "e2e": "yarn workspace @actual-app/web run e2e",
+    "e2e:desktop": "yarn build:desktop --skip-exe-build --skip-translations && yarn workspace desktop-electron e2e",
     "playwright": "yarn workspace @actual-app/web run playwright",
-    "vrt": "yarn workspaces foreach --all --parallel --verbose run vrt",
+    "vrt": "yarn workspace @actual-app/web run vrt",
     "vrt:docker": "./bin/run-vrt",
-    "rebuild-electron": "./node_modules/.bin/electron-rebuild -f -m ./packages/loot-core",
+    "rebuild-electron": "./node_modules/.bin/electron-rebuild -m ./packages/loot-core",
     "rebuild-node": "yarn workspace loot-core rebuild",
-    "lint": "prettier --check . && eslint . --max-warnings 0",
-    "lint:fix": "prettier --check --write . && eslint . --max-warnings 0 --fix",
+    "lint": "oxfmt --check . && oxlint --deny-warnings",
+    "lint:fix": "oxfmt . && oxlint --deny-warnings --fix",
     "install:server": "yarn workspaces focus @actual-app/sync-server --production",
     "typecheck": "yarn tsc --incremental && tsc-strict",
     "jq": "./node_modules/node-jq/bin/jq",
     "prepare": "husky"
   },
   "devDependencies": {
-    "@octokit/rest": "^22.0.0",
-    "@types/node": "^22.17.0",
+    "@octokit/rest": "^22.0.1",
+    "@types/node": "^22.19.3",
     "@types/prompts": "^2.4.9",
-    "@typescript-eslint/parser": "^8.32.1",
-    "cross-env": "^7.0.3",
-    "eslint": "^9.27.0",
-    "eslint-config-prettier": "^10.1.5",
-    "eslint-import-resolver-typescript": "^4.3.5",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^5.2.0",
+    "baseline-browser-mapping": "^2.9.14",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.39.2",
+    "eslint-plugin-perfectionist": "^4.15.1",
     "eslint-plugin-typescript-paths": "^0.0.33",
-    "globals": "^15.15.0",
     "html-to-image": "^1.11.13",
     "husky": "^9.1.7",
-    "lint-staged": "^15.5.2",
-    "minimatch": "^10.0.3",
-    "node-jq": "^6.0.1",
+    "lage": "^2.14.15",
+    "lint-staged": "^16.2.7",
+    "minimatch": "^10.1.1",
+    "node-jq": "^6.3.1",
     "npm-run-all": "^4.1.5",
-    "p-limit": "^6.2.0",
-    "prettier": "^3.5.3",
+    "oxfmt": "^0.22.0",
+    "oxlint": "^1.38.0",
+    "p-limit": "^7.2.0",
     "prompts": "^2.4.2",
     "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.32.1",
+    "typescript": "^5.9.3",
     "typescript-strict-plugin": "^2.4.4"
   },
   "resolutions": {
     "rollup": "4.40.1",
     "socks": ">=2.8.3"
   },
-  "engines": {
-    "node": ">=20",
-    "yarn": "^4.9.1"
-  },
   "lint-staged": {
-    "*.{js,mjs,jsx,ts,tsx,md,json,yml}": [
-      "eslint --fix",
-      "prettier --write"
+    "*.{js,mjs,jsx,ts,tsx,md,json,yml,yaml}": [
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "*.{js,mjs,jsx,ts,tsx}": [
+      "oxlint --deny-warnings --fix"
     ]
   },
-  "packageManager": "yarn@4.9.1",
   "browserslist": [
-    "electron 24.0",
+    "electron >= 35.0",
     "defaults"
-  ]
+  ],
+  "engines": {
+    "node": ">=22",
+    "yarn": "^4.9.1"
+  },
+  "packageManager": "yarn@4.10.3"
 }

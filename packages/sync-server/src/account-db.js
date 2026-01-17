@@ -2,10 +2,10 @@ import { join, resolve } from 'node:path';
 
 import * as bcrypt from 'bcrypt';
 
-import { bootstrapOpenId } from './accounts/openid.js';
-import { bootstrapPassword, loginWithPassword } from './accounts/password.js';
-import { openDatabase } from './db.js';
-import { config } from './load-config.js';
+import { bootstrapOpenId } from './accounts/openid';
+import { bootstrapPassword, loginWithPassword } from './accounts/password';
+import { openDatabase } from './db';
+import { config } from './load-config';
 
 let _accountDb;
 
@@ -225,6 +225,33 @@ export function getUserPermission(userId) {
   ) || { role: '' };
 
   return role;
+}
+
+export function getServerPrefs() {
+  const accountDb = getAccountDb();
+  const rows = accountDb.all('SELECT key, value FROM server_prefs') || [];
+
+  return rows.reduce((prefs, row) => {
+    prefs[row.key] = row.value;
+    return prefs;
+  }, {});
+}
+
+export function setServerPrefs(prefs) {
+  const accountDb = getAccountDb();
+
+  if (!prefs) {
+    return;
+  }
+
+  accountDb.transaction(() => {
+    Object.entries(prefs).forEach(([key, value]) => {
+      accountDb.mutate(
+        'INSERT INTO server_prefs (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value',
+        [key, value],
+      );
+    });
+  });
 }
 
 export function clearExpiredSessions() {

@@ -1,6 +1,9 @@
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
-import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from '../../types/models';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
@@ -18,7 +21,7 @@ import * as cleanupActions from './cleanup-template';
 import * as goalActions from './goal-template';
 import * as goalNoteActions from './template-notes';
 
-export interface BudgetHandlers {
+export type BudgetHandlers = {
   'budget/budget-amount': typeof actions.setBudget;
   'budget/copy-previous-month': typeof actions.copyPreviousMonth;
   'budget/copy-single-month': typeof actions.copySinglePreviousMonth;
@@ -59,7 +62,7 @@ export interface BudgetHandlers {
   'budget/set-category-automations': typeof goalActions.storeTemplates;
   'budget/store-note-templates': typeof goalNoteActions.storeNoteTemplates;
   'budget/render-note-templates': typeof goalNoteActions.unparse;
-}
+};
 
 export const app = createApp<BudgetHandlers>();
 
@@ -297,7 +300,7 @@ async function createCategory({
 
 async function updateCategory(
   category: CategoryEntity,
-): Promise<{ error?: { type: 'category-exists' } }> {
+): Promise<{ error: { type: 'category-exists' } } | object> {
   try {
     await db.updateCategory(
       categoryModel.toDb({

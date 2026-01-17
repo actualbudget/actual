@@ -1,11 +1,11 @@
 import React, {
   memo,
-  useMemo,
   useCallback,
+  useMemo,
   type CSSProperties,
   type ReactNode,
 } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgArrowsSynchronize } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
@@ -17,7 +17,6 @@ import {
 } from 'date-fns';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { integerToCurrency } from 'loot-core/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
 
 import {
@@ -31,9 +30,10 @@ import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCategory } from '@desktop-client/hooks/useCategory';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import {
-  useSelectedItems,
   useSelectedDispatch,
+  useSelectedItems,
 } from '@desktop-client/hooks/useSelected';
 
 function serializeTransaction(
@@ -56,12 +56,14 @@ type TransactionRowProps = {
   transaction: TransactionEntity;
   fields: string[];
   selected: boolean;
+  format: (value: unknown, type: FormatType) => string;
 };
 
 const TransactionRow = memo(function TransactionRow({
   transaction,
   fields,
   selected,
+  format,
 }: TransactionRowProps) {
   const { t } = useTranslation();
 
@@ -73,7 +75,7 @@ const TransactionRow = memo(function TransactionRow({
   return (
     <Row style={{ color: theme.tableText }}>
       <SelectCell
-        exposed={true}
+        exposed
         focused={false}
         onSelect={e => {
           dispatchSelected({
@@ -103,7 +105,7 @@ const TransactionRow = memo(function TransactionRow({
               <Cell
                 key={i}
                 width="flex"
-                exposed={true}
+                exposed
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -157,7 +159,7 @@ const TransactionRow = memo(function TransactionRow({
                 width={75}
                 style={{ textAlign: 'right', ...styles.tnum }}
               >
-                {integerToCurrency(transaction.amount)}
+                {format(transaction.amount, 'financial')}
               </Field>
             );
           default:
@@ -181,6 +183,7 @@ export function SimpleTransactionsTable({
   fields = ['date', 'payee', 'amount'],
   style,
 }: SimpleTransactionsTableProps) {
+  const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
@@ -197,10 +200,11 @@ export function SimpleTransactionsTable({
           transaction={item}
           fields={memoFields}
           selected={selectedItems && selectedItems.has(item.id)}
+          format={format}
         />
       );
     },
-    [memoFields, selectedItems],
+    [memoFields, selectedItems, format],
   );
 
   return (
@@ -211,7 +215,7 @@ export function SimpleTransactionsTable({
       headers={
         <>
           <SelectCell
-            exposed={true}
+            exposed
             focused={false}
             selected={selectedItems.size > 0}
             width={20}

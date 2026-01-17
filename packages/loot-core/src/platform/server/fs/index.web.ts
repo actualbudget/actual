@@ -4,7 +4,8 @@ import IndexedDBBackend from 'absurd-sql/dist/indexeddb-backend';
 
 import * as connection from '../connection';
 import * as idb from '../indexeddb';
-import { _getModule, SqlJsModule } from '../sqlite';
+import { logger } from '../log';
+import { _getModule, type SqlJsModule } from '../sqlite';
 
 import { join } from './path-join';
 
@@ -27,12 +28,12 @@ function _exists(filepath: string): boolean {
   try {
     FS.readlink(filepath);
     return true;
-  } catch (e) {}
+  } catch {}
 
   try {
     FS.stat(filepath);
     return true;
-  } catch (e) {}
+  } catch {}
   return false;
 }
 
@@ -114,7 +115,7 @@ function resolveLink(path: string): string {
   try {
     const { node } = FS.lookupPath(path, { follow: false });
     return node.link ? FS.readlink(path) : path;
-  } catch (e) {
+  } catch {
     return path;
   }
 }
@@ -191,7 +192,7 @@ async function _copySqlFile(
     tofile.close();
     fromfile.close();
     _removeFile(toDbPath);
-    console.error('Failed to copy database file', error);
+    logger.error('Failed to copy database file', error);
     return false;
   } finally {
     tofile.close();

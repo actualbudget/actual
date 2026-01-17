@@ -1,37 +1,49 @@
 // @ts-strict-ignore
 import { Buffer } from 'node:buffer';
 import fs from 'node:fs/promises';
+import { resolve } from 'node:path';
 
 import { SyncProtoBuf } from '@actual-app/crdt';
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getAccountDb } from './account-db.js';
-import { FileNotFound } from './app-sync/errors.js';
+import { getAccountDb, isAdmin } from './account-db';
+import { FileNotFound } from './app-sync/errors';
 import {
   File,
   FilesService,
   FileUpdate,
-} from './app-sync/services/files-service.js';
+} from './app-sync/services/files-service';
 import {
   validateSyncedFile,
   validateUploadedFile,
-} from './app-sync/validation.js';
-import * as simpleSync from './sync-simple.js';
+} from './app-sync/validation';
+import { config } from './load-config';
+import * as simpleSync from './sync-simple';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
-} from './util/middlewares.js';
-import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
+} from './util/middlewares';
+import { getPathForGroupFile, getPathForUserFile } from './util/paths';
 
 const app = express();
 app.use(validateSessionMiddleware);
 app.use(errorMiddleware);
 app.use(requestLoggerMiddleware);
-app.use(express.raw({ type: 'application/actual-sync' }));
-app.use(express.raw({ type: 'application/encrypted-file' }));
-app.use(express.json());
+app.use(
+  express.raw({
+    type: 'application/actual-sync',
+    limit: `${config.get('upload.fileSizeSyncLimitMB')}mb`,
+  }),
+);
+app.use(
+  express.raw({
+    type: 'application/encrypted-file',
+    limit: `${config.get('upload.syncEncryptedFileSizeLimitMB')}mb`,
+  }),
+);
+app.use(express.json({ limit: `${config.get('upload.fileSizeLimitMB')}mb` }));
 
 export { app as handlers };
 
@@ -295,8 +307,16 @@ app.get('/download-user-file', async (req, res) => {
     return;
   }
 
+  const path = getPathForUserFile(fileId);
+
+  if (!path.startsWith(resolve(config.get('userFiles')))) {
+    //Ensure the user doesn't try to access files outside of the user files directory
+    res.status(403).send('Access denied');
+    return;
+  }
+
   res.setHeader('Content-Disposition', `attachment;filename=${fileId}`);
-  res.sendFile(getPathForUserFile(fileId));
+  res.sendFile(path, { dotfiles: 'allow' });
 });
 
 app.post('/update-user-filename', (req, res) => {
@@ -384,7 +404,23 @@ app.post('/delete-user-file', (req, res) => {
   }
 
   const filesService = new FilesService(getAccountDb());
-  if (!verifyFileExists(fileId, filesService, res, 'file-not-found')) {
+  const file = verifyFileExists(fileId, filesService, res, 'file-not-found');
+  if (!file) {
+    return;
+  }
+
+  // Check if user has permission to delete the file
+  const { user_id: userId } = res.locals;
+
+  const isOwner = file.owner === userId;
+  const isServerAdmin = isAdmin(userId);
+
+  if (!isOwner && !isServerAdmin) {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'file-delete-not-allowed',
+    });
     return;
   }
 

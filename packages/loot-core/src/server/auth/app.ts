@@ -1,5 +1,6 @@
 import * as asyncStorage from '../../platform/server/asyncStorage';
-import { OpenIdConfig } from '../../types/models';
+import { logger } from '../../platform/server/log';
+import { type OpenIdConfig } from '../../types/models';
 import { createApp } from '../app';
 import * as encryption from '../encryption';
 import { PostError } from '../errors';
@@ -51,14 +52,14 @@ async function needsBootstrap({ url }: { url?: string } = {}) {
     if (!serverConfig) {
       return { bootstrapped: true, hasServer: false };
     }
-  } catch (err) {
+  } catch {
     return { error: 'get-server-failure' };
   }
 
   let resText: string;
   try {
     resText = await get(serverConfig.SIGNUP_SERVER + '/needs-bootstrap');
-  } catch (err) {
+  } catch {
     return { error: 'network-failure' };
   }
 
@@ -78,7 +79,7 @@ async function needsBootstrap({ url }: { url?: string } = {}) {
 
   try {
     res = JSON.parse(resText);
-  } catch (err) {
+  } catch {
     return { error: 'parse-failure' };
   }
 
@@ -173,6 +174,7 @@ async function getUser() {
         userId = null,
         displayName = null,
         loginMethod = null,
+        prefs: serverPrefs,
       } = {},
     } = JSON.parse(res) || {};
 
@@ -194,9 +196,10 @@ async function getUser() {
       displayName,
       loginMethod,
       tokenExpired,
+      serverPrefs,
     };
   } catch (e) {
-    console.log(e);
+    logger.log(e);
     return { offline: true };
   }
 }

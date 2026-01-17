@@ -1,19 +1,19 @@
-import { makeValue, FIELD_TYPES } from 'loot-core/shared/rules';
+import { FIELD_TYPES, makeValue } from 'loot-core/shared/rules';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
-export function updateFilterReducer(
-  state: Pick<RuleConditionEntity, 'op' | 'field' | 'value'>,
-  action: { type: 'set-op' | 'set-value' } & Pick<
-    RuleConditionEntity,
-    'op' | 'value'
-  >,
+export function updateFilterReducer<T extends RuleConditionEntity>(
+  state: Pick<T, 'op' | 'field'> & { value: T['value'] | null },
+  action:
+    | { type: 'set-op'; op: T['op'] }
+    | { type: 'set-value'; value: T['value'] },
 ) {
   switch (action.type) {
     case 'set-op': {
       const type = FIELD_TYPES.get(state.field);
-      let value: RuleConditionEntity['value'] | null = state.value;
+      let value = state.value;
       if (
         (type === 'id' || type === 'string') &&
+        state.field !== 'notes' &&
         (action.op === 'contains' ||
           action.op === 'matches' ||
           action.op === 'is' ||
@@ -23,9 +23,22 @@ export function updateFilterReducer(
           action.op === 'onBudget' ||
           action.op === 'offBudget')
       ) {
-        // Clear out the value if switching between contains or
-        // is/oneof for the id or string type
-        value = null;
+        // When switching to single-value operators, convert array to first element
+        if (Array.isArray(value)) {
+          value = value.length > 0 ? value[0] : null;
+        }
+      } else if (
+        (type === 'id' || type === 'string') &&
+        state.field !== 'notes' &&
+        (action.op === 'oneOf' || action.op === 'notOneOf')
+      ) {
+        // Convert single value to array when switching to oneOf/notOneOf
+        if (value === null || value === undefined) {
+          value = [];
+        } else if (!Array.isArray(value)) {
+          // @ts-expect-error - fix me
+          value = [value];
+        }
       }
       return { ...state, op: action.op, value };
     }
@@ -36,6 +49,7 @@ export function updateFilterReducer(
       return { ...state, value };
     }
     default:
+      // @ts-expect-error - fix me
       throw new Error(`Unhandled action type: ${action.type}`);
   }
 }

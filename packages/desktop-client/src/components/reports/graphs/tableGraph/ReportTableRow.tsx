@@ -1,8 +1,8 @@
 import React, {
   memo,
+  type CSSProperties,
   type RefObject,
   type UIEventHandler,
-  type CSSProperties,
 } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -17,7 +17,7 @@ import {
 } from 'loot-core/types/models';
 
 import { showActivity } from '@desktop-client/components/reports/graphs/showActivity';
-import { Row, Cell } from '@desktop-client/components/table';
+import { Cell, Row } from '@desktop-client/components/table';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -105,7 +105,7 @@ export const ReportTableRow = memo(
       <Row
         key={item.id}
         height={height}
-        collapsed={true}
+        collapsed
         style={{
           color: theme.tableText,
           backgroundColor: theme.tableBackground,
@@ -119,6 +119,7 @@ export const ReportTableRow = memo(
           style={{
             flexDirection: 'row',
             flex: 1,
+            backgroundColor: style?.backgroundColor,
             ...totalStyle,
           }}
         >
@@ -129,6 +130,7 @@ export const ReportTableRow = memo(
               width: compact ? 80 : 125,
               flexShrink: 0,
               flexGrow: 1,
+              backgroundColor: style?.backgroundColor,
             }}
             valueStyle={compactStyle}
           />
@@ -137,14 +139,24 @@ export const ReportTableRow = memo(
                 return (
                   <Cell
                     key={index}
+                    textAlign="right"
                     style={{
                       minWidth: compact ? 50 : 85,
+                      backgroundColor: style?.backgroundColor,
                       ...(colorized && {
                         color: getAmountColor(intervalItem[balanceTypeOp]),
                       }),
                     }}
                     unexposedContent={({ value }) => (
-                      <Text style={hoverUnderline}>{value}</Text>
+                      <Text
+                        style={{
+                          ...hoverUnderline,
+                          textAlign: 'right',
+                          flexGrow: 1,
+                        }}
+                      >
+                        {value}
+                      </Text>
                     )}
                     valueStyle={compactStyle}
                     value={format(intervalItem[balanceTypeOp], 'financial')}
@@ -188,16 +200,26 @@ export const ReportTableRow = memo(
                         ? format(item.totalAssets, 'financial')
                         : undefined
                     }
+                    textAlign="right"
                     width="flex"
                     privacyFilter
                     style={{
                       minWidth: compact ? 50 : 85,
+                      backgroundColor: style?.backgroundColor,
                       ...(colorized && {
                         color: getAmountColor(item.totalAssets),
                       }),
                     }}
                     unexposedContent={({ value }) => (
-                      <Text style={hoverUnderline}>{value}</Text>
+                      <Text
+                        style={{
+                          ...hoverUnderline,
+                          textAlign: 'right',
+                          flexGrow: 1,
+                        }}
+                      >
+                        {value}
+                      </Text>
                     )}
                     valueStyle={compactStyle}
                     onClick={() =>
@@ -228,16 +250,26 @@ export const ReportTableRow = memo(
                         ? format(item.totalDebts, 'financial')
                         : undefined
                     }
+                    textAlign="right"
                     width="flex"
                     privacyFilter
                     style={{
                       minWidth: compact ? 50 : 85,
+                      backgroundColor: style?.backgroundColor,
                       ...(colorized && {
                         color: getAmountColor(item.totalDebts),
                       }),
                     }}
                     unexposedContent={({ value }) => (
-                      <Text style={hoverUnderline}>{value}</Text>
+                      <Text
+                        style={{
+                          ...hoverUnderline,
+                          textAlign: 'right',
+                          flexGrow: 1,
+                        }}
+                      >
+                        {value}
+                      </Text>
                     )}
                     valueStyle={compactStyle}
                     onClick={() =>
@@ -270,13 +302,23 @@ export const ReportTableRow = memo(
                 ? format(item[balanceTypeOp], 'financial')
                 : undefined
             }
+            textAlign="right"
             style={{
               fontWeight: 600,
               minWidth: compact ? 50 : 85,
+              backgroundColor: style?.backgroundColor,
               ...(colorized && { color: getAmountColor(item[balanceTypeOp]) }),
             }}
             unexposedContent={({ value }) => (
-              <Text style={hoverUnderline}>{value}</Text>
+              <Text
+                style={{
+                  ...hoverUnderline,
+                  textAlign: 'right',
+                  flexGrow: 1,
+                }}
+              >
+                {value}
+              </Text>
             )}
             valueStyle={compactStyle}
             onClick={() =>
@@ -309,9 +351,11 @@ export const ReportTableRow = memo(
                 ? format(average, 'financial')
                 : undefined
             }
+            textAlign="right"
             style={{
               fontWeight: 600,
               minWidth: compact ? 50 : 85,
+              backgroundColor: style?.backgroundColor,
               ...(colorized && { color: getAmountColor(average) }),
             }}
             valueStyle={compactStyle}

@@ -8,23 +8,37 @@ import { getSpecificRange, validateRange } from './reportRanges';
 export function getLiveRange(
   cond: string,
   earliestTransaction: string,
+  latestTransaction: string,
   includeCurrentInterval: boolean,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ): [string, string, TimeFrame['mode']] {
   let dateStart = earliestTransaction;
-  let dateEnd = monthUtils.currentDay();
+  let dateEnd = latestTransaction;
   const rangeName = ReportOptions.dateRangeMap.get(cond);
   switch (rangeName) {
-    case 'yearToDate':
+    case 'yearToDate': {
       [dateStart, dateEnd] = validateRange(
         earliestTransaction,
+        latestTransaction,
         monthUtils.getYearStart(monthUtils.currentMonth()) + '-01',
         monthUtils.currentDay(),
       );
       break;
-    case 'lastYear':
+    }
+    case 'lastMonth': {
+      const prevMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
       [dateStart, dateEnd] = validateRange(
         earliestTransaction,
+        latestTransaction,
+        monthUtils.firstDayOfMonth(prevMonth),
+        monthUtils.lastDayOfMonth(prevMonth),
+      );
+      break;
+    }
+    case 'lastYear': {
+      [dateStart, dateEnd] = validateRange(
+        earliestTransaction,
+        latestTransaction,
         monthUtils.getYearStart(
           monthUtils.prevYear(monthUtils.currentMonth()),
         ) + '-01',
@@ -32,19 +46,23 @@ export function getLiveRange(
           '-31',
       );
       break;
-    case 'priorYearToDate':
+    }
+    case 'priorYearToDate': {
       [dateStart, dateEnd] = validateRange(
         earliestTransaction,
+        latestTransaction,
         monthUtils.getYearStart(
           monthUtils.prevYear(monthUtils.currentMonth()),
         ) + '-01',
         monthUtils.prevYear(monthUtils.currentDate(), 'yyyy-MM-dd'),
       );
       break;
-    case 'allTime':
+    }
+    case 'allTime': {
       dateStart = earliestTransaction;
-      dateEnd = monthUtils.currentDay();
+      dateEnd = latestTransaction;
       break;
+    }
     default:
       if (typeof rangeName === 'number') {
         [dateStart, dateEnd] = getSpecificRange(

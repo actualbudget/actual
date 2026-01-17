@@ -7,7 +7,7 @@ import { generateAccount } from 'loot-core/mocks';
 import { q } from 'loot-core/shared/query';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
+import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { TestProvider } from '@desktop-client/redux/mock';
@@ -57,7 +57,7 @@ describe('ReconcilingMessage math & UI', () => {
     ).not.toBeInTheDocument();
 
     // Done button triggers callback
-    await userEvent.click(screen.getByText('Done reconciling'));
+    await userEvent.click(screen.getByText('Lock transactions'));
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 
@@ -71,7 +71,7 @@ describe('ReconcilingMessage math & UI', () => {
         <ReconcilingMessage
           balanceQuery={makeBalanceQuery()}
           targetBalance={10000}
-          onDone={() => {}}
+          onDone={vi.fn()}
           onCreateTransaction={onCreateTransaction}
         />
       </TestProvider>,
@@ -99,7 +99,7 @@ describe('ReconcilingMessage math & UI', () => {
         <ReconcilingMessage
           balanceQuery={makeBalanceQuery()}
           targetBalance={10000}
-          onDone={() => {}}
+          onDone={vi.fn()}
           onCreateTransaction={onCreateTransaction}
         />
       </TestProvider>,

@@ -1,12 +1,12 @@
 // @ts-strict-ignore
 import 'fake-indexeddb/auto';
-import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
+import { IDBFactory } from 'fake-indexeddb';
 
 import { patchFetchForSqlJS } from '../../../mocks/util';
 import * as idb from '../indexeddb';
 import * as sqlite from '../sqlite';
 
-import { init, readFile, writeFile, exists, pathToId, join } from './index';
+import { exists, init, join, pathToId, readFile, writeFile } from './index';
 
 beforeAll(() => {
   const baseURL = `${__dirname}/../../../../../../node_modules/@jlongster/sql.js/dist/`;
@@ -15,7 +15,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  global.indexedDB = new FDBFactory();
+  global.indexedDB = new IDBFactory();
 });
 
 afterEach(() => {
@@ -51,10 +51,11 @@ describe('web filesystem', () => {
       filepath: '/documents/foo.txt',
       contents: 'hello',
     });
-    expect(await idb.get(store, '/documents/foo.bin')).toEqual({
-      filepath: '/documents/foo.bin',
-      contents: new Uint8Array(buf),
-    });
+    const binResult = await idb.get(store, '/documents/foo.bin');
+    expect(binResult.filepath).toBe('/documents/foo.bin');
+    expect(Array.from(binResult.contents)).toEqual(
+      Array.from(new Uint8Array(buf)),
+    );
 
     // Write a file outside of documents
     await writeFile('/outside.txt', 'some junk');

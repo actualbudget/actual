@@ -1,29 +1,29 @@
 {
   "name": "@actual-app/crdt",
   "version": "2.1.0",
-  "license": "MIT",
   "description": "CRDT layer of Actual",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "license": "MIT",
   "files": [
     "dist"
   ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build:node": "tsc --p tsconfig.dist.json",
     "proto:generate": "./bin/generate-proto",
     "build": "rm -rf dist && yarn run build:node",
-    "test": "vitest --globals"
+    "test": "vitest --run"
   },
   "dependencies": {
     "google-protobuf": "^3.21.4",
     "murmurhash": "^2.0.1",
-    "uuid": "^11.1.0"
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@types/google-protobuf": "^3.15.12",
-    "protoc-gen-js": "^3.21.4-4",
-    "ts-protoc-gen": "^0.15.0",
-    "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "@types/google-protobuf": "3.15.12",
+    "protoc-gen-js": "3.21.4-4",
+    "ts-protoc-gen": "0.15.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
   }
 }

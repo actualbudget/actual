@@ -1,23 +1,26 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
 import {
-  getNextDate,
-  getDateWithSkippedWeekend,
   extractScheduleConds,
+  getDateWithSkippedWeekend,
+  getNextDate,
 } from '../../shared/schedules';
-import { CategoryEntity } from '../../types/models';
-import { ScheduleTemplate, Template } from '../../types/models/templates';
+import { type CategoryEntity } from '../../types/models';
+import {
+  type ScheduleTemplate,
+  type Template,
+} from '../../types/models/templates';
 import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
 
-import { isReflectBudget } from './actions';
+import { getSheetValue, isReflectBudget } from './actions';
 
 type ScheduleTemplateTarget = {
   name: string;
   target: number;
   next_date_string: string;
   target_interval: number;
-  target_frequency: string;
+  target_frequency: string | undefined;
   num_months: number;
   completed: number;
   full: boolean;
@@ -234,6 +237,10 @@ function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
         if (intervalMonths === 0) intervalMonths = 1;
         monthlyAmount = schedule.target / intervalMonths;
         break;
+      default:
+        // default to same math as monthly for now for non-reoccuring
+        monthlyAmount = schedule.target / schedule.target_interval;
+        break;
     }
     total += monthlyAmount;
   }
@@ -270,23 +277,41 @@ export async function runSchedule(
 
   const isPayMonthOf = c =>
     c.full ||
-    (c.target_frequency === 'monthly' &&
+    ((c.target_frequency === 'monthly' || !c.target_frequency) &&
       c.target_interval === 1 &&
       c.num_months === 0) ||
     (c.target_frequency === 'weekly' && c.target_interval <= 4) ||
     (c.target_frequency === 'daily' && c.target_interval <= 31) ||
     isReflectBudget();
 
+  const isSubMonthly = c =>
+    c.target_frequency === 'weekly' || c.target_frequency === 'daily';
+
   const t_payMonthOf = t.t.filter(isPayMonthOf);
   const t_sinking = t.t
     .filter(c => !isPayMonthOf(c))
     .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
+  const numSubMonthly = t.t.filter(isSubMonthly).length;
   const totalPayMonthOf = getPayMonthOfTotal(t_payMonthOf);
   const totalSinking = getSinkingTotal(t_sinking);
   const totalSinkingBaseContribution =
     getSinkingBaseContributionTotal(t_sinking);
+  const lastMonthGoal = await getSheetValue(
+    monthUtils.sheetForMonth(monthUtils.subMonths(current_month, 1)),
+    `goal-${category.id}`,
+  );
 
-  if (balance >= totalSinking + totalPayMonthOf) {
+  // check and see if we should budget the full amount becaue the previous schedules
+  // haven't been paid yet, or if we can use the leftover balance for this month
+  // First option: check if the previous month doesn't have its monthly schedules paid yet
+  // Second option: check if the previous month needed less than this month and hasn't paid yet
+  if (
+    balance >= totalSinking + totalPayMonthOf ||
+    (lastMonthGoal < totalSinking + totalPayMonthOf &&
+      lastMonthGoal !== 0 &&
+      balance >= lastMonthGoal &&
+      numSubMonthly > 0)
+  ) {
     to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);
   } else {
     const totalSinkingContribution = await getSinkingContributionTotal(

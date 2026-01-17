@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { type Query } from 'loot-core/shared/query';
 import { type IntegerAmount } from 'loot-core/shared/util';
@@ -14,7 +14,7 @@ type TransactionSplitsOption = 'all' | 'inline' | 'grouped' | 'none';
 
 type CalculateRunningBalancesOption =
   | ((
-      transactions: TransactionEntity[],
+      transactions: readonly TransactionEntity[],
       splits: TransactionSplitsOption,
       startingBalance?: IntegerAmount,
     ) => Map<TransactionEntity['id'], IntegerAmount>)
@@ -173,6 +173,34 @@ export function useTransactions({
     };
   }, [query]);
 
+  // Recalculate running balances whenever the transactions change or the
+  // calculation options change (for example, when toggling show/hide
+  // running balances). We intentionally keep the main data subscription
+  // dependent only on `query` above, but this effect ensures running
+  // balances are updated in-place when the caller changes options.
+  useEffect(() => {
+    const calculateFn = getCalculateRunningBalancesFn(
+      options?.calculateRunningBalances,
+    );
+
+    if (calculateFn) {
+      setRunningBalances(
+        calculateFn(
+          transactions,
+          query?.state.tableOptions?.splits as TransactionSplitsOption,
+          options?.startingBalance,
+        ),
+      );
+    } else {
+      setRunningBalances(new Map());
+    }
+  }, [
+    transactions,
+    query,
+    options?.calculateRunningBalances,
+    options?.startingBalance,
+  ]);
+
   const loadMore = useCallback(async () => {
     if (!pagedQueryRef.current) {
       return;
@@ -214,7 +242,7 @@ function getCalculateRunningBalancesFn(
 }
 
 export function calculateRunningBalancesBottomUp(
-  transactions: TransactionEntity[],
+  transactions: readonly TransactionEntity[],
   splits: TransactionSplitsOption,
   startingBalance: IntegerAmount = 0,
 ) {
@@ -252,7 +280,7 @@ export function calculateRunningBalancesBottomUp(
 }
 
 export function calculateRunningBalancesTopDown(
-  transactions: TransactionEntity[],
+  transactions: readonly TransactionEntity[],
   splits: TransactionSplitsOption,
   startingBalance: IntegerAmount = 0,
 ) {

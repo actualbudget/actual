@@ -1,6 +1,6 @@
 import { type RuleConditionEntity } from './rule';
 
-export interface CustomReportEntity {
+export type CustomReportEntity = {
   id: string;
   name: string;
   startDate: string;
@@ -17,12 +17,13 @@ export interface CustomReportEntity {
   showHiddenCategories: boolean;
   includeCurrentInterval: boolean;
   showUncategorized: boolean;
+  trimIntervals: boolean;
   graphType: string;
   conditions?: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
   data?: GroupedEntity;
   tombstone?: boolean;
-}
+};
 
 export type balanceTypeOpType =
   | 'totalAssets'
@@ -43,15 +44,15 @@ export type SpendingMonthEntity = Record<
   }
 >;
 
-export interface SpendingDataEntity {
+export type SpendingDataEntity = {
   date: string;
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;
   cumulative: number;
-}
+};
 
-export interface SpendingEntity {
+export type SpendingEntity = {
   intervalData: {
     months: SpendingMonthEntity;
     day: string;
@@ -65,9 +66,9 @@ export interface SpendingEntity {
   totalDebts: number;
   totalAssets: number;
   totalTotals: number;
-}
+};
 
-export interface DataEntity {
+export type DataEntity = {
   data?: GroupedEntity[];
   intervalData: IntervalEntity[];
   groupedData?: GroupedEntity[] | null;
@@ -79,7 +80,7 @@ export interface DataEntity {
   netAssets: number;
   netDebts: number;
   totalTotals: number;
-}
+};
 
 export type LegendEntity = {
   name: string;
@@ -99,7 +100,7 @@ export type IntervalEntity = {
   totalTotals: number;
 };
 
-export interface GroupedEntity {
+export type GroupedEntity = {
   id: string;
   name: string;
   date?: string;
@@ -110,13 +111,13 @@ export interface GroupedEntity {
   netAssets: number;
   netDebts: number;
   categories?: GroupedEntity[];
-}
+};
 
 export type Interval = {
   interval: string;
 };
 
-export interface CustomReportData {
+export type CustomReportData = {
   id: string;
   name: string;
   start_date: string;
@@ -132,10 +133,11 @@ export interface CustomReportData {
   show_hidden: number;
   include_current: number;
   show_uncategorized: number;
+  trim_intervals: number;
   graph_type: string;
   conditions?: RuleConditionEntity[];
   conditions_op: 'and' | 'or';
   metadata?: GroupedEntity;
   interval: string;
   color_scheme?: string;
-}
+};

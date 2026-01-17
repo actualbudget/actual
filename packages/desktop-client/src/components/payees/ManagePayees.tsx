@@ -1,8 +1,8 @@
 import {
-  useState,
-  useRef,
-  useMemo,
   useCallback,
+  useMemo,
+  useRef,
+  useState,
   type ComponentProps,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -15,7 +15,7 @@ import { View } from '@actual-app/components/view';
 import memoizeOne from 'memoize-one';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { type Diff, groupById } from 'loot-core/shared/util';
+import { groupById, type Diff } from 'loot-core/shared/util';
 import { type PayeeEntity } from 'loot-core/types/models';
 
 import { PayeeMenu } from './PayeeMenu';
@@ -23,13 +23,13 @@ import { PayeeTable } from './PayeeTable';
 
 import { Search } from '@desktop-client/components/common/Search';
 import {
-  TableHeader,
   Cell,
   SelectCell,
+  TableHeader,
 } from '@desktop-client/components/table';
 import {
-  useSelected,
   SelectedProvider,
+  useSelected,
   useSelectedDispatch,
   useSelectedItems,
 } from '@desktop-client/hooks/useSelected';
@@ -39,6 +39,8 @@ import { useDispatch } from '@desktop-client/redux';
 const getPayeesById = memoizeOne((payees: PayeeEntity[]) => groupById(payees));
 
 function PayeeTableHeader() {
+  const { t } = useTranslation();
+
   const dispatchSelected = useSelectedDispatch();
   const selectedItems = useSelectedItems();
 
@@ -51,10 +53,10 @@ function PayeeTableHeader() {
           zIndex: 200,
           userSelect: 'none',
         }}
-        collapsed={true}
+        collapsed
       >
         <SelectCell
-          exposed={true}
+          exposed
           focused={false}
           selected={selectedItems.size > 0}
           icon={<SvgSubtract width={6} height={6} />}
@@ -62,7 +64,7 @@ function PayeeTableHeader() {
             dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
           }
         />
-        <Cell value="Name" width="flex" />
+        <Cell value={t('Name')} width="flex" />
       </TableHeader>
     </View>
   );

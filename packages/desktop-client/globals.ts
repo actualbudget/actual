@@ -6,9 +6,9 @@ declare module '*.png';
 declare global {
   function __resetWorld(): void;
 
-  // eslint-disable-next-line @typescript-eslint/no-namespace
+  // oxlint-disable-next-line typescript/no-namespace
   namespace PlaywrightTest {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+    // oxlint-disable-next-line typescript/consistent-type-definitions
     interface Matchers<R> {
       toMatchThemeScreenshots(): Promise<R>;
     }

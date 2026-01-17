@@ -9,8 +9,8 @@ import { theme } from '@actual-app/components/theme';
 import { Setting } from './UI';
 
 import {
-  useMultiuserEnabled,
   useLoginMethod,
+  useMultiuserEnabled,
 } from '@desktop-client/components/ServerContext';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -45,9 +45,7 @@ export function AuthSettings() {
                     pushModal({
                       modal: {
                         name: 'enable-openid',
-                        options: {
-                          onSave: async () => {},
-                        },
+                        options: {},
                       },
                     }),
                   )
@@ -73,9 +71,7 @@ export function AuthSettings() {
                     pushModal({
                       modal: {
                         name: 'enable-password-auth',
-                        options: {
-                          onSave: async () => {},
-                        },
+                        options: {},
                       },
                     }),
                   )
@@ -84,11 +80,11 @@ export function AuthSettings() {
                 <Trans>Disable OpenID</Trans>
               </Button>
               {multiuserEnabled && (
-                <label style={{ paddingTop: 5, color: theme.errorText }}>
+                <Text style={{ paddingTop: 5, color: theme.errorText }}>
                   <Trans>
                     Disabling OpenID will deactivate multi-user mode.
                   </Trans>
-                </label>
+                </Text>
               )}
             </>
           )}

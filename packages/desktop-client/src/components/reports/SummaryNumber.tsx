@@ -1,8 +1,8 @@
-import React, { type Ref, useRef, useState } from 'react';
+import React, { useRef, useState, type Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
-import { debounce } from 'debounce';
+import debounce from 'lodash/debounce';
 
 import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';
@@ -74,7 +74,6 @@ export function SummaryNumber({
       {!loading && (
         <View
           ref={mergedRef as Ref<HTMLDivElement>}
-          role="text"
           aria-label={
             value < 0
               ? t('Negative amount: {{amount}}', { amount: displayAmount })

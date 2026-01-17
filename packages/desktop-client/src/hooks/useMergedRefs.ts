@@ -1,4 +1,4 @@
-import { useCallback, type RefObject, type Ref, type RefCallback } from 'react';
+import { useCallback, type Ref, type RefCallback, type RefObject } from 'react';
 
 export function useMergedRefs<T>(
   ...refs: (
@@ -14,8 +14,8 @@ export function useMergedRefs<T>(
       [...refs].forEach(ref => {
         if (typeof ref === 'function') {
           ref(value);
-        } else if (ref != null && 'current' in ref) {
-          (ref as RefObject<T>).current = value;
+        } else if (ref != null) {
+          ref.current = value;
         }
       });
     },
