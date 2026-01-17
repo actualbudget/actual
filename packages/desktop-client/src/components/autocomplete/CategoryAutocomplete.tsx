@@ -462,6 +462,7 @@ function CategoryItem({
 
   return (
     <button
+      type="button"
       style={style}
       // See comment above.
       className={cx(
