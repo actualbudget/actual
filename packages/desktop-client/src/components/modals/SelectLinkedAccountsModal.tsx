@@ -11,17 +11,17 @@ import { View } from '@actual-app/components/view';
 
 import {
   type AccountEntity,
+  type SyncServerAkahuAccount,
   type SyncServerGoCardlessAccount,
   type SyncServerPluggyAiAccount,
   type SyncServerSimpleFinAccount,
-  type SyncServerAkahuAccount,
 } from 'loot-core/types/models';
 
 import {
   linkAccount,
+  linkAccountAkahu,
   linkAccountPluggyAi,
   linkAccountSimpleFin,
-  linkAccountAkahu,
   unlinkAccount,
 } from '@desktop-client/accounts/accountsSlice';
 import {
