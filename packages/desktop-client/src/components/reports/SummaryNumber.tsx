@@ -7,8 +7,8 @@ import debounce from 'lodash/debounce';
 import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';
 
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { FinancialText } from '@desktop-client/components/FinancialText';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';

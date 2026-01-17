@@ -24,6 +24,7 @@ import * as monthUtils from 'loot-core/shared/months';
 import { type NetWorthWidget, type TimeFrame } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,
@@ -40,7 +41,6 @@ import { calculateTimeRange } from '@desktop-client/components/reports/reportRan
 import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
@@ -348,7 +348,9 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
             style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
           >
             <PrivacyFilter>
-              <FinancialText>{format(data.netWorth, 'financial')}</FinancialText>
+              <FinancialText>
+                {format(data.netWorth, 'financial')}
+              </FinancialText>
             </PrivacyFilter>
           </View>
           <PrivacyFilter>

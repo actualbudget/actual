@@ -14,8 +14,8 @@ import {
   useEnvelopeSheetName,
   useEnvelopeSheetValue,
 } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { FinancialText } from '@desktop-client/components/FinancialText';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 

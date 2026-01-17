@@ -18,10 +18,10 @@ import { type SpendingEntity } from 'loot-core/types/models';
 
 import { computePadding } from './util/computePadding';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -115,7 +115,9 @@ const CustomTooltip = ({
                       : t('To:')
                 }
                 right={
-                  <FinancialText>{format(Math.round(comparison), 'financial')}</FinancialText>
+                  <FinancialText>
+                    {format(Math.round(comparison), 'financial')}
+                  </FinancialText>
                 }
               />
             )}

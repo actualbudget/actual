@@ -18,6 +18,7 @@ import {
 import * as monthUtils from 'loot-core/shared/months';
 import { type TransactionEntity } from 'loot-core/types/models';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import {
   Cell,
   Field,
@@ -25,7 +26,6 @@ import {
   SelectCell,
   Table,
 } from '@desktop-client/components/table';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCategory } from '@desktop-client/hooks/useCategory';
@@ -155,7 +155,9 @@ const TransactionRow = memo(function TransactionRow({
           case 'amount':
             return (
               <Field key={i} width={75} style={{ textAlign: 'right' }}>
-                <FinancialText>{format(transaction.amount, 'financial')}</FinancialText>
+                <FinancialText>
+                  {format(transaction.amount, 'financial')}
+                </FinancialText>
               </Field>
             );
           default:

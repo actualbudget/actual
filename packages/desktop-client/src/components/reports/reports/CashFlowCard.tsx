@@ -17,6 +17,7 @@ import { type CashFlowWidget } from 'loot-core/types/models';
 
 import { defaultTimeFrame } from './CashFlow';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { Change } from '@desktop-client/components/reports/Change';
 import {
@@ -32,7 +33,6 @@ import { calculateTimeRange } from '@desktop-client/components/reports/reportRan
 import { simpleCashFlow } from '@desktop-client/components/reports/spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type CustomLabelProps = {

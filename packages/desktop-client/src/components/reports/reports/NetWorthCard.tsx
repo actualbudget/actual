@@ -13,6 +13,7 @@ import {
   type NetWorthWidget,
 } from 'loot-core/types/models';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { Change } from '@desktop-client/components/reports/Change';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
@@ -24,7 +25,6 @@ import { calculateTimeRange } from '@desktop-client/components/reports/reportRan
 import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
@@ -168,7 +168,9 @@ export function NetWorthCard({
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  <FinancialText>{format(data.netWorth, 'financial')}</FinancialText>
+                  <FinancialText>
+                    {format(data.netWorth, 'financial')}
+                  </FinancialText>
                 </PrivacyFilter>
               </Block>
               <PrivacyFilter activationFilters={[!isCardHovered]}>

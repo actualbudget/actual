@@ -25,6 +25,7 @@ import {
 
 import { Link } from '@desktop-client/components/common/Link';
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,
@@ -40,7 +41,6 @@ import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndi
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -921,7 +921,9 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                   <PrivacyFilter>
                     {targetMonthlyIncome != null &&
                     !isNaN(targetMonthlyIncome) ? (
-                      <FinancialText>{format(targetMonthlyIncome, 'financial')}</FinancialText>
+                      <FinancialText>
+                        {format(targetMonthlyIncome, 'financial')}
+                      </FinancialText>
                     ) : (
                       t('N/A')
                     )}
@@ -937,7 +939,9 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                   <Trans>Target Life Savings</Trans>:{' '}
                   <PrivacyFilter>
                     {targetNestEgg != null && !isNaN(targetNestEgg) ? (
-                      <FinancialText>{format(targetNestEgg, 'financial')}</FinancialText>
+                      <FinancialText>
+                        {format(targetNestEgg, 'financial')}
+                      </FinancialText>
                     ) : (
                       t('N/A')
                     )}

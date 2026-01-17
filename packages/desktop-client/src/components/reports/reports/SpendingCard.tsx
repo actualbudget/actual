@@ -9,6 +9,7 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from 'loot-core/shared/months';
 import { type SpendingWidget } from 'loot-core/types/models';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
 import { SpendingGraph } from '@desktop-client/components/reports/graphs/SpendingGraph';
@@ -19,7 +20,6 @@ import { calculateSpendingReportTimeRange } from '@desktop-client/components/rep
 import { createSpendingSpreadsheet } from '@desktop-client/components/reports/spreadsheets/spending-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type SpendingCardProps = {

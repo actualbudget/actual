@@ -504,13 +504,17 @@ function CategoryItem({
             ? toBudget != null && (
                 <>
                   {' '}
-                  <FinancialText>{integerToCurrency(toBudget || 0)}</FinancialText>
+                  <FinancialText>
+                    {integerToCurrency(toBudget || 0)}
+                  </FinancialText>
                 </>
               )
             : balance != null && (
                 <>
                   {' '}
-                  <FinancialText>{integerToCurrency(balance || 0)}</FinancialText>
+                  <FinancialText>
+                    {integerToCurrency(balance || 0)}
+                  </FinancialText>
                 </>
               )}
         </TextOneLine>

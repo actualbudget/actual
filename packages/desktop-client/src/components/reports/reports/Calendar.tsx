@@ -37,6 +37,7 @@ import {
 } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { TransactionList as TransactionListMobile } from '@desktop-client/components/mobile/transactions/TransactionList';
 import {
@@ -58,7 +59,6 @@ import {
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { type TableHandleRef } from '@desktop-client/components/table';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
@@ -869,7 +869,9 @@ function CalendarWithHeader({
             aria-label={t('Income')}
           >
             <PrivacyFilter>
-              <FinancialText>{format(calendar.totalIncome, 'financial')}</FinancialText>
+              <FinancialText>
+                {format(calendar.totalIncome, 'financial')}
+              </FinancialText>
             </PrivacyFilter>
           </View>
           <SvgArrowThickDown
@@ -887,7 +889,9 @@ function CalendarWithHeader({
             aria-label={t('Expenses')}
           >
             <PrivacyFilter>
-              <FinancialText>{format(calendar.totalExpense, 'financial')}</FinancialText>
+              <FinancialText>
+                {format(calendar.totalExpense, 'financial')}
+              </FinancialText>
             </PrivacyFilter>
           </View>
         </View>
@@ -981,7 +985,9 @@ function CalendarCardHeader({
             </View>
             <View style={{ color: chartTheme.colors.blue }}>
               <PrivacyFilter>
-                <FinancialText>{format(totalIncome, 'financial')}</FinancialText>
+                <FinancialText>
+                  {format(totalIncome, 'financial')}
+                </FinancialText>
               </PrivacyFilter>
             </View>
 
@@ -995,7 +1001,9 @@ function CalendarCardHeader({
             </View>
             <View style={{ color: chartTheme.colors.red }}>
               <PrivacyFilter>
-                <FinancialText>{format(totalExpense, 'financial')}</FinancialText>
+                <FinancialText>
+                  {format(totalExpense, 'financial')}
+                </FinancialText>
               </PrivacyFilter>
             </View>
           </View>

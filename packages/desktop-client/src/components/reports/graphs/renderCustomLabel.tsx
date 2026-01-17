@@ -3,8 +3,8 @@ import React, { type SVGAttributes } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { FinancialText } from '@desktop-client/components/FinancialText';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 
 export const renderCustomLabel = (
   calcX: SVGAttributes<SVGTextElement>['x'],

@@ -15,9 +15,9 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { showActivity } from '@desktop-client/components/reports/graphs/showActivity';
 import { Cell, Row } from '@desktop-client/components/table';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -359,7 +359,9 @@ export const ReportTableRow = memo(
               ...(colorized && { color: getAmountColor(average) }),
             }}
             unexposedContent={({ value }) => (
-              <FinancialText style={{ textAlign: 'right', flexGrow: 1 }}>{value}</FinancialText>
+              <FinancialText style={{ textAlign: 'right', flexGrow: 1 }}>
+                {value}
+              </FinancialText>
             )}
             valueStyle={compactStyle}
             width="flex"

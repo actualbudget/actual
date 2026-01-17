@@ -15,9 +15,9 @@ import {
   YAxis,
 } from 'recharts';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -156,7 +156,9 @@ export function CrossoverGraph({
                   <Trans>Life savings:</Trans>
                 </div>
                 <div>
-                  <FinancialText>{format(payload[0].payload.nestEgg, 'financial')}</FinancialText>
+                  <FinancialText>
+                    {format(payload[0].payload.nestEgg, 'financial')}
+                  </FinancialText>
                 </div>
               </View>
             </div>

@@ -25,6 +25,7 @@ import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { Warning } from '@desktop-client/components/alerts';
 import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,
@@ -59,7 +60,6 @@ import {
   calculateHasWarning,
   fromDateRepr,
 } from '@desktop-client/components/reports/util';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';

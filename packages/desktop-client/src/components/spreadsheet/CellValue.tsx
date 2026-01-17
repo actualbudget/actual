@@ -7,8 +7,8 @@ import React, {
 
 import { Text } from '@actual-app/components/text';
 
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { FinancialText } from '@desktop-client/components/FinancialText';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useSheetName } from '@desktop-client/hooks/useSheetName';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';

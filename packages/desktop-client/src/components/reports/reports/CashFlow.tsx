@@ -21,6 +21,7 @@ import {
 } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,
@@ -35,7 +36,6 @@ import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndi
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { cashFlowByDate } from '@desktop-client/components/reports/spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';

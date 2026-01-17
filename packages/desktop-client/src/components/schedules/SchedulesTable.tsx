@@ -18,6 +18,7 @@ import { type ScheduleEntity } from 'loot-core/types/models';
 
 import { StatusBadge } from './StatusBadge';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import {
   Cell,
@@ -26,7 +27,6 @@ import {
   Table,
   TableHeader,
 } from '@desktop-client/components/table';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';

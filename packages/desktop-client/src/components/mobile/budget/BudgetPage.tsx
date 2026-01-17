@@ -45,9 +45,9 @@ import {
   updateCategoryGroup,
 } from '@desktop-client/budget/budgetSlice';
 import { prewarmMonth } from '@desktop-client/components/budget/util';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';

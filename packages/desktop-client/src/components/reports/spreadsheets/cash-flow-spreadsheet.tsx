@@ -10,8 +10,8 @@ import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
-import { indexCashFlow, runAll } from '@desktop-client/components/reports/util';
 import { FinancialText } from '@desktop-client/components/FinancialText';
+import { indexCashFlow, runAll } from '@desktop-client/components/reports/util';
 import { type FormatType } from '@desktop-client/hooks/useFormat';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
@@ -222,16 +222,22 @@ function recalculate(
           <div style={{ lineHeight: 1.5 }}>
             <AlignedText
               left={t('Income:')}
-              right={<FinancialText>{format(income, 'financial')}</FinancialText>}
+              right={
+                <FinancialText>{format(income, 'financial')}</FinancialText>
+              }
             />
             <AlignedText
               left={t('Expenses:')}
-              right={<FinancialText>{format(expense, 'financial')}</FinancialText>}
+              right={
+                <FinancialText>{format(expense, 'financial')}</FinancialText>
+              }
             />
             <AlignedText
               left={t('Change:')}
               right={
-                <FinancialText as="strong">{format(income + expense, 'financial')}</FinancialText>
+                <FinancialText as="strong">
+                  {format(income + expense, 'financial')}
+                </FinancialText>
               }
             />
             {creditTransfers + debitTransfers !== 0 && (
@@ -246,7 +252,9 @@ function recalculate(
             )}
             <AlignedText
               left={t('Balance:')}
-              right={<FinancialText>{format(balance, 'financial')}</FinancialText>}
+              right={
+                <FinancialText>{format(balance, 'financial')}</FinancialText>
+              }
             />
           </div>
         </div>

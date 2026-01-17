@@ -18,10 +18,10 @@ import {
 
 import { computePadding } from './util/computePadding';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -141,7 +141,9 @@ export function NetWorthGraph({
             <div style={{ lineHeight: 1.5 }}>
               <AlignedText
                 left={t('Assets:')}
-                right={<FinancialText>{payload[0].payload.assets}</FinancialText>}
+                right={
+                  <FinancialText>{payload[0].payload.assets}</FinancialText>
+                }
               />
               <AlignedText
                 left={t('Debt:')}
@@ -149,11 +151,17 @@ export function NetWorthGraph({
               />
               <AlignedText
                 left={t('Net worth:')}
-                right={<FinancialText as="strong">{payload[0].payload.networth}</FinancialText>}
+                right={
+                  <FinancialText as="strong">
+                    {payload[0].payload.networth}
+                  </FinancialText>
+                }
               />
               <AlignedText
                 left={t('Change:')}
-                right={<FinancialText>{payload[0].payload.change}</FinancialText>}
+                right={
+                  <FinancialText>{payload[0].payload.change}</FinancialText>
+                }
               />
             </div>
           </div>

@@ -31,6 +31,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import {
   Cell,
@@ -39,7 +40,6 @@ import {
   Table,
   TableHeader,
 } from '@desktop-client/components/table';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { closeModal } from '@desktop-client/modals/modalsSlice';
