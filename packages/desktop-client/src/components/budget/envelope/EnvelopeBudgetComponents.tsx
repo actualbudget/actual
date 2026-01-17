@@ -469,9 +469,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         width="flex"
         style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
       >
-        <button
-          type="button"
-          onClick={() => {
+        <Button
+          variant="bare"
+          onPress={() => {
             resetBalancePosition(-6, -4);
             setBalanceMenuOpen(true);
           }}
@@ -485,8 +485,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             );
           }}
           style={{
-            border: 'none',
+            justifyContent: 'flex-end',
             background: 'transparent',
+            width: '100%',
             padding: 0,
           }}
         >
@@ -498,7 +499,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             longGoal={envelopeBudget.catLongGoal(category.id)}
             tooltipDisabled={balanceMenuOpen}
           />
-        </button>
+        </Button>
 
         <Popover
           triggerRef={balanceMenuTriggerRef}
@@ -589,9 +590,9 @@ export function IncomeCategoryMonth({
             position: 'relative',
           }}
         >
-          <button
-            type="button"
-            onClick={() => {
+          <Button
+            variant="bare"
+            onPress={() => {
               resetIncomePosition(-6, -4);
               setIncomeMenuOpen(true);
             }}
@@ -605,7 +606,6 @@ export function IncomeCategoryMonth({
               );
             }}
             style={{
-              border: 'none',
               background: 'transparent',
               padding: 0,
               paddingRight: styles.monthRightPadding,
@@ -618,7 +618,7 @@ export function IncomeCategoryMonth({
               budgeted={envelopeBudget.catBudgeted(category.id)}
               longGoal={envelopeBudget.catLongGoal(category.id)}
             />
-          </button>
+          </Button>
           <Popover
             triggerRef={incomeMenuTriggerRef}
             placement="bottom end"

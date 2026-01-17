@@ -15,7 +15,6 @@ import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 
@@ -108,23 +107,19 @@ export function ReportCard({
   if (to) {
     return (
       <Layout {...layoutProps}>
-        <button
-          type="button"
-          onClick={isEditing || disableClick ? undefined : () => navigate(to)}
-          className={css({
+        <Button
+          variant="bare"
+          onPress={isEditing || disableClick ? undefined : () => navigate(to)}
+          style={{
             height: '100%',
             width: '100%',
-            border: 'none',
             background: 'transparent',
             padding: 0,
             textAlign: 'left',
-            ':hover': {
-              cursor: 'pointer',
-            },
-          })}
+          }}
         >
           {content}
-        </button>
+        </Button>
       </Layout>
     );
   }
