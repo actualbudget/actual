@@ -138,6 +138,7 @@ export function ThemeInstaller({
   const handleCatalogThemeClick = useCallback(
     async (theme: CatalogTheme) => {
       setPastedCss('');
+      setSelectedCatalogTheme(theme);
 
       const normalizedRepo = normalizeGitHubRepo(theme.repo);
       await installTheme({
