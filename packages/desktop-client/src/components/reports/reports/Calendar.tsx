@@ -58,7 +58,7 @@ import {
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { type TableHandleRef } from '@desktop-client/components/table';
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
@@ -869,7 +869,7 @@ function CalendarWithHeader({
             aria-label={t('Income')}
           >
             <PrivacyFilter>
-              <TNum>{format(calendar.totalIncome, 'financial')}</TNum>
+              <FinancialText>{format(calendar.totalIncome, 'financial')}</FinancialText>
             </PrivacyFilter>
           </View>
           <SvgArrowThickDown
@@ -887,7 +887,7 @@ function CalendarWithHeader({
             aria-label={t('Expenses')}
           >
             <PrivacyFilter>
-              <TNum>{format(calendar.totalExpense, 'financial')}</TNum>
+              <FinancialText>{format(calendar.totalExpense, 'financial')}</FinancialText>
             </PrivacyFilter>
           </View>
         </View>
@@ -981,7 +981,7 @@ function CalendarCardHeader({
             </View>
             <View style={{ color: chartTheme.colors.blue }}>
               <PrivacyFilter>
-                <TNum>{format(totalIncome, 'financial')}</TNum>
+                <FinancialText>{format(totalIncome, 'financial')}</FinancialText>
               </PrivacyFilter>
             </View>
 
@@ -995,7 +995,7 @@ function CalendarCardHeader({
             </View>
             <View style={{ color: chartTheme.colors.red }}>
               <PrivacyFilter>
-                <TNum>{format(totalExpense, 'financial')}</TNum>
+                <FinancialText>{format(totalExpense, 'financial')}</FinancialText>
               </PrivacyFilter>
             </View>
           </View>

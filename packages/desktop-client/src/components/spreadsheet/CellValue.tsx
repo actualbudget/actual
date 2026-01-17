@@ -8,7 +8,7 @@ import React, {
 import { Text } from '@actual-app/components/text';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useSheetName } from '@desktop-client/hooks/useSheetName';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
@@ -96,7 +96,7 @@ export function CellValueText<
 
   if (isFinancial) {
     return (
-      <TNum
+      <FinancialText
         {...sharedProps}
         style={{
           whiteSpace: 'nowrap',
@@ -108,7 +108,7 @@ export function CellValueText<
         >
           {formatter ? formatter(value, type) : format(value, type)}
         </PrivacyFilter>
-      </TNum>
+      </FinancialText>
     );
   }
 

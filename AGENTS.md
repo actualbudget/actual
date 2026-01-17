@@ -261,7 +261,7 @@ Always run `yarn typecheck` before committing.
 
 ### 5. Financial Number Typography
 
-- Wrap standalone financial numbers with `TNum` or apply `styles.tnum` directly if wrapping is not possible
+- Wrap standalone financial numbers with `FinancialText` or apply `styles.tnum` directly if wrapping is not possible
 
 ## Code Style & Conventions
 

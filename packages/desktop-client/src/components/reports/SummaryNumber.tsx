@@ -8,7 +8,7 @@ import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
@@ -95,9 +95,9 @@ export function SummaryNumber({
             color: value < 0 ? chartTheme.colors.red : chartTheme.colors.blue,
           }}
         >
-          <TNum aria-hidden="true">
+          <FinancialText aria-hidden="true">
             <PrivacyFilter>{displayAmount}</PrivacyFilter>
-          </TNum>
+          </FinancialText>
         </View>
       )}
     </>

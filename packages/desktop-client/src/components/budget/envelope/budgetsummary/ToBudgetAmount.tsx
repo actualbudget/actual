@@ -15,7 +15,7 @@ import {
   useEnvelopeSheetValue,
 } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
@@ -96,7 +96,7 @@ export function ToBudgetAmount({
                 amountStyle,
               ])}
             >
-              <TNum>{format(num, 'financial')}</TNum>
+              <FinancialText>{format(num, 'financial')}</FinancialText>
             </Block>
           </PrivacyFilter>
         </Tooltip>

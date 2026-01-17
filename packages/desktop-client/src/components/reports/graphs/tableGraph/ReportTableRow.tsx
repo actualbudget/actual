@@ -17,7 +17,7 @@ import {
 
 import { showActivity } from '@desktop-client/components/reports/graphs/showActivity';
 import { Cell, Row } from '@desktop-client/components/table';
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -148,7 +148,7 @@ export const ReportTableRow = memo(
                       }),
                     }}
                     unexposedContent={({ value }) => (
-                      <TNum
+                      <FinancialText
                         style={{
                           ...hoverUnderline,
                           textAlign: 'right',
@@ -156,7 +156,7 @@ export const ReportTableRow = memo(
                         }}
                       >
                         {value}
-                      </TNum>
+                      </FinancialText>
                     )}
                     valueStyle={compactStyle}
                     value={format(intervalItem[balanceTypeOp], 'financial')}
@@ -211,7 +211,7 @@ export const ReportTableRow = memo(
                       }),
                     }}
                     unexposedContent={({ value }) => (
-                      <TNum
+                      <FinancialText
                         style={{
                           ...hoverUnderline,
                           textAlign: 'right',
@@ -219,7 +219,7 @@ export const ReportTableRow = memo(
                         }}
                       >
                         {value}
-                      </TNum>
+                      </FinancialText>
                     )}
                     valueStyle={compactStyle}
                     onClick={() =>
@@ -261,7 +261,7 @@ export const ReportTableRow = memo(
                       }),
                     }}
                     unexposedContent={({ value }) => (
-                      <TNum
+                      <FinancialText
                         style={{
                           ...hoverUnderline,
                           textAlign: 'right',
@@ -269,7 +269,7 @@ export const ReportTableRow = memo(
                         }}
                       >
                         {value}
-                      </TNum>
+                      </FinancialText>
                     )}
                     valueStyle={compactStyle}
                     onClick={() =>
@@ -310,7 +310,7 @@ export const ReportTableRow = memo(
               ...(colorized && { color: getAmountColor(item[balanceTypeOp]) }),
             }}
             unexposedContent={({ value }) => (
-              <TNum
+              <FinancialText
                 style={{
                   ...hoverUnderline,
                   textAlign: 'right',
@@ -318,7 +318,7 @@ export const ReportTableRow = memo(
                 }}
               >
                 {value}
-              </TNum>
+              </FinancialText>
             )}
             valueStyle={compactStyle}
             onClick={() =>
@@ -359,7 +359,7 @@ export const ReportTableRow = memo(
               ...(colorized && { color: getAmountColor(average) }),
             }}
             unexposedContent={({ value }) => (
-              <TNum style={{ textAlign: 'right', flexGrow: 1 }}>{value}</TNum>
+              <FinancialText style={{ textAlign: 'right', flexGrow: 1 }}>{value}</FinancialText>
             )}
             valueStyle={compactStyle}
             width="flex"

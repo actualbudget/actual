@@ -31,7 +31,7 @@ import { useRechartsAnimation } from '@desktop-client/components/reports/chart-t
 import { Container } from '@desktop-client/components/reports/Container';
 import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
@@ -98,9 +98,9 @@ const CustomTooltip = ({
               <AlignedText
                 left={t('Assets:')}
                 right={
-                  <TNum>
+                  <FinancialText>
                     {format(payload[0].payload.totalAssets, 'financial')}
-                  </TNum>
+                  </FinancialText>
                 }
               />
             )}
@@ -108,9 +108,9 @@ const CustomTooltip = ({
               <AlignedText
                 left={t('Debts:')}
                 right={
-                  <TNum>
+                  <FinancialText>
                     {format(payload[0].payload.totalDebts, 'financial')}
-                  </TNum>
+                  </FinancialText>
                 }
               />
             )}
@@ -118,9 +118,9 @@ const CustomTooltip = ({
               <AlignedText
                 left={t('Net Assets:')}
                 right={
-                  <TNum>
+                  <FinancialText>
                     {format(payload[0].payload.netAssets, 'financial')}
-                  </TNum>
+                  </FinancialText>
                 }
               />
             )}
@@ -128,9 +128,9 @@ const CustomTooltip = ({
               <AlignedText
                 left={t('Net Debts:')}
                 right={
-                  <TNum>
+                  <FinancialText>
                     {format(payload[0].payload.netDebts, 'financial')}
-                  </TNum>
+                  </FinancialText>
                 }
               />
             )}
@@ -138,9 +138,9 @@ const CustomTooltip = ({
               <AlignedText
                 left={t('Net:')}
                 right={
-                  <TNum as="strong">
+                  <FinancialText as="strong">
                     {format(payload[0].payload.totalTotals, 'financial')}
-                  </TNum>
+                  </FinancialText>
                 }
               />
             )}

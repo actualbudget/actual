@@ -4,7 +4,7 @@ import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 export function Change({
@@ -23,10 +23,10 @@ export function Change({
 
   return (
     <Block style={textStyle}>
-      <TNum style={textStyle}>
+      <FinancialText style={textStyle}>
         {amount >= 0 ? '+' : ''}
         {format(amount, 'financial')}
-      </TNum>
+      </FinancialText>
     </Block>
   );
 }

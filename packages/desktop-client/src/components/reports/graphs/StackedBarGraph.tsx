@@ -28,7 +28,7 @@ import { useRechartsAnimation } from '@desktop-client/components/reports/chart-t
 import { Container } from '@desktop-client/components/reports/Container';
 import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
@@ -105,7 +105,7 @@ const CustomTooltip = ({
                   <AlignedText
                     key={pay.name}
                     left={pay.name}
-                    right={<TNum>{format(pay.value, 'financial')}</TNum>}
+                    right={<FinancialText>{format(pay.value, 'financial')}</FinancialText>}
                     style={{
                       color: pay.color,
                       textDecoration:
@@ -118,7 +118,7 @@ const CustomTooltip = ({
             {payload.length > 5 && compact && '...'}
             <AlignedText
               left={t('Total')}
-              right={<TNum>{format(sumTotals, 'financial')}</TNum>}
+              right={<FinancialText>{format(sumTotals, 'financial')}</FinancialText>}
               style={{
                 fontWeight: 600,
               }}

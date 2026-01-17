@@ -85,7 +85,7 @@ Over-mocking makes tests brittle and less reliable. Real implementations provide
 
 Standalone financial numbers should have tabular number styles applied.
 
-- Standalone financial numbers should be wrapped with `TNum` or `styles.tnum` should be applied directly if wrapping is not possible
+- Standalone financial numbers should be wrapped with `FinancialText` or `styles.tnum` should be applied directly if wrapping is not possible
 
 ## Related Documentation
 

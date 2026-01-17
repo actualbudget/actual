@@ -10,7 +10,7 @@ import { getMonthYearFormat } from 'loot-core/shared/months';
 import { getRecurringDescription } from 'loot-core/shared/schedules';
 
 import { Link } from '@desktop-client/components/common/Link';
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
@@ -48,7 +48,7 @@ export function Value<T>({
     color: theme.pageTextPositive,
     ...style,
   };
-  const ValueText = field === 'amount' ? TNum : Text;
+  const ValueText = field === 'amount' ? FinancialText : Text;
   const locale = useLocale();
 
   const data =

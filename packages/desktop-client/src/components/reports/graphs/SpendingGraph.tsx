@@ -21,7 +21,7 @@ import { computePadding } from './util/computePadding';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -96,12 +96,12 @@ const CustomTooltip = ({
               <AlignedText
                 left={t('Compare:')}
                 right={
-                  <TNum>
+                  <FinancialText>
                     {format(
                       payload[0].payload.months[compare]?.cumulative * -1,
                       'financial',
                     )}
-                  </TNum>
+                  </FinancialText>
                 }
               />
             ) : null}
@@ -115,7 +115,7 @@ const CustomTooltip = ({
                       : t('To:')
                 }
                 right={
-                  <TNum>{format(Math.round(comparison), 'financial')}</TNum>
+                  <FinancialText>{format(Math.round(comparison), 'financial')}</FinancialText>
                 }
               />
             )}
@@ -123,7 +123,7 @@ const CustomTooltip = ({
               <AlignedText
                 left={t('Difference:')}
                 right={
-                  <TNum>
+                  <FinancialText>
                     {format(
                       Math.round(
                         payload[0].payload.months[compare]?.cumulative * -1 -
@@ -131,7 +131,7 @@ const CustomTooltip = ({
                       ),
                       'financial',
                     )}
-                  </TNum>
+                  </FinancialText>
                 }
               />
             ) : null}

@@ -25,7 +25,7 @@ import {
   SelectCell,
   Table,
 } from '@desktop-client/components/table';
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCategory } from '@desktop-client/hooks/useCategory';
@@ -155,7 +155,7 @@ const TransactionRow = memo(function TransactionRow({
           case 'amount':
             return (
               <Field key={i} width={75} style={{ textAlign: 'right' }}>
-                <TNum>{format(transaction.amount, 'financial')}</TNum>
+                <FinancialText>{format(transaction.amount, 'financial')}</FinancialText>
               </Field>
             );
           default:

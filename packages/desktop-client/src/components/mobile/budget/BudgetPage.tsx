@@ -47,7 +47,7 @@ import {
 import { prewarmMonth } from '@desktop-client/components/budget/util';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
@@ -722,13 +722,13 @@ function UncategorizedTransactionsBanner(props) {
           <Trans count={transactions.length}>
             You have {{ count: transactions.length }} uncategorized transactions
             (
-            <TNum>
+            <FinancialText>
               {
                 {
                   amount: format(totalUncategorizedAmount, 'financial'),
                 } as TransObjectLiteral
               }
-            </TNum>
+            </FinancialText>
             )
           </Trans>
           <Button
@@ -972,13 +972,13 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
               <Trans count={numberOfOverspentCategories}>
                 You have {{ count: numberOfOverspentCategories }} overspent
                 categories (
-                <TNum>
+                <FinancialText>
                   {
                     {
                       amount: format(totalOverspending, 'financial'),
                     } as TransObjectLiteral
                   }
-                </TNum>
+                </FinancialText>
                 )
               </Trans>
             </Text>

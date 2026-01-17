@@ -21,7 +21,7 @@ import {
   useRechartsAnimation,
 } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
@@ -83,29 +83,29 @@ function CustomTooltip({
         <div style={{ lineHeight: 1.5 }}>
           <AlignedText
             left={t('Income:')}
-            right={<TNum>{format(data.income, 'financial')}</TNum>}
+            right={<FinancialText>{format(data.income, 'financial')}</FinancialText>}
           />
           <AlignedText
             left={t('Expenses:')}
-            right={<TNum>{format(data.expenses, 'financial')}</TNum>}
+            right={<FinancialText>{format(data.expenses, 'financial')}</FinancialText>}
           />
           <AlignedText
             left={t('Change:')}
             right={
-              <TNum as="strong">
+              <FinancialText as="strong">
                 {format(data.income + data.expenses, 'financial')}
-              </TNum>
+              </FinancialText>
             }
           />
           {data.transfers !== 0 && (
             <AlignedText
               left={t('Transfers:')}
-              right={<TNum>{format(data.transfers, 'financial')}</TNum>}
+              right={<FinancialText>{format(data.transfers, 'financial')}</FinancialText>}
             />
           )}
           <AlignedText
             left={t('Balance:')}
-            right={<TNum>{format(data.balance, 'financial')}</TNum>}
+            right={<FinancialText>{format(data.balance, 'financial')}</FinancialText>}
           />
         </div>
       </div>

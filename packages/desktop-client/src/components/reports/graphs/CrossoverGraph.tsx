@@ -17,7 +17,7 @@ import {
 
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -109,9 +109,9 @@ export function CrossoverGraph({
                   <Trans>Monthly investment income:</Trans>
                 </div>
                 <div>
-                  <TNum>
+                  <FinancialText>
                     {format(payload[0].payload.investmentIncome, 'financial')}
-                  </TNum>
+                  </FinancialText>
                 </div>
               </View>
               <View
@@ -124,9 +124,9 @@ export function CrossoverGraph({
                   <Trans>Monthly expenses:</Trans>
                 </div>
                 <div>
-                  <TNum>
+                  <FinancialText>
                     {format(payload[0].payload.expenses, 'financial')}
-                  </TNum>
+                  </FinancialText>
                 </div>
               </View>
               {payload[0].payload.adjustedExpenses != null && (
@@ -140,9 +140,9 @@ export function CrossoverGraph({
                     <Trans>Target income:</Trans>
                   </div>
                   <div>
-                    <TNum>
+                    <FinancialText>
                       {format(payload[0].payload.adjustedExpenses, 'financial')}
-                    </TNum>
+                    </FinancialText>
                   </div>
                 </View>
               )}
@@ -156,7 +156,7 @@ export function CrossoverGraph({
                   <Trans>Life savings:</Trans>
                 </div>
                 <div>
-                  <TNum>{format(payload[0].payload.nestEgg, 'financial')}</TNum>
+                  <FinancialText>{format(payload[0].payload.nestEgg, 'financial')}</FinancialText>
                 </div>
               </View>
             </div>

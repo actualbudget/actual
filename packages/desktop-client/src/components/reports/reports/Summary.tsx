@@ -42,7 +42,7 @@ import { summarySpreadsheet } from '@desktop-client/components/reports/spreadshe
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { FieldSelect } from '@desktop-client/components/rules/RuleEditor';
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -459,7 +459,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                   }}
                 >
                   <PrivacyFilter>
-                    <TNum>{format(data?.dividend ?? 0, 'financial')}</TNum>
+                    <FinancialText>{format(data?.dividend ?? 0, 'financial')}</FinancialText>
                   </PrivacyFilter>
                 </Text>
                 <div

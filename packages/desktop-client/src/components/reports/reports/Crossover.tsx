@@ -40,7 +40,7 @@ import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndi
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { TNum } from '@desktop-client/components/TNum';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -921,7 +921,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                   <PrivacyFilter>
                     {targetMonthlyIncome != null &&
                     !isNaN(targetMonthlyIncome) ? (
-                      <TNum>{format(targetMonthlyIncome, 'financial')}</TNum>
+                      <FinancialText>{format(targetMonthlyIncome, 'financial')}</FinancialText>
                     ) : (
                       t('N/A')
                     )}
@@ -937,7 +937,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                   <Trans>Target Life Savings</Trans>:{' '}
                   <PrivacyFilter>
                     {targetNestEgg != null && !isNaN(targetNestEgg) ? (
-                      <TNum>{format(targetNestEgg, 'financial')}</TNum>
+                      <FinancialText>{format(targetNestEgg, 'financial')}</FinancialText>
                     ) : (
                       t('N/A')
                     )}
