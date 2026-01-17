@@ -11,8 +11,8 @@ import {
   recalculateSplit,
 } from '../../shared/transactions';
 import {
-  amountToInteger,
   hasFieldsChanged,
+  amountToInteger,
   integerToAmount,
 } from '../../shared/util';
 import {
@@ -90,9 +90,10 @@ async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
   ).data?.[0];
 }
 
-async function getAccountSyncStartDate(id) { 
-  // May be make this configurable per account in the future, for now 180 days back
-  const dates = [monthUtils.subDays(monthUtils.currentDay(), 180)];
+async function getAccountSyncStartDate(id) {
+  // Enable Banking may support more than 90 days depending on the bank.
+  // Try to get up to 1 year of data - bank will return what it can.
+  const dates = [monthUtils.subDays(monthUtils.currentDay(), 365)];
 
   const oldestTransaction = await getAccountOldestTransaction(id);
 
