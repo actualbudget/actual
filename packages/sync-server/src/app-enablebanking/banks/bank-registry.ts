@@ -18,21 +18,28 @@ class ProcessorRegistry {
     if (this.map.has(id)) throw new Error(`Duplicate bank processor id: ${id}`);
     this.map.set(id, ctor);
   }
-  get(id: string) {
-    const Ctor: (new () => BankProcessor) | undefined = this.map.get(id);
+  get(id: string): BankProcessor {
+    const Ctor = this.map.get(id);
     if (!Ctor) {
       debug('No dedicated processor found for %s', id);
       return new FallbackBankProcessor();
     }
 
-    if (
-      !(Ctor.prototype instanceof FallbackBankProcessor) ||
-      typeof Ctor != 'function'
-    ) {
+    // Validate the constructor is a function and extends FallbackBankProcessor
+    // before invoking to prevent unexpected dispatch
+    if (typeof Ctor !== 'function') {
       debug('Unsafe ctor type: %s', typeof Ctor);
-      console.warn(`Enable Banking: Unsafe ctor for '${id}', using fallback.`);
       return new FallbackBankProcessor();
     }
+
+    if (
+      !Ctor.prototype ||
+      !(Ctor.prototype instanceof FallbackBankProcessor)
+    ) {
+      debug('Ctor does not extend FallbackBankProcessor: %s', id);
+      return new FallbackBankProcessor();
+    }
+
     const processor = new Ctor();
     debug('Using %s to process %s', processor.name, id);
     return processor;

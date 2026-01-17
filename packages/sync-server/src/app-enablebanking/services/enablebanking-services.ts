@@ -43,8 +43,8 @@ type SessionEntry = {
   expiresAt: number;
 };
 
-// TTL for auth sessions (15 minutes)
-const SESSION_TTL_MS = 15 * 60 * 1000;
+// TTL for auth sessions (30 minutes - bank setup can be slow with app/SMS verification)
+const SESSION_TTL_MS = 30 * 60 * 1000;
 
 // Cleanup interval (5 minutes)
 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;

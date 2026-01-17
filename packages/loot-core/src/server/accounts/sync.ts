@@ -90,8 +90,8 @@ async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
 }
 
 async function getAccountSyncStartDate(id) { 
-  // May be make this configurable per account in the future, for now just 90 days back
-  const dates = [monthUtils.subDays(monthUtils.currentDay(), 90)];
+  // May be make this configurable per account in the future, for now 180 days back
+  const dates = [monthUtils.subDays(monthUtils.currentDay(), 180)];
 
   const oldestTransaction = await getAccountOldestTransaction(id);
 
