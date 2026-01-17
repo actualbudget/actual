@@ -116,6 +116,7 @@ export function ActionableGridListItem<T extends object>({
             minWidth: '100%',
             padding: 16,
             textAlign: 'left',
+            borderRadius: 0,
           }}
           onClick={handleAction}
         >
