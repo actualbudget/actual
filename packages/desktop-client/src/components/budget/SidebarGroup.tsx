@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, type RefCallback, useRef } from 'react';
+import React, { useRef, type CSSProperties, type RefCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';

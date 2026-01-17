@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type Currency, getCurrency } from 'loot-core/shared/currencies';
+import { getCurrency, type Currency } from 'loot-core/shared/currencies';
 import { q } from 'loot-core/shared/query';
 
 import * as monthUtils from '../../shared/months';
@@ -11,16 +11,16 @@ import {
   type CopyTemplate,
   type GoalTemplate,
   type PercentageTemplate,
+  type PeriodicTemplate,
   type RemainderTemplate,
   type SimpleTemplate,
   type SpendTemplate,
   type Template,
-  type PeriodicTemplate,
 } from '../../types/models/templates';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
 
-import { getSheetValue, getSheetBoolean } from './actions';
+import { getSheetBoolean, getSheetValue } from './actions';
 import { runSchedule } from './schedule-template';
 import { getActiveSchedules } from './statements';
 
@@ -548,7 +548,7 @@ export class CategoryTemplateContext {
         templateContext.currency.decimalPlaces,
       );
     } else {
-      return templateContext.limitAmount;
+      return templateContext.limitAmount - templateContext.fromLastMonth;
     }
   }
 

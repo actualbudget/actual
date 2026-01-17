@@ -11,8 +11,8 @@ import {
   recalculateSplit,
 } from '../../shared/transactions';
 import {
-  hasFieldsChanged,
   amountToInteger,
+  hasFieldsChanged,
   integerToAmount,
 } from '../../shared/util';
 import {

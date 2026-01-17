@@ -19,9 +19,9 @@ import {
 } from 'loot-core/types/models';
 
 import {
+  Checkbox,
   FormField,
   FormLabel,
-  Checkbox,
 } from '@desktop-client/components/forms';
 import { OpSelect } from '@desktop-client/components/rules/RuleEditor';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
@@ -36,8 +36,8 @@ import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import {
-  type Actions,
   SelectedProvider,
+  type Actions,
 } from '@desktop-client/hooks/useSelected';
 
 export type ScheduleFormFields = {

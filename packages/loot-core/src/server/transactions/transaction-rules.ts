@@ -2,44 +2,44 @@
 
 import { logger } from '../../platform/server/log';
 import {
-  currentDay,
   addDays,
-  subDays,
-  parseDate,
+  currentDay,
   dayFromDate,
+  parseDate,
+  subDays,
 } from '../../shared/months';
 import { q } from '../../shared/query';
-import { sortNumbers, getApproxNumberThreshold } from '../../shared/rules';
+import { getApproxNumberThreshold, sortNumbers } from '../../shared/rules';
 import { ungroupTransaction } from '../../shared/transactions';
-import { partitionByField, fastSetMerge } from '../../shared/util';
+import { fastSetMerge, partitionByField } from '../../shared/util';
 import {
-  type TransactionEntity,
   type RuleActionEntity,
   type RuleEntity,
+  type TransactionEntity,
 } from '../../types/models';
 import { aqlQuery, schemaConfig } from '../aql';
 import * as db from '../db';
 import {
+  getAccount,
+  getCategory,
   getPayee,
   getPayeeByName,
   insertPayee,
-  getAccount,
-  getCategory,
 } from '../db';
 import { getMappings } from '../db/mappings';
 import { RuleError } from '../errors';
 import { requiredFields, toDateRepr } from '../models';
 import {
-  Condition,
   Action,
+  Condition,
+  execActions,
+  iterateIds,
+  migrateIds,
+  rankRules,
   Rule,
   RuleIndexer,
-  rankRules,
-  migrateIds,
-  iterateIds,
-  execActions,
 } from '../rules';
-import { batchMessages, addSyncListener } from '../sync';
+import { addSyncListener, batchMessages } from '../sync';
 
 import { batchUpdateTransactions } from '.';
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type FocusEvent } from 'react';
+import { useEffect, useRef, useState, type FocusEvent } from 'react';
 
 import { Input, type InputProps } from '@actual-app/components/input';
 

@@ -7,12 +7,12 @@ import React, {
   type CSSProperties,
 } from 'react';
 import {
+  Collection,
+  Header,
   ListBox,
   ListBoxSection,
-  Header,
-  Collection,
-  Virtualizer,
   ListLayout,
+  Virtualizer,
 } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -36,8 +36,8 @@ import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
 import {
   groupById,
-  type IntegerAmount,
   integerToCurrency,
+  type IntegerAmount,
 } from 'loot-core/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
 

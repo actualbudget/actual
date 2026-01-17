@@ -1,7 +1,12 @@
 // @ts-strict-ignore
-import React, { type ReactElement, useEffect, useRef } from 'react';
+import React, {
+  useEffect,
+  useEffectEvent,
+  useRef,
+  type ReactElement,
+} from 'react';
 import { useTranslation } from 'react-i18next';
-import { Route, Routes, Navigate, useLocation, useHref } from 'react-router';
+import { Navigate, Route, Routes, useHref, useLocation } from 'react-router';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
@@ -37,7 +42,7 @@ import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { ScrollProvider } from '@desktop-client/hooks/useScrollListener';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -97,15 +102,13 @@ export function FinancesApp() {
 
   const multiuserEnabled = useMultiuserEnabled();
 
-  useEffect(() => {
+  const init = useEffectEvent(() => {
     // Wait a little bit to make sure the sync button will get the
     // sync start event. This can be improved later.
     setTimeout(async () => {
       await dispatch(sync());
     }, 100);
-  }, []);
 
-  useEffect(() => {
     async function run() {
       await global.Actual.waitForUpdateReadyForDownload(); // This will only resolve when an update is ready
       dispatch(
@@ -130,7 +133,9 @@ export function FinancesApp() {
     }
 
     run();
-  }, []);
+  });
+
+  useEffect(() => init(), []);
 
   useEffect(() => {
     dispatch(getLatestAppVersion());

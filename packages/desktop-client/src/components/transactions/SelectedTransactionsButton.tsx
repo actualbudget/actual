@@ -6,8 +6,8 @@ import { Menu } from '@actual-app/components/menu';
 
 import { q } from 'loot-core/shared/query';
 import {
-  scheduleIsRecurring,
   extractScheduleConds,
+  scheduleIsRecurring,
 } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
@@ -240,7 +240,7 @@ export function SelectedTransactionsButton({
     onDelete,
     selectedIds,
   ]);
-  useHotkeys('t', () => onEdit('date', selectedIds), hotKeyOptions, [
+  useHotkeys('e', () => onEdit('date', selectedIds), hotKeyOptions, [
     onEdit,
     selectedIds,
   ]);
@@ -393,7 +393,7 @@ export function SelectedTransactionsButton({
                 : []),
               Menu.line,
               { type: Menu.label, name: t('Edit field'), text: '' } as const,
-              { name: 'date', text: t('Date'), key: 'T' } as const,
+              { name: 'date', text: t('Date'), key: 'E' } as const,
               { name: 'account', text: t('Account'), key: 'A' } as const,
               { name: 'payee', text: t('Payee'), key: 'P' } as const,
               { name: 'notes', text: t('Notes'), key: 'N' } as const,

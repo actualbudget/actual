@@ -12,13 +12,13 @@ import { amountToInteger } from '../../shared/util';
 import {
   type AccountEntity,
   type CategoryEntity,
-  type SyncServerGoCardlessAccount,
-  type TransactionEntity,
-  type SyncServerSimpleFinAccount,
-  type SyncServerPluggyAiAccount,
-  type SyncServerAkahuAccount,
   type GoCardlessToken,
   type ImportTransactionEntity,
+  type SyncServerAkahuAccount,
+  type SyncServerGoCardlessAccount,
+  type SyncServerPluggyAiAccount,
+  type SyncServerSimpleFinAccount,
+  type TransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';

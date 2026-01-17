@@ -4,8 +4,8 @@ import * as db from '../db';
 
 import {
   compileQuery,
-  type CompilerState,
   defaultConstructQuery,
+  type CompilerState,
   type OutputTypes,
   type SchemaConfig,
   type SqlPieces,

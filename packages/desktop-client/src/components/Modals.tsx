@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { useLocation } from 'react-router';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -21,6 +21,7 @@ import { ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
 import { ConfirmTransactionEditModal } from './modals/ConfirmTransactionEditModal';
 import { ConfirmUnlinkAccountModal } from './modals/ConfirmUnlinkAccountModal';
 import { ConvertToScheduleModal } from './modals/ConvertToScheduleModal';
+import { CopyWidgetToDashboardModal } from './modals/CopyWidgetToDashboardModal';
 import { CoverModal } from './modals/CoverModal';
 import { CreateAccountModal } from './modals/CreateAccountModal';
 import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
@@ -95,7 +96,8 @@ export function Modals() {
     if (modalStack.length > 0) {
       dispatch(closeModal());
     }
-  }, [location]);
+    // oxlint-disable-next-line react/exhaustive-deps
+  }, [dispatch, location]);
 
   const modals = modalStack
     .map((modal, idx) => {
@@ -148,6 +150,9 @@ export function Modals() {
 
         case 'confirm-delete':
           return <ConfirmDeleteModal key={key} {...modal.options} />;
+
+        case 'copy-widget-to-dashboard':
+          return <CopyWidgetToDashboardModal key={key} {...modal.options} />;
 
         case 'load-backup':
           return (
@@ -409,9 +414,7 @@ export function Modals() {
       }
     })
     .map((modal, idx) => (
-      <React.Fragment key={`${modalStack[idx].name}-${idx}`}>
-        {modal}
-      </React.Fragment>
+      <Fragment key={`${modalStack[idx].name}-${idx}`}>{modal}</Fragment>
     ));
 
   // fragment needed per TS types

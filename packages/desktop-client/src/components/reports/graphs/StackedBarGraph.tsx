@@ -6,13 +6,13 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
-  BarChart,
   Bar,
+  BarChart,
   CartesianGrid,
+  LabelList,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  LabelList,
 } from 'recharts';
 
 import {
@@ -209,7 +209,6 @@ export function StackedBarGraph({
           <div>
             {!compact && <div style={{ marginTop: '15px' }} />}
             <BarChart
-              responsive
               width={width}
               height={height}
               data={data.intervalData}

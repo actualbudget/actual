@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -14,12 +14,12 @@ import * as d from 'date-fns';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import {
-  type CategoryEntity,
   type balanceTypeOpType,
+  type CategoryEntity,
   type CustomReportEntity,
   type DataEntity,
-  type sortByOpType,
   type RuleConditionEntity,
+  type sortByOpType,
 } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
@@ -44,8 +44,8 @@ import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ReportLegend } from '@desktop-client/components/reports/ReportLegend';
 import {
-  ReportOptions,
   defaultReport,
+  ReportOptions,
   type dateRangeProps,
 } from '@desktop-client/components/reports/ReportOptions';
 import { ReportSidebar } from '@desktop-client/components/reports/ReportSidebar';
@@ -397,6 +397,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
 
     run();
     // omitted `conditions` and `conditionsOp` from dependencies to avoid infinite loops
+    // oxlint-disable-next-line react/exhaustive-deps
   }, [
     interval,
     dateRange,

@@ -2,21 +2,21 @@
   "name": "plugins-service",
   "version": "0.0.1",
   "description": "Plugin service worker for Actual",
+  "license": "ISC",
+  "author": "",
   "main": "plugin-sw.js",
   "scripts": {
     "build": "cross-env NODE_ENV=production ./bin/build-service-worker",
     "build-dev": "cross-env NODE_ENV=development ./bin/build-service-worker",
     "watch": "cross-env NODE_ENV=development ./bin/build-service-worker --watch"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "workbox-precaching": "^7.3.0"
+    "workbox-precaching": "^7.4.0"
   },
   "devDependencies": {
-    "@types/node": "^22.19.1",
+    "@types/node": "^22.19.3",
     "cross-env": "^10.1.0",
     "typescript": "^5.9.3",
-    "vite": "^7.2.2"
+    "vite": "^7.3.1"
   }
 }

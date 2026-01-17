@@ -1,17 +1,17 @@
 import React, {
   useEffect,
-  useRef,
   useLayoutEffect,
+  useRef,
   useState,
-  type ReactNode,
   type ComponentPropsWithoutRef,
   type ComponentPropsWithRef,
   type CSSProperties,
+  type ReactNode,
 } from 'react';
 import {
-  ModalOverlay as ReactAriaModalOverlay,
-  Modal as ReactAriaModal,
   Dialog,
+  Modal as ReactAriaModal,
+  ModalOverlay as ReactAriaModalOverlay,
 } from 'react-aria-components';
 import { useHotkeysContext } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';

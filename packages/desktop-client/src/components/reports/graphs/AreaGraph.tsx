@@ -1,17 +1,17 @@
-import React, { type SVGAttributes, type CSSProperties } from 'react';
+import React, { type CSSProperties, type SVGAttributes } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
-  AreaChart,
   Area,
+  AreaChart,
   CartesianGrid,
+  LabelList,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  LabelList,
   type LabelProps,
 } from 'recharts';
 
@@ -25,7 +25,7 @@ import { renderCustomLabel } from './renderCustomLabel';
 
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type PayloadItem = {

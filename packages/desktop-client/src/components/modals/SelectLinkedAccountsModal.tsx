@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -35,11 +35,11 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import {
-  TableHeader,
-  Table,
-  Row,
-  Field,
   Cell,
+  Field,
+  Row,
+  Table,
+  TableHeader,
 } from '@desktop-client/components/table';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFormat } from '@desktop-client/hooks/useFormat';

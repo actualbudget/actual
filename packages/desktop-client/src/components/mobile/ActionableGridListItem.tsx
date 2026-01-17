@@ -1,6 +1,6 @@
-import React, { type ReactNode, useRef, useState } from 'react';
+import React, { useRef, useState, type ReactNode } from 'react';
 import { GridListItem, type GridListItemProps } from 'react-aria-components';
-import { useSpring, animated, config } from 'react-spring';
+import { animated, config, useSpring } from 'react-spring';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -108,6 +108,7 @@ export function ActionableGridListItem<T extends object>({
       >
         {/* Main content */}
         <div
+          role="button"
           style={{
             display: 'flex',
             alignItems: 'center',

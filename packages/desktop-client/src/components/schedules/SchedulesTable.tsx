@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useRef, useMemo, type CSSProperties } from 'react';
+import React, { useMemo, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -20,11 +20,11 @@ import { StatusBadge } from './StatusBadge';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import {
+  Cell,
+  Field,
+  Row,
   Table,
   TableHeader,
-  Row,
-  Field,
-  Cell,
 } from '@desktop-client/components/table';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
@@ -34,8 +34,8 @@ import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
-  type ScheduleStatusType,
   type ScheduleStatuses,
+  type ScheduleStatusType,
 } from '@desktop-client/hooks/useSchedules';
 
 type SchedulesTableProps = {
@@ -45,11 +45,21 @@ type SchedulesTableProps = {
   filter: string;
   allowCompleted: boolean;
   onSelect: (id: ScheduleEntity['id']) => void;
-  onAction: (actionName: ScheduleItemAction, id: ScheduleEntity['id']) => void;
   style: CSSProperties;
-  minimal?: boolean;
   tableStyle?: CSSProperties;
-};
+} & (
+  | {
+      minimal: true;
+      onAction?: never;
+    }
+  | {
+      minimal?: false;
+      onAction: (
+        actionName: ScheduleItemAction,
+        id: ScheduleEntity['id'],
+      ) => void;
+    }
+);
 
 type CompletedScheduleItem = { id: 'show-completed' };
 type SchedulesTableItem = ScheduleEntity | CompletedScheduleItem;
@@ -366,7 +376,7 @@ export function SchedulesTable({
         filterIncludes(dateStr)
       );
     });
-  }, [payees, accounts, schedules, filter, statuses]);
+  }, [payees, accounts, schedules, filter, statuses, format, dateFormat]);
 
   const items: readonly SchedulesTableItem[] = useMemo(() => {
     const unCompletedSchedules = filteredSchedules.filter(s => !s.completed);

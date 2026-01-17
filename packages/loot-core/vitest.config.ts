@@ -30,7 +30,7 @@ export default defineConfig({
     alias: [
       {
         find: /^@actual-app\/crdt(\/.*)?$/,
-        replacement: path.resolve('../crdt/src$1'),
+        replacement: path.resolve(path.join(__dirname, '../crdt/src$1')),
       },
     ],
     extensions: resolveExtensions,

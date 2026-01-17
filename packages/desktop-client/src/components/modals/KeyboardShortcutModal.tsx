@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, useMemo, type ReactNode } from 'react';
+import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -161,8 +161,8 @@ export function KeyboardShortcutModal() {
   const defaultShortcuts: ShortcutCategories[] = useMemo(
     () => [
       {
-        name: t('General'),
-        id: 'general',
+        name: t('Global'),
+        id: 'global',
         items: [
           {
             id: 'help',
@@ -208,6 +208,17 @@ export function KeyboardShortcutModal() {
         name: t('Budget page'),
         items: [
           {
+            id: 'budget-down',
+            shortcut: 'Enter',
+            description: t('Move down to next category'),
+          },
+          {
+            id: 'budget-up',
+            shortcut: 'Enter',
+            shift: true,
+            description: t('Move up to next category'),
+          },
+          {
             id: 'current-month',
             shortcut: '0',
             style: {
@@ -228,8 +239,83 @@ export function KeyboardShortcutModal() {
         ],
       },
       {
-        id: 'account-page',
-        name: t('Account page'),
+        id: 'account-page-general',
+        name: t('Account page general'),
+        items: [
+          {
+            id: 'bank-sync',
+            shortcut: 'B',
+            meta: ctrl,
+            description: t('Bank sync'),
+          },
+          {
+            id: 'import-transactions',
+            shortcut: 'I',
+            meta: ctrl,
+            description: t('Import transactions'),
+          },
+          {
+            id: 'add-new-transaction',
+            shortcut: 'T',
+            description: t('Add new transaction'),
+          },
+          {
+            id: 'filter-menu',
+            shortcut: 'F',
+            description: t(
+              'Show filter dropdown when no transactions are selected',
+            ),
+          },
+        ],
+      },
+      {
+        id: 'account-transaction-selection',
+        name: t('Account transaction selection'),
+        items: [
+          {
+            id: 'select-all-transactions',
+            shortcut: 'A',
+            description: t('Select all transactions'),
+            meta: ctrl,
+          },
+          {
+            id: 'toggle-selection-current-transaction',
+            shortcut: 'Space',
+            description: t('Toggle selection of current transaction'),
+          },
+          {
+            id: 'toggle-selection-all-transactions',
+            shortcut: 'Space',
+            description: t(
+              'Toggle transactions between current and most recently selected transaction',
+            ),
+            shift: true,
+          },
+          {
+            id: 'move-next-transaction',
+            shortcut: 'J',
+            description: t('Move down to the next transaction'),
+          },
+          {
+            id: 'move-next-transaction-scroll',
+            shortcut: '↓',
+            description: t('Move down to the next transaction and scroll'),
+          },
+          {
+            id: 'move-previous-transaction',
+            shortcut: 'K',
+            description: t('Move up to the next transaction'),
+          },
+          {
+            id: 'move-previous-transaction-scroll',
+            shortcut: '↑',
+            description: t('Move up to the next transaction and scroll'),
+          },
+        ],
+      },
+      {
+        id: 'account-transaction-editing',
+        name: t('Account transaction editing'),
         items: [
           {
             id: 'move-down',
@@ -243,41 +329,32 @@ export function KeyboardShortcutModal() {
             description: t('Move up when editing'),
           },
           {
-            id: 'import-transactions',
-            shortcut: 'I',
+            id: 'add-transaction-and-close',
+            shortcut: 'Enter',
             meta: ctrl,
-            description: t('Import transactions'),
+            description: t('Add transaction and close form'),
           },
           {
-            id: 'bank-sync',
-            shortcut: 'B',
-            meta: ctrl,
-            description: t('Bank sync'),
+            id: 'move-right-when-editing',
+            shortcut: 'Tab',
+            description: t('Move right when editing'),
           },
           {
-            id: 'filter-to-selected-transactions',
-            shortcut: 'F',
-            description: t('Filter to the selected transactions'),
+            id: 'move-left-when-editing',
+            shortcut: 'Tab',
+            description: t('Move left when editing'),
+            shift: true,
           },
+        ],
+      },
+      {
+        id: 'account-transaction-management',
+        name: t('Account transaction management'),
+        items: [
           {
-            id: 'delete-selected-transactions',
-            shortcut: 'D',
-            description: t('Delete the selected transactions'),
-          },
-          {
-            id: 'duplicate-selected-transactions',
-            shortcut: 'U',
-            description: t('Duplicate the selected transactions'),
-          },
-          {
-            id: 'merge-selected-transactions',
-            shortcut: 'G',
-            description: t('Merge the selected transactions'),
-          },
-          {
-            id: 'set-account-for-selected-transactions',
-            shortcut: 'A',
-            description: t('Set account for selected transactions'),
+            id: 'set-date-for-selected-transactions',
+            shortcut: 'E',
+            description: t('Set date for selected transactions'),
           },
           {
             id: 'set-payee-for-selected-transactions',
@@ -302,7 +379,12 @@ export function KeyboardShortcutModal() {
           {
             id: 'toggle-cleared-for-selected-transactions',
             shortcut: 'L',
-            description: t('Toggle cleared for selected transactions'),
+            description: t('Toggle cleared status for selected transactions'),
+          },
+          {
+            id: 'set-account-for-selected-transactions',
+            shortcut: 'A',
+            description: t('Set account for selected transactions'),
           },
           {
             id: 'link-or-view-schedule-for-selected-transactions',
@@ -310,70 +392,24 @@ export function KeyboardShortcutModal() {
             description: t('Link or view schedule for selected transactions'),
           },
           {
-            id: 'select-all-transactions',
-            shortcut: 'A',
-            description: t('Select all transactions'),
-            meta: ctrl,
-          },
-          {
-            id: 'move-left-when-editing',
-            shortcut: 'Tab',
-            description: t('Move left when editing'),
-            shift: true,
-          },
-          {
-            id: 'move-right-when-editing',
-            shortcut: 'Tab',
-            description: t('Move right when editing'),
-          },
-          {
-            id: 'add-new-transaction',
-            shortcut: 'T',
-            description: t('Add a new transaction'),
-          },
-          {
-            id: 'add-transaction-and-close',
-            shortcut: 'Enter',
-            meta: ctrl,
-            description: t('Add transaction and close form'),
-          },
-          {
-            id: 'filter-transactions',
+            id: 'filter-selected-transactions',
             shortcut: 'F',
-            description: t('Filter transactions'),
+            description: t('Filter to the selected transactions'),
           },
           {
-            id: 'move-next-transaction',
-            shortcut: 'J',
-            description: t('Move to the next transaction down'),
+            id: 'delete-selected-transactions',
+            shortcut: 'D',
+            description: t('Delete the selected transactions'),
           },
           {
-            id: 'move-previous-transaction',
-            shortcut: 'K',
-            description: t('Move to the next transaction up'),
+            id: 'duplicate-selected-transactions',
+            shortcut: 'U',
+            description: t('Duplicate the selected transactions'),
           },
           {
-            id: 'move-previous-transaction-scroll',
-            shortcut: '↑',
-            description: t('Move to the previous transaction and scroll'),
-          },
-          {
-            id: 'move-next-transaction-scroll',
-            shortcut: '↓',
-            description: t('Move to the next transaction and scroll'),
-          },
-          {
-            id: 'toggle-selection-current-transaction',
-            shortcut: 'Space',
-            description: t('Toggle selection of current transaction'),
-          },
-          {
-            id: 'toggle-selection-all-transactions',
-            shortcut: 'Space',
-            description: t(
-              'Toggle transactions between current and most recently selected transaction',
-            ),
-            shift: true,
+            id: 'merge-selected-transactions',
+            shortcut: 'G',
+            description: t('Merge the selected transactions'),
           },
         ],
       },

@@ -5,13 +5,13 @@ import { send } from 'loot-core/platform/client/fetch';
 import { type SyncResponseWithErrors } from 'loot-core/server/accounts/app';
 import { groupById } from 'loot-core/shared/util';
 import {
-  type SyncServerGoCardlessAccount,
   type AccountEntity,
-  type TransactionEntity,
-  type SyncServerSimpleFinAccount,
-  type SyncServerPluggyAiAccount,
-  type SyncServerAkahuAccount,
   type CategoryEntity,
+  type SyncServerAkahuAccount,
+  type SyncServerGoCardlessAccount,
+  type SyncServerPluggyAiAccount,
+  type SyncServerSimpleFinAccount,
+  type TransactionEntity,
 } from 'loot-core/types/models';
 
 import { resetApp } from '@desktop-client/app/appSlice';

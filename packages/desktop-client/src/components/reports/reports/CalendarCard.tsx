@@ -1,12 +1,12 @@
 import React, {
-  useState,
+  useCallback,
+  useEffect,
   useMemo,
   useRef,
-  type Ref,
-  useEffect,
+  useState,
   type Dispatch,
+  type Ref,
   type SetStateAction,
-  useCallback,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -38,11 +38,12 @@ import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import {
-  type CalendarDataType,
   calendarSpreadsheet,
+  type CalendarDataType,
 } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
@@ -53,6 +54,7 @@ type CalendarCardProps = {
   meta?: CalendarWidget['meta'];
   onMetaChange: (newMeta: CalendarWidget['meta']) => void;
   onRemove: () => void;
+  onCopy: (targetDashboardId: string) => void;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
 };
 
@@ -62,6 +64,7 @@ export function CalendarCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onCopy,
   firstDayOfWeekIdx,
 }: CalendarCardProps) {
   const { t } = useTranslation();
@@ -168,9 +171,13 @@ export function CalendarCard({
     return data?.calendarData.length;
   }, [data]);
 
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
+
   return (
     <ReportCard
       isEditing={isEditing}
+      disableClick={nameMenuOpen}
       to={`/reports/calendar/${widgetId}`}
       menuItems={[
         {
@@ -181,8 +188,10 @@ export function CalendarCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);

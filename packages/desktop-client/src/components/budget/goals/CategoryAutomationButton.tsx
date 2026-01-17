@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgChartPie } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
-import { cx, css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 
 import { type CategoryEntity } from 'loot-core/types/models';
 

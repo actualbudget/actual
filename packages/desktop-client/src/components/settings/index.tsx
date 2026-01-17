@@ -1,5 +1,5 @@
-import React, { type ReactNode, useEffect } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import React, { useEffect, type ReactNode } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -23,7 +23,7 @@ import { ExportBudget } from './Export';
 import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
 import { RepairTransactions } from './RepairTransactions';
-import { ForceReload, ResetCache, ResetSync } from './Reset';
+import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
@@ -43,7 +43,7 @@ import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { loadPrefs } from '@desktop-client/prefs/prefsSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 function About() {
   const version = useServerVersion();
@@ -176,7 +176,6 @@ export function Settings() {
   const [budgetName] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
-  const isForceReloadEnabled = useFeatureFlag('forceReload');
   const [_, setDefaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
 
   const onCloseBudget = () => {
@@ -253,7 +252,6 @@ export function Settings() {
         <ExportBudget />
         <AdvancedToggle>
           <AdvancedAbout />
-          {isForceReloadEnabled && <ForceReload />}
           <ResetCache />
           <ResetSync />
           <RepairTransactions />

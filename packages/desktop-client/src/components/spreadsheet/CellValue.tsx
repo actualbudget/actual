@@ -1,21 +1,21 @@
 // @ts-strict-ignore
 import React, {
   type ComponentPropsWithoutRef,
-  type ReactNode,
   type CSSProperties,
+  type ReactNode,
 } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useSheetName } from '@desktop-client/hooks/useSheetName';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import {
   type Binding,
-  type SheetNames,
   type SheetFields,
+  type SheetNames,
   type Spreadsheets,
 } from '@desktop-client/spreadsheet';
 

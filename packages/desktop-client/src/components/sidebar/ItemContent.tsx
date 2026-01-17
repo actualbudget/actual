@@ -1,7 +1,7 @@
 import React, {
+  type ComponentProps,
   type MouseEventHandler,
   type ReactNode,
-  type ComponentProps,
 } from 'react';
 
 import { type CSSProperties } from '@actual-app/components/styles';

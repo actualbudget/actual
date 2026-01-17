@@ -81,3 +81,5 @@ Actual currently has official support for migrating budgets from YNAB4 and nYNAB
   - _API to interact with the Actual server, written in Python._
 - **Actual Budget Home Assistant Integration** - https://github.com/jlvcm/ha-actualbudget
   - _Home Assistant Integration with an Actual Budget server_
+- **Wallos schedule importer** - https://github.com/StephenBrown2/actual-wallos-import
+  - _Script to import subscriptions from [Wallos](https://github.com/ellite/Wallos) to Actual Budget schedules_

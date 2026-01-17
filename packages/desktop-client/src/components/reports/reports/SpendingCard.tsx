@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -18,6 +18,7 @@ import { ReportCardName } from '@desktop-client/components/reports/ReportCardNam
 import { calculateSpendingReportTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpendingSpreadsheet } from '@desktop-client/components/reports/spreadsheets/spending-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type SpendingCardProps = {
@@ -26,6 +27,7 @@ type SpendingCardProps = {
   meta?: SpendingWidget['meta'];
   onMetaChange: (newMeta: SpendingWidget['meta']) => void;
   onRemove: () => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function SpendingCard({
@@ -34,12 +36,17 @@ export function SpendingCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onCopy,
 }: SpendingCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
+
   const spendingReportMode = meta?.mode ?? 'single-month';
 
   const [compare, compareTo] = calculateSpendingReportTimeRange(meta ?? {});
@@ -83,8 +90,10 @@ export function SpendingCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
