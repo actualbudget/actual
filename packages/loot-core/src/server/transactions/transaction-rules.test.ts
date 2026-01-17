@@ -5,17 +5,17 @@ import * as db from '../db';
 import { loadMappings } from '../db/mappings';
 
 import {
-  getRules,
-  loadRules,
-  insertRule,
-  updateRule,
-  deleteRule,
-  makeRule,
-  runRules,
   conditionsToAQL,
-  resetState,
+  deleteRule,
   getProbableCategory,
+  getRules,
+  insertRule,
+  loadRules,
+  makeRule,
+  resetState,
+  runRules,
   updateCategoryRules,
+  updateRule,
 } from './transaction-rules';
 
 // TODO: write tests to make sure payee renaming is "pre" and category

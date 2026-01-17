@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import React, {
-  type FocusEvent,
   forwardRef,
   useCallback,
   useImperativeHandle,
@@ -9,6 +8,7 @@ import React, {
   useRef,
   useState,
   type ComponentProps,
+  type FocusEvent,
   type JSX,
   type KeyboardEvent,
   type ReactElement,
@@ -26,7 +26,7 @@ import { SvgCheckmark } from '@actual-app/components/icons/v1';
 import { Input } from '@actual-app/components/input';
 import { Menu, type MenuItem } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
-import { type CSSProperties, styles } from '@actual-app/components/styles';
+import { styles, type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -37,7 +37,7 @@ import {
   mergeConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
 
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useModalState } from '@desktop-client/hooks/useModalState';
 import {
   AvoidRefocusScrollProvider,
@@ -46,10 +46,10 @@ import {
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import {
-  type Spreadsheets,
+  type Binding,
   type SheetFields,
   type SheetNames,
-  type Binding,
+  type Spreadsheets,
 } from '@desktop-client/spreadsheet';
 
 export const ROW_HEIGHT = 32;

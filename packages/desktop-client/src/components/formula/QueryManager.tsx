@@ -31,9 +31,9 @@ import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
 import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
 import {
   calculateTimeRange,
+  getLatestRange,
   validateEnd,
   validateStart,
-  getLatestRange,
 } from '@desktop-client/components/reports/reportRanges';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';

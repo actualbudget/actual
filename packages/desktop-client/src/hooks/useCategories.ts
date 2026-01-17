@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useInitialMount } from './useInitialMount';
 
 import { getCategories } from '@desktop-client/budget/budgetSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 export function useCategories() {
   const dispatch = useDispatch();

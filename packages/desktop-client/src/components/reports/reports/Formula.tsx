@@ -1,10 +1,10 @@
 import {
-  useState,
-  useRef,
+  lazy,
+  Suspense,
   useCallback,
   useMemo,
-  Suspense,
-  lazy,
+  useRef,
+  useState,
   type ChangeEvent,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';

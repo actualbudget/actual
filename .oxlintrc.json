@@ -50,6 +50,12 @@
         "newlinesBetween": "always"
       }
     ],
+    "perfectionist/sort-named-imports": [
+      "warn",
+      {
+        "groups": ["value-import", "type-import"]
+      }
+    ],
 
     // Actual rules
     "actual/typography": "warn",

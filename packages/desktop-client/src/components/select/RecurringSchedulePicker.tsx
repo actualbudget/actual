@@ -1,13 +1,13 @@
 import {
-  type CSSProperties,
-  type Dispatch,
   useEffect,
   useMemo,
   useReducer,
   useRef,
   useState,
+  type CSSProperties,
+  type Dispatch,
 } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';

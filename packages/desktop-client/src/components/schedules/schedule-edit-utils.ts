@@ -2,8 +2,8 @@ import { t } from 'i18next';
 
 import { extractScheduleConds } from 'loot-core/shared/schedules';
 import {
-  type ScheduleEntity,
   type RuleConditionOp,
+  type ScheduleEntity,
 } from 'loot-core/types/models';
 
 import { type ScheduleFormFields } from './ScheduleEditForm';

@@ -1,10 +1,10 @@
 import React, {
-  type ComponentProps,
-  type CSSProperties,
   memo,
   useRef,
+  type ComponentProps,
+  type CSSProperties,
 } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
@@ -34,8 +34,8 @@ import {
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
 import {
-  Row,
   Field,
+  Row,
   SheetCell,
   type SheetCellProps,
 } from '@desktop-client/components/table';

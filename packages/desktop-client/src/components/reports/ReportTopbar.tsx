@@ -3,14 +3,14 @@ import { useTranslation } from 'react-i18next';
 
 import {
   SvgCalculator,
+  SvgCamera,
   SvgChart,
+  SvgChartArea,
   SvgChartBar,
   SvgChartPie,
   SvgListBullet,
   SvgQueue,
   SvgTag,
-  SvgCamera,
-  SvgChartArea,
 } from '@actual-app/components/icons/v1';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';

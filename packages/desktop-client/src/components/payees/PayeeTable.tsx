@@ -14,7 +14,7 @@ import { type PayeeEntity } from 'loot-core/types/models';
 
 import { PayeeTableRow } from './PayeeTableRow';
 
-import { useTableNavigator, Table } from '@desktop-client/components/table';
+import { Table, useTableNavigator } from '@desktop-client/components/table';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 // Table items require an ID to work, it's optional in the loot-core

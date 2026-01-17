@@ -2,9 +2,9 @@
 import React, {
   type ComponentProps,
   type ComponentType,
+  type CSSProperties,
   type ReactNode,
   type SVGProps,
-  type CSSProperties,
 } from 'react';
 
 import { Block } from '@actual-app/components/block';

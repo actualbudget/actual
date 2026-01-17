@@ -1,20 +1,20 @@
 // @ts-strict-ignore
 import {
-  serializeClock,
   deserializeClock,
   getClock,
-  Timestamp,
   merkle,
+  serializeClock,
+  Timestamp,
 } from '@actual-app/crdt';
 
 import { captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
 import { logger } from '../../platform/server/log';
-import { sequential, once } from '../../shared/async';
-import { setIn, getIn } from '../../shared/util';
+import { once, sequential } from '../../shared/async';
+import { getIn, setIn } from '../../shared/util';
 import { type MetadataPrefs } from '../../types/prefs';
-import { triggerBudgetChanges, setType as setBudgetType } from '../budget/base';
+import { setType as setBudgetType, triggerBudgetChanges } from '../budget/base';
 import * as db from '../db';
 import { PostError, SyncError } from '../errors';
 import { app } from '../main-app';

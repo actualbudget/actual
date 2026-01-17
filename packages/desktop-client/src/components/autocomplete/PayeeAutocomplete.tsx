@@ -1,15 +1,15 @@
 // @ts-strict-ignore
 import React, {
   Fragment,
-  useState,
   useMemo,
+  useState,
   type ComponentProps,
-  type ReactNode,
-  type ComponentType,
-  type SVGProps,
   type ComponentPropsWithoutRef,
-  type ReactElement,
+  type ComponentType,
   type CSSProperties,
+  type ReactElement,
+  type ReactNode,
+  type SVGProps,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -27,8 +27,8 @@ import { type AccountEntity, type PayeeEntity } from 'loot-core/types/models';
 
 import {
   Autocomplete,
-  defaultFilterSuggestion,
   AutocompleteFooter,
+  defaultFilterSuggestion,
 } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
 

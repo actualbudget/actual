@@ -3,10 +3,10 @@ import type { Template } from '../../types/models/templates';
 import { storeTemplates } from './goal-template';
 import { parse } from './goal-template.pegjs';
 import {
-  type CategoryWithTemplateNote,
   getActiveSchedules,
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
+  type CategoryWithTemplateNote,
 } from './statements';
 
 type Notification = {

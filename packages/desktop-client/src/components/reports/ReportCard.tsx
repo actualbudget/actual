@@ -3,8 +3,8 @@ import React, {
   useRef,
   useState,
   type ComponentProps,
-  type ReactNode,
   type CSSProperties,
+  type ReactNode,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 

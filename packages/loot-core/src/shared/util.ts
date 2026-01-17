@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type Locale, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, type Locale } from 'date-fns';
 
 export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];

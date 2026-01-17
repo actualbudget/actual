@@ -2,8 +2,8 @@
 import React, {
   type ComponentProps,
   type ComponentType,
-  type SVGProps,
   type CSSProperties,
+  type SVGProps,
 } from 'react';
 
 import { Block } from '@actual-app/components/block';

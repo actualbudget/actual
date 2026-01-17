@@ -1,4 +1,4 @@
-import { type CSSProperties, type ReactNode, useRef, useState } from 'react';
+import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';

@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import React, {
-  type ComponentProps,
-  type CSSProperties,
   memo,
   useRef,
   useState,
+  type ComponentProps,
+  type CSSProperties,
 } from 'react';
 import { Trans } from 'react-i18next';
 

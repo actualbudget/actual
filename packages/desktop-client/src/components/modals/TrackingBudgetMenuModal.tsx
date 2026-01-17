@@ -1,4 +1,4 @@
-import React, { useState, useEffect, type CSSProperties } from 'react';
+import React, { useEffect, useState, type CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';

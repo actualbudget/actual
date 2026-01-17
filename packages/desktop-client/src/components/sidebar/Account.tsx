@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, useRef, useState } from 'react';
+import React, { useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -44,7 +44,7 @@ import { useNotes } from '@desktop-client/hooks/useNotes';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { openAccountCloseModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { type SheetFields, type Binding } from '@desktop-client/spreadsheet';
+import { type Binding, type SheetFields } from '@desktop-client/spreadsheet';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,

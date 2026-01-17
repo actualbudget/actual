@@ -1,14 +1,14 @@
 import React, {
-  type ComponentProps,
   Fragment,
+  useCallback,
   useMemo,
+  type ComponentProps,
+  type ComponentPropsWithoutRef,
+  type ComponentType,
+  type CSSProperties,
+  type ReactElement,
   type ReactNode,
   type SVGProps,
-  type ComponentType,
-  type ComponentPropsWithoutRef,
-  type ReactElement,
-  type CSSProperties,
-  useCallback,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -37,8 +37,8 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import {
-  trackingBudget,
   envelopeBudget,
+  trackingBudget,
 } from '@desktop-client/spreadsheet/bindings';
 
 type CategoryAutocompleteItem = Omit<CategoryEntity, 'group'> & {

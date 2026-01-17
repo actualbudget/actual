@@ -1,8 +1,8 @@
 import {
-  type DependencyList,
-  type EffectCallback,
   useEffect,
   useRef,
+  type DependencyList,
+  type EffectCallback,
 } from 'react';
 
 /**

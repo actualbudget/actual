@@ -1,4 +1,4 @@
-import React, { type Ref, useRef, useState } from 'react';
+import React, { useRef, useState, type Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
