@@ -204,6 +204,12 @@ export function ExperimentalFeatures() {
               <Trans>Crossover Report</Trans>
             </FeatureToggle>
             <FeatureToggle
+              flag="ageOfMoneyReport"
+              feedbackLink="https://github.com/actualbudget/actual/issues/2994"
+            >
+              <Trans>Age of Money Report</Trans>
+            </FeatureToggle>
+            <FeatureToggle
               flag="customThemes"
               feedbackLink="https://github.com/actualbudget/actual/issues/6607"
             >

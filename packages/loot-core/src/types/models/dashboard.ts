@@ -105,6 +105,19 @@ export type MarkdownWidget = AbstractWidget<
   { content: string; text_align?: 'left' | 'right' | 'center' }
 >;
 
+export type AgeOfMoneyGranularity = 'daily' | 'weekly' | 'monthly';
+
+export type AgeOfMoneyWidget = AbstractWidget<
+  'age-of-money-card',
+  {
+    name?: string;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+    granularity?: AgeOfMoneyGranularity;
+  } | null
+>;
+
 type SpecializedWidget =
   | NetWorthWidget
   | CashFlowWidget
@@ -114,7 +127,8 @@ type SpecializedWidget =
   | MarkdownWidget
   | SummaryWidget
   | CalendarWidget
-  | FormulaWidget;
+  | FormulaWidget
+  | AgeOfMoneyWidget;
 export type Widget = SpecializedWidget | CustomReportWidget;
 export type NewWidget = Omit<Widget, 'id' | 'tombstone' | 'dashboard_page_id'>;
 
