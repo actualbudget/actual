@@ -122,6 +122,8 @@ export function AccountSyncCheck() {
             //TODO: skip choosing the bank since we have that info
             authorizeEnableBankingSession(dispatch, acc, () => unlink(acc));
             return;
+          default:
+            break;
         }
       }
     },

@@ -1,5 +1,5 @@
-import { components } from '../models/enablebanking-openapi.js';
-import { Transaction } from '../models/enablebanking.js';
+import { type components } from '../models/enablebanking-openapi.js';
+import { type Transaction } from '../models/enablebanking.js';
 
 import { BankProcessorFor } from './bank-registry.js';
 import { FallbackBankProcessor } from './fallback.bank.js';
@@ -37,7 +37,9 @@ function extractPayeeFromNotes(notes: string): string {
   // Handle foreign currency transactions where merchant is AFTER "Nota nr. XXXXX"
   // Pattern: "GBP 8,99 Kurs 861,73 Nota nr. 33856 Audible UK, adbl.co/pymt"
   // or "HUF 3195,00 Kurs 1,9471 Nota nr. 49307 Google One, Dublin 2"
-  const foreignCurrencyMatch = clean.match(/^(?:EUR|USD|CAD|GBP|HUF|SEK|NOK|CHF|PLN)\s+[\d,]+\s+Kurs\s+[\d,]+\s+Nota\s+(?:nr\.?\s*)?\d+\s+(.+)$/i);
+  const foreignCurrencyMatch = clean.match(
+    /^(?:EUR|USD|CAD|GBP|HUF|SEK|NOK|CHF|PLN)\s+[\d,]+\s+Kurs\s+[\d,]+\s+Nota\s+(?:nr\.?\s*)?\d+\s+(.+)$/i,
+  );
   if (foreignCurrencyMatch) {
     // Extract merchant from after "Nota nr. XXXXX", split at comma to remove location
     const merchant = foreignCurrencyMatch[1].split(',')[0].trim();
@@ -48,13 +50,19 @@ function extractPayeeFromNotes(notes: string): string {
 
   // Handle foreign transactions starting with numbers (e.g., "63250113 Hamburg Hbf, EUR 6,89...")
   // Pattern: leading digits followed by actual merchant name
-  const foreignMatch = clean.match(/^\d{6,}\s+(.+?)(?:,\s*(?:EUR|USD|CAD|GBP|HUF|SEK|NOK|CHF|PLN)\s|$)/i);
+  const foreignMatch = clean.match(
+    /^\d{6,}\s+(.+?)(?:,\s*(?:EUR|USD|CAD|GBP|HUF|SEK|NOK|CHF|PLN)\s|$)/i,
+  );
   if (foreignMatch) {
     clean = foreignMatch[1].trim();
   }
 
   // Split at common suffixes (receipt numbers, agreement numbers, currency info)
-  let payee = clean.split(/[,.]?\s*(Nota|Notanr|Aftalenr|beløb omregnet|EUR\s|USD\s|CAD\s|GBP\s|\d{6,})/i)[0].trim();
+  let payee = clean
+    .split(
+      /[,.]?\s*(Nota|Notanr|Aftalenr|beløb omregnet|EUR\s|USD\s|CAD\s|GBP\s|\d{6,})/i,
+    )[0]
+    .trim();
 
   // For "STORE, CITY" patterns, take just the store name
   if (payee.includes(',')) {
@@ -101,7 +109,7 @@ export class DanishBankProcessor extends FallbackBankProcessor {
   normalizeTransaction(t: components['schemas']['Transaction']): Transaction {
     const isDebtor = t.credit_debit_indicator === 'DBIT';
     const payeeObject = isDebtor ? t.creditor : t.debtor;
-    
+
     const notes = t.remittance_information
       ? t.remittance_information.join(' ')
       : '';

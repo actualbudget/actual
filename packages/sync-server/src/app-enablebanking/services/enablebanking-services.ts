@@ -3,25 +3,25 @@ import createClient from 'openapi-fetch';
 import { SecretName, secretsService } from '../../services/secrets-service.js';
 import { getLoadedRegistry } from '../banks/bank-registry.js';
 import {
-  components,
-  operations,
-  paths,
+  type components,
+  type operations,
+  type paths,
 } from '../models/enablebanking-openapi.js';
 import {
-  Account,
-  EnableBankingAuthenticationStartResponse,
-  EnableBankingToken,
-  Transaction,
+  type Account,
+  type EnableBankingAuthenticationStartResponse,
+  type EnableBankingToken,
+  type Transaction,
 } from '../models/enablebanking.js';
 import {
   ApplicationInactiveError,
   EnableBankingError,
   EnableBankingSetupError,
-  ErrorResponse,
   handleErrorResponse,
   isErrorResponse,
   ResourceNotFoundError,
   SecretsInvalidError,
+  type ErrorResponse,
 } from '../utils/errors.js';
 import { getJWT } from '../utils/jwt.js';
 
@@ -98,7 +98,7 @@ export const enableBankingservice = {
     let jwt: string;
     try {
       jwt = getJWT(applicationId, secretKey);
-    } catch (error) {
+    } catch {
       throw new SecretsInvalidError();
     }
 

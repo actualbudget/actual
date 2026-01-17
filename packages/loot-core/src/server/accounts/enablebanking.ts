@@ -1,9 +1,10 @@
-import { AccountEntity } from 'loot-core/types/models';
+import { type AccountEntity } from 'loot-core/types/models';
 
 import * as asyncStorage from '../../platform/server/asyncStorage';
+import { logger } from '../../platform/server/log';
 import {
-  EnableBankingEndpoints,
-  EnableBankingResponse,
+  type EnableBankingEndpoints,
+  type EnableBankingResponse,
 } from '../../types/models/enablebanking';
 import { createApp } from '../app';
 import { BankSyncError } from '../errors';
@@ -85,16 +86,16 @@ async function pollAuth({
 }): Promise<EnableBankingResponse<'/get_session'>> {
   stopPolling = false;
   const startTime = Date.now();
-  console.log('starting poll');
+  logger.log('starting poll');
   while (!stopPolling) {
     const resp = await post('/get_session', { state });
-    console.log('poll response', resp);
+    logger.log('poll response', resp);
     if (resp.data || resp.error.error_code !== 'NOT_READY') {
-      console.log('returning');
+      logger.log('returning');
       return resp;
     }
     if (Date.now() - startTime >= 1000 * 60 * 10) {
-      console.log('Time out reached after 10 minutes');
+      logger.log('Time out reached after 10 minutes');
       return {
         error: {
           error_code: 'TIME_OUT',
@@ -102,7 +103,7 @@ async function pollAuth({
         },
       };
     }
-    console.log('waiting');
+    logger.log('waiting');
     await new Promise(r => setTimeout(r, 1000));
   }
 
@@ -130,7 +131,7 @@ export async function downloadEnableBankingTransactions(
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
-  console.log(`Pulling transactions from enablebanking since ${startDate}`);
+  logger.log(`Pulling transactions from enablebanking since ${startDate}`);
 
   const { error, data } = await post('/transactions', {
     account_id: acctId,
@@ -138,7 +139,7 @@ export async function downloadEnableBankingTransactions(
     bank_id: bankId,
   });
   if (error) {
-    console.log('got error', error);
+    logger.log('got error', error);
     throw new BankSyncError(
       error.error_type,
       error.error_code,

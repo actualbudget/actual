@@ -1,6 +1,6 @@
-import { BankProcessor } from '../models/bank-processor.js';
-import { components } from '../models/enablebanking-openapi.js';
-import { Transaction } from '../models/enablebanking.js';
+import { type BankProcessor } from '../models/bank-processor.js';
+import { type components } from '../models/enablebanking-openapi.js';
+import { type Transaction } from '../models/enablebanking.js';
 
 export class FallbackBankProcessor implements BankProcessor {
   debug = true;

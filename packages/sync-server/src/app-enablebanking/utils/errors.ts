@@ -1,14 +1,14 @@
 import { inspect } from 'util';
 
 import createDebug from 'debug';
-import { Request, Response } from 'express';
+import { type Request, type Response } from 'express';
 
-import { components } from '../models/enablebanking-openapi.js';
+import { type components } from '../models/enablebanking-openapi.js';
 import {
-  EnableBankingErrorInterface,
-  EnableBankingErrorCode,
-  EnableBankingResponse,
-  EnableBankingEndpoints,
+  type EnableBankingEndpoints,
+  type EnableBankingErrorCode,
+  type EnableBankingErrorInterface,
+  type EnableBankingResponse,
 } from '../models/enablebanking.js';
 
 const debug = createDebug('actual:enablebanking:errors');
@@ -141,6 +141,8 @@ export async function handleEnableBankingError(response: globalThis.Response) {
     case 'CLOSED_SESSION':
     case 'EXPIRED_SESSION':
       throw new ClosedSessionError();
+    default:
+      break;
   }
 
   debug('Unhandled error: %d %o', response.status, errorResponse);

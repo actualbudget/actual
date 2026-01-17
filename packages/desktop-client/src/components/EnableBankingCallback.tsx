@@ -18,10 +18,6 @@ export function EnableBankingCallback() {
   const state = searchParams.get('state');
   const code = searchParams.get('code');
 
-  if (!state) {
-  }
-  console.log(searchParams.get('state'));
-
   useEffect(() => {
     const fetchData = async () => {
       if (!state || !code) {
@@ -31,9 +27,7 @@ export function EnableBankingCallback() {
         return;
       }
       await send('enablebanking-completeauth', { state, code });
-      console.log('this is going great');
       window.close();
-      console.log('not so much');
     };
     fetchData();
   }, [state, code, t]);

@@ -11,8 +11,8 @@ import {
   recalculateSplit,
 } from '../../shared/transactions';
 import {
-  hasFieldsChanged,
   amountToInteger,
+  hasFieldsChanged,
   integerToAmount,
 } from '../../shared/util';
 import {
@@ -989,7 +989,7 @@ export async function syncAccount(
 
   const syncStartDate = await getAccountSyncStartDate(id);
   const oldestTransaction = await getAccountOldestTransaction(id);
-  console.log(syncStartDate, oldestTransaction);
+  logger.log(syncStartDate, oldestTransaction);
   const newAccount = oldestTransaction == null;
 
   let download;

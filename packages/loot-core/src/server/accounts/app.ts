@@ -36,7 +36,7 @@ import { undoable, withUndo } from '../undo';
 
 import {
   app as enableBankingApp,
-  AccountHandlers as EnableBankingAccountHandlers,
+  type AccountHandlers as EnableBankingAccountHandlers,
 } from './enablebanking';
 import * as link from './link';
 import { getStartingBalancePayee } from './payees';
@@ -139,7 +139,7 @@ async function linkGoCardlessAccount({
       : { name: account.institution as string };
   const bank = await link.findOrCreateBank(institution, requisitionId);
   if (upgradingId) {
-    console.log('upgrading', upgradingId);
+    logger.log('upgrading', upgradingId);
     const accRow = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
       [upgradingId],
@@ -157,7 +157,7 @@ async function linkGoCardlessAccount({
       official_name: account.official_name,
       account_sync_source: syncSource,
     });
-    console.log('upgrading finished.');
+    logger.log('upgrading finished.');
   } else {
     id = uuidv4();
     await db.insertWithUUID('accounts', {
@@ -526,7 +526,7 @@ async function setSecret({
       },
     );
   } catch (error) {
-    console.log('this errored somehow');
+    logger.log('this errored somehow');
     return {
       error: 'failed',
       reason: error instanceof PostError ? error.reason : undefined,
@@ -544,7 +544,7 @@ async function checkSecret(name: string) {
   if (!serverConfig) {
     throw new Error('Failed to get server config.');
   }
-  console.log('ready to retrieve data');
+  logger.log('ready to retrieve data');
 
   try {
     return await get(serverConfig.BASE_SERVER + '/secret/' + name, {

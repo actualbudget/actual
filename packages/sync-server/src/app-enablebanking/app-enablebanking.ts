@@ -1,12 +1,12 @@
-import express, { Request } from 'express';
-import { ParamsDictionary } from 'express-serve-static-core';
+import express, { type Request } from 'express';
+import { type ParamsDictionary } from 'express-serve-static-core';
 
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '../util/middlewares.js';
 
-import { EnableBankingEndpoints } from './models/enablebanking.js';
+import { type EnableBankingEndpoints } from './models/enablebanking.js';
 import { enableBankingservice } from './services/enablebanking-services.js';
 import {
   BadRequestError,

@@ -1,11 +1,11 @@
-import { components } from './enablebanking-openapi.js';
-import { Transaction } from './enablebanking.js';
+import { type components } from './enablebanking-openapi.js';
+import { type Transaction } from './enablebanking.js';
 
-export interface BankProcessor {
+export type BankProcessor = {
   debug: boolean;
   name: string;
   normalizeTransaction: (
     transaction: components['schemas']['Transaction'],
     edited_transaction?: Transaction,
   ) => Transaction;
-}
+};

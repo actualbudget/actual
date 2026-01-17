@@ -112,11 +112,9 @@ const AspspSelector = ({
   }, [onError]);
 
   useEffect(() => {
-    console.log(country);
     if (country) {
       send('enablebanking-banks', { country: country.id }).then(
         ({ data, error }) => {
-          console.log(data, error);
           if (data) {
             setAvailableAspsps(data);
             return;
@@ -189,7 +187,11 @@ const AspspSelector = ({
         />
       </FormField>
       {country && !availableAspsps && (
-        <WaitingIndicator message={`Getting aspsps for ${country.name}.`} />
+        <WaitingIndicator
+          message={t('Getting banks for {{countryName}}.', {
+            countryName: country.name,
+          })}
+        />
       )}
 
       {country && availableAspsps && (
@@ -219,9 +221,9 @@ const AspspSelector = ({
           <Warning>
             <Trans>
               By enabling bank sync, you will be granting Enable Banking (a
-              third party service) read-only access to your entire account’s
+              third party service) read-only access to your entire account's
               transaction history. This service is not affiliated with Actual in
-              any way. Make sure you’ve read and understand Enable Banking’s{' '}
+              any way. Make sure you've read and understand Enable Banking's{' '}
               <Link
                 variant="external"
                 to="https://enablebanking.com/privacy/"
@@ -347,7 +349,9 @@ export function EnableBankingSetupAccountModal({
   }, [isConfigurationLoading, phase]);
 
   let component = (
-    <WaitingIndicator message="Checking if Enable Banking is available..." />
+    <WaitingIndicator
+      message={t('Checking if Enable Banking is available...')}
+    />
   );
 
   switch (phase) {
@@ -396,6 +400,9 @@ export function EnableBankingSetupAccountModal({
           }}
         />
       );
+      break;
+    default:
+      break;
   }
   return (
     <Modal

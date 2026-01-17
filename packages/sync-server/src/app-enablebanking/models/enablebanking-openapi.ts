@@ -3,7 +3,7 @@
  * Do not make direct changes to the file.
  */
 
-export interface paths {
+export type paths = {
   '/auth': {
     parameters: {
       query?: never;
@@ -248,9 +248,9 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-}
+};
 export type webhooks = Record<string, never>;
-export interface components {
+export type components = {
   schemas: {
     /** ASPSP */
     ASPSP: {
@@ -2400,9 +2400,9 @@ export interface components {
   requestBodies: never;
   headers: never;
   pathItems: never;
-}
+};
 export type $defs = Record<string, never>;
-export interface operations {
+export type operations = {
   initialize_session_auth_post: {
     parameters: {
       query?: never;
@@ -3744,4 +3744,4 @@ export interface operations {
       };
     };
   };
-}
+};
