@@ -9,7 +9,9 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { AccountTransactions } from './AccountTransactions';
+import { vi } from 'vitest';
+
+import { AccountTransactions } from '@desktop-client/components/mobile/accounts/AccountTransactions';
 
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
@@ -163,6 +165,9 @@ describe('AccountTransactions', () => {
 
   it('does not call search when no initial search text', () => {
     renderWithRouter('/accounts/account-1');
+
+    const searchBox = screen.getByPlaceholderText(/search test account/i);
+    expect(searchBox).toHaveValue('');
 
     // Search should not have been called on mount without search text
     expect(mockSearch).not.toHaveBeenCalled();
