@@ -229,6 +229,14 @@ export async function unparse(templates: Template[]): Promise<string> {
           const result = `${prefix} copy from ${template.lookBack} months ago`;
           return result;
         }
+        case 'limit': {
+          if (!template.refill) {
+            // #template 0 up to <limit>
+            return `${prefix} 0 ${limitToString(template)}`;
+          }
+          // #template up to <limit>
+          return `${prefix} ${limitToString(template)}`;
+        }
         default:
           return [];
       }

@@ -21,7 +21,7 @@ export type PeriodicTemplate = {
     period: 'day' | 'week' | 'month' | 'year';
     amount: number;
   };
-  starting: string;
+  starting?: string;
   limit?: {
     amount: number;
     hold: boolean;
@@ -101,6 +101,7 @@ export type LimitTemplate = {
   hold: boolean;
   period: 'daily' | 'weekly' | 'monthly';
   start?: string;
+  refill?: boolean;
   directive: 'template';
   priority: null;
 } & BaseTemplate;

@@ -354,3 +354,37 @@ describe('unparse/parse round-trip', () => {
     expect(parsed).toEqual(reparsed);
   });
 });
+
+describe('unparse limit templates', () => {
+  it('serializes refill limits to notes syntax', async () => {
+    const serialized = await unparse([
+      {
+        type: 'limit',
+        amount: 150,
+        hold: false,
+        period: 'monthly',
+        directive: 'template',
+        priority: null,
+        refill: true,
+      },
+    ]);
+
+    expect(serialized).toBe('#template up to 150');
+  });
+
+  it('serializes non-refill limits with a zero base amount', async () => {
+    const serialized = await unparse([
+      {
+        type: 'limit',
+        amount: 200,
+        hold: false,
+        period: 'monthly',
+        directive: 'template',
+        priority: null,
+        refill: false,
+      },
+    ]);
+
+    expect(serialized).toBe('#template 0 up to 200');
+  });
+});
