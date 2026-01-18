@@ -281,12 +281,8 @@ describe('Auto-hold for future month budgeting', () => {
   });
 
   it('auto-holds new income for nearest overbudgeted future month when current month is not overbudgeted', async () => {
-    const {
-      currentMonth,
-      nextMonth,
-      incomeCategoryId,
-      expenseCategoryId,
-    } = await setupBudget();
+    const { currentMonth, nextMonth, incomeCategoryId, expenseCategoryId } =
+      await setupBudget();
 
     await budgetActions.setBudget({
       category: expenseCategoryId,
@@ -307,12 +303,8 @@ describe('Auto-hold for future month budgeting', () => {
   });
 
   it('does not auto-hold new income when current month is overbudgeted', async () => {
-    const {
-      currentMonth,
-      nextMonth,
-      incomeCategoryId,
-      expenseCategoryId,
-    } = await setupBudget();
+    const { currentMonth, nextMonth, incomeCategoryId, expenseCategoryId } =
+      await setupBudget();
 
     await budgetActions.setBudget({
       category: expenseCategoryId,
