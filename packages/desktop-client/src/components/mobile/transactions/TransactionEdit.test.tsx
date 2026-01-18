@@ -35,12 +35,15 @@ vi.mock('loot-core/platform/client/fetch', () => ({
   send: vi.fn().mockResolvedValue({}),
 }));
 
-const mockAccounts = [
+const mockAccounts: AccountEntity[] = [
   {
     id: 'account-1',
     name: 'Test Account',
     offbudget: 0,
     closed: 0,
+    sort_order: 0,
+    last_reconciled: null,
+    tombstone: 0,
   },
 ] as AccountEntity[];
 
