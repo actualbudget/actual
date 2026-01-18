@@ -159,7 +159,7 @@ function BudgetAutomationList({
           period: 'monthly',
           hold: false,
           refill: false,
-          priority: null,
+          priority: DEFAULT_PRIORITY,
         },
         'limit',
       ),
