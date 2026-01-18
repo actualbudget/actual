@@ -375,6 +375,7 @@ export function ThemeInstaller({
           aria-label={t('Custom Theme CSS')}
           style={{
             height: 120,
+            resize: 'vertical',
           }}
         />
         <View
