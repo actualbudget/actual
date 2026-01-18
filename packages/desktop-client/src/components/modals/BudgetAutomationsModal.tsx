@@ -18,6 +18,7 @@ import type { Template } from 'loot-core/types/models/templates';
 
 import { Warning } from '@desktop-client/components/alerts';
 import { BudgetAutomation } from '@desktop-client/components/budget/goals/BudgetAutomation';
+import { type DisplayTemplateType } from '@desktop-client/components/budget/goals/constants';
 import { DEFAULT_PRIORITY } from '@desktop-client/components/budget/goals/reducer';
 import { useBudgetAutomationCategories } from '@desktop-client/components/budget/goals/useBudgetAutomationCategories';
 import { Link } from '@desktop-client/components/common/Link';
@@ -33,6 +34,89 @@ import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
+type AutomationEntry = {
+  id: string;
+  template: Template;
+  displayType: DisplayTemplateType;
+};
+
+function getDisplayTypeFromTemplate(template: Template): DisplayTemplateType {
+  switch (template.type) {
+    case 'percentage':
+      return 'percentage';
+    case 'schedule':
+      return 'schedule';
+    case 'periodic':
+    case 'simple':
+      return 'week';
+    case 'limit':
+      return 'limit';
+    case 'average':
+    case 'copy':
+      return 'historical';
+    default:
+      return 'week';
+  }
+}
+
+function createAutomationEntry(
+  template: Template,
+  displayType: DisplayTemplateType,
+): AutomationEntry {
+  return {
+    id: uniqueId('automation-'),
+    template,
+    displayType,
+  };
+}
+
+function expandAutomations(templates: Template[]): AutomationEntry[] {
+  const entries: AutomationEntry[] = [];
+
+  templates.forEach(template => {
+    if (template.type === 'limit') {
+      entries.push(
+        createAutomationEntry({ ...template, refill: false }, 'limit'),
+      );
+      if (template.refill) {
+        entries.push(
+          createAutomationEntry({ ...template, refill: true }, 'refill'),
+        );
+      }
+      return;
+    }
+    entries.push(
+      createAutomationEntry(template, getDisplayTypeFromTemplate(template)),
+    );
+  });
+
+  return entries;
+}
+
+function collapseAutomations(entries: AutomationEntry[]): Template[] {
+  const hasRefill = entries.some(entry => entry.displayType === 'refill');
+  const templates: Template[] = [];
+
+  entries.forEach(entry => {
+    if (entry.displayType === 'refill') {
+      return;
+    }
+    if (entry.displayType === 'limit') {
+      if (entry.template.type !== 'limit') {
+        throw new Error('Expected limit template for limit automation');
+      }
+      templates.push({
+        ...entry.template,
+        refill: hasRefill,
+      });
+      return;
+    }
+    templates.push(entry.template);
+  });
+
+  return templates;
+}
+
 function BudgetAutomationList({
   automations,
   setAutomations,
@@ -40,47 +124,67 @@ function BudgetAutomationList({
   categories,
   style,
 }: {
-  automations: Template[];
-  setAutomations: (fn: (prev: Template[]) => Template[]) => void;
+  automations: AutomationEntry[];
+  setAutomations: (fn: (prev: AutomationEntry[]) => AutomationEntry[]) => void;
   schedules: readonly ScheduleEntity[];
   categories: CategoryGroupEntity[];
   style?: CSSProperties;
 }) {
-  const [automationIds, setAutomationIds] = useState(() => {
-    // automations don't have ids, so we need to generate them
-    return automations.map(() => uniqueId('automation-'));
-  });
-
   const onAdd = () => {
-    const newId = uniqueId('automation-');
-    setAutomationIds(prevIds => [...prevIds, newId]);
     setAutomations(prev => [
       ...prev,
-      {
-        type: 'simple',
-        monthly: 5,
-        directive: 'template',
-        priority: DEFAULT_PRIORITY,
-      },
+      createAutomationEntry(
+        {
+          type: 'periodic',
+          amount: 5,
+          period: {
+            period: 'month',
+            amount: 5,
+          },
+          directive: 'template',
+          priority: DEFAULT_PRIORITY,
+        },
+        'week',
+      ),
+    ]);
+  };
+  const onAddLimit = () => {
+    setAutomations(prev => [
+      ...prev,
+      createAutomationEntry(
+        {
+          directive: 'template',
+          type: 'limit',
+          amount: 500,
+          period: 'monthly',
+          hold: false,
+          refill: false,
+          priority: null,
+        },
+        'limit',
+      ),
     ]);
   };
   const onDelete = (index: number) => () => {
     setAutomations(prev => [...prev.slice(0, index), ...prev.slice(index + 1)]);
-    setAutomationIds(prev => [
-      ...prev.slice(0, index),
-      ...prev.slice(index + 1),
-    ]);
   };
 
   const onSave = useCallback(
-    (index: number) => (template: Template) => {
-      setAutomations(prev =>
-        prev.map((oldAutomation, mapIndex) =>
-          mapIndex === index ? template : oldAutomation,
-        ),
-      );
-    },
+    (index: number) =>
+      (template: Template, displayType: DisplayTemplateType) => {
+        setAutomations(prev =>
+          prev.map((oldAutomation, mapIndex) =>
+            mapIndex === index
+              ? { ...oldAutomation, template, displayType }
+              : oldAutomation,
+          ),
+        );
+      },
     [setAutomations],
+  );
+
+  const hasLimitAutomation = automations.some(
+    automation => automation.displayType === 'limit',
   );
 
   return (
@@ -96,12 +200,17 @@ function BudgetAutomationList({
     >
       {automations.map((automation, index) => (
         <BudgetAutomation
-          key={automationIds[index]}
+          key={automation.id}
           onSave={onSave(index)}
           onDelete={onDelete(index)}
-          template={automation}
+          template={automation.template}
+          displayType={automation.displayType}
           categories={categories}
           schedules={schedules}
+          hasLimitAutomation={hasLimitAutomation}
+          onAddLimitAutomation={
+            automation.displayType === 'refill' ? onAddLimit : undefined
+          }
           readOnlyStyle={{
             color: theme.pillText,
             backgroundColor: theme.pillBackground,
@@ -180,12 +289,18 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
-  const [automations, setAutomations] = useState<Record<string, Template[]>>(
-    {},
-  );
+  const [automations, setAutomations] = useState<
+    Record<string, AutomationEntry[]>
+  >({});
   const { loading } = useBudgetAutomations({
     categoryId,
-    onLoaded: setAutomations,
+    onLoaded: result => {
+      const next: Record<string, AutomationEntry[]> = {};
+      for (const [id, templates] of Object.entries(result)) {
+        next[id] = expandAutomations(templates);
+      }
+      setAutomations(next);
+    },
   });
 
   const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
@@ -204,11 +319,12 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
       return;
     }
 
+    const templates = collapseAutomations(automations[categoryId]);
     await send('budget/set-category-automations', {
       categoriesWithTemplates: [
         {
           id: categoryId,
-          templates: automations[categoryId],
+          templates,
         },
       ],
       source: 'ui',
@@ -257,7 +373,9 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
               )}
               <BudgetAutomationList
                 automations={automations[categoryId] || []}
-                setAutomations={(cb: (prev: Template[]) => Template[]) => {
+                setAutomations={(
+                  cb: (prev: AutomationEntry[]) => AutomationEntry[],
+                ) => {
                   setAutomations(prev => ({
                     ...prev,
                     [categoryId]: cb(prev[categoryId] || []),
@@ -285,7 +403,10 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
                     pushModal({
                       modal: {
                         name: 'category-automations-unmigrate',
-                        options: { categoryId, templates },
+                        options: {
+                          categoryId,
+                          templates: collapseAutomations(templates),
+                        },
                       },
                     }),
                   );
