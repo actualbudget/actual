@@ -81,6 +81,3 @@ build/
 
 *storybook.log
 storybook-static
-
-# Claude AI cache
-.claude/
