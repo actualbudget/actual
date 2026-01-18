@@ -11,6 +11,7 @@ import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -827,13 +828,7 @@ export function ImportTransactionsModal({
             </View>
           )}
           {(!error || !error.parsed) && (
-            <View
-              style={{
-                flex: 'unset',
-                height: 300,
-                border: '1px solid ' + theme.tableBorder,
-              }}
-            >
+            <View style={styles.tableContainer}>
               <TableHeader headers={headers} />
 
               {/* @ts-expect-error - ImportTransaction is not a TableItem */}

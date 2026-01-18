@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -328,13 +329,7 @@ export function SelectLinkedAccountsModal({
               ))}
             </View>
           ) : (
-            <View
-              style={{
-                flex: 'unset',
-                height: 300,
-                border: '1px solid ' + theme.tableBorder,
-              }}
-            >
+            <View style={styles.tableContainer}>
               <TableHeader>
                 <Cell value={t('Institution to Sync')} width={175} />
                 <Cell value={t('Bank Account To Sync')} width={175} />
