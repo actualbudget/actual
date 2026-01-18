@@ -4,7 +4,7 @@ import { Method, MethodBox } from './types';
 
 :::warning
 
-Many people mistake the term "API" for a HTTP and/or REST-full API. Actual **does not** expose HTTP endpoints that can be called. We do, however, offer a NPM package - API - that allows interacting with the product programmatically.
+Actual provide a "Code-level API". Many people mistake the term "API" for a HTTP and/or REST-full API. Actual **does not** expose HTTP endpoints that can be called. We do, however, offer a NPM package - API - that allows interacting with the product programmatically.
 
 :::
 
