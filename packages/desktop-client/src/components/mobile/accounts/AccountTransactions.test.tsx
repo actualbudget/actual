@@ -3,15 +3,14 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { vi } from 'vitest';
 
 import {
   type AccountEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { vi } from 'vitest';
-
-import { AccountTransactions } from '@desktop-client/components/mobile/accounts/AccountTransactions';
+import { AccountTransactions } from './AccountTransactions';
 
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
