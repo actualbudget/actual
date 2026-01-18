@@ -12,15 +12,15 @@ import {
 
 import { TransactionEdit } from './TransactionEdit';
 
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { TestProvider } from '@desktop-client/redux/mock';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import { TestProvider } from '@desktop-client/redux/mock';
 
 // Mock hooks and modules
 vi.mock('@desktop-client/hooks/useNavigate');
@@ -35,20 +35,20 @@ vi.mock('loot-core/platform/client/fetch', () => ({
   send: vi.fn().mockResolvedValue({}),
 }));
 
-const mockAccounts: AccountEntity[] = [
+const mockAccounts = [
   {
     id: 'account-1',
     name: 'Test Account',
-    offbudget: false,
-    closed: false,
+    offbudget: 0,
+    closed: 0,
   },
-];
+] as AccountEntity[];
 
 const mockCategories: CategoryEntity[] = [
   {
     id: 'category-1',
     name: 'Food',
-    cat_group: 'group-1',
+    group: 'group-1',
     hidden: false,
   },
 ];
@@ -96,21 +96,31 @@ describe('TransactionEdit navigateBack preserves search text', () => {
 
   it('should fall back to navigate(-1) when no search text in location state', () => {
     // Test the fallback logic
-    const locationState: { previousLocation: { pathname: string }; searchText?: string } = {
+    const locationState: {
+      previousLocation: { pathname: string };
+      searchText?: string;
+    } = {
       previousLocation: { pathname: '/accounts/account-1' },
     };
 
-    const shouldFallback = !(locationState.previousLocation && locationState.searchText);
+    const shouldFallback = !(
+      locationState.previousLocation && locationState.searchText
+    );
     expect(shouldFallback).toBe(true);
   });
 
   it('should fall back to navigate(-1) when no previous location', () => {
     // Test when there's no previous location
-    const locationState: { searchText: string; previousLocation?: { pathname: string } } = {
+    const locationState: {
+      searchText: string;
+      previousLocation?: { pathname: string };
+    } = {
       searchText: 'test',
     };
 
-    const shouldFallback = !(locationState.previousLocation && locationState.searchText);
+    const shouldFallback = !(
+      locationState.previousLocation && locationState.searchText
+    );
     expect(shouldFallback).toBe(true);
   });
 });
@@ -146,11 +156,16 @@ describe('Search text flow integration', () => {
       previousLocation: { pathname: step1_accountPath },
     };
     expect(step6_locationState.searchText).toBe('grocery');
-    expect(step6_locationState.previousLocation.pathname).toBe('/accounts/account-1');
+    expect(step6_locationState.previousLocation.pathname).toBe(
+      '/accounts/account-1',
+    );
 
     // Step 9: Navigation back with search text preserved
-    const step9_backNavigationPath = step6_locationState.previousLocation.pathname;
-    const step9_backNavigationState = { searchText: step6_locationState.searchText };
+    const step9_backNavigationPath =
+      step6_locationState.previousLocation.pathname;
+    const step9_backNavigationState = {
+      searchText: step6_locationState.searchText,
+    };
     expect(step9_backNavigationPath).toBe('/accounts/account-1');
     expect(step9_backNavigationState.searchText).toBe('grocery');
 
@@ -173,8 +188,11 @@ describe('TransactionEdit component rendering', () => {
     vi.mocked(usePayees).mockReturnValue(mockPayees);
     vi.mocked(useDateFormat).mockReturnValue('MM/dd/yyyy');
     vi.mocked(useSyncedPref).mockReturnValue(['7', vi.fn()]);
-    vi.mocked(useLocalPref).mockReturnValue([false, vi.fn()]);
-    vi.mocked(aqlQuery).mockResolvedValue({ data: [mockTransaction] });
+    vi.mocked(useLocalPref).mockReturnValue([false, vi.fn(), vi.fn()]);
+    vi.mocked(aqlQuery).mockResolvedValue({
+      data: [mockTransaction],
+      dependencies: [],
+    });
   });
 
   const renderWithRouter = (
@@ -195,7 +213,10 @@ describe('TransactionEdit component rendering', () => {
       <TestProvider>
         <MemoryRouter initialEntries={initialEntries}>
           <Routes>
-            <Route path="/transactions/:transactionId" element={<TransactionEdit />} />
+            <Route
+              path="/transactions/:transactionId"
+              element={<TransactionEdit />}
+            />
             <Route path="/accounts/:id" element={<div>Account Page</div>} />
           </Routes>
         </MemoryRouter>
