@@ -322,7 +322,7 @@ export function Titlebar({ style }: TitlebarProps) {
 
       <Routes>
         <Route
-          path="/accounts"
+          path="*"
           element={
             location.state?.goBack ? (
               <Button variant="bare" onPress={() => navigate(-1)}>
@@ -340,8 +340,6 @@ export function Titlebar({ style }: TitlebarProps) {
         <Route path="/accounts/:id" element={<AccountSyncCheck />} />
 
         <Route path="/budget" element={<BudgetTitlebar />} />
-
-        <Route path="*" element={null} />
       </Routes>
       <View style={{ flex: 1 }} />
       <SpaceBetween gap={10}>
