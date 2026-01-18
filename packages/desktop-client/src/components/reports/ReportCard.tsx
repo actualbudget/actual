@@ -109,7 +109,11 @@ export function ReportCard({
       <Layout {...layoutProps}>
         <Button
           variant="bare"
-          onPress={isEditing || disableClick ? undefined : () => navigate(to)}
+          onPress={
+            isEditing || disableClick
+              ? undefined
+              : () => navigate(to, { state: { goBack: true } })
+          }
           style={{
             height: '100%',
             width: '100%',
