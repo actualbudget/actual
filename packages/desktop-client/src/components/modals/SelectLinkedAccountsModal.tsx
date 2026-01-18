@@ -329,7 +329,9 @@ export function SelectLinkedAccountsModal({
               ))}
             </View>
           ) : (
-            <View style={styles.tableContainer}>
+            <View
+              style={{ ...styles.tableContainer, height: 300, flex: 'unset' }}
+            >
               <TableHeader>
                 <Cell value={t('Institution to Sync')} width={175} />
                 <Cell value={t('Bank Account To Sync')} width={175} />

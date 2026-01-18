@@ -828,7 +828,9 @@ export function ImportTransactionsModal({
             </View>
           )}
           {(!error || !error.parsed) && (
-            <View style={styles.tableContainer}>
+            <View
+              style={{ ...styles.tableContainer, height: 300, flex: 'unset' }}
+            >
               <TableHeader headers={headers} />
 
               {/* @ts-expect-error - ImportTransaction is not a TableItem */}
