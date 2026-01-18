@@ -143,7 +143,10 @@ export class CategoryTemplateContext {
     if (this.limitMet) return 0;
 
     const t = this.templates.filter(
-      t => t.directive === 'template' && t.priority === priority,
+      t =>
+        t.directive === 'template' &&
+        (t.priority === priority ||
+          (priority === 0 && t.type === 'limit' && t.priority === null)),
     );
     let available = budgetAvail || 0;
     let toBudget = 0;
@@ -337,13 +340,13 @@ export class CategoryTemplateContext {
     // sort the template lines into regular template, goals, and remainder templates
     if (templates) {
       templates.forEach(t => {
-        if (
-          t.directive === 'template' &&
-          t.type !== 'remainder' &&
-          t.type !== 'limit'
-        ) {
+        if (t.directive === 'template' && t.type !== 'remainder') {
           this.templates.push(t);
-          if (t.priority !== null) this.priorities.add(t.priority);
+          if (t.priority !== null) {
+            this.priorities.add(t.priority);
+          } else if (t.type === 'limit') {
+            this.priorities.add(0);
+          }
         } else if (t.directive === 'template' && t.type === 'remainder') {
           this.remainder.push(t);
           this.remainderWeight += t.weight;

@@ -168,6 +168,93 @@ describe('CategoryTemplateContext', () => {
     });
   });
 
+  describe('runRefill', () => {
+    it('should refill up to the monthly limit', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'limit',
+        amount: 150,
+        hold: false,
+        period: 'monthly',
+        refill: true,
+        directive: 'template',
+        priority: null,
+      };
+
+      const instance = new TestCategoryTemplateContext(
+        [template],
+        category,
+        '2024-01',
+        9000,
+        0,
+      );
+
+      const result = await instance.runTemplatesForPriority(0, 10000, 10000);
+      expect(result).toBe(6000); // 150 - 90
+    });
+
+    it('should handle weekly limit refill', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'limit',
+        amount: 100,
+        hold: false,
+        period: 'weekly',
+        start: '2024-01-01',
+        refill: true,
+        directive: 'template',
+        priority: null,
+      };
+
+      const instance = new TestCategoryTemplateContext(
+        [template],
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      const result = await instance.runTemplatesForPriority(0, 100000, 100000);
+      expect(result).toBe(50000); // 5 Mondays * 100
+    });
+
+    it('should handle daily limit refill', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'limit',
+        amount: 10,
+        hold: false,
+        period: 'daily',
+        refill: true,
+        directive: 'template',
+        priority: null,
+      };
+      const instance = new TestCategoryTemplateContext(
+        [template],
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      const result = await instance.runTemplatesForPriority(0, 100000, 100000);
+      expect(result).toBe(31000); // 31 days * 10
+    });
+  });
+
   describe('runCopy', () => {
     let instance: TestCategoryTemplateContext;
 
