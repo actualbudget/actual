@@ -364,12 +364,12 @@ describe('unparse limit templates', () => {
         hold: false,
         period: 'monthly',
         directive: 'template',
-        priority: null,
+        priority: 2,
         refill: true,
       },
     ]);
 
-    expect(serialized).toBe('#template up to 150');
+    expect(serialized).toBe('#template-2 up to 150');
   });
 
   it('serializes non-refill limits with a zero base amount', async () => {

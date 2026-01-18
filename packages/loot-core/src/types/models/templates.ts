@@ -103,7 +103,7 @@ export type LimitTemplate = {
   start?: string;
   refill?: boolean;
   directive: 'template';
-  priority: null;
+  priority: number | null;
 } & BaseTemplate;
 
 type ErrorTemplate = {

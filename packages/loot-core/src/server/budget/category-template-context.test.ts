@@ -183,7 +183,7 @@ describe('CategoryTemplateContext', () => {
         period: 'monthly',
         refill: true,
         directive: 'template',
-        priority: null,
+        priority: 1,
       };
 
       const instance = new TestCategoryTemplateContext(
@@ -194,7 +194,7 @@ describe('CategoryTemplateContext', () => {
         0,
       );
 
-      const result = await instance.runTemplatesForPriority(0, 10000, 10000);
+      const result = await instance.runTemplatesForPriority(1, 10000, 10000);
       expect(result).toBe(6000); // 150 - 90
     });
 
@@ -213,7 +213,7 @@ describe('CategoryTemplateContext', () => {
         start: '2024-01-01',
         refill: true,
         directive: 'template',
-        priority: null,
+        priority: 1,
       };
 
       const instance = new TestCategoryTemplateContext(
@@ -223,7 +223,7 @@ describe('CategoryTemplateContext', () => {
         0,
         0,
       );
-      const result = await instance.runTemplatesForPriority(0, 100000, 100000);
+      const result = await instance.runTemplatesForPriority(1, 100000, 100000);
       expect(result).toBe(50000); // 5 Mondays * 100
     });
 
@@ -241,7 +241,7 @@ describe('CategoryTemplateContext', () => {
         period: 'daily',
         refill: true,
         directive: 'template',
-        priority: null,
+        priority: 1,
       };
       const instance = new TestCategoryTemplateContext(
         [template],
@@ -250,7 +250,7 @@ describe('CategoryTemplateContext', () => {
         0,
         0,
       );
-      const result = await instance.runTemplatesForPriority(0, 100000, 100000);
+      const result = await instance.runTemplatesForPriority(1, 100000, 100000);
       expect(result).toBe(31000); // 31 days * 10
     });
   });

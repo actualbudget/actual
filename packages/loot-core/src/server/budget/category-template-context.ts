@@ -143,10 +143,7 @@ export class CategoryTemplateContext {
     if (this.limitMet) return 0;
 
     const t = this.templates.filter(
-      t =>
-        t.directive === 'template' &&
-        (t.priority === priority ||
-          (priority === 0 && t.type === 'limit' && t.priority === null)),
+      t => t.directive === 'template' && t.priority === priority,
     );
     let available = budgetAvail || 0;
     let toBudget = 0;
@@ -162,10 +159,7 @@ export class CategoryTemplateContext {
           break;
         }
         case 'limit': {
-          newBudget = CategoryTemplateContext.runRefill(
-            template,
-            this.limitAmount,
-          );
+          newBudget = CategoryTemplateContext.runRefill(template, this);
           break;
         }
         case 'copy': {
@@ -342,11 +336,7 @@ export class CategoryTemplateContext {
       templates.forEach(t => {
         if (t.directive === 'template' && t.type !== 'remainder') {
           this.templates.push(t);
-          if (t.priority !== null) {
-            this.priorities.add(t.priority);
-          } else if (t.type === 'limit') {
-            this.priorities.add(0);
-          }
+          if (t.priority !== null) this.priorities.add(t.priority);
         } else if (t.directive === 'template' && t.type === 'remainder') {
           this.remainder.push(t);
           this.remainderWeight += t.weight;
@@ -563,9 +553,12 @@ export class CategoryTemplateContext {
     }
   }
 
-  static runRefill(template: LimitTemplate, limit: number): number {
+  static runRefill(
+    template: LimitTemplate,
+    templateContext: CategoryTemplateContext,
+  ): number {
     if (template.refill) {
-      return limit;
+      return templateContext.limitAmount - templateContext.fromLastMonth;
     } else {
       return 0;
     }
