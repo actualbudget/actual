@@ -8,7 +8,13 @@ import {
   useState,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation, useParams, useSearchParams } from 'react-router';
+import {
+  useLocation,
+  useNavigate as useNavigateReactRouter,
+  useParams,
+  useSearchParams,
+  type Location,
+} from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { SvgSplit } from '@actual-app/components/icons/v0';
@@ -545,6 +551,7 @@ type TransactionEditInnerProps = {
   payees: PayeeEntity[];
   dateFormat: string;
   transactions: TransactionEntity[];
+  navigateBack: () => void;
   onSave: (transactions: TransactionEntity[]) => void;
   onUpdate: <Field extends keyof TransactionEntity>(
     transaction: TransactionEntity,
@@ -564,6 +571,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     payees,
     dateFormat,
     transactions: unserializedTransactions,
+    navigateBack,
     onSave,
     onUpdate,
     onDelete,
@@ -682,7 +690,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         }
 
         onSave(transactionsToSave);
-        navigate(-1);
+        navigateBack();
       };
 
       const today = monthUtils.currentDay();
@@ -740,7 +748,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                       },
                     }),
                   );
-                  navigate(-1);
+                  navigateBack();
                 },
                 onCancel: onConfirmSave,
               },
@@ -772,7 +780,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     }, [
       isAdding,
       dispatch,
-      navigate,
+      navigateBack,
       onSave,
       unserializedTransactions,
       upcomingLength,
@@ -948,7 +956,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                       return;
                     }
 
-                    navigate(-1);
+                    navigateBack();
                   },
                 },
               },
@@ -974,7 +982,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       },
       [
         dispatch,
-        navigate,
+        navigateBack,
         onClearActiveEdit,
         onDelete,
         unserializedTransactions,
@@ -1027,7 +1035,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   : t('Transaction')
                 : title
             }
-            leftContent={<MobileBackButton />}
+            leftContent={<MobileBackButton onPress={navigateBack} />}
           />
         }
         footer={
@@ -1308,16 +1316,41 @@ function TransactionEditUnconnected({
 }: TransactionEditUnconnectedProps) {
   const { t } = useTranslation();
   const { transactionId } = useParams();
-  const { state: locationState } = useLocation();
+  const location = useLocation();
+  const locationState = location.state as {
+    searchText?: string;
+    previousLocation?: Location;
+    accountId?: string;
+    categoryId?: string;
+  } | null;
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  // Use raw React Router navigate to bypass custom useNavigate's back-navigation optimization
+  const navigateRaw = useNavigateReactRouter();
   const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
   const [fetchedTransactions, setFetchedTransactions] = useState<
     TransactionEntity[]
   >([]);
   const isAdding = useRef(false);
   const isDeleted = useRef(false);
+
+  // Navigate back while preserving search text in location state
+  // Uses raw React Router navigate to ensure state is properly passed
+  const navigateBack = useCallback(() => {
+    const searchText = locationState?.searchText;
+    const previousLocation = locationState?.previousLocation;
+
+    if (previousLocation && searchText) {
+      // Navigate back to the previous location with the search text preserved
+      navigateRaw(previousLocation.pathname, {
+        state: { searchText },
+      });
+    } else {
+      // Fall back to regular back navigation
+      navigateRaw(-1);
+    }
+  }, [navigateRaw, locationState?.searchText, locationState?.previousLocation]);
 
   const searchParamCategory = useMemo(
     () => categories.find(c => c.name === searchParams.get('category'))?.id,
@@ -1549,7 +1582,7 @@ function TransactionEditUnconnected({
         header={
           <MobilePageHeader
             title={t('New Transaction')}
-            leftContent={<MobileBackButton />}
+            leftContent={<MobileBackButton onPress={navigateBack} />}
           />
         }
         padding={0}
@@ -1600,7 +1633,7 @@ function TransactionEditUnconnected({
         header={
           <MobilePageHeader
             title={t('New Transaction')}
-            leftContent={<MobileBackButton />}
+            leftContent={<MobileBackButton onPress={navigateBack} />}
           />
         }
         padding={0}
@@ -1663,6 +1696,7 @@ function TransactionEditUnconnected({
         accounts={accounts}
         payees={payees}
         dateFormat={dateFormat}
+        navigateBack={navigateBack}
         onUpdate={onUpdate}
         onSave={onSave}
         onDelete={onDelete}

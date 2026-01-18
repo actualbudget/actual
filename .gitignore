@@ -76,3 +76,6 @@ build/
 
 # Lage cache
 .lage/
+
+# Claude AI cache
+.claude/
