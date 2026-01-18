@@ -412,8 +412,9 @@ export function ThemeInstaller({
           placeholder={t(':root {\n  --color-sidebarItemSelected: #007bff;\n}')}
           aria-label={t('Custom Theme CSS')}
           style={{
-            height: 120,
             ...baseInputStyle,
+            height: 120,
+            resize: 'vertical',
           }}
         />
         <View
