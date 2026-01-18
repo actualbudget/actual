@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router';
 
 import { listen, send } from 'loot-core/platform/client/fetch';
 import { type Query } from 'loot-core/shared/query';
@@ -57,14 +56,6 @@ function TransactionListWithPreviews({
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Get search text from location state (restored when navigating back)
-  const locationState = location.state as { searchText?: string } | null;
-  const initialSearchText = locationState?.searchText ?? '';
-
-  // Track current search text for navigation state
-  const searchTextRef = useRef(initialSearchText);
 
   const baseTransactionsQuery = useCallback(
     () =>
@@ -77,29 +68,11 @@ function TransactionListWithPreviews({
     baseTransactionsQuery(),
   );
 
-  const { isSearching, search: baseOnSearch } = useTransactionsSearch({
+  const { isSearching, search: onSearch } = useTransactionsSearch({
     updateQuery: setTransactionsQuery,
     resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
     dateFormat,
   });
-
-  // Wrap onSearch to track the current search text
-  const onSearch = useCallback(
-    (text: string) => {
-      searchTextRef.current = text;
-      baseOnSearch(text);
-    },
-    [baseOnSearch],
-  );
-
-  // Apply initial search text on mount if present
-  useEffect(() => {
-    if (initialSearchText) {
-      baseOnSearch(initialSearchText);
-    }
-    // Only run on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const shouldCalculateRunningBalances =
     showRunningBalances === 'true' && !!account?.id && !isSearching;
@@ -177,10 +150,7 @@ function TransactionListWithPreviews({
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {
       if (!isPreviewId(transaction.id)) {
-        // Pass search text in state so it can be restored when navigating back
-        navigate(`/transactions/${transaction.id}`, {
-          state: { searchText: searchTextRef.current },
-        });
+        navigate(`/transactions/${transaction.id}`);
       } else {
         dispatch(
           pushModal({
@@ -262,7 +232,6 @@ function TransactionListWithPreviews({
         accountName: account.name,
       })}
       onSearch={onSearch}
-      defaultSearchText={initialSearchText}
       onOpenTransaction={onOpenTransaction}
       onRefresh={onRefresh}
     />

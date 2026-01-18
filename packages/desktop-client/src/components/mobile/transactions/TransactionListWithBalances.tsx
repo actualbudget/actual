@@ -32,15 +32,13 @@ import type {
 type TransactionSearchInputProps = {
   placeholder: string;
   onSearch: TransactionListWithBalancesProps['onSearch'];
-  defaultValue?: string;
 };
 
 function TransactionSearchInput({
   placeholder,
   onSearch,
-  defaultValue = '',
 }: TransactionSearchInputProps) {
-  const [text, setText] = useState(defaultValue);
+  const [text, setText] = useState('');
 
   return (
     <View
@@ -91,7 +89,6 @@ type TransactionListWithBalancesProps = {
   runningBalances?: Map<TransactionEntity['id'], IntegerAmount>;
   searchPlaceholder: string;
   onSearch: (searchText: string) => void;
-  defaultSearchText?: string;
   isLoadingMore: boolean;
   onLoadMore: () => void;
   onOpenTransaction: (transaction: TransactionEntity) => void;
@@ -109,7 +106,6 @@ export function TransactionListWithBalances({
   runningBalances,
   searchPlaceholder = 'Search...',
   onSearch,
-  defaultSearchText,
   isLoadingMore,
   onLoadMore,
   onOpenTransaction,
@@ -146,7 +142,6 @@ export function TransactionListWithBalances({
           <TransactionSearchInput
             placeholder={searchPlaceholder}
             onSearch={onSearch}
-            defaultValue={defaultSearchText}
           />
         </View>
         <PullToRefresh

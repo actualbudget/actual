@@ -1,21 +1,24 @@
-import React, { useRef } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { type AccountEntity, type TransactionEntity } from 'loot-core/types/models';
+import {
+  type AccountEntity,
+  type TransactionEntity,
+} from 'loot-core/types/models';
 
 import { AccountTransactions } from './AccountTransactions';
 
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useTransactions } from '@desktop-client/hooks/useTransactions';
-import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { ScrollProvider } from '@desktop-client/hooks/useScrollListener';
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useTransactions } from '@desktop-client/hooks/useTransactions';
+import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
 import { TestProvider } from '@desktop-client/redux/mock';
 
 // Mock hooks
@@ -27,16 +30,16 @@ vi.mock('@desktop-client/hooks/useSyncedPref');
 vi.mock('@desktop-client/hooks/useAccountPreviewTransactions');
 vi.mock('@desktop-client/hooks/useDateFormat');
 vi.mock('@desktop-client/hooks/useCachedSchedules', () => ({
-  SchedulesProvider: ({ children }: { children: React.ReactNode }) => children,
+  SchedulesProvider: ({ children }: { children: ReactNode }) => children,
   useCachedSchedules: () => ({ isLoading: false, schedules: [] }),
 }));
 
-const mockAccount: AccountEntity = {
+const mockAccount = {
   id: 'account-1',
   name: 'Test Account',
-  offbudget: false,
-  closed: false,
-};
+  offbudget: 0,
+  closed: 0,
+} as AccountEntity;
 
 const mockTransactions: TransactionEntity[] = [
   {
@@ -62,13 +65,11 @@ const mockTransactions: TransactionEntity[] = [
 ];
 
 // Wrapper component that provides ScrollProvider with a ref
-function TestWrapper({ children }: { children: React.ReactNode }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+function TestWrapper({ children }: { children: ReactNode }) {
+  const scrollRef = useRef<HTMLDivElement>(null!);
   return (
     <div ref={scrollRef} style={{ overflow: 'auto', height: '100vh' }}>
-      <ScrollProvider scrollableRef={scrollRef}>
-        {children}
-      </ScrollProvider>
+      <ScrollProvider scrollableRef={scrollRef}>{children}</ScrollProvider>
     </div>
   );
 }
@@ -148,20 +149,6 @@ describe('AccountTransactions', () => {
     expect(mockSearch).toHaveBeenCalledWith('groce');
     expect(mockSearch).toHaveBeenCalledWith('grocer');
     expect(mockSearch).toHaveBeenCalledWith('grocery');
-  });
-
-  it('restores search text from location state on mount', async () => {
-    // Render with search text in location state (simulating return from transaction)
-    renderWithRouter('/accounts/account-1', { searchText: 'restored search' });
-
-    // The search input should have the restored value
-    await waitFor(() => {
-      const searchBox = screen.getByPlaceholderText(/search test account/i);
-      expect(searchBox).toHaveValue('restored search');
-    });
-
-    // The search function should have been called with the restored text
-    expect(mockSearch).toHaveBeenCalledWith('restored search');
   });
 
   it('does not restore search text when location state is empty', () => {
