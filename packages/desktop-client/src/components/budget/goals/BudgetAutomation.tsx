@@ -11,6 +11,7 @@ import { type Template } from 'loot-core/types/models/templates';
 
 import { BudgetAutomationEditor } from './BudgetAutomationEditor';
 import { BudgetAutomationReadOnly } from './BudgetAutomationReadOnly';
+import { type DisplayTemplateType } from './constants';
 import { DEFAULT_PRIORITY, getInitialState, templateReducer } from './reducer';
 
 import { useEffectAfterMount } from '@desktop-client/hooks/useEffectAfterMount';
@@ -19,17 +20,24 @@ type BudgetAutomationProps = {
   categories: CategoryGroupEntity[];
   schedules: readonly ScheduleEntity[];
   template?: Template;
-  onSave?: (template: Template) => void;
+  displayType?: DisplayTemplateType;
+  onSave?: (template: Template, displayType: DisplayTemplateType) => void;
   onDelete?: () => void;
   style?: CSSProperties;
   readOnlyStyle?: CSSProperties;
   inline?: boolean;
+  hasLimitAutomation?: boolean;
+  onAddLimitAutomation?: () => void;
 };
 
 const DEFAULT_TEMPLATE: Template = {
   directive: 'template',
-  type: 'simple',
-  monthly: 0,
+  type: 'periodic',
+  amount: 0,
+  period: {
+    period: 'month',
+    amount: 1,
+  },
   priority: DEFAULT_PRIORITY,
 };
 
@@ -41,19 +49,21 @@ export const BudgetAutomation = ({
   readOnlyStyle,
   style,
   template,
+  displayType,
   inline = false,
+  hasLimitAutomation,
+  onAddLimitAutomation,
 }: BudgetAutomationProps) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  const [state, dispatch] = useReducer(
-    templateReducer,
-    getInitialState(template ?? DEFAULT_TEMPLATE),
+  const [state, dispatch] = useReducer(templateReducer, null, () =>
+    getInitialState(template ?? DEFAULT_TEMPLATE, displayType),
   );
 
   const onSaveRef = useRef(onSave);
   onSaveRef.current = onSave;
   useEffectAfterMount(() => {
-    onSaveRef.current?.(state.template);
+    onSaveRef.current?.(state.template, state.displayType);
   }, [state]);
 
   const categoryNameMap = useMemo(() => {
@@ -91,6 +101,8 @@ export const BudgetAutomation = ({
           dispatch={dispatch}
           schedules={schedules}
           categories={categories}
+          hasLimitAutomation={hasLimitAutomation}
+          onAddLimitAutomation={onAddLimitAutomation}
         />
       )}
     </SpaceBetween>

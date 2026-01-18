@@ -17,28 +17,9 @@ import { Column, Setting } from './UI';
 import { Checkbox } from '@desktop-client/components/forms';
 import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useDaysOfWeek } from '@desktop-client/hooks/useDaysOfWeek';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
-// Follows Pikaday 'firstDay' numbering
-// https://github.com/Pikaday/Pikaday
-function useDaysOfWeek() {
-  const { t } = useTranslation();
-
-  const daysOfWeek: {
-    value: SyncedPrefs['firstDayOfWeekIdx'];
-    label: string;
-  }[] = [
-    { value: '0', label: t('Sunday') },
-    { value: '1', label: t('Monday') },
-    { value: '2', label: t('Tuesday') },
-    { value: '3', label: t('Wednesday') },
-    { value: '4', label: t('Thursday') },
-    { value: '5', label: t('Friday') },
-    { value: '6', label: t('Saturday') },
-  ] as const;
-
-  return { daysOfWeek };
-}
 const dateFormats: { value: SyncedPrefs['dateFormat']; label: string }[] = [
   { value: 'MM/dd/yyyy', label: 'MM/DD/YYYY' },
   { value: 'dd/MM/yyyy', label: 'DD/MM/YYYY' },
@@ -61,7 +42,7 @@ export function FormatSettings() {
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction, setHideFractionPref] = useSyncedPref('hideFraction');
 
-  const { daysOfWeek } = useDaysOfWeek();
+  const daysOfWeek = useDaysOfWeek();
 
   const selectButtonClassName = css({
     '&[data-hovered]': {
@@ -125,7 +106,7 @@ export function FormatSettings() {
             <Select
               value={firstDayOfWeekIdx}
               onChange={idx => setFirstDayOfWeekIdxPref(idx)}
-              options={daysOfWeek.map(f => [f.value, f.label])}
+              options={Object.entries(daysOfWeek)}
               className={selectButtonClassName}
             />
           </Column>
