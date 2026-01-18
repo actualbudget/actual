@@ -102,9 +102,7 @@ export type LimitTemplate = {
   period: 'daily' | 'weekly' | 'monthly';
   start?: string;
   refill?: boolean;
-  directive: 'template';
-  priority: number | null;
-} & BaseTemplate;
+} & BaseTemplateWithPriority;
 
 type ErrorTemplate = {
   type: 'error';
