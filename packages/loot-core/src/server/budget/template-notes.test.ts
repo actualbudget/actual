@@ -380,7 +380,7 @@ describe('unparse limit templates', () => {
         hold: false,
         period: 'monthly',
         directive: 'template',
-        priority: null,
+        priority: 0,
         refill: false,
       },
     ]);
