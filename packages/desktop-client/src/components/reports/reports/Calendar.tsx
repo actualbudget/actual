@@ -737,7 +737,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                   </Button>
                   <View
                     style={{
-                      height: '100%',
+                      flex: 1,
                       width: '100%',
                       overflow: 'auto',
                     }}
