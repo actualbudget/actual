@@ -163,11 +163,11 @@ async function getPayeeLocations({
 }: {
   payee_id?: PayeeEntity['id'];
 } = {}): Promise<PayeeLocationEntity[]> {
-  let query = 'SELECT * FROM payee_locations';
+  let query = 'SELECT * FROM payee_locations WHERE tombstone IS NOT 1';
   let params: string[] = [];
 
   if (payee_id) {
-    query += ' WHERE payee_id = ?';
+    query += ' AND payee_id = ?';
     params = [payee_id];
   }
 
