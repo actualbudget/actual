@@ -38,7 +38,7 @@ modifier
 
 percentOrNumber
   = value:$(d+ ('.' (d+)?)?) _? '%' { return { value: value, type: 'percent' } }
-  / value:$(d+ ('.' (d+)?)?) { return { value: value, type: 'amount' } }
+  / value:$(d+ ('.' (d+)?)?) { return { value: value, type: 'fixed' } }
 
 repeat 'repeat interval'
   = 'month'i { return { annual: false }}

@@ -664,7 +664,7 @@ describe('CategoryTemplateContext', () => {
         directive: 'template',
         priority: 1,
         adjustment: 0,
-        adjustmentType: 'amount',
+        adjustmentType: 'fixed',
       };
 
       vi.mocked(actions.getSheetValue)
@@ -686,7 +686,7 @@ describe('CategoryTemplateContext', () => {
         directive: 'template',
         priority: 1,
         adjustment: 11,
-        adjustmentType: 'amount',
+        adjustmentType: 'fixed',
       };
 
       vi.mocked(actions.getSheetValue)
@@ -708,7 +708,7 @@ describe('CategoryTemplateContext', () => {
         directive: 'template',
         priority: 1,
         adjustment: -1,
-        adjustmentType: 'amount',
+        adjustmentType: 'fixed',
       };
 
       vi.mocked(actions.getSheetValue)

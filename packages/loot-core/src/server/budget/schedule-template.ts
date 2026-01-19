@@ -59,7 +59,7 @@ async function createScheduleList(
           scheduleAmount = scheduleAmount * adjustmentFactor;
           break;
         }
-        case 'amount': {
+        case 'fixed': {
           const sign = scheduleAmount < 0 ? -1 : 1;
           scheduleAmount += 100 * sign * template.adjustment;
           break;

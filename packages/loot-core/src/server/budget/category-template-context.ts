@@ -749,13 +749,13 @@ export class CategoryTemplateContext {
           average /= 100;
           break;
         }
-        case 'amount': {
+        case 'fixed': {
           average += 100 * template.adjustment;
           break;
         }
 
         default:
-        //no valid adjustment was found,
+        //no valid adjustment was found
       }
     }
 
