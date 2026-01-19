@@ -17,7 +17,7 @@
   {
     "name": "Simple Dark",
     "repo": "Juulz/simple-dark",
-    "colors": ["#222222", "#063446", "#14aeeb", "#434343", "#edbe5e", "#9446ed"]
+    "colors": ["#222222", "#063446", "#14aeeb", "#434343", "#edbe5e", "#d9e2ec"]
   },
   {
     "name": "Matrix",
@@ -32,6 +32,6 @@
   {
     "name": "Okabe Ito",
     "repo": "Juulz/okabe-ito",
-    "colors": ["#222222", "#141520", "#e69f00", "#56b4e9", "#9446ed", "#00304d"]
+    "colors": ["#222222", "#141520", "#e69f00", "#56b4e9", "#b88115", "#00304d"]
   }
 ]
