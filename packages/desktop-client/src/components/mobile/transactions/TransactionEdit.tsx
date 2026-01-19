@@ -1416,8 +1416,7 @@ function TransactionEditUnconnected({
             locationState?.accountId ||
             lastTransaction?.account ||
             null,
-          category:
-            searchParamCategory || locationState?.categoryId || null,
+          category: searchParamCategory || locationState?.categoryId || null,
           amount: -amountToInteger(
             parseFloat(searchParams.get('amount') || '') || 0,
           ),
