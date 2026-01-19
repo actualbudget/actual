@@ -161,8 +161,9 @@ function upsertBlock(existingBody, block, markers) {
   }
 
   const separator = body.endsWith('\n') ? '\n' : '\n\n';
-  const boundary =
-    body.includes(BOT_BOUNDARY_MARKER) ? '' : `${BOT_BOUNDARY_TEXT}\n\n`;
+  const boundary = body.includes(BOT_BOUNDARY_MARKER)
+    ? ''
+    : `${BOT_BOUNDARY_TEXT}\n\n`;
   return `${body}${separator}${boundary}${block.trim()}`;
 }
 
