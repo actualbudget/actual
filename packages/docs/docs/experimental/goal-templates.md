@@ -425,12 +425,12 @@ Below is a table of the variations of the Schedule template.
 ### Average Type
 
 The Average template allows you to budget based on the average amount spent over a number of months.
-Along with the flexibility to choose a number of months beyond the menu built-ins (3 months, 6 months); there is additional functionality to adjust the budgetted amount from the average by a percentage or by a fixed whole number.
+Along with the flexibility to choose a number of months beyond the menu built-ins (3 months, 6 months); there is additional functionality to adjust the budgeted amount from the average by a percentage or by a fixed whole number.
 
 | Syntax                       | Description                                                                                                                                                                 | Example Application                                                                   |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | `#template average {number} months` | Budget the average amount spent over the last 6 months. Can set the number to any number > 0. Matches the existing option on the budget page but with flexible month ranges | Try to budget only what you need to spend based on the last 6 months of spending data |
-| `#template average {number} months [{increase/decrease} {number\|number%}]` | Budget the average amount spent over the last 6 months. Plus a 10% buffer ontop. | Try to budget just a little bit more than what you need to spend for caution. |
+| `#template average {number} months [{increase/decrease} {number\|number%}]` | Budget the average amount spent over the last 6 months. Plus a 10% buffer on top. | Try to budget just a little bit more than what you need to spend for caution. |
 
 #### Examples
 
