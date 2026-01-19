@@ -7,6 +7,7 @@ import { ThemeInstaller } from './ThemeInstaller';
 import { useThemeCatalog } from '@desktop-client/hooks/useThemeCatalog';
 import {
   fetchThemeCss,
+  generateThemeId,
   validateThemeCss,
 } from '@desktop-client/style/customThemes';
 
@@ -16,6 +17,13 @@ vi.mock('@desktop-client/style/customThemes', async () => {
     ...actual,
     fetchThemeCss: vi.fn(),
     validateThemeCss: vi.fn(),
+    generateThemeId: vi.fn((repo: string) => {
+      // Generate predictable IDs for testing
+      if (repo.includes('demo-theme')) return 'theme-demo123';
+      if (repo.includes('ocean-theme')) return 'theme-ocean456';
+      if (repo.includes('forest-theme')) return 'theme-forest789';
+      return `theme-${repo.replace(/[^a-z0-9]/gi, '')}`;
+    }),
     normalizeGitHubRepo: vi.fn((repo: string) =>
       repo.startsWith('http') ? repo : `https://github.com/${repo}`,
     ),
@@ -60,6 +68,13 @@ describe('ThemeInstaller', () => {
     mockOnClose.mockClear();
     vi.mocked(fetchThemeCss).mockResolvedValue(mockValidCss);
     vi.mocked(validateThemeCss).mockImplementation(css => css.trim());
+    // Reset generateThemeId mock to default behavior
+    vi.mocked(generateThemeId).mockImplementation((repo: string) => {
+      if (repo.includes('demo-theme')) return 'theme-demo123';
+      if (repo.includes('ocean-theme')) return 'theme-ocean456';
+      if (repo.includes('forest-theme')) return 'theme-forest789';
+      return `theme-${repo.replace(/[^a-z0-9]/gi, '')}`;
+    });
 
     // Mock useThemeCatalog to return catalog data immediately
     vi.mocked(useThemeCatalog).mockReturnValue({
@@ -189,6 +204,66 @@ describe('ThemeInstaller', () => {
 
       // Since error is displayed, onInstall should NOT be called
       expect(testOnInstall).not.toHaveBeenCalled();
+    });
+
+    it('shows error styling on erroring theme and keeps previous active theme active', async () => {
+      const user = userEvent.setup();
+      const validationError = 'Invalid CSS format';
+
+      // Set up a previously installed theme (Ocean Blue)
+      const installedTheme = {
+        id: 'theme-ocean456',
+        name: 'Ocean Blue',
+        repo: 'https://github.com/actualbudget/ocean-theme',
+        cssContent: mockValidCss,
+      };
+
+      // Make validation fail for Demo Theme
+      vi.mocked(validateThemeCss).mockImplementationOnce(() => {
+        throw new Error(validationError);
+      });
+
+      render(
+        <ThemeInstaller
+          onInstall={mockOnInstall}
+          onClose={mockOnClose}
+          installedTheme={installedTheme}
+        />,
+      );
+
+      // Click on Demo Theme which will fail validation
+      const demoThemeButton = screen.getByRole('button', {
+        name: 'Demo Theme',
+      });
+      await user.click(demoThemeButton);
+
+      // Wait for error to appear
+      await waitFor(() => {
+        expect(screen.getByText(validationError)).toBeInTheDocument();
+      });
+
+      // Verify erroring theme (Demo Theme) has error styling
+      await waitFor(() => {
+        const demoButton = screen.getByRole('button', { name: 'Demo Theme' });
+        const demoButtonStyle = demoButton.getAttribute('style') || '';
+        // Check that error styling is applied - should contain CSS variable for errorText in border
+        // and errorBackground in backgroundColor
+        // The style will contain something like: border: "2px solid var(--color-errorText)"
+        expect(demoButtonStyle).toMatch(/errorText/);
+        expect(demoButtonStyle).toMatch(/errorBackground/);
+      });
+
+      // Verify previously active theme (Ocean Blue) still shows as active (not the erroring one)
+      const oceanButton = screen.getByRole('button', { name: 'Ocean Blue' });
+      const oceanButtonStyle = oceanButton.getAttribute('style') || '';
+      // Active theme should have buttonPrimaryBackground in border (indicating it's active)
+      expect(oceanButtonStyle).toMatch(/buttonPrimaryBackground/);
+      // Should not have error styling - the previous active theme should remain active
+      expect(oceanButtonStyle).not.toMatch(/errorText/);
+      expect(oceanButtonStyle).not.toMatch(/errorBackground/);
+
+      // Verify onInstall was not called (theme installation failed)
+      expect(mockOnInstall).not.toHaveBeenCalled();
     });
 
     it('displays generic error when fetchThemeCss fails with non-Error object', async () => {
