@@ -1,5 +1,4 @@
 import '@testing-library/jest-dom';
-
 import { installPolyfills } from './polyfills';
 import { resetMockStore } from './redux/mock';
 

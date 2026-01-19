@@ -39,7 +39,6 @@ import {
 } from 'loot-core/shared/months';
 
 import 'pikaday/css/pikaday.css';
-
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
 
