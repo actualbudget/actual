@@ -53,13 +53,13 @@ async function setupBudget({ incomeAmount = 10000 } = {}) {
   await sheet.waitOnSpreadsheet();
 
   expect.soft(getMonthValues(CURRENT_MONTH)).toEqual({
-      availableFunds: incomeAmount,
-      lastMonthOverspent: 0,
-      totalBudgeted: -0,
-      buffered: 0,
-      bufferedAuto: 0,
-      toBudget: incomeAmount,
-    });
+    availableFunds: incomeAmount,
+    lastMonthOverspent: 0,
+    totalBudgeted: -0,
+    buffered: 0,
+    bufferedAuto: 0,
+    toBudget: incomeAmount,
+  });
 
   return {
     currentMonth: CURRENT_MONTH,
