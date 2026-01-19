@@ -4,7 +4,8 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
-  | 'crossoverReport';
+  | 'crossoverReport'
+  | 'payeeLocations';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.

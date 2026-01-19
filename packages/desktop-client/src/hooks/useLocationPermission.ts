@@ -4,17 +4,21 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
 import { locationService } from 'loot-core/shared/location';
 
+import { useFeatureFlag } from './useFeatureFlag';
+
 /**
  * Custom hook to manage geolocation permission status
+ * Currently behind the payeeLocations feature flag
  *
  * @returns boolean indicating whether geolocation access is granted
  */
 export function useLocationPermission(): boolean {
+  const payeeLocationsEnabled = useFeatureFlag('payeeLocations');
   const { isNarrowWidth } = useResponsive();
   const [locationAccess, setLocationAccess] = useState(false);
 
   useEffect(() => {
-    if (!isNarrowWidth) {
+    if (!payeeLocationsEnabled || !isNarrowWidth) {
       setLocationAccess(false);
       return;
     }
@@ -89,7 +93,7 @@ export function useLocationPermission(): boolean {
         permissionStatus.removeEventListener('change', handleChange);
       }
     };
-  }, [isNarrowWidth]);
+  }, [payeeLocationsEnabled, isNarrowWidth]);
 
   return locationAccess;
 }

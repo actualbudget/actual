@@ -69,7 +69,9 @@ export function useNearbyPayees(locationAccess: boolean = false) {
     };
   }, [dispatch, isInitialMount, isNearbyPayeesDirty, locationAccess]);
 
-  return useSelector(state => state.payees.nearbyPayees);
+  return useSelector(state =>
+    locationAccess ? state.payees.nearbyPayees : [],
+  );
 }
 
 export function usePayees() {

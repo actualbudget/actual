@@ -202,6 +202,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>Crossover Report</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="payeeLocations"
+              feedbackLink="https://github.com/actualbudget/actual/issues/6706"
+            >
+              <Trans>Payee Locations</Trans>
+            </FeatureToggle>
             {showServerPrefs && (
               <ServerFeatureToggle
                 prefName="flags.plugins"

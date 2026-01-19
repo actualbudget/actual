@@ -54,7 +54,6 @@ export class BrowserGeolocationAdapter implements GeolocationAdapter {
         });
       },
     );
-
     return {
       latitude: position.coords.latitude,
       longitude: position.coords.longitude,
