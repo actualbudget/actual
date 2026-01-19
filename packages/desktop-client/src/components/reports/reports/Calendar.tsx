@@ -64,6 +64,7 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { DisplayPayeeProvider } from '@desktop-client/hooks/useDisplayPayee';
 import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
@@ -743,13 +744,15 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                       overflow: 'auto',
                     }}
                   >
-                    <TransactionListMobile
-                      isLoading={false}
-                      onLoadMore={loadMoreTransactions}
-                      transactions={allTransactions}
-                      onOpenTransaction={onOpenTransaction}
-                      isLoadingMore={false}
-                    />
+                    <DisplayPayeeProvider transactions={allTransactions}>
+                      <TransactionListMobile
+                        isLoading={false}
+                        onLoadMore={loadMoreTransactions}
+                        transactions={allTransactions}
+                        onOpenTransaction={onOpenTransaction}
+                        isLoadingMore={false}
+                      />
+                    </DisplayPayeeProvider>
                   </View>
                 </animated.div>
               )}
