@@ -49,9 +49,9 @@ __metadata:
     "@emotion/css": "npm:^11.13.5"
     "@svgr/cli": "npm:^8.1.0"
     "@types/react": "npm:^19.2.5"
-    react: "npm:19.2.0"
+    react: "npm:19.2.3"
     react-aria-components: "npm:^1.14.0"
-    react-dom: "npm:19.2.0"
+    react-dom: "npm:19.2.3"
     usehooks-ts: "npm:^3.1.1"
     vitest: "npm:^4.0.16"
   peerDependencies:
@@ -157,7 +157,6 @@ __metadata:
     "@types/promise-retry": "npm:^1.1.6"
     "@types/react": "npm:^19.2.5"
     "@types/react-dom": "npm:^19.2.3"
-    "@types/react-grid-layout": "npm:^1"
     "@types/react-modal": "npm:^3.16.3"
     "@uiw/react-codemirror": "npm:^4.25.4"
     "@use-gesture/react": "npm:^10.3.1"
@@ -182,14 +181,14 @@ __metadata:
     promise-retry: "npm:^2.0.1"
     prop-types: "npm:^15.8.1"
     re-resizable: "npm:^6.11.2"
-    react: "npm:19.2.0"
+    react: "npm:19.2.3"
     react-aria: "npm:^3.45.0"
     react-aria-components: "npm:^1.14.0"
     react-dnd: "npm:^16.0.1"
     react-dnd-html5-backend: "npm:^16.0.1"
-    react-dom: "npm:19.2.0"
+    react-dom: "npm:19.2.3"
     react-error-boundary: "npm:^6.0.3"
-    react-grid-layout: "npm:^1.5.3"
+    react-grid-layout: "npm:^2.2.2"
     react-hotkeys-hook: "npm:^5.2.1"
     react-i18next: "npm:^16.5.1"
     react-markdown: "npm:^10.1.0"
@@ -199,7 +198,7 @@ __metadata:
     react-simple-pull-to-refresh: "npm:^1.3.4"
     react-spring: "npm:10.0.0"
     react-swipeable: "npm:^7.0.2"
-    react-virtualized-auto-sizer: "npm:^1.0.26"
+    react-virtualized-auto-sizer: "npm:^2.0.2"
     recharts: "npm:^3.4.1"
     rehype-external-links: "npm:^3.0.0"
     remark-gfm: "npm:^4.0.1"
@@ -9135,15 +9134,6 @@ __metadata:
   peerDependencies:
     "@types/react": ^19.2.0
   checksum: 10/616c4a8aee250ea05fb1e7b98e7e00475dd3a6c1c30d7be18b4b93caba832f4203106b3a496a6b147e5acc2da14575eca47bce234c633bca1f8430ef8ffb234a
-  languageName: node
-  linkType: hard
-
-"@types/react-grid-layout@npm:^1":
-  version: 1.3.5
-  resolution: "@types/react-grid-layout@npm:1.3.5"
-  dependencies:
-    "@types/react": "npm:*"
-  checksum: 10/21599054dfa977ed8445b1ab3198a842531cb36bd620564c3f8a469688cbea051149eb644a99b2f8f6d02f8d9909a6145668f385781b5647601e9663de216946
   languageName: node
   linkType: hard
 
@@ -22960,18 +22950,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:19.2.0":
-  version: 19.2.0
-  resolution: "react-dom@npm:19.2.0"
-  dependencies:
-    scheduler: "npm:^0.27.0"
-  peerDependencies:
-    react: ^19.2.0
-  checksum: 10/3dbba071b9b1e7a19eae55f05c100f6b44f88c0aee72397d719ae338248ca66ed5028e6964c1c14870cc3e1abcecc91b22baba6dc2072f819dea81a9fd72f2fd
-  languageName: node
-  linkType: hard
-
-"react-dom@npm:^19.2.3":
+"react-dom@npm:19.2.3, react-dom@npm:^19.2.3":
   version: 19.2.3
   resolution: "react-dom@npm:19.2.3"
   dependencies:
@@ -23011,9 +22990,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-grid-layout@npm:^1.5.3":
-  version: 1.5.3
-  resolution: "react-grid-layout@npm:1.5.3"
+"react-grid-layout@npm:^2.2.2":
+  version: 2.2.2
+  resolution: "react-grid-layout@npm:2.2.2"
   dependencies:
     clsx: "npm:^2.1.1"
     fast-equals: "npm:^4.0.3"
@@ -23024,7 +23003,7 @@ __metadata:
   peerDependencies:
     react: ">= 16.3.0"
     react-dom: ">= 16.3.0"
-  checksum: 10/a534a33f2a15e075458ba307324c8c39a24a63576ef4f719273a927db7b228ee3fd795dc8f3f4f8d1db16167ccd76f003736abb022615b7b5b71aa1e5e68885e
+  checksum: 10/bfaa2d821b6bbe08732c1f841af23ddec982d4aafa33412fc6fd1c1eee6d60103a92a9f73bd995cc283c673650861271ee0fb36de06f3458469759395c012531
   languageName: node
   linkType: hard
 
@@ -23405,24 +23384,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-virtualized-auto-sizer@npm:^1.0.26":
-  version: 1.0.26
-  resolution: "react-virtualized-auto-sizer@npm:1.0.26"
+"react-virtualized-auto-sizer@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "react-virtualized-auto-sizer@npm:2.0.2"
   peerDependencies:
-    react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0 || ^19.0.0
-    react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10/8f8127369fb3ae1a49987a1e7d2d136f379b71d1b031a4c169389274946eca0248e3fb9130aa8a7ebe82f4ca8aaab58c37252398f8f6220a6eafaa78b8464b6b
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  checksum: 10/ae8e442573c01ad357a25f30f0e838bd56016cefce3995b5505417de3b06e2dd666350616ab9d5d0d2dc7fccab2878845dc59d611252122a37a7ec153a922bfa
   languageName: node
   linkType: hard
 
-"react@npm:19.2.0":
-  version: 19.2.0
-  resolution: "react@npm:19.2.0"
-  checksum: 10/e13bcdb8e994c3cfa922743cb75ca8deb60531bf02f584d2d8dab940a8132ce8a2e6ef16f8ed7f372b4072e7a7eeff589b2812dabbedfa73e6e46201dac8a9d0
-  languageName: node
-  linkType: hard
-
-"react@npm:^19.2.3":
+"react@npm:19.2.3, react@npm:^19.2.3":
   version: 19.2.3
   resolution: "react@npm:19.2.3"
   checksum: 10/d16b7f35c0d35a56f63d9d1693819762e4abc479c57dd6310298920bed3820fcec7e17a99d44983416d8f5049143ea45b8005d3ab8324bae8973224400502b08
