@@ -12,7 +12,23 @@
     "repo": "Juulz/miami-beach"
   },
   {
+    "name": "Simple Dark",
+    "repo": "Juulz/simple-dark"
+  },
+  {
+    "name": "Matrix",
+    "repo": "MatissJanis/actualbudget-matrix-theme"
+  },
+  {
     "name": "Black Gold",
     "repo": "MikesGlitch/actual-black-gold-theme"
+  },
+  {
+    "name": "Simple Dark",
+    "repo": "Juulz/miami-beach"
+  },
+  {
+    "name": "Okabe Ito",
+    "repo": "Juulz/okabe-ito"
   }
 ]

@@ -148,6 +148,7 @@ const LOGICAL_FUNCTIONS = new Set([
 
 const TEXT_FUNCTIONS = new Set([
   'TEXT',
+  'FIXED',
   'CONCATENATE',
   'LEFT',
   'RIGHT',

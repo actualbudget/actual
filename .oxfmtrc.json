@@ -6,5 +6,32 @@
   "printWidth": 80,
   "ignorePatterns": [
     "packages/docs/*" // TOOD: fixme; temporary
-  ]
+  ],
+  "experimentalSortImports": {
+    "groups": [
+      "react",
+      "builtin",
+      "external",
+      "loot-core",
+      "parent",
+      "sibling",
+      "index",
+      "desktop-client"
+    ],
+    "customGroups": [
+      {
+        "groupName": "react",
+        "elementNamePattern": ["react"]
+      },
+      {
+        "groupName": "loot-core",
+        "elementNamePattern": ["loot-core"]
+      },
+      {
+        "groupName": "desktop-client",
+        "elementNamePattern": ["@desktop-client"]
+      }
+    ],
+    "newlinesBetween": true
+  }
 }

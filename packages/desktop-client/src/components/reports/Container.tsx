@@ -1,5 +1,5 @@
 import React, { useRef, type CSSProperties, type ReactNode } from 'react';
-import AutoSizer from 'react-virtualized-auto-sizer';
+import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 import { View } from '@actual-app/components/view';
 
@@ -19,13 +19,19 @@ export function Container({ style, children }: ContainerProps) {
       style={{ height: 300, position: 'relative', flexShrink: 0, ...style }}
     >
       <div ref={portalHost} />
-      <AutoSizer>
-        {({ width, height }: { width: number; height: number }) => (
-          <div style={{ width, height }}>
-            {children(width, height, portalHost.current)}
-          </div>
-        )}
-      </AutoSizer>
+      <AutoSizer
+        renderProp={({ width = 0, height = 0 }) => {
+          if (width === 0 || height === 0) {
+            return null;
+          }
+
+          return (
+            <div style={{ width, height }}>
+              {children(width, height, portalHost.current)}
+            </div>
+          );
+        }}
+      />
     </View>
   );
 }
