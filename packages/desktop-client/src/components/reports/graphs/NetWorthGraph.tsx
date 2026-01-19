@@ -38,27 +38,23 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  style?: CSSProperties;
 };
 
-function CustomTooltip({ active, payload, style }: CustomTooltipProps) {
+function CustomTooltip({ active, payload }: CustomTooltipProps) {
   const { t } = useTranslation();
 
   if (active && payload && payload.length) {
     return (
       <div
-        className={css([
-          {
-            zIndex: 1000,
-            pointerEvents: 'none',
-            borderRadius: 2,
-            boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-            backgroundColor: theme.menuBackground,
-            color: theme.menuItemText,
-            padding: 10,
-          },
-          style,
-        ])}
+        className={css({
+          zIndex: 1000,
+          pointerEvents: 'none',
+          borderRadius: 2,
+          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+          backgroundColor: theme.menuBackground,
+          color: theme.menuItemText,
+          padding: 10,
+        })}
       >
         <div>
           <div style={{ marginBottom: 10 }}>
@@ -215,7 +211,7 @@ export function NetWorthGraph({
               />
               {showTooltip && (
                 <Tooltip
-                  content={<CustomTooltip style={style} />}
+                  content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
