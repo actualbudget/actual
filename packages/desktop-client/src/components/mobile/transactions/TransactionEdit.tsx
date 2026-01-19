@@ -10,7 +10,6 @@ import {
 import { Trans, useTranslation } from 'react-i18next';
 import {
   useLocation,
-  useNavigate as useNavigateReactRouter,
   useParams,
   useSearchParams,
   type Location,
@@ -579,7 +578,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     onAddSplit,
   }) {
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const dispatch = useDispatch();
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
     const [upcomingLength = '7'] = useSyncedPref(
@@ -1326,8 +1324,6 @@ function TransactionEditUnconnected({
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  // Use raw React Router navigate to bypass custom useNavigate's back-navigation optimization
-  const navigateRaw = useNavigateReactRouter();
   const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
   const [fetchedTransactions, setFetchedTransactions] = useState<
     TransactionEntity[]
@@ -1343,14 +1339,14 @@ function TransactionEditUnconnected({
 
     if (previousLocation && searchText) {
       // Navigate back to the previous location with the search text preserved
-      navigateRaw(previousLocation.pathname, {
+      navigate(previousLocation.pathname, {
         state: { searchText },
       });
     } else {
       // Fall back to regular back navigation
-      navigateRaw(-1);
+      navigate(-1);
     }
-  }, [navigateRaw, locationState?.searchText, locationState?.previousLocation]);
+  }, [navigate, locationState?.searchText, locationState?.previousLocation]);
 
   const searchParamCategory = useMemo(
     () => categories.find(c => c.name === searchParams.get('category'))?.id,
@@ -1414,13 +1410,14 @@ function TransactionEditUnconnected({
             }
             return lastTransaction?.date || monthUtils.currentDay();
           })(),
-          payee: searchParamPayee,
+          payee: searchParamPayee ?? null,
           account:
             searchParamAccount ||
             locationState?.accountId ||
             lastTransaction?.account ||
             null,
-          category: searchParamCategory || locationState?.categoryId || null,
+          category:
+            searchParamCategory || locationState?.categoryId || null,
           amount: -amountToInteger(
             parseFloat(searchParams.get('amount') || '') || 0,
           ),
