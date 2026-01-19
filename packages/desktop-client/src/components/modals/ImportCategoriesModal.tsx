@@ -1,6 +1,5 @@
-// @ts-strict-ignore
-import React, { useState, useEffect } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Select } from '@actual-app/components/select';
@@ -20,6 +19,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
+import { Field, Row, TableHeader } from '@desktop-client/components/table';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { popModal, pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -30,6 +30,86 @@ export type NewCategoryMapping = {
   existingCategoryId: CategoryEntity['id'] | null;
   groupId: CategoryGroupEntity['id'] | null;
 };
+
+type GroupSelectorProps = {
+  mapping: NewCategoryMapping;
+  categoryName: string;
+  groupOptions: [string, string][];
+  categoryGroupMap: Map<string, string>;
+  onGroupSelect: (
+    categoryName: string,
+    groupId: CategoryGroupEntity['id'] | 'new-group' | null,
+  ) => void;
+};
+
+function GroupSelector({
+  mapping,
+  categoryName,
+  groupOptions,
+  categoryGroupMap,
+  onGroupSelect,
+}: GroupSelectorProps) {
+  const { t } = useTranslation();
+
+  // When an existing category is selected, show its group name
+  if (mapping.existingCategoryId) {
+    return (
+      <Text
+        style={{
+          color: theme.pageTextSubdued,
+          fontStyle: 'italic',
+        }}
+      >
+        {categoryGroupMap.get(mapping.existingCategoryId) || t('N/A')}
+      </Text>
+    );
+  }
+
+  // When no groups are available, show prompt to create one
+  if (groupOptions.length === 0) {
+    return (
+      <View
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 5,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 13,
+            color: theme.pageTextSubdued,
+          }}
+        >
+          <Trans>No groups available</Trans>
+        </Text>
+        <Button
+          variant="bare"
+          onPress={() => onGroupSelect(categoryName, 'new-group')}
+          style={{
+            padding: '4px 8px',
+            fontSize: 13,
+          }}
+        >
+          <Trans>Create group</Trans>
+        </Button>
+      </View>
+    );
+  }
+
+  // Default: show the group selector dropdown
+  const safeValue =
+    mapping.groupId ?? (groupOptions.length > 0 ? groupOptions[0][0] : null);
+
+  return (
+    <Select
+      value={safeValue || ''}
+      onChange={groupId => onGroupSelect(categoryName, groupId)}
+      options={groupOptions}
+      disabledKeys={[]}
+    />
+  );
+}
 
 type ImportCategoriesModalProps = {
   newCategories: string[];
@@ -89,106 +169,117 @@ export function ImportCategoriesModal({
     }
   }, [defaultGroupId]);
 
-  const handleCategorySelect = (
-    originalName: string,
-    categoryId: CategoryEntity['id'] | null,
-  ) => {
-    const mapping = mappings.get(originalName);
-    if (mapping) {
-      setMappings(
-        new Map(
-          mappings.set(originalName, {
-            ...mapping,
-            existingCategoryId: categoryId,
-            // Update final name based on selected category
-            finalName: categoryId
-              ? categories.list.find(c => c.id === categoryId)?.name ||
-                mapping.finalName
-              : mapping.finalName,
-          }),
-        ),
-      );
-    }
-  };
+  const handleCategorySelect = useCallback(
+    (originalName: string, categoryId: CategoryEntity['id'] | null) => {
+      setMappings(prevMappings => {
+        const mapping = prevMappings.get(originalName);
+        if (!mapping) return prevMappings;
 
-  const handleGroupSelect = (
-    originalName: string,
-    groupId: CategoryGroupEntity['id'] | 'new-group' | null,
-  ) => {
-    // Special handling for "create new group" option
-    if (groupId === 'new-group') {
-      const mapping = mappings.get(originalName);
-      const previousGroupId = mapping?.groupId || null;
+        const newMappings = new Map(prevMappings);
+        newMappings.set(originalName, {
+          ...mapping,
+          existingCategoryId: categoryId,
+          // Update final name based on selected category
+          finalName: categoryId
+            ? categories.list.find(c => c.id === categoryId)?.name ||
+            mapping.finalName
+            : mapping.finalName,
+        });
+        return newMappings;
+      });
+    },
+    [categories.list],
+  );
 
-      dispatch(
-        pushModal({
-          modal: {
-            name: 'new-category-group',
-            options: {
-              onValidate: (name: string) =>
-                !name ? t('Name is required.') : null,
-              onSubmit: async (name: string) => {
-                // Create the group and get its ID
-                const result = await dispatch(createCategoryGroup({ name }));
-                if (createCategoryGroup.fulfilled.match(result)) {
-                  const newGroupId = result.payload;
-                  // Update the mapping with the new group ID
-                  const currentMapping = mappings.get(originalName);
-                  if (currentMapping) {
-                    setMappings(
-                      new Map(
-                        mappings.set(originalName, {
-                          ...currentMapping,
-                          groupId: newGroupId,
-                        }),
-                      ),
-                    );
+  const handleGroupSelect = useCallback(
+    (
+      originalName: string,
+      groupId: CategoryGroupEntity['id'] | 'new-group' | null,
+    ) => {
+      // Special handling for "create new group" option
+      if (groupId === 'new-group') {
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'new-category-group',
+              options: {
+                onValidate: (name: string) =>
+                  !name ? t('Name is required.') : null,
+                onSubmit: async (name: string) => {
+                  // Create the group and get its ID
+                  const result = await dispatch(createCategoryGroup({ name }));
+                  if (createCategoryGroup.fulfilled.match(result)) {
+                    const newGroupId = result.payload;
+                    // Update the mapping with the new group ID
+                    setMappings(prevMappings => {
+                      const currentMapping = prevMappings.get(originalName);
+                      if (!currentMapping) return prevMappings;
+                      const newMappings = new Map(prevMappings);
+                      newMappings.set(originalName, {
+                        ...currentMapping,
+                        groupId: newGroupId,
+                      });
+                      return newMappings;
+                    });
                   }
-                } else {
-                  // Restore previous groupId if creation failed
-                  const currentMapping = mappings.get(originalName);
-                  if (currentMapping) {
-                    setMappings(
-                      new Map(
-                        mappings.set(originalName, {
-                          ...currentMapping,
-                          groupId: previousGroupId,
-                        }),
-                      ),
-                    );
-                  }
-                }
+                  // Note: If creation fails, we don't need to restore - the state hasn't changed yet
+                },
               },
             },
-          },
-        }),
-      );
-      return;
-    }
-
-    const mapping = mappings.get(originalName);
-    if (mapping) {
-      setMappings(
-        new Map(
-          mappings.set(originalName, {
-            ...mapping,
-            groupId,
           }),
-        ),
-      );
-    }
-  };
+        );
+        return;
+      }
 
-  const handleConfirm = () => {
+      setMappings(prevMappings => {
+        const mapping = prevMappings.get(originalName);
+        if (!mapping) return prevMappings;
+
+        const newMappings = new Map(prevMappings);
+        newMappings.set(originalName, {
+          ...mapping,
+          groupId,
+        });
+        return newMappings;
+      });
+    },
+    [dispatch, t],
+  );
+
+  const handleConfirm = useCallback(() => {
     const mappingArray = Array.from(mappings.values());
     onConfirm(mappingArray);
     dispatch(popModal());
-  };
+  }, [dispatch, mappings, onConfirm]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     onCancel();
     dispatch(popModal());
-  };
+  }, [dispatch, onCancel]);
+
+  // Memoize group options to avoid recreating on each render
+  const groupOptions = useMemo<[string, string][]>(
+    () => [
+      ...categories.grouped
+        .filter(g => !g.is_income && !g.hidden)
+        .map(g => [g.id, g.name] as [string, string]),
+      ['new-group', t('Create new group...')],
+    ],
+    [categories.grouped, t],
+  );
+
+  // Create lookup map for finding group by category
+  const categoryGroupMap = useMemo(() => {
+    const categoryToGroup = new Map<string, string>();
+    for (const group of categories.grouped) {
+      if (group.categories) {
+        for (const category of group.categories) {
+          categoryToGroup.set(category.id, group.name);
+        }
+      }
+    }
+    return categoryToGroup;
+  }, [categories.grouped]);
 
   return (
     <Modal name="import-categories">
@@ -198,7 +289,7 @@ export function ImportCategoriesModal({
             title={t('Import Categories')}
             rightContent={<ModalCloseButton onPress={handleCancel} />}
           />
-          <View style={{ padding: 20, maxHeight: 600, overflow: 'auto' }}>
+          <View style={{ padding: 20 }}>
             <Text style={{ marginBottom: 15 }}>
               <Trans>
                 Map imported categories to existing ones, or leave as-is to
@@ -206,157 +297,85 @@ export function ImportCategoriesModal({
               </Trans>
             </Text>
 
-            {/* Table Header */}
+            {/* Table Container */}
             <View
               style={{
-                display: 'flex',
-                flexDirection: 'row',
-                borderBottom: `1px solid ${theme.tableBorder}`,
-                paddingBottom: 5,
-                marginBottom: 10,
-                fontWeight: 600,
+                flex: 'unset',
+                maxHeight: 400,
+                border: '1px solid ' + theme.tableBorder,
+                borderRadius: 6,
+                overflow: 'hidden',
               }}
             >
-              <View style={{ flex: 1, paddingRight: 10 }}>
-                <Text style={{ fontWeight: 600 }}>
-                  <Trans>Imported Category</Trans>
-                </Text>
-              </View>
-              <View style={{ flex: 1, paddingRight: 10 }}>
-                <Text style={{ fontWeight: 600 }}>
-                  <Trans>Map To</Trans>
-                </Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontWeight: 600 }}>
-                  <Trans>Group</Trans>
-                </Text>
-              </View>
-            </View>
+              {/* Table Header */}
+              <TableHeader
+                headers={[
+                  { name: t('Imported Category'), width: 'flex' },
+                  { name: t('Map To'), width: 200 },
+                  { name: t('Group'), width: 180 },
+                ]}
+              />
 
-            {/* Table Rows */}
-            <View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {newCategories.map(categoryName => {
-                const mapping = mappings.get(categoryName);
-                if (!mapping) return null;
+              {/* Table Rows */}
+              <View
+                style={{
+                  overflow: 'auto',
+                  backgroundColor: theme.tableBackground,
+                }}
+              >
+                {newCategories.map(categoryName => {
+                  const mapping = mappings.get(categoryName);
+                  if (!mapping) return null;
 
-                // Prepare category group options
-                const groupOptions: [string, string][] = [
-                  ...categories.grouped
-                    .filter(g => !g.is_income && !g.hidden)
-                    .map(g => [g.id, g.name] as [string, string]),
-                  ['new-group', t('Create new group...')],
-                ];
-
-                // Compute safe value for Select - if groupId is null, use first available option
-                const safeValue =
-                  mapping.groupId ??
-                  (groupOptions.length > 0 ? groupOptions[0][0] : null);
-
-                return (
-                  <View
-                    key={categoryName}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      padding: '8px 0',
-                      borderBottom: `1px solid ${theme.tableBorderHover}`,
-                    }}
-                  >
-                    {/* Original Category Name */}
-                    <View style={{ flex: 1, paddingRight: 10 }}>
-                      <Text
-                        style={{
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {categoryName}
-                      </Text>
-                    </View>
-
-                    {/* Category Autocomplete */}
-                    <View style={{ flex: 1, paddingRight: 10 }}>
-                      <CategoryAutocomplete
-                        value={mapping.existingCategoryId}
-                        categoryGroups={categories.grouped}
-                        onSelect={categoryId => {
-                          handleCategorySelect(categoryName, categoryId);
-                        }}
-                        inputProps={{
-                          placeholder: mapping.existingCategoryId
-                            ? t('Existing category selected')
-                            : t('New'),
-                        }}
-                      />
-                    </View>
-
-                    {/* Category Group Dropdown (only visible when creating new category) */}
-                    <View style={{ flex: 1 }}>
-                      {!mapping.existingCategoryId ? (
-                        groupOptions.length === 0 ? (
-                          <View
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 5,
-                            }}
-                          >
-                            <Text
-                              style={{
-                                fontSize: 13,
-                                color: theme.pageTextSubdued,
-                              }}
-                            >
-                              <Trans>No groups available</Trans>
-                            </Text>
-                            <Button
-                              variant="bare"
-                              onPress={() => {
-                                handleGroupSelect(categoryName, 'new-group');
-                              }}
-                              style={{
-                                padding: '4px 8px',
-                                fontSize: 13,
-                              }}
-                            >
-                              <Trans>Create group</Trans>
-                            </Button>
-                          </View>
-                        ) : (
-                          <Select
-                            value={safeValue || ''}
-                            onChange={groupId => {
-                              handleGroupSelect(categoryName, groupId);
-                            }}
-                            options={groupOptions}
-                            disabledKeys={[]}
-                          />
-                        )
-                      ) : (
+                  return (
+                    <Row
+                      key={categoryName}
+                      height={36}
+                      style={{ backgroundColor: theme.tableBackground }}
+                    >
+                      {/* Original Category Name */}
+                      <Field width="flex">
                         <Text
                           style={{
-                            color: theme.pageTextSubdued,
-                            fontStyle: 'italic',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
                           }}
                         >
-                          {(() => {
-                            const selectedCategory = categories.list.find(
-                              c => c.id === mapping.existingCategoryId,
-                            );
-                            const group = categories.grouped.find(
-                              g => g.id === selectedCategory?.group,
-                            );
-                            return group?.name || t('N/A');
-                          })()}
+                          {categoryName}
                         </Text>
-                      )}
-                    </View>
-                  </View>
-                );
-              })}
+                      </Field>
+
+                      {/* Category Autocomplete */}
+                      <Field width={200} truncate={false}>
+                        <CategoryAutocomplete
+                          value={mapping.existingCategoryId}
+                          categoryGroups={categories.grouped}
+                          onSelect={categoryId =>
+                            handleCategorySelect(categoryName, categoryId)
+                          }
+                          inputProps={{
+                            placeholder: mapping.existingCategoryId
+                              ? t('Existing category selected')
+                              : t('New'),
+                          }}
+                        />
+                      </Field>
+
+                      {/* Category Group Dropdown */}
+                      <Field width={200} truncate={false}>
+                        <GroupSelector
+                          mapping={mapping}
+                          categoryName={categoryName}
+                          groupOptions={groupOptions}
+                          categoryGroupMap={categoryGroupMap}
+                          onGroupSelect={handleGroupSelect}
+                        />
+                      </Field>
+                    </Row>
+                  );
+                })}
+              </View>
             </View>
           </View>
 
@@ -371,12 +390,7 @@ export function ImportCategoriesModal({
             <Button onPress={handleCancel}>
               <Trans>Cancel</Trans>
             </Button>
-            <ButtonWithLoading
-              variant="primary"
-              onPress={() => {
-                handleConfirm();
-              }}
-            >
+            <ButtonWithLoading variant="primary" onPress={handleConfirm}>
               <Trans>Continue Import</Trans>
             </ButtonWithLoading>
           </View>

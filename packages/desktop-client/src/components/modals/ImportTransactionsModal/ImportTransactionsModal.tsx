@@ -151,13 +151,20 @@ function getInitialMappings(transactions) {
 }
 
 function parseCategoryFields(trans, categories) {
+  if (trans.category == null) {
+    return null;
+  }
+
   let match = null;
+  const transCategoryLower = trans.category.toLowerCase();
+
   for (const category of categories) {
     // If trans.category is already a valid category ID, short-circuit.
     if (category.id === trans.category) {
       return category.id;
     }
-    if (category.name === trans.category) {
+    // Case-insensitive name comparison to match collectNewCategories behavior
+    if (category.name.toLowerCase() === transCategoryLower) {
       match = category.id;
     }
   }
@@ -675,7 +682,11 @@ export function ImportTransactionsModal({
             mapping.originalName.trim().toLowerCase(),
             newCategoryId,
           );
-        } catch {
+        } catch (error) {
+          console.error(
+            `Failed to create category ${mapping.finalName}:`,
+            error,
+          );
           errors.push(mapping.originalName);
         }
       }
