@@ -2,7 +2,6 @@ import { useRef, type ReactNode } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 import {
   type AccountEntity,
@@ -100,6 +99,7 @@ describe('AccountTransactions', () => {
     });
     vi.mocked(useTransactions).mockReturnValue({
       transactions: mockTransactions,
+      grouped: null,
       runningBalances: new Map(),
       isLoading: false,
       reload: vi.fn(),
@@ -108,7 +108,9 @@ describe('AccountTransactions', () => {
     });
     vi.mocked(useTransactionsSearch).mockReturnValue({
       isSearching: false,
-      search: mockSearch
+      search: mockSearch,
+      updateQuery: vi.fn(),
+      resetQuery: vi.fn(),
     });
   });
 
