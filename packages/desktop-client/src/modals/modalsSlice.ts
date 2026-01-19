@@ -473,9 +473,6 @@ export type Modal =
       };
     }
   | {
-      name: 'schedules-page-menu';
-    }
-  | {
       name: 'envelope-budget-month-menu';
       options: {
         month: string;
@@ -517,6 +514,12 @@ export type Modal =
       options: {
         message: string;
         onConfirm: () => void;
+      };
+    }
+  | {
+      name: 'copy-widget-to-dashboard';
+      options: {
+        onSelect: (dashboardId: string) => void;
       };
     }
   | {

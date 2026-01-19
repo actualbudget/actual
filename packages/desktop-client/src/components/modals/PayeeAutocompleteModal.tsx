@@ -6,14 +6,14 @@ import { theme } from '@actual-app/components/theme';
 
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
 import {
-  ModalCloseButton,
   Modal,
-  ModalTitle,
+  ModalCloseButton,
   ModalHeader,
+  ModalTitle,
 } from '@desktop-client/components/common/Modal';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { usePayees, useNearbyPayees } from '@desktop-client/hooks/usePayees';
+import { useNearbyPayees, usePayees } from '@desktop-client/hooks/usePayees';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type PayeeAutocompleteModalProps = Extract<

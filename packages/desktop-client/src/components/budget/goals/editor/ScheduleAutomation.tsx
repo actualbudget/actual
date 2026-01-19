@@ -1,4 +1,4 @@
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
@@ -8,8 +8,8 @@ import type { ScheduleEntity } from 'loot-core/types/models';
 import type { ScheduleTemplate } from 'loot-core/types/models/templates';
 
 import {
-  type Action,
   updateTemplate,
+  type Action,
 } from '@desktop-client/components/budget/goals/actions';
 import { Link } from '@desktop-client/components/common/Link';
 import { FormField, FormLabel } from '@desktop-client/components/forms';

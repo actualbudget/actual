@@ -12,9 +12,9 @@ import {
 import * as monthUtils from '../shared/months';
 import { q } from '../shared/query';
 import {
+  deleteTransaction,
   ungroupTransactions,
   updateTransaction,
-  deleteTransaction,
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
 import { type Handlers } from '../types/handlers';
@@ -29,13 +29,13 @@ import { addTransactions } from './accounts/sync';
 import {
   accountModel,
   budgetModel,
-  categoryModel,
   categoryGroupModel,
+  categoryModel,
   payeeModel,
   remoteFileModel,
   scheduleModel,
-  type APIScheduleEntity,
   type AmountOPType,
+  type APIScheduleEntity,
 } from './api-models';
 import { aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
@@ -45,7 +45,7 @@ import { APIError } from './errors';
 import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
-import { setSyncingMode, batchMessages } from './sync';
+import { batchMessages, setSyncingMode } from './sync';
 
 let IMPORT_MODE = false;
 

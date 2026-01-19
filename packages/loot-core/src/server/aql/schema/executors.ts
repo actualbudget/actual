@@ -6,12 +6,12 @@ import { type CategoryEntity } from '../../../types/models';
 import * as db from '../../db';
 import { whereIn } from '../../db/util';
 import {
-  type CompilerState,
   isAggregateQuery,
+  type CompilerState,
   type OutputTypes,
   type SqlPieces,
 } from '../compiler';
-import { type AqlQueryExecutor, execQuery } from '../exec';
+import { execQuery, type AqlQueryExecutor } from '../exec';
 import { convertOutputType } from '../schema-helpers';
 
 // Transactions executor

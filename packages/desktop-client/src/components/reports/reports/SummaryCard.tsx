@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
@@ -18,6 +18,7 @@ import { calculateTimeRange } from '@desktop-client/components/reports/reportRan
 import { summarySpreadsheet } from '@desktop-client/components/reports/spreadsheets/summary-spreadsheet';
 import { SummaryNumber } from '@desktop-client/components/reports/SummaryNumber';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type SummaryCardProps = {
@@ -26,6 +27,7 @@ type SummaryCardProps = {
   meta?: SummaryWidget['meta'];
   onMetaChange: (newMeta: SummaryWidget['meta']) => void;
   onRemove: () => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function SummaryCard({
@@ -34,11 +36,15 @@ export function SummaryCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onCopy,
 }: SummaryCardProps) {
   const locale = useLocale();
   const { t } = useTranslation();
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -104,8 +110,10 @@ export function SummaryCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -114,8 +122,7 @@ export function SummaryCard({
             onRemove();
             break;
           default:
-            console.warn(`Unrecognized menu selection: ${item}`);
-            break;
+            throw new Error(`Unrecognized menu selection: ${item}`);
         }
       }}
     >

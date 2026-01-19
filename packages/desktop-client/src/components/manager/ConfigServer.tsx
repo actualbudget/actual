@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -11,8 +11,8 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import {
-  isNonProductionEnvironment,
   isElectron,
+  isNonProductionEnvironment,
 } from 'loot-core/shared/environment';
 
 import { Title } from './subscribe/common';

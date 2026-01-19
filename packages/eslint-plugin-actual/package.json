@@ -15,6 +15,6 @@
     "loupe": "^3.2.1",
     "strip-literal": "^3.1.0",
     "tinyspy": "^4.0.4",
-    "vitest": "^4.0.9"
+    "vitest": "^4.0.16"
   }
 }

@@ -1,12 +1,10 @@
-import { v4 as uuidv4 } from 'uuid';
-
 import { DEFAULT_MAX_DISTANCE_METERS } from 'loot-core/shared/constants';
 
 import { type Diff } from '../../shared/util';
 import {
   type PayeeEntity,
-  type RuleEntity,
   type PayeeLocationEntity,
+  type RuleEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';

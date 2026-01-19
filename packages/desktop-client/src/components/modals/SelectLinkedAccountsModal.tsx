@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -31,13 +31,14 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import {
-  TableHeader,
-  Table,
-  Row,
-  Field,
   Cell,
+  Field,
+  Row,
+  Table,
+  TableHeader,
 } from '@desktop-client/components/table';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -488,9 +489,13 @@ function TableRow({
       </Field>
       <Field width={80}>
         <PrivacyFilter>
-          {externalAccount.balance != null
-            ? format(externalAccount.balance.toString(), 'financial')
-            : t('Unknown')}
+          {externalAccount.balance != null ? (
+            <FinancialText>
+              {format(externalAccount.balance.toString(), 'financial')}
+            </FinancialText>
+          ) : (
+            t('Unknown')
+          )}
         </PrivacyFilter>
       </Field>
       <Field
@@ -621,9 +626,13 @@ function AccountCard({
       >
         <Trans>Balance:</Trans>{' '}
         <PrivacyFilter>
-          {externalAccount.balance != null
-            ? format(externalAccount.balance.toString(), 'financial')
-            : t('Unknown')}
+          {externalAccount.balance != null ? (
+            <FinancialText>
+              {format(externalAccount.balance.toString(), 'financial')}
+            </FinancialText>
+          ) : (
+            t('Unknown')
+          )}
         </PrivacyFilter>
       </View>
 

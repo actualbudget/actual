@@ -15,10 +15,11 @@ import { type MarkdownWidget } from 'loot-core/types/models';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from '@desktop-client/components/reports/constants';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import {
+  markdownBaseStyles,
   remarkBreaks,
   sequentialNewlinesPlugin,
-  markdownBaseStyles,
 } from '@desktop-client/util/markdown';
 
 const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
@@ -38,6 +39,7 @@ type MarkdownCardProps = {
   meta: MarkdownWidget['meta'];
   onMetaChange: (newMeta: MarkdownWidget['meta']) => void;
   onRemove: () => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function MarkdownCard({
@@ -45,10 +47,14 @@ export function MarkdownCard({
   meta,
   onMetaChange,
   onRemove,
+  onCopy,
 }: MarkdownCardProps) {
   const { t } = useTranslation();
 
   const [isVisibleTextArea, setIsVisibleTextArea] = useState(false);
+
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
 
   return (
     <ReportCard
@@ -81,8 +87,10 @@ export function MarkdownCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'text-left':
             onMetaChange({

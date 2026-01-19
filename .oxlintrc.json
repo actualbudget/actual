@@ -15,14 +15,9 @@
     "vi": "readonly",
     "backend": "readonly",
     "importScripts": "readonly",
-    "FS": "readonly" // TODO: remove this
+    "FS": "readonly"
   },
   "rules": {
-    // TODO fix all these and re-enable
-    "jsx-a11y/click-events-have-key-events": "off",
-    "jsx-a11y/prefer-tag-over-role": "off",
-    "jsx-a11y/tabindex-no-positive": "off",
-
     // Import sorting
     // TODO replace once oxfmt supports this: https://github.com/oxc-project/oxc/issues/17076
     "perfectionist/sort-imports": [
@@ -53,6 +48,12 @@
           }
         ],
         "newlinesBetween": "always"
+      }
+    ],
+    "perfectionist/sort-named-imports": [
+      "warn",
+      {
+        "groups": ["value-import", "type-import"]
       }
     ],
 
@@ -103,13 +104,7 @@
     "jsx-a11y/scope": "warn",
 
     // Typescript rules
-    "typescript/ban-ts-comment": [
-      "warn",
-      {
-        // TODO: remove this
-        "ts-ignore": "allow-with-description"
-      }
-    ],
+    "typescript/ban-ts-comment": ["warn"],
     "typescript/consistent-type-definitions": ["warn", "type"],
     "typescript/consistent-type-imports": [
       "warn",
@@ -190,7 +185,7 @@
 
     // ESLint rules
     "eslint/array-callback-return": "warn",
-    // "eslint/curly": ["warn", "multi-line", "consistent"], // TODO: re-enable? this rule is really slow
+    "eslint/curly": ["warn", "multi-line", "consistent"],
     "eslint/default-case": [
       "warn",
       {
@@ -382,55 +377,9 @@
   },
   "overrides": [
     {
-      // TODO: fix the issues in these files
-      "files": [
-        "packages/component-library/src/Menu.tsx",
-        "packages/desktop-client/src/components/accounts/Account.jsx",
-        "packages/desktop-client/src/components/accounts/MobileAccount.jsx",
-        "packages/desktop-client/src/components/accounts/MobileAccounts.jsx",
-        "packages/desktop-client/src/components/budget/BudgetCategories.jsx",
-        "packages/desktop-client/src/components/budget/BudgetSummaries.tsx",
-        "packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx",
-        "packages/desktop-client/src/components/budget/envelope/HoldMenu.tsx",
-        "packages/desktop-client/src/components/budget/envelope/TransferMenu.tsx",
-        "packages/desktop-client/src/components/budget/index.tsx",
-        "packages/desktop-client/src/components/budget/MobileBudget.tsx",
-        "packages/desktop-client/src/components/FinancesApp.tsx",
-        "packages/desktop-client/src/components/GlobalKeys.ts",
-        "packages/desktop-client/src/components/LoggedInUser.tsx",
-        "packages/desktop-client/src/components/manager/ManagementApp.jsx",
-        "packages/desktop-client/src/components/manager/subscribe/common.tsx",
-        "packages/desktop-client/src/components/ManageRules.tsx",
-        "packages/desktop-client/src/components/mobile/MobileAmountInput.jsx",
-        "packages/desktop-client/src/components/mobile/MobileNavTabs.tsx",
-        "packages/desktop-client/src/components/Modals.tsx",
-        "packages/desktop-client/src/components/modals/EditRule.jsx",
-        "packages/desktop-client/src/components/modals/ImportTransactions.jsx",
-        "packages/desktop-client/src/components/modals/ImportTransactionsModal/ImportTransactionsModal.tsx",
-        "packages/desktop-client/src/components/modals/MergeUnusedPayees.jsx",
-        "packages/desktop-client/src/components/Notifications.tsx",
-        "packages/desktop-client/src/components/payees/ManagePayees.jsx",
-        "packages/desktop-client/src/components/payees/ManagePayeesWithData.jsx",
-        "packages/desktop-client/src/components/payees/PayeeTable.tsx",
-        "packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTable.tsx",
-        "packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTableTotals.tsx",
-        "packages/desktop-client/src/components/reports/reports/CashFlowCard.jsx",
-        "packages/desktop-client/src/components/reports/reports/CustomReport.jsx",
-        "packages/desktop-client/src/components/reports/reports/CustomReport.tsx",
-        "packages/desktop-client/src/components/reports/reports/NetWorthCard.jsx",
-        "packages/desktop-client/src/components/reports/SaveReportName.tsx",
-        "packages/desktop-client/src/components/reports/useReport.ts",
-        "packages/desktop-client/src/components/schedules/ScheduleDetails.jsx",
-        "packages/desktop-client/src/components/schedules/ScheduleEditModal.tsx",
-        "packages/desktop-client/src/components/schedules/SchedulesTable.tsx",
-        "packages/desktop-client/src/components/select/DateSelect.tsx",
-        "packages/desktop-client/src/components/sidebar/Tools.tsx",
-        "packages/desktop-client/src/components/sort.tsx",
-        "packages/desktop-client/src/hooks/useEffectAfterMount.ts",
-        "packages/desktop-client/src/hooks/useQuery.ts"
-      ],
+      "files": ["packages/desktop-electron/**/*"],
       "rules": {
-        "react/exhaustive-deps": "off"
+        "react/rules-of-hooks": "off"
       }
     },
     {
@@ -470,16 +419,9 @@
     // TODO: enable these
     {
       "files": [
-        "packages/desktop-client/src/components/admin/UserAccess/UserAccess.tsx",
-        "packages/desktop-client/src/components/admin/UserDirectory/UserDirectory.tsx",
-        "packages/desktop-client/src/components/budget/BudgetCategories.tsx",
-        "packages/desktop-client/src/components/budget/envelope/BalanceMovementMenu.tsx",
         "packages/desktop-client/src/components/ManageRules.tsx",
         "packages/desktop-client/src/components/mobile/budget/ExpenseGroupList.tsx",
-        "packages/desktop-client/src/components/modals/EditFieldModal.tsx",
         "packages/desktop-client/src/components/reports/reports/Calendar.tsx",
-        "packages/desktop-client/src/components/schedules/ScheduleLink.tsx",
-        "packages/desktop-client/src/components/ServerContext.tsx",
         "packages/desktop-client/src/components/table.tsx"
       ],
       "rules": {

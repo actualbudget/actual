@@ -6,12 +6,12 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
-  LineChart,
-  Line,
   CartesianGrid,
+  Line,
+  LineChart,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
 } from 'recharts';
 
 import {
@@ -22,13 +22,14 @@ import {
 
 import { showActivity } from './showActivity';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -98,7 +99,11 @@ const CustomTooltip = ({
                   <AlignedText
                     key={index}
                     left={p.dataKey}
-                    right={format(p.value, 'financial')}
+                    right={
+                      <FinancialText>
+                        {format(p.value, 'financial')}
+                      </FinancialText>
+                    }
                     style={{
                       color: p.color,
                       textDecoration:
@@ -111,7 +116,9 @@ const CustomTooltip = ({
             {payload.length > 5 && compact && '...'}
             <AlignedText
               left={t('Total')}
-              right={format(sumTotals, 'financial')}
+              right={
+                <FinancialText>{format(sumTotals, 'financial')}</FinancialText>
+              }
               style={{
                 fontWeight: 600,
               }}

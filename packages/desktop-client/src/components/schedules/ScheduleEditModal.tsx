@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { useMemo } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
@@ -8,7 +8,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import { type ScheduleEntity, type RecurConfig } from 'loot-core/types/models';
+import { type RecurConfig, type ScheduleEntity } from 'loot-core/types/models';
 
 import { updateScheduleConditions } from './schedule-edit-utils';
 import { ScheduleEditForm } from './ScheduleEditForm';
@@ -22,8 +22,8 @@ import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useScheduleEdit } from '@desktop-client/hooks/useScheduleEdit';
 import { useSelected } from '@desktop-client/hooks/useSelected';
 import {
-  type Modal as ModalType,
   pushModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { getPayeesById } from '@desktop-client/payees/payeesSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';

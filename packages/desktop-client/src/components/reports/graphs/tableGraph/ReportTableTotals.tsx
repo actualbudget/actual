@@ -1,9 +1,9 @@
 import React, {
-  type ReactNode,
   useLayoutEffect,
   useState,
-  type RefObject,
   type CSSProperties,
+  type ReactNode,
+  type RefObject,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -11,7 +11,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type GroupedEntity, type DataEntity } from 'loot-core/types/models';
+import { type DataEntity, type GroupedEntity } from 'loot-core/types/models';
 
 import { type renderTotalsProps } from './ReportTable';
 
@@ -76,7 +76,7 @@ export function ReportTableTotals({
       ];
       setScrollWidthTotals(parent > 0 && child > 0 ? parent - child : 0);
     }
-  });
+  }, [totalScrollRef]);
 
   const metadata: GroupedEntity = {
     id: '',

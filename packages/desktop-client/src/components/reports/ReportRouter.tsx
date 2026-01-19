@@ -1,7 +1,6 @@
 import React from 'react';
 import { Route, Routes } from 'react-router';
 
-import { Overview } from './Overview';
 import { Calendar } from './reports/Calendar';
 import { CashFlow } from './reports/CashFlow';
 import { Crossover } from './reports/Crossover';
@@ -10,6 +9,7 @@ import { Formula } from './reports/Formula';
 import { NetWorth } from './reports/NetWorth';
 import { Spending } from './reports/Spending';
 import { Summary } from './reports/Summary';
+import { ReportsDashboardRouter } from './ReportsDashboardRouter';
 
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 
@@ -18,7 +18,8 @@ export function ReportRouter() {
 
   return (
     <Routes>
-      <Route path="/" element={<Overview />} />
+      <Route path="/" element={<ReportsDashboardRouter />} />
+      <Route path="/:dashboardId" element={<ReportsDashboardRouter />} />
       <Route path="/net-worth" element={<NetWorth />} />
       <Route path="/net-worth/:id" element={<NetWorth />} />
       {crossoverReportEnabled && (

@@ -2,14 +2,14 @@ import express from 'express';
 
 import {
   bootstrap,
-  needsBootstrap,
-  getLoginMethod,
-  listLoginMethods,
-  getUserInfo,
   getActiveLoginMethod,
+  getLoginMethod,
   getServerPrefs,
-  setServerPrefs,
+  getUserInfo,
   isAdmin,
+  listLoginMethods,
+  needsBootstrap,
+  setServerPrefs,
 } from './account-db';
 import { isValidRedirectUrl, loginWithOpenIdSetup } from './accounts/openid';
 import { changePassword, loginWithPassword } from './accounts/password';

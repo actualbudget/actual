@@ -6,9 +6,9 @@ import * as asyncStorage from '../../platform/server/asyncStorage';
 import { getLocale } from '../../shared/locale';
 import * as monthUtils from '../../shared/months';
 import {
-  type IntegerAmount,
   integerToCurrency,
   safeNumber,
+  type IntegerAmount,
 } from '../../shared/util';
 import { type CategoryEntity } from '../../types/models';
 import * as db from '../db';

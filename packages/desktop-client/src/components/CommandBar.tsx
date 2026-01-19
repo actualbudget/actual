@@ -1,11 +1,11 @@
 import {
-  type ComponentType,
-  type ReactNode,
-  type SVGProps,
   useCallback,
   useEffect,
   useMemo,
   useState,
+  type ComponentType,
+  type ReactNode,
+  type SVGProps,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 

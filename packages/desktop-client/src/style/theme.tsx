@@ -1,13 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { isNonProductionEnvironment } from 'loot-core/shared/environment';
 import type { DarkTheme, Theme } from 'loot-core/types/prefs';
 
+import { parseInstalledTheme, validateThemeCss } from './customThemes';
 import * as darkTheme from './themes/dark';
 import * as developmentTheme from './themes/development';
 import * as lightTheme from './themes/light';
 import * as midnightTheme from './themes/midnight';
 
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 const themes = {
@@ -96,4 +98,39 @@ export function ThemeStyle() {
     .map(([key, value]) => `  --color-${key}: ${value};`)
     .join('\n');
   return <style>{`:root {\n${css}}`}</style>;
+}
+
+/**
+ * CustomThemeStyle injects CSS from the installed custom theme (if any).
+ * This is rendered after ThemeStyle to allow custom themes to override base theme variables.
+ */
+export function CustomThemeStyle() {
+  const customThemesEnabled = useFeatureFlag('customThemes');
+  const [installedThemeJson] = useGlobalPref('installedCustomTheme');
+
+  // Parse installed theme (single theme, not array)
+  const installedTheme = parseInstalledTheme(installedThemeJson);
+
+  // Get CSS content from the theme (cssContent is required)
+  const { cssContent } = installedTheme ?? {};
+
+  // Memoize validated CSS to avoid re-validation on every render
+  const validatedCss = useMemo(() => {
+    if (!customThemesEnabled || !cssContent) {
+      return null;
+    }
+
+    try {
+      return validateThemeCss(cssContent);
+    } catch (error) {
+      console.error('Invalid custom theme CSS', { error, cssContent });
+      return null;
+    }
+  }, [customThemesEnabled, cssContent]);
+
+  if (!validatedCss) {
+    return null;
+  }
+
+  return <style id="custom-theme-active">{validatedCss}</style>;
 }

@@ -47,6 +47,7 @@ export const sidebarItemBackgroundHover = colorPalette.navy800;
 export const sidebarItemAccentSelected = colorPalette.purple200;
 export const sidebarItemText = colorPalette.navy150;
 export const sidebarItemTextSelected = colorPalette.purple200;
+export const sidebarBudgetName = colorPalette.navy150;
 
 export const menuBackground = colorPalette.white;
 export const menuItemBackground = colorPalette.navy50;
@@ -217,3 +218,5 @@ export const tooltipBackground = colorPalette.navy50;
 export const tooltipBorder = colorPalette.navy150;
 
 export const calendarCellBackground = colorPalette.navy100;
+
+export const overlayBackground = 'rgba(0, 0, 0, 0.3)';

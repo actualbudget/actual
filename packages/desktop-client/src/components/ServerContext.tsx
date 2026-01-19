@@ -1,9 +1,9 @@
 import React, {
   createContext,
-  useState,
   useCallback,
-  useEffect,
   useContext,
+  useEffect,
+  useState,
   type ReactNode,
 } from 'react';
 
@@ -43,8 +43,12 @@ const ServerContext = createContext<ServerContextValue>({
   setURL: () => Promise.reject(new Error('ServerContext not initialized')),
   refreshLoginMethods: () =>
     Promise.reject(new Error('ServerContext not initialized')),
-  setMultiuserEnabled: () => {},
-  setLoginMethods: () => {},
+  setMultiuserEnabled: () => {
+    throw new Error('ServerContext not initialized');
+  },
+  setLoginMethods: () => {
+    throw new Error('ServerContext not initialized');
+  },
 });
 
 export const useServerURL = () => useContext(ServerContext).url;

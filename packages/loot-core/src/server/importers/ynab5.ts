@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
-import { sortByKey, groupBy } from '../../shared/util';
+import { groupBy, sortByKey } from '../../shared/util';
 
 import type * as YNAB5 from './ynab5-types';
 

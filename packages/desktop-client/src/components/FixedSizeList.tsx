@@ -2,11 +2,11 @@
 import {
   createRef,
   PureComponent,
+  type CSSProperties,
   type ReactNode,
   type Ref,
   type RefObject,
   type UIEvent,
-  type CSSProperties,
 } from 'react';
 
 import { View } from '@actual-app/components/view';

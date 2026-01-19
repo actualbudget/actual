@@ -9,6 +9,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   formulaMode: false,
   currency: false,
   crossoverReport: false,
+  customThemes: false,
   payeeLocations: false,
 };
 

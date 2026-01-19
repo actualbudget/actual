@@ -6,18 +6,18 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
-  mapField,
   friendlyOp,
   getAllocationMethods,
+  mapField,
 } from 'loot-core/shared/rules';
 import {
-  type SetSplitAmountRuleActionEntity,
+  type AppendNoteRuleActionEntity,
+  type DeleteTransactionRuleActionEntity,
   type LinkScheduleRuleActionEntity,
+  type PrependNoteRuleActionEntity,
   type RuleActionEntity,
   type SetRuleActionEntity,
-  type AppendNoteRuleActionEntity,
-  type PrependNoteRuleActionEntity,
-  type DeleteTransactionRuleActionEntity,
+  type SetSplitAmountRuleActionEntity,
 } from 'loot-core/types/models';
 
 import { ScheduleValue } from './ScheduleValue';

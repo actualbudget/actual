@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 
-import { useBootstrapped, Title } from './common';
+import { Title, useBootstrapped } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 import { createBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';

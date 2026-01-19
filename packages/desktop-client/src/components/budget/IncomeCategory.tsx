@@ -9,9 +9,9 @@ import { SidebarCategory } from './SidebarCategory';
 import { useBudgetComponents } from '.';
 
 import {
+  DropHighlight,
   useDraggable,
   useDroppable,
-  DropHighlight,
   type OnDragChangeCallback,
   type OnDropCallback,
 } from '@desktop-client/components/sort';

@@ -16,12 +16,13 @@ import {
   YAxis,
 } from 'recharts';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import {
   chartTheme,
   useRechartsAnimation,
 } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -82,29 +83,41 @@ function CustomTooltip({
         <div style={{ lineHeight: 1.5 }}>
           <AlignedText
             left={t('Income:')}
-            right={format(data.income, 'financial')}
+            right={
+              <FinancialText>{format(data.income, 'financial')}</FinancialText>
+            }
           />
           <AlignedText
             left={t('Expenses:')}
-            right={format(data.expenses, 'financial')}
+            right={
+              <FinancialText>
+                {format(data.expenses, 'financial')}
+              </FinancialText>
+            }
           />
           <AlignedText
             left={t('Change:')}
             right={
-              <strong>
+              <FinancialText as="strong">
                 {format(data.income + data.expenses, 'financial')}
-              </strong>
+              </FinancialText>
             }
           />
           {data.transfers !== 0 && (
             <AlignedText
               left={t('Transfers:')}
-              right={format(data.transfers, 'financial')}
+              right={
+                <FinancialText>
+                  {format(data.transfers, 'financial')}
+                </FinancialText>
+              }
             />
           )}
           <AlignedText
             left={t('Balance:')}
-            right={format(data.balance, 'financial')}
+            right={
+              <FinancialText>{format(data.balance, 'financial')}</FinancialText>
+            }
           />
         </div>
       </div>

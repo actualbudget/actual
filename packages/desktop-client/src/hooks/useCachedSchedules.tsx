@@ -1,13 +1,13 @@
 import React, {
   createContext,
-  type PropsWithChildren,
   useContext,
+  type PropsWithChildren,
 } from 'react';
 
 import {
-  type UseSchedulesResult,
-  type UseSchedulesProps,
   useSchedules,
+  type UseSchedulesProps,
+  type UseSchedulesResult,
 } from './useSchedules';
 
 type SchedulesContextValue = UseSchedulesResult;

@@ -1,4 +1,4 @@
-import { type CSSProperties, type ReactNode, useRef, useState } from 'react';
+import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -109,7 +109,6 @@ export function EditFieldModal({
           value={formatDate(parseISO(today), dateFormat)}
           dateFormat={dateFormat}
           embedded
-          onUpdate={() => {}}
           onSelect={date => {
             onSelect(dayFromDate(parseDate(date, 'yyyy-MM-dd', new Date())));
             close();

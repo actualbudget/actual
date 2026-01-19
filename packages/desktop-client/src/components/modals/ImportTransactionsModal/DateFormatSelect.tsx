@@ -7,8 +7,8 @@ import { View } from '@actual-app/components/view';
 import {
   dateFormats,
   type DateFormat,
-  type ImportTransaction,
   type FieldMapping,
+  type ImportTransaction,
 } from './utils';
 
 import { SectionLabel } from '@desktop-client/components/forms';

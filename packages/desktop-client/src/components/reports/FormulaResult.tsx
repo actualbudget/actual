@@ -1,11 +1,11 @@
 import React, {
-  type Ref,
-  type RefObject,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
+  type Ref,
+  type RefObject,
 } from 'react';
 
 import { theme } from '@actual-app/components/theme';
