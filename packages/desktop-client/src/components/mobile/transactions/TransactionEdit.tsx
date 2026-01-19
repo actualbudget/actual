@@ -1410,14 +1410,14 @@ function TransactionEditUnconnected({
             }
             return lastTransaction?.date || monthUtils.currentDay();
           })(),
-          payee: searchParamPayee ?? null,
+          payee: searchParamPayee ?? undefined,
           account:
-            searchParamAccount ||
-            locationState?.accountId ||
-            lastTransaction?.account ||
-            null,
+            searchParamAccount ??
+            locationState?.accountId ??
+            lastTransaction?.account ??
+            '',
           category:
-            searchParamCategory || locationState?.categoryId || null,
+            searchParamCategory ?? locationState?.categoryId ?? undefined,
           amount: -amountToInteger(
             parseFloat(searchParams.get('amount') || '') || 0,
           ),
