@@ -48,52 +48,45 @@ export function MobileSchedulesPage() {
   const payees = usePayees();
   const accounts = useAccounts();
 
-  const baseSchedules = useMemo(() => {
-    const filterIncludes = (str: string | null | undefined) =>
-      str
-        ? getNormalisedString(str).includes(getNormalisedString(filter)) ||
-          getNormalisedString(filter).includes(getNormalisedString(str))
-        : false;
+  const filterIncludes = (str: string | null | undefined) =>
+    str
+      ? getNormalisedString(str).includes(getNormalisedString(filter)) ||
+        getNormalisedString(filter).includes(getNormalisedString(str))
+      : false;
 
-    return filter
-      ? schedules.filter(schedule => {
-          const payee = payees.find(p => schedule._payee === p.id);
-          const account = accounts.find(a => schedule._account === a.id);
-          const amount = getScheduledAmount(schedule._amount);
-          const amountStr =
-            (schedule._amountOp === 'isapprox' ||
-            schedule._amountOp === 'isbetween'
-              ? '~'
-              : '') +
-            (amount > 0 ? '+' : '') +
-            format(Math.abs(amount || 0), 'financial');
-          const dateStr = schedule.next_date
-            ? monthUtilFormat(schedule.next_date, dateFormat)
-            : null;
-          const statusLabel = statuses.get(schedule.id);
+  const baseSchedules = filter
+    ? schedules.filter(schedule => {
+        const payee = payees.find(p => schedule._payee === p.id);
+        const account = accounts.find(a => schedule._account === a.id);
+        const amount = getScheduledAmount(schedule._amount);
+        const amountStr =
+          (schedule._amountOp === 'isapprox' ||
+          schedule._amountOp === 'isbetween'
+            ? '~'
+            : '') +
+          (amount > 0 ? '+' : '') +
+          format(Math.abs(amount || 0), 'financial');
+        const dateStr = schedule.next_date
+          ? monthUtilFormat(schedule.next_date, dateFormat)
+          : null;
+        const statusLabel = statuses.get(schedule.id);
 
-          return (
-            filterIncludes(schedule.name) ||
-            filterIncludes(payee?.name) ||
-            filterIncludes(account?.name) ||
-            filterIncludes(amountStr) ||
-            filterIncludes(statusLabel) ||
-            filterIncludes(dateStr)
-          );
-        })
-      : schedules;
-  }, [schedules, filter, payees, accounts, format, dateFormat, statuses]);
-  const hasCompletedSchedules = useMemo(
-    () => baseSchedules.some(schedule => schedule.completed),
-    [baseSchedules],
+        return (
+          filterIncludes(schedule.name) ||
+          filterIncludes(payee?.name) ||
+          filterIncludes(account?.name) ||
+          filterIncludes(amountStr) ||
+          filterIncludes(statusLabel) ||
+          filterIncludes(dateStr)
+        );
+      })
+    : schedules;
+  const hasCompletedSchedules = baseSchedules.some(
+    schedule => schedule.completed,
   );
-  const filteredSchedules = useMemo(
-    () =>
-      showCompleted
-        ? baseSchedules
-        : baseSchedules.filter(schedule => !schedule.completed),
-    [baseSchedules, showCompleted],
-  );
+  const filteredSchedules = showCompleted
+    ? baseSchedules
+    : baseSchedules.filter(schedule => !schedule.completed);
 
   const handleSchedulePress = useCallback(
     (schedule: ScheduleEntity) => {
