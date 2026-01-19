@@ -22,7 +22,6 @@ import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
@@ -37,7 +36,7 @@ export function MobileSchedulesPage() {
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const [filter, setFilter] = useState('');
-  const [showCompleted = false] = useLocalPref('schedules.showCompleted');
+  const [showCompleted, setShowCompleted] = useState(false);
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
@@ -55,14 +54,14 @@ export function MobileSchedulesPage() {
   const payees = usePayees();
   const accounts = useAccounts();
 
-  const filteredSchedules = useMemo(() => {
+  const baseSchedules = useMemo(() => {
     const filterIncludes = (str: string | null | undefined) =>
       str
         ? getNormalisedString(str).includes(getNormalisedString(filter)) ||
           getNormalisedString(filter).includes(getNormalisedString(str))
         : false;
 
-    const baseSchedules = filter
+    return filter
       ? schedules.filter(schedule => {
           const payee = payees.find(p => schedule._payee === p.id);
           const account = accounts.find(a => schedule._account === a.id);
@@ -89,12 +88,6 @@ export function MobileSchedulesPage() {
           );
         })
       : schedules;
-
-    if (showCompleted) {
-      return baseSchedules;
-    }
-
-    return baseSchedules.filter(s => !s.completed);
   }, [
     schedules,
     filter,
@@ -103,8 +96,18 @@ export function MobileSchedulesPage() {
     format,
     dateFormat,
     statuses,
-    showCompleted,
   ]);
+  const hasCompletedSchedules = useMemo(
+    () => baseSchedules.some(schedule => schedule.completed),
+    [baseSchedules],
+  );
+  const filteredSchedules = useMemo(
+    () =>
+      showCompleted
+        ? baseSchedules
+        : baseSchedules.filter(schedule => !schedule.completed),
+    [baseSchedules, showCompleted],
+  );
 
   const handleSchedulePress = useCallback(
     (schedule: ScheduleEntity) => {
@@ -188,6 +191,9 @@ export function MobileSchedulesPage() {
         statuses={statuses}
         onSchedulePress={handleSchedulePress}
         onScheduleDelete={handleScheduleDelete}
+        hasCompletedSchedules={hasCompletedSchedules}
+        showCompleted={showCompleted}
+        onShowCompleted={() => setShowCompleted(true)}
       />
     </Page>
   );
