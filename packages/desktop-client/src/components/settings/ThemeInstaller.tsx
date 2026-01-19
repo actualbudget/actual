@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { TextArea } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
-import AutoSizer from 'react-virtualized-auto-sizer';
+import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
@@ -207,8 +207,8 @@ export function ThemeInstaller({
               />
             </View>
           ) : (
-            <AutoSizer>
-              {({ width, height }) => {
+            <AutoSizer
+              renderProp={({ width = 0, height = 0 }) => {
                 if (width === 0 || height === 0) {
                   return null;
                 }
@@ -352,7 +352,7 @@ export function ThemeInstaller({
                   />
                 );
               }}
-            </AutoSizer>
+            />
           )}
         </View>
       )}

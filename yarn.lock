@@ -199,7 +199,7 @@ __metadata:
     react-simple-pull-to-refresh: "npm:^1.3.4"
     react-spring: "npm:10.0.0"
     react-swipeable: "npm:^7.0.2"
-    react-virtualized-auto-sizer: "npm:^1.0.26"
+    react-virtualized-auto-sizer: "npm:^2.0.2"
     recharts: "npm:^3.4.1"
     rehype-external-links: "npm:^3.0.0"
     remark-gfm: "npm:^4.0.1"
@@ -23394,13 +23394,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-virtualized-auto-sizer@npm:^1.0.26":
-  version: 1.0.26
-  resolution: "react-virtualized-auto-sizer@npm:1.0.26"
+"react-virtualized-auto-sizer@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "react-virtualized-auto-sizer@npm:2.0.2"
   peerDependencies:
-    react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0 || ^19.0.0
-    react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10/8f8127369fb3ae1a49987a1e7d2d136f379b71d1b031a4c169389274946eca0248e3fb9130aa8a7ebe82f4ca8aaab58c37252398f8f6220a6eafaa78b8464b6b
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  checksum: 10/ae8e442573c01ad357a25f30f0e838bd56016cefce3995b5505417de3b06e2dd666350616ab9d5d0d2dc7fccab2878845dc59d611252122a37a7ec153a922bfa
   languageName: node
   linkType: hard
 
