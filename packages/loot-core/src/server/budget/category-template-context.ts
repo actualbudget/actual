@@ -741,18 +741,21 @@ export class CategoryTemplateContext {
     // negate as sheet value is cost ie negative
     let average = -(sum / template.numMonths);
 
-    if (template.adjustment && template.adjustmentType) {
+    if (template.adjustment !== undefined && template.adjustmentType) {
       switch (template.adjustmentType) {
-        case 'percent':
+        case 'percent': {
           const percent = 100 + template.adjustment;
           average *= percent;
           average /= 100;
           break;
-        case 'amount':
+        }
+        case 'amount': {
           average += template.adjustment;
           break;
+        }
+
         default:
-        //no valid adjustment was found, will remain regular average. perhaps an error could be raised?
+        //no valid adjustment was found,
       }
     }
 
