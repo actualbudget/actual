@@ -49,9 +49,9 @@ __metadata:
     "@emotion/css": "npm:^11.13.5"
     "@svgr/cli": "npm:^8.1.0"
     "@types/react": "npm:^19.2.5"
-    react: "npm:19.2.0"
+    react: "npm:19.2.3"
     react-aria-components: "npm:^1.14.0"
-    react-dom: "npm:19.2.0"
+    react-dom: "npm:19.2.3"
     usehooks-ts: "npm:^3.1.1"
     vitest: "npm:^4.0.16"
   peerDependencies:
@@ -182,12 +182,12 @@ __metadata:
     promise-retry: "npm:^2.0.1"
     prop-types: "npm:^15.8.1"
     re-resizable: "npm:^6.11.2"
-    react: "npm:19.2.0"
+    react: "npm:19.2.3"
     react-aria: "npm:^3.45.0"
     react-aria-components: "npm:^1.14.0"
     react-dnd: "npm:^16.0.1"
     react-dnd-html5-backend: "npm:^16.0.1"
-    react-dom: "npm:19.2.0"
+    react-dom: "npm:19.2.3"
     react-error-boundary: "npm:^6.0.3"
     react-grid-layout: "npm:^1.5.3"
     react-hotkeys-hook: "npm:^5.2.1"
@@ -22960,18 +22960,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:19.2.0":
-  version: 19.2.0
-  resolution: "react-dom@npm:19.2.0"
-  dependencies:
-    scheduler: "npm:^0.27.0"
-  peerDependencies:
-    react: ^19.2.0
-  checksum: 10/3dbba071b9b1e7a19eae55f05c100f6b44f88c0aee72397d719ae338248ca66ed5028e6964c1c14870cc3e1abcecc91b22baba6dc2072f819dea81a9fd72f2fd
-  languageName: node
-  linkType: hard
-
-"react-dom@npm:^19.2.3":
+"react-dom@npm:19.2.3, react-dom@npm:^19.2.3":
   version: 19.2.3
   resolution: "react-dom@npm:19.2.3"
   dependencies:
@@ -23415,14 +23404,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:19.2.0":
-  version: 19.2.0
-  resolution: "react@npm:19.2.0"
-  checksum: 10/e13bcdb8e994c3cfa922743cb75ca8deb60531bf02f584d2d8dab940a8132ce8a2e6ef16f8ed7f372b4072e7a7eeff589b2812dabbedfa73e6e46201dac8a9d0
-  languageName: node
-  linkType: hard
-
-"react@npm:^19.2.3":
+"react@npm:19.2.3, react@npm:^19.2.3":
   version: 19.2.3
   resolution: "react@npm:19.2.3"
   checksum: 10/d16b7f35c0d35a56f63d9d1693819762e4abc479c57dd6310298920bed3820fcec7e17a99d44983416d8f5049143ea45b8005d3ab8324bae8973224400502b08
