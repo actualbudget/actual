@@ -150,15 +150,14 @@ async function createPayeeLocation({
   latitude: number;
   longitude: number;
 }): Promise<PayeeLocationEntity['id']> {
-  const id = uuidv4();
   const created_at = Date.now();
 
-  await db.runQuery(
-    'INSERT INTO payee_locations (id, payee_id, latitude, longitude, created_at) VALUES (?, ?, ?, ?, ?)',
-    [id, payee_id, latitude, longitude, created_at],
-  );
-
-  return id;
+  return await db.insertWithUUID('payee_locations', {
+    payee_id,
+    latitude,
+    longitude,
+    created_at,
+  });
 }
 
 async function getPayeeLocations({
@@ -185,7 +184,7 @@ async function deletePayeeLocation({
 }: {
   id: PayeeLocationEntity['id'];
 }): Promise<void> {
-  await db.runQuery('DELETE FROM payee_locations WHERE id = ?', [id]);
+  await db.delete_('payee_locations', id);
 }
 
 // Type for the raw query result that combines PayeeEntity and PayeeLocationEntity fields
@@ -249,6 +248,7 @@ async function getNearbyPayees({
       FROM payee_locations pl
       JOIN payees p ON pl.payee_id = p.id
       WHERE p.tombstone IS NOT 1
+        AND pl.tombstone IS NOT 1
         -- Filter by distance using Haversine formula
         AND (6371 * acos(
           MIN(1, MAX(-1,

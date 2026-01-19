@@ -198,6 +198,7 @@ export const schema = {
     latitude: f('float', { required: true }),
     longitude: f('float', { required: true }),
     created_at: f('integer', { required: true }),
+    tombstone: f('boolean'),
   },
 };
 

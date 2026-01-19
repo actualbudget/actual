@@ -2,11 +2,11 @@ BEGIN TRANSACTION;
 
     CREATE TABLE IF NOT EXISTS payee_locations (
       id TEXT PRIMARY KEY,
-      payee_id TEXT NOT NULL,
-      latitude REAL NOT NULL,
-      longitude REAL NOT NULL,
-      created_at INTEGER NOT NULL,
-      FOREIGN KEY (payee_id) REFERENCES payees (id) ON DELETE CASCADE
+      payee_id TEXT,
+      latitude REAL,
+      longitude REAL,
+      created_at INTEGER,
+      tombstone INTEGER DEFAULT 0
     );
 
     -- Create index on payee_id for faster lookups
