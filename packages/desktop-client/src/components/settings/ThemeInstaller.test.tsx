@@ -27,10 +27,6 @@ vi.mock('@desktop-client/style/customThemes', async () => {
     normalizeGitHubRepo: vi.fn((repo: string) =>
       repo.startsWith('http') ? repo : `https://github.com/${repo}`,
     ),
-    getThemeScreenshotUrl: vi.fn(
-      (repo: string) =>
-        `https://raw.githubusercontent.com/${repo}/refs/heads/main/screenshot.png`,
-    ),
   };
 });
 
@@ -51,14 +47,38 @@ describe('ThemeInstaller', () => {
     {
       name: 'Demo Theme',
       repo: 'actualbudget/demo-theme',
+      colors: [
+        '#1a1a2e',
+        '#16213e',
+        '#0f3460',
+        '#e94560',
+        '#533483',
+        '#f1f1f1',
+      ],
     },
     {
       name: 'Ocean Blue',
       repo: 'actualbudget/ocean-theme',
+      colors: [
+        '#0d47a1',
+        '#1565c0',
+        '#1976d2',
+        '#1e88e5',
+        '#42a5f5',
+        '#90caf9',
+      ],
     },
     {
       name: 'Forest Green',
       repo: 'actualbudget/forest-theme',
+      colors: [
+        '#1b5e20',
+        '#2e7d32',
+        '#388e3c',
+        '#43a047',
+        '#66bb6a',
+        '#a5d6a7',
+      ],
     },
   ];
 
@@ -562,21 +582,28 @@ describe('ThemeInstaller', () => {
   });
 
   describe('catalog theme display', () => {
-    it('displays theme screenshot URL correctly', () => {
+    it('displays theme color palette correctly', () => {
       render(
         <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
       );
 
-      const images = screen.getAllByRole('img');
-      expect(images.length).toBeGreaterThan(0);
+      // Check that color palettes are rendered instead of images
+      const images = screen.queryAllByRole('img');
+      expect(images.length).toBe(0);
 
-      // Check that images have the correct src pattern
-      images.forEach(img => {
-        expect(img).toHaveAttribute(
-          'src',
-          expect.stringContaining('raw.githubusercontent.com'),
-        );
+      // Check that color swatches are rendered (6 divs per theme)
+      const demoThemeButton = screen.getByRole('button', {
+        name: 'Demo Theme',
       });
+      const colorSwatches = demoThemeButton.querySelectorAll(
+        'div[style*="background-color"]',
+      );
+      expect(colorSwatches.length).toBe(6);
+
+      // Verify the first color from the mockCatalog is used (browser converts hex to rgb)
+      // #1a1a2e = rgb(26, 26, 46)
+      const firstColor = colorSwatches[0]?.getAttribute('style');
+      expect(firstColor).toContain('rgb(26, 26, 46)');
     });
 
     it('displays theme author correctly', () => {
