@@ -18,6 +18,7 @@ import { type SpendingEntity } from 'loot-core/types/models';
 
 import { computePadding } from './util/computePadding';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
@@ -94,10 +95,14 @@ const CustomTooltip = ({
             {payload[0].payload.months[compare]?.cumulative ? (
               <AlignedText
                 left={t('Compare:')}
-                right={format(
-                  payload[0].payload.months[compare]?.cumulative * -1,
-                  'financial',
-                )}
+                right={
+                  <FinancialText>
+                    {format(
+                      payload[0].payload.months[compare]?.cumulative * -1,
+                      'financial',
+                    )}
+                  </FinancialText>
+                }
               />
             ) : null}
             {['cumulative'].includes(balanceTypeOp) && (
@@ -109,19 +114,27 @@ const CustomTooltip = ({
                       ? t('Budgeted:')
                       : t('To:')
                 }
-                right={format(Math.round(comparison), 'financial')}
+                right={
+                  <FinancialText>
+                    {format(Math.round(comparison), 'financial')}
+                  </FinancialText>
+                }
               />
             )}
             {payload[0].payload.months[compare]?.cumulative ? (
               <AlignedText
                 left={t('Difference:')}
-                right={format(
-                  Math.round(
-                    payload[0].payload.months[compare]?.cumulative * -1 -
-                      comparison,
-                  ),
-                  'financial',
-                )}
+                right={
+                  <FinancialText>
+                    {format(
+                      Math.round(
+                        payload[0].payload.months[compare]?.cumulative * -1 -
+                          comparison,
+                      ),
+                      'financial',
+                    )}
+                  </FinancialText>
+                }
               />
             ) : null}
           </div>

@@ -24,6 +24,7 @@ import * as monthUtils from 'loot-core/shared/months';
 import { type NetWorthWidget, type TimeFrame } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,
@@ -346,7 +347,11 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
           <View
             style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
           >
-            <PrivacyFilter>{format(data.netWorth, 'financial')}</PrivacyFilter>
+            <PrivacyFilter>
+              <FinancialText>
+                {format(data.netWorth, 'financial')}
+              </FinancialText>
+            </PrivacyFilter>
           </View>
           <PrivacyFilter>
             <Change amount={data.totalChange} />

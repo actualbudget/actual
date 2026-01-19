@@ -29,6 +29,7 @@ import * as monthUtils from 'loot-core/shared/months';
 import { type CalendarWidget } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { chartTheme } from '@desktop-client/components/reports/chart-theme';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
@@ -253,7 +254,9 @@ export function CalendarCard({
                           <View style={{ color: chartTheme.colors.blue }}>
                             {totalIncome !== 0 ? (
                               <PrivacyFilter>
-                                {format(totalIncome, 'financial')}
+                                <FinancialText>
+                                  {format(totalIncome, 'financial')}
+                                </FinancialText>
                               </PrivacyFilter>
                             ) : (
                               ''
@@ -274,7 +277,9 @@ export function CalendarCard({
                           <View style={{ color: chartTheme.colors.red }}>
                             {totalExpense !== 0 ? (
                               <PrivacyFilter>
-                                {format(totalExpense, 'financial')}
+                                <FinancialText>
+                                  {format(totalExpense, 'financial')}
+                                </FinancialText>
                               </PrivacyFilter>
                             ) : (
                               ''
@@ -518,7 +523,9 @@ function CalendarCardInner({
                   style={{ flexShrink: 0 }}
                 />
                 <PrivacyFilter>
-                  {format(calendar.totalIncome, 'financial')}
+                  <FinancialText>
+                    {format(calendar.totalIncome, 'financial')}
+                  </FinancialText>
                 </PrivacyFilter>
               </>
             ) : (
@@ -541,7 +548,9 @@ function CalendarCardInner({
                   style={{ flexShrink: 0 }}
                 />
                 <PrivacyFilter>
-                  {format(calendar.totalExpense, 'financial')}
+                  <FinancialText>
+                    {format(calendar.totalExpense, 'financial')}
+                  </FinancialText>
                 </PrivacyFilter>
               </>
             ) : (

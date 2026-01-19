@@ -18,6 +18,7 @@ import { type ScheduleEntity } from 'loot-core/types/models';
 
 import { StatusBadge } from './StatusBadge';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import {
   Cell,
@@ -175,7 +176,7 @@ export function ScheduleAmountCell({
           ~
         </View>
       )}
-      <Text
+      <FinancialText
         style={{
           flex: 1,
           color: num > 0 ? theme.noticeTextLight : theme.tableText,
@@ -192,7 +193,7 @@ export function ScheduleAmountCell({
         <PrivacyFilter>
           {num > 0 ? `+${currencyAmount}` : `${currencyAmount}`}
         </PrivacyFilter>
-      </Text>
+      </FinancialText>
     </Cell>
   );
 }

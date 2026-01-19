@@ -17,6 +17,7 @@ import {
 
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { chartTheme } from '@desktop-client/components/reports/chart-theme';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -143,7 +144,9 @@ export function CalendarGraph({
                       >
                         {day.incomeValue !== 0 ? (
                           <PrivacyFilter>
-                            {format(day.incomeValue, 'financial')}
+                            <FinancialText>
+                              {format(day.incomeValue, 'financial')}
+                            </FinancialText>
                           </PrivacyFilter>
                         ) : (
                           ''
@@ -172,7 +175,9 @@ export function CalendarGraph({
                       >
                         {day.expenseValue !== 0 ? (
                           <PrivacyFilter>
-                            {format(day.expenseValue, 'financial')}
+                            <FinancialText>
+                              {format(day.expenseValue, 'financial')}
+                            </FinancialText>
                           </PrivacyFilter>
                         ) : (
                           ''

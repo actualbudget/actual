@@ -31,6 +31,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import {
   Cell,
@@ -488,9 +489,13 @@ function TableRow({
       </Field>
       <Field width={80}>
         <PrivacyFilter>
-          {externalAccount.balance != null
-            ? format(externalAccount.balance.toString(), 'financial')
-            : t('Unknown')}
+          {externalAccount.balance != null ? (
+            <FinancialText>
+              {format(externalAccount.balance.toString(), 'financial')}
+            </FinancialText>
+          ) : (
+            t('Unknown')
+          )}
         </PrivacyFilter>
       </Field>
       <Field
@@ -621,9 +626,13 @@ function AccountCard({
       >
         <Trans>Balance:</Trans>{' '}
         <PrivacyFilter>
-          {externalAccount.balance != null
-            ? format(externalAccount.balance.toString(), 'financial')
-            : t('Unknown')}
+          {externalAccount.balance != null ? (
+            <FinancialText>
+              {format(externalAccount.balance.toString(), 'financial')}
+            </FinancialText>
+          ) : (
+            t('Unknown')
+          )}
         </PrivacyFilter>
       </View>
 
