@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ThemeInstaller } from './ThemeInstaller';
 
+import { useThemeCatalog } from '@desktop-client/hooks/useThemeCatalog';
 import {
   fetchThemeCss,
   validateThemeCss,
@@ -24,8 +25,21 @@ vi.mock('@desktop-client/style/customThemes', async () => {
     ),
   };
 });
-vi.mock('@desktop-client/data/customThemeCatalog.json', () => ({
-  default: [
+
+vi.mock('@desktop-client/hooks/useThemeCatalog', () => ({
+  useThemeCatalog: vi.fn(),
+}));
+
+describe('ThemeInstaller', () => {
+  const mockOnInstall = vi.fn();
+  const mockOnClose = vi.fn();
+
+  const mockValidCss = `:root {
+    --color-primary: #007bff;
+    --color-secondary: #6c757d;
+  }`;
+
+  const mockCatalog = [
     {
       name: 'Demo Theme',
       repo: 'actualbudget/demo-theme',
@@ -38,17 +52,7 @@ vi.mock('@desktop-client/data/customThemeCatalog.json', () => ({
       name: 'Forest Green',
       repo: 'actualbudget/forest-theme',
     },
-  ],
-}));
-
-describe('ThemeInstaller', () => {
-  const mockOnInstall = vi.fn();
-  const mockOnClose = vi.fn();
-
-  const mockValidCss = `:root {
-    --color-primary: #007bff;
-    --color-secondary: #6c757d;
-  }`;
+  ];
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -56,6 +60,13 @@ describe('ThemeInstaller', () => {
     mockOnClose.mockClear();
     vi.mocked(fetchThemeCss).mockResolvedValue(mockValidCss);
     vi.mocked(validateThemeCss).mockImplementation(css => css.trim());
+
+    // Mock useThemeCatalog to return catalog data immediately
+    vi.mocked(useThemeCatalog).mockReturnValue({
+      data: mockCatalog,
+      isLoading: false,
+      error: null,
+    });
   });
 
   describe('rendering', () => {
