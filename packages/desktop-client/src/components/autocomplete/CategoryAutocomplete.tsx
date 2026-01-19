@@ -33,6 +33,7 @@ import { ItemHeader } from './ItemHeader';
 
 import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
@@ -503,12 +504,22 @@ function CategoryItem({
           }}
         >
           {isToBudgetItem
-            ? toBudget != null
-              ? ` ${integerToCurrency(toBudget || 0)}`
-              : null
-            : balance != null
-              ? ` ${integerToCurrency(balance || 0)}`
-              : null}
+            ? toBudget != null && (
+                <>
+                  {' '}
+                  <FinancialText>
+                    {integerToCurrency(toBudget || 0)}
+                  </FinancialText>
+                </>
+              )
+            : balance != null && (
+                <>
+                  {' '}
+                  <FinancialText>
+                    {integerToCurrency(balance || 0)}
+                  </FinancialText>
+                </>
+              )}
         </TextOneLine>
       </View>
     </button>

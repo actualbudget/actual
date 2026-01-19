@@ -26,6 +26,7 @@ import {
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
 import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { Checkbox } from '@desktop-client/components/forms';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
@@ -458,7 +459,9 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                   }}
                 >
                   <PrivacyFilter>
-                    {format(data?.dividend ?? 0, 'financial')}
+                    <FinancialText>
+                      {format(data?.dividend ?? 0, 'financial')}
+                    </FinancialText>
                   </PrivacyFilter>
                 </Text>
                 <div

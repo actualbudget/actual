@@ -15,6 +15,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -108,7 +109,9 @@ export function CrossoverGraph({
                   <Trans>Monthly investment income:</Trans>
                 </div>
                 <div>
-                  {format(payload[0].payload.investmentIncome, 'financial')}
+                  <FinancialText>
+                    {format(payload[0].payload.investmentIncome, 'financial')}
+                  </FinancialText>
                 </div>
               </View>
               <View
@@ -120,7 +123,11 @@ export function CrossoverGraph({
                 <div>
                   <Trans>Monthly expenses:</Trans>
                 </div>
-                <div>{format(payload[0].payload.expenses, 'financial')}</div>
+                <div>
+                  <FinancialText>
+                    {format(payload[0].payload.expenses, 'financial')}
+                  </FinancialText>
+                </div>
               </View>
               {payload[0].payload.adjustedExpenses != null && (
                 <View
@@ -133,7 +140,9 @@ export function CrossoverGraph({
                     <Trans>Target income:</Trans>
                   </div>
                   <div>
-                    {format(payload[0].payload.adjustedExpenses, 'financial')}
+                    <FinancialText>
+                      {format(payload[0].payload.adjustedExpenses, 'financial')}
+                    </FinancialText>
                   </div>
                 </View>
               )}
@@ -146,7 +155,11 @@ export function CrossoverGraph({
                 <div>
                   <Trans>Life savings:</Trans>
                 </div>
-                <div>{format(payload[0].payload.nestEgg, 'financial')}</div>
+                <div>
+                  <FinancialText>
+                    {format(payload[0].payload.nestEgg, 'financial')}
+                  </FinancialText>
+                </div>
               </View>
             </div>
           </div>

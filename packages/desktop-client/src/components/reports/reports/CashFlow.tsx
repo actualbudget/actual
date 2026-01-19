@@ -21,6 +21,7 @@ import {
 } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,
@@ -326,11 +327,11 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
               </Block>
             }
             right={
-              <Text style={{ fontWeight: 600 }}>
+              <FinancialText style={{ fontWeight: 600 }}>
                 <PrivacyFilter>
                   {format(totalIncome, 'financial')}
                 </PrivacyFilter>
-              </Text>
+              </FinancialText>
             }
           />
 
@@ -342,11 +343,11 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
               </Block>
             }
             right={
-              <Text style={{ fontWeight: 600 }}>
+              <FinancialText style={{ fontWeight: 600 }}>
                 <PrivacyFilter>
                   {format(totalExpenses, 'financial')}
                 </PrivacyFilter>
-              </Text>
+              </FinancialText>
             }
           />
 
@@ -358,11 +359,11 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
               </Block>
             }
             right={
-              <Text style={{ fontWeight: 600 }}>
+              <FinancialText style={{ fontWeight: 600 }}>
                 <PrivacyFilter>
                   {format(totalTransfers, 'financial')}
                 </PrivacyFilter>
-              </Text>
+              </FinancialText>
             }
           />
           <Text style={{ fontWeight: 600 }}>
