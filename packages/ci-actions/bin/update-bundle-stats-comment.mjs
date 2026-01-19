@@ -14,6 +14,9 @@ import process from 'node:process';
 
 import { Octokit } from '@octokit/rest';
 
+const BOT_BOUNDARY_MARKER = '<!--- actual-bot-sections --->';
+const BOT_BOUNDARY_TEXT = `${BOT_BOUNDARY_MARKER}\n<hr />`;
+
 function parseArgs(argv) {
   const args = {
     commentFile: null,
@@ -158,7 +161,10 @@ function upsertBlock(existingBody, block, markers) {
   }
 
   const separator = body.endsWith('\n') ? '\n' : '\n\n';
-  return `${body}${separator}${block.trim()}`;
+  const boundary = body.includes(BOT_BOUNDARY_MARKER)
+    ? ''
+    : `${BOT_BOUNDARY_TEXT}\n\n`;
+  return `${body}${separator}${boundary}${block.trim()}`;
 }
 
 async function updatePullRequestBody(
