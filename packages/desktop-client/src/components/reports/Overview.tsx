@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components';
-import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
+import ReactGridLayout, { type Layout } from 'react-grid-layout';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
@@ -11,7 +11,6 @@ import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
-import { breakpoints } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -48,6 +47,7 @@ import {
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useReports } from '@desktop-client/hooks/useReports';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import {
@@ -55,8 +55,6 @@ import {
   removeNotification,
 } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
-
-const ResponsiveGridLayout = WidthProvider(Responsive);
 
 function isCustomReportWidget(widget: Widget): widget is CustomReportWidget {
   return widget.type === 'custom-report';
@@ -77,9 +75,10 @@ export function Overview({ dashboard }: OverviewProps) {
 
   const [isImporting, setIsImporting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [currentBreakpoint, setCurrentBreakpoint] = useState<
-    'mobile' | 'desktop'
-  >('desktop');
+  const { isNarrowWidth } = useResponsive();
+  const currentBreakpoint: 'mobile' | 'desktop' = isNarrowWidth
+    ? 'mobile'
+    : 'desktop';
 
   const { data: customReports, isLoading: isCustomReportsLoading } =
     useReports();
@@ -96,11 +95,17 @@ export function Overview({ dashboard }: OverviewProps) {
 
   const isLoading = isCustomReportsLoading || isWidgetsLoading;
 
-  const { isNarrowWidth } = useResponsive();
   const navigate = useNavigate();
 
   const location = useLocation();
   sessionStorage.setItem('url', location.pathname);
+
+  const [containerWidth, setContainerWidth] = useState(0);
+  const handleResize = useCallback((contentRect: DOMRectReadOnly) => {
+    setContainerWidth(Math.floor(contentRect.width));
+  }, []);
+  const containerRef = useResizeObserver<HTMLDivElement>(handleResize);
+  const isMounted = containerWidth > 0;
 
   const mobileLayout = useMemo(() => {
     if (!widgets || widgets.length === 0) {
@@ -124,7 +129,6 @@ export function Overview({ dashboard }: OverviewProps) {
       currentY += widget.height;
 
       return {
-        ...widget,
         i: widget.id,
         x: 0,
         y: itemY, // Calculate correct y co-ordinate to prevent react-grid-layout's auto-compacting behaviour
@@ -138,15 +142,26 @@ export function Overview({ dashboard }: OverviewProps) {
     if (!widgets) return [];
     return widgets.map(widget => ({
       i: widget.id,
+      x: widget.x,
+      y: widget.y,
       w: widget.width,
       h: widget.height,
       minW:
         isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 2 : 3,
       minH:
         isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
-      ...widget,
     }));
   }, [widgets]);
+
+  const currentLayout = useMemo(
+    () => (currentBreakpoint === 'desktop' ? desktopLayout : mobileLayout),
+    [currentBreakpoint, desktopLayout, mobileLayout],
+  );
+
+  const widgetMap = useMemo(
+    () => new Map((widgets ?? []).map(widget => [widget.id, widget])),
+    [widgets],
+  );
 
   const closeNotifications = () => {
     dispatch(removeNotification({ id: 'import' }));
@@ -184,10 +199,6 @@ export function Overview({ dashboard }: OverviewProps) {
     );
   };
 
-  const onBreakpointChange = (breakpoint: 'mobile' | 'desktop') => {
-    setCurrentBreakpoint(breakpoint);
-  };
-
   const onResetDashboard = async () => {
     setIsImporting(true);
     await send('dashboard-reset', dashboard.id);
@@ -200,7 +211,7 @@ export function Overview({ dashboard }: OverviewProps) {
     );
   };
 
-  const onLayoutChange = (newLayout: Layout[]) => {
+  const onLayoutChange = (newLayout: Layout) => {
     if (!isEditing) {
       return;
     }
@@ -235,8 +246,6 @@ export function Overview({ dashboard }: OverviewProps) {
   };
 
   const onExport = () => {
-    const widgetMap = new Map(widgets.map(item => [item.id, item]));
-
     const data = {
       version: 1,
       widgets: desktopLayout.map(item => {
@@ -639,127 +648,143 @@ export function Overview({ dashboard }: OverviewProps) {
         <div>
           <View
             data-testid="reports-overview"
+            innerRef={containerRef}
             style={{ userSelect: 'none', paddingBottom: MOBILE_NAV_HEIGHT }}
           >
-            <ResponsiveGridLayout
-              breakpoints={{ desktop: breakpoints.medium, mobile: 1 }}
-              layouts={{ desktop: desktopLayout, mobile: mobileLayout }}
-              onLayoutChange={
-                currentBreakpoint === 'desktop' ? onLayoutChange : undefined
-              }
-              onBreakpointChange={onBreakpointChange}
-              cols={{ desktop: 12, mobile: 1 }}
-              rowHeight={100}
-              draggableCancel={`.${NON_DRAGGABLE_AREA_CLASS_NAME}`}
-              isDraggable={currentBreakpoint === 'desktop' && isEditing}
-              isResizable={currentBreakpoint === 'desktop' && isEditing}
-            >
-              {desktopLayout.map(item => (
-                <div key={item.i}>
-                  {item.type === 'net-worth-card' ? (
-                    <NetWorthCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      accounts={accounts}
-                      meta={item.meta}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                      onCopy={targetDashboardId =>
-                        onCopyWidget(item.i, targetDashboardId)
-                      }
-                    />
-                  ) : item.type === 'crossover-card' &&
-                    crossoverReportEnabled ? (
-                    <CrossoverCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      accounts={accounts}
-                      meta={item.meta}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                      onCopy={targetDashboardId =>
-                        onCopyWidget(item.i, targetDashboardId)
-                      }
-                    />
-                  ) : item.type === 'cash-flow-card' ? (
-                    <CashFlowCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      meta={item.meta}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                      onCopy={targetDashboardId =>
-                        onCopyWidget(item.i, targetDashboardId)
-                      }
-                    />
-                  ) : item.type === 'spending-card' ? (
-                    <SpendingCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      meta={item.meta}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                      onCopy={targetDashboardId =>
-                        onCopyWidget(item.i, targetDashboardId)
-                      }
-                    />
-                  ) : item.type === 'markdown-card' ? (
-                    <MarkdownCard
-                      isEditing={isEditing}
-                      meta={item.meta}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                      onCopy={targetDashboardId =>
-                        onCopyWidget(item.i, targetDashboardId)
-                      }
-                    />
-                  ) : item.type === 'custom-report' ? (
-                    <CustomReportListCards
-                      isEditing={isEditing}
-                      report={customReportMap.get(item.meta.id)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                      onCopy={targetDashboardId =>
-                        onCopyWidget(item.i, targetDashboardId)
-                      }
-                    />
-                  ) : item.type === 'summary-card' ? (
-                    <SummaryCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      meta={item.meta}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                      onCopy={targetDashboardId =>
-                        onCopyWidget(item.i, targetDashboardId)
-                      }
-                    />
-                  ) : item.type === 'calendar-card' ? (
-                    <CalendarCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      meta={item.meta}
-                      firstDayOfWeekIdx={firstDayOfWeekIdx}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                      onCopy={targetDashboardId =>
-                        onCopyWidget(item.i, targetDashboardId)
-                      }
-                    />
-                  ) : item.type === 'formula-card' && formulaMode ? (
-                    <FormulaCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      meta={item.meta}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                      onCopy={targetDashboardId =>
-                        onCopyWidget(item.i, targetDashboardId)
-                      }
-                    />
-                  ) : null}
-                </div>
-              ))}
-            </ResponsiveGridLayout>
+            {isMounted && (
+              <ReactGridLayout
+                width={containerWidth}
+                layout={currentLayout}
+                gridConfig={{
+                  cols: currentBreakpoint === 'desktop' ? 12 : 1,
+                  rowHeight: 100,
+                }}
+                dragConfig={{
+                  enabled: currentBreakpoint === 'desktop' && isEditing,
+                  cancel: `.${NON_DRAGGABLE_AREA_CLASS_NAME}`,
+                }}
+                resizeConfig={{
+                  enabled: currentBreakpoint === 'desktop' && isEditing,
+                }}
+                onLayoutChange={
+                  currentBreakpoint === 'desktop' ? onLayoutChange : undefined
+                }
+              >
+                {currentLayout.map(item => {
+                  const widget = widgetMap.get(item.i);
+
+                  if (!widget) {
+                    return null;
+                  }
+
+                  return (
+                    <div key={item.i}>
+                      {widget.type === 'net-worth-card' ? (
+                        <NetWorthCard
+                          widgetId={item.i}
+                          isEditing={isEditing}
+                          accounts={accounts}
+                          meta={widget.meta}
+                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                          onRemove={() => onRemoveWidget(item.i)}
+                          onCopy={targetDashboardId =>
+                            onCopyWidget(item.i, targetDashboardId)
+                          }
+                        />
+                      ) : widget.type === 'crossover-card' &&
+                        crossoverReportEnabled ? (
+                        <CrossoverCard
+                          widgetId={item.i}
+                          isEditing={isEditing}
+                          accounts={accounts}
+                          meta={widget.meta}
+                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                          onRemove={() => onRemoveWidget(item.i)}
+                          onCopy={targetDashboardId =>
+                            onCopyWidget(item.i, targetDashboardId)
+                          }
+                        />
+                      ) : widget.type === 'cash-flow-card' ? (
+                        <CashFlowCard
+                          widgetId={item.i}
+                          isEditing={isEditing}
+                          meta={widget.meta}
+                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                          onRemove={() => onRemoveWidget(item.i)}
+                          onCopy={targetDashboardId =>
+                            onCopyWidget(item.i, targetDashboardId)
+                          }
+                        />
+                      ) : widget.type === 'spending-card' ? (
+                        <SpendingCard
+                          widgetId={item.i}
+                          isEditing={isEditing}
+                          meta={widget.meta}
+                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                          onRemove={() => onRemoveWidget(item.i)}
+                          onCopy={targetDashboardId =>
+                            onCopyWidget(item.i, targetDashboardId)
+                          }
+                        />
+                      ) : widget.type === 'markdown-card' ? (
+                        <MarkdownCard
+                          isEditing={isEditing}
+                          meta={widget.meta}
+                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                          onRemove={() => onRemoveWidget(item.i)}
+                          onCopy={targetDashboardId =>
+                            onCopyWidget(item.i, targetDashboardId)
+                          }
+                        />
+                      ) : widget.type === 'custom-report' ? (
+                        <CustomReportListCards
+                          isEditing={isEditing}
+                          report={customReportMap.get(widget.meta.id)}
+                          onRemove={() => onRemoveWidget(item.i)}
+                          onCopy={targetDashboardId =>
+                            onCopyWidget(item.i, targetDashboardId)
+                          }
+                        />
+                      ) : widget.type === 'summary-card' ? (
+                        <SummaryCard
+                          widgetId={item.i}
+                          isEditing={isEditing}
+                          meta={widget.meta}
+                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                          onRemove={() => onRemoveWidget(item.i)}
+                          onCopy={targetDashboardId =>
+                            onCopyWidget(item.i, targetDashboardId)
+                          }
+                        />
+                      ) : widget.type === 'calendar-card' ? (
+                        <CalendarCard
+                          widgetId={item.i}
+                          isEditing={isEditing}
+                          meta={widget.meta}
+                          firstDayOfWeekIdx={firstDayOfWeekIdx}
+                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                          onRemove={() => onRemoveWidget(item.i)}
+                          onCopy={targetDashboardId =>
+                            onCopyWidget(item.i, targetDashboardId)
+                          }
+                        />
+                      ) : widget.type === 'formula-card' && formulaMode ? (
+                        <FormulaCard
+                          widgetId={item.i}
+                          isEditing={isEditing}
+                          meta={widget.meta}
+                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                          onRemove={() => onRemoveWidget(item.i)}
+                          onCopy={targetDashboardId =>
+                            onCopyWidget(item.i, targetDashboardId)
+                          }
+                        />
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </ReactGridLayout>
+            )}
           </View>
         </div>
       )}
