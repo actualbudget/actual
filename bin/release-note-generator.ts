@@ -37,7 +37,7 @@ async function run() {
       choices: [
         { title: '✨ Features', value: 'Features' },
         { title: '👍 Enhancements', value: 'Enhancements' },
-        { title: '🐛 Bugfix', value: 'Bugfix' },
+        { title: '🐛 Bugfixes', value: 'Bugfixes' },
         { title: '⚙️  Maintenance', value: 'Maintenance' },
       ],
     },

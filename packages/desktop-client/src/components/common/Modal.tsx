@@ -313,15 +313,16 @@ export function ModalHeader({
 }: ModalHeaderProps) {
   const { t } = useTranslation();
   return (
-    <View
-      role="heading"
-      aria-level={1}
+    <h1
       style={{
         justifyContent: 'center',
         alignItems: 'center',
         position: 'relative',
         height: 60,
         flex: 'none',
+        display: 'flex',
+        margin: 0,
+        padding: 0,
       }}
     >
       <View
@@ -369,7 +370,7 @@ export function ModalHeader({
           {rightContent}
         </View>
       )}
-    </View>
+    </h1>
   );
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FocusEvent } from 'react';
 
 import { Input, type InputProps } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
 
 import { type IntegerAmount } from 'loot-core/shared/util';
 
@@ -86,6 +87,7 @@ export function FinancialInput({
       {...restProps}
       ref={setInputRef}
       value={internalValue || ''}
+      style={{ ...restProps.style, ...styles.tnum }}
       onChangeValue={handleChange}
       onFocus={handleFocus}
       onBlur={handleBlur}

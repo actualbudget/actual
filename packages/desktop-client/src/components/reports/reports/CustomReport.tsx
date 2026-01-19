@@ -25,6 +25,7 @@ import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { Warning } from '@desktop-client/components/alerts';
 import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,
@@ -944,11 +945,11 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
                     <AlignedText
                       left={<Block>{balanceType}:</Block>}
                       right={
-                        <Text>
+                        <FinancialText>
                           <PrivacyFilter>
                             {format(data[balanceTypeOp], 'financial')}
                           </PrivacyFilter>
-                        </Text>
+                        </FinancialText>
                       }
                     />
                   </View>

@@ -22,6 +22,7 @@ import {
 
 import { showActivity } from './showActivity';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
@@ -98,7 +99,11 @@ const CustomTooltip = ({
                   <AlignedText
                     key={index}
                     left={p.dataKey}
-                    right={format(p.value, 'financial')}
+                    right={
+                      <FinancialText>
+                        {format(p.value, 'financial')}
+                      </FinancialText>
+                    }
                     style={{
                       color: p.color,
                       textDecoration:
@@ -111,7 +116,9 @@ const CustomTooltip = ({
             {payload.length > 5 && compact && '...'}
             <AlignedText
               left={t('Total')}
-              right={format(sumTotals, 'financial')}
+              right={
+                <FinancialText>{format(sumTotals, 'financial')}</FinancialText>
+              }
               style={{
                 fontWeight: 600,
               }}

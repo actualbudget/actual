@@ -17,7 +17,7 @@ import React, {
   type RefObject,
   type UIEvent,
 } from 'react';
-import AutoSizer from 'react-virtualized-auto-sizer';
+import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
@@ -1158,7 +1158,7 @@ export const Table = forwardRef(
           outline: 'none',
           ...style,
         }}
-        tabIndex={1}
+        tabIndex={0}
         {...getNavigatorProps(props)}
         data-testid="table"
       >
@@ -1177,8 +1177,8 @@ export const Table = forwardRef(
           {isEmpty ? (
             getEmptyContent(renderEmpty)
           ) : (
-            <AutoSizer>
-              {({ width, height }) => {
+            <AutoSizer
+              renderProp={({ width = 0, height = 0 }) => {
                 if (width === 0 || height === 0) {
                   return null;
                 }
@@ -1213,7 +1213,7 @@ export const Table = forwardRef(
                   </AvoidRefocusScrollProvider>
                 );
               }}
-            </AutoSizer>
+            />
           )}
         </View>
       </View>

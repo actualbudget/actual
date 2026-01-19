@@ -25,6 +25,7 @@ import {
 
 import { Link } from '@desktop-client/components/common/Link';
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,
@@ -918,9 +919,14 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                 <span>
                   <Trans>Target Monthly Income</Trans>:{' '}
                   <PrivacyFilter>
-                    {targetMonthlyIncome != null && !isNaN(targetMonthlyIncome)
-                      ? format(targetMonthlyIncome, 'financial')
-                      : t('N/A')}
+                    {targetMonthlyIncome != null &&
+                    !isNaN(targetMonthlyIncome) ? (
+                      <FinancialText>
+                        {format(targetMonthlyIncome, 'financial')}
+                      </FinancialText>
+                    ) : (
+                      t('N/A')
+                    )}
                   </PrivacyFilter>
                 </span>
               </View>
@@ -932,9 +938,13 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                 <span>
                   <Trans>Target Life Savings</Trans>:{' '}
                   <PrivacyFilter>
-                    {targetNestEgg != null && !isNaN(targetNestEgg)
-                      ? format(targetNestEgg, 'financial')
-                      : t('N/A')}
+                    {targetNestEgg != null && !isNaN(targetNestEgg) ? (
+                      <FinancialText>
+                        {format(targetNestEgg, 'financial')}
+                      </FinancialText>
+                    ) : (
+                      t('N/A')
+                    )}
                   </PrivacyFilter>
                 </span>
               </View>
