@@ -380,6 +380,7 @@ function SplitTransactionButton({
       // * https://github.com/WebKit/WebKit/blob/447d90b0c52b2951a69df78f06bb5e6b10262f4b/LayoutTests/fast/events/touch/ios/content-observation/400ms-hover-intent.html
       // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
       // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
+      // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
       role="button"
       style={{
         backgroundColor: highlighted
@@ -461,10 +462,10 @@ function CategoryItem({
   const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget);
 
   return (
-    <div
+    <button
+      type="button"
       style={style}
       // See comment above.
-      role="button"
       className={cx(
         className,
         css({
@@ -477,6 +478,8 @@ function CategoryItem({
           padding: 4,
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
+          border: 'none',
+          font: 'inherit',
           ...narrowStyle,
         }),
       )}
@@ -519,7 +522,7 @@ function CategoryItem({
               )}
         </TextOneLine>
       </View>
-    </div>
+    </button>
   );
 }
 

@@ -1158,7 +1158,7 @@ export const Table = forwardRef(
           outline: 'none',
           ...style,
         }}
-        tabIndex={1}
+        tabIndex={0}
         {...getNavigatorProps(props)}
         data-testid="table"
       >
