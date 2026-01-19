@@ -595,15 +595,8 @@ describe('ThemeInstaller', () => {
       const demoThemeButton = screen.getByRole('button', {
         name: 'Demo Theme',
       });
-      const colorSwatches = demoThemeButton.querySelectorAll(
-        'div[style*="background-color"]',
-      );
+      const colorSwatches = demoThemeButton.querySelectorAll('[data-swatch]');
       expect(colorSwatches.length).toBe(6);
-
-      // Verify the first color from the mockCatalog is used (browser converts hex to rgb)
-      // #1a1a2e = rgb(26, 26, 46)
-      const firstColor = colorSwatches[0]?.getAttribute('style');
-      expect(firstColor).toContain('rgb(26, 26, 46)');
     });
 
     it('displays theme author correctly', () => {

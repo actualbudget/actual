@@ -23,7 +23,7 @@ export function ColorPalette({ colors }: ColorPaletteProps) {
       }}
     >
       {paletteColors.slice(0, 6).map((color, i) => (
-        <div key={i} style={{ backgroundColor: color }} />
+        <div key={i} data-swatch style={{ backgroundColor: color }} />
       ))}
     </View>
   );
