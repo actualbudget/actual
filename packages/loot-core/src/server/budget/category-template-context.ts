@@ -10,9 +10,9 @@ import type {
   ByTemplate,
   CopyTemplate,
   GoalTemplate,
-  LimitTemplate,
   PercentageTemplate,
   PeriodicTemplate,
+  RefillTemplate,
   RemainderTemplate,
   SimpleTemplate,
   SpendTemplate,
@@ -158,7 +158,7 @@ export class CategoryTemplateContext {
           newBudget = CategoryTemplateContext.runSimple(template, this);
           break;
         }
-        case 'limit': {
+        case 'refill': {
           newBudget = CategoryTemplateContext.runRefill(template, this);
           break;
         }
@@ -334,7 +334,11 @@ export class CategoryTemplateContext {
     // sort the template lines into regular template, goals, and remainder templates
     if (templates) {
       templates.forEach(t => {
-        if (t.directive === 'template' && t.type !== 'remainder') {
+        if (
+          t.directive === 'template' &&
+          t.type !== 'remainder' &&
+          t.type !== 'limit'
+        ) {
           this.templates.push(t);
           if (t.priority !== null) this.priorities.add(t.priority);
         } else if (t.directive === 'template' && t.type === 'remainder') {
@@ -554,14 +558,10 @@ export class CategoryTemplateContext {
   }
 
   static runRefill(
-    template: LimitTemplate,
+    template: RefillTemplate,
     templateContext: CategoryTemplateContext,
   ): number {
-    if (template.refill) {
-      return templateContext.limitAmount - templateContext.fromLastMonth;
-    } else {
-      return 0;
-    }
+    return templateContext.limitAmount - templateContext.fromLastMonth;
   }
 
   static async runCopy(

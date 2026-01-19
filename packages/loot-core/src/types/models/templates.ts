@@ -89,6 +89,10 @@ export type RemainderTemplate = {
   priority: null;
 } & BaseTemplate;
 
+export type RefillTemplate = {
+  type: 'refill';
+} & BaseTemplateWithPriority;
+
 export type GoalTemplate = {
   type: 'goal';
   amount: number;
@@ -101,8 +105,9 @@ export type LimitTemplate = {
   hold: boolean;
   period: 'daily' | 'weekly' | 'monthly';
   start?: string;
-  refill?: boolean;
-} & BaseTemplateWithPriority;
+  directive: 'template';
+  priority: null;
+} & BaseTemplate;
 
 type ErrorTemplate = {
   type: 'error';
@@ -122,5 +127,6 @@ export type Template =
   | AverageTemplate
   | GoalTemplate
   | CopyTemplate
+  | RefillTemplate
   | LimitTemplate
   | ErrorTemplate;
