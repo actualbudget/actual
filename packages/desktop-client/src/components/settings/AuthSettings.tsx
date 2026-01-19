@@ -73,12 +73,10 @@ export function AuthSettings() {
               >
                 <Trans>Start using OpenID</Trans>
               </Button>
-              {!isOffline && (
-                <Label
-                  style={{ paddingTop: 5 }}
-                  title={t('OpenID is required to enable multi-user mode.')}
-                />
-              )}
+              <Label
+                style={{ paddingTop: 5 }}
+                title={t('OpenID is required to enable multi-user mode.')}
+              />
             </>
           )}
           {loginMethod !== 'password' && (

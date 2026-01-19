@@ -71,19 +71,6 @@ describe('AuthSettings', () => {
       );
       expect(warningText).toBeInTheDocument();
     });
-
-    it('hides the label hint when offline', () => {
-      vi.mocked(useSyncServerStatus).mockReturnValue('offline');
-      vi.mocked(useMultiuserEnabled).mockReturnValue(false);
-      vi.mocked(useLoginMethod).mockReturnValue('password');
-
-      render(<AuthSettings />, { wrapper: TestProvider });
-
-      const labelHint = screen.queryByText(
-        /openid is required to enable multi-user mode\./i,
-      );
-      expect(labelHint).not.toBeInTheDocument();
-    });
   });
 
   describe('when server is online', () => {
@@ -106,11 +93,6 @@ describe('AuthSettings', () => {
         /server is offline\. openid settings are unavailable\./i,
       );
       expect(warningText).not.toBeInTheDocument();
-
-      const labelHint = screen.getByText(
-        /openid is required to enable multi-user mode\./i,
-      );
-      expect(labelHint).toBeInTheDocument();
     });
 
     it('renders normally with openid login method', () => {
