@@ -750,7 +750,7 @@ export class CategoryTemplateContext {
           break;
         }
         case 'amount': {
-          average += template.adjustment;
+          average += 100 * template.adjustment;
           break;
         }
 

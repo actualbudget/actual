@@ -690,15 +690,15 @@ describe('CategoryTemplateContext', () => {
       };
 
       vi.mocked(actions.getSheetValue)
-        .mockResolvedValueOnce(-100)
-        .mockResolvedValueOnce(-100)
-        .mockResolvedValueOnce(-100);
+        .mockResolvedValueOnce(-10000)
+        .mockResolvedValueOnce(-10000)
+        .mockResolvedValueOnce(-10000);
 
       const result = await CategoryTemplateContext.runAverage(
         template,
         instance,
       );
-      expect(result).toBe(111);
+      expect(result).toBe(11100);
     });
 
     it('should handle negative amount adjustments', async () => {
@@ -712,15 +712,15 @@ describe('CategoryTemplateContext', () => {
       };
 
       vi.mocked(actions.getSheetValue)
-        .mockResolvedValueOnce(-100)
-        .mockResolvedValueOnce(-100)
-        .mockResolvedValueOnce(-100);
+        .mockResolvedValueOnce(-10000)
+        .mockResolvedValueOnce(-10000)
+        .mockResolvedValueOnce(-10000);
 
       const result = await CategoryTemplateContext.runAverage(
         template,
         instance,
       );
-      expect(result).toBe(99);
+      expect(result).toBe(9900);
     });
   });
 
