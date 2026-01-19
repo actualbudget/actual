@@ -3,9 +3,7 @@
  * These functions have no side effects and can be easily tested.
  */
 
-const metersInKilometer = 1000;
 const metersToFeet = 3.28084;
-const feetInMile = 5280;
 
 export type LocationCoordinates = {
   latitude: number;
@@ -42,31 +40,10 @@ export function calculateDistance(
 /**
  * Format a distance in meters to a human-readable string
  * @param meters Distance in meters
- * @param convertToImperial Whether to use imperial units (feet/miles) instead of metric (meters/kilometers)
  * @returns Formatted distance string
  */
-export function formatDistance(
-  meters: number,
-  convertToImperial?: boolean,
-): string {
-  // Use metric system
-  if (!convertToImperial) {
-    if (meters < metersInKilometer) {
-      return `${Math.round(meters)} m`;
-    }
-
-    // Convert to kilometers
-    return `${(meters / metersInKilometer).toFixed(1)} km`;
-  }
-
-  // Convert meters to feet
-  const feet = meters * metersToFeet;
-  if (feet < feetInMile) {
-    // Less than 1 mile
-    return `${Math.round(feet)} ft`;
-  }
-
-  // Convert to miles
-  const miles = feet / feetInMile;
-  return `${miles.toFixed(1)} mi`;
+export function formatDistance(meters: number): string {
+  const distanceImperial = `${Math.round(meters * metersToFeet)}ft`;
+  const distanceMetric = `${Math.round(meters)}m`;
+  return `${distanceImperial} | ${distanceMetric}`;
 }

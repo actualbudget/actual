@@ -43,7 +43,6 @@ import {
   usePayees,
   useNearbyPayees,
 } from '@desktop-client/hooks/usePayees';
-import { useUnitOfMeasurementFormat } from '@desktop-client/hooks/useUnitOfMeasurementFormat';
 import {
   createPayee,
   getActivePayees,
@@ -816,7 +815,6 @@ function NearbyPayeeItem({
   onForgetLocation,
   ...props
 }: NearbyPayeeItemProps) {
-  const unitOfMeasurementFormat = useUnitOfMeasurementFormat();
   const { isNarrowWidth } = useResponsive();
   const narrowStyle = isNarrowWidth
     ? {
@@ -842,10 +840,7 @@ function NearbyPayeeItem({
   // Extract location ID and distance from the nearby payee item
   const locationId = item.location?.id;
   const distance = item.location?.distance;
-  const useImperial =
-    !unitOfMeasurementFormat || unitOfMeasurementFormat === 'imperial';
-  const distanceText =
-    distance !== undefined ? formatDistance(distance, useImperial) : '';
+  const distanceText = distance !== undefined ? formatDistance(distance) : '';
 
   const handleForgetClick = () => {
     if (locationId && onForgetLocation) {

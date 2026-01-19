@@ -31,8 +31,8 @@ export class LocationService {
     private apiClient: LocationApiClient,
   ) {}
 
-  formatDistance(meters: number, convertToImperial?: boolean): string {
-    return formatDistance(meters, convertToImperial);
+  formatDistance(meters: number): string {
+    return formatDistance(meters);
   }
 
   async getCurrentPosition(): Promise<LocationCoordinates> {

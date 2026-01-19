@@ -16,7 +16,6 @@ export type SyncedPrefs = Partial<
     | 'firstDayOfWeekIdx'
     | 'dateFormat'
     | 'numberFormat'
-    | 'unitOfMeasurementFormat'
     | 'hideFraction'
     | 'isPrivacyEnabled'
     | 'currencySymbolPosition'

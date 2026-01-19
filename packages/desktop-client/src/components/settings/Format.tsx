@@ -48,20 +48,6 @@ const dateFormats: { value: SyncedPrefs['dateFormat']; label: string }[] = [
   { value: 'dd-MM-yyyy', label: 'DD-MM-YYYY' },
 ];
 
-function useUnitOfMeasurementFormats() {
-  const { t } = useTranslation();
-
-  const unitOfMeasurementFormats: {
-    value: SyncedPrefs['unitOfMeasurementFormat'];
-    label: string;
-  }[] = [
-    { value: 'imperial', label: t('Imperial (ft, mi)') },
-    { value: 'metric', label: t('Metric (m, km)') },
-  ] as const;
-
-  return { unitOfMeasurementFormats };
-}
-
 export function FormatSettings() {
   const { t } = useTranslation();
 
@@ -74,12 +60,8 @@ export function FormatSettings() {
   const [_numberFormat, setNumberFormatPref] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction, setHideFractionPref] = useSyncedPref('hideFraction');
-  const [_unitOfMeasurementFormat, setUnitOfMeasurementFormatPref] =
-    useSyncedPref('unitOfMeasurementFormat');
-  const unitOfMeasurementFormat = _unitOfMeasurementFormat || 'imperial';
 
   const { daysOfWeek } = useDaysOfWeek();
-  const { unitOfMeasurementFormats } = useUnitOfMeasurementFormats();
 
   const selectButtonClassName = css({
     '&[data-hovered]': {
@@ -144,15 +126,6 @@ export function FormatSettings() {
               value={firstDayOfWeekIdx}
               onChange={idx => setFirstDayOfWeekIdxPref(idx)}
               options={daysOfWeek.map(f => [f.value, f.label])}
-              className={selectButtonClassName}
-            />
-          </Column>
-
-          <Column title={t('Unit of Measurement')}>
-            <Select
-              value={unitOfMeasurementFormat}
-              onChange={format => setUnitOfMeasurementFormatPref(format)}
-              options={unitOfMeasurementFormats.map(f => [f.value, f.label])}
               className={selectButtonClassName}
             />
           </Column>

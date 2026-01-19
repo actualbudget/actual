@@ -385,10 +385,9 @@ describe('LocationService Integration Tests', () => {
 
   describe('Distance Formatting', () => {
     it('delegates to pure function correctly', () => {
-      expect(locationService.formatDistance(1000)).toBe('1.0 km');
-      expect(locationService.formatDistance(500)).toBe('500 m');
-      expect(locationService.formatDistance(1000, true)).toBe('3281 ft');
-      expect(locationService.formatDistance(1610, true)).toBe('1.0 mi');
+      expect(locationService.formatDistance(500)).toBe('1640ft | 500m');
+      expect(locationService.formatDistance(1000)).toBe('3281ft | 1000m');
+      expect(locationService.formatDistance(1610)).toBe('5282ft | 1610m');
     });
   });
 
