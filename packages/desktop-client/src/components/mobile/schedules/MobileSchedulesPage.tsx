@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -26,7 +25,6 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import { useUndo } from '@desktop-client/hooks/useUndo';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -39,10 +37,6 @@ export function MobileSchedulesPage() {
   const [showCompleted, setShowCompleted] = useState(false);
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-
-  const onOpenSchedulesPageMenu = useCallback(() => {
-    dispatch(pushModal({ modal: { name: 'schedules-page-menu' } }));
-  }, [dispatch]);
 
   const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
   const {
@@ -88,15 +82,7 @@ export function MobileSchedulesPage() {
           );
         })
       : schedules;
-  }, [
-    schedules,
-    filter,
-    payees,
-    accounts,
-    format,
-    dateFormat,
-    statuses,
-  ]);
+  }, [schedules, filter, payees, accounts, format, dateFormat, statuses]);
   const hasCompletedSchedules = useMemo(
     () => baseSchedules.some(schedule => schedule.completed),
     [baseSchedules],
@@ -143,18 +129,9 @@ export function MobileSchedulesPage() {
       header={
         <MobilePageHeader
           title={
-            <Button
-              variant="bare"
-              onPress={onOpenSchedulesPageMenu}
-              style={{
-                fontSize: 16,
-                fontWeight: 500,
-              }}
-            >
-              <Text style={styles.underlinedText}>
-                <Trans>Schedules</Trans>
-              </Text>
-            </Button>
+            <Text style={{ ...styles.underlinedText, fontSize: 16 }}>
+              <Trans>Schedules</Trans>
+            </Text>
           }
           rightContent={<AddScheduleButton />}
         />
