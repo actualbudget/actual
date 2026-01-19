@@ -28,8 +28,8 @@ services:
       - ./caddy/data:/data
       - ./caddy/config:/config
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
 
   actual-server:
     image: actualbudget/actual-server:latest
@@ -58,21 +58,21 @@ services:
     image: traefik:latest
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
-      - "./traefik.yaml:/etc/traefik/traefik.yaml"
-      - "./traefik/data:/data"
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - './traefik.yaml:/etc/traefik/traefik.yaml'
+      - './traefik/data:/data'
+      - '/var/run/docker.sock:/var/run/docker.sock'
 
   actual-server:
     image: actualbudget/actual-server:latest
     restart: unless-stopped
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.actual-server.rule=Host(`budget.example.org`)"
-      - "traefik.http.routers.actual-server.entrypoints=websecure"
-      - "traefik.http.services.actual-server.loadbalancer.server.port=5006"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.actual-server.rule=Host(`budget.example.org`)'
+      - 'traefik.http.routers.actual-server.entrypoints=websecure'
+      - 'traefik.http.services.actual-server.loadbalancer.server.port=5006'
     volumes:
       - ./actual-data:/data
 ```
@@ -80,7 +80,7 @@ services:
 ```yaml title="traefik.yaml"
 entryPoints:
   web:
-    address: ":80"
+    address: ':80'
     http:
       redirections:
         entryPoint:
@@ -88,7 +88,7 @@ entryPoints:
           scheme: https
           permanent: true
   websecure:
-    address: ":443"
+    address: ':443'
     http:
       tls:
         certResolver: le
@@ -129,11 +129,12 @@ location / {
     add_header Cross-Origin-Embedder-Policy "require-corp" always;
     add_header Cross-Origin-Opener-Policy "same-origin" always;
     add_header Origin-Agent-Cluster "?1" always;
-    
+
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
 }
 ```
+
 The SSL certificate is issued by Let's Encrypt. The [Certbot](https://certbot.eff.org/instructions) tool provides options for automatic updating upon expiration.
 At the very least you will need to adapt `server_name` and the `ssl_certificate/ssl_certificate_key` paths to match your setup.
 Please refer to their [official documentation](https://nginx.org/en/docs/) for further details.
