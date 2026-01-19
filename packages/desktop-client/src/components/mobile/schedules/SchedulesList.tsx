@@ -15,7 +15,7 @@ import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTa
 import { type ScheduleStatusType } from '@desktop-client/hooks/useSchedules';
 
 type CompletedSchedulesItem = { id: 'show-completed' };
-type SchedulesListItem = ScheduleEntity | CompletedSchedulesItem;
+type SchedulesListEntry = ScheduleEntity | CompletedSchedulesItem;
 
 type SchedulesListProps = {
   schedules: readonly ScheduleEntity[];
@@ -41,7 +41,7 @@ export function SchedulesList({
   const { t } = useTranslation();
   const shouldShowCompletedItem =
     hasCompletedSchedules && !showCompleted && onShowCompleted;
-  const listItems: readonly SchedulesListItem[] = shouldShowCompletedItem
+  const listItems: readonly SchedulesListEntry[] = shouldShowCompletedItem
     ? [...schedules, { id: 'show-completed' }]
     : schedules;
   const showCompletedLabel = t('Show completed schedules');
