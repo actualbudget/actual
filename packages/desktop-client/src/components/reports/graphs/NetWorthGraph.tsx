@@ -25,6 +25,74 @@ import { numberFormatterTooltip } from '@desktop-client/components/reports/numbe
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
+type PayloadItem = {
+  payload: {
+    date: string;
+    assets: number | string;
+    debt: number | string;
+    networth: number | string;
+    change: number | string;
+  };
+};
+
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: PayloadItem[];
+  style?: CSSProperties;
+};
+
+function CustomTooltip({ active, payload, style }: CustomTooltipProps) {
+  const { t } = useTranslation();
+
+  if (active && payload && payload.length) {
+    return (
+      <div
+        className={css([
+          {
+            zIndex: 1000,
+            pointerEvents: 'none',
+            borderRadius: 2,
+            boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+            backgroundColor: theme.menuBackground,
+            color: theme.menuItemText,
+            padding: 10,
+          },
+          style,
+        ])}
+      >
+        <div>
+          <div style={{ marginBottom: 10 }}>
+            <strong>{payload[0].payload.date}</strong>
+          </div>
+          <div style={{ lineHeight: 1.5 }}>
+            <AlignedText
+              left={t('Assets:')}
+              right={<FinancialText>{payload[0].payload.assets}</FinancialText>}
+            />
+            <AlignedText
+              left={t('Debt:')}
+              right={<FinancialText>{payload[0].payload.debt}</FinancialText>}
+            />
+            <AlignedText
+              left={t('Net worth:')}
+              right={
+                <FinancialText as="strong">
+                  {payload[0].payload.networth}
+                </FinancialText>
+              }
+            />
+            <AlignedText
+              left={t('Change:')}
+              right={<FinancialText>{payload[0].payload.change}</FinancialText>}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+}
+
 type NetWorthGraphProps = {
   style?: CSSProperties;
   graphData: {
@@ -53,7 +121,6 @@ export function NetWorthGraph({
   showTooltip = true,
   interval = 'Monthly',
 }: NetWorthGraphProps) {
-  const { t } = useTranslation();
   const privacyMode = usePrivacyMode();
   const id = useId();
   const format = useFormat();
@@ -100,75 +167,6 @@ export function NetWorthGraph({
       })
       .map(point => point.x);
   }, [interval, graphData.data]);
-
-  type PayloadItem = {
-    payload: {
-      date: string;
-      assets: number | string;
-      debt: number | string;
-      networth: number | string;
-      change: number | string;
-    };
-  };
-
-  type CustomTooltipProps = {
-    active?: boolean;
-    payload?: PayloadItem[];
-  };
-
-  // oxlint-disable-next-line react/no-unstable-nested-components
-  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
-    if (active && payload && payload.length) {
-      return (
-        <div
-          className={css([
-            {
-              zIndex: 1000,
-              pointerEvents: 'none',
-              borderRadius: 2,
-              boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-              backgroundColor: theme.menuBackground,
-              color: theme.menuItemText,
-              padding: 10,
-            },
-            style,
-          ])}
-        >
-          <div>
-            <div style={{ marginBottom: 10 }}>
-              <strong>{payload[0].payload.date}</strong>
-            </div>
-            <div style={{ lineHeight: 1.5 }}>
-              <AlignedText
-                left={t('Assets:')}
-                right={
-                  <FinancialText>{payload[0].payload.assets}</FinancialText>
-                }
-              />
-              <AlignedText
-                left={t('Debt:')}
-                right={<FinancialText>{payload[0].payload.debt}</FinancialText>}
-              />
-              <AlignedText
-                left={t('Net worth:')}
-                right={
-                  <FinancialText as="strong">
-                    {payload[0].payload.networth}
-                  </FinancialText>
-                }
-              />
-              <AlignedText
-                left={t('Change:')}
-                right={
-                  <FinancialText>{payload[0].payload.change}</FinancialText>
-                }
-              />
-            </div>
-          </div>
-        </div>
-      );
-    }
-  };
 
   return (
     <Container
@@ -217,7 +215,7 @@ export function NetWorthGraph({
               />
               {showTooltip && (
                 <Tooltip
-                  content={<CustomTooltip />}
+                  content={<CustomTooltip style={style} />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />

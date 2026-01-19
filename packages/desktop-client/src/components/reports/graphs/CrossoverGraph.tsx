@@ -21,6 +21,119 @@ import { Container } from '@desktop-client/components/reports/Container';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
+type PayloadItem = {
+  payload: {
+    x: string;
+    investmentIncome: number | string;
+    expenses: number | string;
+    nestEgg: number | string;
+    adjustedExpenses?: number | string;
+    isProjection?: boolean;
+  };
+};
+
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: PayloadItem[];
+};
+
+function CustomTooltip({ active, payload }: CustomTooltipProps) {
+  const { t } = useTranslation();
+  const format = useFormat();
+
+  if (active && payload && payload.length) {
+    return (
+      <div
+        className={css({
+          zIndex: 1000,
+          pointerEvents: 'none',
+          borderRadius: 2,
+          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+          backgroundColor: theme.menuBackground,
+          color: theme.menuItemText,
+          padding: 10,
+        })}
+      >
+        <div>
+          <div style={{ marginBottom: 10 }}>
+            <strong>{payload[0].payload.x}</strong>
+            {payload[0].payload.isProjection ? (
+              <span style={{ marginLeft: 8, opacity: 0.7 }}>
+                {t('(projected)')}
+              </span>
+            ) : null}
+          </div>
+          <div style={{ lineHeight: 1.5 }}>
+            <View
+              className={css({
+                display: 'flex',
+                justifyContent: 'space-between',
+              })}
+            >
+              <div>
+                <Trans>Monthly investment income:</Trans>
+              </div>
+              <div>
+                <FinancialText>
+                  {format(payload[0].payload.investmentIncome, 'financial')}
+                </FinancialText>
+              </div>
+            </View>
+            <View
+              className={css({
+                display: 'flex',
+                justifyContent: 'space-between',
+              })}
+            >
+              <div>
+                <Trans>Monthly expenses:</Trans>
+              </div>
+              <div>
+                <FinancialText>
+                  {format(payload[0].payload.expenses, 'financial')}
+                </FinancialText>
+              </div>
+            </View>
+            {payload[0].payload.adjustedExpenses != null && (
+              <View
+                className={css({
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                })}
+              >
+                <div>
+                  <Trans>Target income:</Trans>
+                </div>
+                <div>
+                  <FinancialText>
+                    {format(payload[0].payload.adjustedExpenses, 'financial')}
+                  </FinancialText>
+                </div>
+              </View>
+            )}
+            <View
+              className={css({
+                display: 'flex',
+                justifyContent: 'space-between',
+              })}
+            >
+              <div>
+                <Trans>Life savings:</Trans>
+              </div>
+              <div>
+                <FinancialText>
+                  {format(payload[0].payload.nestEgg, 'financial')}
+                </FinancialText>
+              </div>
+            </View>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+}
+
 type CrossoverGraphProps = {
   style?: CSSProperties;
   graphData: {
@@ -46,7 +159,6 @@ export function CrossoverGraph({
   compact = false,
   showTooltip = true,
 }: CrossoverGraphProps) {
-  const { t } = useTranslation();
   const privacyMode = usePrivacyMode();
   const format = useFormat();
   const animationProps = useRechartsAnimation({ isAnimationActive: false });
@@ -56,116 +168,6 @@ export function CrossoverGraph({
       return '...';
     }
     return `${format(Math.round(tick), 'financial-no-decimals')}`;
-  };
-
-  type PayloadItem = {
-    payload: {
-      x: string;
-      investmentIncome: number | string;
-      expenses: number | string;
-      nestEgg: number | string;
-      adjustedExpenses?: number | string;
-      isProjection?: boolean;
-    };
-  };
-
-  type CustomTooltipProps = {
-    active?: boolean;
-    payload?: PayloadItem[];
-  };
-
-  // oxlint-disable-next-line react/no-unstable-nested-components
-  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
-    if (active && payload && payload.length) {
-      return (
-        <div
-          className={css({
-            zIndex: 1000,
-            pointerEvents: 'none',
-            borderRadius: 2,
-            boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-            backgroundColor: theme.menuBackground,
-            color: theme.menuItemText,
-            padding: 10,
-          })}
-        >
-          <div>
-            <div style={{ marginBottom: 10 }}>
-              <strong>{payload[0].payload.x}</strong>
-              {payload[0].payload.isProjection ? (
-                <span style={{ marginLeft: 8, opacity: 0.7 }}>
-                  {t('(projected)')}
-                </span>
-              ) : null}
-            </div>
-            <div style={{ lineHeight: 1.5 }}>
-              <View
-                className={css({
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                })}
-              >
-                <div>
-                  <Trans>Monthly investment income:</Trans>
-                </div>
-                <div>
-                  <FinancialText>
-                    {format(payload[0].payload.investmentIncome, 'financial')}
-                  </FinancialText>
-                </div>
-              </View>
-              <View
-                className={css({
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                })}
-              >
-                <div>
-                  <Trans>Monthly expenses:</Trans>
-                </div>
-                <div>
-                  <FinancialText>
-                    {format(payload[0].payload.expenses, 'financial')}
-                  </FinancialText>
-                </div>
-              </View>
-              {payload[0].payload.adjustedExpenses != null && (
-                <View
-                  className={css({
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                  })}
-                >
-                  <div>
-                    <Trans>Target income:</Trans>
-                  </div>
-                  <div>
-                    <FinancialText>
-                      {format(payload[0].payload.adjustedExpenses, 'financial')}
-                    </FinancialText>
-                  </div>
-                </View>
-              )}
-              <View
-                className={css({
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                })}
-              >
-                <div>
-                  <Trans>Life savings:</Trans>
-                </div>
-                <div>
-                  <FinancialText>
-                    {format(payload[0].payload.nestEgg, 'financial')}
-                  </FinancialText>
-                </div>
-              </View>
-            </div>
-          </div>
-        </div>
-      );
-    }
   };
 
   return (

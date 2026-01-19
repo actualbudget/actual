@@ -416,6 +416,12 @@
         "typescript-paths/absolute-import": ["error", { "enableAlias": false }]
       }
     },
+    {
+      "files": ["packages/desktop-client/src/style/themes/*"],
+      "rules": {
+        "eslint/no-restricted-imports": "off"
+      }
+    },
     // TODO: enable these
     {
       "files": [
