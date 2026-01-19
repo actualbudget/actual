@@ -28,6 +28,19 @@ import {
 import { Checkbox } from '@desktop-client/components/forms';
 import { Field, Row } from '@desktop-client/components/table';
 
+// SVG data URIs for checkbox icons (white fill variants)
+// Layers icon from packages/component-library/src/icons/v1/layers.svg
+const ICON_LAYERS =
+  'url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="white" d="M10 1l10 6-10 6L0 7l10-6zm6.67 10L20 13l-10 6-10-6 3.33-2L10 15l6.67-4z" /></svg>\')';
+
+// Minus icon (horizontal bar from add.svg) for skip/exclude state
+const ICON_MINUS =
+  'url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M23,11.5 L23,11.5 L23,11.5 C23,12.3284271 22.3284271,13 21.5,13 L1.5,13 L1.5,13 C0.671572875,13 1.01453063e-16,12.3284271 0,11.5 L0,11.5 L0,11.5 C-1.01453063e-16,10.6715729 0.671572875,10 1.5,10 L21.5,10 L21.5,10 C22.3284271,10 23,10.6715729 23,11.5 Z" /></svg>\')';
+
+// Plus icon from packages/component-library/src/icons/v1/add.svg
+const ICON_PLUS =
+  'url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M23,11.5 L23,11.5 L23,11.5 C23,12.3284271 22.3284271,13 21.5,13 L1.5,13 L1.5,13 C0.671572875,13 1.01453063e-16,12.3284271 0,11.5 L0,11.5 L0,11.5 C-1.01453063e-16,10.6715729 0.671572875,10 1.5,10 L21.5,10 L21.5,10 C22.3284271,10 23,10.6715729 23,11.5 Z" /><path fill="white" d="M11.5,23 C10.6715729,23 10,22.3284271 10,21.5 L10,1.5 C10,0.671572875 10.6715729,1.52179594e-16 11.5,0 C12.3284271,-1.52179594e-16 13,0.671572875 13,1.5 L13,21.5 C13,22.3284271 12.3284271,23 11.5,23 Z" /></svg>\')';
+
 function getTooltipContent(
   transaction: ImportTransaction,
   t: (key: string) => string,
@@ -59,9 +72,7 @@ function getCheckboxStyle(
       ':checked': {
         '::after': {
           background:
-            theme.checkboxBackgroundSelected +
-            // update sign from packages/desktop-client/src/icons/v1/layer.svg
-            ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="white" d="M10 1l10 6-10 6L0 7l10-6zm6.67 10L20 13l-10 6-10-6 3.33-2L10 15l6.67-4z" /></svg>\') 9px 9px',
+            theme.checkboxBackgroundSelected + ' ' + ICON_LAYERS + ' 9px 9px',
         },
       },
     };
@@ -83,9 +94,7 @@ function getCheckboxStyle(
       '::after': {
         display: 'block',
         background:
-          theme.buttonNormalDisabledBorder +
-          // minus sign adapted from packages/desktop-client/src/icons/v1/add.svg
-          ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" className="path" d="M23,11.5 L23,11.5 L23,11.5 C23,12.3284271 22.3284271,13 21.5,13 L1.5,13 L1.5,13 C0.671572875,13 1.01453063e-16,12.3284271 0,11.5 L0,11.5 L0,11.5 C-1.01453063e-16,10.6715729 0.671572875,10 1.5,10 L21.5,10 L21.5,10 C22.3284271,10 23,10.6715729 23,11.5 Z" /></svg>\') 9px 9px',
+          theme.buttonNormalDisabledBorder + ' ' + ICON_MINUS + ' 9px 9px',
         width: 9,
         height: 9,
         content: '" "',
@@ -96,9 +105,7 @@ function getCheckboxStyle(
       backgroundColor: theme.checkboxBackgroundSelected,
       '::after': {
         background:
-          theme.checkboxBackgroundSelected +
-          // plus sign from packages/desktop-client/src/icons/v1/add.svg
-          ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" className="path" d="M23,11.5 L23,11.5 L23,11.5 C23,12.3284271 22.3284271,13 21.5,13 L1.5,13 L1.5,13 C0.671572875,13 1.01453063e-16,12.3284271 0,11.5 L0,11.5 L0,11.5 C-1.01453063e-16,10.6715729 0.671572875,10 1.5,10 L21.5,10 L21.5,10 C22.3284271,10 23,10.6715729 23,11.5 Z" /><path fill="white" className="path" d="M11.5,23 C10.6715729,23 10,22.3284271 10,21.5 L10,1.5 C10,0.671572875 10.6715729,1.52179594e-16 11.5,0 C12.3284271,-1.52179594e-16 13,0.671572875 13,1.5 L13,21.5 C13,22.3284271 12.3284271,23 11.5,23 Z" /></svg>\') 9px 9px',
+          theme.checkboxBackgroundSelected + ' ' + ICON_PLUS + ' 9px 9px',
       },
     },
   };

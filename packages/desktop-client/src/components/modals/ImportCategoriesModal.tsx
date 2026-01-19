@@ -182,7 +182,7 @@ export function ImportCategoriesModal({
           // Update final name based on selected category
           finalName: categoryId
             ? categories.list.find(c => c.id === categoryId)?.name ||
-            mapping.finalName
+              mapping.finalName
             : mapping.finalName,
         });
         return newMappings;
