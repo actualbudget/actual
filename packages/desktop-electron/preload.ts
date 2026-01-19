@@ -1,4 +1,4 @@
-import { ipcRenderer, contextBridge, type IpcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, type IpcRenderer } from 'electron';
 
 import {
   type GetBootstrapDataPayload,

@@ -3,14 +3,14 @@ import { useTranslation } from 'react-i18next';
 
 import {
   SvgCalculator,
+  SvgCamera,
   SvgChart,
+  SvgChartArea,
   SvgChartBar,
   SvgChartPie,
   SvgListBullet,
   SvgQueue,
   SvgTag,
-  SvgCamera,
-  SvgChartArea,
 } from '@actual-app/components/icons/v1';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
@@ -24,7 +24,7 @@ import {
 } from 'loot-core/types/models';
 
 import { GraphButton } from './GraphButton';
-import { SaveReport } from './SaveReport';
+import { SaveReportWrapper } from './SaveReport';
 import { setSessionReport } from './setSessionReport';
 import { SnapshotButton } from './SnapshotButton';
 
@@ -40,7 +40,7 @@ type ReportTopbarProps = {
   viewLabels: boolean;
   onApplyFilter: (newFilter: RuleConditionEntity) => void;
   onChangeViews: (viewType: string) => void;
-  onReportChange: ComponentProps<typeof SaveReport>['onReportChange'];
+  onReportChange: ComponentProps<typeof SaveReportWrapper>['onReportChange'];
   isItemDisabled: (type: string) => boolean;
   defaultItems: (item: string) => void;
 };
@@ -243,7 +243,7 @@ export function ReportTopbar({
           }}
           exclude={[]}
         />
-        <SaveReport
+        <SaveReportWrapper
           customReportItems={customReportItems}
           report={report}
           savedStatus={savedStatus}

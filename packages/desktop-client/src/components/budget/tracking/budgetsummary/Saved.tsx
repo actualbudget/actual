@@ -11,6 +11,7 @@ import { css } from '@emotion/css';
 
 import { useTrackingSheetValue } from '@desktop-client/components/budget/tracking/TrackingBudgetComponents';
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
@@ -48,22 +49,17 @@ export function Saved({ projected, style }: SavedProps) {
             <AlignedText
               left={t('Projected savings:')}
               right={
-                <Text
-                  style={{
-                    ...makeAmountFullStyle(budgetedSaved),
-                    ...styles.tnum,
-                  }}
-                >
+                <FinancialText style={makeAmountFullStyle(budgetedSaved)}>
                   {format(budgetedSaved, 'financial-with-sign')}
-                </Text>
+                </FinancialText>
               }
             />
             <AlignedText
               left={t('Difference:')}
               right={
-                <Text style={{ ...makeAmountFullStyle(diff), ...styles.tnum }}>
+                <FinancialText style={makeAmountFullStyle(diff)}>
                   {format(diff, 'financial-with-sign')}
-                </Text>
+                </FinancialText>
               }
             />
           </>
@@ -83,7 +79,9 @@ export function Saved({ projected, style }: SavedProps) {
                 : theme.upcomingText,
           })}
         >
-          <PrivacyFilter>{format(saved, 'financial')}</PrivacyFilter>
+          <PrivacyFilter>
+            <FinancialText>{format(saved, 'financial')}</FinancialText>
+          </PrivacyFilter>
         </View>
       </Tooltip>
     </View>

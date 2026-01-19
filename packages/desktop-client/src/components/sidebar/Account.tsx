@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, useRef, useState } from 'react';
+import React, { useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -44,7 +44,7 @@ import { useNotes } from '@desktop-client/hooks/useNotes';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { openAccountCloseModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { type SheetFields, type Binding } from '@desktop-client/spreadsheet';
+import { type Binding, type SheetFields } from '@desktop-client/spreadsheet';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,
@@ -73,6 +73,7 @@ type AccountProps<FieldName extends SheetFields<'account'>> = {
   onDragChange?: OnDragChangeCallback<{ id: string }>;
   onDrop?: OnDropCallback;
   titleAccount?: boolean;
+  isExactPathMatch?: boolean;
 };
 
 export function Account<FieldName extends SheetFields<'account'>>({
@@ -89,6 +90,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
   onDragChange,
   onDrop,
   titleAccount,
+  isExactPathMatch,
 }: AccountProps<FieldName>) {
   const isTestEnv = useIsTestEnv();
   const { t } = useTranslation();
@@ -145,6 +147,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
             variant="internal"
             to={to}
             isDisabled={isEditing}
+            isExactPathMatch={isExactPathMatch}
             style={{
               ...accountNameStyle,
               ...style,

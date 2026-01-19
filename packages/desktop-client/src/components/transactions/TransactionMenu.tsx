@@ -5,8 +5,8 @@ import { Menu } from '@actual-app/components/menu';
 
 import { q } from 'loot-core/shared/query';
 import {
-  scheduleIsRecurring,
   extractScheduleConds,
+  scheduleIsRecurring,
 } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type TransactionEntity } from 'loot-core/types/models';

@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { getClock, deserializeClock } from '@actual-app/crdt';
+import { deserializeClock, getClock } from '@actual-app/crdt';
 import { v4 as uuidv4 } from 'uuid';
 
 import { expectSnapshotWithDiffer } from '../mocks/util';
@@ -12,10 +12,10 @@ import * as budget from './budget/base';
 import * as db from './db';
 import { handlers } from './main';
 import {
-  runHandler,
-  runMutator,
   disableGlobalMutations,
   enableGlobalMutations,
+  runHandler,
+  runMutator,
 } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';

@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
@@ -22,7 +28,7 @@ import { Permissions } from '@desktop-client/auth/types';
 import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 import { getUserData, signOut } from '@desktop-client/users/usersSlice';
 
 type LoggedInUserProps = {
@@ -56,7 +62,7 @@ export function LoggedInUser({
   const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
   const hasSyncedPrefs = useSelector(state => state.prefs.synced);
 
-  const initializeUserData = async () => {
+  const initializeUserData = useCallback(async () => {
     try {
       await dispatch(getUserData());
     } catch (error) {
@@ -64,11 +70,11 @@ export function LoggedInUser({
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     initializeUserData();
-  }, []);
+  }, [initializeUserData]);
 
   useEffect(() => {
     return listen('sync-event', ({ type }) => {
@@ -89,7 +95,7 @@ export function LoggedInUser({
         setLoading(false);
       }
     });
-  }, [userData]);
+  }, [initializeUserData, userData]);
 
   async function onCloseBudget() {
     await dispatch(closeBudget());

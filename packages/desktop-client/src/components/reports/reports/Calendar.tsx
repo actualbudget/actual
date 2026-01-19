@@ -1,10 +1,10 @@
 import {
-  type Ref,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
+  type Ref,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router';
@@ -37,6 +37,7 @@ import {
 } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { TransactionList as TransactionListMobile } from '@desktop-client/components/mobile/transactions/TransactionList';
 import {
@@ -52,8 +53,8 @@ import { Header } from '@desktop-client/components/reports/Header';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import {
-  type CalendarDataType,
   calendarSpreadsheet,
+  type CalendarDataType,
 } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
@@ -63,7 +64,8 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { DisplayPayeeProvider } from '@desktop-client/hooks/useDisplayPayee';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -742,13 +744,15 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                       overflow: 'auto',
                     }}
                   >
-                    <TransactionListMobile
-                      isLoading={false}
-                      onLoadMore={loadMoreTransactions}
-                      transactions={allTransactions}
-                      onOpenTransaction={onOpenTransaction}
-                      isLoadingMore={false}
-                    />
+                    <DisplayPayeeProvider transactions={allTransactions}>
+                      <TransactionListMobile
+                        isLoading={false}
+                        onLoadMore={loadMoreTransactions}
+                        transactions={allTransactions}
+                        onOpenTransaction={onOpenTransaction}
+                        isLoadingMore={false}
+                      />
+                    </DisplayPayeeProvider>
                   </View>
                 </animated.div>
               )}
@@ -868,7 +872,9 @@ function CalendarWithHeader({
             aria-label={t('Income')}
           >
             <PrivacyFilter>
-              {format(calendar.totalIncome, 'financial')}
+              <FinancialText>
+                {format(calendar.totalIncome, 'financial')}
+              </FinancialText>
             </PrivacyFilter>
           </View>
           <SvgArrowThickDown
@@ -886,7 +892,9 @@ function CalendarWithHeader({
             aria-label={t('Expenses')}
           >
             <PrivacyFilter>
-              {format(calendar.totalExpense, 'financial')}
+              <FinancialText>
+                {format(calendar.totalExpense, 'financial')}
+              </FinancialText>
             </PrivacyFilter>
           </View>
         </View>
@@ -979,7 +987,11 @@ function CalendarCardHeader({
               <Trans>Income:</Trans>
             </View>
             <View style={{ color: chartTheme.colors.blue }}>
-              <PrivacyFilter>{format(totalIncome, 'financial')}</PrivacyFilter>
+              <PrivacyFilter>
+                <FinancialText>
+                  {format(totalIncome, 'financial')}
+                </FinancialText>
+              </PrivacyFilter>
             </View>
 
             <View
@@ -991,7 +1003,11 @@ function CalendarCardHeader({
               <Trans>Expenses:</Trans>
             </View>
             <View style={{ color: chartTheme.colors.red }}>
-              <PrivacyFilter>{format(totalExpense, 'financial')}</PrivacyFilter>
+              <PrivacyFilter>
+                <FinancialText>
+                  {format(totalExpense, 'financial')}
+                </FinancialText>
+              </PrivacyFilter>
             </View>
           </View>
         </View>

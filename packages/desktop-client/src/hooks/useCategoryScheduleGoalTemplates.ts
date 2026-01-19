@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 
 import {
-  type ScheduleEntity,
   type CategoryEntity,
+  type ScheduleEntity,
 } from 'loot-core/types/models';
 
 import { useCachedSchedules } from './useCachedSchedules';

@@ -6,13 +6,13 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
-  BarChart,
   Bar,
+  BarChart,
   CartesianGrid,
+  LabelList,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  LabelList,
 } from 'recharts';
 
 import {
@@ -24,6 +24,7 @@ import {
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
@@ -104,7 +105,11 @@ const CustomTooltip = ({
                   <AlignedText
                     key={pay.name}
                     left={pay.name}
-                    right={format(pay.value, 'financial')}
+                    right={
+                      <FinancialText>
+                        {format(pay.value, 'financial')}
+                      </FinancialText>
+                    }
                     style={{
                       color: pay.color,
                       textDecoration:
@@ -117,7 +122,9 @@ const CustomTooltip = ({
             {payload.length > 5 && compact && '...'}
             <AlignedText
               left={t('Total')}
-              right={format(sumTotals, 'financial')}
+              right={
+                <FinancialText>{format(sumTotals, 'financial')}</FinancialText>
+              }
               style={{
                 fontWeight: 600,
               }}
@@ -209,7 +216,6 @@ export function StackedBarGraph({
           <div>
             {!compact && <div style={{ marginTop: '15px' }} />}
             <BarChart
-              responsive
               width={width}
               height={height}
               data={data.intervalData}

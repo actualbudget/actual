@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { Trans } from 'react-i18next';
 

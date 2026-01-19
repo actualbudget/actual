@@ -12,8 +12,8 @@ import {
   type AccountEntity,
   type CategoryEntity,
   type CategoryGroupEntity,
-  type PayeeEntity,
   type CustomReportEntity,
+  type PayeeEntity,
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 

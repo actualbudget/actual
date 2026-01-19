@@ -12,9 +12,9 @@ import rehypeExternalLinks from 'rehype-external-links';
 import remarkGfm from 'remark-gfm';
 
 import {
+  markdownBaseStyles,
   remarkBreaks,
   sequentialNewlinesPlugin,
-  markdownBaseStyles,
 } from '@desktop-client/util/markdown';
 
 const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];

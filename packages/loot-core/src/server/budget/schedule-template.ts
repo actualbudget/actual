@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
 import {
-  getNextDate,
-  getDateWithSkippedWeekend,
   extractScheduleConds,
+  getDateWithSkippedWeekend,
+  getNextDate,
 } from '../../shared/schedules';
 import { type CategoryEntity } from '../../types/models';
 import {
@@ -20,7 +20,7 @@ type ScheduleTemplateTarget = {
   target: number;
   next_date_string: string;
   target_interval: number;
-  target_frequency: string;
+  target_frequency: string | undefined;
   num_months: number;
   completed: number;
   full: boolean;
@@ -238,6 +238,8 @@ function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
         monthlyAmount = schedule.target / intervalMonths;
         break;
       default:
+        // default to same math as monthly for now for non-reoccuring
+        monthlyAmount = schedule.target / schedule.target_interval;
         break;
     }
     total += monthlyAmount;
@@ -275,17 +277,21 @@ export async function runSchedule(
 
   const isPayMonthOf = c =>
     c.full ||
-    (c.target_frequency === 'monthly' &&
+    ((c.target_frequency === 'monthly' || !c.target_frequency) &&
       c.target_interval === 1 &&
       c.num_months === 0) ||
     (c.target_frequency === 'weekly' && c.target_interval <= 4) ||
     (c.target_frequency === 'daily' && c.target_interval <= 31) ||
     isReflectBudget();
 
+  const isSubMonthly = c =>
+    c.target_frequency === 'weekly' || c.target_frequency === 'daily';
+
   const t_payMonthOf = t.t.filter(isPayMonthOf);
   const t_sinking = t.t
     .filter(c => !isPayMonthOf(c))
     .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
+  const numSubMonthly = t.t.filter(isSubMonthly).length;
   const totalPayMonthOf = getPayMonthOfTotal(t_payMonthOf);
   const totalSinking = getSinkingTotal(t_sinking);
   const totalSinkingBaseContribution =
@@ -303,7 +309,8 @@ export async function runSchedule(
     balance >= totalSinking + totalPayMonthOf ||
     (lastMonthGoal < totalSinking + totalPayMonthOf &&
       lastMonthGoal !== 0 &&
-      balance >= lastMonthGoal)
+      balance >= lastMonthGoal &&
+      numSubMonthly > 0)
   ) {
     to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);
   } else {

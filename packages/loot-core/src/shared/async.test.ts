@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { sequential, once } from './async';
+import { once, sequential } from './async';
 
 function timeout(n) {
   return new Promise(resolve => setTimeout(resolve, n));

@@ -21,20 +21,20 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import {
+  Field,
+  Row,
+  SelectCell,
   Table,
   TableHeader,
-  Row,
-  Field,
-  SelectCell,
 } from '@desktop-client/components/table';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import {
+  SelectedProvider,
   useSelected,
   useSelectedDispatch,
   useSelectedItems,
-  SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
 import { useSendPlatformRequest } from '@desktop-client/hooks/useSendPlatformRequest';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
