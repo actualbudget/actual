@@ -1,10 +1,13 @@
 import React, { useEffect, useState, type CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { SvgNotesPaper } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { t } from 'i18next';
 
 import * as Platform from 'loot-core/shared/platform';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
@@ -18,14 +21,24 @@ import {
   ModalTitle,
 } from '@desktop-client/components/common/Modal';
 import { FocusableAmountInput } from '@desktop-client/components/mobile/transactions/FocusableAmountInput';
+import { Notes } from '@desktop-client/components/Notes';
 import { useCategory } from '@desktop-client/hooks/useCategory';
+import { useNotes } from '@desktop-client/hooks/useNotes';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
 
-type TrackingBudgetMenuModalProps = Omit<
-  Extract<ModalType, { name: 'tracking-budget-menu' }>['options'],
-  'month'
->;
+const buttonStyle: CSSProperties = {
+  ...styles.mediumText,
+  height: styles.mobileMinHeight,
+  color: theme.formLabelText,
+  // Adjust based on desired number of buttons per row.
+  flexBasis: '100%',
+};
+
+type TrackingBudgetMenuModalProps = Extract<
+  ModalType,
+  { name: 'tracking-budget-menu' }
+>['options'];
 
 export function TrackingBudgetMenuModal({
   categoryId,
@@ -33,6 +46,8 @@ export function TrackingBudgetMenuModal({
   onCopyLastMonthAverage,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
+  onEditNotes,
+  month,
 }: TrackingBudgetMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
@@ -45,10 +60,19 @@ export function TrackingBudgetMenuModal({
     trackingBudget.catBudgeted(categoryId),
   );
   const category = useCategory(categoryId);
+  const notesId = category ? category.id + month : '';
+  const originalNotes = useNotes(notesId) ?? '';
+
   const [amountFocused, setAmountFocused] = useState(false);
 
   const _onUpdateBudget = (amount: number) => {
     onUpdateBudget?.(amountToInteger(amount));
+  };
+
+  const _onEditNotes = () => {
+    if (category && month) {
+      onEditNotes?.(category.id + month, month);
+    }
   };
 
   useEffect(() => {
@@ -70,6 +94,19 @@ export function TrackingBudgetMenuModal({
           <ModalHeader
             title={<ModalTitle title={category.name} shrinkOnOverflow />}
             rightContent={<ModalCloseButton onPress={close} />}
+          />
+          <Notes
+            notes={originalNotes.length > 0 ? originalNotes : t('No notes')}
+            editable={false}
+            focused={false}
+            getStyle={() => ({
+              borderRadius: 6,
+              ...(originalNotes.length === 0 && {
+                textAlign: 'center',
+                alignSelf: 'center',
+                color: theme.pageTextSubdued,
+              }),
+            })}
           />
           <View
             style={{
@@ -111,6 +148,10 @@ export function TrackingBudgetMenuModal({
             onSetMonthsAverage={onSetMonthsAverage}
             onApplyBudgetTemplate={onApplyBudgetTemplate}
           />
+          <Button style={buttonStyle} onPress={_onEditNotes}>
+            <SvgNotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
+            <Trans>Edit notes</Trans>
+          </Button>
         </>
       )}
     </Modal>
