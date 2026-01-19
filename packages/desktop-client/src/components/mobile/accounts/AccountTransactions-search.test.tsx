@@ -53,7 +53,7 @@ const mockTransactions: TransactionEntity[] = [
     sort_order: 1,
     reconciled: false,
     tombstone: false,
-    schedule: null,
+    schedule: undefined,
   },
   {
     id: 'txn-2',
@@ -67,7 +67,7 @@ const mockTransactions: TransactionEntity[] = [
     sort_order: 1,
     reconciled: false,
     tombstone: false,
-    schedule: null,
+    schedule: undefined,
   },
 ];
 
@@ -99,7 +99,6 @@ describe('AccountTransactions', () => {
     });
     vi.mocked(useTransactions).mockReturnValue({
       transactions: mockTransactions,
-      grouped: null,
       runningBalances: new Map(),
       isLoading: false,
       reload: vi.fn(),
@@ -109,8 +108,6 @@ describe('AccountTransactions', () => {
     vi.mocked(useTransactionsSearch).mockReturnValue({
       isSearching: false,
       search: mockSearch,
-      updateQuery: vi.fn(),
-      resetQuery: vi.fn(),
     });
   });
 
