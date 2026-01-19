@@ -52,10 +52,26 @@ async function createScheduleList(
           2
         : amountCondition.value;
     // Apply adjustment percentage if specified
-    if (template.adjustment) {
-      const adjustmentFactor = 1 + template.adjustment / 100;
-      scheduleAmount = Math.round(scheduleAmount * adjustmentFactor);
+    if (template.adjustment !== undefined && template.adjustmentType) {
+      switch (template.adjustmentType) {
+        case 'percent': {
+          const adjustmentFactor = 1 + template.adjustment / 100;
+          scheduleAmount = scheduleAmount * adjustmentFactor;
+          break;
+        }
+        case 'amount': {
+          const sign = scheduleAmount < 0 ? -1 : 1;                                                                         
+          scheduleAmount += 100 * sign * template.adjustment;   
+          break;
+        }
+
+        default:
+        //no valid adjustment was found
+      }
     }
+
+    scheduleAmount = Math.round(scheduleAmount);
+
     const { amount: postRuleAmount, subtransactions } = rule.execActions({
       amount: scheduleAmount,
       category: category.id,

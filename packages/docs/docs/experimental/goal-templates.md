@@ -394,21 +394,22 @@ Below is an example of using the "Full" flag assuming a once-per-year schedule f
 | `#template schedule full Simplefin` |       $ 0       | Budget in all months except May |
 | `#template schedule full Simplefin` |      $ 15       |          Budget in May          |
 
-#### Percentage Increase / Decrease
+#### Increase / Decrease
 
 Yearly expenses (e.g. insurance, property rates, etc.) increase year on year. Often the amount is unknown until close to the due date. This creates a budget crunch - if your $ 1,000 insurance jumps 20% ($ 1,200), you need to make up that extra $ 200 in just a month or two.
 
-This feature adds percentage adjustments to templates, letting you gradually save the expected increase throughout the year. By proactively budgeting a percentage change for these yearly increases, you avoid last-minute scrambling when renewal notices arrive with higher amounts.
+This feature adds adjustments to the template (either percentage or fixed), letting you gradually save the expected increase throughout the year. By proactively budgeting a percentage/fixed change for these yearly increases, you avoid last-minute scrambling when renewal notices arrive with higher amounts.
 
 | Syntax                                                               | Description                                                                                                    |
 | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `#template schedule {SCHEDULE NAME} [{increase/decrease} {number}%]` | Fund the upcoming scheduled transaction over time, increasing or decreasing the amount by the given percentage |
+| `#template schedule {SCHEDULE NAME} [{increase/decrease} {number\|number%}]` | Fund the upcoming scheduled transaction over time, increasing or decreasing the amount by the given percentage |
 
 As an example, assume the amount Scheduled for 'Insurance' the prior year was $ 1000 and $ 83.33 was budgeted monthly; the below will apply.
 
 | Category  | Template line                                 | Budgeted Amount |
 | --------- | --------------------------------------------- | :-------------: |
 | Insurance | `#template schedule Insurance [increase 20%]` |     $ 100       |
+| Insurance | `#template schedule Insurance [increase 200]` |     $ 100       |
 
 When "Insurance" comes due at the end of the year, $1200 will be available.
 
@@ -420,7 +421,7 @@ Below is a table of the variations of the Schedule template.
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | `#template schedule {SCHEDULE NAME}`                                 | Fund upcoming scheduled transactions over time                                                             | Monthly schedules, or larger non-monthly scheduled transactions |
 | `#template schedule full {SCHEDULE NAME}`                            | Fund upcoming scheduled transaction only on needed month                                                   | Small schedules that are non-monthly                            |
-| `#template schedule {SCHEDULE NAME} [{increase/decrease} {number}%]` | Fund upcoming scheduled transaction over time, increasing or decreasing the amount by the given percentage | Yearly renewals where the amount changes                        |
+| `#template schedule {SCHEDULE NAME} [{increase/decrease} {number\|number%}]` | Fund upcoming scheduled transaction over time, increasing or decreasing the amount by the given value | Yearly renewals where the amount changes                        |
 
 ### Average Type
 

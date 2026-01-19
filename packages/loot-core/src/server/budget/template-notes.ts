@@ -99,16 +99,21 @@ async function getCategoriesWithTemplates(): Promise<
 
         // Validate schedule adjustments
         if (
-          parsedTemplate.type === 'schedule' &&
+          (parsedTemplate.type === 'average' ||
+            parsedTemplate.type === 'schedule') &&
           parsedTemplate.adjustment !== undefined
         ) {
-          if (
-            parsedTemplate.adjustment <= -100 ||
-            parsedTemplate.adjustment > 1000
-          ) {
-            throw new Error(
-              `Invalid adjustment percentage (${parsedTemplate.adjustment}%). Must be between -100% and 1000%`,
-            );
+          if (parsedTemplate.adjustmentType === 'percent') {
+            if (
+              parsedTemplate.adjustment <= -100 ||
+              parsedTemplate.adjustment > 1000
+            ) {
+              throw new Error(
+                `Invalid adjustment percentage (${parsedTemplate.adjustment}%). Must be between -100% and 1000%`,
+              );
+            }
+          } else if (parsedTemplate.adjustmentType === 'amount') {
+            //placeholder for potential validation of amount/fixed adjustments
           }
         }
 

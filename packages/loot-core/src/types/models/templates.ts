@@ -64,6 +64,7 @@ export type ScheduleTemplate = {
   name: string;
   full?: boolean;
   adjustment?: number;
+  adjustmentType?: 'percent' | 'amount';
 } & BaseTemplateWithPriority;
 
 export type AverageTemplate = {

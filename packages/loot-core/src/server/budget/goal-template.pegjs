@@ -19,7 +19,7 @@ expr
   / template: template _ limit: limit
     { return { type: 'simple', monthly: null, limit, priority: template.priority, directive: template.directive }}
   / template: template _ schedule:schedule _ full:full? name:rawScheduleName modifiers:modifiers?
-    { return { type: 'schedule', name: name.trim(), priority: template.priority, directive: template.directive, full, adjustment: modifiers?.adjustment }}
+    { return { type: 'schedule', name: name.trim(), priority: template.priority, directive: template.directive, full, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType  }}
   / template: template _ remainder: remainder limit: limit?
     { return { type: 'remainder', priority: null, directive: template.directive, weight: remainder, limit }}
   / template: template _ 'average'i _ amount: positive _ 'months'i? modifiers:modifiers?
