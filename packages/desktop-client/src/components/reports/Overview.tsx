@@ -27,6 +27,7 @@ import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { DashboardHeader } from './DashboardHeader';
 import { DashboardSelector } from './DashboardSelector';
 import { LoadingIndicator } from './LoadingIndicator';
+import { AgeOfMoneyCard } from './reports/AgeOfMoneyCard';
 import { CalendarCard } from './reports/CalendarCard';
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CrossoverCard } from './reports/CrossoverCard';
@@ -72,6 +73,7 @@ export function Overview({ dashboard }: OverviewProps) {
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
+  const ageOfMoneyReportEnabled = useFeatureFlag('ageOfMoneyReport');
 
   const formulaMode = useFeatureFlag('formulaMode');
 
@@ -505,6 +507,14 @@ export function Overview({ dashboard }: OverviewProps) {
                                   },
                                 ]
                               : []),
+                            ...(ageOfMoneyReportEnabled
+                              ? [
+                                  {
+                                    name: 'age-of-money-card' as const,
+                                    text: t('Age of Money'),
+                                  },
+                                ]
+                              : []),
                             {
                               name: 'spending-card' as const,
                               text: t('Spending analysis'),
@@ -674,6 +684,18 @@ export function Overview({ dashboard }: OverviewProps) {
                       widgetId={item.i}
                       isEditing={isEditing}
                       accounts={accounts}
+                      meta={item.meta}
+                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                      onRemove={() => onRemoveWidget(item.i)}
+                      onCopy={targetDashboardId =>
+                        onCopyWidget(item.i, targetDashboardId)
+                      }
+                    />
+                  ) : item.type === 'age-of-money-card' &&
+                    ageOfMoneyReportEnabled ? (
+                    <AgeOfMoneyCard
+                      widgetId={item.i}
+                      isEditing={isEditing}
                       meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
