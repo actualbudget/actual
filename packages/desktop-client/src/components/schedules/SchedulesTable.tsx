@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useMemo, useRef, type CSSProperties } from 'react';
+import React, { useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -32,7 +32,6 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
   type ScheduleStatuses,
@@ -337,9 +336,7 @@ export function SchedulesTable({
   const format = useFormat();
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [showCompleted = false, setShowCompleted] = useLocalPref(
-    'schedules.showCompleted',
-  );
+  const [showCompleted, setShowCompleted] = useState(false);
 
   const payees = usePayees();
   const accounts = useAccounts();

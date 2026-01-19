@@ -472,9 +472,6 @@ export type Modal =
       };
     }
   | {
-      name: 'schedules-page-menu';
-    }
-  | {
       name: 'envelope-budget-month-menu';
       options: {
         month: string;
