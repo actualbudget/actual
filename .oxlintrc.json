@@ -19,37 +19,6 @@
   },
   "rules": {
     // Import sorting
-    // TODO replace once oxfmt supports this: https://github.com/oxc-project/oxc/issues/17076
-    "perfectionist/sort-imports": [
-      "warn",
-      {
-        "groups": [
-          "react",
-          "builtin",
-          "external",
-          "loot-core",
-          "parent",
-          "sibling",
-          "index",
-          "desktop-client"
-        ],
-        "customGroups": [
-          {
-            "groupName": "react",
-            "elementNamePattern": "^react(-.*)?$"
-          },
-          {
-            "groupName": "loot-core",
-            "elementNamePattern": "^loot-core"
-          },
-          {
-            "groupName": "desktop-client",
-            "elementNamePattern": "^@desktop-client"
-          }
-        ],
-        "newlinesBetween": "always"
-      }
-    ],
     "perfectionist/sort-named-imports": [
       "warn",
       {
