@@ -60,8 +60,8 @@ async function createScheduleList(
           break;
         }
         case 'amount': {
-          const sign = scheduleAmount < 0 ? -1 : 1;                                                                         
-          scheduleAmount += 100 * sign * template.adjustment;   
+          const sign = scheduleAmount < 0 ? -1 : 1;
+          scheduleAmount += 100 * sign * template.adjustment;
           break;
         }
 
