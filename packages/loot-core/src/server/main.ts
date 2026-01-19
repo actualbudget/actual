@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import './polyfills';
-
 import * as injectAPI from '@actual-app/api/injected';
 
 import * as asyncStorage from '../platform/server/asyncStorage';
