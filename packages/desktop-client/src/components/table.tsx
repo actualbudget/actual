@@ -1042,7 +1042,7 @@ export const Table = forwardRef(
     }));
 
     useLayoutEffect(() => {
-      // We wait for the list to mount because { AutoSizer } needs to run
+      // We wait for the list to mount because AutoSizer needs to run
       // before it's mounted
       if (!listInitialized.current && listContainer.current) {
         // Animation is on by default
