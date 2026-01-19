@@ -737,7 +737,26 @@ export class CategoryTemplateContext {
         `sum-amount-${templateContext.category.id}`,
       );
     }
-    return -Math.round(sum / template.numMonths);
+
+    // negate as sheet value is cost ie negative
+    let average = -(sum / template.numMonths);
+
+    if (template.adjustment && template.adjustmentType) {
+      switch (template.adjustmentType) {
+        case 'percent':
+          const percent = 100 + template.adjustment;
+          average *= percent;
+          average /= 100;
+          break;
+        case 'amount':
+          average += template.adjustment;
+          break;
+        default:
+        //no valid adjustment was found, will remain regular average. perhaps an error could be raised?
+      }
+    }
+
+    return Math.round(average);
   }
 
   static runBy(templateContext: CategoryTemplateContext): number {

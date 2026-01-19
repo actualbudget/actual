@@ -591,6 +591,137 @@ describe('CategoryTemplateContext', () => {
       );
       expect(result).toBe(67); // Average of -100, 200, -300
     });
+
+    it('should handle positive percent adjustments', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 1,
+        adjustment: 10,
+        adjustmentType: 'percent',
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100);
+
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
+      expect(result).toBe(110);
+    });
+
+    it('should handle negative percent adjustments', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 1,
+        adjustment: -10,
+        adjustmentType: 'percent',
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100);
+
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
+      expect(result).toBe(90);
+    });
+    it('should handle zero percent adjustments', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 1,
+        adjustment: 0,
+        adjustmentType: 'percent',
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100);
+
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
+      expect(result).toBe(100);
+    });
+
+    it('should handle zero amount adjustments', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 1,
+        adjustment: 0,
+        adjustmentType: 'amount',
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100);
+
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
+      expect(result).toBe(100);
+    });
+
+    it('should handle positive amount adjustments', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 1,
+        adjustment: 11,
+        adjustmentType: 'amount',
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100);
+
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
+      expect(result).toBe(111);
+    });
+
+    it('should handle negative amount adjustments', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 1,
+        adjustment: -1,
+        adjustmentType: 'amount',
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100);
+
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
+      expect(result).toBe(99);
+    });
   });
 
   describe('runBy', () => {

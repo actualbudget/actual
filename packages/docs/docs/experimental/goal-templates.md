@@ -424,13 +424,27 @@ Below is a table of the variations of the Schedule template.
 
 ### Average Type
 
-The Average template allows you to budget the average amount spend over a number of months.
-This is the same function provided by the menu in the budget table but it can be used in a single category automatically where the menu option must be applied to the whole budget or a single category.
-The table below shows how to use the Average template.
+The Average template allows you to budget based on the average amount spent over a number of months.
+Along with the flexibility to choose a number of months beyond the menu built-ins (3 months, 6 months); there is additional functionality to adjust the budgetted amount from the average by a percentage or by a fixed whole number.
 
 | Syntax                       | Description                                                                                                                                                                 | Example Application                                                                   |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `#template average 6 months` | Budget the average amount spent over the last 6 months. Can set the number to any number > 0. Matches the existing option on the budget page but with flexible month ranges | Try to budget only what you need to spend based on the last 6 months of spending data |
+| `#template average {number} months` | Budget the average amount spent over the last 6 months. Can set the number to any number > 0. Matches the existing option on the budget page but with flexible month ranges | Try to budget only what you need to spend based on the last 6 months of spending data |
+| `#template average {number} months [{increase/decrease} {number\|number%}]` | Budget the average amount spent over the last 6 months. Plus a 10% buffer ontop. | Try to budget just a little bit more than what you need to spend for caution. |
+
+#### Examples
+
+As an example, assume the spend for the category was [\$40, \$50, \$60] for the past 3 months; here are some example usages
+
+| Template line                                 | Budgeted Amount |
+| --------------------------------------------- | :-------------: |
+| `#template average 3 months` |     \$ 50       |
+| `#template average 3 months [increase 20%]` |     \$ 60       |
+| `#template average 3 months [decrease 10%]` |     \$ 45       |
+| `#template average 3 months [increase 11]` |     \$ 61       |
+| `#template average 3 months [decrease 1]` |     \$ 49       |
+
+
 
 ### Copy Type
 

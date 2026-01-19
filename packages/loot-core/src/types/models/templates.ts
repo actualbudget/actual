@@ -69,6 +69,8 @@ export type ScheduleTemplate = {
 export type AverageTemplate = {
   type: 'average';
   numMonths: number;
+  adjustment?: number;
+  adjustmentType?: 'percent' | 'amount';
 } & BaseTemplateWithPriority;
 
 export type CopyTemplate = {
