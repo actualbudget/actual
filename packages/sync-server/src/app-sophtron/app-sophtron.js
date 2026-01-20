@@ -229,8 +229,8 @@ app.post(
     const { requisitionId } = req.body || {};
 
     const data = await sophtronService.deleteRequisition(requisitionId);
-    if (data.summary === 'Requisition deleted') {
-      res.send({
+    if (data.status === 'ok') {
+        res.send({
         status: 'ok',
         data,
       });

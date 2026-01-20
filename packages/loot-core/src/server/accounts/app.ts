@@ -342,7 +342,9 @@ async function linkSophtronAccount({
   let id;
 
   const institution = {
-    name: externalAccount.institution ?? t('Unknown'),
+    name: typeof externalAccount.institution === 'string'
+      ? externalAccount.institution
+      : externalAccount.institution?.name ?? t('Unknown'),
   };
 
   // For Sophtron, we need to use orgId (customerId) as the bank_id
@@ -388,7 +390,7 @@ async function linkSophtronAccount({
 
       await db.insertTransaction({
         account: id,
-        amount: amountToInteger(externalAccount.balance),
+        amount: externalAccount.balance,
         category: offBudget ? null : payee.category,
         payee: payee.id,
         date: monthUtils.currentDay(),

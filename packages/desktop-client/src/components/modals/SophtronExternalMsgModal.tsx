@@ -11,7 +11,7 @@ import { View } from '@actual-app/components/view';
 import { sendCatch } from 'loot-core/platform/client/fetch';
 import { type SophtronToken } from 'loot-core/types/models/sophtron';
 
-import { Error, Warning } from '@desktop-client/components/alerts';
+import { Error as AlertError, Warning } from '@desktop-client/components/alerts';
 import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
 import { Link } from '@desktop-client/components/common/Link';
 import {
@@ -94,14 +94,14 @@ function renderError(
   t: ReturnType<typeof useTranslation>['t'],
 ) {
   return (
-    <Error style={{ alignSelf: 'center', marginBottom: 10 }}>
+    <AlertError style={{ alignSelf: 'center', marginBottom: 10 }}>
       {error.code === 'timeout'
         ? t('Timed out. Please try again.')
         : t(
             'An error occurred while linking your account, sorry! The potential issue could be: {{ message }}',
             { message: error.message },
           )}
-    </Error>
+    </AlertError>
   );
 }
 
@@ -195,7 +195,7 @@ export function SophtronExternalMsgModal({
     return (
       <View style={{ gap: 10 }}>
         {isAccountOptionError ? (
-          <Error>
+          <AlertError>
             <Trans>
               Failed loading available accounts: Sophtron access credentials are
               not configured. Please configure them in{' '}
@@ -211,7 +211,7 @@ export function SophtronExternalMsgModal({
               </Link>
               .
             </Trans>
-          </Error>
+          </AlertError>
         ) : (
           <>
             <FormField>

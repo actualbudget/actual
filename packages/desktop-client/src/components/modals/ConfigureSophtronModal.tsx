@@ -11,7 +11,7 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import { getSecretsError } from 'loot-core/shared/errors';
 
-import { Error } from '@desktop-client/components/alerts';
+import { Error as AlertError } from '@desktop-client/components/alerts';
 import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
@@ -134,8 +134,7 @@ export const ConfigureSophtronModal = ({
                 }}
               />
             </FormField>
-
-            {!isValid && <Error>{error}</Error>}
+            {!isValid && <AlertError>{error}</AlertError>}
           </View>
 
           <ModalButtons>

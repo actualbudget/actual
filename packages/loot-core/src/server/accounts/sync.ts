@@ -336,8 +336,7 @@ async function downloadSophtronTransactions(
 
   logger.log('Pulling transactions from Sophtron');
 
-  const endDate = new Date().toISOString().substring(0, 10);
-
+  const endDate = monthUtils.currentDay();
   logger.log('[Sophtron Sync] Date range:', {
     startDate: since,
     endDate,

@@ -14,11 +14,14 @@ export function useSophtronStatus() {
   useEffect(() => {
     async function fetch() {
       setIsLoading(true);
-
-      const results = await send('sophtron-status');
-
-      setConfiguredSophtron(results.configured || false);
-      setIsLoading(false);
+      try {
+        const results = await send('sophtron-status');
+        setConfiguredSophtron(Boolean(results?.configured));
+      } catch {
+        setConfiguredSophtron(false);
+      } finally {
+        setIsLoading(false);
+      }
     }
 
     if (status === 'online') {

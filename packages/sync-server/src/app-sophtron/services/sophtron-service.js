@@ -237,48 +237,57 @@ class SophtronService {
     // For Sophtron Universal Widget, the link would be:
     // https://sophtron.com/universal-widget?institutionId={institutionId}&...
     // For testing, we'll immediately fetch existing accounts
-    setTimeout(async () => {
-      try {
-        // Get existing accounts for this user
-        const customers = await this.getCustomers();
-        const allAccounts = [];
+    setTimeout(() => {
+      (async () => {
+        try {
+          // Get existing accounts for this user
+          const customers = await this.getCustomers();
+          const allAccounts = [];
 
-        for (const customer of customers) {
-          try {
-            const accounts = await this.getCustomerAccounts(
-              customer.CustomerID,
-            );
-            if (accounts && accounts.length > 0) {
-              accounts.forEach(account => {
-                allAccounts.push({
-                  ...account,
-                  customerId: customer.CustomerID,
+          for (const customer of customers) {
+            try {
+              const accounts = await this.getCustomerAccounts(
+                customer.CustomerID,
+              );
+              if (accounts && accounts.length > 0) {
+                accounts.forEach(account => {
+                  allAccounts.push({
+                    ...account,
+                    customerId: customer.CustomerID,
+                  });
                 });
-              });
+              }
+            } catch (error) {
+              console.error(
+                `Error fetching accounts for customer ${customer.CustomerID}:`,
+                error,
+              );
             }
-          } catch (error) {
-            console.error(
-              `Error fetching accounts for customer ${customer.CustomerID}:`,
-              error,
-            );
           }
-        }
 
-        // Update linking session with accounts
-        this.linkingSessions.set(requisitionId, {
-          status: 'complete',
-          institutionId,
-          accounts: allAccounts,
-          completedAt: Date.now(),
-        });
-      } catch (error) {
-        console.error('Error fetching accounts:', error);
+          // Update linking session with accounts
+          this.linkingSessions.set(requisitionId, {
+            status: 'complete',
+            institutionId,
+            accounts: allAccounts,
+            completedAt: Date.now(),
+          });
+        } catch (error) {
+          console.error('Error fetching accounts:', error);
+          this.linkingSessions.set(requisitionId, {
+            status: 'error',
+            institutionId,
+            error: error.message,
+          });
+        }
+      })().catch(error => {
+        console.error('Unhandled error in setTimeout callback:', error);
         this.linkingSessions.set(requisitionId, {
           status: 'error',
           institutionId,
           error: error.message,
         });
-      }
+      });
     }, 2000); // Simulate delay
 
     return {
