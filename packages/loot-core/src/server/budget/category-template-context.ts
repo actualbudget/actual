@@ -745,9 +745,8 @@ export class CategoryTemplateContext {
     if (template.adjustment !== undefined && template.adjustmentType) {
       switch (template.adjustmentType) {
         case 'percent': {
-          const percent = 100 + template.adjustment;
-          average *= percent;
-          average /= 100;
+          const adjustmentFactor = 1 + template.adjustment / 100;
+          average = adjustmentFactor * average;
           break;
         }
         case 'fixed': {
