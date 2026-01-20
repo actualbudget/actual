@@ -13,8 +13,8 @@ import {
   type AccountEntity,
   type CategoryEntity,
   type GoCardlessToken,
-  type SophtronToken,
   type ImportTransactionEntity,
+  type SophtronToken,
   type SyncServerGoCardlessAccount,
   type SyncServerPluggyAiAccount,
   type SyncServerSimpleFinAccount,
@@ -347,10 +347,7 @@ async function linkSophtronAccount({
 
   // For Sophtron, we need to use orgId (customerId) as the bank_id
   // This is required for transaction sync
-  const bank = await link.findOrCreateBank(
-    institution,
-    externalAccount.orgId,
-  );
+  const bank = await link.findOrCreateBank(institution, externalAccount.orgId);
 
   if (upgradingId) {
     const accRow = await db.first<db.DbAccount>(

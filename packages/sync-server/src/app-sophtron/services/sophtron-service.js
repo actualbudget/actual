@@ -9,19 +9,16 @@
 // Note: Cannot get accounts directly - must get customers first, then get accounts for each customer.
 // This service implements the customer-based flow for retrieving accounts and transactions.
 
-import {
-  extractMerchantName,
-  suggestCategory,
-} from './merchant-extractor.js';
+import crypto from 'crypto';
 //
 // Authentication: Uses direct auth with HMAC-SHA256 signature (FIApiAUTH header)
 // Based on: https://github.com/sophtron/Sophtron-Integration
 
-import crypto from 'crypto';
-
 import axios from 'axios';
 
 import { SecretName, secretsService } from '../../services/secrets-service';
+
+import { extractMerchantName, suggestCategory } from './merchant-extractor.js';
 
 const SOPHTRON_API_BASE = 'https://api.sophtron.com/api/';
 
@@ -115,7 +112,6 @@ class SophtronService {
       throw error;
     }
   }
-  
 
   /**
    * Set token (placeholder for consistency with interface)
@@ -156,7 +152,11 @@ class SophtronService {
     // Sophtron API requires startDate and endDate - set defaults if not provided
     const now = new Date();
     const defaultEndDate = now.toISOString().substring(0, 10);
-    const defaultStartDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate())
+    const defaultStartDate = new Date(
+      now.getFullYear(),
+      now.getMonth() - 3,
+      now.getDate(),
+    )
       .toISOString()
       .substring(0, 10); // Default to 3 months ago
 
@@ -168,11 +168,11 @@ class SophtronService {
       endDate instanceof Date
         ? endDate.toISOString().substring(0, 10)
         : endDate || defaultEndDate;
-    
+
     const path = `v2/customers/${customerId}/accounts/${accountId}/transactions?startDate=${startDateStr}&endDate=${endDateStr}`;
-    
+
     const result = await this.get(path);
-    
+
     return result;
   }
 
@@ -204,11 +204,17 @@ class SophtronService {
         name: inst.InstitutionName,
         institutionId: inst.InstitutionID,
       }));
-      
+
       return mapped;
     } catch (error) {
-      console.error('[Sophtron Service] Error fetching institutions:', error.message);
-      console.error('[Sophtron Service] Error details:', error.response?.data || error);
+      console.error(
+        '[Sophtron Service] Error fetching institutions:',
+        error.message,
+      );
+      console.error(
+        '[Sophtron Service] Error details:',
+        error.response?.data || error,
+      );
       throw error;
     }
   }
@@ -368,14 +374,14 @@ class SophtronService {
   async getAccounts(requisitionId) {
     // Get all institutions to map InstitutionID to InstitutionName
     const institutions = await this.getInstitutions();
-    
+
     const institutionMap = new Map();
     if (institutions && institutions.length > 0) {
       institutions.forEach(inst => {
         institutionMap.set(inst.id, inst.name);
       });
     }
-    
+
     // Get all customers
     const customers = await this.getCustomers();
     if (!customers || customers.length === 0) {
@@ -402,16 +408,20 @@ class SophtronService {
         const customerAccounts = await this.getCustomerAccounts(
           customer.CustomerID,
         );
-        
+
         if (customerAccounts && customerAccounts.length > 0) {
           // Add customer context and institution name to each account
           customerAccounts.forEach(account => {
             // Get InstitutionID from MemberID first, or use account's InstitutionID if available
-            const institutionId = account.InstitutionID || memberToInstitutionMap.get(account.MemberID);
+            const institutionId =
+              account.InstitutionID ||
+              memberToInstitutionMap.get(account.MemberID);
             // Get institution name from InstitutionID
-            const institutionName = institutionId ? institutionMap.get(institutionId) : null;
+            const institutionName = institutionId
+              ? institutionMap.get(institutionId)
+              : null;
             const finalInstitutionName = institutionName || 'Unknown Bank';
-            
+
             allAccounts.push({
               ...account,
               customerId: customer.CustomerID,
@@ -419,7 +429,10 @@ class SophtronService {
               institution: finalInstitutionName, // Add institution name for UI
               // Convert balance from dollars to cents (multiply by 100)
               // Actual Budget stores amounts as integers in cents
-              balance: account.Balance != null ? Math.round(account.Balance * 100) : null,
+              balance:
+                account.Balance != null
+                  ? Math.round(account.Balance * 100)
+                  : null,
             });
           });
         }
@@ -455,13 +468,13 @@ class SophtronService {
     );
 
     // Helper function to convert date to YYYY-MM-DD format
-    const formatDate = (dateStr) => {
+    const formatDate = dateStr => {
       if (!dateStr) return null;
       return dateStr.substring(0, 10); // Extract YYYY-MM-DD from ISO string
     };
 
     // Helper function to format amount as string (required by Actual)
-    const formatAmount = (amount) => {
+    const formatAmount = amount => {
       if (amount == null) return '0.00';
       return amount.toFixed(2);
     };
@@ -470,11 +483,11 @@ class SophtronService {
     const normalizedTransactions = (transactions || []).map(t => {
       const payeeName = t.merchant || extractMerchantName(t.Description);
       const suggestedCategory = suggestCategory(t.Description, payeeName);
-      
+
       return {
         transactionId: t.TransactionID,
         date: formatDate(t.TransactionDate),
-        payeeName: payeeName,
+        payeeName,
         notes: t.Description, // Keep full description in notes
         transactionAmount: {
           amount: formatAmount(t.Amount),
@@ -482,7 +495,7 @@ class SophtronService {
         },
         booked: true, // Sophtron transactions are always booked
         // Add category hint that Actual's rules engine can use
-        suggestedCategory: suggestedCategory,
+        suggestedCategory,
       };
     });
 
@@ -528,13 +541,13 @@ class SophtronService {
     );
 
     // Helper function to convert date to YYYY-MM-DD format
-    const formatDate = (dateStr) => {
+    const formatDate = dateStr => {
       if (!dateStr) return null;
       return dateStr.substring(0, 10); // Extract YYYY-MM-DD from ISO string
     };
 
     // Helper function to format amount as string (required by Actual)
-    const formatAmount = (amount) => {
+    const formatAmount = amount => {
       if (amount == null) return '0.00';
       return amount.toFixed(2);
     };
@@ -543,11 +556,11 @@ class SophtronService {
     const normalizedTransactions = (transactions || []).map(t => {
       const payeeName = t.merchant || extractMerchantName(t.Description);
       const suggestedCategory = suggestCategory(t.Description, payeeName);
-      
+
       return {
         transactionId: t.TransactionID,
         date: formatDate(t.TransactionDate),
-        payeeName: payeeName,
+        payeeName,
         notes: t.Description, // Keep full description in notes
         transactionAmount: {
           amount: formatAmount(t.Amount),
@@ -555,7 +568,7 @@ class SophtronService {
         },
         booked: true, // Sophtron transactions are always booked
         // Add category hint that Actual's rules engine can use
-        suggestedCategory: suggestedCategory,
+        suggestedCategory,
       };
     });
 
@@ -579,7 +592,6 @@ class SophtronService {
     // For now, return success
     return { status: 'ok' };
   }
-
 }
 
 export const sophtronService = new SophtronService();

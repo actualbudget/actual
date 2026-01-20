@@ -151,7 +151,7 @@ app.post(
 
     // Get all institutions to map InstitutionID to InstitutionName
     const institutions = await sophtronService.getInstitutions();
-    
+
     const institutionMap = new Map();
     if (institutions && institutions.length > 0) {
       institutions.forEach(inst => {
@@ -184,15 +184,19 @@ app.post(
         const accounts = await sophtronService.getCustomerAccounts(
           customer.CustomerID,
         );
-        
+
         if (accounts && accounts.length > 0) {
           accounts.forEach(account => {
             // Get InstitutionID from MemberID first, or use account's InstitutionID if available
-            const institutionId = account.InstitutionID || memberToInstitutionMap.get(account.MemberID);
+            const institutionId =
+              account.InstitutionID ||
+              memberToInstitutionMap.get(account.MemberID);
             // Get institution name from InstitutionID
-            const institutionName = institutionId ? institutionMap.get(institutionId) : null;
+            const institutionName = institutionId
+              ? institutionMap.get(institutionId)
+              : null;
             const finalInstitutionName = institutionName || 'Unknown Bank';
-            
+
             allAccounts.push({
               ...account,
               customerId: customer.CustomerID,
@@ -365,7 +369,10 @@ app.post(
           });
           break;
         default:
-          console.error('[Sophtron] Unknown error:', error.message || String(error));
+          console.error(
+            '[Sophtron] Unknown error:',
+            error.message || String(error),
+          );
           sendErrorResponse({
             error_type: 'UNKNOWN',
             error_code: 'UNKNOWN',

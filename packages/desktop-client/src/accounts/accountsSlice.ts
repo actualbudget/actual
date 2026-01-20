@@ -1,3 +1,5 @@
+import { link } from 'node:fs';
+
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import memoizeOne from 'memoize-one';
 
@@ -20,7 +22,6 @@ import { markPayeesDirty } from '@desktop-client/payees/payeesSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
 import { setNewTransactions } from '@desktop-client/transactions/transactionsSlice';
-import { link } from 'node:fs';
 
 const sliceName = 'account';
 

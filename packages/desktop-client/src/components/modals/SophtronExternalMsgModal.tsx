@@ -22,8 +22,8 @@ import {
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { useSophtronStatus } from '@desktop-client/hooks/useSophtronStatus';
 import {
-  type Modal as ModalType,
   pushModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 

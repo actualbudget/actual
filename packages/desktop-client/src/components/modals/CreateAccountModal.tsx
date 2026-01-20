@@ -684,9 +684,12 @@ export function CreateAccountModal({
                       </View>
                       <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
                         <Trans>
-                          <strong>Link <em>US & Canada</em> bank account</strong> to automatically
-                          download transactions. Sophtron provides reliable,
-                          up-to-date information from hundreds of banks.
+                          <strong>
+                            Link <em>US & Canada</em> bank account
+                          </strong>{' '}
+                          to automatically download transactions. Sophtron
+                          provides reliable, up-to-date information from
+                          hundreds of banks.
                         </Trans>
                       </Text>
                     </>
