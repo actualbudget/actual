@@ -8,10 +8,15 @@ import classes from './index.module.css';
 
 export default function Hello() {
   const title = 'Your Finances — made simple';
-  const pageDescription = 'Actual Budget is a super fast and privacy-focused app for managing your finances. At its heart is the well proven and much loved Envelope Budgeting methodology.';
+  const pageDescription =
+    'Actual Budget is a super fast and privacy-focused app for managing your finances. At its heart is the well proven and much loved Envelope Budgeting methodology.';
 
   return (
-    <Layout title={title} description={pageDescription} style={{ position: 'relative' }}>
+    <Layout
+      title={title}
+      description={pageDescription}
+      style={{ position: 'relative' }}
+    >
       <img alt="" src="/img/homepage/hero-bg.svg" className={classes.heroBg} />
 
       <div className={`${classes.main} ${classes.container}`}>
