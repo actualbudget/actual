@@ -11,7 +11,10 @@ import { View } from '@actual-app/components/view';
 import { sendCatch } from 'loot-core/platform/client/fetch';
 import { type SophtronToken } from 'loot-core/types/models/sophtron';
 
-import { Error as AlertError, Warning } from '@desktop-client/components/alerts';
+import {
+  Error as AlertError,
+  Warning,
+} from '@desktop-client/components/alerts';
 import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
 import { Link } from '@desktop-client/components/common/Link';
 import {

@@ -54,6 +54,6 @@ Before setting up Sophtron, you will need:
 ### Support
 
 For issues related to Sophtron integration, please visit:
+
 - Sophtron's website: https://sophtron.com/
 - Actual Budget community support channels
-

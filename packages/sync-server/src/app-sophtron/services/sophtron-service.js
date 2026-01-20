@@ -500,7 +500,7 @@ class SophtronService {
         notes: t.Description, // Keep full description in notes
         transactionAmount: {
           amount: formatAmount(t.Amount),
-          currency: 'USD',
+          currency: t.Currency || 'USD',
         },
         booked: true, // Sophtron transactions are always booked
         // Add category hint that Actual's rules engine can use
@@ -573,7 +573,7 @@ class SophtronService {
         notes: t.Description, // Keep full description in notes
         transactionAmount: {
           amount: formatAmount(t.Amount),
-          currency: 'USD',
+          currency: t.Currency || 'USD',
         },
         booked: true, // Sophtron transactions are always booked
         // Add category hint that Actual's rules engine can use

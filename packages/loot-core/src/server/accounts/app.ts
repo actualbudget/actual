@@ -342,9 +342,10 @@ async function linkSophtronAccount({
   let id;
 
   const institution = {
-    name: typeof externalAccount.institution === 'string'
-      ? externalAccount.institution
-      : externalAccount.institution?.name ?? t('Unknown'),
+    name:
+      typeof externalAccount.institution === 'string'
+        ? externalAccount.institution
+        : (externalAccount.institution?.name ?? t('Unknown')),
   };
 
   // For Sophtron, we need to use orgId (customerId) as the bank_id

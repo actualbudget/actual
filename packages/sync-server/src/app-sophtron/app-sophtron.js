@@ -230,7 +230,7 @@ app.post(
 
     const data = await sophtronService.deleteRequisition(requisitionId);
     if (data.status === 'ok') {
-        res.send({
+      res.send({
         status: 'ok',
         data,
       });
