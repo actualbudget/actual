@@ -387,6 +387,7 @@ export function Notifications({ style }: { style?: CSSProperties }) {
         right: notificationInset?.right || 13,
         left: notificationInset?.left || (isNarrowWidth ? 13 : undefined),
         zIndex: MODAL_Z_INDEX - 1,
+        width: isNarrowWidth ? undefined : 400,
         ...style,
       }}
     >
