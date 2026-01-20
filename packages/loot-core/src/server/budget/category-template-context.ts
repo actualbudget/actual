@@ -750,7 +750,10 @@ export class CategoryTemplateContext {
           break;
         }
         case 'fixed': {
-          average += 100 * template.adjustment;
+          average += amountToInteger(
+            template.adjustment,
+            templateContext.currency.decimalPlaces,
+          );
           break;
         }
 
