@@ -261,8 +261,8 @@ export function StackedBarGraph({
                 .reverse()
                 .map(entry => (
                   <Bar
-                    key={entry.name}
-                    dataKey={entry.name}
+                    key={entry.dataKey}
+                    dataKey={entry.dataKey}
                     stackId="a"
                     fill={entry.color}
                     {...animationProps}
@@ -271,7 +271,7 @@ export function StackedBarGraph({
                       setTooltip('');
                     }}
                     onMouseEnter={() => {
-                      setTooltip(entry.name);
+                      setTooltip(entry.dataKey);
                       if (!['Group', 'Interval'].includes(groupBy)) {
                         setPointer('pointer');
                       }
@@ -298,7 +298,7 @@ export function StackedBarGraph({
                   >
                     {viewLabels && !compact && (
                       <LabelList
-                        dataKey={entry.name}
+                        dataKey={entry.dataKey}
                         content={customLabelWithFormat}
                       />
                     )}

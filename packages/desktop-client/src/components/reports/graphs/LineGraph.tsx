@@ -248,13 +248,13 @@ export function LineGraph({
                     key={index}
                     strokeWidth={2}
                     type="monotone"
-                    dataKey={entry.name}
+                    dataKey={entry.dataKey}
                     stroke={entry.color}
                     {...animationProps}
                     activeDot={{
-                      r: entry.name === tooltip && !compact ? 8 : 3,
+                      r: entry.dataKey === tooltip && !compact ? 8 : 3,
                       onMouseEnter: () => {
-                        setTooltip(entry.name);
+                        setTooltip(entry.dataKey);
                         if (!['Group', 'Interval'].includes(groupBy)) {
                           setPointer('pointer');
                         }

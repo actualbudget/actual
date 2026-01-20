@@ -86,6 +86,7 @@ export type LegendEntity = {
   name: string;
   id: string | null;
   color: string;
+  dataKey: string; // Uses id for unique data lookup when categories have same name
 };
 
 export type IntervalEntity = {
