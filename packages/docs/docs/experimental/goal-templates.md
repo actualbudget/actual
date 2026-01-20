@@ -394,7 +394,7 @@ Below is an example of using the "Full" flag assuming a once-per-year schedule f
 | `#template schedule full Simplefin` |       $ 0       | Budget in all months except May |
 | `#template schedule full Simplefin` |      $ 15       |          Budget in May          |
 
-#### Increase / Decrease
+#### Adjustments
 
 Yearly expenses (e.g. insurance, property rates, etc.) increase year on year. Often the amount is unknown until close to the due date. This creates a budget crunch - if your $ 1,000 insurance jumps 20% ($ 1,200), you need to make up that extra $ 200 in just a month or two.
 
@@ -426,7 +426,7 @@ Below is a table of the variations of the Schedule template.
 ### Average Type
 
 The Average template allows you to budget based on the average amount spent over a number of months.
-Along with the flexibility to choose a number of months beyond the menu built-ins (3 months, 6 months); there is additional functionality to adjust the budgeted amount from the average by a percentage or by a fixed whole number.
+Along with the flexibility to choose a number of months beyond the menu built-ins (3 months, 6 months); there is additional functionality to adjust the budgeted amount from the average by a percentage or by a fixed whole number. (See also [adjustments](#adjustments))
 
 | Syntax                                                                      | Description                                                                                                                                                                          | Example Application                                                                   |
 | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
