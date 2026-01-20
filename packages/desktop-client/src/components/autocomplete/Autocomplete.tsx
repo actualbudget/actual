@@ -295,6 +295,18 @@ function SingleAutocomplete<T extends AutocompleteItem>({
     }
   }, [strict, suggestions, initialValue, updateOnValueChange]);
 
+  // Set the initial highlightedIndex when the dropdown opens
+  useEffect(() => {
+    if (isOpen && !embedded) {
+      const defaultGetHighlightedIndex = (filteredSuggestions: T[]) => {
+        return highlightFirst && filteredSuggestions.length ? 0 : null;
+      };
+      const filtered = isChanged ? filteredSuggestions || suggestions : suggestions;
+      const index = (getHighlightedIndex || defaultGetHighlightedIndex)(filtered);
+      setHighlightedIndex(index);
+    }
+  }, [isOpen, embedded]);
+
   function resetState(newValue?: string) {
     const val = newValue === undefined ? initialValue : newValue;
     const selectedItem = findItem<T>(strict, suggestions, val);
