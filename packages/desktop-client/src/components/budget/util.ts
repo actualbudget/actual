@@ -63,7 +63,7 @@ export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
 
 export function makeAmountGrey(value: number | string | null): CSSProperties {
   return value === 0 || value === '0' || value === '' || value == null
-    ? { color: theme.tableTextSubdued }
+    ? { color: theme.budgetTextSubdued }
     : null;
 }
 
