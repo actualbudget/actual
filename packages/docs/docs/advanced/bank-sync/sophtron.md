@@ -6,7 +6,7 @@ This feature requires a compatible version of Actual Budget with Sophtron suppor
 
 Sophtron provides bank synchronization services for US and Canadian financial institutions. This guide will help you set up and use Sophtron with Actual Budget.
 
-### Prerequisites
+## Prerequisites
 
 Before setting up Sophtron, you will need:
 
@@ -24,11 +24,11 @@ Before setting up Sophtron, you will need:
 1. Add the link to your accounts in Actual (Existing or New).
    - **_For an existing account, click on that account, select the ... (kebab menu) in the top right, and choose Link Account_**
 
-     ![](/img/connecting-your-bank/connecting-your-bank-01.webp)
+     ![Link account menu option in the kebab menu](/img/connecting-your-bank/connecting-your-bank-01.webp)
 
    - **_To create a new account with bank syncing click on the '+ Add account' link in the left menu at the bottom_**
 
-     ![](/img/connecting-your-bank/connecting-your-bank-02.webp)
+     ![Add account button in the sidebar](/img/connecting-your-bank/connecting-your-bank-02.webp)
 
 2. Select the Link bank account with Sophtron option.
 
@@ -55,5 +55,5 @@ Before setting up Sophtron, you will need:
 
 For issues related to Sophtron integration, please visit:
 
-- Sophtron's website: https://sophtron.com/
+- [Sophtron's website](https://sophtron.com/)
 - Actual Budget community support channels

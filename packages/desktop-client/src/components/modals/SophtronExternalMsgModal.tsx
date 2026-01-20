@@ -152,33 +152,40 @@ export function SophtronExternalMsgModal({
     setError(null);
     setWaiting('accounts');
 
-    // Direct link - accounts are already available
-    const selectedAccountData = accountOptions.find(
-      acc => acc.accountId === selectedAccount.accountId,
-    );
+    try {
+      // Direct link - accounts are already available
+      const selectedAccountData = accountOptions.find(
+        acc => acc.accountId === selectedAccount.accountId,
+      );
 
-    if (selectedAccountData && selectedAccountData.fullData) {
-      const acc = selectedAccountData.fullData;
-      data.current = {
-        id: selectedAccount.accountId,
-        accounts: [
-          {
-            account_id: acc.AccountID,
-            name: acc.AccountName,
-            official_name: acc.AccountName,
-            mask: acc.AccountNumber?.slice(-4) || acc.AccountID.slice(-4),
-            balance: acc.Balance || 0,
-            institution: acc.InstitutionName || 'Sophtron',
-            orgId: selectedAccountData.customerId,
-            orgDomain: acc.UserInstitutionID,
-          },
-        ],
-      };
+      if (selectedAccountData && selectedAccountData.fullData) {
+        const acc = selectedAccountData.fullData;
+        data.current = {
+          id: selectedAccount.accountId,
+          accounts: [
+            {
+              account_id: acc.AccountID,
+              name: acc.AccountName,
+              official_name: acc.AccountName,
+              mask: acc.AccountNumber?.slice(-4) || acc.AccountID.slice(-4),
+              balance: acc.Balance || 0,
+              institution: acc.InstitutionName || 'Sophtron',
+              orgId: selectedAccountData.customerId,
+              orgDomain: acc.UserInstitutionID,
+            },
+          ],
+        };
 
-      await onSuccess(data.current);
+        await onSuccess(data.current);
+      }
+    } catch (err) {
+      setError({
+        code: 'unknown',
+        message: (err as Error).message,
+      });
+    } finally {
+      setWaiting(null);
     }
-
-    setWaiting(null);
   }
 
   const onSophtronInit = () => {
