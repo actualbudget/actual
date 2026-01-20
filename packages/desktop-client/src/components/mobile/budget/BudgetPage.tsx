@@ -44,6 +44,7 @@ import {
   updateCategory,
   updateCategoryGroup,
 } from '@desktop-client/budget/budgetSlice';
+import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { prewarmMonth } from '@desktop-client/components/budget/util';
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
@@ -505,7 +506,7 @@ export function BudgetPage() {
   );
 
   const onSwitchBudgetFile = useCallback(() => {
-    dispatch(pushModal({ modal: { name: 'budget-file-selection' } }));
+    dispatch(closeBudget());
   }, [dispatch]);
 
   const onOpenBudgetMonthMenu = useCallback(
