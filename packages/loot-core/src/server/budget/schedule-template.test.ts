@@ -1,4 +1,5 @@
-import { Currency } from 'loot-core/shared/currencies';
+import { type Currency } from 'loot-core/shared/currencies';
+
 import { type CategoryEntity } from '../../types/models';
 import * as db from '../db';
 import { Rule } from '../rules';
@@ -39,13 +40,13 @@ describe('runSchedule', () => {
     const to_budget = 0;
     const errors: string[] = [];
     const category = { id: '1', name: 'Test Category' } as CategoryEntity;
-    const currency : Currency = {
+    const currency: Currency = {
       code: '',
       symbol: '',
       name: '',
       decimalPlaces: 2,
       numberFormat: 'comma-dot',
-      symbolFirst: false
+      symbolFirst: false,
     };
 
     vi.mocked(db.first).mockResolvedValue({ id: 1, completed: 0 });
@@ -83,7 +84,6 @@ describe('runSchedule', () => {
     );
     vi.mocked(isReflectBudget).mockReturnValue(false);
 
-
     // When
     const result = await runSchedule(
       template_lines,
@@ -93,8 +93,8 @@ describe('runSchedule', () => {
       last_month_balance,
       to_budget,
       errors,
-      category, 
-      currency
+      category,
+      currency,
     );
 
     // Then
@@ -120,13 +120,13 @@ describe('runSchedule', () => {
     const to_budget = 0;
     const errors: string[] = [];
     const category = { id: '1', name: 'Test Category' } as CategoryEntity;
-    const currency : Currency = {
+    const currency: Currency = {
       code: '',
       symbol: '',
       name: '',
       decimalPlaces: 2,
       numberFormat: 'comma-dot',
-      symbolFirst: false
+      symbolFirst: false,
     };
 
     vi.mocked(db.first).mockResolvedValue({ id: 1, completed: 0 });
@@ -174,7 +174,7 @@ describe('runSchedule', () => {
       to_budget,
       errors,
       category,
-      currency
+      currency,
     );
 
     // Then

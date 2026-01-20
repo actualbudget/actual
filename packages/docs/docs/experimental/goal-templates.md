@@ -400,8 +400,8 @@ Yearly expenses (e.g. insurance, property rates, etc.) increase year on year. Of
 
 This feature adds adjustments to the template (either percentage or fixed), letting you gradually save the expected increase throughout the year. By proactively budgeting a percentage/fixed change for these yearly increases, you avoid last-minute scrambling when renewal notices arrive with higher amounts.
 
-| Syntax                                                                       | Description                                                                                                    |
-| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Syntax                                                                       | Description                                                                                               |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `#template schedule {SCHEDULE NAME} [{increase/decrease} {number\|number%}]` | Fund the upcoming scheduled transaction over time, increasing or decreasing the amount by the given value |
 
 As an example, assume the amount Scheduled for 'Insurance' the prior year was $ 1000 and $ 83.33 was budgeted monthly; the below will apply.
@@ -431,7 +431,7 @@ Along with the flexibility to choose a number of months beyond the menu built-in
 | Syntax                                                                      | Description                                                                                                                                                                        | Example Application                                                                   |
 | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | `#template average {number} months`                                         | Budget the average amount spent over the last {number} months. Can set the number to any number > 0. Matches the existing option on the budget page but with flexible month ranges | Try to budget only what you need to spend based on the last 6 months of spending data |
-| `#template average {number} months [{increase/decrease} {number\|number%}]` | Budget the average amount spent over a period, with an adjustment                                                                                                                 | Budget 10% more than the average spend over the last 3 months                         |
+| `#template average {number} months [{increase/decrease} {number\|number%}]` | Budget the average amount spent over a period, with an adjustment                                                                                                                  | Budget 10% more than the average spend over the last 3 months                         |
 
 #### Examples
 
