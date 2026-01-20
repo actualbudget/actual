@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { amountToInteger } from '@actual-app/api/utils';
 
 import { type Currency } from 'loot-core/shared/currencies';
 
@@ -18,6 +17,7 @@ import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
 
 import { getSheetValue, isReflectBudget } from './actions';
+import { amountToInteger } from 'loot-core/shared/util';
 
 type ScheduleTemplateTarget = {
   name: string;
