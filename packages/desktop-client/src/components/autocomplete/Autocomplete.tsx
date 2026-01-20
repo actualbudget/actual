@@ -381,19 +381,24 @@ function SingleAutocomplete<T extends AutocompleteItem>({
         // desired
         const filteredSuggestions = filterSuggestions(suggestions, value);
 
+        const defaultGetHighlightedIndex = filteredSuggestions => {
+          return highlightFirst && filteredSuggestions.length ? 0 : null;
+        };
+
         if (value === '') {
-          // A blank value shouldn't highlight any item so that the field
-          // can be left blank if desired
+          // When the field is empty but the dropdown is opening, we should still
+          // set an initial highlighted index to enable keyboard navigation
+          const highlightedIndex = (
+            getHighlightedIndex || defaultGetHighlightedIndex
+          )(filteredSuggestions);
+
           // @ts-expect-error Types say there is no type
           if (changes.type !== Downshift.stateChangeTypes.clickItem) {
             fireUpdate(onUpdate, strict, filteredSuggestions, null, null);
           }
 
-          setHighlightedIndex(null);
+          setHighlightedIndex(highlightedIndex);
         } else {
-          const defaultGetHighlightedIndex = filteredSuggestions => {
-            return highlightFirst && filteredSuggestions.length ? 0 : null;
-          };
           const highlightedIndex = (
             getHighlightedIndex || defaultGetHighlightedIndex
           )(filteredSuggestions);
