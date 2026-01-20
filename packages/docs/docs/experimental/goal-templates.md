@@ -436,7 +436,7 @@ You can also adjust the budgeted amount from the average by a percentage or by a
 
 #### Examples
 
-As an example, assume the spend for the category was [\$40, \$50, \$60] for the past 3 months; here are some example usages
+As an example, assume the spend for the category was [\$40, \$50, \$60] for the past 3 months; here are some example usages.
 
 | Template line                               | Budgeted Amount |
 | ------------------------------------------- | :-------------: |
