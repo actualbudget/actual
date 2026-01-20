@@ -199,6 +199,7 @@ export class CategoryTemplateContext {
               toBudget,
               [],
               this.category,
+              this.currency
             );
             // Schedules assume that its to budget value is the whole thing so this
             // needs to remove the previous funds so they aren't double counted

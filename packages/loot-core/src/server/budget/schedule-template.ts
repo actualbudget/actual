@@ -16,6 +16,7 @@ import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
 
 import { getSheetValue, isReflectBudget } from './actions';
+import { Currency } from 'loot-core/shared/currencies';
 
 type ScheduleTemplateTarget = {
   name: string;
@@ -33,6 +34,7 @@ async function createScheduleList(
   templates: ScheduleTemplate[],
   current_month: string,
   category: CategoryEntity,
+  currency : Currency
 ) {
   const t: Array<ScheduleTemplateTarget> = [];
   const errors: string[] = [];
@@ -65,7 +67,7 @@ async function createScheduleList(
           const sign = scheduleAmount < 0 ? -1 : 1;
           scheduleAmount +=
             sign *
-            amountToInteger(template.adjustment, this.currency.decimalPlaces);
+            amountToInteger(template.adjustment, currency.decimalPlaces);
           break;
         }
 
@@ -285,6 +287,7 @@ export async function runSchedule(
   to_budget: number,
   errors: string[],
   category: CategoryEntity,
+  currency: Currency
 ) {
   const scheduleTemplates = template_lines.filter(t => t.type === 'schedule');
 
@@ -292,6 +295,7 @@ export async function runSchedule(
     scheduleTemplates,
     current_month,
     category,
+    currency
   );
   errors = errors.concat(t.errors);
 
