@@ -427,7 +427,7 @@ Below is a table of the variations of the Schedule template.
 
 This template allows you to budget based on the average amount spent over a number of months, adding flexibility beyond the menu built-ins (3 months, 6 months).
 
-You can also adjust the budgeted amount from the average by a percentage or by a fixed whole numbepr. This functionality may be useful when you want to budget an average, but bump it up or down a bit to account for inflation or to slowly wean off a category you'd like to spend less on. (See also [adjustments](#adjustments))
+You can also adjust the budgeted amount from the average by a percentage or by a fixed whole number. This functionality may be useful when you want to budget an average, but bump it up or down a bit to account for inflation or to slowly wean off a category you'd like to spend less on. (See also [adjustments](#adjustments))
 
 | Syntax                                                                      | Description                                                                                                                                                                          |
 | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
