@@ -13,7 +13,7 @@ import React, {
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgRemove } from '@actual-app/components/icons/v2';
-import { baseInputStyle, Input } from '@actual-app/components/input';
+import { Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -142,69 +142,8 @@ function fireUpdate<T extends AutocompleteItem>(
 }
 
 function defaultRenderInput(props: ComponentProps<typeof Input>) {
-  // Use a plain HTML input element instead of React Aria's Input component
-  // to avoid conflicts with Downshift's keyboard event handling.
   // data-1p-ignore disables 1Password autofill behaviour
-  const {
-    onEnter,
-    onEscape,
-    onChangeValue,
-    onUpdate,
-    className,
-    style,
-    ...htmlProps
-  } = props;
-
-  // Filter out function-type className and style props since they're specific to
-  // React Aria's Input component and not compatible with plain HTML inputs.
-  const actualClassName =
-    typeof className === 'function' ? undefined : className;
-  const actualStyle = typeof style === 'function' ? undefined : style;
-
-  return (
-    <input
-      data-1p-ignore
-      className={cx(
-        css({
-          ...baseInputStyle,
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          flexShrink: 0,
-          '&:focus': {
-            border: '1px solid ' + theme.formInputBorderSelected,
-            boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
-          },
-          '&:disabled': {
-            color: theme.formInputTextPlaceholder,
-          },
-          '::placeholder': { color: theme.formInputTextPlaceholder },
-          ...styles.smallText,
-        }),
-        actualClassName,
-      )}
-      style={actualStyle}
-      {...htmlProps}
-      onKeyUp={e => {
-        htmlProps.onKeyUp?.(e);
-
-        if (e.key === 'Enter' && onEnter) {
-          onEnter(e.currentTarget.value, e);
-        }
-
-        if (e.key === 'Escape' && onEscape) {
-          onEscape(e.currentTarget.value, e);
-        }
-      }}
-      onBlur={e => {
-        onUpdate?.(e.currentTarget.value, e);
-        htmlProps.onBlur?.(e);
-      }}
-      onChange={e => {
-        onChangeValue?.(e.currentTarget.value, e);
-        htmlProps.onChange?.(e);
-      }}
-    />
-  );
+  return <Input data-1p-ignore {...props} />;
 }
 
 function defaultRenderItems<T extends AutocompleteItem>(
