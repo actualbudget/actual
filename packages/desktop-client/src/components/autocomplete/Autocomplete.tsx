@@ -13,7 +13,7 @@ import React, {
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgRemove } from '@actual-app/components/icons/v2';
-import { Input } from '@actual-app/components/input';
+import { baseInputStyle, Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -155,7 +155,8 @@ function defaultRenderInput(props: ComponentProps<typeof Input>) {
     ...htmlProps
   } = props;
 
-  // Extract the actual className and style values, handling potential function types from React Aria
+  // Filter out function-type className and style props since they're specific to
+  // React Aria's Input component and not compatible with plain HTML inputs.
   const actualClassName =
     typeof className === 'function' ? undefined : className;
   const actualStyle = typeof style === 'function' ? undefined : style;
@@ -165,13 +166,7 @@ function defaultRenderInput(props: ComponentProps<typeof Input>) {
       data-1p-ignore
       className={cx(
         css({
-          outline: 0,
-          backgroundColor: theme.tableBackground,
-          color: theme.formInputText,
-          margin: 0,
-          padding: 5,
-          borderRadius: 4,
-          border: '1px solid ' + theme.formInputBorder,
+          ...baseInputStyle,
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           flexShrink: 0,
