@@ -404,14 +404,14 @@ This feature adds adjustments to the template (either percentage or fixed), lett
 | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `#template schedule {SCHEDULE NAME} [{increase/decrease} {number\|number%}]` | Fund the upcoming scheduled transaction over time, increasing or decreasing the amount by the given value |
 
-As an example, assume the amount Scheduled for 'Insurance' the prior year was $ 1000 and $ 83.33 was budgeted monthly; the below will apply.
+As an example, assume the amount scheduled for 'Insurance' the prior year was $ 1000 and $ 83.33 was budgeted monthly; the below will apply.
 
 | Category  | Template line                                 | Monthly Budget | Annual Budget |
 | --------- | --------------------------------------------- | :------------: | :-----------: |
 | Insurance | `#template schedule Insurance [increase 20%]` |     $ 100      |    $ 1200     |
 | Insurance | `#template schedule Insurance [increase 500]` |     $ 125      |    $ 1500     |
 
-When "Insurance" comes due at the end of the year, $1200 will be available.
+When "Insurance" comes due at the end of the year, $1200 will be available for the first example, or $1500 for the second example.
 
 #### Available Variations
 
@@ -425,9 +425,9 @@ Below is a table of the variations of the Schedule template.
 
 ### Average Type
 
-This template allows you to budget based on the average amount spent over a number of months. Adding flexibility beyond the menu built-ins (3 months, 6 months).
+This template allows you to budget based on the average amount spent over a number of months, adding flexibility beyond the menu built-ins (3 months, 6 months).
 
-You can also adjust the budgeted amount from the average by a percentage or by a fixed whole number. This functionality may be useful when you want to budget an average, but bump it up or down a bit to account for inflation or to slowly wean off a category you'd like to spend less on. (See also [adjustments](#adjustments))
+You can also adjust the budgeted amount from the average by a percentage or by a fixed whole numbepr. This functionality may be useful when you want to budget an average, but bump it up or down a bit to account for inflation or to slowly wean off a category you'd like to spend less on. (See also [adjustments](#adjustments))
 
 | Syntax                                                                      | Description                                                                                                                                                                          |
 | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
