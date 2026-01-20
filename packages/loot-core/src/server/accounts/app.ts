@@ -16,7 +16,9 @@ import {
   type TransactionEntity,
   type SyncServerSimpleFinAccount,
   type SyncServerPluggyAiAccount,
+  type SyncServerSophtronAccount,
   type GoCardlessToken,
+  type SophtronToken,
   type ImportTransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
@@ -46,6 +48,7 @@ export type AccountHandlers = {
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
+  'sophtron-accounts-link': typeof linkSophtronAccount;
   'account-create': typeof createAccount;
   'account-close': typeof closeAccount;
   'account-reopen': typeof reopenAccount;
@@ -57,10 +60,17 @@ export type AccountHandlers = {
   'gocardless-status': typeof goCardlessStatus;
   'simplefin-status': typeof simpleFinStatus;
   'pluggyai-status': typeof pluggyAiStatus;
+  'sophtron-status': typeof sophtronStatus;
+  'sophtron-poll-web-token': typeof pollSophtronWebToken;
+  'sophtron-poll-web-token-stop': typeof stopSophtronWebTokenPolling;
   'simplefin-accounts': typeof simpleFinAccounts;
   'pluggyai-accounts': typeof pluggyAiAccounts;
+  'sophtron-accounts': typeof sophtronAccounts;
   'gocardless-get-banks': typeof getGoCardlessBanks;
   'gocardless-create-web-token': typeof createGoCardlessWebToken;
+  'sophtron-create-web-token': typeof createSophtronWebToken;
+  'sophtron-get-institutions': typeof getSophtronInstitutions;
+  'sophtron-get-all-accounts': typeof getSophtronAllAccounts;
   'accounts-bank-sync': typeof accountsBankSync;
   'simplefin-batch-sync': typeof simpleFinBatchSync;
   'transactions-import': typeof importTransactions;
@@ -302,6 +312,93 @@ async function linkPluggyAiAccount({
       name: '',
       transfer_acct: id,
     });
+  }
+
+  await bankSync.syncAccount(
+    undefined,
+    undefined,
+    id,
+    externalAccount.account_id,
+    bank.bank_id,
+  );
+
+  await connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions'],
+  });
+
+  return 'ok';
+}
+
+async function linkSophtronAccount({
+  externalAccount,
+  upgradingId,
+  offBudget = false,
+}: {
+  externalAccount: SyncServerSophtronAccount;
+  upgradingId?: AccountEntity['id'] | undefined;
+  offBudget?: boolean | undefined;
+}) {
+  let id;
+
+  const institution = {
+    name: externalAccount.institution ?? t('Unknown'),
+  };
+
+  // For Sophtron, we need to use orgId (customerId) as the bank_id
+  // This is required for transaction sync
+  const bank = await link.findOrCreateBank(
+    institution,
+    externalAccount.orgId,
+  );
+
+  if (upgradingId) {
+    const accRow = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      [upgradingId],
+    );
+
+    if (!accRow) {
+      throw new Error(`Account with ID ${upgradingId} not found.`);
+    }
+
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      bank: bank.id,
+      account_sync_source: 'sophtron',
+    });
+  } else {
+    id = uuidv4();
+    await db.insertWithUUID('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      name: externalAccount.name,
+      official_name: externalAccount.name,
+      bank: bank.id,
+      offbudget: offBudget ? 1 : 0,
+      account_sync_source: 'sophtron',
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id,
+    });
+
+    // Set initial balance if provided
+    if (externalAccount.balance != null && externalAccount.balance !== 0) {
+      const payee = await getStartingBalancePayee();
+
+      await db.insertTransaction({
+        account: id,
+        amount: amountToInteger(externalAccount.balance),
+        category: offBudget ? null : payee.category,
+        payee: payee.id,
+        date: monthUtils.currentDay(),
+        cleared: true,
+        starting_balance_flag: true,
+      });
+    }
   }
 
   await bankSync.syncAccount(
@@ -740,6 +837,53 @@ async function pluggyAiAccounts() {
   }
 }
 
+async function sophtronStatus() {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  return post(
+    serverConfig.SOPHTRON_SERVER + '/status',
+    {},
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+}
+
+async function sophtronAccounts() {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  try {
+    return await post(
+      serverConfig.SOPHTRON_SERVER + '/accounts',
+      {},
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+      60000,
+    );
+  } catch {
+    return { error_code: 'TIMED_OUT' };
+  }
+}
+
 async function getGoCardlessBanks(country: string) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -794,6 +938,162 @@ async function createGoCardlessWebToken({
     logger.error(error);
     return { error: 'failed' };
   }
+}
+
+async function createSophtronWebToken({
+  institutionId,
+}: {
+  institutionId: string;
+}) {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  try {
+    return await post(
+      serverConfig.SOPHTRON_SERVER + '/create-web-token',
+      {
+        institutionId,
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+  } catch (error) {
+    logger.error(error);
+    return { error: 'failed' };
+  }
+}
+
+let stopSophtronPolling = false;
+
+async function pollSophtronWebToken({
+  userInstitutionId,
+}: {
+  userInstitutionId: string;
+}) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return { error: 'unknown' };
+
+  const startTime = Date.now();
+  stopSophtronPolling = false;
+
+  async function getData(
+    cb: (
+      data:
+        | { status: 'timeout' }
+        | { status: 'unknown'; message?: string }
+        | { status: 'success'; data: SophtronToken },
+    ) => void,
+  ) {
+    if (stopSophtronPolling) {
+      return;
+    }
+
+    if (Date.now() - startTime >= 1000 * 60 * 10) {
+      cb({ status: 'timeout' });
+      return;
+    }
+
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('Failed to get server config.');
+    }
+
+    const data = await post(
+      serverConfig.SOPHTRON_SERVER + '/get-accounts',
+      {
+        userInstitutionId,
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+
+    if (data) {
+      if (data.error_code) {
+        logger.error('Failed linking sophtron account:', data);
+        cb({ status: 'unknown', message: data.error_type });
+      } else {
+        cb({ status: 'success', data });
+      }
+    } else {
+      setTimeout(() => getData(cb), 3000);
+    }
+  }
+
+  return new Promise(resolve => {
+    getData(data => {
+      if (data.status === 'success') {
+        resolve({ data: data.data });
+        return;
+      }
+
+      if (data.status === 'timeout') {
+        resolve({ error: data.status });
+        return;
+      }
+
+      resolve({
+        error: data.status,
+        message: data.message,
+      });
+    });
+  });
+}
+
+async function stopSophtronWebTokenPolling() {
+  stopSophtronPolling = true;
+  return 'ok';
+}
+
+async function getSophtronInstitutions() {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  return post(
+    serverConfig.SOPHTRON_SERVER + '/get-institutions',
+    {},
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+}
+
+async function getSophtronAllAccounts() {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  return post(
+    serverConfig.SOPHTRON_SERVER + '/get-all-accounts',
+    {},
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
 }
 
 type SyncResponse = {
@@ -1220,6 +1520,7 @@ app.method('account-properties', getAccountProperties);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
+app.method('sophtron-accounts-link', linkSophtronAccount);
 app.method('account-create', mutator(undoable(createAccount)));
 app.method('account-close', mutator(closeAccount));
 app.method('account-reopen', mutator(undoable(reopenAccount)));
@@ -1231,10 +1532,17 @@ app.method('gocardless-poll-web-token-stop', stopGoCardlessWebTokenPolling);
 app.method('gocardless-status', goCardlessStatus);
 app.method('simplefin-status', simpleFinStatus);
 app.method('pluggyai-status', pluggyAiStatus);
+app.method('sophtron-status', sophtronStatus);
+app.method('sophtron-poll-web-token', pollSophtronWebToken);
+app.method('sophtron-poll-web-token-stop', stopSophtronWebTokenPolling);
 app.method('simplefin-accounts', simpleFinAccounts);
 app.method('pluggyai-accounts', pluggyAiAccounts);
+app.method('sophtron-accounts', sophtronAccounts);
 app.method('gocardless-get-banks', getGoCardlessBanks);
 app.method('gocardless-create-web-token', createGoCardlessWebToken);
+app.method('sophtron-create-web-token', createSophtronWebToken);
+app.method('sophtron-get-institutions', getSophtronInstitutions);
+app.method('sophtron-get-all-accounts', getSophtronAllAccounts);
 app.method('accounts-bank-sync', accountsBankSync);
 app.method('simplefin-batch-sync', simpleFinBatchSync);
 app.method('transactions-import', mutator(undoable(importTransactions)));

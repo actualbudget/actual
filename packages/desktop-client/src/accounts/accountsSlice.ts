@@ -10,6 +10,7 @@ import {
   type TransactionEntity,
   type SyncServerSimpleFinAccount,
   type SyncServerPluggyAiAccount,
+  type SyncServerSophtronAccount,
   type CategoryEntity,
 } from 'loot-core/types/models';
 
@@ -19,6 +20,7 @@ import { markPayeesDirty } from '@desktop-client/payees/payeesSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
 import { setNewTransactions } from '@desktop-client/transactions/transactionsSlice';
+import { link } from 'node:fs';
 
 const sliceName = 'account';
 
@@ -304,6 +306,28 @@ export const linkAccountPluggyAi = createAppAsyncThunk(
     { dispatch },
   ) => {
     await send('pluggyai-accounts-link', {
+      externalAccount,
+      upgradingId,
+      offBudget,
+    });
+    dispatch(markPayeesDirty());
+    dispatch(markAccountsDirty());
+  },
+);
+
+type LinkAccountSophtronPayload = {
+  externalAccount: SyncServerSophtronAccount;
+  upgradingId?: AccountEntity['id'];
+  offBudget?: boolean;
+};
+
+export const linkAccountSophtron = createAppAsyncThunk(
+  `${sliceName}/linkAccountSophtron`,
+  async (
+    { externalAccount, upgradingId, offBudget }: LinkAccountSophtronPayload,
+    { dispatch },
+  ) => {
+    await send('sophtron-accounts-link', {
       externalAccount,
       upgradingId,
       offBudget,
@@ -627,6 +651,7 @@ export const actions = {
   linkAccount,
   linkAccountSimpleFin,
   linkAccountPluggyAi,
+  linkAccountSophtron,
   moveAccount,
   unlinkAccount,
   syncAccounts,

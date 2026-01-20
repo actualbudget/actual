@@ -81,6 +81,8 @@ async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
         .filter({
           account: id,
           date: { $lte: monthUtils.currentDay() },
+          // Exclude starting balance transactions from sync date calculation
+          starting_balance_flag: { $oneof: [null, false] },
         })
         .select('date')
         .orderBy('date')
@@ -109,6 +111,31 @@ export async function getGoCardlessAccounts(userId, userKey, id) {
 
   const res = await post(
     getServer().GOCARDLESS_SERVER + '/accounts',
+    {
+      userId,
+      key: userKey,
+      item_id: id,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+
+  const { accounts } = res;
+
+  accounts.forEach(acct => {
+    acct.balances.current = getAccountBalance(acct);
+  });
+
+  return accounts;
+}
+
+export async function getSophtronAccounts(userId, userKey, id) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  const res = await post(
+    getServer().SOPHTRON_SERVER + '/accounts',
     {
       userId,
       key: userKey,
@@ -283,6 +310,72 @@ async function downloadPluggyAiTransactions(
   } else if ('error' in res) {
     throw BankSyncError('Connection', res.error);
   }
+
+  let retVal = {};
+  const singleRes = res as BankSyncResponse;
+  retVal = {
+    transactions: singleRes.transactions.all,
+    accountBalance: singleRes.balances,
+    startingBalance: singleRes.startingBalance,
+  };
+
+  logger.log('Response:', retVal);
+  return retVal;
+}
+
+async function downloadSophtronTransactions(
+  userId,
+  userKey,
+  acctId,
+  bankId,
+  since,
+  includeBalance = true,
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  logger.log('Pulling transactions from Sophtron');
+
+  const endDate = new Date().toISOString().substring(0, 10);
+  
+  logger.log('[Sophtron Sync] Date range:', {
+    startDate: since,
+    endDate: endDate,
+    includeBalance,
+  });
+
+  const res = await post(
+    getServer().SOPHTRON_SERVER + '/transactions',
+    {
+      userId,
+      key: userKey,
+      requisitionId: bankId,
+      accountId: acctId,
+      startDate: since,
+      endDate: endDate,
+      includeBalance,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+    60000,
+  );
+
+  if (res.error_code) {
+    const errorDetails = {
+      rateLimitHeaders: res.rateLimitHeaders,
+    };
+
+    throw BankSyncError(res.error_type, res.error_code, errorDetails);
+  }
+
+  logger.log('Sophtron response received:', {
+    hasTransactions: !!res.transactions,
+    transactionKeys: res.transactions ? Object.keys(res.transactions) : [],
+    allCount: res.transactions?.all?.length,
+    bookedCount: res.transactions?.booked?.length,
+    firstTransaction: res.transactions?.all?.[0],
+  });
 
   let retVal = {};
   const singleRes = res as BankSyncResponse;
@@ -923,6 +1016,15 @@ async function processBankSyncDownload(
       balanceToUse = Math.round(previousBalance);
     }
 
+    if (acctRow.account_sync_source === 'sophtron') {
+      const previousBalance = transactions.reduce((total, trans) => {
+        return (
+          total - parseInt(trans.transactionAmount.amount.replace('.', ''))
+        );
+      }, currentBalance);
+      balanceToUse = previousBalance;
+    }
+
     const oldestTransaction = transactions[transactions.length - 1];
 
     const oldestDate =
@@ -995,6 +1097,15 @@ export async function syncAccount(
     download = await downloadSimpleFinTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'pluggyai') {
     download = await downloadPluggyAiTransactions(acctId, syncStartDate);
+  } else if (acctRow.account_sync_source === 'sophtron') {
+    download = await downloadSophtronTransactions(
+      userId,
+      userKey,
+      acctId,
+      bankId,
+      syncStartDate,
+      newAccount,
+    );
   } else if (acctRow.account_sync_source === 'goCardless') {
     download = await downloadGoCardlessTransactions(
       userId,

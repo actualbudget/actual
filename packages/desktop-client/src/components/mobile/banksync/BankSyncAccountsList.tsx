@@ -10,7 +10,7 @@ import { BankSyncAccountsListItem } from './BankSyncAccountsListItem';
 
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
 
-type SyncProviders = 'goCardless' | 'simpleFin' | 'pluggyai' | 'unlinked';
+type SyncProviders = 'goCardless' | 'simpleFin' | 'pluggyai' | 'unlinked' | 'sophtron';
 
 type BankSyncAccountsListProps = {
   groupedAccounts: Record<SyncProviders, AccountEntity[]>;

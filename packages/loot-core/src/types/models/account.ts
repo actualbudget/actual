@@ -22,4 +22,8 @@ export type _SyncFields<T> = {
   last_sync: T extends true ? string : null;
 };
 
-export type AccountSyncSource = 'simpleFin' | 'goCardless' | 'pluggyai';
+export type AccountSyncSource =
+  | 'simpleFin'
+  | 'goCardless'
+  | 'pluggyai'
+  | 'sophtron';
