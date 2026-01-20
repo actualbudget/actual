@@ -16,9 +16,10 @@ import type {
 import { setType, type Action } from './actions';
 import { displayTemplateTypes, type ReducerState } from './constants';
 import { HistoricalAutomation } from './editor/HistoricalAutomation';
+import { LimitAutomation } from './editor/LimitAutomation';
 import { PercentageAutomation } from './editor/PercentageAutomation';
+import { RefillAutomation } from './editor/RefillAutomation';
 import { ScheduleAutomation } from './editor/ScheduleAutomation';
-import { SimpleAutomation } from './editor/SimpleAutomation';
 import { WeekAutomation } from './editor/WeekAutomation';
 
 import {
@@ -33,10 +34,25 @@ type BudgetAutomationEditorProps = {
   dispatch: (action: Action) => void;
   schedules: readonly ScheduleEntity[];
   categories: CategoryGroupEntity[];
+  hasLimitAutomation?: boolean;
+  onAddLimitAutomation?: () => void;
 };
 
 const displayTypeToDescription = {
-  simple: <Trans>Add a fixed amount to this category each month.</Trans>,
+  limit: (
+    <Trans>
+      Set a cap for all budget contributions to this category across all
+      automations. The maximum can be set on a monthly, weekly, or daily basis.
+      For example, a $100 weekly cap would result in a $400 monthly cap ($500
+      depending on the month).
+    </Trans>
+  ),
+  refill: (
+    <Trans>
+      Refill the category up to the balance limit set by the balance limit
+      automation.
+    </Trans>
+  ),
   week: (
     <Trans>
       Add a fixed amount to this category for each week in the month. For
@@ -75,14 +91,24 @@ export function BudgetAutomationEditor({
   dispatch,
   schedules,
   categories,
+  hasLimitAutomation = false,
+  onAddLimitAutomation,
 }: BudgetAutomationEditorProps) {
   const { t } = useTranslation();
 
   let automationEditor: ReactNode;
   switch (state.displayType) {
-    case 'simple':
+    case 'limit':
       automationEditor = (
-        <SimpleAutomation template={state.template} dispatch={dispatch} />
+        <LimitAutomation template={state.template} dispatch={dispatch} />
+      );
+      break;
+    case 'refill':
+      automationEditor = (
+        <RefillAutomation
+          hasLimitAutomation={hasLimitAutomation}
+          onAddLimitAutomation={onAddLimitAutomation}
+        />
       );
       break;
     case 'week':
