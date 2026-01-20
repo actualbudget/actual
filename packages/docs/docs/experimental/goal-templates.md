@@ -406,10 +406,10 @@ This feature adds adjustments to the template (either percentage or fixed), lett
 
 As an example, assume the amount Scheduled for 'Insurance' the prior year was $ 1000 and $ 83.33 was budgeted monthly; the below will apply.
 
-| Category  | Template line                                 | Budgeted Amount |
-| --------- | --------------------------------------------- | :-------------: |
-| Insurance | `#template schedule Insurance [increase 20%]` |      $ 100      |
-| Insurance | `#template schedule Insurance [increase 200]` |      $ 100      |
+| Category  | Template line                                 | Monthly Budget | Annual Budget |
+| --------- | --------------------------------------------- | :------------: | :-----------: |
+| Insurance | `#template schedule Insurance [increase 20%]` |     $ 100      |    $ 1200     |
+| Insurance | `#template schedule Insurance [increase 500]` |     $ 125      |    $ 1500     |
 
 When "Insurance" comes due at the end of the year, $1200 will be available.
 
