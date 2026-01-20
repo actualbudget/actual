@@ -80,6 +80,7 @@ class SophtronService {
         Authorization: authHeader,
         'Content-Type': 'application/json',
       },
+      timeout: 20000,
     });
 
     return response.data;
@@ -98,6 +99,7 @@ class SophtronService {
         headers: {
           Authorization: authHeader,
         },
+        timeout: 20000,
       });
 
       return response.data;

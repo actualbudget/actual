@@ -73,8 +73,8 @@ app.post(
       // Only return accounts if there are any (for polling to work)
       if (!accounts || accounts.length === 0) {
         res.send({
-          status: 'ok',
-          data: null, // Return null to indicate polling should continue
+          status: 'pending',
+          data: null,
         });
         return;
       }

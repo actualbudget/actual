@@ -684,9 +684,9 @@ export function CreateAccountModal({
                       </View>
                       <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
                         <Trans>
-                          +{' '}
+                          {' '}
                           <strong>
-                            + Link a <em>US or Canadian</em> bank account +{' '}
+                            Link a <em>US or Canadian</em> bank account +{' '}
                           </strong>{' '}
                           to automatically download transactions. Sophtron
                           provides reliable, up-to-date information from

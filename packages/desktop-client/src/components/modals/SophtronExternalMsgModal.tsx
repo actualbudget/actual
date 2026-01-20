@@ -41,7 +41,7 @@ type RawSophtronAccount = {
   UserInstitutionID?: string;
 };
 
-function useAvailableAccounts() {
+function useAvailableAccounts(shouldFetch: boolean) {
   const [accounts, setAccounts] = useState<
     Array<{
       id: string;
@@ -55,6 +55,13 @@ function useAvailableAccounts() {
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
+    if (!shouldFetch) {
+      setAccounts([]);
+      setIsError(false);
+      setIsLoading(false);
+      return;
+    }
+
     async function fetch() {
       setIsError(false);
       setIsLoading(true);
@@ -83,7 +90,7 @@ function useAvailableAccounts() {
     }
 
     fetch();
-  }, []);
+  }, [shouldFetch]);
 
   return {
     data: accounts,
@@ -137,14 +144,16 @@ export function SophtronExternalMsgModal({
   const data = useRef<SophtronToken | null>(null);
 
   const {
-    data: accountOptions,
-    isLoading: isAccountOptionsLoading,
-    isError: isAccountOptionError,
-  } = useAvailableAccounts();
-  const {
     configuredSophtron: isConfigured,
     isLoading: isConfigurationLoading,
   } = useSophtronStatus();
+
+  const shouldFetchAccounts = Boolean(isConfigured || isSophtronSetupComplete);
+  const {
+    data: accountOptions,
+    isLoading: isAccountOptionsLoading,
+    isError: isAccountOptionError,
+  } = useAvailableAccounts(shouldFetchAccounts);
 
   async function onJump() {
     if (!selectedAccount) return;
@@ -179,9 +188,10 @@ export function SophtronExternalMsgModal({
         await onSuccess(data.current);
       }
     } catch (err) {
+      const message = err instanceof Error ? err.message : t('Unknown error');
       setError({
         code: 'unknown',
-        message: (err as Error).message,
+        message,
       });
     } finally {
       setWaiting(null);
