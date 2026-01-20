@@ -5,6 +5,7 @@
 export type CatalogTheme = {
   name: string;
   repo: string;
+  colors?: string[];
 };
 
 export type InstalledTheme = {
@@ -48,24 +49,6 @@ export function normalizeGitHubRepo(repo: string): string {
   }
 
   return `https://github.com/${owner}/${repoName}`;
-}
-
-/**
- * Get the screenshot URL for a theme repo.
- * Returns a safe fallback URL for malformed repos.
- */
-export function getThemeScreenshotUrl(repo: string): string {
-  if (
-    !repo ||
-    typeof repo !== 'string' ||
-    !repo.trim() ||
-    !repo.includes('/')
-  ) {
-    // Return a placeholder or empty data URL for malformed repos
-    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQwIiBoZWlnaHQ9IjYwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxNDAiIGhlaWdodD0iNjAiIGZpbGw9IiNmNWY1ZjUiLz48L3N2Zz4=';
-  }
-  const trimmed = repo.trim();
-  return `https://raw.githubusercontent.com/${trimmed}/refs/heads/main/screenshot.png`;
 }
 
 /**
