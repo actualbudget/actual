@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import { amountToInteger } from '@actual-app/api/utils';
+
 import * as monthUtils from '../../shared/months';
 import {
   extractScheduleConds,
@@ -62,10 +63,9 @@ async function createScheduleList(
         }
         case 'fixed': {
           const sign = scheduleAmount < 0 ? -1 : 1;
-          scheduleAmount += sign * amountToInteger(
-                      template.adjustment,
-                      this.currency.decimalPlaces,
-                    );
+          scheduleAmount +=
+            sign *
+            amountToInteger(template.adjustment, this.currency.decimalPlaces);
           break;
         }
 
