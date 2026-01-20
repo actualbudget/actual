@@ -1,6 +1,6 @@
 import React, {
-  type CSSProperties,
   type ComponentProps,
+  type CSSProperties,
   type ReactNode,
 } from 'react';
 

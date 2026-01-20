@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -6,8 +6,8 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import {
-  type BankSyncProviders,
   type AccountEntity,
+  type BankSyncProviders,
 } from 'loot-core/types/models';
 
 import { AccountsHeader } from './AccountsHeader';

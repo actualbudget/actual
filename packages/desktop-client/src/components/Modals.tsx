@@ -97,7 +97,8 @@ export function Modals() {
     if (modalStack.length > 0) {
       dispatch(closeModal());
     }
-  }, [location]);
+    // oxlint-disable-next-line react/exhaustive-deps
+  }, [dispatch, location]);
 
   const modals = modalStack
     .map((modal, idx) => {

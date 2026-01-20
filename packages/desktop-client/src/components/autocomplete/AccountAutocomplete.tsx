@@ -1,11 +1,11 @@
 // @ts-strict-ignore
 import React, {
   Fragment,
+  useMemo,
   type ComponentProps,
   type ComponentPropsWithoutRef,
-  type ReactElement,
   type CSSProperties,
-  useMemo,
+  type ReactElement,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 

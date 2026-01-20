@@ -1,4 +1,4 @@
-import { type Transaction, type Balance } from '../gocardless-node.types';
+import { type Balance, type Transaction } from '../gocardless-node.types';
 import {
   type DetailedAccountWithInstitution,
   type NormalizedAccountDetails,

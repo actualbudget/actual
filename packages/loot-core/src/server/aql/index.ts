@@ -2,9 +2,9 @@ import { Query, type QueryState } from '../../shared/query';
 
 import { type CompilerState, type SqlPieces } from './compiler';
 import {
-  type AqlQueryParams,
   compileAndRunAqlQuery,
   runCompiledAqlQuery,
+  type AqlQueryParams,
 } from './exec';
 import { schema, schemaConfig } from './schema';
 import { schemaExecutors } from './schema/executors';

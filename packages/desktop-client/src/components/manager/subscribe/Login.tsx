@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 
@@ -19,7 +19,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
 import { type OpenIdConfig } from 'loot-core/types/models';
 
-import { useBootstrapped, Title } from './common';
+import { Title, useBootstrapped } from './common';
 import { OpenIdForm } from './OpenIdForm';
 
 import { Link } from '@desktop-client/components/common/Link';

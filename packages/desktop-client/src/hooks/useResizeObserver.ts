@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
 export function useResizeObserver<T extends Element>(
   func: (contentRect: DOMRectReadOnly) => void,

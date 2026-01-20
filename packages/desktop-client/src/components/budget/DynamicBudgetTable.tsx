@@ -60,7 +60,7 @@ const DynamicBudgetTable = ({
 
   useEffect(() => {
     setDisplayMax(numPossible);
-  }, [numPossible]);
+  }, [setDisplayMax, numPossible]);
 
   function getValidMonth(month) {
     const start = monthBounds.start;

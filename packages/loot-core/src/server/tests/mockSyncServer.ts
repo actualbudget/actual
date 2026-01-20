@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import {
-  type Clock,
   makeClock,
-  Timestamp,
   merkle,
   SyncProtoBuf,
+  Timestamp,
+  type Clock,
 } from '@actual-app/crdt';
 
 import { type Message } from '../sync';

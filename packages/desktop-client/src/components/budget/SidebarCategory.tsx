@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, type Ref, useRef } from 'react';
+import React, { useRef, type CSSProperties, type Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -11,8 +11,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
-  type CategoryGroupEntity,
   type CategoryEntity,
+  type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { SidebarCategoryButtons } from './SidebarCategoryButtons';

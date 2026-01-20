@@ -6,6 +6,6 @@
     "test": "vitest --run"
   },
   "devDependencies": {
-    "vitest": "^4.0.9"
+    "vitest": "^4.0.16"
   }
 }

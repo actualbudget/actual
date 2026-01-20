@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type ComponentProps, memo } from 'react';
+import React, { memo, type ComponentProps } from 'react';
 
 import { View } from '@actual-app/components/view';
 

@@ -10,17 +10,17 @@ import {
   type CompletionContext,
 } from '@codemirror/autocomplete';
 import {
-  syntaxHighlighting,
   HighlightStyle,
   StreamLanguage,
+  syntaxHighlighting,
   type StreamParser,
 } from '@codemirror/language';
 import { type Extension } from '@codemirror/state';
 import {
-  hoverTooltip,
-  type Tooltip,
   EditorView,
+  hoverTooltip,
   tooltips,
+  type Tooltip,
 } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 import { t } from 'i18next';

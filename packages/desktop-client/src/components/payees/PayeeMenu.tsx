@@ -1,4 +1,4 @@
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgDelete, SvgMerge } from '@actual-app/components/icons/v0';
 import { SvgBookmark, SvgLightBulb } from '@actual-app/components/icons/v1';

@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 import React, {
   type ComponentType,
-  type ReactNode,
   type CSSProperties,
+  type ReactNode,
 } from 'react';
 
 import {

@@ -1,8 +1,8 @@
 import React, {
   memo,
+  type CSSProperties,
   type RefObject,
   type UIEventHandler,
-  type CSSProperties,
 } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -17,7 +17,7 @@ import {
 } from 'loot-core/types/models';
 
 import { showActivity } from '@desktop-client/components/reports/graphs/showActivity';
-import { Row, Cell } from '@desktop-client/components/table';
+import { Cell, Row } from '@desktop-client/components/table';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';

@@ -31,8 +31,8 @@ import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
 import { useSophtronStatus } from '@desktop-client/hooks/useSophtronStatus';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 import {
-  type Modal as ModalType,
   pushModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';

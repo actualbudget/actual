@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import React, {
-  useState,
-  useEffect,
   useCallback,
+  useEffect,
   useMemo,
+  useState,
   type CSSProperties,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -19,8 +19,8 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type Handlers } from 'loot-core/types/handlers';
 import {
-  type UserAvailable,
   type UserAccessEntity,
+  type UserAvailable,
 } from 'loot-core/types/models';
 
 import { UserAccessHeader } from './UserAccessHeader';

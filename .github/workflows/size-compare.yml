@@ -139,7 +139,8 @@ jobs:
             --head desktop-client=./head/web-stats.json \
             --head loot-core=./head/loot-core-stats.json \
             --head api=./head/api-stats.json \
-            --identifier combined > bundle-stats-comment.md
+            --identifier combined \
+            --format pr-body > bundle-stats-comment.md
       - name: Post combined bundle stats comment
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -148,4 +149,5 @@ jobs:
         run: |
           node packages/ci-actions/bin/update-bundle-stats-comment.mjs \
             --comment-file bundle-stats-comment.md \
-            --identifier '<!--- bundlestats-action-comment key:combined --->'
+            --identifier combined \
+            --target pr-body

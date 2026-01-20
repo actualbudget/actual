@@ -2,7 +2,7 @@
 import SQL from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 
-import { removeFile, readFile } from '../fs';
+import { readFile, removeFile } from '../fs';
 import { logger } from '../log';
 
 import { normalise } from './normalise';

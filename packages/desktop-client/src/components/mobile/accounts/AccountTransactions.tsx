@@ -21,8 +21,8 @@ import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import {
-  useTransactions,
   calculateRunningBalancesTopDown,
+  useTransactions,
 } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';

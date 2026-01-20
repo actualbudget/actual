@@ -1,7 +1,7 @@
 import { type Template } from 'loot-core/types/models/templates';
 
 import { type Action } from './actions';
-import { type ReducerState, type DisplayTemplateType } from './constants';
+import { type DisplayTemplateType, type ReducerState } from './constants';
 
 export const DEFAULT_PRIORITY = 1;
 

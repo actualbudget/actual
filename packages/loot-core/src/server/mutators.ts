@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { captureException, captureBreadcrumb } from '../platform/exceptions';
+import { captureBreadcrumb, captureException } from '../platform/exceptions';
 import { sequential } from '../shared/async';
 import { type HandlerFunctions, type Handlers } from '../types/handlers';
 

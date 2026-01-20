@@ -68,7 +68,6 @@ Fineco
 Finicity
 Fintro
 Finverse
-flathub
 Flathub
 FORTUNEO
 FTNOFRP
