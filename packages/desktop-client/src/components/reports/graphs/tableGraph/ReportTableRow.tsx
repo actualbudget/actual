@@ -6,7 +6,6 @@ import React, {
 } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -16,6 +15,7 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { showActivity } from '@desktop-client/components/reports/graphs/showActivity';
 import { Cell, Row } from '@desktop-client/components/table';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
@@ -148,7 +148,7 @@ export const ReportTableRow = memo(
                       }),
                     }}
                     unexposedContent={({ value }) => (
-                      <Text
+                      <FinancialText
                         style={{
                           ...hoverUnderline,
                           textAlign: 'right',
@@ -156,7 +156,7 @@ export const ReportTableRow = memo(
                         }}
                       >
                         {value}
-                      </Text>
+                      </FinancialText>
                     )}
                     valueStyle={compactStyle}
                     value={format(intervalItem[balanceTypeOp], 'financial')}
@@ -211,7 +211,7 @@ export const ReportTableRow = memo(
                       }),
                     }}
                     unexposedContent={({ value }) => (
-                      <Text
+                      <FinancialText
                         style={{
                           ...hoverUnderline,
                           textAlign: 'right',
@@ -219,7 +219,7 @@ export const ReportTableRow = memo(
                         }}
                       >
                         {value}
-                      </Text>
+                      </FinancialText>
                     )}
                     valueStyle={compactStyle}
                     onClick={() =>
@@ -261,7 +261,7 @@ export const ReportTableRow = memo(
                       }),
                     }}
                     unexposedContent={({ value }) => (
-                      <Text
+                      <FinancialText
                         style={{
                           ...hoverUnderline,
                           textAlign: 'right',
@@ -269,7 +269,7 @@ export const ReportTableRow = memo(
                         }}
                       >
                         {value}
-                      </Text>
+                      </FinancialText>
                     )}
                     valueStyle={compactStyle}
                     onClick={() =>
@@ -310,7 +310,7 @@ export const ReportTableRow = memo(
               ...(colorized && { color: getAmountColor(item[balanceTypeOp]) }),
             }}
             unexposedContent={({ value }) => (
-              <Text
+              <FinancialText
                 style={{
                   ...hoverUnderline,
                   textAlign: 'right',
@@ -318,7 +318,7 @@ export const ReportTableRow = memo(
                 }}
               >
                 {value}
-              </Text>
+              </FinancialText>
             )}
             valueStyle={compactStyle}
             onClick={() =>
@@ -358,6 +358,11 @@ export const ReportTableRow = memo(
               backgroundColor: style?.backgroundColor,
               ...(colorized && { color: getAmountColor(average) }),
             }}
+            unexposedContent={({ value }) => (
+              <FinancialText style={{ textAlign: 'right', flexGrow: 1 }}>
+                {value}
+              </FinancialText>
+            )}
             valueStyle={compactStyle}
             width="flex"
             privacyFilter

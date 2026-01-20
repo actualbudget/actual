@@ -63,7 +63,6 @@ import { PasswordEnableModal } from './modals/PasswordEnableModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
-import { SchedulesPageMenuModal } from './modals/SchedulesPageMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
 import { SophtronExternalMsgModal } from './modals/SophtronExternalMsgModal';
@@ -361,9 +360,6 @@ export function Modals() {
 
         case 'budget-page-menu':
           return <BudgetPageMenuModal key={key} {...modal.options} />;
-
-        case 'schedules-page-menu':
-          return <SchedulesPageMenuModal key={key} />;
 
         case 'envelope-budget-month-menu':
           return (

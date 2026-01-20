@@ -17,6 +17,7 @@ import { type CashFlowWidget } from 'loot-core/types/models';
 
 import { defaultTimeFrame } from './CashFlow';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { Change } from '@desktop-client/components/reports/Change';
 import {
@@ -87,14 +88,15 @@ function CustomLabel({
       >
         {name}
       </text>
-      <text
+      <FinancialText
+        as="text"
         x={x + barWidth + valueXOffsets[position]}
         y={yOffset + 26}
         textAnchor={anchorValue[position]}
         fill={theme.tableText}
       >
         <PrivacyFilter>{format(value, 'financial')}</PrivacyFilter>
-      </text>
+      </FinancialText>
     </>
   );
 }

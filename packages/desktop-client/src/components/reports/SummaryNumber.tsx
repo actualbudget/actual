@@ -7,6 +7,7 @@ import debounce from 'lodash/debounce';
 import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
@@ -94,9 +95,9 @@ export function SummaryNumber({
             color: value < 0 ? chartTheme.colors.red : chartTheme.colors.blue,
           }}
         >
-          <span aria-hidden="true">
+          <FinancialText aria-hidden="true">
             <PrivacyFilter>{displayAmount}</PrivacyFilter>
-          </span>
+          </FinancialText>
         </View>
       )}
     </>

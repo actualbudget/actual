@@ -8,7 +8,6 @@ import React, {
 import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgArrowsSynchronize } from '@actual-app/components/icons/v2';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import {
   format as formatDate,
@@ -19,6 +18,7 @@ import {
 import * as monthUtils from 'loot-core/shared/months';
 import { type TransactionEntity } from 'loot-core/types/models';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import {
   Cell,
   Field,
@@ -154,12 +154,10 @@ const TransactionRow = memo(function TransactionRow({
             );
           case 'amount':
             return (
-              <Field
-                key={i}
-                width={75}
-                style={{ textAlign: 'right', ...styles.tnum }}
-              >
-                {format(transaction.amount, 'financial')}
+              <Field key={i} width={75} style={{ textAlign: 'right' }}>
+                <FinancialText>
+                  {format(transaction.amount, 'financial')}
+                </FinancialText>
               </Field>
             );
           default:

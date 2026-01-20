@@ -13,6 +13,7 @@ import { getScheduledAmount } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type AccountEntity } from 'loot-core/types/models';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import {
   CellValue,
@@ -47,10 +48,10 @@ function DetailedBalance({
     >
       {name}{' '}
       <PrivacyFilter>
-        <Text style={{ fontWeight: 600 }}>
+        <FinancialText style={{ fontWeight: 600 }}>
           {!isExactBalance && '~ '}
           {format(balance, 'financial')}
-        </Text>
+        </FinancialText>
       </PrivacyFilter>
     </Text>
   );

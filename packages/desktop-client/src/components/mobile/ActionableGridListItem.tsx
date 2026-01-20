@@ -2,6 +2,7 @@ import React, { useRef, useState, type ReactNode } from 'react';
 import { GridListItem, type GridListItemProps } from 'react-aria-components';
 import { animated, config, useSpring } from 'react-spring';
 
+import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { useDrag } from '@use-gesture/react';
@@ -107,20 +108,20 @@ export function ActionableGridListItem<T extends object>({
         }}
       >
         {/* Main content */}
-        <div
-          role="button"
+        <Button
+          variant="bare"
           style={{
-            display: 'flex',
-            alignItems: 'center',
             flex: 1,
             backgroundColor: theme.tableBackground,
             minWidth: '100%',
             padding: 16,
+            textAlign: 'left',
+            borderRadius: 0,
           }}
           onClick={handleAction}
         >
           {children}
-        </div>
+        </Button>
 
         {/* Actions that appear when swiped */}
         {hasActions && (
