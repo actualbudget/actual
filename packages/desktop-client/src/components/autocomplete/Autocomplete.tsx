@@ -142,8 +142,74 @@ function fireUpdate<T extends AutocompleteItem>(
 }
 
 function defaultRenderInput(props: ComponentProps<typeof Input>) {
+  // Use a plain HTML input element instead of React Aria's Input component
+  // to avoid conflicts with Downshift's keyboard event handling.
   // data-1p-ignore disables 1Password autofill behaviour
-  return <Input data-1p-ignore {...props} />;
+  const {
+    onEnter,
+    onEscape,
+    onChangeValue,
+    onUpdate,
+    className,
+    style,
+    ...htmlProps
+  } = props;
+
+  // Extract the actual className and style values, handling potential function types from React Aria
+  const actualClassName =
+    typeof className === 'function' ? undefined : className;
+  const actualStyle = typeof style === 'function' ? undefined : style;
+
+  return (
+    <input
+      data-1p-ignore
+      className={cx(
+        css({
+          outline: 0,
+          backgroundColor: theme.tableBackground,
+          color: theme.formInputText,
+          margin: 0,
+          padding: 5,
+          borderRadius: 4,
+          border: '1px solid ' + theme.formInputBorder,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          flexShrink: 0,
+          '&:focus': {
+            border: '1px solid ' + theme.formInputBorderSelected,
+            boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
+          },
+          '&:disabled': {
+            color: theme.formInputTextPlaceholder,
+          },
+          '::placeholder': { color: theme.formInputTextPlaceholder },
+          ...styles.smallText,
+        }),
+        actualClassName,
+      )}
+      style={actualStyle}
+      {...htmlProps}
+      onKeyUp={e => {
+        htmlProps.onKeyUp?.(e);
+
+        if (e.key === 'Enter' && onEnter) {
+          onEnter(e.currentTarget.value, e);
+        }
+
+        if (e.key === 'Escape' && onEscape) {
+          onEscape(e.currentTarget.value, e);
+        }
+      }}
+      onBlur={e => {
+        onUpdate?.(e.currentTarget.value, e);
+        htmlProps.onBlur?.(e);
+      }}
+      onChange={e => {
+        onChangeValue?.(e.currentTarget.value, e);
+        htmlProps.onChange?.(e);
+      }}
+    />
+  );
 }
 
 function defaultRenderItems<T extends AutocompleteItem>(
