@@ -254,7 +254,18 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   );
   const [highlightedIndex, setHighlightedIndex] = useState(null);
   const [isOpen, setIsOpen] = useState(embedded);
-  const open = () => setIsOpen(true);
+  const open = () => {
+    setIsOpen(true);
+    // Set initial highlightedIndex when opening dropdown
+    if (!embedded) {
+      const defaultGetHighlightedIndex = (suggestions: T[]) => {
+        return highlightFirst && suggestions.length ? 0 : null;
+      };
+      const filtered = filteredSuggestions || suggestions;
+      const index = (getHighlightedIndex || defaultGetHighlightedIndex)(filtered);
+      setHighlightedIndex(index);
+    }
+  };
   const close = () => {
     setIsOpen(false);
     onClose?.();
@@ -294,18 +305,6 @@ function SingleAutocomplete<T extends AutocompleteItem>({
       setValue(item ? getItemName(item) : '');
     }
   }, [strict, suggestions, initialValue, updateOnValueChange]);
-
-  // Set the initial highlightedIndex when the dropdown opens
-  useEffect(() => {
-    if (isOpen && !embedded) {
-      const defaultGetHighlightedIndex = (filteredSuggestions: T[]) => {
-        return highlightFirst && filteredSuggestions.length ? 0 : null;
-      };
-      const filtered = isChanged ? filteredSuggestions || suggestions : suggestions;
-      const index = (getHighlightedIndex || defaultGetHighlightedIndex)(filtered);
-      setHighlightedIndex(index);
-    }
-  }, [isOpen, embedded]);
 
   function resetState(newValue?: string) {
     const val = newValue === undefined ? initialValue : newValue;
