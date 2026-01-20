@@ -33,5 +33,10 @@
     "name": "Okabe Ito",
     "repo": "Juulz/okabe-ito",
     "colors": ["#222222", "#141520", "#e69f00", "#56b4e9", "#b88115", "#00304d"]
+  },
+  {
+    "name": "Theme from 1970",
+    "repo": "Juulz/1970-theme",
+    "colors": ["#f2f2f2", "#61591f", "#a92da3", "#4d2d19", "#f4ebe7", "#dad18b"]
   }
 ]
