@@ -4,14 +4,14 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
 
 import {
-  type TransactionFilterEntity,
   type RuleConditionEntity,
+  type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
 import { AppliedFilters } from './AppliedFilters';
 import {
-  type SavedFilter,
   SavedFilterMenuButton,
+  type SavedFilter,
 } from './SavedFilterMenuButton';
 
 export function FiltersStack({

@@ -111,6 +111,7 @@ function ToBudget({ toBudget, onPress, show3Columns }: ToBudgetProps) {
                     maxFontSizePx={12}
                     mode="oneline"
                     style={{
+                      ...styles.tnum,
                       fontSize: 12,
                       fontWeight: '700',
                       color:
@@ -209,6 +210,7 @@ function Saved({ projected, onPress, show3Columns }: SavedProps) {
                     maxFontSizePx={12}
                     mode="oneline"
                     style={{
+                      ...styles.tnum,
                       textAlign: 'left',
                       fontSize: 12,
                       fontWeight: '700',
@@ -431,6 +433,7 @@ function BudgetTableHeader({
   const columnWidth = getColumnWidth({ show3Columns });
 
   const amountStyle: CSSProperties = {
+    ...styles.tnum,
     color: theme.formInputText,
     textAlign: 'right',
     fontSize: 12,

@@ -11,12 +11,12 @@
     "watch": "cross-env NODE_ENV=development ./bin/build-service-worker --watch"
   },
   "dependencies": {
-    "workbox-precaching": "^7.3.0"
+    "workbox-precaching": "^7.4.0"
   },
   "devDependencies": {
-    "@types/node": "^22.19.1",
+    "@types/node": "^22.19.3",
     "cross-env": "^10.1.0",
     "typescript": "^5.9.3",
-    "vite": "^7.2.2"
+    "vite": "^7.3.1"
   }
 }

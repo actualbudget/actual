@@ -1,9 +1,9 @@
 import React, {
   forwardRef,
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
   useCallback,
   useRef,
+  type ComponentPropsWithoutRef,
+  type CSSProperties,
 } from 'react';
 import { type DragItem } from 'react-aria';
 import {
@@ -12,13 +12,13 @@ import {
   ListBoxItem,
   useDragAndDrop,
 } from 'react-aria-components';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
   SvgAdd,
-  SvgCheveronRight,
   SvgCheveronDown,
+  SvgCheveronRight,
 } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';

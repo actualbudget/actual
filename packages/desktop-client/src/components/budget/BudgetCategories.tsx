@@ -1,4 +1,4 @@
-import React, { memo, useState, useMemo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -282,7 +282,6 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                     }}
                     editing
                     onSave={_onSaveCategory}
-                    onDelete={async () => {}}
                     onHideNewCategory={onHideNewCategory}
                     onEditName={onEditName!}
                   />

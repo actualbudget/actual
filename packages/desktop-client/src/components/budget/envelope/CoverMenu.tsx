@@ -5,6 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
@@ -77,7 +78,11 @@ export function CoverMenu({
         </View>
         <View>
           <InitialFocus>
-            <Input defaultValue={_initialAmount} onUpdate={setAmount} />
+            <Input
+              defaultValue={_initialAmount}
+              onUpdate={setAmount}
+              style={styles.tnum}
+            />
           </InitialFocus>
         </View>
         <View style={{ margin: '10px 0 5px 0' }}>

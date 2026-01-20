@@ -6,8 +6,8 @@ import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
   type RuleConditionEntity,
-  type SpendingMonthEntity,
   type SpendingEntity,
+  type SpendingMonthEntity,
 } from 'loot-core/types/models';
 
 import { makeQuery } from './makeQuery';

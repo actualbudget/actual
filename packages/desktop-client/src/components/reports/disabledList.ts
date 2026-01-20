@@ -39,10 +39,6 @@ const currentIntervalOptions = [
     disableInclude: true,
   },
   {
-    description: t('Last month'),
-    disableInclude: true,
-  },
-  {
     description: t('Last year'),
     disableInclude: true,
   },

@@ -25,8 +25,8 @@ import {
   FormLabel,
 } from '@desktop-client/components/forms';
 import {
-  type Modal as ModalType,
   popModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';

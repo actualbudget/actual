@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import md5 from 'md5';
 
-import { schema, schemaConfig, makeViews } from './aql';
+import { makeViews, schema, schemaConfig } from './aql';
 import * as db from './db';
 import * as migrations from './migrate/migrations';
 

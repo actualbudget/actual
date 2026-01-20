@@ -6,18 +6,19 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { type CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
-import { parse, getDay } from 'date-fns';
+import { getDay, parse } from 'date-fns';
 import {
-  AreaChart,
   Area,
+  AreaChart,
   CartesianGrid,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
 } from 'recharts';
 
 import { computePadding } from './util/computePadding';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
@@ -140,16 +141,27 @@ export function NetWorthGraph({
             <div style={{ lineHeight: 1.5 }}>
               <AlignedText
                 left={t('Assets:')}
-                right={payload[0].payload.assets}
+                right={
+                  <FinancialText>{payload[0].payload.assets}</FinancialText>
+                }
               />
-              <AlignedText left={t('Debt:')} right={payload[0].payload.debt} />
+              <AlignedText
+                left={t('Debt:')}
+                right={<FinancialText>{payload[0].payload.debt}</FinancialText>}
+              />
               <AlignedText
                 left={t('Net worth:')}
-                right={<strong>{payload[0].payload.networth}</strong>}
+                right={
+                  <FinancialText as="strong">
+                    {payload[0].payload.networth}
+                  </FinancialText>
+                }
               />
               <AlignedText
                 left={t('Change:')}
-                right={payload[0].payload.change}
+                right={
+                  <FinancialText>{payload[0].payload.change}</FinancialText>
+                }
               />
             </div>
           </div>

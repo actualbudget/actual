@@ -8,11 +8,11 @@ import { loadMappings } from '../db/mappings';
 import { loadRules, updateRule } from '../transactions/transaction-rules';
 
 import {
-  updateConditions,
   createSchedule,
-  updateSchedule,
   deleteSchedule,
   setNextDate,
+  updateConditions,
+  updateSchedule,
 } from './app';
 
 beforeEach(async () => {

@@ -90,6 +90,10 @@ export class MobileNavigation {
         y: boundingBox.height / NAVBAR_ROWS,
       },
     });
+
+    // Wait for the react-spring animation to complete before taking screenshots.
+    // The animation typically takes a few hundred milliseconds to finish.
+    await this.page.waitForTimeout(500);
   }
 
   async hasNavbarState(...states: string[]) {

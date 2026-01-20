@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
@@ -202,8 +202,11 @@ export function ExperimentalFeatures() {
             >
               <Trans>Crossover Report</Trans>
             </FeatureToggle>
-            <FeatureToggle flag="forceReload">
-              <Trans>Force reload app button</Trans>
+            <FeatureToggle
+              flag="customThemes"
+              feedbackLink="https://github.com/actualbudget/actual/issues/6607"
+            >
+              <Trans>Custom themes</Trans>
             </FeatureToggle>
             {showServerPrefs && (
               <ServerFeatureToggle

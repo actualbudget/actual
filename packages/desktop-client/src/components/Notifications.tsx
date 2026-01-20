@@ -1,13 +1,14 @@
 // @ts-strict-ignore
 import React, {
-  useState,
   useEffect,
+  useEffectEvent,
   useMemo,
-  type SetStateAction,
+  useState,
   type CSSProperties,
+  type SetStateAction,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { animated, useSpring, to } from 'react-spring';
+import { animated, to, useSpring } from 'react-spring';
 import { useSwipeable } from 'react-swipeable';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -28,7 +29,7 @@ import {
   removeNotification,
   type NotificationWithId,
 } from '@desktop-client/notifications/notificationsSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 // Notification stacking configuration
 const MAX_VISIBLE_NOTIFICATIONS = 3; // Maximum number of notifications visible in the stack
@@ -123,7 +124,7 @@ function Notification({
   const [loading, setLoading] = useState(false);
   const [overlayLoading, setOverlayLoading] = useState(false);
 
-  useEffect(() => {
+  const connected = useEffectEvent(() => {
     if (type === 'error' && internal) {
       console.error('Internal error:', internal);
     }
@@ -131,14 +132,15 @@ function Notification({
     if (!sticky) {
       setTimeout(onRemove, timeout || 6500);
     }
-  }, []);
+  });
+  useEffect(() => connected(), []);
 
   const positive = type === 'message';
   const error = type === 'error';
 
   const processedMessage = useMemo(
     () => compileMessage(message, messageActions, setOverlayLoading, onRemove),
-    [message, messageActions],
+    [message, messageActions, onRemove, setOverlayLoading],
   );
 
   const { isNarrowWidth } = useResponsive();

@@ -1,5 +1,5 @@
 import React, { useState, type ReactNode } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgQuestion } from '@actual-app/components/icons/v1';

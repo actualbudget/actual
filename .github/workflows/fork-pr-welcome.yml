@@ -1,0 +1,48 @@
+name: Fork PR Welcome
+
+##########################################################################################
+# WARNING! This workflow uses the 'pull_request_target' event. That means that it will    #
+# always run in the context of the main actualbudget/actual repo, even if the PR is from  #
+# a fork. This is necessary to get access to a GitHub token that can post a comment on   #
+# the PR. Be VERY CAREFUL about adding things to this workflow, since forks can inject   #
+# arbitrary code into their branch, and can pollute the artifacts we download. Arbitrary #
+# code execution in this workflow could lead to a compromise of the main repo.           #
+##########################################################################################
+# See: https://securitylab.github.com/research/github-actions-preventing-pwn-requests    #
+##########################################################################################
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  welcome:
+    name: Post Welcome Message
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name != github.repository
+    steps:
+      - name: Post welcome comment
+        uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405 # v2.9.4
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ github.event.pull_request.number }}
+          header: fork-pr-welcome
+          hide_and_recreate: true
+          hide_classify: OUTDATED
+          message: |
+            <!-- fork-pr-welcome -->
+            👋 Hello contributor!
+
+            We would love to review your PR! Before we can do that, please make sure:
+
+            - ✅ All CI checks pass
+            - ✅ The PR is moved from draft to open (if applicable)
+            - ✅ The "[WIP]" prefix is removed from the PR title
+            - ✅ All CodeRabbit code review comments are resolved (if you disagree with anything - reply to the bot with your reasoning so we can read through it). The bot will eventually approve the PR.
+
+            We do this to reduce the TOIL the core contributor team has to go through for each PR and to allow for speedy reviews and merges.
+
+            For more information, please see our [Contributing Guide](https://actualbudget.org/docs/contributing/).

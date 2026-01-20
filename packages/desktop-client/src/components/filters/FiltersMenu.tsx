@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useReducer, useMemo } from 'react';
+import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { FocusScope } from 'react-aria';
 import { Form } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -15,22 +15,22 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import {
-  parse as parseDate,
   format as formatDate,
   isValid as isDateValid,
+  parse as parseDate,
 } from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { getMonthYearFormat } from 'loot-core/shared/months';
 import {
-  mapField,
   deserializeField,
-  getFieldError,
-  unparse,
   FIELD_TYPES,
+  getFieldError,
   getValidOps,
+  mapField,
+  unparse,
 } from 'loot-core/shared/rules';
-import { type IntegerAmount, titleFirst } from 'loot-core/shared/util';
+import { titleFirst, type IntegerAmount } from 'loot-core/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { CompactFiltersButton } from './CompactFiltersButton';
@@ -125,6 +125,10 @@ function ConfigureField<T extends RuleConditionEntity>({
     }
     return value;
   }, [value, field, subfield, dateFormat]);
+
+  // For ops that filter based on payeeId, those use PayeeFilter, otherwise we use GenericInput
+  const isPayeeIdOp = (op: T['op']) =>
+    ['is', 'is not', 'one of', 'not one of'].includes(op);
 
   return (
     <FocusScope>
@@ -260,7 +264,7 @@ function ConfigureField<T extends RuleConditionEntity>({
           });
         }}
       >
-        {type !== 'boolean' && field !== 'payee' && (
+        {type !== 'boolean' && (field !== 'payee' || !isPayeeIdOp(op)) && (
           <GenericInput
             ref={inputRef}
             // @ts-expect-error - fix me
@@ -292,7 +296,7 @@ function ConfigureField<T extends RuleConditionEntity>({
           />
         )}
 
-        {field === 'payee' && (
+        {field === 'payee' && isPayeeIdOp(op) && (
           <PayeeFilter
             // @ts-expect-error - fix me
             value={formattedValue}

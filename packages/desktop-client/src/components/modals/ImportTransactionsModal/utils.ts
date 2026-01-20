@@ -27,7 +27,7 @@ export function isDateFormat(format: string): format is DateFormat {
 export function parseDate(
   str: string | number | null | Array<unknown> | object,
   order: DateFormat,
-) {
+): string | null {
   if (typeof str !== 'string') {
     return null;
   }

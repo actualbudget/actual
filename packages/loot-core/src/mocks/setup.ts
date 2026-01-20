@@ -6,8 +6,8 @@ import * as sqlite from '../platform/server/sqlite';
 import * as db from '../server/db';
 import type * as MigrationsType from '../server/migrate/migrations';
 import {
-  enableGlobalMutations,
   disableGlobalMutations,
+  enableGlobalMutations,
 } from '../server/mutators';
 import { setServer } from '../server/server-config';
 import * as sheet from '../server/sheet';
