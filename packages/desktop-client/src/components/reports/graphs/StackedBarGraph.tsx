@@ -18,6 +18,7 @@ import {
 import {
   type balanceTypeOpType,
   type DataEntity,
+  type LegendEntity,
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
@@ -48,6 +49,7 @@ type PayloadItem = {
 type CustomTooltipProps = {
   compact: boolean;
   tooltip: string;
+  legend: LegendEntity[];
   active?: boolean;
   payload?: PayloadItem[];
   label?: string;
@@ -57,12 +59,18 @@ type CustomTooltipProps = {
 const CustomTooltip = ({
   compact,
   tooltip,
+  legend,
   active,
   payload,
   label,
   format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
+
+  const dataKeyToName = useMemo(() => {
+    return new Map(legend.map(entry => [entry.dataKey, entry.name]));
+  }, [legend]);
+
   const { sumTotals, items } = useMemo(() => {
     return (payload ?? [])
       .slice(0)
@@ -99,12 +107,13 @@ const CustomTooltip = ({
           </div>
           <div style={{ lineHeight: 1.4 }}>
             {items.map((pay, i) => {
+              const displayName = dataKeyToName.get(pay.name) ?? pay.name;
               return (
                 pay.value !== 0 &&
                 (compact ? i < 5 : true) && (
                   <AlignedText
                     key={pay.name}
-                    left={pay.name}
+                    left={displayName}
                     right={
                       <FinancialText>
                         {format(pay.value, 'financial')}
@@ -229,6 +238,7 @@ export function StackedBarGraph({
                     <CustomTooltip
                       compact={compact}
                       tooltip={tooltip}
+                      legend={data.legend}
                       format={format}
                     />
                   }

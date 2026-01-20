@@ -17,6 +17,7 @@ import {
 import {
   type balanceTypeOpType,
   type DataEntity,
+  type LegendEntity,
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
@@ -46,6 +47,7 @@ type PayloadItem = {
 type CustomTooltipProps = {
   compact: boolean;
   tooltip: string;
+  legend: LegendEntity[];
   active?: boolean;
   payload?: PayloadItem[];
   format: (value: unknown, type: FormatType) => string;
@@ -54,11 +56,17 @@ type CustomTooltipProps = {
 const CustomTooltip = ({
   compact,
   tooltip,
+  legend,
   active,
   payload,
   format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
+
+  const dataKeyToName = useMemo(() => {
+    return new Map(legend.map(entry => [entry.dataKey, entry.name]));
+  }, [legend]);
+
   const { sumTotals, items } = useMemo(() => {
     return (payload ?? [])
       .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
@@ -94,11 +102,12 @@ const CustomTooltip = ({
           </div>
           <div style={{ lineHeight: 1.5 }}>
             {items.map((p: PayloadItem, index: number) => {
+              const displayName = dataKeyToName.get(p.dataKey) ?? p.dataKey;
               return (
                 (compact ? index < 4 : true) && (
                   <AlignedText
                     key={index}
-                    left={p.dataKey}
+                    left={displayName}
                     right={
                       <FinancialText>
                         {format(p.value, 'financial')}
@@ -214,6 +223,7 @@ export function LineGraph({
                     <CustomTooltip
                       compact={compact}
                       tooltip={tooltip}
+                      legend={data.legend}
                       format={format}
                     />
                   }
