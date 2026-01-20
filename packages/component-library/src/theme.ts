@@ -195,6 +195,7 @@ export const theme = {
   budgetCurrentMonth: 'var(--color-budgetCurrentMonth)',
   budgetHeaderOtherMonth: 'var(--color-budgetHeaderOtherMonth)',
   budgetHeaderCurrentMonth: 'var(--color-budgetHeaderCurrentMonth)',
+  budgetTextSubdued: 'var(--color-budgetTextSubdued)',
   floatingActionBarBackground: 'var(--color-floatingActionBarBackground)',
   floatingActionBarBorder: 'var(--color-floatingActionBarBorder)',
   floatingActionBarText: 'var(--color-floatingActionBarText)',
