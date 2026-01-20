@@ -11,6 +11,8 @@ import { Text } from '@actual-app/components/text';
 import { theme as themeStyle } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { ColorPalette } from './ColorPalette';
+
 import { Link } from '@desktop-client/components/common/Link';
 import { FixedSizeList } from '@desktop-client/components/FixedSizeList';
 import { useThemeCatalog } from '@desktop-client/hooks/useThemeCatalog';
@@ -18,7 +20,6 @@ import {
   extractRepoOwner,
   fetchThemeCss,
   generateThemeId,
-  getThemeScreenshotUrl,
   normalizeGitHubRepo,
   validateThemeCss,
   type CatalogTheme,
@@ -337,16 +338,7 @@ export function ThemeInstaller({
                                     }}
                                   />
                                 </View>
-                                <img
-                                  src={getThemeScreenshotUrl(theme.repo)}
-                                  alt={theme.name}
-                                  style={{
-                                    width: '100%',
-                                    height: 60,
-                                    objectFit: 'cover',
-                                    borderRadius: 4,
-                                  }}
-                                />
+                                <ColorPalette colors={theme.colors} />
                                 <Text
                                   style={{
                                     fontSize: 12,

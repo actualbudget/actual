@@ -77,6 +77,7 @@ export default defineConfig(async ({ mode }) => {
   // Forward Netlify env variables
   if (process.env.REVIEW_ID) {
     process.env.REACT_APP_REVIEW_ID = process.env.REVIEW_ID;
+    process.env.REACT_APP_BRANCH = process.env.BRANCH;
   }
 
   let resolveExtensions = [
