@@ -430,8 +430,8 @@ Along with the flexibility to choose a number of months beyond the menu built-in
 
 | Syntax                       | Description                                                                                                                                                                 | Example Application                                                                   |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `#template average {number} months` | Budget the average amount spent over the last 6 months. Can set the number to any number > 0. Matches the existing option on the budget page but with flexible month ranges | Try to budget only what you need to spend based on the last 6 months of spending data |
-| `#template average {number} months [{increase/decrease} {number\|number%}]` | Budget the average amount spent over the last 6 months. Plus a 10% buffer on top. | Try to budget just a little bit more than what you need to spend for caution. |
+| `#template average {number} months` | Budget the average amount spent over the last {number} months. Can set the number to any number > 0. Matches the existing option on the budget page but with flexible month ranges | Try to budget only what you need to spend based on the last 6 months of spending data |
+| `#template average {number} months [{increase/decrease} {number\|number%}]` | Budget the average amount spent over timeframe, with an adjustment | Budget 10% more than the average spend over the last 3 months |
 
 #### Examples
 
