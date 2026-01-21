@@ -22,6 +22,9 @@ type SchedulesProviderProps = PropsWithChildren<{
 
 export function SchedulesProvider({ query, children }: SchedulesProviderProps) {
   const data = useSchedules({ query });
+  // Note: We don't memoize the context value here because arrays/Maps get new references
+  // on each render. The useDeferredValue in PayeeIcons handles deferring updates to
+  // prevent blocking touch scrolling.
   return (
     <SchedulesContext.Provider value={data}>
       {children}

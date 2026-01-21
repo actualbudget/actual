@@ -1,4 +1,7 @@
 import React, {
+  memo,
+  useDeferredValue,
+  useMemo,
   type ComponentPropsWithoutRef,
   type CSSProperties,
 } from 'react';
@@ -84,283 +87,338 @@ type TransactionListItemProps = Omit<
   onLongPress: (transaction: TransactionEntity) => void;
 };
 
-export function TransactionListItem({
-  showRunningBalance,
-  runningBalance,
-  onPress,
-  onLongPress,
-  ...props
-}: TransactionListItemProps) {
-  const { t } = useTranslation();
-  const { list: categories } = useCategories();
+export const TransactionListItem = memo(
+  function TransactionListItem({
+    showRunningBalance,
+    runningBalance,
+    onPress,
+    onLongPress,
+    ...props
+  }: TransactionListItemProps) {
+    const { t } = useTranslation();
+    const { list: categories } = useCategories();
 
-  const { value: transaction } = props;
+    const { value: transaction } = props;
 
-  const payee = usePayee(transaction?.payee || '');
-  const displayPayee = useDisplayPayee({ transaction });
+    const payee = usePayee(transaction?.payee || '');
+    const displayPayee = useDisplayPayee({ transaction });
 
-  const account = useAccount(transaction?.account || '');
-  const transferAccount = useAccount(payee?.transfer_acct || '');
-  const isPreview = isPreviewId(transaction?.id || '');
+    const account = useAccount(transaction?.account || '');
+    const transferAccount = useAccount(payee?.transfer_acct || '');
+    const isPreview = isPreviewId(transaction?.id || '');
 
-  const newTransactions = useSelector(
-    state => state.transactions.newTransactions,
-  );
+    const newTransactions = useSelector(
+      state => state.transactions.newTransactions,
+    );
 
-  const { longPressProps } = useLongPress({
-    accessibilityDescription: 'Long press to select multiple transactions',
-    onLongPress: () => {
-      if (isPreview) {
-        return;
-      }
+    const { longPressProps } = useLongPress({
+      accessibilityDescription: 'Long press to select multiple transactions',
+      onLongPress: () => {
+        if (isPreview) {
+          return;
+        }
 
-      onLongPress(transaction!);
-    },
-  });
+        onLongPress(transaction!);
+      },
+    });
 
-  const { pressProps } = usePress({
-    onPress: () => {
-      onPress(transaction!);
-    },
-  });
+    const { pressProps } = usePress({
+      onPress: () => {
+        onPress(transaction!);
+      },
+    });
 
-  if (!transaction) {
-    return null;
-  }
+    if (!transaction) {
+      return null;
+    }
 
-  const {
-    id,
-    amount,
-    category: categoryId,
-    cleared: isCleared,
-    reconciled: isReconciled,
-    is_parent: isParent,
-    is_child: isChild,
-    notes,
-    forceUpcoming,
-  } = transaction;
+    const {
+      id,
+      amount,
+      category: categoryId,
+      cleared: isCleared,
+      reconciled: isReconciled,
+      is_parent: isParent,
+      is_child: isChild,
+      notes,
+      forceUpcoming,
+    } = transaction;
 
-  const previewStatus = forceUpcoming ? 'upcoming' : categoryId;
+    const previewStatus = forceUpcoming ? 'upcoming' : categoryId;
 
-  const isAdded = newTransactions.includes(id);
-  const categoryName = lookupName(categories, categoryId);
-  const specialCategory = account?.offbudget
-    ? t('Off budget')
-    : transferAccount && !transferAccount.offbudget
-      ? t('Transfer')
-      : isParent
-        ? t('Split')
-        : null;
+    const isAdded = newTransactions.includes(id);
+    const categoryName = lookupName(categories, categoryId);
+    const specialCategory = account?.offbudget
+      ? t('Off budget')
+      : transferAccount && !transferAccount.offbudget
+        ? t('Transfer')
+        : isParent
+          ? t('Split')
+          : null;
 
-  const prettyCategory = specialCategory || categoryName;
-  const textStyle = getTextStyle({ isPreview });
+    const prettyCategory = specialCategory || categoryName;
+    const textStyle = getTextStyle({ isPreview });
 
-  return (
-    <ListBoxItem textValue={id} {...props}>
-      {itemProps => (
-        <PressResponder {...mergeProps(pressProps, longPressProps)}>
-          <Button
-            {...itemProps}
-            style={{
-              userSelect: 'none',
-              height: ROW_HEIGHT,
-              width: '100%',
-              borderRadius: 0,
-              ...(itemProps.isSelected
-                ? {
-                    borderWidth: '0 0 0 4px',
-                    borderColor: theme.mobileTransactionSelected,
-                    borderStyle: 'solid',
-                  }
-                : {
-                    borderWidth: '0 0 1px 0',
-                    borderColor: theme.tableBorder,
-                    borderStyle: 'solid',
-                  }),
-              ...(isPreview
-                ? {
-                    backgroundColor: theme.tableRowHeaderBackground,
-                  }
-                : {
-                    backgroundColor: theme.tableBackground,
-                  }),
-            }}
-          >
-            <View
+    return (
+      <ListBoxItem textValue={id} {...props}>
+        {itemProps => (
+          <PressResponder {...mergeProps(pressProps, longPressProps)}>
+            <Button
+              {...itemProps}
               style={{
-                flexDirection: 'row',
-                flex: 1,
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0 4px',
+                userSelect: 'none',
+                height: ROW_HEIGHT,
+                width: '100%',
+                borderRadius: 0,
+                ...(itemProps.isSelected
+                  ? {
+                      borderWidth: '0 0 0 4px',
+                      borderColor: theme.mobileTransactionSelected,
+                      borderStyle: 'solid',
+                    }
+                  : {
+                      borderWidth: '0 0 1px 0',
+                      borderColor: theme.tableBorder,
+                      borderStyle: 'solid',
+                    }),
+                ...(isPreview
+                  ? {
+                      backgroundColor: theme.tableRowHeaderBackground,
+                    }
+                  : {
+                      backgroundColor: theme.tableBackground,
+                    }),
               }}
             >
-              <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <PayeeIcons
-                    transaction={transaction}
-                    transferAccount={transferAccount}
-                  />
-                  <TextOneLine
-                    style={{
-                      ...textStyle,
-                      fontWeight: isAdded ? '600' : '400',
-                      ...(!displayPayee && !isPreview
-                        ? {
-                            color: theme.pageTextLight,
-                            fontStyle: 'italic',
-                          }
-                        : {}),
-                    }}
-                  >
-                    {displayPayee || t('(No payee)')}
-                  </TextOneLine>
-                </View>
-                {isPreview ? (
-                  <Status
-                    status={previewStatus}
-                    isSplit={isParent || isChild}
-                  />
-                ) : (
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginTop: 3,
-                    }}
-                  >
-                    {isReconciled ? (
-                      <SvgLockClosed
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0 4px',
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <PayeeIcons
+                      transaction={transaction}
+                      transferAccount={transferAccount}
+                    />
+                    <TextOneLine
+                      style={{
+                        ...textStyle,
+                        fontWeight: isAdded ? '600' : '400',
+                        ...(!displayPayee && !isPreview
+                          ? {
+                              color: theme.pageTextLight,
+                              fontStyle: 'italic',
+                            }
+                          : {}),
+                      }}
+                    >
+                      {displayPayee || t('(No payee)')}
+                    </TextOneLine>
+                  </View>
+                  {isPreview ? (
+                    <Status
+                      status={previewStatus}
+                      isSplit={isParent || isChild}
+                    />
+                  ) : (
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        marginTop: 3,
+                      }}
+                    >
+                      {isReconciled ? (
+                        <SvgLockClosed
+                          style={{
+                            width: 11,
+                            height: 11,
+                            color: theme.noticeTextLight,
+                            marginRight: 5,
+                          }}
+                        />
+                      ) : (
+                        <SvgCheckCircle1
+                          style={{
+                            width: 11,
+                            height: 11,
+                            color: isCleared
+                              ? theme.noticeTextLight
+                              : theme.pageTextSubdued,
+                            marginRight: 5,
+                          }}
+                        />
+                      )}
+                      {(isParent || isChild) && (
+                        <SvgSplit
+                          style={{
+                            width: 12,
+                            height: 12,
+                            marginRight: 5,
+                          }}
+                        />
+                      )}
+                      <TextOneLine
                         style={{
-                          width: 11,
-                          height: 11,
-                          color: theme.noticeTextLight,
-                          marginRight: 5,
+                          fontSize: 11,
+                          marginTop: 1,
+                          fontWeight: '400',
+                          color: prettyCategory
+                            ? theme.tableText
+                            : theme.menuItemTextSelected,
+                          fontStyle:
+                            specialCategory || !prettyCategory
+                              ? 'italic'
+                              : undefined,
+                          textAlign: 'left',
                         }}
-                      />
-                    ) : (
-                      <SvgCheckCircle1
-                        style={{
-                          width: 11,
-                          height: 11,
-                          color: isCleared
-                            ? theme.noticeTextLight
-                            : theme.pageTextSubdued,
-                          marginRight: 5,
-                        }}
-                      />
-                    )}
-                    {(isParent || isChild) && (
-                      <SvgSplit
-                        style={{
-                          width: 12,
-                          height: 12,
-                          marginRight: 5,
-                        }}
-                      />
-                    )}
+                      >
+                        {prettyCategory || t('Uncategorized')}
+                      </TextOneLine>
+                    </View>
+                  )}
+                  {notes && (
                     <TextOneLine
                       style={{
                         fontSize: 11,
-                        marginTop: 1,
+                        marginTop: 4,
                         fontWeight: '400',
-                        color: prettyCategory
-                          ? theme.tableText
-                          : theme.menuItemTextSelected,
-                        fontStyle:
-                          specialCategory || !prettyCategory
-                            ? 'italic'
-                            : undefined,
+                        color: theme.tableText,
                         textAlign: 'left',
+                        opacity: 0.85,
                       }}
                     >
-                      {prettyCategory || t('Uncategorized')}
+                      <NotesTagFormatter notes={notes} />
                     </TextOneLine>
-                  </View>
-                )}
-                {notes && (
-                  <TextOneLine
-                    style={{
-                      fontSize: 11,
-                      marginTop: 4,
-                      fontWeight: '400',
-                      color: theme.tableText,
-                      textAlign: 'left',
-                      opacity: 0.85,
-                    }}
-                  >
-                    <NotesTagFormatter notes={notes} />
-                  </TextOneLine>
-                )}
-              </View>
-              <View
-                style={{ justifyContent: 'center', alignItems: 'flex-end' }}
-              >
-                <Text
-                  style={{
-                    ...textStyle,
-                    ...styles.tnum,
-                    ...makeAmountFullStyle(amount),
-                  }}
+                  )}
+                </View>
+                <View
+                  style={{ justifyContent: 'center', alignItems: 'flex-end' }}
                 >
-                  {integerToCurrency(amount)}
-                </Text>
-                {showRunningBalance && runningBalance !== undefined && (
                   <Text
                     style={{
-                      fontSize: 11,
-                      fontWeight: '400',
+                      ...textStyle,
                       ...styles.tnum,
-                      ...makeBalanceAmountStyle(runningBalance),
+                      ...makeAmountFullStyle(amount),
                     }}
                   >
-                    {integerToCurrency(runningBalance)}
+                    {integerToCurrency(amount)}
                   </Text>
-                )}
+                  {showRunningBalance && runningBalance !== undefined && (
+                    <Text
+                      style={{
+                        fontSize: 11,
+                        fontWeight: '400',
+                        ...styles.tnum,
+                        ...makeBalanceAmountStyle(runningBalance),
+                      }}
+                    >
+                      {integerToCurrency(runningBalance)}
+                    </Text>
+                  )}
+                </View>
               </View>
-            </View>
-          </Button>
-        </PressResponder>
-      )}
-    </ListBoxItem>
-  );
-}
+            </Button>
+          </PressResponder>
+        )}
+      </ListBoxItem>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Only re-render if transaction data or relevant props change
+    // This prevents re-renders when schedules context updates but transaction props haven't changed
+    // Note: We don't compare onPress/onLongPress callbacks as they're recreated on each render
+    // but don't affect the rendered output
+    const prevTransaction = prevProps.value;
+    const nextTransaction = nextProps.value;
+
+    return (
+      prevTransaction?.id === nextTransaction?.id &&
+      prevTransaction?.amount === nextTransaction?.amount &&
+      prevTransaction?.payee === nextTransaction?.payee &&
+      prevTransaction?.account === nextTransaction?.account &&
+      prevTransaction?.category === nextTransaction?.category &&
+      prevTransaction?.cleared === nextTransaction?.cleared &&
+      prevTransaction?.reconciled === nextTransaction?.reconciled &&
+      prevTransaction?.notes === nextTransaction?.notes &&
+      prevTransaction?.schedule === nextTransaction?.schedule &&
+      prevProps.showRunningBalance === nextProps.showRunningBalance &&
+      prevProps.runningBalance === nextProps.runningBalance
+    );
+  },
+);
 
 type PayeeIconsProps = {
   transaction: TransactionEntity;
   transferAccount?: AccountEntity;
 };
 
-function PayeeIcons({ transaction, transferAccount }: PayeeIconsProps) {
-  const { id, schedule: scheduleId } = transaction;
-  const { isLoading: isSchedulesLoading, schedules = [] } =
-    useCachedSchedules();
-  const isPreview = isPreviewId(id);
-  const schedule = schedules.find(s => s.id === scheduleId);
-  const isScheduleRecurring =
-    schedule &&
-    schedule._date &&
-    typeof schedule._date === 'object' &&
-    !!schedule._date.frequency;
+const PayeeIcons = memo(
+  function PayeeIcons({ transaction, transferAccount }: PayeeIconsProps) {
+    const { id, schedule: scheduleId } = transaction;
+    const { isLoading: isSchedulesLoading, schedules = [] } =
+      useCachedSchedules();
+    const isPreview = isPreviewId(id);
 
-  if (isSchedulesLoading) {
-    return null;
-  }
+    // Use deferred value to prevent blocking touch scrolling when schedules finish loading
+    // This allows the virtualizer to continue scrolling smoothly while schedule icons
+    // update in the background at lower priority. The deferred value will update after
+    // user interactions (like scrolling) complete, preventing scroll blocking.
+    const deferredSchedules = useDeferredValue(schedules);
+    const deferredIsLoading = useDeferredValue(isSchedulesLoading);
 
-  return (
-    <>
-      {schedule &&
-        (isScheduleRecurring ? (
-          <SvgArrowsSynchronize style={getScheduleIconStyle({ isPreview })} />
-        ) : (
-          <SvgCalendar3 style={getScheduleIconStyle({ isPreview })} />
-        ))}
-      {transferAccount &&
-        (transaction.amount > 0 ? (
-          <SvgLeftArrow2 style={{ width: 12, height: 12, marginRight: 5 }} />
-        ) : (
-          <SvgRightArrow2 style={{ width: 12, height: 12, marginRight: 5 }} />
-        ))}
-    </>
-  );
-}
+    // Memoize the schedule lookup based on the deferred schedules
+    // This prevents re-computation when the schedules array reference changes
+    // but the specific schedule for this transaction hasn't changed
+    const schedule = useMemo(
+      () =>
+        scheduleId
+          ? deferredSchedules.find(s => s.id === scheduleId)
+          : undefined,
+      [scheduleId, deferredSchedules],
+    );
+
+    const isScheduleRecurring =
+      schedule &&
+      schedule._date &&
+      typeof schedule._date === 'object' &&
+      !!schedule._date.frequency;
+
+    if (deferredIsLoading) {
+      return null;
+    }
+
+    return (
+      <>
+        {schedule &&
+          (isScheduleRecurring ? (
+            <SvgArrowsSynchronize style={getScheduleIconStyle({ isPreview })} />
+          ) : (
+            <SvgCalendar3 style={getScheduleIconStyle({ isPreview })} />
+          ))}
+        {transferAccount &&
+          (transaction.amount > 0 ? (
+            <SvgLeftArrow2 style={{ width: 12, height: 12, marginRight: 5 }} />
+          ) : (
+            <SvgRightArrow2 style={{ width: 12, height: 12, marginRight: 5 }} />
+          ))}
+      </>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Only re-render if the transaction's schedule ID or transfer account changes
+    // This prevents re-renders when the schedules context updates but this
+    // transaction's schedule data hasn't changed
+    return (
+      prevProps.transaction.id === nextProps.transaction.id &&
+      prevProps.transaction.schedule === nextProps.transaction.schedule &&
+      prevProps.transaction.amount === nextProps.transaction.amount &&
+      prevProps.transferAccount?.id === nextProps.transferAccount?.id
+    );
+  },
+);

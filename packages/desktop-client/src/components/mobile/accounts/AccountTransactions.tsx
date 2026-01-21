@@ -117,14 +117,12 @@ function TransactionListWithPreviews({
     }
   }, [account.id, dispatch]);
 
-  const allBalances = useMemo(
-    () =>
-      new Map<TransactionEntity['id'], IntegerAmount>([
-        ...previewRunningBalances,
-        ...runningBalances,
-      ]),
-    [runningBalances, previewRunningBalances],
-  );
+  const allBalances = useMemo(() => {
+    return new Map<TransactionEntity['id'], IntegerAmount>([
+      ...previewRunningBalances,
+      ...runningBalances,
+    ]);
+  }, [runningBalances, previewRunningBalances]);
 
   useEffect(() => {
     if (account.id) {
