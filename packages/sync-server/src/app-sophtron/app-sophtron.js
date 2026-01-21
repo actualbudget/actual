@@ -204,7 +204,7 @@ app.post(
               // Note: Balance NOT converted to cents for /get-all-accounts
               // This endpoint is for display only, not for linking
               // Actual linking via /accounts endpoint does the conversion
-              Balance: account.Balance != null ? account.Balance : null,
+              Balance: account.Balance != null ? account.Balance * 100 : null,
             });
           });
         }

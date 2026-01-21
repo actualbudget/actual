@@ -358,6 +358,7 @@ class SophtronService {
             allAccounts.push({
               ...account,
               customerId: customer.CustomerID,
+              orgId: customer.CustomerID,
             });
           });
         }
@@ -436,6 +437,7 @@ class SophtronService {
             allAccounts.push({
               ...account,
               customerId: customer.CustomerID,
+              orgId: customer.CustomerID,
               requisitionId,
               institution: finalInstitutionName, // Add institution name for UI
               // Convert balance from dollars to cents (multiply by 100)

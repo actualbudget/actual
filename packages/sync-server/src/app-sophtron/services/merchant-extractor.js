@@ -27,13 +27,23 @@ function cleanMerchantName(name) {
   // Remove trailing POS
   cleaned = cleaned.replace(/\s+POS$/i, '');
 
+  // Preserve common merchant keywords that might look like state codes
+  const hasGasKeyword = /\bGAS\b/i.test(cleaned);
+  const hasConKeyword = /\bCON\b/i.test(cleaned);
+
   // Remove concatenated city+state patterns (e.g., "BOTHELLWA", "S.PORTLANDOR")
   // Matches word followed by 2-letter state code at end
-  cleaned = cleaned.replace(/\s+(?:[A-Z.]+\s+)*[A-Z.]+[A-Z]{2}$/i, '');
+  // But preserve if it contains GAS or CON (common in gas station names)
+  if (!hasGasKeyword && !hasConKeyword) {
+    cleaned = cleaned.replace(/\s+(?:[A-Z.]+\s+)*[A-Z.]+[A-Z]{2}$/i, '');
+  }
 
   // Remove location patterns: "CITY STATE" or "CITY1 CITY2 STATE"
   // Examples: "REDMOND WA", "SOUTH PORTLAND OR", "S.PORTLAND OR"
-  cleaned = cleaned.replace(/\s+(?:[A-Z][a-z.]+\s+)*[A-Z]{2}$/i, '');
+  // But preserve if it contains GAS or CON
+  if (!hasGasKeyword && !hasConKeyword) {
+    cleaned = cleaned.replace(/\s+(?:[A-Z][a-z.]+\s+)*[A-Z]{2}$/i, '');
+  }
 
   // Remove "Reversal Return -" prefix - just keep "Reversal Return"
   if (/^Reversal Return\s*-/i.test(cleaned)) {

@@ -52,25 +52,44 @@ function useAvailableAccounts(shouldFetch: boolean) {
     }>
   >([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
+  const [error, setError] = useState<{
+    type: 'credential' | 'network' | 'unknown';
+    message?: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!shouldFetch) {
       setAccounts([]);
-      setIsError(false);
+      setError(null);
       setIsLoading(false);
       return;
     }
 
     async function fetch() {
-      setIsError(false);
+      setError(null);
       setIsLoading(true);
 
       // Get all existing Sophtron accounts directly
-      const { data, error } = await sendCatch('sophtron-get-all-accounts');
+      const { data, error: fetchError } = await sendCatch(
+        'sophtron-get-all-accounts',
+      );
 
-      if (error || !Array.isArray(data)) {
-        setIsError(true);
+      if (fetchError || !Array.isArray(data)) {
+        // Determine error type based on error details
+        const errorMessage =
+          typeof fetchError === 'string'
+            ? fetchError
+            : fetchError?.message || '';
+        const isCredentialError =
+          errorMessage.toLowerCase().includes('not configured') ||
+          errorMessage.toLowerCase().includes('credentials') ||
+          errorMessage.toLowerCase().includes('unauthorized') ||
+          errorMessage.toLowerCase().includes('authentication');
+
+        setError({
+          type: isCredentialError ? 'credential' : 'network',
+          message: errorMessage,
+        });
         setAccounts([]);
       } else {
         setAccounts(
@@ -95,7 +114,7 @@ function useAvailableAccounts(shouldFetch: boolean) {
   return {
     data: accounts,
     isLoading,
-    isError,
+    error,
   };
 }
 
@@ -149,13 +168,14 @@ export function SophtronExternalMsgModal({
   } = useSophtronStatus();
 
   const shouldFetchAccounts = Boolean(isConfigured || isSophtronSetupComplete);
+
   const {
     data: accountOptions,
     isLoading: isAccountOptionsLoading,
-    isError: isAccountOptionError,
+    error: accountOptionError,
   } = useAvailableAccounts(shouldFetchAccounts);
 
-  async function onJump() {
+  async function onJumpExisting() {
     if (!selectedAccount) return;
 
     setError(null);
@@ -214,23 +234,35 @@ export function SophtronExternalMsgModal({
   const renderLinkButton = () => {
     return (
       <View style={{ gap: 10 }}>
-        {isAccountOptionError ? (
+        {accountOptionError ? (
           <AlertError>
-            <Trans>
-              Failed loading available accounts: Sophtron access credentials are
-              not configured. Please configure them in{' '}
-              <Link
-                variant="text"
-                onClick={onSophtronInit}
-                style={{
-                  color: theme.errorTextDark,
-                  textDecoration: 'underline',
-                }}
-              >
-                settings
-              </Link>
-              .
-            </Trans>
+            {accountOptionError.type === 'credential' ? (
+              <Trans>
+                Failed loading available accounts: Sophtron access credentials
+                are not configured. Please configure them in{' '}
+                <Link
+                  variant="text"
+                  onClick={onSophtronInit}
+                  style={{
+                    color: theme.errorTextDark,
+                    textDecoration: 'underline',
+                  }}
+                >
+                  settings
+                </Link>
+                .
+              </Trans>
+            ) : (
+              <Trans>
+                Failed loading available accounts. Please check your network
+                connection and try again.
+                {accountOptionError.message && (
+                  <View style={{ marginTop: 5, fontSize: 12 }}>
+                    Error: {accountOptionError.message}
+                  </View>
+                )}
+              </Trans>
+            )}
           </AlertError>
         ) : (
           <>
@@ -286,7 +318,7 @@ export function SophtronExternalMsgModal({
               <Button
                 variant="primary"
                 isDisabled={!selectedAccount}
-                onPress={onJump}
+                onPress={onJumpExisting}
               >
                 <Trans>Link account</Trans>
                 {waiting === 'accounts' ? (
@@ -333,6 +365,20 @@ export function SophtronExternalMsgModal({
                   .
                 </Trans>
               </Warning>
+            </View>
+          ) : waiting || isConfigurationLoading ? (
+            <View style={{ alignItems: 'center', marginTop: 15 }}>
+              <AnimatedLoading
+                color={theme.pageTextDark}
+                style={{ width: 20, height: 20 }}
+              />
+              <View style={{ marginTop: 10, color: theme.pageText }}>
+                {isConfigurationLoading
+                  ? t('Checking Sophtron configuration...')
+                  : waiting === 'accounts'
+                    ? t('Loading accounts...')
+                    : null}
+              </View>
             </View>
           ) : (
             renderLinkButton()
