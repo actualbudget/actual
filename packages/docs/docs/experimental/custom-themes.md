@@ -28,7 +28,7 @@ The easiest way to install a custom theme is to choose one from the catalog:
 3. The theme installer will open showing available themes from the catalog
 4. Click on any theme to install it immediately
 
-Themes in the catalog are hosted on GitHub and are automatically fetched when you select them. Each theme shows a preview screenshot and includes a link to its source repository.
+Themes in the catalog are hosted on GitHub and are automatically fetched when you select them. Each theme shows a color palette preview (6 colors in a 3x2 grid) and includes a link to its source repository.
 
 ### Installing a Theme by Pasting CSS
 
@@ -124,14 +124,12 @@ To share your theme with others or add it to the catalog, you can host it on Git
 1. Create a new GitHub repository
 2. Create a file named `actual.css` in the root directory (on the `main` branch)
 3. Add your theme CSS to this file
-4. Add a `screenshot.png` file for catalog display (recommended size: 140x60px or similar)
 
 **Example repository structure:**
 
 ```text
 your-theme-repo/
-├── actual.css          # Your theme CSS
-└── screenshot.png      # Preview image
+└── actual.css          # Your theme CSS
 ```
 
 **Example `actual.css`:**
@@ -149,6 +147,8 @@ your-theme-repo/
 
 The theme can then be referenced in the catalog using the format `owner/repo` (e.g., `actualbudget/demo-theme`).
 
+When your theme is added to the catalog, it will display a color palette preview. The palette is defined in the catalog JSON file and should include 6 representative colors from your theme (typically background colors, accent colors, and text colors).
+
 ### Example Theme
 
 For a complete example of a custom theme, check out the [demo theme repository](https://github.com/actualbudget/demo-theme). This repository contains multiple theme variations and demonstrates the proper structure and format.
@@ -157,7 +157,6 @@ The demo theme includes examples of:
 
 - Proper CSS variable naming
 - Complete theme definitions
-- Screenshot assets for catalog display
 
 You can use this as a template for creating your own themes.
 
@@ -176,5 +175,10 @@ To have your theme added to the official catalog, you'll need to:
 1. Host your theme on GitHub following the structure above
 2. Open an issue or pull request on the Actual repository requesting your theme be added to the catalog
 3. Provide the repository name in `owner/repo` format
+4. Include 6 representative colors for the color palette preview (as an array of hex color values)
 
-The catalog is maintained in `packages/desktop-client/src/data/customThemeCatalog.json`.
+The catalog is maintained in `packages/desktop-client/src/data/customThemeCatalog.json`. Each theme entry includes:
+
+- `name`: The theme name
+- `repo`: The GitHub repository in `owner/repo` format
+- `colors`: An array of 6 hex color values for the palette preview (e.g., `["#1a1a2e", "#16213e", "#0f3460", "#e94560", "#533483", "#f1f1f1"]`)

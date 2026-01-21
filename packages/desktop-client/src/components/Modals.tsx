@@ -9,7 +9,6 @@ import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
-import { BudgetFileSelectionModal } from './modals/BudgetFileSelectionModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
@@ -381,8 +380,6 @@ export function Modals() {
             </SheetNameProvider>
           );
 
-        case 'budget-file-selection':
-          return <BudgetFileSelectionModal key={name} />;
         case 'delete-budget':
           return <DeleteFileModal key={key} {...modal.options} />;
         case 'duplicate-budget':

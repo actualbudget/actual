@@ -509,9 +509,6 @@ export type Modal =
       };
     }
   | {
-      name: 'budget-file-selection';
-    }
-  | {
       name: 'confirm-transaction-edit';
       options: {
         onConfirm: () => void;
