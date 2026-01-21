@@ -292,9 +292,6 @@ export function Header({
               <Trans>All time</Trans>
             </Button>
 
-            {/* {filters && (
-              <FilterButton compact={isNarrowWidth} onApply={onApply} hover={false} />
-            )} */}
             {filters && (
               <FilterButton
                 compact={isNarrowWidth}
