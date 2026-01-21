@@ -16,6 +16,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
