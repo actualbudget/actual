@@ -18,7 +18,7 @@ import axios from 'axios';
 
 import { SecretName, secretsService } from '../../services/secrets-service';
 
-import { extractMerchantName, suggestCategory } from './merchant-extractor';
+import { extractMerchantName, suggestCategory } from './merchant-extractor.js';
 
 const SOPHTRON_API_BASE = 'https://api.sophtron.com/api/';
 
@@ -44,6 +44,19 @@ class SophtronService {
     // Store for tracking linking sessions (requisitionId -> accountData)
     // In production, this should be persisted to database
     this.linkingSessions = new Map();
+    // Clean up old sessions every hour
+    this.SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+    setInterval(() => this.cleanupOldSessions(), 60 * 60 * 1000);
+  }
+
+  cleanupOldSessions() {
+    const now = Date.now();
+    for (const [id, session] of this.linkingSessions.entries()) {
+      const age = now - (session.completedAt || session.createdAt);
+      if (age > this.SESSION_TTL_MS) {
+        this.linkingSessions.delete(id);
+      }
+    }
   }
 
   /**
@@ -267,6 +280,7 @@ class SophtronService {
                   allAccounts.push({
                     ...account,
                     customerId: customer.CustomerID,
+                    orgId: customer.CustomerID,
                   });
                 });
               }
