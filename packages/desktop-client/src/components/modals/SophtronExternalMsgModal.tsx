@@ -258,7 +258,7 @@ export function SophtronExternalMsgModal({
                 connection and try again.
                 {accountOptionError.message && (
                   <View style={{ marginTop: 5, fontSize: 12 }}>
-                    Error: {accountOptionError.message}
+                    <Trans>Error:</Trans> {accountOptionError.message}
                   </View>
                 )}
               </Trans>

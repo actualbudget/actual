@@ -18,7 +18,7 @@ import axios from 'axios';
 
 import { SecretName, secretsService } from '../../services/secrets-service';
 
-import { extractMerchantName, suggestCategory } from './merchant-extractor.js';
+import { extractMerchantName, suggestCategory } from './merchant-extractor.ts';
 
 const SOPHTRON_API_BASE = 'https://api.sophtron.com/api/';
 
@@ -154,13 +154,28 @@ class SophtronService {
     // Sophtron API requires startDate and endDate - set defaults if not provided
     const now = new Date();
     const defaultEndDate = now.toISOString().substring(0, 10);
-    const defaultStartDate = new Date(
-      now.getFullYear(),
-      now.getMonth() - 3,
-      now.getDate(),
-    )
-      .toISOString()
-      .substring(0, 10); // Default to 3 months ago
+
+    // Safe month subtraction to avoid invalid dates (e.g., Jan 31 - 3 months)
+    const threeMonthsAgo = new Date(now);
+    const originalDay = threeMonthsAgo.getDate();
+    const targetMonth = threeMonthsAgo.getMonth() - 3;
+    const targetYear =
+      threeMonthsAgo.getFullYear() + Math.floor(targetMonth / 12);
+    const normalizedMonth = ((targetMonth % 12) + 12) % 12;
+
+    // Get days in target month to handle edge cases (e.g., Jan 31 -> Oct 31 is valid, but May 31 -> Feb 28/29)
+    const daysInTargetMonth = new Date(
+      targetYear,
+      normalizedMonth + 1,
+      0,
+    ).getDate();
+    const safeDay = Math.min(originalDay, daysInTargetMonth);
+
+    threeMonthsAgo.setFullYear(targetYear);
+    threeMonthsAgo.setMonth(normalizedMonth);
+    threeMonthsAgo.setDate(safeDay);
+
+    const defaultStartDate = threeMonthsAgo.toISOString().substring(0, 10);
 
     const startDateStr =
       startDate instanceof Date
@@ -178,10 +193,6 @@ class SophtronService {
     return result;
   }
 
-  /**
-   * Get list of all institutions for a country
-   * Note: Sophtron API uses institution name search, not country filtering
-   */
   /**
    * Get list of all institutions for a country
    * Endpoint: institution/GetInstitutionsByUser (v1 API)
@@ -593,17 +604,6 @@ class SophtronService {
       },
       institutionId: requisitionId,
     };
-  }
-
-  /**
-   * Delete requisition (disconnect bank connection)
-   * Maps to deleting user institution in Sophtron
-   */
-  async deleteRequisition(_requisitionId) {
-    // Sophtron doesn't have a simple delete endpoint
-    // Would need to implement UserInstitution/DeleteUserInstitution
-    // For now, return success
-    return { status: 'ok' };
   }
 }
 

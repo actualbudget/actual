@@ -1,13 +1,8 @@
 // Helper function to extract merchant name from transaction description
 // Based on sophisticated pattern matching for various transaction formats
 
-/**
- * Clean merchant name by removing common noise patterns
- * @param {string} name - Raw merchant name
- * @returns {string} - Cleaned merchant name
- */
-function cleanMerchantName(name) {
-  let cleaned = name.trim();
+function cleanMerchantName(name: string): string {
+  let cleaned: string = name.trim();
 
   // Remove date patterns (MM/DD) and everything after
   cleaned = cleaned.replace(/\s+\d{1,2}\/\d{1,2}.*$/, '');
@@ -28,8 +23,8 @@ function cleanMerchantName(name) {
   cleaned = cleaned.replace(/\s+POS$/i, '');
 
   // Preserve common merchant keywords that might look like state codes
-  const hasGasKeyword = /\bGAS\b/i.test(cleaned);
-  const hasConKeyword = /\bCON\b/i.test(cleaned);
+  const hasGasKeyword: boolean = /\bGAS\b/i.test(cleaned);
+  const hasConKeyword: boolean = /\bCON\b/i.test(cleaned);
 
   // Remove concatenated city+state patterns (e.g., "BOTHELLWA", "S.PORTLANDOR")
   // Matches word followed by 2-letter state code at end
@@ -59,13 +54,11 @@ function cleanMerchantName(name) {
 /**
  * Extract merchant name from description
  * Handles special bank fees, CHECKCARD patterns, and standard purchase formats
- * @param {string} description - Transaction description
- * @returns {string} - Cleaned merchant name
  */
-export function extractMerchantName(description) {
+export function extractMerchantName(description: string): string {
   if (!description) return 'Unknown';
 
-  const line = description.trim();
+  const line: string = description.trim();
   if (line.length === 0) return 'Unknown';
 
   // 1. Handle special bank fees and automated transactions
@@ -84,13 +77,15 @@ export function extractMerchantName(description) {
 
   // 2. CHECKCARD Pattern
   // Extract merchant name after CHECKCARD ####
-  const checkcardMatch = line.match(/CHECKCARD\s+\d{4}\s+(.+)/i);
+  const checkcardMatch: RegExpMatchArray | null = line.match(
+    /CHECKCARD\s+\d{4}\s+(.+)/i,
+  );
   if (checkcardMatch) {
     return cleanMerchantName(checkcardMatch[1]);
   }
 
   // 3. Extract merchant from start of description
-  let merchantName = line;
+  let merchantName: string = line;
 
   // Stop before DES: pattern (common in ACH/payroll transactions)
   merchantName = merchantName.replace(/\s+DES:.*/i, '');
@@ -110,13 +105,13 @@ export function extractMerchantName(description) {
 
 /**
  * Suggest category based on merchant/description patterns
- * @param {string} description - Full transaction description
- * @param {string} payeeName - Extracted payee name
- * @returns {string|null} - Suggested category or null
  */
-export function suggestCategory(description, payeeName) {
-  const desc = (description || '').toLowerCase();
-  const payee = (payeeName || '').toLowerCase();
+export function suggestCategory(
+  description: string,
+  payeeName: string,
+): string | null {
+  const desc: string = (description || '').toLowerCase();
+  const payee: string = (payeeName || '').toLowerCase();
 
   // Gas stations
   if (
@@ -132,7 +127,8 @@ export function suggestCategory(description, payeeName) {
   if (
     /\b(walmart|target|costco|safeway|kroger|albertsons|publix|whole foods|trader joe|aldi|food|grocery|market|supermarket)\b/.test(
       payee,
-    )
+    ) ||
+    /\b(grocery|groceries|supermarket|food market)\b/.test(desc)
   ) {
     return 'Groceries';
   }
@@ -141,13 +137,17 @@ export function suggestCategory(description, payeeName) {
   if (
     /\b(restaurant|mcdonald|burger|pizza|starbucks|subway|chipotle|panera|cafe|coffee|dining|doordash|uber eats|grubhub)\b/.test(
       payee,
-    )
+    ) ||
+    /\b(restaurant|dining|cafe|coffee shop|food delivery)\b/.test(desc)
   ) {
     return 'Dining Out';
   }
 
   // Transportation
-  if (/\b(uber|lyft|taxi|parking|toll|transit|metro|bus|train)\b/.test(payee)) {
+  if (
+    /\b(uber|lyft|taxi|parking|toll|transit|metro|bus|train)\b/.test(payee) ||
+    /\b(parking|toll|transit|transportation)\b/.test(desc)
+  ) {
     return 'Transportation';
   }
 
@@ -155,13 +155,17 @@ export function suggestCategory(description, payeeName) {
   if (
     /\b(electric|power|gas company|water|utility|comcast|at&t|verizon|internet|phone|cable)\b/.test(
       payee,
-    )
+    ) ||
+    /\b(electric|electricity|utility|water bill|internet|cable)\b/.test(desc)
   ) {
     return 'Utilities';
   }
 
   // Shopping
-  if (/\b(amazon|ebay|etsy|shop|store|retail)\b/.test(payee)) {
+  if (
+    /\b(amazon|ebay|etsy|shop|store|retail)\b/.test(payee) ||
+    /\b(shopping|retail|store|online purchase)\b/.test(desc)
+  ) {
     return 'Shopping';
   }
 
@@ -169,7 +173,8 @@ export function suggestCategory(description, payeeName) {
   if (
     /\b(netflix|hulu|spotify|apple music|disney|hbo|theater|cinema|movie)\b/.test(
       payee,
-    )
+    ) ||
+    /\b(entertainment|theater|cinema|movie|streaming|subscription)\b/.test(desc)
   ) {
     return 'Entertainment';
   }
@@ -178,13 +183,19 @@ export function suggestCategory(description, payeeName) {
   if (
     /\b(pharmacy|cvs|walgreens|rite aid|hospital|medical|doctor|dental|health)\b/.test(
       payee,
+    ) ||
+    /\b(pharmacy|medical|doctor|dental|hospital|healthcare|prescription)\b/.test(
+      desc,
     )
   ) {
     return 'Healthcare';
   }
 
   // Insurance
-  if (/\b(insurance|geico|state farm|progressive|allstate)\b/.test(payee)) {
+  if (
+    /\b(insurance|geico|state farm|progressive|allstate)\b/.test(payee) ||
+    /\b(insurance|premium)\b/.test(desc)
+  ) {
     return 'Insurance';
   }
 

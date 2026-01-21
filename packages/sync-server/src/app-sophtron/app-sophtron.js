@@ -20,13 +20,12 @@ import { handleError } from './util/handle-error';
 
 const app = express();
 app.use(requestLoggerMiddleware);
+app.use(express.json());
 
 app.get('/link', function (req, res) {
   res.sendFile('link.html', { root: path.resolve('./src/app-sophtron') });
 });
 
-export { app as handlers };
-app.use(express.json());
 app.use(validateSessionMiddleware);
 
 app.post('/status', async (req, res) => {
@@ -224,29 +223,6 @@ app.post(
 );
 
 app.post(
-  '/remove-account',
-  handleError(async (req, res) => {
-    const { requisitionId } = req.body || {};
-
-    const data = await sophtronService.deleteRequisition(requisitionId);
-    if (data.status === 'ok') {
-      res.send({
-        status: 'ok',
-        data,
-      });
-    } else {
-      res.send({
-        status: 'error',
-        data: {
-          data,
-          reason: 'Can not delete requisition',
-        },
-      });
-    }
-  }),
-);
-
-app.post(
   '/transactions',
   handleError(async (req, res) => {
     const {
@@ -405,3 +381,5 @@ app.post(
     });
   }),
 );
+
+export { app as handlers };
