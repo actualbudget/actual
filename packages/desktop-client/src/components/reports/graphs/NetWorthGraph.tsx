@@ -226,12 +226,12 @@ export function NetWorthGraph({
                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                   <stop
                     offset={off}
-                    stopColor={theme.reportsBlue}
+                    stopColor={theme.reportsChartFill}
                     stopOpacity={0.2}
                   />
                   <stop
                     offset={off}
-                    stopColor={theme.reportsRed}
+                    stopColor={theme.reportsNumberNegative}
                     stopOpacity={0.2}
                   />
                 </linearGradient>
@@ -243,7 +243,7 @@ export function NetWorthGraph({
                 activeDot={false}
                 {...animationProps}
                 dataKey="y"
-                stroke={theme.reportsBlue}
+                stroke={theme.reportsChartFill}
                 strokeWidth={2}
                 fill={`url(#${gradientId})`}
                 fillOpacity={1}

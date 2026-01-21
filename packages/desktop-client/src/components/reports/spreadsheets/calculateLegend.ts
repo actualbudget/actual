@@ -33,18 +33,26 @@ export function calculateLegend(
 
     if (groupBy === 'Interval') {
       if (balanceTypeOp === 'totalDebts') {
-        return theme.reportsRed;
+        return theme.reportsNumberNegative;
+      }
+
+      if (balanceTypeOp === 'netDebts') {
+        return theme.reportsNumberNegative;
       }
 
       if (balanceTypeOp === 'totalTotals') {
         if (data.totalTotals < 0) {
-          return theme.reportsRed;
+          return theme.reportsNumberNegative;
         }
 
-        return theme.reportsBlue;
+        return theme.reportsNumberPositive;
       }
 
-      return theme.reportsBlue;
+      if (balanceTypeOp === 'totalAssets' || balanceTypeOp === 'netAssets') {
+        return theme.reportsNumberPositive;
+      }
+
+      return theme.reportsChartFill;
     }
 
     return colorScale[index % colorScale.length];
