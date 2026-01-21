@@ -217,11 +217,14 @@ export function BudgetAnalysisGraph({
             <CartesianGrid strokeDasharray="3 3" stroke={theme.pillBorder} />
             <XAxis
               dataKey="date"
+              tick={{ fill: theme.reportsLabel }}
               tickFormatter={formatDate}
-              stroke={theme.pageTextSubdued}
+              minTickGap={50}
             />
             <YAxis
-              tickFormatter={value => format(value, 'financial')}
+              tick={{ fill: theme.reportsLabel }}
+              tickCount={8}
+              tickFormatter={value => format(value, 'financial-no-decimals')}
               stroke={theme.pageTextSubdued}
             />
             <Tooltip
@@ -270,11 +273,14 @@ export function BudgetAnalysisGraph({
             <CartesianGrid strokeDasharray="3 3" stroke={theme.pillBorder} />
             <XAxis
               dataKey="date"
+              tick={{ fill: theme.reportsLabel }}
               tickFormatter={formatDate}
-              stroke={theme.pageTextSubdued}
+              minTickGap={50}
             />
             <YAxis
-              tickFormatter={value => format(value, 'financial')}
+              tick={{ fill: theme.reportsLabel }}
+              tickCount={8}
+              tickFormatter={value => format(value, 'financial-no-decimals')}
               stroke={theme.pageTextSubdued}
             />
             <Tooltip
