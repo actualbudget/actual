@@ -42,6 +42,13 @@
   {
     "name": "Shades of Gray (light)",
     "repo": "Juulz/shades-of-gray",
-    "colors": ["hsl(0, 0%, 90%)", "hsl(0, 0%, 20%)", "#fff", "hsl(0, 0%, 80%)", "hsl(0, 0%, 15%)", "#99ffff"]
+    "colors": [
+      "hsl(0, 0%, 90%)",
+      "hsl(0, 0%, 20%)",
+      "#fff",
+      "hsl(0, 0%, 80%)",
+      "hsl(0, 0%, 15%)",
+      "#99ffff"
+    ]
   }
 ]
