@@ -76,9 +76,11 @@ export function SummaryNumber({
         <View
           ref={mergedRef as Ref<HTMLDivElement>}
           aria-label={
-            value < 0
-              ? t('Negative amount: {{amount}}', { amount: displayAmount })
-              : t('Positive amount: {{amount}}', { amount: displayAmount })
+            value === 0
+              ? t('Zero amount')
+              : value < 0
+                ? t('Negative amount: {{amount}}', { amount: displayAmount })
+                : t('Positive amount: {{amount}}', { amount: displayAmount })
           }
           style={{
             alignItems: 'center',
