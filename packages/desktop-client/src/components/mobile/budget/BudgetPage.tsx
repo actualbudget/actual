@@ -714,24 +714,33 @@ function UncategorizedTransactionsBanner(props) {
       <Banner type="warning">
         <View
           style={{
-            flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
           }}
         >
-          <Trans count={transactions.length}>
-            You have {{ count: transactions.length }} uncategorized transactions
-            (
-            <FinancialText>
-              {
-                {
-                  amount: format(totalUncategorizedAmount, 'financial'),
-                } as TransObjectLiteral
-              }
-            </FinancialText>
-            )
-          </Trans>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              flexShrink: 1,
+            }}
+          >
+            <Text>
+              <Trans count={transactions.length}>
+                You have {{ count: transactions.length }} uncategorized
+                transactions (
+                <FinancialText>
+                  {
+                    {
+                      amount: format(totalUncategorizedAmount, 'financial'),
+                    } as TransObjectLiteral
+                  }
+                </FinancialText>
+                )
+              </Trans>
+            </Text>
+          </View>
           <Button
             onPress={() => navigate('/categories/uncategorized')}
             style={PILL_STYLE}
