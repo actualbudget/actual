@@ -411,7 +411,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                           right={
                             <Text style={{ fontWeight: 600 }}>
                               <PrivacyFilter>
-                                {format(-data.totalSpent, 'financial')}
+                                {format(data.totalSpent, 'financial')}
                               </PrivacyFilter>
                             </Text>
                           }
