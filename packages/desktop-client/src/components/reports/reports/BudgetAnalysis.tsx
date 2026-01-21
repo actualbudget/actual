@@ -303,6 +303,16 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         onUpdateFilter={onUpdateFilter}
         onDeleteFilter={onDeleteFilter}
         onConditionsOpChange={onConditionsOpChange}
+        filterExclude={[
+          'date',
+          'account',
+          'payee',
+          'notes',
+          'amount',
+          'cleared',
+          'reconciled',
+          'transfer',
+        ]}
         inlineContent={
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <Tooltip

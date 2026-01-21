@@ -43,6 +43,8 @@ type HeaderProps = {
   ) => void;
   children?: ReactNode;
   inlineContent?: ReactNode;
+  // no separate category filter; use main filters instead
+  filterExclude?: string[];
 } & (
   | {
       filters: RuleConditionEntity[];
@@ -82,10 +84,12 @@ export function Header({
   onConditionsOpChange,
   children,
   inlineContent,
+  filterExclude,
 }: HeaderProps) {
   const locale = useLocale();
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+
   function convertToMonth(
     start: string,
     end: string,
@@ -288,11 +292,18 @@ export function Header({
               <Trans>All time</Trans>
             </Button>
 
+            {/* {filters && (
+              <FilterButton compact={isNarrowWidth} onApply={onApply} hover={false} />
+            )} */}
             {filters && (
               <FilterButton
                 compact={isNarrowWidth}
                 onApply={onApply}
                 hover={false}
+                // Exclude the provided list, fallback to category-only exclude set
+                exclude={
+                  filterExclude
+                }
               />
             )}
           </SpaceBetween>
