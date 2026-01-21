@@ -9,6 +9,7 @@ import type {
   APIFileEntity,
   APIPayeeEntity,
   APIScheduleEntity,
+  APITagEntity,
 } from '../server/api-models';
 import { type BudgetFileHandlers } from '../server/budgetfiles/app';
 import { type batchUpdateTransactions } from '../server/transactions';
@@ -216,6 +217,19 @@ export type ApiHandlers = {
     targetId: APIPayeeEntity['id'];
     mergeIds: string[];
   }) => Promise<void>;
+
+  'api/tags-get': () => Promise<APITagEntity[]>;
+
+  'api/tag-create': (arg: {
+    tag: Omit<APITagEntity, 'id'>;
+  }) => Promise<APITagEntity['id']>;
+
+  'api/tag-update': (arg: {
+    id: APITagEntity['id'];
+    fields: Partial<Omit<APITagEntity, 'id'>>;
+  }) => Promise<void>;
+
+  'api/tag-delete': (arg: { id: APITagEntity['id'] }) => Promise<void>;
 
   'api/rules-get': () => Promise<RuleEntity[]>;
 
