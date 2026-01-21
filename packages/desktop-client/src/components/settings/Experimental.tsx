@@ -218,7 +218,7 @@ export function ExperimentalFeatures() {
               <ServerFeatureToggle
                 prefName="flags.plugins"
                 disableToggle
-                feedbackLink="https://github.com/actualbudget/actual/issues/5950"
+                feedbackLink="https://github.com/actualbudget/actual/issues/6742"
               >
                 <Trans>Client-Side plugins (soon)</Trans>
               </ServerFeatureToggle>
