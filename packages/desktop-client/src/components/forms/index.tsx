@@ -1,4 +1,4 @@
-import React, { type ReactNode, type ComponentProps } from 'react';
+import React, { type ComponentProps, type ReactNode } from 'react';
 
 import { type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';

@@ -28,8 +28,8 @@ import {
   useRefreshLoginMethods,
 } from '@desktop-client/components/ServerContext';
 import {
-  type Modal as ModalType,
   popModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 

@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React, {
-  type CSSProperties,
   type ComponentType,
+  type CSSProperties,
   type ReactNode,
 } from 'react';
 import { Trans } from 'react-i18next';
@@ -12,7 +12,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
-import { type SheetFields, type Binding } from '@desktop-client/spreadsheet';
+import { type Binding, type SheetFields } from '@desktop-client/spreadsheet';
 
 type BudgetTotalProps<
   CurrentField extends SheetFields<'tracking-budget'>,

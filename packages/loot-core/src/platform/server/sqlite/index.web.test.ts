@@ -3,11 +3,11 @@ import { patchFetchForSqlJS } from '../../../mocks/util';
 
 // oxlint-disable-next-line eslint/no-restricted-imports
 import {
+  execQuery,
   init,
   openDatabase,
-  transaction,
-  execQuery,
   runQuery,
+  transaction,
 } from './index.web';
 
 beforeAll(async () => {

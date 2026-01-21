@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -13,6 +13,7 @@ import {
   type NetWorthWidget,
 } from 'loot-core/types/models';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { Change } from '@desktop-client/components/reports/Change';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
@@ -167,7 +168,9 @@ export function NetWorthCard({
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  {format(data.netWorth, 'financial')}
+                  <FinancialText>
+                    {format(data.netWorth, 'financial')}
+                  </FinancialText>
                 </PrivacyFilter>
               </Block>
               <PrivacyFilter activationFilters={[!isCardHovered]}>

@@ -33,7 +33,7 @@ import {
   useServerVersion,
 } from '@desktop-client/components/ServerContext';
 import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 import { loggedIn } from '@desktop-client/users/usersSlice';
 
 function Version() {

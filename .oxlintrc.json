@@ -18,41 +18,11 @@
     "FS": "readonly"
   },
   "rules": {
-    // TODO fix all these and re-enable
-    "jsx-a11y/click-events-have-key-events": "off",
-    "jsx-a11y/prefer-tag-over-role": "off",
-    "jsx-a11y/tabindex-no-positive": "off",
-
     // Import sorting
-    // TODO replace once oxfmt supports this: https://github.com/oxc-project/oxc/issues/17076
-    "perfectionist/sort-imports": [
+    "perfectionist/sort-named-imports": [
       "warn",
       {
-        "groups": [
-          "react",
-          "builtin",
-          "external",
-          "loot-core",
-          "parent",
-          "sibling",
-          "index",
-          "desktop-client"
-        ],
-        "customGroups": [
-          {
-            "groupName": "react",
-            "elementNamePattern": "^react(-.*)?$"
-          },
-          {
-            "groupName": "loot-core",
-            "elementNamePattern": "^loot-core"
-          },
-          {
-            "groupName": "desktop-client",
-            "elementNamePattern": "^@desktop-client"
-          }
-        ],
-        "newlinesBetween": "always"
+        "groups": ["value-import", "type-import"]
       }
     ],
 

@@ -1,9 +1,9 @@
 import React, {
-  useState,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
-  useCallback,
+  useState,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
@@ -21,9 +21,10 @@ import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { type TimeFrame, type NetWorthWidget } from 'loot-core/types/models';
+import { type NetWorthWidget, type TimeFrame } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,
@@ -346,7 +347,11 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
           <View
             style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
           >
-            <PrivacyFilter>{format(data.netWorth, 'financial')}</PrivacyFilter>
+            <PrivacyFilter>
+              <FinancialText>
+                {format(data.netWorth, 'financial')}
+              </FinancialText>
+            </PrivacyFilter>
           </View>
           <PrivacyFilter>
             <Change amount={data.totalChange} />

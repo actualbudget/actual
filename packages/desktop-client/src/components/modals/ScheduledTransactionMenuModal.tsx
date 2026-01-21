@@ -14,8 +14,8 @@ import { View } from '@actual-app/components/view';
 import { format } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
-  scheduleIsRecurring,
   extractScheduleConds,
+  scheduleIsRecurring,
 } from 'loot-core/shared/schedules';
 
 import {

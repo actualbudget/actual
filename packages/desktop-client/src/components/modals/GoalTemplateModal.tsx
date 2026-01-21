@@ -10,7 +10,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { TableHeader, Row, Field } from '@desktop-client/components/table';
+import { Field, Row, TableHeader } from '@desktop-client/components/table';
 
 export function GoalTemplateModal() {
   const { t } = useTranslation();

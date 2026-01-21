@@ -3,8 +3,8 @@ import React, {
   useRef,
   useState,
   type ComponentProps,
-  type ReactNode,
   type CSSProperties,
+  type ReactNode,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -107,19 +107,19 @@ export function ReportCard({
   if (to) {
     return (
       <Layout {...layoutProps}>
-        <View
-          role="button"
-          onClick={isEditing || disableClick ? undefined : () => navigate(to)}
+        <Button
+          variant="bare"
+          onPress={isEditing || disableClick ? undefined : () => navigate(to)}
           style={{
             height: '100%',
             width: '100%',
-            ':hover': {
-              cursor: 'pointer',
-            },
+            background: 'transparent',
+            padding: 0,
+            textAlign: 'left',
           }}
         >
           {content}
-        </View>
+        </Button>
       </Layout>
     );
   }

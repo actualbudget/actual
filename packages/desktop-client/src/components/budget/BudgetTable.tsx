@@ -1,4 +1,4 @@
-import React, { type KeyboardEvent, useMemo, useState } from 'react';
+import React, { useMemo, useState, type KeyboardEvent } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -13,7 +13,7 @@ import {
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
-import { type MonthBounds, MonthsProvider } from './MonthsContext';
+import { MonthsProvider, type MonthBounds } from './MonthsContext';
 import {
   findSortDown,
   findSortUp,

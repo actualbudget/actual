@@ -1,4 +1,4 @@
-import { type ComponentPropsWithoutRef, useCallback } from 'react';
+import { useCallback, type ComponentPropsWithoutRef } from 'react';
 import { GridListItem } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 

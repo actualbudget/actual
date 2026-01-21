@@ -511,6 +511,14 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
       { name: 'format', description: 'Format' },
     ],
   },
+  FIXED: {
+    name: 'FIXED',
+    description: t('Formats a number to a fixed amount of decimal places.'),
+    parameters: [
+      { name: 'number', description: 'Number' },
+      { name: 'decimals', description: 'Decimals' },
+    ],
+  },
   REPT: {
     name: 'REPT',
     description: t('Repeats text specified number of times.'),

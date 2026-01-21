@@ -1,4 +1,4 @@
-import React, { type ReactNode, useRef, useState } from 'react';
+import React, { useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';

@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useInitialMount } from './useInitialMount';
 
 import { getAccounts } from '@desktop-client/accounts/accountsSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 export function useAccounts() {
   const dispatch = useDispatch();

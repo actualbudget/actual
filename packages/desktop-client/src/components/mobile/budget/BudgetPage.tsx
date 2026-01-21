@@ -30,6 +30,7 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { groupById } from 'loot-core/shared/util';
+import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { BudgetTable, PILL_STYLE } from './BudgetTable';
 
@@ -43,7 +44,9 @@ import {
   useSaveCategoryMutation,
   useSaveCategoryGroupMutation,
 } from '@desktop-client/budget';
+import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { prewarmMonth } from '@desktop-client/components/budget/util';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -471,7 +474,7 @@ export function BudgetPage() {
   );
 
   const onSwitchBudgetFile = useCallback(() => {
-    dispatch(pushModal({ modal: { name: 'budget-file-selection' } }));
+    dispatch(closeBudget());
   }, [dispatch]);
 
   const onOpenBudgetMonthMenu = useCallback(
@@ -687,7 +690,15 @@ function UncategorizedTransactionsBanner(props) {
         >
           <Trans count={transactions.length}>
             You have {{ count: transactions.length }} uncategorized transactions
-            ({{ amount: format(totalUncategorizedAmount, 'financial') }})
+            (
+            <FinancialText>
+              {
+                {
+                  amount: format(totalUncategorizedAmount, 'financial'),
+                } as TransObjectLiteral
+              }
+            </FinancialText>
+            )
           </Trans>
           <Button
             onPress={() => navigate('/categories/uncategorized')}
@@ -929,7 +940,14 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
             <Text>
               <Trans count={numberOfOverspentCategories}>
                 You have {{ count: numberOfOverspentCategories }} overspent
-                categories ({{ amount: format(totalOverspending, 'financial') }}
+                categories (
+                <FinancialText>
+                  {
+                    {
+                      amount: format(totalOverspending, 'financial'),
+                    } as TransObjectLiteral
+                  }
+                </FinancialText>
                 )
               </Trans>
             </Text>

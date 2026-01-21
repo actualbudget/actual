@@ -1,7 +1,7 @@
 import React, { type ReactNode } from 'react';
 import { Provider } from 'react-redux';
 
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
 
 import { type store as realStore } from './store';
 

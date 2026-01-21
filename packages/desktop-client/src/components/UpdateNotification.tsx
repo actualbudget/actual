@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 import { Link } from './common/Link';
 
 import { setAppState, updateApp } from '@desktop-client/app/appSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 export function UpdateNotification() {
   const { t } = useTranslation();

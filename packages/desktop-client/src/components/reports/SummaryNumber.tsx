@@ -1,12 +1,13 @@
-import React, { type Ref, useRef, useState } from 'react';
+import React, { useRef, useState, type Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import debounce from 'lodash/debounce';
 
-import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
@@ -75,9 +76,11 @@ export function SummaryNumber({
         <View
           ref={mergedRef as Ref<HTMLDivElement>}
           aria-label={
-            value < 0
-              ? t('Negative amount: {{amount}}', { amount: displayAmount })
-              : t('Positive amount: {{amount}}', { amount: displayAmount })
+            value === 0
+              ? t('Zero amount')
+              : value < 0
+                ? t('Negative amount: {{amount}}', { amount: displayAmount })
+                : t('Positive amount: {{amount}}', { amount: displayAmount })
           }
           style={{
             alignItems: 'center',
@@ -91,12 +94,17 @@ export function SummaryNumber({
             margin: `${CONTAINER_MARGIN}px 0`,
             justifyContent: 'center',
             transition: animate ? 'font-size 0.3s ease' : '',
-            color: value < 0 ? chartTheme.colors.red : chartTheme.colors.blue,
+            color:
+              value === 0
+                ? theme.reportsNumberNeutral
+                : value < 0
+                  ? theme.reportsNumberNegative
+                  : theme.reportsNumberPositive,
           }}
         >
-          <span aria-hidden="true">
+          <FinancialText aria-hidden="true">
             <PrivacyFilter>{displayAmount}</PrivacyFilter>
-          </span>
+          </FinancialText>
         </View>
       )}
     </>

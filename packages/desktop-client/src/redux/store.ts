@@ -22,9 +22,9 @@ import {
   reducer as modalsSliceReducer,
 } from '@desktop-client/modals/modalsSlice';
 import {
+  addNotification,
   name as notificationsSliceName,
   reducer as notificationsSliceReducer,
-  addNotification,
 } from '@desktop-client/notifications/notificationsSlice';
 import {
   name as payeesSliceName,

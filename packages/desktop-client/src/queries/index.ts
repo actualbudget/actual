@@ -1,15 +1,15 @@
 // @ts-strict-ignore
-import { parse as parseDate, isValid as isDateValid } from 'date-fns';
+import { isValid as isDateValid, parse as parseDate } from 'date-fns';
 
 import {
   dayFromDate,
-  getDayMonthRegex,
   getDayMonthFormat,
-  getShortYearRegex,
+  getDayMonthRegex,
   getShortYearFormat,
+  getShortYearRegex,
 } from 'loot-core/shared/months';
 import { q, type Query } from 'loot-core/shared/query';
-import { currencyToAmount, amountToInteger } from 'loot-core/shared/util';
+import { amountToInteger, currencyToAmount } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 

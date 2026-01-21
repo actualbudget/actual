@@ -1,15 +1,15 @@
 import { type ChangeEvent, type ReactNode } from 'react';
 import {
   ColorPicker as AriaColorPicker,
-  type ColorPickerProps as AriaColorPickerProps,
+  ColorSwatch as AriaColorSwatch,
+  ColorSwatchPicker as AriaColorSwatchPicker,
+  ColorField,
+  ColorSwatchPickerItem,
   Dialog,
   DialogTrigger,
-  ColorSwatch as AriaColorSwatch,
-  type ColorSwatchProps,
-  ColorSwatchPicker as AriaColorSwatchPicker,
-  ColorSwatchPickerItem,
-  ColorField,
   parseColor,
+  type ColorPickerProps as AriaColorPickerProps,
+  type ColorSwatchProps,
 } from 'react-aria-components';
 
 import { css } from '@emotion/css';

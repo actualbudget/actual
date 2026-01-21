@@ -1,5 +1,5 @@
-import React, { type ReactNode, useEffect } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import React, { useEffect, type ReactNode } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -43,7 +43,7 @@ import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { loadPrefs } from '@desktop-client/prefs/prefsSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 function About() {
   const version = useServerVersion();

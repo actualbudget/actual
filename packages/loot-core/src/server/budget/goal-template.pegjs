@@ -19,11 +19,11 @@ expr
   / template: template _ limit: limit
     { return { type: 'simple', monthly: null, limit, priority: template.priority, directive: template.directive }}
   / template: template _ schedule:schedule _ full:full? name:rawScheduleName modifiers:modifiers?
-    { return { type: 'schedule', name: name.trim(), priority: template.priority, directive: template.directive, full, adjustment: modifiers?.adjustment }}
+    { return { type: 'schedule', name: name.trim(), priority: template.priority, directive: template.directive, full, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType  }}
   / template: template _ remainder: remainder limit: limit?
     { return { type: 'remainder', priority: null, directive: template.directive, weight: remainder, limit }}
-  / template: template _ 'average'i _ amount: positive _ 'months'i?
-    { return { type: 'average', numMonths: +amount, priority: template.priority, directive: template.directive }}
+  / template: template _ 'average'i _ amount: positive _ 'months'i? modifiers:modifiers?
+    { return { type: 'average', numMonths: +amount, priority: template.priority, directive: template.directive, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType  }}
   / template: template _ 'copy from'i _ lookBack: positive _ 'months ago'i limit:limit?
     { return { type: 'copy', priority: template.priority, directive: template.directive, lookBack: +lookBack, limit }}
   / goal: goal amount: amount { return {type: 'goal', amount: amount, priority: null, directive: goal }}
@@ -31,10 +31,14 @@ expr
 modifiers = _ '[' modifier:modifier ']' { return modifier }
 
 modifier
-  = op:('increase'i / 'decrease'i) _ value:percent { 
+  = op:('increase'i / 'decrease'i) _ value:percentOrNumber {
       const multiplier = op.toLowerCase() === 'increase' ? 1 : -1;
-      return { adjustment: multiplier * +value }
+      return { adjustment: multiplier * +value.value, adjustmentType: value.type }
     }
+
+percentOrNumber
+  = value:$(d+ ('.' (d+)?)?) _? '%' { return { value: value, type: 'percent' } }
+  / value:$(d+ ('.' (d+)?)?) { return { value: value, type: 'fixed' } }
 
 repeat 'repeat interval'
   = 'month'i { return { annual: false }}

@@ -3,11 +3,11 @@ import mitt from 'mitt';
 
 import { logger } from '../../platform/server/log';
 import { type QueryState } from '../../shared/query';
-import { compileQuery, aqlCompiledQuery, schema, schemaConfig } from '../aql';
+import { aqlCompiledQuery, compileQuery, schema, schemaConfig } from '../aql';
 import { type BudgetType } from '../prefs';
 
 import { Graph } from './graph-data-structure';
-import { unresolveName, resolveName } from './util';
+import { resolveName, unresolveName } from './util';
 
 export type Node = {
   name: string;
