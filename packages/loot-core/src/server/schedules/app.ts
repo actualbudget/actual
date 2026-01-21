@@ -6,7 +6,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { captureBreadcrumb } from '../../platform/exceptions';
 import * as connection from '../../platform/server/connection';
 import { logger } from '../../platform/server/log';
-import { currentDay, dayFromDate, parseDate } from '../../shared/months';
+import {
+  addDays,
+  currentDay,
+  dayFromDate,
+  parseDate,
+} from '../../shared/months';
 import { q } from '../../shared/query';
 import {
   extractScheduleConds,
@@ -15,7 +20,9 @@ import {
   getNextDate,
   getScheduledAmount,
   getStatus,
+  getUpcomingDays,
   recurConfigToRSchedule,
+  scheduleIsRecurring,
 } from '../../shared/schedules';
 import { type ScheduleEntity } from '../../types/models';
 import { addTransactions } from '../accounts/sync';
@@ -524,6 +531,461 @@ async function advanceSchedulesService(syncSuccess) {
   }
 }
 
+/**
+ * Safely parse a value that might already be parsed or might be a JSON string.
+ * SQLite's json_extract returns primitives directly but objects/arrays as strings.
+ */
+function safeJsonParse<T>(value: unknown, defaultValue: T): T {
+  if (value == null) {
+    return defaultValue;
+  }
+  // If it's already the expected type (number, object, array), return it directly
+  if (typeof value !== 'string') {
+    return value as T;
+  }
+  // If it's a string, try to parse it as JSON
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return defaultValue;
+  }
+}
+
+/**
+ * Optimized query for fetching schedules for preview transactions.
+ * This bypasses the AQL layer for better performance by using simpler queries.
+ */
+async function getSchedulesForPreview({
+  accountId,
+}: {
+  accountId?: string;
+}): Promise<ScheduleEntity[]> {
+  // Step 1: Get all non-tombstoned schedules with their next_date (simple query)
+  const scheduleRows = await db.all<{
+    id: string;
+    name: string | null;
+    completed: number;
+    rule: string;
+    local_next_date: number | null;
+    local_next_date_ts: number | null;
+    base_next_date: number | null;
+    base_next_date_ts: number | null;
+  }>(`
+    SELECT
+      s.id,
+      s.name,
+      s.completed,
+      s.rule,
+      nd.local_next_date,
+      nd.local_next_date_ts,
+      nd.base_next_date,
+      nd.base_next_date_ts
+    FROM schedules s
+    LEFT JOIN schedules_next_date nd ON nd.schedule_id = s.id
+    WHERE s.tombstone = 0
+  `);
+
+  if (scheduleRows.length === 0) {
+    return [];
+  }
+
+  // Step 2: Get rule conditions/actions for all schedules in one query
+  const ruleIds = scheduleRows.map(s => s.rule).filter(Boolean);
+  const rulesMap = new Map<
+    string,
+    { conditions: string | null; actions: string | null }
+  >();
+
+  if (ruleIds.length > 0) {
+    const ruleRows = await db.all<{
+      id: string;
+      conditions: string | null;
+      actions: string | null;
+    }>(
+      `SELECT id, conditions, actions FROM rules WHERE id IN (${ruleIds.map(() => '?').join(',')})`,
+      ruleIds,
+    );
+    for (const row of ruleRows) {
+      rulesMap.set(row.id, {
+        conditions: row.conditions,
+        actions: row.actions,
+      });
+    }
+  }
+
+  // Step 3: Get JSON paths for all schedules
+  const scheduleIds = scheduleRows.map(s => s.id);
+  const pathsMap = new Map<
+    string,
+    {
+      payee: string | null;
+      account: string | null;
+      amount: string | null;
+      date: string | null;
+    }
+  >();
+
+  if (scheduleIds.length > 0) {
+    const pathRows = await db.all<{
+      schedule_id: string;
+      payee: string | null;
+      account: string | null;
+      amount: string | null;
+      date: string | null;
+    }>(
+      `SELECT schedule_id, payee, account, amount, date FROM schedules_json_paths WHERE schedule_id IN (${scheduleIds.map(() => '?').join(',')})`,
+      scheduleIds,
+    );
+    for (const row of pathRows) {
+      pathsMap.set(row.schedule_id, {
+        payee: row.payee,
+        account: row.account,
+        amount: row.amount,
+        date: row.date,
+      });
+    }
+  }
+
+  // Step 4: Get closed accounts to filter out
+  const closedAccountIds = new Set(
+    (
+      await db.all<{ id: string }>(`SELECT id FROM accounts WHERE closed = 1`)
+    ).map(a => a.id),
+  );
+
+  // Step 5: Get payee mappings and transfer accounts for filtering
+  const payeeMappings = new Map<
+    string,
+    { targetId: string; transfer_acct: string | null }
+  >();
+  const pmRows = await db.all<{
+    id: string;
+    targetId: string;
+    transfer_acct: string | null;
+  }>(
+    `SELECT pm.id, pm.targetId, p.transfer_acct
+     FROM payee_mapping pm
+     LEFT JOIN payees p ON p.id = pm.targetId`,
+  );
+  for (const row of pmRows) {
+    payeeMappings.set(row.id, {
+      targetId: row.targetId,
+      transfer_acct: row.transfer_acct,
+    });
+  }
+
+  // Step 6: Build the schedule entities in JS
+  const results: ScheduleEntity[] = [];
+
+  for (const row of scheduleRows) {
+    const rule = row.rule ? rulesMap.get(row.rule) : null;
+    const paths = pathsMap.get(row.id);
+    const conditions = rule?.conditions
+      ? safeJsonParse<Array<{ field: string; value: unknown; op?: string }>>(
+          rule.conditions,
+          [],
+        )
+      : [];
+    const actions = rule?.actions
+      ? safeJsonParse<unknown[]>(rule.actions, [])
+      : [];
+
+    // Extract values using paths
+    let _payee: string | null = null;
+    let _account: string | null = null;
+    let _amount: unknown = null;
+    let _amountOp: string | null = null;
+    let _date: unknown = null;
+
+    if (paths) {
+      // Find conditions by path indices
+      const payeeIdx = paths.payee
+        ? parseInt(paths.payee.match(/\$\[(\d+)\]/)?.[1] || '-1', 10)
+        : -1;
+      const accountIdx = paths.account
+        ? parseInt(paths.account.match(/\$\[(\d+)\]/)?.[1] || '-1', 10)
+        : -1;
+      const amountIdx = paths.amount
+        ? parseInt(paths.amount.match(/\$\[(\d+)\]/)?.[1] || '-1', 10)
+        : -1;
+      const dateIdx = paths.date
+        ? parseInt(paths.date.match(/\$\[(\d+)\]/)?.[1] || '-1', 10)
+        : -1;
+
+      if (payeeIdx >= 0 && payeeIdx < conditions.length) {
+        const payeeCondValue = conditions[payeeIdx]?.value as string;
+        const mapping = payeeMappings.get(payeeCondValue);
+        _payee = mapping?.targetId || payeeCondValue;
+      }
+      if (accountIdx >= 0 && accountIdx < conditions.length) {
+        _account = conditions[accountIdx]?.value as string;
+      }
+      if (amountIdx >= 0 && amountIdx < conditions.length) {
+        _amount = conditions[amountIdx]?.value;
+        _amountOp = (conditions[amountIdx]?.op as string) || null;
+      }
+      if (dateIdx >= 0 && dateIdx < conditions.length) {
+        _date = conditions[dateIdx]?.value;
+      }
+    }
+
+    // Filter out schedules with closed accounts
+    if (_account && closedAccountIds.has(_account)) {
+      continue;
+    }
+
+    // Filter by accountId if provided
+    if (accountId) {
+      const payeeCondIdx = paths?.payee
+        ? parseInt(paths.payee.match(/\$\[(\d+)\]/)?.[1] || '-1', 10)
+        : -1;
+      const payeeCondValue =
+        payeeCondIdx >= 0 && payeeCondIdx < conditions.length
+          ? (conditions[payeeCondIdx]?.value as string)
+          : null;
+      const mapping = payeeCondValue ? payeeMappings.get(payeeCondValue) : null;
+      const transferAcct = mapping?.transfer_acct;
+
+      if (_account !== accountId && transferAcct !== accountId) {
+        continue;
+      }
+    }
+
+    // Convert next_date from integer to string
+    const dateInt =
+      row.local_next_date_ts === row.base_next_date_ts
+        ? row.local_next_date
+        : row.base_next_date;
+    const nextDateStr = dateInt
+      ? `${String(dateInt).slice(0, 4)}-${String(dateInt).slice(4, 6)}-${String(dateInt).slice(6, 8)}`
+      : null;
+
+    results.push({
+      id: row.id,
+      name: row.name,
+      completed: row.completed === 1,
+      rule: row.rule,
+      next_date: nextDateStr,
+      _payee,
+      _account,
+      _amount,
+      _amountOp,
+      _date,
+      _conditions: conditions,
+      _actions: actions,
+    } as ScheduleEntity);
+  }
+
+  // Sort by next_date descending
+  results.sort((a, b) => {
+    if (!a.next_date && !b.next_date) return 0;
+    if (!a.next_date) return 1;
+    if (!b.next_date) return -1;
+    return b.next_date.localeCompare(a.next_date);
+  });
+
+  return results;
+}
+
+/**
+ * Combined endpoint that returns schedules AND their statuses in one call.
+ * This avoids the expensive second round-trip for status queries.
+ */
+async function getSchedulesWithStatuses({
+  accountId,
+  upcomingLength = '7',
+}: {
+  accountId?: string;
+  upcomingLength?: string;
+}): Promise<{
+  schedules: ScheduleEntity[];
+  statuses: Record<string, string>;
+}> {
+  // First get the schedules using our optimized query
+  const schedules = await getSchedulesForPreview({ accountId });
+
+  if (schedules.length === 0) {
+    return { schedules: [], statuses: {} };
+  }
+
+  // Build a single query to check all schedules at once
+  const scheduleIds = schedules.map(s => s.id);
+  const transWithSchedule = await db.all<{ schedule: string }>(
+    `SELECT DISTINCT schedule FROM transactions
+     WHERE schedule IN (${scheduleIds.map(() => '?').join(',')})
+       AND tombstone = 0`,
+    scheduleIds,
+  );
+
+  const hasTrans = new Set(transWithSchedule.map(t => t.schedule));
+
+  // Compute statuses
+  const statuses: Record<string, string> = {};
+  for (const schedule of schedules) {
+    statuses[schedule.id] = getStatus(
+      schedule.next_date || '',
+      schedule.completed,
+      hasTrans.has(schedule.id),
+      upcomingLength,
+    );
+  }
+
+  return { schedules, statuses };
+}
+
+/**
+ * MEGA endpoint: Fetches schedules, computes statuses, generates preview transactions,
+ * and applies rules - all in ONE call to minimize web worker round-trips.
+ */
+async function getPreviewTransactions({
+  accountId,
+  upcomingLength = '7',
+}: {
+  accountId?: string;
+  upcomingLength?: string;
+}): Promise<{
+  schedules: ScheduleEntity[];
+  statuses: Record<string, string>;
+  previewTransactions: Array<{
+    id: string;
+    payee: string;
+    account: string;
+    amount: number;
+    date: string;
+    schedule: string;
+    forceUpcoming: boolean;
+    category?: string;
+  }>;
+}> {
+  // Step 1: Get schedules with statuses
+  const { schedules, statuses } = await getSchedulesWithStatuses({
+    accountId,
+    upcomingLength,
+  });
+
+  if (schedules.length === 0) {
+    return { schedules: [], statuses: {}, previewTransactions: [] };
+  }
+
+  // Step 2: Filter schedules for preview (due, upcoming, missed, paid)
+  const schedulesForPreview = schedules.filter(s => {
+    const status = statuses[s.id];
+    return (
+      !s.completed && ['due', 'upcoming', 'missed', 'paid'].includes(status)
+    );
+  });
+
+  // Step 3: Generate preview transactions (expand recurring schedules)
+  const today = currentDay();
+  if (!today) {
+    return { schedules, statuses, previewTransactions: [] };
+  }
+  // Ensure upcomingLength has a default value
+  const safeUpcomingLength = upcomingLength || '7';
+  const upcomingDays = getUpcomingDays(safeUpcomingLength, today);
+  // Safeguard against NaN or invalid values
+  const safeDays =
+    Number.isFinite(upcomingDays) && upcomingDays > 0 ? upcomingDays : 7;
+  const upcomingPeriodEnd = addDays(today, safeDays);
+
+  const previewTransactionsRaw: Array<{
+    id: string;
+    payee: string;
+    account: string;
+    amount: number;
+    date: string;
+    schedule: string;
+    forceUpcoming: boolean;
+  }> = [];
+
+  for (const schedule of schedulesForPreview) {
+    const { date: dateConditions } = extractScheduleConds(schedule._conditions);
+    const status = statuses[schedule.id];
+    const isRecurring = scheduleIsRecurring(dateConditions);
+
+    const dates: string[] = schedule.next_date ? [schedule.next_date] : [];
+
+    if (isRecurring && schedule.next_date) {
+      let day = parseDate(schedule.next_date);
+      const endDate = parseDate(upcomingPeriodEnd);
+
+      while (day <= endDate) {
+        const nextDate = getNextDate(dateConditions, day);
+        const nextDateParsed = parseDate(nextDate);
+
+        if (nextDateParsed > endDate) break;
+
+        if (!dates.includes(nextDate)) {
+          dates.push(nextDate);
+        }
+
+        // Move to next day to continue searching
+        day = new Date(day.getTime() + 24 * 60 * 60 * 1000);
+      }
+    }
+
+    // If status is 'paid', remove the first date
+    if (status === 'paid' && dates.length > 0) {
+      dates.shift();
+    }
+
+    for (const date of dates) {
+      previewTransactionsRaw.push({
+        id: 'preview/' + schedule.id + '/' + date,
+        payee: schedule._payee || '',
+        account: schedule._account || '',
+        amount: getScheduledAmount(schedule._amount),
+        date,
+        schedule: schedule.id,
+        forceUpcoming: date !== schedule.next_date || status === 'paid',
+      });
+    }
+  }
+
+  // Sort by date descending, then by amount
+  previewTransactionsRaw.sort((a, b) => {
+    const dateCompare = b.date.localeCompare(a.date);
+    if (dateCompare !== 0) return dateCompare;
+    return a.amount - b.amount;
+  });
+
+  // Step 4: Apply rules to preview transactions
+  const { runRulesBatch } = await import('../transactions/transaction-rules');
+
+  const transactionsForRules = previewTransactionsRaw.map(t => ({
+    ...t,
+    imported_id: null,
+    imported_payee: null,
+    starting_balance_flag: false,
+    transfer_id: null,
+    sort_order: 0,
+    cleared: false,
+    reconciled: false,
+    tombstone: false,
+    is_parent: false,
+    is_child: false,
+    error: null,
+    parent_id: null,
+    notes: null,
+  }));
+
+  const ruledTransactions = await runRulesBatch(transactionsForRules);
+
+  // Extract just the fields we need
+  const previewTransactions = ruledTransactions.map((t, i) => ({
+    id: previewTransactionsRaw[i].id,
+    payee: t.payee || previewTransactionsRaw[i].payee,
+    account: t.account || previewTransactionsRaw[i].account,
+    amount: t.amount ?? previewTransactionsRaw[i].amount,
+    date: t.date || previewTransactionsRaw[i].date,
+    schedule: previewTransactionsRaw[i].schedule,
+    forceUpcoming: previewTransactionsRaw[i].forceUpcoming,
+    category: t.category,
+  }));
+
+  return { schedules, statuses, previewTransactions };
+}
+
 export type SchedulesHandlers = {
   'schedule/create': typeof createSchedule;
   'schedule/update': typeof updateSchedule;
@@ -533,6 +995,9 @@ export type SchedulesHandlers = {
   'schedule/force-run-service': typeof advanceSchedulesService;
   'schedule/discover': typeof discoverSchedules;
   'schedule/get-upcoming-dates': typeof getUpcomingDates;
+  'schedule/get-for-preview': typeof getSchedulesForPreview;
+  'schedule/get-with-statuses': typeof getSchedulesWithStatuses;
+  'schedule/get-preview-transactions': typeof getPreviewTransactions;
 };
 
 // Expose functions to the client
@@ -552,6 +1017,9 @@ app.method(
 );
 app.method('schedule/discover', discoverSchedules);
 app.method('schedule/get-upcoming-dates', getUpcomingDates);
+app.method('schedule/get-for-preview', getSchedulesForPreview);
+app.method('schedule/get-with-statuses', getSchedulesWithStatuses);
+app.method('schedule/get-preview-transactions', getPreviewTransactions);
 
 app.service(trackJSONPaths);
 

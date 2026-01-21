@@ -310,7 +310,6 @@ export async function getAllRuleIdsFromSchedules(
   return ruleIds;
 }
 
-// Runner
 export async function runRules(
   trans,
   accounts: Map<string, db.DbAccount> | null = null,
@@ -366,6 +365,93 @@ export async function runRules(
   }
 
   return await finalizeTransactionForRules(finalTrans);
+}
+
+/**
+ * Batched version of runRules that processes multiple transactions efficiently.
+ * This avoids redundant database queries by fetching shared data once.
+ */
+export async function runRulesBatch(
+  transactions: TransactionEntity[],
+): Promise<TransactionEntity[]> {
+  if (transactions.length === 0) {
+    return [];
+  }
+
+  // Fetch accounts once for all transactions
+  const accountsMap = new Map(
+    (await db.getAccounts()).map(account => [account.id, account]),
+  );
+
+  // Collect all unique schedule IDs
+  const scheduleIds = [
+    ...new Set(
+      transactions.map(t => t.schedule).filter((s): s is string => s != null),
+    ),
+  ];
+
+  // Batch fetch all schedule rule IDs
+  const scheduleRuleIdMap = new Map<string, string>();
+  if (scheduleIds.length > 0) {
+    const rows = await db.all<{ id: string; rule: string | null }>(
+      `SELECT id, rule FROM schedules WHERE id IN (${scheduleIds.map(() => '?').join(',')})`,
+      scheduleIds,
+    );
+    for (const row of rows) {
+      if (row.rule) {
+        scheduleRuleIdMap.set(row.id, row.rule);
+      }
+    }
+  }
+
+  // Fetch all rule IDs linked to schedules once (excluding none initially)
+  const allScheduleRuleIds = await getAllRuleIdsFromSchedules('');
+
+  // Process all transactions with the cached data
+  const results = await Promise.all(
+    transactions.map(async trans => {
+      let finalTrans = await prepareTransactionForRules(
+        { ...trans },
+        accountsMap,
+      );
+
+      let scheduleRuleID = '';
+      if (trans.schedule != null) {
+        scheduleRuleID = scheduleRuleIdMap.get(trans.schedule) || '';
+      }
+
+      // Filter out the current schedule's rule from the exclusion list
+      const RuleIdsLinkedToSchedules = scheduleRuleID
+        ? allScheduleRuleIds.filter(id => id !== scheduleRuleID)
+        : allScheduleRuleIds;
+
+      const rules = rankRules(
+        fastSetMerge(
+          firstcharIndexer.getApplicableRules(trans),
+          payeeIndexer.getApplicableRules(trans),
+        ),
+      );
+
+      for (let i = 0; i < rules.length; i++) {
+        if (scheduleRuleID !== '') {
+          if (rules[i].id === scheduleRuleID) {
+            const changes = rules[i].execActions(finalTrans);
+            finalTrans = Object.assign({}, finalTrans, changes);
+          } else if (RuleIdsLinkedToSchedules.includes(rules[i].id)) {
+            continue;
+          } else {
+            finalTrans = rules[i].apply(finalTrans);
+          }
+        } else {
+          finalTrans = rules[i].apply(finalTrans);
+        }
+      }
+
+      return await finalizeTransactionForRules(finalTrans);
+    }),
+  );
+
+  return results;
 }
 
 function conditionSpecialCases(cond: Condition | null): Condition | null {

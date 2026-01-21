@@ -13,11 +13,10 @@ import {
 import { markAccountRead } from '@desktop-client/accounts/accountsSlice';
 import { syncAndDownload } from '@desktop-client/app/appSlice';
 import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
-import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
+import { usePreviewTransactionsOptimized } from '@desktop-client/hooks/usePreviewTransactions';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import {
@@ -35,13 +34,10 @@ export function AccountTransactions({
 }: {
   readonly account: AccountEntity;
 }) {
-  const schedulesQuery = useMemo(
-    () => getSchedulesQuery(account.id),
-    [account.id],
-  );
-
+  // SchedulesProvider is still needed for child components (PayeeIcons etc)
+  // but we use the mega optimized endpoint for preview transactions
   return (
-    <SchedulesProvider query={schedulesQuery}>
+    <SchedulesProvider>
       <TransactionListWithPreviews account={account} />
     </SchedulesProvider>
   );
@@ -103,11 +99,12 @@ function TransactionListWithPreviews({
     },
   });
 
+  // Use the mega optimized endpoint that does everything in ONE server call
   const {
     previewTransactions,
     runningBalances: previewRunningBalances,
     isLoading: isPreviewTransactionsLoading,
-  } = useAccountPreviewTransactions({
+  } = usePreviewTransactionsOptimized({
     accountId: account?.id,
   });
 

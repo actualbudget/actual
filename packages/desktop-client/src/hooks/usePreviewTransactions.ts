@@ -162,12 +162,8 @@ export function usePreviewTransactions({
 
     setIsLoading(true);
 
-    Promise.all(
-      scheduleTransactions.map(transaction =>
-        // Kick off an async rules application
-        send('rules-run', { transaction }),
-      ),
-    )
+    // Use batched API to avoid N individual round-trips
+    send('rules-run-batch', { transactions: scheduleTransactions })
       .then(newTrans => {
         if (!isUnmounted) {
           const withDefaults = newTrans.map(t => ({
@@ -231,4 +227,102 @@ function isForPreview(schedule: ScheduleEntity, statuses: ScheduleStatuses) {
     !schedule.completed &&
     ['due', 'upcoming', 'missed', 'paid'].includes(status!)
   );
+}
+
+/**
+ * Optimized version that uses a single server call to get everything:
+ * schedules, statuses, preview transactions, and rules applied.
+ * This eliminates multiple round-trips to the web worker.
+ */
+export function usePreviewTransactionsOptimized({
+  accountId,
+  filter,
+}: {
+  accountId?: string;
+  filter?: (schedule: ScheduleEntity) => boolean;
+}): UsePreviewTransactionsResult {
+  const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | undefined>(undefined);
+  const [previewTransactions, setPreviewTransactions] = useState<
+    ReadonlyArray<TransactionEntity>
+  >([]);
+
+  useEffect(() => {
+    let isUnmounted = false;
+
+    async function loadPreviewTransactions() {
+      setIsLoading(true);
+      setError(undefined);
+
+      try {
+        const result = (await send('schedule/get-preview-transactions', {
+          accountId,
+          upcomingLength: upcomingLength ? String(upcomingLength) : '7',
+        })) as {
+          schedules: ScheduleEntity[];
+          statuses: Record<string, string>;
+          previewTransactions: Array<{
+            id: string;
+            payee: string;
+            account: string;
+            amount: number;
+            date: string;
+            schedule: string;
+            forceUpcoming: boolean;
+            category?: string;
+          }>;
+        };
+
+        if (isUnmounted) return;
+
+        // Apply client-side filter if provided
+        let filteredTransactions = result.previewTransactions;
+        if (filter) {
+          const scheduleMap = new Map(result.schedules.map(s => [s.id, s]));
+          filteredTransactions = filteredTransactions.filter(t => {
+            const schedule = scheduleMap.get(t.schedule);
+            return schedule ? filter(schedule) : true;
+          });
+        }
+
+        // Convert to TransactionEntity format
+        const transactions: TransactionEntity[] = filteredTransactions.map(
+          t => ({
+            id: t.id,
+            payee: t.payee,
+            account: t.account,
+            amount: t.amount,
+            date: t.date,
+            schedule: t.schedule,
+            category: t.category,
+            // Mark as preview transaction
+            _isPreview: true,
+            forceUpcoming: t.forceUpcoming,
+          }),
+        ) as TransactionEntity[];
+
+        setPreviewTransactions(transactions);
+        setIsLoading(false);
+      } catch (err) {
+        if (!isUnmounted) {
+          setError(err as Error);
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadPreviewTransactions();
+
+    return () => {
+      isUnmounted = true;
+    };
+  }, [accountId, upcomingLength, filter]);
+
+  return {
+    previewTransactions,
+    runningBalances: new Map(),
+    isLoading,
+    ...(error && { error }),
+  };
 }

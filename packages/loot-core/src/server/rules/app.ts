@@ -79,6 +79,7 @@ export type RulesHandlers = {
   'rules-get': typeof getRules;
   'rule-get': typeof getRule;
   'rules-run': typeof runRules;
+  'rules-run-batch': typeof runRulesBatch;
 };
 
 // Expose functions to the client
@@ -94,6 +95,7 @@ app.method('rule-add-payee-rename', mutator(addRulePayeeRename));
 app.method('rules-get', getRules);
 app.method('rule-get', getRule);
 app.method('rules-run', runRules);
+app.method('rules-run-batch', runRulesBatch);
 
 async function ruleValidate(
   rule: Partial<RuleEntity>,
@@ -190,4 +192,12 @@ async function runRules({
   transaction: TransactionEntity;
 }): Promise<TransactionEntity> {
   return rules.runRules(transaction);
+}
+
+async function runRulesBatch({
+  transactions,
+}: {
+  transactions: TransactionEntity[];
+}): Promise<TransactionEntity[]> {
+  return rules.runRulesBatch(transactions) as Promise<TransactionEntity[]>;
 }

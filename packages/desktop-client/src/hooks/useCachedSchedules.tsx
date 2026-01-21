@@ -6,6 +6,7 @@ import React, {
 
 import {
   useSchedules,
+  useSchedulesOptimized,
   type UseSchedulesProps,
   type UseSchedulesResult,
 } from './useSchedules';
@@ -22,6 +23,26 @@ type SchedulesProviderProps = PropsWithChildren<{
 
 export function SchedulesProvider({ query, children }: SchedulesProviderProps) {
   const data = useSchedules({ query });
+  return (
+    <SchedulesContext.Provider value={data}>
+      {children}
+    </SchedulesContext.Provider>
+  );
+}
+
+type SchedulesProviderOptimizedProps = PropsWithChildren<{
+  accountId?: string;
+}>;
+
+/**
+ * Optimized schedules provider that uses direct API calls
+ * instead of AQL liveQuery for better performance.
+ */
+export function SchedulesProviderOptimized({
+  accountId,
+  children,
+}: SchedulesProviderOptimizedProps) {
+  const data = useSchedulesOptimized({ accountId });
   return (
     <SchedulesContext.Provider value={data}>
       {children}
