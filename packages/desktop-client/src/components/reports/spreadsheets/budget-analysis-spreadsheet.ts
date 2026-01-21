@@ -208,13 +208,13 @@ export function createBudgetAnalysisSpreadsheet({
 
       // Update totals
       totalBudgeted += budgeted;
-      totalSpent += Math.abs(spent);
+      totalSpent += spent;
       totalOverspendingAdjustment += Math.abs(overspendingAdjustment);
 
       intervalData.push({
         date: month,
         budgeted,
-        spent: Math.abs(spent), // Display as positive
+        spent: spent, // Display as positive
         balance: monthBalance,
         overspendingAdjustment: Math.abs(overspendingAdjustment), // Display as positive
       });

@@ -130,7 +130,7 @@ function CustomTooltip({
                 <Trans>Spent:</Trans>
               </span>
             }
-            right={format(-data.spent, 'financial')}
+            right={format(data.spent, 'financial')}
           />
           <AlignedText
             left={
