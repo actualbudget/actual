@@ -18,7 +18,7 @@ import axios from 'axios';
 
 import { SecretName, secretsService } from '../../services/secrets-service';
 
-import { extractMerchantName, suggestCategory } from './merchant-extractor.ts';
+import { extractMerchantName, suggestCategory } from './merchant-extractor';
 
 const SOPHTRON_API_BASE = 'https://api.sophtron.com/api/';
 
