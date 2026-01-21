@@ -220,7 +220,8 @@ export function createCustomSpreadsheet({
             stackAmounts += netAmounts;
           }
 
-          stacked[item.name] = stackAmounts;
+          // Use id as key to prevent collisions when categories have the same name
+          stacked[item.id || item.name] = stackAmounts;
 
           perIntervalTotals += netAmounts;
 

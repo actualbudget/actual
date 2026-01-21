@@ -55,6 +55,7 @@ export function calculateLegend(
       id: item.id || '',
       name: item.name || '',
       color: getColor(item.data, index),
+      dataKey: item.id || item.name || '', // Use id for unique data lookup
     };
   });
   return legend;
