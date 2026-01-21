@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -20,6 +21,7 @@ import * as monthUtils from 'loot-core/shared/months';
 import { Container } from '@desktop-client/components/reports/Container';
 import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
+import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 /**
  * Interval data for the Budget Analysis graph.
@@ -182,6 +184,8 @@ export function BudgetAnalysisGraph({
   const { t } = useTranslation();
   const format = useFormat();
   const locale = useLocale();
+  const privacyMode = usePrivacyMode();
+  const [yAxisIsHovered, setYAxisIsHovered] = useState(false);
 
   // Centralize translated labels to avoid repetition
   const budgetedLabel = t('Budgeted');
@@ -224,7 +228,13 @@ export function BudgetAnalysisGraph({
             <YAxis
               tick={{ fill: theme.reportsLabel }}
               tickCount={8}
-              tickFormatter={value => format(value, 'financial-no-decimals')}
+              tickFormatter={value =>
+                privacyMode && !yAxisIsHovered
+                  ? '...'
+                  : format(value, 'financial-no-decimals')
+              }
+              onMouseEnter={() => setYAxisIsHovered(true)}
+              onMouseLeave={() => setYAxisIsHovered(false)}
               stroke={theme.pageTextSubdued}
             />
             <Tooltip
@@ -280,7 +290,13 @@ export function BudgetAnalysisGraph({
             <YAxis
               tick={{ fill: theme.reportsLabel }}
               tickCount={8}
-              tickFormatter={value => format(value, 'financial-no-decimals')}
+              tickFormatter={value =>
+                privacyMode && !yAxisIsHovered
+                  ? '...'
+                  : format(value, 'financial-no-decimals')
+              }
+              onMouseEnter={() => setYAxisIsHovered(true)}
+              onMouseLeave={() => setYAxisIsHovered(false)}
               stroke={theme.pageTextSubdued}
             />
             <Tooltip
