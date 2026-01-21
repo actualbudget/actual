@@ -92,7 +92,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
   const [graphType, setGraphType] = useState<'Line' | 'Bar'>(
-    widget?.meta?.graphType || 'Line',
+    widget?.meta?.graphType || 'Bar',
   );
   const [showBalance, setShowBalance] = useState(
     widget?.meta?.showBalance ?? true,
