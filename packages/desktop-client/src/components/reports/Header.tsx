@@ -297,7 +297,6 @@ export function Header({
                 compact={isNarrowWidth}
                 onApply={onApply}
                 hover={false}
-                // Exclude the provided list, fallback to category-only exclude set
                 exclude={
                   filterExclude
                 }
