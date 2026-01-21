@@ -7,7 +7,6 @@ import React, {
   type CSSProperties,
 } from 'react';
 import {
-  Collection,
   Header,
   ListBox,
   ListBoxSection,
@@ -160,6 +159,17 @@ export function TransactionList({
     ),
   );
 
+  // Memoize the layout instance for better performance
+  const layout = useMemo(
+    () =>
+      new ListLayout({
+        estimatedRowHeight: ROW_HEIGHT,
+        estimatedHeadingHeight: 30, // Header padding (4+4) + line height (~22px) ≈ 30px
+        padding: 0,
+      }),
+    [],
+  );
+
   return (
     <>
       {isLoading && (
@@ -169,13 +179,7 @@ export function TransactionList({
         />
       )}
       <View style={{ flex: 1, overflow: 'auto' }}>
-        <Virtualizer
-          layout={ListLayout}
-          layoutOptions={{
-            estimatedRowHeight: ROW_HEIGHT,
-            padding: 0,
-          }}
-        >
+        <Virtualizer layout={layout}>
           <ListBox
             aria-label={t('Transaction list')}
             selectionMode={
@@ -207,30 +211,29 @@ export function TransactionList({
             }
             items={sections}
           >
-            {section => (
-              <ListBoxSection>
-                <Header
-                  style={{
-                    ...styles.smallText,
-                    backgroundColor: theme.pageBackground,
-                    color: theme.tableHeaderText,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    paddingBottom: 4,
-                    paddingTop: 4,
-                    position: 'sticky',
-                    top: '0',
-                    width: '100%',
-                    zIndex: 10,
-                  }}
-                >
-                  {monthUtils.format(section.date, 'MMMM dd, yyyy', locale)}
-                </Header>
-                <Collection
-                  items={section.transactions.filter(
-                    t => !isPreviewId(t.id) || !t.is_child,
-                  )}
-                >
+            {section => {
+              const filteredTransactions = section.transactions.filter(
+                t => !isPreviewId(t.id) || !t.is_child,
+              );
+              return (
+                <ListBoxSection items={filteredTransactions}>
+                  <Header
+                    style={{
+                      ...styles.smallText,
+                      backgroundColor: theme.pageBackground,
+                      color: theme.tableHeaderText,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      paddingBottom: 4,
+                      paddingTop: 4,
+                      position: 'sticky',
+                      top: '0',
+                      width: '100%',
+                      zIndex: 10,
+                    }}
+                  >
+                    {monthUtils.format(section.date, 'MMMM dd, yyyy', locale)}
+                  </Header>
                   {transaction => (
                     <TransactionListItem
                       key={transaction.id}
@@ -241,9 +244,9 @@ export function TransactionList({
                       onLongPress={trans => onTransactionPress(trans, true)}
                     />
                   )}
-                </Collection>
-              </ListBoxSection>
-            )}
+                </ListBoxSection>
+              );
+            }}
           </ListBox>
         </Virtualizer>
       </View>
