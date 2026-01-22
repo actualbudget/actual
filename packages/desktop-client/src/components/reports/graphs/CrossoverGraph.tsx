@@ -219,7 +219,7 @@ export function CrossoverGraph({
                 type="monotone"
                 dataKey="investmentIncome"
                 dot={false}
-                stroke={theme.reportsBlue}
+                stroke={theme.reportsNumberPositive}
                 strokeWidth={2}
                 {...animationProps}
               />
@@ -227,7 +227,7 @@ export function CrossoverGraph({
                 type="monotone"
                 dataKey="expenses"
                 dot={false}
-                stroke={theme.reportsRed}
+                stroke={theme.reportsNumberNegative}
                 strokeWidth={2}
                 {...animationProps}
               />
@@ -235,7 +235,7 @@ export function CrossoverGraph({
                 type="monotone"
                 dataKey="adjustedExpenses"
                 dot={false}
-                stroke={theme.reportsRed}
+                stroke={theme.reportsNumberNegative}
                 strokeWidth={2}
                 strokeDasharray="5 5"
                 {...animationProps}

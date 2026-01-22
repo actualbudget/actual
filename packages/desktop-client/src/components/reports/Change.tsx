@@ -15,18 +15,23 @@ export function Change({
   style?: CSSProperties;
 }) {
   const format = useFormat();
-  const textStyle = {
-    ...styles.smallText,
-    color: amount < 0 ? theme.errorText : theme.noticeTextLight,
-    ...style,
-  };
 
   return (
-    <Block style={textStyle}>
-      <FinancialText style={textStyle}>
-        {amount >= 0 ? '+' : ''}
-        {format(amount, 'financial')}
-      </FinancialText>
-    </Block>
+    <FinancialText
+      as={Block}
+      style={{
+        ...styles.smallText,
+        color:
+          amount === 0
+            ? theme.reportsNumberNeutral
+            : amount < 0
+              ? theme.reportsNumberNegative
+              : theme.reportsNumberPositive,
+        ...style,
+      }}
+    >
+      {amount >= 0 ? '+' : ''}
+      {format(amount, 'financial')}
+    </FinancialText>
   );
 }

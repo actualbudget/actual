@@ -198,6 +198,10 @@ export const reportsGreen = colorPalette.green400;
 export const reportsGray = colorPalette.gray400;
 export const reportsLabel = pageText;
 export const reportsInnerLabel = colorPalette.navy800;
+export const reportsNumberNegative = reportsRed;
+export const reportsNumberNeutral = pageText;
+export const reportsNumberPositive = reportsGreen;
+export const reportsChartFill = reportsNumberPositive;
 
 export const noteTagBackground = colorPalette.purple700;
 export const noteTagBackgroundHover = colorPalette.purple500;

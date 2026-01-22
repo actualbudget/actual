@@ -290,7 +290,7 @@ export function SpendingGraph({
                 >
                   <stop
                     offset={gradientOffset()}
-                    stopColor={theme.reportsGreen}
+                    stopColor={theme.reportsChartFill}
                     stopOpacity={0.2}
                   />
                 </linearGradient>
@@ -303,7 +303,7 @@ export function SpendingGraph({
                 >
                   <stop
                     offset={gradientOffset()}
-                    stopColor={theme.reportsGreen}
+                    stopColor={theme.reportsChartFill}
                     stopOpacity={1}
                   />
                 </linearGradient>
@@ -313,7 +313,7 @@ export function SpendingGraph({
                 type="linear"
                 dot={false}
                 activeDot={{
-                  fill: theme.reportsGreen,
+                  fill: theme.reportsChartFill,
                   fillOpacity: 1,
                   r: 10,
                 }}
