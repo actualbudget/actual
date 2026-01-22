@@ -200,6 +200,7 @@ export const theme = {
   budgetNumberZero: 'var(--color-budgetNumberZero)',
   toBudgetPositive: 'var(--color-toBudgetPositive)',
   toBudgetZero: 'var(--color-toBudgetZero)',
+  toBudgetNegative: 'var(--color-toBudgetNegative)',
   templateNumberFunded: 'var(--color-templateNumberFunded)',
   templateNumberUnderFunded: 'var(--color-templateNumberUnderFunded)',
   noteTagBackground: 'var(--color-noteTagBackground)',
