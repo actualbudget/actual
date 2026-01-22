@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 import React, {
   useState,
-  type ComponentType,
   type ComponentPropsWithoutRef,
+  type ComponentType,
   type FormEvent,
 } from 'react';
 import { Form } from 'react-aria-components';

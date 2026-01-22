@@ -6,8 +6,8 @@ import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
 import {
-  type CategoryGroupEntity,
   type CategoryEntity,
+  type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';

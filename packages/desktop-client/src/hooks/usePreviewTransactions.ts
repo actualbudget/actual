@@ -1,15 +1,15 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { currentDay, addDays, parseDate } from 'loot-core/shared/months';
+import { addDays, currentDay, parseDate } from 'loot-core/shared/months';
 import {
-  getUpcomingDays,
   extractScheduleConds,
-  scheduleIsRecurring,
   getNextDate,
   getScheduledAmount,
+  getUpcomingDays,
+  scheduleIsRecurring,
 } from 'loot-core/shared/schedules';
 import { ungroupTransactions } from 'loot-core/shared/transactions';
 import { type IntegerAmount } from 'loot-core/shared/util';

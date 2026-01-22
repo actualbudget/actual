@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import {
-  makeClock,
-  setClock,
-  serializeClock,
   deserializeClock,
   makeClientId,
+  makeClock,
+  serializeClock,
+  setClock,
   Timestamp,
 } from '@actual-app/crdt';
 import { type Database } from '@jlongster/sql.js';
@@ -18,20 +18,20 @@ import { groupById } from '../../shared/util';
 import { type TransactionEntity } from '../../types/models';
 import { type WithRequired } from '../../types/util';
 import {
-  schema,
-  schemaConfig,
   convertForInsert,
   convertForUpdate,
   convertFromSelect,
+  schema,
+  schemaConfig,
 } from '../aql';
 import {
-  toDateRepr,
   accountModel,
-  categoryModel,
   categoryGroupModel,
+  categoryModel,
   payeeModel,
+  toDateRepr,
 } from '../models';
-import { sendMessages, batchMessages } from '../sync';
+import { batchMessages, sendMessages } from '../sync';
 
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
 import {

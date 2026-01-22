@@ -1,11 +1,11 @@
-import { parseISO, isValid as isDateValid } from 'date-fns';
+import { isValid as isDateValid, parseISO } from 'date-fns';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { currentDay } from 'loot-core/shared/months';
 import {
   amountToInteger,
-  type CurrencyAmount,
   integerToCurrencyWithDecimal,
+  type CurrencyAmount,
 } from 'loot-core/shared/util';
 import {
   type AccountEntity,

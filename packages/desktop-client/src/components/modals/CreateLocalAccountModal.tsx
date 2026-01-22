@@ -1,7 +1,7 @@
 // @ts-strict-ignore
-import { type FormEvent, useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Form } from 'react-aria-components';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { FormError } from '@actual-app/components/form-error';

@@ -1,4 +1,4 @@
-import React, { type RefObject, useEffect } from 'react';
+import React, { useEffect, type RefObject } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 

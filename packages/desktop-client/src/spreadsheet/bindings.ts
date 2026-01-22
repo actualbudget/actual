@@ -3,8 +3,8 @@ import type { AccountEntity, CategoryEntity } from 'loot-core/types/models';
 
 import {
   parametrizedField,
-  type SheetFields,
   type Binding,
+  type SheetFields,
   type SheetNames,
 } from '.';
 

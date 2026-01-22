@@ -1,14 +1,14 @@
 // @ts-strict-ignore
 import React, {
-  useState,
-  useEffectEvent,
   useEffect,
+  useEffectEvent,
   useMemo,
-  type SetStateAction,
+  useState,
   type CSSProperties,
+  type SetStateAction,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { animated, useSpring, to } from 'react-spring';
+import { animated, to, useSpring } from 'react-spring';
 import { useSwipeable } from 'react-swipeable';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -29,7 +29,7 @@ import {
   removeNotification,
   type NotificationWithId,
 } from '@desktop-client/notifications/notificationsSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 // Notification stacking configuration
 const MAX_VISIBLE_NOTIFICATIONS = 3; // Maximum number of notifications visible in the stack
@@ -387,6 +387,7 @@ export function Notifications({ style }: { style?: CSSProperties }) {
         right: notificationInset?.right || 13,
         left: notificationInset?.left || (isNarrowWidth ? 13 : undefined),
         zIndex: MODAL_Z_INDEX - 1,
+        width: isNarrowWidth ? undefined : 400,
         ...style,
       }}
     >

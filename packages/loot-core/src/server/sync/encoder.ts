@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { Timestamp, SyncProtoBuf } from '@actual-app/crdt';
+import { SyncProtoBuf, Timestamp } from '@actual-app/crdt';
 
 import { logger } from '../../platform/server/log';
 import * as encryption from '../encryption';

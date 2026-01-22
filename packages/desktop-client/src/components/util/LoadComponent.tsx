@@ -1,4 +1,4 @@
-import { type ComponentType, useEffect, useState } from 'react';
+import { useEffect, useState, type ComponentType } from 'react';
 
 import { Block } from '@actual-app/components/block';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';

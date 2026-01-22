@@ -17,9 +17,9 @@ import { NON_DRAGGABLE_AREA_CLASS_NAME } from '@desktop-client/components/report
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import {
+  markdownBaseStyles,
   remarkBreaks,
   sequentialNewlinesPlugin,
-  markdownBaseStyles,
 } from '@desktop-client/util/markdown';
 
 const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];

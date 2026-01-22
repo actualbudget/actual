@@ -1,7 +1,7 @@
 import React, {
-  type RefObject,
   useLayoutEffect,
   useRef,
+  type RefObject,
   type UIEventHandler,
 } from 'react';
 
@@ -10,9 +10,9 @@ import { type CSSProperties } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import {
-  type GroupedEntity,
-  type DataEntity,
   type balanceTypeOpType,
+  type DataEntity,
+  type GroupedEntity,
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
@@ -156,7 +156,7 @@ export function ReportTable({
           outline: 'none',
           '& .animated .animated-row': { transition: '.25s transform' },
         }}
-        tabIndex={1}
+        tabIndex={0}
       >
         <Block
           innerRef={listScrollRef}

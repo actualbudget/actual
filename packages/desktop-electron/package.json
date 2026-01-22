@@ -27,8 +27,8 @@
     "@types/fs-extra": "^11",
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
-    "electron": "38.3.0",
-    "electron-builder": "26.0.12",
+    "electron": "39.2.7",
+    "electron-builder": "26.4.0",
     "typescript": "^5.9.3"
   },
   "build": {

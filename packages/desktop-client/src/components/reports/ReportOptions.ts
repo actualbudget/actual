@@ -2,9 +2,9 @@ import { t } from 'i18next';
 
 import * as monthUtils from 'loot-core/shared/months';
 import {
-  type CustomReportEntity,
   type CategoryEntity,
   type CategoryGroupEntity,
+  type CustomReportEntity,
   type sortByOpType,
 } from 'loot-core/types/models';
 
