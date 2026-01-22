@@ -121,7 +121,7 @@ export function ElectronServerConfig({
   return (
     <>
       <Title text={t('Configure your server')} />
-      <div style={{ display: 'none' }}>test</div>
+      <div style={{ display: 'none' }}>test again</div>
       <View
         style={{
           display: 'flex',
