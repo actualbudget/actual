@@ -293,7 +293,7 @@ function QueryItem({
         .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM yyyy'),
         }))
         .reverse();
 

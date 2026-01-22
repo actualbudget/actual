@@ -102,7 +102,7 @@ export function CrossoverCard({
         .rangeInclusive(earliestDate, latestDate)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM yyyy'),
         }))
         .reverse();
 
