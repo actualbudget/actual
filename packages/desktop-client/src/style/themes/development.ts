@@ -48,6 +48,7 @@ export const budgetNumberNeutral = tableText;
 export const budgetNumberPositive = budgetNumberNeutral;
 export const templateNumberFunded = numberPositive;
 export const templateNumberUnderFunded = colorPalette.orange300;
+export const toBudgetPositive = numberPositive;
 
 export const sidebarBackground = colorPalette.navy900;
 export const sidebarItemBackgroundPending = colorPalette.orange200;
