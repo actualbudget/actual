@@ -56,6 +56,7 @@ export type CrossoverParams = {
   incomeAccountIds: AccountEntity['id'][]; // selected accounts for both historical returns and projections
   safeWithdrawalRate: number; // annual percent, e.g. 0.04 for 4%
   estimatedReturn?: number | null; // optional annual return to project future balances
+  expectedContribution?: number | null; // optional monthly contribution to project future balances
   projectionType: 'hampel' | 'median' | 'mean'; // expense projection method
   expenseAdjustmentFactor?: number; // multiplier for expenses (default 1.0)
 };
@@ -67,6 +68,7 @@ export function createCrossoverSpreadsheet({
   incomeAccountIds,
   safeWithdrawalRate,
   estimatedReturn,
+  expectedContribution,
   projectionType,
   expenseAdjustmentFactor,
 }: CrossoverParams) {
@@ -175,6 +177,7 @@ export function createCrossoverSpreadsheet({
           incomeAccountIds,
           safeWithdrawalRate,
           estimatedReturn,
+          expectedContribution,
           projectionType,
           expenseAdjustmentFactor,
         },
@@ -194,6 +197,7 @@ function recalculate(
     | 'incomeAccountIds'
     | 'safeWithdrawalRate'
     | 'estimatedReturn'
+    | 'expectedContribution'
     | 'projectionType'
     | 'expenseAdjustmentFactor'
   >,
@@ -310,6 +314,11 @@ function recalculate(
     }
   }
 
+  // Use user-provided contribution, or default to 0
+  // (We don't use historical contribution as default because the historical
+  // return calculation already includes contributions)
+  const monthlyContribution = params.expectedContribution ?? 0;
+
   if (months.length > 0) {
     // If no explicit return provided, use the calculated default
     if (monthlyReturn == null) {
@@ -337,10 +346,15 @@ function recalculate(
 
     for (let i = 1; i <= maxProjectionMonths; i++) {
       monthCursor = d.addMonths(monthCursor, 1);
-      // grow balance
+
+      // Add contribution BEFORE applying growth
+      projectedBalance = projectedBalance + monthlyContribution;
+
+      // Then grow balance
       if (monthlyReturn != null) {
         projectedBalance = projectedBalance * (1 + monthlyReturn);
       }
+
       const projectedIncome = projectedBalance * monthlySWR;
 
       const projectedExpenses = Math.max(0, flatExpense);

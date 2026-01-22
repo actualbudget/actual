@@ -208,6 +208,7 @@ export function SimpleTransactionsTable({
   return (
     <Table
       style={style}
+      backgroundColor={theme.tableBackground}
       items={serializedTransactions}
       renderEmpty={renderEmpty}
       headers={
