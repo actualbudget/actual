@@ -72,7 +72,7 @@ export function Saved({ projected, style }: SavedProps) {
         <View
           className={css({
             fontSize: 25,
-            color: projected
+            color: saved
               ? theme.templateNumberUnderFunded
               : isNegative
                 ? theme.budgetNumberNegative
