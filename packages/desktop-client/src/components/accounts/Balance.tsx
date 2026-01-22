@@ -233,9 +233,9 @@ export function Balances({
                 fontWeight: 400,
                 color:
                   props.value < 0
-                    ? theme.errorText
+                    ? theme.numberNegative
                     : props.value > 0
-                      ? theme.noticeTextLight
+                      ? theme.numberPositive
                       : theme.pageTextSubdued,
               }}
             />
