@@ -10,6 +10,7 @@ import * as monthUtils from 'loot-core/shared/months';
 import { type BudgetAnalysisWidget } from 'loot-core/types/models';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
 import { BudgetAnalysisGraph } from '@desktop-client/components/reports/graphs/BudgetAnalysisGraph';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
@@ -142,9 +143,11 @@ export function BudgetAnalysisCard({
                   color: balance >= 0 ? theme.noticeTextLight : theme.errorText,
                 }}
               >
-                <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  {format(balance, 'financial')}
-                </PrivacyFilter>
+                <FinancialText>
+                  <PrivacyFilter activationFilters={[!isCardHovered]}>
+                    {format(balance, 'financial')}
+                  </PrivacyFilter>
+                </FinancialText>
               </Block>
             </View>
           )}

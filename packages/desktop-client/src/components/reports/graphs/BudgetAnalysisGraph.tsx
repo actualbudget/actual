@@ -20,6 +20,7 @@ import * as monthUtils from 'loot-core/shared/months';
 
 import { Container } from '@desktop-client/components/reports/Container';
 import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -116,7 +117,7 @@ function CustomTooltip({
                 <Trans>Budgeted:</Trans>
               </span>
             }
-            right={format(data.budgeted, 'financial')}
+            right={<FinancialText>{format(data.budgeted, 'financial')}</FinancialText>}
           />
           <AlignedText
             left={
@@ -132,7 +133,7 @@ function CustomTooltip({
                 <Trans>Spent:</Trans>
               </span>
             }
-            right={format(data.spent, 'financial')}
+            right={<FinancialText>{format(data.spent, 'financial')}</FinancialText>}
           />
           <AlignedText
             left={
@@ -148,25 +149,33 @@ function CustomTooltip({
                 {t('Overspending Adjustment:')}
               </span>
             }
-            right={format(data.overspendingAdjustment, 'financial')}
+            right={
+              <FinancialText>
+                {format(data.overspendingAdjustment, 'financial')}
+              </FinancialText>
+            }
           />
           {showBalance && (
-            <AlignedText
-              left={
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <span
-                    style={{
-                      width: 10,
-                      height: 10,
-                      backgroundColor: theme.pageTextLight,
-                      display: 'inline-block',
-                    }}
-                  />
-                  <Trans>Balance:</Trans>
-                </span>
-              }
-              right={<strong>{format(data.balance, 'financial')}</strong>}
-            />
+              <AlignedText
+                left={
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <span
+                      style={{
+                        width: 10,
+                        height: 10,
+                        backgroundColor: theme.pageTextLight,
+                        display: 'inline-block',
+                      }}
+                    />
+                    <Trans>Balance:</Trans>
+                  </span>
+                }
+                right={
+                  <FinancialText>
+                    <strong>{format(data.balance, 'financial')}</strong>
+                  </FinancialText>
+                }
+              />
           )}
         </div>
       </div>

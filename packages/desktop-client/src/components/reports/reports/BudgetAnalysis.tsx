@@ -3,12 +3,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgChartBar, SvgChart } from '@actual-app/components/icons/v1';
 import { Paragraph } from '@actual-app/components/paragraph';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
@@ -404,11 +404,11 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                             </Block>
                           }
                           right={
-                            <Text style={{ fontWeight: 600 }}>
+                            <FinancialText style={{ fontWeight: 600 }}>
                               <PrivacyFilter>
                                 {format(data.totalBudgeted, 'financial')}
                               </PrivacyFilter>
-                            </Text>
+                            </FinancialText>
                           }
                         />
                         <AlignedText
@@ -419,11 +419,11 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                             </Block>
                           }
                           right={
-                            <Text style={{ fontWeight: 600 }}>
+                            <FinancialText style={{ fontWeight: 600 }}>
                               <PrivacyFilter>
                                 {format(data.totalSpent, 'financial')}
                               </PrivacyFilter>
-                            </Text>
+                            </FinancialText>
                           }
                         />
                         <AlignedText
@@ -434,14 +434,14 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                             </Block>
                           }
                           right={
-                            <Text style={{ fontWeight: 600 }}>
+                            <FinancialText style={{ fontWeight: 600 }}>
                               <PrivacyFilter>
                                 {format(
                                   data.totalOverspendingAdjustment,
                                   'financial',
                                 )}
                               </PrivacyFilter>
-                            </Text>
+                            </FinancialText>
                           }
                         />
                         {showBalance && (
@@ -453,11 +453,11 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                               </Block>
                             }
                             right={
-                              <Text style={{ fontWeight: 600 }}>
+                              <FinancialText style={{ fontWeight: 600 }}>
                                 <PrivacyFilter>
                                   <Change amount={endingBalance} />
                                 </PrivacyFilter>
-                              </Text>
+                              </FinancialText>
                             }
                           />
                         )}
