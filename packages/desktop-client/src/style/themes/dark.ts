@@ -47,6 +47,7 @@ export const sidebarItemAccentSelected = colorPalette.purple200;
 export const sidebarItemBackgroundHover = colorPalette.navy700;
 export const sidebarItemText = colorPalette.navy150;
 export const sidebarItemTextSelected = colorPalette.purple200;
+export const sidebarBudgetName = colorPalette.navy300;
 
 export const menuBackground = colorPalette.navy800;
 export const menuItemBackground = colorPalette.navy800;
@@ -197,6 +198,10 @@ export const reportsGreen = colorPalette.green400;
 export const reportsGray = colorPalette.gray400;
 export const reportsLabel = pageText;
 export const reportsInnerLabel = colorPalette.navy800;
+export const reportsNumberNegative = reportsRed;
+export const reportsNumberNeutral = pageText;
+export const reportsNumberPositive = reportsGreen;
+export const reportsChartFill = reportsNumberPositive;
 
 export const noteTagBackground = colorPalette.purple700;
 export const noteTagBackgroundHover = colorPalette.purple500;
@@ -217,3 +222,5 @@ export const tooltipBackground = colorPalette.navy800;
 export const tooltipBorder = colorPalette.navy700;
 
 export const calendarCellBackground = colorPalette.navy900;
+
+export const overlayBackground = 'rgba(0, 0, 0, 0.3)';

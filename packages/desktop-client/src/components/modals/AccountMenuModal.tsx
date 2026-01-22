@@ -1,9 +1,9 @@
 import {
-  type ComponentProps,
-  type CSSProperties,
   Fragment,
   useRef,
   useState,
+  type ComponentProps,
+  type CSSProperties,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 

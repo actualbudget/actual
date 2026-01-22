@@ -2,7 +2,7 @@
 import * as CRDT from '@actual-app/crdt';
 
 import { createTestBudget } from '../../mocks/budget';
-import { captureException, captureBreadcrumb } from '../../platform/exceptions';
+import { captureBreadcrumb, captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
 import * as fs from '../../platform/server/fs';
@@ -20,7 +20,7 @@ import { mutator } from '../mutators';
 import * as prefs from '../prefs';
 import { getServer } from '../server-config';
 import * as sheet from '../sheet';
-import { setSyncingMode, initialFullSync, clearFullSyncTimeout } from '../sync';
+import { clearFullSyncTimeout, initialFullSync, setSyncingMode } from '../sync';
 import * as syncMigrations from '../sync/migrate';
 import * as rules from '../transactions/transaction-rules';
 import { clearUndo } from '../undo';
@@ -32,9 +32,9 @@ import {
 } from '../util/budget-name';
 
 import {
-  getAvailableBackups,
-  makeBackup as _makeBackup,
   loadBackup as _loadBackup,
+  makeBackup as _makeBackup,
+  getAvailableBackups,
   startBackupService,
   stopBackupService,
 } from './backups';
@@ -47,7 +47,6 @@ export type BudgetFileHandlers = {
   'unique-budget-name': typeof handleUniqueBudgetName;
   'get-budgets': typeof getBudgets;
   'get-remote-files': typeof getRemoteFiles;
-  'get-user-file-info': typeof getUserFileInfo;
   'reset-budget-cache': typeof resetBudgetCache;
   'upload-budget': typeof uploadBudget;
   'download-budget': typeof downloadBudget;
@@ -72,7 +71,6 @@ app.method('validate-budget-name', handleValidateBudgetName);
 app.method('unique-budget-name', handleUniqueBudgetName);
 app.method('get-budgets', getBudgets);
 app.method('get-remote-files', getRemoteFiles);
-app.method('get-user-file-info', getUserFileInfo);
 app.method('reset-budget-cache', mutator(resetBudgetCache));
 app.method('upload-budget', uploadBudget);
 app.method('download-budget', downloadBudget);
@@ -138,10 +136,6 @@ async function getBudgets() {
 
 async function getRemoteFiles() {
   return cloudStorage.listRemoteFiles();
-}
-
-async function getUserFileInfo(fileId: string) {
-  return cloudStorage.getRemoteFile(fileId);
 }
 
 async function resetBudgetCache() {

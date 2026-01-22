@@ -1,7 +1,7 @@
 import React, {
+  type CSSProperties,
   type RefObject,
   type UIEventHandler,
-  type CSSProperties,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,7 +14,7 @@ import {
 } from 'loot-core/types/models';
 
 import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
-import { Row, Cell } from '@desktop-client/components/table';
+import { Cell, Row } from '@desktop-client/components/table';
 
 type ReportTableHeaderProps = {
   groupBy: string;

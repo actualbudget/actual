@@ -1,8 +1,8 @@
 import { Trans } from 'react-i18next';
 
 import type {
-  CopyTemplate,
   AverageTemplate,
+  CopyTemplate,
 } from 'loot-core/types/models/templates';
 
 type HistoricalAutomationReadOnlyProps = {

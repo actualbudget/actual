@@ -9,13 +9,13 @@ import { logger } from '../../platform/server/log';
 import * as sqlite from '../../platform/server/sqlite';
 
 import {
-  getMigrationsDir,
-  withMigrationsDir,
-  getUpMigration,
-  getMigrationList,
   getAppliedMigrations,
+  getMigrationList,
+  getMigrationsDir,
   getPending,
+  getUpMigration,
   migrate,
+  withMigrationsDir,
 } from './migrations';
 
 const argv = yargs()

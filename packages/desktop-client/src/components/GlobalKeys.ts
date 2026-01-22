@@ -36,7 +36,7 @@ export function GlobalKeys() {
     document.addEventListener('keydown', handleKeys);
 
     return () => document.removeEventListener('keydown', handleKeys);
-  }, []);
+  }, [navigate]);
 
   return null;
 }

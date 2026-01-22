@@ -13,7 +13,7 @@ import {
   type TransactionDirection,
 } from './EditSyncAccount';
 
-import { Row, Cell, TableHeader } from '@desktop-client/components/table';
+import { Cell, Row, TableHeader } from '@desktop-client/components/table';
 
 const useTransactionDirectionOptions = () => {
   const { t } = useTranslation();

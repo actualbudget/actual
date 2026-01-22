@@ -2,7 +2,7 @@
 import React, { useState, type CSSProperties } from 'react';
 
 import { theme } from '@actual-app/components/theme';
-import { PieChart, Pie, Cell, Sector, Tooltip } from 'recharts';
+import { Cell, Pie, PieChart, Sector, Tooltip } from 'recharts';
 
 import {
   type balanceTypeOpType,
@@ -16,6 +16,7 @@ import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
@@ -60,7 +61,8 @@ const ActiveShapeMobile = props => {
         {`${yAxis}`}
       </text>
       <PrivacyFilter>
-        <text
+        <FinancialText
+          as="text"
           x={cx + outerRadius * Math.cos(-RADIAN * 240) - 30}
           y={ey}
           dy={0}
@@ -68,7 +70,7 @@ const ActiveShapeMobile = props => {
           fill={fill}
         >
           {`${format(value, 'financial')}`}
-        </text>
+        </FinancialText>
         <text
           x={cx + outerRadius * Math.cos(-RADIAN * 330) + 10}
           y={ey}
@@ -164,13 +166,16 @@ const ActiveShape = props => {
         fill={fill}
       >{`${yAxis}`}</text>
       <PrivacyFilter>
-        <text
+        <FinancialText
+          as="text"
           x={ex + (cos <= 0 ? 1 : -1) * 16}
           y={ey}
           dy={18}
           textAnchor={textAnchor}
           fill={fill}
-        >{`${format(value, 'financial')}`}</text>
+        >
+          {`${format(value, 'financial')}`}
+        </FinancialText>
         <text
           x={ex + (cos <= 0 ? 1 : -1) * 16}
           y={ey}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -9,6 +9,7 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from 'loot-core/shared/months';
 import { type SpendingWidget } from 'loot-core/types/models';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
 import { SpendingGraph } from '@desktop-client/components/reports/graphs/SpendingGraph';
@@ -18,6 +19,7 @@ import { ReportCardName } from '@desktop-client/components/reports/ReportCardNam
 import { calculateSpendingReportTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpendingSpreadsheet } from '@desktop-client/components/reports/spreadsheets/spending-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type SpendingCardProps = {
@@ -26,6 +28,7 @@ type SpendingCardProps = {
   meta?: SpendingWidget['meta'];
   onMetaChange: (newMeta: SpendingWidget['meta']) => void;
   onRemove: () => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function SpendingCard({
@@ -34,12 +37,17 @@ export function SpendingCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onCopy,
 }: SpendingCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
+
   const spendingReportMode = meta?.mode ?? 'single-month';
 
   const [compare, compareTo] = calculateSpendingReportTimeRange(meta ?? {});
@@ -83,8 +91,10 @@ export function SpendingCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -129,17 +139,20 @@ export function SpendingCard({
                   ...styles.mediumText,
                   fontWeight: 500,
                   marginBottom: 5,
-                  color: !difference
-                    ? 'inherit'
-                    : difference <= 0
-                      ? theme.noticeTextLight
-                      : theme.errorText,
+                  color:
+                    difference === 0 || difference == null
+                      ? theme.reportsNumberNeutral
+                      : difference > 0
+                        ? theme.reportsNumberPositive
+                        : theme.reportsNumberNegative,
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  {data &&
-                    (difference && difference > 0 ? '+' : '') +
-                      format(difference || 0, 'financial')}
+                  <FinancialText>
+                    {data &&
+                      (difference && difference > 0 ? '+' : '') +
+                        format(difference || 0, 'financial')}
+                  </FinancialText>
                 </PrivacyFilter>
               </Block>
             </View>

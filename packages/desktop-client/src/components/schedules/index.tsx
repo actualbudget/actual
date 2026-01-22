@@ -9,7 +9,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 import { type ScheduleEntity } from 'loot-core/types/models';
 
-import { type ScheduleItemAction, SchedulesTable } from './SchedulesTable';
+import { SchedulesTable, type ScheduleItemAction } from './SchedulesTable';
 
 import { Search } from '@desktop-client/components/common/Search';
 import { Page } from '@desktop-client/components/Page';

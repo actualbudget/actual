@@ -1,8 +1,8 @@
 import React, {
-  type ComponentProps,
-  type ReactNode,
   useRef,
   useState,
+  type ComponentProps,
+  type ReactNode,
 } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';

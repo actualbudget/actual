@@ -1,11 +1,11 @@
-import { type ComponentPropsWithoutRef, useCallback, useMemo } from 'react';
+import { useCallback, useMemo, type ComponentPropsWithoutRef } from 'react';
 import { GridListItem } from 'react-aria-components';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
 import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { SvgCheveronRight } from '@actual-app/components/icons/v1';
-import { type CSSProperties, styles } from '@actual-app/components/styles';
+import { styles, type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -287,6 +287,7 @@ function ExpenseGroupCells({
   const columnWidth = getColumnWidth({ show3Columns });
 
   const amountStyle: CSSProperties = {
+    ...styles.tnum,
     width: columnWidth,
     fontSize: 12,
     fontWeight: '500',

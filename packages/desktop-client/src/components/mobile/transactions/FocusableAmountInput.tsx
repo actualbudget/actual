@@ -1,12 +1,12 @@
 import React, {
-  type Ref,
-  type ComponentPropsWithRef,
-  type HTMLProps,
   memo,
   useEffect,
   useRef,
   useState,
+  type ComponentPropsWithRef,
   type CSSProperties,
+  type HTMLProps,
+  type Ref,
 } from 'react';
 
 import { Button } from '@actual-app/components/button';

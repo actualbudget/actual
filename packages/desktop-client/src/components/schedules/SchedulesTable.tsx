@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useRef, useMemo, type CSSProperties } from 'react';
+import React, { useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -18,24 +18,24 @@ import { type ScheduleEntity } from 'loot-core/types/models';
 
 import { StatusBadge } from './StatusBadge';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import {
+  Cell,
+  Field,
+  Row,
   Table,
   TableHeader,
-  Row,
-  Field,
-  Cell,
 } from '@desktop-client/components/table';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
-  type ScheduleStatusType,
   type ScheduleStatuses,
+  type ScheduleStatusType,
 } from '@desktop-client/hooks/useSchedules';
 
 type SchedulesTableProps = {
@@ -45,11 +45,21 @@ type SchedulesTableProps = {
   filter: string;
   allowCompleted: boolean;
   onSelect: (id: ScheduleEntity['id']) => void;
-  onAction: (actionName: ScheduleItemAction, id: ScheduleEntity['id']) => void;
   style: CSSProperties;
-  minimal?: boolean;
   tableStyle?: CSSProperties;
-};
+} & (
+  | {
+      minimal: true;
+      onAction?: never;
+    }
+  | {
+      minimal?: false;
+      onAction: (
+        actionName: ScheduleItemAction,
+        id: ScheduleEntity['id'],
+      ) => void;
+    }
+);
 
 type CompletedScheduleItem = { id: 'show-completed' };
 type SchedulesTableItem = ScheduleEntity | CompletedScheduleItem;
@@ -165,7 +175,7 @@ export function ScheduleAmountCell({
           ~
         </View>
       )}
-      <Text
+      <FinancialText
         style={{
           flex: 1,
           color: num > 0 ? theme.noticeTextLight : theme.tableText,
@@ -182,7 +192,7 @@ export function ScheduleAmountCell({
         <PrivacyFilter>
           {num > 0 ? `+${currencyAmount}` : `${currencyAmount}`}
         </PrivacyFilter>
-      </Text>
+      </FinancialText>
     </Cell>
   );
 }
@@ -326,9 +336,7 @@ export function SchedulesTable({
   const format = useFormat();
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [showCompleted = false, setShowCompleted] = useLocalPref(
-    'schedules.showCompleted',
-  );
+  const [showCompleted, setShowCompleted] = useState(false);
 
   const payees = usePayees();
   const accounts = useAccounts();
@@ -366,7 +374,7 @@ export function SchedulesTable({
         filterIncludes(dateStr)
       );
     });
-  }, [payees, accounts, schedules, filter, statuses]);
+  }, [payees, accounts, schedules, filter, statuses, format, dateFormat]);
 
   const items: readonly SchedulesTableItem[] = useMemo(() => {
     const unCompletedSchedules = filteredSchedules.filter(s => !s.completed);

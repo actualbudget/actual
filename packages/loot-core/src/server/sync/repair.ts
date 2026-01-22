@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { serializeClock, getClock, Timestamp, merkle } from '@actual-app/crdt';
+import { getClock, merkle, serializeClock, Timestamp } from '@actual-app/crdt';
 
 import * as db from '../db';
 

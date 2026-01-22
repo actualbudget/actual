@@ -2,16 +2,16 @@ import { useState } from 'react';
 
 import {
   defaultMappings,
-  type Mappings,
   mappingsFromString,
   mappingsToString,
+  type Mappings,
 } from 'loot-core/server/util/custom-sync-mapping';
 import { q } from 'loot-core/shared/query';
 
 import {
-  type TransactionDirection,
-  type MappableFieldWithExample,
   getFields,
+  type MappableFieldWithExample,
+  type TransactionDirection,
 } from './EditSyncAccount';
 
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
