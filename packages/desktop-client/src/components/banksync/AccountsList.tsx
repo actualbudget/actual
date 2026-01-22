@@ -31,6 +31,7 @@ export function AccountsList({
     <View
       style={{
         minHeight: 'initial',
+        marginBottom: -1,
       }}
     >
       {accounts.map(account => {
