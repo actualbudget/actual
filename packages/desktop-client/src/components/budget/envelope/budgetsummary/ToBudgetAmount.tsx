@@ -86,13 +86,13 @@ export function ToBudgetAmount({
                   cursor: 'pointer',
                   color: isNegative
                     ? theme.budgetNumberNegative
-                    : theme.numberPositive,
+                    : theme.toBudgetPositive,
                   marginBottom: -1,
                   borderBottom: '1px solid transparent',
                   ':hover': {
                     borderColor: isNegative
                       ? theme.budgetNumberNegative
-                      : theme.numberPositive,
+                      : theme.toBudgetPositive,
                   },
                 },
                 amountStyle,
