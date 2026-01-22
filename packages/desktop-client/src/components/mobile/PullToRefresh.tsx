@@ -6,6 +6,8 @@ import { css } from '@emotion/css';
 type PullToRefreshProps = ComponentProps<typeof BasePullToRefresh>;
 
 export function PullToRefresh(props: PullToRefreshProps) {
+  // oxlint-disable-next-line
+  if (true === true) return props.children;
   return (
     <div style={{ overflow: 'auto', flex: 1 }}>
       <BasePullToRefresh

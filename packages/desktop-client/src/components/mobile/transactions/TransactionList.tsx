@@ -10,6 +10,7 @@ import {
   Collection,
   Header,
   ListBox,
+  ListBoxItem,
   ListBoxSection,
   ListLayout,
   Virtualizer,
@@ -168,7 +169,7 @@ export function TransactionList({
           aria-label={t('Loading transactions...')}
         />
       )}
-      <View style={{ flex: 1, overflow: 'auto' }}>
+      <View style={{ flex: 1 }}>
         <Virtualizer
           layout={ListLayout}
           layoutOptions={{
@@ -181,6 +182,7 @@ export function TransactionList({
             selectionMode={
               selectedTransactions.size > 0 ? 'multiple' : 'single'
             }
+            style={{ flex: 1, overflow: 'auto' }}
             selectedKeys={selectedTransactions}
             dependencies={[
               selectedTransactions,
@@ -232,14 +234,18 @@ export function TransactionList({
                   )}
                 >
                   {transaction => (
-                    <TransactionListItem
-                      key={transaction.id}
-                      showRunningBalance={showRunningBalances}
-                      runningBalance={runningBalances?.get(transaction.id)}
-                      value={transaction}
-                      onPress={trans => onTransactionPress(trans)}
-                      onLongPress={trans => onTransactionPress(trans, true)}
-                    />
+                    <ListBoxItem textValue={transaction.id} value={transaction}>
+                      {itemProps => (
+                        <TransactionListItem
+                          {...itemProps}
+                          showRunningBalance={showRunningBalances}
+                          runningBalance={runningBalances?.get(transaction.id)}
+                          transaction={transaction}
+                          onPress={trans => onTransactionPress(trans)}
+                          onLongPress={trans => onTransactionPress(trans, true)}
+                        />
+                      )}
+                    </ListBoxItem>
                   )}
                 </Collection>
               </ListBoxSection>
