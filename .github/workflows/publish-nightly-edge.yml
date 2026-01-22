@@ -28,6 +28,12 @@ jobs:
         id: get_deploy
         run: |
           DEPLOY_ID=$(netlify api listSiteDeploys --data '{ "site_id": "${{ secrets.NETLIFY_EDGE_SITE_ID }}", "production": true, "state": "ready", "branch": "master", "per_page": 1 }' | jq -r '.[0].id')
+
+          if [ -z "$DEPLOY_ID" ] || [ "$DEPLOY_ID" = "null" ]; then
+             echo "::error::No valid deploy found"
+             exit 1
+          fi
+
           echo "deploy_id=$DEPLOY_ID" >> $GITHUB_OUTPUT
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_API_TOKEN }}
