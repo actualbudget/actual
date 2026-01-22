@@ -39,6 +39,16 @@ export const tableRowBackgroundHighlightText = colorPalette.navy700;
 export const tableRowHeaderBackground = colorPalette.navy50;
 export const tableRowHeaderText = colorPalette.navy800;
 
+export const numberPositive = colorPalette.green700;
+export const numberNegative = colorPalette.red500;
+export const numberNeutral = colorPalette.navy100;
+export const budgetNumberZero = tableTextSubdued;
+export const budgetNumberNegative = numberNegative;
+export const budgetNumberNeutral = tableText;
+export const budgetNumberPositive = budgetNumberNeutral;
+export const templateNumberFunded = numberPositive;
+export const templateNumberUnderFunded = colorPalette.orange700;
+
 export const sidebarBackground = colorPalette.navy900;
 export const sidebarItemBackgroundPending = colorPalette.orange200;
 export const sidebarItemBackgroundPositive = colorPalette.green500;
@@ -200,9 +210,9 @@ export const reportsGreen = colorPalette.green400;
 export const reportsGray = colorPalette.gray400;
 export const reportsLabel = colorPalette.navy900;
 export const reportsInnerLabel = colorPalette.navy800;
-export const reportsNumberNegative = reportsRed;
-export const reportsNumberNeutral = pageText;
-export const reportsNumberPositive = reportsGreen;
+export const reportsNumberPositive = numberPositive;
+export const reportsNumberNegative = numberNegative;
+export const reportsNumberNeutral = numberNeutral;
 export const reportsChartFill = reportsNumberPositive;
 
 export const noteTagBackground = colorPalette.purple125;
