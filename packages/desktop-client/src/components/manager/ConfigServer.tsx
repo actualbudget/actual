@@ -1,22 +1,9 @@
-// @ts-strict-ignore
-import React, { useCallback, useEffect, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { BigInput } from '@actual-app/components/input';
 import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-
-import {
-  isElectron,
-  isNonProductionEnvironment,
-} from 'loot-core/shared/environment';
-
-import { Title } from './subscribe/common';
-
 import { createBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { Link } from '@desktop-client/components/common/Link';
 import {
@@ -28,6 +15,16 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { saveGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { loggedIn, signOut } from '@desktop-client/users/usersSlice';
+import { css } from '@emotion/css';
+import {
+  isElectron,
+  isNonProductionEnvironment,
+} from 'loot-core/shared/environment';
+// @ts-strict-ignore
+import React, { useCallback, useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+
+import { Title } from './subscribe/common';
 
 export function ElectronServerConfig({
   onDoNotUseServer,
@@ -124,6 +121,7 @@ export function ElectronServerConfig({
   return (
     <>
       <Title text={t('Configure your server')} />
+      <div style={{ display: 'none' }}>test</div>
       <View
         style={{
           display: 'flex',
