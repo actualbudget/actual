@@ -33,6 +33,7 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_API_TOKEN }}
 
       - name: Restore and Publish Deploy
+        # Restore API call can bypass Netlify's lock function
         run: |
           netlify api restoreSiteDeploy --data '{ "site_id": "${{ secrets.NETLIFY_EDGE_SITE_ID }}", "deploy_id": "${{ steps.get_deploy.outputs.deploy_id }}" }'
         env:
