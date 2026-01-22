@@ -84,13 +84,15 @@ export function ToBudgetAmount({
                   fontWeight: 400,
                   userSelect: 'none',
                   cursor: 'pointer',
-                  color: isNegative ? theme.errorText : theme.pageTextPositive,
+                  color: isNegative
+                    ? theme.budgetNumberNegative
+                    : theme.numberPositive,
                   marginBottom: -1,
                   borderBottom: '1px solid transparent',
                   ':hover': {
                     borderColor: isNegative
-                      ? theme.errorBorder
-                      : theme.pageTextPositive,
+                      ? theme.budgetNumberNegative
+                      : theme.numberPositive,
                   },
                 },
                 amountStyle,
