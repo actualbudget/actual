@@ -44,5 +44,3 @@ jobs:
             --auth ${{ secrets.NETLIFY_API_TOKEN }} \
             --filter @actual-app/web \
             --prod
-
-
