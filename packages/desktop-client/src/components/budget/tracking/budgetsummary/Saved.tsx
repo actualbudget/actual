@@ -73,8 +73,8 @@ export function Saved({ projected, style }: SavedProps) {
           className={css({
             fontSize: 25,
             color: isNegative
-                ? theme.budgetNumberNegative
-                : theme.templateNumberUnderFunded,              
+              ? theme.budgetNumberNegative
+              : theme.templateNumberUnderFunded,
           })}
         >
           <PrivacyFilter>
