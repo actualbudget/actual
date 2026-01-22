@@ -88,7 +88,7 @@ export function ToBudgetAmount({
                   color: isPositive
                     ? theme.toBudgetPositive
                     : isNegative
-                      ? theme.budgetNumberNegative
+                      ? theme.toBudgetNegative
                       : theme.toBudgetZero,
                   marginBottom: -1,
                   borderBottom: '1px solid transparent',
@@ -96,7 +96,7 @@ export function ToBudgetAmount({
                     borderColor: isPositive
                       ? theme.toBudgetPositive
                       : isNegative
-                        ? theme.budgetNumberNegative
+                        ? theme.toBudgetNegative
                         : theme.toBudgetZero,
                   },
                 },
