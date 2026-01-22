@@ -162,4 +162,11 @@ export const styles: Record<string, any> = {
     padding: 16,
     cursor: 'pointer',
   },
+  tableContainer: {
+    flex: 1,
+    border: '1px solid ' + theme.tableBorder,
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+    overflow: 'hidden',
+  },
 };

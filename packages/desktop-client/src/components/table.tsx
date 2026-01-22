@@ -789,7 +789,6 @@ export function TableHeader({
   return (
     <View
       style={{
-        borderRadius: '6px 6px 0 0',
         overflow: 'hidden',
         flexShrink: 0,
       }}
@@ -956,7 +955,7 @@ export const Table = forwardRef(
       contentHeader,
       loading,
       rowHeight = ROW_HEIGHT,
-      backgroundColor = theme.tableHeaderBackground,
+      backgroundColor = theme.tableBackground,
       renderItem,
       renderEmpty,
       getItemKey,
@@ -1088,6 +1087,7 @@ export const Table = forwardRef(
             ...rowStyle,
             zIndex: editing || selected ? 101 : 'auto',
             transform: 'translateY(var(--pos))',
+            backgroundColor,
           }}
           nativeStyle={{ '--pos': `${style.top - 1}px` }}
           data-focus-key={item.id}
@@ -1156,6 +1156,7 @@ export const Table = forwardRef(
         style={{
           flex: 1,
           outline: 'none',
+          overflow: 'hidden',
           ...style,
         }}
         tabIndex={0}
