@@ -9,8 +9,6 @@ import { SvgArrowLeft } from '@actual-app/components/icons/v1';
 import {
   SvgAlertTriangle,
   SvgNavigationMenu,
-  SvgViewHide,
-  SvgViewShow,
 } from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles, type CSSProperties } from '@actual-app/components/styles';
@@ -29,6 +27,7 @@ import { MonthCountSelector } from './budget/MonthCountSelector';
 import { Link } from './common/Link';
 import { HelpMenu } from './HelpMenu';
 import { LoggedInUser } from './LoggedInUser';
+import { PrivacyButton } from './PrivacyButton';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar/SidebarProvider';
 import { ThemeSelector } from './ThemeSelector';
@@ -39,7 +38,6 @@ import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useDispatch } from '@desktop-client/redux';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
 
@@ -60,48 +58,6 @@ function UncategorizedButton() {
     >
       <Trans count={count}>{{ count }} uncategorized transactions</Trans>
     </Link>
-  );
-}
-
-type PrivacyButtonProps = {
-  style?: CSSProperties;
-};
-
-function PrivacyButton({ style }: PrivacyButtonProps) {
-  const { t } = useTranslation();
-  const [isPrivacyEnabledPref, setPrivacyEnabledPref] =
-    useSyncedPref('isPrivacyEnabled');
-  const isPrivacyEnabled = String(isPrivacyEnabledPref) === 'true';
-
-  const privacyIconStyle = { width: 15, height: 15 };
-
-  useHotkeys(
-    'shift+ctrl+p, shift+cmd+p, shift+meta+p',
-    () => {
-      setPrivacyEnabledPref(String(!isPrivacyEnabled));
-    },
-    {
-      preventDefault: true,
-      scopes: ['app'],
-    },
-    [setPrivacyEnabledPref, isPrivacyEnabled],
-  );
-
-  return (
-    <Button
-      variant="bare"
-      aria-label={
-        isPrivacyEnabled ? t('Disable privacy mode') : t('Enable privacy mode')
-      }
-      onPress={() => setPrivacyEnabledPref(String(!isPrivacyEnabled))}
-      style={style}
-    >
-      {isPrivacyEnabled ? (
-        <SvgViewHide style={privacyIconStyle} />
-      ) : (
-        <SvgViewShow style={privacyIconStyle} />
-      )}
-    </Button>
   );
 }
 

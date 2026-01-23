@@ -6,6 +6,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { PrivacyButton } from './PrivacyButton';
+
 const HEADER_HEIGHT = 50;
 
 type PageHeaderProps = {
@@ -98,8 +100,16 @@ export function MobilePageHeader({
           flexBasis: '25%',
           justifyContent: 'flex-end',
           flexDirection: 'row',
+          alignItems: 'center',
         }}
       >
+        <PrivacyButton
+          isMobile
+          style={{
+            color: theme.mobileHeaderText,
+            marginRight: rightContent ? 10 : 0,
+          }}
+        />
         {rightContent}
       </View>
     </View>
