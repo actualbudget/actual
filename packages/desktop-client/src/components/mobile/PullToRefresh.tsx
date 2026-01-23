@@ -1,13 +1,14 @@
 import React, { type ComponentProps } from 'react';
 import BasePullToRefresh from 'react-simple-pull-to-refresh';
 
+import { type CSSProperties } from '@actual-app/components/styles';
 import { css } from '@emotion/css';
 
-type PullToRefreshProps = ComponentProps<typeof BasePullToRefresh>;
+type PullToRefreshProps = ComponentProps<typeof BasePullToRefresh> & {
+  style?: CSSProperties;
+};
 
 export function PullToRefresh(props: PullToRefreshProps) {
-  // oxlint-disable-next-line
-  if (true === true) return props.children;
   return (
     <div style={{ overflow: 'auto', flex: 1 }}>
       <BasePullToRefresh
@@ -20,6 +21,7 @@ export function PullToRefresh(props: PullToRefreshProps) {
           '& .ptr__children': {
             overflow: 'hidden auto',
           },
+          ...(props.style || {}),
         })}
         {...props}
         // Force async because the library errors out when a sync onRefresh method is provided.

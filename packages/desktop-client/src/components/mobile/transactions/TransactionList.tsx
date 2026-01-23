@@ -162,10 +162,10 @@ export function TransactionList({
   );
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
       {isLoading && (
         <Loading
-          style={{ paddingBottom: 8 }}
+          style={{ flex: 'none', paddingBottom: 8 }}
           aria-label={t('Loading transactions...')}
         />
       )}
@@ -270,7 +270,7 @@ export function TransactionList({
           showMakeTransfer={showMakeTransfer}
         />
       )}
-    </>
+    </View>
   );
 }
 
