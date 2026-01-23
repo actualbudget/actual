@@ -6,10 +6,7 @@ import type { AccountEntity } from 'loot-core/types/models';
 import { useSyncedPref } from './useSyncedPref';
 
 import { accountFilter } from '@desktop-client/queries';
-import {
-  scheduleQueries,
-  type ScheduleData,
-} from '@desktop-client/schedules';
+import { scheduleQueries, type ScheduleData } from '@desktop-client/schedules';
 
 export type UseSchedulesProps = {
   query?: Query;

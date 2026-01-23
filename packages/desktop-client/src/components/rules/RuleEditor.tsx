@@ -46,6 +46,7 @@ import {
   parse,
   unparse,
 } from 'loot-core/shared/rules';
+import { type ScheduleStatusLabel } from 'loot-core/shared/schedules';
 import {
   type NewRuleEntity,
   type RuleActionEntity,
@@ -72,7 +73,6 @@ import { addNotification } from '@desktop-client/notifications/notificationsSlic
 import { getPayees } from '@desktop-client/payees/payeesSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
-import { type ScheduleStatusType } from '@desktop-client/schedules';
 import { disableUndo, enableUndo } from '@desktop-client/undo';
 
 function updateValue(array, value, update) {
@@ -373,7 +373,7 @@ function ScheduleDescription({ id }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const format = useFormat();
   const {
-    data: { schedules, labels: statusLabels } = {},
+    data: { schedules, scheduleStatusLabelMap: statusLabels } = {},
     isFetching: isSchedulesLoading,
   } = useSchedules({ query: q('schedules').filter({ id }).select('*') });
 
@@ -387,7 +387,7 @@ function ScheduleDescription({ id }) {
     return <View style={{ flex: 1 }}>{id}</View>;
   }
 
-  const status = statusLabels.get(schedule.id) as ScheduleStatusType;
+  const status = statusLabels.get(schedule.id) as ScheduleStatusLabel;
 
   return (
     <View

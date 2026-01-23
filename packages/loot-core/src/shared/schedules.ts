@@ -15,6 +15,8 @@ import { Condition } from '../server/rules';
 import * as monthUtils from './months';
 import { q } from './query';
 
+export type ScheduleStatus = ReturnType<typeof getStatus>;
+
 export function getStatus(
   nextDate: string,
   completed: boolean,
@@ -40,6 +42,8 @@ export function getStatus(
     return 'scheduled';
   }
 }
+
+export type ScheduleStatusLabel = ReturnType<typeof getStatusLabel>;
 
 export function getStatusLabel(status: string) {
   switch (status) {

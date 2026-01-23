@@ -44,7 +44,7 @@ export function ScheduleLink({
   const [filter, setFilter] = useState(accountName || '');
   const {
     isFetching: isSchedulesLoading,
-    data: { schedules, statuses },
+    data: { schedules, scheduleStatusMap },
   } = useSchedules({
     query: q('schedules').filter({ completed: false }).select('*'),
   });
@@ -152,7 +152,7 @@ export function ScheduleLink({
                 close();
               }}
               schedules={schedules}
-              statuses={statuses}
+              scheduleStatusMap={scheduleStatusMap}
               style={null}
             />
           </View>
