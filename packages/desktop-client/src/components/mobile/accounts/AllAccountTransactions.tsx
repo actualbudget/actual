@@ -41,10 +41,10 @@ function TransactionListWithPreviews() {
   );
   const {
     transactions,
-    isLoading: isTransactionsLoading,
-    reload: reloadTransactions,
-    isLoadingMore,
-    loadMore: loadMoreTransactions,
+    isFetching: isFetchingTransactions,
+    refetch: reloadTransactions,
+    isFetchingNextPage: isFetchingMoreTransactions,
+    fetchNextPage: fetchMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
   });
@@ -140,12 +140,12 @@ function TransactionListWithPreviews() {
   return (
     <TransactionListWithBalances
       isLoading={
-        isSearching ? isTransactionsLoading : isPreviewTransactionsLoading
+        isSearching ? isFetchingTransactions : isPreviewTransactionsLoading
       }
       transactions={transactionsToDisplay}
       balance={balanceBindings.balance}
-      isLoadingMore={isLoadingMore}
-      onLoadMore={loadMoreTransactions}
+      isLoadingMore={isFetchingMoreTransactions}
+      onLoadMore={fetchMoreTransactions}
       searchPlaceholder={t('Search All Accounts')}
       onSearch={onSearch}
       onOpenTransaction={onOpenTransaction}

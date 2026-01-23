@@ -1,13 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+
+import {
+  useInfiniteQuery,
+  type InfiniteData,
+  type UseInfiniteQueryResult,
+} from '@tanstack/react-query';
 
 import { type Query } from 'loot-core/shared/query';
 import { type IntegerAmount } from 'loot-core/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
 
-import {
-  pagedQuery,
-  type PagedQuery,
-} from '@desktop-client/queries/pagedQuery';
+import { transactionQueries } from '@desktop-client/transactions';
 
 // Mirrors the `splits` AQL option from the server
 type TransactionSplitsOption = 'all' | 'inline' | 'grouped' | 'none';
@@ -37,7 +40,7 @@ type UseTransactionsProps = {
      * The default is 50.
      * @default 50
      */
-    pageCount?: number;
+    pageSize?: number;
     /**
      * Whether to calculate running balances for the transactions returned by the query.
      * This can be set to `true` to calculate running balances for all transactions
@@ -62,7 +65,10 @@ type UseTransactionsProps = {
   };
 };
 
-type UseTransactionsResult = {
+type UseTransactionsResult = UseInfiniteQueryResult<
+  InfiniteData<TransactionEntity[]>,
+  Error
+> & {
   /**
    * The transactions returned by the query.
    */
@@ -73,105 +79,26 @@ type UseTransactionsResult = {
    * or a function that implements the calculation in the options.
    */
   runningBalances: Map<TransactionEntity['id'], IntegerAmount>;
-  /**
-   * Whether the transactions are currently being loaded.
-   */
-  isLoading: boolean;
-  /**
-   * An error that occurred while loading the transactions.
-   */
-  error?: Error;
-  /**
-   * Reload the transactions.
-   */
-  reload: () => void;
-  /**
-   * Load more transactions.
-   */
-  loadMore: () => void;
-  /**
-   * Whether more transactions are currently being loaded.
-   */
-  isLoadingMore: boolean;
 };
 
 export function useTransactions({
   query,
-  options = { pageCount: 50, calculateRunningBalances: false },
+  options = { pageSize: 50, calculateRunningBalances: false },
 }: UseTransactionsProps): UseTransactionsResult {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [error, setError] = useState<Error | undefined>(undefined);
-  const [transactions, setTransactions] = useState<
-    ReadonlyArray<TransactionEntity>
-  >([]);
   const [runningBalances, setRunningBalances] = useState<
     Map<TransactionEntity['id'], IntegerAmount>
   >(new Map());
 
-  const pagedQueryRef = useRef<PagedQuery<TransactionEntity> | null>(null);
+  const queryResult = useInfiniteQuery(
+    transactionQueries.aql({ query, pageSize: options.pageSize }),
+  );
 
-  // We don't want to re-render if options changes.
-  // Putting options in a ref will prevent that and
-  // allow us to use the latest options on next render.
-  const optionsRef = useRef(options);
-  optionsRef.current = options;
-
-  useEffect(() => {
-    let isUnmounted = false;
-
-    setError(undefined);
-
-    if (!query) {
-      return;
-    }
-
-    function onError(error: Error) {
-      if (!isUnmounted) {
-        setError(error);
-        setIsLoading(false);
-      }
-    }
-
-    if (query.state.table !== 'transactions') {
-      onError(new Error('Query must be a transactions query.'));
-      return;
-    }
-
-    setIsLoading(true);
-
-    pagedQueryRef.current = pagedQuery<TransactionEntity>(query, {
-      onData: data => {
-        if (!isUnmounted) {
-          setTransactions(data);
-
-          const calculateFn = getCalculateRunningBalancesFn(
-            optionsRef.current?.calculateRunningBalances,
-          );
-          if (calculateFn) {
-            setRunningBalances(
-              calculateFn(
-                data,
-                query.state.tableOptions?.splits as TransactionSplitsOption,
-                optionsRef.current?.startingBalance,
-              ),
-            );
-          }
-
-          setIsLoading(false);
-        }
-      },
-      onError,
-      options: optionsRef.current.pageCount
-        ? { pageCount: optionsRef.current.pageCount }
-        : {},
-    });
-
-    return () => {
-      isUnmounted = true;
-      pagedQueryRef.current?.unsubscribe();
-    };
-  }, [query]);
+  const calculateRunningBalancesOptionFn = getCalculateRunningBalancesFn(
+    options?.calculateRunningBalances,
+  );
+  const startingBalanceOption = options?.startingBalance;
+  const splitsOption = query?.state.tableOptions
+    ?.splits as TransactionSplitsOption;
 
   // Recalculate running balances whenever the transactions change or the
   // calculation options change (for example, when toggling show/hide
@@ -179,55 +106,32 @@ export function useTransactions({
   // dependent only on `query` above, but this effect ensures running
   // balances are updated in-place when the caller changes options.
   useEffect(() => {
-    const calculateFn = getCalculateRunningBalancesFn(
-      options?.calculateRunningBalances,
-    );
-
-    if (calculateFn) {
-      setRunningBalances(
-        calculateFn(
-          transactions,
-          query?.state.tableOptions?.splits as TransactionSplitsOption,
-          options?.startingBalance,
-        ),
-      );
+    if (calculateRunningBalancesOptionFn) {
+      if (queryResult.isSuccess) {
+        const transactions = queryResult.data.pages.flat();
+        setRunningBalances(
+          calculateRunningBalancesOptionFn(
+            transactions,
+            splitsOption,
+            startingBalanceOption,
+          ),
+        );
+      }
     } else {
       setRunningBalances(new Map());
     }
   }, [
-    transactions,
-    query,
-    options?.calculateRunningBalances,
-    options?.startingBalance,
+    queryResult.data,
+    queryResult.isSuccess,
+    calculateRunningBalancesOptionFn,
+    startingBalanceOption,
+    splitsOption,
   ]);
 
-  const loadMore = useCallback(async () => {
-    if (!pagedQueryRef.current) {
-      return;
-    }
-
-    setIsLoadingMore(true);
-
-    await pagedQueryRef.current
-      .fetchNext()
-      .catch(setError)
-      .finally(() => {
-        setIsLoadingMore(false);
-      });
-  }, []);
-
-  const reload = useCallback(() => {
-    pagedQueryRef.current?.run();
-  }, []);
-
   return {
-    transactions,
+    ...queryResult,
+    transactions: queryResult.data ? queryResult.data.pages.flat() : [],
     runningBalances,
-    isLoading,
-    ...(error && { error }),
-    reload,
-    loadMore,
-    isLoadingMore,
   };
 }
 

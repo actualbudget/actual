@@ -661,14 +661,14 @@ function UncategorizedTransactionsBanner(props) {
     [],
   );
 
-  const { transactions, isLoading } = useTransactions({
+  const { transactions, isFetching: isFetchingTransactions } = useTransactions({
     query: transactionsQuery,
     options: {
-      pageCount: 1000,
+      pageSize: 1000,
     },
   });
 
-  if (isLoading || transactions.length === 0) {
+  if (isFetchingTransactions || transactions.length === 0) {
     return null;
   }
 
