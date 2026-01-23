@@ -7,11 +7,9 @@ import {
 
 import { useCachedSchedules } from './useCachedSchedules';
 import { useFeatureFlag } from './useFeatureFlag';
+import { useScheduleStatus } from './useSchedules';
 
-import {
-  type ScheduleStatusLabelMap,
-  type ScheduleStatusMap,
-} from '@desktop-client/schedules';
+import { type ScheduleStatusData } from '@desktop-client/schedules';
 
 type ScheduleGoalDefinition = {
   type: 'schedule';
@@ -22,30 +20,25 @@ type UseCategoryScheduleGoalTemplatesProps = {
   category?: CategoryEntity | undefined;
 };
 
-type UseCategoryScheduleGoalTemplatesResult = {
-  schedules: ScheduleEntity[];
-  statuses: ScheduleStatusMap;
-  statusLabels: ScheduleStatusLabelMap;
+type UseCategoryScheduleGoalTemplatesResult = ScheduleStatusData & {
+  schedules: readonly ScheduleEntity[];
 };
 
 export function useCategoryScheduleGoalTemplates({
   category,
 }: UseCategoryScheduleGoalTemplatesProps): UseCategoryScheduleGoalTemplatesResult {
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const { data: allSchedules = [] } = useCachedSchedules();
   const {
-    data: {
-      schedules: allSchedules,
-      scheduleStatusMap: allStatuses,
-      scheduleStatusLabelMap: allStatusLabels,
-    },
-  } = useCachedSchedules();
+    data: { statusLookup = {}, statusLabelLookup = {} },
+  } = useScheduleStatus({ schedules: allSchedules });
 
   return useMemo(() => {
     if (!isGoalTemplatesEnabled || !category || !category.goal_def) {
       return {
         schedules: [],
-        statuses: new Map(),
-        statusLabels: new Map(),
+        statusLookup: {},
+        statusLabelLookup: {},
       };
     }
 
@@ -56,8 +49,8 @@ export function useCategoryScheduleGoalTemplates({
       console.error('Failed to parse category goal_def:', e);
       return {
         schedules: [],
-        statuses: new Map(),
-        statusLabels: new Map(),
+        statusLookup: {},
+        statusLabelLookup: {},
       };
     }
 
@@ -68,8 +61,8 @@ export function useCategoryScheduleGoalTemplates({
     if (!scheduleGoalDefinitions.length) {
       return {
         schedules: [],
-        statuses: new Map(),
-        statusLabels: new Map(),
+        statusLookup: {},
+        statusLabelLookup: {},
       };
     }
 
@@ -79,22 +72,22 @@ export function useCategoryScheduleGoalTemplates({
 
     const scheduleIds = new Set(schedules.map(s => s.id));
 
-    const statuses = new Map(
-      [...allStatuses].filter(([id]) => scheduleIds.has(id)),
+    const filteredStatusLookup = Object.fromEntries(
+      Object.entries(statusLookup).filter(([id]) => scheduleIds.has(id)),
     );
-    const statusLabels = new Map(
-      [...allStatusLabels].filter(([id]) => scheduleIds.has(id)),
+    const filteredStatusLabelLookup = Object.fromEntries(
+      Object.entries(statusLabelLookup).filter(([id]) => scheduleIds.has(id)),
     );
 
     return {
       schedules,
-      statuses,
-      statusLabels,
+      statusLookup: filteredStatusLookup,
+      statusLabelLookup: filteredStatusLabelLookup,
     };
   }, [
     allSchedules,
-    allStatusLabels,
-    allStatuses,
+    statusLabelLookup,
+    statusLookup,
     category,
     isGoalTemplatesEnabled,
   ]);

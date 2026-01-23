@@ -137,9 +137,7 @@ export function ManageRules({
   const [filter, setFilter] = useState('');
   const dispatch = useDispatch();
 
-  const {
-    data: { schedules },
-  } = useSchedules({
+  const { data: schedules = [] } = useSchedules({
     query: q('schedules').select('*'),
   });
   const { list: categories } = useCategories();

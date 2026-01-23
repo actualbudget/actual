@@ -12,7 +12,7 @@ import { SchedulesListItem } from './SchedulesListItem';
 
 import { ActionableGridListItem } from '@desktop-client/components/mobile/ActionableGridListItem';
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
-import { type ScheduleStatusMap } from '@desktop-client/schedules';
+import { type ScheduleStatusLookup } from '@desktop-client/schedules';
 
 type CompletedSchedulesItem = { id: 'show-completed' };
 type SchedulesListEntry = ScheduleEntity | CompletedSchedulesItem;
@@ -20,7 +20,7 @@ type SchedulesListEntry = ScheduleEntity | CompletedSchedulesItem;
 type SchedulesListProps = {
   schedules: readonly ScheduleEntity[];
   isLoading: boolean;
-  scheduleStatusMap: ScheduleStatusMap;
+  statusLookup: ScheduleStatusLookup;
   onSchedulePress: (schedule: ScheduleEntity) => void;
   onScheduleDelete: (schedule: ScheduleEntity) => void;
   hasCompletedSchedules?: boolean;
@@ -31,7 +31,7 @@ type SchedulesListProps = {
 export function SchedulesList({
   schedules,
   isLoading,
-  scheduleStatusMap,
+  statusLookup,
   onSchedulePress,
   onScheduleDelete,
   hasCompletedSchedules = false,
@@ -125,7 +125,7 @@ export function SchedulesList({
             ) : (
               <SchedulesListItem
                 value={item}
-                status={scheduleStatusMap.get(item.id) || 'scheduled'}
+                status={statusLookup[item.id] || 'scheduled'}
                 onAction={() => onSchedulePress(item)}
                 onDelete={() => onScheduleDelete(item)}
               />

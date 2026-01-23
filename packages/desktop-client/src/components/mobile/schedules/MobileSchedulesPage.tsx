@@ -23,7 +23,10 @@ import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import {
+  useSchedules,
+  useScheduleStatus,
+} from '@desktop-client/hooks/useSchedules';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -38,10 +41,12 @@ export function MobileSchedulesPage() {
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
+  const { isFetching: isSchedulesLoading, data: schedules = [] } = useSchedules(
+    { query: q('schedules').select('*') },
+  );
   const {
-    isFetching: isSchedulesLoading,
-    data: { schedules, scheduleStatusMap },
-  } = useSchedules({ query: q('schedules').select('*') });
+    data: { statusLookup = {} },
+  } = useScheduleStatus({ schedules });
 
   const payees = usePayees();
   const accounts = useAccounts();
@@ -67,7 +72,7 @@ export function MobileSchedulesPage() {
         const dateStr = schedule.next_date
           ? monthUtilFormat(schedule.next_date, dateFormat)
           : null;
-        const statusLabel = scheduleStatusMap.get(schedule.id);
+        const statusLabel = statusLookup[schedule.id];
 
         return (
           filterIncludes(schedule.name) ||
@@ -156,7 +161,7 @@ export function MobileSchedulesPage() {
       <SchedulesList
         schedules={filteredSchedules}
         isLoading={isSchedulesLoading}
-        scheduleStatusMap={scheduleStatusMap}
+        statusLookup={statusLookup}
         onSchedulePress={handleSchedulePress}
         onScheduleDelete={handleScheduleDelete}
         hasCompletedSchedules={hasCompletedSchedules}
