@@ -10,6 +10,7 @@ import { Provider } from 'react-redux';
 import { type NavigateFunction } from 'react-router';
 
 import { bindActionCreators } from '@reduxjs/toolkit';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
@@ -83,13 +84,18 @@ window.$send = send;
 window.$query = aqlQuery;
 window.$q = q;
 
+const queryClient = new QueryClient();
+window.__TANSTACK_QUERY_CLIENT__ = queryClient;
+
 const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(
   <Provider store={store}>
     <ServerProvider>
       <AuthProvider>
-        <App />
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
       </AuthProvider>
     </ServerProvider>
   </Provider>,
@@ -109,6 +115,8 @@ declare global {
     $send: typeof send;
     $query: typeof aqlQuery;
     $q: typeof q;
+
+    __TANSTACK_QUERY_CLIENT__: QueryClient;
   }
 }
 
