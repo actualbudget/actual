@@ -42,15 +42,14 @@ export function useCategoryScheduleGoalTemplateIndicator({
     'upcomingScheduledTransactionLength',
   );
   const upcomingDays = getUpcomingDays(upcomingScheduledTransactionLength);
-  const { schedules, statuses: scheduleStatuses } =
-    useCategoryScheduleGoalTemplates({
-      category,
-    });
+  const { schedules, statusLookup } = useCategoryScheduleGoalTemplates({
+    category,
+  });
 
   return useMemo<UseCategoryScheduleGoalTemplateResult>(() => {
     const schedulesToDisplay = schedules
       .filter(schedule => {
-        const status = scheduleStatuses.get(schedule.id);
+        const status = statusLookup[schedule.id];
         return status === 'upcoming' || status === 'due' || status === 'missed';
       })
       .filter(schedule => {
@@ -66,8 +65,8 @@ export function useCategoryScheduleGoalTemplateIndicator({
       })
       .sort((a, b) => {
         // Display missed schedules first, then due, then upcoming.
-        const aStatus = scheduleStatuses.get(a.id);
-        const bStatus = scheduleStatuses.get(b.id);
+        const aStatus = statusLookup[a.id];
+        const bStatus = statusLookup[b.id];
         if (aStatus === 'missed' && bStatus !== 'missed') return -1;
         if (bStatus === 'missed' && aStatus !== 'missed') return 1;
         if (aStatus === 'due' && bStatus !== 'due') return -1;
@@ -80,7 +79,7 @@ export function useCategoryScheduleGoalTemplateIndicator({
         return getScheduleStatusDescription({
           t,
           schedule: s,
-          scheduleStatus: scheduleStatuses.get(s.id),
+          scheduleStatus: statusLookup[s.id],
           locale,
         });
       })
@@ -88,7 +87,7 @@ export function useCategoryScheduleGoalTemplateIndicator({
 
     const schedule = schedulesToDisplay[0] || null;
     const scheduleStatus =
-      (schedule ? scheduleStatuses.get(schedule.id) : null) || null;
+      (schedule ? statusLookup[schedule.id] : null) || null;
 
     return {
       schedule,
@@ -98,7 +97,7 @@ export function useCategoryScheduleGoalTemplateIndicator({
       ),
       description,
     };
-  }, [locale, month, scheduleStatuses, schedules, t, upcomingDays]);
+  }, [locale, month, statusLookup, schedules, t, upcomingDays]);
 }
 
 function getScheduleStatusDescription({

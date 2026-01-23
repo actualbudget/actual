@@ -20,7 +20,10 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { Search } from '@desktop-client/components/common/Search';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import {
+  useSchedules,
+  useScheduleStatus,
+} from '@desktop-client/hooks/useSchedules';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -40,12 +43,15 @@ export function ScheduleLink({
 
   const dispatch = useDispatch();
   const [filter, setFilter] = useState(accountName || '');
+  const { isFetching: isSchedulesLoading, data: schedules = [] } = useSchedules(
+    {
+      query: q('schedules').filter({ completed: false }).select('*'),
+    },
+  );
+
   const {
-    isFetching: isSchedulesLoading,
-    data: { schedules, scheduleStatusMap },
-  } = useSchedules({
-    query: q('schedules').filter({ completed: false }).select('*'),
-  });
+    data: { statusLookup = {} },
+  } = useScheduleStatus({ schedules });
 
   const searchInput = useRef<HTMLInputElement | null>(null);
 
@@ -150,7 +156,7 @@ export function ScheduleLink({
                 close();
               }}
               schedules={schedules}
-              scheduleStatusMap={scheduleStatusMap}
+              statusLookup={statusLookup}
               style={null}
             />
           </View>

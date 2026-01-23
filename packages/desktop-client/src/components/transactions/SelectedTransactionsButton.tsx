@@ -78,9 +78,7 @@ export function SelectedTransactionsButton({
       .map(id => id.split('/')[1]);
   }, [selectedIds]);
 
-  const {
-    data: { schedules: selectedSchedules },
-  } = useSchedules({
+  const { data: selectedSchedules = [] } = useSchedules({
     query: q('schedules')
       .filter({ id: { $oneof: scheduleIds } })
       .select('*'),

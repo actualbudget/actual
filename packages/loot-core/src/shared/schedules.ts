@@ -474,17 +474,17 @@ export function scheduleIsRecurring(dateCond: Condition | null) {
   return value.type === 'recur';
 }
 
-export type ScheduleStatusMap = Map<ScheduleEntity['id'], ScheduleStatus>;
-export type ScheduleStatusLabelMap = Map<
+export type ScheduleStatusLookup = Record<ScheduleEntity['id'], ScheduleStatus>;
+export type ScheduleStatusLabelLookup = Record<
   ScheduleEntity['id'],
   ScheduleStatusLabel
 >;
 
 export function isForPreview(
   schedule: ScheduleEntity,
-  statusMap: ScheduleStatusMap,
+  statusMap: ScheduleStatusLookup,
 ) {
-  const status = statusMap.get(schedule.id);
+  const status = statusMap[schedule.id];
   return (
     !schedule.completed &&
     ['due', 'upcoming', 'missed', 'paid'].includes(status!)
@@ -493,7 +493,7 @@ export function isForPreview(
 
 export function computeSchedulePreviewTransactions(
   schedules: readonly ScheduleEntity[],
-  statuses: ScheduleStatusMap,
+  statuses: ScheduleStatusLookup,
   upcomingLength?: string,
   filter?: (schedule: ScheduleEntity) => boolean,
 ) {
@@ -515,7 +515,7 @@ export function computeSchedulePreviewTransactions(
         schedule._conditions,
       );
 
-      const status = statuses.get(schedule.id);
+      const status = statuses[schedule.id];
       const isRecurring = scheduleIsRecurring(dateConditions);
 
       const dates = [schedule.next_date];

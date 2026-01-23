@@ -18,7 +18,7 @@ import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { getScheduledAmount } from 'loot-core/shared/schedules';
 import type {
   ScheduleStatus,
-  ScheduleStatusMap,
+  ScheduleStatusLookup,
 } from 'loot-core/shared/schedules';
 import type { ScheduleEntity } from 'loot-core/types/models';
 
@@ -43,7 +43,7 @@ import { usePayees } from '@desktop-client/hooks/usePayees';
 type SchedulesTableProps = {
   isLoading?: boolean;
   schedules: readonly ScheduleEntity[];
-  scheduleStatusMap: ScheduleStatusMap;
+  statusLookup: ScheduleStatusLookup;
   filter: string;
   allowCompleted: boolean;
   onSelect: (schedule: ScheduleEntity) => void;
@@ -204,11 +204,11 @@ function ScheduleRow({
   onAction,
   onSelect,
   minimal,
-  scheduleStatusMap,
+  statusLookup,
   dateFormat,
 }: {
   schedule: ScheduleEntity;
-  scheduleStatusMap: ScheduleStatusMap;
+  statusLookup: ScheduleStatusLookup;
   dateFormat: string;
 } & Pick<SchedulesTableProps, 'onSelect' | 'onAction' | 'minimal'>) {
   const { t } = useTranslation();
@@ -250,7 +250,7 @@ function ScheduleRow({
         >
           <OverflowMenu
             schedule={schedule}
-            status={scheduleStatusMap.get(schedule.id)}
+            status={statusLookup[schedule.id]}
             onAction={(action, id) => {
               onAction(action, id);
               resetPosition();
@@ -283,7 +283,7 @@ function ScheduleRow({
           : null}
       </Field>
       <Field width={120} name="status" style={{ alignItems: 'flex-start' }}>
-        <StatusBadge status={scheduleStatusMap.get(schedule.id)} />
+        <StatusBadge status={statusLookup[schedule.id]} />
       </Field>
       <ScheduleAmountCell amount={schedule._amount} op={schedule._amountOp} />
       {!minimal && (
@@ -323,7 +323,7 @@ function ScheduleRow({
 export function SchedulesTable({
   isLoading,
   schedules,
-  scheduleStatusMap,
+  statusLookup,
   filter,
   minimal,
   allowCompleted,
@@ -370,19 +370,11 @@ export function SchedulesTable({
         filterIncludes(payee && payee.name) ||
         filterIncludes(account && account.name) ||
         filterIncludes(amountStr) ||
-        filterIncludes(scheduleStatusMap.get(schedule.id)) ||
+        filterIncludes(statusLookup[schedule.id]) ||
         filterIncludes(dateStr)
       );
     });
-  }, [
-    payees,
-    accounts,
-    schedules,
-    filter,
-    scheduleStatusMap,
-    format,
-    dateFormat,
-  ]);
+  }, [payees, accounts, schedules, filter, statusLookup, format, dateFormat]);
 
   const items: readonly SchedulesTableItem[] = useMemo(() => {
     const unCompletedSchedules = filteredSchedules.filter(s => !s.completed);
@@ -430,7 +422,7 @@ export function SchedulesTable({
     return (
       <ScheduleRow
         schedule={item as ScheduleEntity}
-        {...{ scheduleStatusMap, dateFormat, onSelect, onAction, minimal }}
+        {...{ statusLookup, dateFormat, onSelect, onAction, minimal }}
       />
     );
   }

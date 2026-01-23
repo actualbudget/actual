@@ -764,10 +764,7 @@ function PayeeIcons({
   const { t } = useTranslation();
 
   const scheduleId = transaction.schedule;
-  const {
-    isFetching,
-    data: { schedules },
-  } = useCachedSchedules();
+  const { isFetching, data: schedules = [] } = useCachedSchedules();
 
   if (isFetching) {
     return null;
@@ -1095,7 +1092,7 @@ const Transaction = memo(function Transaction({
     _unmatched = false,
   } = transaction;
 
-  const { data: { schedules = [] } = {} } = useCachedSchedules();
+  const { data: schedules = [] } = useCachedSchedules();
   const schedule = transaction.schedule
     ? schedules.find(s => s.id === transaction.schedule)
     : null;

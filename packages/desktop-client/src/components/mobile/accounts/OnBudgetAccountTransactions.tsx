@@ -12,16 +12,16 @@ import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useOnBudgetAccounts } from '@desktop-client/hooks/useOnBudgetAccounts';
 import { usePreviewTransactions } from '@desktop-client/hooks/usePreviewTransactions';
-import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
 import * as queries from '@desktop-client/queries';
 import { useDispatch } from '@desktop-client/redux';
+import { schedulesViewQuery } from '@desktop-client/schedules';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 export function OnBudgetAccountTransactions() {
-  const schedulesQuery = useMemo(() => getSchedulesQuery('onbudget'), []);
+  const schedulesQuery = useMemo(() => schedulesViewQuery('onbudget'), []);
 
   return (
     <SchedulesProvider query={schedulesQuery}>

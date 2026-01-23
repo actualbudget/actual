@@ -189,9 +189,7 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
     onLoaded: setAutomations,
   });
 
-  const {
-    data: { schedules },
-  } = useSchedules({
+  const { data: schedules = [] } = useSchedules({
     query: q('schedules').select('*'),
   });
 

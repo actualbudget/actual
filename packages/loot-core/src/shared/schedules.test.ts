@@ -11,7 +11,7 @@ import {
   getStatus,
   getUpcomingDays,
 } from './schedules';
-import type { ScheduleStatusMap } from './schedules';
+import type { ScheduleStatusLookup } from './schedules';
 
 i18next.init({
   lng: 'en',
@@ -483,7 +483,7 @@ describe('schedules', () => {
           ],
         });
 
-        const statuses: ScheduleStatusMap = new Map([['sched-1', 'missed']]);
+        const statuses: ScheduleStatusLookup = new Map([['sched-1', 'missed']]);
         const result = computeSchedulePreviewTransactions(
           [schedule],
           statuses,
@@ -508,7 +508,7 @@ describe('schedules', () => {
           ],
         });
 
-        const statuses: ScheduleStatusMap = new Map([['sched-1', 'missed']]);
+        const statuses: ScheduleStatusLookup = new Map([['sched-1', 'missed']]);
         const result = computeSchedulePreviewTransactions(
           [schedule],
           statuses,
@@ -527,7 +527,9 @@ describe('schedules', () => {
           _conditions: [{ field: 'date', op: 'is', value: '2017-01-03' }],
         });
 
-        const statuses: ScheduleStatusMap = new Map([['sched-1', 'upcoming']]);
+        const statuses: ScheduleStatusLookup = new Map([
+          ['sched-1', 'upcoming'],
+        ]);
         const result = computeSchedulePreviewTransactions(
           [schedule],
           statuses,
@@ -551,7 +553,7 @@ describe('schedules', () => {
           ],
         });
 
-        const statuses: ScheduleStatusMap = new Map([['sched-1', 'paid']]);
+        const statuses: ScheduleStatusLookup = new Map([['sched-1', 'paid']]);
         const result = computeSchedulePreviewTransactions(
           [schedule],
           statuses,

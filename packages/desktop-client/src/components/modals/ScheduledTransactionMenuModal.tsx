@@ -44,12 +44,11 @@ export function ScheduledTransactionMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
   const scheduleId = transactionId?.split('/')?.[1];
-  const {
-    isFetching: isSchedulesLoading,
-    data: { schedules },
-  } = useSchedules({
-    query: q('schedules').filter({ id: scheduleId }).select('*'),
-  });
+  const { isFetching: isSchedulesLoading, data: schedules = [] } = useSchedules(
+    {
+      query: q('schedules').filter({ id: scheduleId }).select('*'),
+    },
+  );
 
   if (isSchedulesLoading) {
     return null;

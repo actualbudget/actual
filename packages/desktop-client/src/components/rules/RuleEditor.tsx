@@ -58,7 +58,10 @@ import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import {
+  useSchedules,
+  useScheduleStatus,
+} from '@desktop-client/hooks/useSchedules';
 import {
   SelectedProvider,
   useSelected,
@@ -366,10 +369,13 @@ function ScheduleDescription({ id }) {
   const { isNarrowWidth } = useResponsive();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const format = useFormat();
+  const { data: schedules = [], isFetching: isSchedulesLoading } = useSchedules(
+    { query: q('schedules').filter({ id }).select('*') },
+  );
+
   const {
-    data: { schedules, scheduleStatusLabelMap: statusLabels } = {},
-    isFetching: isSchedulesLoading,
-  } = useSchedules({ query: q('schedules').filter({ id }).select('*') });
+    data: { statusLabelLookup = {} },
+  } = useScheduleStatus({ schedules });
 
   if (isSchedulesLoading) {
     return null;
@@ -381,7 +387,7 @@ function ScheduleDescription({ id }) {
     return <View style={{ flex: 1 }}>{id}</View>;
   }
 
-  const status = statusLabels.get(schedule.id) as ScheduleStatusLabel;
+  const status = statusLabelLookup[schedule.id] as ScheduleStatusLabel;
 
   return (
     <View

@@ -37,9 +37,7 @@ export function MobileRulesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('');
 
-  const {
-    data: { schedules },
-  } = useSchedules({
+  const { data: schedules = [] } = useSchedules({
     query: q('schedules').select('*'),
   });
   const { data: { list: categories } = { list: [] } } = useCategories();

@@ -14,7 +14,10 @@ import type { ScheduleItemAction } from './SchedulesTable';
 
 import { Search } from '@desktop-client/components/common/Search';
 import { Page } from '@desktop-client/components/Page';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import {
+  useSchedules,
+  useScheduleStatus,
+} from '@desktop-client/hooks/useSchedules';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -80,10 +83,13 @@ export function Schedules() {
     [],
   );
 
+  const { isLoading: isSchedulesLoading, data: schedules = [] } = useSchedules({
+    query: q('schedules').select('*'),
+  });
+
   const {
-    isLoading: isSchedulesLoading,
-    data: { schedules, scheduleStatusMap },
-  } = useSchedules({ query: q('schedules').select('*') });
+    data: { statusLookup = {} },
+  } = useScheduleStatus({ schedules });
 
   return (
     <Page header={t('Schedules')}>
@@ -113,7 +119,7 @@ export function Schedules() {
         isLoading={isSchedulesLoading}
         schedules={schedules}
         filter={filter}
-        scheduleStatusMap={scheduleStatusMap}
+        statusLookup={statusLookup}
         allowCompleted
         onSelect={onEdit}
         onAction={onAction}

@@ -6,7 +6,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import type { ScheduleStatusMap } from 'loot-core/shared/schedules';
+import type { ScheduleStatusLookup } from 'loot-core/shared/schedules';
 import type { ScheduleEntity } from 'loot-core/types/models';
 
 import { SchedulesListItem } from './SchedulesListItem';
@@ -20,7 +20,7 @@ type SchedulesListEntry = ScheduleEntity | CompletedSchedulesItem;
 type SchedulesListProps = {
   schedules: readonly ScheduleEntity[];
   isLoading: boolean;
-  scheduleStatusMap: ScheduleStatusMap;
+  statusLookup: ScheduleStatusLookup;
   onSchedulePress: (schedule: ScheduleEntity) => void;
   onScheduleDelete: (schedule: ScheduleEntity) => void;
   hasCompletedSchedules?: boolean;
@@ -31,7 +31,7 @@ type SchedulesListProps = {
 export function SchedulesList({
   schedules,
   isLoading,
-  scheduleStatusMap,
+  statusLookup,
   onSchedulePress,
   onScheduleDelete,
   hasCompletedSchedules = false,
@@ -125,7 +125,7 @@ export function SchedulesList({
             ) : (
               <SchedulesListItem
                 value={item}
-                status={scheduleStatusMap.get(item.id) || 'scheduled'}
+                status={statusLookup[item.id] || 'scheduled'}
                 onAction={() => onSchedulePress(item)}
                 onDelete={() => onScheduleDelete(item)}
               />

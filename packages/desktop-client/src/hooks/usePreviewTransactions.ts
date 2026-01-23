@@ -7,6 +7,7 @@ import type { IntegerAmount } from 'loot-core/shared/util';
 import type { ScheduleEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { useCachedSchedules } from './useCachedSchedules';
+import { useScheduleStatus } from './useSchedules';
 import { useSyncedPref } from './useSyncedPref';
 import { calculateRunningBalancesBottomUp } from './useTransactions';
 
@@ -42,8 +43,11 @@ export function usePreviewTransactions({
   const {
     isFetching: isSchedulesLoading,
     error: scheduleQueryError,
-    data: { schedules, scheduleStatusMap },
+    data: schedules = [],
   } = useCachedSchedules();
+  const {
+    data: { statusLookup },
+  } = useScheduleStatus({ schedules });
   const [isLoading, setIsLoading] = useState(isSchedulesLoading);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [runningBalances, setRunningBalances] = useState<
@@ -65,17 +69,11 @@ export function usePreviewTransactions({
 
     return computeSchedulePreviewTransactions(
       schedules,
-      scheduleStatusMap,
+      statusLookup,
       upcomingLength,
       filter,
     );
-  }, [
-    filter,
-    isSchedulesLoading,
-    schedules,
-    scheduleStatusMap,
-    upcomingLength,
-  ]);
+  }, [filter, isSchedulesLoading, schedules, statusLookup, upcomingLength]);
 
   useEffect(() => {
     let isUnmounted = false;
@@ -100,10 +98,7 @@ export function usePreviewTransactions({
         if (!isUnmounted) {
           const withDefaults = newTrans.map(t => ({
             ...t,
-            category:
-              t.schedule != null
-                ? scheduleStatusMap.get(t.schedule)
-                : undefined,
+            category: t.schedule != null ? statusLookup[t.schedule] : undefined,
             schedule: t.schedule,
             subtransactions: t.subtransactions?.map(
               (st: TransactionEntity) => ({
@@ -145,7 +140,7 @@ export function usePreviewTransactions({
     return () => {
       isUnmounted = true;
     };
-  }, [scheduleTransactions, schedules, scheduleStatusMap, upcomingLength]);
+  }, [scheduleTransactions, schedules, statusLookup, upcomingLength]);
 
   const returnError = error || scheduleQueryError;
   return {
