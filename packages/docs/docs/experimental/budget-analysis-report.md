@@ -24,7 +24,7 @@ It tracks four separate series: **Budgeted**, **Spent**, **Overspending Adjustme
 - **Live / Static**: toggle a rolling window (auto-updates) or a fixed date range.
 - **Start / End**: pick start and end months.
 - **Quick ranges**: 1, 3, 6 months, 1 year, Year-to-date, Previous year-to-date, All time.
-- **Filters**: use the Filter button → choose *Category* to include/exclude categories; active filters appear as editable chips.
+- **Filters**: use the Filter button → choose _Category_ to include/exclude categories; active filters appear as editable chips.
 - **Graph type**: toggle Line ↔ Bar via the header icon.
 - **Show/Hide balance**: toggle the running balance series.
 
