@@ -43,8 +43,10 @@ export type NetWorthWidget = AbstractWidget<
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
     interval?: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
+    mode?: 'trend' | 'stacked';
   } | null
 >;
+
 export type CashFlowWidget = AbstractWidget<
   'cash-flow-card',
   {
