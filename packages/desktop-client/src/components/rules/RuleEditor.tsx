@@ -66,7 +66,7 @@ import { addNotification } from '@desktop-client/notifications/notificationsSlic
 import { getPayees } from '@desktop-client/payees/payeesSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
-import type { ScheduleStatusType } from '@desktop-client/schedules/queries';
+import type { ScheduleStatusType } from '@desktop-client/schedules';
 import { disableUndo, enableUndo } from '@desktop-client/undo';
 
 function updateValue(array, value, update) {

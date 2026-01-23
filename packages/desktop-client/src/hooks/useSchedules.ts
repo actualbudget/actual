@@ -8,8 +8,8 @@ import type { AccountEntity } from 'loot-core/types/models';
 import { useSyncedPref } from './useSyncedPref';
 
 import { accountFilter } from '@desktop-client/queries';
-import { scheduleQueries } from '@desktop-client/schedules/queries';
-import type { ScheduleData } from '@desktop-client/schedules/queries';
+import { scheduleQueries } from '@desktop-client/schedules';
+import type { ScheduleData } from '@desktop-client/schedules';
 
 export type UseSchedulesProps = {
   query?: Query;
