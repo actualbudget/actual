@@ -737,18 +737,18 @@ export function Overview({ dashboard }: OverviewProps) {
                           }
                         />
                       ) : widget.type === 'budget-analysis-card' &&
-                    budgetAnalysisReportEnabled ? (
-                    <BudgetAnalysisCard
-                      widgetId={item.i}
-                      isEditing={isEditing}
-                      meta={widget.meta}
-                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                      onCopy={targetDashboardId =>
-                        onCopyWidget(item.i, targetDashboardId)
-                      }
-                    />
-                  ) : widget.type === 'markdown-card' ? (
+                        budgetAnalysisReportEnabled ? (
+                        <BudgetAnalysisCard
+                          widgetId={item.i}
+                          isEditing={isEditing}
+                          meta={widget.meta}
+                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                          onRemove={() => onRemoveWidget(item.i)}
+                          onCopy={targetDashboardId =>
+                            onCopyWidget(item.i, targetDashboardId)
+                          }
+                        />
+                      ) : widget.type === 'markdown-card' ? (
                         <MarkdownCard
                           isEditing={isEditing}
                           meta={widget.meta}

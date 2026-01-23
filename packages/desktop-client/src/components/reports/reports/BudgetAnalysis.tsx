@@ -1,13 +1,12 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
-import { FinancialText } from '@desktop-client/components/FinancialText';
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { SvgChartBar, SvgChart } from '@actual-app/components/icons/v1';
+import { SvgChart, SvgChartBar } from '@actual-app/components/icons/v1';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -23,6 +22,7 @@ import {
 } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,
@@ -492,7 +492,8 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                     The balance starts from the month before your selected
                     period. Budgeted, spent, and overspending adjustments show
                     totals over the period. Ending balance shows the final
-                    balance at period end. You can filter by categories to track changes in a specific area.
+                    balance at period end. You can filter by categories to track
+                    changes in a specific area.
                   </Paragraph>
                   <Paragraph>
                     Hint: You can use the icon in the header to toggle between
