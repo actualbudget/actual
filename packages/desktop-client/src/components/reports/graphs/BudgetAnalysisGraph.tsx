@@ -110,7 +110,7 @@ function CustomTooltip({
                   style={{
                     width: 10,
                     height: 10,
-                    backgroundColor: theme.reportsBlue,
+                    backgroundColor: theme.reportsNumberPositive,
                     display: 'inline-block',
                   }}
                 />
@@ -130,7 +130,7 @@ function CustomTooltip({
                   style={{
                     width: 10,
                     height: 10,
-                    backgroundColor: theme.reportsRed,
+                    backgroundColor: theme.reportsNumberNegative,
                     display: 'inline-block',
                   }}
                 />
@@ -148,7 +148,7 @@ function CustomTooltip({
                   style={{
                     width: 10,
                     height: 10,
-                    backgroundColor: theme.errorText,
+                    backgroundColor: theme.templateNumberUnderFunded,
                     display: 'inline-block',
                   }}
                 />
@@ -169,7 +169,7 @@ function CustomTooltip({
                     style={{
                       width: 10,
                       height: 10,
-                      backgroundColor: theme.pageTextLight,
+                      backgroundColor: theme.reportsNumberNeutral,
                       display: 'inline-block',
                     }}
                   />
@@ -265,19 +265,19 @@ export function BudgetAnalysisGraph({
             />
             <Bar
               dataKey="budgeted"
-              fill={theme.reportsBlue}
+              fill={theme.reportsNumberPositive}
               name={budgetedLabel}
               animationDuration={1000}
             />
             <Bar
               dataKey="spent"
-              fill={theme.reportsRed}
+              fill={theme.reportsNumberNegative}
               name={spentLabel}
               animationDuration={1000}
             />
             <Bar
               dataKey="overspendingAdjustment"
-              fill={theme.errorText}
+              fill={theme.templateNumberUnderFunded}
               name={overspendingLabel}
               animationDuration={1000}
             />
@@ -285,7 +285,7 @@ export function BudgetAnalysisGraph({
               <Line
                 type="monotone"
                 dataKey="balance"
-                stroke={theme.pageTextLight}
+                stroke={theme.reportsNumberNeutral}
                 strokeWidth={2}
                 name={balanceLabel}
                 dot={false}
@@ -328,7 +328,7 @@ export function BudgetAnalysisGraph({
             <Line
               type="monotone"
               dataKey="budgeted"
-              stroke={theme.reportsBlue}
+              stroke={theme.reportsNumberPositive}
               strokeWidth={2}
               name={budgetedLabel}
               dot={false}
@@ -337,7 +337,7 @@ export function BudgetAnalysisGraph({
             <Line
               type="monotone"
               dataKey="spent"
-              stroke={theme.reportsRed}
+              stroke={theme.reportsNumberNegative}
               strokeWidth={2}
               name={spentLabel}
               dot={false}
@@ -346,7 +346,7 @@ export function BudgetAnalysisGraph({
             <Line
               type="monotone"
               dataKey="overspendingAdjustment"
-              stroke={theme.errorText}
+              stroke={theme.templateNumberUnderFunded}
               strokeWidth={2}
               name={overspendingLabel}
               dot={false}
@@ -356,7 +356,7 @@ export function BudgetAnalysisGraph({
               <Line
                 type="monotone"
                 dataKey="balance"
-                stroke={theme.pageTextLight}
+                stroke={theme.reportsNumberNeutral}
                 strokeWidth={2}
                 name={balanceLabel}
                 dot={false}
