@@ -26,5 +26,6 @@ export const transactionQueries = {
       getNextPageParam: (lastPage, pages) => {
         return lastPage.length < pageSize ? undefined : pages.length;
       },
+      enabled: !!query,
     }),
 };
