@@ -9,7 +9,7 @@ import { accountFilter } from '@desktop-client/queries';
 import {
   scheduleQueries,
   type ScheduleData,
-} from '@desktop-client/schedules/queries';
+} from '@desktop-client/schedules';
 
 export type UseSchedulesProps = {
   query?: Query;
