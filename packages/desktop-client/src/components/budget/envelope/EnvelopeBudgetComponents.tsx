@@ -429,7 +429,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     scheduleStatus === 'missed'
                       ? theme.budgetNumberNegative
                       : scheduleStatus === 'due'
-                        ? theme.budgetNumberNeutral
+                        ? theme.templateNumberUnderFunded
                         : theme.upcomingText,
                 }}
                 onPress={() =>
