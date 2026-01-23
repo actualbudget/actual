@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -10,6 +10,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
+import type { ScheduleEntity } from 'loot-core/types/models';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
 
@@ -39,24 +40,21 @@ export function ScheduleLink({
 
   const dispatch = useDispatch();
   const [filter, setFilter] = useState(accountName || '');
-  const schedulesQuery = useMemo(
-    () => q('schedules').filter({ completed: false }).select('*'),
-    [],
-  );
   const {
-    isLoading: isSchedulesLoading,
-    schedules,
-    statuses,
-  } = useSchedules({ query: schedulesQuery });
+    isFetching: isSchedulesLoading,
+    data: { schedules, statuses },
+  } = useSchedules({
+    query: q('schedules').filter({ completed: false }).select('*'),
+  });
 
   const searchInput = useRef<HTMLInputElement | null>(null);
 
-  async function onSelect(scheduleId: string) {
+  async function onSelect(schedule: ScheduleEntity) {
     if (ids?.length > 0) {
       await send('transactions-batch-update', {
-        updated: ids.map(id => ({ id, schedule: scheduleId })),
+        updated: ids.map(id => ({ id, schedule: schedule.id })),
       });
-      onScheduleLinked?.(schedules.find(s => s.id === scheduleId));
+      onScheduleLinked?.(schedule);
     }
   }
 
@@ -147,8 +145,8 @@ export function ScheduleLink({
               allowCompleted={false}
               filter={filter}
               minimal
-              onSelect={id => {
-                onSelect(id);
+              onSelect={schedule => {
+                onSelect(schedule);
                 close();
               }}
               schedules={schedules}

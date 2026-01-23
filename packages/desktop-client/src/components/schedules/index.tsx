@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -25,9 +25,11 @@ export function Schedules() {
   const [filter, setFilter] = useState('');
 
   const onEdit = useCallback(
-    (id: ScheduleEntity['id']) => {
+    (schedule: ScheduleEntity) => {
       dispatch(
-        pushModal({ modal: { name: 'schedule-edit', options: { id } } }),
+        pushModal({
+          modal: { name: 'schedule-edit', options: { id: schedule.id } },
+        }),
       );
     },
     [dispatch],
@@ -78,12 +80,10 @@ export function Schedules() {
     [],
   );
 
-  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
   const {
     isLoading: isSchedulesLoading,
-    schedules,
-    statuses,
-  } = useSchedules({ query: schedulesQuery });
+    data: { schedules, statuses },
+  } = useSchedules({ query: q('schedules').select('*') });
 
   return (
     <Page header={t('Schedules')}>

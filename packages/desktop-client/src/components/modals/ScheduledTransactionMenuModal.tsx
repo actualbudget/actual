@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -44,19 +44,18 @@ export function ScheduledTransactionMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
   const scheduleId = transactionId?.split('/')?.[1];
-  const schedulesQuery = useMemo(
-    () => q('schedules').filter({ id: scheduleId }).select('*'),
-    [scheduleId],
-  );
-  const { isLoading: isSchedulesLoading, schedules } = useSchedules({
-    query: schedulesQuery,
+  const {
+    isFetching: isSchedulesLoading,
+    data: { schedules },
+  } = useSchedules({
+    query: q('schedules').filter({ id: scheduleId }).select('*'),
   });
 
   if (isSchedulesLoading) {
     return null;
   }
 
-  const schedule = schedules?.[0];
+  const schedule = schedules[0];
   const { date: dateCond } = extractScheduleConds(schedule._conditions);
 
   const canBeSkipped = scheduleIsRecurring(dateCond);

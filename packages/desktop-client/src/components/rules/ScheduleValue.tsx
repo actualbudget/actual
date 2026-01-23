@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
@@ -22,10 +22,14 @@ export function ScheduleValue({ value }: ScheduleValueProps) {
   const { t } = useTranslation();
   const payees = usePayees();
   const byId = getPayeesById(payees);
-  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
-  const { schedules = [], isLoading } = useSchedules({ query: schedulesQuery });
+  const {
+    data: { schedules },
+    isFetching,
+  } = useSchedules({
+    query: q('schedules').select('*'),
+  });
 
-  if (isLoading) {
+  if (isFetching) {
     return (
       <View aria-label={t('Loading...')} style={{ display: 'inline-flex' }}>
         <AnimatedLoading width={10} height={10} />

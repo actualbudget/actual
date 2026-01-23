@@ -78,14 +78,12 @@ export function SelectedTransactionsButton({
       .map(id => id.split('/')[1]);
   }, [selectedIds]);
 
-  const scheduleQuery = useMemo(() => {
-    return q('schedules')
+  const {
+    data: { schedules: selectedSchedules },
+  } = useSchedules({
+    query: q('schedules')
       .filter({ id: { $oneof: scheduleIds } })
-      .select('*');
-  }, [scheduleIds]);
-
-  const { schedules: selectedSchedules } = useSchedules({
-    query: scheduleQuery,
+      .select('*'),
   });
 
   const types = useMemo(() => {

@@ -6,13 +6,13 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import type { ScheduleStatusType } from 'loot-core/shared/schedules';
 import type { ScheduleEntity } from 'loot-core/types/models';
 
 import { SchedulesListItem } from './SchedulesListItem';
 
 import { ActionableGridListItem } from '@desktop-client/components/mobile/ActionableGridListItem';
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import type { ScheduleStatusType } from '@desktop-client/schedules';
 
 type CompletedSchedulesItem = { id: 'show-completed' };
 type SchedulesListEntry = ScheduleEntity | CompletedSchedulesItem;

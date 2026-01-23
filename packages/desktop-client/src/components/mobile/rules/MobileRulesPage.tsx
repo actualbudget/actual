@@ -37,8 +37,10 @@ export function MobileRulesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('');
 
-  const { schedules = [] } = useSchedules({
-    query: useMemo(() => q('schedules').select('*'), []),
+  const {
+    data: { schedules },
+  } = useSchedules({
+    query: q('schedules').select('*'),
   });
   const { data: { list: categories } = { list: [] } } = useCategories();
   const payees = usePayees();

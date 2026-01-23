@@ -12,7 +12,10 @@ import { useHover } from 'usehooks-ts';
 import { q } from 'loot-core/shared/query';
 import type { Query } from 'loot-core/shared/query';
 import { getScheduledAmount } from 'loot-core/shared/schedules';
-import { isPreviewId } from 'loot-core/shared/transactions';
+import {
+  getScheduleFromPreviewId,
+  isPreviewId,
+} from 'loot-core/shared/transactions';
 import type { AccountEntity } from 'loot-core/types/models';
 
 import { FinancialText } from '@desktop-client/components/FinancialText';
@@ -91,28 +94,32 @@ function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
 
   let scheduleBalance = 0;
 
-  const { isLoading, schedules = [] } = useCachedSchedules();
+  const {
+    data: { schedules },
+    isFetching,
+  } = useCachedSchedules();
 
-  if (isLoading) {
+  if (isFetching) {
     return null;
   }
 
-  const previewIds = [...selectedItems]
+  const previewedScheduleIds = [...selectedItems]
     .filter(id => isPreviewId(id))
-    .map(id => id.slice(8));
+    .map(id => getScheduleFromPreviewId(id));
+
   let isExactBalance = true;
 
-  for (const s of schedules) {
-    if (previewIds.includes(s.id)) {
+  for (const schedule of schedules) {
+    if (previewedScheduleIds.includes(schedule.id)) {
       // If a schedule is `between X and Y` then we calculate the average
-      if (s._amountOp === 'isbetween') {
+      if (schedule._amountOp === 'isbetween') {
         isExactBalance = false;
       }
 
-      if (!account || account.id === s._account) {
-        scheduleBalance += getScheduledAmount(s._amount);
+      if (!account || account.id === schedule._account) {
+        scheduleBalance += getScheduledAmount(schedule._amount);
       } else {
-        scheduleBalance -= getScheduledAmount(s._amount);
+        scheduleBalance -= getScheduledAmount(schedule._amount);
       }
     }
   }

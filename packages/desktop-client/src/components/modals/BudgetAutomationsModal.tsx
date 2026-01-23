@@ -189,9 +189,10 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
     onLoaded: setAutomations,
   });
 
-  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
-  const { schedules } = useSchedules({
-    query: schedulesQuery,
+  const {
+    data: { schedules },
+  } = useSchedules({
+    query: q('schedules').select('*'),
   });
 
   const categories = useBudgetAutomationCategories();
