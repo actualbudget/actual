@@ -492,7 +492,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                     The balance starts from the month before your selected
                     period. Budgeted, spent, and overspending adjustments show
                     totals over the period. Ending balance shows the final
-                    balance at period end.
+                    balance at period end. You can filter by categories to track changes in a specific area.
                   </Paragraph>
                   <Paragraph>
                     Hint: You can use the icon in the header to toggle between
