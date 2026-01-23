@@ -156,7 +156,7 @@ export function BudgetAnalysisCard({
           <BudgetAnalysisGraph
             style={{ flex: 1 }}
             data={data}
-            graphType={meta?.graphType || 'Line'}
+            graphType={meta?.graphType || 'Bar'}
             showBalance={meta?.showBalance ?? true}
           />
         ) : (
