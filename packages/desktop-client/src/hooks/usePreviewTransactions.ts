@@ -19,9 +19,10 @@ import {
 } from 'loot-core/types/models';
 
 import { useCachedSchedules } from './useCachedSchedules';
-import { type ScheduleStatuses } from './useSchedules';
 import { useSyncedPref } from './useSyncedPref';
 import { calculateRunningBalancesBottomUp } from './useTransactions';
+
+import { type ScheduleStatuses } from '@desktop-client/schedules';
 
 type UsePreviewTransactionsProps = {
   filter?: (schedule: ScheduleEntity) => boolean;
@@ -53,10 +54,9 @@ export function usePreviewTransactions({
     TransactionEntity[]
   >([]);
   const {
-    isLoading: isSchedulesLoading,
+    isFetching: isSchedulesLoading,
     error: scheduleQueryError,
-    schedules,
-    statuses,
+    data: { schedules, statuses },
   } = useCachedSchedules();
   const [isLoading, setIsLoading] = useState(isSchedulesLoading);
   const [error, setError] = useState<Error | undefined>(undefined);

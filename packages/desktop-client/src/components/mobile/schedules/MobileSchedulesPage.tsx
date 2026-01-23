@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -38,12 +38,10 @@ export function MobileSchedulesPage() {
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
-  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
   const {
-    isLoading: isSchedulesLoading,
-    schedules,
-    statuses,
-  } = useSchedules({ query: schedulesQuery });
+    isFetching: isSchedulesLoading,
+    data: { schedules, statuses },
+  } = useSchedules({ query: q('schedules').select('*') });
 
   const payees = usePayees();
   const accounts = useAccounts();

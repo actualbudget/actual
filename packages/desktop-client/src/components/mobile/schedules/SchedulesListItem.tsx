@@ -19,7 +19,7 @@ import { StatusBadge } from '@desktop-client/components/schedules/StatusBadge';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
-import { type ScheduleStatusType } from '@desktop-client/hooks/useSchedules';
+import { type ScheduleStatusType } from '@desktop-client/schedules';
 
 type SchedulesListItemProps = {
   onDelete: () => void;

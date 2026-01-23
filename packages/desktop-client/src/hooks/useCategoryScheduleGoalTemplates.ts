@@ -7,10 +7,11 @@ import {
 
 import { useCachedSchedules } from './useCachedSchedules';
 import { useFeatureFlag } from './useFeatureFlag';
+
 import {
   type ScheduleStatuses,
   type ScheduleStatusLabels,
-} from './useSchedules';
+} from '@desktop-client/schedules';
 
 type ScheduleGoalDefinition = {
   type: 'schedule';
@@ -32,9 +33,11 @@ export function useCategoryScheduleGoalTemplates({
 }: UseCategoryScheduleGoalTemplatesProps): UseCategoryScheduleGoalTemplatesResult {
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const {
-    schedules: allSchedules,
-    statuses: allStatuses,
-    statusLabels: allStatusLabels,
+    data: {
+      schedules: allSchedules,
+      statuses: allStatuses,
+      labels: allStatusLabels,
+    },
   } = useCachedSchedules();
 
   return useMemo(() => {

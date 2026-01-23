@@ -9,6 +9,10 @@ export function isTemporaryId(id: string) {
   return id.indexOf('temp') !== -1;
 }
 
+export function getScheduleFromPreviewId(previewId: string) {
+  return previewId.slice('preview/'.length);
+}
+
 export function isPreviewId(id: string) {
   return id.indexOf('preview/') !== -1;
 }

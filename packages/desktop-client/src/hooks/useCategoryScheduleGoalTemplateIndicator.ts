@@ -13,8 +13,9 @@ import {
 
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
 import { useLocale } from './useLocale';
-import { type ScheduleStatusType } from './useSchedules';
 import { useSyncedPref } from './useSyncedPref';
+
+import { type ScheduleStatusType } from '@desktop-client/schedules';
 
 type UseCategoryScheduleGoalTemplateProps = {
   category: CategoryEntity;
