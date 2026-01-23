@@ -1,10 +1,6 @@
-import React, {
-  useEffect,
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-} from 'react';
+import React, { type CSSProperties } from 'react';
 import { mergeProps } from 'react-aria';
-import { type GridListItem } from 'react-aria-components';
+import { type ListBoxItemRenderProps } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -75,10 +71,7 @@ const getScheduleIconStyle = ({ isPreview }: { isPreview: boolean }) => ({
   color: isPreview ? theme.pageTextLight : theme.menuItemText,
 });
 
-type TransactionListItemProps = Omit<
-  ComponentPropsWithoutRef<typeof GridListItem<TransactionEntity>>,
-  'onPress' | 'onAction'
-> & {
+type TransactionListItemProps = ListBoxItemRenderProps & {
   transaction?: TransactionEntity;
   showRunningBalance?: boolean;
   runningBalance?: IntegerAmount;
@@ -94,11 +87,6 @@ export function TransactionListItem({
   transaction,
   ...itemProps
 }: TransactionListItemProps) {
-  useEffect(() => {
-    console.warn('TransactionListItem');
-    return () => console.warn('TransactionListItem cleanup');
-  }, []);
-
   const { t } = useTranslation();
   const { list: categories } = useCategories();
 
