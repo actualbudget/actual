@@ -24,7 +24,7 @@ export const transactionQueries = {
       placeholderData: keepPreviousData,
       initialPageParam: 0,
       getNextPageParam: (lastPage, pages) => {
-        return lastPage.length < pageSize ? undefined : pages.length + 1;
+        return lastPage.length < pageSize ? undefined : pages.length;
       },
     }),
 };
