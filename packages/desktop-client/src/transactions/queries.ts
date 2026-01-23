@@ -12,6 +12,10 @@ export const transactionQueries = {
     infiniteQueryOptions<TransactionEntity[]>({
       queryKey: [...transactionQueries.lists(), query],
       queryFn: async ({ pageParam }) => {
+        if (!query) {
+          // Shouldn't happen because of the enabled flag, but needed to satisfy TS
+          throw new Error('No query provided.');
+        }
         const queryWithOffset = query
           .offset((pageParam as number) * pageSize)
           .limit(pageSize);

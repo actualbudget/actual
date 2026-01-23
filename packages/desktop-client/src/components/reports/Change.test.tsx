@@ -6,7 +6,9 @@ import { render, screen } from '@testing-library/react';
 
 import { Change } from './Change';
 
-import { store } from '@desktop-client/redux/store';
+import { configureAppStore } from '@desktop-client/redux/store';
+
+const store = configureAppStore();
 
 describe('Change', () => {
   it('renders a positive amount with a plus sign and positive color', () => {
