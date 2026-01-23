@@ -116,6 +116,7 @@ export function ReportCard({
             background: 'transparent',
             padding: 0,
             textAlign: 'left',
+            overflow: 'visible',
           }}
         >
           {content}
