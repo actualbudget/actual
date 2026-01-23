@@ -314,28 +314,26 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
           'transfer',
         ]}
         inlineContent={
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            <Tooltip
-              content={
-                graphType === 'Line'
-                  ? t('Switch to bar chart')
-                  : t('Switch to line chart')
+          <Tooltip
+            content={
+              graphType === 'Line'
+                ? t('Switch to bar chart')
+                : t('Switch to line chart')
+            }
+          >
+            <Button
+              variant="bare"
+              onPress={() =>
+                setGraphType(graphType === 'Line' ? 'Bar' : 'Line')
               }
             >
-              <Button
-                variant="bare"
-                onPress={() =>
-                  setGraphType(graphType === 'Line' ? 'Bar' : 'Line')
-                }
-              >
-                {graphType === 'Line' ? (
-                  <SvgChartBar style={{ width: 12, height: 12 }} />
-                ) : (
-                  <SvgChart style={{ width: 12, height: 12 }} />
-                )}
-              </Button>
-            </Tooltip>
-          </View>
+              {graphType === 'Line' ? (
+                <SvgChartBar style={{ width: 12, height: 12 }} />
+              ) : (
+                <SvgChart style={{ width: 12, height: 12 }} />
+              )}
+            </Button>
+          </Tooltip>
         }
       >
         <View style={{ flexDirection: 'row', gap: 10 }}>

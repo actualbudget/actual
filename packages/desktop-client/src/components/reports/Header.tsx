@@ -297,13 +297,11 @@ export function Header({
                 compact={isNarrowWidth}
                 onApply={onApply}
                 hover={false}
-                exclude={
-                  filterExclude
-                }
+                exclude={filterExclude}
               />
             )}
+            {inlineContent}
           </SpaceBetween>
-          <SpaceBetween gap={0}>{inlineContent}</SpaceBetween>
         </View>
 
         {children && (
