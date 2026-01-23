@@ -10,7 +10,10 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { format as monthUtilFormat } from 'loot-core/shared/months';
-import { getScheduledAmount, type ScheduleStatus } from 'loot-core/shared/schedules';
+import {
+  getScheduledAmount,
+  type ScheduleStatus,
+} from 'loot-core/shared/schedules';
 import { type ScheduleEntity } from 'loot-core/types/models';
 import { type WithRequired } from 'loot-core/types/util';
 

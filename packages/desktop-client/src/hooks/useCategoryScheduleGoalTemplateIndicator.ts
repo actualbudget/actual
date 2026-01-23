@@ -5,7 +5,10 @@ import { type Locale } from 'date-fns';
 import { type TFunction } from 'i18next';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { getUpcomingDays, type ScheduleStatus } from 'loot-core/shared/schedules';
+import {
+  getUpcomingDays,
+  type ScheduleStatus,
+} from 'loot-core/shared/schedules';
 import {
   type CategoryEntity,
   type ScheduleEntity,

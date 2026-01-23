@@ -14,7 +14,10 @@ import { View } from '@actual-app/components/view';
 
 import { format as monthUtilFormat } from 'loot-core/shared/months';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { getScheduledAmount, type ScheduleStatus } from 'loot-core/shared/schedules';
+import {
+  getScheduledAmount,
+  type ScheduleStatus,
+} from 'loot-core/shared/schedules';
 import { type ScheduleEntity } from 'loot-core/types/models';
 
 import { StatusBadge } from './StatusBadge';
