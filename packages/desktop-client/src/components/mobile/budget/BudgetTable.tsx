@@ -116,10 +116,10 @@ function ToBudget({ toBudget, onPress, show3Columns }: ToBudgetProps) {
                       fontWeight: '700',
                       color:
                         amount < 0
-                          ? theme.errorText
+                          ? theme.toBudgetNegative
                           : amount > 0
-                            ? theme.noticeText
-                            : theme.formInputText,
+                            ? theme.toBudgetPositive
+                            : theme.toBudgetZero,
                     }}
                   >
                     {format(value, type)}
