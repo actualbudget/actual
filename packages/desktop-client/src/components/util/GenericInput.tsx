@@ -413,7 +413,7 @@ export const GenericInput = ({
             <Input
               ref={ref}
               value={props.value || ''}
-              placeholder={t('nothing')}
+              placeholder="0.00"
               onChangeValue={newValue => props.onChange(Number(newValue))}
               style={inputStyle}
             />
