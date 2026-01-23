@@ -10,7 +10,7 @@ import { MobilePayeesPage } from './MobilePayeesPage';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayeeRuleCounts } from '@desktop-client/hooks/usePayeeRuleCounts';
 import { usePayees } from '@desktop-client/hooks/usePayees';
-import { TestProvider } from '@desktop-client/redux/mock';
+import { TestProviders } from '@desktop-client/mocks';
 
 vi.mock('@use-gesture/react', () => ({
   useDrag: vi.fn().mockReturnValue(() => ({})),
@@ -57,9 +57,9 @@ describe('MobilePayeesPage', () => {
 
   const renderPayeesPage = () => {
     return render(
-      <TestProvider>
+      <TestProviders>
         <MobilePayeesPage />
-      </TestProvider>,
+      </TestProviders>,
     );
   };
 
