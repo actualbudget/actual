@@ -20,7 +20,6 @@ export const transactionQueries = {
           await aqlQuery(queryWithOffset);
         return data;
       },
-
       placeholderData: keepPreviousData,
       initialPageParam: 0,
       getNextPageParam: (lastPage, pages) => {
