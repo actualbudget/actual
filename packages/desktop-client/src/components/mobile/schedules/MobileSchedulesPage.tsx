@@ -40,7 +40,7 @@ export function MobileSchedulesPage() {
 
   const {
     isFetching: isSchedulesLoading,
-    data: { schedules, statuses },
+    data: { schedules, scheduleStatusMap },
   } = useSchedules({ query: q('schedules').select('*') });
 
   const payees = usePayees();
@@ -67,7 +67,7 @@ export function MobileSchedulesPage() {
         const dateStr = schedule.next_date
           ? monthUtilFormat(schedule.next_date, dateFormat)
           : null;
-        const statusLabel = statuses.get(schedule.id);
+        const statusLabel = scheduleStatusMap.get(schedule.id);
 
         return (
           filterIncludes(schedule.name) ||
@@ -156,7 +156,7 @@ export function MobileSchedulesPage() {
       <SchedulesList
         schedules={filteredSchedules}
         isLoading={isSchedulesLoading}
-        statuses={statuses}
+        scheduleStatusMap={scheduleStatusMap}
         onSchedulePress={handleSchedulePress}
         onScheduleDelete={handleScheduleDelete}
         hasCompletedSchedules={hasCompletedSchedules}

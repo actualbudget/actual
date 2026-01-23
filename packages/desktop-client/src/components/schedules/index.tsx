@@ -82,7 +82,7 @@ export function Schedules() {
 
   const {
     isLoading: isSchedulesLoading,
-    data: { schedules, statuses },
+    data: { schedules, scheduleStatusMap },
   } = useSchedules({ query: q('schedules').select('*') });
 
   return (
@@ -113,7 +113,7 @@ export function Schedules() {
         isLoading={isSchedulesLoading}
         schedules={schedules}
         filter={filter}
-        statuses={statuses}
+        scheduleStatusMap={scheduleStatusMap}
         allowCompleted
         onSelect={onEdit}
         onAction={onAction}

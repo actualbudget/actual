@@ -6,13 +6,12 @@ import type { TFunction } from 'i18next';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { getUpcomingDays } from 'loot-core/shared/schedules';
+import type { ScheduleStatus } from 'loot-core/shared/schedules';
 import type { CategoryEntity, ScheduleEntity } from 'loot-core/types/models';
 
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
 import { useLocale } from './useLocale';
 import { useSyncedPref } from './useSyncedPref';
-
-import type { ScheduleStatusType } from '@desktop-client/schedules';
 
 type UseCategoryScheduleGoalTemplateProps = {
   category: CategoryEntity;
@@ -21,7 +20,7 @@ type UseCategoryScheduleGoalTemplateProps = {
 
 type UseCategoryScheduleGoalTemplateResult = {
   schedule: ScheduleEntity | null;
-  scheduleStatus: ScheduleStatusType | null;
+  scheduleStatus: ScheduleStatus | null;
   isScheduleRecurring: boolean;
   description: string;
 };
@@ -110,7 +109,7 @@ function getScheduleStatusDescription({
 }: {
   t: TFunction;
   schedule?: ScheduleEntity;
-  scheduleStatus?: ScheduleStatusType;
+  scheduleStatus?: ScheduleStatus;
   locale?: Locale;
 }) {
   if (!schedule || !scheduleStatus) {

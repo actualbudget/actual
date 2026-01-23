@@ -42,7 +42,7 @@ export function usePreviewTransactions({
   const {
     isFetching: isSchedulesLoading,
     error: scheduleQueryError,
-    data: { schedules, statuses },
+    data: { schedules, scheduleStatusMap },
   } = useCachedSchedules();
   const [isLoading, setIsLoading] = useState(isSchedulesLoading);
   const [error, setError] = useState<Error | undefined>(undefined);
@@ -65,11 +65,17 @@ export function usePreviewTransactions({
 
     return computeSchedulePreviewTransactions(
       schedules,
-      statuses,
+      scheduleStatusMap,
       upcomingLength,
       filter,
     );
-  }, [filter, isSchedulesLoading, schedules, statuses, upcomingLength]);
+  }, [
+    filter,
+    isSchedulesLoading,
+    schedules,
+    scheduleStatusMap,
+    upcomingLength,
+  ]);
 
   useEffect(() => {
     let isUnmounted = false;
@@ -94,7 +100,10 @@ export function usePreviewTransactions({
         if (!isUnmounted) {
           const withDefaults = newTrans.map(t => ({
             ...t,
-            category: t.schedule != null ? statuses.get(t.schedule) : undefined,
+            category:
+              t.schedule != null
+                ? scheduleStatusMap.get(t.schedule)
+                : undefined,
             schedule: t.schedule,
             subtransactions: t.subtransactions?.map(
               (st: TransactionEntity) => ({
@@ -136,7 +145,7 @@ export function usePreviewTransactions({
     return () => {
       isUnmounted = true;
     };
-  }, [scheduleTransactions, schedules, statuses, upcomingLength]);
+  }, [scheduleTransactions, schedules, scheduleStatusMap, upcomingLength]);
 
   const returnError = error || scheduleQueryError;
   return {

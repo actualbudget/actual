@@ -6,13 +6,13 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import type { ScheduleStatusMap } from 'loot-core/shared/schedules';
 import type { ScheduleEntity } from 'loot-core/types/models';
 
 import { SchedulesListItem } from './SchedulesListItem';
 
 import { ActionableGridListItem } from '@desktop-client/components/mobile/ActionableGridListItem';
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
-import type { ScheduleStatusType } from '@desktop-client/schedules';
 
 type CompletedSchedulesItem = { id: 'show-completed' };
 type SchedulesListEntry = ScheduleEntity | CompletedSchedulesItem;
@@ -20,7 +20,7 @@ type SchedulesListEntry = ScheduleEntity | CompletedSchedulesItem;
 type SchedulesListProps = {
   schedules: readonly ScheduleEntity[];
   isLoading: boolean;
-  statuses: Map<ScheduleEntity['id'], ScheduleStatusType>;
+  scheduleStatusMap: ScheduleStatusMap;
   onSchedulePress: (schedule: ScheduleEntity) => void;
   onScheduleDelete: (schedule: ScheduleEntity) => void;
   hasCompletedSchedules?: boolean;
@@ -31,7 +31,7 @@ type SchedulesListProps = {
 export function SchedulesList({
   schedules,
   isLoading,
-  statuses,
+  scheduleStatusMap,
   onSchedulePress,
   onScheduleDelete,
   hasCompletedSchedules = false,
@@ -125,7 +125,7 @@ export function SchedulesList({
             ) : (
               <SchedulesListItem
                 value={item}
-                status={statuses.get(item.id) || 'scheduled'}
+                status={scheduleStatusMap.get(item.id) || 'scheduled'}
                 onAction={() => onSchedulePress(item)}
                 onDelete={() => onScheduleDelete(item)}
               />

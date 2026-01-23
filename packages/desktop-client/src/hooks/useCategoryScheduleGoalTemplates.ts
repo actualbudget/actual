@@ -1,14 +1,13 @@
 import { useMemo } from 'react';
 
+import type {
+  ScheduleStatusLabelMap,
+  ScheduleStatusMap,
+} from 'loot-core/shared/schedules';
 import type { CategoryEntity, ScheduleEntity } from 'loot-core/types/models';
 
 import { useCachedSchedules } from './useCachedSchedules';
 import { useFeatureFlag } from './useFeatureFlag';
-
-import type {
-  ScheduleStatuses,
-  ScheduleStatusLabels,
-} from '@desktop-client/schedules';
 
 type ScheduleGoalDefinition = {
   type: 'schedule';
@@ -21,8 +20,8 @@ type UseCategoryScheduleGoalTemplatesProps = {
 
 type UseCategoryScheduleGoalTemplatesResult = {
   schedules: ScheduleEntity[];
-  statuses: ScheduleStatuses;
-  statusLabels: ScheduleStatusLabels;
+  statuses: ScheduleStatusMap;
+  statusLabels: ScheduleStatusLabelMap;
 };
 
 export function useCategoryScheduleGoalTemplates({
@@ -32,8 +31,8 @@ export function useCategoryScheduleGoalTemplates({
   const {
     data: {
       schedules: allSchedules,
-      statuses: allStatuses,
-      labels: allStatusLabels,
+      scheduleStatusMap: allStatuses,
+      scheduleStatusLabelMap: allStatusLabels,
     },
   } = useCachedSchedules();
 

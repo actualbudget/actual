@@ -6,26 +6,21 @@ import {
   getStatus,
   getStatusLabel,
 } from 'loot-core/shared/schedules';
+import type {
+  ScheduleStatusLabelMap,
+  ScheduleStatusMap,
+} from 'loot-core/shared/schedules';
 import type { ScheduleEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-
-export type ScheduleStatusType = ReturnType<typeof getStatus>;
-export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
-
-export type ScheduleStatusLabelType = ReturnType<typeof getStatusLabel>;
-export type ScheduleStatusLabels = Map<
-  ScheduleEntity['id'],
-  ScheduleStatusLabelType
->;
 
 export type ScheduleData = ScheduleStatusData & {
   schedules: readonly ScheduleEntity[];
 };
 
 export type ScheduleStatusData = {
-  statuses: ScheduleStatuses;
-  labels: ScheduleStatusLabels;
+  scheduleStatusMap: ScheduleStatusMap;
+  scheduleStatusLabelMap: ScheduleStatusLabelMap;
 };
 
 type AqlOptions = {
@@ -59,22 +54,22 @@ export const scheduleQueries = {
           );
           return {
             schedules,
-            statuses: statuses.statuses,
-            labels: statuses.labels,
+            scheduleStatusMap: statuses.scheduleStatusMap,
+            scheduleStatusLabelMap: statuses.scheduleStatusLabelMap,
           };
         }
 
         return {
           schedules,
-          statuses: new Map(),
-          labels: new Map(),
+          scheduleStatusMap: new Map(),
+          scheduleStatusLabelMap: new Map(),
         };
       },
       enabled: !!query,
       placeholderData: {
         schedules: [],
-        statuses: new Map(),
-        labels: new Map(),
+        scheduleStatusMap: new Map(),
+        scheduleStatusLabelMap: new Map(),
       },
     }),
   statuses: ({
@@ -94,7 +89,7 @@ export const scheduleQueries = {
           transactions.filter(Boolean).map(trans => trans.schedule),
         );
 
-        const statuses: ScheduleStatuses = new Map(
+        const scheduleStatusMap: ScheduleStatusMap = new Map(
           schedules.map(s => [
             s.id,
             getStatus(
@@ -106,14 +101,14 @@ export const scheduleQueries = {
           ]),
         );
 
-        const labels: ScheduleStatusLabels = new Map(
-          [...statuses.keys()].map(key => [
+        const scheduleStatusLabelMap: ScheduleStatusLabelMap = new Map(
+          [...scheduleStatusMap.keys()].map(key => [
             key,
-            getStatusLabel(statuses.get(key) || ''),
+            getStatusLabel(scheduleStatusMap.get(key) || ''),
           ]),
         );
 
-        return { statuses, labels };
+        return { scheduleStatusMap, scheduleStatusLabelMap };
       },
       enabled: schedules.length > 0,
     }),

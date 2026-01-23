@@ -15,16 +15,14 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { getStatusLabel } from 'loot-core/shared/schedules';
+import type {
+  ScheduleStatus,
+  ScheduleStatusLabel,
+} from 'loot-core/shared/schedules';
 import { titleFirst } from 'loot-core/shared/util';
 
-import type { ScheduleStatusType } from '@desktop-client/schedules';
-
 // Consists of Schedule Statuses + Transaction statuses
-export type StatusTypes =
-  | ScheduleStatusType
-  | 'cleared'
-  | 'pending'
-  | 'reconciled';
+export type StatusTypes = ScheduleStatus | 'cleared' | 'pending' | 'reconciled';
 
 export const defaultStatusProps = {
   color: theme.buttonNormalDisabledText,
@@ -32,7 +30,7 @@ export const defaultStatusProps = {
   Icon: SvgCheckCircleHollow,
 };
 
-export function getStatusProps(status: StatusTypes | null | undefined) {
+export function getStatusProps(status: ScheduleStatusLabel | null | undefined) {
   switch (status) {
     case 'missed':
       return {
@@ -93,7 +91,7 @@ export function getStatusProps(status: StatusTypes | null | undefined) {
   }
 }
 
-export function StatusBadge({ status }: { status: ScheduleStatusType }) {
+export function StatusBadge({ status }: { status: ScheduleStatusLabel }) {
   const { color, backgroundColor, Icon } = getStatusProps(status);
   return (
     <View

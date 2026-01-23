@@ -15,6 +15,8 @@ import { Condition } from '../server/rules';
 import * as monthUtils from './months';
 import { q } from './query';
 
+export type ScheduleStatus = ReturnType<typeof getStatus>;
+
 export function getStatus(
   nextDate: string,
   completed: boolean,
@@ -40,6 +42,8 @@ export function getStatus(
     return 'scheduled';
   }
 }
+
+export type ScheduleStatusLabel = ReturnType<typeof getStatusLabel>;
 
 export function getStatusLabel(status: string) {
   switch (status) {
@@ -470,14 +474,17 @@ export function scheduleIsRecurring(dateCond: Condition | null) {
   return value.type === 'recur';
 }
 
-export type ScheduleStatusType = ReturnType<typeof getStatus>;
-export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
+export type ScheduleStatusMap = Map<ScheduleEntity['id'], ScheduleStatus>;
+export type ScheduleStatusLabelMap = Map<
+  ScheduleEntity['id'],
+  ScheduleStatusLabel
+>;
 
 export function isForPreview(
   schedule: ScheduleEntity,
-  statuses: ScheduleStatuses,
+  statusMap: ScheduleStatusMap,
 ) {
-  const status = statuses.get(schedule.id);
+  const status = statusMap.get(schedule.id);
   return (
     !schedule.completed &&
     ['due', 'upcoming', 'missed', 'paid'].includes(status!)
@@ -486,7 +493,7 @@ export function isForPreview(
 
 export function computeSchedulePreviewTransactions(
   schedules: readonly ScheduleEntity[],
-  statuses: ScheduleStatuses,
+  statuses: ScheduleStatusMap,
   upcomingLength?: string,
   filter?: (schedule: ScheduleEntity) => boolean,
 ) {
