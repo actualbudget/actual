@@ -119,7 +119,7 @@ function ToBudget({ toBudget, onPress, show3Columns }: ToBudgetProps) {
                           ? theme.toBudgetNegative
                           : amount > 0
                             ? theme.toBudgetPositive
-                            : theme.toBudgetZero,
+                            : theme.budgetNumberNeutral,
                     }}
                   >
                     {format(value, type)}
