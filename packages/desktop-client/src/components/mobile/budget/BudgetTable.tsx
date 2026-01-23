@@ -434,7 +434,7 @@ function BudgetTableHeader({
 
   const amountStyle: CSSProperties = {
     ...styles.tnum,
-    color: theme.formInputText,
+    color: theme.budgetNumberNeutral,
     textAlign: 'right',
     fontSize: 12,
     fontWeight: '500',
