@@ -83,46 +83,60 @@ async function startAuth({
   return await post('/start_auth', { country, aspsp });
 }
 
-let stopPolling = false;
+// AbortController for cancelling polling - one per active poll session
+let currentPollController: AbortController | null = null;
 
 async function pollAuth({
   state,
 }: {
   state: string;
 }): Promise<EnableBankingResponse<'/get_session'>> {
-  stopPolling = false;
+  // Create a new controller for this poll session
+  const controller = new AbortController();
+  currentPollController = controller;
+
   const startTime = Date.now();
   logger.debug('starting poll');
-  while (!stopPolling) {
-    const resp = await post('/get_session', { state });
-    logger.debug('poll response', resp);
-    if (resp.data || resp.error.error_code !== 'NOT_READY') {
-      logger.debug('returning');
-      return resp;
-    }
-    if (Date.now() - startTime >= 1000 * 60 * 10) {
-      logger.debug('Time out reached after 10 minutes');
-      return {
-        error: {
-          error_code: 'TIME_OUT',
-          error_type: 'Time out has been reached',
-        },
-      };
-    }
-    logger.debug('waiting');
-    await new Promise(r => setTimeout(r, 1000));
-  }
 
-  return {
-    error: {
-      error_code: 'TIME_OUT',
-      error_type: 'Polling was stopped',
-    },
-  };
+  try {
+    while (!controller.signal.aborted) {
+      const resp = await post('/get_session', { state });
+      logger.debug('poll response', resp);
+      if (resp.data || resp.error.error_code !== 'NOT_READY') {
+        logger.debug('returning');
+        return resp;
+      }
+      if (Date.now() - startTime >= 1000 * 60 * 10) {
+        logger.debug('Time out reached after 10 minutes');
+        return {
+          error: {
+            error_code: 'TIME_OUT',
+            error_type: 'Time out has been reached',
+          },
+        };
+      }
+      logger.debug('waiting');
+      await new Promise(r => setTimeout(r, 1000));
+    }
+
+    return {
+      error: {
+        error_code: 'TIME_OUT',
+        error_type: 'Polling was stopped',
+      },
+    };
+  } finally {
+    // Clear the controller if this was the current poll
+    if (currentPollController === controller) {
+      currentPollController = null;
+    }
+  }
 }
 
 async function stopAuthPoll() {
-  stopPolling = true;
+  if (currentPollController) {
+    currentPollController.abort();
+  }
 }
 
 async function completeAuth({ state, code }: { state: string; code: string }) {
