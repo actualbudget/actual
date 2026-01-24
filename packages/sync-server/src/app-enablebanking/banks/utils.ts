@@ -26,7 +26,7 @@ export function isKeyValueCache(remittance_information: string[]):
 
   if (map.size) {
     return {
-      header: header as string,
+      header: header ?? undefined,
       map,
     };
   }

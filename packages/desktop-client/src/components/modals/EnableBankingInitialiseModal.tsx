@@ -132,7 +132,10 @@ export const EnableBankingInitialiseModal = ({
                 defaultValue=""
                 accept=".pem"
                 onChange={e => {
-                  onSecretKey(e.target.files[0]);
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    onSecretKey(file);
+                  }
                 }}
               />
             </FormField>

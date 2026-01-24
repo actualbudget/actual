@@ -7,7 +7,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 
-import { Error } from './alerts';
+import { Error as ErrorAlert } from './alerts';
 import { Modal, ModalHeader } from './common/Modal';
 
 export function EnableBankingCallback() {
@@ -55,9 +55,9 @@ export function EnableBankingCallback() {
             </Paragraph>
           </View>
         ) : (
-          <Error style={{ alignSelf: 'center', marginBottom: 10 }}>
+          <ErrorAlert style={{ alignSelf: 'center', marginBottom: 10 }}>
             {error}
-          </Error>
+          </ErrorAlert>
         )}
       </View>
     </Modal>

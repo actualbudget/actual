@@ -1,5 +1,3 @@
-import { type AccountEntity } from 'loot-core/types/models';
-
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import { logger } from '../../platform/server/log';
 import {
@@ -124,7 +122,7 @@ async function completeAuth({ state, code }: { state: string; code: string }) {
 }
 
 export async function downloadEnableBankingTransactions(
-  acctId: AccountEntity['id'],
+  acctId: string,
   startDate: string,
   bankId: string,
 ) {

@@ -133,20 +133,20 @@ export async function handleEnableBankingError(response: globalThis.Response) {
     return await response.json();
   }
   debug('Enable Banking API error response: %o', response);
-  //TODO
-  const errorResponse = (await response.json()) as ErrorResponse;
-  debug('Enable Banking API error response body: %o', errorResponse);
 
-  switch (errorResponse.error) {
-    case 'CLOSED_SESSION':
-    case 'EXPIRED_SESSION':
-      throw new ClosedSessionError();
-    default:
-      break;
+  const body = await response.json();
+  if (!isErrorResponse(body)) {
+    debug('Unexpected error response format: %o', body);
+    throw new EnableBankingError(
+      'INTERNAL_ERROR',
+      'Unexpected error response from Enable Banking API.',
+    );
   }
 
-  debug('Unhandled error: %d %o', response.status, errorResponse);
-  throw new Error('Not Implemented');
+  const errorResponse = body;
+  debug('Enable Banking API error response body: %o', errorResponse);
+
+  throw handleErrorResponse(errorResponse);
 }
 
 export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
