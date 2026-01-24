@@ -26,6 +26,7 @@ import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { DashboardHeader } from './DashboardHeader';
 import { DashboardSelector } from './DashboardSelector';
 import { LoadingIndicator } from './LoadingIndicator';
+import { BudgetAnalysisCard } from './reports/BudgetAnalysisCard';
 import { CalendarCard } from './reports/CalendarCard';
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CrossoverCard } from './reports/CrossoverCard';
@@ -70,6 +71,7 @@ export function Overview({ dashboard }: OverviewProps) {
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
+  const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
 
   const formulaMode = useFeatureFlag('formulaMode');
 
@@ -518,6 +520,14 @@ export function Overview({ dashboard }: OverviewProps) {
                               name: 'spending-card' as const,
                               text: t('Spending analysis'),
                             },
+                            ...(budgetAnalysisReportEnabled
+                              ? [
+                                  {
+                                    name: 'budget-analysis-card' as const,
+                                    text: t('Budget analysis'),
+                                  },
+                                ]
+                              : []),
                             {
                               name: 'markdown-card' as const,
                               text: t('Text widget'),
@@ -717,6 +727,18 @@ export function Overview({ dashboard }: OverviewProps) {
                         />
                       ) : widget.type === 'spending-card' ? (
                         <SpendingCard
+                          widgetId={item.i}
+                          isEditing={isEditing}
+                          meta={widget.meta}
+                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                          onRemove={() => onRemoveWidget(item.i)}
+                          onCopy={targetDashboardId =>
+                            onCopyWidget(item.i, targetDashboardId)
+                          }
+                        />
+                      ) : widget.type === 'budget-analysis-card' &&
+                        budgetAnalysisReportEnabled ? (
+                        <BudgetAnalysisCard
                           widgetId={item.i}
                           isEditing={isEditing}
                           meta={widget.meta}
