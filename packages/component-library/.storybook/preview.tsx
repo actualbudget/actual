@@ -3,9 +3,8 @@ import React from 'react'; // This is reuqired for JSX syntax
 import type { Preview } from '@storybook/react-vite';
 
 import * as lightTheme from '../../desktop-client/src/style/themes/light';
-import * as midnightTheme from '../../desktop-client/src/style/themes/midnight';
 
-const RootTheme = () => {
+const Theme = () => {
   const css = Object.entries(lightTheme)
     .map(([key, value]) => `  --color-${key}: ${value};`)
     .join('\n');
@@ -16,7 +15,7 @@ const preview: Preview = {
   decorators: [
     Story => (
       <>
-        <RootTheme />
+        <Theme />
         <Story />
       </>
     ),
