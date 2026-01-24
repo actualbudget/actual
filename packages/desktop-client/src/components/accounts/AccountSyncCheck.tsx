@@ -145,7 +145,6 @@ export function AccountSyncCheck() {
   }
 
   const { type, code } = error;
-  console.log(error);
   const showAuth =
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
     (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN') ||

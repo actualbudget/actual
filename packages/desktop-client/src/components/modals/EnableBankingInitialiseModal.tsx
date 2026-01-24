@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 
-import { Error } from '@desktop-client/components/alerts';
+import { Error as ErrorAlert } from '@desktop-client/components/alerts';
 import {
   Modal,
   ModalButtons,
@@ -102,14 +102,14 @@ export const EnableBankingInitialiseModal = ({
             <Text>
               <Trans>
                 In order to enable bank sync via Enable Banking (only for EU
-                banks) you will need to create application credentials. .
+                banks) you will need to create application credentials.
               </Trans>
             </Text>
 
             <FormField>
               <FormLabel
                 title={t('Application Id:')}
-                htmlFor="secret-id-field"
+                htmlFor="application-id-field"
               />
               <InitialFocus>
                 <Input
@@ -137,7 +137,7 @@ export const EnableBankingInitialiseModal = ({
               />
             </FormField>
 
-            {!isValid && <Error>{error}</Error>}
+            {!isValid && <ErrorAlert>{error}</ErrorAlert>}
           </View>
 
           <ModalButtons>

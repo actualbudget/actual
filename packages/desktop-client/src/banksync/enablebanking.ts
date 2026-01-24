@@ -1,3 +1,5 @@
+import { t } from 'i18next';
+
 import { send } from 'loot-core/platform/client/fetch';
 import {
   type AccountEntity,
@@ -59,7 +61,12 @@ export function selectEnableBankingAccounts(
         addNotification({
           notification: {
             type: 'message',
-            message: `Reauthorized Banksync via Enable Banking for ${accountEntity.name}`,
+            message: t(
+              'Reauthorized bank sync via Enable Banking for {{accountName}}',
+              {
+                accountName: accountEntity.name,
+              },
+            ),
           },
         }),
       );

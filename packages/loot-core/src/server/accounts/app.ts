@@ -544,7 +544,6 @@ async function checkSecret(name: string) {
   if (!serverConfig) {
     throw new Error('Failed to get server config.');
   }
-  logger.log('ready to retrieve data');
 
   try {
     return await get(serverConfig.BASE_SERVER + '/secret/' + name, {

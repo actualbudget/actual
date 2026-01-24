@@ -16,7 +16,10 @@ import {
   type EnableBankingToken,
 } from 'loot-core/types/models/enablebanking';
 
-import { Error, Warning } from '@desktop-client/components/alerts';
+import {
+  Error as ErrorAlert,
+  Warning,
+} from '@desktop-client/components/alerts';
 import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
 import { Link } from '@desktop-client/components/common/Link';
 import {
@@ -28,8 +31,6 @@ import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { COUNTRY_OPTIONS } from '@desktop-client/components/util/countries';
 import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-
-// TODO: Errorhandling
 
 function renderError(
   error: EnableBankingErrorInterface,
@@ -47,14 +48,14 @@ function renderError(
   };
 
   return (
-    <Error style={{ alignSelf: 'center', marginBottom: 10 }}>
+    <ErrorAlert style={{ alignSelf: 'center', marginBottom: 10 }}>
       {error.error_code in error_messages
         ? error_messages[error.error_code]
         : t(
             'An error occurred while linking your account, sorry! The potential issue could be: {{ message }}',
             { message: error.error_type },
           )}
-    </Error>
+    </ErrorAlert>
   );
 }
 
@@ -383,6 +384,19 @@ export function EnableBankingSetupAccountModal({
     }
   }, [isConfigurationLoading, phase]);
 
+  // Handle invalid state transitions
+  useEffect(() => {
+    if (phase === 'polling' && authenticationStartResponse === null) {
+      setPhase('selectingAspsp');
+    }
+  }, [phase, authenticationStartResponse]);
+
+  useEffect(() => {
+    if (phase === 'done' && token === null) {
+      setPhase('polling');
+    }
+  }, [phase, token]);
+
   let component = (
     <WaitingIndicator
       message={t('Checking if Enable Banking is available...')}
@@ -405,36 +419,32 @@ export function EnableBankingSetupAccountModal({
       );
       break;
     case 'polling':
-      if (authenticationStartResponse === null) {
-        setPhase('selectingAspsp');
-        break;
+      if (authenticationStartResponse !== null) {
+        component = (
+          <PollingComponent
+            authenticationStartResponse={authenticationStartResponse}
+            onComplete={token => {
+              setToken(token);
+              setPhase('done');
+            }}
+            onError={error => {
+              setError(error);
+              resetState();
+            }}
+          />
+        );
       }
-      component = (
-        <PollingComponent
-          authenticationStartResponse={authenticationStartResponse}
-          onComplete={token => {
-            setToken(token);
-            setPhase('done');
-          }}
-          onError={error => {
-            setError(error);
-            resetState();
-          }}
-        />
-      );
       break;
     case 'done':
-      if (token === null) {
-        setPhase('polling');
-        break;
+      if (token !== null) {
+        component = (
+          <CompletedAuthorizationIndicator
+            onContinue={async () => {
+              await onSuccess(token);
+            }}
+          />
+        );
       }
-      component = (
-        <CompletedAuthorizationIndicator
-          onContinue={async () => {
-            await onSuccess(token);
-          }}
-        />
-      );
       break;
     default:
       break;

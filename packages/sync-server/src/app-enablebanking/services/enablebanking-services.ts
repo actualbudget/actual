@@ -293,6 +293,9 @@ export const enableBankingservice = {
         { params: { path: { account_id } } },
       );
       isDefined(balance);
+      if (!balance.balances.length) {
+        throw new Error(`No balance data for account ${account_id}`);
+      }
       const name = account.account_id
         ? (account.account_id.iban ?? 'unknown')
         : 'unknown';
@@ -346,7 +349,7 @@ export const enableBankingservice = {
     const bankProcessor = registry.get(bank_id ?? 'fallback');
     if (bankProcessor.debug) {
       console.debug(
-        `--- Debugging '${bankProcessor.name}': showing first 5 transactions with processed transactions.---`,
+        `--- Debugging '${bankProcessor.name}': showing first 2 transactions with processed transactions.---`,
       );
       transactions.slice(0, 2).forEach(transaction => {
         console.debug('# ORIGINAL:');

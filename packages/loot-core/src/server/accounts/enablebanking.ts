@@ -129,7 +129,13 @@ export async function downloadEnableBankingTransactions(
   bankId: string,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
-  if (!userToken) return;
+  if (!userToken) {
+    throw new BankSyncError(
+      'User not authenticated',
+      'AUTH_ERROR',
+      'NO_USER_TOKEN',
+    );
+  }
 
   logger.log(`Pulling transactions from enablebanking since ${startDate}`);
 

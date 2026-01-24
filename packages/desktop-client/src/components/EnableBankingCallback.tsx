@@ -26,8 +26,15 @@ export function EnableBankingCallback() {
         );
         return;
       }
-      await send('enablebanking-completeauth', { state, code });
-      window.close();
+      try {
+        await send('enablebanking-completeauth', { state, code });
+        window.close();
+      } catch (err) {
+        console.error('Error completing Enable Banking authentication:', err);
+        setError(
+          t('Something went wrong during authentication. Please try again.'),
+        );
+      }
     };
     fetchData();
   }, [state, code, t]);
