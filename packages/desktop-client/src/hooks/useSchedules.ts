@@ -29,7 +29,7 @@ type UseScheduleStatusResult = UseQueryResult<ScheduleStatusData>;
 export function useScheduleStatus({
   schedules,
 }: UseScheduleStatusProps): UseScheduleStatusResult {
-  const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
+  const [upcomingLength = '7'] = useSyncedPref('upcomingScheduledTransactionLength');
   return useQuery(
     scheduleQueries.statuses({
       schedules,

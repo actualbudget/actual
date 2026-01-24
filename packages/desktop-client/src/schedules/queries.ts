@@ -91,6 +91,7 @@ export const scheduleQueries = {
         return { statusLookup, statusLabelLookup };
       },
       enabled: schedules.length > 0,
+      placeholderData: { statusLookup: {}, statusLabelLookup: {} },
     }),
 };
 
