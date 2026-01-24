@@ -184,7 +184,7 @@ const TransactionHeader = memo(
           fontWeight: 300,
           zIndex: 200,
           color: theme.tableHeaderText,
-          backgroundColor: theme.tableBackground,
+          backgroundColor: theme.tableHeaderBackground,
           paddingRight: `${5 + (scrollWidth ?? 0)}px`,
           borderTopWidth: 1,
           borderBottomWidth: 1,

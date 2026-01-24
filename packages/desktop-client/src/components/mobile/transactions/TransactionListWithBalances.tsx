@@ -147,6 +147,11 @@ export function TransactionListWithBalances({
         <PullToRefresh
           isPullable={!isLoading && !!onRefresh}
           onRefresh={async () => onRefresh?.()}
+          style={{
+            '& .ptr__children': {
+              display: 'flex',
+            },
+          }}
         >
           <TransactionList
             isLoading={isLoading}
