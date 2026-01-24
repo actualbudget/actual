@@ -478,11 +478,8 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                     <br />• <strong>Budgeted:</strong> The amount you allocated
                     each month
                     <br />• <strong>Spent:</strong> Your actual spending
-                    <br />• <strong>Overspending Adjustment:</strong>
-                    Amounts from categories without rollover that were reset
-                    <br />• <strong>Balance:</strong> Your cumulative budget
-                    performance, starting with any prior balance. Respects
-                    category rollover settings from your budget.
+                    <br />• <strong>Overspending Adjustment:</strong> Amounts from categories without rollover that were reset
+                    <br />• <strong>Balance:</strong> Your cumulative budget performance, starting with any prior balance. Respects category rollover settings from your budget.
                   </Paragraph>
                   <Paragraph>
                     <strong>Understanding the Budget Summary</strong>
