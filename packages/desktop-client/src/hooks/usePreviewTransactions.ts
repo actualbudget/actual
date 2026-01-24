@@ -19,10 +19,10 @@ import {
 } from 'loot-core/types/models';
 
 import { useCachedSchedules } from './useCachedSchedules';
-import { useScheduleStatus } from './useSchedules';
 import { useSyncedPref } from './useSyncedPref';
 import { calculateRunningBalancesBottomUp } from './useTransactions';
 
+import { useScheduleStatus } from './useScheduleStatus';
 import { type ScheduleStatusLookup } from '@desktop-client/schedules';
 
 type UsePreviewTransactionsProps = {

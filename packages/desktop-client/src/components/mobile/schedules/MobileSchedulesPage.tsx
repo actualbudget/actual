@@ -23,10 +23,8 @@ import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
-import {
-  useSchedules,
-  useScheduleStatus,
-} from '@desktop-client/hooks/useSchedules';
+import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import { useScheduleStatus } from '@desktop-client/hooks/useScheduleStatus';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
