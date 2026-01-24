@@ -2,6 +2,7 @@ import React from 'react'; // This is reuqired for JSX syntax
 
 import type { Preview } from '@storybook/react-vite';
 
+// Not ideal to import from desktop-client, but we need a source of truth for theme variables
 import * as lightTheme from '../../desktop-client/src/style/themes/light';
 
 const Theme = () => {

@@ -21,6 +21,7 @@ const config: StorybookConfig = {
   framework: getAbsolutePath('@storybook/react-vite'),
   async viteFinal(config) {
     const { mergeConfig } = await import('vite');
+
     return mergeConfig(config, {
       // Telling Vite how to resolve path aliases
       plugins: [viteTsconfigPaths({ root: '../..' })],
