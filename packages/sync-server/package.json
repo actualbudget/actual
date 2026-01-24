@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/sync-server",
-  "version": "26.1.0",
+  "version": "26.2.0-pre",
   "description": "actual syncing server",
   "license": "MIT",
   "bin": {
