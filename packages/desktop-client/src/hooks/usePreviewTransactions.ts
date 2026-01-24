@@ -45,9 +45,7 @@ export function usePreviewTransactions({
     error: scheduleQueryError,
     data: schedules = [],
   } = useCachedSchedules();
-  const {
-    data: { statusLookup },
-  } = useScheduleStatus({ schedules });
+  const { data: { statusLookup = {} } = {} } = useScheduleStatus({ schedules });
   const [isLoading, setIsLoading] = useState(isSchedulesLoading);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [runningBalances, setRunningBalances] = useState<

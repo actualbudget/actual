@@ -26,9 +26,8 @@ export function useCategoryScheduleGoalTemplates({
 }: UseCategoryScheduleGoalTemplatesProps): UseCategoryScheduleGoalTemplatesResult {
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const { data: allSchedules = [] } = useCachedSchedules();
-  const {
-    data: { statusLookup = {}, statusLabelLookup = {} },
-  } = useScheduleStatus({ schedules: allSchedules });
+  const { data: { statusLookup = {}, statusLabelLookup = {} } = {} } =
+    useScheduleStatus({ schedules: allSchedules });
 
   return useMemo(() => {
     if (!isGoalTemplatesEnabled || !category || !category.goal_def) {

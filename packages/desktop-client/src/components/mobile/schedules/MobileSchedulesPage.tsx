@@ -42,9 +42,7 @@ export function MobileSchedulesPage() {
   const { isFetching: isSchedulesLoading, data: schedules = [] } = useSchedules(
     { query: q('schedules').select('*') },
   );
-  const {
-    data: { statusLookup = {} },
-  } = useScheduleStatus({ schedules });
+  const { data: { statusLookup = {} } = {} } = useScheduleStatus({ schedules });
 
   const payees = usePayees();
   const accounts = useAccounts();
