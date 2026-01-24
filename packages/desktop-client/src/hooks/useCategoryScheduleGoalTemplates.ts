@@ -4,7 +4,7 @@ import type { CategoryEntity, ScheduleEntity } from 'loot-core/types/models';
 
 import { useCachedSchedules } from './useCachedSchedules';
 import { useFeatureFlag } from './useFeatureFlag';
-import { useScheduleStatus } from './useSchedules';
+import { useScheduleStatus } from './useScheduleStatus';
 
 import type { ScheduleStatusData } from '@desktop-client/schedules';
 

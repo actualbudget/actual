@@ -20,10 +20,8 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { Search } from '@desktop-client/components/common/Search';
-import {
-  useSchedules,
-  useScheduleStatus,
-} from '@desktop-client/hooks/useSchedules';
+import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import { useScheduleStatus } from '@desktop-client/hooks/useScheduleStatus';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';

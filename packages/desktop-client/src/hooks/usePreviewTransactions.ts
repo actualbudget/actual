@@ -7,7 +7,7 @@ import type { IntegerAmount } from 'loot-core/shared/util';
 import type { ScheduleEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { useCachedSchedules } from './useCachedSchedules';
-import { useScheduleStatus } from './useSchedules';
+import { useScheduleStatus } from './useScheduleStatus';
 import { useSyncedPref } from './useSyncedPref';
 import { calculateRunningBalancesBottomUp } from './useTransactions';
 
