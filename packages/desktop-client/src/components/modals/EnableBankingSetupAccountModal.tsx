@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -327,8 +327,10 @@ const PollingComponent = ({
 
 const CompletedAuthorizationIndicator = ({
   onContinue,
+  onClose,
 }: {
   onContinue: () => void;
+  onClose: () => void;
 }) => {
   return (
     <Button
@@ -340,7 +342,10 @@ const CompletedAuthorizationIndicator = ({
         fontWeight: 600,
         marginTop: 10,
       }}
-      onPress={onContinue}
+      onPress={async () => {
+        await onContinue();
+        onClose();
+      }}
     >
       <Trans>Success! Click to continue</Trans> &rarr;
     </Button>
@@ -397,7 +402,7 @@ export function EnableBankingSetupAccountModal({
     }
   }, [phase, token]);
 
-  let component = (
+  let component: ReactElement | ((close: () => void) => ReactElement) = (
     <WaitingIndicator
       message={t('Checking if Enable Banking is available...')}
     />
@@ -437,12 +442,12 @@ export function EnableBankingSetupAccountModal({
       break;
     case 'done':
       if (token !== null) {
-        component = (
+        component = (close: () => void) => (
           <CompletedAuthorizationIndicator
             onContinue={async () => {
               await onSuccess(token);
-              close();
             }}
+            onClose={close}
           />
         );
       }
@@ -471,7 +476,7 @@ export function EnableBankingSetupAccountModal({
                 Banking will not be able to withdraw funds from your accounts.
               </Trans>
             </Paragraph>
-            {component}
+            {typeof component === 'function' ? component(close) : component}
           </View>
         </>
       )}
