@@ -194,7 +194,7 @@ const AspspSelector = ({
           focused
           strict
           highlightFirst
-          suggestions={availableCountries.sort((a, b) =>
+          suggestions={[...availableCountries].sort((a, b) =>
             a.name.localeCompare(b.name),
           )}
           onSelect={onSelectCountry}
@@ -441,6 +441,7 @@ export function EnableBankingSetupAccountModal({
           <CompletedAuthorizationIndicator
             onContinue={async () => {
               await onSuccess(token);
+              close();
             }}
           />
         );

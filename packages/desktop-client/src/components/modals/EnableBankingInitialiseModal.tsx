@@ -40,8 +40,12 @@ export const EnableBankingInitialiseModal = ({
   const onSecretKey = (file: File) => {
     const reader = new FileReader();
     reader.onloadend = () => {
-      setSecretKey(reader.result as string);
-      setIsValid(true);
+      if (typeof reader.result === 'string') {
+        setSecretKey(reader.result);
+        setIsValid(true);
+      } else {
+        setIsValid(false);
+      }
     };
     reader.readAsText(file);
   };
