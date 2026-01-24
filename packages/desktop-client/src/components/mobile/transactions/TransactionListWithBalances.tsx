@@ -282,7 +282,11 @@ function Balance({ balance }: BalanceProps) {
               textAlign: 'center',
               fontWeight: '500',
               color:
-                props.value < 0 ? theme.errorText : theme.pillTextHighlighted,
+                props.value < 0
+                  ? theme.numberNegative
+                  : props.value > 0
+                    ? theme.numberPositive
+                    : theme.numberNeutral,
             }}
             data-testid="transactions-balance"
           />
