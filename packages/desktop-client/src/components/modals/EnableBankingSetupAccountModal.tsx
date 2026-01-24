@@ -160,19 +160,26 @@ const AspspSelector = ({
       return;
     }
     setStartingAuth(true);
-    const { data, error } = await send('enablebanking-startauth', {
-      country: country.id,
-      aspsp,
-    });
-    if (error) {
-      // Handle the error from start auth.
-      onErrorRef.current(error);
-      setStartingAuth(false);
-      return;
-    }
+    try {
+      const { data, error } = await send('enablebanking-startauth', {
+        country: country.id,
+        aspsp,
+      });
+      if (error) {
+        // Handle the error from start auth.
+        onErrorRef.current(error);
+        return;
+      }
 
-    onCompleteRef.current(data);
-    setStartingAuth(false);
+      onCompleteRef.current(data);
+    } catch (err) {
+      onErrorRef.current({
+        error_code: 'INTERNAL_ERROR',
+        error_type: err instanceof Error ? err.message : String(err),
+      });
+    } finally {
+      setStartingAuth(false);
+    }
   };
 
   if (availableCountries === null) {

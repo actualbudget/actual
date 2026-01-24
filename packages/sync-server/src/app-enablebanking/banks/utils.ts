@@ -8,7 +8,7 @@ export function isKeyValueCache(remittance_information: string[]):
   let currentKey = null;
   let header = null;
   for (const line of remittance_information) {
-    const matches = line.match(/^(?<key>[a-zA-Z]*): (?<value>.*)/);
+    const matches = line.match(/^(?<key>[a-zA-Z]+): (?<value>.*)/);
     if (matches) {
       const { key, value } = matches.groups || {};
       if (key) {
