@@ -86,14 +86,7 @@ export type RuleConditionEntity =
     >
   | BaseConditionEntity<
       'notes',
-      | 'is'
-      | 'isNot'
-      | 'oneOf'
-      | 'notOneOf'
-      | 'contains'
-      | 'doesNotContain'
-      | 'matches'
-      | 'hasTags'
+      'is' | 'isNot' | 'contains' | 'doesNotContain' | 'matches' | 'hasTags'
     >
   | BaseConditionEntity<
       'payee',

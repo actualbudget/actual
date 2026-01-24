@@ -3,21 +3,21 @@ import { createServer, type Server } from 'http';
 import path from 'path';
 
 import {
-  net,
   app,
-  ipcMain,
   BrowserWindow,
-  Menu,
   dialog,
-  shell,
+  ipcMain,
+  Menu,
+  net,
   powerMonitor,
   protocol,
+  shell,
   utilityProcess,
-  type UtilityProcess,
-  type OpenDialogSyncOptions,
-  type SaveDialogOptions,
   type Env,
   type ForkOptions,
+  type OpenDialogSyncOptions,
+  type SaveDialogOptions,
+  type UtilityProcess,
 } from 'electron';
 import { copy, exists, mkdir, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';

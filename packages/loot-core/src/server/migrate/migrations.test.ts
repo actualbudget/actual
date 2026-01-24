@@ -2,11 +2,11 @@
 import * as db from '../db';
 
 import {
-  migrate,
-  withMigrationsDir,
   getAppliedMigrations,
   getMigrationList,
   getPending,
+  migrate,
+  withMigrationsDir,
 } from './migrations';
 
 beforeEach(global.emptyDatabase(true));

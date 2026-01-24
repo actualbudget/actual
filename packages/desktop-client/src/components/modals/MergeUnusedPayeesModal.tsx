@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -15,10 +15,10 @@ import { Information } from '@desktop-client/components/alerts';
 import { Modal, ModalButtons } from '@desktop-client/components/common/Modal';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
-  type Modal as ModalType,
   replaceModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 const highlightStyle = { color: theme.pageTextPositive };
 

@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { memo, useRef, useMemo, type CSSProperties } from 'react';
+import { memo, useMemo, useRef, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {

@@ -5,6 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -21,20 +22,20 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import {
+  Field,
+  Row,
+  SelectCell,
   Table,
   TableHeader,
-  Row,
-  Field,
-  SelectCell,
 } from '@desktop-client/components/table';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import {
+  SelectedProvider,
   useSelected,
   useSelectedDispatch,
   useSelectedItems,
-  SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
 import { useSendPlatformRequest } from '@desktop-client/hooks/useSendPlatformRequest';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
@@ -117,7 +118,7 @@ function DiscoverSchedulesTable({
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.tableContainer}>
       <TableHeader height={ROW_HEIGHT} inset={15}>
         <SelectCell
           exposed={!loading}

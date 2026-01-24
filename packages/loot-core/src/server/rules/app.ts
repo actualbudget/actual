@@ -2,8 +2,8 @@
 import { logger } from '../../platform/server/log';
 import {
   type RuleActionEntity,
-  type TransactionEntity,
   type RuleEntity,
+  type TransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import { RuleError } from '../errors';
@@ -12,7 +12,7 @@ import { batchMessages } from '../sync';
 import * as rules from '../transactions/transaction-rules';
 import { undoable } from '../undo';
 
-import { Condition, Action, rankRules } from '.';
+import { Action, Condition, rankRules } from '.';
 
 function validateRule(rule: Partial<RuleEntity>) {
   // Returns an array of errors, the array is the same link as the

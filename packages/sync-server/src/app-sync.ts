@@ -25,7 +25,7 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares';
-import { getPathForUserFile, getPathForGroupFile } from './util/paths';
+import { getPathForGroupFile, getPathForUserFile } from './util/paths';
 
 const app = express();
 app.use(validateSessionMiddleware);

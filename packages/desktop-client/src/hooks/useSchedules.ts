@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { q, type Query } from 'loot-core/shared/query';
 import {
+  getHasTransactionsQuery,
   getStatus,
   getStatusLabel,
-  getHasTransactionsQuery,
 } from 'loot-core/shared/schedules';
 import type {
   AccountEntity,

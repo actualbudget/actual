@@ -41,7 +41,7 @@ export function InfiniteScrollWrapper({
         // Hide the last border of the item in the table
         marginBottom: -1,
       }}
-      tabIndex={1}
+      tabIndex={0}
       data-testid="table"
     >
       <View

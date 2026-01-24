@@ -9,7 +9,6 @@ import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
-import { BudgetFileSelectionModal } from './modals/BudgetFileSelectionModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
@@ -20,6 +19,7 @@ import { ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
 import { ConfirmTransactionEditModal } from './modals/ConfirmTransactionEditModal';
 import { ConfirmUnlinkAccountModal } from './modals/ConfirmUnlinkAccountModal';
 import { ConvertToScheduleModal } from './modals/ConvertToScheduleModal';
+import { CopyWidgetToDashboardModal } from './modals/CopyWidgetToDashboardModal';
 import { CoverModal } from './modals/CoverModal';
 import { CreateAccountModal } from './modals/CreateAccountModal';
 import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
@@ -61,7 +61,6 @@ import { PasswordEnableModal } from './modals/PasswordEnableModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
-import { SchedulesPageMenuModal } from './modals/SchedulesPageMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
@@ -94,7 +93,8 @@ export function Modals() {
     if (modalStack.length > 0) {
       dispatch(closeModal());
     }
-  }, [location]);
+    // oxlint-disable-next-line react/exhaustive-deps
+  }, [dispatch, location]);
 
   const modals = modalStack
     .map((modal, idx) => {
@@ -147,6 +147,9 @@ export function Modals() {
 
         case 'confirm-delete':
           return <ConfirmDeleteModal key={key} {...modal.options} />;
+
+        case 'copy-widget-to-dashboard':
+          return <CopyWidgetToDashboardModal key={key} {...modal.options} />;
 
         case 'load-backup':
           return (
@@ -340,9 +343,6 @@ export function Modals() {
         case 'budget-page-menu':
           return <BudgetPageMenuModal key={key} {...modal.options} />;
 
-        case 'schedules-page-menu':
-          return <SchedulesPageMenuModal key={key} />;
-
         case 'envelope-budget-month-menu':
           return (
             <SheetNameProvider
@@ -363,8 +363,6 @@ export function Modals() {
             </SheetNameProvider>
           );
 
-        case 'budget-file-selection':
-          return <BudgetFileSelectionModal key={name} />;
         case 'delete-budget':
           return <DeleteFileModal key={key} {...modal.options} />;
         case 'duplicate-budget':

@@ -1,8 +1,8 @@
 import {
-  type MenuItemConstructorOptions,
+  app,
   Menu,
   type BrowserWindow,
-  app,
+  type MenuItemConstructorOptions,
 } from 'electron';
 
 export function getMenu() {

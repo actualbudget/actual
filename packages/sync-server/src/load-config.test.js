@@ -1,5 +1,5 @@
 import convict from 'convict';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 // Import the custom format
 import './load-config';

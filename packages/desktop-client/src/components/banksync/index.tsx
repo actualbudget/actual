@@ -1,15 +1,16 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
-  type BankSyncProviders,
   type AccountEntity,
+  type BankSyncProviders,
 } from 'loot-core/types/models';
 
 import { AccountsHeader } from './AccountsHeader';
@@ -185,7 +186,7 @@ export function BankSync() {
 
         {Object.entries(groupedAccounts).map(([syncProvider, accounts]) => {
           return (
-            <View key={syncProvider} style={{ minHeight: 'initial' }}>
+            <View key={syncProvider} style={styles.tableContainer}>
               {Object.keys(groupedAccounts).length > 1 && (
                 <Text
                   style={{ fontWeight: 500, fontSize: 20, margin: '.5em 0' }}

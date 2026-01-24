@@ -12,14 +12,14 @@ type BalanceMovementMenuProps = {
   categoryId: string;
   month: string;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-  onClose?: () => void;
+  onClose: () => void;
 };
 
 export function BalanceMovementMenu({
   categoryId,
   month,
   onBudgetAction,
-  onClose = () => {},
+  onClose,
 }: BalanceMovementMenuProps) {
   const format = useFormat();
 

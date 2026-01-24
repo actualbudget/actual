@@ -1,19 +1,20 @@
 // @ts-strict-ignore
 import React, {
-  type Ref,
+  useCallback,
+  useEffect,
   useRef,
   useState,
-  useEffect,
+  type CSSProperties,
   type FocusEventHandler,
   type KeyboardEvent,
-  type CSSProperties,
-  useCallback,
+  type Ref,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgAdd, SvgSubtract } from '@actual-app/components/icons/v1';
 import { baseInputStyle, Input } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
@@ -206,7 +207,7 @@ export function AmountInput({
         inputMode="decimal"
         value={value}
         disabled={disabled}
-        style={inputStyle}
+        style={{ ...inputStyle, ...styles.tnum }}
         className={cx(
           css({
             width: '100%',

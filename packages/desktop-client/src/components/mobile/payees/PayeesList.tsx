@@ -1,4 +1,4 @@
-import { GridList, Virtualizer, ListLayout } from 'react-aria-components';
+import { GridList, ListLayout, Virtualizer } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';

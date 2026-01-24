@@ -7,8 +7,8 @@ import {
 import { filterHiddenItems } from './filterHiddenItems';
 
 import {
-  type UncategorizedEntity,
   type QueryDataEntity,
+  type UncategorizedEntity,
 } from '@desktop-client/components/reports/ReportOptions';
 
 type recalculateProps = {

@@ -1,8 +1,8 @@
 import React, {
-  type CSSProperties,
   useCallback,
   useRef,
   useState,
+  type CSSProperties,
 } from 'react';
 
 import { Popover } from '@actual-app/components/popover';

@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
 
 import { Text } from '@actual-app/components/text';
@@ -8,7 +8,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
-import { type RuleEntity, type NewRuleEntity } from 'loot-core/types/models';
+import { type NewRuleEntity, type RuleEntity } from 'loot-core/types/models';
 
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';

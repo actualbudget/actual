@@ -1,8 +1,8 @@
 import {
-  useState,
-  useRef,
-  useMemo,
   useCallback,
+  useMemo,
+  useRef,
+  useState,
   type ComponentProps,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -10,12 +10,13 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgExpandArrow, SvgSubtract } from '@actual-app/components/icons/v0';
 import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import memoizeOne from 'memoize-one';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { type Diff, groupById } from 'loot-core/shared/util';
+import { groupById, type Diff } from 'loot-core/shared/util';
 import { type PayeeEntity } from 'loot-core/types/models';
 
 import { PayeeMenu } from './PayeeMenu';
@@ -23,13 +24,13 @@ import { PayeeTable } from './PayeeTable';
 
 import { Search } from '@desktop-client/components/common/Search';
 import {
-  TableHeader,
   Cell,
   SelectCell,
+  TableHeader,
 } from '@desktop-client/components/table';
 import {
-  useSelected,
   SelectedProvider,
+  useSelected,
   useSelectedDispatch,
   useSelectedItems,
 } from '@desktop-client/hooks/useSelected';
@@ -46,15 +47,7 @@ function PayeeTableHeader() {
 
   return (
     <View>
-      <TableHeader
-        style={{
-          backgroundColor: theme.tableBackground,
-          color: theme.pageTextLight,
-          zIndex: 200,
-          userSelect: 'none',
-        }}
-        collapsed
-      >
+      <TableHeader collapsed>
         <SelectCell
           exposed
           focused={false}
@@ -288,15 +281,7 @@ export const ManagePayees = ({
       </View>
 
       <SelectedProvider instance={selected} fetchAllIds={getSelectableIds}>
-        <View
-          style={{
-            flex: 1,
-            border: '1px solid ' + theme.tableBorder,
-            borderTopLeftRadius: 4,
-            borderTopRightRadius: 4,
-            overflow: 'hidden',
-          }}
-        >
+        <View style={styles.tableContainer}>
           <PayeeTableHeader />
           {filteredPayees.length === 0 ? (
             <View

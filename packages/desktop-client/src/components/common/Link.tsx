@@ -1,6 +1,6 @@
 import React, {
-  type MouseEventHandler,
   type ComponentProps,
+  type MouseEventHandler,
   type ReactNode,
 } from 'react';
 import { NavLink, useMatch } from 'react-router';
@@ -31,6 +31,7 @@ type InternalLinkProps = {
   activeStyle?: CSSProperties;
   children?: ReactNode;
   isDisabled?: boolean;
+  isExactPathMatch?: boolean;
 };
 
 const externalLinkColors = {
@@ -43,12 +44,14 @@ type ExternalLinkProps = {
   children?: ReactNode;
   to?: string;
   linkColor?: keyof typeof externalLinkColors;
+  onClick?: MouseEventHandler;
 };
 
 const ExternalLink = ({
   children,
   to,
   linkColor = 'blue',
+  onClick,
 }: ExternalLinkProps) => {
   return (
     // we can't use <ExternalLink /> here for obvious reasons
@@ -57,6 +60,7 @@ const ExternalLink = ({
       target="_blank"
       rel="noopener noreferrer"
       style={{ color: externalLinkColors[linkColor] }}
+      onClick={onClick}
     >
       {children}
     </a>
@@ -88,7 +92,7 @@ const TextLink = ({ style, onClick, children, ...props }: TextLinkProps) => {
 const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
   const navigate = useNavigate();
   const path = to ?? '';
-  const match = useMatch({ path });
+  const match = useMatch({ path, end: false });
   return (
     <Button
       className={() =>
@@ -116,9 +120,10 @@ const InternalLink = ({
   activeStyle,
   children,
   isDisabled,
+  isExactPathMatch = false,
 }: InternalLinkProps) => {
   const path = to ?? '';
-  const match = useMatch({ path });
+  const match = useMatch({ path, end: isExactPathMatch });
 
   return (
     <NavLink

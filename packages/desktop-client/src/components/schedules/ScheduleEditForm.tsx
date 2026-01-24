@@ -7,6 +7,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -19,9 +20,9 @@ import {
 } from 'loot-core/types/models';
 
 import {
+  Checkbox,
   FormField,
   FormLabel,
-  Checkbox,
 } from '@desktop-client/components/forms';
 import { OpSelect } from '@desktop-client/components/rules/RuleEditor';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
@@ -36,8 +37,8 @@ import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import {
-  type Actions,
   SelectedProvider,
+  type Actions,
 } from '@desktop-client/hooks/useSelected';
 
 export type ScheduleFormFields = {
@@ -470,9 +471,7 @@ export function ScheduleEditForm({
             transactions={transactions}
             fields={['date', 'payee', 'notes', 'amount']}
             style={{
-              border: '1px solid ' + theme.tableBorder,
-              borderRadius: 4,
-              overflow: 'hidden',
+              ...styles.tableContainer,
               marginTop: 5,
               maxHeight: 200,
             }}

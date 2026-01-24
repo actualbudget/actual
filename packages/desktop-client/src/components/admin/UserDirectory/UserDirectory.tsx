@@ -1,17 +1,16 @@
 // @ts-strict-ignore
 import {
-  useState,
-  useEffect,
   useCallback,
+  useEffect,
   useMemo,
-  type SetStateAction,
-  type Dispatch,
+  useState,
   type CSSProperties,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -37,7 +36,6 @@ import { signOut } from '@desktop-client/users/usersSlice';
 
 type ManageUserDirectoryContentProps = {
   isModal: boolean;
-  setLoading?: Dispatch<SetStateAction<boolean>>;
 };
 
 function useGetUserDirectoryErrors() {
@@ -81,10 +79,7 @@ function useGetUserDirectoryErrors() {
   return { getUserDirectoryErrors };
 }
 
-function UserDirectoryContent({
-  isModal,
-  setLoading,
-}: ManageUserDirectoryContentProps) {
+function UserDirectoryContent({ isModal }: ManageUserDirectoryContentProps) {
   const { t } = useTranslation();
 
   const [allUsers, setAllUsers] = useState([]);
@@ -120,8 +115,6 @@ function UserDirectoryContent({
   );
 
   const loadUsers = useCallback(async () => {
-    setLoading(true);
-
     const loadedUsers = (await send('users-get')) ?? [];
     if ('error' in loadedUsers) {
       dispatch(
@@ -135,19 +128,16 @@ function UserDirectoryContent({
           },
         }),
       );
-      setLoading(false);
       return;
     }
 
     setAllUsers(loadedUsers);
-    setLoading(false);
     return loadedUsers;
-  }, [dispatch, getUserDirectoryErrors, setLoading, t]);
+  }, [dispatch, getUserDirectoryErrors, t]);
 
   useEffect(() => {
     async function loadData() {
       await loadUsers();
-      setLoading(false);
     }
 
     loadData();
@@ -155,14 +145,13 @@ function UserDirectoryContent({
     return () => {
       undo.setUndoState('openModal', null);
     };
-  }, [setLoading, loadUsers]);
+  }, [loadUsers]);
 
   function loadMore() {
     setPage(page => page + 1);
   }
 
   const onDeleteSelected = useCallback(async () => {
-    setLoading(true);
     const res = await send('user-delete-all', [...selectedInst.items]);
 
     const error = res['error'];
@@ -202,15 +191,7 @@ function UserDirectoryContent({
 
     await loadUsers();
     selectedInst.dispatch({ type: 'select-none' });
-    setLoading(false);
-  }, [
-    setLoading,
-    selectedInst,
-    loadUsers,
-    dispatch,
-    t,
-    getUserDirectoryErrors,
-  ]);
+  }, [selectedInst, loadUsers, dispatch, t, getUserDirectoryErrors]);
 
   const onEditUser = useCallback(
     user => {
@@ -222,14 +203,13 @@ function UserDirectoryContent({
               user,
               onSave: async () => {
                 await loadUsers();
-                setLoading(false);
               },
             },
           },
         }),
       );
     },
-    [dispatch, loadUsers, setLoading],
+    [dispatch, loadUsers],
   );
 
   function onAddUser() {
@@ -248,7 +228,6 @@ function UserDirectoryContent({
             user,
             onSave: async () => {
               await loadUsers();
-              setLoading(false);
             },
           },
         },
@@ -301,7 +280,7 @@ function UserDirectoryContent({
           />
         </View>
 
-        <View style={{ flex: 1 }}>
+        <View style={styles.tableContainer}>
           <UserDirectoryHeader />
           <InfiniteScrollWrapper loadMore={loadMore}>
             {filteredUsers.length === 0 ? (
@@ -370,14 +349,10 @@ function EmptyMessage({ text, style }: EmptyMessageProps) {
 
 type ManageUsersProps = {
   isModal: boolean;
-  setLoading?: Dispatch<SetStateAction<boolean>>;
 };
 
-export function UserDirectory({
-  isModal,
-  setLoading = () => {},
-}: ManageUsersProps) {
-  return <UserDirectoryContent isModal={isModal} setLoading={setLoading} />;
+export function UserDirectory({ isModal }: ManageUsersProps) {
+  return <UserDirectoryContent isModal={isModal} />;
 }
 
 type UsersListProps = {

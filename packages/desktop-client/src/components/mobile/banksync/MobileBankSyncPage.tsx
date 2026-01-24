@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -8,8 +8,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
-  type BankSyncProviders,
   type AccountEntity,
+  type BankSyncProviders,
 } from 'loot-core/types/models';
 
 import { BankSyncAccountsList } from './BankSyncAccountsList';
