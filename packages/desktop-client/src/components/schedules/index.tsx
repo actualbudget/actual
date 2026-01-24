@@ -84,9 +84,7 @@ export function Schedules() {
     query: q('schedules').select('*'),
   });
 
-  const {
-    data: { statusLookup = {} },
-  } = useScheduleStatus({ schedules });
+  const { data: { statusLookup = {} } = {} } = useScheduleStatus({ schedules });
 
   return (
     <Page header={t('Schedules')}>
