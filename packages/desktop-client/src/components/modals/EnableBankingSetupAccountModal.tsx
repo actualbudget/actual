@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -83,6 +83,14 @@ const AspspSelector = ({
 }) => {
   const { t } = useTranslation();
 
+  // Use refs to avoid infinite loops from callback dependencies
+  const onErrorRef = useRef(onError);
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onErrorRef.current = onError;
+    onCompleteRef.current = onComplete;
+  }, [onError, onComplete]);
+
   const [availableCountries, setAvailableCountries] = useState<
     { id: string; name: string }[] | null
   >(null);
@@ -98,7 +106,9 @@ const AspspSelector = ({
   const [startingAuth, setStartingAuth] = useState<boolean>(false);
 
   useEffect(() => {
+    let cancelled = false;
     send('enablebanking-countries').then(({ data, error }) => {
+      if (cancelled) return;
       if (data) {
         const cids = new Set(data);
         const availableCountries = COUNTRY_OPTIONS.filter(val =>
@@ -107,23 +117,31 @@ const AspspSelector = ({
         setAvailableCountries(availableCountries);
         return;
       }
-      onError(error);
+      onErrorRef.current(error);
     });
-  }, [onError]);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (country) {
+      let cancelled = false;
       send('enablebanking-banks', { country: country.id }).then(
         ({ data, error }) => {
+          if (cancelled) return;
           if (data) {
             setAvailableAspsps(data);
             return;
           }
-          onError(error);
+          onErrorRef.current(error);
         },
       );
+      return () => {
+        cancelled = true;
+      };
     }
-  }, [country, onError]);
+  }, [country]);
 
   const onSelectCountry = (country_id: string) => {
     if (!country || country_id !== country.id) {
@@ -137,7 +155,7 @@ const AspspSelector = ({
 
   const onLink = async () => {
     if (country === null || aspsp === null) {
-      onError({ error_code: 'INTERNAL_ERROR', error_type: '' });
+      onErrorRef.current({ error_code: 'INTERNAL_ERROR', error_type: '' });
       return;
     }
     setStartingAuth(true);
@@ -147,12 +165,12 @@ const AspspSelector = ({
     });
     if (error) {
       // Handle the error from start auth.
-      onError(error);
+      onErrorRef.current(error);
       setStartingAuth(false);
       return;
     }
 
-    onComplete(data);
+    onCompleteRef.current(data);
     setStartingAuth(false);
   };
 
@@ -266,21 +284,38 @@ const PollingComponent = ({
   onError: (error: EnableBankingErrorInterface) => void;
 }) => {
   const { t } = useTranslation();
+
+  // Use refs to avoid infinite loops and to safely call callbacks after unmount check
+  const onCompleteRef = useRef(onComplete);
+  const onErrorRef = useRef(onError);
   useEffect(() => {
+    onCompleteRef.current = onComplete;
+    onErrorRef.current = onError;
+  }, [onComplete, onError]);
+
+  useEffect(() => {
+    let cancelled = false;
+
     (async () => {
       const { redirect_url, state } = authenticationStartResponse;
-      //open redirect_url in browser
+      // Open redirect_url in browser
       window.Actual.openURLInBrowser(redirect_url);
-      //polling starts here.
+      // Polling starts here
       const { data, error } = await send('enablebanking-pollauth', { state });
 
+      if (cancelled) return;
+
       if (error) {
-        onError(error);
+        onErrorRef.current(error);
         return;
       }
-      onComplete(data);
+      onCompleteRef.current(data);
     })();
-  }, [authenticationStartResponse, onComplete, onError]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authenticationStartResponse]);
 
   return (
     <WaitingIndicator

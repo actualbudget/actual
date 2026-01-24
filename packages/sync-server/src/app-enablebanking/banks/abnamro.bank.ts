@@ -30,10 +30,9 @@ export class ABNAmroBankProcessor extends FallbackBankProcessor {
 
   normalizeTransaction(t: components['schemas']['Transaction']): Transaction {
     const transaction = super.normalizeTransaction(t);
-    if (transaction.remittance_information) {
-      transaction.notes = this.getNoteFromRemittance(
-        transaction.remittance_information as string[],
-      );
+    const remittanceInfo = transaction.remittance_information;
+    if (remittanceInfo && Array.isArray(remittanceInfo)) {
+      transaction.notes = this.getNoteFromRemittance(remittanceInfo);
     }
 
     return transaction;

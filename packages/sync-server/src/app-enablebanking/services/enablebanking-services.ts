@@ -56,6 +56,8 @@ class SessionStore {
   constructor() {
     // Start periodic cleanup
     this.cleanupTimer = setInterval(() => this.cleanup(), CLEANUP_INTERVAL_MS);
+    // Don't keep process alive just for cleanup
+    this.cleanupTimer.unref();
   }
 
   set(state: string, sessionId: string): void {
@@ -367,8 +369,8 @@ export const enableBankingservice = {
   },
 
   getCurrentBalance: async (account_id: string) => {
-    const clients = enableBankingservice.getClient();
-    const { data } = await clients.GET('/accounts/{account_id}/balances', {
+    const client = enableBankingservice.getClient();
+    const { data } = await client.GET('/accounts/{account_id}/balances', {
       params: { path: { account_id } },
     });
     isDefined(data);
