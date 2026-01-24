@@ -46,7 +46,6 @@ import {
   PageHeader,
 } from '@desktop-client/components/Page';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { chartTheme } from '@desktop-client/components/reports/chart-theme';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
 import { CalendarGraph } from '@desktop-client/components/reports/graphs/CalendarGraph';
 import { Header } from '@desktop-client/components/reports/Header';
@@ -860,11 +859,11 @@ function CalendarWithHeader({
           <SvgArrowThickUp
             width={16}
             height={16}
-            style={{ color: chartTheme.colors.blue, flexShrink: 0 }}
+            style={{ color: theme.reportsNumberPositive, flexShrink: 0 }}
           />
           <View
             style={{
-              color: chartTheme.colors.blue,
+              color: theme.reportsNumberPositive,
               flexDirection: 'row',
               flexGrow: 1,
               justifyContent: 'start',
@@ -880,11 +879,11 @@ function CalendarWithHeader({
           <SvgArrowThickDown
             width={16}
             height={16}
-            style={{ color: chartTheme.colors.red, flexShrink: 0 }}
+            style={{ color: theme.reportsNumberNegative, flexShrink: 0 }}
           />
           <View
             style={{
-              color: chartTheme.colors.red,
+              color: theme.reportsNumberNegative,
               flexDirection: 'row',
               flexGrow: 1,
               justifyContent: 'start',
@@ -986,12 +985,8 @@ function CalendarCardHeader({
             >
               <Trans>Income:</Trans>
             </View>
-            <View style={{ color: chartTheme.colors.blue }}>
-              <PrivacyFilter>
-                <FinancialText>
-                  {format(totalIncome, 'financial')}
-                </FinancialText>
-              </PrivacyFilter>
+            <View style={{ color: theme.reportsNumberPositive }}>
+              <PrivacyFilter>{format(totalIncome, 'financial')}</PrivacyFilter>
             </View>
 
             <View
@@ -1002,12 +997,8 @@ function CalendarCardHeader({
             >
               <Trans>Expenses:</Trans>
             </View>
-            <View style={{ color: chartTheme.colors.red }}>
-              <PrivacyFilter>
-                <FinancialText>
-                  {format(totalExpense, 'financial')}
-                </FinancialText>
-              </PrivacyFilter>
+            <View style={{ color: theme.reportsNumberNegative }}>
+              <PrivacyFilter>{format(totalExpense, 'financial')}</PrivacyFilter>
             </View>
           </View>
         </View>

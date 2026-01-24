@@ -44,6 +44,7 @@ import {
   updateCategory,
   updateCategoryGroup,
 } from '@desktop-client/budget/budgetSlice';
+import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { prewarmMonth } from '@desktop-client/components/budget/util';
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
@@ -505,7 +506,7 @@ export function BudgetPage() {
   );
 
   const onSwitchBudgetFile = useCallback(() => {
-    dispatch(pushModal({ modal: { name: 'budget-file-selection' } }));
+    dispatch(closeBudget());
   }, [dispatch]);
 
   const onOpenBudgetMonthMenu = useCallback(
@@ -719,18 +720,20 @@ function UncategorizedTransactionsBanner(props) {
             justifyContent: 'space-between',
           }}
         >
-          <Trans count={transactions.length}>
-            You have {{ count: transactions.length }} uncategorized transactions
-            (
-            <FinancialText>
-              {
+          <Text>
+            <Trans count={transactions.length}>
+              You have {{ count: transactions.length }} uncategorized
+              transactions (
+              <FinancialText>
                 {
-                  amount: format(totalUncategorizedAmount, 'financial'),
-                } as TransObjectLiteral
-              }
-            </FinancialText>
-            )
-          </Trans>
+                  {
+                    amount: format(totalUncategorizedAmount, 'financial'),
+                  } as TransObjectLiteral
+                }
+              </FinancialText>
+              )
+            </Trans>
+          </Text>
           <Button
             onPress={() => navigate('/categories/uncategorized')}
             style={PILL_STYLE}
@@ -808,13 +811,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
             justifyContent: 'space-between',
           }}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 10,
-            }}
-          >
+          <View>
             <View
               style={{
                 flexDirection: 'row',
@@ -961,28 +958,20 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
             justifyContent: 'space-between',
           }}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 10,
-            }}
-          >
-            <Text>
-              <Trans count={numberOfOverspentCategories}>
-                You have {{ count: numberOfOverspentCategories }} overspent
-                categories (
-                <FinancialText>
+          <Text>
+            <Trans count={numberOfOverspentCategories}>
+              You have {{ count: numberOfOverspentCategories }} overspent
+              categories (
+              <FinancialText>
+                {
                   {
-                    {
-                      amount: format(totalOverspending, 'financial'),
-                    } as TransObjectLiteral
-                  }
-                </FinancialText>
-                )
-              </Trans>
-            </Text>
-          </View>
+                    amount: format(totalOverspending, 'financial'),
+                  } as TransObjectLiteral
+                }
+              </FinancialText>
+              )
+            </Trans>
+          </Text>
           <Button onPress={onOpenCategorySelectionModal} style={PILL_STYLE}>
             {budgetType === 'envelope' && <Trans>Cover</Trans>}
             {budgetType === 'tracking' && <Trans>View</Trans>}

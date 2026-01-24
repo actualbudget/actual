@@ -6,7 +6,7 @@ import { Text } from '@actual-app/components/text';
 type FinancialTextProps<T extends ElementType = typeof Text> = {
   as?: T;
   style?: CSSProperties;
-} & Omit<ComponentPropsWithoutRef<T>, 'style'>;
+} & Omit<ComponentPropsWithoutRef<T>, 'style' | 'as'>;
 
 export function FinancialText<T extends ElementType = typeof Text>({
   as,

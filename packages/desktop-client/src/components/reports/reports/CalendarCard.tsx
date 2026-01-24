@@ -31,7 +31,6 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { chartTheme } from '@desktop-client/components/reports/chart-theme';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
 import { CalendarGraph } from '@desktop-client/components/reports/graphs/CalendarGraph';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
@@ -251,7 +250,7 @@ export function CalendarCard({
                           >
                             <Trans>Income:</Trans>
                           </View>
-                          <View style={{ color: chartTheme.colors.blue }}>
+                          <View style={{ color: theme.reportsNumberPositive }}>
                             {totalIncome !== 0 ? (
                               <PrivacyFilter>
                                 <FinancialText>
@@ -274,7 +273,7 @@ export function CalendarCard({
                           >
                             <Trans>Expenses:</Trans>
                           </View>
-                          <View style={{ color: chartTheme.colors.red }}>
+                          <View style={{ color: theme.reportsNumberNegative }}>
                             {totalExpense !== 0 ? (
                               <PrivacyFilter>
                                 <FinancialText>
@@ -508,7 +507,7 @@ function CalendarCardInner({
         >
           <View
             style={{
-              color: chartTheme.colors.blue,
+              color: theme.reportsNumberPositive,
               flexDirection: 'row',
               fontSize: '10px',
               marginRight: 10,
@@ -534,7 +533,7 @@ function CalendarCardInner({
           </View>
           <View
             style={{
-              color: chartTheme.colors.red,
+              color: theme.reportsNumberNegative,
               flexDirection: 'row',
               fontSize: '10px',
             }}
