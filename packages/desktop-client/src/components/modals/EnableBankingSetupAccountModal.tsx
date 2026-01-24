@@ -413,6 +413,7 @@ export function EnableBankingSetupAccountModal({
       component = (
         <AspspSelector
           onComplete={(response: EnableBankingAuthenticationStartResponse) => {
+            setError(null);
             setAuthenticationStartResponse(response);
             setPhase('polling');
           }}

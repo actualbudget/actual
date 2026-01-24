@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router';
 
 import { Paragraph } from '@actual-app/components/paragraph';
 import { View } from '@actual-app/components/view';
@@ -10,13 +9,13 @@ import { send } from 'loot-core/platform/client/fetch';
 import { Error as ErrorAlert } from './alerts';
 import { Modal, ModalHeader } from './common/Modal';
 
+import { useUrlParam } from '@desktop-client/hooks/useUrlParam';
+
 export function EnableBankingCallback() {
   const { t } = useTranslation();
-  const [searchParams, _] = useSearchParams();
+  const [state] = useUrlParam('state');
+  const [code] = useUrlParam('code');
   const [error, setError] = useState<string | null>(null);
-
-  const state = searchParams.get('state');
-  const code = searchParams.get('code');
 
   useEffect(() => {
     const fetchData = async () => {

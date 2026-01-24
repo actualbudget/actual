@@ -29,6 +29,14 @@ function post<T extends KeysWithoutBody>(
 
 async function post(path: keyof EBE, body?: unknown) {
   const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    throw new BankSyncError(
+      'User not authenticated',
+      'AUTH_ERROR',
+      'NO_USER_TOKEN',
+    );
+  }
+
   const serverConfig = getServer();
   if (!serverConfig) {
     throw new Error('Failed to get server config.');
@@ -84,16 +92,16 @@ async function pollAuth({
 }): Promise<EnableBankingResponse<'/get_session'>> {
   stopPolling = false;
   const startTime = Date.now();
-  logger.log('starting poll');
+  logger.debug('starting poll');
   while (!stopPolling) {
     const resp = await post('/get_session', { state });
-    logger.log('poll response', resp);
+    logger.debug('poll response', resp);
     if (resp.data || resp.error.error_code !== 'NOT_READY') {
-      logger.log('returning');
+      logger.debug('returning');
       return resp;
     }
     if (Date.now() - startTime >= 1000 * 60 * 10) {
-      logger.log('Time out reached after 10 minutes');
+      logger.debug('Time out reached after 10 minutes');
       return {
         error: {
           error_code: 'TIME_OUT',
@@ -101,7 +109,7 @@ async function pollAuth({
         },
       };
     }
-    logger.log('waiting');
+    logger.debug('waiting');
     await new Promise(r => setTimeout(r, 1000));
   }
 
