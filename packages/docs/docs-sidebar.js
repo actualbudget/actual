@@ -300,6 +300,21 @@ const sidebars = {
             'contributing/project-details/electron',
             'contributing/project-details/migrations',
             'contributing/project-details/advice',
+             {
+              type: 'category',
+              label: 'Color Variables',
+              collapsible: true,
+              link: {
+                type: 'doc',
+                id: 'contributing/project-details/color-variables/index',
+              },
+              items: [
+                'contributing/project-details/color-variables/palette',
+                'contributing/project-details/color-variables/light-theme-variables',
+                'contributing/project-details/color-variables/dark-theme-variables',
+                'contributing/project-details/color-variables/midnight-theme-variables',
+              ],
+            },
           ],
         },
         'contributing/development-setup',
