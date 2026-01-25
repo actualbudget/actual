@@ -300,7 +300,7 @@ const sidebars = {
             'contributing/project-details/electron',
             'contributing/project-details/migrations',
             'contributing/project-details/advice',
-             {
+            {
               type: 'category',
               label: 'Color Variables',
               collapsible: true,
