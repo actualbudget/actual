@@ -463,4 +463,3 @@ A list of the color palette variables used in the Light Theme:
 | tooltipBackground:                 | white                           | #ffffff                   |
 | tooltipBorder:                     | navy150                         | #d9e2ec                   |
 | overlayBackground:                 |                                 | rgba(0, 0, 0, 0.3)        |
-
