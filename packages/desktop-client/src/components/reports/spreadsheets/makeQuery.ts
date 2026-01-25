@@ -9,6 +9,7 @@ export function makeQuery(
   interval: string,
   conditionsOpKey: string,
   filters: unknown[],
+  useExactDates: boolean,
 ) {
   const intervalGroup =
     interval === 'Monthly'
@@ -29,8 +30,12 @@ export function makeQuery(
     //Apply month range filters
     .filter({
       $and: [
-        { date: { $transform: intervalFilter, $gte: startDate } },
-        { date: { $transform: intervalFilter, $lte: endDate } },
+        useExactDates
+          ? { date: { $gte: startDate } }
+          : { date: { $transform: intervalFilter, $gte: startDate } },
+        useExactDates
+          ? { date: { $lte: endDate } }
+          : { date: { $transform: intervalFilter, $lte: endDate } },
       ],
     })
     //Show assets or debts

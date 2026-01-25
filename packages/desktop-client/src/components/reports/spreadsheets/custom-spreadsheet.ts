@@ -58,6 +58,7 @@ export type createCustomSpreadsheetProps = {
   graphType?: string;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
   setDataCheck?: (value: boolean) => void;
+  useExactDates: boolean;
 };
 
 export function createCustomSpreadsheet({
@@ -80,6 +81,7 @@ export function createCustomSpreadsheet({
   graphType,
   firstDayOfWeekIdx,
   setDataCheck,
+  useExactDates,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
 
@@ -112,6 +114,7 @@ export function createCustomSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
+          useExactDates,
         ),
       ).then(({ data }) => data),
       aqlQuery(
@@ -122,6 +125,7 @@ export function createCustomSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
+          useExactDates,
         ),
       ).then(({ data }) => data),
     ]);
