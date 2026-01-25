@@ -2,25 +2,74 @@ import React from 'react'; // This is reuqired for JSX syntax
 
 import type { Preview } from '@storybook/react-vite';
 
+import * as darkTheme from '../../desktop-client/src/style/themes/dark';
+import * as developmentTheme from '../../desktop-client/src/style/themes/development';
 // Not ideal to import from desktop-client, but we need a source of truth for theme variables
 import * as lightTheme from '../../desktop-client/src/style/themes/light';
+import * as midnightTheme from '../../desktop-client/src/style/themes/midnight';
 
-const Theme = () => {
-  const css = Object.entries(lightTheme)
-    .map(([key, value]) => `  --color-${key}: ${value};`)
+const THEMES = {
+  light: lightTheme,
+  dark: darkTheme,
+  midnight: midnightTheme,
+  development: developmentTheme,
+} as const;
+
+type ThemeName = keyof typeof THEMES;
+
+const ThemedStory = ({
+  themeName = 'light',
+  children,
+}: {
+  themeName?: ThemeName;
+  children?: React.ReactNode;
+}) => {
+  const theme = THEMES[themeName];
+
+  if (!themeName || !theme) {
+    throw new Error(`No theme specified`);
+  }
+
+  const css = Object.entries(theme)
+    .map(([key, value]) => `--color-${key}: ${value};`)
     .join('\n');
-  return <style>{`:root {\n${css}}`}</style>;
+
+  return (
+    <div>
+      <style>{`:root {\n${css}}`}</style>
+      {children}
+    </div>
+  );
 };
 
 const preview: Preview = {
   decorators: [
-    Story => (
-      <>
-        <Theme />
-        <Story />
-      </>
-    ),
+    (Story, { globals }) => {
+      const themeName = globals.theme || 'light';
+
+      return (
+        <ThemedStory themeName={themeName}>
+          <Story />
+        </ThemedStory>
+      );
+    },
   ],
+  globalTypes: {
+    theme: {
+      name: 'Theme',
+      description: 'Global theme for components',
+      defaultValue: 'light',
+      toolbar: {
+        icon: 'circlehollow',
+        items: [
+          { value: 'light', title: 'Light' },
+          { value: 'dark', title: 'Dark' },
+          { value: 'midnight', title: 'Midnight' },
+          { value: 'development', title: 'Development' },
+        ],
+      },
+    },
+  },
   parameters: {
     controls: {
       matchers: {
