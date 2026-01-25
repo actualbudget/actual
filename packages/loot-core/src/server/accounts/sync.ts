@@ -870,8 +870,16 @@ export async function addTransactions(
     newTransactions = res.added.map(t => t.id);
   } else {
     await batchMessages(async () => {
+      const tsGroupedByDate = Object.values(Object.groupBy(added, t => t.date));
       newTransactions = await Promise.all(
-        added.map(async trans => db.insertTransaction(trans)),
+        tsGroupedByDate.flatMap(ts => {
+          const ids = [];
+          for (const [i, t] of ts.entries()) {
+            const sort_order = ts.length - 1 - i;
+            ids.push(db.insertTransaction({ sort_order, ...t }));
+          }
+          return ids;
+        }),
       );
     });
   }

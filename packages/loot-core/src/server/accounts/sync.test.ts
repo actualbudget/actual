@@ -31,7 +31,7 @@ function getAllTransactions() {
     `SELECT t.*, p.name as payee_name
        FROM v_transactions_internal t
        LEFT JOIN payees p ON p.id = t.payee
-       ORDER BY date DESC, amount DESC, id
+       ORDER BY date DESC, amount DESC, sort_order DESC, id
      `,
   );
 }
@@ -388,6 +388,43 @@ describe('Account sync', () => {
       'bakkerij-renamed',
     ]);
   });
+
+  const addTransactionsSameDayTests = [
+    {
+      runTransfers: false,
+      learnCategories: false,
+    },
+    {
+      runTransfers: true,
+      learnCategories: true,
+    },
+  ];
+
+  test.each(addTransactionsSameDayTests)(
+    'addTransactions adds same-day transactions in the correct order',
+    async addTransactionsOptions => {
+      const { id: acctId } = await prepareDatabase();
+
+      // Generate 11 same-day transactions: sorting by
+      // ID will cause ID 10 to come after 1 instead of 9
+      const transactions = [...Array(11).keys()].map(i => ({
+        id: `${i}`,
+        date: '2017-10-17',
+        amount: -2947,
+      }));
+
+      const added = await addTransactions(
+        acctId,
+        transactions,
+        addTransactionsOptions,
+      );
+      expect(added.length).toBe(transactions.length);
+
+      const allTransactions = await getAllTransactions();
+      expect(allTransactions.length).toBe(11);
+      expect(allTransactions.map(t => +t.id)).toEqual([...Array(11).keys()]);
+    },
+  );
 
   test("reconcile does not merge transactions with different 'imported_id' values", async () => {
     const { id } = await prepareDatabase();

@@ -79,14 +79,20 @@ export async function batchUpdateTransactions({
   // and makes bulk updates much faster
   await batchMessages(async () => {
     if (added) {
+      const tsGroupedByDate = Object.values(Object.groupBy(added, t => t.date));
       addedIds = await Promise.all(
-        added.map(async t => {
-          // Offbudget account transactions and parent transactions should not have categories.
-          const account = accounts.find(acct => acct.id === t.account);
-          if (t.is_parent || account?.offbudget === 1) {
-            t.category = null;
+        tsGroupedByDate.flatMap(ts => {
+          const ids = [];
+          for (const [i, t] of ts.entries()) {
+            // Offbudget account transactions and parent transactions should not have categories.
+            const account = accounts.find(acct => acct.id === t.account);
+            if (t.is_parent || account?.offbudget === 1) {
+              t.category = null;
+            }
+            const sort_order = ts.length - 1 - i;
+            ids.push(db.insertTransaction({ sort_order, ...t }));
           }
-          return db.insertTransaction(t);
+          return ids;
         }),
       );
     }
