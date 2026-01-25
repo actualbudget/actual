@@ -578,31 +578,15 @@ function ActionEditor({
                     : onChange('formula', options.formula || value || '=')
                 }
               >
-                {hasFormula ? (
-                  <span
-                    style={{
-                      fontSize: 14,
-                      fontFamily: 'serif',
-                      textAlign: 'center',
-                    }}
-                  >
-                    ƒ
-                  </span>
-                ) : hasFormula ? (
-                  <SvgCode
-                    style={{ width: 12, height: 12, color: 'inherit' }}
-                  />
-                ) : (
-                  <span
-                    style={{
-                      fontSize: 14,
-                      fontFamily: 'serif',
-                      textAlign: 'center',
-                    }}
-                  >
-                    ƒ
-                  </span>
-                )}
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontFamily: 'serif',
+                    textAlign: 'center',
+                  }}
+                >
+                  ƒ
+                </span>
               </Button>
             )}
           {isTemplatingEnabled &&
@@ -649,7 +633,12 @@ function ActionEditor({
               minWidth: options.method === 'fixed-percent' ? 45 : 70,
             }}
           >
-            {options.method !== 'remainder' && (
+            {options.method === 'formula' ? (
+              <FormulaActionEditor
+                value={options?.formula || '='}
+                onChange={v => onChange('formula', v, { formula: true })}
+              />
+            ) : options.method !== 'remainder' ? (
               <GenericInput
                 key={inputKey}
                 // @ts-expect-error fix this
@@ -662,8 +651,34 @@ function ActionEditor({
                 value={value}
                 onChange={v => onChange('value', v)}
               />
-            )}
+            ) : null}
           </View>
+          {options.method === 'formula' && (
+            <View
+              style={{
+                padding: 5,
+                backgroundColor: theme.buttonPrimaryBackground,
+                height: 24,
+                width: 24,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 4,
+              }}
+              aria-label={t('Formula mode indicator')}
+              role="img"
+            >
+              <span
+                style={{
+                  fontSize: 14,
+                  fontFamily: 'serif',
+                  textAlign: 'center',
+                }}
+              >
+                ƒ
+              </span>
+            </View>
+          )}
         </>
       ) : op === 'link-schedule' ? (
         <>
