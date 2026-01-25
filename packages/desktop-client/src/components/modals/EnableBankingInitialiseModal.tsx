@@ -34,7 +34,7 @@ export const EnableBankingInitialiseModal = ({
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(
-    t('It is required to provide both the secret id and secret key.'),
+    t('It is required to provide both the application id and secret key.'),
   );
 
   const onSecretKey = (file: File) => {
