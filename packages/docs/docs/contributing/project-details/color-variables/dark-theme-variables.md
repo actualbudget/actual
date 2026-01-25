@@ -246,7 +246,7 @@ This palette can be copied to form the basis of a new theme.
 
 A list of the color variables used in the Dark Theme:
 
-| Color Variable                     | Color Palette                   | Color Code               |                         Color Swatch                          |
+| Color Variable                     | Color Palette                   | Color Code               |                         Color Swatch                         |
 | ---------------------------------- | ------------------------------- | ------------------------ | :----------------------------------------------------------: |
 | pageBackground:                    | gray900                         | #080811                  | <img src="https://www.colorhexa.com/080811.png" width="50"/> |
 | pageBackgroundModalActive:         | gray800                         | #141520                  | <img src="https://www.colorhexa.com/141520.png" width="50"/> |
