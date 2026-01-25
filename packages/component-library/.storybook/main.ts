@@ -33,6 +33,7 @@ const config: StorybookConfig = {
       // Telling Vite how to resolve path aliases
       plugins: [viteTsconfigPaths({ root: '../..' })],
       esbuild: {
+        // Needed to handle JSX in .ts/.tsx files
         jsx: 'automatic',
       },
     });
