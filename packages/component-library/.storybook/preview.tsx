@@ -18,19 +18,17 @@ const THEMES = {
 type ThemeName = keyof typeof THEMES;
 
 const ThemedStory = ({
-  themeName = 'light',
+  themeName,
   children,
 }: {
   themeName?: ThemeName;
   children?: ReactNode;
 }) => {
-  const theme = THEMES[themeName];
-
-  if (!themeName || !theme) {
+  if (!themeName || !THEMES[themeName]) {
     throw new Error(`No theme specified`);
   }
 
-  const css = Object.entries(theme)
+  const css = Object.entries(THEMES[themeName])
     .map(([key, value]) => `--color-${key}: ${value};`)
     .join('\n');
 
@@ -45,7 +43,7 @@ const ThemedStory = ({
 const preview: Preview = {
   decorators: [
     (Story, { globals }) => {
-      const themeName = globals.theme || 'light';
+      const themeName = globals.theme;
 
       return (
         <ThemedStory themeName={themeName}>
