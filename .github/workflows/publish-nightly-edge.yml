@@ -1,14 +1,18 @@
 name: Deploy nightly Edge
 
-# Publish nightly version of Edge - Runs every day at midnight
+# Publish nightly version of Edge - Runs every day at 23:00 UTC
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 23 * * *'
   workflow_dispatch:
 
 defaults:
   run:
     shell: bash
+
+concurrency:
+  group: nightly-edge-deploy
+  cancel-in-progress: false
 
 env:
   CI: true

@@ -1,9 +1,9 @@
 name: Publish nightly npm packages
 
-# Nightly npm packages are built daily
+# Nightly npm packages are built daily at 11PM UTC
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 23 * * *'
   workflow_dispatch:
 
 jobs:
