@@ -1,4 +1,4 @@
-# Color Palette 
+# Color Palette
 
 <!-- Please do not change these png file sizes -->
 
