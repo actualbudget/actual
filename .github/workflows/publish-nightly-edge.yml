@@ -10,12 +10,12 @@ defaults:
   run:
     shell: bash
 
+env:
+  CI: true
+
 concurrency:
   group: nightly-edge-deploy
   cancel-in-progress: false
-
-env:
-  CI: true
 
 jobs:
   publish-latest-deploy:
