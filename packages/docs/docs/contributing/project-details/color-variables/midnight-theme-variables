@@ -1,0 +1,248 @@
+# Midnight Theme Variables
+
+
+
+```
+--color-pageBackground: #373b4a;
+--color-pageBackgroundModalActive: #242733;
+--color-pageBackgroundTopLeft: #141520;
+--color-pageBackgroundBottomRight: #242733;
+--color-pageBackgroundLineTop: #a368fc;
+--color-pageBackgroundLineMid: #080811;
+--color-pageBackgroundLineBottom: #d4dae0;
+--color-pageText: #e8ecf0;
+--color-pageTextLight: #bdc5cf;
+--color-pageTextSubdued: #747c8b;
+--color-pageTextDark: #e8ecf0;
+--color-pageTextPositive: #b990ff;
+--color-pageTextLink: #a368fc;
+--color-pageTextLinkLight: #a368fc;
+
+--color-numberPositive: #65d6ad;
+--color-numberNegative: #ff9b9b;
+--color-numberNeutral: #4d5768;
+
+--color-cardBackground: #141520;
+--color-cardBorder: #a368fc;
+--color-cardShadow: #080811;
+
+--color-tableBackground: #141520;
+--color-tableRowBackgroundHover: #4d5768;
+--color-tableText: #d4dae0;
+--color-tableTextLight: #d4dae0;
+--color-tableTextSubdued: #4d5768;
+--color-tableTextSelected: #141520;
+--color-tableTextHover: #747c8b;
+--color-tableTextInactive: #747c8b;
+--color-tableHeaderText: #bdc5cf;
+--color-tableHeaderBackground: #080811;
+--color-tableBorder: #373b4a;
+--color-tableBorderSelected: #9446ed;
+--color-tableBorderHover: #a368fc;
+--color-tableBorderSeparator: #747c8b;
+--color-tableRowBackgroundHighlight: #dac4ff;
+--color-tableRowBackgroundHighlightText: #141520;
+--color-tableRowHeaderBackground: #242733;
+--color-tableRowHeaderText: #d4dae0;
+
+--color-sidebarBackground: #080811;
+--color-sidebarItemBackgroundPending: #fcf088;
+--color-sidebarItemBackgroundPositive: #3ebd93;
+--color-sidebarItemBackgroundFailed: #f86a6a;
+--color-sidebarItemAccentSelected: #b990ff;
+--color-sidebarItemBackgroundHover: #242733;
+--color-sidebarItemText: #e8ecf0;
+--color-sidebarItemTextSelected: #b990ff;
+--color-sidebarBudgetName: #98a1ae;
+
+--color-menuBackground: #242733;
+--color-menuItemBackground: #bdc5cf;
+--color-menuItemBackgroundHover: #4d5768;
+--color-menuItemText: #e8ecf0;
+--color-menuItemTextHover: #f6f8fa;
+--color-menuItemTextSelected: #9446ed;
+--color-menuItemTextHeader: #b990ff;
+--color-menuBorder: #141520;
+--color-menuBorderHover: #a368fc;
+--color-menuKeybindingText: #b990ff;
+--color-menuAutoCompleteBackground: #373b4a;
+--color-menuAutoCompleteBackgroundHover: #4d5768;
+--color-menuAutoCompleteText: #e8ecf0;
+--color-menuAutoCompleteTextHover: #014d40;
+--color-menuAutoCompleteTextHeader: #b990ff;
+--color-menuAutoCompleteItemTextHover: #f6f8fa;
+--color-menuAutoCompleteItemText: #e8ecf0;
+
+--color-modalBackground: #242733;
+--color-modalBorder: #bdc5cf;
+
+--color-mobileHeaderBackground: #080811;
+--color-mobileHeaderText: #b990ff;
+--color-mobileHeaderTextSubdued: #bdc5cf;
+--color-mobileHeaderTextHover: rgba(200, 200, 200, .15);
+--color-mobilePageBackground: #080811;
+--color-mobileNavBackground: #373b4a;
+--color-mobileNavItem: #d4dae0;
+--color-mobileNavItemSelected: #b990ff;
+--color-mobileAccountShadow: #080811;
+--color-mobileAccountText: #0b5fa3;
+--color-mobileTransactionSelected: #a368fc;
+--color-mobileViewTheme: #080811;
+--color-mobileConfigServerViewTheme: #8719e0;
+
+--color-markdownNormal: #690cb0;
+--color-markdownDark: #8719e0;
+--color-markdownLight: #580a94;
+
+--color-buttonMenuText: #bdc5cf;
+--color-buttonMenuTextHover: #bdc5cf;
+--color-buttonMenuBackground: #242733;
+--color-buttonMenuBackgroundHover: rgba(200, 200, 200, .25);
+--color-buttonMenuBorder: #4d5768;
+--color-buttonMenuSelectedText: #0c6b58;
+--color-buttonMenuSelectedTextHover: #87540d;
+--color-buttonMenuSelectedBackground: #fcf088;
+--color-buttonMenuSelectedBackgroundHover: #98a1ae;
+--color-buttonMenuSelectedBorder: #fcf088;
+
+--color-buttonPrimaryText: #ffffff;
+--color-buttonPrimaryTextHover: #ffffff;
+--color-buttonPrimaryBackground: #a368fc;
+--color-buttonPrimaryBackgroundHover: #a368fc;
+--color-buttonPrimaryBorder: #a368fc;
+--color-buttonPrimaryShadow: rgba(0, 0, 0, 0.6);
+--color-buttonPrimaryDisabledText: #747c8b;
+--color-buttonPrimaryDisabledBackground: #242733;
+--color-buttonPrimaryDisabledBorder: #242733;
+
+--color-buttonNormalText: #d4dae0;
+--color-buttonNormalTextHover: #d4dae0;
+--color-buttonNormalBackground: #373b4a;
+--color-buttonNormalBackgroundHover: #747c8b;
+--color-buttonNormalBorder: #98a1ae;
+--color-buttonNormalShadow: rgba(0, 0, 0, 0.4);
+--color-buttonNormalSelectedText: #ffffff;
+--color-buttonNormalSelectedBackground: #8719e0;
+--color-buttonNormalDisabledText: #747c8b;
+--color-buttonNormalDisabledBackground: #242733;
+--color-buttonNormalDisabledBorder: #4d5768;
+
+--color-buttonBareText: #d4dae0;
+--color-buttonBareTextHover: #d4dae0;
+--color-buttonBareBackground: transparent;
+--color-buttonBareBackgroundHover: rgba(200, 200, 200, .3);
+--color-buttonBareBackgroundActive: rgba(200, 200, 200, .5);
+--color-buttonBareDisabledText: #747c8b;
+--color-buttonBareDisabledBackground: transparent;
+
+--color-calendarText: #f6f8fa;
+--color-calendarBackground: #242733;
+--color-calendarItemText: #d4dae0;
+--color-calendarItemBackground: #4d5768;
+--color-calendarSelectedBackground: #8719e0;
+--color-calendarCellBackground: #102a43;
+
+--color-noticeBackground: #199473;
+--color-noticeBackgroundLight: #014d40;
+--color-noticeBackgroundDark: #3ebd93;
+--color-noticeText: #65d6ad;
+--color-noticeTextLight: #3ebd93;
+--color-noticeTextDark: #c6f7e2;
+--color-noticeTextMenu: #3ebd93;
+--color-noticeTextMenuHover: #147d64;
+--color-noticeBorder: #0c6b58;
+
+--color-warningBackground: #87540d;
+--color-warningText: #fcf088;
+--color-warningTextLight: #e6bb20;
+--color-warningTextDark: #fffbea;
+--color-warningBorder: #e6bb20;
+
+--color-errorBackground: #8a041a;
+--color-errorText: #ff9b9b;
+--color-errorTextDark: #ffbdbd;
+--color-errorTextDarker: #ffbdbd;
+--color-errorTextMenu: #ff9b9b;
+--color-errorBorder: #e12d39;
+
+--color-upcomingBackground: #580a94;
+--color-upcomingText: #b990ff;
+--color-upcomingBorder: #373b4a;
+
+--color-formLabelText: #dac4ff;
+--color-formLabelBackground: #034388;
+--color-formInputBackground: #141520;
+--color-formInputBackgroundSelected: #242733;
+--color-formInputBackgroundSelection: #9446ed;
+--color-formInputBorder: #373b4a;
+--color-formInputTextReadOnlySelection: #141520;
+--color-formInputBorderSelected: #a368fc;
+--color-formInputText: #d4dae0;
+--color-formInputTextSelected: #000000;
+--color-formInputTextPlaceholder: #d4dae0;
+--color-formInputTextPlaceholderSelected: #e8ecf0;
+--color-formInputTextSelection: #141520;
+--color-formInputShadowSelected: #9446ed;
+--color-formInputTextHighlight: #b990ff;
+
+--color-checkboxText: #d4dae0;
+--color-checkboxBackgroundSelected: #a368fc;
+--color-checkboxBorderSelected: #a368fc;
+--color-checkboxShadowSelected: #8719e0;
+--color-checkboxToggleBackground: #747c8b;
+--color-checkboxToggleBackgroundSelected: #a368fc;
+--color-checkboxToggleDisabled: #242733;
+
+--color-pillBackground: #4d5768;
+--color-pillBackgroundLight: #080811;
+--color-pillText: #bdc5cf;
+--color-pillTextHighlighted: #b990ff;
+--color-pillBorder: #4d5768;
+--color-pillBorderDark: #4d5768;
+--color-pillBackgroundSelected: #7a0ecc;
+--color-pillTextSelected: #d4dae0;
+--color-pillBorderSelected: #a368fc;
+--color-pillTextSubdued: #4d5768;
+
+--color-reportsRed: #f86a6a;
+--color-reportsBlue: #40a5f7;
+--color-reportsGreen: #3ebd93;
+--color-reportsGray: #747c8b;
+--color-reportsLabel: #e8ecf0;
+--color-reportsInnerLabel: #243b53;
+--color-reportsNumberPositive: #65d6ad;
+--color-reportsNumberNegative: #ff9b9b;
+--color-reportsNumberNeutral: #4d5768;
+--color-reportsChartFill: #65d6ad;
+
+--color-noteTagBackground: #580a94;
+--color-noteTagBackgroundHover: #7a0ecc;
+--color-noteTagDefault: #690cb0;
+--color-noteTagText: #f2ebfe;
+
+--color-budgetCurrentMonth: #141520;
+--color-budgetOtherMonth: #242733;
+--color-budgetHeaderCurrentMonth: #080811;
+--color-budgetHeaderOtherMonth: #141520;
+--color-budgetNumberZero: #4d5768;
+--color-budgetNumberNegative: #ff9b9b;
+--color-budgetNumberNeutral: #d4dae0;
+--color-budgetNumberPositive: #d4dae0;
+--color-templateNumberFunded: #65d6ad;
+--color-templateNumberUnderFunded: #fcf088;
+--color-toBudgetPositive: #65d6ad;
+--color-toBudgetZero: #65d6ad;
+--color-toBudgetNegative: #ff9b9b;
+
+--color-floatingActionBarBackground: #080811;
+--color-floatingActionBarBorder: #a368fc;
+--color-floatingActionBarText: #b990ff;
+
+--color-tooltipText: #e8ecf0;
+--color-tooltipBackground: #141520;
+--color-tooltipBorder: #373b4a;
+
+--color-overlayBackground: rgba(0, 0, 0, 0.3);
+```
+
+
