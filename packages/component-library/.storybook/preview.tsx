@@ -2,9 +2,9 @@ import { type ReactNode } from 'react';
 
 import type { Preview } from '@storybook/react-vite';
 
+// Not ideal to import from desktop-client, but we need a source of truth for theme variables
 import * as darkTheme from '../../desktop-client/src/style/themes/dark';
 import * as developmentTheme from '../../desktop-client/src/style/themes/development';
-// Not ideal to import from desktop-client, but we need a source of truth for theme variables
 import * as lightTheme from '../../desktop-client/src/style/themes/light';
 import * as midnightTheme from '../../desktop-client/src/style/themes/midnight';
 
