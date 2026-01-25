@@ -53,4 +53,3 @@ These documents aim to create a full color catalog of Actual's three main themes
 ### Tooltip
 
 ### Overlay Background
-

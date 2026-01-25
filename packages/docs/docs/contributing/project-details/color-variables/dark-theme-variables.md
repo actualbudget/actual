@@ -459,4 +459,3 @@ A list of the color variables used in the Dark Theme:
 | tooltipBackground:                 | navy800                         | #243b53                  |
 | tooltipBorder:                     | navy700                         | #334e68                  |
 | overlayBackground:                 |                                 | rgba(0, 0, 0, 0.3)       |
-
