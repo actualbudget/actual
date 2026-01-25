@@ -33,8 +33,10 @@ class ProcessorRegistry {
     }
 
     // Allow FallbackBankProcessor itself or any subclass
-    if (Ctor !== FallbackBankProcessor &&
-        (!Ctor.prototype || !(Ctor.prototype instanceof FallbackBankProcessor))) {
+    if (
+      Ctor !== FallbackBankProcessor &&
+      (!Ctor.prototype || !(Ctor.prototype instanceof FallbackBankProcessor))
+    ) {
       debug('Ctor does not extend FallbackBankProcessor: %s', id);
       return new FallbackBankProcessor();
     }
