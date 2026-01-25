@@ -61,14 +61,14 @@ export const EnableBankingInitialiseModal = ({
 
     setIsLoading(true);
 
-    const { error } = await send('enablebanking-configure', {
+    const { error: apiError } = await send('enablebanking-configure', {
       secret: secretKey,
       applicationId,
     });
-    if (error) {
+    if (apiError) {
       setIsLoading(false);
       setIsValid(false);
-      switch (error.error_code) {
+      switch (apiError.error_code) {
         case 'ENABLEBANKING_SECRETS_INVALID':
           setError(t('The provided credentials are not valid.'));
           break;
@@ -108,6 +108,22 @@ export const EnableBankingInitialiseModal = ({
                 In order to enable bank sync via Enable Banking (only for EU
                 banks) you will need to create application credentials.
               </Trans>
+            </Text>
+            <Text style={{ fontWeight: 500 }}>
+              <Trans>
+                When creating your application, use this redirect URL:
+              </Trans>
+            </Text>
+            <Text
+              style={{
+                fontFamily: 'monospace',
+                fontSize: 12,
+                padding: 8,
+                backgroundColor: 'var(--color-table-background)',
+                borderRadius: 4,
+              }}
+            >
+              {window.location.origin}/enablebanking/auth_callback
             </Text>
 
             <FormField>

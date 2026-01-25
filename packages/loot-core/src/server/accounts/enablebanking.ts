@@ -168,7 +168,7 @@ export async function downloadEnableBankingTransactions(
     logger.log('got error', error);
     throw new BankSyncError(
       error.error_type,
-      error.error_code,
+      error.error_type,
       error.error_code,
     );
   }

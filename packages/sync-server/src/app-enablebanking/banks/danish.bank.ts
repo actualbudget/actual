@@ -126,7 +126,9 @@ export class DanishBankProcessor extends FallbackBankProcessor {
     return {
       ...t,
       payeeObject,
-      amount: parseFloat(t.transaction_amount.amount) * (isDebtor ? -1 : 1),
+      amount: t.transaction_amount?.amount
+        ? parseFloat(t.transaction_amount.amount) * (isDebtor ? -1 : 1)
+        : 0,
       payeeName,
       notes: cleanNotes,
       date: t.transaction_date ?? t.booking_date ?? t.value_date ?? '',
