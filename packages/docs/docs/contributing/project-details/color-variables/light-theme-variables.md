@@ -1,4 +1,4 @@
-# Full Color Variable Palette (Light Theme)
+# Light Theme Color Palette
 
 This palette can be copied to form the basis of a new theme.
 
