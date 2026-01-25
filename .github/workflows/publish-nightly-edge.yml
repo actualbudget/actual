@@ -13,10 +13,6 @@ defaults:
 env:
   CI: true
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
   publish-latest-deploy:
     runs-on: ubuntu-latest
