@@ -5,17 +5,18 @@ import { q } from 'loot-core/shared/query';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, integerToAmount } from '../../shared/util';
 import { type CategoryEntity } from '../../types/models';
-import {
-  type AverageTemplate,
-  type ByTemplate,
-  type CopyTemplate,
-  type GoalTemplate,
-  type PercentageTemplate,
-  type PeriodicTemplate,
-  type RemainderTemplate,
-  type SimpleTemplate,
-  type SpendTemplate,
-  type Template,
+import type {
+  AverageTemplate,
+  ByTemplate,
+  CopyTemplate,
+  GoalTemplate,
+  PercentageTemplate,
+  PeriodicTemplate,
+  RefillTemplate,
+  RemainderTemplate,
+  SimpleTemplate,
+  SpendTemplate,
+  Template,
 } from '../../types/models/templates';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
@@ -155,6 +156,10 @@ export class CategoryTemplateContext {
       switch (template.type) {
         case 'simple': {
           newBudget = CategoryTemplateContext.runSimple(template, this);
+          break;
+        }
+        case 'refill': {
+          newBudget = CategoryTemplateContext.runRefill(template, this);
           break;
         }
         case 'copy': {
@@ -551,6 +556,13 @@ export class CategoryTemplateContext {
     } else {
       return templateContext.limitAmount - templateContext.fromLastMonth;
     }
+  }
+
+  static runRefill(
+    template: RefillTemplate,
+    templateContext: CategoryTemplateContext,
+  ): number {
+    return templateContext.limitAmount - templateContext.fromLastMonth;
   }
 
   static async runCopy(
