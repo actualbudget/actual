@@ -2,7 +2,7 @@
 
 This palette can be copied to form the basis of a new theme.
 
-```
+```css
 /* Actual Dark Theme */
 
 --color-pageBackground: #080811;
