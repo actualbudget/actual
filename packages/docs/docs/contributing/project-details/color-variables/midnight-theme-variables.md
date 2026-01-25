@@ -81,7 +81,7 @@ This palette can be copied to form the basis of a new theme.
 --color-mobileHeaderBackground: #080811;
 --color-mobileHeaderText: #b990ff;
 --color-mobileHeaderTextSubdued: #bdc5cf;
---color-mobileHeaderTextHover: rgba(200, 200, 200, .15);
+--color-mobileHeaderTextHover: rgba(200, 200, 200, 0.15);
 --color-mobilePageBackground: #080811;
 --color-mobileNavBackground: #373b4a;
 --color-mobileNavItem: #d4dae0;
@@ -99,7 +99,7 @@ This palette can be copied to form the basis of a new theme.
 --color-buttonMenuText: #bdc5cf;
 --color-buttonMenuTextHover: #bdc5cf;
 --color-buttonMenuBackground: #242733;
---color-buttonMenuBackgroundHover: rgba(200, 200, 200, .25);
+--color-buttonMenuBackgroundHover: rgba(200, 200, 200, 0.25);
 --color-buttonMenuBorder: #4d5768;
 --color-buttonMenuSelectedText: #0c6b58;
 --color-buttonMenuSelectedTextHover: #87540d;
@@ -132,8 +132,8 @@ This palette can be copied to form the basis of a new theme.
 --color-buttonBareText: #d4dae0;
 --color-buttonBareTextHover: #d4dae0;
 --color-buttonBareBackground: transparent;
---color-buttonBareBackgroundHover: rgba(200, 200, 200, .3);
---color-buttonBareBackgroundActive: rgba(200, 200, 200, .5);
+--color-buttonBareBackgroundHover: rgba(200, 200, 200, 0.3);
+--color-buttonBareBackgroundActive: rgba(200, 200, 200, 0.5);
 --color-buttonBareDisabledText: #747c8b;
 --color-buttonBareDisabledBackground: transparent;
 
