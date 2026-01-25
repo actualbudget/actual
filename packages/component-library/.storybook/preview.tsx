@@ -1,4 +1,4 @@
-import React from 'react'; // This is reuqired for JSX syntax
+import { type ReactNode } from 'react'; // This is reuqired for JSX syntax
 
 import type { Preview } from '@storybook/react-vite';
 
@@ -22,7 +22,7 @@ const ThemedStory = ({
   children,
 }: {
   themeName?: ThemeName;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) => {
   const theme = THEMES[themeName];
 
