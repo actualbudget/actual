@@ -1,6 +1,10 @@
-# Midnight Theme Variables
+# Midnight Theme Color Palette
+
+This palette can be copied to form the basis of a new theme.
 
 ```
+/* Actual Midnight Theme */
+
 --color-pageBackground: #373b4a;
 --color-pageBackgroundModalActive: #242733;
 --color-pageBackgroundTopLeft: #141520;
