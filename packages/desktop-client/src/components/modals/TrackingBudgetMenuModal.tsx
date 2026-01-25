@@ -2,6 +2,10 @@ import React, { useState, useEffect, type CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import {
+  SvgCheveronDown,
+  SvgCheveronUp,
+} from '@actual-app/components/icons/v1';
 import { SvgNotesPaper } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -27,14 +31,6 @@ import { useNotes } from '@desktop-client/hooks/useNotes';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
 
-const buttonStyle: CSSProperties = {
-  ...styles.mediumText,
-  height: styles.mobileMinHeight,
-  color: theme.formLabelText,
-  // Adjust based on desired number of buttons per row.
-  flexBasis: '100%',
-};
-
 type TrackingBudgetMenuModalProps = Extract<
   ModalType,
   { name: 'tracking-budget-menu' }
@@ -54,6 +50,19 @@ export function TrackingBudgetMenuModal({
     color: theme.menuItemText,
     borderRadius: 0,
     borderTop: `1px solid ${theme.pillBorder}`,
+  };
+
+  const buttonStyle: CSSProperties = {
+    ...styles.mediumText,
+    height: styles.mobileMinHeight,
+    color: theme.formLabelText,
+    // Adjust based on desired number of buttons per row.
+    flexBasis: '100%',
+  };
+  const [showMore, setShowMore] = useState(false);
+
+  const onShowMore = () => {
+    setShowMore(!showMore);
   };
 
   const budgeted = useTrackingSheetValue(
@@ -95,19 +104,6 @@ export function TrackingBudgetMenuModal({
             title={<ModalTitle title={category.name} shrinkOnOverflow />}
             rightContent={<ModalCloseButton onPress={close} />}
           />
-          <Notes
-            notes={originalNotes.length > 0 ? originalNotes : t('No notes')}
-            editable={false}
-            focused={false}
-            getStyle={() => ({
-              borderRadius: 6,
-              ...(originalNotes.length === 0 && {
-                textAlign: 'center',
-                alignSelf: 'center',
-                color: theme.pageTextSubdued,
-              }),
-            })}
-          />
           <View
             style={{
               justifyContent: 'center',
@@ -142,16 +138,71 @@ export function TrackingBudgetMenuModal({
               data-testid="budget-amount"
             />
           </View>
-          <BudgetMenu
-            getItemStyle={() => defaultMenuItemStyle}
-            onCopyLastMonthAverage={onCopyLastMonthAverage}
-            onSetMonthsAverage={onSetMonthsAverage}
-            onApplyBudgetTemplate={onApplyBudgetTemplate}
-          />
-          <Button style={buttonStyle} onPress={_onEditNotes}>
-            <SvgNotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
-            <Trans>Edit notes</Trans>
-          </Button>
+          <View
+            style={{
+              display: showMore ? 'none' : undefined,
+              overflowY: 'auto',
+              flex: 1,
+            }}
+          >
+            <Notes
+              notes={originalNotes.length > 0 ? originalNotes : t('No notes')}
+              editable={false}
+              focused={false}
+              getStyle={() => ({
+                borderRadius: 6,
+                ...(originalNotes.length === 0 && {
+                  justifySelf: 'center',
+                  alignSelf: 'center',
+                  color: theme.pageTextSubdued,
+                }),
+              })}
+            />
+          </View>
+          <View
+            style={{
+              display: showMore ? 'none' : undefined,
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              alignContent: 'space-between',
+            }}
+          >
+            <Button style={buttonStyle} onPress={_onEditNotes}>
+              <SvgNotesPaper
+                width={20}
+                height={20}
+                style={{ paddingRight: 5 }}
+              />
+              <Trans>Edit notes</Trans>
+            </Button>
+          </View>
+          <View>
+            <Button variant="bare" style={buttonStyle} onPress={onShowMore}>
+              {!showMore ? (
+                <SvgCheveronUp
+                  width={30}
+                  height={30}
+                  style={{ paddingRight: 5 }}
+                />
+              ) : (
+                <SvgCheveronDown
+                  width={30}
+                  height={30}
+                  style={{ paddingRight: 5 }}
+                />
+              )}
+              <Trans>Actions</Trans>
+            </Button>
+          </View>
+          {showMore && (
+            <BudgetMenu
+              getItemStyle={() => defaultMenuItemStyle}
+              onCopyLastMonthAverage={onCopyLastMonthAverage}
+              onSetMonthsAverage={onSetMonthsAverage}
+              onApplyBudgetTemplate={onApplyBudgetTemplate}
+            />
+          )}
         </>
       )}
     </Modal>
