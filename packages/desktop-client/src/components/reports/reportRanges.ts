@@ -9,7 +9,19 @@ export function validateStart(
   end: string,
   interval?: string,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  useAbsoluteDates?: boolean,
 ): [string, string, TimeFrame['mode']] {
+  if (useAbsoluteDates) {
+    const [validatedStart, validatedEnd] = validateRange(
+      earliest,
+      latest,
+      start,
+      end,
+      true,
+    );
+    return [validatedStart, validatedEnd, 'static'];
+  }
+
   let addDays: number;
   let dateStart: string;
   switch (interval) {
@@ -51,7 +63,19 @@ export function validateEnd(
   end: string,
   interval?: string,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  useAbsoluteDates?: boolean,
 ): [string, string, TimeFrame['mode']] {
+  if (useAbsoluteDates) {
+    const [validatedStart, validatedEnd] = validateRange(
+      earliest,
+      latest,
+      start,
+      end,
+      true,
+    );
+    return [validatedStart, validatedEnd, 'static'];
+  }
+
   let subDays: number;
   let dateEnd: string;
   switch (interval) {
@@ -91,9 +115,12 @@ export function validateRange(
   latest: string,
   start: string,
   end: string,
+  allowFutureDates?: boolean,
 ) {
-  if (end > latest) {
-    end = latest;
+  if (!allowFutureDates) {
+    if (end > latest) {
+      end = latest;
+    }
   }
   if (start < earliest) {
     start = earliest;
