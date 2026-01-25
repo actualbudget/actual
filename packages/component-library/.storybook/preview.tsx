@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'; // This is reuqired for JSX syntax
+import { type ReactNode } from 'react';
 
 import type { Preview } from '@storybook/react-vite';
 
