@@ -249,219 +249,220 @@ This palette can be copied to form the basis of a new theme.
 
 A list of the color palette variables used in the Midnight Theme:
 
-| Color Variable                     | Color Palette                   | Color Code               |
-| ---------------------------------- | ------------------------------- | ------------------------ |
-| pageBackground:                    | gray600                         | #373b4a                  |
-| pageBackgroundModalActive:         | gray700                         | #242733                  |
-| pageBackgroundTopLeft:             | gray800                         | #141520                  |
-| pageBackgroundBottomRight:         | gray700                         | #242733                  |
-| pageBackgroundLineTop:             | purple300                       | #a368fc                  |
-| pageBackgroundLineMid:             | gray900                         | #080811                  |
-| pageBackgroundLineBottom:          | gray150                         | #d4dae0                  |
-| pageText:                          | gray100                         | #e8ecf0                  |
-| pageTextLight:                     | gray200                         | #bdc5cf                  |
-| pageTextSubdued:                   | gray400                         | #747c8b                  |
-| pageTextDark:                      | gray100                         | #e8ecf0                  |
-| pageTextPositive:                  | purple200                       | #b990ff                  |
-| pageTextLink:                      | purple300                       | #a368fc                  |
-| pageTextLinkLight:                 | purple300                       | #a368fc                  |
-| numberPositive:                    | green300                        | #65d6ad                  |
-| numberNegative:                    | red200                          | #ff9b9b                  |
-| numberNeutral:                     | gray500                         | #4d5768                  |
-| cardBackground:                    | gray800                         | #141520                  |
-| cardBorder:                        | purple300                       | #a368fc                  |
-| cardShadow:                        | gray900                         | #080811                  |
-| tableBackground:                   | gray800                         | #141520                  |
-| tableRowBackgroundHover:           | gray500                         | #4d5768                  |
-| tableText:                         | gray150                         | #d4dae0                  |
-| tableTextLight:                    | tableText                       | #d4dae0                  |
-| tableTextSubdued:                  | gray500                         | #4d5768                  |
-| tableTextSelected:                 | gray800                         | #141520                  |
-| tableTextHover:                    | gray400                         | #747c8b                  |
-| tableTextInactive:                 | gray400                         | #747c8b                  |
-| tableHeaderText:                   | gray200                         | #bdc5cf                  |
-| tableHeaderBackground:             | gray900                         | #080811                  |
-| tableBorder:                       | gray600                         | #373b4a                  |
-| tableBorderSelected:               | purple400                       | #9446ed                  |
-| tableBorderHover:                  | purple300                       | #a368fc                  |
-| tableBorderSeparator:              | gray400                         | #747c8b                  |
-| tableRowBackgroundHighlight:       | purple150                       | #dac4ff                  |
-| tableRowBackgroundHighlightText:   | gray800                         | #141520                  |
-| tableRowHeaderBackground:          | gray700                         | #242733                  |
-| tableRowHeaderText:                | gray150                         | #d4dae0                  |
-| sidebarBackground:                 | gray900                         | #080811                  |
-| sidebarItemBackgroundPending:      | orange200                       | #fcf088                  |
-| sidebarItemBackgroundPositive:     | green400                        | #3ebd93                  |
-| sidebarItemBackgroundFailed:       | red300                          | #f86a6a                  |
-| sidebarItemAccentSelected:         | purple200                       | #b990ff                  |
-| sidebarItemBackgroundHover:        | gray700                         | #242733                  |
-| sidebarItemText:                   | gray100                         | #e8ecf0                  |
-| sidebarItemTextSelected:           | purple200                       | #b990ff                  |
-| sidebarBudgetName:                 | gray300                         | #98a1ae                  |
-| menuBackground:                    | gray700                         | #242733                  |
-| menuItemBackground:                | gray200                         | #bdc5cf                  |
-| menuItemBackgroundHover:           | gray500                         | #4d5768                  |
-| menuItemText:                      | gray100                         | #e8ecf0                  |
-| menuItemTextHover:                 | gray50                          | #f6f8fa                  |
-| menuItemTextSelected:              | purple400                       | #9446ed                  |
-| menuItemTextHeader:                | purple200                       | #b990ff                  |
-| menuBorder:                        | gray800                         | #141520                  |
-| menuBorderHover:                   | purple300                       | #a368fc                  |
-| menuKeybindingText:                | purple200                       | #b990ff                  |
-| menuAutoCompleteBackground:        | gray600                         | #373b4a                  |
-| menuAutoCompleteBackgroundHover:   | gray500                         | #4d5768                  |
-| menuAutoCompleteText:              | gray100                         | #e8ecf0                  |
-| menuAutoCompleteTextHover:         | green900                        | #014d40                  |
-| menuAutoCompleteTextHeader:        | purple200                       | #b990ff                  |
-| menuAutoCompleteItemTextHover:     | gray50                          | #f6f8fa                  |
-| menuAutoCompleteItemText:          | menuItemText                    | #e8ecf0                  |
-| modalBackground:                   | gray700                         | #242733                  |
-| modalBorder:                       | gray200                         | #bdc5cf                  |
-| mobileHeaderBackground:            | gray900                         | #080811                  |
-| mobileHeaderText:                  | purple200                       | #b990ff                  |
-| mobileHeaderTextSubdued:           | gray200                         | #bdc5cf                  |
-| mobileHeaderTextHover:             | rgba(200, 200, 200, .15)        | rgba(200, 200, 200, .15) |
-| mobilePageBackground:              | gray900                         | #080811                  |
-| mobileNavBackground:               | gray600                         | #373b4a                  |
-| mobileNavItem:                     | gray150                         | #d4dae0                  |
-| mobileNavItemSelected:             | purple200                       | #b990ff                  |
-| mobileAccountShadow:               | cardShadow                      | #080811                  |
-| mobileAccountText:                 | blue800                         | #0b5fa3                  |
-| mobileTransactionSelected:         | purple300                       | #a368fc                  |
-| mobileViewTheme:                   | mobileHeaderBackground          | #080811                  |
-| mobileConfigServerViewTheme:       | purple500                       | #8719e0                  |
-| markdownNormal:                    | purple700                       | #690cb0                  |
-| markdownDark:                      | purple500                       | #8719e0                  |
-| markdownLight:                     | purple800                       | #580a94                  |
-| buttonMenuText:                    | gray200                         | #bdc5cf                  |
-| buttonMenuTextHover:               | buttonMenuText                  | #bdc5cf                  |
-| buttonMenuBackground:              | gray700                         | #242733                  |
-| buttonMenuBackgroundHover:         | rgba(200, 200, 200, .25)        | rgba(200, 200, 200, .25) |
-| buttonMenuBorder:                  | gray500                         | #4d5768                  |
-| buttonMenuSelectedText:            | green800                        | #0c6b58                  |
-| buttonMenuSelectedTextHover:       | orange800                       | #87540d                  |
-| buttonMenuSelectedBackground:      | orange200                       | #fcf088                  |
-| buttonMenuSelectedBackgroundHover: | gray300                         | #98a1ae                  |
-| buttonMenuSelectedBorder:          | buttonMenuSelectedBackground    | #fcf088                  |
-| buttonPrimaryText:                 | white                           | #ffffff                  |
-| buttonPrimaryTextHover:            | buttonPrimaryText               | #ffffff                  |
-| buttonPrimaryBackground:           | purple300                       | #a368fc                  |
-| buttonPrimaryBackgroundHover:      | buttonPrimaryBackground         | #a368fc                  |
-| buttonPrimaryBorder:               | buttonPrimaryBackground         | #a368fc                  |
-| buttonPrimaryShadow:               | rgba(0, 0, 0, 0.6)              | rgba(0, 0, 0, 0.6)       |
-| buttonPrimaryDisabledText:         | gray400                         | #747c8b                  |
-| buttonPrimaryDisabledBackground:   | gray700                         | #242733                  |
-| buttonPrimaryDisabledBorder:       | buttonPrimaryDisabledBackground | #242733                  |
-| buttonNormalText:                  | gray150                         | #d4dae0                  |
-| buttonNormalTextHover:             | gray150                         | #d4dae0                  |
-| buttonNormalBackground:            | gray600                         | #373b4a                  |
-| buttonNormalBackgroundHover:       | gray400                         | #747c8b                  |
-| buttonNormalBorder:                | gray300                         | #98a1ae                  |
-| buttonNormalShadow:                | rgba(0, 0, 0, 0.4)              | rgba(0, 0, 0, 0.4)       |
-| buttonNormalSelectedText:          | white                           | #ffffff                  |
-| buttonNormalSelectedBackground:    | purple500                       | #8719e0                  |
-| buttonNormalDisabledText:          | gray400                         | #747c8b                  |
-| buttonNormalDisabledBackground:    | gray700                         | #242733                  |
-| buttonNormalDisabledBorder:        | gray500                         | #4d5768                  |
-| buttonBareText:                    | buttonNormalText                | #d4dae0                  |
-| buttonBareTextHover:               | buttonNormalText                | #d4dae0                  |
-| buttonBareBackground:              | transparent                     | transparent              |
-| buttonBareBackgroundHover:         | rgba(200, 200, 200, .3)         | rgba(200, 200, 200, .3)  |
-| buttonBareBackgroundActive:        | rgba(200, 200, 200, .5)         | rgba(200, 200, 200, .5)  |
-| buttonBareDisabledText:            | buttonNormalDisabledText        | #747c8b                  |
-| buttonBareDisabledBackground:      | buttonBareBackground            | transparent              |
-| calendarText:                      | gray50                          | #f6f8fa                  |
-| calendarBackground:                | gray700                         | #242733                  |
-| calendarItemText:                  | gray150                         | #d4dae0                  |
-| calendarItemBackground:            | gray500                         | #4d5768                  |
-| calendarSelectedBackground:        | buttonNormalSelectedBackground  | #8719e0                  |
-| calendarCellBackground:            | navy900                         | #102a43                  |
-| noticeBackground:                  | green600                        | #199473                  |
-| noticeBackgroundLight:             | green900                        | #014d40                  |
-| noticeBackgroundDark:              | green400                        | #3ebd93                  |
-| noticeText:                        | green300                        | #65d6ad                  |
-| noticeTextLight:                   | green400                        | #3ebd93                  |
-| noticeTextDark:                    | green150                        | #c6f7e2                  |
-| noticeTextMenu:                    | green400                        | #3ebd93                  |
-| noticeTextMenuHover:               | green700                        | #147d64                  |
-| noticeBorder:                      | green800                        | #0c6b58                  |
-| warningBackground:                 | orange800                       | #87540d                  |
-| warningText:                       | orange200                       | #fcf088                  |
-| warningTextLight:                  | orange500                       | #e6bb20                  |
-| warningTextDark:                   | orange100                       | #fffbea                  |
-| warningBorder:                     | orange500                       | #e6bb20                  |
-| errorBackground:                   | red800                          | #8a041a                  |
-| errorText:                         | red200                          | #ff9b9b                  |
-| errorTextDark:                     | red150                          | #ffbdbd                  |
-| errorTextDarker:                   | errorTextDark                   | #ffbdbd                  |
-| errorTextMenu:                     | red200                          | #ff9b9b                  |
-| errorBorder:                       | red500                          | #e12d39                  |
-| upcomingBackground:                | purple800                       | #580a94                  |
-| upcomingText:                      | purple200                       | #b990ff                  |
-| upcomingBorder:                    | tableBorder                     | #373b4a                  |
-| formLabelText:                     | purple150                       | #dac4ff                  |
-| formLabelBackground:               | blue900                         | #034388                  |
-| formInputBackground:               | gray800                         | #141520                  |
-| formInputBackgroundSelected:       | gray700                         | #242733                  |
-| formInputBackgroundSelection:      | purple400                       | #9446ed                  |
-| formInputBorder:                   | gray600                         | #373b4a                  |
-| formInputTextReadOnlySelection:    | gray800                         | #141520                  |
-| formInputBorderSelected:           | purple300                       | #a368fc                  |
-| formInputText:                     | gray150                         | #d4dae0                  |
-| formInputTextSelected:             | black                           | #000000                  |
-| formInputTextPlaceholder:          | gray150                         | #d4dae0                  |
-| formInputTextPlaceholderSelected:  | gray100                         | #e8ecf0                  |
-| formInputTextSelection:            | gray800                         | #141520                  |
-| formInputShadowSelected:           | purple400                       | #9446ed                  |
-| formInputTextHighlight:            | purple200                       | #b990ff                  |
-| checkboxText:                      | tableText                       | #d4dae0                  |
-| checkboxBackgroundSelected:        | purple300                       | #a368fc                  |
-| checkboxBorderSelected:            | purple300                       | #a368fc                  |
-| checkboxShadowSelected:            | purple500                       | #8719e0                  |
-| checkboxToggleBackground:          | gray400                         | #747c8b                  |
-| checkboxToggleBackgroundSelected:  | purple300                       | #a368fc                  |
-| checkboxToggleDisabled:            | gray700                         | #242733                  |
-| pillBackground:                    | gray500                         | #4d5768                  |
-| pillBackgroundLight:               | gray900                         | #080811                  |
-| pillText:                          | gray200                         | #bdc5cf                  |
-| pillTextHighlighted:               | purple200                       | #b990ff                  |
-| pillBorder:                        | gray500                         | #4d5768                  |
-| pillBorderDark:                    | pillBorder                      | #4d5768                  |
-| pillBackgroundSelected:            | purple600                       | #7a0ecc                  |
-| pillTextSelected:                  | gray150                         | #d4dae0                  |
-| pillBorderSelected:                | purple300                       | #a368fc                  |
-| pillTextSubdued:                   | gray500                         | #4d5768                  |
-| reportsRed:                        | red300                          | #f86a6a                  |
-| reportsBlue:                       | blue400                         | #40a5f7                  |
-| reportsGreen:                      | green400                        | #3ebd93                  |
-| reportsGray:                       | gray400                         | #747c8b                  |
-| reportsLabel:                      | pageText                        | #e8ecf0                  |
-| reportsInnerLabel:                 | navy800                         | #243b53                  |
-| reportsNumberPositive:             | numberPositive                  | #65d6ad                  |
-| reportsNumberNegative:             | numberNegative                  | #ff9b9b                  |
-| reportsNumberNeutral:              | numberNeutral                   | #4d5768                  |
-| reportsChartFill:                  | reportsNumberPositive           | #65d6ad                  |
-| noteTagBackground:                 | purple800                       | #580a94                  |
-| noteTagBackgroundHover:            | purple600                       | #7a0ecc                  |
-| noteTagDefault:                    | purple700                       | #690cb0                  |
-| noteTagText:                       | purple100                       | #f2ebfe                  |
-| budgetCurrentMonth:                | tableBackground                 | #141520                  |
-| budgetOtherMonth:                  | gray700                         | #242733                  |
-| budgetHeaderCurrentMonth:          | tableHeaderBackground           | #080811                  |
-| budgetHeaderOtherMonth:            | gray800                         | #141520                  |
-| budgetNumberZero:                  | tableTextSubdued                | #4d5768                  |
-| budgetNumberNegative:              | numberNegative                  | #ff9b9b                  |
-| budgetNumberNeutral:               | tableText                       | #d4dae0                  |
-| budgetNumberPositive:              | budgetNumberNeutral             | #d4dae0                  |
-| templateNumberFunded:              | numberPositive                  | #65d6ad                  |
-| templateNumberUnderFunded:         | orange200                       | #fcf088                  |
-| toBudgetPositive:                  | numberPositive                  | #65d6ad                  |
-| toBudgetZero:                      | numberPositive                  | #65d6ad                  |
-| toBudgetNegative:                  | budgetNumberNegative            | #ff9b9b                  |
-| floatingActionBarBackground:       | gray900                         | #080811                  |
-| floatingActionBarBorder:           | purple300                       | #a368fc                  |
-| floatingActionBarText:             | purple200                       | #b990ff                  |
-| tooltipText:                       | gray100                         | #e8ecf0                  |
-| tooltipBackground:                 | gray800                         | #141520                  |
-| tooltipBorder:                     | gray600                         | #373b4a                  |
-| overlayBackground:                 | rgba(0, 0, 0, 0.3)              | rgba(0, 0, 0, 0.3)       |
+| Color Variable                     | Color Palette                   | Color Code               |  Color Swatch  |
+| ---------------------------------- | ------------------------------- | ------------------------ | :------------: |
+| pageBackground: | gray600 | #373b4a |<img src="https://www.colorhexa.com/373b4a.png" width="50"/> |
+| pageBackgroundModalActive: | gray700 | #242733 |<img src="https://www.colorhexa.com/242733.png" width="50"/> |
+| pageBackgroundTopLeft: | gray800 | #141520 |<img src="https://www.colorhexa.com/141520.png" width="50"/> |
+| pageBackgroundBottomRight: | gray700 | #242733 |<img src="https://www.colorhexa.com/242733.png" width="50"/> |
+| pageBackgroundLineTop: | purple300 | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| pageBackgroundLineMid: | gray900 | #080811 |<img src="https://www.colorhexa.com/080811.png" width="50"/> |
+| pageBackgroundLineBottom: | gray150 | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| pageText: | gray100 | #e8ecf0 |<img src="https://www.colorhexa.com/e8ecf0.png" width="50"/> |
+| pageTextLight: | gray200 | #bdc5cf |<img src="https://www.colorhexa.com/bdc5cf.png" width="50"/> |
+| pageTextSubdued: | gray400 | #747c8b |<img src="https://www.colorhexa.com/747c8b.png" width="50"/> |
+| pageTextDark: | gray100 | #e8ecf0 |<img src="https://www.colorhexa.com/e8ecf0.png" width="50"/> |
+| pageTextPositive: | purple200 | #b990ff |<img src="https://www.colorhexa.com/b990ff.png" width="50"/> |
+| pageTextLink: | purple300 | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| pageTextLinkLight: | purple300 | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| numberPositive: | green300 | #65d6ad |<img src="https://www.colorhexa.com/65d6ad.png" width="50"/> |
+| numberNegative: | red200 | #ff9b9b |<img src="https://www.colorhexa.com/ff9b9b.png" width="50"/> |
+| numberNeutral: | gray500 | #4d5768 |<img src="https://www.colorhexa.com/4d5768.png" width="50"/> |
+| cardBackground: | gray800 | #141520 |<img src="https://www.colorhexa.com/141520.png" width="50"/> |
+| cardBorder: | purple300 | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| cardShadow: | gray900 | #080811 |<img src="https://www.colorhexa.com/080811.png" width="50"/> |
+| tableBackground: | gray800 | #141520 |<img src="https://www.colorhexa.com/141520.png" width="50"/> |
+| tableRowBackgroundHover: | gray500 | #4d5768 |<img src="https://www.colorhexa.com/4d5768.png" width="50"/> |
+| tableText: | gray150 | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| tableTextLight: | tableText | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| tableTextSubdued: | gray500 | #4d5768 |<img src="https://www.colorhexa.com/4d5768.png" width="50"/> |
+| tableTextSelected: | gray800 | #141520 |<img src="https://www.colorhexa.com/141520.png" width="50"/> |
+| tableTextHover: | gray400 | #747c8b |<img src="https://www.colorhexa.com/747c8b.png" width="50"/> |
+| tableTextInactive: | gray400 | #747c8b |<img src="https://www.colorhexa.com/747c8b.png" width="50"/> |
+| tableHeaderText: | gray200 | #bdc5cf |<img src="https://www.colorhexa.com/bdc5cf.png" width="50"/> |
+| tableHeaderBackground: | gray900 | #080811 |<img src="https://www.colorhexa.com/080811.png" width="50"/> |
+| tableBorder: | gray600 | #373b4a |<img src="https://www.colorhexa.com/373b4a.png" width="50"/> |
+| tableBorderSelected: | purple400 | #9446ed |<img src="https://www.colorhexa.com/9446ed.png" width="50"/> |
+| tableBorderHover: | purple300 | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| tableBorderSeparator: | gray400 | #747c8b |<img src="https://www.colorhexa.com/747c8b.png" width="50"/> |
+| tableRowBackgroundHighlight: | purple150 | #dac4ff |<img src="https://www.colorhexa.com/dac4ff.png" width="50"/> |
+| tableRowBackgroundHighlightText: | gray800 | #141520 |<img src="https://www.colorhexa.com/141520.png" width="50"/> |
+| tableRowHeaderBackground: | gray700 | #242733 |<img src="https://www.colorhexa.com/242733.png" width="50"/> |
+| tableRowHeaderText: | gray150 | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| sidebarBackground: | gray900 | #080811 |<img src="https://www.colorhexa.com/080811.png" width="50"/> |
+| sidebarItemBackgroundPending: | orange200 | #fcf088 |<img src="https://www.colorhexa.com/fcf088.png" width="50"/> |
+| sidebarItemBackgroundPositive: | green400 | #3ebd93 |<img src="https://www.colorhexa.com/3ebd93.png" width="50"/> |
+| sidebarItemBackgroundFailed: | red300 | #f86a6a |<img src="https://www.colorhexa.com/f86a6a.png" width="50"/> |
+| sidebarItemAccentSelected: | purple200 | #b990ff |<img src="https://www.colorhexa.com/b990ff.png" width="50"/> |
+| sidebarItemBackgroundHover: | gray700 | #242733 |<img src="https://www.colorhexa.com/242733.png" width="50"/> |
+| sidebarItemText: | gray100 | #e8ecf0 |<img src="https://www.colorhexa.com/e8ecf0.png" width="50"/> |
+| sidebarItemTextSelected: | purple200 | #b990ff |<img src="https://www.colorhexa.com/b990ff.png" width="50"/> |
+| sidebarBudgetName: | gray300 | #98a1ae |<img src="https://www.colorhexa.com/98a1ae.png" width="50"/> |
+| menuBackground: | gray700 | #242733 |<img src="https://www.colorhexa.com/242733.png" width="50"/> |
+| menuItemBackground: | gray200 | #bdc5cf |<img src="https://www.colorhexa.com/bdc5cf.png" width="50"/> |
+| menuItemBackgroundHover: | gray500 | #4d5768 |<img src="https://www.colorhexa.com/4d5768.png" width="50"/> |
+| menuItemText: | gray100 | #e8ecf0 |<img src="https://www.colorhexa.com/e8ecf0.png" width="50"/> |
+| menuItemTextHover: | gray50 | #f6f8fa |<img src="https://www.colorhexa.com/f6f8fa.png" width="50"/> |
+| menuItemTextSelected: | purple400 | #9446ed |<img src="https://www.colorhexa.com/9446ed.png" width="50"/> |
+| menuItemTextHeader: | purple200 | #b990ff |<img src="https://www.colorhexa.com/b990ff.png" width="50"/> |
+| menuBorder: | gray800 | #141520 |<img src="https://www.colorhexa.com/141520.png" width="50"/> |
+| menuBorderHover: | purple300 | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| menuKeybindingText: | purple200 | #b990ff |<img src="https://www.colorhexa.com/b990ff.png" width="50"/> |
+| menuAutoCompleteBackground: | gray600 | #373b4a |<img src="https://www.colorhexa.com/373b4a.png" width="50"/> |
+| menuAutoCompleteBackgroundHover: | gray500 | #4d5768 |<img src="https://www.colorhexa.com/4d5768.png" width="50"/> |
+| menuAutoCompleteText: | gray100 | #e8ecf0 |<img src="https://www.colorhexa.com/e8ecf0.png" width="50"/> |
+| menuAutoCompleteTextHover: | green900 | #014d40 |<img src="https://www.colorhexa.com/014d40.png" width="50"/> |
+| menuAutoCompleteTextHeader: | purple200 | #b990ff |<img src="https://www.colorhexa.com/b990ff.png" width="50"/> |
+| menuAutoCompleteItemTextHover: | gray50 | #f6f8fa |<img src="https://www.colorhexa.com/f6f8fa.png" width="50"/> |
+| menuAutoCompleteItemText: | menuItemText | #e8ecf0 |<img src="https://www.colorhexa.com/e8ecf0.png" width="50"/> |
+| modalBackground: | gray700 | #242733 |<img src="https://www.colorhexa.com/242733.png" width="50"/> |
+| modalBorder: | gray200 | #bdc5cf |<img src="https://www.colorhexa.com/bdc5cf.png" width="50"/> |
+| mobileHeaderBackground: | gray900 | #080811 |<img src="https://www.colorhexa.com/080811.png" width="50"/> |
+| mobileHeaderText: | purple200 | #b990ff |<img src="https://www.colorhexa.com/b990ff.png" width="50"/> |
+| mobileHeaderTextSubdued: | gray200 | #bdc5cf |<img src="https://www.colorhexa.com/bdc5cf.png" width="50"/> |
+| mobileHeaderTextHover: | rgba(200, 200, 200, .15) | rgba(200, 200, 200, .15) |  |
+| mobilePageBackground: | gray900 | #080811 |<img src="https://www.colorhexa.com/080811.png" width="50"/> |
+| mobileNavBackground: | gray600 | #373b4a |<img src="https://www.colorhexa.com/373b4a.png" width="50"/> |
+| mobileNavItem: | gray150 | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| mobileNavItemSelected: | purple200 | #b990ff |<img src="https://www.colorhexa.com/b990ff.png" width="50"/> |
+| mobileAccountShadow: | cardShadow | #080811 |<img src="https://www.colorhexa.com/080811.png" width="50"/> |
+| mobileAccountText: | blue800 | #0b5fa3 |<img src="https://www.colorhexa.com/0b5fa3.png" width="50"/> |
+| mobileTransactionSelected: | purple300 | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| mobileViewTheme: | mobileHeaderBackground | #080811 |<img src="https://www.colorhexa.com/080811.png" width="50"/> |
+| mobileConfigServerViewTheme: | purple500 | #8719e0 |<img src="https://www.colorhexa.com/8719e0.png" width="50"/> |
+| markdownNormal: | purple700 | #690cb0 |<img src="https://www.colorhexa.com/690cb0.png" width="50"/> |
+| markdownDark: | purple500 | #8719e0 |<img src="https://www.colorhexa.com/8719e0.png" width="50"/> |
+| markdownLight: | purple800 | #580a94 |<img src="https://www.colorhexa.com/580a94.png" width="50"/> |
+| buttonMenuText: | gray200 | #bdc5cf |<img src="https://www.colorhexa.com/bdc5cf.png" width="50"/> |
+| buttonMenuTextHover: | buttonMenuText | #bdc5cf |<img src="https://www.colorhexa.com/bdc5cf.png" width="50"/> |
+| buttonMenuBackground: | gray700 | #242733 |<img src="https://www.colorhexa.com/242733.png" width="50"/> |
+| buttonMenuBackgroundHover: | rgba(200, 200, 200, .25) | rgba(200, 200, 200, .25) |  |
+| buttonMenuBorder: | gray500 | #4d5768 |<img src="https://www.colorhexa.com/4d5768.png" width="50"/> |
+| buttonMenuSelectedText: | green800 | #0c6b58 |<img src="https://www.colorhexa.com/0c6b58.png" width="50"/> |
+| buttonMenuSelectedTextHover: | orange800 | #87540d |<img src="https://www.colorhexa.com/87540d.png" width="50"/> |
+| buttonMenuSelectedBackground: | orange200 | #fcf088 |<img src="https://www.colorhexa.com/fcf088.png" width="50"/> |
+| buttonMenuSelectedBackgroundHover: | gray300 | #98a1ae |<img src="https://www.colorhexa.com/98a1ae.png" width="50"/> |
+| buttonMenuSelectedBorder: | buttonMenuSelectedBackground | #fcf088 |<img src="https://www.colorhexa.com/fcf088.png" width="50"/> |
+| buttonPrimaryText: | white | #ffffff |<img src="https://www.colorhexa.com/ffffff.png" width="50"/> |
+| buttonPrimaryTextHover: | buttonPrimaryText | #ffffff |<img src="https://www.colorhexa.com/ffffff.png" width="50"/> |
+| buttonPrimaryBackground: | purple300 | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| buttonPrimaryBackgroundHover: | buttonPrimaryBackground | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| buttonPrimaryBorder: | buttonPrimaryBackground | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| buttonPrimaryShadow: | rgba(0, 0, 0, 0.6) | rgba(0, 0, 0, 0.6) |  |
+| buttonPrimaryDisabledText: | gray400 | #747c8b |<img src="https://www.colorhexa.com/747c8b.png" width="50"/> |
+| buttonPrimaryDisabledBackground: | gray700 | #242733 |<img src="https://www.colorhexa.com/242733.png" width="50"/> |
+| buttonPrimaryDisabledBorder: | buttonPrimaryDisabledBackground | #242733 |<img src="https://www.colorhexa.com/242733.png" width="50"/> |
+| buttonNormalText: | gray150 | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| buttonNormalTextHover: | gray150 | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| buttonNormalBackground: | gray600 | #373b4a |<img src="https://www.colorhexa.com/373b4a.png" width="50"/> |
+| buttonNormalBackgroundHover: | gray400 | #747c8b |<img src="https://www.colorhexa.com/747c8b.png" width="50"/> |
+| buttonNormalBorder: | gray300 | #98a1ae |<img src="https://www.colorhexa.com/98a1ae.png" width="50"/> |
+| buttonNormalShadow: | rgba(0, 0, 0, 0.4) | rgba(0, 0, 0, 0.4) |  |
+| buttonNormalSelectedText: | white | #ffffff |<img src="https://www.colorhexa.com/ffffff.png" width="50"/> |
+| buttonNormalSelectedBackground: | purple500 | #8719e0 |<img src="https://www.colorhexa.com/8719e0.png" width="50"/> |
+| buttonNormalDisabledText: | gray400 | #747c8b |<img src="https://www.colorhexa.com/747c8b.png" width="50"/> |
+| buttonNormalDisabledBackground: | gray700 | #242733 |<img src="https://www.colorhexa.com/242733.png" width="50"/> |
+| buttonNormalDisabledBorder: | gray500 | #4d5768 |<img src="https://www.colorhexa.com/4d5768.png" width="50"/> |
+| buttonBareText: | buttonNormalText | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| buttonBareTextHover: | buttonNormalText | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| buttonBareBackground: | transparent | transparent |  |
+| buttonBareBackgroundHover: | rgba(200, 200, 200, .3) | rgba(200, 200, 200, .3) |  |
+| buttonBareBackgroundActive: | rgba(200, 200, 200, .5) | rgba(200, 200, 200, .5) |  |
+| buttonBareDisabledText: | buttonNormalDisabledText | #747c8b |<img src="https://www.colorhexa.com/747c8b.png" width="50"/> |
+| buttonBareDisabledBackground: | buttonBareBackground | transparent |  |
+| calendarText: | gray50 | #f6f8fa |<img src="https://www.colorhexa.com/f6f8fa.png" width="50"/> |
+| calendarBackground: | gray700 | #242733 |<img src="https://www.colorhexa.com/242733.png" width="50"/> |
+| calendarItemText: | gray150 | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| calendarItemBackground: | gray500 | #4d5768 |<img src="https://www.colorhexa.com/4d5768.png" width="50"/> |
+| calendarSelectedBackground: | buttonNormalSelectedBackground | #8719e0 |<img src="https://www.colorhexa.com/8719e0.png" width="50"/> |
+| calendarCellBackground: | navy900 | #102a43 |<img src="https://www.colorhexa.com/102a43.png" width="50"/> |
+| noticeBackground: | green600 | #199473 |<img src="https://www.colorhexa.com/199473.png" width="50"/> |
+| noticeBackgroundLight: | green900 | #014d40 |<img src="https://www.colorhexa.com/014d40.png" width="50"/> |
+| noticeBackgroundDark: | green400 | #3ebd93 |<img src="https://www.colorhexa.com/3ebd93.png" width="50"/> |
+| noticeText: | green300 | #65d6ad |<img src="https://www.colorhexa.com/65d6ad.png" width="50"/> |
+| noticeTextLight: | green400 | #3ebd93 |<img src="https://www.colorhexa.com/3ebd93.png" width="50"/> |
+| noticeTextDark: | green150 | #c6f7e2 |<img src="https://www.colorhexa.com/c6f7e2.png" width="50"/> |
+| noticeTextMenu: | green400 | #3ebd93 |<img src="https://www.colorhexa.com/3ebd93.png" width="50"/> |
+| noticeTextMenuHover: | green700 | #147d64 |<img src="https://www.colorhexa.com/147d64.png" width="50"/> |
+| noticeBorder: | green800 | #0c6b58 |<img src="https://www.colorhexa.com/0c6b58.png" width="50"/> |
+| warningBackground: | orange800 | #87540d |<img src="https://www.colorhexa.com/87540d.png" width="50"/> |
+| warningText: | orange200 | #fcf088 |<img src="https://www.colorhexa.com/fcf088.png" width="50"/> |
+| warningTextLight: | orange500 | #e6bb20 |<img src="https://www.colorhexa.com/e6bb20.png" width="50"/> |
+| warningTextDark: | orange100 | #fffbea |<img src="https://www.colorhexa.com/fffbea.png" width="50"/> |
+| warningBorder: | orange500 | #e6bb20 |<img src="https://www.colorhexa.com/e6bb20.png" width="50"/> |
+| errorBackground: | red800 | #8a041a |<img src="https://www.colorhexa.com/8a041a.png" width="50"/> |
+| errorText: | red200 | #ff9b9b |<img src="https://www.colorhexa.com/ff9b9b.png" width="50"/> |
+| errorTextDark: | red150 | #ffbdbd |<img src="https://www.colorhexa.com/ffbdbd.png" width="50"/> |
+| errorTextDarker: | errorTextDark | #ffbdbd |<img src="https://www.colorhexa.com/ffbdbd.png" width="50"/> |
+| errorTextMenu: | red200 | #ff9b9b |<img src="https://www.colorhexa.com/ff9b9b.png" width="50"/> |
+| errorBorder: | red500 | #e12d39 |<img src="https://www.colorhexa.com/e12d39.png" width="50"/> |
+| upcomingBackground: | purple800 | #580a94 |<img src="https://www.colorhexa.com/580a94.png" width="50"/> |
+| upcomingText: | purple200 | #b990ff |<img src="https://www.colorhexa.com/b990ff.png" width="50"/> |
+| upcomingBorder: | tableBorder | #373b4a |<img src="https://www.colorhexa.com/373b4a.png" width="50"/> |
+| formLabelText: | purple150 | #dac4ff |<img src="https://www.colorhexa.com/dac4ff.png" width="50"/> |
+| formLabelBackground: | blue900 | #034388 |<img src="https://www.colorhexa.com/034388.png" width="50"/> |
+| formInputBackground: | gray800 | #141520 |<img src="https://www.colorhexa.com/141520.png" width="50"/> |
+| formInputBackgroundSelected: | gray700 | #242733 |<img src="https://www.colorhexa.com/242733.png" width="50"/> |
+| formInputBackgroundSelection: | purple400 | #9446ed |<img src="https://www.colorhexa.com/9446ed.png" width="50"/> |
+| formInputBorder: | gray600 | #373b4a |<img src="https://www.colorhexa.com/373b4a.png" width="50"/> |
+| formInputTextReadOnlySelection: | gray800 | #141520 |<img src="https://www.colorhexa.com/141520.png" width="50"/> |
+| formInputBorderSelected: | purple300 | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| formInputText: | gray150 | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| formInputTextSelected: | black | #000000 |<img src="https://www.colorhexa.com/000000.png" width="50"/> |
+| formInputTextPlaceholder: | gray150 | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| formInputTextPlaceholderSelected: | gray100 | #e8ecf0 |<img src="https://www.colorhexa.com/e8ecf0.png" width="50"/> |
+| formInputTextSelection: | gray800 | #141520 |<img src="https://www.colorhexa.com/141520.png" width="50"/> |
+| formInputShadowSelected: | purple400 | #9446ed |<img src="https://www.colorhexa.com/9446ed.png" width="50"/> |
+| formInputTextHighlight: | purple200 | #b990ff |<img src="https://www.colorhexa.com/b990ff.png" width="50"/> |
+| checkboxText: | tableText | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| checkboxBackgroundSelected: | purple300 | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| checkboxBorderSelected: | purple300 | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| checkboxShadowSelected: | purple500 | #8719e0 |<img src="https://www.colorhexa.com/8719e0.png" width="50"/> |
+| checkboxToggleBackground: | gray400 | #747c8b |<img src="https://www.colorhexa.com/747c8b.png" width="50"/> |
+| checkboxToggleBackgroundSelected: | purple300 | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| checkboxToggleDisabled: | gray700 | #242733 |<img src="https://www.colorhexa.com/242733.png" width="50"/> |
+| pillBackground: | gray500 | #4d5768 |<img src="https://www.colorhexa.com/4d5768.png" width="50"/> |
+| pillBackgroundLight: | gray900 | #080811 |<img src="https://www.colorhexa.com/080811.png" width="50"/> |
+| pillText: | gray200 | #bdc5cf |<img src="https://www.colorhexa.com/bdc5cf.png" width="50"/> |
+| pillTextHighlighted: | purple200 | #b990ff |<img src="https://www.colorhexa.com/b990ff.png" width="50"/> |
+| pillBorder: | gray500 | #4d5768 |<img src="https://www.colorhexa.com/4d5768.png" width="50"/> |
+| pillBorderDark: | pillBorder | #4d5768 |<img src="https://www.colorhexa.com/4d5768.png" width="50"/> |
+| pillBackgroundSelected: | purple600 | #7a0ecc |<img src="https://www.colorhexa.com/7a0ecc.png" width="50"/> |
+| pillTextSelected: | gray150 | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| pillBorderSelected: | purple300 | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| pillTextSubdued: | gray500 | #4d5768 |<img src="https://www.colorhexa.com/4d5768.png" width="50"/> |
+| reportsRed: | red300 | #f86a6a |<img src="https://www.colorhexa.com/f86a6a.png" width="50"/> |
+| reportsBlue: | blue400 | #40a5f7 |<img src="https://www.colorhexa.com/40a5f7.png" width="50"/> |
+| reportsGreen: | green400 | #3ebd93 |<img src="https://www.colorhexa.com/3ebd93.png" width="50"/> |
+| reportsGray: | gray400 | #747c8b |<img src="https://www.colorhexa.com/747c8b.png" width="50"/> |
+| reportsLabel: | pageText | #e8ecf0 |<img src="https://www.colorhexa.com/e8ecf0.png" width="50"/> |
+| reportsInnerLabel: | navy800 | #243b53 |<img src="https://www.colorhexa.com/243b53.png" width="50"/> |
+| reportsNumberPositive: | numberPositive | #65d6ad |<img src="https://www.colorhexa.com/65d6ad.png" width="50"/> |
+| reportsNumberNegative: | numberNegative | #ff9b9b |<img src="https://www.colorhexa.com/ff9b9b.png" width="50"/> |
+| reportsNumberNeutral: | numberNeutral | #4d5768 |<img src="https://www.colorhexa.com/4d5768.png" width="50"/> |
+| reportsChartFill: | reportsNumberPositive | #65d6ad |<img src="https://www.colorhexa.com/65d6ad.png" width="50"/> |
+| noteTagBackground: | purple800 | #580a94 |<img src="https://www.colorhexa.com/580a94.png" width="50"/> |
+| noteTagBackgroundHover: | purple600 | #7a0ecc |<img src="https://www.colorhexa.com/7a0ecc.png" width="50"/> |
+| noteTagDefault: | purple700 | #690cb0 |<img src="https://www.colorhexa.com/690cb0.png" width="50"/> |
+| noteTagText: | purple100 | #f2ebfe |<img src="https://www.colorhexa.com/f2ebfe.png" width="50"/> |
+| budgetCurrentMonth: | tableBackground | #141520 |<img src="https://www.colorhexa.com/141520.png" width="50"/> |
+| budgetOtherMonth: | gray700 | #242733 |<img src="https://www.colorhexa.com/242733.png" width="50"/> |
+| budgetHeaderCurrentMonth: | tableHeaderBackground | #080811 |<img src="https://www.colorhexa.com/080811.png" width="50"/> |
+| budgetHeaderOtherMonth: | gray800 | #141520 |<img src="https://www.colorhexa.com/141520.png" width="50"/> |
+| budgetNumberZero: | tableTextSubdued | #4d5768 |<img src="https://www.colorhexa.com/4d5768.png" width="50"/> |
+| budgetNumberNegative: | numberNegative | #ff9b9b |<img src="https://www.colorhexa.com/ff9b9b.png" width="50"/> |
+| budgetNumberNeutral: | tableText | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| budgetNumberPositive: | budgetNumberNeutral | #d4dae0 |<img src="https://www.colorhexa.com/d4dae0.png" width="50"/> |
+| templateNumberFunded: | numberPositive | #65d6ad |<img src="https://www.colorhexa.com/65d6ad.png" width="50"/> |
+| templateNumberUnderFunded: | orange200 | #fcf088 |<img src="https://www.colorhexa.com/fcf088.png" width="50"/> |
+| toBudgetPositive: | numberPositive | #65d6ad |<img src="https://www.colorhexa.com/65d6ad.png" width="50"/> |
+| toBudgetZero: | numberPositive | #65d6ad |<img src="https://www.colorhexa.com/65d6ad.png" width="50"/> |
+| toBudgetNegative: | budgetNumberNegative | #ff9b9b |<img src="https://www.colorhexa.com/ff9b9b.png" width="50"/> |
+| floatingActionBarBackground: | gray900 | #080811 |<img src="https://www.colorhexa.com/080811.png" width="50"/> |
+| floatingActionBarBorder: | purple300 | #a368fc |<img src="https://www.colorhexa.com/a368fc.png" width="50"/> |
+| floatingActionBarText: | purple200 | #b990ff |<img src="https://www.colorhexa.com/b990ff.png" width="50"/> |
+| tooltipText: | gray100 | #e8ecf0 |<img src="https://www.colorhexa.com/e8ecf0.png" width="50"/> |
+| tooltipBackground: | gray800 | #141520 |<img src="https://www.colorhexa.com/141520.png" width="50"/> |
+| tooltipBorder: | gray600 | #373b4a |<img src="https://www.colorhexa.com/373b4a.png" width="50"/> |
+| overlayBackground: | rgba(0, 0, 0, 0.3) | rgba(0, 0, 0, 0.3) |  |
+
