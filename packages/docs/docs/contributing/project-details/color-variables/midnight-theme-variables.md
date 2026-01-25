@@ -2,7 +2,7 @@
 
 This palette can be copied to form the basis of a new theme.
 
-```
+```css
 /* Actual Midnight Theme */
 
 --color-pageBackground: #373b4a;
