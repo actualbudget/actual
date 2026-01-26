@@ -32,6 +32,14 @@ function isFutureMonth(month: string): boolean {
   return monthUtils.isAfter(month, monthUtils.currentMonth());
 }
 
+function isImprovedAutoHoldEnabled(): boolean {
+  const pref = db.firstSync<Pick<db.DbPreference, 'value'>>(
+    `SELECT value FROM preferences WHERE id = ?`,
+    ['flags.improvedAutoHold'],
+  );
+  return pref?.value === 'true';
+}
+
 async function getTotalBudgetsAfterMonth(afterMonth: string): Promise<number> {
   const { createdMonths } = sheet.get().meta();
 
@@ -225,7 +233,7 @@ export function setBudget({
   }
 
   // Auto-hold funds when budgeting in future months (expense categories only)
-  if (categoryInfo?.is_income === 0) {
+  if (isImprovedAutoHoldEnabled() && categoryInfo?.is_income === 0) {
     result = result.then(() => applyFutureBudgetHold(month));
   }
 

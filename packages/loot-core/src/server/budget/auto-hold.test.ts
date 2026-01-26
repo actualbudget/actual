@@ -11,6 +11,12 @@ const CURRENT_MONTH = '2017-01';
 beforeEach(async () => {
   await global.emptyDatabase()();
   global.currentMonth = CURRENT_MONTH;
+
+  // Enable the improvedAutoHold feature flag for tests
+  await db.insertWithUUID('preferences', {
+    id: 'flags.improvedAutoHold',
+    value: 'true',
+  });
 });
 
 afterEach(() => {
