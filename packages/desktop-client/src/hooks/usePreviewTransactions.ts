@@ -55,7 +55,7 @@ export function usePreviewTransactions({
     TransactionEntity[]
   >([]);
   const {
-    isFetching: isSchedulesLoading,
+    isPending: isSchedulesLoading,
     error: scheduleQueryError,
     data: schedules = [],
   } = useCachedSchedules();

@@ -22,11 +22,11 @@ export function ScheduleValue({ value }: ScheduleValueProps) {
   const { t } = useTranslation();
   const payees = usePayees();
   const byId = getPayeesById(payees);
-  const { data: schedules = [], isFetching } = useSchedules({
+  const { data: schedules = [], isPending } = useSchedules({
     query: q('schedules').select('*'),
   });
 
-  if (isFetching) {
+  if (isPending) {
     return (
       <View aria-label={t('Loading...')} style={{ display: 'inline-flex' }}>
         <AnimatedLoading width={10} height={10} />
