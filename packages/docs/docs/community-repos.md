@@ -23,7 +23,7 @@ The following are implementations of bank syncing using the Actual API. For inst
 - **My Edenred and Coverfelx Portugal bank sync** - https://github.com/rodriguestiago0/myedenred-actual
 - **Norwegian Trumf Visa PDF invoice to Actual Budget friendly CSV converter** - https://github.com/RubenOlsen/TrumfVisa2ActualBudget
 - **Plaid bank sync** - https://github.com/youngcw/actualplaid
-- **ANZ Plus bank PDFtoOFX converter** - https://github.com/spydisec/PDFtoOFX/
+- **ANZ Plus bank PDFtoOFX converter** - [PDFtoOFX](https://github.com/spydisec/PDFtoOFX/)
 
 ## Other Importers
 
