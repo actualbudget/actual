@@ -183,9 +183,11 @@ export function NetWorthCard({
         {data ? (
           <NetWorthGraph
             graphData={data.graphData}
+            accounts={data.accounts}
             compact
             showTooltip={!isEditing && !isNarrowWidth}
             interval={meta?.interval || 'Monthly'}
+            mode={meta?.mode || 'trend'}
             style={{ height: 'auto', flex: 1 }}
           />
         ) : (

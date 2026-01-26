@@ -42,12 +42,15 @@ export const tableRowHeaderText = colorPalette.navy800;
 export const numberPositive = colorPalette.green700;
 export const numberNegative = colorPalette.red500;
 export const numberNeutral = colorPalette.navy100;
-export const budgetNumberZero = tableTextSubdued;
 export const budgetNumberNegative = numberNegative;
+export const budgetNumberZero = tableTextSubdued;
 export const budgetNumberNeutral = tableText;
 export const budgetNumberPositive = budgetNumberNeutral;
 export const templateNumberFunded = numberPositive;
 export const templateNumberUnderFunded = colorPalette.orange700;
+export const toBudgetPositive = numberPositive;
+export const toBudgetZero = numberPositive;
+export const toBudgetNegative = budgetNumberNegative;
 
 export const sidebarBackground = colorPalette.navy900;
 export const sidebarItemBackgroundPending = colorPalette.orange200;

@@ -116,10 +116,10 @@ function ToBudget({ toBudget, onPress, show3Columns }: ToBudgetProps) {
                       fontWeight: '700',
                       color:
                         amount < 0
-                          ? theme.errorText
+                          ? theme.toBudgetNegative
                           : amount > 0
-                            ? theme.noticeText
-                            : theme.formInputText,
+                            ? theme.toBudgetPositive
+                            : theme.budgetNumberNeutral,
                     }}
                   >
                     {format(value, type)}
@@ -434,7 +434,7 @@ function BudgetTableHeader({
 
   const amountStyle: CSSProperties = {
     ...styles.tnum,
-    color: theme.formInputText,
+    color: theme.budgetNumberNeutral,
     textAlign: 'right',
     fontSize: 12,
     fontWeight: '500',

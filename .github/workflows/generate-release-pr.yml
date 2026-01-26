@@ -35,7 +35,10 @@ jobs:
             pkg="${packages[$key]}"
 
             if [[ -n "${{ github.event.inputs.version }}" ]]; then
-              version="${{ github.event.inputs.version }}"
+              version=$(node ./packages/ci-actions/bin/get-next-package-version.js \
+                --package-json "./packages/$pkg/package.json" \
+                --version "${{ github.event.inputs.version }}" \
+                --update)
             else
               version=$(node ./packages/ci-actions/bin/get-next-package-version.js \
                 --package-json "./packages/$pkg/package.json" \

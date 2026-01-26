@@ -43,8 +43,10 @@ export type NetWorthWidget = AbstractWidget<
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
     interval?: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
+    mode?: 'trend' | 'stacked';
   } | null
 >;
+
 export type CashFlowWidget = AbstractWidget<
   'cash-flow-card',
   {
@@ -65,6 +67,18 @@ export type SpendingWidget = AbstractWidget<
     compareTo?: string;
     isLive?: boolean;
     mode?: 'single-month' | 'budget' | 'average';
+  } | null
+>;
+export type BudgetAnalysisWidget = AbstractWidget<
+  'budget-analysis-card',
+  {
+    name?: string;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+    interval?: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
+    graphType?: 'Line' | 'Bar';
+    showBalance?: boolean;
   } | null
 >;
 export type CustomReportWidget = AbstractWidget<
@@ -95,6 +109,7 @@ type SpecializedWidget =
   | NetWorthWidget
   | CashFlowWidget
   | SpendingWidget
+  | BudgetAnalysisWidget
   | CrossoverWidget
   | MarkdownWidget
   | SummaryWidget

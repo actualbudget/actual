@@ -19,6 +19,10 @@ const options = {
     type: 'string', // nightly, hotfix, monthly, auto
     short: 't',
   },
+  version: {
+    type: 'string',
+    short: 'v',
+  },
   update: {
     type: 'boolean',
     short: 'u',
@@ -44,16 +48,21 @@ try {
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
   const currentVersion = packageJson.version;
 
+  const explicitVersion = values.version;
   let newVersion;
-  try {
-    newVersion = getNextVersion({
-      currentVersion,
-      type: values.type,
-      currentDate: new Date(),
-    });
-  } catch (e) {
-    console.error(e.message);
-    process.exit(1);
+  if (explicitVersion) {
+    newVersion = explicitVersion;
+  } else {
+    try {
+      newVersion = getNextVersion({
+        currentVersion,
+        type: values.type,
+        currentDate: new Date(),
+      });
+    } catch (e) {
+      console.error(e.message);
+      process.exit(1);
+    }
   }
 
   process.stdout.write(newVersion);

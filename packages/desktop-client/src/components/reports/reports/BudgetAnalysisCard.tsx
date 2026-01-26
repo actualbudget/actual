@@ -7,38 +7,37 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { type SpendingWidget } from 'loot-core/types/models';
+import { type BudgetAnalysisWidget } from 'loot-core/types/models';
 
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
-import { SpendingGraph } from '@desktop-client/components/reports/graphs/SpendingGraph';
+import { BudgetAnalysisGraph } from '@desktop-client/components/reports/graphs/BudgetAnalysisGraph';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { calculateSpendingReportTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { createSpendingSpreadsheet } from '@desktop-client/components/reports/spreadsheets/spending-spreadsheet';
+import { createBudgetAnalysisSpreadsheet } from '@desktop-client/components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
-type SpendingCardProps = {
+type BudgetAnalysisCardProps = {
   widgetId: string;
   isEditing?: boolean;
-  meta?: SpendingWidget['meta'];
-  onMetaChange: (newMeta: SpendingWidget['meta']) => void;
+  meta?: BudgetAnalysisWidget['meta'];
+  onMetaChange: (newMeta: BudgetAnalysisWidget['meta']) => void;
   onRemove: () => void;
   onCopy: (targetDashboardId: string) => void;
 };
 
-export function SpendingCard({
+export function BudgetAnalysisCard({
   widgetId,
   isEditing,
   meta = {},
   onMetaChange,
   onRemove,
   onCopy,
-}: SpendingCardProps) {
+}: BudgetAnalysisCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
@@ -48,40 +47,43 @@ export function SpendingCard({
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
     useWidgetCopyMenu(onCopy);
 
-  const spendingReportMode = meta?.mode ?? 'single-month';
+  const timeFrame = meta?.timeFrame ?? {
+    start: monthUtils.subMonths(monthUtils.currentMonth(), 5),
+    end: monthUtils.currentMonth(),
+    mode: 'sliding-window' as const,
+  };
 
-  const [compare, compareTo] = calculateSpendingReportTimeRange(meta ?? {});
+  // Calculate date range
+  let startDate = timeFrame.start + '-01';
+  let endDate = monthUtils.getMonthEnd(timeFrame.end + '-01');
 
-  const selection =
-    spendingReportMode === 'single-month' ? 'compareTo' : spendingReportMode;
+  if (timeFrame.mode === 'sliding-window') {
+    const currentMonth = monthUtils.currentMonth();
+    startDate = monthUtils.subMonths(currentMonth, 5) + '-01';
+    endDate = monthUtils.getMonthEnd(currentMonth + '-01');
+  }
+
   const getGraphData = useMemo(() => {
-    return createSpendingSpreadsheet({
+    return createBudgetAnalysisSpreadsheet({
       conditions: meta?.conditions,
       conditionsOp: meta?.conditionsOp,
-      compare,
-      compareTo,
+      startDate,
+      endDate,
     });
-  }, [meta?.conditions, meta?.conditionsOp, compare, compareTo]);
+  }, [meta?.conditions, meta?.conditionsOp, startDate, endDate]);
 
   const data = useReport('default', getGraphData);
-  const todayDay =
-    compare !== monthUtils.currentMonth()
-      ? 27
-      : monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
-        ? 27
-        : monthUtils.getDay(monthUtils.currentDay()) - 1;
-  const difference =
-    data &&
-    Math.round(
-      data.intervalData[todayDay][selection] -
-        data.intervalData[todayDay].compare,
-    );
 
+  const latestInterval =
+    data && data.intervalData.length > 0
+      ? data.intervalData[data.intervalData.length - 1]
+      : undefined;
+  const balance = latestInterval?.balance ?? 0;
   return (
     <ReportCard
       isEditing={isEditing}
       disableClick={nameMenuOpen}
-      to={`/reports/spending/${widgetId}`}
+      to={`/reports/budget-analysis/${widgetId}`}
       menuItems={[
         {
           name: 'rename',
@@ -115,7 +117,7 @@ export function SpendingCard({
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
-              name={meta?.name || t('Monthly Spending')}
+              name={meta?.name || t('Budget Analysis')}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({
@@ -127,9 +129,8 @@ export function SpendingCard({
               onClose={() => setNameMenuOpen(false)}
             />
             <DateRange
-              start={compare}
-              end={compareTo}
-              type={spendingReportMode}
+              start={monthUtils.getMonth(startDate)}
+              end={monthUtils.getMonth(endDate)}
             />
           </View>
           {data && (
@@ -139,33 +140,24 @@ export function SpendingCard({
                   ...styles.mediumText,
                   fontWeight: 500,
                   marginBottom: 5,
-                  color:
-                    difference === 0 || difference == null
-                      ? theme.reportsNumberNeutral
-                      : difference > 0
-                        ? theme.reportsNumberNegative
-                        : theme.reportsNumberPositive,
+                  color: balance >= 0 ? theme.noticeTextLight : theme.errorText,
                 }}
               >
-                <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  <FinancialText>
-                    {data &&
-                      (difference && difference > 0 ? '+' : '') +
-                        format(difference || 0, 'financial')}
-                  </FinancialText>
-                </PrivacyFilter>
+                <FinancialText>
+                  <PrivacyFilter activationFilters={[!isCardHovered]}>
+                    {format(balance, 'financial')}
+                  </PrivacyFilter>
+                </FinancialText>
               </Block>
             </View>
           )}
         </View>
         {data ? (
-          <SpendingGraph
+          <BudgetAnalysisGraph
             style={{ flex: 1 }}
-            compact
             data={data}
-            mode={spendingReportMode}
-            compare={compare}
-            compareTo={compareTo}
+            graphType={meta?.graphType || 'Bar'}
+            showBalance={meta?.showBalance ?? true}
           />
         ) : (
           <LoadingIndicator />

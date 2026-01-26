@@ -5,7 +5,8 @@ export type FeatureFlag =
   | 'formulaMode'
   | 'currency'
   | 'crossoverReport'
-  | 'customThemes';
+  | 'customThemes'
+  | 'budgetAnalysisReport';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
