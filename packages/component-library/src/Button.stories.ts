@@ -16,7 +16,6 @@ const meta = {
   args: { onClick: fn() },
 } satisfies Meta<typeof Button>;
 
-// oxlint-disable-next-line import/no-default-export
 export default meta;
 
 type Story = StoryObj<typeof meta>;

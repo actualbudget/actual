@@ -85,5 +85,4 @@ const preview: Preview = {
   },
 };
 
-// oxlint-disable-next-line import/no-default-export
 export default preview;
