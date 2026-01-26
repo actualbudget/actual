@@ -62,10 +62,5 @@
   "peerDependencies": {
     "react": ">=18.2",
     "react-dom": ">=18.2"
-  },
-  "eslintConfig": {
-    "extends": [
-      "plugin:storybook/recommended"
-    ]
   }
 }
