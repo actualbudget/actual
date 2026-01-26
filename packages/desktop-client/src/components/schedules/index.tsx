@@ -81,7 +81,7 @@ export function Schedules() {
     [],
   );
 
-  const { isLoading: isSchedulesLoading, data: schedules = [] } = useSchedules({
+  const { isPending: isSchedulesLoading, data: schedules = [] } = useSchedules({
     query: q('schedules').select('*'),
   });
 
