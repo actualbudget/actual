@@ -40,12 +40,8 @@ import {
   parse,
   unparse,
 } from 'loot-core/shared/rules';
-import type { ScheduleStatusLabel } from 'loot-core/shared/schedules';
-import type {
-  NewRuleEntity,
-  RuleActionEntity,
-  RuleEntity,
-} from 'loot-core/types/models';
+import type { ScheduleStatus } from 'loot-core/shared/schedules';
+import type { NewRuleEntity, RuleActionEntity, RuleEntity } from 'loot-core/types/models';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
 
@@ -372,7 +368,7 @@ function ScheduleDescription({ id }) {
   );
 
   const {
-    data: { statusLabelLookup = {} },
+    data: { statusLookup = {} },
   } = useScheduleStatus({ schedules });
 
   if (isSchedulesLoading) {
@@ -385,7 +381,7 @@ function ScheduleDescription({ id }) {
     return <View style={{ flex: 1 }}>{id}</View>;
   }
 
-  const status = statusLabelLookup[schedule.id] as ScheduleStatusLabel;
+  const status = statusLookup[schedule.id] as ScheduleStatus;
 
   return (
     <View
