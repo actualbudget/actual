@@ -2,6 +2,7 @@
 import React, {
   forwardRef,
   useEffect,
+  useEffectEvent,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
@@ -176,10 +177,9 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
       [onUpdate],
     );
 
-    useLayoutEffect(() => {
+    const initPikaday = useEffectEvent(() => {
       const pikadayLocale = createPikadayLocale(locale);
-
-      picker.current = new Pikaday({
+      return new Pikaday({
         theme: 'actual-date-picker',
         keyboardInput: false,
         firstDay: parseInt(firstDayOfWeekIdx),
@@ -196,13 +196,15 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
         onSelect,
         i18n: pikadayLocale,
       });
+    });
 
+    useLayoutEffect(() => {
+      picker.current = initPikaday();
       mountPoint.current.appendChild(picker.current.el);
 
       return () => {
         picker.current.destroy();
       };
-      // oxlint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
