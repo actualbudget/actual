@@ -6,8 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { configureAppStore, type AppStore } from './redux/store';
 
 let mockQueryClient = new QueryClient();
-
-export let mockStore: AppStore = configureAppStore();
+let mockStore: AppStore = configureAppStore();
 
 export function resetTestProviders() {
   mockQueryClient = new QueryClient();
