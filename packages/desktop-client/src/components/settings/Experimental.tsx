@@ -224,9 +224,8 @@ export function ExperimentalFeatures() {
                 <Trans>Client-Side plugins (soon)</Trans>
               </ServerFeatureToggle>
             )}
-            <FeatureToggle
-              flag="improvedAutoHold">
-                <Trans>Improved Auto Hold</Trans>
+            <FeatureToggle flag="improvedAutoHold">
+              <Trans>Improved Auto Hold</Trans>
             </FeatureToggle>
           </View>
         ) : (
