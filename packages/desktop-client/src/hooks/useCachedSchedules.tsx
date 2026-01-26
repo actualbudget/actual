@@ -10,12 +10,13 @@ const SchedulesContext = createContext<SchedulesContextValue | undefined>(
   undefined,
 );
 
-type SchedulesProviderProps = PropsWithChildren<{
-  query?: UseSchedulesProps['query'];
-}>;
+type SchedulesProviderProps = PropsWithChildren<UseSchedulesProps>;
 
-export function SchedulesProvider({ query, children }: SchedulesProviderProps) {
-  const data = useSchedules({ query });
+export function SchedulesProvider({
+  children,
+  ...props
+}: SchedulesProviderProps) {
+  const data = useSchedules(props);
   return (
     <SchedulesContext.Provider value={data}>
       {children}
