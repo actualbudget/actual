@@ -10,7 +10,7 @@ export const transactionQueries = {
   lists: () => [...transactionQueries.all(), 'lists'],
   aql: ({ query, pageSize = 50 }: { query?: Query; pageSize?: number }) =>
     infiniteQueryOptions<TransactionEntity[]>({
-      queryKey: [...transactionQueries.lists(), query],
+      queryKey: [...transactionQueries.lists(), query, pageSize],
       queryFn: async ({ pageParam }) => {
         if (!query) {
           // Shouldn't happen because of the enabled flag, but needed to satisfy TS
