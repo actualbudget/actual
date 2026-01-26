@@ -220,6 +220,7 @@ const sidebars = {
             'experimental/pluggyai',
             'experimental/crossover-point-report',
             'experimental/custom-themes',
+            'experimental/budget-analysis-report',
           ],
         },
         'getting-started/tips-tricks',
