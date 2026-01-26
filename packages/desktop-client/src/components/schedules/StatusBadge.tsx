@@ -21,7 +21,11 @@ import {
 import { titleFirst } from 'loot-core/shared/util';
 
 // Consists of Schedule Statuses + Transaction statuses
-export type ScheduleTransactionStatus = ScheduleStatus | 'cleared' | 'pending' | 'reconciled';
+export type ScheduleTransactionStatus =
+  | ScheduleStatus
+  | 'cleared'
+  | 'pending'
+  | 'reconciled';
 
 export const defaultStatusProps = {
   color: theme.buttonNormalDisabledText,
