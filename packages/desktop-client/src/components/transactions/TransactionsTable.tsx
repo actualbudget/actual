@@ -92,7 +92,7 @@ import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/Ca
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
 import {
   getStatusProps,
-  type StatusTypes,
+  type ScheduleTransactionStatus,
 } from '@desktop-client/components/schedules/StatusBadge';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import {
@@ -335,7 +335,7 @@ TransactionHeader.displayName = 'TransactionHeader';
 
 type StatusCellProps = {
   id: TransactionEntity['id'];
-  status?: StatusTypes | null;
+  status?: ScheduleTransactionStatus | null;
   focused?: boolean;
   selected?: boolean;
   isChild?: boolean;
@@ -1689,7 +1689,7 @@ const Transaction = memo(function Transaction({
           isPreview={isPreview}
           status={
             isPreview
-              ? (previewStatus as StatusTypes)
+              ? (previewStatus as ScheduleTransactionStatus)
               : reconciled
                 ? 'reconciled'
                 : cleared
