@@ -32,8 +32,7 @@ function isFutureMonth(month: string): boolean {
   return monthUtils.isAfter(month, monthUtils.currentMonth());
 }
 
-async function getTotalFutureBudgets(): Promise<number> {
-  const currentMonth = monthUtils.currentMonth();
+async function getTotalBudgetsAfterMonth(afterMonth: string): Promise<number> {
   const { createdMonths } = sheet.get().meta();
 
   if (!createdMonths || createdMonths.size === 0) {
@@ -41,7 +40,7 @@ async function getTotalFutureBudgets(): Promise<number> {
   }
 
   const futureMonths = Array.from(createdMonths).filter(month =>
-    monthUtils.isAfter(month, currentMonth),
+    monthUtils.isAfter(month, afterMonth),
   );
 
   if (futureMonths.length === 0) {
@@ -73,7 +72,6 @@ export async function applyFutureBudgetHold(
   }
 
   const currentMonth = monthUtils.currentMonth();
-  const totalFutureBudgets = await getTotalFutureBudgets();
 
   const currentSheetName = monthUtils.sheetForMonth(currentMonth);
   const availableFunds = await getSheetValue(
@@ -87,14 +85,14 @@ export async function applyFutureBudgetHold(
   // (i.e., what would be to-budget if buffered was 0)
   const maxAvailable = availableFunds + currentBuffered + totalBudgeted;
 
-  // Target buffer is the minimum of what we need and what's available
-  const targetBuffer = Math.max(0, Math.min(totalFutureBudgets, maxAvailable));
-
   // Set buffer for all months from current to the month before the future month
   const lastHoldMonth = monthUtils.prevMonth(futureMonth);
   const months = monthUtils.rangeInclusive(currentMonth, lastHoldMonth);
 
+  // Each month's buffer = sum of budgets for months AFTER that month
   for (const month of months) {
+    const budgetsAfterMonth = await getTotalBudgetsAfterMonth(month);
+    const targetBuffer = Math.max(0, Math.min(budgetsAfterMonth, maxAvailable));
     await setBuffer(month, targetBuffer);
   }
 }

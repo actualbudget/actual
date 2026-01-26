@@ -207,6 +207,40 @@ describe('Auto-hold for future month budgeting', () => {
 
     await budgetActions.setBudget({
       category: expenseCategoryId,
+      month: nextMonth,
+      amount: 200,
+    });
+    await sheet.waitOnSpreadsheet();
+
+    expect.soft(getMonthValues(currentMonth)).toEqual({
+      availableFunds: 10000,
+      lastMonthOverspent: 0,
+      totalBudgeted: -0,
+      buffered: 200,
+      bufferedAuto: 0,
+      toBudget: 9800,
+    });
+
+    expect.soft(getMonthValues(nextMonth)).toEqual({
+      availableFunds: 10000,
+      lastMonthOverspent: 0,
+      totalBudgeted: -200,
+      buffered: 0,
+      bufferedAuto: 0,
+      toBudget: 9800,
+    });
+
+    expect.soft(getMonthValues(followingMonth)).toEqual({
+      availableFunds: 9800,
+      lastMonthOverspent: 0,
+      totalBudgeted: -0,
+      buffered: 0,
+      bufferedAuto: 0,
+      toBudget: 9800,
+    });
+
+    await budgetActions.setBudget({
+      category: expenseCategoryId,
       month: followingMonth,
       amount: 5000,
     });
@@ -216,27 +250,27 @@ describe('Auto-hold for future month budgeting', () => {
       availableFunds: 10000,
       lastMonthOverspent: 0,
       totalBudgeted: -0,
-      buffered: 5000,
+      buffered: 5200,
       bufferedAuto: 0,
-      toBudget: 5000,
+      toBudget: 4800,
     });
 
     expect.soft(getMonthValues(nextMonth)).toEqual({
       availableFunds: 10000,
       lastMonthOverspent: 0,
-      totalBudgeted: -0,
+      totalBudgeted: -200,
       buffered: 5000,
       bufferedAuto: 0,
-      toBudget: 5000,
+      toBudget: 4800,
     });
 
     expect.soft(getMonthValues(followingMonth)).toEqual({
-      availableFunds: 10000,
+      availableFunds: 9800,
       lastMonthOverspent: 0,
       totalBudgeted: -5000,
       buffered: 0,
       bufferedAuto: 0,
-      toBudget: 5000,
+      toBudget: 4800,
     });
   });
 
