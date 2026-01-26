@@ -363,9 +363,9 @@ function ScheduleDescription({ id }) {
   const { isNarrowWidth } = useResponsive();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const format = useFormat();
-  const { data: schedules = [], isFetching: isSchedulesLoading } = useSchedules(
-    { query: q('schedules').filter({ id }).select('*') },
-  );
+  const { data: schedules = [], isPending: isSchedulesLoading } = useSchedules({
+    query: q('schedules').filter({ id }).select('*'),
+  });
 
   const {
     data: { statusLookup = {} },
