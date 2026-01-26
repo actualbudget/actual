@@ -46,7 +46,7 @@ function TransactionListWithPreviews() {
   );
   const {
     transactions,
-    isPending: isLoadingTransactions,
+    isPending: isTransactionsLoading,
     refetch: reloadTransactions,
     isFetchingNextPage: isLoadingMoreTransactions,
     fetchNextPage: fetchMoreTransactions,
@@ -60,7 +60,7 @@ function TransactionListWithPreviews() {
     [offBudgetAccounts],
   );
 
-  const { previewTransactions, isLoading: isLoadingPreviewTransactions } =
+  const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
     usePreviewTransactions({
       filter: offBudgetAccountsFilter,
     });
@@ -154,7 +154,7 @@ function TransactionListWithPreviews() {
   return (
     <TransactionListWithBalances
       isLoading={
-        isSearching ? isLoadingTransactions : isLoadingPreviewTransactions
+        isSearching ? isTransactionsLoading : isPreviewTransactionsLoading
       }
       transactions={transactionsToDisplay}
       balance={balanceBindings.balance}

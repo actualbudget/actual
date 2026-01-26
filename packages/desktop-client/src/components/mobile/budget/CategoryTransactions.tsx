@@ -62,7 +62,7 @@ function TransactionListWithPreviews({
   );
   const {
     transactions,
-    isPending: isLoadingTransactions,
+    isPending: isTransactionsLoading,
     isFetchingNextPage: isLoadingMoreTransactions,
     fetchNextPage: fetchMoreTransactions,
     refetch: reloadTransactions,
@@ -110,7 +110,7 @@ function TransactionListWithPreviews({
     month,
   );
 
-  const { previewTransactions, isLoading: isLoadingPreviewTransactions } =
+  const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
     useCategoryPreviewTransactions({
       categoryId: category.id,
       month,
@@ -124,8 +124,8 @@ function TransactionListWithPreviews({
     <TransactionListWithBalances
       isLoading={
         isSearching
-          ? isLoadingTransactions
-          : isLoadingTransactions || isLoadingPreviewTransactions
+          ? isTransactionsLoading
+          : isTransactionsLoading || isPreviewTransactionsLoading
       }
       transactions={transactionsToDisplay}
       balance={balance}
