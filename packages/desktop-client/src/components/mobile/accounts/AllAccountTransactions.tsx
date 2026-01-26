@@ -41,14 +41,14 @@ function TransactionListWithPreviews() {
   );
   const {
     transactions,
-    isPending: isLoadingTransactions,
+    isPending: isTransactionsLoading,
     refetch: reloadTransactions,
     isFetchingNextPage: isLoadingMoreTransactions,
     fetchNextPage: fetchMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
   });
-  const { previewTransactions, isLoading: isLoadingPreviewTransactions } =
+  const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
     usePreviewTransactions();
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
@@ -140,7 +140,7 @@ function TransactionListWithPreviews() {
   return (
     <TransactionListWithBalances
       isLoading={
-        isSearching ? isLoadingTransactions : isLoadingPreviewTransactions
+        isSearching ? isTransactionsLoading : isPreviewTransactionsLoading
       }
       transactions={transactionsToDisplay}
       balance={balanceBindings.balance}

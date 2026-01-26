@@ -27,7 +27,7 @@ export function UncategorizedTransactions() {
   );
   const {
     transactions,
-    isPending: isLoadingTransactions,
+    isPending: isTransactionsLoading,
     isFetchingNextPage: isLoadingMoreTransactions,
     fetchNextPage: fetchMoreTransactions,
     refetch: reloadTransactions,
@@ -73,7 +73,7 @@ export function UncategorizedTransactions() {
   return (
     <SchedulesProvider>
       <TransactionListWithBalances
-        isLoading={isLoadingTransactions}
+        isLoading={isTransactionsLoading}
         transactions={transactions}
         balance={balance}
         searchPlaceholder="Search uncategorized transactions"
