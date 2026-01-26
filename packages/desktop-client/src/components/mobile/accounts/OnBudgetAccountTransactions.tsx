@@ -46,9 +46,9 @@ function TransactionListWithPreviews() {
   );
   const {
     transactions,
-    isFetching: isFetchingTransactions,
+    isPending: isLoadingTransactions,
     refetch: reloadTransactions,
-    isFetchingNextPage: isFetchingMoreTransactions,
+    isFetchingNextPage: isLoadingMoreTransactions,
     fetchNextPage: fetchMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
@@ -60,7 +60,7 @@ function TransactionListWithPreviews() {
     [onBudgetAccounts],
   );
 
-  const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
+  const { previewTransactions, isLoading: isLoadingPreviewTransactions } =
     usePreviewTransactions({
       filter: onBudgetAccountsFilter,
     });
@@ -154,11 +154,11 @@ function TransactionListWithPreviews() {
   return (
     <TransactionListWithBalances
       isLoading={
-        isSearching ? isFetchingTransactions : isPreviewTransactionsLoading
+        isSearching ? isLoadingTransactions : isLoadingPreviewTransactions
       }
       transactions={transactionsToDisplay}
       balance={balanceBindings.balance}
-      isLoadingMore={isFetchingMoreTransactions}
+      isLoadingMore={isLoadingMoreTransactions}
       onLoadMore={fetchMoreTransactions}
       searchPlaceholder={t('Search On Budget Accounts')}
       onSearch={onSearch}
