@@ -62,8 +62,8 @@ function TransactionListWithPreviews({
   );
   const {
     transactions,
-    isFetching: isFetchingTransactions,
-    isFetchingNextPage: isFetchingMoreTransactions,
+    isPending: isLoadingTransactions,
+    isFetchingNextPage: isLoadingMoreTransactions,
     fetchNextPage: fetchMoreTransactions,
     refetch: reloadTransactions,
   } = useTransactions({
@@ -110,7 +110,7 @@ function TransactionListWithPreviews({
     month,
   );
 
-  const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
+  const { previewTransactions, isLoading: isLoadingPreviewTransactions } =
     useCategoryPreviewTransactions({
       categoryId: category.id,
       month,
@@ -124,8 +124,8 @@ function TransactionListWithPreviews({
     <TransactionListWithBalances
       isLoading={
         isSearching
-          ? isFetchingTransactions
-          : isFetchingTransactions || isPreviewTransactionsLoading
+          ? isLoadingTransactions
+          : isLoadingTransactions || isLoadingPreviewTransactions
       }
       transactions={transactionsToDisplay}
       balance={balance}
@@ -133,7 +133,7 @@ function TransactionListWithPreviews({
       balanceUncleared={balanceUncleared}
       searchPlaceholder={`Search ${category.name}`}
       onSearch={onSearch}
-      isLoadingMore={isFetchingMoreTransactions}
+      isLoadingMore={isLoadingMoreTransactions}
       onLoadMore={fetchMoreTransactions}
       onOpenTransaction={onOpenTransaction}
     />

@@ -89,9 +89,9 @@ function TransactionListWithPreviews({
   const {
     transactions,
     runningBalances,
-    isFetching: isFetchingTransactions,
+    isPending: isLoadingTransactions,
     refetch: reloadTransactions,
-    isFetchingNextPage: isFetchingMoreTransactions,
+    isFetchingNextPage: isLoadingMoreTransactions,
     fetchNextPage: fetchMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
@@ -106,7 +106,7 @@ function TransactionListWithPreviews({
   const {
     previewTransactions,
     runningBalances: previewRunningBalances,
-    isLoading: isPreviewTransactionsLoading,
+    isLoading: isLoadingPreviewTransactions,
   } = useAccountPreviewTransactions({
     accountId: account?.id,
   });
@@ -217,8 +217,8 @@ function TransactionListWithPreviews({
     <TransactionListWithBalances
       isLoading={
         isSearching
-          ? isFetchingTransactions
-          : isFetchingTransactions || isPreviewTransactionsLoading
+          ? isLoadingTransactions
+          : isLoadingTransactions || isLoadingPreviewTransactions
       }
       transactions={transactionsToDisplay}
       balance={balanceBindings.balance}
@@ -226,7 +226,7 @@ function TransactionListWithPreviews({
       balanceUncleared={balanceBindings.uncleared}
       runningBalances={allBalances}
       showRunningBalances={shouldCalculateRunningBalances}
-      isLoadingMore={isFetchingMoreTransactions}
+      isLoadingMore={isLoadingMoreTransactions}
       onLoadMore={fetchMoreTransactions}
       searchPlaceholder={t('Search {{accountName}}', {
         accountName: account.name,
