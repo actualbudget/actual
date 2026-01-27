@@ -27,7 +27,7 @@ body:
         - What actually happened instead
         - Any error messages (copy/paste the exact text)
 
-        Please include a (redacted) version of the file, and a screenshot of the import screen. You may need to zip it before uploading.
+        If you're reporting an issue with imports, please include a (redacted) version of the file, and a screenshot of the import screen. You may need to zip it before uploading.
       placeholder: |
         I was trying to [action] when [context].
         Expected: [expected behavior]
