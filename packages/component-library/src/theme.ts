@@ -16,6 +16,7 @@ export const theme = {
   numberPositive: 'var(--color-numberPositive)',
   numberNegative: 'var(--color-numberNegative)',
   numberNeutral: 'var(--color-numberNeutral)',
+  numberZero: 'var(--color-numberZero)',
   cardBackground: 'var(--color-cardBackground)',
   cardBorder: 'var(--color-cardBorder)',
   cardShadow: 'var(--color-cardShadow)',
