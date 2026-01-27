@@ -421,9 +421,16 @@ export const applyMessages = sequential(async (messages: Message[]) => {
 });
 
 export function receiveMessages(messages: Message[]): Promise<Message[]> {
-  messages.forEach(msg => {
-    Timestamp.recv(msg.timestamp);
-  });
+  try {
+    messages.forEach(msg => {
+      Timestamp.recv(msg.timestamp);
+    });
+  } catch (e) {
+    if (e instanceof Timestamp.ClockDriftError) {
+      throw new SyncError('clock-drift');
+    }
+    throw e;
+  }
 
   return runMutator(() => applyMessages(messages));
 }
@@ -597,6 +604,12 @@ export const fullSync = once(async function (): Promise<
         app.events.emit('sync', {
           type: 'error',
           subtype: e.reason,
+          meta: e.meta,
+        });
+      } else if (e.reason === 'clock-drift') {
+        app.events.emit('sync', {
+          type: 'error',
+          subtype: 'clock-drift',
           meta: e.meta,
         });
       } else {
