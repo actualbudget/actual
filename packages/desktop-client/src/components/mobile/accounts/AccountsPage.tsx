@@ -228,7 +228,7 @@ function AccountListItem({
                   ...makeAmountFullStyle(props.value, {
                     positiveColor: theme.numberPositive,
                     negativeColor: theme.numberNegative,
-                    zeroColor: theme.numberNeutral,
+                    zeroColor: theme.numberZero,
                   }),
                 }}
                 data-testid="account-balance"
