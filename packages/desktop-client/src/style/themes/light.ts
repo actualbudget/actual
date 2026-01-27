@@ -41,7 +41,8 @@ export const tableRowHeaderText = colorPalette.navy800;
 
 export const numberPositive = colorPalette.green700;
 export const numberNegative = colorPalette.red500;
-export const numberNeutral = colorPalette.navy100;
+export const numberNeutral = tableText;
+export const numberZero = tableTextLight;
 export const budgetNumberNegative = numberNegative;
 export const budgetNumberZero = tableTextSubdued;
 export const budgetNumberNeutral = tableText;
