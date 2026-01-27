@@ -99,16 +99,21 @@ async function getCategoriesWithTemplates(): Promise<
 
         // Validate schedule adjustments
         if (
-          parsedTemplate.type === 'schedule' &&
+          (parsedTemplate.type === 'average' ||
+            parsedTemplate.type === 'schedule') &&
           parsedTemplate.adjustment !== undefined
         ) {
-          if (
-            parsedTemplate.adjustment <= -100 ||
-            parsedTemplate.adjustment > 1000
-          ) {
-            throw new Error(
-              `Invalid adjustment percentage (${parsedTemplate.adjustment}%). Must be between -100% and 1000%`,
-            );
+          if (parsedTemplate.adjustmentType === 'percent') {
+            if (
+              parsedTemplate.adjustment <= -100 ||
+              parsedTemplate.adjustment > 1000
+            ) {
+              throw new Error(
+                `Invalid adjustment percentage (${parsedTemplate.adjustment}%). Must be between -100% and 1000%`,
+              );
+            }
+          } else if (parsedTemplate.adjustmentType === 'fixed') {
+            //placeholder for potential validation of amount/fixed adjustments
           }
         }
 
@@ -175,7 +180,8 @@ export async function unparse(templates: Template[]): Promise<string> {
             const adj = template.adjustment;
             const op = adj >= 0 ? 'increase' : 'decrease';
             const val = Math.abs(adj);
-            result += ` [${op} ${val}%]`;
+            const type = template.adjustmentType === 'percent' ? '%' : '';
+            result += ` [${op} ${val}${type}]`;
           }
           return result;
         }
@@ -221,8 +227,18 @@ export async function unparse(templates: Template[]): Promise<string> {
           return result;
         }
         case 'average': {
-          // #template average <numMonths> months
-          return `${prefix} average ${template.numMonths} months`;
+          let result = `${prefix} average ${template.numMonths} months`;
+
+          if (template.adjustment !== undefined) {
+            const adj = template.adjustment;
+            const op = adj >= 0 ? 'increase' : 'decrease';
+            const val = Math.abs(adj);
+            const type = template.adjustmentType === 'percent' ? '%' : '';
+            result += ` [${op} ${val}${type}]`;
+          }
+
+          // #template average <numMonths> months [increase/decrease {number|number%}]
+          return result;
         }
         case 'copy': {
           // #template copy from <lookBack> months ago [limit]

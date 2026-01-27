@@ -10,6 +10,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -279,7 +280,7 @@ function UserDirectoryContent({ isModal }: ManageUserDirectoryContentProps) {
           />
         </View>
 
-        <View style={{ flex: 1 }}>
+        <View style={styles.tableContainer}>
           <UserDirectoryHeader />
           <InfiniteScrollWrapper loadMore={loadMore}>
             {filteredUsers.length === 0 ? (

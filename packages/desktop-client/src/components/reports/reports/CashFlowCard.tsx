@@ -20,10 +20,7 @@ import { defaultTimeFrame } from './CashFlow';
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { Change } from '@desktop-client/components/reports/Change';
-import {
-  chartTheme,
-  useRechartsAnimation,
-} from '@desktop-client/components/reports/chart-theme';
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
@@ -236,7 +233,7 @@ export function CashFlowCard({
               >
                 <Bar
                   dataKey="income"
-                  fill={chartTheme.colors.blue}
+                  fill={theme.reportsNumberPositive}
                   barSize={14}
                   {...animationProps}
                 >
@@ -249,7 +246,7 @@ export function CashFlowCard({
 
                 <Bar
                   dataKey="expenses"
-                  fill={chartTheme.colors.red}
+                  fill={theme.reportsNumberNegative}
                   barSize={14}
                   {...animationProps}
                 >

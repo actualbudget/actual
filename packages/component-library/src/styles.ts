@@ -161,4 +161,11 @@ export const styles: CSSProperties = {
     padding: 16,
     cursor: 'pointer',
   },
+  tableContainer: {
+    flex: 1,
+    border: '1px solid ' + theme.tableBorder,
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+    overflow: 'hidden',
+  },
 };

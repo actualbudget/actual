@@ -160,11 +160,11 @@ export function BalanceWithCarryover({
         <>
           <span style={{ fontWeight: 'bold' }}>
             {getDifferenceToGoal(balanceValue) === 0 ? (
-              <span style={{ color: theme.noticeText }}>
+              <span style={{ color: theme.templateNumberFunded }}>
                 <Trans>Fully funded</Trans>
               </span>
             ) : getDifferenceToGoal(balanceValue) > 0 ? (
-              <span style={{ color: theme.noticeText }}>
+              <span style={{ color: theme.templateNumberFunded }}>
                 <Trans>
                   Overfunded (
                   {{
@@ -177,7 +177,7 @@ export function BalanceWithCarryover({
                 </Trans>
               </span>
             ) : (
-              <span style={{ color: theme.errorText }}>
+              <span style={{ color: theme.templateNumberUnderFunded }}>
                 <Trans>
                   Underfunded (
                   {{
