@@ -54,8 +54,34 @@ jobs:
             echo "PR does not target master branch, skipping release notes generation"
           fi
 
-      - name: Check if release notes file already exists
+      - name: Check if PR only modifies documentation
         if: steps.check-first-comment.outputs.result == 'true' && steps.pr-details.outputs.result != 'null' && steps.check-base-branch.outputs.targets_master == 'true'
+        id: check-docs-only
+        run: |
+          PR_NUMBER=$(echo '${{ steps.pr-details.outputs.result }}' | jq -r '.number')
+          echo "Fetching changed files for PR #$PR_NUMBER"
+
+          # Get list of changed files
+          CHANGED_FILES=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/files" | \
+            jq -r '.[].filename')
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          # Check if all changed files are in packages/docs or .github/actions/docs-spelling
+          NON_DOCS_FILES=$(echo "$CHANGED_FILES" | grep -v -e "^packages/docs/" -e "^\.github/actions/docs-spelling/" || true)
+
+          if [ -z "$NON_DOCS_FILES" ] && [ -n "$CHANGED_FILES" ]; then
+            echo "only_docs=true" >> $GITHUB_OUTPUT
+            echo "✓ PR only modifies documentation files, skipping release notes generation"
+          else
+            echo "only_docs=false" >> $GITHUB_OUTPUT
+            echo "✓ PR modifies non-documentation files, will proceed with release notes generation"
+          fi
+
+      - name: Check if release notes file already exists
+        if: steps.check-first-comment.outputs.result == 'true' && steps.pr-details.outputs.result != 'null' && steps.check-base-branch.outputs.targets_master == 'true' && steps.check-docs-only.outputs.only_docs != 'true'
         id: check-release-notes-exists
         run: node .github/actions/ai-generated-release-notes/check-release-notes-exists.js
         env:
@@ -65,7 +91,7 @@ jobs:
           PR_DETAILS: ${{ steps.pr-details.outputs.result }}
 
       - name: Generate summary with OpenAI
-        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false'
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-docs-only.outputs.only_docs != 'true' && steps.check-release-notes-exists.outputs.result == 'false'
         id: generate-summary
         run: node .github/actions/ai-generated-release-notes/generate-summary.js
         env:
@@ -74,7 +100,7 @@ jobs:
           PR_DETAILS: ${{ steps.pr-details.outputs.result }}
 
       - name: Determine category with OpenAI
-        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null'
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-docs-only.outputs.only_docs != 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null'
         id: determine-category
         run: node .github/actions/ai-generated-release-notes/determine-category.js
         env:
@@ -84,7 +110,7 @@ jobs:
           SUMMARY_DATA: ${{ steps.generate-summary.outputs.result }}
 
       - name: Create and commit release notes file via GitHub API
-        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-docs-only.outputs.only_docs != 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
         run: node .github/actions/ai-generated-release-notes/create-release-notes-file.js
         env:
           GITHUB_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
@@ -94,7 +120,7 @@ jobs:
           CATEGORY: ${{ steps.determine-category.outputs.result }}
 
       - name: Comment on PR
-        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-docs-only.outputs.only_docs != 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
         run: node .github/actions/ai-generated-release-notes/comment-on-pr.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
