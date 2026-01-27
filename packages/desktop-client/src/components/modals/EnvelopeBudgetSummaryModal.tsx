@@ -5,8 +5,8 @@ import { styles } from '@actual-app/components/styles';
 
 import {
   format as formatMonth,
-  sheetForMonth,
   prevMonth,
+  sheetForMonth,
 } from 'loot-core/shared/months';
 import { groupById } from 'loot-core/shared/util';
 
@@ -25,8 +25,8 @@ import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import {
   collapseModals,
-  type Modal as ModalType,
   pushModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';

@@ -1,13 +1,13 @@
 // @ts-strict-ignore
 import React, {
-  type ComponentProps,
-  type HTMLProps,
-  type KeyboardEvent,
-  type ReactNode,
   useEffect,
   useMemo,
   useRef,
   useState,
+  type ComponentProps,
+  type HTMLProps,
+  type KeyboardEvent,
+  type ReactNode,
 } from 'react';
 
 import { Button } from '@actual-app/components/button';
@@ -180,6 +180,7 @@ function defaultRenderItems<T extends AutocompleteItem>(
             // * https://github.com/WebKit/WebKit/blob/447d90b0c52b2951a69df78f06bb5e6b10262f4b/LayoutTests/fast/events/touch/ios/content-observation/400ms-hover-intent.html
             // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
             // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
+            // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
             role="button"
             className={css({
               padding: 5,
@@ -562,7 +563,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                     if (e.key === 'Escape') {
                       e.nativeEvent['preventDownshiftDefault'] = true;
 
-                      if (!embedded) {
+                      if (!embedded && isOpen) {
                         e.stopPropagation();
                       }
 

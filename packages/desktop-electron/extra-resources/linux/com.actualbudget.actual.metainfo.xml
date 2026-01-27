@@ -2,7 +2,7 @@
 <component type="desktop">
   <id>com.actualbudget.actual</id>
   <name>Actual Budget</name>
-  <summary>Your Finances - made simple</summary>
+  <summary>Your Finances made simple</summary>
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
   <content_rating type="oars-1.0" />
@@ -21,43 +21,28 @@
   <launchable type="desktop-id">com.actualbudget.actual.desktop</launchable>
   <url type="homepage">https://actualbudget.org/</url>
   <url type="bugtracker">https://github.com/actualbudget/actual/issues</url>
+  <url type="vcs-browser">https://github.com/actualbudget/actual</url>
   <recommends>
     <control>keyboard</control>
     <control>pointing</control>
     <control>touch</control>
   </recommends>
   <screenshots>
-    <screenshot type="default" environment="gnome:dark">
-      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/budget-gnome-dark.png</image>
-      <caption xml:lang="en">Budget screen (dark theme)</caption>
+    <screenshot type="default" environment="gnome">
+      <image type="source">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/budget-gnome-light.png</image>
+      <caption>Budget screen</caption>
     </screenshot>
     <screenshot environment="gnome">
-      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/budget-gnome-light.png</image>
-      <caption xml:lang="en">Budget screen (light theme)</caption>
-    </screenshot>
-    <screenshot environment="gnome:dark">
-      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/transactions-gnome-dark.png</image>
-      <caption xml:lang="en">Transactions screen (dark theme)</caption>
+      <image type="source">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/transactions-gnome-light.png</image>
+      <caption>Transactions screen</caption>
     </screenshot>
     <screenshot environment="gnome">
-      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/transactions-gnome-light.png</image>
-      <caption xml:lang="en">Transactions screen (light theme)</caption>
-    </screenshot>
-    <screenshot environment="gnome:dark">
-      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/schedules-gnome-dark.png</image>
-      <caption xml:lang="en">Schedules screen (dark theme)</caption>
+      <image type="source">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/schedules-gnome-light.png</image>
+      <caption>Schedules screen</caption>
     </screenshot>
     <screenshot environment="gnome">
-      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/schedules-gnome-light.png</image>
-      <caption xml:lang="en">Schedules screen (light theme)</caption>
-    </screenshot>
-    <screenshot environment="gnome:dark">
-      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/reports-gnome-dark.png</image>
-      <caption xml:lang="en">Reports screen (dark theme)</caption>
-    </screenshot>
-    <screenshot environment="gnome">
-      <image xml:lang="en">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/reports-gnome-light.png</image>
-      <caption xml:lang="en">Reports screen (light theme)</caption>
+      <image type="source">https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/reports-gnome-light.png</image>
+      <caption>Reports screen</caption>
     </screenshot>
   </screenshots>
   <releases>
@@ -68,6 +53,9 @@
       </description>
     </release>
   </releases>
-  <developer_name>Actual Core Contributors</developer_name>
+
+  <developer id="com.actualbudget">
+    <name>Actual Core Contributors</name>
+  </developer>
   <update_contact>dev@actualbudget.org</update_contact>
 </component>

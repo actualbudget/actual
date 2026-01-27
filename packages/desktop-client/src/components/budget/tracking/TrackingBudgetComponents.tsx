@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import React, {
-  type ComponentProps,
-  type CSSProperties,
   memo,
   useRef,
   useState,
+  type ComponentProps,
+  type CSSProperties,
 } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -247,8 +247,18 @@ export const CategoryMonth = memo(function CategoryMonth({
           opacity: 0,
           transition: 'opacity .25s',
         },
-        '&:hover .hover-visible': {
+        '&:hover .hover-visible, & .force-visible .hover-visible': {
           opacity: 1,
+        },
+        '& .hover-expand': {
+          maxWidth: 0,
+          overflow: 'hidden',
+          transition: 'max-width 0s .25s',
+        },
+        '&:hover .hover-expand, & .hover-expand.force-visible': {
+          maxWidth: '300px',
+          overflow: 'visible',
+          transition: 'max-width 0s linear 0s',
         },
       }}
     >
@@ -260,6 +270,7 @@ export const CategoryMonth = memo(function CategoryMonth({
       >
         {!editing && (
           <View
+            className={`hover-expand ${menuOpen ? 'force-visible' : ''}`}
             style={{
               flexDirection: 'row',
               flexShrink: 0,
@@ -283,7 +294,6 @@ export const CategoryMonth = memo(function CategoryMonth({
                 width={14}
                 height={14}
                 className="hover-visible"
-                style={menuOpen && { opacity: 1 }}
               />
             </Button>
 
@@ -436,9 +446,16 @@ export const CategoryMonth = memo(function CategoryMonth({
           width="flex"
           style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
         >
-          <span
+          <Button
+            variant="bare"
             ref={triggerBalanceMenuRef}
-            onClick={() => !category.is_income && setBalanceMenuOpen(true)}
+            onPress={() => !category.is_income && setBalanceMenuOpen(true)}
+            style={{
+              justifyContent: 'flex-end',
+              background: 'transparent',
+              width: '100%',
+              padding: 0,
+            }}
           >
             <BalanceWithCarryover
               isDisabled={category.is_income}
@@ -448,7 +465,7 @@ export const CategoryMonth = memo(function CategoryMonth({
               budgeted={trackingBudget.catBudgeted(category.id)}
               longGoal={trackingBudget.catLongGoal(category.id)}
             />
-          </span>
+          </Button>
 
           <Popover
             triggerRef={triggerBalanceMenuRef}

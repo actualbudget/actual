@@ -16,9 +16,9 @@ import * as monthUtils from 'loot-core/shared/months';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
-  type TimeFrame,
   type CustomReportEntity,
   type sortByOpType,
+  type TimeFrame,
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
@@ -26,7 +26,7 @@ import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
 import { ModeButton } from './ModeButton';
-import { type dateRangeProps, ReportOptions } from './ReportOptions';
+import { ReportOptions, type dateRangeProps } from './ReportOptions';
 import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
 

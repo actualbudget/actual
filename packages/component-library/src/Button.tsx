@@ -2,8 +2,8 @@ import React, {
   forwardRef,
   useMemo,
   type ComponentPropsWithoutRef,
-  type ReactNode,
   type CSSProperties,
+  type ReactNode,
 } from 'react';
 import { Button as ReactAriaButton } from 'react-aria-components';
 

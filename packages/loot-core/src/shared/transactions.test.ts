@@ -4,11 +4,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { type TransactionEntity } from '../types/models';
 
 import {
+  addSplitTransaction,
+  deleteTransaction,
+  makeAsNonChildTransactions,
+  makeChild,
   splitTransaction,
   updateTransaction,
-  deleteTransaction,
-  addSplitTransaction,
-  makeChild,
 } from './transactions';
 
 function makeTransaction(data: Partial<TransactionEntity>): TransactionEntity {
@@ -224,5 +225,30 @@ describe('Transactions', () => {
       expect.objectContaining({ amount: 2500, error: null }),
       expect.objectContaining({ amount: 3002 }),
     ]);
+  });
+
+  test('unsplitting last remaining child converts parent to regular transaction', () => {
+    const [parent, child] = makeSplitTransaction(
+      { id: 't1', amount: 2000, category: 'cat1' },
+      [{ id: 't2', amount: 0, category: 'cat2' }],
+    );
+
+    const transactions = [parent, child];
+
+    const result = makeAsNonChildTransactions([child], transactions);
+
+    expect(result.updated).toHaveLength(1);
+    expect(result.deleted).toHaveLength(1);
+
+    expect(result.updated[0]).toMatchObject({
+      id: 't1',
+      amount: 2000,
+      is_parent: false,
+      category: 'cat2',
+    });
+
+    expect(result.deleted[0]).toMatchObject({
+      id: 't2',
+    });
   });
 });

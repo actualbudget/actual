@@ -111,14 +111,15 @@ function ToBudget({ toBudget, onPress, show3Columns }: ToBudgetProps) {
                     maxFontSizePx={12}
                     mode="oneline"
                     style={{
+                      ...styles.tnum,
                       fontSize: 12,
                       fontWeight: '700',
                       color:
                         amount < 0
-                          ? theme.errorText
+                          ? theme.toBudgetNegative
                           : amount > 0
-                            ? theme.noticeText
-                            : theme.formInputText,
+                            ? theme.toBudgetPositive
+                            : theme.budgetNumberNeutral,
                     }}
                   >
                     {format(value, type)}
@@ -209,6 +210,7 @@ function Saved({ projected, onPress, show3Columns }: SavedProps) {
                     maxFontSizePx={12}
                     mode="oneline"
                     style={{
+                      ...styles.tnum,
                       textAlign: 'left',
                       fontSize: 12,
                       fontWeight: '700',
@@ -431,7 +433,8 @@ function BudgetTableHeader({
   const columnWidth = getColumnWidth({ show3Columns });
 
   const amountStyle: CSSProperties = {
-    color: theme.formInputText,
+    ...styles.tnum,
+    color: theme.budgetNumberNeutral,
     textAlign: 'right',
     fontSize: 12,
     fontWeight: '500',

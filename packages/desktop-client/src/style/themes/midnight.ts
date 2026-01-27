@@ -39,6 +39,19 @@ export const tableRowBackgroundHighlightText = colorPalette.gray800;
 export const tableRowHeaderBackground = colorPalette.gray700;
 export const tableRowHeaderText = colorPalette.gray150;
 
+export const numberPositive = colorPalette.green300;
+export const numberNegative = colorPalette.red200;
+export const numberNeutral = colorPalette.gray500;
+export const budgetNumberNegative = numberNegative;
+export const budgetNumberZero = tableTextSubdued;
+export const budgetNumberNeutral = tableText;
+export const budgetNumberPositive = budgetNumberNeutral;
+export const templateNumberFunded = numberPositive;
+export const templateNumberUnderFunded = colorPalette.orange200;
+export const toBudgetPositive = numberPositive;
+export const toBudgetZero = numberPositive;
+export const toBudgetNegative = budgetNumberNegative;
+
 export const sidebarBackground = colorPalette.gray900;
 export const sidebarItemBackgroundPending = colorPalette.orange200;
 export const sidebarItemBackgroundPositive = colorPalette.green400;
@@ -47,6 +60,7 @@ export const sidebarItemAccentSelected = colorPalette.purple200;
 export const sidebarItemBackgroundHover = colorPalette.gray700;
 export const sidebarItemText = colorPalette.gray100;
 export const sidebarItemTextSelected = colorPalette.purple200;
+export const sidebarBudgetName = colorPalette.gray300;
 
 export const menuBackground = colorPalette.gray700;
 export const menuItemBackground = colorPalette.gray200;
@@ -199,6 +213,10 @@ export const reportsGreen = colorPalette.green400;
 export const reportsGray = colorPalette.gray400;
 export const reportsLabel = pageText;
 export const reportsInnerLabel = colorPalette.navy800;
+export const reportsNumberPositive = numberPositive;
+export const reportsNumberNegative = numberNegative;
+export const reportsNumberNeutral = numberNeutral;
+export const reportsChartFill = reportsNumberPositive;
 
 export const noteTagBackground = colorPalette.purple800;
 export const noteTagBackgroundHover = colorPalette.purple600;
@@ -219,3 +237,5 @@ export const tooltipBackground = colorPalette.gray800;
 export const tooltipBorder = colorPalette.gray600;
 
 export const calendarCellBackground = colorPalette.navy900;
+
+export const overlayBackground = 'rgba(0, 0, 0, 0.3)';

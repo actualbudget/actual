@@ -3,6 +3,7 @@ import React, { type SVGAttributes } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 
 export const renderCustomLabel = (
@@ -16,7 +17,8 @@ export const renderCustomLabel = (
   fill: SVGAttributes<SVGTextElement>['fill'] = theme.pageText,
 ) => {
   return !showLabel || Math.abs(showLabel) > showLabelThreshold ? (
-    <text
+    <FinancialText
+      as="text"
       key={fill + display}
       x={calcX}
       y={calcY}
@@ -26,7 +28,7 @@ export const renderCustomLabel = (
       fontSize={textSize}
     >
       <PrivacyFilter>{display}</PrivacyFilter>
-    </text>
+    </FinancialText>
   ) : (
     <text />
   );

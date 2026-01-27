@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -28,8 +28,8 @@ import { getCountryFromBrowser } from '@desktop-client/components/util/localeToC
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import {
-  type Modal as ModalType,
   pushModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 

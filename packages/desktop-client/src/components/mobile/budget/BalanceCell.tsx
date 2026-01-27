@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgArrowThickRight } from '@actual-app/components/icons/v1';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -102,6 +103,7 @@ export function BalanceCell({
               className={cx(
                 defaultClassName,
                 css({
+                  ...styles.tnum,
                   maxWidth: columnWidth,
                   textAlign: 'right',
                   fontSize: 12,

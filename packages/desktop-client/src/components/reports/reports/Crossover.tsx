@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -18,13 +18,15 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import {
+  type CategoryEntity,
   type CrossoverWidget,
   type TimeFrame,
-  type CategoryEntity,
 } from 'loot-core/types/models';
 
 import { Link } from '@desktop-client/components/common/Link';
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { FinancialText } from '@desktop-client/components/FinancialText';
+import { Checkbox } from '@desktop-client/components/forms';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,
@@ -57,6 +59,7 @@ type CrossoverData = {
       investmentIncome: number;
       expenses: number;
       nestEgg: number;
+      adjustedExpenses?: number;
       isProjection?: boolean;
     }>;
     start: string;
@@ -125,10 +128,15 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   >(accounts.map(a => a.id));
 
   const [swr, setSwr] = useState(0.04);
+  const [useCustomGrowth, setUseCustomGrowth] = useState(false);
   const [estimatedReturn, setEstimatedReturn] = useState<number | null>(null);
-  const [projectionType, setProjectionType] = useState<'trend' | 'hampel'>(
-    'hampel',
-  );
+  const [expectedContribution, setExpectedContribution] = useState<
+    number | null
+  >(null);
+  const [projectionType, setProjectionType] = useState<
+    'hampel' | 'median' | 'mean'
+  >('hampel');
+  const [expenseAdjustmentFactor, setExpenseAdjustmentFactor] = useState(1.0);
   const [showHiddenCategories, setShowHiddenCategories] = useState(false);
   const [selectionsInitialized, setSelectionsInitialized] = useState(false);
 
@@ -160,8 +168,18 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     setSelectedExpenseCategories(initialExpenseCategories);
     setSelectedIncomeAccountIds(initialIncomeAccountIds);
     setSwr(widget?.meta?.safeWithdrawalRate ?? 0.04);
-    setEstimatedReturn(widget?.meta?.estimatedReturn ?? null);
+
+    const initialEstimatedReturn = widget?.meta?.estimatedReturn ?? null;
+    const initialExpectedContribution =
+      widget?.meta?.expectedContribution ?? null;
+    const hasCustomGrowth =
+      initialEstimatedReturn != null || initialExpectedContribution != null;
+
+    setUseCustomGrowth(hasCustomGrowth);
+    setEstimatedReturn(initialEstimatedReturn);
+    setExpectedContribution(initialExpectedContribution);
     setProjectionType(widget?.meta?.projectionType ?? 'hampel');
+    setExpenseAdjustmentFactor(widget?.meta?.expenseAdjustmentFactor ?? 1.0);
     setShowHiddenCategories(widget?.meta?.showHiddenCategories ?? false);
 
     setSelectionsInitialized(true);
@@ -289,8 +307,12 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         expenseCategoryIds: selectedExpenseCategories.map(c => c.id),
         incomeAccountIds: selectedIncomeAccountIds,
         safeWithdrawalRate: swr,
-        estimatedReturn,
+        estimatedReturn: useCustomGrowth ? (estimatedReturn ?? 0) : null,
+        expectedContribution: useCustomGrowth
+          ? (expectedContribution ?? 0)
+          : null,
         projectionType,
+        expenseAdjustmentFactor,
         showHiddenCategories,
         timeFrame: { start, end, mode },
       },
@@ -330,8 +352,12 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         expenseCategoryIds,
         incomeAccountIds: selectedIncomeAccountIds,
         safeWithdrawalRate: swr,
-        estimatedReturn,
+        estimatedReturn: useCustomGrowth ? (estimatedReturn ?? 0) : null,
+        expectedContribution: useCustomGrowth
+          ? (expectedContribution ?? 0)
+          : null,
         projectionType,
+        expenseAdjustmentFactor,
       });
       await crossoverSpreadsheet(spreadsheet, setData);
     },
@@ -339,8 +365,11 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
       start,
       end,
       swr,
+      useCustomGrowth,
       estimatedReturn,
+      expectedContribution,
       projectionType,
+      expenseAdjustmentFactor,
       expenseCategoryIds,
       selectedIncomeAccountIds,
     ],
@@ -692,12 +721,15 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                               How past expenses are projected into the future.
                               <br />
                               <br />
-                              Linear Trend: Projects expenses using a linear
-                              regression of historical data.
-                              <br />
-                              <br />
                               Hampel Filtered Median: Filters out outliers
                               before calculating the median expense.
+                              <br />
+                              <br />
+                              Median: Uses the median of all historical expenses
+                              without filtering.
+                              <br />
+                              <br />
+                              Mean: Uses the average of all historical expenses.
                             </Trans>
                           </Text>
                         </View>
@@ -714,11 +746,12 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                 <Select
                   value={projectionType}
                   onChange={value =>
-                    setProjectionType(value as 'trend' | 'hampel')
+                    setProjectionType(value as 'hampel' | 'median' | 'mean')
                   }
                   options={[
-                    ['trend', t('Linear Trend')],
                     ['hampel', t('Hampel Filtered Median')],
+                    ['median', t('Median')],
+                    ['mean', t('Mean')],
                   ]}
                   style={{ width: 200, marginBottom: 12 }}
                 />
@@ -733,21 +766,29 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                       justifyContent: 'space-between',
                     }}
                   >
-                    <Text>{t('Estimated return (annual %, optional)')}</Text>
+                    <Text>{t('Target Income (% of expenses)')}</Text>
                     <Tooltip
                       content={
                         <View style={{ maxWidth: 300 }}>
                           <Text>
                             <Trans>
-                              The expected annual return rate for your
-                              investments, used to project growth of Income
-                              Accounts. If not specified, the historical return
-                              from your Income Accounts will be used instead.
+                              Your target retirement income as a percentage of
+                              projected expenses.
                               <br />
                               <br />
-                              Note: Historical return calculation includes
-                              contributions and may not reflect actual
-                              investment performance.
+                              100% means you need retirement income equal to
+                              your current projected expenses.
+                              <br />
+                              Values above 100% mean you plan to spend more in
+                              retirement.
+                              <br />
+                              Values below 100% mean you plan to spend less in
+                              retirement.
+                              <br />
+                              <br />
+                              The graph shows both the projected expenses (solid
+                              red line) and your target income (dashed red
+                              line).
                             </Trans>
                           </Text>
                         </View>
@@ -764,32 +805,226 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                 <Input
                   type="number"
                   min={0}
-                  max={100}
-                  step={0.1}
+                  max={1000}
+                  step={1}
                   value={
-                    estimatedReturn == null
+                    expenseAdjustmentFactor == null
                       ? ''
-                      : Number((estimatedReturn * 100).toFixed(2))
+                      : Number((expenseAdjustmentFactor * 100).toFixed(0))
                   }
                   onChange={e =>
-                    setEstimatedReturn(
+                    setExpenseAdjustmentFactor(
                       isNaN(e.target.valueAsNumber)
-                        ? null
+                        ? 1.0
                         : e.target.valueAsNumber / 100,
                     )
                   }
-                  style={{ width: 120 }}
+                  style={{ width: 120, marginBottom: 12 }}
                 />
-                {estimatedReturn == null && historicalReturn != null && (
+              </View>
+
+              <View style={{ marginBottom: 12 }}>
+                <label
+                  htmlFor="custom-growth"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    marginBottom: 8,
+                  }}
+                >
+                  <Checkbox
+                    id="custom-growth"
+                    checked={useCustomGrowth}
+                    onChange={e => {
+                      const checked = e.target.checked;
+                      setUseCustomGrowth(checked);
+                      // On first enable (when estimatedReturn is null), default to 6%
+                      if (checked && estimatedReturn === null) {
+                        setEstimatedReturn(0.06);
+                      }
+                    }}
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text style={{ fontWeight: 600 }}>
+                    <Trans>Use custom growth projections</Trans>
+                  </Text>
+                  <Tooltip
+                    content={
+                      <View style={{ maxWidth: 300 }}>
+                        <Text>
+                          <Trans>
+                            Enable this to specify custom monthly contribution
+                            amounts and investment returns that will be used to
+                            project your investments into the future.
+                            <br />
+                            <br />
+                            When disabled, uses historical performance from your
+                            Income Accounts (which includes both past
+                            contributions and investment growth).
+                          </Trans>
+                        </Text>
+                      </View>
+                    }
+                    placement="right top"
+                    style={{
+                      ...styles.tooltip,
+                    }}
+                  >
+                    <SvgQuestion
+                      height={12}
+                      width={12}
+                      cursor="pointer"
+                      style={{ marginLeft: 4 }}
+                    />
+                  </Tooltip>
+                </label>
+
+                {useCustomGrowth && (
+                  <View
+                    style={{
+                      marginLeft: 24,
+                      paddingLeft: 12,
+                      borderLeft: `3px solid ${theme.tableBorder}`,
+                    }}
+                  >
+                    <View style={{ marginBottom: 12 }}>
+                      <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                          }}
+                        >
+                          <Text>{t('Expected return (annual %)')}</Text>
+                          <Tooltip
+                            content={
+                              <View style={{ maxWidth: 300 }}>
+                                <Text>
+                                  <Trans>
+                                    The expected annual return rate for your
+                                    investments, used to project growth of
+                                    Income Accounts.
+                                  </Trans>
+                                </Text>
+                              </View>
+                            }
+                            placement="right top"
+                            style={{
+                              ...styles.tooltip,
+                            }}
+                          >
+                            <SvgQuestion
+                              height={12}
+                              width={12}
+                              cursor="pointer"
+                            />
+                          </Tooltip>
+                        </View>
+                      </div>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={100}
+                        step={0.1}
+                        value={
+                          estimatedReturn === null
+                            ? ''
+                            : Number((estimatedReturn * 100).toFixed(2))
+                        }
+                        onChange={e =>
+                          setEstimatedReturn(
+                            isNaN(e.target.valueAsNumber)
+                              ? null
+                              : e.target.valueAsNumber / 100,
+                          )
+                        }
+                        onBlur={() => {
+                          if (estimatedReturn === null) {
+                            setEstimatedReturn(0);
+                          }
+                        }}
+                        style={{ width: 120 }}
+                      />
+                    </View>
+
+                    <View style={{ marginBottom: 12 }}>
+                      <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                          }}
+                        >
+                          <Text>
+                            <Trans>Expected monthly contribution</Trans>
+                          </Text>
+                          <Tooltip
+                            content={
+                              <View style={{ maxWidth: 300 }}>
+                                <Text>
+                                  <Trans>
+                                    The amount you plan to contribute to your
+                                    Income Accounts each month. This amount is
+                                    added to your balance each month before
+                                    applying the investment return.
+                                  </Trans>
+                                </Text>
+                              </View>
+                            }
+                            placement="right top"
+                            style={{
+                              ...styles.tooltip,
+                            }}
+                          >
+                            <SvgQuestion
+                              height={12}
+                              width={12}
+                              cursor="pointer"
+                            />
+                          </Tooltip>
+                        </View>
+                      </div>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={100}
+                        value={
+                          expectedContribution === null
+                            ? ''
+                            : expectedContribution / 100
+                        }
+                        onChange={e =>
+                          setExpectedContribution(
+                            isNaN(e.target.valueAsNumber)
+                              ? null
+                              : e.target.valueAsNumber * 100,
+                          )
+                        }
+                        onBlur={() => {
+                          if (expectedContribution === null) {
+                            setExpectedContribution(0);
+                          }
+                        }}
+                        style={{ width: 120 }}
+                      />
+                    </View>
+                  </View>
+                )}
+
+                {!useCustomGrowth && historicalReturn != null && (
                   <div
                     style={{
                       fontSize: 12,
                       color: theme.pageTextSubdued,
-                      marginTop: 4,
+                      marginLeft: 24,
                     }}
                   >
                     <Trans>
-                      Using historical return:{' '}
+                      Using calculated historical return of{' '}
                       {(historicalReturn * 100).toFixed(1)}%
                     </Trans>
                   </div>
@@ -842,9 +1077,14 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                 <span>
                   <Trans>Target Monthly Income</Trans>:{' '}
                   <PrivacyFilter>
-                    {targetMonthlyIncome != null && !isNaN(targetMonthlyIncome)
-                      ? format(targetMonthlyIncome, 'financial')
-                      : t('N/A')}
+                    {targetMonthlyIncome != null &&
+                    !isNaN(targetMonthlyIncome) ? (
+                      <FinancialText>
+                        {format(targetMonthlyIncome, 'financial')}
+                      </FinancialText>
+                    ) : (
+                      t('N/A')
+                    )}
                   </PrivacyFilter>
                 </span>
               </View>
@@ -856,9 +1096,13 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                 <span>
                   <Trans>Target Life Savings</Trans>:{' '}
                   <PrivacyFilter>
-                    {targetNestEgg != null && !isNaN(targetNestEgg)
-                      ? format(targetNestEgg, 'financial')
-                      : t('N/A')}
+                    {targetNestEgg != null && !isNaN(targetNestEgg) ? (
+                      <FinancialText>
+                        {format(targetNestEgg, 'financial')}
+                      </FinancialText>
+                    ) : (
+                      t('N/A')
+                    )}
                   </PrivacyFilter>
                 </span>
               </View>

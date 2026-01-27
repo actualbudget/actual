@@ -4,13 +4,13 @@ import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 
 import type {
-  CopyTemplate,
   AverageTemplate,
+  CopyTemplate,
 } from 'loot-core/types/models/templates';
 
 import {
-  type Action,
   updateTemplate,
+  type Action,
 } from '@desktop-client/components/budget/goals/actions';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { GenericInput } from '@desktop-client/components/util/GenericInput';

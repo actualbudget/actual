@@ -12,11 +12,11 @@ Use this page to manage users who have access to the Actual Budget instance.
 
 To access the **User Directory** page, access the menu from the server:
 
-![](/img/multiuser/user-directory.png)
+![](/img/multiuser/user-directory.webp)
 
 Users can be added, disabled, enabled, removed from this page:
 
-![](/img/multiuser/user-directory-overview.png)
+![](/img/multiuser/user-directory-overview.webp)
 
 There are two user roles _Basic_ or _Admin_.
 
@@ -35,10 +35,10 @@ Use this page to manage user access to the current open budget file.
 :::info
 The **User Access Management** menu is only visible from within an open budget:
 
-![](/img/multiuser/user-access.png)
+![](/img/multiuser/user-access.webp)
 
 :::
 
 This screen is where you assign, give and revoke budget access and transfer ownership:
 
-![](/img/multiuser/user-access-overview.png)
+![](/img/multiuser/user-access-overview.webp)

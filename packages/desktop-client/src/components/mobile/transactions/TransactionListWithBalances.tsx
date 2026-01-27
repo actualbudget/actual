@@ -1,4 +1,4 @@
-import React, { type ComponentProps, useState } from 'react';
+import React, { useState, type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Label } from '@actual-app/components/label';
@@ -25,8 +25,8 @@ import {
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import type {
   Binding,
-  SheetNames,
   SheetFields,
+  SheetNames,
 } from '@desktop-client/spreadsheet';
 
 type TransactionSearchInputProps = {
@@ -147,6 +147,11 @@ export function TransactionListWithBalances({
         <PullToRefresh
           isPullable={!isLoading && !!onRefresh}
           onRefresh={async () => onRefresh?.()}
+          style={{
+            '& .ptr__children': {
+              display: 'flex',
+            },
+          }}
         >
           <TransactionList
             isLoading={isLoading}
@@ -277,7 +282,11 @@ function Balance({ balance }: BalanceProps) {
               textAlign: 'center',
               fontWeight: '500',
               color:
-                props.value < 0 ? theme.errorText : theme.pillTextHighlighted,
+                props.value < 0
+                  ? theme.numberNegative
+                  : props.value > 0
+                    ? theme.numberPositive
+                    : theme.numberNeutral,
             }}
             data-testid="transactions-balance"
           />

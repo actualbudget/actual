@@ -1,0 +1,46 @@
+name: Deploy nightly Edge
+
+# Publish nightly version of Edge - Runs every day at 23:00 UTC
+on:
+  schedule:
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI: true
+
+concurrency:
+  group: nightly-edge-deploy
+  cancel-in-progress: false
+
+jobs:
+  publish-latest-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Netlify CLI
+        run: npm install netlify-cli@17.10.1 -g
+
+      - name: Get Latest Deploy ID
+        id: get_deploy
+        run: |
+          DEPLOY_ID=$(netlify api listSiteDeploys --data '{ "site_id": "${{ secrets.NETLIFY_EDGE_SITE_ID }}", "production": true, "state": "ready", "branch": "master", "per_page": 1 }' | jq -r '.[0].id')
+
+          if [ -z "$DEPLOY_ID" ] || [ "$DEPLOY_ID" = "null" ]; then
+             echo "::error::No valid deploy found"
+             exit 1
+          fi
+
+          echo "deploy_id=$DEPLOY_ID" >> $GITHUB_OUTPUT
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_API_TOKEN }}
+
+      - name: Restore and Publish Deploy
+        # restoreSiteDeploy API call can bypass Netlify's lock function
+        run: |
+          netlify api restoreSiteDeploy --data '{ "site_id": "${{ secrets.NETLIFY_EDGE_SITE_ID }}", "deploy_id": "${{ steps.get_deploy.outputs.deploy_id }}" }'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_API_TOKEN }}

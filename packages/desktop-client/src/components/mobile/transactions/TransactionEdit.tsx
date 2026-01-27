@@ -1,11 +1,11 @@
-import React, {
+import {
   forwardRef,
-  useEffect,
-  useState,
-  useRef,
   memo,
-  useMemo,
   useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
@@ -25,9 +25,9 @@ import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import {
   format as formatDate,
+  isValid as isValidDate,
   parse as parseDate,
   parseISO,
-  isValid as isValidDate,
 } from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -36,22 +36,23 @@ import * as Platform from 'loot-core/shared/platform';
 import { q } from 'loot-core/shared/query';
 import { getStatusLabel, getUpcomingDays } from 'loot-core/shared/schedules';
 import {
-  ungroupTransactions,
-  updateTransaction,
-  realizeTempTransactions,
-  splitTransaction,
   addSplitTransaction,
   deleteTransaction,
   makeChild,
+  realizeTempTransactions,
+  splitTransaction,
+  ungroupTransactions,
+  updateTransaction,
 } from 'loot-core/shared/transactions';
 import {
-  titleFirst,
-  integerToCurrency,
-  integerToAmount,
   amountToInteger,
-  getChangedValues,
+  applyFindReplace,
   diffItems,
+  getChangedValues,
   groupById,
+  integerToAmount,
+  integerToCurrency,
+  titleFirst,
 } from 'loot-core/shared/util';
 import {
   type AccountEntity,
@@ -65,8 +66,8 @@ import { FocusableAmountInput } from './FocusableAmountInput';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   FieldLabel,
-  TapField,
   InputField,
+  TapField,
   ToggleField,
 } from '@desktop-client/components/mobile/MobileForms';
 import { getPrettyPayee } from '@desktop-client/components/mobile/utils';
@@ -88,7 +89,7 @@ import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 import { setLastTransaction } from '@desktop-client/transactions/transactionsSlice';
 
 function getFieldName(transactionId: TransactionEntity['id'], field: string) {
@@ -392,6 +393,8 @@ const ChildTransactionEdit = forwardRef<
     const { t } = useTranslation();
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
+    const [hideFraction, _] = useSyncedPref('hideFraction');
+
     const prettyPayee = getPrettyPayee({
       t,
       transaction,
@@ -457,7 +460,7 @@ const ChildTransactionEdit = forwardRef<
                   onClearActiveEdit();
                 }
               }}
-              autoDecimals
+              autoDecimals={!hideFraction}
             />
           </View>
         </View>
@@ -684,8 +687,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
       const today = monthUtils.currentDay();
       const isFuture = unserializedTransaction.date > today;
+      const isLinkedToSchedule = !!unserializedTransaction.schedule;
 
-      if (isFuture) {
+      if (isFuture && !isLinkedToSchedule) {
         const upcomingDays = getUpcomingDays(upcomingLength, today);
         const daysUntilTransaction = monthUtils.differenceInCalendarDays(
           unserializedTransaction.date,
@@ -795,8 +799,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const onTotalAmountUpdate = useCallback(
       (value: number) => {
         if (transaction.amount !== value) {
-          // @ts-expect-error - fix me
-          onUpdateInner(transaction, 'amount', value.toString());
+          onUpdateInner(transaction, 'amount', value);
         }
       },
       [onUpdateInner, transaction],
@@ -884,7 +887,20 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     options: {
                       name,
                       onSubmit: (name, value) => {
-                        onUpdateInner(transactionToEdit, name, value);
+                        if (typeof value === 'object' && 'useRegex' in value) {
+                          onUpdateInner(
+                            transactionToEdit,
+                            name,
+                            applyFindReplace(
+                              transactionToEdit.notes,
+                              value.find,
+                              value.replace,
+                              value.useRegex,
+                            ),
+                          );
+                        } else {
+                          onUpdateInner(transactionToEdit, name, value);
+                        }
                       },
                       onClose: () => {
                         onClearActiveEdit();
@@ -1419,8 +1435,7 @@ function TransactionEditUnconnected({
               newTransaction[field] === 0 ||
               newTransaction[field] === false
             ) {
-              // @ts-expect-error - fix me
-              newTransaction[field] = diff[field];
+              (newTransaction as Record<string, unknown>)[field] = diff[field];
             }
           });
 

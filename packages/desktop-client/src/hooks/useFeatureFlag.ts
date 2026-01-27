@@ -9,8 +9,8 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   formulaMode: false,
   currency: false,
   crossoverReport: false,
-  plugins: false,
-  forceReload: false,
+  customThemes: false,
+  budgetAnalysisReport: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

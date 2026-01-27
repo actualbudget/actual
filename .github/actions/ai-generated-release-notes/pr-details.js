@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import { Octokit } from '@octokit/rest';
 import fs from 'fs';
+
+import { Octokit } from '@octokit/rest';
 
 const token = process.env.GITHUB_TOKEN;
 const repo = process.env.GITHUB_REPOSITORY;
@@ -35,11 +36,13 @@ async function getPRDetails() {
     console.log('- PR Number:', pr.number);
     console.log('- PR Author:', pr.user.login);
     console.log('- PR Title:', pr.title);
+    console.log('- Base Branch:', pr.base.ref);
 
     const result = {
       number: pr.number,
       author: pr.user.login,
       title: pr.title,
+      baseBranch: pr.base.ref,
     };
 
     setOutput('result', JSON.stringify(result));

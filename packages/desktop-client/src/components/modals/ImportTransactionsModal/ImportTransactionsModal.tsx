@@ -1,16 +1,17 @@
 // @ts-strict-ignore
 import React, {
-  useState,
-  useEffect,
   useCallback,
+  useEffect,
+  useState,
   type ComponentProps,
 } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -226,18 +227,30 @@ export function ImportTransactionsModal({
 
   const getImportPreview = useCallback(
     async (
-      transactions,
-      filetype,
-      flipAmount,
-      fieldMappings,
-      splitMode,
+      transactions: ImportTransaction[],
+      filetype: string,
+      flipAmount: boolean,
+      fieldMappings: FieldMapping | null,
+      splitMode: boolean,
       parseDateFormat: DateFormat,
-      inOutMode,
-      outValue,
-      multiplierAmount,
+      inOutMode: boolean,
+      outValue: string,
+      multiplierAmount: string,
     ) => {
       const previewTransactions = [];
       const inOutModeEnabled = isOfxFile(filetype) ? false : inOutMode;
+      const getTransDate: (trans: ImportTransaction) => string | null =
+        isOfxFile(filetype)
+          ? trans => trans.date ?? null
+          : trans => parseDate(trans.date, parseDateFormat);
+
+      // Note that the sort will behave unpredictably if any date fails to parse.
+      transactions.sort((a, b) => {
+        const aDate = getTransDate(a);
+        const bDate = getTransDate(b);
+
+        return aDate < bDate ? 1 : aDate === bDate ? 0 : -1;
+      });
 
       for (let trans of transactions) {
         if (trans.isMatchedTransaction) {
@@ -249,9 +262,7 @@ export function ImportTransactionsModal({
           ? applyFieldMappings(trans, fieldMappings)
           : trans;
 
-        const date = isOfxFile(filetype)
-          ? trans.date
-          : parseDate(trans.date, parseDateFormat);
+        const date = getTransDate(trans);
         if (date == null) {
           console.log(
             `Unable to parse date ${
@@ -431,12 +442,7 @@ export function ImportTransactionsModal({
           setParseDateFormat(null);
         }
 
-        // Reverse the transactions because it's very common for them to
-        // be ordered ascending, but we show transactions descending by
-        // date. This is purely cosmetic.
-        const reversedTransactions =
-          transactions.reverse() as ImportTransaction[];
-        setParsedTransactions(reversedTransactions);
+        setParsedTransactions(transactions as ImportTransaction[]);
       }
 
       setLoadingState(null);
@@ -746,6 +752,7 @@ export function ImportTransactionsModal({
 
     runImportPreview();
     // intentionally exclude runImportPreview from dependencies to avoid infinite rerenders
+    // oxlint-disable-next-line react/exhaustive-deps
   }, [
     filetype,
     flipAmount,
@@ -822,11 +829,7 @@ export function ImportTransactionsModal({
           )}
           {(!error || !error.parsed) && (
             <View
-              style={{
-                flex: 'unset',
-                height: 300,
-                border: '1px solid ' + theme.tableBorder,
-              }}
+              style={{ ...styles.tableContainer, height: 300, flex: 'unset' }}
             >
               <TableHeader headers={headers} />
 

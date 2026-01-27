@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import React, {
+  type ComponentProps,
   type ComponentType,
-  type MouseEventHandler,
-  type SVGProps,
   type CSSProperties,
+  type SVGProps,
 } from 'react';
 
 import { Block } from '@actual-app/components/block';
@@ -22,7 +22,7 @@ type SecondaryItemProps = {
     | ComponentType<SVGProps<SVGElement>>
     | ComponentType<SVGProps<SVGSVGElement>>;
   style?: CSSProperties;
-  onClick?: MouseEventHandler<HTMLDivElement>;
+  onClick?: ComponentProps<typeof ItemContent>['onClick'];
   bold?: boolean;
   indent?: number;
 };

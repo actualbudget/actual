@@ -59,11 +59,11 @@ curl -H "Authorization: Bearer <ACCESS_TOKEN>" https://api.youneedabudget.com/v1
 - Select the drop down menu and **Close File**
 - Select **Import file**
 
-![](/img/migrating/actual-import-1.png)
+![](/img/migrating/actual-import-1.webp)
 
 - Select **nYnab**
 
-![](/img/migrating/actual-import-2.png)
+![](/img/migrating/actual-import-2.webp)
 
 - Choose the exported JSON file
 

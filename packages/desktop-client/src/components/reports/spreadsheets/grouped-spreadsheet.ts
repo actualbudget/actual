@@ -14,8 +14,8 @@ import {
 
 import {
   categoryLists,
-  type QueryDataEntity,
   ReportOptions,
+  type QueryDataEntity,
 } from '@desktop-client/components/reports/ReportOptions';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';

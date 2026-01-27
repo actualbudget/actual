@@ -1,10 +1,10 @@
 import React, {
-  type ComponentProps,
-  type CSSProperties,
   memo,
   useRef,
+  type ComponentProps,
+  type CSSProperties,
 } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
@@ -34,8 +34,8 @@ import {
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
 import {
-  Row,
   Field,
+  Row,
   SheetCell,
   type SheetCellProps,
 } from '@desktop-client/components/table';
@@ -260,8 +260,18 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           opacity: 0,
           transition: 'opacity .25s',
         },
-        '&:hover .hover-visible': {
+        '&:hover .hover-visible, & .force-visible .hover-visible': {
           opacity: 1,
+        },
+        '& .hover-expand': {
+          maxWidth: 0,
+          overflow: 'hidden',
+          transition: 'max-width 0s .25s',
+        },
+        '&:hover .hover-expand, & .hover-expand.force-visible': {
+          maxWidth: '300px',
+          overflow: 'visible',
+          transition: 'max-width 0s linear 0s',
         },
       }}
     >
@@ -278,6 +288,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       >
         {!editing && (
           <View
+            className={`hover-expand ${budgetMenuOpen ? 'force-visible' : ''}`}
             style={{
               flexDirection: 'row',
               flexShrink: 1,
@@ -303,7 +314,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                 width={14}
                 height={14}
                 className="hover-visible"
-                style={budgetMenuOpen ? { opacity: 1 } : {}}
               />
             </Button>
 
@@ -417,9 +427,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                 style={{
                   color:
                     scheduleStatus === 'missed'
-                      ? theme.errorText
+                      ? theme.budgetNumberNegative
                       : scheduleStatus === 'due'
-                        ? theme.warningText
+                        ? theme.templateNumberUnderFunded
                         : theme.upcomingText,
                 }}
                 onPress={() =>
@@ -459,8 +469,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         width="flex"
         style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
       >
-        <span
-          onClick={() => {
+        <Button
+          variant="bare"
+          onPress={() => {
             resetBalancePosition(-6, -4);
             setBalanceMenuOpen(true);
           }}
@@ -473,6 +484,12 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               e.clientY - rect.bottom - 8,
             );
           }}
+          style={{
+            justifyContent: 'flex-end',
+            background: 'transparent',
+            width: '100%',
+            padding: 0,
+          }}
         >
           <BalanceWithCarryover
             carryover={envelopeBudget.catCarryover(category.id)}
@@ -482,7 +499,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             longGoal={envelopeBudget.catLongGoal(category.id)}
             tooltipDisabled={balanceMenuOpen}
           />
-        </span>
+        </Button>
 
         <Popover
           triggerRef={balanceMenuTriggerRef}
@@ -573,8 +590,9 @@ export function IncomeCategoryMonth({
             position: 'relative',
           }}
         >
-          <span
-            onClick={() => {
+          <Button
+            variant="bare"
+            onPress={() => {
               resetIncomePosition(-6, -4);
               setIncomeMenuOpen(true);
             }}
@@ -587,7 +605,11 @@ export function IncomeCategoryMonth({
                 e.clientY - rect.bottom - 8,
               );
             }}
-            style={{ paddingRight: styles.monthRightPadding }}
+            style={{
+              background: 'transparent',
+              padding: 0,
+              paddingRight: styles.monthRightPadding,
+            }}
           >
             <BalanceWithCarryover
               carryover={envelopeBudget.catCarryover(category.id)}
@@ -596,7 +618,7 @@ export function IncomeCategoryMonth({
               budgeted={envelopeBudget.catBudgeted(category.id)}
               longGoal={envelopeBudget.catLongGoal(category.id)}
             />
-          </span>
+          </Button>
           <Popover
             triggerRef={incomeMenuTriggerRef}
             placement="bottom end"

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
@@ -14,6 +14,6 @@ export function useReport<T>(
 
   useEffect(() => {
     getData(spreadsheet, results => setResults(results));
-  }, [getData]);
+  }, [getData, spreadsheet]);
   return results;
 }

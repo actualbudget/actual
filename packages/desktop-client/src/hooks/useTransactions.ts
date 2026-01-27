@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { type Query } from 'loot-core/shared/query';
 import { type IntegerAmount } from 'loot-core/shared/util';

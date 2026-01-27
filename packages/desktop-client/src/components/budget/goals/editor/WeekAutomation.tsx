@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import type { PeriodicTemplate } from 'loot-core/types/models/templates';
 
 import {
-  type Action,
   updateTemplate,
+  type Action,
 } from '@desktop-client/components/budget/goals/actions';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { AmountInput } from '@desktop-client/components/util/AmountInput';

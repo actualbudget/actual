@@ -14,9 +14,9 @@ Starting our example Budget in July, we'll show you step-by-step how to handle c
 
 To show more top level information about your budget, hover over the top left corner of the header and press the expand arrows:
 
-<img width="50%" height="50%" alt="Unexpanded Budget header" src="/img/credit-cards/CC-IND-01.png" />
+<img width="50%" height="50%" alt="Unexpanded Budget header" src="/img/credit-cards/CC-IND-01.webp" />
 
-<img width="50%" height="50%" alt="Expanded Budget Header" src="/img/credit-cards/CC-IND-02.png" />
+<img width="50%" height="50%" alt="Expanded Budget Header" src="/img/credit-cards/CC-IND-02.webp" />
 
 :::
 
@@ -28,7 +28,7 @@ We started our budget at the beginning of July and we normally pay off our Chase
 
 Every time we use the card, we choose a category with a positive Budget Balance. Our account closes on the 7th of every month and our statement arrives a few days later. When the July statement arrives, our Chase account looks like this:
 
-<img width="100%" height="100%" alt="Chase Account July" src="/img/credit-cards/CC-IND-03.png" />
+<img width="100%" height="100%" alt="Chase Account July" src="/img/credit-cards/CC-IND-03.webp" />
 
 :::note
 
@@ -58,7 +58,7 @@ If necessary, remember to enter a transaction for any interest and or fees charg
 
 When we [reconcile](/docs/accounts/reconciliation.md) our account for this first month, we clear all of the June purchases and payments (which should be part of the "Starting Balance") in one lump. In our case their lump sum is $35.00.
 
-<img width="100%" height="100%" alt="Chase Reconcile July" src="/img/credit-cards/CC-IND-04.png" />
+<img width="100%" height="100%" alt="Chase Reconcile July" src="/img/credit-cards/CC-IND-04.webp" />
 
 We know that we accounted for all of these purchases as **none** of our Budget categories are overspent and our "To Budget" amount in the Budget header is **not** less than 0.00. We can pay our statement New Balance without worry, so we send Chase $93.23 from Ally Savings and we _Make Transfer_ that amount from Ally to Chase as a deposit to our Chase credit card account.
 
@@ -68,20 +68,20 @@ We continue to spend in July, sometimes using our Chase card and _always_ catego
 
 At the end of July, our Budget looks like this:
 
-<img width="100%" height="100%" alt="July Budget" src="/img/credit-cards/CC-IND-05.png" />
+<img width="100%" height="100%" alt="July Budget" src="/img/credit-cards/CC-IND-05.webp" />
 
 <br />
 
 Our Chase credit card account looks like this:
 
-<img width="100%" height="100%" alt="Chase July Account" src="/img/credit-cards/CC-IND-06.png" />
+<img width="100%" height="100%" alt="Chase July Account" src="/img/credit-cards/CC-IND-06.webp" />
 
 <br />
 
 We set up our August Budget on the 1st and it looks a lot like our July Budget.
 We continue to spend and categorize each transaction _Within the Budget_ and when our August statement arrives on the 12th, our Chase credit card account looks like this:
 
-<img width="100%" height="100%" alt="Chase August Account" src="/img/credit-cards/CC-IND-07.png" />
+<img width="100%" height="100%" alt="Chase August Account" src="/img/credit-cards/CC-IND-07.webp" />
 
 **Chase Account Summary - August 2025**
 
@@ -95,7 +95,7 @@ We continue to spend and categorize each transaction _Within the Budget_ and whe
 
 We [reconcile](/docs/accounts/reconciliation.md) our Chase account and it now looks like this:
 
-<img width="100%" height="100%" alt="Chase August Reconcile" src="/img/credit-cards/CC-IND-08.png" />
+<img width="100%" height="100%" alt="Chase August Reconcile" src="/img/credit-cards/CC-IND-08.webp" />
 
 <br />
 
@@ -111,13 +111,13 @@ If you use a Schedule for your auto-pay, edit the payment amount in your next Sc
 
 Our Chase account now looks like this:
 
-<img width="100%" height="100%" alt="Chase August Payment" src="/img/credit-cards/CC-IND-09.png" />
+<img width="100%" height="100%" alt="Chase August Payment" src="/img/credit-cards/CC-IND-09.webp" />
 
 <br />
 
 on the 18th, our Budget looks like this:
 
-<img width="100%" height="100%" alt="Budget August 18" src="/img/credit-cards/CC-IND-010.png" />
+<img width="100%" height="100%" alt="Budget August 18" src="/img/credit-cards/CC-IND-010.webp" />
 
 <br />
 

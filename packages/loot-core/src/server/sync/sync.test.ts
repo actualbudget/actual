@@ -9,7 +9,7 @@ import * as mockSyncServer from '../tests/mockSyncServer';
 import * as encoder from './encoder';
 import { isError } from './utils';
 
-import { setSyncingMode, sendMessages, applyMessages, fullSync } from './index';
+import { applyMessages, fullSync, sendMessages, setSyncingMode } from './index';
 
 beforeEach(() => {
   mockSyncServer.reset();

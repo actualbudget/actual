@@ -5,16 +5,17 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import {
-  LineChart,
-  Line,
   CartesianGrid,
+  Line,
+  LineChart,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceLine,
 } from 'recharts';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -28,6 +29,7 @@ type CrossoverGraphProps = {
       investmentIncome: number;
       expenses: number;
       nestEgg: number;
+      adjustedExpenses?: number;
       isProjection?: boolean;
     }>;
     start: string;
@@ -62,6 +64,7 @@ export function CrossoverGraph({
       investmentIncome: number | string;
       expenses: number | string;
       nestEgg: number | string;
+      adjustedExpenses?: number | string;
       isProjection?: boolean;
     };
   };
@@ -106,7 +109,9 @@ export function CrossoverGraph({
                   <Trans>Monthly investment income:</Trans>
                 </div>
                 <div>
-                  {format(payload[0].payload.investmentIncome, 'financial')}
+                  <FinancialText>
+                    {format(payload[0].payload.investmentIncome, 'financial')}
+                  </FinancialText>
                 </div>
               </View>
               <View
@@ -118,8 +123,29 @@ export function CrossoverGraph({
                 <div>
                   <Trans>Monthly expenses:</Trans>
                 </div>
-                <div>{format(payload[0].payload.expenses, 'financial')}</div>
+                <div>
+                  <FinancialText>
+                    {format(payload[0].payload.expenses, 'financial')}
+                  </FinancialText>
+                </div>
               </View>
+              {payload[0].payload.adjustedExpenses != null && (
+                <View
+                  className={css({
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                  })}
+                >
+                  <div>
+                    <Trans>Target income:</Trans>
+                  </div>
+                  <div>
+                    <FinancialText>
+                      {format(payload[0].payload.adjustedExpenses, 'financial')}
+                    </FinancialText>
+                  </div>
+                </View>
+              )}
               <View
                 className={css({
                   display: 'flex',
@@ -129,7 +155,11 @@ export function CrossoverGraph({
                 <div>
                   <Trans>Life savings:</Trans>
                 </div>
-                <div>{format(payload[0].payload.nestEgg, 'financial')}</div>
+                <div>
+                  <FinancialText>
+                    {format(payload[0].payload.nestEgg, 'financial')}
+                  </FinancialText>
+                </div>
               </View>
             </div>
           </div>
@@ -189,7 +219,7 @@ export function CrossoverGraph({
                 type="monotone"
                 dataKey="investmentIncome"
                 dot={false}
-                stroke={theme.reportsBlue}
+                stroke={theme.reportsNumberPositive}
                 strokeWidth={2}
                 {...animationProps}
               />
@@ -197,8 +227,17 @@ export function CrossoverGraph({
                 type="monotone"
                 dataKey="expenses"
                 dot={false}
-                stroke={theme.reportsRed}
+                stroke={theme.reportsNumberNegative}
                 strokeWidth={2}
+                {...animationProps}
+              />
+              <Line
+                type="monotone"
+                dataKey="adjustedExpenses"
+                dot={false}
+                stroke={theme.reportsNumberNegative}
+                strokeWidth={2}
+                strokeDasharray="5 5"
                 {...animationProps}
               />
             </LineChart>
