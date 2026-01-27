@@ -27,7 +27,10 @@ import {
 } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import {
+  useFormat,
+  type UseFormatResult,
+} from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type NetWorthDataPoint = {
@@ -39,6 +42,187 @@ type NetWorthDataPoint = {
   networth: string;
   date: string;
 } & Record<string, string | number>;
+
+type TrendTooltipProps = TooltipContentProps<number, string> & {
+  style?: CSSProperties;
+  t: (key: string) => string;
+};
+
+function TrendTooltip({ active, payload, style, t }: TrendTooltipProps) {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        className={css([
+          {
+            zIndex: 1000,
+            pointerEvents: 'none',
+            borderRadius: 2,
+            boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+            backgroundColor: theme.menuBackground,
+            color: theme.menuItemText,
+            padding: 10,
+          },
+          style,
+        ])}
+      >
+        <div>
+          <div style={{ marginBottom: 10 }}>
+            <strong>{payload[0].payload.date}</strong>
+          </div>
+          <div style={{ lineHeight: 1.5 }}>
+            <AlignedText
+              left={t('Assets:')}
+              right={<FinancialText>{payload[0].payload.assets}</FinancialText>}
+            />
+            <AlignedText
+              left={t('Debt:')}
+              right={<FinancialText>{payload[0].payload.debt}</FinancialText>}
+            />
+            <AlignedText
+              left={t('Net worth:')}
+              right={
+                <FinancialText as="strong">
+                  {payload[0].payload.networth}
+                </FinancialText>
+              }
+            />
+            <AlignedText
+              left={t('Change:')}
+              right={<FinancialText>{payload[0].payload.change}</FinancialText>}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+}
+
+type StackedTooltipProps = TooltipContentProps<number, string> & {
+  sortedAccounts: Array<{ id: string; name: string }>;
+  accounts: Array<{ id: string; name: string }>;
+  hoveredAccountId: string | null;
+  format: UseFormatResult;
+};
+
+function StackedTooltip({
+  active,
+  payload,
+  sortedAccounts,
+  accounts,
+  hoveredAccountId,
+  format,
+}: StackedTooltipProps) {
+  if (active && payload && payload.length) {
+    // Calculate total from payload (visible accounts)
+    const total = payload.reduce(
+      (acc: number, p) => acc + (Number(p.value) || 0),
+      0,
+    );
+    const sortedPayload = [...payload].sort((a, b) => {
+      const indexA = sortedAccounts.findIndex(acc => acc.id === a.dataKey);
+      const indexB = sortedAccounts.findIndex(acc => acc.id === b.dataKey);
+      return indexB - indexA;
+    });
+
+    const hasPositive = payload.some(p => (Number(p.value) || 0) > 0);
+    const hasNegative = payload.some(p => (Number(p.value) || 0) < 0);
+    const showPercentage = !(hasPositive && hasNegative);
+
+    return (
+      <div
+        className={css([
+          {
+            zIndex: 1000,
+            pointerEvents: 'auto',
+            borderRadius: 2,
+            boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+            backgroundColor: theme.menuBackground,
+            color: theme.menuItemText,
+            padding: 10,
+            fontSize: 12,
+            maxHeight: '80vh',
+            overflowY: 'auto',
+          },
+        ])}
+      >
+        <div style={{ marginBottom: 10, fontWeight: 'bold' }}>
+          {payload[0].payload.date}
+        </div>
+        <table style={{ borderSpacing: '15px 0', marginLeft: '-15px' }}>
+          <thead>
+            <tr>
+              <th style={{ textAlign: 'left', paddingLeft: 15 }}>
+                <Trans>Account</Trans>
+              </th>
+              <th style={{ textAlign: 'right' }}>
+                <Trans>Value</Trans>
+              </th>
+              {showPercentage && <th style={{ textAlign: 'right' }}>%</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {sortedPayload.map(entry => {
+              const accountId = entry.dataKey as string;
+              const accountName =
+                accounts.find(a => a.id === accountId)?.name || accountId;
+              const value = Number(entry.value);
+              const percent = total !== 0 ? (value / total) * 100 : 0;
+
+              return (
+                <tr key={accountId} style={{ color: entry.color }}>
+                  <td
+                    style={{
+                      textAlign: 'left',
+                      paddingLeft: 15,
+                      textDecoration:
+                        hoveredAccountId === accountId
+                          ? 'underline'
+                          : undefined,
+                    }}
+                  >
+                    {accountName}
+                  </td>
+                  <td style={{ textAlign: 'right' }}>
+                    <span style={{ color: theme.pageText }}>
+                      <FinancialText>
+                        {format(value, 'financial')}
+                      </FinancialText>
+                    </span>
+                  </td>
+                  {showPercentage && (
+                    <td style={{ textAlign: 'right' }}>
+                      <span style={{ color: theme.pageText }}>
+                        <FinancialText>{percent.toFixed(1)}%</FinancialText>
+                      </span>
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
+            <tr
+              style={{
+                fontWeight: 'bold',
+                borderTop: '1px solid ' + theme.tableBorder,
+              }}
+            >
+              <td style={{ textAlign: 'left', paddingLeft: 15, paddingTop: 5 }}>
+                <Trans>Total</Trans>
+              </td>
+              <td style={{ textAlign: 'right', paddingTop: 5 }}>
+                <FinancialText>{format(total, 'financial')}</FinancialText>
+              </td>
+              {showPercentage && (
+                <td style={{ textAlign: 'right', paddingTop: 5 }}>100.0%</td>
+              )}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+  return null;
+}
 
 type NetWorthGraphProps = {
   style?: CSSProperties;
@@ -152,183 +336,6 @@ export function NetWorthGraph({
 
   const { t } = useTranslation();
 
-  // Trend Tooltip
-  // oxlint-disable-next-line react/no-unstable-nested-components
-  const TrendTooltip = ({
-    active,
-    payload,
-  }: TooltipContentProps<number, string>) => {
-    if (active && payload && payload.length) {
-      return (
-        <div
-          className={css([
-            {
-              zIndex: 1000,
-              pointerEvents: 'none',
-              borderRadius: 2,
-              boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-              backgroundColor: theme.menuBackground,
-              color: theme.menuItemText,
-              padding: 10,
-            },
-            style,
-          ])}
-        >
-          <div>
-            <div style={{ marginBottom: 10 }}>
-              <strong>{payload[0].payload.date}</strong>
-            </div>
-            <div style={{ lineHeight: 1.5 }}>
-              <AlignedText
-                left={t('Assets:')}
-                right={
-                  <FinancialText>{payload[0].payload.assets}</FinancialText>
-                }
-              />
-              <AlignedText
-                left={t('Debt:')}
-                right={<FinancialText>{payload[0].payload.debt}</FinancialText>}
-              />
-              <AlignedText
-                left={t('Net worth:')}
-                right={
-                  <FinancialText as="strong">
-                    {payload[0].payload.networth}
-                  </FinancialText>
-                }
-              />
-              <AlignedText
-                left={t('Change:')}
-                right={
-                  <FinancialText>{payload[0].payload.change}</FinancialText>
-                }
-              />
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  // Stacked Tooltip
-  // oxlint-disable-next-line react/no-unstable-nested-components
-  const StackedTooltip = ({
-    active,
-    payload,
-  }: TooltipContentProps<number, string>) => {
-    if (active && payload && payload.length) {
-      // Calculate total from payload (visible accounts)
-      const total = payload.reduce(
-        (acc: number, p) => acc + (Number(p.value) || 0),
-        0,
-      );
-      const sortedPayload = [...payload].sort((a, b) => {
-        const indexA = sortedAccounts.findIndex(acc => acc.id === a.dataKey);
-        const indexB = sortedAccounts.findIndex(acc => acc.id === b.dataKey);
-        return indexB - indexA;
-      });
-
-      const hasPositive = payload.some(p => (Number(p.value) || 0) > 0);
-      const hasNegative = payload.some(p => (Number(p.value) || 0) < 0);
-      const showPercentage = !(hasPositive && hasNegative);
-
-      return (
-        <div
-          className={css([
-            {
-              zIndex: 1000,
-              pointerEvents: 'auto',
-              borderRadius: 2,
-              boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-              backgroundColor: theme.menuBackground,
-              color: theme.menuItemText,
-              padding: 10,
-              fontSize: 12,
-              maxHeight: '80vh',
-              overflowY: 'auto',
-            },
-          ])}
-        >
-          <div style={{ marginBottom: 10, fontWeight: 'bold' }}>
-            {payload[0].payload.date}
-          </div>
-          <table style={{ borderSpacing: '15px 0', marginLeft: '-15px' }}>
-            <thead>
-              <tr>
-                <th style={{ textAlign: 'left', paddingLeft: 15 }}>
-                  <Trans>Account</Trans>
-                </th>
-                <th style={{ textAlign: 'right' }}>
-                  <Trans>Value</Trans>
-                </th>
-                {showPercentage && <th style={{ textAlign: 'right' }}>%</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {sortedPayload.map(entry => {
-                const accountId = entry.dataKey as string;
-                const accountName =
-                  accounts.find(a => a.id === accountId)?.name || accountId;
-                const value = Number(entry.value);
-                const percent = total !== 0 ? (value / total) * 100 : 0;
-
-                return (
-                  <tr key={accountId} style={{ color: entry.color }}>
-                    <td
-                      style={{
-                        textAlign: 'left',
-                        paddingLeft: 15,
-                        textDecoration:
-                          hoveredAccountId === accountId
-                            ? 'underline'
-                            : undefined,
-                      }}
-                    >
-                      {accountName}
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <span style={{ color: theme.pageText }}>
-                        <FinancialText>
-                          {format(value, 'financial')}
-                        </FinancialText>
-                      </span>
-                    </td>
-                    {showPercentage && (
-                      <td style={{ textAlign: 'right' }}>
-                        <span style={{ color: theme.pageText }}>
-                          <FinancialText>{percent.toFixed(1)}%</FinancialText>
-                        </span>
-                      </td>
-                    )}
-                  </tr>
-                );
-              })}
-              <tr
-                style={{
-                  fontWeight: 'bold',
-                  borderTop: '1px solid ' + theme.tableBorder,
-                }}
-              >
-                <td
-                  style={{ textAlign: 'left', paddingLeft: 15, paddingTop: 5 }}
-                >
-                  <Trans>Total</Trans>
-                </td>
-                <td style={{ textAlign: 'right', paddingTop: 5 }}>
-                  <FinancialText>{format(total, 'financial')}</FinancialText>
-                </td>
-                {showPercentage && (
-                  <td style={{ textAlign: 'right', paddingTop: 5 }}>100.0%</td>
-                )}
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      );
-    }
-    return null;
-  };
   return (
     <Container
       style={{
@@ -391,14 +398,24 @@ export function NetWorthGraph({
               />
               {effectiveShowTooltip && mode === 'trend' && (
                 <Tooltip<number, string>
-                  content={props => <TrendTooltip {...props} />}
+                  content={props => (
+                    <TrendTooltip {...props} style={style} t={t} />
+                  )}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
               )}
               {effectiveShowTooltip && mode === 'stacked' && (
                 <Tooltip<number, string>
-                  content={props => <StackedTooltip {...props} />}
+                  content={props => (
+                    <StackedTooltip
+                      {...props}
+                      sortedAccounts={sortedAccounts}
+                      accounts={accounts}
+                      hoveredAccountId={hoveredAccountId}
+                      format={format}
+                    />
+                  )}
                   isAnimationActive={false}
                   wrapperStyle={{ zIndex: 9999, pointerEvents: 'auto' }}
                 />
