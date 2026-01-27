@@ -351,10 +351,10 @@ const PollingComponent = ({
 
 const CompletedAuthorizationIndicator = ({
   onContinue,
-  onClose,
+  _onClose,
 }: {
   onContinue: () => Promise<void>;
-  onClose: () => void;
+  _onClose: () => void;
 }) => {
   return (
     <Button
@@ -479,12 +479,13 @@ export function EnableBankingSetupAccountModal({
                 console.error('Error in onSuccess:', error);
                 setError({
                   error_code: 'INTERNAL_ERROR',
-                  error_type: error instanceof Error ? error.message : String(error),
+                  error_type:
+                    error instanceof Error ? error.message : String(error),
                 });
                 resetState();
               }
             }}
-            onClose={close}
+            _onClose={close}
           />
         );
       }

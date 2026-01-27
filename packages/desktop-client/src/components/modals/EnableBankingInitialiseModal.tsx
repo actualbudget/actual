@@ -43,8 +43,15 @@ export const EnableBankingInitialiseModal = ({
         setSecretKey(reader.result);
         setIsValid(true);
       } else {
+        setSecretKey('');
         setIsValid(false);
+        setError(t('Failed to read the secret key file.'));
       }
+    };
+    reader.onerror = () => {
+      setSecretKey('');
+      setIsValid(false);
+      setError(t('Failed to read the secret key file.'));
     };
     reader.readAsText(file);
   };
