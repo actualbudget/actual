@@ -282,7 +282,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
                 ...makeAmountFullStyle(value, {
                   positiveColor: theme.numberPositive,
                   negativeColor: theme.numberNegative,
-                  zeroColor: theme.numberNeutral,
+                  zeroColor: theme.numberZero,
                 }),
                 fontSize: 15,
                 userSelect: 'none',
