@@ -111,7 +111,7 @@ export function SchedulesListItem({
               <Text style={{ color: theme.pageTextSubdued }}>
                 <Trans>Amount:</Trans>
               </Text>
-              <Text style={{ ...styles.tnum, color: theme.pageText }}>
+              <Text style={{ ...styles.tnum, color: theme.pageTextSubdued }}>
                 {amountStr}
               </Text>
             </SpaceBetween>
