@@ -286,7 +286,7 @@ function Balance({ balance }: BalanceProps) {
                   ? theme.numberNegative
                   : props.value > 0
                     ? theme.numberPositive
-                    : theme.numberNeutral,
+                    : theme.numberZero,
             }}
             data-testid="transactions-balance"
           />
