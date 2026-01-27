@@ -109,6 +109,7 @@ export type DbRule = {
   actions: JsonString;
   tombstone: 1 | 0;
   conditions_op: string;
+  sort_order: number | null;
 };
 
 export type DbSchedule = {
