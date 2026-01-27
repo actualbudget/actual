@@ -184,6 +184,17 @@ describe('utility functions', () => {
     expect(currencyToAmount('3,000.')).toBe(3000);
   });
 
+  test('currencyToAmount works with apostrophe-dot format', () => {
+    setNumberFormat({ format: 'apostrophe-dot', hideFraction: false });
+    // These are the failing cases from the bug report
+    expect(currencyToAmount("12'345.67")).toBe(12345.67);
+    expect(currencyToAmount("1'234.56")).toBe(1234.56);
+    expect(currencyToAmount("1'000.33")).toBe(1000.33);
+    // Additional test cases
+    expect(currencyToAmount("100'000.99")).toBe(100000.99);
+    expect(currencyToAmount("1'000'000.50")).toBe(1000000.5);
+  });
+
   test('currencyToAmount works with dot-comma', () => {
     setNumberFormat({ format: 'dot-comma', hideFraction: false });
     expect(currencyToAmount('3,45')).toBe(3.45);
