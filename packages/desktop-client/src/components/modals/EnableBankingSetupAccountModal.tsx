@@ -351,10 +351,8 @@ const PollingComponent = ({
 
 const CompletedAuthorizationIndicator = ({
   onContinue,
-  _onClose,
 }: {
   onContinue: () => Promise<void>;
-  _onClose: () => void;
 }) => {
   return (
     <Button
@@ -427,7 +425,7 @@ export function EnableBankingSetupAccountModal({
     }
   }, [phase, token]);
 
-  let component: ReactElement | ((close: () => void) => ReactElement) = (
+  let component: ReactElement = (
     <WaitingIndicator
       message={t('Checking if Enable Banking is available...')}
     />
@@ -470,7 +468,7 @@ export function EnableBankingSetupAccountModal({
       break;
     case 'done':
       if (token !== null) {
-        component = (close: () => void) => (
+        component = (
           <CompletedAuthorizationIndicator
             onContinue={async () => {
               try {
@@ -485,7 +483,6 @@ export function EnableBankingSetupAccountModal({
                 resetState();
               }
             }}
-            _onClose={close}
           />
         );
       }
@@ -514,7 +511,7 @@ export function EnableBankingSetupAccountModal({
                 Banking will not be able to withdraw funds from your accounts.
               </Trans>
             </Paragraph>
-            {typeof component === 'function' ? component(close) : component}
+            {component}
           </View>
         </>
       )}
