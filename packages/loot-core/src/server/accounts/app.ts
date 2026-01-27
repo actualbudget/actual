@@ -121,7 +121,10 @@ async function getAccountProperties({ id }: { id: AccountEntity['id'] }) {
 }
 
 async function getBank({ id }: { id: string }) {
-  return await db.first<db.DbBank>('SELECT * FROM banks WHERE id = ?', [id]);
+  return await db.first<db.DbBank>(
+    'SELECT * FROM banks WHERE id = ? AND tombstone = 0',
+    [id],
+  );
 }
 
 async function linkGoCardlessAccount({
@@ -531,7 +534,7 @@ async function setSecret({
       },
     );
   } catch (error) {
-    logger.log('this errored somehow');
+    logger.error('Error saving secret:', error);
     return {
       error: 'failed',
       reason: error instanceof PostError ? error.reason : undefined,

@@ -368,7 +368,6 @@ const CompletedAuthorizationIndicator = ({
       }}
       onPress={async () => {
         await onContinue();
-        onClose();
       }}
     >
       <Trans>Success! Click to continue</Trans> &rarr;
@@ -383,6 +382,8 @@ type EnableBankingSetupAccountModalProps = Extract<
 
 export function EnableBankingSetupAccountModal({
   onSuccess,
+  initialCountry = undefined,
+  initialAspsp = undefined,
 }: EnableBankingSetupAccountModalProps) {
   const { t } = useTranslation();
 
@@ -436,6 +437,8 @@ export function EnableBankingSetupAccountModal({
     case 'selectingAspsp':
       component = (
         <AspspSelector
+          init_country={initialCountry}
+          init_aspsp={initialAspsp}
           onComplete={(response: EnableBankingAuthenticationStartResponse) => {
             setError(null);
             setAuthenticationStartResponse(response);
@@ -470,7 +473,16 @@ export function EnableBankingSetupAccountModal({
         component = (close: () => void) => (
           <CompletedAuthorizationIndicator
             onContinue={async () => {
-              await onSuccess(token);
+              try {
+                await onSuccess(token);
+              } catch (error) {
+                console.error('Error in onSuccess:', error);
+                setError({
+                  error_code: 'INTERNAL_ERROR',
+                  error_type: error instanceof Error ? error.message : String(error),
+                });
+                resetState();
+              }
             }}
             onClose={close}
           />
