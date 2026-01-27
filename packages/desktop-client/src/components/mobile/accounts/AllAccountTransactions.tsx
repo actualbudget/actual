@@ -41,10 +41,10 @@ function TransactionListWithPreviews() {
   );
   const {
     transactions,
-    isLoading: isTransactionsLoading,
-    reload: reloadTransactions,
-    isLoadingMore,
-    loadMore: loadMoreTransactions,
+    isPending: isTransactionsLoading,
+    refetch: reloadTransactions,
+    isFetchingNextPage: isLoadingMoreTransactions,
+    fetchNextPage: fetchMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
   });
@@ -144,8 +144,8 @@ function TransactionListWithPreviews() {
       }
       transactions={transactionsToDisplay}
       balance={balanceBindings.balance}
-      isLoadingMore={isLoadingMore}
-      onLoadMore={loadMoreTransactions}
+      isLoadingMore={isLoadingMoreTransactions}
+      onLoadMore={fetchMoreTransactions}
       searchPlaceholder={t('Search All Accounts')}
       onSearch={onSearch}
       onOpenTransaction={onOpenTransaction}
