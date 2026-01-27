@@ -26,7 +26,11 @@ FROM deps AS builder
 
 WORKDIR /app
 
+COPY bin/ ./bin/
 COPY packages/ ./packages/
+
+# Skip git operations during Docker build
+ENV SKIP_GIT_OPERATIONS=true
 
 # Increase memory limit for the build process to 8GB
 ENV NODE_OPTIONS=--max_old_space_size=8192

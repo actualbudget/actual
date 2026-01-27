@@ -75,6 +75,7 @@ export function selectEnableBankingAccounts(
     }
   }
 
+  dispatch(closeModal());
   dispatch(
     pushModal({
       modal: {
@@ -89,11 +90,28 @@ export function selectEnableBankingAccounts(
   );
 }
 
-export function authorizeEnableBankingSession(
+export async function authorizeEnableBankingSession(
   dispatch: AppDispatch,
   account?: AccountEntity,
   onUnlink?: () => void,
 ) {
+  // For reauth, fetch the bank record to get the ASPSP identifier
+  // The bank_id field contains "COUNTRY_BANKNAME" (e.g., "IT_ING" or "NL_ABN_AMRO")
+  let initialCountry: string | undefined;
+  let initialAspsp: string | undefined;
+
+  if (account?.bank && account.account_sync_source === 'enablebanking') {
+    // Fetch the bank record from the database
+    const bankRecord = await send('get-bank', { id: account.bank });
+    if (bankRecord?.bank_id) {
+      const underscoreIndex = bankRecord.bank_id.indexOf('_');
+      if (underscoreIndex > 0) {
+        initialCountry = bankRecord.bank_id.substring(0, underscoreIndex);
+        initialAspsp = bankRecord.bank_id.substring(underscoreIndex + 1);
+      }
+    }
+  }
+
   dispatch(
     pushModal({
       modal: {
@@ -105,6 +123,9 @@ export function authorizeEnableBankingSession(
             }
             selectEnableBankingAccounts(dispatch, token, account);
           },
+          // Pre-select country and bank for re-authorization
+          initialCountry,
+          initialAspsp,
         },
       },
     }),

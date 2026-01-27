@@ -114,6 +114,8 @@ export type Modal =
       name: 'enablebanking-setup-account';
       options: {
         onSuccess: (data: EnableBankingToken) => Promise<void>;
+        initialCountry?: string;
+        initialAspsp?: string;
       };
     }
   | {

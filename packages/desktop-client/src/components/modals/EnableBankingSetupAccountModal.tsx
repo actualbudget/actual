@@ -105,6 +105,23 @@ const AspspSelector = ({
     init_aspsp ? init_aspsp : null,
   );
   const [startingAuth, setStartingAuth] = useState<boolean>(false);
+  const autoTriggeredRef = useRef(false);
+
+  // Auto-trigger authentication when both init values are provided (reauth scenario)
+  useEffect(() => {
+    if (
+      init_country &&
+      init_aspsp &&
+      country &&
+      aspsp &&
+      !startingAuth &&
+      !autoTriggeredRef.current
+    ) {
+      autoTriggeredRef.current = true;
+      onLink();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [country, aspsp]); // Only trigger when country/aspsp are set
 
   useEffect(() => {
     let cancelled = false;
@@ -336,7 +353,7 @@ const CompletedAuthorizationIndicator = ({
   onContinue,
   onClose,
 }: {
-  onContinue: () => void;
+  onContinue: () => Promise<void>;
   onClose: () => void;
 }) => {
   return (

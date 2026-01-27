@@ -37,8 +37,7 @@ export function EnableBankingCallback() {
           return;
         }
         window.close();
-      } catch (err) {
-        console.error('Error completing Enable Banking authentication:', err);
+      } catch {
         setError(
           t('Something went wrong during authentication. Please try again.'),
         );

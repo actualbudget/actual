@@ -110,7 +110,7 @@ export function AccountSyncCheck() {
   );
 
   const reauth = useCallback(
-    (acc: AccountEntity) => {
+    async (acc: AccountEntity) => {
       setOpen(false);
 
       if (acc.account_id) {
@@ -119,8 +119,9 @@ export function AccountSyncCheck() {
             authorizeBank(dispatch);
             return;
           case 'enablebanking':
-            //TODO: skip choosing the bank since we have that info
-            authorizeEnableBankingSession(dispatch, acc, () => unlink(acc));
+            await authorizeEnableBankingSession(dispatch, acc, () =>
+              unlink(acc),
+            );
             return;
           default:
             break;

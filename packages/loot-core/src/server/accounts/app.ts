@@ -47,6 +47,7 @@ export type AccountHandlers = {
   'accounts-get': typeof getAccounts;
   'account-balance': typeof getAccountBalance;
   'account-properties': typeof getAccountProperties;
+  'get-bank': typeof getBank;
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
@@ -117,6 +118,10 @@ async function getAccountProperties({ id }: { id: AccountEntity['id'] }) {
     balance: balanceResult?.balance || 0,
     numTransactions: countResult?.count || 0,
   };
+}
+
+async function getBank({ id }: { id: string }) {
+  return await db.first<db.DbBank>('SELECT * FROM banks WHERE id = ?', [id]);
 }
 
 async function linkGoCardlessAccount({
@@ -1231,6 +1236,7 @@ app.method('account-update', mutator(undoable(updateAccount)));
 app.method('accounts-get', getAccounts);
 app.method('account-balance', getAccountBalance);
 app.method('account-properties', getAccountProperties);
+app.method('get-bank', getBank);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
