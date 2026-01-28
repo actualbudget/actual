@@ -4,16 +4,16 @@ import type {
 } from 'node-fetch';
 
 // loot-core types
-import type { InitConfig } from 'loot-core/server/main';
+import {
+  init as initLootCore,
+  lib,
+  type InitConfig,
+} from 'loot-core/server/main';
 
-// oxlint-disable-next-line typescript/ban-ts-comment
-// @ts-ignore: bundle not available until we build it
-import * as bundle from './app/bundle.api.js';
-import * as injected from './injected';
 import { validateNodeVersion } from './validateNodeVersion';
 
-let actualApp: null | typeof bundle.lib;
-export const internal = bundle.lib;
+let actualApp: null | typeof lib;
+export const internal = lib;
 
 export * from './methods';
 export * as utils from './utils';
@@ -33,11 +33,10 @@ export async function init(config: InitConfig = {}) {
     };
   }
 
-  await bundle.init(config);
-  actualApp = bundle.lib;
+  await initLootCore(config);
+  actualApp = lib;
 
-  injected.override(bundle.lib.send);
-  return bundle.lib;
+  return lib;
 }
 
 export async function shutdown() {
