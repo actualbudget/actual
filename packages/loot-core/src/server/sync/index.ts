@@ -421,33 +421,51 @@ export const applyMessages = sequential(async (messages: Message[]) => {
 });
 
 export function receiveMessages(messages: Message[]): Promise<Message[]> {
-  messages.forEach(msg => {
-    Timestamp.recv(msg.timestamp);
-  });
+  try {
+    messages.forEach(msg => {
+      Timestamp.recv(msg.timestamp);
+    });
+  } catch (e) {
+    if (e instanceof Timestamp.ClockDriftError) {
+      throw new SyncError('clock-drift');
+    }
+    throw e;
+  }
 
   return runMutator(() => applyMessages(messages));
+}
+
+async function errorHandler(e: Error) {
+  captureException(e);
+
+  if (e instanceof SyncError) {
+    if (e.reason === 'invalid-schema') {
+      // We know this message came from a local modification, and it
+      // couldn't apply, which doesn't make any sense. Must be a bug
+      // in the code. Send a specific error type for it for a custom
+      // message.
+      app.events.emit('sync', {
+        type: 'error',
+        subtype: 'apply-failure',
+        meta: e.meta,
+      });
+    } else {
+      app.events.emit('sync', { type: 'error', meta: e.meta });
+    }
+  } else if (e instanceof Timestamp.ClockDriftError) {
+    app.events.emit('sync', {
+      type: 'error',
+      subtype: 'clock-drift',
+      meta: { message: e.message },
+    });
+  }
 }
 
 async function _sendMessages(messages: Message[]): Promise<void> {
   try {
     await applyMessages(messages);
   } catch (e) {
-    if (e instanceof SyncError) {
-      if (e.reason === 'invalid-schema') {
-        // We know this message came from a local modification, and it
-        // couldn't apply, which doesn't make any sense. Must be a bug
-        // in the code. Send a specific error type for it for a custom
-        // message.
-        app.events.emit('sync', {
-          type: 'error',
-          subtype: 'apply-failure',
-          meta: e.meta,
-        });
-      } else {
-        app.events.emit('sync', { type: 'error', meta: e.meta });
-      }
-    }
-
+    errorHandler(e);
     throw e;
   }
 
@@ -467,6 +485,8 @@ export async function batchMessages(func: () => Promise<void>): Promise<void> {
 
   try {
     await func();
+  } catch (e) {
+    errorHandler(e);
     // TODO: if it fails, it shouldn't apply them?
   } finally {
     IS_BATCHING = false;
@@ -584,6 +604,12 @@ export const fullSync = once(async function (): Promise<
         app.events.emit('sync', {
           type: 'error',
           subtype: e.reason,
+          meta: e.meta,
+        });
+      } else if (e.reason === 'clock-drift') {
+        app.events.emit('sync', {
+          type: 'error',
+          subtype: 'clock-drift',
           meta: e.meta,
         });
       } else {
