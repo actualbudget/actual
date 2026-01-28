@@ -21,7 +21,7 @@ export default defineConfig({
   },
   plugins: [
     peggyLoader(),
-    visualizer({ template: 'raw-data', filename: 'dist/stats.json' }),
+    visualizer({ template: 'raw-data', filename: 'app/stats.json' }),
   ],
   resolve: {
     extensions: [
