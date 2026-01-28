@@ -12,5 +12,13 @@
     "declarationDir": "@types"
   },
   "include": ["."],
-  "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts"]
+  "exclude": [
+    "**/node_modules/*",
+    "dist",
+    "@types",
+    "*.test.ts",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "vitest.setup.ts"
+  ]
 }
