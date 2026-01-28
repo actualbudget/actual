@@ -7,14 +7,12 @@
     "@types",
     "dist"
   ],
-  "main": "dist/index.js",
-  "types": "@types/index.d.ts",
+  "main": "dist/api/index.js",
+  "types": "@types/api/index.d.ts",
   "scripts": {
     "build:crdt": "yarn workspace @actual-app/crdt build",
     "build:node": "tsc --p tsconfig.dist.json && tsc-alias -p tsconfig.dist.json",
-    "build:migrations": "cp migrations/*.sql dist/migrations",
-    "build:default-db": "cp default-db.sqlite dist/",
-    "build": "yarn run clean && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
+    "build": "yarn run clean && yarn run build:node",
     "test": "yarn run clean && yarn run build:crdt && vitest --run",
     "clean": "rm -rf dist @types"
   },

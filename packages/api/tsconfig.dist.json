@@ -9,10 +9,7 @@
     "noEmit": false,
     "declaration": true,
     "outDir": "dist",
-    "declarationDir": "@types",
-    "paths": {
-      "loot-core/*": ["./@types/loot-core/src/*"]
-    }
+    "declarationDir": "@types"
   },
   "include": ["."],
   "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts"]
