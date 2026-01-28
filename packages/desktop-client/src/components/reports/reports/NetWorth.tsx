@@ -10,7 +10,7 @@ import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { SvgCalendar } from '@actual-app/components/icons/v1';
+import { SvgCalendar, SvgChart } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
@@ -24,6 +24,7 @@ import * as monthUtils from 'loot-core/shared/months';
 import { type NetWorthWidget, type TimeFrame } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,
@@ -107,6 +108,9 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
   const [interval, setInterval] = useState(
     widget?.meta?.interval || getDefaultIntervalForMode(mode),
+  );
+  const [graphMode, setGraphMode] = useState<'trend' | 'stacked'>(
+    widget?.meta?.mode || 'trend',
   );
   // Combined setter: set mode and update interval (unless interval was set in widget meta)
   const setModeAndInterval = useCallback(
@@ -233,6 +237,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         conditions,
         conditionsOp,
         interval,
+        mode: graphMode,
         timeFrame: {
           start,
           end,
@@ -318,7 +323,10 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         conditionsOp={conditionsOp}
         onConditionsOpChange={onConditionsOpChange}
         inlineContent={
-          <IntervalSelector interval={interval} onChange={setInterval} />
+          <>
+            <IntervalSelector interval={interval} onChange={setInterval} />
+            <ModeSelector mode={graphMode} onChange={setGraphMode} />
+          </>
         }
       >
         {widget && (
@@ -346,7 +354,11 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
           <View
             style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
           >
-            <PrivacyFilter>{format(data.netWorth, 'financial')}</PrivacyFilter>
+            <PrivacyFilter>
+              <FinancialText>
+                {format(data.netWorth, 'financial')}
+              </FinancialText>
+            </PrivacyFilter>
           </View>
           <PrivacyFilter>
             <Change amount={data.totalChange} />
@@ -355,8 +367,10 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
 
         <NetWorthGraph
           graphData={data.graphData}
+          accounts={data.accounts}
           showTooltip={!isNarrowWidth}
           interval={interval}
+          mode={graphMode}
         />
 
         <View style={{ marginTop: 30, userSelect: 'none' }}>
@@ -422,6 +436,59 @@ function IntervalSelector({
           }}
           items={ReportOptions.interval.map(({ key, description }) => ({
             name: key as 'Daily' | 'Weekly' | 'Monthly' | 'Yearly',
+            text: description,
+          }))}
+        />
+      </Popover>
+    </>
+  );
+}
+
+function ModeSelector({
+  mode,
+  onChange,
+}: {
+  mode: 'trend' | 'stacked';
+  onChange: (val: 'trend' | 'stacked') => void;
+}) {
+  const { t } = useTranslation();
+
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const options = [
+    { key: 'trend', description: t('Trend') },
+    { key: 'stacked', description: t('Stacked') },
+  ];
+
+  const currentLabel =
+    options.find(opt => opt.key === mode)?.description ?? mode;
+
+  return (
+    <>
+      <Button
+        ref={triggerRef}
+        variant="bare"
+        onPress={() => setIsOpen(true)}
+        aria-label={t('Change mode')}
+      >
+        <SvgChart style={{ width: 12, height: 12 }} />
+        <span style={{ marginLeft: 5 }}>{currentLabel}</span>
+      </Button>
+
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={isOpen}
+        onOpenChange={() => setIsOpen(false)}
+      >
+        <Menu
+          onMenuSelect={item => {
+            onChange(item as 'trend' | 'stacked');
+            setIsOpen(false);
+          }}
+          items={options.map(({ key, description }) => ({
+            name: key,
             text: description,
           }))}
         />

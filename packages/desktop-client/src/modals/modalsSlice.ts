@@ -478,9 +478,6 @@ export type Modal =
       };
     }
   | {
-      name: 'schedules-page-menu';
-    }
-  | {
       name: 'envelope-budget-month-menu';
       options: {
         month: string;
@@ -495,9 +492,6 @@ export type Modal =
         onBudgetAction: (month: string, action: string, arg?: unknown) => void;
         onEditNotes: (id: NoteEntity['id']) => void;
       };
-    }
-  | {
-      name: 'budget-file-selection';
     }
   | {
       name: 'confirm-transaction-edit';

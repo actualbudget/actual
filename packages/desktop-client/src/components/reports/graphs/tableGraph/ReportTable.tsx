@@ -156,7 +156,7 @@ export function ReportTable({
           outline: 'none',
           '& .animated .animated-row': { transition: '.25s transform' },
         }}
-        tabIndex={1}
+        tabIndex={0}
       >
         <Block
           innerRef={listScrollRef}

@@ -5,6 +5,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
 import { SvgSearchAlternate } from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -89,7 +90,7 @@ export function ManageTags() {
             onChange={setFilter}
           />
         </SpaceBetween>
-        <View style={{ flex: 1, marginTop: 12 }}>
+        <View style={{ marginTop: 12, ...styles.tableContainer }}>
           <TagsHeader />
           {create && (
             <TagCreationRow onClose={() => setCreate(false)} tags={tags} />

@@ -427,9 +427,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                 style={{
                   color:
                     scheduleStatus === 'missed'
-                      ? theme.errorText
+                      ? theme.budgetNumberNegative
                       : scheduleStatus === 'due'
-                        ? theme.warningText
+                        ? theme.templateNumberUnderFunded
                         : theme.upcomingText,
                 }}
                 onPress={() =>
@@ -469,9 +469,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         width="flex"
         style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
       >
-        <span
-          role="button"
-          onClick={() => {
+        <Button
+          variant="bare"
+          onPress={() => {
             resetBalancePosition(-6, -4);
             setBalanceMenuOpen(true);
           }}
@@ -484,6 +484,12 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               e.clientY - rect.bottom - 8,
             );
           }}
+          style={{
+            justifyContent: 'flex-end',
+            background: 'transparent',
+            width: '100%',
+            padding: 0,
+          }}
         >
           <BalanceWithCarryover
             carryover={envelopeBudget.catCarryover(category.id)}
@@ -493,7 +499,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             longGoal={envelopeBudget.catLongGoal(category.id)}
             tooltipDisabled={balanceMenuOpen}
           />
-        </span>
+        </Button>
 
         <Popover
           triggerRef={balanceMenuTriggerRef}
@@ -584,9 +590,9 @@ export function IncomeCategoryMonth({
             position: 'relative',
           }}
         >
-          <span
-            role="button"
-            onClick={() => {
+          <Button
+            variant="bare"
+            onPress={() => {
               resetIncomePosition(-6, -4);
               setIncomeMenuOpen(true);
             }}
@@ -599,7 +605,11 @@ export function IncomeCategoryMonth({
                 e.clientY - rect.bottom - 8,
               );
             }}
-            style={{ paddingRight: styles.monthRightPadding }}
+            style={{
+              background: 'transparent',
+              padding: 0,
+              paddingRight: styles.monthRightPadding,
+            }}
           >
             <BalanceWithCarryover
               carryover={envelopeBudget.catCarryover(category.id)}
@@ -608,7 +618,7 @@ export function IncomeCategoryMonth({
               budgeted={envelopeBudget.catBudgeted(category.id)}
               longGoal={envelopeBudget.catLongGoal(category.id)}
             />
-          </span>
+          </Button>
           <Popover
             triggerRef={incomeMenuTriggerRef}
             placement="bottom end"

@@ -184,7 +184,7 @@ const TransactionHeader = memo(
           fontWeight: 300,
           zIndex: 200,
           color: theme.tableHeaderText,
-          backgroundColor: theme.tableBackground,
+          backgroundColor: theme.tableHeaderBackground,
           paddingRight: `${5 + (scrollWidth ?? 0)}px`,
           borderTopWidth: 1,
           borderBottomWidth: 1,
@@ -1670,7 +1670,8 @@ const Transaction = memo(function Transaction({
               : integerToCurrency(runningBalance)
           }
           valueStyle={{
-            color: runningBalance < 0 ? theme.errorText : theme.noticeTextLight,
+            color:
+              runningBalance < 0 ? theme.numberNegative : theme.numberPositive,
           }}
           style={{ ...styles.tnum, ...amountStyle }}
           width={103}

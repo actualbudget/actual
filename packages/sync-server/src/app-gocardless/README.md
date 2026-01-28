@@ -2,7 +2,7 @@
 
 If the default bank integration does not work for you, you can integrate a new bank by following these steps.
 
-1. Find in [this google doc](https://docs.google.com/spreadsheets/d/1ogpzydzotOltbssrc3IQ8rhBLlIZbQgm5QCiiNJrkyA/edit#gid=489769432) what is the identifier of the bank which you want to integrate.
+1. Find the identifier of the bank which you want to integrate. Note: the reference sheet that previously contained bank identifiers no longer exists.
 
 2. Launch frontend and backend server.
 

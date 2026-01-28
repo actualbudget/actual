@@ -10,7 +10,6 @@ import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
-import { BudgetFileSelectionModal } from './modals/BudgetFileSelectionModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
@@ -63,7 +62,6 @@ import { PasswordEnableModal } from './modals/PasswordEnableModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
-import { SchedulesPageMenuModal } from './modals/SchedulesPageMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
@@ -349,9 +347,6 @@ export function Modals() {
         case 'budget-page-menu':
           return <BudgetPageMenuModal key={key} {...modal.options} />;
 
-        case 'schedules-page-menu':
-          return <SchedulesPageMenuModal key={key} />;
-
         case 'envelope-budget-month-menu':
           return (
             <SheetNameProvider
@@ -372,8 +367,6 @@ export function Modals() {
             </SheetNameProvider>
           );
 
-        case 'budget-file-selection':
-          return <BudgetFileSelectionModal key={name} />;
         case 'delete-budget':
           return <DeleteFileModal key={key} {...modal.options} />;
         case 'duplicate-budget':
