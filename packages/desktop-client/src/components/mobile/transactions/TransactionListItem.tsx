@@ -283,9 +283,9 @@ export function TransactionListItem({
           <View style={{ justifyContent: 'center', alignItems: 'flex-end' }}>
             <Text
               style={{
-                ...textStyle,
                 ...styles.tnum,
                 ...makeAmountFullStyle(amount),
+                ...textStyle,
               }}
             >
               {integerToCurrency(amount)}

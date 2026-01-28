@@ -53,7 +53,10 @@ function parsePrimary(state: ParserState): number {
 
   let numberStr = '';
   let currentChar = char(state);
-  while (currentChar && currentChar.match(/[0-9,.’\u00A0\u202F ]|\p{Sc}/u)) {
+  while (
+    currentChar &&
+    currentChar.match(/[0-9,.'\u2019\u00A0\u202F ]|\p{Sc}/u)
+  ) {
     const ch = next(state);
     if (ch !== null) {
       numberStr += ch;
