@@ -190,6 +190,3 @@ export class LocationService {
     return [];
   }
 }
-
-// LocationService class exported for platform-specific instantiation
-// Platform-specific instances should be created in platform files (location.web.ts, location.electron.ts)
