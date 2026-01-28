@@ -8,35 +8,66 @@ body:
     attributes:
       value: |
         Thanks for taking the time to fill out this bug report! Please ensure you provide as much information as possible to better assist in confirming and identifying a fix for the bug.
+
+        ⚠️ **CRITICAL:** Bug reports without clear, step-by-step reproduction instructions will be closed. We cannot investigate or fix bugs without being able to reproduce them. Please take the time to provide detailed reproduction steps.
   - type: markdown
     attributes:
       value: |
         **IMPORTANT:** we use GitHub Issues only for BUG REPORTS and FEATURE REQUESTS. If you are looking for help/support - please reach out to the [community on Discord](https://discord.gg/pRYNYr4W5A). All non-bug and non-feature-request issues will be closed.
 
         **Bank-sync problems (SimpleFin / GoCardless)?** Reach out via the [community Discord](https://discord.gg/pRYNYr4W5A) first and open an issue only if the community deems the issue to be a legitimate bug in Actual.
-  - type: checkboxes
-    id: existing-issue
-    attributes:
-      label: 'Verified issue does not already exist?'
-      description: 'Please search to see if an issue already exists for the issue you encountered.'
-      options:
-        - label: 'I have searched and found no existing issue'
-          required: true
   - type: textarea
     id: what-happened
     attributes:
       label: What happened?
-      description: Also tell us, what did you expect to happen? If you're reporting an issue with imports, please attach a (redacted) version of the file you're having trouble importing. You may need to zip it before uploading.
-      placeholder: Tell us what you see!
-      value: 'A bug happened!'
+      description: |
+        Describe the bug clearly and concisely. Include:
+        - What you were trying to do
+        - What you expected to happen
+        - What actually happened instead
+        - Any error messages (copy/paste the exact text)
+
+        If you're reporting an issue with imports, please include a (redacted) version of the file, and a screenshot of the import screen. You may need to zip it before uploading.
+      placeholder: |
+        I was trying to [action] when [context].
+        Expected: [expected behavior]
+        Actual: [actual behavior]
+        Error message: [if any]
     validations:
       required: true
+  - type: markdown
+    attributes:
+      value: |
+        ## Reproduction Steps
+
+        **REQUIRED:** Without clear reproduction steps, we cannot investigate or fix the bug. Please provide detailed, step-by-step instructions that anyone can follow to reproduce the issue.
   - type: textarea
     id: reproduction
     attributes:
       label: How can we reproduce the issue?
-      description: Please give step-by-step instructions on how to reproduce the issue. In most cases this might also require uploading a sample budget/import file.
-      value: 'How can we reproduce the issue?'
+      description: |
+        **This field is mandatory and must be filled out completely.**
+
+        Provide numbered, step-by-step instructions that allow us to reproduce the bug. Include:
+        - Specific actions you took (e.g., "Click on the Budget tab", "Enter $100 in the amount field")
+        - What you expected to happen
+        - What actually happened instead
+
+        Example format:
+        1. Navigate to [specific page/section]
+        2. Click on [specific button/link]
+        3. Enter [specific data] in [specific field]
+        4. Click [action]
+        5. Observe [expected vs actual behavior]
+
+        If the issue involves importing data, please attach a (redacted) sample file. You may need to zip it before uploading.
+      placeholder: |
+        1. Go to [specific location]
+        2. Click [specific element]
+        3. Enter [specific data]
+        4. Click [action]
+        5. Expected: [what should happen]
+           Actual: [what actually happens]
     validations:
       required: true
   - type: markdown
