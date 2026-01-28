@@ -345,18 +345,8 @@ export function listenForSyncEvent(store: AppStore) {
           // Show nothing
           break;
         case 'token-expired':
-          notif = {
-            title: 'Login expired',
-            message: 'Please login again.',
-            sticky: true,
-            id: 'login-expired',
-            button: {
-              title: 'Go to login',
-              action: () => {
-                store.dispatch(signOut());
-              },
-            },
-          };
+          notif = null;
+          store.dispatch(signOut());
           break;
         default:
           console.trace('unknown error', event);
