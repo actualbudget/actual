@@ -146,6 +146,7 @@ RSD
 SEK
 simplefin
 SKHSFI
+sophtron
 Sparkasse
 SPK
 sseldorf
