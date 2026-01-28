@@ -14,7 +14,10 @@ import { View } from '@actual-app/components/view';
 
 import { format as monthUtilFormat } from 'loot-core/shared/months';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { getScheduledAmount } from 'loot-core/shared/schedules';
+import {
+  getScheduledAmount,
+  type ScheduleStatus,
+} from 'loot-core/shared/schedules';
 import { type ScheduleEntity } from 'loot-core/types/models';
 
 import { StatusBadge } from './StatusBadge';
@@ -34,18 +37,15 @@ import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePayees } from '@desktop-client/hooks/usePayees';
-import {
-  type ScheduleStatuses,
-  type ScheduleStatusType,
-} from '@desktop-client/hooks/useSchedules';
+import { type ScheduleStatusLookup } from '@desktop-client/schedules';
 
 type SchedulesTableProps = {
   isLoading?: boolean;
   schedules: readonly ScheduleEntity[];
-  statuses: ScheduleStatuses;
+  statusLookup: ScheduleStatusLookup;
   filter: string;
   allowCompleted: boolean;
-  onSelect: (id: ScheduleEntity['id']) => void;
+  onSelect: (schedule: ScheduleEntity) => void;
   style: CSSProperties;
   tableStyle?: CSSProperties;
 } & (
@@ -81,7 +81,7 @@ function OverflowMenu({
   onAction,
 }: {
   schedule: ScheduleEntity;
-  status: ScheduleStatusType;
+  status: ScheduleStatus;
   onAction: SchedulesTableProps['onAction'];
 }) {
   const { t } = useTranslation();
@@ -203,15 +203,13 @@ function ScheduleRow({
   onAction,
   onSelect,
   minimal,
-  statuses,
+  statusLookup,
   dateFormat,
 }: {
   schedule: ScheduleEntity;
+  statusLookup: ScheduleStatusLookup;
   dateFormat: string;
-} & Pick<
-  SchedulesTableProps,
-  'onSelect' | 'onAction' | 'minimal' | 'statuses'
->) {
+} & Pick<SchedulesTableProps, 'onSelect' | 'onAction' | 'minimal'>) {
   const { t } = useTranslation();
 
   const rowRef = useRef(null);
@@ -230,7 +228,7 @@ function ScheduleRow({
       ref={rowRef}
       height={ROW_HEIGHT}
       inset={15}
-      onClick={() => onSelect(schedule.id)}
+      onClick={() => onSelect(schedule)}
       style={{
         cursor: 'pointer',
         backgroundColor: theme.tableBackground,
@@ -251,7 +249,7 @@ function ScheduleRow({
         >
           <OverflowMenu
             schedule={schedule}
-            status={statuses.get(schedule.id)}
+            status={statusLookup[schedule.id]}
             onAction={(action, id) => {
               onAction(action, id);
               resetPosition();
@@ -284,7 +282,7 @@ function ScheduleRow({
           : null}
       </Field>
       <Field width={120} name="status" style={{ alignItems: 'flex-start' }}>
-        <StatusBadge status={statuses.get(schedule.id)} />
+        <StatusBadge status={statusLookup[schedule.id]} />
       </Field>
       <ScheduleAmountCell amount={schedule._amount} op={schedule._amountOp} />
       {!minimal && (
@@ -324,7 +322,7 @@ function ScheduleRow({
 export function SchedulesTable({
   isLoading,
   schedules,
-  statuses,
+  statusLookup,
   filter,
   minimal,
   allowCompleted,
@@ -371,11 +369,11 @@ export function SchedulesTable({
         filterIncludes(payee && payee.name) ||
         filterIncludes(account && account.name) ||
         filterIncludes(amountStr) ||
-        filterIncludes(statuses.get(schedule.id)) ||
+        filterIncludes(statusLookup[schedule.id]) ||
         filterIncludes(dateStr)
       );
     });
-  }, [payees, accounts, schedules, filter, statuses, format, dateFormat]);
+  }, [payees, accounts, schedules, filter, statusLookup, format, dateFormat]);
 
   const items: readonly SchedulesTableItem[] = useMemo(() => {
     const unCompletedSchedules = filteredSchedules.filter(s => !s.completed);
@@ -423,7 +421,7 @@ export function SchedulesTable({
     return (
       <ScheduleRow
         schedule={item as ScheduleEntity}
-        {...{ statuses, dateFormat, onSelect, onAction, minimal }}
+        {...{ statusLookup, dateFormat, onSelect, onAction, minimal }}
       />
     );
   }

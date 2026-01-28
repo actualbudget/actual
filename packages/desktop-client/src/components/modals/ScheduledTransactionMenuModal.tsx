@@ -1,5 +1,4 @@
 import React, {
-  useMemo,
   type ComponentPropsWithoutRef,
   type CSSProperties,
 } from 'react';
@@ -47,19 +46,15 @@ export function ScheduledTransactionMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
   const scheduleId = transactionId?.split('/')?.[1];
-  const schedulesQuery = useMemo(
-    () => q('schedules').filter({ id: scheduleId }).select('*'),
-    [scheduleId],
-  );
-  const { isLoading: isSchedulesLoading, schedules } = useSchedules({
-    query: schedulesQuery,
+  const { isPending: isSchedulesLoading, data: schedules = [] } = useSchedules({
+    query: q('schedules').filter({ id: scheduleId }).select('*'),
   });
 
   if (isSchedulesLoading) {
     return null;
   }
 
-  const schedule = schedules?.[0];
+  const schedule = schedules[0];
   const { date: dateCond } = extractScheduleConds(schedule._conditions);
 
   const canBeSkipped = scheduleIsRecurring(dateCond);

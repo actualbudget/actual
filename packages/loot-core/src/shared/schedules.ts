@@ -15,6 +15,8 @@ import { Condition } from '../server/rules';
 import * as monthUtils from './months';
 import { q } from './query';
 
+export type ScheduleStatus = ReturnType<typeof getStatus>;
+
 export function getStatus(
   nextDate: string,
   completed: boolean,
@@ -41,6 +43,8 @@ export function getStatus(
   }
 }
 
+export type ScheduleStatusLabel = ReturnType<typeof getStatusLabel>;
+
 export function getStatusLabel(status: string) {
   switch (status) {
     case 'completed':
@@ -60,7 +64,7 @@ export function getStatusLabel(status: string) {
   }
 }
 
-export function getHasTransactionsQuery(schedules) {
+export function getHasTransactionsQuery(schedules: readonly ScheduleEntity[]) {
   const filters = schedules.map(schedule => {
     const dateCond = schedule._conditions?.find(c => c.field === 'date');
     return {
@@ -89,7 +93,7 @@ function makeNumberSuffix(num: number, locale: Locale) {
   return monthUtils.format(new Date(2020, 0, num, 12), 'do', locale);
 }
 
-function prettyDayName(day) {
+function prettyDayName(day: string) {
   const days = {
     SU: t('Sunday'),
     MO: t('Monday'),

@@ -61,7 +61,6 @@ import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { usePayees } from '@desktop-client/hooks/usePayees';
-import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
 import {
   SelectedProviderWithItems,
   type Actions,
@@ -89,6 +88,7 @@ import {
 } from '@desktop-client/queries/pagedQuery';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
+import { schedulesViewQuery } from '@desktop-client/schedules';
 import { updateNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
@@ -2000,7 +2000,7 @@ export function Account() {
   const savedFiters = useTransactionFilters();
 
   const schedulesQuery = useMemo(
-    () => getSchedulesQuery(params.id),
+    () => schedulesViewQuery(params.id),
     [params.id],
   );
 
