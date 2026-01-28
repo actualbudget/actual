@@ -1,9 +1,9 @@
-import { type RefObject } from 'react';
+import type { RefObject } from 'react';
 
 import { Button } from '@actual-app/components/button';
 import { ColorPicker } from '@actual-app/components/color-picker';
 
-import { type TagEntity } from 'loot-core/types/models';
+import type { TagEntity } from 'loot-core/types/models';
 
 import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
 import { useDispatch } from '@desktop-client/redux';

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useRef, type CSSProperties, type Ref } from 'react';
+import React, { useRef } from 'react';
+import type { CSSProperties, Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -10,9 +11,9 @@ import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { SidebarCategoryButtons } from './SidebarCategoryButtons';

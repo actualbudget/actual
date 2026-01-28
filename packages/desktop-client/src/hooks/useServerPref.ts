@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { type ServerPrefs } from 'loot-core/types/prefs';
+import type { ServerPrefs } from 'loot-core/types/prefs';
 
 import { saveServerPrefs } from '@desktop-client/prefs/prefsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';

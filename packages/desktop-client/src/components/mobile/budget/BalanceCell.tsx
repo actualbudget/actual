@@ -1,4 +1,4 @@
-import { type CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
-import { type CategoryEntity } from 'loot-core/types/models';
+import type { CategoryEntity } from 'loot-core/types/models';
 
 import { getColumnWidth, PILL_STYLE } from './BudgetTable';
 
@@ -18,7 +18,7 @@ import { BalanceWithCarryover } from '@desktop-client/components/budget/BalanceW
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { type Binding } from '@desktop-client/spreadsheet';
+import type { Binding } from '@desktop-client/spreadsheet';
 import {
   envelopeBudget,
   trackingBudget,

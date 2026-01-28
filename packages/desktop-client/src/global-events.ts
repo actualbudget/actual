@@ -13,7 +13,7 @@ import {
 } from './notifications/notificationsSlice';
 import { reloadPayees } from './payees/payeesSlice';
 import { loadPrefs } from './prefs/prefsSlice';
-import { type AppStore } from './redux/store';
+import type { AppStore } from './redux/store';
 import * as syncEvents from './sync-events';
 
 export function handleGlobalEvents(store: AppStore) {

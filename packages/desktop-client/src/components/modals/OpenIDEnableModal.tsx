@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 import { getOpenIdErrors } from 'loot-core/shared/errors';
-import { type OpenIdConfig } from 'loot-core/types/models';
+import type { OpenIdConfig } from 'loot-core/types/models';
 
 import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { Error } from '@desktop-client/components/alerts';
@@ -21,10 +21,8 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { OpenIdForm } from '@desktop-client/components/manager/subscribe/OpenIdForm';
 import { useRefreshLoginMethods } from '@desktop-client/components/ServerContext';
-import {
-  popModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
+import { popModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type OpenIDEnableModalProps = Extract<

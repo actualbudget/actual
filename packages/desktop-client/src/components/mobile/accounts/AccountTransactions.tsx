@@ -2,13 +2,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { listen, send } from 'loot-core/platform/client/fetch';
-import { type Query } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
-import { type IntegerAmount } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type TransactionEntity,
-} from 'loot-core/types/models';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { AccountEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { markAccountRead } from '@desktop-client/accounts/accountsSlice';
 import { syncAndDownload } from '@desktop-client/app/appSlice';

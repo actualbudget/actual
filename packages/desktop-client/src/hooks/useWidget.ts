@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { q } from 'loot-core/shared/query';
-import { type Widget } from 'loot-core/types/models';
+import type { Widget } from 'loot-core/types/models';
 
 import { useQuery } from './useQuery';
 

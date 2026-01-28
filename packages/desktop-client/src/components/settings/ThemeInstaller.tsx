@@ -22,8 +22,10 @@ import {
   generateThemeId,
   normalizeGitHubRepo,
   validateThemeCss,
-  type CatalogTheme,
-  type InstalledTheme,
+} from '@desktop-client/style/customThemes';
+import type {
+  CatalogTheme,
+  InstalledTheme,
 } from '@desktop-client/style/customThemes';
 
 // Theme item fixed dimensions

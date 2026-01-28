@@ -1,10 +1,5 @@
-import {
-  Fragment,
-  useRef,
-  useState,
-  type ComponentProps,
-  type CSSProperties,
-} from 'react';
+import { Fragment, useRef, useState } from 'react';
+import type { ComponentProps, CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -20,7 +15,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
 import {
   Modal,
@@ -34,7 +29,7 @@ import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNotes } from '@desktop-client/hooks/useNotes';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type AccountMenuModalProps = Extract<
   ModalType,

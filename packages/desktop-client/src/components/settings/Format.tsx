@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { numberFormats } from 'loot-core/shared/util';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { Column, Setting } from './UI';
 

@@ -1,16 +1,10 @@
 import { useMemo } from 'react';
 
-import {
-  type CategoryEntity,
-  type ScheduleEntity,
-} from 'loot-core/types/models';
+import type { CategoryEntity, ScheduleEntity } from 'loot-core/types/models';
 
 import { useCachedSchedules } from './useCachedSchedules';
 import { useFeatureFlag } from './useFeatureFlag';
-import {
-  type ScheduleStatuses,
-  type ScheduleStatusLabels,
-} from './useSchedules';
+import type { ScheduleStatuses, ScheduleStatusLabels } from './useSchedules';
 
 type ScheduleGoalDefinition = {
   type: 'schedule';

@@ -13,10 +13,10 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type RecurConfig,
-  type ScheduleEntity,
-  type TransactionEntity,
+import type {
+  RecurConfig,
+  ScheduleEntity,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 import {
@@ -36,10 +36,8 @@ import {
 import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
-import {
-  SelectedProvider,
-  type Actions,
-} from '@desktop-client/hooks/useSelected';
+import { SelectedProvider } from '@desktop-client/hooks/useSelected';
+import type { Actions } from '@desktop-client/hooks/useSelected';
 
 export type ScheduleFormFields = {
   payee: null | string;

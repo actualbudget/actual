@@ -1,4 +1,5 @@
-import { useCallback, type ComponentPropsWithoutRef } from 'react';
+import { useCallback } from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
 import { GridListItem } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
@@ -10,7 +11,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { type CategoryEntity } from 'loot-core/types/models';
+import type { CategoryEntity } from 'loot-core/types/models';
 
 import { BalanceCell } from './BalanceCell';
 import { BudgetCell } from './BudgetCell';

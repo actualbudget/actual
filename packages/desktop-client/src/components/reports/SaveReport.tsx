@@ -10,9 +10,9 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
-import {
-  type CustomReportEntity,
-  type DashboardEntity,
+import type {
+  CustomReportEntity,
+  DashboardEntity,
 } from 'loot-core/types/models';
 
 import { LoadingIndicator } from './LoadingIndicator';

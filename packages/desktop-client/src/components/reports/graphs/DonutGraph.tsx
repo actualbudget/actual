@@ -1,15 +1,16 @@
 // @ts-strict-ignore
-import React, { useState, type CSSProperties } from 'react';
+import React, { useState } from 'react';
+import type { CSSProperties } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { Cell, Pie, PieChart, Sector, Tooltip } from 'recharts';
 
-import {
-  type balanceTypeOpType,
-  type DataEntity,
-  type GroupedEntity,
-  type IntervalEntity,
-  type RuleConditionEntity,
+import type {
+  balanceTypeOpType,
+  DataEntity,
+  GroupedEntity,
+  IntervalEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { adjustTextSize } from './adjustTextSize';

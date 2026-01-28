@@ -54,11 +54,11 @@ import {
   integerToCurrency,
   titleFirst,
 } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type PayeeEntity,
-  type TransactionEntity,
+import type {
+  AccountEntity,
+  CategoryEntity,
+  PayeeEntity,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 import { FocusableAmountInput } from './FocusableAmountInput';

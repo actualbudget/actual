@@ -6,7 +6,7 @@ import {
   splitTransaction,
   ungroupTransaction,
 } from '../../shared/transactions';
-import { type RuleEntity } from '../../types/models';
+import type { RuleEntity } from '../../types/models';
 
 import { Action } from './action';
 import { Condition } from './condition';

@@ -1,9 +1,9 @@
-import { type IntegerAmount } from '../../shared/util';
+import type { IntegerAmount } from '../../shared/util';
 
-import { type AccountEntity } from './account';
-import { type CategoryEntity } from './category';
-import { type PayeeEntity } from './payee';
-import { type ScheduleEntity } from './schedule';
+import type { AccountEntity } from './account';
+import type { CategoryEntity } from './category';
+import type { PayeeEntity } from './payee';
+import type { ScheduleEntity } from './schedule';
 
 export type TransactionEntity = {
   id: string;

@@ -1,13 +1,13 @@
 import { useMemo, useReducer, useRef, useState } from 'react';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { type CSSProperties } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 
-import {
-  type CategoryGroupEntity,
-  type ScheduleEntity,
+import type {
+  CategoryGroupEntity,
+  ScheduleEntity,
 } from 'loot-core/types/models';
-import { type Template } from 'loot-core/types/models/templates';
+import type { Template } from 'loot-core/types/models/templates';
 
 import { BudgetAutomationEditor } from './BudgetAutomationEditor';
 import { BudgetAutomationReadOnly } from './BudgetAutomationReadOnly';

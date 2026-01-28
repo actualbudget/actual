@@ -1,10 +1,11 @@
-import { useState, type Ref } from 'react';
+import { useState } from 'react';
+import type { Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgRemove, SvgSearchAlternate } from '@actual-app/components/icons/v2';
 import { baseInputStyle, Input } from '@actual-app/components/input';
-import { type CSSProperties } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';

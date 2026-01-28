@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type GlobalPrefsJson } from '../../../types/prefs';
+import type { GlobalPrefsJson } from '../../../types/prefs';
 import { getDatabase } from '../indexeddb';
 
 import type * as T from './index-types';

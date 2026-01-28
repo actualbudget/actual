@@ -1,11 +1,5 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type Ref,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { Ref } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router';
 import { animated, config, useSpring } from 'react-spring';
@@ -27,13 +21,14 @@ import { format as formatDate, parseISO } from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { q, type Query } from 'loot-core/shared/query';
+import { q } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 import { ungroupTransactions } from 'loot-core/shared/transactions';
-import {
-  type CalendarWidget,
-  type RuleConditionEntity,
-  type TimeFrame,
-  type TransactionEntity,
+import type {
+  CalendarWidget,
+  RuleConditionEntity,
+  TimeFrame,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
@@ -51,20 +46,19 @@ import { CalendarGraph } from '@desktop-client/components/reports/graphs/Calenda
 import { Header } from '@desktop-client/components/reports/Header';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import {
-  calendarSpreadsheet,
-  type CalendarDataType,
-} from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
+import { calendarSpreadsheet } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
+import type { CalendarDataType } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
-import { type TableHandleRef } from '@desktop-client/components/table';
+import type { TableHandleRef } from '@desktop-client/components/table';
 import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { DisplayPayeeProvider } from '@desktop-client/hooks/useDisplayPayee';
-import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';

@@ -1,4 +1,5 @@
-import React, { useState, type SVGProps } from 'react';
+import React, { useState } from 'react';
+import type { SVGProps } from 'react';
 
 export const SvgLoading = (props: SVGProps<SVGSVGElement>) => {
   const { color = 'currentColor' } = props;

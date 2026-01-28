@@ -1,11 +1,5 @@
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ComponentProps,
-  type ReactNode,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { Tooltip as AriaTooltip, TooltipTrigger } from 'react-aria-components';
 
 import { styles } from './styles';

@@ -1,5 +1,7 @@
-import React, { useRef, useState, type ReactNode } from 'react';
-import { GridListItem, type GridListItemProps } from 'react-aria-components';
+import React, { useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { GridListItem } from 'react-aria-components';
+import type { GridListItemProps } from 'react-aria-components';
 import { animated, config, useSpring } from 'react-spring';
 
 import { Button } from '@actual-app/components/button';
@@ -7,7 +9,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { useDrag } from '@use-gesture/react';
 
-import { type WithRequired } from 'loot-core/types/util';
+import type { WithRequired } from 'loot-core/types/util';
 
 type ActionableGridListItemProps<T> = {
   actions?: ReactNode | ((params: { close: () => void }) => ReactNode);

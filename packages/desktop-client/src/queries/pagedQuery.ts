@@ -1,9 +1,11 @@
 // @ts-strict-ignore
 import { once } from 'loot-core/shared/async';
-import { getPrimaryOrderBy, type Query } from 'loot-core/shared/query';
+import { getPrimaryOrderBy } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 
 import { aqlQuery } from './aqlQuery';
-import { LiveQuery, type LiveQueryOptions } from './liveQuery';
+import { LiveQuery } from './liveQuery';
+import type { LiveQueryOptions } from './liveQuery';
 
 export function pagedQuery<TResponse = unknown>(
   query: Query,

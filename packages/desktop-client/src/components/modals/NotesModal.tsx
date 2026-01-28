@@ -13,7 +13,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { Notes } from '@desktop-client/components/Notes';
 import { useNotes } from '@desktop-client/hooks/useNotes';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type NotesModalProps = Extract<ModalType, { name: 'notes' }>['options'];
 

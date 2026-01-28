@@ -1,4 +1,4 @@
-import { type RuleConditionEntity } from 'loot-core/types/models';
+import type { RuleConditionEntity } from 'loot-core/types/models';
 
 export function subfieldFromFilter({
   field,

@@ -1,10 +1,5 @@
-import React, {
-  useEffect,
-  useMemo,
-  useState,
-  type CSSProperties,
-  type Ref,
-} from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { CSSProperties, Ref } from 'react';
 import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 import { SpaceBetween } from '@actual-app/components/space-between';

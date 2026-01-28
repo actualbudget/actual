@@ -1,9 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import {
-  type CustomReportData,
-  type CustomReportEntity,
-} from '../../types/models';
+import type { CustomReportData, CustomReportEntity } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
 import { ValidationError } from '../errors';

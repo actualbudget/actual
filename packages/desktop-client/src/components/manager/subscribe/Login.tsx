@@ -17,7 +17,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
-import { type OpenIdConfig } from 'loot-core/types/models';
+import type { OpenIdConfig } from 'loot-core/types/models';
 
 import { Title, useBootstrapped } from './common';
 import { OpenIdForm } from './OpenIdForm';

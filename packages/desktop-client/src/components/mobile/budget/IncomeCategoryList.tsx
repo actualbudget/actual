@@ -1,11 +1,11 @@
-import { type DragItem } from 'react-aria';
+import type { DragItem } from 'react-aria';
 import { DropIndicator, GridList, useDragAndDrop } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
-import { type CategoryEntity } from 'loot-core/types/models';
+import type { CategoryEntity } from 'loot-core/types/models';
 
 import { IncomeCategoryListItem } from './IncomeCategoryListItem';
 

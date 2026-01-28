@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { type GlobalPrefs } from 'loot-core/types/prefs';
+import type { GlobalPrefs } from 'loot-core/types/prefs';
 
 import { saveGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';

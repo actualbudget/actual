@@ -6,7 +6,7 @@ import {
   ModalHeader,
   ModalTitle,
 } from '@desktop-client/components/common/Modal';
-import { type Modal } from '@desktop-client/modals/modalsSlice';
+import type { Modal } from '@desktop-client/modals/modalsSlice';
 
 type NewCategoryGroupModalProps = Extract<
   Modal,

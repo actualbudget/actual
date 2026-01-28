@@ -1,11 +1,5 @@
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ComponentProps,
-  type CSSProperties,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { ComponentProps, CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';

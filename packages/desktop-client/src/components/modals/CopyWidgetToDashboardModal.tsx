@@ -1,4 +1,5 @@
-import { useMemo, type ComponentProps } from 'react';
+import { useMemo } from 'react';
+import type { ComponentProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -11,7 +12,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { useDashboardPages } from '@desktop-client/hooks/useDashboard';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type CopyWidgetToDashboardModalProps = Extract<
   ModalType,

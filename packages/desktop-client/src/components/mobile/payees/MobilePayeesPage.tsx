@@ -7,7 +7,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { type PayeeEntity, type RuleEntity } from 'loot-core/types/models';
+import type { PayeeEntity, RuleEntity } from 'loot-core/types/models';
 
 import { PayeesList } from './PayeesList';
 

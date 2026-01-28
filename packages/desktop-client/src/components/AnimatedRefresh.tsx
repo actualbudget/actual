@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { type CSSProperties } from 'react';
+import React from 'react';
+import type { CSSProperties } from 'react';
 
 import { SvgRefresh } from '@actual-app/components/icons/v1';
 import { View } from '@actual-app/components/view';

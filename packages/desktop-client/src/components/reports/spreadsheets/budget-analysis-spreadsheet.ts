@@ -1,12 +1,12 @@
 // @ts-strict-ignore
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type CategoryEntity,
-  type RuleConditionEntity,
+import type {
+  CategoryEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 type BudgetAnalysisIntervalData = {
   date: string;

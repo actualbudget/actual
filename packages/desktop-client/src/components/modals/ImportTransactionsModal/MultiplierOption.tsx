@@ -1,4 +1,5 @@
-import React, { type ComponentProps } from 'react';
+import React from 'react';
+import type { ComponentProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';

@@ -1,4 +1,4 @@
-import { type RuleConditionEntity } from './rule';
+import type { RuleConditionEntity } from './rule';
 
 export type TransactionFilterEntity = {
   id: string;

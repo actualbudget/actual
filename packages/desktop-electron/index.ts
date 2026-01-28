@@ -1,5 +1,6 @@
 import fs from 'fs';
-import { createServer, type Server } from 'http';
+import { createServer } from 'http';
+import type { Server } from 'http';
 import path from 'path';
 
 import {
@@ -13,11 +14,13 @@ import {
   protocol,
   shell,
   utilityProcess,
-  type Env,
-  type ForkOptions,
-  type OpenDialogSyncOptions,
-  type SaveDialogOptions,
-  type UtilityProcess,
+} from 'electron';
+import type {
+  Env,
+  ForkOptions,
+  OpenDialogSyncOptions,
+  SaveDialogOptions,
+  UtilityProcess,
 } from 'electron';
 import { copy, exists, mkdir, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';

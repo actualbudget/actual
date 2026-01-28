@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, type RefObject } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { RefObject } from 'react';
 
 /**
  * Check if the given element (by ref) is visible in the viewport.

@@ -1,18 +1,20 @@
-import { useCallback, type ComponentPropsWithoutRef } from 'react';
+import { useCallback } from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
 import { GridListItem } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronRight } from '@actual-app/components/icons/v1';
-import { styles, type CSSProperties } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type BudgetType } from 'loot-core/server/prefs';
+import type { BudgetType } from 'loot-core/server/prefs';
 import * as monthUtils from 'loot-core/shared/months';
 import { groupById } from 'loot-core/shared/util';
-import { type CategoryEntity } from 'loot-core/types/models';
+import type { CategoryEntity } from 'loot-core/types/models';
 
 import { BalanceCell } from './BalanceCell';
 import { BudgetCell } from './BudgetCell';

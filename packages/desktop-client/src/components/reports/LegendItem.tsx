@@ -1,4 +1,5 @@
-import React, { type CSSProperties } from 'react';
+import React from 'react';
+import type { CSSProperties } from 'react';
 
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';

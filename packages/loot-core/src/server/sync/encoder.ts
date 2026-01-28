@@ -6,7 +6,7 @@ import * as encryption from '../encryption';
 import { SyncError } from '../errors';
 import * as prefs from '../prefs';
 
-import { type Message } from './index';
+import type { Message } from './index';
 
 function coerceBuffer(value) {
   // The web encryption APIs give us back raw Uint8Array... but our

@@ -1,11 +1,5 @@
-import React, {
-  createRef,
-  PureComponent,
-  useEffect,
-  useMemo,
-  type ReactElement,
-  type RefObject,
-} from 'react';
+import React, { createRef, PureComponent, useEffect, useMemo } from 'react';
+import type { ReactElement, RefObject } from 'react';
 import { Trans } from 'react-i18next';
 import { Navigate, useLocation, useParams } from 'react-router';
 
@@ -19,9 +13,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { listen, send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
-import { type UndoState } from 'loot-core/server/undo';
+import type { UndoState } from 'loot-core/server/undo';
 import { currentDay } from 'loot-core/shared/months';
-import { q, type Query } from 'loot-core/shared/query';
+import { q } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 import {
   makeAsNonChildTransactions,
   makeChild,
@@ -30,14 +25,15 @@ import {
   ungroupTransactions,
   updateTransaction,
 } from 'loot-core/shared/transactions';
-import { applyChanges, type IntegerAmount } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type NewRuleEntity,
-  type RuleActionEntity,
-  type RuleConditionEntity,
-  type TransactionEntity,
-  type TransactionFilterEntity,
+import { applyChanges } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type {
+  AccountEntity,
+  NewRuleEntity,
+  RuleActionEntity,
+  RuleConditionEntity,
+  TransactionEntity,
+  TransactionFilterEntity,
 } from 'loot-core/types/models';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
@@ -50,7 +46,7 @@ import {
   updateAccount,
 } from '@desktop-client/accounts/accountsSlice';
 import { syncAndDownload } from '@desktop-client/app/appSlice';
-import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
+import type { SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
 import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
 import { validateAccountName } from '@desktop-client/components/util/accountValidation';
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
@@ -62,10 +58,8 @@ import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
-import {
-  SelectedProviderWithItems,
-  type Actions,
-} from '@desktop-client/hooks/useSelected';
+import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
+import type { Actions } from '@desktop-client/hooks/useSelected';
 import {
   SplitsExpandedProvider,
   useSplitsExpanded,
@@ -83,12 +77,10 @@ import { addNotification } from '@desktop-client/notifications/notificationsSlic
 import { createPayee, getPayees } from '@desktop-client/payees/payeesSlice';
 import * as queries from '@desktop-client/queries';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import {
-  pagedQuery,
-  type PagedQuery,
-} from '@desktop-client/queries/pagedQuery';
+import { pagedQuery } from '@desktop-client/queries/pagedQuery';
+import type { PagedQuery } from '@desktop-client/queries/pagedQuery';
 import { useDispatch, useSelector } from '@desktop-client/redux';
-import { type AppDispatch } from '@desktop-client/redux/store';
+import type { AppDispatch } from '@desktop-client/redux/store';
 import { updateNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;

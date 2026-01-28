@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 
-import { type SavedFilter } from './SavedFilterMenuButton';
+import type { SavedFilter } from './SavedFilterMenuButton';
 
 export function FilterMenu({
   filterId,

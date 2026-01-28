@@ -5,10 +5,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type SummaryContent,
-  type SummaryWidget,
-} from 'loot-core/types/models';
+import type { SummaryContent, SummaryWidget } from 'loot-core/types/models';
 
 import { DateRange } from '@desktop-client/components/reports/DateRange';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';

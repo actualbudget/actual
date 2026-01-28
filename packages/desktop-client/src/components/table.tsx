@@ -7,15 +7,17 @@ import React, {
   useMemo,
   useRef,
   useState,
-  type ComponentProps,
-  type FocusEvent,
-  type JSX,
-  type KeyboardEvent,
-  type ReactElement,
-  type ReactNode,
-  type Ref,
-  type RefObject,
-  type UIEvent,
+} from 'react';
+import type {
+  ComponentProps,
+  FocusEvent,
+  JSX,
+  KeyboardEvent,
+  ReactElement,
+  ReactNode,
+  Ref,
+  RefObject,
+  UIEvent,
 } from 'react';
 import { AutoSizer } from 'react-virtualized-auto-sizer';
 
@@ -24,9 +26,11 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgDelete, SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { SvgCheckmark } from '@actual-app/components/icons/v1';
 import { Input } from '@actual-app/components/input';
-import { Menu, type MenuItem } from '@actual-app/components/menu';
+import { Menu } from '@actual-app/components/menu';
+import type { MenuItem } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
-import { styles, type CSSProperties } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -37,7 +41,8 @@ import {
   mergeConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
 
-import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { useModalState } from '@desktop-client/hooks/useModalState';
 import {
   AvoidRefocusScrollProvider,
@@ -45,11 +50,11 @@ import {
 } from '@desktop-client/hooks/useProperFocus';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import {
-  type Binding,
-  type SheetFields,
-  type SheetNames,
-  type Spreadsheets,
+import type {
+  Binding,
+  SheetFields,
+  SheetNames,
+  Spreadsheets,
 } from '@desktop-client/spreadsheet';
 
 export const ROW_HEIGHT = 32;

@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 
-import electron, { type BrowserWindow } from 'electron';
+import electron from 'electron';
+import type { BrowserWindow } from 'electron';
 
 type WindowState = Electron.Rectangle & {
   isMaximized?: boolean;

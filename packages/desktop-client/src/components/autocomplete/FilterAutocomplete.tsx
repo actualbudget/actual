@@ -1,6 +1,7 @@
-import React, { type ComponentProps } from 'react';
+import React from 'react';
+import type { ComponentProps } from 'react';
 
-import { type TransactionFilterEntity } from 'loot-core/types/models';
+import type { TransactionFilterEntity } from 'loot-core/types/models';
 
 import { Autocomplete } from './Autocomplete';
 import { FilterList } from './FilterList';

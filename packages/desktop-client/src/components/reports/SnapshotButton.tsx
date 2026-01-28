@@ -1,4 +1,5 @@
-import React, { type CSSProperties, type ReactNode } from 'react';
+import React from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';

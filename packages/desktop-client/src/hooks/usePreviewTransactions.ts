@@ -12,14 +12,11 @@ import {
   scheduleIsRecurring,
 } from 'loot-core/shared/schedules';
 import { ungroupTransactions } from 'loot-core/shared/transactions';
-import { type IntegerAmount } from 'loot-core/shared/util';
-import {
-  type ScheduleEntity,
-  type TransactionEntity,
-} from 'loot-core/types/models';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { ScheduleEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { useCachedSchedules } from './useCachedSchedules';
-import { type ScheduleStatuses } from './useSchedules';
+import type { ScheduleStatuses } from './useSchedules';
 import { useSyncedPref } from './useSyncedPref';
 import { calculateRunningBalancesBottomUp } from './useTransactions';
 

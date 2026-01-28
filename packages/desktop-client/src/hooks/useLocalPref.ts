@@ -1,6 +1,6 @@
 import { useLocalStorage } from 'usehooks-ts';
 
-import { type LocalPrefs } from 'loot-core/types/prefs';
+import type { LocalPrefs } from 'loot-core/types/prefs';
 
 import { useMetadataPref } from './useMetadataPref';
 

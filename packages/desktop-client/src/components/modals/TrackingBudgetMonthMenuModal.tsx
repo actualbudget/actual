@@ -8,7 +8,8 @@ import {
   SvgCheveronUp,
 } from '@actual-app/components/icons/v1';
 import { SvgNotesPaper } from '@actual-app/components/icons/v2';
-import { styles, type CSSProperties } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
@@ -25,7 +26,7 @@ import { Notes } from '@desktop-client/components/Notes';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNotes } from '@desktop-client/hooks/useNotes';
 import { useUndo } from '@desktop-client/hooks/useUndo';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type TrackingBudgetMonthMenuModalProps = Extract<
   ModalType,
