@@ -1,7 +1,5 @@
 // @ts-strict-ignore
 import './polyfills';
-import * as injectAPI from '@actual-app/api/injected';
-
 import * as asyncStorage from '../platform/server/asyncStorage';
 import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
@@ -125,8 +123,6 @@ handlers['app-focused'] = async function () {
 };
 
 handlers = installAPI(handlers) as Handlers;
-
-injectAPI.override((name, args) => runHandler(app.handlers[name], args));
 
 // A hack for now until we clean up everything
 app.handlers = handlers;

@@ -6,7 +6,9 @@ import type {
   APIPayeeEntity,
   APIScheduleEntity,
 } from 'loot-core/server/api-models';
+import { lib } from 'loot-core/server/main';
 import type { Query } from 'loot-core/shared/query';
+import type { ImportTransactionsOpts } from 'loot-core/types/api-handlers';
 import type { Handlers } from 'loot-core/types/handlers';
 import type {
   ImportTransactionEntity,
@@ -14,15 +16,13 @@ import type {
   TransactionEntity,
 } from 'loot-core/types/models';
 
-import * as injected from './injected';
-
 export { q } from './app/query';
 
 function send<K extends keyof Handlers, T extends Handlers[K]>(
   name: K,
   args?: Parameters<T>[0],
 ): Promise<Awaited<ReturnType<T>>> {
-  return injected.send(name, args);
+  return lib.send(name, args);
 }
 
 export async function runImport(
@@ -125,10 +125,7 @@ export function addTransactions(
   });
 }
 
-export type ImportTransactionsOpts = {
-  defaultCleared?: boolean;
-  dryRun?: boolean;
-};
+export type { ImportTransactionsOpts };
 
 export function importTransactions(
   accountId: APIAccountEntity['id'],
