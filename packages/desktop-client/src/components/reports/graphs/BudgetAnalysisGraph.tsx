@@ -169,7 +169,7 @@ function CustomTooltip({
                     style={{
                       width: 10,
                       height: 10,
-                      backgroundColor: theme.reportsNumberNeutral,
+                      backgroundColor: theme.reportsGray,
                       display: 'inline-block',
                     }}
                   />
@@ -285,7 +285,7 @@ export function BudgetAnalysisGraph({
               <Line
                 type="monotone"
                 dataKey="balance"
-                stroke={theme.reportsNumberNeutral}
+                stroke={theme.reportsGray}
                 strokeWidth={2}
                 name={balanceLabel}
                 dot={false}
@@ -356,7 +356,7 @@ export function BudgetAnalysisGraph({
               <Line
                 type="monotone"
                 dataKey="balance"
-                stroke={theme.reportsNumberNeutral}
+                stroke={theme.reportsGray}
                 strokeWidth={2}
                 name={balanceLabel}
                 dot={false}
