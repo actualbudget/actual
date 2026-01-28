@@ -4,8 +4,6 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import peggyLoader from 'vite-plugin-peggy-loader';
 
-const crdtDir = path.resolve(__dirname, '../crdt');
-
 export default defineConfig({
   ssr: { noExternal: true, external: ['better-sqlite3'] },
   build: {
@@ -13,6 +11,7 @@ export default defineConfig({
     target: 'es2021',
     outDir: path.resolve(__dirname, 'dist'),
     emptyOutDir: true,
+    sourcemap: true,
     lib: {
       entry: path.resolve(__dirname, 'index.ts'),
       formats: ['cjs'],
@@ -37,14 +36,19 @@ export default defineConfig({
       '.json',
     ],
     alias: [
-      // {
-      //   find: 'handlebars',
-      //   replacement: require.resolve('handlebars/dist/handlebars.js'),
-      // },
       {
         find: /^@actual-app\/crdt(\/.*)?$/,
-        replacement: path.resolve(crdtDir, 'src') + '$1',
+        replacement: path.resolve(__dirname, '../crdt/src') + '$1',
       },
     ],
+  },
+  test: {
+    globals: true,
+    setupFiles: ['./vitest.setup.ts'],
+    onConsoleLog(log: string, type: 'stdout' | 'stderr'): boolean | void {
+      // print only console.error
+      return type === 'stderr';
+    },
+    maxWorkers: 2,
   },
 });
