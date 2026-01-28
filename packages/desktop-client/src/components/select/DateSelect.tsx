@@ -7,27 +7,19 @@ import React, {
   useMemo,
   useRef,
   useState,
-  type ComponentProps,
-  type KeyboardEvent,
-  type Ref,
 } from 'react';
+import type { ComponentProps, KeyboardEvent, Ref } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
-import { styles, type CSSProperties } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
-import {
-  addDays,
-  format,
-  isValid,
-  parse,
-  parseISO,
-  subDays,
-  type Locale,
-} from 'date-fns';
+import { addDays, format, isValid, parse, parseISO, subDays } from 'date-fns';
+import type { Locale } from 'date-fns';
 import Pikaday from 'pikaday';
 
 import {

@@ -1,11 +1,6 @@
 // @ts-strict-ignore
-import React, {
-  memo,
-  useRef,
-  useState,
-  type ComponentProps,
-  type CSSProperties,
-} from 'react';
+import React, { memo, useRef, useState } from 'react';
+import type { ComponentProps, CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -23,7 +18,7 @@ import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { type CategoryGroupMonthProps, type CategoryMonthProps } from '..';
+import type { CategoryGroupMonthProps, CategoryMonthProps } from '..';
 
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
@@ -34,17 +29,14 @@ import {
   CellValue,
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
-import {
-  Field,
-  SheetCell,
-  type SheetCellProps,
-} from '@desktop-client/components/table';
+import { Field, SheetCell } from '@desktop-client/components/table';
+import type { SheetCellProps } from '@desktop-client/components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useUndo } from '@desktop-client/hooks/useUndo';
-import { type Binding, type SheetFields } from '@desktop-client/spreadsheet';
+import type { Binding, SheetFields } from '@desktop-client/spreadsheet';
 import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
 
 export const useTrackingSheetValue = <

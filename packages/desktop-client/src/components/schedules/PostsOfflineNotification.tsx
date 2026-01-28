@@ -9,7 +9,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { type PayeeEntity } from 'loot-core/types/models';
+import type { PayeeEntity } from 'loot-core/types/models';
 
 import {
   Modal,

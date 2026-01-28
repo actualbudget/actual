@@ -1,11 +1,12 @@
-import React, { type ComponentProps } from 'react';
+import React from 'react';
+import type { ComponentProps } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
 import { fraction } from './fraction';
 import { PieProgress } from './PieProgress';
 
-import { type CellValue } from '@desktop-client/components/spreadsheet/CellValue';
+import type { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 
 type IncomeProgressProps = {

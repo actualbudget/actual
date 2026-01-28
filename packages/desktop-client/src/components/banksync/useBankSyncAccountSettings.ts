@@ -4,14 +4,14 @@ import {
   defaultMappings,
   mappingsFromString,
   mappingsToString,
-  type Mappings,
 } from 'loot-core/server/util/custom-sync-mapping';
+import type { Mappings } from 'loot-core/server/util/custom-sync-mapping';
 import { q } from 'loot-core/shared/query';
 
-import {
-  getFields,
-  type MappableFieldWithExample,
-  type TransactionDirection,
+import { getFields } from './EditSyncAccount';
+import type {
+  MappableFieldWithExample,
+  TransactionDirection,
 } from './EditSyncAccount';
 
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';

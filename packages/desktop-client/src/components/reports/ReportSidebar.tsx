@@ -4,7 +4,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
-import { Select, type SelectOption } from '@actual-app/components/select';
+import { Select } from '@actual-app/components/select';
+import type { SelectOption } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -13,20 +14,21 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
-  type CustomReportEntity,
-  type sortByOpType,
-  type TimeFrame,
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
+  CustomReportEntity,
+  sortByOpType,
+  TimeFrame,
 } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
 import { ModeButton } from './ModeButton';
-import { ReportOptions, type dateRangeProps } from './ReportOptions';
+import { ReportOptions } from './ReportOptions';
+import type { dateRangeProps } from './ReportOptions';
 import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
 

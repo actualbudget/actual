@@ -1,4 +1,5 @@
-import React, { type ComponentProps } from 'react';
+import React from 'react';
+import type { ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -18,9 +19,9 @@ import { View } from '@actual-app/components/view';
 import { toPng } from 'html-to-image';
 
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type CustomReportEntity,
-  type RuleConditionEntity,
+import type {
+  CustomReportEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { GraphButton } from './GraphButton';

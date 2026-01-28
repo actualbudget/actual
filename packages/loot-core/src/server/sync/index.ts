@@ -13,7 +13,7 @@ import * as connection from '../../platform/server/connection';
 import { logger } from '../../platform/server/log';
 import { once, sequential } from '../../shared/async';
 import { getIn, setIn } from '../../shared/util';
-import { type MetadataPrefs } from '../../types/prefs';
+import type { MetadataPrefs } from '../../types/prefs';
 import { setType as setBudgetType, triggerBudgetChanges } from '../budget/base';
 import * as db from '../db';
 import { PostError, SyncError } from '../errors';

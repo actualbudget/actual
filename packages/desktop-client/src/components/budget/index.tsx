@@ -1,20 +1,15 @@
 // @ts-strict-ignore
-import React, {
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useState,
-  type ComponentType,
-} from 'react';
+import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
+import type { ComponentType } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { AutoSizingBudgetTable } from './DynamicBudgetTable';

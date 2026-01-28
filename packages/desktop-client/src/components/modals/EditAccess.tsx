@@ -18,10 +18,8 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
-import {
-  popModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
+import { popModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { signOut } from '@desktop-client/users/usersSlice';
