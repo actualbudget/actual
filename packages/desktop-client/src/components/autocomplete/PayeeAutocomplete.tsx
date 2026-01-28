@@ -853,8 +853,7 @@ function NearbyPayeeItem({
   };
 
   return (
-    <button
-      type="button"
+    <div
       className={cx(
         className,
         css({
@@ -870,17 +869,28 @@ function NearbyPayeeItem({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          border: 'none',
-          font: 'inherit',
-          textAlign: 'left',
           ...narrowStyle,
         }),
       )}
       data-testid={`${item.name}-payee-item`}
       data-highlighted={highlighted || undefined}
-      {...props}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+      <button
+        type="button"
+        className={css({
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          background: 'none',
+          border: 'none',
+          font: 'inherit',
+          color: 'inherit',
+          textAlign: 'left',
+          padding: 0,
+          cursor: 'pointer',
+        })}
+        {...props}
+      >
         <TextOneLine>
           {itemIcon}
           {item.name}
@@ -898,7 +908,7 @@ function NearbyPayeeItem({
             {distanceText}
           </div>
         )}
-      </div>
+      </button>
       {locationId && (
         <Button
           variant="menu"
@@ -920,6 +930,6 @@ function NearbyPayeeItem({
           />
         </Button>
       )}
-    </button>
+    </div>
   );
 }
