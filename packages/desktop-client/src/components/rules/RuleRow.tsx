@@ -18,10 +18,27 @@ import { type RuleEntity } from 'loot-core/types/models';
 import { ActionExpression } from './ActionExpression';
 import { ConditionExpression } from './ConditionExpression';
 
+import {
+  DropHighlight,
+  useDraggable,
+  useDroppable,
+  type OnDragChangeCallback,
+  type OnDropCallback,
+} from '@desktop-client/components/sort';
 import { Cell, Field, Row, SelectCell } from '@desktop-client/components/table';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useDragRef } from '@desktop-client/hooks/useDragRef';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
 import { groupActionsBySplitIndex } from '@desktop-client/util/ruleUtils';
+
+function getRuleDragType(
+  stage: RuleEntity['stage'] | 'cleanup' | 'modify',
+): string {
+  // Normalize legacy stages to 'pre' for consistent drag types
+  const normalizedStage =
+    stage === 'cleanup' || stage === 'modify' ? 'pre' : (stage ?? 'null');
+  return `rule-${normalizedStage}`;
+}
 
 type RuleRowProps = {
   rule: RuleEntity;
@@ -30,6 +47,8 @@ type RuleRowProps = {
   onHover?: (id: string | null) => void;
   onEditRule?: (rule: RuleEntity) => void;
   onDeleteRule?: (rule: RuleEntity) => void;
+  onDragChange?: OnDragChangeCallback<{ id: string }>;
+  onDrop?: OnDropCallback;
 };
 
 export const RuleRow = memo(
@@ -40,6 +59,8 @@ export const RuleRow = memo(
     onHover,
     onEditRule,
     onDeleteRule,
+    onDragChange,
+    onDrop,
   }: RuleRowProps) => {
     const dispatchSelected = useSelectedDispatch();
     const borderColor = selected ? theme.tableBorderSelected : 'none';
@@ -56,166 +77,205 @@ export const RuleRow = memo(
     const { setMenuOpen, menuOpen, handleContextMenu, position } =
       useContextMenu();
 
+    const dragType = getRuleDragType(rule.stage);
+    const isDraggable = rule.stage !== null;
+
+    const { dragRef } = useDraggable({
+      type: dragType,
+      onDragChange,
+      item: { id: rule.id },
+      canDrag: isDraggable && !!onDragChange, // Only allow dragging for pre/post stages
+    });
+    const handleDragRef = useDragRef(dragRef);
+
+    const { dropRef, dropPos } = useDroppable({
+      types: onDrop && isDraggable ? [dragType] : [], // Only allow drops for pre/post stages
+      id: rule.id,
+      onDrop,
+    });
+
     return (
-      <Row
-        ref={triggerRef}
-        height="auto"
-        style={{
-          fontSize: 13,
-          zIndex: selected ? 101 : 'auto',
-          borderColor,
-          backgroundColor: selected
-            ? theme.tableRowBackgroundHighlight
-            : backgroundFocus
-              ? theme.tableRowBackgroundHover
-              : theme.tableBackground,
-        }}
-        collapsed
-        onMouseEnter={() => onHover && onHover(rule.id)}
-        onMouseLeave={() => onHover && onHover(null)}
-        onContextMenu={handleContextMenu}
-      >
-        <Popover
-          triggerRef={triggerRef}
-          placement="bottom start"
-          isOpen={menuOpen}
-          onOpenChange={() => setMenuOpen(false)}
-          {...position}
-          style={{ width: 200, margin: 1 }}
-          isNonModal
-        >
-          <Menu
-            items={[
-              onEditRule && { name: 'edit', text: t('Edit') },
-              onDeleteRule &&
-                !hasSchedule && { name: 'delete', text: t('Delete') },
-            ]}
-            onMenuSelect={name => {
-              switch (name) {
-                case 'delete':
-                  onDeleteRule(rule);
-                  break;
-                case 'edit':
-                  onEditRule(rule);
-                  break;
-                default:
-                  throw new Error(`Unrecognized menu option: ${name}`);
-              }
-              setMenuOpen(false);
-            }}
-          />
-        </Popover>
-        <SelectCell
-          exposed={hovered || selected}
-          focused
-          onSelect={e => {
-            dispatchSelected({
-              type: 'select',
-              id: rule.id,
-              isRangeSelect: e.shiftKey,
-            });
+      <View innerRef={dropRef} style={{ position: 'relative' }}>
+        <DropHighlight pos={dropPos} />
+        <View
+          innerRef={handleDragRef}
+          style={{
+            opacity: isDraggable ? 1 : 0.85, // Slightly dim non-draggable rules
           }}
-          selected={selected}
-        />
-
-        <Cell name="stage" width={50} plain style={{ color: theme.tableText }}>
-          {rule.stage && (
-            <View
-              style={{
-                alignSelf: 'flex-start',
-                margin: 5,
-                backgroundColor: theme.pillBackgroundSelected,
-                color: theme.pillTextSelected,
-                borderRadius: 4,
-                padding: '3px 5px',
-              }}
+        >
+          <Row
+            ref={triggerRef}
+            height="auto"
+            style={{
+              fontSize: 13,
+              cursor: isDraggable ? 'grab' : 'default', // Show grab cursor only for draggable rules
+              zIndex: selected ? 101 : 'auto',
+              borderColor,
+              backgroundColor: selected
+                ? theme.tableRowBackgroundHighlight
+                : backgroundFocus
+                  ? theme.tableRowBackgroundHover
+                  : theme.tableBackground,
+            }}
+            collapsed
+            onMouseEnter={() => onHover && onHover(rule.id)}
+            onMouseLeave={() => onHover && onHover(null)}
+            onContextMenu={handleContextMenu}
+          >
+            <Popover
+              triggerRef={triggerRef}
+              placement="bottom start"
+              isOpen={menuOpen}
+              onOpenChange={() => setMenuOpen(false)}
+              {...position}
+              style={{ width: 200, margin: 1 }}
+              isNonModal
             >
-              {translateRuleStage(rule.stage)}
-            </View>
-          )}
-        </Cell>
-
-        <Field width="flex" style={{ padding: '15px 0' }} truncate={false}>
-          <SpaceBetween style={{ alignItems: 'center' }}>
-            <View
-              style={{ flex: 1, alignItems: 'flex-start' }}
-              data-testid="conditions"
-            >
-              {rule.conditions.map((cond, i) => (
-                <ConditionExpression
-                  key={i}
-                  field={cond.field}
-                  op={cond.op}
-                  inline
-                  value={cond.value}
-                  options={cond.options}
-                  prefix={i > 0 ? friendlyOp(rule.conditionsOp) : null}
-                  style={i !== 0 && { marginTop: 3 }}
-                />
-              ))}
-            </View>
-
-            <Text>
-              <SvgRightArrow2
-                style={{ width: 12, height: 12, color: theme.tableText }}
+              <Menu
+                items={[
+                  onEditRule && { name: 'edit', text: t('Edit') },
+                  onDeleteRule &&
+                    !hasSchedule && { name: 'delete', text: t('Delete') },
+                ]}
+                onMenuSelect={name => {
+                  switch (name) {
+                    case 'delete':
+                      onDeleteRule(rule);
+                      break;
+                    case 'edit':
+                      onEditRule(rule);
+                      break;
+                    default:
+                      throw new Error(`Unrecognized menu option: ${name}`);
+                  }
+                  setMenuOpen(false);
+                }}
               />
-            </Text>
+            </Popover>
+            <SelectCell
+              exposed={hovered || selected}
+              focused
+              onSelect={e => {
+                dispatchSelected({
+                  type: 'select',
+                  id: rule.id,
+                  isRangeSelect: e.shiftKey,
+                });
+              }}
+              selected={selected}
+            />
 
-            <View
-              style={{ flex: 1, alignItems: 'flex-start' }}
-              data-testid="actions"
+            <Cell
+              name="stage"
+              width={50}
+              plain
+              style={{ color: theme.tableText }}
             >
-              {hasSplits
-                ? actionSplits.map((split, i) => (
-                    <View
-                      key={split.id}
-                      style={{
-                        width: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        marginTop: i > 0 ? 3 : 0,
-                        padding: '5px',
-                        borderColor: theme.tableBorder,
-                        borderWidth: '1px',
-                        borderRadius: '5px',
-                      }}
-                    >
-                      <Text
-                        style={{
-                          ...styles.smallText,
-                          color: theme.pageTextLight,
-                          marginBottom: 6,
-                        }}
-                      >
-                        {i ? t('Split {{num}}', { num: i }) : t('Apply to all')}
-                      </Text>
-                      {split.actions.map((action, j) => (
-                        <ActionExpression
-                          key={j}
-                          {...action}
-                          style={j !== 0 && { marginTop: 3 }}
-                        />
-                      ))}
-                    </View>
-                  ))
-                : rule.actions.map((action, i) => (
-                    <ActionExpression
+              {rule.stage && (
+                <View
+                  style={{
+                    alignSelf: 'flex-start',
+                    margin: 5,
+                    backgroundColor: theme.pillBackgroundSelected,
+                    color: theme.pillTextSelected,
+                    borderRadius: 4,
+                    padding: '3px 5px',
+                  }}
+                >
+                  {translateRuleStage(rule.stage)}
+                </View>
+              )}
+            </Cell>
+
+            <Field width="flex" style={{ padding: '15px 0' }} truncate={false}>
+              <SpaceBetween style={{ alignItems: 'center' }}>
+                <View
+                  style={{ flex: 1, alignItems: 'flex-start' }}
+                  data-testid="conditions"
+                >
+                  {rule.conditions.map((cond, i) => (
+                    <ConditionExpression
                       key={i}
-                      {...action}
+                      field={cond.field}
+                      op={cond.op}
+                      inline
+                      value={cond.value}
+                      options={cond.options}
+                      prefix={i > 0 ? friendlyOp(rule.conditionsOp) : null}
                       style={i !== 0 && { marginTop: 3 }}
                     />
                   ))}
-            </View>
-          </SpaceBetween>
-        </Field>
+                </View>
 
-        <Cell name="edit" plain style={{ padding: '0 15px', paddingLeft: 5 }}>
-          <Button onPress={() => onEditRule(rule)}>
-            <Trans>Edit</Trans>
-          </Button>
-        </Cell>
-      </Row>
+                <Text>
+                  <SvgRightArrow2
+                    style={{ width: 12, height: 12, color: theme.tableText }}
+                  />
+                </Text>
+
+                <View
+                  style={{ flex: 1, alignItems: 'flex-start' }}
+                  data-testid="actions"
+                >
+                  {hasSplits
+                    ? actionSplits.map((split, i) => (
+                        <View
+                          key={split.id}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start',
+                            marginTop: i > 0 ? 3 : 0,
+                            padding: '5px',
+                            borderColor: theme.tableBorder,
+                            borderWidth: '1px',
+                            borderRadius: '5px',
+                          }}
+                        >
+                          <Text
+                            style={{
+                              ...styles.smallText,
+                              color: theme.pageTextLight,
+                              marginBottom: 6,
+                            }}
+                          >
+                            {i
+                              ? t('Split {{num}}', { num: i })
+                              : t('Apply to all')}
+                          </Text>
+                          {split.actions.map((action, j) => (
+                            <ActionExpression
+                              key={j}
+                              {...action}
+                              style={j !== 0 && { marginTop: 3 }}
+                            />
+                          ))}
+                        </View>
+                      ))
+                    : rule.actions.map((action, i) => (
+                        <ActionExpression
+                          key={i}
+                          {...action}
+                          style={i !== 0 && { marginTop: 3 }}
+                        />
+                      ))}
+                </View>
+              </SpaceBetween>
+            </Field>
+
+            <Cell
+              name="edit"
+              plain
+              style={{ padding: '0 15px', paddingLeft: 5 }}
+            >
+              <Button onPress={() => onEditRule && onEditRule(rule)}>
+                <Trans>Edit</Trans>
+              </Button>
+            </Cell>
+          </Row>
+        </View>
+      </View>
     );
   },
 );

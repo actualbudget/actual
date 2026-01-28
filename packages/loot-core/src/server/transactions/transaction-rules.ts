@@ -9,7 +9,11 @@ import {
   subDays,
 } from '../../shared/months';
 import { q } from '../../shared/query';
-import { getApproxNumberThreshold, sortNumbers } from '../../shared/rules';
+import {
+  getApproxNumberThreshold,
+  normalizeStage,
+  sortNumbers,
+} from '../../shared/rules';
 import { ungroupTransaction } from '../../shared/transactions';
 import { fastSetMerge, partitionByField } from '../../shared/util';
 import {
@@ -27,6 +31,7 @@ import {
   insertPayee,
 } from '../db';
 import { getMappings } from '../db/mappings';
+import { shoveSortOrders, SORT_INCREMENT } from '../db/sort';
 import { RuleError } from '../errors';
 import { requiredFields, toDateRepr } from '../models';
 import {
@@ -218,11 +223,88 @@ export async function insertRule(
   rule: Omit<RuleEntity, 'id'> & { id?: string },
 ) {
   rule = ruleModel.validate(rule);
+
+  const normalizedStage = normalizeStage(rule.stage);
+
+  // Only auto-assign sort_order for pre/post stages (not null/default stage)
+  // Null stage rules are auto-sorted by specificity
+  if (
+    (rule.sort_order === null || rule.sort_order === undefined) &&
+    normalizedStage !== null
+  ) {
+    const allRules = getRules();
+    // Use normalizedStage for consistent filtering
+    const stageRules = allRules.filter(
+      r => normalizeStage(r.stage) === normalizedStage,
+    );
+
+    // For pre/post stages, ALWAYS assign sort_order (even if it's the first rule)
+    // Check if there are existing rules with sort_order to determine where to append
+    const rulesWithOrder = stageRules
+      .filter(r => r.sort_order != null)
+      .sort((a, b) => a.sort_order - b.sort_order);
+
+    if (rulesWithOrder.length > 0) {
+      // Append after existing rules
+      const { sort_order } = shoveSortOrders(
+        rulesWithOrder.map(r => ({ id: r.id, sort_order: r.sort_order })),
+        null,
+      );
+      rule.sort_order = sort_order;
+    } else {
+      // First rule in this stage - start at SORT_INCREMENT
+      rule.sort_order = SORT_INCREMENT;
+    }
+  }
+
   return db.insertWithUUID('rules', ruleModel.fromJS(rule));
 }
 
 export async function updateRule(rule) {
   rule = ruleModel.validate(rule, { update: true });
+
+  // If stage is being changed, handle sort_order appropriately
+  if ('stage' in rule) {
+    const oldRule = await db.first<db.DbRule>(
+      'SELECT stage, sort_order FROM rules WHERE id = ?',
+      [rule.id],
+    );
+
+    if (!oldRule) {
+      throw new Error(`Rule not found: ${rule.id}`);
+    }
+
+    const oldStage = normalizeStage(oldRule.stage);
+    const newStage = normalizeStage(rule.stage);
+
+    // ONLY handle sort_order if stage is ACTUALLY changing
+    if (oldStage !== newStage) {
+      // Moving FROM null TO pre/post: assign sort_order at end of target stage
+      if (oldStage === null && newStage !== null) {
+        const allRules = getRules();
+        const targetStageRules = allRules
+          .filter(
+            r => normalizeStage(r.stage) === newStage && r.sort_order != null,
+          )
+          .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+
+        // Assign sort_order after the last rule in the target stage
+        if (targetStageRules.length > 0) {
+          rule.sort_order =
+            targetStageRules[targetStageRules.length - 1].sort_order +
+            SORT_INCREMENT;
+        } else {
+          rule.sort_order = SORT_INCREMENT;
+        }
+      }
+
+      // Moving FROM pre/post TO null: clear sort_order
+      if (oldStage !== null && newStage === null) {
+        rule.sort_order = null;
+      }
+    }
+  }
+
   return db.update('rules', ruleModel.fromJS(rule));
 }
 
@@ -238,6 +320,91 @@ export async function deleteRule(id: string) {
 
   await db.delete_('rules', id);
   return true;
+}
+
+export async function moveRule(id: string, targetId: string | null) {
+  // Get the rule being moved
+  const rule = await db.first<db.DbRule>('SELECT * FROM rules WHERE id = ?', [
+    id,
+  ]);
+
+  if (!rule) {
+    throw new Error(`Rule not found: ${id}`);
+  }
+
+  // Normalize the stage
+  const normalizedRuleStage = normalizeStage(rule.stage);
+
+  // Block manual reordering of default stage rules - they are auto-sorted by specificity
+  if (normalizedRuleStage === null) {
+    throw new Error(
+      'Cannot manually reorder default stage rules - they are auto-sorted by specificity',
+    );
+  }
+
+  // Validate that targetId refers to a rule in the same stage
+  if (targetId !== null) {
+    const targetRule = await db.first<db.DbRule>(
+      'SELECT * FROM rules WHERE id = ?',
+      [targetId],
+    );
+
+    if (!targetRule) {
+      throw new Error(`Target rule not found: ${targetId}`);
+    }
+
+    // Normalize both stages before comparing
+    const normalizedTargetStage = normalizeStage(targetRule.stage);
+
+    if (normalizedTargetStage !== normalizedRuleStage) {
+      throw new Error(`Target rule not in same stage as rule ${id}`);
+    }
+  }
+
+  // Get all rules in the same stage (using in-memory rules which are already ranked)
+  // Filter using normalized stages
+  const allInMemoryRules = getRules();
+  const rulesInStage = rankRules(
+    allInMemoryRules.filter(
+      r => normalizeStage(r.stage) === normalizedRuleStage,
+    ),
+  );
+
+  // Check if any rule in this stage already has a sort_order
+  const hasExistingSortOrder = rulesInStage.some(r => r.sort_order != null);
+
+  await batchMessages(async () => {
+    if (!hasExistingSortOrder) {
+      // First reorder in this stage - initialize sort_order for all rules
+      // based on their current ranked order
+      let order = SORT_INCREMENT;
+      for (const r of rulesInStage) {
+        await db.update('rules', { id: r.id, sort_order: order });
+        order += SORT_INCREMENT;
+      }
+    }
+
+    // Now get the rules with sort_order for shoveSortOrders
+    const rulesForShove = rulesInStage.map(r => ({
+      id: r.id,
+      sort_order: hasExistingSortOrder
+        ? (r.sort_order ?? SORT_INCREMENT * (rulesInStage.indexOf(r) + 1))
+        : SORT_INCREMENT * (rulesInStage.indexOf(r) + 1),
+    }));
+
+    // Remove the rule being moved from the list
+    const filteredRules = rulesForShove.filter(r => r.id !== id);
+
+    const { updates, sort_order } = shoveSortOrders(filteredRules, targetId);
+
+    // Apply any updates needed to make room
+    for (const info of updates) {
+      await db.update('rules', info);
+    }
+
+    // Update the moved rule with its new sort_order
+    await db.update('rules', { id, sort_order });
+  });
 }
 
 // Sync projections
@@ -267,6 +434,14 @@ function onApplySync(oldValues, newValues) {
             allRules.set(newValue.id, rule);
             firstcharIndexer.index(rule);
             payeeIndexer.index(rule);
+
+            // Clean up invalid sort_order on null stage rules during sync
+            if (
+              normalizeStage(rule.stage) === null &&
+              rule.sort_order != null
+            ) {
+              db.update('rules', { id: rule.id, sort_order: null });
+            }
           }
         }
       });

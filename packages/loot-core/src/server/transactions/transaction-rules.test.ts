@@ -2,7 +2,9 @@
 import { q } from '../../shared/query';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
+import { insertPayee } from '../db';
 import { loadMappings } from '../db/mappings';
+import { rankRules } from '../rules';
 
 import {
   conditionsToAQL,
@@ -12,9 +14,11 @@ import {
   insertRule,
   loadRules,
   makeRule,
+  moveRule,
   resetState,
   runRules,
   updateCategoryRules,
+  updatePayeeRenameRule,
   updateRule,
 } from './transaction-rules';
 
@@ -339,6 +343,7 @@ describe('Transaction rules', () => {
 
     await insertRule({
       stage: null,
+      sort_order: null,
       conditionsOp: 'and',
       conditions: [
         { op: 'contains', field: 'imported_payee', value: 'kroger' },
@@ -348,6 +353,7 @@ describe('Transaction rules', () => {
 
     await insertRule({
       stage: null,
+      sort_order: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'kroger4' }],
       actions: [{ op: 'set', field: 'notes', value: 'got it' }],
@@ -678,6 +684,7 @@ describe('Learning categories', () => {
 
     await insertRule({
       stage: null,
+      sort_order: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
       actions: [{ op: 'set', field: 'category', value: 'fun' }],
@@ -703,6 +710,7 @@ describe('Learning categories', () => {
 
     await insertRule({
       stage: null,
+      sort_order: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
       actions: [{ op: 'set', field: 'category', value: 'beer' }],
@@ -748,6 +756,7 @@ describe('Learning categories', () => {
 
     await insertRule({
       stage: null,
+      sort_order: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
       actions: [{ op: 'set', field: 'category', value: 'beer' }],
@@ -795,18 +804,21 @@ describe('Learning categories', () => {
 
     await insertRule({
       stage: null,
+      sort_order: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
       actions: [{ op: 'set', field: 'category', value: 'unknown1' }],
     });
     await insertRule({
       stage: null,
+      sort_order: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
       actions: [{ op: 'set', field: 'category', value: 'unknown2' }],
     });
     await insertRule({
       stage: null,
+      sort_order: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: null }],
       actions: [{ op: 'set', field: 'category', value: 'beer' }],
@@ -897,12 +909,14 @@ describe('Learning categories', () => {
 
     await insertRule({
       stage: null,
+      sort_order: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
       actions: [{ op: 'set', field: 'category', value: 'unknown1' }],
     });
     await insertRule({
       stage: null,
+      sort_order: null,
       conditionsOp: 'and',
       conditions: [{ op: 'oneOf', field: 'payee', value: ['foo', 'bar'] }],
       actions: [{ op: 'set', field: 'category', value: 'unknown1' }],
@@ -931,6 +945,7 @@ describe('Learning categories', () => {
   test('rules are saved with internal field names', async () => {
     await insertRule({
       stage: null,
+      sort_order: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: 'foo' }],
       actions: [{ op: 'set', field: 'payee', value: 'unknown1' }],
@@ -964,6 +979,7 @@ describe('Learning categories', () => {
   test('rules with public field names are loaded correctly', async () => {
     await db.insertWithUUID('rules', {
       stage: null,
+      sort_order: null,
       conditions_op: 'and',
       conditions: JSON.stringify([
         { op: 'is', field: 'imported_payee', value: 'foo' },
@@ -991,4 +1007,159 @@ describe('Learning categories', () => {
   });
 
   // TODO: write tests for split transactions
+});
+
+describe('Learned rules with manual ordering', () => {
+  test('learned rules in non-ordered stage keep null sort_order', async () => {
+    // Create a learned category rule (no sort_order specified)
+    const ruleId = await insertRule({
+      stage: null,
+      sort_order: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'payee', value: 'test-payee' }],
+      actions: [{ op: 'set', field: 'category', value: 'groceries' }],
+    });
+
+    // Load rules and verify it has null sort_order
+    await loadRules();
+    const rules = getRules();
+    const defaultRules = rules.filter(r => r.stage === null);
+    const insertedRule = defaultRules.find(r => r.id === ruleId);
+
+    expect(insertedRule).toBeDefined();
+    expect(insertedRule.sort_order).toBeNull();
+  });
+
+  test('learned payee rename rules append to pre stage correctly', async () => {
+    // Create manually-ordered pre-stage rule
+    const rule1 = await insertRule({
+      stage: 'pre',
+      sort_order: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'contains', field: 'imported_payee', value: 'STORE' }],
+      actions: [{ op: 'set', field: 'payee', value: 'store-payee' }],
+    });
+
+    await moveRule(rule1, null);
+    await loadRules();
+
+    // Trigger learned rename rule creation
+    const payee1 = await insertPayee({ name: 'specific-store' });
+    await updatePayeeRenameRule(['SPECIFIC STORE 123'], payee1);
+
+    await loadRules();
+    const rules = getRules();
+    const preRules = rules.filter(r => r.stage === 'pre');
+
+    // Find the learned rule
+    const learnedRule = preRules.find(r =>
+      r.actions.some((a: { value: string }) => a.value === payee1),
+    );
+
+    expect(learnedRule).toBeDefined();
+    expect(learnedRule.sort_order).not.toBeNull();
+
+    const insertedRule1 = preRules.find(r => r.id === rule1);
+
+    // Learned rule should have higher sort_order (appears after rule1)
+    expect(learnedRule.sort_order).toBeGreaterThan(insertedRule1.sort_order);
+  });
+
+  test('rules with same sort_order are ordered by ID', async () => {
+    // Manually create two rules with same sort_order
+    const rule1Id = await insertRule({
+      stage: null,
+      sort_order: 16384,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'payee', value: 'payee1' }],
+      actions: [{ op: 'set', field: 'category', value: 'cat1' }],
+    });
+
+    const rule2Id = await insertRule({
+      stage: null,
+      sort_order: 16384, // Same sort_order
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'payee', value: 'payee2' }],
+      actions: [{ op: 'set', field: 'category', value: 'cat2' }],
+    });
+
+    await loadRules();
+    const rules = getRules();
+    const ranked = rankRules(rules.filter(r => r.stage === null));
+    const positions = ranked.map(r => r.id);
+
+    const pos1 = positions.indexOf(rule1Id);
+    const pos2 = positions.indexOf(rule2Id);
+
+    // Whichever ID is lexicographically smaller should come first
+    if (rule1Id < rule2Id) {
+      expect(pos1).toBeLessThan(pos2);
+    } else {
+      expect(pos2).toBeLessThan(pos1);
+    }
+  });
+
+  test('moveRule throws error for null stage rules', async () => {
+    const ruleId = await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'payee', value: 'test' }],
+      actions: [{ op: 'set', field: 'category', value: 'food' }],
+    });
+
+    await loadRules();
+
+    await expect(moveRule(ruleId, null)).rejects.toThrow(
+      'Cannot manually reorder default stage rules - they are auto-sorted by specificity',
+    );
+  });
+
+  test('stage change from null to pre assigns sort_order', async () => {
+    const ruleId = await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'payee', value: 'test' }],
+      actions: [{ op: 'set', field: 'category', value: 'food' }],
+    });
+
+    await loadRules();
+
+    // Verify initial state
+    let rule = getRules().find(r => r.id === ruleId);
+    expect(rule.sort_order).toBeNull();
+    expect(rule.stage).toBeNull();
+
+    // Change to pre stage
+    await updateRule({ id: ruleId, stage: 'pre' });
+    await loadRules();
+
+    rule = getRules().find(r => r.id === ruleId);
+    expect(rule.stage).toBe('pre');
+    expect(rule.sort_order).not.toBeNull();
+    expect(rule.sort_order).toBeGreaterThan(0);
+  });
+
+  test('stage change from pre to null clears sort_order', async () => {
+    const ruleId = await insertRule({
+      stage: 'pre',
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'payee', value: 'test' }],
+      actions: [{ op: 'set', field: 'category', value: 'food' }],
+    });
+
+    await loadRules();
+
+    // Verify initial state - pre stage should have sort_order
+    let rule = getRules().find(r => r.id === ruleId);
+    expect(rule.stage).toBe('pre');
+    expect(rule.sort_order).not.toBeNull();
+
+    // Change to null stage
+    await updateRule({ id: ruleId, stage: null });
+    await loadRules();
+
+    rule = getRules().find(r => r.id === ruleId);
+    expect(rule.stage).toBeNull();
+    expect(rule.sort_order).toBeNull();
+  });
 });

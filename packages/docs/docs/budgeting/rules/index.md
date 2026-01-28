@@ -20,7 +20,21 @@ If there is a conflict, for example if two rules set the category, the rule that
 
 Rules are **automatically ranked** from least to most specific. If the conditions of one rule apply broadly, while the conditions of another are more specific, the latter will always run _after_ the former so its changes always win out. This means you can make a broad rule like "if a transaction's payee _contains_ 'cat' set the category to 'pets'", and then fix a mismatched transaction with another rule that says "if the payee _is_ 'catan' set the category to 'games'". An "is" condition always ranks higher than "contains". Generally, you don't need to worry about this and it should work like you expect.
 
-While ranking works for the most part, you might want to say "this rule _always_ should run last no matter what". Actual allows this with **stages**. Rules are actually run in 3 stages: `pre`, `default`, and `post`. By tagging a rule as `pre` or `post`, you force it to always run before or after rules in the other stages. Within a stage, rules are still automatically ranked.
+While ranking works for the most part, you might want to say "this rule _always_ should run last no matter what". Actual allows this with **stages**. Rules are actually run in 3 stages: `pre`, `default`, and `post`. By tagging a rule as `pre` or `post`, you force it to always run before or after rules in the other stages. Within a stage, rules are still automatically ranked unless you manually reorder them.
+
+### Reordering Rules
+
+You can manually reorder rules by dragging them within the rules list. Rules can only be reordered within their stage (pre, default, or post) - you cannot drag a rule from one stage to another.
+
+To reorder a rule:
+
+1. Go to **More** > **Rules**
+2. Click and drag a rule to its new position within its stage
+3. Release to drop it in place
+
+When you manually reorder any rule in a stage, **all rules in that stage** will switch from automatic ranking to manual ordering. This ensures the ordering is predictable and consistent.
+
+**New rules added to a manually-ordered stage** (including automatically created rules from renaming payees or categorizing transactions) **will be placed at the end**. You can then drag them to a different position if needed. In stages that haven't been manually reordered, automatically created rules continue to use automatic specificity-based ranking.
 
 ### Condition Types
 
