@@ -220,7 +220,7 @@ async function importPayeeLocations(
     try {
       // Create the payee location in Actual
       await send('payee-location-create', {
-        payee_id: actualPayeeId,
+        payeeId: actualPayeeId,
         latitude,
         longitude,
       });

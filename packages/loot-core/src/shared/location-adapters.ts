@@ -70,14 +70,14 @@ export class SendApiLocationClient implements LocationApiClient {
     coordinates: LocationCoordinates,
   ): Promise<string> {
     return await send('payee-location-create', {
-      payee_id: payeeId,
+      payeeId,
       latitude: coordinates.latitude,
       longitude: coordinates.longitude,
     });
   }
 
   async getLocations(payeeId: string): Promise<PayeeLocationEntity[]> {
-    return await send('payee-locations-get', { payee_id: payeeId });
+    return await send('payee-locations-get', { payeeId });
   }
 
   async deleteLocation(locationId: string): Promise<void> {

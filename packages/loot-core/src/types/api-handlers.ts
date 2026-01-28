@@ -219,13 +219,13 @@ export type ApiHandlers = {
   }) => Promise<void>;
 
   'api/payee-location-create': (arg: {
-    payee_id: string;
+    payeeId: string;
     latitude: number;
     longitude: number;
   }) => Promise<string>;
 
   'api/payee-locations-get': (arg: {
-    payee_id: string;
+    payeeId: string;
   }) => Promise<PayeeLocationEntity[]>;
 
   'api/payee-location-delete': (arg: { id: string }) => Promise<void>;

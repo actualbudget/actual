@@ -742,17 +742,17 @@ handlers['api/payees-merge'] = withMutation(async function ({
 });
 
 handlers['api/payee-location-create'] = withMutation(async function ({
-  payee_id,
+  payeeId,
   latitude,
   longitude,
 }) {
   checkFileOpen();
-  return handlers['payee-location-create']({ payee_id, latitude, longitude });
+  return handlers['payee-location-create']({ payeeId, latitude, longitude });
 });
 
-handlers['api/payee-locations-get'] = async function ({ payee_id }) {
+handlers['api/payee-locations-get'] = async function ({ payeeId }) {
   checkFileOpen();
-  return handlers['payee-locations-get']({ payee_id });
+  return handlers['payee-locations-get']({ payeeId });
 };
 
 handlers['api/payee-location-delete'] = withMutation(async function ({ id }) {
