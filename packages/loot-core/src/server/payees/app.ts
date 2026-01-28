@@ -150,6 +150,10 @@ async function createPayeeLocation({
 }): Promise<PayeeLocationEntity['id']> {
   const created_at = Date.now();
 
+  if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+     throw new Error('Invalid coordinates: latitude must be between -90 and 90, longitude must be between -180 and 180');
+  }
+
   return await db.insertWithUUID('payee_locations', {
     payee_id,
     latitude,
