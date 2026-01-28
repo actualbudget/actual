@@ -22,6 +22,7 @@ import {
 import { CellValueText } from '@desktop-client/components/spreadsheet/CellValue';
 import { useCategory } from '@desktop-client/hooks/useCategory';
 import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type EnvelopeIncomeBalanceMenuModalProps = Omit<
@@ -42,6 +43,7 @@ export function EnvelopeIncomeBalanceMenuModal({
   };
 
   const { t } = useTranslation();
+  const isImprovedAutoHoldEnabled = useFeatureFlag('improvedAutoHold');
   const { data: category } = useCategory(categoryId);
 
   const carryover = useEnvelopeSheetValue(
@@ -121,12 +123,16 @@ export function EnvelopeIncomeBalanceMenuModal({
               }
             }}
             items={[
-              {
-                name: 'carryover',
-                text: carryover
-                  ? t('Disable auto hold')
-                  : t('Enable auto hold'),
-              },
+              ...(!isImprovedAutoHoldEnabled
+                ? [
+                    {
+                      name: 'carryover',
+                      text: carryover
+                        ? t('Disable auto hold')
+                        : t('Enable auto hold'),
+                    },
+                  ]
+                : []),
               {
                 name: 'view',
                 text: t('View transactions'),
