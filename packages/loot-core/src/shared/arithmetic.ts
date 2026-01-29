@@ -38,7 +38,10 @@ function parsePrimary(state) {
   }
 
   let numberStr = '';
-  while (char(state) && char(state).match(/[0-9,.’\u00A0\u202F ]|\p{Sc}/u)) {
+  while (
+    char(state) &&
+    char(state).match(/[0-9,.'\u2019\u00A0\u202F ]|\p{Sc}/u)
+  ) {
     numberStr += next(state);
   }
 

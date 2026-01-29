@@ -43,7 +43,7 @@ through the list of available commands. You can also quickly move to any of the 
 - <Key k="0" /> (zero) View the current month.
 - <Key arrow="left" /> View the previous month.
 - <Key arrow="right" /> View the next month.
-  
+
 ### Account page shortcuts
 
 - <Key mod="ctrl" k="B" /> Initiate bank sync.
@@ -60,7 +60,7 @@ through the list of available commands. You can also quickly move to any of the 
 - <Key k="K" /> or <Key arrow="up" /> With a transaction selected, move to the next transaction up. Hold to scroll up.
 
 #### Transaction shortcuts
-  
+
 - <Key k="enter" /> when editing will move down. In a dropdown, this will save the value and close the dropdown. in either the Payment or Deposit columns this will add the transaction; the form remains open for the next addition.
 - <Key mod="shift" k="enter" /> when editing will move up. In a dropdown, this will save the value and close the dropdown.
 - <Key mod="ctrl" k="enter" /> will add the transaction and close the form regardless of where you are editing.

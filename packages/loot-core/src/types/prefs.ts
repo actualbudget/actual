@@ -6,6 +6,7 @@ export type FeatureFlag =
   | 'currency'
   | 'crossoverReport'
   | 'customThemes'
+  | 'budgetAnalysisReport'
   | 'payeeLocations';
 
 /**

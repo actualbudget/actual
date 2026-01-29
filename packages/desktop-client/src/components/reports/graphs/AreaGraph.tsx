@@ -289,12 +289,12 @@ export function AreaGraph({
                 >
                   <stop
                     offset={off}
-                    stopColor={theme.reportsBlue}
+                    stopColor={theme.reportsNumberPositive}
                     stopOpacity={0.2}
                   />
                   <stop
                     offset={off}
-                    stopColor={theme.reportsRed}
+                    stopColor={theme.reportsNumberNegative}
                     stopOpacity={0.2}
                   />
                 </linearGradient>
@@ -307,12 +307,12 @@ export function AreaGraph({
                 >
                   <stop
                     offset={off}
-                    stopColor={theme.reportsBlue}
+                    stopColor={theme.reportsNumberPositive}
                     stopOpacity={1}
                   />
                   <stop
                     offset={off}
-                    stopColor={theme.reportsRed}
+                    stopColor={theme.reportsNumberNegative}
                     stopOpacity={1}
                   />
                 </linearGradient>

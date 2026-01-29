@@ -39,7 +39,6 @@ import {
 } from 'loot-core/shared/months';
 
 import 'pikaday/css/pikaday.css';
-
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
 
@@ -174,7 +173,8 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
           }
         },
       }),
-      [onUpdate],
+      // oxlint-disable-next-line react-hooks/exhaustive-deps
+      [],
     );
 
     useLayoutEffect(() => {
@@ -317,7 +317,8 @@ function DateSelectDesktop({
         setSelectedValue(value);
       }
     }
-  }, [value, onUpdate, dateFormat]);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, dateFormat]);
 
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (
