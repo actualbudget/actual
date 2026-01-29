@@ -14,10 +14,6 @@ import {
   reducer as appSliceReducer,
 } from '@desktop-client/app/appSlice';
 import {
-  name as budgetSliceName,
-  reducer as budgetSliceReducer,
-} from '@desktop-client/budget/budgetSlice';
-import {
   name as budgetfilesSliceName,
   reducer as budgetfilesSliceReducer,
 } from '@desktop-client/budgetfiles/budgetfilesSlice';
@@ -54,7 +50,6 @@ import {
 const rootReducer = combineReducers({
   [accountsSliceName]: accountsSliceReducer,
   [appSliceName]: appSliceReducer,
-  [budgetSliceName]: budgetSliceReducer,
   [budgetfilesSliceName]: budgetfilesSliceReducer,
   [modalsSliceName]: modalsSliceReducer,
   [notificationsSliceName]: notificationsSliceReducer,

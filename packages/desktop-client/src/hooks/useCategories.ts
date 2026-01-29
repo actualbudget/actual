@@ -1,22 +1,8 @@
-import { useEffect } from 'react';
-
-import { useInitialMount } from './useInitialMount';
-
-import { getCategories } from '@desktop-client/budget/budgetSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
+import { useCategoriesQuery } from './useCategoriesQuery';
 
 export function useCategories() {
-  const dispatch = useDispatch();
-  const isInitialMount = useInitialMount();
-  const isCategoriesDirty = useSelector(
-    state => state.budget.isCategoriesDirty,
-  );
-
-  useEffect(() => {
-    if (isInitialMount || isCategoriesDirty) {
-      dispatch(getCategories());
-    }
-  }, [dispatch, isInitialMount, isCategoriesDirty]);
-
-  return useSelector(state => state.budget.categories);
+  const query = useCategoriesQuery();
+  // TODO: Update to return query states (e.g. isFetching, isError, etc)
+  // so clients can handle loading and error states appropriately.
+  return query.data ?? { list: [], grouped: [] };
 }
