@@ -85,6 +85,7 @@ export type LocalPrefs = Partial<{
   reportsViewLabel: boolean;
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
+  'payees.orphanedDisplayMode': string;
 }>;
 
 export type Theme =
