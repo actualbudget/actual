@@ -200,7 +200,7 @@ async function deletePayeeLocation({
 
 // Type for the raw query result that combines PayeeEntity and PayeeLocationEntity fields
 type NearbyPayeeQueryResult = Pick<
-  PayeeEntity,
+  db.DbPayee,
   | 'id'
   | 'name'
   | 'transfer_acct'
@@ -326,25 +326,28 @@ async function getNearbyPayees({
     )) || [];
 
   // Transform results to expected format
-  const nearbyPayees = results.map(row => ({
-    // Payee properties
-    id: row.id,
-    name: row.name,
-    transfer_acct: row.transfer_acct,
-    favorite: row.favorite,
-    learn_categories: row.learn_categories,
-    tombstone: row.tombstone,
-    // Location properties
-    location: {
-      id: row.location_id,
-      payee_id: row.payee_id,
-      latitude: row.latitude,
-      longitude: row.longitude,
-      created_at: row.created_at,
-      // Calculated distance from SQL
-      distance: row.distance,
-    },
-  }));
+  const nearbyPayees = results.map(row => {
+    const payee = payeeModel.fromDb({
+      id: row.id,
+      name: row.name,
+      transfer_acct: row.transfer_acct,
+      favorite: row.favorite,
+      learn_categories: row.learn_categories,
+      tombstone: row.tombstone,
+    });
+
+    return {
+      ...payee,
+      location: {
+        id: row.location_id,
+        payee_id: row.payee_id,
+        latitude: row.latitude,
+        longitude: row.longitude,
+        created_at: row.created_at,
+        distance: row.distance,
+      },
+    } as PayeeEntity;
+  });
 
   return nearbyPayees;
 }
