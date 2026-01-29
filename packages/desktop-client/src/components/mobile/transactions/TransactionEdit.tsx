@@ -1422,6 +1422,11 @@ function TransactionEditUnconnected({
 
   useEffect(() => {
     if (!locationAccess) {
+      // Clear location-derived state when location access is revoked
+      setNearestPayee(null);
+      setAutoSelectedPayeeId(null);
+      setShouldShowForgetLocation(false);
+      hasAutoSelectedPayee.current = false;
       return;
     }
     let unmounted = false;
@@ -1550,14 +1555,20 @@ function TransactionEditUnconnected({
 
       // Show forget location button when payee is manually changed (not auto-selected)
       // and it has a recent potential duplicate location
-      if (
-        updatedField === 'payee' &&
-        newTransaction.payee &&
-        newTransaction.payee !== autoSelectedPayeeId &&
-        locationAccess &&
-        (await locationService.hasRecentDuplicateLocation(newTransaction.payee))
-      ) {
-        setShouldShowForgetLocation(true);
+      if (updatedField === 'payee') {
+        if (
+          newTransaction.payee &&
+          newTransaction.payee !== autoSelectedPayeeId &&
+          locationAccess &&
+          (await locationService.hasRecentDuplicateLocation(
+            newTransaction.payee,
+          ))
+        ) {
+          setShouldShowForgetLocation(true);
+        } else {
+          // Clear the button when the new payee doesn't qualify
+          setShouldShowForgetLocation(false);
+        }
       }
     },
     [
@@ -1671,7 +1682,13 @@ function TransactionEditUnconnected({
 
           // If it's within a reasonable distance (indicating it was auto-saved for this session)
           if (distance <= DEFAULT_MAX_DISTANCE_METERS) {
-            await dispatch(deletePayeeLocation(mostRecentLocation.id)).unwrap();
+            const result = await dispatch(
+              deletePayeeLocation(mostRecentLocation.id),
+            ).unwrap();
+
+            if (!result.success) {
+              throw new Error('deletePayeeLocation failed');
+            }
           }
         }
 

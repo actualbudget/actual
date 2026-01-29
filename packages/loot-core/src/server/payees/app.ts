@@ -150,7 +150,14 @@ async function createPayeeLocation({
 }): Promise<PayeeLocationEntity['id']> {
   const created_at = Date.now();
 
-  if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
     throw new Error(
       'Invalid coordinates: latitude must be between -90 and 90, longitude must be between -180 and 180',
     );
@@ -216,6 +223,25 @@ async function getNearbyPayees({
   longitude: number;
   maxDistance?: number;
 }): Promise<Array<PayeeEntity>> {
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    throw new Error(
+      'Invalid coordinates: latitude must be between -90 and 90, longitude must be between -180 and 180',
+    );
+  }
+
+  if (!Number.isFinite(maxDistance) || maxDistance <= 0) {
+    throw new Error(
+      'Invalid maxDistance: must be a finite positive number greater than 0',
+    );
+  }
+
   // Get the closest location for each payee within maxDistance using window functions
   const query = `
     WITH payee_distances AS (
