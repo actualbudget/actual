@@ -46,31 +46,54 @@ async function commentOnPR() {
     const prBranch = pr.head.ref;
     const headOwner = pr.head.repo.owner.login;
     const headRepo = pr.head.repo.name;
-    const fileUrl = `https://github.com/${headOwner}/${headRepo}/blob/${prBranch}/upcoming-release-notes/${summaryData.prNumber}.md`;
+    const isFork = pr.head.repo.fork;
+    const fileName = `upcoming-release-notes/${summaryData.prNumber}.md`;
+    const fileUrl = `https://github.com/${headOwner}/${headRepo}/blob/${prBranch}/${fileName}`;
 
-    const commentBody = [
-      '🤖 **Auto-generated Release Notes**',
-      '',
-      `Hey @${summaryData.author}! I've automatically created a release notes file based on CodeRabbit's analysis:`,
-      '',
-      `**Category:** ${cleanCategory}`,
-      `**Summary:** ${summaryData.summary}`,
-      `**File:** [upcoming-release-notes/${summaryData.prNumber}.md](${fileUrl})`,
-      '',
-      //      'The release notes file has been committed to the repository. You can edit it if needed before merging.',
-      "If you're happy with this release note, you can add it to your pull request. If not, you'll need to add your own before a maintainer can review your change.",
-    ].join('\n');
+    const fileContent = `---
+category: ${cleanCategory}
+authors: [${summaryData.author}]
+---
+
+${summaryData.summary}
+`;
+
+    let commentBody = ['🤖 **Auto-generated Release Notes**', ''];
+    if (isFork) {
+      commentBody = commentBody.concat([
+        `Hey @${summaryData.author}! I've generated release notes based on CodeRabbit's analysis.`,
+        '',
+        `Since this PR is from a fork, I couldn't automatically commit the file. Please create \`${fileName}\` with the following content:`,
+        '',
+        '```markdown',
+        fileContent,
+        '```',
+        '',
+        'You can edit the summary if needed before committing.',
+      ]);
+    } else {
+      commentBody = commentBody.concat([
+        `Hey @${summaryData.author}! I've automatically created a release notes file based on CodeRabbit's analysis:`,
+        '',
+        `**Category:** ${cleanCategory}`,
+        `**Summary:** ${summaryData.summary}`,
+        `**File:** [${fileName}](${fileUrl})`,
+        '',
+        'The release notes file has been committed to your branch. You can edit it if needed before merging.',
+      ]);
+    }
 
     await octokit.rest.issues.createComment({
       owner,
       repo: repoName,
       issue_number: issueNumber,
-      body: commentBody,
+      body: commentBody.join('\n'),
     });
 
     console.log('✅ Successfully commented on PR');
   } catch (error) {
     console.log('Error commenting on PR:', error.message);
+    process.exit(1);
   }
 }
 
