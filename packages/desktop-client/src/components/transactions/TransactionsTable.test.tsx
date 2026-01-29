@@ -1,9 +1,9 @@
 import {
   forwardRef,
-  useState,
   useEffect,
-  type RefObject,
+  useState,
   type ReactNode,
+  type RefObject,
 } from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react';
