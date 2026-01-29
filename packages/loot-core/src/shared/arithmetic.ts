@@ -21,15 +21,6 @@ function next(state) {
   return ch;
 }
 
-function nextOperator(state, op) {
-  if (char(state) === op) {
-    next(state);
-    return true;
-  }
-
-  return false;
-}
-
 function parsePrimary(state) {
   // We only support numbers
   const isNegative = char(state) === '-';
@@ -69,20 +60,38 @@ function parseParens(state) {
   return parsePrimary(state);
 }
 
-function makeOperatorParser(...ops) {
-  return ops.reduce((prevParser, op) => {
-    return state => {
-      let node = prevParser(state);
-      while (nextOperator(state, op)) {
-        node = { op, left: node, right: prevParser(state) };
-      }
-      return node;
-    };
-  }, parseParens);
+// Parse operators with correct precedence grouping.
+// Operators at the same precedence level should be grouped together.
+// Precedence (highest to lowest): ^ > (*, /) > (+, -)
+
+function parseExponent(state) {
+  let node = parseParens(state);
+  while (char(state) === '^') {
+    next(state);
+    node = { op: '^', left: node, right: parseParens(state) };
+  }
+  return node;
 }
 
-// These operators go from high to low order of precedence
-const parseOperator = makeOperatorParser('^', '/', '*', '-', '+');
+function parseMultDiv(state) {
+  let node = parseExponent(state);
+  while (char(state) === '*' || char(state) === '/') {
+    const op = next(state);
+    node = { op, left: node, right: parseExponent(state) };
+  }
+  return node;
+}
+
+function parseAddSub(state) {
+  let node = parseMultDiv(state);
+  while (char(state) === '+' || char(state) === '-') {
+    const op = next(state);
+    node = { op, left: node, right: parseMultDiv(state) };
+  }
+  return node;
+}
+
+const parseOperator = parseAddSub;
 
 function parse(expression: string) {
   const state = { str: expression.replace(/\s/g, ''), index: 0 };
