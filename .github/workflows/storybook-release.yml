@@ -1,0 +1,39 @@
+name: Release design.actualbudget.org to Github Pages
+
+# Release design.actualbudget.org on every push to master
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'packages/component-library/**'
+      - '.github/workflows/storybook-release.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy Storybook to design.actualbudget.org
+    if: github.event.repository.fork == false
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+
+      - name: Build Storybook
+        run: yarn build:storybook
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'packages/component-library/storybook-static'
+
+      - name: Deploy to external repo
+        uses: peaceiris/actions-gh-pages@v3
+        with: deploy_key: ${{ secrets.STORYBOOK_GITHUB_PAGES_DEPLOY }}
+          external_repository: actualbudget/design.actualbudget.org
+          publish_branch: main
+          publish_dir: packages/component-library/storybook-static
