@@ -27,6 +27,7 @@ import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
@@ -96,34 +97,50 @@ const CustomTooltip = ({
             {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Assets:')}
-                right={format(payload[0].payload.totalAssets, 'financial')}
+                right={
+                  <FinancialText>
+                    {format(payload[0].payload.totalAssets, 'financial')}
+                  </FinancialText>
+                }
               />
             )}
             {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Debts:')}
-                right={format(payload[0].payload.totalDebts, 'financial')}
+                right={
+                  <FinancialText>
+                    {format(payload[0].payload.totalDebts, 'financial')}
+                  </FinancialText>
+                }
               />
             )}
             {['netAssets'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Assets:')}
-                right={format(payload[0].payload.netAssets, 'financial')}
+                right={
+                  <FinancialText>
+                    {format(payload[0].payload.netAssets, 'financial')}
+                  </FinancialText>
+                }
               />
             )}
             {['netDebts'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Debts:')}
-                right={format(payload[0].payload.netDebts, 'financial')}
+                right={
+                  <FinancialText>
+                    {format(payload[0].payload.netDebts, 'financial')}
+                  </FinancialText>
+                }
               />
             )}
             {['totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net:')}
                 right={
-                  <strong>
+                  <FinancialText as="strong">
                     {format(payload[0].payload.totalTotals, 'financial')}
-                  </strong>
+                  </FinancialText>
                 }
               />
             )}

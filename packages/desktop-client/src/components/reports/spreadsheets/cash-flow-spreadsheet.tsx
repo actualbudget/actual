@@ -10,6 +10,7 @@ import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { indexCashFlow, runAll } from '@desktop-client/components/reports/util';
 import { type FormatType } from '@desktop-client/hooks/useFormat';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
@@ -221,25 +222,39 @@ function recalculate(
           <div style={{ lineHeight: 1.5 }}>
             <AlignedText
               left={t('Income:')}
-              right={format(income, 'financial')}
+              right={
+                <FinancialText>{format(income, 'financial')}</FinancialText>
+              }
             />
             <AlignedText
               left={t('Expenses:')}
-              right={format(expense, 'financial')}
+              right={
+                <FinancialText>{format(expense, 'financial')}</FinancialText>
+              }
             />
             <AlignedText
               left={t('Change:')}
-              right={<strong>{format(income + expense, 'financial')}</strong>}
+              right={
+                <FinancialText as="strong">
+                  {format(income + expense, 'financial')}
+                </FinancialText>
+              }
             />
             {creditTransfers + debitTransfers !== 0 && (
               <AlignedText
                 left={t('Transfers:')}
-                right={format(creditTransfers + debitTransfers, 'financial')}
+                right={
+                  <FinancialText>
+                    {format(creditTransfers + debitTransfers, 'financial')}
+                  </FinancialText>
+                }
               />
             )}
             <AlignedText
               left={t('Balance:')}
-              right={format(balance, 'financial')}
+              right={
+                <FinancialText>{format(balance, 'financial')}</FinancialText>
+              }
             />
           </div>
         </div>
