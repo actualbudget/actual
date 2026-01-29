@@ -42,10 +42,13 @@ describe('Location Utils', () => {
     });
 
     it('handles cross-meridian distances', () => {
-      const eastLondon = { latitude: 51.5074, longitude: 179 };
-      const westLondon = { latitude: 51.5074, longitude: -179 };
+      const nearAntimeridianEast = { latitude: 51.5074, longitude: 179 };
+      const nearAntimeridianWest = { latitude: 51.5074, longitude: -179 };
 
-      const distance = calculateDistance(eastLondon, westLondon);
+      const distance = calculateDistance(
+        nearAntimeridianEast,
+        nearAntimeridianWest,
+      );
       // Should be a reasonable distance, not the long way around
       expect(distance).toBeGreaterThan(0);
       expect(distance).toBeLessThan(1000000); // < 1000 km

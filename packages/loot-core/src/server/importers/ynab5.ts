@@ -225,8 +225,10 @@ async function importPayeeLocations(
         longitude,
       });
     } catch (error) {
-      const err = error as Error | unknown;
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : String(error ?? 'Unknown error');
       logger.error(
         `Failed to import location for payee ${actualPayeeId} at (${latitude}, ${longitude}): ${errorMessage}`,
       );

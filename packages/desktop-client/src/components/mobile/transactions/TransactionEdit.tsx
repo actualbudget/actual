@@ -1511,7 +1511,8 @@ function TransactionEditUnconnected({
           Object.keys(diff).forEach(key => {
             const field = key as keyof TransactionEntity;
             // Update "empty" fields in general
-            // Or update all fields if the payee changes (assists location-based entry)
+            // Or update all fields if the payee changes (assists location-based entry by
+            // applying rules to prefill category, notes, etc. based on the selected payee)
             if (
               newTransaction[field] == null ||
               newTransaction[field] === '' ||
