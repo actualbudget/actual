@@ -33,7 +33,10 @@ jobs:
 
       - name: Deploy to external repo
         uses: peaceiris/actions-gh-pages@v3
-        with: deploy_key: ${{ secrets.STORYBOOK_GITHUB_PAGES_DEPLOY }}
+        with:
+          deploy_key: ${{ secrets.STORYBOOK_GITHUB_PAGES_DEPLOY }}
           external_repository: actualbudget/design.actualbudget.org
           publish_branch: main
           publish_dir: packages/component-library/storybook-static
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
