@@ -334,6 +334,10 @@
             "message": "Please use themes instead of colors"
           },
           {
+            "group": ["**/style/themes/*"],
+            "message": "Please do not import theme files directly"
+          },
+          {
             "group": ["@actual-app/web/**/*"],
             "message": "Please do not import `@actual-app/web` in `loot-core`"
           }
