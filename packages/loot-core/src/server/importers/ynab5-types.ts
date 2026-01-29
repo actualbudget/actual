@@ -8,13 +8,7 @@ export type Budget = {
   transactions: Transaction[];
   subtransactions: Subtransaction[];
   months: Month[];
-  payee_locations?: PayeeLocationsData;
-};
-
-export type PayeeLocationsData = {
-  data: {
-    payee_locations: PayeeLocation[];
-  };
+  payee_locations?: PayeeLocation[];
 };
 
 export type Account = {

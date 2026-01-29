@@ -5,7 +5,6 @@
 // entire backend bundle from the API
 import { send } from '@actual-app/api/injected';
 import * as actual from '@actual-app/api/methods';
-import AdmZip from 'adm-zip';
 import { v4 as uuidv4 } from 'uuid';
 
 import { logger } from '../../platform/server/log';
@@ -186,12 +185,12 @@ async function importPayeeLocations(
   entityIdMap: Map<string, string>,
 ) {
   // If no payee locations data provided, skip import
-  if (!data.payee_locations?.data?.payee_locations) {
+  if (!data?.payee_locations) {
     logger.log('No payee locations data provided, skipping...');
     return;
   }
 
-  const payeeLocations = data.payee_locations.data.payee_locations;
+  const payeeLocations = data.payee_locations;
 
   for (const location of payeeLocations) {
     // Skip deleted locations
@@ -583,71 +582,15 @@ export async function doImport(data: YNAB5.Budget) {
 }
 
 export function parseFile(buffer: Buffer): YNAB5.Budget {
-  // Check if this is a zip file by looking at the magic number
-  const isZip =
-    buffer.length >= 4 &&
-    buffer[0] === 0x50 &&
-    buffer[1] === 0x4b &&
-    (buffer[2] === 0x03 || buffer[2] === 0x05 || buffer[2] === 0x07);
-
-  if (isZip) {
-    // Handle zip file
-    const zip = new AdmZip(buffer);
-    const entries = zip.getEntries();
-
-    // Look for budget.json file
-    const budgetEntry = entries.find(
-      entry =>
-        entry.entryName.toLowerCase().endsWith('budget.json') ||
-        entry.entryName.toLowerCase().endsWith('data.json'),
-    );
-
-    if (!budgetEntry) {
-      throw new Error('No budget.json file found in the zip archive');
-    }
-
-    const budgetData = JSON.parse(zip.readAsText(budgetEntry));
-    let data = budgetData;
-
-    // Normalize the budget data
-    if (data.data) {
-      data = data.data;
-    }
-    if (data.budget) {
-      data = data.budget;
-    }
-
-    // Look for payee locations file
-    const payeeLocationsEntry = entries.find(
-      entry =>
-        entry.entryName.toLowerCase().includes('payee_location') &&
-        entry.entryName.toLowerCase().endsWith('.json'),
-    );
-
-    if (payeeLocationsEntry) {
-      try {
-        const payeeLocationsData = JSON.parse(
-          zip.readAsText(payeeLocationsEntry),
-        );
-        data.payee_locations = payeeLocationsData;
-      } catch (e) {
-        logger.warn('Failed to parse payee locations from zip file', e);
-        // Continue without payee locations if parsing fails
-      }
-    }
-
-    return data;
-  } else {
-    // Handle regular JSON file
-    let data = JSON.parse(buffer.toString());
-    if (data.data) {
-      data = data.data;
-    }
-    if (data.budget) {
-      data = data.budget;
-    }
-    return data;
+  let data = JSON.parse(buffer.toString());
+  if (data.data) {
+    data = data.data;
   }
+  if (data.budget) {
+    data = data.budget;
+  }
+
+  return data;
 }
 
 export function getBudgetName(_filepath: string, data: YNAB5.Budget) {
