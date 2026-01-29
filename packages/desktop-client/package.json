@@ -24,6 +24,7 @@
     "@codemirror/language": "^6.12.1",
     "@codemirror/state": "^6.5.3",
     "@codemirror/view": "^6.38.7",
+    "@emoji-mart/data": "^1.2.1",
     "@emotion/css": "^11.13.5",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource/redacted-script": "^5.2.8",

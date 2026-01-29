@@ -42,6 +42,7 @@ export const schema = {
     amount: f('integer', { default: 0, required: true }),
     payee: f('id', { ref: 'payees' }),
     notes: f('string'),
+    flag: f('string'),
     date: f('date', { required: true }),
     imported_id: f('string'),
     error: f('json'),

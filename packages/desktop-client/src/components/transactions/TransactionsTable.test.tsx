@@ -1,4 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import {
+  forwardRef,
+  useEffect,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -11,6 +17,7 @@ import {
   generateTransaction,
 } from 'loot-core/mocks';
 import { initServer } from 'loot-core/platform/client/fetch';
+import { shortcodeToNative } from 'loot-core/shared/emoji';
 import {
   addSplitTransaction,
   realizeTempTransactions,
@@ -44,6 +51,43 @@ vi.mock('../../hooks/useSyncedPref', () => ({
 }));
 vi.mock('../../hooks/useFeatureFlag', () => ({
   useFeatureFlag: () => false,
+}));
+
+vi.mock('react-aria-components', async importOriginal => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  return {
+    ...actual,
+    Button: (props: Record<string, unknown>) => {
+      const { children, onPress, ...rest } = props;
+      return (
+        <button onClick={onPress as () => void} {...rest}>
+          {children as ReactNode}
+        </button>
+      );
+    },
+    Input: forwardRef((props: Record<string, unknown>, ref: unknown) => (
+      <input ref={ref as RefObject<HTMLInputElement>} {...props} />
+    )),
+  };
+});
+
+vi.mock('@emoji-mart/data', () => ({
+  default: {
+    emojis: {
+      grinning: {
+        id: 'grinning',
+        name: 'Grinning Face',
+        keywords: ['face', 'grin', 'smile', 'happy'],
+        skins: [{ native: '😀' }],
+      },
+      '100': {
+        id: '100',
+        name: 'Hundred Points',
+        keywords: ['100', 'hundred', 'points', 'score'],
+        skins: [{ native: '💯' }],
+      },
+    },
+  },
 }));
 
 const accounts = [generateAccount('Bank of America')];
@@ -444,6 +488,9 @@ describe('Transactions', () => {
     getTransactions().forEach((transaction, idx) => {
       expect(queryField(container, 'date', 'div', idx).textContent).toBe(
         prettyDate(transaction.date),
+      );
+      expect(queryField(container, 'flag', 'div', idx).textContent).toBe(
+        transaction.flag ? shortcodeToNative(transaction.flag) : '',
       );
       expect(queryField(container, 'account', 'div', idx).textContent).toBe(
         accounts.find(acct => acct.id === transaction.account)?.name,
@@ -927,7 +974,7 @@ describe('Transactions', () => {
     // new transaction form
     let input = expectToBeEditingField(container, 'date', 0, true);
     await userEvent.type(input, '[Tab]');
-    input = expectToBeEditingField(container, 'account', 0, true);
+    input = expectToBeEditingField(container, 'flag', 0, true);
 
     await userEvent.type(input, '[Escape]');
     await userEvent.type(input, '[Escape]');
@@ -1110,10 +1157,10 @@ describe('Transactions', () => {
       {
         account: accounts[0].id,
         amount: -2777,
-        category: undefined,
         cleared: false,
         date: '2017-01-01',
         error: null,
+        flag: null,
         id: expect.any(String),
         is_parent: true,
         notes: 'Notes',

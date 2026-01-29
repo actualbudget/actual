@@ -1,4 +1,4 @@
-import { type Locator, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 import { CloseAccountModal } from './close-account-modal';
 
@@ -9,6 +9,7 @@ type TransactionEntry = {
   payee?: string;
   notes?: string;
   category?: string;
+  flag?: string;
 };
 
 export class AccountPage {
@@ -143,6 +144,7 @@ export class AccountPage {
       category: row.getByTestId('category'),
       debit: row.getByTestId('debit'),
       credit: row.getByTestId('credit'),
+      flag: row.getByTestId('flag'),
     };
   }
 
@@ -250,6 +252,29 @@ export class AccountPage {
         await categoryInput.pressSequentially(transaction.category);
         await this.page.keyboard.press('Tab');
       }
+    }
+
+    if (transaction.flag) {
+      const flagCell = transactionRow.getByTestId('flag');
+      await flagCell.click();
+      const popover = this.page.getByTestId('emoji-select-popover');
+      await popover.waitFor({ state: 'visible', timeout: 2000 });
+      const flagInput = flagCell.getByRole('textbox');
+      await this.selectInputText(flagInput);
+      await flagInput.pressSequentially(transaction.flag);
+      await flagInput.press('Enter');
+      await popover.waitFor({ state: 'hidden', timeout: 2000 });
+      const inputValue = await flagInput.inputValue();
+      expect(inputValue).not.toBe('');
+      expect(inputValue).not.toContain(':');
+      // Verify the input contains an emoji (non-ASCII character)
+      expect(
+        Array.from(inputValue).some(char => (char.codePointAt(0) ?? 0) > 127),
+      ).toBe(true);
+      await expect(popover).not.toBeVisible();
+      const flagCellText = await flagCell.textContent();
+      expect(flagCellText).not.toBeNull();
+      expect(flagCellText).not.toContain(':');
     }
   }
 

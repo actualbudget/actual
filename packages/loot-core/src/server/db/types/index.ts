@@ -159,6 +159,7 @@ export type DbTransaction = {
   category?: DbCategory['id'] | null;
   description?: string | null;
   notes?: string | null;
+  flag?: string | null;
   financial_id?: string | null;
   error?: string | null;
   imported_description?: string | null;
@@ -264,6 +265,7 @@ export type DbViewTransactionInternal = {
   account: DbAccount['id'];
   amount: DbTransaction['amount'];
   parent_id: DbTransaction['parent_id'] | null;
+  flag: DbTransaction['flag'] | null;
   category: DbCategory['id'] | null;
   payee: DbPayee['id'] | null;
   notes: DbTransaction['notes'] | null;
