@@ -14,8 +14,13 @@ import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { groupById } from 'loot-core/shared/util';
 import type { Diff } from 'loot-core/shared/util';
 import type { PayeeEntity } from 'loot-core/types/models';
+import type { PayeeOrphanDisplayMode } from 'loot-core/types/prefs';
 
 import { PayeeMenu } from './PayeeMenu';
+import {
+  getPayeeOrphanDisplayModeTitle,
+  PayeeOrphanDisplayModeMenu,
+} from './PayeeOrphanDisplayModeMenu';
 import { PayeeTable } from './PayeeTable';
 
 import { Search } from '@desktop-client/components/common/Search';
@@ -24,6 +29,7 @@ import {
   SelectCell,
   TableHeader,
 } from '@desktop-client/components/table';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import {
   SelectedProvider,
   useSelected,
@@ -83,9 +89,17 @@ export const ManagePayees = ({
   const [filter, setFilter] = useState('');
   const table = useRef(null);
   const triggerRef = useRef(null);
-  const [orphanedOnly, setOrphanedOnly] = useState(false);
   const { t } = useTranslation();
   const dispatch = useDispatch();
+
+  const [orphanDisplayModePref, setOrphanDisplayModePref] = useLocalPref(
+    'payees.orphanedDisplayMode',
+  );
+
+  const orphanDisplayMode =
+    (orphanDisplayModePref as PayeeOrphanDisplayMode) || 'include-orphans';
+  const setOrphanDisplayMode = (mode: PayeeOrphanDisplayMode) =>
+    setOrphanDisplayModePref(mode);
 
   const filteredPayees = useMemo(() => {
     let filtered = payees;
@@ -94,13 +108,23 @@ export const ManagePayees = ({
         getNormalisedString(p.name).includes(getNormalisedString(filter)),
       );
     }
-    if (orphanedOnly) {
-      filtered = filtered.filter(p =>
-        orphanedPayees.map(o => o.id).includes(p.id),
-      );
+    switch (orphanDisplayMode) {
+      case 'include-orphans':
+        break;
+      case 'hide-orphans':
+        filtered = filtered.filter(
+          p => !orphanedPayees.map(o => o.id).includes(p.id),
+        );
+        break;
+      case 'only-orphans':
+        filtered = filtered.filter(p =>
+          orphanedPayees.map(o => o.id).includes(p.id),
+        );
+        break;
+      default:
     }
     return filtered;
-  }, [payees, filter, orphanedOnly, orphanedPayees]);
+  }, [payees, filter, orphanDisplayMode, orphanedPayees]);
 
   const selected = useSelected('payees', filteredPayees, initialSelectedIds);
 
@@ -206,6 +230,10 @@ export const ManagePayees = ({
 
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const payeeMenuTriggerRef = useRef(null);
+  const [payeeDisplayModeMenuOpen, setPayeeDisplayModeMenuOpen] =
+    useState(false);
+
   return (
     <View style={{ height: '100%' }}>
       <View
@@ -254,19 +282,28 @@ export const ManagePayees = ({
             flexShrink: 0,
           }}
         >
-          {(orphanedOnly || (orphanedPayees && orphanedPayees.length > 0)) && (
-            <Button
-              variant="bare"
-              style={{ marginRight: 10 }}
-              onPress={() => setOrphanedOnly(prev => !prev)}
-            >
-              {orphanedOnly
-                ? t('Show all payees')
-                : t('Show {{count}} unused payees', {
-                    count: orphanedPayees.length,
-                  })}
-            </Button>
-          )}
+          <Button
+            ref={payeeMenuTriggerRef}
+            variant="bare"
+            style={{ marginRight: 10 }}
+            onPress={() => setPayeeDisplayModeMenuOpen(true)}
+          >
+            {getPayeeOrphanDisplayModeTitle(t, orphanDisplayMode)}
+          </Button>
+
+          <Popover
+            triggerRef={payeeMenuTriggerRef}
+            isOpen={payeeDisplayModeMenuOpen}
+            placement="bottom start"
+            style={{ width: 250 }}
+            onOpenChange={() => setPayeeDisplayModeMenuOpen(false)}
+          >
+            <PayeeOrphanDisplayModeMenu
+              currentMode={orphanDisplayMode}
+              onClose={() => setPayeeDisplayModeMenuOpen(false)}
+              onDisplayMode={mode => setOrphanDisplayMode(mode)}
+            />
+          </Popover>
         </View>
         <View style={{ flex: 1 }} />
         <Search

@@ -69,6 +69,11 @@ export type MetadataPrefs = Partial<{
   userId: string; // TODO: delete this (unused)
 }>;
 
+export type PayeeOrphanDisplayMode =
+  | 'include-orphans'
+  | 'hide-orphans'
+  | 'only-orphans';
+
 /**
  * Local preferences applicable to a single device. Stored in local storage.
  */
@@ -86,6 +91,7 @@ export type LocalPrefs = Partial<{
   reportsViewLabel: boolean;
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
+  'payees.orphanedDisplayMode': PayeeOrphanDisplayMode;
 }>;
 
 export type Theme =
