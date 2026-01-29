@@ -175,6 +175,7 @@ export function Overview({ dashboard }: OverviewProps) {
     closeNotifications,
     {
       scopes: ['app'],
+      useKey: true,
     },
     [closeNotifications],
   );

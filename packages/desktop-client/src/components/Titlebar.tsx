@@ -83,6 +83,7 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
     {
       preventDefault: true,
       scopes: ['app'],
+      useKey: true,
     },
     [setPrivacyEnabledPref, isPrivacyEnabled],
   );
@@ -205,6 +206,7 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
       enableOnFormTags: true,
       preventDefault: true,
       scopes: ['app'],
+      useKey: true,
     },
     [onSync],
   );

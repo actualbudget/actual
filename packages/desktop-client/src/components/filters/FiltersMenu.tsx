@@ -441,6 +441,7 @@ export function FilterButton<T extends RuleConditionEntity>({
   }
   useHotkeys('f', () => dispatch({ type: 'select-field' }), {
     scopes: ['app'],
+    useKey: true,
   });
 
   return (

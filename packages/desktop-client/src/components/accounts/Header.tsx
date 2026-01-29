@@ -243,6 +243,7 @@ export function AccountHeader({
     {
       enableOnFormTags: true,
       preventDefault: true,
+      useKey: true,
       scopes: ['app'],
     },
     [searchInput],
@@ -252,6 +253,7 @@ export function AccountHeader({
     () => onAddTransaction(),
     {
       preventDefault: true,
+      useKey: true,
       scopes: ['app'],
     },
     [onAddTransaction],
@@ -260,6 +262,7 @@ export function AccountHeader({
     'ctrl+i, cmd+i, meta+i',
     () => onImport(),
     {
+      useKey: true,
       scopes: ['app'],
     },
     [onImport],
@@ -270,6 +273,7 @@ export function AccountHeader({
     {
       enabled: canSync && !isServerOffline,
       preventDefault: true,
+      useKey: true,
       scopes: ['app'],
     },
     [onSync],
