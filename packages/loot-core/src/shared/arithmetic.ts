@@ -66,9 +66,9 @@ function parseParens(state) {
 
 function parseExponent(state) {
   let node = parseParens(state);
-  while (char(state) === '^') {
+  if (char(state) === '^') {
     next(state);
-    node = { op: '^', left: node, right: parseParens(state) };
+    node = { op: '^', left: node, right: parseExponent(state) };
   }
   return node;
 }
