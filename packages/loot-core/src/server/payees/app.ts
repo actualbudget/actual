@@ -281,22 +281,23 @@ async function getNearbyPayees({
     LIMIT 10
   `;
 
-  const results = await db.runQuery<NearbyPayeeQueryResult>(
-    query,
-    [
-      latitude,
-      longitude,
-      latitude, // For first distance calculation in SELECT
-      latitude,
-      longitude,
-      latitude, // For ROW_NUMBER() ordering
-      latitude,
-      longitude,
-      latitude, // For WHERE distance filter
-      maxDistance,
-    ],
-    true,
-  );
+  const results =
+    (await db.runQuery<NearbyPayeeQueryResult>(
+      query,
+      [
+        latitude,
+        longitude,
+        latitude, // For first distance calculation in SELECT
+        latitude,
+        longitude,
+        latitude, // For ROW_NUMBER() ordering
+        latitude,
+        longitude,
+        latitude, // For WHERE distance filter
+        maxDistance,
+      ],
+      true,
+    )) || [];
 
   // Transform results to expected format
   const nearbyPayees = results.map(row => ({

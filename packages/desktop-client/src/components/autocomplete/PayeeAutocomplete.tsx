@@ -453,9 +453,9 @@ export function PayeeAutocomplete({
         return [];
       }
 
-      const processed = nearbyPayees.map(p => ({
+      const processed: PayeeAutocompleteItem[] = nearbyPayees.map(p => ({
         ...p,
-        itemType: 'nearby_payee' as ItemTypes,
+        itemType: 'nearby_payee',
       }));
       return processed;
     }, [nearbyPayees]);

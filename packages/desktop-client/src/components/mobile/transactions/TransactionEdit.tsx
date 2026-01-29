@@ -1690,6 +1690,12 @@ function TransactionEditUnconnected({
     }
   }, [t, transactions, dispatch]);
 
+  // Reset auto-selection flag when the active transaction changes
+  const activeTransactionId = transactions[0]?.id;
+  useEffect(() => {
+    hasAutoSelectedPayee.current = false;
+  }, [activeTransactionId]);
+
   // Automatically select the nearest payee if available and unset
   useEffect(() => {
     const transaction = transactions[0];
