@@ -1,3 +1,4 @@
+import { logger } from '../../platform/server/log';
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
 import { safeNumber } from '../../shared/util';
@@ -7,6 +8,55 @@ import { resolveName } from '../spreadsheet/util';
 
 import { createCategory as createCategoryFromBase } from './base';
 import { flatten2, number, sumAmounts, unflatten2 } from './util';
+
+/**
+ * Get the list of on-budget currencies for per-currency budget totals.
+ * Returns an empty array if multi-currency is disabled.
+ */
+function getOnBudgetCurrencies(): string[] {
+  // Check if multi-currency is enabled
+  const multiCurrencyPref = db.runQuery<{ value: string }>(
+    `SELECT value FROM preferences WHERE id = 'isMultiCurrencyEnabled'`,
+    [],
+    true,
+  );
+  const isMultiCurrency = multiCurrencyPref[0]?.value === 'true';
+  if (!isMultiCurrency) {
+    return [];
+  }
+
+  // Get default currency code
+  const defaultCurrencyPref = db.runQuery<{ value: string }>(
+    `SELECT value FROM preferences WHERE id = 'defaultCurrencyCode'`,
+    [],
+    true,
+  );
+  const defaultCurrencyCode = defaultCurrencyPref[0]?.value;
+  if (!defaultCurrencyCode) {
+    return [];
+  }
+
+  // Get all distinct currencies from on-budget accounts
+  const rows = db.runQuery<{ currency_code: string }>(
+    `SELECT DISTINCT COALESCE(currency_code, ?) as currency_code
+     FROM accounts
+     WHERE offbudget = 0 AND closed = 0 AND tombstone = 0`,
+    [defaultCurrencyCode],
+    true,
+  );
+
+  const currencies = new Set<string>();
+  currencies.add(defaultCurrencyCode);
+  for (const row of rows) {
+    currencies.add(row.currency_code);
+  }
+
+  // Return default first, then others sorted
+  const others = Array.from(currencies)
+    .filter(c => c !== defaultCurrencyCode)
+    .sort();
+  return [defaultCurrencyCode, ...others];
+}
 
 function getBlankSheet(months) {
   const blankMonth = monthUtils.prevMonth(months[0]);
@@ -73,7 +123,12 @@ export function createCategory(cat, sheetName, prevSheetName) {
   }
 }
 
-export function createCategoryGroup(group, sheetName) {
+export function createCategoryGroup(
+  group,
+  sheetName,
+  currencies: string[] = [],
+  defaultCurrencyCode: string | null = null,
+) {
   sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
     initialValue: 0,
     dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),
@@ -91,6 +146,52 @@ export function createCategoryGroup(group, sheetName) {
       initialValue: 0,
       dependencies: group.categories.map(cat => `leftover-${cat.id}`),
       run: sumAmounts,
+    });
+
+    // Create per-currency group totals for multi-currency support
+    currencies.forEach(currencyCode => {
+      const isDefault = currencyCode === defaultCurrencyCode;
+      // Filter categories by currency
+      const currencyCategories = group.categories.filter(cat =>
+        isDefault
+          ? !cat.currency || cat.currency === defaultCurrencyCode
+          : cat.currency === currencyCode,
+      );
+
+      // Group budget by currency - sum budget amounts for categories in this currency
+      sheet
+        .get()
+        .createDynamic(sheetName, `group-budget-${group.id}-${currencyCode}`, {
+          initialValue: 0,
+          dependencies: currencyCategories.map(cat => `budget-${cat.id}`),
+          run: sumAmounts,
+        });
+
+      // Group spent by currency - sum spent amounts for categories in this currency
+      sheet
+        .get()
+        .createDynamic(
+          sheetName,
+          `group-sum-amount-${group.id}-${currencyCode}`,
+          {
+            initialValue: 0,
+            dependencies: currencyCategories.map(cat => `sum-amount-${cat.id}`),
+            run: sumAmounts,
+          },
+        );
+
+      // Group balance by currency - sum balance amounts for categories in this currency
+      sheet
+        .get()
+        .createDynamic(
+          sheetName,
+          `group-leftover-${group.id}-${currencyCode}`,
+          {
+            initialValue: 0,
+            dependencies: currencyCategories.map(cat => `leftover-${cat.id}`),
+            run: sumAmounts,
+          },
+        );
     });
   }
 }
@@ -238,210 +339,332 @@ export function createSummary(
     for (const currencyCode of currencies) {
       const isDefault = currencyCode === defaultCurrencyCode;
 
-      if (isDefault) {
-        // Default currency: alias main calculations for backwards compatibility
-        // This ensures existing budgets work correctly and includes all
-        // categories without an explicit currency assignment
-        sheet.get().createDynamic(sheetName, `total-budgeted-${currencyCode}`, {
-          initialValue: 0,
-          dependencies: ['total-budgeted'],
-          run: totalBudgeted => totalBudgeted,
-        });
+      // Categories for this currency (used for non-budgeted dependencies)
+      // - Default currency includes categories with null/undefined currency OR explicit default
+      // - Other currencies only include categories explicitly set to that currency
+      const currencyCategories = expenseCategories.filter(cat =>
+        isDefault
+          ? !cat.currency || cat.currency === defaultCurrencyCode
+          : cat.currency === currencyCode,
+      );
 
-        sheet.get().createDynamic(sheetName, `total-income-${currencyCode}`, {
-          initialValue: 0,
-          dependencies: ['total-income'],
-          run: income => income,
-        });
+      // Total budgeted for this currency - depends on ALL expense category budgets
+      // The run function dynamically queries which categories have which currency
+      // This allows the totals to update when a category's currency is changed
+      sheet.get().createDynamic(sheetName, `total-budgeted-${currencyCode}`, {
+        initialValue: 0,
+        dependencies: expenseCategories.map(cat => `budget-${cat.id}`),
+        run: () => {
+          // Query the zero_budgets table for the sum of budgets where category.currency matches
+          // For default currency, include categories with null/undefined currency
+          // month format in zero_budgets is YYYYMM as integer (e.g., 202601)
+          const monthInt = parseInt(sheetName.replace('budget', ''), 10);
+          const budgetQuery = isDefault
+            ? `SELECT COALESCE(SUM(b.amount), 0) as total
+               FROM categories c
+               LEFT JOIN zero_budgets b
+                 ON b.category = c.id AND b.month = ?
+               WHERE c.is_income = 0
+                 AND c.tombstone = 0
+                 AND (c.currency IS NULL OR c.currency = ?)`
+            : `SELECT COALESCE(SUM(b.amount), 0) as total
+               FROM categories c
+               LEFT JOIN zero_budgets b
+                 ON b.category = c.id AND b.month = ?
+               WHERE c.is_income = 0
+                 AND c.tombstone = 0
+                 AND c.currency = ?`;
+          const result = db.runQuery<{ total: number }>(
+            budgetQuery,
+            [monthInt, currencyCode],
+            true,
+          );
+          // DEBUG: Log the query result
+          logger.log(
+            `[DEBUG] total-budgeted-${currencyCode} for ${sheetName}: month=${monthInt}, result=`,
+            result,
+          );
+          // Return negated (budgeted amounts are positive in UI, negative in calculation)
+          return -(result[0]?.total || 0);
+        },
+      });
 
-        sheet
-          .get()
-          .createDynamic(sheetName, `from-last-month-${currencyCode}`, {
-            initialValue: 0,
-            dependencies: ['from-last-month'],
-            run: fromLastMonth => fromLastMonth,
-          });
-
-        sheet
-          .get()
-          .createDynamic(sheetName, `available-funds-${currencyCode}`, {
-            initialValue: 0,
-            dependencies: ['available-funds'],
-            run: available => available,
-          });
-
-        sheet
-          .get()
-          .createDynamic(sheetName, `last-month-overspent-${currencyCode}`, {
-            initialValue: 0,
-            dependencies: ['last-month-overspent'],
-            run: overspent => overspent,
-          });
-
-        sheet.get().createDynamic(sheetName, `buffered-${currencyCode}`, {
-          initialValue: 0,
-          dependencies: ['buffered-selected'],
-          run: buffered => buffered,
-        });
-
-        sheet.get().createDynamic(sheetName, `to-budget-${currencyCode}`, {
-          initialValue: 0,
-          dependencies: ['to-budget'],
-          run: toBudget => toBudget,
-        });
-
-        sheet.get().createDynamic(sheetName, `total-spent-${currencyCode}`, {
-          initialValue: 0,
-          dependencies: ['total-spent'],
-          run: spent => spent,
-        });
-
-        sheet.get().createDynamic(sheetName, `total-leftover-${currencyCode}`, {
-          initialValue: 0,
-          dependencies: ['total-leftover'],
-          run: leftover => leftover,
-        });
-      } else {
-        // Non-default currencies: calculate separately based on account currency
-        // Categories for this currency
-        const currencyCategories = expenseCategories.filter(
-          cat => cat.currency === currencyCode,
-        );
-
-        // Total budgeted for this currency
-        sheet.get().createDynamic(sheetName, `total-budgeted-${currencyCode}`, {
-          initialValue: 0,
-          dependencies: currencyCategories.map(cat => `budget-${cat.id}`),
-          run: (...amounts) =>
-            amounts.length > 0 ? -sumAmounts(...amounts) : 0,
-        });
-
-        // Total income: sum native amounts from accounts with this currency
-        sheet.get().createDynamic(sheetName, `total-income-${currencyCode}`, {
-          initialValue: 0,
-          dependencies: ['total-income'], // Trigger recalc when any income changes
-          run: () => {
-            const incomeTotal = db.runQuery<{ amount: number }>(
-              `SELECT SUM(t.amount) as amount
+      // Total income: sum native amounts from accounts with this currency
+      // For default currency, also include accounts with null currency_code
+      sheet.get().createDynamic(sheetName, `total-income-${currencyCode}`, {
+        initialValue: 0,
+        dependencies: ['total-income'], // Trigger recalc when any income changes
+        run: () => {
+          const incomeQuery = isDefault
+            ? `SELECT SUM(t.amount) as amount
                FROM v_transactions_internal_alive t
                LEFT JOIN accounts a ON a.id = t.account
                LEFT JOIN categories c ON c.id = t.category
                WHERE t.date >= ? AND t.date <= ?
                  AND c.is_income = 1
                  AND a.offbudget = 0
-                 AND a.currency_code = ?`,
-              [start, end, currencyCode],
-              true,
-            );
-            return incomeTotal[0]?.amount || 0;
-          },
-        });
+                 AND (a.currency_code IS NULL OR a.currency_code = ?)`
+            : `SELECT SUM(t.amount) as amount
+               FROM v_transactions_internal_alive t
+               LEFT JOIN accounts a ON a.id = t.account
+               LEFT JOIN categories c ON c.id = t.category
+               WHERE t.date >= ? AND t.date <= ?
+                 AND c.is_income = 1
+                 AND a.offbudget = 0
+                 AND a.currency_code = ?`;
+          const incomeTotal = db.runQuery<{ amount: number }>(
+            incomeQuery,
+            [start, end, currencyCode],
+            true,
+          );
+          return incomeTotal[0]?.amount || 0;
+        },
+      });
 
-        // Carryover from last month
+      // Per-category income sums for this currency
+      // This allows income categories to show per-currency amounts
+      for (const cat of incomeCategories) {
         sheet
           .get()
-          .createDynamic(sheetName, `from-last-month-${currencyCode}`, {
+          .createDynamic(sheetName, `sum-amount-${cat.id}-${currencyCode}`, {
             initialValue: 0,
-            dependencies: [
-              `${prevSheetName}!to-budget-${currencyCode}`,
-              `${prevSheetName}!buffered-${currencyCode}`,
-            ],
-            run: (toBudget, buffered) =>
-              safeNumber(number(toBudget || 0) + number(buffered || 0)),
-          });
-
-        // Available funds
-        sheet
-          .get()
-          .createDynamic(sheetName, `available-funds-${currencyCode}`, {
-            initialValue: 0,
-            dependencies: [
-              `total-income-${currencyCode}`,
-              `from-last-month-${currencyCode}`,
-            ],
-            run: (income, fromLastMonth) =>
-              safeNumber(number(income) + number(fromLastMonth)),
-          });
-
-        // Last month overspent
-        sheet
-          .get()
-          .createDynamic(sheetName, `last-month-overspent-${currencyCode}`, {
-            initialValue: 0,
-            dependencies:
-              currencyCategories.length > 0
-                ? flatten2(
-                    currencyCategories.map(cat => [
-                      `${prevSheetName}!leftover-${cat.id}`,
-                      `${prevSheetName}!carryover-${cat.id}`,
-                    ]),
-                  )
-                : [],
-            run: (...data) => {
-              if (data.length === 0) return 0;
-              data = unflatten2(data);
-              return safeNumber(
-                data.reduce((total, [leftover, carryover]) => {
-                  if (carryover) {
-                    return total;
-                  }
-                  return total + Math.min(0, number(leftover));
-                }, 0),
+            dependencies: [`sum-amount-${cat.id}`], // Trigger recalc when category sum changes
+            run: () => {
+              const categoryIncomeQuery = isDefault
+                ? `SELECT SUM(t.amount) as amount
+                   FROM v_transactions_internal_alive t
+                   LEFT JOIN accounts a ON a.id = t.account
+                   WHERE t.date >= ? AND t.date <= ?
+                     AND t.category = ?
+                     AND a.offbudget = 0
+                     AND (a.currency_code IS NULL OR a.currency_code = ?)`
+                : `SELECT SUM(t.amount) as amount
+                   FROM v_transactions_internal_alive t
+                   LEFT JOIN accounts a ON a.id = t.account
+                   WHERE t.date >= ? AND t.date <= ?
+                     AND t.category = ?
+                     AND a.offbudget = 0
+                     AND a.currency_code = ?`;
+              const result = db.runQuery<{ amount: number }>(
+                categoryIncomeQuery,
+                [start, end, cat.id, currencyCode],
+                true,
               );
+              return result[0]?.amount || 0;
             },
           });
+      }
 
-        // Buffered amount (for next month) - static value
-        sheet.get().createStatic(sheetName, `buffered-${currencyCode}`, 0);
+      // Carryover from last month
+      sheet.get().createDynamic(sheetName, `from-last-month-${currencyCode}`, {
+        initialValue: 0,
+        dependencies: [
+          `${prevSheetName}!to-budget-${currencyCode}`,
+          `${prevSheetName}!buffered-selected-${currencyCode}`,
+        ],
+        run: (toBudget, buffered) =>
+          safeNumber(number(toBudget || 0) + number(buffered || 0)),
+      });
 
-        // To-budget
-        sheet.get().createDynamic(sheetName, `to-budget-${currencyCode}`, {
+      // Available funds
+      sheet.get().createDynamic(sheetName, `available-funds-${currencyCode}`, {
+        initialValue: 0,
+        dependencies: [
+          `total-income-${currencyCode}`,
+          `from-last-month-${currencyCode}`,
+        ],
+        run: (income, fromLastMonth) =>
+          safeNumber(number(income) + number(fromLastMonth)),
+      });
+
+      // Last month overspent - depends on ALL expense categories
+      // The run function dynamically queries which categories have which currency
+      sheet
+        .get()
+        .createDynamic(sheetName, `last-month-overspent-${currencyCode}`, {
           initialValue: 0,
-          dependencies: [
-            `available-funds-${currencyCode}`,
-            `last-month-overspent-${currencyCode}`,
-            `total-budgeted-${currencyCode}`,
-            `buffered-${currencyCode}`,
-          ],
-          run: (available, lastOverspent, totalBudgeted, buffered) => {
-            return safeNumber(
-              number(available) +
-                number(lastOverspent) +
-                number(totalBudgeted) -
-                number(buffered),
+          dependencies: flatten2(
+            expenseCategories.map(cat => [
+              `${prevSheetName}!leftover-${cat.id}`,
+              `${prevSheetName}!carryover-${cat.id}`,
+            ]),
+          ),
+          run: (...data) => {
+            if (data.length === 0) return 0;
+            // Query current category currencies from database
+            const categoriesWithCurrency = db.runQuery<{
+              id: string;
+              currency: string | null;
+            }>(
+              `SELECT id, currency FROM categories
+               WHERE is_income = 0 AND tombstone = 0`,
+              [],
+              true,
             );
+
+            // Build a map of category id to its currency
+            const currencyMap = new Map<string, string>();
+            for (const cat of categoriesWithCurrency) {
+              // Default currency for null/undefined
+              currencyMap.set(
+                cat.id,
+                cat.currency || defaultCurrencyCode || 'USD',
+              );
+            }
+
+            // Filter data to only include categories that match this currency
+            const filteredData = unflatten2(data);
+            let total = 0;
+            for (let i = 0; i < expenseCategories.length; i++) {
+              const cat = expenseCategories[i];
+              const catCurrency = currencyMap.get(cat.id);
+              if (catCurrency === currencyCode) {
+                const [leftover, carryover] = filteredData[i];
+                if (!carryover) {
+                  total += Math.min(0, number(leftover));
+                }
+              }
+            }
+            return safeNumber(total);
           },
         });
 
-        // Total spent: sum spending from accounts with this currency
-        sheet.get().createDynamic(sheetName, `total-spent-${currencyCode}`, {
+      // Per-currency buffered cells for hold-for-next-month
+      // Manual buffered amount (set by user via holdForNextMonth)
+      sheet.get().createDynamic(sheetName, `buffered-${currencyCode}`, {
+        initialValue: 0,
+      });
+
+      // Auto buffered amount (from income categories with carryover flag)
+      // Use per-currency income sums so auto-hold is currency-specific
+      // All income categories can have transactions in any currency,
+      // so we include all of them but use the currency-specific sum-amount
+      sheet.get().createDynamic(sheetName, `buffered-auto-${currencyCode}`, {
+        initialValue: 0,
+        dependencies: flatten2(
+          incomeCategories.map(c => [
+            `${sheetName}!sum-amount-${c.id}-${currencyCode}`,
+            `${sheetName}!carryover-${c.id}`,
+          ]),
+        ),
+        run: (...data) => {
+          data = unflatten2(data);
+          return safeNumber(
+            data.reduce((total, [sumAmount, carryover]) => {
+              if (carryover) {
+                return total + sumAmount;
+              }
+              return total;
+            }, 0),
+          );
+        },
+      });
+
+      // Selected buffered (uses manual if set, otherwise auto)
+      sheet
+        .get()
+        .createDynamic(sheetName, `buffered-selected-${currencyCode}`, {
           initialValue: 0,
-          dependencies: ['total-spent'],
-          run: () => {
-            const spentTotal = db.runQuery<{ amount: number }>(
-              `SELECT SUM(t.amount) as amount
+          dependencies: [
+            `${sheetName}!buffered-${currencyCode}`,
+            `${sheetName}!buffered-auto-${currencyCode}`,
+          ],
+          run: (manual, auto) => {
+            if (manual !== 0) {
+              return manual;
+            }
+            return auto;
+          },
+        });
+
+      // To-budget
+      sheet.get().createDynamic(sheetName, `to-budget-${currencyCode}`, {
+        initialValue: 0,
+        dependencies: [
+          `available-funds-${currencyCode}`,
+          `last-month-overspent-${currencyCode}`,
+          `total-budgeted-${currencyCode}`,
+          `buffered-selected-${currencyCode}`,
+        ],
+        run: (available, lastOverspent, totalBudgeted, buffered) => {
+          return safeNumber(
+            number(available) +
+              number(lastOverspent) +
+              number(totalBudgeted) -
+              number(buffered),
+          );
+        },
+      });
+
+      // Total spent: sum spending from accounts with this currency
+      sheet.get().createDynamic(sheetName, `total-spent-${currencyCode}`, {
+        initialValue: 0,
+        dependencies: ['total-spent'],
+        run: () => {
+          const spentQuery = isDefault
+            ? `SELECT SUM(t.amount) as amount
                FROM v_transactions_internal_alive t
                LEFT JOIN accounts a ON a.id = t.account
                LEFT JOIN categories c ON c.id = t.category
                WHERE t.date >= ? AND t.date <= ?
                  AND (c.is_income = 0 OR c.is_income IS NULL)
                  AND a.offbudget = 0
-                 AND a.currency_code = ?`,
-              [start, end, currencyCode],
-              true,
-            );
-            return spentTotal[0]?.amount || 0;
-          },
-        });
+                 AND (a.currency_code IS NULL OR a.currency_code = ?)`
+            : `SELECT SUM(t.amount) as amount
+               FROM v_transactions_internal_alive t
+               LEFT JOIN accounts a ON a.id = t.account
+               LEFT JOIN categories c ON c.id = t.category
+               WHERE t.date >= ? AND t.date <= ?
+                 AND (c.is_income = 0 OR c.is_income IS NULL)
+                 AND a.offbudget = 0
+                 AND a.currency_code = ?`;
+          const spentTotal = db.runQuery<{ amount: number }>(
+            spentQuery,
+            [start, end, currencyCode],
+            true,
+          );
+          return spentTotal[0]?.amount || 0;
+        },
+      });
 
-        // Total leftover
-        sheet.get().createDynamic(sheetName, `total-leftover-${currencyCode}`, {
-          initialValue: 0,
-          dependencies: currencyCategories.map(cat => `leftover-${cat.id}`),
-          run: (...amounts) =>
-            amounts.length > 0 ? sumAmounts(...amounts) : 0,
-        });
-      }
+      // Total leftover - depends on ALL expense categories
+      // The run function dynamically queries which categories have which currency
+      sheet.get().createDynamic(sheetName, `total-leftover-${currencyCode}`, {
+        initialValue: 0,
+        dependencies: expenseCategories.map(cat => `leftover-${cat.id}`),
+        run: (...amounts) => {
+          if (amounts.length === 0) return 0;
+          // Query current category currencies from database
+          const categoriesWithCurrency = db.runQuery<{
+            id: string;
+            currency: string | null;
+          }>(
+            `SELECT id, currency FROM categories
+             WHERE is_income = 0 AND tombstone = 0`,
+            [],
+            true,
+          );
+
+          // Build a map of category id to its currency
+          const currencyMap = new Map<string, string>();
+          for (const cat of categoriesWithCurrency) {
+            currencyMap.set(
+              cat.id,
+              cat.currency || defaultCurrencyCode || 'USD',
+            );
+          }
+
+          // Sum only leftovers for categories that match this currency
+          let total = 0;
+          for (let i = 0; i < expenseCategories.length; i++) {
+            const cat = expenseCategories[i];
+            if (currencyMap.get(cat.id) === currencyCode) {
+              total += number(amounts[i]);
+            }
+          }
+          return safeNumber(total);
+        },
+      });
     }
   }
 }
@@ -499,9 +722,23 @@ export function handleCategoryChange(months, oldValue, newValue) {
     const id = newValue.id;
     const groupId = newValue.cat_group;
 
+    // Get currencies for per-currency budget totals
+    const currencies = getOnBudgetCurrencies();
+
     months.forEach(month => {
       const sheetName = monthUtils.sheetForMonth(month);
       removeDeps(sheetName, groupId, id);
+
+      // Remove from per-currency budget totals (only for expense categories)
+      if (!newValue.is_income) {
+        for (const currencyCode of currencies) {
+          sheet
+            .get()
+            .removeDependencies(sheetName, `total-budgeted-${currencyCode}`, [
+              `budget-${id}`,
+            ]);
+        }
+      }
     });
   } else if (
     newValue.tombstone === 0 &&
@@ -528,6 +765,20 @@ export function handleCategoryChange(months, oldValue, newValue) {
         ]);
 
       addDeps(sheetName, groupId, id);
+
+      // Add to per-currency budget totals (only for expense categories)
+      // Get currencies for per-currency budget totals
+      const currencies = getOnBudgetCurrencies();
+      if (!newValue.is_income) {
+        for (const currencyCode of currencies) {
+          sheet
+            .get()
+            .addDependencies(sheetName, `total-budgeted-${currencyCode}`, [
+              `budget-${id}`,
+            ]);
+        }
+      }
+
       if (newValue.is_income) {
         sheet
           .get()
@@ -549,6 +800,28 @@ export function handleCategoryChange(months, oldValue, newValue) {
       const sheetName = monthUtils.sheetForMonth(month);
       removeDeps(sheetName, oldValue.cat_group, id);
       addDeps(sheetName, newValue.cat_group, id);
+    });
+  }
+
+  // Handle currency change - trigger recalculation of budget cell
+  // The total-budgeted-${currencyCode} cells use database queries that
+  // dynamically filter by category currency, so we just need to trigger
+  // the budget cell to recalculate its dependents
+  if (
+    oldValue &&
+    newValue.tombstone === 0 &&
+    oldValue.currency !== newValue.currency
+  ) {
+    const id = newValue.id;
+    months.forEach(month => {
+      const sheetName = monthUtils.sheetForMonth(month);
+      // Re-set the budget value to trigger dependents to recalculate
+      const budgetCellName = `${sheetName}!budget-${id}`;
+      const currentValue = sheet.get().getCellValue(sheetName, `budget-${id}`);
+      if (currentValue !== null && currentValue !== undefined) {
+        // Re-set the same value to trigger recalculation of dependents
+        sheet.get().set(budgetCellName, currentValue);
+      }
     });
   }
 }

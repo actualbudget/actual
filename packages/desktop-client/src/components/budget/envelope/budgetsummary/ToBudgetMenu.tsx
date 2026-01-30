@@ -16,6 +16,7 @@ type ToBudgetMenuProps = Omit<
   onResetHoldBuffer: () => void;
   onBudgetAction?: (month: string, action: string, arg?: unknown) => void;
   month: string;
+  currencyCode?: string;
 };
 
 export function ToBudgetMenu({
@@ -25,15 +26,36 @@ export function ToBudgetMenu({
   onResetHoldBuffer,
   onBudgetAction,
   month,
+  currencyCode,
   ...props
 }: ToBudgetMenuProps) {
   const { t } = useTranslation();
 
-  const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
-  const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth) ?? 0;
+  // Use currency-specific bindings when currencyCode is provided
+  const toBudget =
+    useEnvelopeSheetValue(
+      currencyCode
+        ? envelopeBudget.toBudgetByCurrency(currencyCode)
+        : envelopeBudget.toBudget,
+    ) ?? 0;
+  const forNextMonth =
+    useEnvelopeSheetValue(
+      currencyCode
+        ? envelopeBudget.forNextMonthByCurrency(currencyCode)
+        : envelopeBudget.forNextMonth,
+    ) ?? 0;
   const manualBuffered =
-    useEnvelopeSheetValue(envelopeBudget.manualBuffered) ?? 0;
-  const autoBuffered = useEnvelopeSheetValue(envelopeBudget.autoBuffered) ?? 0;
+    useEnvelopeSheetValue(
+      currencyCode
+        ? envelopeBudget.manualBufferedByCurrency(currencyCode)
+        : envelopeBudget.manualBuffered,
+    ) ?? 0;
+  const autoBuffered =
+    useEnvelopeSheetValue(
+      currencyCode
+        ? envelopeBudget.autoBufferedByCurrency(currencyCode)
+        : envelopeBudget.autoBuffered,
+    ) ?? 0;
   const items = [
     ...(toBudget > 0
       ? [

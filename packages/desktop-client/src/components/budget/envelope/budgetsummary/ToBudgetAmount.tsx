@@ -28,6 +28,7 @@ type ToBudgetAmountProps = {
   style?: CSSProperties;
   amountStyle?: CSSProperties;
   onClick: () => void;
+  onCurrencyClick?: (currencyCode: string) => void;
   onContextMenu?: MouseEventHandler;
   isTotalsListTooltipDisabled?: boolean;
 };
@@ -91,6 +92,7 @@ export function ToBudgetAmount({
   style,
   amountStyle,
   onClick,
+  onCurrencyClick,
   isTotalsListTooltipDisabled = false,
   onContextMenu,
 }: ToBudgetAmountProps) {
@@ -127,7 +129,9 @@ export function ToBudgetAmount({
             <ToBudgetCurrencyAmount
               key={currencyCode}
               currencyCode={currencyCode}
-              onClick={onClick}
+              onClick={() =>
+                onCurrencyClick ? onCurrencyClick(currencyCode) : onClick()
+              }
               onContextMenu={onContextMenu}
               amountStyle={amountStyle}
             />

@@ -14,13 +14,19 @@ import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 type HoldMenuProps = {
   onSubmit: (amount: number) => void;
   onClose: () => void;
+  currencyCode?: string;
 };
-export function HoldMenu({ onSubmit, onClose }: HoldMenuProps) {
+export function HoldMenu({ onSubmit, onClose, currencyCode }: HoldMenuProps) {
   const [amount, setAmount] = useState<IntegerAmount | null>(null);
 
-  useSheetValue<'envelope-budget', 'to-budget'>('to-budget', ({ value }) => {
-    setAmount(Math.max(value || 0, 0));
-  });
+  // Use currency-specific to-budget when currencyCode is provided
+  const sheetName = currencyCode ? `to-budget-${currencyCode}` : 'to-budget';
+  useSheetValue<'envelope-budget', 'to-budget'>(
+    sheetName as 'to-budget',
+    ({ value }) => {
+      setAmount(Math.max(value || 0, 0));
+    },
+  );
 
   if (amount === null) {
     // See `TransferMenu` for more info about this

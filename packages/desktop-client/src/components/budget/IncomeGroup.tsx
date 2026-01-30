@@ -12,7 +12,9 @@ import { SidebarGroup } from './SidebarGroup';
 
 import { useBudgetComponents } from '.';
 
-import { Row } from '@desktop-client/components/table';
+import { Row, ROW_HEIGHT } from '@desktop-client/components/table';
+import { useOnBudgetCurrencies } from '@desktop-client/hooks/useOnBudgetCurrencies';
+import { useShowCurrencyColumn } from '@desktop-client/hooks/useShowCurrencyColumn';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type IncomeGroupProps = {
@@ -35,14 +37,23 @@ export function IncomeGroup({
   onShowNewCategory,
 }: IncomeGroupProps) {
   const { IncomeGroupComponent: MonthComponent } = useBudgetComponents();
+  const showCurrencyColumn = useShowCurrencyColumn();
+  const currencies = useOnBudgetCurrencies();
   const [enableMultiCurrencyOnBudget] = useSyncedPref(
     'enableMultiCurrencyOnBudget',
   );
-  const showCurrencyColumn = enableMultiCurrencyOnBudget === 'true';
+  const showMultiCurrency =
+    enableMultiCurrencyOnBudget === 'true' && currencies.length > 1;
+
+  // Calculate row height: if multi-currency, one row per currency, otherwise single row
+  const rowHeight = showMultiCurrency
+    ? currencies.length * ROW_HEIGHT
+    : ROW_HEIGHT;
 
   return (
     <Row
       collapsed
+      height={rowHeight}
       style={{
         fontWeight: 600,
         backgroundColor: theme.tableRowHeaderBackground,

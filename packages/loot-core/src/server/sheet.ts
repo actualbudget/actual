@@ -241,6 +241,28 @@ export async function loadUserBudgets(db: typeof DbModule): Promise<void> {
       const sheetName = sheetForMonth(budgetMonth.id);
       sheet.set(`${sheetName}!buffered`, budgetMonth.buffered);
     }
+
+    // Load per-currency buffered amounts (table may not exist in older databases)
+    try {
+      const budgetMonthCurrencies = await db.all<{
+        month: string;
+        currency_code: string;
+        buffered: number;
+      }>('SELECT * FROM zero_budget_month_currencies');
+      for (const budgetCurrency of budgetMonthCurrencies) {
+        // Skip rows with missing month or currency_code (can happen with CRDT partial inserts)
+        if (!budgetCurrency.month || !budgetCurrency.currency_code) {
+          continue;
+        }
+        const sheetName = sheetForMonth(budgetCurrency.month);
+        sheet.set(
+          `${sheetName}!buffered-${budgetCurrency.currency_code}`,
+          budgetCurrency.buffered || 0,
+        );
+      }
+    } catch (e) {
+      // Table may not exist yet if migrations haven't run
+    }
   }
 
   sheet.endTransaction();

@@ -189,6 +189,41 @@ export function setBuffer(month: string, amount: unknown): Promise<void> {
   return db.insert('zero_budget_months', { id: month, buffered: amount });
 }
 
+export function setBufferForCurrency(
+  month: string,
+  currencyCode: string,
+  amount: unknown,
+): Promise<void> {
+  const id = `${month}-${currencyCode}`;
+  const existing = db.firstSync<{ id: string }>(
+    `SELECT id FROM zero_budget_month_currencies WHERE id = ?`,
+    [id],
+  );
+  if (existing) {
+    return db.update('zero_budget_month_currencies', {
+      id: existing.id,
+      buffered: amount,
+    });
+  }
+  return db.insert('zero_budget_month_currencies', {
+    id,
+    month,
+    currency_code: currencyCode,
+    buffered: amount,
+  });
+}
+
+export function getBufferForCurrency(
+  month: string,
+  currencyCode: string,
+): number {
+  const row = db.firstSync<{ buffered: number }>(
+    `SELECT buffered FROM zero_budget_month_currencies WHERE month = ? AND currency_code = ?`,
+    [month, currencyCode],
+  );
+  return (row && row.buffered) || 0;
+}
+
 function setCarryover(
   table: string,
   category: string,
@@ -405,16 +440,39 @@ export async function setNMonthAvg({
 export async function holdForNextMonth({
   month,
   amount,
+  currencyCode,
 }: {
   month: string;
   amount: number;
+  currencyCode?: string;
 }): Promise<boolean> {
+  const sheetName = monthUtils.sheetForMonth(month);
+
+  // If currency is provided, use per-currency buffer
+  if (currencyCode) {
+    const toBudget = await getSheetValue(
+      sheetName,
+      `to-budget-${currencyCode}`,
+    );
+    if (toBudget > 0) {
+      const currentBuffered = getBufferForCurrency(month, currencyCode);
+      const bufferedAmount = calcBufferedAmount(
+        toBudget,
+        currentBuffered,
+        amount,
+      );
+      await setBufferForCurrency(month, currencyCode, bufferedAmount);
+      return true;
+    }
+    return false;
+  }
+
+  // Default behavior for single currency
   const row = await db.first<Pick<db.DbZeroBudgetMonth, 'buffered'>>(
     'SELECT buffered FROM zero_budget_months WHERE id = ?',
     [month],
   );
 
-  const sheetName = monthUtils.sheetForMonth(month);
   const toBudget = await getSheetValue(sheetName, 'to-budget');
 
   if (toBudget > 0) {
@@ -430,8 +488,18 @@ export async function holdForNextMonth({
   return false;
 }
 
-export async function resetHold({ month }: { month: string }): Promise<void> {
-  await setBuffer(month, 0);
+export async function resetHold({
+  month,
+  currencyCode,
+}: {
+  month: string;
+  currencyCode?: string;
+}): Promise<void> {
+  if (currencyCode) {
+    await setBufferForCurrency(month, currencyCode, 0);
+  } else {
+    await setBuffer(month, 0);
+  }
 }
 
 export async function coverOverspending({

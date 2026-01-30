@@ -696,6 +696,11 @@ type SheetCellValueProps<
   privacyFilter?: ComponentProps<
     typeof ConditionalPrivacyFilter
   >['privacyFilter'];
+  /**
+   * Optional currency code to use for formatting financial values.
+   * If not provided, uses the default currency from preferences.
+   */
+  currencyCode?: string | null;
 };
 
 export type SheetCellProps<
@@ -730,6 +735,7 @@ export function SheetCell<
     formatExpr,
     unformatExpr,
     privacyFilter,
+    currencyCode,
   } = valueProps;
 
   const sheetValue = useSheetValue(binding, () => {
@@ -751,7 +757,9 @@ export function SheetCell<
       {...props}
       value={String(sheetValue ?? '')}
       formatter={value =>
-        props.formatter ? props.formatter(value, type) : format(value, type)
+        props.formatter
+          ? props.formatter(value, type)
+          : format(value, type, currencyCode)
       }
       privacyFilter={
         privacyFilter != null

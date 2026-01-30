@@ -15,6 +15,7 @@ type BudgetType<SheetName extends SheetNames> = Record<
   | SheetFields<SheetName>
   | ((id: string) => SheetFields<SheetName>)
   | ((id: string) => string) // For dynamic fields like per-currency bindings
+  | ((id1: string, id2: string) => string) // For dynamic fields with two parameters
 >;
 
 const accountParametrizedField = parametrizedField<'account'>();
@@ -213,11 +214,27 @@ export const envelopeBudget = {
   lastMonthOverspentByCurrency: (currencyCode: string) =>
     `last-month-overspent-${currencyCode}` as const,
   forNextMonthByCurrency: (currencyCode: string) =>
+    `buffered-selected-${currencyCode}` as const,
+  manualBufferedByCurrency: (currencyCode: string) =>
     `buffered-${currencyCode}` as const,
+  autoBufferedByCurrency: (currencyCode: string) =>
+    `buffered-auto-${currencyCode}` as const,
   totalSpentByCurrency: (currencyCode: string) =>
     `total-spent-${currencyCode}` as const,
   totalBalanceByCurrency: (currencyCode: string) =>
     `total-leftover-${currencyCode}` as const,
+  totalIncomeByCurrency: (currencyCode: string) =>
+    `total-income-${currencyCode}` as const,
+  catSumAmountByCurrency: (categoryId: string, currencyCode: string) =>
+    `sum-amount-${categoryId}-${currencyCode}` as const,
+
+  // Per-currency group bindings for category group subtotals
+  groupBudgetedByCurrency: (groupId: string, currencyCode: string) =>
+    `group-budget-${groupId}-${currencyCode}` as const,
+  groupSumAmountByCurrency: (groupId: string, currencyCode: string) =>
+    `group-sum-amount-${groupId}-${currencyCode}` as const,
+  groupBalanceByCurrency: (groupId: string, currencyCode: string) =>
+    `group-leftover-${groupId}-${currencyCode}` as const,
 } satisfies BudgetType<'envelope-budget'>;
 
 export const trackingBudget = {

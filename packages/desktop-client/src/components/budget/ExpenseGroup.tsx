@@ -25,7 +25,8 @@ import {
 } from '@desktop-client/components/sort';
 import { Row, ROW_HEIGHT } from '@desktop-client/components/table';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useGroupCurrencyCount } from '@desktop-client/hooks/useGroupCurrencyCount';
+import { useShowCurrencyColumn } from '@desktop-client/hooks/useShowCurrencyColumn';
 
 type ExpenseGroupProps = {
   group: ComponentProps<typeof SidebarGroup>['group'];
@@ -91,14 +92,14 @@ export function ExpenseGroup({
 
   const { ExpenseGroupComponent: MonthComponent } = useBudgetComponents();
 
-  const [enableMultiCurrencyOnBudget] = useSyncedPref(
-    'enableMultiCurrencyOnBudget',
-  );
-  const showCurrencyColumn = enableMultiCurrencyOnBudget === 'true';
+  const showCurrencyColumn = useShowCurrencyColumn();
+  const currencyRowCount = useGroupCurrencyCount(group);
+  const rowHeight = ROW_HEIGHT * currencyRowCount;
 
   return (
     <Row
       collapsed
+      height={rowHeight}
       style={{
         fontWeight: 600,
         opacity: group.hidden ? 0.33 : undefined,
@@ -113,7 +114,7 @@ export function ExpenseGroup({
             left: 0,
             right: 0,
             height: collapsed
-              ? ROW_HEIGHT - 1
+              ? rowHeight - 1
               : (1 + group.categories.length) * (ROW_HEIGHT - 1) + 1,
             zIndex: 10000,
           }}

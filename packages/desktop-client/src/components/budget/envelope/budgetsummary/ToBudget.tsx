@@ -17,6 +17,8 @@ import { HoldMenu } from '@desktop-client/components/budget/envelope/HoldMenu';
 import { TransferMenu } from '@desktop-client/components/budget/envelope/TransferMenu';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
+import { useOnBudgetCurrencies } from '@desktop-client/hooks/useOnBudgetCurrencies';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type ToBudgetProps = {
@@ -36,8 +38,16 @@ export function ToBudget({
   isCollapsed = false,
 }: ToBudgetProps) {
   const [menuStep, _setMenuStep] = useState<string>('actions');
+  const [selectedCurrency, setSelectedCurrency] = useState<string | null>(null);
   const triggerRef = useRef(null);
   const format = useFormat();
+
+  const currencies = useOnBudgetCurrencies();
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  const isMultiCurrency =
+    enableMultiCurrencyOnBudget === 'true' && currencies.length > 1;
 
   const ref = useRef<HTMLSpanElement>(null);
   const setMenuStep = useCallback(
@@ -66,14 +76,21 @@ export function ToBudget({
     asContextMenu,
   } = useContextMenu();
 
+  const handleCurrencyClick = useCallback(
+    (currencyCode: string | null) => {
+      setSelectedCurrency(currencyCode);
+      resetPosition();
+      setMenuOpen(true);
+    },
+    [resetPosition, setMenuOpen],
+  );
+
   return (
     <>
       <View ref={triggerRef}>
         <ToBudgetAmount
-          onClick={() => {
-            resetPosition();
-            setMenuOpen(true);
-          }}
+          onClick={() => handleCurrencyClick(null)}
+          onCurrencyClick={isMultiCurrency ? handleCurrencyClick : undefined}
           prevMonthName={prevMonthName}
           style={style}
           amountStyle={amountStyle}
@@ -88,6 +105,7 @@ export function ToBudget({
         isOpen={menuOpen}
         onOpenChange={() => {
           setMenuStep('actions');
+          setSelectedCurrency(null);
           setMenuOpen(false);
         }}
         style={{ width: 200, margin: 1 }}
@@ -101,19 +119,26 @@ export function ToBudget({
               onCover={() => setMenuStep('cover')}
               onHoldBuffer={() => setMenuStep('buffer')}
               onResetHoldBuffer={() => {
-                onBudgetAction(month, 'reset-hold');
+                onBudgetAction(month, 'reset-hold', {
+                  currencyCode: selectedCurrency,
+                });
                 setMenuOpen(false);
               }}
               month={month}
               onBudgetAction={onBudgetAction}
+              currencyCode={selectedCurrency ?? undefined}
             />
           )}
           {menuStep === 'buffer' && (
             <HoldMenu
               onClose={() => setMenuOpen(false)}
               onSubmit={amount => {
-                onBudgetAction(month, 'hold', { amount });
+                onBudgetAction(month, 'hold', {
+                  amount,
+                  currencyCode: selectedCurrency ?? undefined,
+                });
               }}
+              currencyCode={selectedCurrency ?? undefined}
             />
           )}
           {menuStep === 'transfer' && (
@@ -137,7 +162,7 @@ export function ToBudget({
                 onBudgetAction(month, 'cover-overbudgeted', {
                   category: categoryId,
                   amount,
-                  currencyCode: format.currency.code,
+                  currencyCode: selectedCurrency || format.currency.code,
                 });
               }}
             />

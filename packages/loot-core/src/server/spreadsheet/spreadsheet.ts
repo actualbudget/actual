@@ -395,14 +395,8 @@ export class Spreadsheet {
     const name = resolveName(sheetName, cellName);
     const node = this._getNode(name);
 
-    if (node.dynamic) {
-      // If it already exists, do nothing
-      return;
-    }
-
-    node.dynamic = true;
-    node._run = run;
-
+    // Resolve dependencies regardless of whether node is already dynamic
+    // (needed for cached nodes that need graph edges re-established)
     dependencies = dependencies.map(dep => {
       let resolved;
       if (!unresolveName(dep).sheet) {
@@ -413,6 +407,29 @@ export class Spreadsheet {
 
       return resolved;
     });
+
+    if (node.dynamic) {
+      // For existing dynamic nodes (e.g., loaded from cache), we need to
+      // restore the run function and dependencies since those aren't cached
+      node._run = run;
+      node._dependencies = dependencies;
+
+      // Re-establish graph edges
+      this.graph.removeIncomingEdges(name);
+      dependencies.forEach(dep => {
+        this.graph.addEdge(dep, name);
+      });
+
+      // Mark the cell as dirty so the run function is called to recalculate
+      // This is necessary because cached values may be stale
+      this.transaction(() => {
+        this._markDirty(name);
+      });
+      return;
+    }
+
+    node.dynamic = true;
+    node._run = run;
 
     node._dependencies = dependencies;
 

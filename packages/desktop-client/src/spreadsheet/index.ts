@@ -56,6 +56,12 @@ export type Spreadsheets = {
     carryover: number;
     goal: number;
     'long-goal': number;
+
+    // Per-currency buffered fields
+    [key: `buffered-${string}`]: number;
+    [key: `buffered-auto-${string}`]: number;
+    [key: `buffered-selected-${string}`]: number;
+    [key: `to-budget-${string}`]: number;
   };
   'tracking-budget': {
     // Common fields

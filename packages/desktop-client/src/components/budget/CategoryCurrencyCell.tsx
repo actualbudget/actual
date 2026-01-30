@@ -48,7 +48,10 @@ export function CategoryCurrencyCell({
             ? null
             : newCurrency,
       };
-      console.log('[CategoryCurrencyCell] Calling onSave with:', updatedCategory);
+      console.log(
+        '[CategoryCurrencyCell] Calling onSave with:',
+        updatedCategory,
+      );
       onSave(updatedCategory);
     } else {
       console.log('[CategoryCurrencyCell] onSave is not defined!');

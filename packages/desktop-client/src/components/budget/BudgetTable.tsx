@@ -27,7 +27,7 @@ import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useShowCurrencyColumn } from '@desktop-client/hooks/useShowCurrencyColumn';
 
 type BudgetTableProps = {
   type: string;
@@ -81,10 +81,7 @@ export function BudgetTable(props: BudgetTableProps) {
   );
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
-  const [enableMultiCurrencyOnBudget] = useSyncedPref(
-    'enableMultiCurrencyOnBudget',
-  );
-  const showCurrencyColumn = enableMultiCurrencyOnBudget === 'true';
+  const showCurrencyColumn = useShowCurrencyColumn();
   const currencyColumnWidth = showCurrencyColumn ? CURRENCY_COLUMN_WIDTH : 0;
 
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(

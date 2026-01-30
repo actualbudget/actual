@@ -38,13 +38,19 @@ import {
   Row,
   SheetCell,
   type SheetCellProps,
+  ROW_HEIGHT,
 } from '@desktop-client/components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useOnBudgetCurrencies } from '@desktop-client/hooks/useOnBudgetCurrencies';
 import { useSheetName } from '@desktop-client/hooks/useSheetName';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
+import {
+  useDynamicSheetValue,
+  useSheetValue,
+} from '@desktop-client/hooks/useSheetValue';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { type Binding, type SheetFields } from '@desktop-client/spreadsheet';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
@@ -149,11 +155,145 @@ export function IncomeHeaderMonth() {
   );
 }
 
+type ExpenseGroupCurrencyRowProps = {
+  groupId: string;
+  currencyCode: string;
+  month: string;
+};
+
+function ExpenseGroupCurrencyRow({
+  groupId,
+  currencyCode,
+  month,
+}: ExpenseGroupCurrencyRowProps) {
+  const format = useFormat();
+
+  const budgetedValue = useDynamicSheetValue(
+    envelopeBudget.groupBudgetedByCurrency(groupId, currencyCode),
+    0,
+  );
+  const spentValue = useDynamicSheetValue(
+    envelopeBudget.groupSumAmountByCurrency(groupId, currencyCode),
+    0,
+  );
+  const balanceValue = useDynamicSheetValue(
+    envelopeBudget.groupBalanceByCurrency(groupId, currencyCode),
+    0,
+  );
+
+  const bgStyle = {
+    backgroundColor: monthUtils.isCurrentMonth(month)
+      ? theme.budgetHeaderCurrentMonth
+      : theme.budgetHeaderOtherMonth,
+  };
+
+  return (
+    <View style={{ flex: 1, flexDirection: 'row', ...bgStyle }}>
+      <Field
+        name="budgeted"
+        width="flex"
+        style={{
+          fontWeight: 600,
+          ...styles.tnum,
+          textAlign: 'right',
+          ...bgStyle,
+        }}
+      >
+        <Text>
+          {format(
+            typeof budgetedValue === 'number' ? budgetedValue : 0,
+            'financial',
+            currencyCode,
+          )}
+        </Text>
+      </Field>
+      <Field
+        name="spent"
+        width="flex"
+        style={{
+          fontWeight: 600,
+          ...styles.tnum,
+          textAlign: 'right',
+          ...bgStyle,
+        }}
+      >
+        <Text>
+          {format(
+            typeof spentValue === 'number' ? spentValue : 0,
+            'financial',
+            currencyCode,
+          )}
+        </Text>
+      </Field>
+      <Field
+        name="balance"
+        width="flex"
+        style={{
+          fontWeight: 600,
+          paddingRight: styles.monthRightPadding,
+          ...styles.tnum,
+          textAlign: 'right',
+          ...bgStyle,
+        }}
+      >
+        <Text>
+          {format(
+            typeof balanceValue === 'number' ? balanceValue : 0,
+            'financial',
+            currencyCode,
+          )}
+        </Text>
+      </Field>
+    </View>
+  );
+}
+
 export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   month,
   group,
 }: CategoryGroupMonthProps) {
   const { id } = group;
+  const currencies = useOnBudgetCurrencies();
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  const showMultiCurrency =
+    enableMultiCurrencyOnBudget === 'true' && currencies.length > 1;
+
+  // Check which currencies this group has categories for
+  const defaultCurrency = currencies[0];
+  const groupCurrencies = showMultiCurrency
+    ? currencies.filter(currency =>
+        group.categories?.some(cat =>
+          currency === defaultCurrency
+            ? !cat.currency || cat.currency === currency
+            : cat.currency === currency,
+        ),
+      )
+    : [];
+
+  // Show per-currency rows if:
+  // 1. Multi-currency is enabled AND
+  // 2. Either the group has multiple currencies OR the group only has non-default currency categories
+  const hasNonDefaultCurrency =
+    groupCurrencies.length > 0 && !groupCurrencies.includes(defaultCurrency);
+  const hasMultipleCurrencies = groupCurrencies.length > 1;
+  const showPerCurrencyRows = hasMultipleCurrencies || hasNonDefaultCurrency;
+
+  if (showMultiCurrency && showPerCurrencyRows) {
+    return (
+      <View style={{ flex: 1 }}>
+        {groupCurrencies.map(currencyCode => (
+          <ExpenseGroupCurrencyRow
+            key={currencyCode}
+            groupId={id}
+            currencyCode={currencyCode}
+            month={month}
+          />
+        ))}
+      </View>
+    );
+  }
 
   return (
     <View
@@ -390,6 +530,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             getValueStyle: makeAmountGrey,
             formatExpr: format.forEdit,
             unformatExpr: format.fromEdit,
+            currencyCode: category.currency,
           }}
           inputProps={{
             onBlur: () => {
@@ -449,6 +590,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           <EnvelopeCellValue
             binding={envelopeBudget.catSumAmount(category.id)}
             type="financial"
+            currencyCode={category.currency}
           >
             {props => (
               <CellValueText
@@ -498,6 +640,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             budgeted={envelopeBudget.catBudgeted(category.id)}
             longGoal={envelopeBudget.catLongGoal(category.id)}
             tooltipDisabled={balanceMenuOpen}
+            currencyCode={category.currency}
           />
         </Button>
 
@@ -522,10 +665,68 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   );
 });
 
+type IncomeGroupCurrencyRowProps = {
+  currencyCode: string;
+  month: string;
+};
+
+function IncomeGroupCurrencyRow({
+  currencyCode,
+  month,
+}: IncomeGroupCurrencyRowProps) {
+  const format = useFormat();
+  const totalIncome = useDynamicSheetValue(
+    envelopeBudget.totalIncomeByCurrency(currencyCode),
+    0,
+  );
+  const value = typeof totalIncome === 'number' ? totalIncome : 0;
+
+  return (
+    <Field
+      name={`received-${currencyCode}`}
+      width="flex"
+      style={{
+        height: ROW_HEIGHT,
+        fontWeight: 600,
+        paddingRight: styles.monthRightPadding,
+        ...styles.tnum,
+        textAlign: 'right',
+        backgroundColor: monthUtils.isCurrentMonth(month)
+          ? theme.budgetHeaderCurrentMonth
+          : theme.budgetHeaderOtherMonth,
+      }}
+    >
+      <Text>{format(value, 'financial', currencyCode)}</Text>
+    </Field>
+  );
+}
+
 type IncomeGroupMonthProps = {
   month: string;
 };
 export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
+  const currencies = useOnBudgetCurrencies();
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  const showMultiCurrency =
+    enableMultiCurrencyOnBudget === 'true' && currencies.length > 1;
+
+  if (showMultiCurrency) {
+    // Show per-currency income totals
+    return (
+      <View style={{ flex: 1 }}>
+        {currencies.map(currencyCode => (
+          <IncomeGroupCurrencyRow
+            key={currencyCode}
+            currencyCode={currencyCode}
+            month={month}
+          />
+        ))}
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <EnvelopeSheetCell
@@ -549,6 +750,110 @@ export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
   );
 }
 
+type IncomeCategoryCurrencyValueProps = {
+  categoryId: string;
+  currencyCode: string;
+};
+
+function IncomeCategoryCurrencyValue({
+  categoryId,
+  currencyCode,
+}: IncomeCategoryCurrencyValueProps) {
+  const categoryIncome = useDynamicSheetValue(
+    envelopeBudget.catSumAmountByCurrency(categoryId, currencyCode),
+    0,
+  );
+  const value = typeof categoryIncome === 'number' ? categoryIncome : 0;
+
+  return (
+    <CellValueText
+      name={`sum-amount-${categoryId}-${currencyCode}`}
+      value={value}
+      type="financial"
+      currencyCode={currencyCode}
+      className={css({
+        cursor: 'pointer',
+        ':hover': { textDecoration: 'underline' },
+        ...makeAmountGrey(value),
+      })}
+    />
+  );
+}
+
+type IncomeCategoryCurrencyRowProps = {
+  categoryId: string;
+  currencyCode: string;
+  month: string;
+  isLast?: boolean;
+  isLastCurrency: boolean;
+  triggerRef?: React.RefObject<HTMLDivElement | null>;
+  onOpenMenu: () => void;
+  onContextMenu: (e: React.MouseEvent<HTMLElement>) => void;
+};
+
+function IncomeCategoryCurrencyRow({
+  categoryId,
+  currencyCode,
+  month,
+  isLast,
+  isLastCurrency,
+  triggerRef,
+  onOpenMenu,
+  onContextMenu,
+}: IncomeCategoryCurrencyRowProps) {
+  const categoryIncome = useDynamicSheetValue(
+    envelopeBudget.catSumAmountByCurrency(categoryId, currencyCode),
+    0,
+  );
+  const value = typeof categoryIncome === 'number' ? categoryIncome : 0;
+
+  return (
+    <Field
+      name={`received-${currencyCode}`}
+      width="flex"
+      truncate={false}
+      ref={triggerRef}
+      style={{
+        height: ROW_HEIGHT,
+        textAlign: 'right',
+        ...(isLast && isLastCurrency && { borderBottomWidth: 0 }),
+        backgroundColor: monthUtils.isCurrentMonth(month)
+          ? theme.budgetCurrentMonth
+          : theme.budgetOtherMonth,
+      }}
+    >
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          position: 'relative',
+        }}
+      >
+        <span
+          role="button"
+          onClick={onOpenMenu}
+          onContextMenu={onContextMenu}
+          style={{ paddingRight: styles.monthRightPadding }}
+        >
+          <CellValueText
+            name={`sum-amount-${categoryId}-${currencyCode}`}
+            value={value}
+            type="financial"
+            currencyCode={currencyCode}
+            className={css({
+              cursor: 'pointer',
+              ':hover': { textDecoration: 'underline' },
+              ...makeAmountGrey(value),
+            })}
+          />
+        </span>
+      </View>
+    </Field>
+  );
+}
+
 export function IncomeCategoryMonth({
   category,
   isLast,
@@ -556,7 +861,14 @@ export function IncomeCategoryMonth({
   onShowActivity,
   onBudgetAction,
 }: CategoryMonthProps) {
-  const incomeMenuTriggerRef = useRef(null);
+  const currencies = useOnBudgetCurrencies();
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  const showMultiCurrency =
+    enableMultiCurrencyOnBudget === 'true' && currencies.length > 1;
+
+  const incomeMenuTriggerRef = useRef<HTMLDivElement>(null);
   const {
     setMenuOpen: setIncomeMenuOpen,
     menuOpen: incomeMenuOpen,
@@ -564,6 +876,57 @@ export function IncomeCategoryMonth({
     resetPosition: resetIncomePosition,
     position: incomePosition,
   } = useContextMenu();
+
+  if (showMultiCurrency) {
+    const handleOpenMenu = () => {
+      resetIncomePosition(-6, -4);
+      setIncomeMenuOpen(true);
+    };
+    const handleContextMenuEvent = (e: React.MouseEvent<HTMLElement>) => {
+      handleIncomeContextMenu(e);
+      const rect = e.currentTarget.getBoundingClientRect();
+      resetIncomePosition(
+        e.clientX - rect.right + 200 - 8,
+        e.clientY - rect.bottom - 8,
+      );
+    };
+
+    // Show per-currency income amounts for this category (only non-zero amounts)
+    return (
+      <View style={{ flex: 1 }}>
+        {currencies.map((currencyCode, index) => (
+          <IncomeCategoryCurrencyRow
+            key={currencyCode}
+            categoryId={category.id}
+            currencyCode={currencyCode}
+            month={month}
+            isLast={isLast}
+            isLastCurrency={index === currencies.length - 1}
+            triggerRef={index === 0 ? incomeMenuTriggerRef : undefined}
+            onOpenMenu={handleOpenMenu}
+            onContextMenu={handleContextMenuEvent}
+          />
+        ))}
+        <Popover
+          triggerRef={incomeMenuTriggerRef}
+          placement="bottom end"
+          isOpen={incomeMenuOpen}
+          onOpenChange={() => setIncomeMenuOpen(false)}
+          style={{ margin: 1 }}
+          isNonModal
+          {...incomePosition}
+        >
+          <IncomeMenu
+            categoryId={category.id}
+            month={month}
+            onBudgetAction={onBudgetAction}
+            onShowActivity={onShowActivity}
+            onClose={() => setIncomeMenuOpen(false)}
+          />
+        </Popover>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1 }}>

@@ -21,7 +21,7 @@ import { getScrollbarWidth } from './util';
 import { useBudgetComponents } from '.';
 
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useShowCurrencyColumn } from '@desktop-client/hooks/useShowCurrencyColumn';
 
 type BudgetTotalsProps = {
   toggleHiddenCategories: () => void;
@@ -40,11 +40,7 @@ export const BudgetTotals = memo(function BudgetTotals({
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
-
-  const [enableMultiCurrencyOnBudget] = useSyncedPref(
-    'enableMultiCurrencyOnBudget',
-  );
-  const showCurrencyColumn = enableMultiCurrencyOnBudget === 'true';
+  const showCurrencyColumn = useShowCurrencyColumn();
 
   const cycleExpandedState = () => {
     const nextState = (categoryExpandedState + 1) % 3;

@@ -13,7 +13,7 @@ import { BudgetTable } from './BudgetTable';
 import { CURRENCY_COLUMN_WIDTH } from './constants';
 
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useShowCurrencyColumn } from '@desktop-client/hooks/useShowCurrencyColumn';
 
 function getNumPossibleMonths(width: number, categoryWidth: number) {
   const estimatedTableWidth = width - categoryWidth;
@@ -52,11 +52,8 @@ const DynamicBudgetTable = ({
   const { setDisplayMax } = useBudgetMonthCount();
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
-  const [enableMultiCurrencyOnBudget] = useSyncedPref(
-    'enableMultiCurrencyOnBudget',
-  );
-  const currencyColumnWidth =
-    enableMultiCurrencyOnBudget === 'true' ? CURRENCY_COLUMN_WIDTH : 0;
+  const showCurrencyColumn = useShowCurrencyColumn();
+  const currencyColumnWidth = showCurrencyColumn ? CURRENCY_COLUMN_WIDTH : 0;
 
   const numPossible = getNumPossibleMonths(
     width,

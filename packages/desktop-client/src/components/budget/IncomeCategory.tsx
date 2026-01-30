@@ -19,8 +19,10 @@ import {
   type OnDragChangeCallback,
   type OnDropCallback,
 } from '@desktop-client/components/sort';
-import { Row } from '@desktop-client/components/table';
+import { Row, ROW_HEIGHT } from '@desktop-client/components/table';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
+import { useOnBudgetCurrencies } from '@desktop-client/hooks/useOnBudgetCurrencies';
+import { useShowCurrencyColumn } from '@desktop-client/hooks/useShowCurrencyColumn';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type IncomeCategoryProps = {
@@ -66,15 +68,24 @@ export function IncomeCategory({
 
   const { IncomeCategoryComponent: MonthComponent } = useBudgetComponents();
 
+  const showCurrencyColumn = useShowCurrencyColumn();
+  const currencies = useOnBudgetCurrencies();
   const [enableMultiCurrencyOnBudget] = useSyncedPref(
     'enableMultiCurrencyOnBudget',
   );
-  const showCurrencyColumn = enableMultiCurrencyOnBudget === 'true';
+  const showMultiCurrency =
+    enableMultiCurrencyOnBudget === 'true' && currencies.length > 1;
+
+  // Calculate row height: if multi-currency, one row per currency, otherwise single row
+  const rowHeight = showMultiCurrency
+    ? currencies.length * ROW_HEIGHT
+    : ROW_HEIGHT;
 
   return (
     <Row
       innerRef={dropRef}
       collapsed
+      height={rowHeight}
       style={{
         opacity: cat.hidden ? 0.5 : undefined,
       }}

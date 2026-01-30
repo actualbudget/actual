@@ -27,10 +27,12 @@ type CellValueProps<
     type,
     name,
     value,
+    currencyCode,
   }: {
     type?: FormatType;
     name: string;
     value: Spreadsheets[SheetName][FieldName];
+    currencyCode?: string | null;
   }) => ReactNode;
   binding: Binding<SheetName, FieldName>;
   type?: FormatType;
@@ -57,7 +59,9 @@ export function CellValue<
   const sheetValue = useSheetValue(binding);
 
   return typeof children === 'function' ? (
-    <>{children({ type, name: fullSheetName, value: sheetValue })}</>
+    <>
+      {children({ type, name: fullSheetName, value: sheetValue, currencyCode })}
+    </>
   ) : (
     <CellValueText
       type={type}

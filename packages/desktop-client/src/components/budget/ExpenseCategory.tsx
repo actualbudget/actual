@@ -25,7 +25,7 @@ import {
 } from '@desktop-client/components/sort';
 import { Row } from '@desktop-client/components/table';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useShowCurrencyColumn } from '@desktop-client/hooks/useShowCurrencyColumn';
 
 type ExpenseCategoryProps = {
   cat: CategoryEntity;
@@ -78,10 +78,7 @@ export function ExpenseCategory({
 
   const { ExpenseCategoryComponent: MonthComponent } = useBudgetComponents();
 
-  const [enableMultiCurrencyOnBudget] = useSyncedPref(
-    'enableMultiCurrencyOnBudget',
-  );
-  const showCurrencyColumn = enableMultiCurrencyOnBudget === 'true';
+  const showCurrencyColumn = useShowCurrencyColumn();
 
   return (
     <Row

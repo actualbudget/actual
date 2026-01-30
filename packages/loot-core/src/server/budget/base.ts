@@ -151,6 +151,24 @@ function handleBudgetMonthChange(budget) {
   sheet.get().set(`${sheetName}!buffered`, budget.buffered);
 }
 
+function handleBudgetMonthCurrencyChange(budgetCurrency: {
+  month: string;
+  currency_code: string;
+  buffered: number;
+}) {
+  // Guard against partial CRDT inserts where month or currency_code may not be set yet
+  if (!budgetCurrency.month || !budgetCurrency.currency_code) {
+    return;
+  }
+  const sheetName = monthUtils.sheetForMonth(budgetCurrency.month);
+  sheet
+    .get()
+    .set(
+      `${sheetName}!buffered-${budgetCurrency.currency_code}`,
+      budgetCurrency.buffered || 0,
+    );
+}
+
 function handleBudgetChange(budget) {
   if (budget.category) {
     const sheetName = monthUtils.sheetForMonth(budget.month.toString());
@@ -184,6 +202,8 @@ export function triggerBudgetChanges(oldValues, newValues) {
 
         if (table === 'zero_budget_months') {
           handleBudgetMonthChange(newValue);
+        } else if (table === 'zero_budget_month_currencies') {
+          handleBudgetMonthCurrencyChange(newValue);
         } else if (table === 'zero_budgets' || table === 'reflect_budgets') {
           handleBudgetChange(newValue);
         } else if (table === 'transactions') {
@@ -288,43 +308,46 @@ export async function createBudget(months) {
   }
 
   months.forEach(month => {
-    if (!meta.createdMonths.has(month)) {
-      const prevMonth = monthUtils.prevMonth(month);
-      const { start, end } = monthUtils.bounds(month);
-      const sheetName = monthUtils.sheetForMonth(month);
-      const prevSheetName = monthUtils.sheetForMonth(prevMonth);
+    const isNewMonth = !meta.createdMonths.has(month);
+    const prevMonth = monthUtils.prevMonth(month);
+    const { start, end } = monthUtils.bounds(month);
+    const sheetName = monthUtils.sheetForMonth(month);
+    const prevSheetName = monthUtils.sheetForMonth(prevMonth);
 
-      categories.forEach(cat => {
-        createCategory(cat, sheetName, prevSheetName, start, end);
-      });
-      groups.forEach(group => {
-        if (budgetType === 'envelope') {
-          envelopeBudget.createCategoryGroup(group, sheetName);
-        } else {
-          report.createCategoryGroup(group, sheetName);
-        }
-      });
-
+    // Always call creation functions to ensure run functions are attached
+    // (createDynamic handles the case where nodes already exist from cache)
+    categories.forEach(cat => {
+      createCategory(cat, sheetName, prevSheetName, start, end);
+    });
+    groups.forEach(group => {
       if (budgetType === 'envelope') {
-        envelopeBudget.createSummary(
-          groups,
-          categories,
-          prevSheetName,
+        envelopeBudget.createCategoryGroup(
+          group,
           sheetName,
-          start,
-          end,
           currencies,
           defaultCurrencyCode,
         );
       } else {
-        report.createSummary(
-          groups,
-          sheetName,
-          currencies,
-          defaultCurrencyCode,
-        );
+        report.createCategoryGroup(group, sheetName);
       }
+    });
 
+    if (budgetType === 'envelope') {
+      envelopeBudget.createSummary(
+        groups,
+        categories,
+        prevSheetName,
+        sheetName,
+        start,
+        end,
+        currencies,
+        defaultCurrencyCode,
+      );
+    } else {
+      report.createSummary(groups, sheetName, currencies, defaultCurrencyCode);
+    }
+
+    if (isNewMonth) {
       meta.createdMonths.add(month);
     }
   });
@@ -354,13 +377,11 @@ export async function createAllBudgets() {
     currentMonth,
   );
 
-  const meta = sheet.get().meta();
-  const createdMonths = meta.createdMonths || new Set();
-  const newMonths = range.filter(m => !createdMonths.has(m));
-
-  if (newMonths.length > 0) {
-    await createBudget(range);
-  }
+  // Always call createBudget to ensure run functions are attached for dynamic cells.
+  // When cells are loaded from cache, they only have values - the run functions
+  // need to be re-attached by calling createDynamic again. createDynamic handles
+  // existing nodes gracefully by just re-attaching the run function.
+  await createBudget(range);
 
   return { start, end };
 }

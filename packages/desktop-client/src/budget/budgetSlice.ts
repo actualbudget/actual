@@ -339,12 +339,15 @@ type ApplyBudgetActionPayload =
       month: string;
       args: {
         amount: number;
+        currencyCode?: string;
       };
     }
   | {
       type: 'reset-hold';
       month: string;
-      args: never;
+      args: {
+        currencyCode?: string;
+      };
     }
   | {
       type: 'cover-overspending';
@@ -509,10 +512,14 @@ export const applyBudgetAction = createAppAsyncThunk(
         await send('budget/hold-for-next-month', {
           month,
           amount: args.amount,
+          currencyCode: args.currencyCode,
         });
         break;
       case 'reset-hold':
-        await send('budget/reset-hold', { month });
+        await send('budget/reset-hold', {
+          month,
+          currencyCode: args.currencyCode,
+        });
         break;
       case 'cover-overspending':
         await send('budget/cover-overspending', {

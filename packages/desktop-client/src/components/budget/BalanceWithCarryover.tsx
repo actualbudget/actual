@@ -99,6 +99,11 @@ type BalanceWithCarryoverProps = Omit<
   shouldInlineGoalStatus?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
   tooltipDisabled?: boolean;
+  /**
+   * Optional currency code for formatting amounts.
+   * If not provided, uses the default currency from preferences.
+   */
+  currencyCode?: string | null;
 };
 
 export function BalanceWithCarryover({
@@ -111,6 +116,7 @@ export function BalanceWithCarryover({
   shouldInlineGoalStatus,
   CarryoverIndicator: CarryoverIndicatorComponent = CarryoverIndicator,
   tooltipDisabled,
+  currencyCode,
   children,
   ...props
 }: BalanceWithCarryoverProps) {
@@ -247,7 +253,12 @@ export function BalanceWithCarryover({
   );
 
   return (
-    <CellValue binding={balance} type="financial" {...props}>
+    <CellValue
+      binding={balance}
+      type="financial"
+      currencyCode={currencyCode}
+      {...props}
+    >
       {({ type, name, value: balanceValue }) => (
         <>
           <Tooltip
@@ -279,6 +290,7 @@ export function BalanceWithCarryover({
                 type={type}
                 name={name}
                 value={balanceValue}
+                currencyCode={currencyCode}
                 className={getDefaultClassName(balanceValue)}
               />
             )}

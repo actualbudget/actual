@@ -184,6 +184,7 @@ function undoMessage(message, oldData) {
     ) {
       if (
         message.dataset === 'zero_budget_months' ||
+        message.dataset === 'zero_budget_month_currencies' ||
         message.dataset === 'zero_budgets' ||
         message.dataset === 'reflect_budgets'
       ) {
@@ -246,6 +247,7 @@ function redoResurrections(messages, oldData): Message[] {
       !oldItem &&
       ![
         'zero_budget_months',
+        'zero_budget_month_currencies',
         'zero_budgets',
         'reflect_budgets',
         'notes',

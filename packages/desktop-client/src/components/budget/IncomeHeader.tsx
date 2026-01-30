@@ -10,7 +10,7 @@ import { RenderMonths } from './RenderMonths';
 import { useBudgetComponents } from '.';
 
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useShowCurrencyColumn } from '@desktop-client/hooks/useShowCurrencyColumn';
 
 type IncomeHeaderProps = {
   onShowNewGroup: () => void;
@@ -19,11 +19,8 @@ type IncomeHeaderProps = {
 export function IncomeHeader({ onShowNewGroup }: IncomeHeaderProps) {
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
-  const [enableMultiCurrencyOnBudget] = useSyncedPref(
-    'enableMultiCurrencyOnBudget',
-  );
-  const currencyColumnWidth =
-    enableMultiCurrencyOnBudget === 'true' ? CURRENCY_COLUMN_WIDTH : 0;
+  const showCurrencyColumn = useShowCurrencyColumn();
+  const currencyColumnWidth = showCurrencyColumn ? CURRENCY_COLUMN_WIDTH : 0;
   const { IncomeHeaderComponent: MonthComponent } = useBudgetComponents();
   return (
     <View style={{ flexDirection: 'row', flex: 1 }}>
