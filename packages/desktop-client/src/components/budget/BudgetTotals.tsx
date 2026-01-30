@@ -83,7 +83,7 @@ export const BudgetTotals = memo(function BudgetTotals({
       <View
         style={{
           width: 200 + 100 * categoryExpandedState,
-          color: theme.pageTextLight,
+          color: theme.tableHeaderText,
           justifyContent: 'center',
           paddingLeft: 5,
           paddingRight: 5,
@@ -141,7 +141,7 @@ export const BudgetTotals = memo(function BudgetTotals({
           <SvgDotsHorizontalTriple
             width={15}
             height={15}
-            style={{ color: theme.pageTextLight }}
+            style={{ color: theme.tableHeaderText }}
           />
         </Button>
 
