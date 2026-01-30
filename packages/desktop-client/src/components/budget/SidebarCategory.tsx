@@ -155,11 +155,11 @@ export function SidebarCategory({
               display: 'flex',
             },
           }),
-        ...(dragging && { color: theme.formInputTextPlaceholderSelected }),
+        ...(dragging && { color: theme.buttonPrimaryBackground }), //always visible color
         // The zIndex here forces the the view on top of a row below
         // it that may be "collapsed" and show a border on top
         ...(dragPreview && {
-          backgroundColor: theme.tableBackground,
+          backgroundColor: theme.budgetCurrentMonth,
           zIndex: 10000,
           borderRadius: 6,
           overflow: 'hidden',
