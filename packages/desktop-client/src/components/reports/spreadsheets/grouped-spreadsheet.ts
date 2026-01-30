@@ -35,6 +35,7 @@ export function createGroupedSpreadsheet({
   balanceTypeOp,
   sortByOp,
   firstDayOfWeekIdx,
+  useExactDates,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
 
@@ -62,6 +63,7 @@ export function createGroupedSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
+          useExactDates,
         ),
       ).then(({ data }) => data),
       aqlQuery(
@@ -72,6 +74,7 @@ export function createGroupedSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
+          useExactDates,
         ),
       ).then(({ data }) => data),
     ]);

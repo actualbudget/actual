@@ -91,6 +91,7 @@ function CustomReportListCardsInner({
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const [financialYearStart] = useSyncedPref('financialYearStart');
 
   useEffect(() => {
     async function run() {
@@ -194,6 +195,7 @@ function CustomReportListCardsInner({
           latestTransaction={latestTransaction}
           firstDayOfWeekIdx={firstDayOfWeekIdx}
           showTooltip={!isEditing}
+          financialYearStart={financialYearStart}
         />
       </View>
       {hasWarning && (
