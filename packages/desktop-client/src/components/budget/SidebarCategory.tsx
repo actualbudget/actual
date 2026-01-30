@@ -155,7 +155,7 @@ export function SidebarCategory({
               display: 'flex',
             },
           }),
-        ...(dragging && { color: theme.buttonPrimaryBackground }), //always visible color
+        ...(dragging && { color: theme.pageTextSubdued }), //always visible color
         // The zIndex here forces the the view on top of a row below
         // it that may be "collapsed" and show a border on top
         ...(dragPreview && {
