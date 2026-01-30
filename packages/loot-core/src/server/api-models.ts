@@ -134,7 +134,7 @@ export const tagModel = {
   },
 
   fromExternal(tag: Partial<APITagEntity>): Partial<TagEntity> {
-    return tag as Partial<TagEntity>;
+    return tag;
   },
 };
 
