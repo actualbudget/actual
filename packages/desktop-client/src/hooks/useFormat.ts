@@ -259,12 +259,10 @@ export function useFormat(): UseFormatResult {
         return defaultValue;
       }
 
-      // strip directional formatting characters
-      const normalized = trimmed.replace(
-        /[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g,
-        '',
-      );
-
+      // strip directional formatting characters and letters
+      const normalized = trimmed
+        .replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '')
+        .replace(/\p{L}+/gu, '');
       let numericValue: number | null = evalArithmetic(normalized, null);
 
       if (numericValue === null || isNaN(numericValue)) {
