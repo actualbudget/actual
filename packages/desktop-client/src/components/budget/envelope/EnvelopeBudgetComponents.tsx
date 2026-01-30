@@ -307,6 +307,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                 setBudgetMenuOpen(true);
               }}
               style={{
+                color: theme.budgetNumberNeutral, //make sure button is visible when hovered
                 padding: 3,
               }}
             >
@@ -380,8 +381,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             padding: '0 4px',
             borderRadius: 4,
             ':hover': {
-              boxShadow: 'inset 0 0 0 1px ' + theme.mobileAccountShadow,
-              backgroundColor: theme.tableBackground,
+              boxShadow: 'inset 0 0 0 1px ' + theme.buttonPrimaryShadow, //remove mobile color variable
+              backgroundColor: theme.budgetCurrentMonth,
             },
           }}
           valueProps={{
@@ -396,7 +397,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               onEdit(null);
             },
             style: {
-              backgroundColor: theme.tableBackground,
+              backgroundColor: theme.budgetCurrentMonth,
             },
           }}
           onSave={(parsedIntegerAmount: number | null) => {
