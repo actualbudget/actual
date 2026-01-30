@@ -28,7 +28,7 @@ export function IncomeProgress({ current, target }: IncomeProgressProps) {
   return (
     <PieProgress
       progress={frac}
-      color={over ? theme.budgetNumberNegative : theme.budgetNumberPositive}
+      color={over ? theme.numberNegative : theme.numberPositive}
       backgroundColor={over ? theme.errorBackground : theme.budgetCurrentMonth}
       style={{ width: 20, height: 20 }}
     />
