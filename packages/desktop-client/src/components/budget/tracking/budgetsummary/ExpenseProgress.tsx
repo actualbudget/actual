@@ -34,8 +34,8 @@ export function ExpenseProgress({ current, target }: ExpenseProgressProps) {
   return (
     <PieProgress
       progress={frac}
-      color={over ? theme.errorText : theme.noticeTextLight}
-      backgroundColor={over ? theme.errorBackground : theme.tableBackground}
+      color={over ? theme.budgetNumberNegative : theme.budgetNumberPositive}
+      backgroundColor={over ? theme.errorBackground : theme.budgetCurrentMonth}
       style={{ width: 20, height: 20 }}
     />
   );
