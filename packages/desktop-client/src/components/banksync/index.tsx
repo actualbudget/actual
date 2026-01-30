@@ -115,6 +115,7 @@ export function BankSync() {
     <Page
       header={t('Bank Sync')}
       style={{
+        minHeight: 'initial',
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
         paddingBottom: MOBILE_NAV_HEIGHT,
       }}
@@ -129,7 +130,7 @@ export function BankSync() {
         )}
         {Object.entries(groupedAccounts).map(([syncProvider, accounts]) => {
           return (
-            <View key={syncProvider} style={{ marginBottom: '1em' }}>
+            <View key={syncProvider} style={{ minHeight: 'initial' }}>
               {Object.keys(groupedAccounts).length > 1 && (
                 <Text
                   style={{ fontWeight: 500, fontSize: 20, margin: '.5em 0' }}
