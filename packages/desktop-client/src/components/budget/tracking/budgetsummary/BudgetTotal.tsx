@@ -58,7 +58,7 @@ export function BudgetTotal<
               allocatedAmount: <CellValue binding={current} type="financial" />,
               italic: (
                 <Text
-                  style={{ color: theme.pageTextSubdued, fontStyle: 'italic' }}
+                  style={{ color: theme.pageTextLight, fontStyle: 'italic' }}
                 />
               ),
               totalAmount: <CellValue binding={target} type="financial" />,
