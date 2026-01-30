@@ -63,7 +63,7 @@ export const BudgetTotals = memo(function BudgetTotals({
     <View
       data-testid="budget-totals"
       style={{
-        backgroundColor: theme.tableBackground,
+        backgroundColor: theme.budgetCurrentMonth, //use budget colors, not generic table colors
         flexDirection: 'row',
         flexShrink: 0,
         boxShadow: styles.cardShadow,
@@ -128,7 +128,7 @@ export const BudgetTotals = memo(function BudgetTotals({
             />
           )}
         </Button>
-        <View style={{ flexGrow: '1' }}>
+        <View style={{ flexGrow: '1', fontWeight: 600 }}>
           <Trans>Category</Trans>
         </View>
         <Button
