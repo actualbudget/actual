@@ -10,11 +10,11 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import {
-  type AccountEntity,
-  type SyncServerGoCardlessAccount,
-  type SyncServerPluggyAiAccount,
-  type SyncServerSimpleFinAccount,
+import type {
+  AccountEntity,
+  SyncServerGoCardlessAccount,
+  SyncServerPluggyAiAccount,
+  SyncServerSimpleFinAccount,
 } from 'loot-core/types/models';
 
 import {
@@ -23,10 +23,8 @@ import {
   linkAccountSimpleFin,
   unlinkAccount,
 } from '@desktop-client/accounts/accountsSlice';
-import {
-  Autocomplete,
-  type AutocompleteItem,
-} from '@desktop-client/components/autocomplete/Autocomplete';
+import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
+import type { AutocompleteItem } from '@desktop-client/components/autocomplete/Autocomplete';
 import {
   Modal,
   ModalCloseButton,

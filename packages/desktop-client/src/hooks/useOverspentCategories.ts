@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { groupById, type IntegerAmount } from 'loot-core/shared/util';
-import { type CategoryEntity } from 'loot-core/types/models';
+import { groupById } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from './useCategories';
 import { useSpreadsheet } from './useSpreadsheet';

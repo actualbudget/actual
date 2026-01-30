@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 
 import { generateAccount } from 'loot-core/mocks';
 import { q } from 'loot-core/shared/query';
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 

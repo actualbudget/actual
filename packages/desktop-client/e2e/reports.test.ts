@@ -1,10 +1,10 @@
-import { type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
-import { type CustomReportPage } from './page-models/custom-report-page';
+import type { CustomReportPage } from './page-models/custom-report-page';
 import { Navigation } from './page-models/navigation';
-import { type ReportsPage } from './page-models/reports-page';
+import type { ReportsPage } from './page-models/reports-page';
 
 test.describe.parallel('Reports', () => {
   let page: Page;

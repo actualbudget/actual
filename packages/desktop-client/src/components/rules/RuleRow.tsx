@@ -13,7 +13,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { friendlyOp, translateRuleStage } from 'loot-core/shared/rules';
-import { type RuleEntity } from 'loot-core/types/models';
+import type { RuleEntity } from 'loot-core/types/models';
 
 import { ActionExpression } from './ActionExpression';
 import { ConditionExpression } from './ConditionExpression';

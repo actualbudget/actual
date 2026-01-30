@@ -1,7 +1,7 @@
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type CategoryEntity } from 'loot-core/types/models/category';
+import type { CategoryEntity } from 'loot-core/types/models/category';
 
 import { CategoryAutomationButton } from './goals/CategoryAutomationButton';
 

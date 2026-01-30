@@ -23,11 +23,8 @@ import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useUndo } from '@desktop-client/hooks/useUndo';
-import {
-  collapseModals,
-  pushModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
+import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 

@@ -1,7 +1,7 @@
-import { type ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { type Menu } from '@actual-app/components/menu';
+import type { Menu } from '@actual-app/components/menu';
 
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';

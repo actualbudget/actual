@@ -1,10 +1,7 @@
 import { useCallback, useMemo } from 'react';
 
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type CategoryEntity,
-  type ScheduleEntity,
-} from 'loot-core/types/models';
+import type { CategoryEntity, ScheduleEntity } from 'loot-core/types/models';
 
 import { useCategory } from './useCategory';
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';

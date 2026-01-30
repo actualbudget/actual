@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -17,10 +18,10 @@ import { parseISO } from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type SummaryContent,
-  type SummaryWidget,
-  type TimeFrame,
+import type {
+  SummaryContent,
+  SummaryWidget,
+  TimeFrame,
 } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';

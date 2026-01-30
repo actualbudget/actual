@@ -8,14 +8,14 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type CategoryGroupEntity,
-  type CustomReportEntity,
-  type PayeeEntity,
+import type {
+  AccountEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+  CustomReportEntity,
+  PayeeEntity,
 } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { ChooseGraph } from '@desktop-client/components/reports/ChooseGraph';
 import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';

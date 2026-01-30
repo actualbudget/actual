@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { type SVGAttributes } from 'react';
+import React from 'react';
+import type { SVGAttributes } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 

@@ -8,10 +8,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type AccountEntity,
-  type NetWorthWidget,
-} from 'loot-core/types/models';
+import type { AccountEntity, NetWorthWidget } from 'loot-core/types/models';
 
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';

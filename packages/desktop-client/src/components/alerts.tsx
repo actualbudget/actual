@@ -1,9 +1,6 @@
 // @ts-strict-ignore
-import React, {
-  type ComponentType,
-  type CSSProperties,
-  type ReactNode,
-} from 'react';
+import React from 'react';
+import type { ComponentType, CSSProperties, ReactNode } from 'react';
 
 import {
   SvgExclamationOutline,

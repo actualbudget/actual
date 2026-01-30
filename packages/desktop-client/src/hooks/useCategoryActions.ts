@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/platform/client/fetch';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { useCategories } from './useCategories';

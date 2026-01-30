@@ -1,4 +1,4 @@
-import { type ComponentProps, type ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -8,11 +8,8 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type RuleConditionEntity,
-  type TimeFrame,
-} from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { RuleConditionEntity, TimeFrame } from 'loot-core/types/models';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { getLiveRange } from './getLiveRange';
 import {

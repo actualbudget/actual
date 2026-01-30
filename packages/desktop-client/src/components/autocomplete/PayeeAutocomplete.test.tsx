@@ -1,14 +1,13 @@
-import { render, screen, type Screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import type { Screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
 import { generateAccount } from 'loot-core/mocks';
 import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 
-import {
-  PayeeAutocomplete,
-  type PayeeAutocompleteProps,
-} from './PayeeAutocomplete';
+import { PayeeAutocomplete } from './PayeeAutocomplete';
+import type { PayeeAutocompleteProps } from './PayeeAutocomplete';
 
 import { AuthProvider } from '@desktop-client/auth/AuthProvider';
 import { useCommonPayees } from '@desktop-client/hooks/usePayees';

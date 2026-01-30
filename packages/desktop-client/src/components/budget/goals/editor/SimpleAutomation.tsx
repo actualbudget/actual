@@ -2,10 +2,8 @@ import { useTranslation } from 'react-i18next';
 
 import type { SimpleTemplate } from 'loot-core/types/models/templates';
 
-import {
-  updateTemplate,
-  type Action,
-} from '@desktop-client/components/budget/goals/actions';
+import { updateTemplate } from '@desktop-client/components/budget/goals/actions';
+import type { Action } from '@desktop-client/components/budget/goals/actions';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { AmountInput } from '@desktop-client/components/util/AmountInput';
 

@@ -3,10 +3,12 @@ import {
   useLocation,
   // oxlint-disable-next-line eslint/no-restricted-imports
   useNavigate as useNavigateReactRouter,
-  type Location,
-  type NavigateFunction,
-  type NavigateOptions,
-  type To,
+} from 'react-router';
+import type {
+  Location,
+  NavigateFunction,
+  NavigateOptions,
+  To,
 } from 'react-router';
 
 export function useNavigate(): NavigateFunction {

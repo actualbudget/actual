@@ -1,12 +1,9 @@
-import React, {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ComponentPropsWithoutRef,
-  type ComponentPropsWithRef,
-  type CSSProperties,
-  type ReactNode,
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type {
+  ComponentPropsWithoutRef,
+  ComponentPropsWithRef,
+  CSSProperties,
+  ReactNode,
 } from 'react';
 import {
   Dialog,

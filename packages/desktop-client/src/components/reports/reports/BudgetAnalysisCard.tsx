@@ -7,7 +7,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { type BudgetAnalysisWidget } from 'loot-core/types/models';
+import type { BudgetAnalysisWidget } from 'loot-core/types/models';
 
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';

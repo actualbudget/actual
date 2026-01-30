@@ -5,9 +5,8 @@ import React, {
   useLayoutEffect,
   useMemo,
   useRef,
-  type ReactElement,
-  type RefObject,
 } from 'react';
+import type { ReactElement, RefObject } from 'react';
 
 function getFocusedKey(el: HTMLElement): string | null {
   let node: HTMLElement | ParentNode = el;

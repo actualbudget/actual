@@ -7,10 +7,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type balanceTypeOpType,
-  type DataEntity,
-} from 'loot-core/types/models';
+import type { balanceTypeOpType, DataEntity } from 'loot-core/types/models';
 
 import { ReportOptions } from './ReportOptions';
 

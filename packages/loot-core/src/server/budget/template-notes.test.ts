@@ -6,8 +6,8 @@ import {
   getActiveSchedules,
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
-  type CategoryWithTemplateNote,
 } from './statements';
+import type { CategoryWithTemplateNote } from './statements';
 import {
   checkTemplateNotes,
   storeNoteTemplates,

@@ -3,10 +3,10 @@ import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { type IntegerAmount } from 'loot-core/shared/util';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { resetApp } from '@desktop-client/app/appSlice';

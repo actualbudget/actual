@@ -2,7 +2,7 @@
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
 import { getChangedValues } from '../../shared/util';
-import { type CategoryGroupEntity } from '../../types/models';
+import type { CategoryGroupEntity } from '../../types/models';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
 import * as sheet from '../sheet';

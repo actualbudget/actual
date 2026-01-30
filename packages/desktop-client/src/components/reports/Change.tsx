@@ -1,4 +1,5 @@
-import React, { type CSSProperties } from 'react';
+import React from 'react';
+import type { CSSProperties } from 'react';
 
 import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';

@@ -13,15 +13,15 @@ import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type balanceTypeOpType,
-  type CategoryEntity,
-  type CustomReportEntity,
-  type DataEntity,
-  type RuleConditionEntity,
-  type sortByOpType,
+import type {
+  balanceTypeOpType,
+  CategoryEntity,
+  CustomReportEntity,
+  DataEntity,
+  RuleConditionEntity,
+  sortByOpType,
 } from 'loot-core/types/models';
-import { type TransObjectLiteral } from 'loot-core/types/util';
+import type { TransObjectLiteral } from 'loot-core/types/util';
 
 import { Warning } from '@desktop-client/components/alerts';
 import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
@@ -47,8 +47,8 @@ import { ReportLegend } from '@desktop-client/components/reports/ReportLegend';
 import {
   defaultReport,
   ReportOptions,
-  type dateRangeProps,
 } from '@desktop-client/components/reports/ReportOptions';
+import type { dateRangeProps } from '@desktop-client/components/reports/ReportOptions';
 import { ReportSidebar } from '@desktop-client/components/reports/ReportSidebar';
 import { ReportSummary } from '@desktop-client/components/reports/ReportSummary';
 import { ReportTopbar } from '@desktop-client/components/reports/ReportTopbar';

@@ -3,7 +3,7 @@ import React from 'react';
 
 import { View } from '@actual-app/components/view';
 
-import { type RuleEntity } from 'loot-core/types/models';
+import type { RuleEntity } from 'loot-core/types/models';
 
 import { RuleRow } from './RuleRow';
 

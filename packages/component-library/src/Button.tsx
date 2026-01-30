@@ -1,10 +1,5 @@
-import React, {
-  forwardRef,
-  useMemo,
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-  type ReactNode,
-} from 'react';
+import React, { forwardRef, useMemo } from 'react';
+import type { ComponentPropsWithoutRef, CSSProperties, ReactNode } from 'react';
 import { Button as ReactAriaButton } from 'react-aria-components';
 
 import { css, cx } from '@emotion/css';

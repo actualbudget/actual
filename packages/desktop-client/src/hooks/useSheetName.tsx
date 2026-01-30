@@ -1,10 +1,11 @@
 // @ts-strict-ignore
-import { createContext, useContext, type PropsWithChildren } from 'react';
+import { createContext, useContext } from 'react';
+import type { PropsWithChildren } from 'react';
 
-import {
-  type Binding,
-  type SheetFields,
-  type SheetNames,
+import type {
+  Binding,
+  SheetFields,
+  SheetNames,
 } from '@desktop-client/spreadsheet';
 
 function unresolveName(name) {

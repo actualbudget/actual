@@ -13,7 +13,7 @@ import {
   ModalTitle,
 } from '@desktop-client/components/common/Modal';
 import { SectionLabel } from '@desktop-client/components/forms';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type AccountAutocompleteModalProps = Extract<
   ModalType,

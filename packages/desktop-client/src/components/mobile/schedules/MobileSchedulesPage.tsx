@@ -11,7 +11,7 @@ import { format as monthUtilFormat } from 'loot-core/shared/months';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { q } from 'loot-core/shared/query';
 import { getScheduledAmount } from 'loot-core/shared/schedules';
-import { type ScheduleEntity } from 'loot-core/types/models';
+import type { ScheduleEntity } from 'loot-core/types/models';
 
 import { AddScheduleButton } from './AddScheduleButton';
 import { SchedulesList } from './SchedulesList';

@@ -1,4 +1,4 @@
-import { type Database, type SqlJsStatic } from '@jlongster/sql.js';
+import type { Database, SqlJsStatic } from '@jlongster/sql.js';
 /// <reference types="emscripten" />
 
 // Types exported from sql.js (and Emscripten) are incomplete, so we need to redefine them here

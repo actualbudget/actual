@@ -2,7 +2,7 @@
 import * as fs from 'fs';
 import { join } from 'path';
 
-import { type GlobalPrefsJson } from '../../../types/prefs';
+import type { GlobalPrefsJson } from '../../../types/prefs';
 import * as lootFs from '../fs';
 
 import type * as T from './index-types';

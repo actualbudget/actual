@@ -1,12 +1,13 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { type RemoteFile } from 'loot-core/server/cloud-storage';
+import type { RemoteFile } from 'loot-core/server/cloud-storage';
 import { getDownloadError, getSyncError } from 'loot-core/shared/errors';
-import { type Budget } from 'loot-core/types/budget';
-import { type File } from 'loot-core/types/file';
-import { type Handlers } from 'loot-core/types/handlers';
+import type { Budget } from 'loot-core/types/budget';
+import type { File } from 'loot-core/types/file';
+import type { Handlers } from 'loot-core/types/handlers';
 
 import { resetApp, setAppState } from '@desktop-client/app/appSlice';
 import { closeModal, pushModal } from '@desktop-client/modals/modalsSlice';

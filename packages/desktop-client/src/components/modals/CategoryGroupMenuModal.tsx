@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useRef, useState, type ComponentProps } from 'react';
+import React, { useRef, useState } from 'react';
+import type { ComponentProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -17,7 +18,8 @@ import {
 } from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
-import { styles, type CSSProperties } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
@@ -34,7 +36,7 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useNotes } from '@desktop-client/hooks/useNotes';
 import { useUndo } from '@desktop-client/hooks/useUndo';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type CategoryGroupMenuModalProps = Extract<
   ModalType,

@@ -11,7 +11,7 @@ import { css } from '@emotion/css';
 import rehypeExternalLinks from 'rehype-external-links';
 import remarkGfm from 'remark-gfm';
 
-import { type MarkdownWidget } from 'loot-core/types/models';
+import type { MarkdownWidget } from 'loot-core/types/models';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from '@desktop-client/components/reports/constants';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';

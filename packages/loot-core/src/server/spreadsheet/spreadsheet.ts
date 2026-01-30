@@ -2,9 +2,9 @@
 import mitt from 'mitt';
 
 import { logger } from '../../platform/server/log';
-import { type QueryState } from '../../shared/query';
+import type { QueryState } from '../../shared/query';
 import { aqlCompiledQuery, compileQuery, schema, schemaConfig } from '../aql';
-import { type BudgetType } from '../prefs';
+import type { BudgetType } from '../prefs';
 
 import { Graph } from './graph-data-structure';
 import { resolveName, unresolveName } from './util';

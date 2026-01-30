@@ -1,4 +1,4 @@
-import { type RecurConfig, type ScheduleEntity } from './schedule';
+import type { RecurConfig, ScheduleEntity } from './schedule';
 
 export type NewRuleEntity = {
   stage: 'pre' | null | 'post';

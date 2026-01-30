@@ -1,11 +1,6 @@
-import React, {
-  forwardRef,
-  useCallback,
-  useRef,
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-} from 'react';
-import { type DragItem } from 'react-aria';
+import React, { forwardRef, useCallback, useRef } from 'react';
+import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
+import type { DragItem } from 'react-aria';
 import {
   DropIndicator,
   ListBox,
@@ -27,7 +22,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
 import { moveAccount } from '@desktop-client/accounts/accountsSlice';
 import { syncAndDownload } from '@desktop-client/app/appSlice';
@@ -46,7 +41,7 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { replaceModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
-import { type Binding, type SheetFields } from '@desktop-client/spreadsheet';
+import type { Binding, SheetFields } from '@desktop-client/spreadsheet';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 const ROW_HEIGHT = 60;

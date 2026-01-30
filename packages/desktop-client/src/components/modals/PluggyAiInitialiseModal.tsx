@@ -20,7 +20,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type PluggyAiInitialiseProps = Extract<
   ModalType,

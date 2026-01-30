@@ -1,23 +1,24 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import memoizeOne from 'memoize-one';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { type SyncResponseWithErrors } from 'loot-core/server/accounts/app';
+import type { SyncResponseWithErrors } from 'loot-core/server/accounts/app';
 import { groupById } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type SyncServerGoCardlessAccount,
-  type SyncServerPluggyAiAccount,
-  type SyncServerSimpleFinAccount,
-  type TransactionEntity,
+import type {
+  AccountEntity,
+  CategoryEntity,
+  SyncServerGoCardlessAccount,
+  SyncServerPluggyAiAccount,
+  SyncServerSimpleFinAccount,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 import { resetApp } from '@desktop-client/app/appSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { markPayeesDirty } from '@desktop-client/payees/payeesSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
-import { type AppDispatch } from '@desktop-client/redux/store';
+import type { AppDispatch } from '@desktop-client/redux/store';
 import { setNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
 const sliceName = 'account';

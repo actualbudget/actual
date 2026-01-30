@@ -1,4 +1,4 @@
-import { type ChangeEvent, type ReactNode } from 'react';
+import type { ChangeEvent, ReactNode } from 'react';
 import {
   ColorPicker as AriaColorPicker,
   ColorSwatch as AriaColorSwatch,
@@ -8,8 +8,10 @@ import {
   Dialog,
   DialogTrigger,
   parseColor,
-  type ColorPickerProps as AriaColorPickerProps,
-  type ColorSwatchProps,
+} from 'react-aria-components';
+import type {
+  ColorPickerProps as AriaColorPickerProps,
+  ColorSwatchProps,
 } from 'react-aria-components';
 
 import { css } from '@emotion/css';

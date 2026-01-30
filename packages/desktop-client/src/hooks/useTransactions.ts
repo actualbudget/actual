@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { type Query } from 'loot-core/shared/query';
-import { type IntegerAmount } from 'loot-core/shared/util';
-import { type TransactionEntity } from 'loot-core/types/models';
+import type { Query } from 'loot-core/shared/query';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { TransactionEntity } from 'loot-core/types/models';
 
-import {
-  pagedQuery,
-  type PagedQuery,
-} from '@desktop-client/queries/pagedQuery';
+import { pagedQuery } from '@desktop-client/queries/pagedQuery';
+import type { PagedQuery } from '@desktop-client/queries/pagedQuery';
 
 // Mirrors the `splits` AQL option from the server
 type TransactionSplitsOption = 'all' | 'inline' | 'grouped' | 'none';

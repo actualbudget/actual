@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import { useSearchParams, type NavigateOptions } from 'react-router';
+import { useSearchParams } from 'react-router';
+import type { NavigateOptions } from 'react-router';
 
 /**
  * Hook to get and set a specific URL search parameter value

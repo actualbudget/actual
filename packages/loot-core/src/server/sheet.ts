@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type Database } from '@jlongster/sql.js';
+import type { Database } from '@jlongster/sql.js';
 
 import { captureBreadcrumb } from '../platform/exceptions';
 import { logger } from '../platform/server/log';
@@ -8,11 +8,11 @@ import { sheetForMonth } from '../shared/months';
 import * as Platform from '../shared/platform';
 
 import type * as DbModule from './db';
-import {
-  type DbPreference,
-  type DbReflectBudget,
-  type DbZeroBudget,
-  type DbZeroBudgetMonth,
+import type {
+  DbPreference,
+  DbReflectBudget,
+  DbZeroBudget,
+  DbZeroBudgetMonth,
 } from './db';
 import { Spreadsheet } from './spreadsheet/spreadsheet';
 import { resolveName } from './spreadsheet/util';

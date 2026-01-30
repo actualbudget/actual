@@ -1,4 +1,5 @@
-import React, { type ComponentPropsWithoutRef } from 'react';
+import React from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';

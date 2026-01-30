@@ -4,8 +4,8 @@ import React, {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
 } from 'react';
+import type { CSSProperties } from 'react';
 import {
   Collection,
   Header,
@@ -21,11 +21,8 @@ import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgDelete } from '@actual-app/components/icons/v0';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
-import {
-  Menu,
-  type MenuItem,
-  type MenuItemObject,
-} from '@actual-app/components/menu';
+import { Menu } from '@actual-app/components/menu';
+import type { MenuItem, MenuItemObject } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -35,12 +32,9 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
-import {
-  groupById,
-  integerToCurrency,
-  type IntegerAmount,
-} from 'loot-core/shared/util';
-import { type TransactionEntity } from 'loot-core/types/models';
+import { groupById, integerToCurrency } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { TransactionEntity } from 'loot-core/types/models';
 
 import { ROW_HEIGHT, TransactionListItem } from './TransactionListItem';
 

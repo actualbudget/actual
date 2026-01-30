@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type ImportTransactionsOpts } from '@actual-app/api';
+import type { ImportTransactionsOpts } from '@actual-app/api';
 
 import type { ImportTransactionsResult } from '../server/accounts/app';
 import type {
@@ -10,8 +10,8 @@ import type {
   APIPayeeEntity,
   APIScheduleEntity,
 } from '../server/api-models';
-import { type BudgetFileHandlers } from '../server/budgetfiles/app';
-import { type batchUpdateTransactions } from '../server/transactions';
+import type { BudgetFileHandlers } from '../server/budgetfiles/app';
+import type { batchUpdateTransactions } from '../server/transactions';
 import type { QueryState } from '../shared/query';
 
 import type {

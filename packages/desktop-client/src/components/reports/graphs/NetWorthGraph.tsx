@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { type CSSProperties } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import { getDay, parse } from 'date-fns';
@@ -15,8 +15,8 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  type TooltipContentProps,
 } from 'recharts';
+import type { TooltipContentProps } from 'recharts';
 
 import { computePadding } from './util/computePadding';
 

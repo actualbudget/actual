@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, type ComponentProps } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+import type { ComponentProps } from 'react';
 import { Popover as ReactAriaPopover } from 'react-aria-components';
 
 import { css } from '@emotion/css';

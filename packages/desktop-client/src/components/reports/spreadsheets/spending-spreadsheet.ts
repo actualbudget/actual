@@ -4,15 +4,15 @@ import keyBy from 'lodash/keyBy';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import {
-  type RuleConditionEntity,
-  type SpendingEntity,
-  type SpendingMonthEntity,
+import type {
+  RuleConditionEntity,
+  SpendingEntity,
+  SpendingMonthEntity,
 } from 'loot-core/types/models';
 
 import { makeQuery } from './makeQuery';
 
-import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 type createSpendingSpreadsheetProps = {

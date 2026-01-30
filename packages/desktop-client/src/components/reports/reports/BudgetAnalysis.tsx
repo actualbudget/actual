@@ -15,10 +15,10 @@ import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type BudgetAnalysisWidget,
-  type RuleConditionEntity,
-  type TimeFrame,
+import type {
+  BudgetAnalysisWidget,
+  RuleConditionEntity,
+  TimeFrame,
 } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';

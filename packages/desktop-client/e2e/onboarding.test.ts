@@ -1,6 +1,6 @@
 import path from 'path';
 
-import { type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
 import { AccountPage } from './page-models/account-page';

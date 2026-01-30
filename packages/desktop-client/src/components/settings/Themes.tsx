@@ -9,7 +9,7 @@ import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
+import type { DarkTheme, Theme } from 'loot-core/types/prefs';
 
 import { ThemeInstaller } from './ThemeInstaller';
 import { Column, Setting } from './UI';
@@ -26,8 +26,8 @@ import {
 import {
   parseInstalledTheme,
   serializeInstalledTheme,
-  type InstalledTheme,
 } from '@desktop-client/style/customThemes';
+import type { InstalledTheme } from '@desktop-client/style/customThemes';
 
 const INSTALL_NEW_VALUE = '__install_new__';
 

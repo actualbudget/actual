@@ -11,10 +11,8 @@ import type {
 import type { PercentageTemplate } from 'loot-core/types/models/templates';
 
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
-import {
-  updateTemplate,
-  type Action,
-} from '@desktop-client/components/budget/goals/actions';
+import { updateTemplate } from '@desktop-client/components/budget/goals/actions';
+import type { Action } from '@desktop-client/components/budget/goals/actions';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { PercentInput } from '@desktop-client/components/util/PercentInput';
 

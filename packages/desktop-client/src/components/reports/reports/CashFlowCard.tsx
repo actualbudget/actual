@@ -1,10 +1,5 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type SVGAttributes,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { SVGAttributes } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
@@ -13,7 +8,7 @@ import { Bar, BarChart, LabelList } from 'recharts';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { type CashFlowWidget } from 'loot-core/types/models';
+import type { CashFlowWidget } from 'loot-core/types/models';
 
 import { defaultTimeFrame } from './CashFlow';
 

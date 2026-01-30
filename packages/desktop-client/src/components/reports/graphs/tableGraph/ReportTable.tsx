@@ -1,19 +1,15 @@
-import React, {
-  useLayoutEffect,
-  useRef,
-  type RefObject,
-  type UIEventHandler,
-} from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
+import type { RefObject, UIEventHandler } from 'react';
 
 import { Block } from '@actual-app/components/block';
-import { type CSSProperties } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import {
-  type balanceTypeOpType,
-  type DataEntity,
-  type GroupedEntity,
-  type RuleConditionEntity,
+import type {
+  balanceTypeOpType,
+  DataEntity,
+  GroupedEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { ReportTableHeader } from './ReportTableHeader';

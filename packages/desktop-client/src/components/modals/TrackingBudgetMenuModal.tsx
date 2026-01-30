@@ -1,4 +1,5 @@
-import React, { useEffect, useState, type CSSProperties } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -19,7 +20,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { FocusableAmountInput } from '@desktop-client/components/mobile/transactions/FocusableAmountInput';
 import { useCategory } from '@desktop-client/hooks/useCategory';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
 
 type TrackingBudgetMenuModalProps = Omit<
