@@ -229,7 +229,7 @@ export function BudgetTable(props: BudgetTableProps) {
             backgroundColor: 'transparent',
           },
           '& ::-webkit-scrollbar-thumb:vertical': {
-            backgroundColor: theme.pageTextSubdued, 
+            backgroundColor: theme.pageTextSubdued,
             // changed from tableHeaderBackground. pageTextSubdued is always visible on pageBackground
           },
         }),
