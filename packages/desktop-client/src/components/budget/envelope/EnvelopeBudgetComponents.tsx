@@ -381,7 +381,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             padding: '0 4px',
             borderRadius: 4,
             ':hover': {
-              boxShadow: 'inset 0 0 0 1px ' + theme.buttonPrimaryShadow, //remove mobile color variable
+              boxShadow: 'inset 0 0 0 1px ' + theme.pageTextSubdued, //remove mobile color variable
               backgroundColor: theme.budgetCurrentMonth,
             },
           }}
