@@ -259,10 +259,16 @@ export function useFormat(): UseFormatResult {
         return defaultValue;
       }
 
-      let numericValue: number | null = evalArithmetic(trimmed, null);
+      // strip directional formatting characters
+      const normalized = trimmed.replace(
+        /[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g,
+        '',
+      );
+
+      let numericValue: number | null = evalArithmetic(normalized, null);
 
       if (numericValue === null || isNaN(numericValue)) {
-        numericValue = currencyToAmount(trimmed);
+        numericValue = currencyToAmount(normalized);
       }
 
       if (numericValue !== null && !isNaN(numericValue)) {
