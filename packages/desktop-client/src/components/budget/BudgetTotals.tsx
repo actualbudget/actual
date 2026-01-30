@@ -128,7 +128,7 @@ export const BudgetTotals = memo(function BudgetTotals({
             />
           )}
         </Button>
-        <View style={{ flexGrow: '1', fontWeight: 600 }}>
+        <View style={{ flexGrow: '1' }}>
           <Trans>Category</Trans>
         </View>
         <Button
