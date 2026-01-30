@@ -288,8 +288,8 @@ export const CategoryMonth = memo(function CategoryMonth({
               onPress={() => setMenuOpen(true)}
               style={{
                 color: theme.budgetNumberNeutral, //make sure button is visible when hovered
-                padding: 3
-              }}  
+                padding: 3,
+              }}
             >
               <SvgCheveronDown
                 width={14}
