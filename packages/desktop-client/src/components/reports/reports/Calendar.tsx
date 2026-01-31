@@ -116,8 +116,10 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const [dirty, setDirty] = useState(false);
   const [latestTransaction, setLatestTransaction] = useState('');
 
-  const { transactions: transactionsGrouped, loadMore: loadMoreTransactions } =
-    useTransactions({ query });
+  const {
+    transactions: transactionsGrouped,
+    fetchNextPage: loadMoreTransactions,
+  } = useTransactions({ query });
 
   const allTransactions = useMemo(
     () => ungroupTransactions(transactionsGrouped as TransactionEntity[]),

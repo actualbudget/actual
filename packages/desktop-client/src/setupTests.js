@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
+import { resetTestProviders } from './mocks';
 import { installPolyfills } from './polyfills';
-import { resetMockStore } from './redux/mock';
 
 installPolyfills();
 
@@ -22,7 +22,7 @@ vi.mock('react-virtualized-auto-sizer', () => {
 global.Date.now = () => 123456789;
 
 global.__resetWorld = () => {
-  resetMockStore();
+  resetTestProviders();
 };
 
 process.on('unhandledRejection', reason => {
