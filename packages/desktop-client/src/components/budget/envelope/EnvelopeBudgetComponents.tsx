@@ -112,15 +112,16 @@ function BudgetTotalsCurrencyRow({ currencyCode }: BudgetTotalsCurrencyRowProps)
     0,
   );
 
+  // Negate budgeted value for display, but avoid -0
+  const displayBudgeted = typeof budgetedValue === 'number' && budgetedValue !== 0 
+    ? -budgetedValue 
+    : 0;
+
   return (
     <View style={{ flex: 1, flexDirection: 'row' }}>
       <View style={headerLabelStyle}>
         <Text style={cellStyle}>
-          {format(
-            typeof budgetedValue === 'number' ? -budgetedValue : 0,
-            'financial',
-            currencyCode,
-          )}
+          {format(displayBudgeted, 'financial', currencyCode)}
         </Text>
       </View>
       <View style={headerLabelStyle}>

@@ -88,16 +88,12 @@ function CurrencyTotalsRow({
         <Block style={{ fontWeight: 600 }}>
           {overspent > 0
             ? '+' + format(overspent, 'financial', currencyCode)
-            : overspent === 0
-              ? '-' + format(overspent, 'financial', currencyCode)
-              : format(overspent, 'financial', currencyCode)}
+            : '-' + format(Math.abs(overspent), 'financial', currencyCode)}
         </Block>
         <Block style={{ fontWeight: 600 }}>
           {budgeted > 0
             ? '+' + format(budgeted, 'financial', currencyCode)
-            : budgeted === 0
-              ? '-' + format(budgeted, 'financial', currencyCode)
-              : format(budgeted, 'financial', currencyCode)}
+            : '-' + format(Math.abs(budgeted), 'financial', currencyCode)}
         </Block>
         <Block style={{ fontWeight: 600 }}>
           {buffered >= 0
@@ -209,8 +205,9 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
               {...props}
               style={{ fontWeight: 600 }}
               formatter={(value, type) => {
-                const v = format(value, type);
-                return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
+                // Format absolute value and add explicit sign to avoid double negative from -0
+                const v = format(Math.abs(value), type);
+                return value > 0 ? '+' + v : '-' + v;
               }}
             />
           )}
@@ -225,8 +222,9 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
               {...props}
               style={{ fontWeight: 600 }}
               formatter={(value, type) => {
-                const v = format(value, type);
-                return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
+                // Format absolute value and add explicit sign to avoid double negative from -0
+                const v = format(Math.abs(value), type);
+                return value > 0 ? '+' + v : '-' + v;
               }}
             />
           )}
