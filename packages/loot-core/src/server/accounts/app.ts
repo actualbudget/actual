@@ -34,6 +34,10 @@ import { getServer } from '../server-config';
 import { batchMessages } from '../sync';
 import { undoable, withUndo } from '../undo';
 
+import {
+  app as enableBankingApp,
+  type AccountHandlers as EnableBankingAccountHandlers,
+} from './enablebanking';
 import * as link from './link';
 import { getStartingBalancePayee } from './payees';
 import * as bankSync from './sync';
@@ -43,6 +47,7 @@ export type AccountHandlers = {
   'accounts-get': typeof getAccounts;
   'account-balance': typeof getAccountBalance;
   'account-properties': typeof getAccountProperties;
+  'get-bank': typeof getBank;
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
@@ -65,7 +70,7 @@ export type AccountHandlers = {
   'simplefin-batch-sync': typeof simpleFinBatchSync;
   'transactions-import': typeof importTransactions;
   'account-unlink': typeof unlinkAccount;
-};
+} & EnableBankingAccountHandlers;
 
 async function updateAccount({
   id,
@@ -115,21 +120,34 @@ async function getAccountProperties({ id }: { id: AccountEntity['id'] }) {
   };
 }
 
+async function getBank({ id }: { id: string }) {
+  return await db.first<db.DbBank>(
+    'SELECT * FROM banks WHERE id = ? AND tombstone = 0',
+    [id],
+  );
+}
+
 async function linkGoCardlessAccount({
   requisitionId,
   account,
   upgradingId,
   offBudget = false,
+  syncSource = 'goCardless',
 }: {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
   upgradingId?: AccountEntity['id'] | undefined;
   offBudget?: boolean | undefined;
+  syncSource?: string | undefined;
 }) {
   let id;
-  const bank = await link.findOrCreateBank(account.institution, requisitionId);
-
+  const institution =
+    (account.institution as { name: string }).name !== undefined
+      ? (account.institution as { name: string })
+      : { name: account.institution as string };
+  const bank = await link.findOrCreateBank(institution, requisitionId);
   if (upgradingId) {
+    logger.log('upgrading', upgradingId);
     const accRow = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
       [upgradingId],
@@ -144,8 +162,10 @@ async function linkGoCardlessAccount({
       id,
       account_id: account.account_id,
       bank: bank.id,
-      account_sync_source: 'goCardless',
+      official_name: account.official_name,
+      account_sync_source: syncSource,
     });
+    logger.log('upgrading finished.');
   } else {
     id = uuidv4();
     await db.insertWithUUID('accounts', {
@@ -156,7 +176,7 @@ async function linkGoCardlessAccount({
       official_name: account.official_name,
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
-      account_sync_source: 'goCardless',
+      account_sync_source: syncSource,
     });
     await db.insertPayee({
       name: '',
@@ -197,7 +217,7 @@ async function linkSimpleFinAccount({
 
   const bank = await link.findOrCreateBank(
     institution,
-    externalAccount.orgDomain ?? externalAccount.orgId,
+    externalAccount.orgDomain ?? externalAccount.orgId ?? 'unknown',
   );
 
   if (upgradingId) {
@@ -267,7 +287,7 @@ async function linkPluggyAiAccount({
 
   const bank = await link.findOrCreateBank(
     institution,
-    externalAccount.orgDomain ?? externalAccount.orgId,
+    externalAccount.orgDomain ?? externalAccount.orgId ?? 'unknown',
   );
 
   if (upgradingId) {
@@ -493,7 +513,6 @@ async function setSecret({
   value: string | null;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
-
   if (!userToken) {
     return { error: 'unauthorized' };
   }
@@ -515,6 +534,7 @@ async function setSecret({
       },
     );
   } catch (error) {
+    logger.error('Error saving secret:', error);
     return {
       error: 'failed',
       reason: error instanceof PostError ? error.reason : undefined,
@@ -535,7 +555,9 @@ async function checkSecret(name: string) {
 
   try {
     return await get(serverConfig.BASE_SERVER + '/secret/' + name, {
-      'X-ACTUAL-TOKEN': userToken,
+      headers: {
+        'X-ACTUAL-TOKEN': userToken,
+      },
     });
   } catch (error) {
     logger.error(error);
@@ -1217,6 +1239,7 @@ app.method('account-update', mutator(undoable(updateAccount)));
 app.method('accounts-get', getAccounts);
 app.method('account-balance', getAccountBalance);
 app.method('account-properties', getAccountProperties);
+app.method('get-bank', getBank);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
@@ -1239,3 +1262,4 @@ app.method('accounts-bank-sync', accountsBankSync);
 app.method('simplefin-batch-sync', simpleFinBatchSync);
 app.method('transactions-import', mutator(undoable(importTransactions)));
 app.method('account-unlink', mutator(unlinkAccount));
+app.combine(enableBankingApp);

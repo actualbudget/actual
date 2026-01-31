@@ -3,7 +3,8 @@
   "compilerOptions": {
     "lib": ["ES2021"],
     "noEmit": false,
-    "outDir": "build"
+    "outDir": "build",
+    "experimentalDecorators": true
   },
   "include": [
     "src/**/*",
