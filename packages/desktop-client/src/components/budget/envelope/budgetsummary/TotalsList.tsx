@@ -55,49 +55,55 @@ function CurrencyTotalsRow({
   const budgeted = typeof totalBudgeted === 'number' ? totalBudgeted : 0;
   const buffered = typeof forNextMonth === 'number' ? forNextMonth : 0;
 
-  // Render grid cells - 2 columns: value (right), label (left)
-  // Currency code is included with the first value
+  // Format values with signs
+  const availableFormatted = format(available, 'financial', currencyCode);
+  const overspentFormatted =
+    (overspent > 0 ? '+' : '-') +
+    format(Math.abs(overspent), 'financial', currencyCode);
+  const budgetedFormatted =
+    (budgeted > 0 ? '+' : '-') +
+    format(Math.abs(budgeted), 'financial', currencyCode);
+  const bufferedFormatted =
+    (buffered >= 0 ? '-' : '+') +
+    format(Math.abs(buffered), 'financial', currencyCode);
+
+  const valueStyle = { fontWeight: 600, textAlign: 'right' } as const;
+
+  // Render grid cells - 3 columns: currency, value, label
   return (
     <>
-      <Block style={{ fontWeight: 600, textAlign: 'right' }}>
-        <Text
-          style={{
-            fontSize: 11,
-            color: theme.pageTextSubdued,
-            marginRight: 4,
-          }}
-        >
-          {currencyCode}:
-        </Text>
-        {format(available, 'financial', currencyCode)}
-      </Block>
+      {/* Row 1: Available funds */}
+      <Text
+        style={{
+          fontSize: 11,
+          color: theme.pageTextSubdued,
+          textAlign: 'right',
+        }}
+      >
+        {currencyCode}:
+      </Text>
+      <Text style={valueStyle}>{availableFormatted}</Text>
       <Block>
         <Trans>Available funds</Trans>
       </Block>
 
-      <Block style={{ fontWeight: 600, textAlign: 'right' }}>
-        {overspent > 0
-          ? '+' + format(overspent, 'financial', currencyCode)
-          : '-' + format(Math.abs(overspent), 'financial', currencyCode)}
-      </Block>
+      {/* Row 2: Overspent */}
+      <Text />
+      <Text style={valueStyle}>{overspentFormatted}</Text>
       <Block>
         <Trans>Overspent in {{ prevMonthName }}</Trans>
       </Block>
 
-      <Block style={{ fontWeight: 600, textAlign: 'right' }}>
-        {budgeted > 0
-          ? '+' + format(budgeted, 'financial', currencyCode)
-          : '-' + format(Math.abs(budgeted), 'financial', currencyCode)}
-      </Block>
+      {/* Row 3: Budgeted */}
+      <Text />
+      <Text style={valueStyle}>{budgetedFormatted}</Text>
       <Block>
         <Trans>Budgeted</Trans>
       </Block>
 
-      <Block style={{ fontWeight: 600, textAlign: 'right' }}>
-        {buffered >= 0
-          ? '-' + format(Math.abs(buffered), 'financial', currencyCode)
-          : '+' + format(Math.abs(buffered), 'financial', currencyCode)}
-      </Block>
+      {/* Row 4: For next month */}
+      <Text />
+      <Text style={valueStyle}>{bufferedFormatted}</Text>
       <Block>
         <Trans>For next month</Trans>
       </Block>
@@ -118,24 +124,35 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
 
   if (showMultiCurrency) {
     return (
-      <View
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'auto auto',
-          gap: '0 8px',
-          alignItems: 'baseline',
-          lineHeight: 1.5,
-          ...styles.smallText,
-          ...style,
-        }}
-      >
-        {currencies.map(currencyCode => (
-          <CurrencyTotalsRow
-            key={currencyCode}
-            currencyCode={currencyCode}
-            prevMonthName={prevMonthName}
-          />
-        ))}
+      <View style={{ alignItems: 'center', ...style }}>
+        <View
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'auto auto auto',
+            gap: '0 8px',
+            alignItems: 'baseline',
+            lineHeight: 1.5,
+            ...styles.smallText,
+          }}
+        >
+          {currencies.map((currencyCode, index) => (
+            <React.Fragment key={currencyCode}>
+              <CurrencyTotalsRow
+                currencyCode={currencyCode}
+                prevMonthName={prevMonthName}
+              />
+              {index < currencies.length - 1 && (
+                <View
+                  style={{
+                    gridColumn: '1 / -1',
+                    borderBottom: `1px solid ${theme.tableBorder}`,
+                    margin: '4px 0',
+                  }}
+                />
+              )}
+            </React.Fragment>
+          ))}
+        </View>
       </View>
     );
   }
@@ -151,11 +168,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
       }}
     >
       <View
-        style={{
-          textAlign: 'right',
-          marginRight: 10,
-          minWidth: 50,
-        }}
+        style={{ textAlign: 'right' }}
       >
         <Tooltip
           style={{ ...styles.tooltip, lineHeight: 1.5, padding: '6px 10px' }}
