@@ -20,16 +20,19 @@ async function createReleaseNotesFile() {
   try {
     const summaryData = JSON.parse(summaryDataJson);
 
-    console.log('Debug - Category value:', category);
-    console.log('Debug - Category type:', typeof category);
-    console.log('Debug - Category JSON stringified:', JSON.stringify(category));
-
     if (!summaryData) {
       console.log('No summary data available, cannot create file');
       return;
     }
 
     if (!category || category === 'null') {
+      console.log('Debug - Category value:', category);
+      console.log('Debug - Category type:', typeof category);
+      console.log(
+        'Debug - Category JSON stringified:',
+        JSON.stringify(category),
+      );
+
       console.log('No valid category available, cannot create file');
       return;
     }
@@ -66,6 +69,16 @@ ${summaryData.summary}
     const headOwner = pr.head.repo.owner.login;
     const headRepo = pr.head.repo.name;
 
+    if (pr.head.repo.fork) {
+      console.log(
+        `⚠️ Skipping file commit - PR is from a fork (${headOwner}/${headRepo})`,
+      );
+      console.log(
+        'Fork PRs require manual creation of release notes or the contributor can add them.',
+      );
+      return;
+    }
+
     console.log(
       `Committing to PR branch: ${headOwner}/${headRepo}:${prBranch}`,
     );
@@ -91,6 +104,7 @@ ${summaryData.summary}
     console.log(`✅ Successfully created release notes file: ${fileName}`);
   } catch (error) {
     console.log('Error creating release notes file:', error.message);
+    process.exit(1);
   }
 }
 
