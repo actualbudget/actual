@@ -41,21 +41,29 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
 
-      - name: Check if PR targets master branch
-        if: steps.check-first-comment.outputs.result == 'true' && steps.pr-details.outputs.result != 'null'
-        id: check-base-branch
+      - name: Check if PR qualifies for release notes
+        if: steps.pr-details.outputs.result != 'null' && steps.pr-details.outputs.result != ''
+        id: check-eligible
         run: |
-          BASE_BRANCH=$(echo '${{ steps.pr-details.outputs.result }}' | jq -r '.baseBranch')
+          BASE_BRANCH=$(printf '%s' "$PR_JSON" | jq -r '.baseBranch')
+          IS_DOCS_ONLY=$(printf '%s' "$PR_JSON" | jq -r '.isDocsOnly')
           echo "Base branch: $BASE_BRANCH"
-          if [ "$BASE_BRANCH" = "master" ]; then
-            echo "targets_master=true" >> $GITHUB_OUTPUT
-          else
-            echo "targets_master=false" >> $GITHUB_OUTPUT
+          echo "Is docs-only: $IS_DOCS_ONLY"
+
+          if [ "$BASE_BRANCH" != "master" ]; then
             echo "PR does not target master branch, skipping release notes generation"
+            echo "eligible=false" >> $GITHUB_OUTPUT
+          elif [ "$IS_DOCS_ONLY" = "true" ]; then
+            echo "PR only changes documentation, skipping release notes generation"
+            echo "eligible=false" >> $GITHUB_OUTPUT
+          else
+            echo "eligible=true" >> $GITHUB_OUTPUT
           fi
+        env:
+          PR_JSON: ${{ steps.pr-details.outputs.result }}
 
       - name: Check if release notes file already exists
-        if: steps.check-first-comment.outputs.result == 'true' && steps.pr-details.outputs.result != 'null' && steps.check-base-branch.outputs.targets_master == 'true'
+        if: steps.check-eligible.outputs.eligible == 'true'
         id: check-release-notes-exists
         run: node .github/actions/ai-generated-release-notes/check-release-notes-exists.js
         env:
@@ -65,7 +73,7 @@ jobs:
           PR_DETAILS: ${{ steps.pr-details.outputs.result }}
 
       - name: Generate summary with OpenAI
-        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false'
+        if: steps.check-release-notes-exists.outputs.result == 'false'
         id: generate-summary
         run: node .github/actions/ai-generated-release-notes/generate-summary.js
         env:
@@ -74,7 +82,7 @@ jobs:
           PR_DETAILS: ${{ steps.pr-details.outputs.result }}
 
       - name: Determine category with OpenAI
-        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null'
+        if: steps.generate-summary.outputs.result != 'null' && steps.generate-summary.outputs.result != ''
         id: determine-category
         run: node .github/actions/ai-generated-release-notes/determine-category.js
         env:
@@ -84,7 +92,7 @@ jobs:
           SUMMARY_DATA: ${{ steps.generate-summary.outputs.result }}
 
       - name: Create and commit release notes file via GitHub API
-        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
+        if: steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
         run: node .github/actions/ai-generated-release-notes/create-release-notes-file.js
         env:
           GITHUB_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
@@ -94,7 +102,7 @@ jobs:
           CATEGORY: ${{ steps.determine-category.outputs.result }}
 
       - name: Comment on PR
-        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
+        if: steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
         run: node .github/actions/ai-generated-release-notes/comment-on-pr.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

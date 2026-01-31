@@ -38,11 +38,28 @@ async function getPRDetails() {
     console.log('- PR Title:', pr.title);
     console.log('- Base Branch:', pr.base.ref);
 
+    // Fetch all changed files to detect docs-only PRs
+    const files = await octokit.paginate(octokit.rest.pulls.listFiles, {
+      owner,
+      repo: repoName,
+      pull_number: issueNumber,
+      per_page: 100,
+    });
+
+    const changedFiles = files.map(f => f.filename);
+    const isDocsOnly =
+      changedFiles.length > 0 &&
+      changedFiles.every(file => file.startsWith('packages/docs/'));
+
+    console.log('- Changed Files:', changedFiles.length);
+    console.log('- Is Docs Only:', isDocsOnly);
+
     const result = {
       number: pr.number,
       author: pr.user.login,
       title: pr.title,
       baseBranch: pr.base.ref,
+      isDocsOnly,
     };
 
     setOutput('result', JSON.stringify(result));
