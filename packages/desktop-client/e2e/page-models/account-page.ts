@@ -165,7 +165,7 @@ export class AccountPage {
    */
   async filterBy(field: string | RegExp) {
     await this.filterButton.click();
-    await this.filterSelectTooltip.getByRole('button', { name: field }).click();
+    await this.filterSelectTooltip.getByRole('button', { name: field, exact: true }).click();
 
     return new FilterTooltip(this.page.getByTestId('filters-menu-tooltip'));
   }
@@ -174,7 +174,7 @@ export class AccountPage {
    * Filter to a specific note
    */
   async filterByNote(note: string) {
-    const filterTooltip = await this.filterBy('Note');
+    const filterTooltip = await this.filterBy('Notes');
     await this.page.keyboard.type(note);
     await filterTooltip.applyButton.click();
   }
