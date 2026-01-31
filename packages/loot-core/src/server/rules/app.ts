@@ -76,6 +76,7 @@ export type RulesHandlers = {
   'rule-delete-all': typeof deleteAllRules;
   'rule-apply-actions': typeof applyRuleActions;
   'rule-add-payee-rename': typeof addRulePayeeRename;
+  'rule-move': typeof moveRule;
   'rules-get': typeof getRules;
   'rule-get': typeof getRule;
   'rules-run': typeof runRules;
@@ -91,6 +92,7 @@ app.method('rule-delete', mutator(undoable(deleteRule)));
 app.method('rule-delete-all', mutator(undoable(deleteAllRules)));
 app.method('rule-apply-actions', mutator(undoable(applyRuleActions)));
 app.method('rule-add-payee-rename', mutator(addRulePayeeRename));
+app.method('rule-move', mutator(undoable(moveRule)));
 app.method('rules-get', getRules);
 app.method('rule-get', getRule);
 app.method('rules-run', runRules);
@@ -169,6 +171,16 @@ async function addRulePayeeRename({
   to: string;
 }): Promise<string> {
   return rules.updatePayeeRenameRule(fromNames, to);
+}
+
+async function moveRule({
+  id,
+  targetId,
+}: {
+  id: RuleEntity['id'];
+  targetId: RuleEntity['id'] | null;
+}): Promise<void> {
+  await rules.moveRule(id, targetId);
 }
 
 async function getRule({

@@ -6,6 +6,7 @@ export type NewRuleEntity = {
   conditions: RuleConditionEntity[];
   actions: RuleActionEntity[];
   tombstone?: boolean;
+  sort_order?: number | null;
 };
 
 export type RuleEntity = {
