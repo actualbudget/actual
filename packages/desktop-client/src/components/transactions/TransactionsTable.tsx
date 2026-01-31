@@ -28,6 +28,7 @@ import {
   SvgArrowDown,
   SvgArrowUp,
   SvgCheveronDown,
+  SvgFlag,
 } from '@actual-app/components/icons/v1';
 import {
   SvgArrowsSynchronize,
@@ -43,6 +44,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { format as formatDate, parseISO } from 'date-fns';
 
+import { shortcodeToNative } from 'loot-core/shared/emoji';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { getStatusLabel } from 'loot-core/shared/schedules';
@@ -95,6 +97,7 @@ import {
   type StatusTypes,
 } from '@desktop-client/components/schedules/StatusBadge';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
+import { EmojiSelect } from '@desktop-client/components/select/EmojiSelect';
 import {
   Cell,
   CellButton,
@@ -227,6 +230,18 @@ const TransactionHeader = memo(
           icon={field === 'date' ? ascDesc : 'clickable'}
           onClick={() =>
             onSort('date', selectAscDesc(field, ascDesc, 'date', 'desc'))
+          }
+        />
+        <HeaderCell
+          value=""
+          width={45}
+          alignItems="center"
+          marginLeft={-5}
+          id="flag"
+          ariaLabel={t('Flag')}
+          icon={field === 'flag' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('flag', selectAscDesc(field, ascDesc, 'flag', 'asc'))
           }
         />
         {showAccount && (
@@ -427,6 +442,7 @@ type HeaderCellProps = {
   id: string;
   icon?: 'asc' | 'desc' | 'clickable';
   onClick?: () => void;
+  ariaLabel?: string;
 } & Pick<CSSProperties, 'width' | 'alignItems' | 'marginLeft' | 'marginRight'>;
 
 function HeaderCell({
@@ -438,6 +454,7 @@ function HeaderCell({
   marginRight,
   icon,
   onClick,
+  ariaLabel,
 }: HeaderCellProps) {
   const style = {
     whiteSpace: 'nowrap' as CSSProperties['whiteSpace'],
@@ -461,15 +478,68 @@ function HeaderCell({
       }}
       unexposedContent={({ value: cellValue }) =>
         onClick ? (
-          <Button variant="bare" onPress={onClick} style={style}>
-            <UnexposedCellContent value={cellValue} />
-            {icon === 'asc' && (
-              <SvgArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
-            )}
-            {icon === 'desc' && (
-              <SvgArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
+          <Button
+            variant="bare"
+            onPress={onClick}
+            style={style}
+            aria-label={ariaLabel}
+          >
+            {id === 'flag' ? (
+              <>
+                <SvgFlag
+                  style={{
+                    width: 14,
+                    height: 14,
+                    color: theme.tableHeaderText,
+                  }}
+                />
+                {icon === 'asc' && (
+                  <SvgArrowDown
+                    width={10}
+                    height={10}
+                    style={{ marginLeft: 5 }}
+                  />
+                )}
+                {icon === 'desc' && (
+                  <SvgArrowUp
+                    width={10}
+                    height={10}
+                    style={{ marginLeft: 5 }}
+                  />
+                )}
+              </>
+            ) : (
+              <>
+                <UnexposedCellContent value={cellValue} />
+                {icon === 'asc' && (
+                  <SvgArrowDown
+                    width={10}
+                    height={10}
+                    style={{ marginLeft: 5 }}
+                  />
+                )}
+                {icon === 'desc' && (
+                  <SvgArrowUp
+                    width={10}
+                    height={10}
+                    style={{ marginLeft: 5 }}
+                  />
+                )}
+              </>
             )}
           </Button>
+        ) : id === 'flag' ? (
+          <View
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <SvgFlag
+              style={{ width: 14, height: 14, color: theme.tableHeaderText }}
+            />
+          </View>
         ) : (
           <Text style={style}>{cellValue}</Text>
         )
@@ -1217,10 +1287,22 @@ const Transaction = memo(function Transaction({
 
       {isChild && (
         <Field
-          /* Checkmark blank placeholder for Child transaction */
+          /* Date blank placeholder for Child transaction */
           width={110}
           style={{
             width: 110,
+            backgroundColor: theme.tableRowBackgroundHover,
+            border: 0, // known z-order issue, bottom border for parent transaction hidden
+          }}
+        />
+      )}
+
+      {isChild && (
+        <Field
+          /* Flag blank placeholder for Child transaction */
+          width={45}
+          style={{
+            width: 45,
             backgroundColor: theme.tableRowBackgroundHover,
             border: 0, // known z-order issue, bottom border for parent transaction hidden
           }}
@@ -1234,6 +1316,18 @@ const Transaction = memo(function Transaction({
             flex: 1,
             backgroundColor: theme.tableRowBackgroundHover,
             border: 0,
+          }}
+        />
+      )}
+
+      {isChild && (
+        <Field
+          /* Spacing before checkmark for Child transaction */
+          width={20}
+          style={{
+            width: 20,
+            backgroundColor: theme.tableRowBackgroundHover,
+            border: 0, // known z-order issue, bottom border for parent transaction hidden
           }}
         />
       )}
@@ -1315,6 +1409,69 @@ const Transaction = memo(function Transaction({
               clearOnBlur
               onUpdate={onUpdate}
               onSelect={onSave}
+            />
+          )}
+        </CustomCell>
+      )}
+
+      {!isChild && (
+        <CustomCell
+          name="flag"
+          width={45}
+          textAlign="center"
+          exposed={focusedField === 'flag'}
+          value={transaction.flag || undefined}
+          valueStyle={{
+            fontSize: transaction.flag ? '18px' : '14px',
+            color: transaction.flag ? theme.tableText : theme.tableTextSubdued,
+            opacity: transaction.flag ? 1 : 0.5,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          onExpose={name => !isPreview && onEdit(id, name)}
+          onUpdate={value => {
+            onUpdate('flag', value);
+          }}
+          formatter={value => {
+            return shortcodeToNative(value);
+          }}
+          unexposedContent={({ value, formatter }) => {
+            const displayValue = value && formatter ? formatter(value) : null;
+            return (
+              <View
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: '100%',
+                  height: '100%',
+                }}
+              >
+                {displayValue ? (
+                  <span style={{ fontSize: '18px' }}>{displayValue}</span>
+                ) : (
+                  <SvgFlag
+                    style={{
+                      width: 14,
+                      height: 14,
+                      color: theme.tableTextSubdued,
+                      opacity: 1,
+                    }}
+                  />
+                )}
+              </View>
+            );
+          }}
+        >
+          {({ onBlur, onKeyDown, onSave, shouldSaveFromKey, inputStyle }) => (
+            <EmojiSelect
+              value={transaction.flag || null}
+              isOpen={focusedField === 'flag'}
+              shouldSaveFromKey={shouldSaveFromKey}
+              inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+              onSelect={value => {
+                onSave(value ?? '');
+              }}
             />
           )}
         </CustomCell>
@@ -2574,6 +2731,7 @@ export const TransactionTable = forwardRef(
       const fields = [
         'select',
         'date',
+        'flag',
         'account',
         'payee',
         'notes',
@@ -2592,6 +2750,7 @@ export const TransactionTable = forwardRef(
       const fields = [
         'select',
         'date',
+        'flag',
         'account',
         'payee',
         'notes',

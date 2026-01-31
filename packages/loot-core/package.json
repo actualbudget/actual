@@ -63,6 +63,7 @@
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts"
   },
   "dependencies": {
+    "@emoji-mart/data": "^1.2.1",
     "@jlongster/sql.js": "^1.6.7",
     "@reduxjs/toolkit": "^2.11.2",
     "@rschedule/core": "^1.5.0",

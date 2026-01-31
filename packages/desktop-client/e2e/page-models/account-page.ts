@@ -9,6 +9,7 @@ type TransactionEntry = {
   payee?: string;
   notes?: string;
   category?: string;
+  flag?: string;
 };
 
 export class AccountPage {
@@ -143,6 +144,7 @@ export class AccountPage {
       category: row.getByTestId('category'),
       debit: row.getByTestId('debit'),
       credit: row.getByTestId('credit'),
+      flag: row.getByTestId('flag'),
     };
   }
 
@@ -218,6 +220,18 @@ export class AccountPage {
       await this.selectInputText(accountInput);
       await accountInput.pressSequentially(transaction.account);
       await this.page.keyboard.press('Tab');
+    }
+
+    if (transaction.flag) {
+      const flagCell = transactionRow.getByTestId('flag');
+      await flagCell.click();
+      const popover = this.page.getByTestId('emoji-select-popover');
+      await popover.waitFor({ state: 'visible', timeout: 2000 });
+      const flagInput = flagCell.getByRole('textbox');
+      await this.selectInputText(flagInput);
+      await flagInput.pressSequentially(transaction.flag);
+      await flagInput.press('Enter');
+      await popover.waitFor({ state: 'hidden', timeout: 2000 });
     }
 
     if (transaction.payee) {

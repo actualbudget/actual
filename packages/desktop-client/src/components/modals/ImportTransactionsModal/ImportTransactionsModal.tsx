@@ -18,6 +18,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { type ParseFileOptions } from 'loot-core/server/transactions/import/parse-file';
+import { validateNormalizeShortcode } from 'loot-core/shared/emoji';
 import { amountToInteger } from 'loot-core/shared/util';
 
 import { DateFormatSelect } from './DateFormatSelect';
@@ -652,12 +653,18 @@ export function ImportTransactionsModal({
         finalTransaction.forceAddTransaction = true;
       }
 
+      let flag = finalTransaction.flag;
+      if (flag && typeof flag === 'string') {
+        flag = validateNormalizeShortcode(flag);
+      }
+
       finalTransactions.push({
         ...finalTransaction,
         date,
         amount: amountToInteger(amount),
         cleared: clearOnImport,
         notes: importNotes ? finalTransaction.notes : null,
+        flag: flag || null,
       });
     }
 
