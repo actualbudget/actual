@@ -55,68 +55,53 @@ function CurrencyTotalsRow({
   const budgeted = typeof totalBudgeted === 'number' ? totalBudgeted : 0;
   const buffered = typeof forNextMonth === 'number' ? forNextMonth : 0;
 
+  // Render grid cells - 2 columns: value (right), label (left)
+  // Currency code is included with the first value
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        lineHeight: 1.5,
-        justifyContent: 'center',
-        ...styles.smallText,
-      }}
-    >
-      <Text
-        style={{
-          fontSize: 11,
-          color: theme.pageTextSubdued,
-          marginRight: 6,
-          minWidth: 30,
-          textAlign: 'right',
-        }}
-      >
-        {currencyCode}:
-      </Text>
-      <View
-        style={{
-          textAlign: 'right',
-          marginRight: 10,
-          minWidth: 50,
-        }}
-      >
-        <Block style={{ fontWeight: 600 }}>
-          {format(available, 'financial', currencyCode)}
-        </Block>
-        <Block style={{ fontWeight: 600 }}>
-          {overspent > 0
-            ? '+' + format(overspent, 'financial', currencyCode)
-            : '-' + format(Math.abs(overspent), 'financial', currencyCode)}
-        </Block>
-        <Block style={{ fontWeight: 600 }}>
-          {budgeted > 0
-            ? '+' + format(budgeted, 'financial', currencyCode)
-            : '-' + format(Math.abs(budgeted), 'financial', currencyCode)}
-        </Block>
-        <Block style={{ fontWeight: 600 }}>
-          {buffered >= 0
-            ? '-' + format(Math.abs(buffered), 'financial', currencyCode)
-            : '+' + format(Math.abs(buffered), 'financial', currencyCode)}
-        </Block>
-      </View>
+    <>
+      <Block style={{ fontWeight: 600, textAlign: 'right' }}>
+        <Text
+          style={{
+            fontSize: 11,
+            color: theme.pageTextSubdued,
+            marginRight: 4,
+          }}
+        >
+          {currencyCode}:
+        </Text>
+        {format(available, 'financial', currencyCode)}
+      </Block>
+      <Block>
+        <Trans>Available funds</Trans>
+      </Block>
 
-      <View>
-        <Block>
-          <Trans>Available funds</Trans>
-        </Block>
-        <Block>
-          <Trans>Overspent in {{ prevMonthName }}</Trans>
-        </Block>
-        <Block>
-          <Trans>Budgeted</Trans>
-        </Block>
-        <Block>
-          <Trans>For next month</Trans>
-        </Block>
-      </View>
-    </View>
+      <Block style={{ fontWeight: 600, textAlign: 'right' }}>
+        {overspent > 0
+          ? '+' + format(overspent, 'financial', currencyCode)
+          : '-' + format(Math.abs(overspent), 'financial', currencyCode)}
+      </Block>
+      <Block>
+        <Trans>Overspent in {{ prevMonthName }}</Trans>
+      </Block>
+
+      <Block style={{ fontWeight: 600, textAlign: 'right' }}>
+        {budgeted > 0
+          ? '+' + format(budgeted, 'financial', currencyCode)
+          : '-' + format(Math.abs(budgeted), 'financial', currencyCode)}
+      </Block>
+      <Block>
+        <Trans>Budgeted</Trans>
+      </Block>
+
+      <Block style={{ fontWeight: 600, textAlign: 'right' }}>
+        {buffered >= 0
+          ? '-' + format(Math.abs(buffered), 'financial', currencyCode)
+          : '+' + format(Math.abs(buffered), 'financial', currencyCode)}
+      </Block>
+      <Block>
+        <Trans>For next month</Trans>
+      </Block>
+    </>
   );
 }
 
@@ -133,7 +118,17 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
 
   if (showMultiCurrency) {
     return (
-      <View style={{ gap: 8, ...style }}>
+      <View
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'auto auto',
+          gap: '0 8px',
+          alignItems: 'baseline',
+          lineHeight: 1.5,
+          ...styles.smallText,
+          ...style,
+        }}
+      >
         {currencies.map(currencyCode => (
           <CurrencyTotalsRow
             key={currencyCode}

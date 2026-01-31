@@ -9,6 +9,9 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+import { getCurrency } from 'loot-core/shared/currencies';
+import { getNumberFormat } from 'loot-core/shared/util';
+
 import { TotalsList } from './TotalsList';
 
 import {
@@ -22,6 +25,35 @@ import { useOnBudgetCurrencies } from '@desktop-client/hooks/useOnBudgetCurrenci
 import { useDynamicSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
+
+/**
+ * Splits a formatted currency string into parts for decimal-aligned display.
+ * Returns [wholePart, decimalSeparator, fractionPart] or [wholePart, '', ''] for currencies without decimals.
+ */
+function splitFormattedAmount(
+  formatted: string,
+  currencyCode: string,
+): [string, string, string] {
+  const currency = getCurrency(currencyCode);
+  const { decimalSeparator } = getNumberFormat({ format: currency.numberFormat });
+
+  // For currencies with no decimal places (like JPY), return just the whole part
+  if (currency.decimalPlaces === 0) {
+    return [formatted, '', ''];
+  }
+
+  // Find the last occurrence of the decimal separator
+  const sepIndex = formatted.lastIndexOf(decimalSeparator);
+  if (sepIndex === -1) {
+    return [formatted, '', ''];
+  }
+
+  return [
+    formatted.slice(0, sepIndex),
+    decimalSeparator,
+    formatted.slice(sepIndex + 1),
+  ];
+}
 
 type ToBudgetAmountProps = {
   prevMonthName: string;
@@ -53,17 +85,32 @@ function ToBudgetCurrencyAmount({
   const format = useFormat();
   const num = typeof sheetValue === 'number' ? sheetValue : 0;
   const isNegative = num < 0;
+  const formatted = format(num, 'financial', currencyCode);
+  const [wholePart, separator, fractionPart] = splitFormattedAmount(
+    formatted,
+    currencyCode,
+  );
 
+  const amountColor = isNegative ? theme.errorText : theme.pageTextPositive;
+  const hoverBorderColor = isNegative
+    ? theme.errorBorder
+    : theme.pageTextPositive;
+
+  // Use display: contents so children participate in parent grid
   return (
-    <View
-      data-testid={`to-budget-${currencyCode}`}
-      style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}
-    >
-      <Text style={{ fontSize: 11, color: theme.pageTextSubdued }}>
+    <>
+      <Text
+        data-testid={`to-budget-${currencyCode}`}
+        style={{
+          fontSize: 11,
+          color: theme.pageTextSubdued,
+          textAlign: 'left',
+        }}
+      >
         {currencyCode}:
       </Text>
       <PrivacyFilter>
-        <Block
+        <View
           data-testid={`to-budget-${currencyCode}-amount`}
           onClick={onClick}
           onContextMenu={onContextMenu}
@@ -73,21 +120,24 @@ function ToBudgetCurrencyAmount({
               fontWeight: 400,
               userSelect: 'none',
               cursor: 'pointer',
-              color: isNegative ? theme.errorText : theme.pageTextPositive,
+              color: amountColor,
               borderBottom: '1px solid transparent',
               ':hover': {
-                borderColor: isNegative
-                  ? theme.errorBorder
-                  : theme.pageTextPositive,
+                borderColor: hoverBorderColor,
               },
             },
             amountStyle,
           ])}
+          style={{
+            display: 'contents',
+          }}
         >
-          {format(num, 'financial', currencyCode)}
-        </Block>
+          <Text style={{ textAlign: 'right' }}>{wholePart}</Text>
+          <Text style={{ textAlign: 'center' }}>{separator}</Text>
+          <Text style={{ textAlign: 'left' }}>{fractionPart}</Text>
+        </View>
       </PrivacyFilter>
-    </View>
+    </>
   );
 }
 
@@ -128,7 +178,15 @@ export function ToBudgetAmount({
     return (
       <View style={{ alignItems: 'center', ...styles.tnum, ...style }}>
         <Block>{t('To Budget:')}</Block>
-        <View style={{ gap: 2, marginTop: 4 }}>
+        <View
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'auto auto auto auto',
+            gap: '2px 0',
+            marginTop: 4,
+            alignItems: 'baseline',
+          }}
+        >
           {currencies.map(currencyCode => (
             <ToBudgetCurrencyAmount
               key={currencyCode}
