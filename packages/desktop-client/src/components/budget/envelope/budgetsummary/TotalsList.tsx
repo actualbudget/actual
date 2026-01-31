@@ -9,6 +9,9 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
+import { getCurrency } from 'loot-core/shared/currencies';
+import { getNumberFormat } from 'loot-core/shared/util';
+
 import { EnvelopeCellValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
 import { CellValueText } from '@desktop-client/components/spreadsheet/CellValue';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -21,6 +24,37 @@ type TotalsListProps = {
   prevMonthName: string;
   style?: CSSProperties;
 };
+
+/**
+ * Splits a formatted currency string into parts for decimal-aligned display.
+ * Returns [wholePart, decimalSeparator, fractionPart] or [wholePart, '', ''] for currencies without decimals.
+ */
+function splitFormattedAmount(
+  formatted: string,
+  currencyCode: string,
+): [string, string, string] {
+  const currency = getCurrency(currencyCode);
+  const { decimalSeparator } = getNumberFormat({
+    format: currency.numberFormat,
+  });
+
+  // For currencies with no decimal places (like JPY), return just the whole part
+  if (currency.decimalPlaces === 0) {
+    return [formatted, '', ''];
+  }
+
+  // Find the last occurrence of the decimal separator
+  const sepIndex = formatted.lastIndexOf(decimalSeparator);
+  if (sepIndex === -1) {
+    return [formatted, '', ''];
+  }
+
+  return [
+    formatted.slice(0, sepIndex),
+    decimalSeparator,
+    formatted.slice(sepIndex + 1),
+  ];
+}
 
 type CurrencyTotalsRowProps = {
   currencyCode: string;
@@ -67,9 +101,28 @@ function CurrencyTotalsRow({
     (buffered >= 0 ? '-' : '+') +
     format(Math.abs(buffered), 'financial', currencyCode);
 
-  const valueStyle = { fontWeight: 600, textAlign: 'right' } as const;
+  // Split for decimal alignment
+  const [availWhole, availSep, availFrac] = splitFormattedAmount(
+    availableFormatted,
+    currencyCode,
+  );
+  const [overspentWhole, overspentSep, overspentFrac] = splitFormattedAmount(
+    overspentFormatted,
+    currencyCode,
+  );
+  const [budgetedWhole, budgetedSep, budgetedFrac] = splitFormattedAmount(
+    budgetedFormatted,
+    currencyCode,
+  );
+  const [bufferedWhole, bufferedSep, bufferedFrac] = splitFormattedAmount(
+    bufferedFormatted,
+    currencyCode,
+  );
 
-  // Render grid cells - 3 columns: currency, value, label
+  const valueStyle = { fontWeight: 600, textAlign: 'right' } as const;
+  const fractionStyle = { fontWeight: 600, textAlign: 'left' } as const;
+
+  // Render grid cells - 5 columns: currency, whole, separator, fraction, label
   return (
     <>
       {/* Row 1: Available funds */}
@@ -82,28 +135,36 @@ function CurrencyTotalsRow({
       >
         {currencyCode}:
       </Text>
-      <Text style={valueStyle}>{availableFormatted}</Text>
+      <Text style={valueStyle}>{availWhole}</Text>
+      <Text style={valueStyle}>{availSep}</Text>
+      <Text style={fractionStyle}>{availFrac}</Text>
       <Block>
         <Trans>Available funds</Trans>
       </Block>
 
       {/* Row 2: Overspent */}
       <Text />
-      <Text style={valueStyle}>{overspentFormatted}</Text>
+      <Text style={valueStyle}>{overspentWhole}</Text>
+      <Text style={valueStyle}>{overspentSep}</Text>
+      <Text style={fractionStyle}>{overspentFrac}</Text>
       <Block>
         <Trans>Overspent in {{ prevMonthName }}</Trans>
       </Block>
 
       {/* Row 3: Budgeted */}
       <Text />
-      <Text style={valueStyle}>{budgetedFormatted}</Text>
+      <Text style={valueStyle}>{budgetedWhole}</Text>
+      <Text style={valueStyle}>{budgetedSep}</Text>
+      <Text style={fractionStyle}>{budgetedFrac}</Text>
       <Block>
         <Trans>Budgeted</Trans>
       </Block>
 
       {/* Row 4: For next month */}
       <Text />
-      <Text style={valueStyle}>{bufferedFormatted}</Text>
+      <Text style={valueStyle}>{bufferedWhole}</Text>
+      <Text style={valueStyle}>{bufferedSep}</Text>
+      <Text style={fractionStyle}>{bufferedFrac}</Text>
       <Block>
         <Trans>For next month</Trans>
       </Block>
@@ -128,8 +189,8 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
         <View
           style={{
             display: 'grid',
-            gridTemplateColumns: 'auto auto auto',
-            gap: '0 8px',
+            gridTemplateColumns: 'auto auto auto auto auto',
+            gap: '0 2px',
             alignItems: 'baseline',
             lineHeight: 1.5,
             ...styles.smallText,
