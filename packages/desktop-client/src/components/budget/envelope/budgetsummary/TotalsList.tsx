@@ -120,7 +120,11 @@ function CurrencyTotalsRow({
   );
 
   const valueStyle = { fontWeight: 600, textAlign: 'right' } as const;
-  const fractionStyle = { fontWeight: 600, textAlign: 'left' } as const;
+  const fractionStyle = {
+    fontWeight: 600,
+    textAlign: 'left',
+    marginRight: 8,
+  } as const;
 
   // Render grid cells - 5 columns: currency, whole, separator, fraction, label
   return (
@@ -131,6 +135,7 @@ function CurrencyTotalsRow({
           fontSize: 11,
           color: theme.pageTextSubdued,
           textAlign: 'right',
+          marginRight: 4,
         }}
       >
         {currencyCode}:
@@ -190,7 +195,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           style={{
             display: 'grid',
             gridTemplateColumns: 'auto auto auto auto auto',
-            gap: '0 2px',
+            gap: '0 0',
             alignItems: 'baseline',
             lineHeight: 1.5,
             ...styles.smallText,
