@@ -92,49 +92,131 @@ const cellStyle: CSSProperties = {
   fontWeight: 600,
 };
 
+type BudgetTotalsCurrencyRowProps = {
+  currencyCode: string;
+};
+
+function BudgetTotalsCurrencyRow({ currencyCode }: BudgetTotalsCurrencyRowProps) {
+  const format = useFormat();
+
+  const budgetedValue = useDynamicSheetValue(
+    envelopeBudget.totalBudgetedByCurrency(currencyCode),
+    0,
+  );
+  const spentValue = useDynamicSheetValue(
+    envelopeBudget.totalSpentByCurrency(currencyCode),
+    0,
+  );
+  const balanceValue = useDynamicSheetValue(
+    envelopeBudget.totalBalanceByCurrency(currencyCode),
+    0,
+  );
+
+  return (
+    <View style={{ flex: 1, flexDirection: 'row' }}>
+      <View style={headerLabelStyle}>
+        <Text style={cellStyle}>
+          {format(
+            typeof budgetedValue === 'number' ? -budgetedValue : 0,
+            'financial',
+            currencyCode,
+          )}
+        </Text>
+      </View>
+      <View style={headerLabelStyle}>
+        <Text style={cellStyle}>
+          {format(
+            typeof spentValue === 'number' ? spentValue : 0,
+            'financial',
+            currencyCode,
+          )}
+        </Text>
+      </View>
+      <View style={headerLabelStyle}>
+        <Text style={cellStyle}>
+          {format(
+            typeof balanceValue === 'number' ? balanceValue : 0,
+            'financial',
+            currencyCode,
+          )}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
+  const currencies = useOnBudgetCurrencies();
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  const showMultiCurrency =
+    enableMultiCurrencyOnBudget === 'true' && currencies.length > 1;
+
   return (
     <View
       style={{
         flex: 1,
-        flexDirection: 'row',
+        flexDirection: 'column',
         marginRight: styles.monthRightPadding,
         paddingTop: 10,
         paddingBottom: 10,
       }}
     >
-      <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>
-          <Trans>Budgeted</Trans>
-        </Text>
-        <EnvelopeCellValue
-          binding={envelopeBudget.totalBudgeted}
-          type="financial"
-        >
-          {props => (
-            <CellValueText {...props} value={-props.value} style={cellStyle} />
-          )}
-        </EnvelopeCellValue>
+      {/* Header row with labels */}
+      <View style={{ flex: 1, flexDirection: 'row' }}>
+        <View style={headerLabelStyle}>
+          <Text style={{ color: theme.tableHeaderText }}>
+            <Trans>Budgeted</Trans>
+          </Text>
+        </View>
+        <View style={headerLabelStyle}>
+          <Text style={{ color: theme.tableHeaderText }}>
+            <Trans>Spent</Trans>
+          </Text>
+        </View>
+        <View style={headerLabelStyle}>
+          <Text style={{ color: theme.tableHeaderText }}>
+            <Trans>Balance</Trans>
+          </Text>
+        </View>
       </View>
-      <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>
-          <Trans>Spent</Trans>
-        </Text>
-        <EnvelopeCellValue binding={envelopeBudget.totalSpent} type="financial">
-          {props => <CellValueText {...props} style={cellStyle} />}
-        </EnvelopeCellValue>
-      </View>
-      <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>
-          <Trans>Balance</Trans>
-        </Text>
-        <EnvelopeCellValue
-          binding={envelopeBudget.totalBalance}
-          type="financial"
-        >
-          {props => <CellValueText {...props} style={cellStyle} />}
-        </EnvelopeCellValue>
-      </View>
+
+      {/* Show per-currency totals when multi-currency is enabled */}
+      {showMultiCurrency ? (
+        currencies.map(currencyCode => (
+          <BudgetTotalsCurrencyRow
+            key={currencyCode}
+            currencyCode={currencyCode}
+          />
+        ))
+      ) : (
+        <View style={{ flex: 1, flexDirection: 'row' }}>
+          <View style={headerLabelStyle}>
+            <EnvelopeCellValue
+              binding={envelopeBudget.totalBudgeted}
+              type="financial"
+            >
+              {props => (
+                <CellValueText {...props} value={-props.value} style={cellStyle} />
+              )}
+            </EnvelopeCellValue>
+          </View>
+          <View style={headerLabelStyle}>
+            <EnvelopeCellValue binding={envelopeBudget.totalSpent} type="financial">
+              {props => <CellValueText {...props} style={cellStyle} />}
+            </EnvelopeCellValue>
+          </View>
+          <View style={headerLabelStyle}>
+            <EnvelopeCellValue
+              binding={envelopeBudget.totalBalance}
+              type="financial"
+            >
+              {props => <CellValueText {...props} style={cellStyle} />}
+            </EnvelopeCellValue>
+          </View>
+        </View>
+      )}
     </View>
   );
 });

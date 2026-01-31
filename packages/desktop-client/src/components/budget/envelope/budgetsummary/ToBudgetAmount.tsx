@@ -55,12 +55,16 @@ function ToBudgetCurrencyAmount({
   const isNegative = num < 0;
 
   return (
-    <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
+    <View
+      data-testid={`to-budget-${currencyCode}`}
+      style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}
+    >
       <Text style={{ fontSize: 11, color: theme.pageTextSubdued }}>
         {currencyCode}:
       </Text>
       <PrivacyFilter>
         <Block
+          data-testid={`to-budget-${currencyCode}-amount`}
           onClick={onClick}
           onContextMenu={onContextMenu}
           className={css([
