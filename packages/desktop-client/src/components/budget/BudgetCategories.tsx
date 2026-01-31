@@ -241,7 +241,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
       <View
         style={{
           marginBottom: 10,
-          backgroundColor: theme.tableBackground,
+          backgroundColor: theme.budgetCurrentMonth, // match budget colors, not generic table colors.
           overflow: 'hidden',
           boxShadow: styles.cardShadow,
           borderRadius: '0 0 4px 4px',
@@ -254,7 +254,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
             case 'new-group':
               content = (
                 <Row
-                  style={{ backgroundColor: theme.tableRowHeaderBackground }}
+                  style={{ backgroundColor: theme.budgetHeaderCurrentMonth }}
                 >
                   <SidebarGroup
                     group={{ id: 'new', name: '' }}
@@ -331,7 +331,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                 <View
                   style={{
                     height: styles.incomeHeaderHeight,
-                    backgroundColor: theme.tableBackground,
+                    backgroundColor: theme.budgetCurrentMonth,
                   }}
                 >
                   <IncomeHeader onShowNewGroup={onShowNewGroup} />
@@ -392,7 +392,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   dragState
                     ? {}
                     : {
-                        ':hover': { backgroundColor: theme.tableBackground },
+                        ':hover': { backgroundColor: theme.budgetCurrentMonth },
                       }
                 }
               >

@@ -112,7 +112,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 width={13}
                 height={13}
                 // The margin is to make it the exact same size as the dots button
-                style={{ color: theme.pageTextSubdued, margin: 1 }}
+                style={{ color: theme.pageTextLight, margin: 1 }}
               />
             </Button>
           </View>
@@ -238,7 +238,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
             style={{
               alignSelf: 'center',
               alignItems: 'flex-start',
-              backgroundColor: theme.tableRowHeaderBackground,
+              backgroundColor: theme.budgetHeaderCurrentMonth,
               borderRadius: 4,
               padding: '10px 15px',
               marginTop: 13,
@@ -255,7 +255,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               alignItems: 'center',
               padding: '10px 20px',
               justifyContent: 'space-between',
-              backgroundColor: theme.tableRowHeaderBackground,
+              backgroundColor: theme.budgetHeaderCurrentMonth,
               borderTop: '1px solid ' + theme.tableBorder,
             }}
           >

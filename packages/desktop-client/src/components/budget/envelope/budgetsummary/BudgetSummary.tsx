@@ -116,7 +116,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
                 width={13}
                 height={13}
                 // The margin is to make it the exact same size as the dots button
-                style={{ color: theme.tableTextLight, margin: 1 }}
+                style={{ color: theme.pageTextLight, margin: 1 }}
               />
             </Button>
           </View>
@@ -151,7 +151,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
                 width={15}
                 height={15}
                 tooltipPosition="bottom right"
-                defaultColor={theme.tableTextLight}
+                defaultColor={theme.pageTextLight}
               />
             </View>
             <View style={{ userSelect: 'none', marginLeft: 2 }}>
@@ -254,7 +254,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
               alignItems: 'center',
               padding: '10px 20px',
               justifyContent: 'space-between',
-              backgroundColor: theme.tableBackground,
+              backgroundColor: theme.budgetCurrentMonth,
               borderTop: '1px solid ' + theme.tableBorder,
             }}
           >
@@ -272,7 +272,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
               style={{
                 padding: '5px 0',
                 marginTop: 17,
-                backgroundColor: theme.tableRowHeaderBackground,
+                backgroundColor: theme.budgetHeaderCurrentMonth,
                 borderTopWidth: 1,
                 borderBottomWidth: 1,
                 borderColor: theme.tableBorder,

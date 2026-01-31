@@ -166,7 +166,7 @@ export const MonthPicker = ({
                 }),
                 ...styles.smallText,
                 ...(selected && {
-                  backgroundColor: theme.tableBorderHover,
+                  backgroundColor: theme.buttonPrimaryBackground,
                   color: theme.buttonPrimaryText,
                 }),
                 ...((hovered || selected) && {
@@ -195,7 +195,7 @@ export const MonthPicker = ({
                   }),
                 ...(hovered &&
                   selected && {
-                    backgroundColor: theme.tableBorderHover,
+                    backgroundColor: theme.buttonPrimaryBackground,
                   }),
                 ...((idx === firstSelectedIndex ||
                   (idx === hoverId && !selected)) && {
