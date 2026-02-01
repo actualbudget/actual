@@ -42,7 +42,7 @@ export function Value<T>({
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const payees = usePayees();
-  const { list: categories } = useCategories();
+  const { grouped: categoryGroups, list: categories } = useCategories();
   const accounts = useAccounts();
   const valueStyle = {
     color: theme.pageTextPositive,
@@ -59,7 +59,9 @@ export function Value<T>({
         ? categories
         : field === 'account'
           ? accounts
-          : []);
+          : field === 'category_group'
+            ? categoryGroups
+            : []);
 
   const [expanded, setExpanded] = useState(false);
 
@@ -97,6 +99,7 @@ export function Value<T>({
           return value;
         case 'payee':
         case 'category':
+        case 'category_group':
         case 'account':
         case 'rule':
           if (valueIsRaw) {

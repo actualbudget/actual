@@ -66,6 +66,7 @@ const filterFields = [
   'payee',
   'notes',
   'category',
+  'category_group',
   'amount',
   'cleared',
   'reconciled',
