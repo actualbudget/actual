@@ -7,6 +7,7 @@ import { groupById } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type CategoryEntity,
+  type SyncServerAkahuAccount,
   type SyncServerGoCardlessAccount,
   type SyncServerPluggyAiAccount,
   type SyncServerSimpleFinAccount,
@@ -304,6 +305,28 @@ export const linkAccountPluggyAi = createAppAsyncThunk(
     { dispatch },
   ) => {
     await send('pluggyai-accounts-link', {
+      externalAccount,
+      upgradingId,
+      offBudget,
+    });
+    dispatch(markPayeesDirty());
+    dispatch(markAccountsDirty());
+  },
+);
+
+type LinkAccountAkahuPayload = {
+  externalAccount: SyncServerAkahuAccount;
+  upgradingId?: AccountEntity['id'] | undefined;
+  offBudget?: boolean | undefined;
+};
+
+export const linkAccountAkahu = createAppAsyncThunk(
+  `${sliceName}/linkAccountAkahu`,
+  async (
+    { externalAccount, upgradingId, offBudget }: LinkAccountAkahuPayload,
+    { dispatch },
+  ) => {
+    await send('akahu-accounts-link', {
       externalAccount,
       upgradingId,
       offBudget,

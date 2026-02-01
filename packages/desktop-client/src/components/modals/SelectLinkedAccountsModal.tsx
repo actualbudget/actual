@@ -12,6 +12,7 @@ import { View } from '@actual-app/components/view';
 
 import {
   type AccountEntity,
+  type SyncServerAkahuAccount,
   type SyncServerGoCardlessAccount,
   type SyncServerPluggyAiAccount,
   type SyncServerSimpleFinAccount,
@@ -19,6 +20,7 @@ import {
 
 import {
   linkAccount,
+  linkAccountAkahu,
   linkAccountPluggyAi,
   linkAccountSimpleFin,
   unlinkAccount,
@@ -76,6 +78,11 @@ export type SelectLinkedAccountsModalProps =
       requisitionId?: undefined;
       externalAccounts: SyncServerPluggyAiAccount[];
       syncSource: 'pluggyai';
+    }
+  | {
+      requisitionId?: undefined;
+      externalAccounts: SyncServerAkahuAccount[];
+      syncSource: 'akahu';
     };
 
 export function SelectLinkedAccountsModal({
@@ -101,6 +108,11 @@ export function SelectLinkedAccountsModal({
           return {
             syncSource: 'pluggyai',
             externalAccounts: toSort as SyncServerPluggyAiAccount[],
+          };
+        case 'akahu':
+          return {
+            syncSource: 'akahu',
+            externalAccounts: toSort as SyncServerAkahuAccount[],
           };
         case 'goCardless':
           return {
@@ -158,7 +170,22 @@ export function SelectLinkedAccountsModal({
         }
 
         // Finally link the matched account
-        if (propsWithSortedExternalAccounts.syncSource === 'simpleFin') {
+        if (propsWithSortedExternalAccounts.syncSource === 'akahu') {
+          dispatch(
+            linkAccountAkahu({
+              externalAccount:
+                propsWithSortedExternalAccounts.externalAccounts[
+                  externalAccountIndex
+                ],
+              upgradingId:
+                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+                chosenLocalAccountId !== addOffBudgetAccountOption.id
+                  ? chosenLocalAccountId
+                  : undefined,
+              offBudget,
+            }),
+          );
+        } else if (propsWithSortedExternalAccounts.syncSource === 'simpleFin') {
           dispatch(
             linkAccountSimpleFin({
               externalAccount:
@@ -219,7 +246,8 @@ export function SelectLinkedAccountsModal({
     externalAccount:
       | SyncServerGoCardlessAccount
       | SyncServerSimpleFinAccount
-      | SyncServerPluggyAiAccount,
+      | SyncServerPluggyAiAccount
+      | SyncServerAkahuAccount,
     localAccountId: string | null | undefined,
   ) {
     setChosenAccounts(accounts => {
@@ -405,7 +433,8 @@ export function SelectLinkedAccountsModal({
 type ExternalAccount =
   | SyncServerGoCardlessAccount
   | SyncServerSimpleFinAccount
-  | SyncServerPluggyAiAccount;
+  | SyncServerPluggyAiAccount
+  | SyncServerAkahuAccount;
 
 type SharedAccountRowProps = {
   externalAccount: ExternalAccount;
