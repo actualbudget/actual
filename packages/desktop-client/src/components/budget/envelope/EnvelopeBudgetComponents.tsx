@@ -86,6 +86,8 @@ const cellStyle: CSSProperties = {
   fontWeight: 600,
 };
 
+const currentMonth = monthUtils.currentMonth();
+
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   return (
     <View
@@ -95,7 +97,9 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         marginRight: styles.monthRightPadding,
         paddingTop: 10,
         paddingBottom: 10,
-        backgroundColor: theme.budgetCurrentMonth,
+        backgroundColor: monthUtils.isCurrentMonth(currentMonth)
+          ? theme.budgetCurrentMonth
+          : theme.budgetOtherMonth,
       }}
     >
       <View style={headerLabelStyle}>
@@ -135,13 +139,16 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
 });
 
 export function IncomeHeaderMonth() {
+  const currentMonth = monthUtils.currentMonth();
   return (
     <Row
       style={{
         color: theme.tableHeaderText,
         alignItems: 'center',
         paddingRight: 10,
-        backgroundColor: theme.budgetCurrentMonth,
+        backgroundColor: monthUtils.isCurrentMonth(currentMonth)
+          ? theme.budgetCurrentMonth
+          : theme.budgetOtherMonth,
       }}
     >
       <View style={{ flex: 1, textAlign: 'right' }}>
