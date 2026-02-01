@@ -86,7 +86,10 @@ import {
 import { TransactionMenu } from './TransactionMenu';
 
 import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
-import { getCategoriesById } from '@desktop-client/budget/budgetSlice';
+import {
+  getCategoriesById,
+  getGroupByCategoryId,
+} from '@desktop-client/budget/budgetSlice';
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
@@ -264,6 +267,16 @@ const TransactionHeader = memo(
             onSort('notes', selectAscDesc(field, ascDesc, 'notes', 'asc'))
           }
         />
+        {showCategory && (
+          <HeaderCell
+            value={t('Group')}
+            width="flex"
+            alignItems="flex"
+            marginLeft={-5}
+            id="group"
+            icon={field === 'group' ? ascDesc : 'clickable'}
+          />
+        )}
         {showCategory && (
           <HeaderCell
             value={t('Category')}
@@ -1406,6 +1419,14 @@ const Transaction = memo(function Transaction({
           value: notes || '',
           onUpdate: onUpdate.bind(null, 'notes'),
         }}
+      />
+
+      <Cell
+        name="group"
+        width="flex"
+        value={
+          getGroupByCategoryId(categoryGroups)[categoryId ?? '']?.name ?? ''
+        }
       />
 
       {(isPreview && !isChild) || isParent ? (

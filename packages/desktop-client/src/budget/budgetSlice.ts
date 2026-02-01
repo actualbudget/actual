@@ -601,6 +601,19 @@ export const applyBudgetAction = createAppAsyncThunk(
   },
 );
 
+export const getGroupByCategoryId = memoizeOne(
+  (categoryGroups: CategoryGroupEntity[] | null | undefined) => {
+    const res: { [id: CategoryEntity['id']]: CategoryGroupEntity } = {};
+    categoryGroups?.forEach(group => {
+      group.categories?.forEach(cat => {
+        res[cat.id] = group;
+      });
+    });
+
+    return res;
+  },
+);
+
 export const getCategoriesById = memoizeOne(
   (categoryGroups: CategoryGroupEntity[] | null | undefined) => {
     const res: { [id: CategoryEntity['id']]: CategoryEntity } = {};
