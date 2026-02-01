@@ -1,6 +1,4 @@
 // @ts-strict-ignore
-import { type ImportTransactionsOpts } from '@actual-app/api';
-
 import type { ImportTransactionsResult } from '../server/accounts/app';
 import type {
   APIAccountEntity,
@@ -21,6 +19,11 @@ import type {
   ScheduleEntity,
   TransactionEntity,
 } from './models';
+
+export type ImportTransactionsOpts = {
+  defaultCleared?: boolean;
+  dryRun?: boolean;
+};
 
 export type ApiHandlers = {
   'api/batch-budget-start': () => Promise<void>;
