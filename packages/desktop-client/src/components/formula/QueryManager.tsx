@@ -36,11 +36,11 @@ import {
   validateStart,
 } from '@desktop-client/components/reports/reportRanges';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
-import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type QueryConfig = {
   conditions?: RuleConditionEntity[];
