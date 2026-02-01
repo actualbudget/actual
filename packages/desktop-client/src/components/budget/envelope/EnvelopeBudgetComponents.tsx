@@ -86,12 +86,7 @@ const cellStyle: CSSProperties = {
   fontWeight: 600,
 };
 
-type BudgetTotalsMonthProps = {
-  month: string;
-};
-export const BudgetTotalsMonth = memo(function BudgetTotalsMonth({
-  month,
-}: BudgetTotalsMonthProps) {
+export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   return (
     <View
       style={{
@@ -100,9 +95,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth({
         marginRight: styles.monthRightPadding,
         paddingTop: 10,
         paddingBottom: 10,
-        backgroundColor: monthUtils.isCurrentMonth(month)
-          ? theme.budgetHeaderCurrentMonth
-          : theme.budgetHeaderOtherMonth,
+        backgroundColor: theme.budgetCurrentMonth
       }}
     >
       <View style={headerLabelStyle}>
@@ -141,19 +134,15 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth({
   );
 });
 
-type IncomeHeaderMonthProps = {
-  month: string;
-};
-export function IncomeHeaderMonth({ month }: IncomeHeaderMonthProps) {
+
+export function IncomeHeaderMonth() {
   return (
     <Row
       style={{
         color: theme.tableHeaderText,
         alignItems: 'center',
         paddingRight: 10,
-        backgroundColor: monthUtils.isCurrentMonth(month)
-          ? theme.budgetHeaderCurrentMonth
-          : theme.budgetHeaderOtherMonth,
+        backgroundColor: theme.budgetCurrentMonth,
       }}
     >
       <View style={{ flex: 1, textAlign: 'right' }}>
