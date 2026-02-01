@@ -89,10 +89,6 @@ const cellStyle: CSSProperties = {
 type BudgetTotalsMonthProps = {
   month: string;
 };
-type IncomeHeaderMonthProps = {
-  month: string;
-};
-
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth({
   month,
 }: BudgetTotalsMonthProps) {
@@ -145,6 +141,9 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth({
   );
 });
 
+type IncomeHeaderMonthProps = {
+  month: string;
+};
 export function IncomeHeaderMonth({ month }: IncomeHeaderMonthProps) {
   return (
     <Row
