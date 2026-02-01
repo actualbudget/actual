@@ -55,7 +55,7 @@ test.describe('Transactions', () => {
     });
 
     test('by category', async () => {
-      const filterTooltip = await accountPage.filterBy('Category');
+      const filterTooltip = await accountPage.filterBy(/^Category$/);
       await expect(filterTooltip.locator).toMatchThemeScreenshots();
 
       // Type in the autocomplete box
@@ -86,7 +86,7 @@ test.describe('Transactions', () => {
     });
 
     test('by category group', async () => {
-      const filterTooltip = await accountPage.filterBy('Category group');
+      const filterTooltip = await accountPage.filterBy(/^Category group$/);
       await expect(filterTooltip.locator).toMatchThemeScreenshots();
 
       // Type in the autocomplete box
