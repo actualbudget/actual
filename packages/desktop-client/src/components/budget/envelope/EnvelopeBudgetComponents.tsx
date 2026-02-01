@@ -95,6 +95,9 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         marginRight: styles.monthRightPadding,
         paddingTop: 10,
         paddingBottom: 10,
+        backgroundColor: monthUtils.isCurrentMonth(month)
+          ? theme.budgetHeaderCurrentMonth
+          : theme.budgetHeaderOtherMonth,
       }}
     >
       <View style={headerLabelStyle}>
@@ -140,6 +143,9 @@ export function IncomeHeaderMonth() {
         color: theme.tableHeaderText,
         alignItems: 'center',
         paddingRight: 10,
+        backgroundColor: monthUtils.isCurrentMonth(month)
+          ? theme.budgetHeaderCurrentMonth
+          : theme.budgetHeaderOtherMonth,
       }}
     >
       <View style={{ flex: 1, textAlign: 'right' }}>
