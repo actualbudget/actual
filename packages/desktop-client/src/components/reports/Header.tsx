@@ -153,7 +153,7 @@ export function Header({
                   )
                 }
                 value={start}
-                defaultLabel={monthUtils.format(start, 'MMMM, yyyy', locale)}
+                defaultLabel={monthUtils.format(start, 'MMMM yyyy', locale)}
                 options={allMonths.map(({ name, pretty }) => [name, pretty])}
               />
               <View>{t('to')}</View>

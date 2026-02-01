@@ -45,6 +45,7 @@ import { useReport } from '@desktop-client/components/reports/useReport';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useWidget } from '@desktop-client/hooks/useWidget';
@@ -98,6 +99,7 @@ export function Crossover() {
 type CrossoverInnerProps = { widget?: CrossoverWidget };
 
 function CrossoverInner({ widget }: CrossoverInnerProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const accounts = useAccounts();
@@ -206,14 +208,14 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         .rangeInclusive(earliestDate, latestDate)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM yyyy', locale),
         }))
         .reverse();
 
       setAllMonths(allMonths);
     }
     run();
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     if (latestTransaction && allMonths?.length) {
