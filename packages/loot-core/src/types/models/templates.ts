@@ -21,7 +21,7 @@ export type PeriodicTemplate = {
     period: 'day' | 'week' | 'month' | 'year';
     amount: number;
   };
-  starting: string;
+  starting?: string;
   limit?: {
     amount: number;
     hold: boolean;
@@ -92,6 +92,10 @@ export type RemainderTemplate = {
   priority: null;
 } & BaseTemplate;
 
+export type RefillTemplate = {
+  type: 'refill';
+} & BaseTemplateWithPriority;
+
 export type GoalTemplate = {
   type: 'goal';
   amount: number;
@@ -126,5 +130,6 @@ export type Template =
   | AverageTemplate
   | GoalTemplate
   | CopyTemplate
+  | RefillTemplate
   | LimitTemplate
   | ErrorTemplate;
