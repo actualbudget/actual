@@ -154,7 +154,7 @@ export function CrossoverCard({
     return () => {
       isMounted = false;
     };
-  }, [meta?.timeFrame]);
+  }, [meta?.timeFrame, locale]);
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const onCardHover = useCallback(() => setIsCardHovered(true), []);

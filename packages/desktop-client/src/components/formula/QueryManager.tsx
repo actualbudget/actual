@@ -302,7 +302,7 @@ function QueryItem({
       setAllMonths(allMonths);
     }
     run();
-  }, []);
+  }, [locale]);
 
   const filters = useRuleConditionFilters(
     conditionsRef.current,
