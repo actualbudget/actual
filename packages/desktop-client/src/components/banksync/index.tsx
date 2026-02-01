@@ -116,6 +116,7 @@ export function BankSync() {
     <Page
       header={t('Bank Sync')}
       style={{
+        minHeight: 'initial',
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
         paddingBottom: MOBILE_NAV_HEIGHT,
       }}
@@ -130,7 +131,7 @@ export function BankSync() {
         )}
         {Object.entries(groupedAccounts).map(([syncProvider, accounts]) => {
           return (
-            <View key={syncProvider} style={styles.tableContainer}>
+            <View key={syncProvider} style={{ minHeight: 'initial' }}>
               {Object.keys(groupedAccounts).length > 1 && (
                 <Text
                   style={{ fontWeight: 500, fontSize: 20, margin: '.5em 0' }}
@@ -138,13 +139,15 @@ export function BankSync() {
                   {syncSourceReadable[syncProvider as SyncProviders]}
                 </Text>
               )}
-              <AccountsHeader unlinked={syncProvider === 'unlinked'} />
-              <AccountsList
-                accounts={accounts}
-                hoveredAccount={hoveredAccount}
-                onHover={onHover}
-                onAction={onAction}
-              />
+              <View style={styles.tableContainer}>
+                <AccountsHeader unlinked={syncProvider === 'unlinked'} />
+                <AccountsList
+                  accounts={accounts}
+                  hoveredAccount={hoveredAccount}
+                  onHover={onHover}
+                  onAction={onAction}
+                />
+              </View>
             </View>
           );
         })}
