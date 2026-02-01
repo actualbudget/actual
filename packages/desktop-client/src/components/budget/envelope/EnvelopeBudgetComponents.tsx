@@ -93,9 +93,9 @@ type IncomeHeaderMonthProps = {
   month: string;
 };
 
- export const BudgetTotalsMonth = memo(function BudgetTotalsMonth({
-   month,
- }: BudgetTotalsMonthProps) {
+export const BudgetTotalsMonth = memo(function BudgetTotalsMonth({
+  month,
+}: BudgetTotalsMonthProps) {
   return (
     <View
       style={{
