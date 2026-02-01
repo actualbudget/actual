@@ -506,7 +506,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                                     locale,
                                   ),
                                 })
-                              : t('Spent {{monthYearFormatted}}:', {
+                              : t('Spent {{monthYearFormatted}}', {
                                   monthYearFormatted: monthUtils.format(
                                     compare,
                                     'MMM yyyy',
