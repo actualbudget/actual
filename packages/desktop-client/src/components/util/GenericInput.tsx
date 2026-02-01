@@ -283,7 +283,7 @@ export const GenericInput = ({
                   dispatch(
                     pushModal({
                       modal: {
-                        name: 'category-autocomplete',
+                        name: 'category-group-autocomplete',
                         options: {
                           onSelect: newValue => {
                             if (props.multi === true) {
