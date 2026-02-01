@@ -72,6 +72,11 @@ export function getDownloadError({
         'This budget cannot be loaded with this version of the app. Make sure the app is up-to-date.',
       );
 
+    case 'clock-drift':
+      return t(
+        'Failed to download the budget because your device time differs too much from the server. Please check your device time settings and ensure they are correct.',
+      );
+
     default:
       const info =
         meta && typeof meta === 'object' && 'fileId' in meta && meta.fileId
@@ -114,6 +119,10 @@ export function getSyncError(error, id) {
     return t(
       'Budget "{{id}}" not found. Check the ID of your budget in the Advanced section of the settings page.',
       { id },
+    );
+  } else if (error === 'clock-drift') {
+    return t(
+      'Failed to sync because your device time differs too much from the server. Please check your device time settings and ensure they are correct.',
     );
   } else {
     return t('We had an unknown problem opening "{{id}}".', { id });
