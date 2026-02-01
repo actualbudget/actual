@@ -1,4 +1,4 @@
-import { type DragItem } from 'react-aria';
+import { isTextDropItem, type DragItem } from 'react-aria';
 import { DropIndicator, GridList, useDragAndDrop } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
@@ -13,7 +13,10 @@ import {
 import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
 
 import { moveCategory } from '@desktop-client/budget/budgetSlice';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDispatch } from '@desktop-client/redux';
+
+const DRAG_TYPE = 'mobile-expense-category-list/category-id';
 
 type ExpenseCategoryListProps = {
   categoryGroup: CategoryGroupEntity;
@@ -37,14 +40,14 @@ export function ExpenseCategoryList({
   shouldHideCategory,
 }: ExpenseCategoryListProps) {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const { reorderCategory } = useReorderCategory();
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: keys =>
       [...keys].map(
         key =>
           ({
-            'text/plain': key as CategoryEntity['id'],
+            [DRAG_TYPE]: key as CategoryEntity['id'],
           }) as DragItem,
       ),
     renderDropIndicator: target => {
@@ -54,7 +57,7 @@ export function ExpenseCategoryList({
           className={css({
             '&[data-drop-target]': {
               height: 4,
-              backgroundColor: theme.tableBorderSeparator,
+              backgroundColor: theme.tableBorderHover,
               opacity: 1,
               borderRadius: 4,
             },
@@ -62,59 +65,25 @@ export function ExpenseCategoryList({
         />
       );
     },
+    acceptedDragTypes: [DRAG_TYPE],
+    getDropOperation: () => 'move',
+    onInsert: async e => {
+      const [id] = await Promise.all(
+        e.items.filter(isTextDropItem).map(item => item.getText(DRAG_TYPE)),
+      );
+      reorderCategory({
+        id: id as CategoryEntity['id'],
+        targetId: e.target.key as CategoryEntity['id'],
+        dropPosition: e.target.dropPosition,
+      });
+    },
     onReorder: e => {
       const [key] = e.keys;
-      const categoryIdToMove = key as CategoryEntity['id'];
-      const categoryToMove = categories.find(c => c.id === categoryIdToMove);
-
-      if (!categoryToMove) {
-        throw new Error(
-          `Internal error: category with ID ${categoryIdToMove} not found.`,
-        );
-      }
-
-      if (!categoryToMove.group) {
-        throw new Error(
-          `Internal error: category ${categoryIdToMove} is not in a group and cannot be moved.`,
-        );
-      }
-
-      const targetCategoryId = e.target.key as CategoryEntity['id'];
-
-      if (e.target.dropPosition === 'before') {
-        dispatch(
-          moveCategory({
-            id: categoryToMove.id,
-            groupId: categoryToMove.group,
-            targetId: targetCategoryId,
-          }),
-        );
-      } else if (e.target.dropPosition === 'after') {
-        const targetCategoryIndex = categories.findIndex(
-          c => c.id === targetCategoryId,
-        );
-
-        if (targetCategoryIndex === -1) {
-          throw new Error(
-            `Internal error: category with ID ${targetCategoryId} not found.`,
-          );
-        }
-
-        const nextToTargetCategory = categories[targetCategoryIndex + 1];
-
-        dispatch(
-          moveCategory({
-            id: categoryToMove.id,
-            groupId: categoryToMove.group,
-            // Due to the way `moveCategory` works, we use the category next to the
-            // actual target category here because `moveCategory` always shoves the
-            // category *before* the target category.
-            // On the other hand, using `null` as `targetId` moves the category
-            // to the end of the list.
-            targetId: nextToTargetCategory?.id || null,
-          }),
-        );
-      }
+      reorderCategory({
+        id: key as CategoryEntity['id'],
+        targetId: e.target.key as CategoryEntity['id'],
+        dropPosition: e.target.dropPosition,
+      });
     },
   });
 
@@ -148,4 +117,77 @@ export function ExpenseCategoryList({
       )}
     </GridList>
   );
+}
+
+function useReorderCategory() {
+  const dispatch = useDispatch();
+  const { list: categories } = useCategories();
+  const reorderCategory = ({
+    id,
+    targetId,
+    dropPosition,
+  }: {
+    id: CategoryEntity['id'];
+    targetId: CategoryEntity['id'];
+    dropPosition: 'on' | 'before' | 'after';
+  }) => {
+    const categoryToMove = categories.find(c => c.id === id);
+
+    if (!categoryToMove) {
+      throw new Error(`Internal error: category with ID ${id} not found.`);
+    }
+
+    if (!categoryToMove.group) {
+      throw new Error(
+        `Internal error: Failed to move category ${id} because it is not in a group.`,
+      );
+    }
+
+    const targetCategoryGroupId = categories.find(
+      c => c.id === targetId,
+    )?.group;
+
+    if (!targetCategoryGroupId) {
+      throw new Error(
+        `Internal error: Failed to move category ${id} because target category ${targetId} is not in a group.`,
+      );
+    }
+
+    if (dropPosition === 'before') {
+      dispatch(
+        moveCategory({
+          id: categoryToMove.id,
+          groupId: targetCategoryGroupId,
+          targetId,
+        }),
+      );
+    } else if (dropPosition === 'after') {
+      const targetCategoryIndex = categories.findIndex(c => c.id === targetId);
+
+      if (targetCategoryIndex === -1) {
+        throw new Error(
+          `Internal error: category with ID ${targetId} not found.`,
+        );
+      }
+
+      const nextToTargetCategory = categories[targetCategoryIndex + 1];
+
+      dispatch(
+        moveCategory({
+          id: categoryToMove.id,
+          groupId: targetCategoryGroupId,
+          // Due to the way `moveCategory` works, we use the category next to the
+          // actual target category here because `moveCategory` always shoves the
+          // category *before* the target category.
+          // On the other hand, using `null` as `targetId` moves the category
+          // to the end of the list.
+          targetId: nextToTargetCategory?.id || null,
+        }),
+      );
+    }
+  };
+
+  return {
+    reorderCategory,
+  };
 }
