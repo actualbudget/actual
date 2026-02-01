@@ -86,9 +86,7 @@ const cellStyle: CSSProperties = {
   fontWeight: 600,
 };
 
-export const BudgetTotalsMonth = memo(function BudgetTotalsMonth({
-  month,
-}: BudgetTotalsMonthProps) {
+export const BudgetTotalsMonth = memo(function BudgetTotalsMonth({ month }) {
   return (
     <View
       style={{
@@ -138,7 +136,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth({
   );
 });
 
-export function IncomeHeaderMonth({ month }: incomeHeaderMonthProps) {
+export function IncomeHeaderMonth({ month }) {
   return (
     <Row
       style={{
