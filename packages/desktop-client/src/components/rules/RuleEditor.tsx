@@ -976,6 +976,7 @@ const conditionFields = [
   'imported_payee',
   'account',
   'category',
+  'category_group',
   'date',
   'payee',
   'notes',

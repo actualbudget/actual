@@ -55,7 +55,7 @@ test.describe('Transactions', () => {
     });
 
     test('by category', async () => {
-      const filterTooltip = await accountPage.filterBy('Category');
+      const filterTooltip = await accountPage.filterBy(/^Category$/);
       await expect(filterTooltip.locator).toMatchThemeScreenshots();
 
       // Type in the autocomplete box
@@ -64,6 +64,37 @@ test.describe('Transactions', () => {
 
       // Select the active item
       await page.getByTestId('Clothing-category-item').click();
+      await filterTooltip.applyButton.click();
+
+      // Assert that there are only clothing transactions
+      await expect(accountPage.getNthTransaction(0).category).toHaveText(
+        'Clothing',
+      );
+      await expect(accountPage.getNthTransaction(1).category).toHaveText(
+        'Clothing',
+      );
+      await expect(accountPage.getNthTransaction(2).category).toHaveText(
+        'Clothing',
+      );
+      await expect(accountPage.getNthTransaction(3).category).toHaveText(
+        'Clothing',
+      );
+      await expect(accountPage.getNthTransaction(4).category).toHaveText(
+        'Clothing',
+      );
+      await expect(page).toMatchThemeScreenshots();
+    });
+
+    test('by category group', async () => {
+      const filterTooltip = await accountPage.filterBy(/^Category group$/);
+      await expect(filterTooltip.locator).toMatchThemeScreenshots();
+
+      // Type in the autocomplete box
+      const autocomplete = page.getByTestId('autocomplete');
+      await expect(autocomplete).toMatchThemeScreenshots();
+
+      // Select the active item
+      await page.getByTestId('Usual Expenses-category-group-item').click();
       await filterTooltip.applyButton.click();
 
       // Assert that there are only clothing transactions

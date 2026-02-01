@@ -11,6 +11,7 @@ import { AccountMenuModal } from './modals/AccountMenuModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
+import { CategoryGroupAutocompleteModal } from './modals/CategoryGroupAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
 import { CloseAccountModal } from './modals/CloseAccountModal';
@@ -202,6 +203,11 @@ export function Modals() {
 
         case 'category-autocomplete':
           return <CategoryAutocompleteModal key={key} {...modal.options} />;
+
+        case 'category-group-autocomplete':
+          return (
+            <CategoryGroupAutocompleteModal key={key} {...modal.options} />
+          );
 
         case 'account-autocomplete':
           return <AccountAutocompleteModal key={key} {...modal.options} />;
