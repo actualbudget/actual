@@ -137,15 +137,17 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   );
 });
 
-export function IncomeHeaderMonth() {
-  const currentMonth = monthUtils.currentMonth();
+type IncomeHeaderMonthProps = {
+  month: string;
+};
+export function IncomeHeaderMonth({ month }: IncomeHeaderMonthProps) {
   return (
     <Row
       style={{
         color: theme.tableHeaderText,
         alignItems: 'center',
         paddingRight: 10,
-        backgroundColor: monthUtils.isCurrentMonth(currentMonth)
+        backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetCurrentMonth
           : theme.budgetOtherMonth,
       }}
