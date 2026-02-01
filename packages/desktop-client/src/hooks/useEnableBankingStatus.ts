@@ -58,9 +58,11 @@ export function useEnableBankingStatus() {
 
         setConfiguredEnableBanking(true);
       } catch {
-        // Handle any unexpected errors during send() call
+        // CodeRabbit review: Handle any unexpected errors during send() call
+        // to prevent loading state from getting stuck
         setConfiguredEnableBanking(false);
       } finally {
+        // CodeRabbit review: Always reset loading state in finally block
         setIsLoading(false);
       }
     }

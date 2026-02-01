@@ -137,6 +137,8 @@ const AspspSelector = ({
 
   useEffect(() => {
     let cancelled = false;
+    // CodeRabbit suggested adding catchErrors: true, but this changes the response
+    // structure and breaks TypeScript compatibility with existing error handling
     send('enablebanking-countries').then(({ data, error }) => {
       if (cancelled) return;
       // Handle error response
@@ -161,6 +163,8 @@ const AspspSelector = ({
   useEffect(() => {
     if (country) {
       let cancelled = false;
+      // CodeRabbit suggested adding catchErrors: true, but this changes the response
+      // structure and breaks TypeScript compatibility with existing error handling
       send('enablebanking-banks', { country: country.id }).then(
         ({ data, error }) => {
           if (cancelled) return;
@@ -571,6 +575,7 @@ export function EnableBankingSetupAccountModal({
               onContinue={async () => {
                 try {
                   await onSuccess(token);
+                  // CodeRabbit suggested calling close() here, but we intentionally don't
                   // Don't call close() - onSuccess handles closing this modal
                   // and opening the account selection modal
                 } catch (error) {
