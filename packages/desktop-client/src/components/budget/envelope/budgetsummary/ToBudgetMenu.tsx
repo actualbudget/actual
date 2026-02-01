@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Menu } from '@actual-app/components/menu';
 
 import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type ToBudgetMenuProps = Omit<
@@ -29,6 +30,7 @@ export function ToBudgetMenu({
 }: ToBudgetMenuProps) {
   const { t } = useTranslation();
 
+  const isImprovedAutoHoldEnabled = useFeatureFlag('improvedAutoHold');
   const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
   const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth) ?? 0;
   const manualBuffered =
@@ -43,7 +45,7 @@ export function ToBudgetMenu({
           },
         ]
       : []),
-    ...(autoBuffered === 0 && toBudget > 0
+    ...(autoBuffered === 0 && toBudget > 0 && !isImprovedAutoHoldEnabled
       ? [
           {
             name: 'buffer',
@@ -59,7 +61,7 @@ export function ToBudgetMenu({
           },
         ]
       : []),
-    ...(forNextMonth > 0 && manualBuffered === 0
+    ...(forNextMonth > 0 && manualBuffered === 0 && !isImprovedAutoHoldEnabled
       ? [
           {
             name: 'disable-auto-buffer',
@@ -67,7 +69,7 @@ export function ToBudgetMenu({
           },
         ]
       : []),
-    ...(forNextMonth > 0 && manualBuffered !== 0
+    ...(forNextMonth > 0 && manualBuffered !== 0 && !isImprovedAutoHoldEnabled
       ? [
           {
             name: 'reset-buffer',
