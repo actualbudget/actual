@@ -35,7 +35,6 @@ import {
   PageHeader,
 } from '@desktop-client/components/Page';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { chartTheme } from '@desktop-client/components/reports/chart-theme';
 import { Header } from '@desktop-client/components/reports/Header';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
@@ -500,9 +499,11 @@ function SummaryInner({ widget }: SummaryInnerProps) {
               fontSize: '50px',
               justifyContent: 'center',
               color:
-                (data?.total ?? 0) < 0
-                  ? chartTheme.colors.red
-                  : chartTheme.colors.blue,
+                (data?.total ?? 0) === 0
+                  ? theme.reportsNumberNeutral
+                  : (data?.total ?? 0) < 0
+                    ? theme.reportsNumberNegative
+                    : theme.reportsNumberPositive,
             }}
           >
             <PrivacyFilter>

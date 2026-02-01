@@ -19,7 +19,6 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { chartTheme } from '@desktop-client/components/reports/chart-theme';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
@@ -138,7 +137,7 @@ export function CalendarGraph({
                       </View>
                       <View
                         style={{
-                          color: chartTheme.colors.blue,
+                          color: theme.reportsNumberPositive,
                           flexDirection: 'row',
                         }}
                       >
@@ -169,7 +168,7 @@ export function CalendarGraph({
                       </View>
                       <View
                         style={{
-                          color: chartTheme.colors.red,
+                          color: theme.reportsNumberNegative,
                           flexDirection: 'row',
                         }}
                       >
@@ -271,7 +270,7 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
             position: 'absolute',
             width: '50%',
             height: '100%',
-            background: chartTheme.colors.red,
+            background: theme.reportsNumberNegative,
             opacity: 0.2,
             right: 0,
           }}
@@ -283,7 +282,7 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
             position: 'absolute',
             width: '50%',
             height: '100%',
-            background: chartTheme.colors.blue,
+            background: theme.reportsNumberPositive,
             opacity: 0.2,
             left: 0,
           }}
@@ -296,7 +295,7 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
           bottom: 0,
           opacity: 0.9,
           height: `${Math.ceil(day.incomeSize)}%`,
-          backgroundColor: chartTheme.colors.blue,
+          backgroundColor: theme.reportsNumberPositive,
           width: '50%',
           transition: 'height 0.5s ease-out',
         }}
@@ -309,7 +308,7 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
           bottom: 0,
           opacity: 0.9,
           height: `${Math.ceil(day.expenseSize)}%`,
-          backgroundColor: chartTheme.colors.red,
+          backgroundColor: theme.reportsNumberNegative,
           width: '50%',
           transition: 'height 0.5s ease-out',
         }}

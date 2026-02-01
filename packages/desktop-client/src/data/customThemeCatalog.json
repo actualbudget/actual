@@ -38,5 +38,17 @@
     "name": "Theme from 1970",
     "repo": "Juulz/1970-theme",
     "colors": ["#f2f2f2", "#61591f", "#a92da3", "#4d2d19", "#f4ebe7", "#dad18b"]
+  },
+  {
+    "name": "Shades of Gray (light)",
+    "repo": "Juulz/shades-of-gray",
+    "colors": [
+      "hsl(0, 0%, 90%)",
+      "hsl(0, 0%, 20%)",
+      "#fff",
+      "hsl(0, 0%, 80%)",
+      "#99ffff",
+      "hsl(0, 0%, 35%)"
+    ]
   }
 ]

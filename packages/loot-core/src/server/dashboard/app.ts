@@ -34,6 +34,7 @@ function isWidgetType(type: string): type is Widget['type'] {
     'cash-flow-card',
     'spending-card',
     'crossover-card',
+    'budget-analysis-card',
     'markdown-card',
     'summary-card',
     'calendar-card',

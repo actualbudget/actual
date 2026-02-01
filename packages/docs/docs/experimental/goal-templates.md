@@ -394,43 +394,57 @@ Below is an example of using the "Full" flag assuming a once-per-year schedule f
 | `#template schedule full Simplefin` |       $ 0       | Budget in all months except May |
 | `#template schedule full Simplefin` |      $ 15       |          Budget in May          |
 
-#### Percentage Increase / Decrease
+#### Adjustments
 
 Yearly expenses (e.g. insurance, property rates, etc.) increase year on year. Often the amount is unknown until close to the due date. This creates a budget crunch - if your $ 1,000 insurance jumps 20% ($ 1,200), you need to make up that extra $ 200 in just a month or two.
 
-This feature adds percentage adjustments to templates, letting you gradually save the expected increase throughout the year. By proactively budgeting a percentage change for these yearly increases, you avoid last-minute scrambling when renewal notices arrive with higher amounts.
+This feature adds adjustments to the template (either percentage or fixed), letting you gradually save the expected increase throughout the year. By proactively budgeting a percentage/fixed change for these yearly increases, you avoid last-minute scrambling when renewal notices arrive with higher amounts.
 
-| Syntax                                                               | Description                                                                                                    |
-| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `#template schedule {SCHEDULE NAME} [{increase/decrease} {number}%]` | Fund the upcoming scheduled transaction over time, increasing or decreasing the amount by the given percentage |
+| Syntax                                                                       | Description                                                                                               |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `#template schedule {SCHEDULE NAME} [{increase/decrease} {number\|number%}]` | Fund the upcoming scheduled transaction over time, increasing or decreasing the amount by the given value |
 
-As an example, assume the amount Scheduled for 'Insurance' the prior year was $ 1000 and $ 83.33 was budgeted monthly; the below will apply.
+As an example, assume the amount scheduled for 'Insurance' the prior year was $ 1000 and $ 83.33 was budgeted monthly; the below will apply.
 
-| Category  | Template line                                 | Budgeted Amount |
-| --------- | --------------------------------------------- | :-------------: |
-| Insurance | `#template schedule Insurance [increase 20%]` |      $ 100      |
+| Category  | Template line                                 | Monthly Budget | Annual Budget |
+| --------- | --------------------------------------------- | :------------: | :-----------: |
+| Insurance | `#template schedule Insurance [increase 20%]` |     $ 100      |    $ 1200     |
+| Insurance | `#template schedule Insurance [increase 500]` |     $ 125      |    $ 1500     |
 
-When "Insurance" comes due at the end of the year, $1200 will be available.
+When "Insurance" comes due at the end of the year, $1200 will be available for the first example, or $1500 for the second example.
 
 #### Available Variations
 
 Below is a table of the variations of the Schedule template.
 
-| Syntax                                                               | Description                                                                                                | Example Application                                             |
-| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `#template schedule {SCHEDULE NAME}`                                 | Fund upcoming scheduled transactions over time                                                             | Monthly schedules, or larger non-monthly scheduled transactions |
-| `#template schedule full {SCHEDULE NAME}`                            | Fund upcoming scheduled transaction only on needed month                                                   | Small schedules that are non-monthly                            |
-| `#template schedule {SCHEDULE NAME} [{increase/decrease} {number}%]` | Fund upcoming scheduled transaction over time, increasing or decreasing the amount by the given percentage | Yearly renewals where the amount changes                        |
+| Syntax                                                                       | Description                                                                                           | Example Application                                             |
+| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `#template schedule {SCHEDULE NAME}`                                         | Fund upcoming scheduled transactions over time                                                        | Monthly schedules, or larger non-monthly scheduled transactions |
+| `#template schedule full {SCHEDULE NAME}`                                    | Fund upcoming scheduled transaction only on needed month                                              | Small schedules that are non-monthly                            |
+| `#template schedule {SCHEDULE NAME} [{increase/decrease} {number\|number%}]` | Fund upcoming scheduled transaction over time, increasing or decreasing the amount by the given value | Yearly renewals where the amount changes                        |
 
 ### Average Type
 
-The Average template allows you to budget the average amount spend over a number of months.
-This is the same function provided by the menu in the budget table but it can be used in a single category automatically where the menu option must be applied to the whole budget or a single category.
-The table below shows how to use the Average template.
+This template allows you to budget based on the average amount spent over a number of months, adding flexibility beyond the menu built-ins (3 months, 6 months).
 
-| Syntax                       | Description                                                                                                                                                                 | Example Application                                                                   |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `#template average 6 months` | Budget the average amount spent over the last 6 months. Can set the number to any number > 0. Matches the existing option on the budget page but with flexible month ranges | Try to budget only what you need to spend based on the last 6 months of spending data |
+You can also adjust the budgeted amount from the average by a percentage or by a fixed whole number. This functionality may be useful when you want to budget an average, but bump it up or down a bit to account for inflation or to slowly wean off a category you'd like to spend less on. (See also [adjustments](#adjustments))
+
+| Syntax                                                                      | Description                                                                                                                                                                          |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `#template average {number} months`                                         | Budget the average amount spent over the last `{number}` months. Can set the number to any number > 0. Matches the existing option on the budget page but with flexible month ranges |
+| `#template average {number} months [{increase/decrease} {number\|number%}]` | Budget the average amount spent over a period, with an adjustment                                                                                                                    |
+
+#### Examples
+
+As an example, assume the spend for the category was [\$40, \$50, \$60] for the past 3 months; here are some example usages.
+
+| Template line                               | Budgeted Amount |
+| ------------------------------------------- | :-------------: |
+| `#template average 3 months`                |      \$ 50      |
+| `#template average 3 months [increase 20%]` |      \$ 60      |
+| `#template average 3 months [decrease 10%]` |      \$ 45      |
+| `#template average 3 months [increase 11]`  |      \$ 61      |
+| `#template average 3 months [decrease 1]`   |      \$ 49      |
 
 ### Copy Type
 
