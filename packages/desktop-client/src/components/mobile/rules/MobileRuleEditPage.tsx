@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
 
@@ -31,20 +31,14 @@ export function MobileRuleEditPage() {
   const [rule, setRule] = useState<RuleEntity | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { schedules = [] } = useSchedules({
-    query: useMemo(
-      () =>
-        rule?.id
-          ? q('schedules')
-              .filter({ rule: rule.id, completed: false })
-              .select('*')
-          : q('schedules').filter({ id: null }).select('*'), // Return empty result when no rule
-      [rule?.id],
-    ),
+  const { data: schedules = [], isSuccess } = useSchedules({
+    query: rule?.id
+      ? q('schedules').filter({ rule: rule.id, completed: false }).select('*')
+      : q('schedules').filter({ id: null }).select('*'), // Return empty result when no rule,
   });
 
   // Check if the current rule is linked to a schedule
-  const isLinkedToSchedule = schedules.length > 0;
+  const isLinkedToSchedule = isSuccess && schedules.length > 0;
 
   // Load rule by ID if we're in edit mode
   useEffect(() => {

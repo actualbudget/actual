@@ -5,7 +5,10 @@ import { type Locale } from 'date-fns';
 import { type TFunction } from 'i18next';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { getUpcomingDays } from 'loot-core/shared/schedules';
+import {
+  getUpcomingDays,
+  type ScheduleStatus,
+} from 'loot-core/shared/schedules';
 import {
   type CategoryEntity,
   type ScheduleEntity,
@@ -13,7 +16,6 @@ import {
 
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
 import { useLocale } from './useLocale';
-import { type ScheduleStatusType } from './useSchedules';
 import { useSyncedPref } from './useSyncedPref';
 
 type UseCategoryScheduleGoalTemplateProps = {
@@ -23,7 +25,7 @@ type UseCategoryScheduleGoalTemplateProps = {
 
 type UseCategoryScheduleGoalTemplateResult = {
   schedule: ScheduleEntity | null;
-  scheduleStatus: ScheduleStatusType | null;
+  scheduleStatus: ScheduleStatus | null;
   isScheduleRecurring: boolean;
   description: string;
 };
@@ -45,15 +47,14 @@ export function useCategoryScheduleGoalTemplateIndicator({
     'upcomingScheduledTransactionLength',
   );
   const upcomingDays = getUpcomingDays(upcomingScheduledTransactionLength);
-  const { schedules, statuses: scheduleStatuses } =
-    useCategoryScheduleGoalTemplates({
-      category,
-    });
+  const { schedules, statusLookup } = useCategoryScheduleGoalTemplates({
+    category,
+  });
 
   return useMemo<UseCategoryScheduleGoalTemplateResult>(() => {
     const schedulesToDisplay = schedules
       .filter(schedule => {
-        const status = scheduleStatuses.get(schedule.id);
+        const status = statusLookup[schedule.id];
         return status === 'upcoming' || status === 'due' || status === 'missed';
       })
       .filter(schedule => {
@@ -69,8 +70,8 @@ export function useCategoryScheduleGoalTemplateIndicator({
       })
       .sort((a, b) => {
         // Display missed schedules first, then due, then upcoming.
-        const aStatus = scheduleStatuses.get(a.id);
-        const bStatus = scheduleStatuses.get(b.id);
+        const aStatus = statusLookup[a.id];
+        const bStatus = statusLookup[b.id];
         if (aStatus === 'missed' && bStatus !== 'missed') return -1;
         if (bStatus === 'missed' && aStatus !== 'missed') return 1;
         if (aStatus === 'due' && bStatus !== 'due') return -1;
@@ -83,7 +84,7 @@ export function useCategoryScheduleGoalTemplateIndicator({
         return getScheduleStatusDescription({
           t,
           schedule: s,
-          scheduleStatus: scheduleStatuses.get(s.id),
+          scheduleStatus: statusLookup[s.id],
           locale,
         });
       })
@@ -91,7 +92,7 @@ export function useCategoryScheduleGoalTemplateIndicator({
 
     const schedule = schedulesToDisplay[0] || null;
     const scheduleStatus =
-      (schedule ? scheduleStatuses.get(schedule.id) : null) || null;
+      (schedule ? statusLookup[schedule.id] : null) || null;
 
     return {
       schedule,
@@ -101,7 +102,7 @@ export function useCategoryScheduleGoalTemplateIndicator({
       ),
       description,
     };
-  }, [locale, month, scheduleStatuses, schedules, t, upcomingDays]);
+  }, [locale, month, statusLookup, schedules, t, upcomingDays]);
 }
 
 function getScheduleStatusDescription({
@@ -112,7 +113,7 @@ function getScheduleStatusDescription({
 }: {
   t: TFunction;
   schedule?: ScheduleEntity;
-  scheduleStatus?: ScheduleStatusType;
+  scheduleStatus?: ScheduleStatus;
   locale?: Locale;
 }) {
   if (!schedule || !scheduleStatus) {

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -14,6 +14,7 @@ import { SchedulesTable, type ScheduleItemAction } from './SchedulesTable';
 import { Search } from '@desktop-client/components/common/Search';
 import { Page } from '@desktop-client/components/Page';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import { useScheduleStatus } from '@desktop-client/hooks/useScheduleStatus';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -24,9 +25,11 @@ export function Schedules() {
   const [filter, setFilter] = useState('');
 
   const onEdit = useCallback(
-    (id: ScheduleEntity['id']) => {
+    (schedule: ScheduleEntity) => {
       dispatch(
-        pushModal({ modal: { name: 'schedule-edit', options: { id } } }),
+        pushModal({
+          modal: { name: 'schedule-edit', options: { id: schedule.id } },
+        }),
       );
     },
     [dispatch],
@@ -77,12 +80,11 @@ export function Schedules() {
     [],
   );
 
-  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
-  const {
-    isLoading: isSchedulesLoading,
-    schedules,
-    statuses,
-  } = useSchedules({ query: schedulesQuery });
+  const { isPending: isSchedulesLoading, data: schedules = [] } = useSchedules({
+    query: q('schedules').select('*'),
+  });
+
+  const { data: { statusLookup = {} } = {} } = useScheduleStatus({ schedules });
 
   return (
     <Page header={t('Schedules')}>
@@ -112,7 +114,7 @@ export function Schedules() {
         isLoading={isSchedulesLoading}
         schedules={schedules}
         filter={filter}
-        statuses={statuses}
+        statusLookup={statusLookup}
         allowCompleted
         onSelect={onEdit}
         onAction={onAction}

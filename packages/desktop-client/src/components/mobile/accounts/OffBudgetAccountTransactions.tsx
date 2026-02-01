@@ -15,16 +15,16 @@ import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useOffBudgetAccounts } from '@desktop-client/hooks/useOffBudgetAccounts';
 import { usePreviewTransactions } from '@desktop-client/hooks/usePreviewTransactions';
-import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
 import * as queries from '@desktop-client/queries';
 import { useDispatch } from '@desktop-client/redux';
+import { schedulesViewQuery } from '@desktop-client/schedules';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 export function OffBudgetAccountTransactions() {
-  const schedulesQuery = useMemo(() => getSchedulesQuery('offbudget'), []);
+  const schedulesQuery = useMemo(() => schedulesViewQuery('offbudget'), []);
 
   return (
     <SchedulesProvider query={schedulesQuery}>
@@ -46,10 +46,10 @@ function TransactionListWithPreviews() {
   );
   const {
     transactions,
-    isLoading: isTransactionsLoading,
-    reload: reloadTransactions,
-    isLoadingMore,
-    loadMore: loadMoreTransactions,
+    isPending: isTransactionsLoading,
+    refetch: reloadTransactions,
+    isFetchingNextPage: isLoadingMoreTransactions,
+    fetchNextPage: fetchMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
   });
@@ -158,8 +158,8 @@ function TransactionListWithPreviews() {
       }
       transactions={transactionsToDisplay}
       balance={balanceBindings.balance}
-      isLoadingMore={isLoadingMore}
-      onLoadMore={loadMoreTransactions}
+      isLoadingMore={isLoadingMoreTransactions}
+      onLoadMore={fetchMoreTransactions}
       searchPlaceholder={t('Search Off Budget Accounts')}
       onSearch={onSearch}
       onOpenTransaction={onOpenTransaction}

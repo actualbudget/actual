@@ -14,14 +14,15 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { getStatusLabel } from 'loot-core/shared/schedules';
+import {
+  getStatusLabel,
+  type ScheduleStatus,
+} from 'loot-core/shared/schedules';
 import { titleFirst } from 'loot-core/shared/util';
 
-import { type ScheduleStatusType } from '@desktop-client/hooks/useSchedules';
-
 // Consists of Schedule Statuses + Transaction statuses
-export type StatusTypes =
-  | ScheduleStatusType
+export type ScheduleTransactionStatus =
+  | ScheduleStatus
   | 'cleared'
   | 'pending'
   | 'reconciled';
@@ -32,7 +33,7 @@ export const defaultStatusProps = {
   Icon: SvgCheckCircleHollow,
 };
 
-export function getStatusProps(status: StatusTypes | null | undefined) {
+export function getStatusProps(status?: ScheduleTransactionStatus | null) {
   switch (status) {
     case 'missed':
       return {
@@ -93,7 +94,7 @@ export function getStatusProps(status: StatusTypes | null | undefined) {
   }
 }
 
-export function StatusBadge({ status }: { status: ScheduleStatusType }) {
+export function StatusBadge({ status }: { status: ScheduleTransactionStatus }) {
   const { color, backgroundColor, Icon } = getStatusProps(status);
   return (
     <View

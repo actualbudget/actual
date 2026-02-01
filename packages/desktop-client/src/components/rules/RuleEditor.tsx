@@ -46,6 +46,7 @@ import {
   parse,
   unparse,
 } from 'loot-core/shared/rules';
+import { type ScheduleStatus } from 'loot-core/shared/schedules';
 import {
   type NewRuleEntity,
   type RuleActionEntity,
@@ -63,10 +64,8 @@ import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useFormat } from '@desktop-client/hooks/useFormat';
-import {
-  useSchedules,
-  type ScheduleStatusType,
-} from '@desktop-client/hooks/useSchedules';
+import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import { useScheduleStatus } from '@desktop-client/hooks/useScheduleStatus';
 import {
   SelectedProvider,
   useSelected,
@@ -374,15 +373,13 @@ function ScheduleDescription({ id }) {
   const { isNarrowWidth } = useResponsive();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const format = useFormat();
-  const scheduleQuery = useMemo(
-    () => q('schedules').filter({ id }).select('*'),
-    [id],
-  );
+  const { data: schedules = [], isPending: isSchedulesLoading } = useSchedules({
+    query: q('schedules').filter({ id }).select('*'),
+  });
+
   const {
-    schedules,
-    statusLabels,
-    isLoading: isSchedulesLoading,
-  } = useSchedules({ query: scheduleQuery });
+    data: { statusLookup = {} },
+  } = useScheduleStatus({ schedules });
 
   if (isSchedulesLoading) {
     return null;
@@ -394,7 +391,7 @@ function ScheduleDescription({ id }) {
     return <View style={{ flex: 1 }}>{id}</View>;
   }
 
-  const status = statusLabels.get(schedule.id) as ScheduleStatusType;
+  const status = statusLookup[schedule.id] as ScheduleStatus;
 
   return (
     <View

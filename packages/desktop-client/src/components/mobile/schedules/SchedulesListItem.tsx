@@ -10,7 +10,10 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { format as monthUtilFormat } from 'loot-core/shared/months';
-import { getScheduledAmount } from 'loot-core/shared/schedules';
+import {
+  getScheduledAmount,
+  type ScheduleStatus,
+} from 'loot-core/shared/schedules';
 import { type ScheduleEntity } from 'loot-core/types/models';
 import { type WithRequired } from 'loot-core/types/util';
 
@@ -19,11 +22,10 @@ import { StatusBadge } from '@desktop-client/components/schedules/StatusBadge';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
-import { type ScheduleStatusType } from '@desktop-client/hooks/useSchedules';
 
 type SchedulesListItemProps = {
   onDelete: () => void;
-  status: ScheduleStatusType;
+  status: ScheduleStatus;
 } & WithRequired<GridListItemProps<ScheduleEntity>, 'value'>;
 
 export function SchedulesListItem({
