@@ -24,6 +24,7 @@ import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/s
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 // Type for the return value of the recalculate function
 type CrossoverData = {
@@ -68,6 +69,7 @@ export function CrossoverCard({
   onRemove,
   onCopy,
 }: CrossoverCardProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
@@ -102,7 +104,7 @@ export function CrossoverCard({
         .rangeInclusive(earliestDate, latestDate)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM yyyy'),
+          pretty: monthUtils.format(month, 'MMMM yyyy', locale),
         }))
         .reverse();
 

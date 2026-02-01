@@ -40,6 +40,7 @@ import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionF
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type QueryConfig = {
   conditions?: RuleConditionEntity[];
@@ -207,6 +208,7 @@ function QueryItem({
   onUpdate,
   onRemove,
 }: QueryItemProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const [importJsonText, setImportJsonText] = useState('');
   const dispatch = useDispatch<AppDispatch>();
@@ -293,7 +295,7 @@ function QueryItem({
         .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM yyyy'),
+          pretty: monthUtils.format(month, 'MMMM yyyy', locale),
         }))
         .reverse();
 

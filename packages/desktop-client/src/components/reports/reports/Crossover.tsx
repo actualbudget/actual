@@ -49,6 +49,7 @@ import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useWidget } from '@desktop-client/hooks/useWidget';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 // Type for the return value of the recalculate function
 type CrossoverData = {
@@ -97,6 +98,7 @@ export function Crossover() {
 type CrossoverInnerProps = { widget?: CrossoverWidget };
 
 function CrossoverInner({ widget }: CrossoverInnerProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const accounts = useAccounts();
@@ -192,7 +194,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         .rangeInclusive(earliestDate, latestDate)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM yyyy'),
+          pretty: monthUtils.format(month, 'MMMM yyyy', locale),
         }))
         .reverse();
 
