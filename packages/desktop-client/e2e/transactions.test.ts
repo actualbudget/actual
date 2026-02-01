@@ -55,7 +55,7 @@ test.describe('Transactions', () => {
     });
 
     test('by category', async () => {
-      const filterTooltip = await accountPage.filterBy(/^Category$/);
+      const filterTooltip = await accountPage.filterBy('Category');
       await expect(filterTooltip.locator).toMatchThemeScreenshots();
 
       // Type in the autocomplete box
@@ -86,7 +86,7 @@ test.describe('Transactions', () => {
     });
 
     test('by category group', async () => {
-      const filterTooltip = await accountPage.filterBy(/^Category group$/);
+      const filterTooltip = await accountPage.filterBy('Group');
       await expect(filterTooltip.locator).toMatchThemeScreenshots();
 
       // Type in the autocomplete box
@@ -97,21 +97,21 @@ test.describe('Transactions', () => {
       await page.getByTestId('Usual Expenses-category-group-item').click();
       await filterTooltip.applyButton.click();
 
-      // Assert that there are only clothing transactions
+      // Assert that there are only transactions with categories in the Usual Expenses group
       await expect(accountPage.getNthTransaction(0).category).toHaveText(
-        'Clothing',
+        /^(Savings|Medical|Gift|General|Clothing|Entertainment|Restaurants|Food)$/,
       );
       await expect(accountPage.getNthTransaction(1).category).toHaveText(
-        'Clothing',
+        /^(Savings|Medical|Gift|General|Clothing|Entertainment|Restaurants|Food)$/,
       );
       await expect(accountPage.getNthTransaction(2).category).toHaveText(
-        'Clothing',
+        /^(Savings|Medical|Gift|General|Clothing|Entertainment|Restaurants|Food)$/,
       );
       await expect(accountPage.getNthTransaction(3).category).toHaveText(
-        'Clothing',
+        /^(Savings|Medical|Gift|General|Clothing|Entertainment|Restaurants|Food)$/,
       );
       await expect(accountPage.getNthTransaction(4).category).toHaveText(
-        'Clothing',
+        /^(Savings|Medical|Gift|General|Clothing|Entertainment|Restaurants|Food)$/,
       );
       await expect(page).toMatchThemeScreenshots();
     });

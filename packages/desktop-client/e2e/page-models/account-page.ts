@@ -174,7 +174,7 @@ export class AccountPage {
    * Filter to a specific note
    */
   async filterByNote(note: string) {
-    const filterTooltip = await this.filterBy('Notes');
+    const filterTooltip = await this.filterBy('Note');
     await this.page.keyboard.type(note);
     await filterTooltip.applyButton.click();
   }
