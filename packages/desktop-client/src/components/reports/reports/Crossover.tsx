@@ -201,7 +201,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
       setAllMonths(allMonths);
     }
     run();
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     if (latestTransaction && allMonths?.length) {
