@@ -599,14 +599,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                                 monthYearFormatted: monthUtils.format(
                                   compare,
                                   'MMM yyyy',
-                                  locale
+                                  locale,
                                 ),
                               })
                             : t('Spent Average {{monthYearFormatted}}:', {
                                 monthYearFormatted: monthUtils.format(
                                   compare,
                                   'MMM yyyy',
-                                  locale
+                                  locale,
                                 ),
                               })}
                         </Block>
