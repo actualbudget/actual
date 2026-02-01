@@ -38,6 +38,14 @@ import * as link from './link';
 import { getStartingBalancePayee } from './payees';
 import * as bankSync from './sync';
 
+// Shared base type for link account parameters
+type LinkAccountBaseParams = {
+  upgradingId?: AccountEntity['id'];
+  offBudget?: boolean;
+  startingDate?: string;
+  startingBalance?: number;
+};
+
 export type AccountHandlers = {
   'account-update': typeof updateAccount;
   'accounts-get': typeof getAccounts;
@@ -120,11 +128,11 @@ async function linkGoCardlessAccount({
   account,
   upgradingId,
   offBudget = false,
-}: {
+  startingDate,
+  startingBalance,
+}: LinkAccountBaseParams & {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
-  upgradingId?: AccountEntity['id'] | undefined;
-  offBudget?: boolean | undefined;
 }) {
   let id;
   const bank = await link.findOrCreateBank(account.institution, requisitionId);
@@ -170,6 +178,8 @@ async function linkGoCardlessAccount({
     id,
     account.account_id,
     bank.bank_id,
+    startingDate,
+    startingBalance,
   );
 
   connection.send('sync-event', {
@@ -184,10 +194,10 @@ async function linkSimpleFinAccount({
   externalAccount,
   upgradingId,
   offBudget = false,
-}: {
+  startingDate,
+  startingBalance,
+}: LinkAccountBaseParams & {
   externalAccount: SyncServerSimpleFinAccount;
-  upgradingId?: AccountEntity['id'] | undefined;
-  offBudget?: boolean | undefined;
 }) {
   let id;
 
@@ -240,6 +250,8 @@ async function linkSimpleFinAccount({
     id,
     externalAccount.account_id,
     bank.bank_id,
+    startingDate,
+    startingBalance,
   );
 
   await connection.send('sync-event', {
@@ -254,10 +266,10 @@ async function linkPluggyAiAccount({
   externalAccount,
   upgradingId,
   offBudget = false,
-}: {
+  startingDate,
+  startingBalance,
+}: LinkAccountBaseParams & {
   externalAccount: SyncServerPluggyAiAccount;
-  upgradingId?: AccountEntity['id'] | undefined;
-  offBudget?: boolean | undefined;
 }) {
   let id;
 
@@ -310,6 +322,8 @@ async function linkPluggyAiAccount({
     id,
     externalAccount.account_id,
     bank.bank_id,
+    startingDate,
+    startingBalance,
   );
 
   await connection.send('sync-event', {
@@ -845,24 +859,37 @@ type SyncError =
       internal?: string;
     };
 
+/**
+ * Type guard to check if an error is a BankSyncError.
+ * Handles both class instances and plain objects with the BankSyncError shape.
+ */
+function isBankSyncError(err: unknown): err is BankSyncError {
+  return (
+    err instanceof BankSyncError ||
+    (typeof err === 'object' &&
+      err !== null &&
+      'type' in err &&
+      err.type === 'BankSyncError')
+  );
+}
+
+/**
+ * Converts a sync error into a standardized SyncError response object.
+ */
 function handleSyncError(
   err: Error | PostError | BankSyncError,
   acct: db.DbAccount,
 ): SyncError {
-  // TODO: refactor bank sync logic to use BankSyncError properly
-  // oxlint-disable-next-line typescript/no-explicit-any
-  if (err instanceof BankSyncError || (err as any)?.type === 'BankSyncError') {
-    const error = err as BankSyncError;
-
+  if (isBankSyncError(err)) {
     const syncError = {
       type: 'SyncError',
       accountId: acct.id,
       message: 'Failed syncing account "' + acct.name + '."',
-      category: error.category,
-      code: error.code,
+      category: err.category,
+      code: err.code,
     };
 
-    if (error.category === 'RATE_LIMIT_EXCEEDED') {
+    if (err.category === 'RATE_LIMIT_EXCEEDED') {
       return {
         ...syncError,
         message: `Failed syncing account ${acct.name}. Rate limit exceeded. Please try again later.`,
