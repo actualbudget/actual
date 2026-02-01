@@ -3,11 +3,12 @@ import { useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/platform/client/fetch';
 
-import { useSyncServerStatus } from './useSyncServerStatus';
-
 import { deconfigureEnableBanking } from '@desktop-client/banksync/enablebanking';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+
+import { useSyncServerStatus } from './useSyncServerStatus';
+
 export function useEnableBankingStatus() {
   const [configuredEnableBanking, setConfiguredEnableBanking] = useState<
     boolean | null
@@ -23,23 +24,33 @@ export function useEnableBankingStatus() {
 
       const results = await send('enablebanking-status');
       if (results.error) {
-        setConfiguredEnableBanking(false);
-        if (results.error.error_code === 'ENABLEBANKING_APPLICATION_INACTIVE') {
-          dispatch(
-            addNotification({
-              notification: {
-                type: 'error',
-                message: t(
-                  'Your Enable Banking application is inactive. Please reconfigure.',
-                ),
-                button: {
-                  title: t('reconfigure'),
-                  action: deconfigureEnableBanking,
+        // Automatically reset credentials on errors that indicate invalid configuration
+        if (
+          results.error.error_code === 'ENABLEBANKING_APPLICATION_INACTIVE' ||
+          results.error.error_code === 'ENABLEBANKING_SECRETS_INVALID'
+        ) {
+          try {
+            await deconfigureEnableBanking();
+            dispatch(
+              addNotification({
+                notification: {
+                  type: 'warning',
+                  message: t(
+                    'EnableBanking credentials were reset due to invalid configuration.',
+                  ),
                 },
-              },
-            }),
-          );
+              }),
+            );
+          } catch {
+            // Deconfiguration failed, but we still mark as unconfigured
+          } finally {
+            setConfiguredEnableBanking(false);
+            setIsLoading(false);
+          }
+          return;
         }
+
+        setConfiguredEnableBanking(false);
         setIsLoading(false);
         return;
       }

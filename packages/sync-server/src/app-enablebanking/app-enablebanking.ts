@@ -11,6 +11,7 @@ import { enableBankingservice } from './services/enablebanking-services.js';
 import {
   BadRequestError,
   badRequestVariableError,
+  EnableBankingSetupError,
   handleErrorInHandler,
   NotReadyError,
 } from './utils/errors.js';
@@ -41,24 +42,37 @@ post('/configure', async req => {
 });
 
 post('/status', async () => {
-  const data = {
-    configured: await enableBankingservice.isConfigured(),
-  };
-  return data;
+  try {
+    const configured = await enableBankingservice.isConfigured();
+    return { configured };
+  } catch (error) {
+    // If checking configuration fails, it means it's not properly configured
+    console.error('Failed to check EnableBanking configuration status:', error);
+    return { configured: false };
+  }
 });
 
 post('/countries', async () => {
+  if (!enableBankingservice.secretsAreSetup()) {
+    throw new EnableBankingSetupError();
+  }
   const application = await enableBankingservice.getApplication();
   return application.countries;
 });
 
 post('/get_aspsps', async req => {
+  if (!enableBankingservice.secretsAreSetup()) {
+    throw new EnableBankingSetupError();
+  }
   const { country } = req.body;
   const responseData = (await enableBankingservice.getASPSPs(country)).aspsps;
   return responseData;
 });
 
 post('/start_auth', async (req: Request) => {
+  if (!enableBankingservice.secretsAreSetup()) {
+    throw new EnableBankingSetupError();
+  }
   const { aspsp, country } = req.body;
 
   const origin = req.headers.origin;
@@ -67,6 +81,25 @@ post('/start_auth', async (req: Request) => {
       "'origin' header should be passed to '/start_auth'.",
     );
   }
+
+  // Validate origin to prevent SSRF attacks
+  try {
+    const originUrl = new URL(origin);
+    // Only allow http and https protocols
+    if (originUrl.protocol !== 'http:' && originUrl.protocol !== 'https:') {
+      throw new BadRequestError(
+        'Invalid origin protocol. Only http and https are allowed.',
+      );
+    }
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      throw error;
+    }
+    throw new BadRequestError(
+      `Invalid origin header: ${error instanceof Error ? error.message : 'malformed URL'}`,
+    );
+  }
+
   return await enableBankingservice.startAuth(
     country,
     aspsp,
@@ -107,6 +140,9 @@ post('/complete_auth', async (req: Request) => {
 });
 
 post('/get_accounts', async (req: Request) => {
+  if (!enableBankingservice.secretsAreSetup()) {
+    throw new EnableBankingSetupError();
+  }
   const { session_id } = req.body;
 
   if (!session_id) {
@@ -117,6 +153,9 @@ post('/get_accounts', async (req: Request) => {
 });
 
 post('/transactions', async (req: Request) => {
+  if (!enableBankingservice.secretsAreSetup()) {
+    throw new EnableBankingSetupError();
+  }
   const { startDate, endDate, account_id, bank_id } = req.body;
 
   if (!account_id) {

@@ -107,7 +107,7 @@ export type Modal =
   | {
       name: 'enablebanking-init';
       options: {
-        onSuccess: () => void;
+        onSuccess: (close: () => void) => void;
       };
     }
   | {

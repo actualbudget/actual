@@ -10,6 +10,7 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 
 import { Error as ErrorAlert } from '@desktop-client/components/alerts';
+import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
   ModalButtons,
@@ -91,8 +92,7 @@ export const EnableBankingInitialiseModal = ({
       }
 
       setIsValid(true);
-      onSuccess();
-      close();
+      onSuccess(close);
     } catch {
       setIsValid(false);
       setError(t('Something went wrong. Please try again later.'));
@@ -113,28 +113,41 @@ export const EnableBankingInitialiseModal = ({
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>
-            <Text>
-              <Trans>
-                In order to enable bank sync via Enable Banking (only for EU
-                banks) you will need to create application credentials.
-              </Trans>
-            </Text>
-            <Text style={{ fontWeight: 500 }}>
-              <Trans>
-                When creating your application, use this redirect URL:
-              </Trans>
-            </Text>
-            <Text
-              style={{
-                fontFamily: 'monospace',
-                fontSize: 12,
-                padding: 8,
-                backgroundColor: 'var(--color-table-background)',
-                borderRadius: 4,
-              }}
-            >
-              {window.location.origin}/enablebanking/auth_callback
-            </Text>
+            {window.location.protocol === 'http:' ? (
+              <ErrorAlert>
+                <Trans>
+                  Enable Banking requires HTTPS. Please access the app via HTTPS
+                  to use this feature.
+                </Trans>
+              </ErrorAlert>
+            ) : (
+              <>
+                <Text>
+                  <Trans>
+                    In order to enable bank sync via Enable Banking (only for EU
+                    banks) you will need to create application credentials at{' '}
+                    <Link
+                      variant="external"
+                      to="https://enablebanking.com/cp/applications"
+                      linkColor="blue"
+                    >
+                      enablebanking.com
+                    </Link>
+                    .
+                  </Trans>
+                </Text>
+                <Text style={{ fontWeight: 500 }}>
+                  <Trans>
+                    When registering your application, copy and paste this exact
+                    URL (including /enablebanking/auth_callback) into the
+                    &quot;URLs whitelisted for redirecting&quot; field:
+                  </Trans>
+                </Text>
+                <Text style={{ fontFamily: 'monospace' }}>
+                  {window.location.origin}/enablebanking/auth_callback
+                </Text>
+              </>
+            )}
 
             <FormField>
               <FormLabel
