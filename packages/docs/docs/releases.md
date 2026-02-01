@@ -106,7 +106,7 @@ This release contains the following notable improvements, along with numerous fi
 - [#6506](https://github.com/actualbudget/actual/pull/6506) test: add mobile payees page unit test — thanks @MatissJanis
 - [#6530](https://github.com/actualbudget/actual/pull/6530) Add token-based authentication to GitHub Actions for PR creation and release notes generation. — thanks @MatissJanis
 - [#6531](https://github.com/actualbudget/actual/pull/6531) Disable some CI workflows in forks — thanks @jfdoming
-- [#6536](https://github.com/actualbudget/actual/pull/6536) Disable coderabbit generated PR summaries — thanks @MatissJanis
+- [#6536](https://github.com/actualbudget/actual/pull/6536) Disable CodeRabbit generated PR summaries — thanks @MatissJanis
 - [#6544](https://github.com/actualbudget/actual/pull/6544) Fix electron workflow job ordering for calculating hashes for Flathub release. — thanks @MikesGlitch
 - [#6545](https://github.com/actualbudget/actual/pull/6545) Fix electron master publish to Flathub caused by hashes calculation — thanks @MikesGlitch
 - [#6560](https://github.com/actualbudget/actual/pull/6560) Upgrade oxlint and oxfmt dependencies, improve accessibility, and fix JSON formatting issues. — thanks @MatissJanis
