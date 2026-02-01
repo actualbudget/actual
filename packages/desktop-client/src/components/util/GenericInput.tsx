@@ -35,7 +35,7 @@ type GenericInputProps = {
   | ((
       | {
           type: 'id';
-          field: 'payee' | 'category';
+          field: 'payee' | 'category' | 'category_group';
         }
       | {
           type: 'id';
