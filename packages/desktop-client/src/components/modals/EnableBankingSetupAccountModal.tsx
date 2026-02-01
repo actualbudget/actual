@@ -449,7 +449,7 @@ export function EnableBankingSetupAccountModal({
     }
   }, [phase, token]);
 
-  let component: ReactElement = (
+  let component: ReactElement | null = (
     <WaitingIndicator
       message={t('Checking if Enable Banking is available...')}
     />
@@ -501,10 +501,13 @@ export function EnableBankingSetupAccountModal({
                               );
                             } catch (dispatchError) {
                               // If modal dispatch fails, show error to user
-                              console.error('Failed to reopen setup modal:', dispatchError);
+                              console.error(
+                                'Failed to reopen setup modal:',
+                                dispatchError,
+                              );
                             }
                           }, MODAL_TRANSITION_DELAY_MS);
-                          
+
                           // Store timeout ID for potential cleanup
                           return () => clearTimeout(timeoutId);
                         },
