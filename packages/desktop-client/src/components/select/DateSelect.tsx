@@ -173,7 +173,8 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
           }
         },
       }),
-      [onUpdate],
+      // oxlint-disable-next-line react-hooks/exhaustive-deps
+      [],
     );
 
     useLayoutEffect(() => {
@@ -316,7 +317,8 @@ function DateSelectDesktop({
         setSelectedValue(value);
       }
     }
-  }, [value, onUpdate, dateFormat]);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, dateFormat]);
 
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (
