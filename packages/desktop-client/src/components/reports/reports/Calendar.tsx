@@ -689,6 +689,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     onMakeAsNonSplitTransactions={() => {}}
                     showSelection={false}
                     allowSplitTransaction={false}
+                    allowReorder={false}
                   />
                 </SplitsExpandedProvider>
               ) : (
