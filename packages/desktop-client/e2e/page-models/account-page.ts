@@ -165,7 +165,9 @@ export class AccountPage {
    */
   async filterBy(field: string | RegExp) {
     await this.filterButton.click();
-    await this.filterSelectTooltip.getByRole('button', { name: field, exact: true }).click();
+    await this.filterSelectTooltip
+      .getByRole('button', { name: field, exact: true })
+      .click();
 
     return new FilterTooltip(this.page.getByTestId('filters-menu-tooltip'));
   }

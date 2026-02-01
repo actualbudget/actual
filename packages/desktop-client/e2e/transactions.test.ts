@@ -99,19 +99,19 @@ test.describe('Transactions', () => {
 
       // Assert that there are only clothing transactions
       await expect(accountPage.getNthTransaction(0).category).toHaveText(
-          'Clothing',
+        'Clothing',
       );
       await expect(accountPage.getNthTransaction(1).category).toHaveText(
-          'Clothing',
+        'Clothing',
       );
       await expect(accountPage.getNthTransaction(2).category).toHaveText(
-          'Clothing',
+        'Clothing',
       );
       await expect(accountPage.getNthTransaction(3).category).toHaveText(
-          'Clothing',
+        'Clothing',
       );
       await expect(accountPage.getNthTransaction(4).category).toHaveText(
-          'Clothing',
+        'Clothing',
       );
       await expect(page).toMatchThemeScreenshots();
     });
