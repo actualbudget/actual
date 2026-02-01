@@ -87,7 +87,6 @@ const cellStyle: CSSProperties = {
 };
 
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
-  const currentMonth = monthUtils.currentMonth();
   return (
     <View
       style={{
@@ -96,9 +95,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         marginRight: styles.monthRightPadding,
         paddingTop: 10,
         paddingBottom: 10,
-        backgroundColor: monthUtils.isCurrentMonth(currentMonth)
-          ? theme.budgetCurrentMonth
-          : theme.budgetOtherMonth,
+        backgroundColor: theme.budgetCurrentMonth,
       }}
     >
       <View style={headerLabelStyle}>
@@ -137,19 +134,14 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   );
 });
 
-type IncomeHeaderMonthProps = {
-  month: string;
-};
-export function IncomeHeaderMonth({ month }: IncomeHeaderMonthProps) {
+export function IncomeHeaderMonth() {
   return (
     <Row
       style={{
         color: theme.tableHeaderText,
         alignItems: 'center',
         paddingRight: 10,
-        backgroundColor: monthUtils.isCurrentMonth(month)
-          ? theme.budgetCurrentMonth
-          : theme.budgetOtherMonth,
+        backgroundColor: theme.budgetCurrentMonth,
       }}
     >
       <View style={{ flex: 1, textAlign: 'right' }}>
