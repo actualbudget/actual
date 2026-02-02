@@ -9,17 +9,146 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
+import { q } from '../../shared/query';
 import { groupBy, sortByKey } from '../../shared/util';
+import {
+  type RecurConfig,
+  type RecurPattern,
+  type RuleEntity,
+} from '../../types/models';
+import { ruleModel } from '../transactions/transaction-rules';
 
-import type * as YNAB5 from './ynab5-types';
+import type {
+  Budget,
+  Payee,
+  ScheduledSubtransaction,
+  ScheduledTransactionSummary,
+  Subtransaction,
+  TransactionSummary,
+} from './ynab5-types';
 
 function amountFromYnab(amount: number) {
-  // ynabs multiplies amount by 1000 and actual by 100
+  // YNAB multiplies amount by 1000 and Actual by 100
   // so, this function divides by 10
   return Math.round(amount / 10);
 }
 
-function importAccounts(data: YNAB5.Budget, entityIdMap: Map<string, string>) {
+function getDayOfMonth(date: string) {
+  return monthUtils.parseDate(date).getDate();
+}
+
+function getYnabMonthlyPatterns(dateFirst: string): RecurPattern[] | undefined {
+  if (getDayOfMonth(dateFirst) !== 31) {
+    return undefined;
+  }
+
+  return [
+    {
+      type: 'day',
+      value: -1,
+    },
+  ];
+}
+
+// Use Actual's "specific days" to avoid drifting every 15 days.
+// This approximates YNAB's "second occurrence is 15 days after the chosen day"
+// by locking to two day-of-month values.
+function getYnabTwiceMonthlyPatterns(dateFirst: string): RecurPattern[] {
+  const firstDay = getDayOfMonth(dateFirst);
+  // Compute the second occurrence as 15 calendar days after the first.
+  const secondDay = getDayOfMonth(monthUtils.addDays(dateFirst, 15));
+
+  return [
+    { type: 'day', value: firstDay === 31 ? -1 : firstDay },
+    { type: 'day', value: secondDay === 31 ? -1 : secondDay },
+  ];
+}
+
+function mapYnabFrequency(
+  frequency: string,
+  dateFirst: string,
+): {
+  frequency: RecurConfig['frequency'];
+  interval?: number;
+  patterns?: RecurPattern[];
+} {
+  switch (frequency) {
+    case 'daily':
+      return { frequency: 'daily' };
+    case 'weekly':
+      return { frequency: 'weekly' };
+    case 'monthly':
+      return {
+        frequency: 'monthly',
+        patterns: getYnabMonthlyPatterns(dateFirst),
+      };
+    case 'yearly':
+      return { frequency: 'yearly' };
+    case 'everyOtherWeek':
+      return { frequency: 'weekly', interval: 2 };
+    case 'every4Weeks':
+      return { frequency: 'weekly', interval: 4 };
+    case 'everyOtherMonth':
+      return {
+        frequency: 'monthly',
+        interval: 2,
+        patterns: getYnabMonthlyPatterns(dateFirst),
+      };
+    case 'every3Months':
+      return {
+        frequency: 'monthly',
+        interval: 3,
+        patterns: getYnabMonthlyPatterns(dateFirst),
+      };
+    case 'every4Months':
+      return {
+        frequency: 'monthly',
+        interval: 4,
+        patterns: getYnabMonthlyPatterns(dateFirst),
+      };
+    case 'everyOtherYear':
+      return { frequency: 'yearly', interval: 2 };
+    case 'twiceAMonth': {
+      return {
+        frequency: 'monthly',
+        patterns: getYnabTwiceMonthlyPatterns(dateFirst),
+      };
+    }
+    case 'twiceAYear': {
+      return {
+        frequency: 'monthly',
+        interval: 6,
+        patterns: getYnabMonthlyPatterns(dateFirst),
+      };
+    }
+    default:
+      throw new Error(`Unsupported scheduled frequency: ${frequency}`);
+  }
+}
+
+function getScheduleDateValue(
+  scheduled: ScheduledTransactionSummary,
+): RecurConfig | string {
+  const dateFirst = scheduled.date_first;
+  const frequency = scheduled.frequency;
+
+  if (frequency === 'never') {
+    return scheduled.date_next;
+  }
+
+  const mapped = mapYnabFrequency(frequency, dateFirst);
+  return {
+    frequency: mapped.frequency,
+    interval: mapped.interval,
+    patterns: mapped.patterns,
+    skipWeekend: false,
+    weekendSolveMode: 'after',
+    endMode: 'never',
+    start: dateFirst,
+  };
+}
+
+function importAccounts(data: Budget, entityIdMap: Map<string, string>) {
   return Promise.all(
     data.accounts.map(async account => {
       if (!account.deleted) {
@@ -35,7 +164,7 @@ function importAccounts(data: YNAB5.Budget, entityIdMap: Map<string, string>) {
 }
 
 async function importCategories(
-  data: YNAB5.Budget,
+  data: Budget,
   entityIdMap: Map<string, string>,
 ) {
   // Hidden categories are put in its own group by YNAB,
@@ -167,7 +296,7 @@ async function importCategories(
   }
 }
 
-function importPayees(data: YNAB5.Budget, entityIdMap: Map<string, string>) {
+function importPayees(data: Budget, entityIdMap: Map<string, string>) {
   return Promise.all(
     data.payees.map(async payee => {
       if (!payee.deleted) {
@@ -180,8 +309,241 @@ function importPayees(data: YNAB5.Budget, entityIdMap: Map<string, string>) {
   );
 }
 
+async function importScheduledTransactions(
+  data: Budget,
+  entityIdMap: Map<string, string>,
+) {
+  const scheduledTransactions = data.scheduled_transactions;
+  const scheduledSubtransactionsGrouped = groupBy(
+    data.scheduled_subtransactions,
+    'scheduled_transaction_id',
+  );
+  if (scheduledTransactions.length === 0) {
+    return;
+  }
+
+  const payees = await actual.getPayees();
+  const payeesByTransferAcct = payees
+    .filter(payee => payee?.transfer_acct)
+    .map(payee => [payee.transfer_acct, payee] as [string, Payee]);
+  const payeeTransferAcctHashMap = new Map<string, Payee>(payeesByTransferAcct);
+  const scheduleCategoryMap = new Map<string, string>();
+  const scheduleSplitsMap = new Map<string, ScheduledSubtransaction[]>();
+  const schedulePayeeMap = new Map<string, string>();
+
+  async function getRuleForSchedule(
+    scheduleId: string,
+  ): Promise<RuleEntity | null> {
+    const { data: ruleId } = (await actual.aqlQuery(
+      q('schedules').filter({ id: scheduleId }).calculate('rule'),
+    )) as { data: string | null };
+    if (!ruleId) {
+      return null;
+    }
+
+    const { data: ruleData } = (await actual.aqlQuery(
+      q('rules').filter({ id: ruleId }).select('*'),
+    )) as { data: Array<Record<string, unknown>> };
+    const ruleRow = ruleData?.[0];
+    if (!ruleRow) {
+      return null;
+    }
+
+    return ruleModel.toJS(ruleRow);
+  }
+
+  for (const scheduled of scheduledTransactions) {
+    if (scheduled.deleted) {
+      continue;
+    }
+
+    const mappedAccountId = entityIdMap.get(scheduled.account_id);
+    if (!mappedAccountId) {
+      continue;
+    }
+
+    const scheduleDate = getScheduleDateValue(scheduled);
+
+    let mappedPayeeId: string | undefined;
+    if (scheduled.transfer_account_id) {
+      const mappedTransferAccountId = entityIdMap.get(
+        scheduled.transfer_account_id,
+      );
+      mappedPayeeId = mappedTransferAccountId
+        ? payeeTransferAcctHashMap.get(mappedTransferAccountId)?.id
+        : undefined;
+    } else if (scheduled.payee_id) {
+      mappedPayeeId = entityIdMap.get(scheduled.payee_id);
+    }
+
+    if (!mappedPayeeId) {
+      continue;
+    }
+
+    const scheduleId = await actual.createSchedule({
+      posts_transaction: false,
+      payee: mappedPayeeId,
+      account: mappedAccountId,
+      amount: amountFromYnab(scheduled.amount),
+      amountOp: 'is',
+      date: scheduleDate,
+    });
+    schedulePayeeMap.set(scheduleId, mappedPayeeId);
+
+    const scheduleNotes = buildTransactionNotes(scheduled);
+    if (scheduleNotes) {
+      const rule = await getRuleForSchedule(scheduleId);
+      if (rule) {
+        const actions = rule.actions ? [...rule.actions] : [];
+        const notesAction = actions.find(
+          action => action.op === 'set' && action.field === 'notes',
+        );
+        if (notesAction) {
+          notesAction.value = scheduleNotes;
+        } else {
+          actions.push({
+            op: 'set',
+            field: 'notes',
+            value: scheduleNotes,
+          });
+        }
+
+        await actual.updateRule(buildRuleUpdate(rule, actions));
+        logger.log(
+          `Updated rule for schedule ${scheduleId} (notes)`,
+          `actions=${actions.length}`,
+        );
+      }
+    }
+
+    const scheduledSubtransactions =
+      scheduledSubtransactionsGrouped
+        .get(scheduled.id)
+        ?.filter(subtransaction => !subtransaction.deleted) || [];
+
+    if (scheduledSubtransactions.length > 0) {
+      scheduleSplitsMap.set(scheduleId, scheduledSubtransactions);
+    } else if (!scheduled.transfer_account_id && scheduled.category_id) {
+      const mappedCategoryId = entityIdMap.get(scheduled.category_id);
+      if (mappedCategoryId) {
+        scheduleCategoryMap.set(scheduleId, mappedCategoryId);
+      }
+    }
+  }
+
+  if (scheduleCategoryMap.size > 0 || scheduleSplitsMap.size > 0) {
+    for (const [scheduleId, categoryId] of scheduleCategoryMap.entries()) {
+      const rule = await getRuleForSchedule(scheduleId);
+      if (!rule) {
+        continue;
+      }
+
+      const actions = rule.actions ? [...rule.actions] : [];
+      const categoryAction = actions.find(
+        action => action.op === 'set' && action.field === 'category',
+      );
+      if (categoryAction) {
+        categoryAction.value = categoryId;
+      } else {
+        actions.push({
+          op: 'set',
+          field: 'category',
+          value: categoryId,
+        });
+      }
+
+      await actual.updateRule(buildRuleUpdate(rule, actions));
+      logger.log(
+        `Updated rule for schedule ${scheduleId} (category)`,
+        `actions=${actions.length}`,
+      );
+    }
+
+    for (const [scheduleId, subtransactions] of scheduleSplitsMap.entries()) {
+      const rule = await getRuleForSchedule(scheduleId);
+      if (!rule) {
+        continue;
+      }
+
+      const actions = rule.actions ? [...rule.actions] : [];
+      const parentPayeeId = schedulePayeeMap.get(scheduleId);
+
+      subtransactions.forEach((subtransaction, index) => {
+        const splitIndex = index + 1;
+
+        actions.push({
+          op: 'set-split-amount',
+          value: amountFromYnab(subtransaction.amount),
+          options: { splitIndex, method: 'fixed-amount' },
+        });
+
+        if (subtransaction.memo) {
+          actions.push({
+            op: 'set',
+            field: 'notes',
+            value: subtransaction.memo,
+            options: { splitIndex },
+          });
+        }
+
+        if (subtransaction.transfer_account_id) {
+          const mappedTransferAccountId = entityIdMap.get(
+            subtransaction.transfer_account_id,
+          );
+          const transferPayeeId = mappedTransferAccountId
+            ? payeeTransferAcctHashMap.get(mappedTransferAccountId)?.id
+            : undefined;
+          if (transferPayeeId) {
+            actions.push({
+              op: 'set',
+              field: 'payee',
+              value: transferPayeeId,
+              options: { splitIndex },
+            });
+          }
+        } else if (subtransaction.payee_id) {
+          const mappedPayeeId = entityIdMap.get(subtransaction.payee_id);
+          if (mappedPayeeId) {
+            actions.push({
+              op: 'set',
+              field: 'payee',
+              value: mappedPayeeId,
+              options: { splitIndex },
+            });
+          }
+        } else if (parentPayeeId) {
+          actions.push({
+            op: 'set',
+            field: 'payee',
+            value: parentPayeeId,
+            options: { splitIndex },
+          });
+        }
+
+        if (!subtransaction.transfer_account_id && subtransaction.category_id) {
+          const mappedCategoryId = entityIdMap.get(subtransaction.category_id);
+          if (mappedCategoryId) {
+            actions.push({
+              op: 'set',
+              field: 'category',
+              value: mappedCategoryId,
+              options: { splitIndex },
+            });
+          }
+        }
+      });
+
+      await actual.updateRule(buildRuleUpdate(rule, actions));
+      logger.log(
+        `Updated rule for schedule ${scheduleId} (splits)`,
+        `actions=${actions.length}`,
+      );
+    }
+  }
+}
+
 async function importTransactions(
-  data: YNAB5.Budget,
+  data: Budget,
   entityIdMap: Map<string, string>,
 ) {
   const payees = await actual.getPayees();
@@ -199,12 +561,10 @@ async function importTransactions(
 
   const payeesByTransferAcct = payees
     .filter(payee => payee?.transfer_acct)
-    .map(payee => [payee.transfer_acct, payee] as [string, YNAB5.Payee]);
-  const payeeTransferAcctHashMap = new Map<string, YNAB5.Payee>(
-    payeesByTransferAcct,
-  );
-  const orphanTransferMap = new Map<string, YNAB5.Transaction[]>();
-  const orphanSubtransfer = [] as YNAB5.Subtransaction[];
+    .map(payee => [payee.transfer_acct, payee] as [string, Payee]);
+  const payeeTransferAcctHashMap = new Map<string, Payee>(payeesByTransferAcct);
+  const orphanTransferMap = new Map<string, TransactionSummary[]>();
+  const orphanSubtransfer = [] as Subtransaction[];
   const orphanSubtransferTrxId = [] as string[];
   const orphanSubtransferAcctIdByTrxIdMap = new Map<string, string>();
   const orphanSubtransferDateByTrxIdMap = new Map<string, string>();
@@ -262,7 +622,7 @@ async function importTransactions(
       }
       return map;
     },
-    new Map<string, YNAB5.Subtransaction[]>(),
+    new Map<string, Subtransaction[]>(),
   );
 
   // The comparator will be used to order transfer transactions and their
@@ -270,11 +630,11 @@ async function importTransactions(
   // for every list index in the transactions list, the related subtransaction
   // will be at the same index.
   const orphanTransferComparator = (
-    a: YNAB5.Transaction | YNAB5.Subtransaction,
-    b: YNAB5.Transaction | YNAB5.Subtransaction,
+    a: TransactionSummary | Subtransaction,
+    b: TransactionSummary | Subtransaction,
   ) => {
-    // a and b can be a YNAB5.Transaction (having a date attribute) or a
-    // YNAB5.Subtransaction (missing that date attribute)
+    // a and b can be a TransactionSummary (having a date attribute) or a
+    // Subtransaction (missing that date attribute)
 
     const date_a =
       'date' in a
@@ -377,7 +737,7 @@ async function importTransactions(
             category: entityIdMap.get(transaction.category_id) || null,
             cleared: ['cleared', 'reconciled'].includes(transaction.cleared),
             reconciled: transaction.cleared === 'reconciled',
-            notes: transaction.memo || null,
+            notes: buildTransactionNotes(transaction),
             imported_id: transaction.import_id || null,
             transfer_id:
               entityIdMap.get(transaction.transfer_transaction_id) ||
@@ -402,10 +762,11 @@ async function importTransactions(
           };
 
           // Handle transactions and subtransactions payee
-          const transactionPayeeUpdate = (
-            trx: YNAB5.Transaction | YNAB5.Subtransaction,
+          function transactionPayeeUpdate(
+            trx: TransactionSummary | Subtransaction,
             newTrx,
-          ) => {
+            fallbackPayeeId?: string | null,
+          ) {
             if (trx.transfer_account_id) {
               const mappedTransferAccountId = entityIdMap.get(
                 trx.transfer_account_id,
@@ -413,13 +774,15 @@ async function importTransactions(
               newTrx.payee = payeeTransferAcctHashMap.get(
                 mappedTransferAccountId,
               )?.id;
-            } else {
+            } else if (trx.payee_id) {
               newTrx.payee = entityIdMap.get(trx.payee_id);
               newTrx.imported_payee = data.payees.find(
                 p => !p.deleted && p.id === trx.payee_id,
               )?.name;
+            } else if (fallbackPayeeId) {
+              newTrx.payee = fallbackPayeeId;
             }
-          };
+          }
 
           transactionPayeeUpdate(transaction, newTransaction);
           if (newTransaction.subtransactions) {
@@ -427,7 +790,11 @@ async function importTransactions(
               const newSubtransaction = newTransaction.subtransactions.find(
                 newSubtrans => newSubtrans.id === entityIdMap.get(subtrans.id),
               );
-              transactionPayeeUpdate(subtrans, newSubtransaction);
+              transactionPayeeUpdate(
+                subtrans,
+                newSubtransaction,
+                newTransaction.payee,
+              );
             });
           }
 
@@ -450,10 +817,7 @@ async function importTransactions(
   );
 }
 
-async function importBudgets(
-  data: YNAB5.Budget,
-  entityIdMap: Map<string, string>,
-) {
+async function importBudgets(data: Budget, entityIdMap: Map<string, string>) {
   // There should be info in the docs to deal with
   // no credit card category and how YNAB and Actual
   // handle differently the amount To be Budgeted
@@ -499,7 +863,7 @@ async function importBudgets(
 
 // Utils
 
-export async function doImport(data: YNAB5.Budget) {
+export async function doImport(data: Budget) {
   const entityIdMap = new Map<string, string>();
 
   logger.log('Importing Accounts...');
@@ -514,13 +878,16 @@ export async function doImport(data: YNAB5.Budget) {
   logger.log('Importing Transactions...');
   await importTransactions(data, entityIdMap);
 
+  logger.log('Importing Scheduled Transactions...');
+  await importScheduledTransactions(data, entityIdMap);
+
   logger.log('Importing Budgets...');
   await importBudgets(data, entityIdMap);
 
   logger.log('Setting up...');
 }
 
-export function parseFile(buffer: Buffer): YNAB5.Budget {
+export function parseFile(buffer: Buffer): Budget {
   let data = JSON.parse(buffer.toString());
   if (data.data) {
     data = data.data;
@@ -532,7 +899,7 @@ export function parseFile(buffer: Buffer): YNAB5.Budget {
   return data;
 }
 
-export function getBudgetName(_filepath: string, data: YNAB5.Budget) {
+export function getBudgetName(_filepath: string, data: Budget) {
   return data.budget_name || data.name;
 }
 
@@ -556,4 +923,33 @@ function findIdByName<T extends { id: string; name: string }>(
   name: string,
 ) {
   return findByNameIgnoreCase<T>(categories, name)?.id;
+}
+
+type FlaggedMemoTransaction = {
+  memo?: string | null;
+  flag_name?: string | null;
+  flag_color?: string | null;
+};
+
+function buildTransactionNotes(transaction: FlaggedMemoTransaction) {
+  const normalizedMemo = transaction.memo?.trim() ?? '';
+  const normalizedFlag =
+    transaction.flag_name?.trim() ?? transaction.flag_color?.trim() ?? '';
+  const notes = `${normalizedMemo} ${
+    normalizedFlag ? `#${normalizedFlag}` : ''
+  }`.trim();
+  return notes.length > 0 ? notes : null;
+}
+
+function buildRuleUpdate(
+  rule: RuleEntity,
+  actions: RuleEntity['actions'],
+): RuleEntity {
+  return {
+    id: rule.id,
+    stage: rule.stage ?? null,
+    conditionsOp: rule.conditionsOp ?? 'and',
+    conditions: rule.conditions,
+    actions,
+  };
 }
