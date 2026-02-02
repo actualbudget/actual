@@ -39,6 +39,13 @@ describe('arithmetic', () => {
     expect(evalArithmetic('20^3 - 5 * (10 / 2)')).toEqual(7975);
   });
 
+  test('exponentiation is right-associative', () => {
+    // 2^3^2 should equal 2^(3^2) = 2^9 = 512, not (2^3)^2 = 8^2 = 64
+    expect(evalArithmetic('2^3^2')).toBe(512);
+    expect(evalArithmetic('2^2^3')).toBe(256); // 2^(2^3) = 2^8 = 256
+    expect(evalArithmetic('3^3^2')).toBe(19683); // 3^(3^2) = 3^9 = 19683
+  });
+
   test('respects current number format', () => {
     expect(evalArithmetic('1,222.45')).toEqual(1222.45);
 
