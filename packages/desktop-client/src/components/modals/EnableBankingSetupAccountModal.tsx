@@ -346,19 +346,27 @@ const PollingComponent = ({
     let cancelled = false;
 
     (async () => {
-      const { redirect_url, state } = authenticationStartResponse;
-      // Open redirect_url in browser
-      window.Actual.openURLInBrowser(redirect_url);
-      // Polling starts here
-      const { data, error } = await send('enablebanking-pollauth', { state });
+      try {
+        const { redirect_url, state } = authenticationStartResponse;
+        // Open redirect_url in browser
+        window.Actual.openURLInBrowser(redirect_url);
+        // Polling starts here
+        const { data, error } = await send('enablebanking-pollauth', { state });
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      if (error) {
-        onErrorRef.current(error);
-        return;
+        if (error) {
+          onErrorRef.current(error);
+          return;
+        }
+        onCompleteRef.current(data);
+      } catch (err) {
+        if (cancelled) return;
+        onErrorRef.current({
+          error_code: 'INTERNAL_ERROR',
+          error_type: err instanceof Error ? err.message : String(err),
+        });
       }
-      onCompleteRef.current(data);
     })();
 
     return () => {
@@ -612,7 +620,9 @@ export function EnableBankingSetupAccountModal({
                   accounts.
                 </Trans>
               </Paragraph>
-              {componentWithClose!}
+              {componentWithClose ?? (
+                <WaitingIndicator message={t('Loading...')} />
+              )}
             </View>
           </>
         );
