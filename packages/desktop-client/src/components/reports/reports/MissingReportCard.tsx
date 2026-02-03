@@ -1,8 +1,9 @@
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
-import { View } from '@actual-app/components/view';
+import { View } from "@actual-app/components/view";
 
-import { ReportCard } from '@desktop-client/components/reports/ReportCard';
+import { ReportCard } from "@desktop-client/components/reports/ReportCard";
 
 type MissingReportCardProps = {
   isEditing?: boolean;
@@ -15,18 +16,20 @@ export function MissingReportCard({
   onRemove,
   children,
 }: MissingReportCardProps) {
+  const { t } = useTranslation();
+
   return (
     <ReportCard
       isEditing={isEditing}
       menuItems={[
         {
-          name: 'remove',
-          text: 'Remove',
+          name: "remove",
+          text: t("Remove"),
         },
       ]}
-      onMenuSelect={item => {
+      onMenuSelect={(item) => {
         switch (item) {
-          case 'remove':
+          case "remove":
             onRemove();
             break;
           default:
@@ -37,8 +40,8 @@ export function MissingReportCard({
       <View
         style={{
           flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
+          alignItems: "center",
+          justifyContent: "center",
           padding: 10,
         }}
       >
