@@ -423,7 +423,8 @@ async function importScheduledTransactions(
       if (rule) {
         const actions = rule.actions ? [...rule.actions] : [];
         actions.push({
-          op: 'append-notes',
+          op: 'set',
+          field: 'notes',
           value: scheduleNotes,
         });
 
