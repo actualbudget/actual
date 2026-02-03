@@ -381,6 +381,7 @@ async function importScheduledTransactions(
     }
 
     const scheduleId = await actual.createSchedule({
+      name: scheduled.memo,
       posts_transaction: false,
       payee: mappedPayeeId,
       account: mappedAccountId,
@@ -409,10 +410,6 @@ async function importScheduledTransactions(
         }
 
         await actual.updateRule(buildRuleUpdate(rule, actions));
-        logger.log(
-          `Updated rule for schedule ${scheduleId} (notes)`,
-          `actions=${actions.length}`,
-        );
       }
     }
 
@@ -453,10 +450,6 @@ async function importScheduledTransactions(
       }
 
       await actual.updateRule(buildRuleUpdate(rule, actions));
-      logger.log(
-        `Updated rule for schedule ${scheduleId} (category)`,
-        `actions=${actions.length}`,
-      );
     }
 
     for (const [scheduleId, subtransactions] of scheduleSplitsMap.entries()) {
@@ -534,10 +527,6 @@ async function importScheduledTransactions(
       });
 
       await actual.updateRule(buildRuleUpdate(rule, actions));
-      logger.log(
-        `Updated rule for schedule ${scheduleId} (splits)`,
-        `actions=${actions.length}`,
-      );
     }
   }
 }
