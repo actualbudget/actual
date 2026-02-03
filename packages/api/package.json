@@ -11,7 +11,10 @@
   "types": "@types/api/index.d.ts",
   "scripts": {
     "build:crdt": "yarn workspace @actual-app/crdt build",
-    "build": "yarn run clean && vite build && tsc -p tsconfig.dist.json --emitDeclarationOnly",
+    "build:node": "vite build && tsc -p tsconfig.dist.json --emitDeclarationOnly",
+    "build:migrations": "mkdir dist/migrations && cp ../loot-core/migrations/*.sql dist/migrations",
+    "build:default-db": "cp ../loot-core/default-db.sqlite dist/",
+    "build": "yarn run clean && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
     "test": "yarn run clean && yarn run build:crdt && vitest --run",
     "clean": "rm -rf dist @types"
   },
