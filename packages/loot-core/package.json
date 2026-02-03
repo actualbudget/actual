@@ -54,7 +54,6 @@
   "scripts": {
     "build:node": "cross-env NODE_ENV=production vite build --config ./vite.desktop.config.ts",
     "watch:node": "cross-env NODE_ENV=development vite build --config ./vite.desktop.config.ts --watch",
-    "build:api": "cross-env NODE_ENV=development ./bin/build-api",
     "build:browser": "cross-env NODE_ENV=production ./bin/build-browser",
     "watch:browser": "cross-env NODE_ENV=development ./bin/build-browser",
     "generate:i18n": "i18next",
@@ -85,7 +84,6 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@actual-app/api": "workspace:^",
     "@actual-app/crdt": "workspace:^",
     "@actual-app/web": "workspace:^",
     "@swc/core": "^1.15.8",

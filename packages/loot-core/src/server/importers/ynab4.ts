@@ -1,10 +1,3 @@
-// @ts-strict-ignore
-// This is a special usage of the API because this package is embedded
-// into Actual itself. We only want to pull in the methods in that
-// case and ignore everything else; otherwise we'd be pulling in the
-// entire backend bundle from the API
-import { send } from '@actual-app/api/injected';
-import * as actual from '@actual-app/api/methods';
 import AdmZip from 'adm-zip';
 import normalizePathSep from 'slash';
 import { v4 as uuidv4 } from 'uuid';
@@ -13,6 +6,12 @@ import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, groupBy, sortByKey } from '../../shared/util';
 
+// @ts-strict-ignore
+// This is a special usage of the API because this package is embedded
+// into Actual itself. We use local API helpers that call handlers directly
+// to avoid cyclic dependency between loot-core and @actual-app/api
+import { send } from './api-helpers';
+import * as actual from './api-helpers';
 import type * as YNAB4 from './ynab4-types';
 
 // Importer

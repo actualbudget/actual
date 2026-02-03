@@ -9,11 +9,15 @@
     "noEmit": false,
     "declaration": true,
     "outDir": "dist",
-    "declarationDir": "@types",
-    "paths": {
-      "loot-core/*": ["./@types/loot-core/src/*"]
-    }
+    "declarationDir": "@types"
   },
   "include": ["."],
-  "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts"]
+  "exclude": [
+    "**/node_modules/*",
+    "dist",
+    "@types",
+    "*.test.ts",
+    "vite.config.ts",
+    "vitest.setup.ts"
+  ]
 }
