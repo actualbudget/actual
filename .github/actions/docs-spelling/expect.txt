@@ -5,6 +5,7 @@ Activo
 AESUDEF
 ALZEY
 Anglais
+ANZ
 aql
 AUR
 Authentik
@@ -40,13 +41,13 @@ COBADEFF
 CODEOWNERS
 COEP
 commerzbank
-COOP
 Copiar
 COUNTA
 COUNTBLANK
 countif
 CREGBEBB
 crt
+CZK
 Danske
 datadir
 DATEDIF
@@ -82,6 +83,7 @@ HABAL
 Hampel
 HELADEF
 HLOOKUP
+HUF
 IFERROR
 IFNA
 INDUSTRIEL
@@ -115,12 +117,14 @@ LKR
 MAXA
 mbank
 mdc
+metainfo
 modals
 Moldovan
 murmurhash
 NETWORKDAYS
 nginx
 OIDC
+Okabe
 overbudgeted
 overbudgeting
 oxc
@@ -133,7 +137,6 @@ prefs
 Primoco
 Priotecs
 proactively
-pwa
 Qatari
 QNTOFRP
 QONTO
@@ -172,6 +175,7 @@ touchscreen
 triaging
 UAH
 ubuntu
+undici
 userinfo
 Userscripts
 UZS
