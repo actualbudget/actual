@@ -331,6 +331,32 @@ async function importScheduledTransactions(
   const scheduleSplitsMap = new Map<string, ScheduledSubtransaction[]>();
   const schedulePayeeMap = new Map<string, string>();
 
+  async function createScheduleWithUniqueName(params: {
+    name: string;
+    posts_transaction: boolean;
+    payee: string;
+    account: string;
+    amount: number;
+    amountOp: 'is';
+    date: RecurConfig | string;
+  }) {
+    const baseName = params.name;
+    const MAX_RETRY = 50;
+    let count = 1;
+
+    while (true) {
+      try {
+        return await actual.createSchedule({ ...params, name: params.name });
+      } catch (e) {
+        if (count >= MAX_RETRY) {
+          throw Error(e.message);
+        }
+        params.name = `${baseName} (${count})`;
+        count += 1;
+      }
+    }
+  }
+
   async function getRuleForSchedule(
     scheduleId: string,
   ): Promise<RuleEntity | null> {
@@ -380,7 +406,7 @@ async function importScheduledTransactions(
       continue;
     }
 
-    const scheduleId = await actual.createSchedule({
+    const scheduleId = await createScheduleWithUniqueName({
       name: scheduled.memo,
       posts_transaction: false,
       payee: mappedPayeeId,
