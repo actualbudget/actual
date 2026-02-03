@@ -46,18 +46,18 @@ const resolveLanguage = (language: string) => {
 
   if (isLanguageAvailable(language)) return language;
 
-  if (language.includes('-')) {
-    const fallback = language.split('-')[0];
-    console.info(`Unknown locale ${language}, falling back to ${fallback}`);
-    return resolveLanguage(fallback);
-  }
-
   const lowercaseLanguage = language.toLowerCase();
   if (lowercaseLanguage !== language) {
     console.info(
       `Unknown locale ${language}, falling back to ${lowercaseLanguage}`,
     );
     return resolveLanguage(lowercaseLanguage);
+  }
+
+  if (language.includes('-')) {
+    const fallback = language.split('-')[0];
+    console.info(`Unknown locale ${language}, falling back to ${fallback}`);
+    return resolveLanguage(fallback);
   }
 
   return undefined;
