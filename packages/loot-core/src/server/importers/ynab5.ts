@@ -396,18 +396,10 @@ async function importScheduledTransactions(
       const rule = await getRuleForSchedule(scheduleId);
       if (rule) {
         const actions = rule.actions ? [...rule.actions] : [];
-        const notesAction = actions.find(
-          action => action.op === 'set' && action.field === 'notes',
-        );
-        if (notesAction) {
-          notesAction.value = scheduleNotes;
-        } else {
-          actions.push({
-            op: 'set',
-            field: 'notes',
-            value: scheduleNotes,
-          });
-        }
+        actions.push({
+          op: 'append-notes',
+          value: scheduleNotes,
+        });
 
         await actual.updateRule(buildRuleUpdate(rule, actions));
       }
@@ -436,18 +428,11 @@ async function importScheduledTransactions(
       }
 
       const actions = rule.actions ? [...rule.actions] : [];
-      const categoryAction = actions.find(
-        action => action.op === 'set' && action.field === 'category',
-      );
-      if (categoryAction) {
-        categoryAction.value = categoryId;
-      } else {
-        actions.push({
-          op: 'set',
-          field: 'category',
-          value: categoryId,
-        });
-      }
+      actions.push({
+        op: 'set',
+        field: 'category',
+        value: categoryId,
+      });
 
       await actual.updateRule(buildRuleUpdate(rule, actions));
     }
