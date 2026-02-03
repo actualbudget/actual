@@ -63,7 +63,7 @@ export function calculateHasWarning(
   }
 
   for (const cond of conditions) {
-    const { field, value, op } = cond;
+    const { field, value, op, options } = cond;
     const isMultiCondition = Array.isArray(value);
     const isSupportedSingleCondition = ['is', 'isNot'].includes(op);
 
@@ -103,6 +103,9 @@ export function calculateHasWarning(
         }
         break;
       case 'category':
+        if (options?.group) {
+          break;
+        }
         if (isMultiCondition) {
           if (value.find(val => !categoryIds.has(val))) {
             return true;

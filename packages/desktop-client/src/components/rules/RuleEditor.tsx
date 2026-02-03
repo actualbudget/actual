@@ -309,6 +309,10 @@ function ConditionEditor({
     } else if (options.outflow) {
       field = 'amount-outflow';
     }
+  } else if (field === 'category' && options) {
+    if (options.group) {
+      field = 'category-group';
+    }
   }
 
   let valueEditor;
@@ -846,6 +850,10 @@ function ConditionsList({
             newCond.field = 'amount';
             // @ts-expect-error fix this
             newCond.options = { outflow: true };
+          } else if (value === 'category-group') {
+            newCond.field = 'category';
+            // @ts-expect-error fix this
+            newCond.options = { group: true };
           }
 
           // @ts-expect-error fix this
@@ -976,7 +984,6 @@ const conditionFields = [
   'imported_payee',
   'account',
   'category',
-  'category_group',
   'date',
   'payee',
   'notes',
@@ -986,6 +993,7 @@ const conditionFields = [
   .concat([
     ['amount-inflow', mapField('amount', { inflow: true })],
     ['amount-outflow', mapField('amount', { outflow: true })],
+    ['category-group', mapField('category', { group: true })],
   ]);
 
 type RuleEditorProps = {

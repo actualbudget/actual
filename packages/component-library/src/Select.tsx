@@ -26,6 +26,7 @@ type SelectProps<Value> = {
   style?: CSSProperties;
   popoverStyle?: CSSProperties;
   className?: string;
+  testId?: string;
 };
 
 /**
@@ -53,6 +54,7 @@ export function Select<const Value = string>({
   style = {},
   popoverStyle = {},
   className,
+  testId,
 }: SelectProps<Value>) {
   const targetOption = options
     .filter(isValueOption)
@@ -73,6 +75,7 @@ export function Select<const Value = string>({
         }}
         style={style}
         className={className}
+        data-testid={testId}
       >
         <View
           style={{
@@ -123,6 +126,7 @@ export function Select<const Value = string>({
                   name: item[0],
                   text: item[1],
                   disabled: disabledKeys.includes(item[0]),
+                  testId: testId ? `${testId}-${item[0]}` : undefined,
                 },
           )}
           getItemStyle={option => {

@@ -43,6 +43,7 @@ export type MenuItemObject<NameType, Type extends string | symbol = string> = {
   key?: string;
   toggle?: boolean;
   tooltip?: string;
+  testId?: string;
 };
 
 export type MenuItem<NameType = string> =
@@ -216,6 +217,7 @@ export function Menu<const NameType = string>({
                 onMenuSelect?.(item.name);
               }
             }}
+            data-testid={item.testId}
           >
             {/* Force it to line up evenly */}
             {item.toggle === undefined ? (

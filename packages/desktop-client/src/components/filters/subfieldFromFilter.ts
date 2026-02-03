@@ -23,5 +23,11 @@ export function subfieldFromFilter({
     }
   }
 
+  if (field === 'category') {
+    if (options && options.group) {
+      return 'category-group';
+    }
+  }
+
   return field;
 }

@@ -43,7 +43,7 @@ export function FilterExpression<T extends RuleConditionEntity>({
   const [editing, setEditing] = useState(false);
   const triggerRef = useRef(null);
 
-  const field = subfieldFromFilter({ field: originalField, value });
+  const field = subfieldFromFilter({ field: originalField, options, value });
 
   return (
     <View

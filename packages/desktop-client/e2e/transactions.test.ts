@@ -86,7 +86,11 @@ test.describe('Transactions', () => {
     });
 
     test('by category group', async () => {
-      const filterTooltip = await accountPage.filterBy('Group');
+      const filterTooltip = await accountPage.filterBy('Category');
+
+      await page.getByTestId('subfield-select-category').click();
+      await page.getByTestId('subfield-select-category-category-group').click();
+
       await expect(filterTooltip.locator).toMatchThemeScreenshots();
 
       // Type in the autocomplete box

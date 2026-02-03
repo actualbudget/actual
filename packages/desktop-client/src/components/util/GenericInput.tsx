@@ -35,7 +35,7 @@ type GenericInputProps = {
   | ((
       | {
           type: 'id';
-          field: 'payee' | 'category' | 'category_group';
+          field: 'payee' | 'category' | 'category-group';
         }
       | {
           type: 'id';
@@ -264,7 +264,7 @@ export const GenericInput = ({
           );
           break;
 
-        case 'category_group':
+        case 'category-group':
           content = (
             <CategoryGroupAutocomplete
               {...multiProps}
