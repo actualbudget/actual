@@ -13,9 +13,8 @@ import { View } from '@actual-app/components/view';
 import { format as formatDate } from 'date-fns';
 import { t } from 'i18next';
 
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { type Query } from 'loot-core/shared/query';
-import { amountToInteger, tsToRelativeTime } from 'loot-core/shared/util';
+import { tsToRelativeTime } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
@@ -160,11 +159,9 @@ export function ReconcileMenu({
       return;
     }
 
-    const evaluatedAmount =
-      inputValue != null ? evalArithmetic(inputValue) : null;
     const amount =
-      evaluatedAmount != null
-        ? amountToInteger(evaluatedAmount)
+      inputValue != null
+        ? format.fromEdit(inputValue, clearedBalance)
         : clearedBalance;
 
     onReconcile(amount);

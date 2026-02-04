@@ -51,6 +51,7 @@ export function ToBudgetAmount({
   }
   const num = availableValue ?? 0;
   const isNegative = num < 0;
+  const isPositive = num > 0;
 
   return (
     <View style={{ alignItems: 'center', ...style }}>
@@ -84,13 +85,19 @@ export function ToBudgetAmount({
                   fontWeight: 400,
                   userSelect: 'none',
                   cursor: 'pointer',
-                  color: isNegative ? theme.errorText : theme.pageTextPositive,
+                  color: isPositive
+                    ? theme.toBudgetPositive
+                    : isNegative
+                      ? theme.toBudgetNegative
+                      : theme.toBudgetZero,
                   marginBottom: -1,
                   borderBottom: '1px solid transparent',
                   ':hover': {
-                    borderColor: isNegative
-                      ? theme.errorBorder
-                      : theme.pageTextPositive,
+                    borderColor: isPositive
+                      ? theme.toBudgetPositive
+                      : isNegative
+                        ? theme.toBudgetNegative
+                        : theme.toBudgetZero,
                   },
                 },
                 amountStyle,
