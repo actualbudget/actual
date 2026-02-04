@@ -1396,6 +1396,7 @@ const Transaction = memo(function Transaction({
         textAlign="flex"
         style={{
           flexDirection: 'row',
+          flexWrap: 'nowrap',
         }}
         exposed={focusedField === 'notes'}
         focused={focusedField === 'notes'}
