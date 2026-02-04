@@ -28,7 +28,7 @@ import { useReports } from '@desktop-client/hooks/useReports';
 type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
   customReportItems: T;
   report: CustomReportEntity;
-  savedStatus: string;
+  savedStatus: 'saved' | 'new' | 'modified';
   onReportChange: (
     params:
       | {

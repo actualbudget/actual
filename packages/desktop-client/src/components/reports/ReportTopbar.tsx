@@ -33,7 +33,7 @@ import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
 type ReportTopbarProps = {
   customReportItems: CustomReportEntity;
   report: CustomReportEntity;
-  savedStatus: string;
+  savedStatus: 'saved' | 'new' | 'modified';
   setGraphType: (value: string) => void;
   viewLegend: boolean;
   viewSummary: boolean;

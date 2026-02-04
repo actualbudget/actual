@@ -9,7 +9,7 @@ export function SaveReportMenu({
   listReports,
 }: {
   onMenuSelect: (item: string) => void;
-  savedStatus: string;
+  savedStatus: 'saved' | 'new' | 'modified';
   listReports: number;
 }) {
   const { t } = useTranslation();
