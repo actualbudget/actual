@@ -22,7 +22,6 @@ const linkStyles = {
   textDecoration: 'underline',
   background: 'transparent',
   padding: 0,
-  display: 'inline-flex',
 };
 
 export function DesktopLinkedNotes({
