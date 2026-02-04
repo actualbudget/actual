@@ -126,7 +126,7 @@ export function makeAmountFullStyle(
 }
 
 export function findSortDown(
-  arr: CategoryGroupEntity[],
+  arr: Array<{ id: string }>,
   pos: DropPosition,
   targetId: string,
 ) {
@@ -150,7 +150,7 @@ export function findSortDown(
 }
 
 export function findSortUp(
-  arr: CategoryGroupEntity[],
+  arr: Array<{ id: string }>,
   pos: DropPosition,
   targetId: string,
 ) {
