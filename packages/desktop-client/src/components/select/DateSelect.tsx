@@ -143,6 +143,8 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
     const picker = useRef(null);
     const mountPoint = useRef(null);
 
+    const onUpdateEffect = useEffectEvent(onUpdate);
+
     useImperativeHandle(
       ref,
       () => ({
@@ -170,11 +172,10 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
 
           if (newDate) {
             picker.current.setDate(newDate, true);
-            onUpdate?.(newDate);
+            onUpdateEffect?.(newDate);
           }
         },
       }),
-      // oxlint-disable-next-line react-hooks/exhaustive-deps
       [],
     );
 
@@ -276,51 +277,43 @@ function DateSelectDesktop({
   const innerRef = useRef<HTMLInputElement | null>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(innerRef, ref);
 
-  // This is confusing, so let me explain: `selectedValue` should be
-  // renamed to `currentValue`. It represents the current highlighted
-  // value in the date select and always changes as the user moves
-  // around. `userSelectedValue` represents the last value that the
-  // user actually selected (with enter or click). Having both allows
-  // us to make various UX decisions
   const [selectedValue, setSelectedValue] = useState(value);
-  const userSelectedValue = useRef(selectedValue);
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
-  useEffect(() => {
-    userSelectedValue.current = value;
-  }, [value]);
-
   useEffect(() => setValue(parsedDefaultValue), [parsedDefaultValue]);
 
-  useEffect(() => {
-    if (getDayMonthRegex(dateFormat).test(value)) {
+  const onUpdateEffect = useEffectEvent((newValue: string) => {
+    if (getDayMonthRegex(dateFormat).test(newValue)) {
       // Support only entering the month and day (4/5). This is complex
       // because of the various date formats - we need to derive
       // the right day/month format from it
-      const test = parse(value, getDayMonthFormat(dateFormat), new Date());
+      const test = parse(newValue, getDayMonthFormat(dateFormat), new Date());
       if (isValid(test)) {
         onUpdate?.(format(test, 'yyyy-MM-dd'));
         setSelectedValue(format(test, dateFormat));
       }
-    } else if (getShortYearRegex(dateFormat).test(value)) {
+    } else if (getShortYearRegex(dateFormat).test(newValue)) {
       // Support entering the year as only two digits (4/5/19)
-      const test = parse(value, getShortYearFormat(dateFormat), new Date());
+      const test = parse(newValue, getShortYearFormat(dateFormat), new Date());
       if (isValid(test)) {
         onUpdate?.(format(test, 'yyyy-MM-dd'));
         setSelectedValue(format(test, dateFormat));
       }
     } else {
-      const test = parse(value, dateFormat, new Date());
+      const test = parse(newValue, dateFormat, new Date());
       if (isValid(test)) {
         const date = format(test, 'yyyy-MM-dd');
         onUpdate?.(date);
-        setSelectedValue(value);
+        setSelectedValue(newValue);
       }
     }
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, dateFormat]);
+  });
+
+  useEffect(() => {
+    onUpdateEffect(value);
+  }, [value]);
 
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (
