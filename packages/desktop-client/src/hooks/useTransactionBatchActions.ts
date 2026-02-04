@@ -115,15 +115,8 @@ export function useTransactionBatchActions() {
         if (trans.is_parent) {
           return trans.id;
         }
-        if (trans.is_child) {
-          // Find the parent in the transactions list
-          const idx = transactionsToChange.findIndex(t => t.id === trans.id);
-          for (let i = idx - 1; i >= 0; i--) {
-            const t = transactionsToChange[i];
-            if (t.is_parent) {
-              return t.id;
-            }
-          }
+        if (trans.is_child && trans.parent_id) {
+          return trans.parent_id;
         }
         return trans.id; // Non-split transaction
       };
