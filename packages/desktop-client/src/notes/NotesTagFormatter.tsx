@@ -76,7 +76,7 @@ export function NotesTagFormatter({
                 displayText={segment.displayText}
                 url={segment.url}
                 separator={separator}
-              /isFilePath={segment.isFilePath}
+                isFilePath={segment.isFilePath}
               />
             );
 
