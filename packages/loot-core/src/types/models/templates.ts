@@ -1,20 +1,20 @@
-interface BaseTemplate {
+type BaseTemplate = {
   type: string;
   directive: 'template' | 'goal' | 'error';
-}
-interface BaseTemplateWithPriority extends BaseTemplate {
+};
+type BaseTemplateWithPriority = {
   priority: number;
   directive: 'template';
-}
+} & BaseTemplate;
 
-export interface PercentageTemplate extends BaseTemplateWithPriority {
+export type PercentageTemplate = {
   type: 'percentage';
   percent: number;
   previous: boolean;
   category: string;
-}
+} & BaseTemplateWithPriority;
 
-export interface PeriodicTemplate extends BaseTemplateWithPriority {
+export type PeriodicTemplate = {
   type: 'periodic';
   amount: number;
   period: {
@@ -28,27 +28,27 @@ export interface PeriodicTemplate extends BaseTemplateWithPriority {
     period: 'daily' | 'weekly' | 'monthly';
     start?: string;
   };
-}
+} & BaseTemplateWithPriority;
 
-export interface ByTemplate extends BaseTemplateWithPriority {
+export type ByTemplate = {
   type: 'by';
   amount: number;
   month: string;
   annual?: boolean;
   repeat?: number;
   from?: string;
-}
+} & BaseTemplateWithPriority;
 
-export interface SpendTemplate extends BaseTemplateWithPriority {
+export type SpendTemplate = {
   type: 'spend';
   amount: number;
   month: string;
   from: string;
   annual?: boolean;
   repeat?: number;
-}
+} & BaseTemplateWithPriority;
 
-export interface SimpleTemplate extends BaseTemplateWithPriority {
+export type SimpleTemplate = {
   type: 'simple';
   monthly?: number;
   limit?: {
@@ -57,26 +57,29 @@ export interface SimpleTemplate extends BaseTemplateWithPriority {
     period: 'daily' | 'weekly' | 'monthly';
     start?: string;
   };
-}
+} & BaseTemplateWithPriority;
 
-export interface ScheduleTemplate extends BaseTemplateWithPriority {
+export type ScheduleTemplate = {
   type: 'schedule';
   name: string;
   full?: boolean;
   adjustment?: number;
-}
+  adjustmentType?: 'percent' | 'fixed';
+} & BaseTemplateWithPriority;
 
-export interface AverageTemplate extends BaseTemplateWithPriority {
+export type AverageTemplate = {
   type: 'average';
   numMonths: number;
-}
+  adjustment?: number;
+  adjustmentType?: 'percent' | 'fixed';
+} & BaseTemplateWithPriority;
 
-export interface CopyTemplate extends BaseTemplateWithPriority {
+export type CopyTemplate = {
   type: 'copy';
   lookBack: number;
-}
+} & BaseTemplateWithPriority;
 
-export interface RemainderTemplate extends BaseTemplate {
+export type RemainderTemplate = {
   type: 'remainder';
   weight: number;
   limit?: {
@@ -87,15 +90,15 @@ export interface RemainderTemplate extends BaseTemplate {
   };
   directive: 'template';
   priority: null;
-}
+} & BaseTemplate;
 
-export interface GoalTemplate extends BaseTemplate {
+export type GoalTemplate = {
   type: 'goal';
   amount: number;
   directive: 'goal';
-}
+} & BaseTemplate;
 
-export interface LimitTemplate extends BaseTemplate {
+export type LimitTemplate = {
   type: 'limit';
   amount: number;
   hold: boolean;
@@ -103,14 +106,14 @@ export interface LimitTemplate extends BaseTemplate {
   start?: string;
   directive: 'template';
   priority: null;
-}
+} & BaseTemplate;
 
-interface ErrorTemplate extends BaseTemplate {
+type ErrorTemplate = {
   type: 'error';
   line: string;
   error: string;
   directive: 'error';
-}
+} & BaseTemplate;
 
 export type Template =
   | PercentageTemplate

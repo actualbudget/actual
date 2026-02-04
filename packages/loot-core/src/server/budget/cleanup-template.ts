@@ -2,7 +2,7 @@
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 
-import { setBudget, getSheetValue, setGoal } from './actions';
+import { getSheetValue, setBudget, setGoal } from './actions';
 import { parse } from './cleanup-template.pegjs';
 
 type Notification = {

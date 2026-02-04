@@ -14,7 +14,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 type DeleteFileModalProps = Extract<
   ModalType,
@@ -30,6 +30,15 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
   const isCloudFile = 'cloudFileId' in file && file.state !== 'broken';
   const serverStatus = useSyncServerStatus();
   const dispatch = useDispatch();
+
+  // Get current user info to check ownership
+  const userData = useSelector(state => state.user.data);
+  const currentUserId = userData?.userId;
+
+  // Check if current user is the owner or has admin permissions
+  const isOwner = 'owner' in file && file.owner === currentUserId;
+  const isAdmin = userData?.permission === 'ADMIN';
+  const canDeleteFromServer = isOwner || isAdmin;
 
   const [loadingState, setLoadingState] = useState<'cloud' | 'local' | null>(
     null,
@@ -53,57 +62,65 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
               lineHeight: '1.5em',
             }}
           >
-            {isCloudFile && (
-              <>
+            {isCloudFile &&
+              (canDeleteFromServer ? (
+                <>
+                  <Text>
+                    <Trans>
+                      This is a <strong>hosted file</strong> which means it is
+                      stored on your server to make it available for download on
+                      any device. You can delete it from the server, which will
+                      also remove it from all of your devices.
+                    </Trans>
+                  </Text>
+
+                  {serverStatus === 'online' ? (
+                    <ButtonWithLoading
+                      variant="primary"
+                      isLoading={loadingState === 'cloud'}
+                      style={{
+                        backgroundColor: theme.errorText,
+                        alignSelf: 'center',
+                        border: 0,
+                        padding: '10px 30px',
+                        fontSize: 14,
+                      }}
+                      onPress={async () => {
+                        setLoadingState('cloud');
+                        await dispatch(
+                          deleteBudget({
+                            id: 'id' in file ? file.id : undefined,
+                            cloudFileId: file.cloudFileId,
+                          }),
+                        );
+                        setLoadingState(null);
+
+                        close();
+                      }}
+                    >
+                      <Trans>Delete file from all devices</Trans>
+                    </ButtonWithLoading>
+                  ) : (
+                    <Button
+                      isDisabled
+                      style={{
+                        alignSelf: 'center',
+                        padding: '10px 30px',
+                        fontSize: 14,
+                      }}
+                    >
+                      <Trans>Server is not available</Trans>
+                    </Button>
+                  )}
+                </>
+              ) : (
                 <Text>
                   <Trans>
-                    This is a <strong>hosted file</strong> which means it is
-                    stored on your server to make it available for download on
-                    any device. You can delete it from the server, which will
-                    also remove it from all of your devices.
+                    This is a <strong>hosted file</strong> shared with you. Only
+                    the file owner can delete it from the server.
                   </Trans>
                 </Text>
-
-                {serverStatus === 'online' ? (
-                  <ButtonWithLoading
-                    variant="primary"
-                    isLoading={loadingState === 'cloud'}
-                    style={{
-                      backgroundColor: theme.errorText,
-                      alignSelf: 'center',
-                      border: 0,
-                      padding: '10px 30px',
-                      fontSize: 14,
-                    }}
-                    onPress={async () => {
-                      setLoadingState('cloud');
-                      await dispatch(
-                        deleteBudget({
-                          id: 'id' in file ? file.id : undefined,
-                          cloudFileId: file.cloudFileId,
-                        }),
-                      );
-                      setLoadingState(null);
-
-                      close();
-                    }}
-                  >
-                    <Trans>Delete file from all devices</Trans>
-                  </ButtonWithLoading>
-                ) : (
-                  <Button
-                    isDisabled
-                    style={{
-                      alignSelf: 'center',
-                      padding: '10px 30px',
-                      fontSize: 14,
-                    }}
-                  >
-                    <Trans>Server is not available</Trans>
-                  </Button>
-                )}
-              </>
-            )}
+              ))}
 
             {'id' in file && (
               <>

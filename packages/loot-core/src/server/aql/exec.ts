@@ -1,14 +1,14 @@
 // @ts-strict-ignore
-import { QueryState } from '../../shared/query';
+import { type QueryState } from '../../shared/query';
 import * as db from '../db';
 
 import {
   compileQuery,
-  CompilerState,
   defaultConstructQuery,
-  OutputTypes,
-  SchemaConfig,
-  SqlPieces,
+  type CompilerState,
+  type OutputTypes,
+  type SchemaConfig,
+  type SqlPieces,
 } from './compiler';
 import { convertInputType, convertOutputType } from './schema-helpers';
 

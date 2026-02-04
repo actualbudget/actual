@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { t } from 'i18next';
 
-import { FieldValueTypes, RuleConditionOp } from '../types/models';
+import { type FieldValueTypes, type RuleConditionOp } from '../types/models';
 
 // For now, this info is duplicated from the backend. Figure out how
 // to share it later.
@@ -68,7 +68,7 @@ const FIELD_INFO = {
   payee: { type: 'id', disallowedOps: new Set(['onBudget', 'offBudget']) },
   payee_name: { type: 'string' },
   date: { type: 'date' },
-  notes: { type: 'string' },
+  notes: { type: 'string', disallowedOps: new Set(['oneOf', 'notOneOf']) },
   amount: { type: 'number' },
   category: {
     type: 'id',

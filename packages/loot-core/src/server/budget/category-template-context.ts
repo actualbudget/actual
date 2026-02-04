@@ -1,26 +1,26 @@
 // @ts-strict-ignore
-import { Currency, getCurrency } from 'loot-core/shared/currencies';
+import { getCurrency, type Currency } from 'loot-core/shared/currencies';
 import { q } from 'loot-core/shared/query';
 
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, integerToAmount } from '../../shared/util';
-import { CategoryEntity } from '../../types/models';
+import { type CategoryEntity } from '../../types/models';
 import {
-  AverageTemplate,
-  ByTemplate,
-  CopyTemplate,
-  GoalTemplate,
-  PercentageTemplate,
-  RemainderTemplate,
-  SimpleTemplate,
-  SpendTemplate,
-  Template,
-  PeriodicTemplate,
+  type AverageTemplate,
+  type ByTemplate,
+  type CopyTemplate,
+  type GoalTemplate,
+  type PercentageTemplate,
+  type PeriodicTemplate,
+  type RemainderTemplate,
+  type SimpleTemplate,
+  type SpendTemplate,
+  type Template,
 } from '../../types/models/templates';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
 
-import { getSheetValue, getSheetBoolean } from './actions';
+import { getSheetBoolean, getSheetValue } from './actions';
 import { runSchedule } from './schedule-template';
 import { getActiveSchedules } from './statements';
 
@@ -199,6 +199,7 @@ export class CategoryTemplateContext {
               toBudget,
               [],
               this.category,
+              this.currency,
             );
             // Schedules assume that its to budget value is the whole thing so this
             // needs to remove the previous funds so they aren't double counted
@@ -210,6 +211,9 @@ export class CategoryTemplateContext {
         }
         case 'average': {
           newBudget = await CategoryTemplateContext.runAverage(template, this);
+          break;
+        }
+        default: {
           break;
         }
       }
@@ -545,7 +549,7 @@ export class CategoryTemplateContext {
         templateContext.currency.decimalPlaces,
       );
     } else {
-      return templateContext.limitAmount;
+      return templateContext.limitAmount - templateContext.fromLastMonth;
     }
   }
 
@@ -591,6 +595,8 @@ export class CategoryTemplateContext {
         dateShiftFunction = (date, numPeriods) =>
           monthUtils.addMonths(date, numPeriods * 12);
         break;
+      default:
+        throw new Error(`Unrecognized periodic period: ${period}`);
     }
 
     //shift the starting date until its in our month or in the future
@@ -732,7 +738,31 @@ export class CategoryTemplateContext {
         `sum-amount-${templateContext.category.id}`,
       );
     }
-    return -Math.round(sum / template.numMonths);
+
+    // negate as sheet value is cost ie negative
+    let average = -(sum / template.numMonths);
+
+    if (template.adjustment !== undefined && template.adjustmentType) {
+      switch (template.adjustmentType) {
+        case 'percent': {
+          const adjustmentFactor = 1 + template.adjustment / 100;
+          average = adjustmentFactor * average;
+          break;
+        }
+        case 'fixed': {
+          average += amountToInteger(
+            template.adjustment,
+            templateContext.currency.decimalPlaces,
+          );
+          break;
+        }
+
+        default:
+        //no valid adjustment was found
+      }
+    }
+
+    return Math.round(average);
   }
 
   static runBy(templateContext: CategoryTemplateContext): number {

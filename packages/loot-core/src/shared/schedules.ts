@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import type { IRuleOptions } from '@rschedule/core';
 import * as d from 'date-fns';
-import { Locale } from 'date-fns';
+import { type Locale } from 'date-fns';
 import { t } from 'i18next';
 
 import {
@@ -55,6 +55,8 @@ export function getStatusLabel(status: string) {
       return t('missed');
     case 'scheduled':
       return t('scheduled');
+    default:
+      return t('unknown');
   }
 }
 
@@ -124,6 +126,7 @@ export function getRecurringDescription(
       });
       break;
     default:
+      break;
   }
 
   const weekendSolveModeString = config.weekendSolveMode
@@ -258,13 +261,13 @@ export function getRecurringDescription(
 export function recurConfigToRSchedule(config) {
   const base: IRuleOptions = {
     start: monthUtils.parseDate(config.start),
-    // @ts-ignore: issues with https://gitlab.com/john.carroll.p/rschedule/-/issues/86
+    // @ts-expect-error: issues with https://gitlab.com/john.carroll.p/rschedule/-/issues/86
     frequency: config.frequency.toUpperCase(),
     byHourOfDay: [12],
   };
 
   if (config.interval) {
-    // @ts-ignore: issues with https://gitlab.com/john.carroll.p/rschedule/-/issues/86
+    // @ts-expect-error: issues with https://gitlab.com/john.carroll.p/rschedule/-/issues/86
     base.interval = config.interval;
   }
 
@@ -276,6 +279,7 @@ export function recurConfigToRSchedule(config) {
       base.end = monthUtils.parseDate(config.endDate);
       break;
     default:
+      break;
   }
 
   const abbrevDay = name => name.slice(0, 2).toUpperCase();

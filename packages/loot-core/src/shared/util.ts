@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type Locale, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, type Locale } from 'date-fns';
 
 export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
@@ -282,7 +282,7 @@ export const numberFormats: Array<{
     label: '1\u202F000,33',
     labelNoFraction: '1\u202F000',
   },
-  { value: 'apostrophe-dot', label: '1’000.33', labelNoFraction: '1’000' },
+  { value: 'apostrophe-dot', label: "1'000.33", labelNoFraction: "1'000" },
   { value: 'comma-dot-in', label: '1,00,000.33', labelNoFraction: '1,00,000' },
 ];
 
@@ -341,7 +341,7 @@ export function getNumberFormat({
       break;
     case 'apostrophe-dot':
       locale = 'de-CH';
-      thousandsSeparator = '’';
+      thousandsSeparator = "'";
       decimalSeparator = '.';
       break;
     case 'comma-dot-in':
@@ -370,11 +370,21 @@ export function getNumberFormat({
           maximumFractionDigits: currentHideFraction ? 0 : 2,
         };
 
+  const intlFormatter = new Intl.NumberFormat(locale, fractionDigitsOptions);
+
+  // Wrapper to handle -0 edge case
+  const formatter = {
+    format: (value: number) => {
+      const formatted = intlFormatter.format(value);
+      return formatted === '-0' ? '0' : formatted;
+    },
+  };
+
   return {
     value: currentFormat,
     thousandsSeparator,
     decimalSeparator,
-    formatter: new Intl.NumberFormat(locale, fractionDigitsOptions),
+    formatter,
   };
 }
 
@@ -413,7 +423,7 @@ export function safeNumber(value: number) {
   }
   if (value > MAX_SAFE_NUMBER || value < MIN_SAFE_NUMBER) {
     throw new Error(
-      'safeNumber: can’t safely perform arithmetic with number: ' + value,
+      "safeNumber: can't safely perform arithmetic with number: " + value,
     );
   }
   return value;
@@ -592,4 +602,21 @@ export function tsToRelativeTime(
   }
 
   return distance;
+}
+
+export function applyFindReplace(
+  text: string | null | undefined,
+  find: string,
+  replace: string,
+  useRegex: boolean,
+): string {
+  if (find === '') return text ?? '';
+  if (!text) return '';
+
+  try {
+    const pattern = useRegex ? new RegExp(find, 'g') : find;
+    return text.replaceAll(pattern, replace);
+  } catch {
+    return text;
+  }
 }

@@ -10,14 +10,14 @@ import { dayFromDate } from '../../shared/months';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
 import {
-  AccountEntity,
-  CategoryEntity,
-  SyncServerGoCardlessAccount,
-  TransactionEntity,
-  SyncServerSimpleFinAccount,
-  SyncServerPluggyAiAccount,
+  type AccountEntity,
+  type CategoryEntity,
   type GoCardlessToken,
-  ImportTransactionEntity,
+  type ImportTransactionEntity,
+  type SyncServerGoCardlessAccount,
+  type SyncServerPluggyAiAccount,
+  type SyncServerSimpleFinAccount,
+  type TransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
@@ -857,7 +857,7 @@ function handleSyncError(
     const syncError = {
       type: 'SyncError',
       accountId: acct.id,
-      message: 'Failed syncing account “' + acct.name + '.”',
+      message: 'Failed syncing account "' + acct.name + '."',
       category: error.category,
       code: error.code,
     };
@@ -877,7 +877,7 @@ function handleSyncError(
       accountId: acct.id,
       message: err.reason
         ? err.reason
-        : `Account “${acct.name}” is not linked properly. Please link it again.`,
+        : `Account "${acct.name}" is not linked properly. Please link it again.`,
     };
   }
 
@@ -943,7 +943,7 @@ async function accountsBankSync({
         errors.push(handleSyncError(error, acct));
         captureException({
           ...error,
-          message: 'Failed syncing account “' + acct.name + '.”',
+          message: 'Failed syncing account "' + acct.name + '."',
         } as Error);
       } finally {
         logger.groupEnd();
@@ -1028,7 +1028,7 @@ async function simpleFinBatchSync({
           handleSyncError(
             {
               type: 'BankSyncError',
-              reason: 'Failed syncing account “' + account.name + '.”',
+              reason: 'Failed syncing account "' + account.name + '."',
               category: syncResponse.res.error_type,
               code: syncResponse.res.error_code,
             } as BankSyncError,

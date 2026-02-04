@@ -4,7 +4,7 @@ This view gives you access to both the two built in reports, _Net Worth_ and _Ca
 
 All reports in this view are shown in their small, tiled, version. Clicking on a tile will take you to that very report.
 
-![Reports overview](/img/a-tour-of-actual/tour-reports-overview.png)
+![Reports overview](/img/a-tour-of-actual/tour-reports-overview.webp)
 
 ## The built in reports
 
@@ -14,11 +14,11 @@ you would have if you sold all your assets and paid off all your debts.
 
 **Cash flow** tracks your spending over time by focusing solely on budget accounts and displaying their balances.
 It includes separate visualizations for income and expenses, providing a quick overview of how these factors affect
-your available money over time. By considering your budgeted accounts as “cash on hand,” cash flow clearly shows how your available funds fluctuate.
+your available money over time. By considering your budgeted accounts as "cash on hand," cash flow clearly shows how your available funds fluctuate.
 
 These reports are detailed in the [reports section](/docs/reports/) in the manual.
 
-![Cashflow report](/img/a-tour-of-actual/tour-reports-cashflow.png)
+![Cashflow report](/img/a-tour-of-actual/tour-reports-cashflow.webp)
 
 ## Custom reports
 
@@ -29,6 +29,6 @@ Below are examples of reports covering our *Daily Expenses* over the last six m
 the other as a table. Note that the table version also shows the sum and average (over six months)
 for the various categories.
 
-![Custom report showing daily expenses as graph](/img/a-tour-of-actual/tour-reports-daily-expenses-graph.png)
+![Custom report showing daily expenses as graph](/img/a-tour-of-actual/tour-reports-daily-expenses-graph.webp)
 
-![Custom report showing daily expenses as table](/img/a-tour-of-actual/tour-reports-daily-expenses-table.png)
+![Custom report showing daily expenses as table](/img/a-tour-of-actual/tour-reports-daily-expenses-table.webp)

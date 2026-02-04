@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { Timestamp } from '@actual-app/crdt';
 
-import { Message, addSyncListener, applyMessages } from './index';
+import { addSyncListener, applyMessages, type Message } from './index';
 
 function migrateParentIds(_oldValues, newValues) {
   newValues.forEach((items, table) => {

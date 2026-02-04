@@ -6,6 +6,7 @@ import type {
 // loot-core types
 import type { InitConfig } from 'loot-core/server/main';
 
+// oxlint-disable-next-line typescript/ban-ts-comment
 // @ts-ignore: bundle not available until we build it
 import * as bundle from './app/bundle.api.js';
 import * as injected from './injected';

@@ -1,4 +1,4 @@
-import React, { memo, useState, useMemo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -259,7 +259,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   <SidebarGroup
                     group={{ id: 'new', name: '' }}
                     collapsed={false}
-                    editing={true}
+                    editing
                     onSave={_onSaveGroup}
                     onHideNewGroup={onHideNewGroup}
                     onEdit={onEditName}
@@ -280,9 +280,8 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                         categoryGroups.find(g => g.is_income)?.id,
                       id: 'new',
                     }}
-                    editing={true}
+                    editing
                     onSave={_onSaveCategory}
-                    onDelete={async () => {}}
                     onHideNewCategory={onHideNewCategory}
                     onEditName={onEditName!}
                   />

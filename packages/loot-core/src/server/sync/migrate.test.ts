@@ -9,7 +9,7 @@ import * as db from '../db';
 
 import { listen, unlisten } from './migrate';
 
-import { Message, addSyncListener, sendMessages } from './index';
+import { addSyncListener, sendMessages, type Message } from './index';
 
 beforeEach(() => {
   listen();
@@ -105,13 +105,12 @@ describe('sync migrations', () => {
               { isChild: number; parent_id: string | null; id: string }
             >;
             if (
-              ts &&
-              [...ts.values()].find(
+              !ts ||
+              ![...ts.values()].find(
                 t =>
                   t.isChild === 1 && t.parent_id == null && t.id.includes('/'),
               )
             ) {
-            } else {
               tracer.event('applied');
             }
           });

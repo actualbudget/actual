@@ -11,15 +11,15 @@ import {
   recalculateSplit,
 } from '../../shared/transactions';
 import {
-  hasFieldsChanged,
   amountToInteger,
+  hasFieldsChanged,
   integerToAmount,
 } from '../../shared/util';
 import {
-  AccountEntity,
-  BankSyncResponse,
-  SimpleFinBatchSyncResponse,
-  TransactionEntity,
+  type AccountEntity,
+  type BankSyncResponse,
+  type SimpleFinBatchSyncResponse,
+  type TransactionEntity,
 } from '../../types/models';
 import { aqlQuery } from '../aql';
 import * as db from '../db';

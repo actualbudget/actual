@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -31,13 +32,14 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import {
-  TableHeader,
-  Table,
-  Row,
-  Field,
   Cell,
+  Field,
+  Row,
+  Table,
+  TableHeader,
 } from '@desktop-client/components/table';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -106,6 +108,8 @@ export function SelectLinkedAccountsModal({
             requisitionId: requisitionId!,
             externalAccounts: toSort as SyncServerGoCardlessAccount[],
           };
+        default:
+          throw new Error(`Unrecognized sync source: ${syncSource}`);
       }
     }, [externalAccounts, syncSource, requisitionId]);
 
@@ -326,11 +330,7 @@ export function SelectLinkedAccountsModal({
             </View>
           ) : (
             <View
-              style={{
-                flex: 'unset',
-                height: 300,
-                border: '1px solid ' + theme.tableBorder,
-              }}
+              style={{ ...styles.tableContainer, height: 300, flex: 'unset' }}
             >
               <TableHeader>
                 <Cell value={t('Institution to Sync')} width={175} />
@@ -486,9 +486,13 @@ function TableRow({
       </Field>
       <Field width={80}>
         <PrivacyFilter>
-          {externalAccount.balance != null
-            ? format(externalAccount.balance.toString(), 'financial')
-            : t('Unknown')}
+          {externalAccount.balance != null ? (
+            <FinancialText>
+              {format(externalAccount.balance.toString(), 'financial')}
+            </FinancialText>
+          ) : (
+            t('Unknown')
+          )}
         </PrivacyFilter>
       </Field>
       <Field
@@ -619,9 +623,13 @@ function AccountCard({
       >
         <Trans>Balance:</Trans>{' '}
         <PrivacyFilter>
-          {externalAccount.balance != null
-            ? format(externalAccount.balance.toString(), 'financial')
-            : t('Unknown')}
+          {externalAccount.balance != null ? (
+            <FinancialText>
+              {format(externalAccount.balance.toString(), 'financial')}
+            </FinancialText>
+          ) : (
+            t('Unknown')
+          )}
         </PrivacyFilter>
       </View>
 

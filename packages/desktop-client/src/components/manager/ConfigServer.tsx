@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -11,8 +11,8 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import {
-  isNonProductionEnvironment,
   isElectron,
+  isNonProductionEnvironment,
 } from 'loot-core/shared/environment';
 
 import { Title } from './subscribe/common';
@@ -208,7 +208,7 @@ export function ElectronServerConfig({
                 width: '7ch',
                 textAlign: 'center',
               })}
-              autoFocus={true}
+              autoFocus
               maxLength={5}
               onChange={event =>
                 setElectronServerPort(Number(event.target.value))
@@ -270,7 +270,7 @@ export function ElectronServerConfig({
           style={{ color: theme.pageTextLight, margin: 5 }}
           onPress={dontUseSyncServer}
         >
-          <Trans>Don’t use a server</Trans>
+          <Trans>Don't use a server</Trans>
         </Button>
         {canShowExternalServerConfig && (
           <Button
@@ -404,7 +404,7 @@ export function ConfigServer() {
       )}
       {serverConfigView === 'external' && (
         <>
-          <Title text={t('Where’s the server?')} />
+          <Title text={t("Where's the server?")} />
           <Text
             style={{
               fontSize: 16,
@@ -472,7 +472,7 @@ export function ConfigServer() {
             style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
           >
             <BigInput
-              autoFocus={true}
+              autoFocus
               placeholder={t('https://example.com')}
               value={url || ''}
               onChangeValue={setUrl}
@@ -533,7 +533,7 @@ export function ConfigServer() {
                   style={{ color: theme.pageTextLight, margin: 5 }}
                   onPress={onSkip}
                 >
-                  <Trans>Don’t use a server</Trans>
+                  <Trans>Don't use a server</Trans>
                 </Button>
 
                 {isNonProductionEnvironment() && (

@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { memo, useRef, useMemo, type CSSProperties } from 'react';
+import { memo, useMemo, useRef, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -234,9 +234,6 @@ export const PayeeTableRow = memo(
         <CustomCell
           width={20}
           exposed={!payee.transfer_acct}
-          onBlur={() => {}}
-          onUpdate={() => {}}
-          onClick={() => {}}
           style={{
             display: 'flex',
             justifyContent: 'center',

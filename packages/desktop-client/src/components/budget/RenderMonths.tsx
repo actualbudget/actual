@@ -1,4 +1,4 @@
-import React, { type ReactNode, useContext, type CSSProperties } from 'react';
+import React, { useContext, type CSSProperties, type ReactNode } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';

@@ -10,7 +10,7 @@ import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type UserAvailable } from 'loot-core/types/models';
 
 import { Checkbox } from '@desktop-client/components/forms';
-import { Row, Cell } from '@desktop-client/components/table';
+import { Cell, Row } from '@desktop-client/components/table';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -110,7 +110,7 @@ export const UserAccessRow = memo(
             ? theme.tableRowBackgroundHover
             : theme.tableBackground,
         }}
-        collapsed={true}
+        collapsed
         onMouseEnter={() => onHover && onHover(access.userId)}
         onMouseLeave={() => onHover && onHover(null)}
       >

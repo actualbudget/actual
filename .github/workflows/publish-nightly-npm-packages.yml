@@ -1,6 +1,6 @@
 name: Publish nightly npm packages
 
-# Nightly npm packages are built daily
+# Nightly npm packages are built daily at midnight UTC
 on:
   schedule:
     - cron: '0 0 * * *'

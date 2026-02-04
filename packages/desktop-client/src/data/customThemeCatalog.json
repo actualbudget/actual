@@ -1,0 +1,54 @@
+[
+  {
+    "name": "Demo Theme",
+    "repo": "actualbudget/demo-theme",
+    "colors": ["#f5f1e8", "#5a4a38", "#b8956a", "#4a3f2e", "#fffef9", "#d4b896"]
+  },
+  {
+    "name": "Shades of Coffee",
+    "repo": "Juulz/shades-of-coffee",
+    "colors": ["#e2d8cf", "#1a0c00", "#cfb3ff", "#f5f2ef", "#604b39", "#c29670"]
+  },
+  {
+    "name": "Miami Beach",
+    "repo": "Juulz/miami-beach",
+    "colors": ["#d095ca", "#5e2a91", "#c5ece4", "#24b2a0", "#f9deb8", "#1e9484"]
+  },
+  {
+    "name": "Simple Dark",
+    "repo": "Juulz/simple-dark",
+    "colors": ["#222222", "#063446", "#14aeeb", "#434343", "#edbe5e", "#d9e2ec"]
+  },
+  {
+    "name": "Matrix",
+    "repo": "MatissJanis/actualbudget-matrix-theme",
+    "colors": ["#000000", "#001a00", "#00ff41", "#004400", "#39ff14", "#00ff00"]
+  },
+  {
+    "name": "Black Gold",
+    "repo": "MikesGlitch/actual-black-gold-theme",
+    "colors": ["#141520", "#242733", "#373B4A", "#E8ECF0", "#FFD700", "#8F7A20"]
+  },
+  {
+    "name": "Okabe Ito",
+    "repo": "Juulz/okabe-ito",
+    "colors": ["#222222", "#141520", "#e69f00", "#56b4e9", "#b88115", "#00304d"]
+  },
+  {
+    "name": "Theme from 1970",
+    "repo": "Juulz/1970-theme",
+    "colors": ["#f2f2f2", "#61591f", "#a92da3", "#4d2d19", "#f4ebe7", "#dad18b"]
+  },
+  {
+    "name": "Shades of Gray (light)",
+    "repo": "Juulz/shades-of-gray",
+    "colors": [
+      "hsl(0, 0%, 90%)",
+      "hsl(0, 0%, 20%)",
+      "#fff",
+      "hsl(0, 0%, 80%)",
+      "#99ffff",
+      "hsl(0, 0%, 35%)"
+    ]
+  }
+]

@@ -12,8 +12,8 @@ import {
   type AccountEntity,
   type CategoryEntity,
   type CategoryGroupEntity,
-  type PayeeEntity,
   type CustomReportEntity,
+  type PayeeEntity,
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
@@ -183,7 +183,7 @@ export function GetCardData({
         balanceType={report.balanceType}
         groupBy={report.groupBy}
         interval={report.interval}
-        compact={true}
+        compact
         style={{ height: 'auto', flex: 1 }}
         intervalsCount={intervals.length}
         showTooltip={!isNarrowWidth && showTooltip}

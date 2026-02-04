@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
+import { HyperFormula } from 'hyperformula';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -40,7 +42,6 @@ export function useFormulaExecution(
     let cancelled = false;
 
     async function executeFormula() {
-      const { HyperFormula } = await import('hyperformula');
       let hfInstance: ReturnType<typeof HyperFormula.buildEmpty> | null = null;
 
       if (!formula || !formula.startsWith('=')) {
@@ -75,7 +76,7 @@ export function useFormulaExecution(
           const queryConfig = queries[queryName];
 
           if (!queryConfig) {
-            console.warn(`Query “${queryName}” not found in queries config`);
+            console.warn(`Query "${queryName}" not found in queries config`);
             queryData[queryName] = 0;
             continue;
           }
@@ -88,7 +89,7 @@ export function useFormulaExecution(
           const queryConfig = queries[queryName];
 
           if (!queryConfig) {
-            console.warn(`Query “${queryName}” not found in queries config`);
+            console.warn(`Query "${queryName}" not found in queries config`);
             queryCountData[queryName] = 0;
             continue;
           }
@@ -118,6 +119,7 @@ export function useFormulaExecution(
         hfInstance = HyperFormula.buildEmpty({
           licenseKey: 'gpl-v3',
           localeLang: typeof locale === 'string' ? locale : 'en-US',
+          language: 'enUS',
         });
 
         // Add a sheet and set the formula in cell A1

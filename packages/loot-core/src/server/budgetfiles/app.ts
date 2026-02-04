@@ -2,25 +2,25 @@
 import * as CRDT from '@actual-app/crdt';
 
 import { createTestBudget } from '../../mocks/budget';
-import { captureException, captureBreadcrumb } from '../../platform/exceptions';
+import { captureBreadcrumb, captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
 import * as fs from '../../platform/server/fs';
 import { logger } from '../../platform/server/log';
 import * as Platform from '../../shared/platform';
-import { Budget } from '../../types/budget';
+import { type Budget } from '../../types/budget';
 import { createApp } from '../app';
 import * as budget from '../budget/base';
 import * as cloudStorage from '../cloud-storage';
 import * as db from '../db';
 import * as mappings from '../db/mappings';
-import { handleBudgetImport, ImportableBudgetType } from '../importers';
+import { handleBudgetImport, type ImportableBudgetType } from '../importers';
 import { app as mainApp } from '../main-app';
 import { mutator } from '../mutators';
 import * as prefs from '../prefs';
 import { getServer } from '../server-config';
 import * as sheet from '../sheet';
-import { setSyncingMode, initialFullSync, clearFullSyncTimeout } from '../sync';
+import { clearFullSyncTimeout, initialFullSync, setSyncingMode } from '../sync';
 import * as syncMigrations from '../sync/migrate';
 import * as rules from '../transactions/transaction-rules';
 import { clearUndo } from '../undo';
@@ -32,9 +32,9 @@ import {
 } from '../util/budget-name';
 
 import {
-  getAvailableBackups,
-  makeBackup as _makeBackup,
   loadBackup as _loadBackup,
+  makeBackup as _makeBackup,
+  getAvailableBackups,
   startBackupService,
   stopBackupService,
 } from './backups';
@@ -47,7 +47,6 @@ export type BudgetFileHandlers = {
   'unique-budget-name': typeof handleUniqueBudgetName;
   'get-budgets': typeof getBudgets;
   'get-remote-files': typeof getRemoteFiles;
-  'get-user-file-info': typeof getUserFileInfo;
   'reset-budget-cache': typeof resetBudgetCache;
   'upload-budget': typeof uploadBudget;
   'download-budget': typeof downloadBudget;
@@ -72,7 +71,6 @@ app.method('validate-budget-name', handleValidateBudgetName);
 app.method('unique-budget-name', handleUniqueBudgetName);
 app.method('get-budgets', getBudgets);
 app.method('get-remote-files', getRemoteFiles);
-app.method('get-user-file-info', getUserFileInfo);
 app.method('reset-budget-cache', mutator(resetBudgetCache));
 app.method('upload-budget', uploadBudget);
 app.method('download-budget', downloadBudget);
@@ -138,10 +136,6 @@ async function getBudgets() {
 
 async function getRemoteFiles() {
   return cloudStorage.listRemoteFiles();
-}
-
-async function getUserFileInfo(fileId: string) {
-  return cloudStorage.getRemoteFile(fileId);
 }
 
 async function resetBudgetCache() {
@@ -216,7 +210,7 @@ async function downloadBudget({
   return { id };
 }
 
-// open and sync, but don’t close
+// open and sync, but don't close
 async function syncBudget() {
   setSyncingMode('enabled');
   const result = await initialFullSync();
@@ -290,7 +284,9 @@ async function deleteBudget({
   // If it's a cloud file, you can delete it from the server by
   // passing its cloud id
   if (cloudFileId) {
-    await cloudStorage.removeFile(cloudFileId).catch(() => {});
+    await cloudStorage.removeFile(cloudFileId).catch(() => {
+      // Ignore errors
+    });
   }
 
   // If a local file exists, you can delete it by passing its local id

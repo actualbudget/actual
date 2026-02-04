@@ -1,4 +1,9 @@
-import { MenuItemConstructorOptions, Menu, BrowserWindow, app } from 'electron';
+import {
+  app,
+  Menu,
+  type BrowserWindow,
+  type MenuItemConstructorOptions,
+} from 'electron';
 
 export function getMenu() {
   const template: MenuItemConstructorOptions[] = [

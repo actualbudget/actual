@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const https = require('https');
 const fs = require('fs');
+const https = require('https');
 
 const commentBody = process.env.GITHUB_EVENT_COMMENT_BODY;
 const prDetailsJson = process.env.PR_DETAILS;
@@ -33,11 +33,11 @@ try {
       {
         role: 'system',
         content:
-          'You are categorizing pull requests for release notes. You must respond with exactly one of these categories: "Features", "Enhancements", "Bugfix", or "Maintenance". No other text or explanation.',
+          'You are categorizing pull requests for release notes. You must respond with exactly one of these categories: "Features", "Enhancements", "Bugfixes", or "Maintenance". No other text or explanation.',
       },
       {
         role: 'user',
-        content: `PR Title: ${prDetails.title}\n\nGenerated Summary: ${summaryData.summary}\n\nCodeRabbit Analysis:\n${commentBody}\n\nCategories:\n- Features: New functionality or capabilities\n- Bugfix: Fixes for broken or incorrect behavior\n- Enhancements: Improvements to existing functionality\n- Maintenance: Code cleanup, refactoring, dependencies, etc.\n\nWhat category does this PR belong to?`,
+        content: `PR Title: ${prDetails.title}\n\nGenerated Summary: ${summaryData.summary}\n\nCodeRabbit Analysis:\n${commentBody}\n\nCategories:\n- Features: New functionality or capabilities\n- Bugfixes: Fixes for broken or incorrect behavior\n- Enhancements: Improvements to existing functionality\n- Maintenance: Code cleanup, refactoring, dependencies, etc.\n\nWhat category does this PR belong to?`,
       },
     ],
     max_tokens: 10,
@@ -86,7 +86,7 @@ try {
         // Validate the category response
         const validCategories = [
           'Features',
-          'Bugfix',
+          'Bugfixes',
           'Enhancements',
           'Maintenance',
         ];

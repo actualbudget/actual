@@ -1,10 +1,10 @@
 import {
-  GoCardlessAccountMetadata,
-  GoCardlessAccountDetails,
-  Institution,
-  Transactions,
-  Balance,
-  Transaction,
+  type Balance,
+  type GoCardlessAccountDetails,
+  type GoCardlessAccountMetadata,
+  type Institution,
+  type Transaction,
+  type Transactions,
 } from './gocardless-node.types';
 
 export type DetailedAccount = Omit<GoCardlessAccountDetails, 'status'> &

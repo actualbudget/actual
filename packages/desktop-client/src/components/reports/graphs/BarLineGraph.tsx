@@ -6,13 +6,13 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
-  ComposedChart,
-  Line,
   Bar,
   CartesianGrid,
+  ComposedChart,
+  Line,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
 } from 'recharts';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';

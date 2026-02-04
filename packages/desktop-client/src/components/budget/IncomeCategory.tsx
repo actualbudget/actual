@@ -9,9 +9,9 @@ import { SidebarCategory } from './SidebarCategory';
 import { useBudgetComponents } from '.';
 
 import {
+  DropHighlight,
   useDraggable,
   useDroppable,
-  DropHighlight,
   type OnDragChangeCallback,
   type OnDropCallback,
 } from '@desktop-client/components/sort';
@@ -64,7 +64,7 @@ export function IncomeCategory({
   return (
     <Row
       innerRef={dropRef}
-      collapsed={true}
+      collapsed
       style={{
         opacity: cat.hidden ? 0.5 : undefined,
       }}

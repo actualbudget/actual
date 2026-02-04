@@ -1,12 +1,11 @@
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -20,9 +19,10 @@ import { CrossoverGraph } from '@desktop-client/components/reports/graphs/Crosso
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
+import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { fromDateRepr } from '@desktop-client/components/reports/util';
+import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 // Type for the return value of the recalculate function
@@ -33,6 +33,7 @@ type CrossoverData = {
       investmentIncome: number;
       expenses: number;
       nestEgg: number;
+      adjustedExpenses?: number;
       isProjection?: boolean;
     }>;
     start: string;
@@ -55,6 +56,7 @@ type CrossoverCardProps = {
   meta?: CrossoverWidget['meta'];
   onMetaChange: (newMeta: CrossoverWidget['meta']) => void;
   onRemove: () => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function CrossoverCard({
@@ -64,11 +66,15 @@ export function CrossoverCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onCopy,
 }: CrossoverCardProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useWidgetCopyMenu(onCopy);
 
   // Calculate date range from meta or use default range
   const [start, setStart] = useState<string>('');
@@ -79,28 +85,68 @@ export function CrossoverCard({
   useEffect(() => {
     let isMounted = true;
     async function calculateDateRange() {
-      if (meta?.timeFrame?.start && meta?.timeFrame?.end) {
-        setStart(meta.timeFrame.start);
-        setEnd(meta.timeFrame.end);
-        return;
-      }
+      const currentMonth = monthUtils.currentMonth();
+      const previousMonth = monthUtils.subMonths(currentMonth, 1);
 
-      const trans = await send('get-earliest-transaction');
+      // Fetch earliest transaction to build the valid range
+      const earliestTransactionData = await send('get-earliest-transaction');
       if (!isMounted) return;
 
-      const currentMonth = monthUtils.currentMonth();
-      const startMonth = trans
-        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
-        : currentMonth;
+      // Build allMonths list similar to Crossover.tsx
+      const earliestDate = earliestTransactionData
+        ? earliestTransactionData.date
+        : monthUtils.firstDayOfMonth(previousMonth);
+      const latestDate = monthUtils.lastDayOfMonth(previousMonth);
 
-      const previousMonth = monthUtils.subMonths(currentMonth, 1);
-      const endMonth = monthUtils.isBefore(startMonth, previousMonth)
-        ? previousMonth
-        : startMonth;
+      const allMonths = monthUtils
+        .rangeInclusive(earliestDate, latestDate)
+        .map(month => ({
+          name: month,
+          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+        }))
+        .reverse();
 
-      // Use saved timeFrame from meta or default range
-      setStart(startMonth);
-      setEnd(endMonth);
+      // Use calculateTimeRange to get initial values based on timeFrame mode
+      const [initialStart, initialEnd, mode] = calculateTimeRange(
+        meta?.timeFrame,
+        undefined,
+        previousMonth,
+      );
+
+      const earliestMonth = allMonths[allMonths.length - 1].name;
+      const latestMonth = allMonths[0].name;
+      let start = initialStart;
+      let end = initialEnd;
+
+      const clampMonth = (m: string) => {
+        if (monthUtils.isBefore(m, earliestMonth)) return earliestMonth;
+        if (monthUtils.isAfter(m, latestMonth)) return latestMonth;
+        return m;
+      };
+
+      // Apply mode-specific logic similar to Crossover.tsx
+      if (mode === 'sliding-window') {
+        // Shift both start and end back one month for sliding-window
+        start = clampMonth(monthUtils.subMonths(start, 1));
+        end = clampMonth(monthUtils.subMonths(end, 1));
+      } else if (mode === 'full') {
+        start = earliestMonth;
+        end = latestMonth;
+      } else {
+        // static mode
+        start = clampMonth(start);
+        end = clampMonth(end);
+      }
+
+      // Ensure end doesn't go before start
+      if (monthUtils.isBefore(end, start)) {
+        end = start;
+      }
+
+      if (isMounted) {
+        setStart(start);
+        setEnd(end);
+      }
     }
     calculateDateRange();
     return () => {
@@ -125,7 +171,10 @@ export function CrossoverCard({
 
   const swr = meta?.safeWithdrawalRate ?? 0.04;
   const estimatedReturn = meta?.estimatedReturn ?? null;
-  const projectionType = meta?.projectionType ?? 'hampel';
+  const expectedContribution = meta?.expectedContribution ?? null;
+  const projectionType: 'hampel' | 'median' | 'mean' =
+    meta?.projectionType ?? 'hampel';
+  const expenseAdjustmentFactor = meta?.expenseAdjustmentFactor ?? 1.0;
 
   const params = useMemo(
     () =>
@@ -135,8 +184,10 @@ export function CrossoverCard({
         expenseCategoryIds,
         incomeAccountIds,
         safeWithdrawalRate: swr,
-        estimatedReturn: estimatedReturn == null ? null : estimatedReturn,
+        estimatedReturn,
+        expectedContribution,
         projectionType,
+        expenseAdjustmentFactor,
       }),
     [
       start,
@@ -145,7 +196,9 @@ export function CrossoverCard({
       incomeAccountIds,
       swr,
       estimatedReturn,
+      expectedContribution,
       projectionType,
+      expenseAdjustmentFactor,
     ],
   );
 
@@ -162,8 +215,10 @@ export function CrossoverCard({
       menuItems={[
         { name: 'rename', text: t('Rename') },
         { name: 'remove', text: t('Remove') },
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -229,7 +284,7 @@ export function CrossoverCard({
         {data ? (
           <CrossoverGraph
             graphData={data.graphData}
-            compact={true}
+            compact
             showTooltip={!isEditing && !isNarrowWidth}
             style={{ height: 'auto', flex: 1 }}
           />

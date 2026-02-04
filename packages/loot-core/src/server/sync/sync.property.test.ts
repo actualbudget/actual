@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { merkle, getClock, Timestamp } from '@actual-app/crdt';
+import { getClock, merkle, Timestamp } from '@actual-app/crdt';
 import jsc, { type Arbitrary } from 'jsverify';
 
 import * as db from '../db';
@@ -235,7 +235,7 @@ async function run(msgs) {
   });
 
   await global.emptyDatabase()();
-  await sheet.loadSpreadsheet(db, () => {});
+  await sheet.loadSpreadsheet(db, vi.fn());
 
   // The test: split up the messages into chunks and in parallel send
   // them all through `sendMessages`. Then add some messages to the

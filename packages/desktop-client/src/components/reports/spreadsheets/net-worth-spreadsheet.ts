@@ -129,6 +129,7 @@ export function createSpreadsheet(
 
         return {
           id: acct.id,
+          name: acct.name,
           balances: processedBalances,
           starting,
         };
@@ -152,6 +153,7 @@ export function createSpreadsheet(
 function recalculate(
   data: Array<{
     id: string;
+    name: string;
     balances: Record<string, Balance>;
     starting: number;
   }>,
@@ -207,8 +209,11 @@ function recalculate(
     let total = 0;
     const last = arr.length === 0 ? null : arr[arr.length - 1];
 
-    accountBalances.forEach(balances => {
-      const balance = balances[idx];
+    const balances: Record<string, number> = {};
+    accountBalances.forEach((acctBalances, i) => {
+      const balance = acctBalances[idx];
+      balances[data[i].id] = balance;
+
       if (balance < 0) {
         debt += -balance;
       } else {
@@ -240,7 +245,7 @@ function recalculate(
 
     // Use standardized format from ReportOptions
     const displayFormat =
-      ReportOptions.intervalFormat.get(interval) ?? 'MMM ‘yy';
+      ReportOptions.intervalFormat.get(interval) ?? "MMM ''yy";
 
     const tooltipFormat =
       interval === 'Daily'
@@ -259,6 +264,7 @@ function recalculate(
       change: format(change, 'financial'),
       networth: format(total, 'financial'),
       date: d.format(x, tooltipFormat, { locale }),
+      ...balances,
     };
 
     arr.push(graphPoint);
@@ -274,6 +280,10 @@ function recalculate(
     return arr;
   }, []);
 
+  const hasBalance = accountBalances.map(balances =>
+    balances.some(b => b !== 0),
+  );
+
   return {
     graphData: {
       data: graphData,
@@ -285,5 +295,8 @@ function recalculate(
     totalChange: endNetWorth - startNetWorth,
     lowestNetWorth,
     highestNetWorth,
+    accounts: data
+      .filter((_, i) => hasBalance[i])
+      .map(d => ({ id: d.id, name: d.name })),
   };
 }

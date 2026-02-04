@@ -9,7 +9,7 @@ import { Change } from './Change';
 import { store } from '@desktop-client/redux/store';
 
 describe('Change', () => {
-  it('renders a positive amount with a plus sign and green color', () => {
+  it('renders a positive amount with a plus sign and positive color', () => {
     render(
       <Provider store={store}>
         <Change amount={12345} />
@@ -17,10 +17,10 @@ describe('Change', () => {
     );
     const el = screen.getByText('+123.45');
     expect(el).toBeInTheDocument();
-    expect(el).toHaveStyle(`color: ${theme.noticeTextLight}`);
+    expect(el).toHaveStyle(`color: ${theme.reportsNumberPositive}`);
   });
 
-  it('renders zero with a plus sign and green color', () => {
+  it('renders zero with a plus sign and neutral color', () => {
     render(
       <Provider store={store}>
         <Change amount={0} />
@@ -28,10 +28,10 @@ describe('Change', () => {
     );
     const el = screen.getByText('+0.00');
     expect(el).toBeInTheDocument();
-    expect(el).toHaveStyle(`color: ${theme.noticeTextLight}`);
+    expect(el).toHaveStyle(`color: ${theme.reportsNumberNeutral}`);
   });
 
-  it('renders a negative amount with a minus sign and red color', () => {
+  it('renders a negative amount with a minus sign and negative color', () => {
     render(
       <Provider store={store}>
         <Change amount={-9876} />
@@ -39,7 +39,7 @@ describe('Change', () => {
     );
     const el = screen.getByText('-98.76');
     expect(el).toBeInTheDocument();
-    expect(el).toHaveStyle(`color: ${theme.errorText}`);
+    expect(el).toHaveStyle(`color: ${theme.reportsNumberNegative}`);
   });
 
   it('merges custom style prop', () => {
@@ -50,6 +50,6 @@ describe('Change', () => {
     );
     const el = screen.getByText('+10.00');
     expect(el).toHaveStyle('font-weight: bold');
-    expect(el).toHaveStyle(`color: ${theme.noticeTextLight}`);
+    expect(el).toHaveStyle(`color: ${theme.reportsNumberPositive}`);
   });
 });

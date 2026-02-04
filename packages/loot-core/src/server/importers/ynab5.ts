@@ -9,9 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
-import { sortByKey, groupBy } from '../../shared/util';
+import { groupBy, sortByKey } from '../../shared/util';
 
-import * as YNAB5 from './ynab5-types';
+import type * as YNAB5 from './ynab5-types';
 
 function amountFromYnab(amount: number) {
   // ynabs multiplies amount by 1000 and actual by 100
@@ -346,6 +346,8 @@ async function importTransactions(
             // So we advance to the next subtransaction
             subtransactionIdx++;
             break;
+          default:
+            throw new Error(`Unrecognized orphan transfer comparator result`);
         }
       } while (
         transactionIdx < transactions.length &&

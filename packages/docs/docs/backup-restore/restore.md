@@ -10,24 +10,24 @@ zip export, you can restore this backup by importing it using the Import File bu
 1. Close your current budget by clicking on the budget name in the top left
    corner of the screen and choosing the option to close the budget file.
 
-![Close the current budget file](/img/backup-restore/restore-close-budget.png)
+![Close the current budget file](/img/backup-restore/restore-close-budget.webp)
 
 2. In the _Budget Selection Screen_, or File Screen that appears, click on _Import file_.
 
-   ![Click on the import file link](/img/backup-restore/restore-import-file.png)
+   ![Click on the import file link](/img/backup-restore/restore-import-file.webp)
 
 3. Choose the _Actual_ option.
 
-   ![Click on the import file link](/img/backup-restore/restore-import-file-dialog.png)
+   ![Click on the import file link](/img/backup-restore/restore-import-file-dialog.webp)
 
 4. Then click on the _Select file..._ button.
 
-   ![Click on the import file link](/img/backup-restore/restore-import-file-select-file.png)
+   ![Click on the import file link](/img/backup-restore/restore-import-file-select-file.webp)
 
 5. Navigate to the location of where you stored your backup file, select it and click
    on the _upload button_.
 
-   ![Click on the import file link](/img/backup-restore/restore-import-file-choose-file.png)
+   ![Click on the import file link](/img/backup-restore/restore-import-file-choose-file.webp)
 
 That is it. The backup is now restored. If the imported budget is a copy
 of your current budget, you may want to rename the import by clicking on its name
@@ -35,7 +35,7 @@ and rename it. Once you verify the new imported budget is correct, you can
 navigate back to the budget selection screen by closing the current budget
 and deleting the old copy.
 
-![Click on the import file link](/img/backup-restore/restore-import-imported-budget.png)
+![Click on the import file link](/img/backup-restore/restore-import-imported-budget.webp)
 
 ## Errors When Restoring Database From Backup
 

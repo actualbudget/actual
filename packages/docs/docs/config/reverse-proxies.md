@@ -28,8 +28,8 @@ services:
       - ./caddy/data:/data
       - ./caddy/config:/config
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
 
   actual-server:
     image: actualbudget/actual-server:latest
@@ -58,21 +58,21 @@ services:
     image: traefik:latest
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
-      - "./traefik.yaml:/etc/traefik/traefik.yaml"
-      - "./traefik/data:/data"
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - './traefik.yaml:/etc/traefik/traefik.yaml'
+      - './traefik/data:/data'
+      - '/var/run/docker.sock:/var/run/docker.sock'
 
   actual-server:
     image: actualbudget/actual-server:latest
     restart: unless-stopped
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.actual-server.rule=Host(`budget.example.org`)"
-      - "traefik.http.routers.actual-server.entrypoints=websecure"
-      - "traefik.http.services.actual-server.loadbalancer.server.port=5006"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.actual-server.rule=Host(`budget.example.org`)'
+      - 'traefik.http.routers.actual-server.entrypoints=websecure'
+      - 'traefik.http.services.actual-server.loadbalancer.server.port=5006'
     volumes:
       - ./actual-data:/data
 ```
@@ -80,7 +80,7 @@ services:
 ```yaml title="traefik.yaml"
 entryPoints:
   web:
-    address: ":80"
+    address: ':80'
     http:
       redirections:
         entryPoint:
@@ -88,7 +88,7 @@ entryPoints:
           scheme: https
           permanent: true
   websecure:
-    address: ":443"
+    address: ':443'
     http:
       tls:
         certResolver: le
@@ -108,6 +108,32 @@ certificatesResolvers:
 Please refer to the [official documentation](https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/) for further details.
 
 ## NGINX
+
+### Note on Cross-Origin Isolation & Header Collisions
+
+Actual Budget requires a "Secure Context" and specific headers (`COOP/COEP`) to enable `SharedArrayBuffer` for its underlying SQLite engine. While the application attempts to set these headers automatically, implementing a manual Nginx configuration as suggested above can lead to **duplicate headers** (e.g., `require-corp, require-corp`).
+
+Modern browsers will invalidate security policies if headers are duplicated, resulting in a `SharedArrayBufferMissing` fatal error.
+
+To resolve the "additional security mechanisms" mentioned in the note above, use the `proxy_hide_header` directive to ensure Nginx acts as the single source of truth:
+
+```nginx
+location / {
+    proxy_pass http://actual_server:5006;
+
+    # Prevents header duplication between Upstream and Proxy
+    proxy_hide_header Cross-Origin-Embedder-Policy;
+    proxy_hide_header Cross-Origin-Opener-Policy;
+
+    # Explicitly set mandatory security headers
+    add_header Cross-Origin-Embedder-Policy "require-corp" always;
+    add_header Cross-Origin-Opener-Policy "same-origin" always;
+    add_header Origin-Agent-Cluster "?1" always;
+
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+```
 
 The SSL certificate is issued by Let's Encrypt. The [Certbot](https://certbot.eff.org/instructions) tool provides options for automatic updating upon expiration.
 At the very least you will need to adapt `server_name` and the `ssl_certificate/ssl_certificate_key` paths to match your setup.

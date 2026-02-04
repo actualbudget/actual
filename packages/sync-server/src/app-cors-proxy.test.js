@@ -1,6 +1,6 @@
 import ipaddr from 'ipaddr.js';
 import request from 'supertest';
-import { vi, describe, it, expect, beforeEach, beforeAll } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { handlers as app, clearAllowlistCache } from './app-cors-proxy';
 import { config } from './load-config';
@@ -173,9 +173,9 @@ describe('app-cors-proxy', () => {
 
     clearAllowlistCache();
 
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(vi.fn());
+    vi.spyOn(console, 'warn').mockImplementation(vi.fn());
+    vi.spyOn(console, 'error').mockImplementation(vi.fn());
   });
 
   describe('CORS preflight', () => {

@@ -1,7 +1,7 @@
 import { q } from '../../shared/query';
 import {
-  ungroupTransactions,
   deleteTransaction as sharedDeleteTransaction,
+  ungroupTransactions,
 } from '../../shared/transactions';
 import { type TransactionEntity } from '../../types/models';
 import { aqlQuery } from '../aql';

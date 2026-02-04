@@ -1,12 +1,12 @@
 # Crossover Point Report
 
 :::warning
-This is an **experimental feature**. That means we’re still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [open an issue](https://github.com/actualbudget/actual/issues) or post a message in the Discord.
+This is an **experimental feature**. That means we're still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [open an issue](https://github.com/actualbudget/actual/issues) or post a message in the Discord.
 :::
 
 The Crossover Point Report is a financial planning tool inspired by the "Your Money or Your Life" methodology. This report helps users visualize when their passive income from investments will be sufficient to cover their projected expenses, marking the point where they achieve financial independence.
 
-![Crossover Point Report](/img/experimental/crossover-point-report/full-chart.png)
+![Crossover Point Report](/img/experimental/crossover-point-report/full-chart.webp)
 
 ## Input Parameters
 

@@ -1,25 +1,41 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "import", "jsx-a11y"],
+  "jsPlugins": [
+    "./packages/eslint-plugin-actual/lib/index.js",
+    "eslint-plugin-typescript-paths",
+    "eslint-plugin-perfectionist"
+  ],
   "env": {
     "browser": true,
-    "jest": true,
-    "node": true
+    "node": true,
+    "vitest": true
   },
   "globals": {
     "vi": "readonly",
     "backend": "readonly",
     "importScripts": "readonly",
-    "FS": "readonly" // TODO: remove this
+    "FS": "readonly"
   },
   "rules": {
-    // TODO fix all these and re-enable
-    "jsx-a11y/click-events-have-key-events": "off",
-    "jsx-a11y/prefer-tag-over-role": "off",
-    "jsx-a11y/tabindex-no-positive": "off",
+    // Import sorting
+    "perfectionist/sort-named-imports": [
+      "warn",
+      {
+        "groups": ["value-import", "type-import"]
+      }
+    ],
 
-    // Keep these rules
-    "no-var": "warn",
+    // Actual rules
+    "actual/typography": "warn",
+    "actual/no-untranslated-strings": "error",
+    "actual/prefer-trans-over-t": "error",
+    "actual/prefer-if-statement": "warn",
+    "actual/prefer-logger-over-console": "error",
+    "actual/object-shorthand-properties": "warn",
+    "actual/prefer-const": "warn",
+    "actual/no-anchor-tag": "warn",
+    "actual/no-react-default-import": "warn",
 
     // JSX A11y rules
     "jsx-a11y/no-autofocus": [
@@ -28,15 +44,36 @@
         "ignoreNonDOM": true
       }
     ],
-
-    // Typescript rules
-    "typescript/ban-ts-comment": [
+    "jsx-a11y/alt-text": "warn",
+    "jsx-a11y/anchor-has-content": "warn",
+    "jsx-a11y/anchor-is-valid": [
       "warn",
       {
-        // TODO: remove this
-        "ts-ignore": "allow-with-description"
+        "aspects": ["noHref", "invalidHref"]
       }
     ],
+    "jsx-a11y/aria-activedescendant-has-tabindex": "warn",
+    "jsx-a11y/aria-props": "warn",
+    "jsx-a11y/aria-proptypes": "warn",
+    "jsx-a11y/aria-role": [
+      "warn",
+      {
+        "ignoreNonDOM": true
+      }
+    ],
+    "jsx-a11y/aria-unsupported-elements": "warn",
+    "jsx-a11y/heading-has-content": "warn",
+    "jsx-a11y/iframe-has-title": "warn",
+    "jsx-a11y/img-redundant-alt": "warn",
+    "jsx-a11y/no-access-key": "warn",
+    "jsx-a11y/no-distracting-elements": "warn",
+    "jsx-a11y/no-redundant-roles": "warn",
+    "jsx-a11y/role-has-required-aria-props": "warn",
+    "jsx-a11y/role-supports-aria-props": "warn",
+    "jsx-a11y/scope": "warn",
+
+    // Typescript rules
+    "typescript/ban-ts-comment": ["warn"],
     "typescript/consistent-type-definitions": ["warn", "type"],
     "typescript/consistent-type-imports": [
       "warn",
@@ -45,6 +82,7 @@
         "fixStyle": "inline-type-imports"
       }
     ],
+    "typescript/no-implied-eval": "warn",
     "typescript/no-explicit-any": "warn",
     "typescript/no-restricted-types": [
       "warn",
@@ -112,17 +150,86 @@
     "react/rules-of-hooks": "error",
     "react/self-closing-comp": "warn",
     "react/style-prop-object": "warn",
+    "react/jsx-boolean-value": "warn",
 
     // ESLint rules
+    "eslint/array-callback-return": "warn",
+    "eslint/curly": ["warn", "multi-line", "consistent"],
     "eslint/default-case": [
       "warn",
       {
         "commentPattern": "^no default$"
       }
     ],
+    "eslint/eqeqeq": ["warn", "smart"],
     "eslint/no-array-constructor": "warn",
-    // "eslint/no-empty-function": "warn", // TODO: enable this
+    "eslint/no-caller": "warn",
+    "eslint/no-cond-assign": ["warn", "except-parens"],
+    "eslint/no-const-assign": "warn",
+    "eslint/no-control-regex": "warn",
+    "eslint/no-delete-var": "warn",
+    "eslint/no-dupe-class-members": "warn",
+    "eslint/no-dupe-keys": "warn",
+    "eslint/no-duplicate-case": "warn",
+    "eslint/no-empty-character-class": "warn",
+    "eslint/no-empty-function": "warn",
+    "eslint/no-empty-pattern": "warn",
+    "eslint/no-eval": "warn",
+    "eslint/no-ex-assign": "warn",
+    "eslint/no-extend-native": "warn",
+    "eslint/no-extra-bind": "warn",
+    "eslint/no-extra-label": "warn",
+    "eslint/no-fallthrough": "warn",
+    "eslint/no-func-assign": "warn",
+    "eslint/no-invalid-regexp": "warn",
+    "eslint/no-iterator": "warn",
+    "eslint/no-label-var": "warn",
+    "eslint/no-var": "warn",
+    "eslint/no-labels": [
+      "warn",
+      {
+        "allowLoop": true,
+        "allowSwitch": false
+      }
+    ],
+    "eslint/no-new-func": "warn",
+    "eslint/no-script-url": "warn",
+    "eslint/no-self-assign": "warn",
+    "eslint/no-self-compare": "warn",
+    "eslint/no-sequences": "warn",
+    "eslint/no-shadow-restricted-names": "warn",
+    "eslint/no-sparse-arrays": "warn",
+    "eslint/no-template-curly-in-string": "warn",
+    "eslint/no-this-before-super": "warn",
+    "eslint/no-throw-literal": "warn",
+    "eslint/no-unreachable": "warn",
+    "eslint/no-obj-calls": "warn",
+    "eslint/no-new-wrappers": "warn",
+    "eslint/no-unsafe-negation": "warn",
+    "eslint/no-multi-str": "warn",
+    "eslint/no-global-assign": "warn",
+    "eslint/no-lone-blocks": "warn",
+    "eslint/no-unused-labels": "warn",
+    "eslint/no-object-constructor": "warn",
+    "eslint/no-new-native-nonconstructor": "warn",
     "eslint/no-redeclare": "warn",
+    "eslint/no-useless-computed-key": "warn",
+    "eslint/no-useless-concat": "warn",
+    "eslint/no-useless-escape": "warn",
+    "eslint/require-yield": "warn",
+    "eslint/getter-return": "warn",
+    "eslint/unicode-bom": ["warn", "never"],
+    "eslint/no-use-isnan": "warn",
+    "eslint/valid-typeof": "warn",
+    "eslint/no-useless-rename": [
+      "warn",
+      {
+        "ignoreDestructuring": false,
+        "ignoreImport": false,
+        "ignoreExport": false
+      }
+    ],
+    "eslint/no-with": "warn",
     "eslint/no-regex-spaces": "warn",
     "eslint/no-restricted-globals": [
       "warn",
@@ -213,7 +320,7 @@
         ],
         "patterns": [
           {
-            "group": ["*.api", "*.web", "*.electron"],
+            "group": ["**/*.api", "**/*.web", "**/*.electron"],
             "message": "Don't directly reference imports from other platforms"
           },
           {
@@ -227,7 +334,7 @@
             "message": "Please use themes instead of colors"
           },
           {
-            "group": ["@actual-app/web/*"],
+            "group": ["@actual-app/web/**/*"],
             "message": "Please do not import `@actual-app/web` in `loot-core`"
           }
         ]
@@ -239,55 +346,16 @@
   },
   "overrides": [
     {
-      // TODO: fix the issues in these files
-      "files": [
-        "packages/component-library/src/Menu.tsx",
-        "packages/desktop-client/src/components/accounts/Account.jsx",
-        "packages/desktop-client/src/components/accounts/MobileAccount.jsx",
-        "packages/desktop-client/src/components/accounts/MobileAccounts.jsx",
-        "packages/desktop-client/src/components/budget/BudgetCategories.jsx",
-        "packages/desktop-client/src/components/budget/BudgetSummaries.tsx",
-        "packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx",
-        "packages/desktop-client/src/components/budget/envelope/HoldMenu.tsx",
-        "packages/desktop-client/src/components/budget/envelope/TransferMenu.tsx",
-        "packages/desktop-client/src/components/budget/index.tsx",
-        "packages/desktop-client/src/components/budget/MobileBudget.tsx",
-        "packages/desktop-client/src/components/FinancesApp.tsx",
-        "packages/desktop-client/src/components/GlobalKeys.ts",
-        "packages/desktop-client/src/components/LoggedInUser.tsx",
-        "packages/desktop-client/src/components/manager/ManagementApp.jsx",
-        "packages/desktop-client/src/components/manager/subscribe/common.tsx",
-        "packages/desktop-client/src/components/ManageRules.tsx",
-        "packages/desktop-client/src/components/mobile/MobileAmountInput.jsx",
-        "packages/desktop-client/src/components/mobile/MobileNavTabs.tsx",
-        "packages/desktop-client/src/components/Modals.tsx",
-        "packages/desktop-client/src/components/modals/EditRule.jsx",
-        "packages/desktop-client/src/components/modals/ImportTransactions.jsx",
-        "packages/desktop-client/src/components/modals/ImportTransactionsModal/ImportTransactionsModal.tsx",
-        "packages/desktop-client/src/components/modals/MergeUnusedPayees.jsx",
-        "packages/desktop-client/src/components/Notifications.tsx",
-        "packages/desktop-client/src/components/payees/ManagePayees.jsx",
-        "packages/desktop-client/src/components/payees/ManagePayeesWithData.jsx",
-        "packages/desktop-client/src/components/payees/PayeeTable.tsx",
-        "packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTable.tsx",
-        "packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTableTotals.tsx",
-        "packages/desktop-client/src/components/reports/reports/CashFlowCard.jsx",
-        "packages/desktop-client/src/components/reports/reports/CustomReport.jsx",
-        "packages/desktop-client/src/components/reports/reports/CustomReport.tsx",
-        "packages/desktop-client/src/components/reports/reports/NetWorthCard.jsx",
-        "packages/desktop-client/src/components/reports/SaveReportName.tsx",
-        "packages/desktop-client/src/components/reports/useReport.ts",
-        "packages/desktop-client/src/components/schedules/ScheduleDetails.jsx",
-        "packages/desktop-client/src/components/schedules/ScheduleEditModal.tsx",
-        "packages/desktop-client/src/components/schedules/SchedulesTable.tsx",
-        "packages/desktop-client/src/components/select/DateSelect.tsx",
-        "packages/desktop-client/src/components/sidebar/Tools.tsx",
-        "packages/desktop-client/src/components/sort.tsx",
-        "packages/desktop-client/src/hooks/useEffectAfterMount.ts",
-        "packages/desktop-client/src/hooks/useQuery.ts"
-      ],
+      "files": ["packages/desktop-electron/**/*"],
       "rules": {
-        "react/exhaustive-deps": "off"
+        "react/rules-of-hooks": "off"
+      }
+    },
+    {
+      "files": ["**/*.test.{js,ts,jsx,tsx}", "packages/docs/**/*"],
+      "rules": {
+        "actual/no-untranslated-strings": "off",
+        "actual/prefer-logger-over-console": "off"
       }
     },
     {
@@ -301,56 +369,32 @@
         "import/no-default-export": "off"
       }
     },
+    {
+      "files": ["packages/docs/**/*"],
+      "rules": {
+        "actual/no-anchor-tag": "off"
+      }
+    },
+    {
+      "files": ["packages/desktop-client/**/*.{js,ts,jsx,tsx}"],
+      "rules": {
+        "typescript-paths/absolute-parent-import": [
+          "error",
+          { "preferPathOverBaseUrl": true }
+        ],
+        "typescript-paths/absolute-import": ["error", { "enableAlias": false }]
+      }
+    },
     // TODO: enable these
     {
       "files": [
-        "packages/api/**",
-        "packages/component-library/**",
-        "packages/crdt/**",
-        "packages/desktop-electron/**",
-        "packages/desktop-client/vite.config.mts",
-        "packages/loot-core/**",
-        "packages/sync-server/**"
+        "packages/desktop-client/src/components/ManageRules.tsx",
+        "packages/desktop-client/src/components/mobile/budget/ExpenseGroupList.tsx",
+        "packages/desktop-client/src/components/reports/reports/Calendar.tsx",
+        "packages/desktop-client/src/components/table.tsx"
       ],
       "rules": {
-        "typescript/consistent-type-imports": "off"
-      }
-    },
-    {
-      "files": [
-        "packages/api/**",
-        "packages/component-library/**",
-        "packages/loot-core/src/server/**",
-        "packages/loot-core/src/types/**",
-        "packages/sync-server/**",
-        "packages/loot-core/typings/window.ts"
-      ],
-      "rules": {
-        "typescript/consistent-type-definitions": "off"
-      }
-    },
-    {
-      "files": [
-        "packages/desktop-client/src/components/budget/envelope/budgetsummary/BudgetMonthMenu.tsx",
-        "packages/desktop-client/src/components/budget/tracking/budgetsummary/BudgetMonthMenu.tsx",
-        "packages/desktop-client/src/components/HelpMenu.tsx",
-        "packages/desktop-client/src/components/mobile/budget/CategoryGroupActionMenu.tsx",
-        "packages/desktop-client/src/components/modals/SelectLinkedAccountsModal.tsx",
-        "packages/desktop-client/src/components/reports/Overview.tsx",
-        "packages/desktop-client/src/components/reports/reports/CustomReport.tsx",
-        "packages/desktop-client/src/components/reports/reports/CustomReportListCards.tsx",
-        "packages/desktop-client/src/components/reports/reports/MissingReportCard.tsx",
-        "packages/desktop-client/src/components/reports/util.ts",
-        "packages/desktop-client/src/components/sidebar/Account.tsx",
-        "packages/desktop-client/src/hooks/useSplitsExpanded.tsx",
-        "packages/loot-core/src/server/budget/category-template-context.ts",
-        "packages/loot-core/src/server/budget/schedule-template.ts",
-        "packages/loot-core/src/server/importers/ynab5.ts",
-        "packages/loot-core/src/server/rules/action.ts",
-        "packages/loot-core/src/shared/schedules.ts"
-      ],
-      "rules": {
-        "eslint/default-case": "off"
+        "eslint/no-empty-function": "off"
       }
     }
   ]

@@ -2,9 +2,9 @@ import { t } from 'i18next';
 
 import * as monthUtils from 'loot-core/shared/months';
 import {
-  type CustomReportEntity,
   type CategoryEntity,
   type CategoryGroupEntity,
+  type CustomReportEntity,
   type sortByOpType,
 } from 'loot-core/types/models';
 
@@ -225,7 +225,7 @@ const intervalOptions: intervalOptionsProps[] = [
     description: t('Monthly'),
     key: 'Monthly',
     name: 'Month',
-    // eslint-disable-next-line actual/typography
+
     format: "MMM ''yy",
     range: 'rangeInclusive',
   },

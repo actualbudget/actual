@@ -2,22 +2,6 @@
   "name": "@actual-app/components",
   "version": "0.0.1",
   "license": "MIT",
-  "peerDependencies": {
-    "react": ">=18.2",
-    "react-dom": ">=18.2"
-  },
-  "dependencies": {
-    "@emotion/css": "^11.13.5",
-    "react-aria-components": "^1.13.0",
-    "usehooks-ts": "^3.1.1"
-  },
-  "devDependencies": {
-    "@svgr/cli": "^8.1.0",
-    "@types/react": "^19.2.5",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "vitest": "^4.0.9"
-  },
   "exports": {
     "./hooks/*": "./src/hooks/*.ts",
     "./icons/logo": "./src/icons/logo/index.ts",
@@ -53,6 +37,30 @@
   "scripts": {
     "generate:icons": "rm src/icons/*/*.tsx; cd src/icons && svgr --template template.ts --index-template index-template.ts --typescript --expand-props start -d . .",
     "test": "npm-run-all -cp 'test:*'",
-    "test:web": "ENV=web vitest --run -c vitest.web.config.ts"
+    "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
+    "start:storybook": "storybook dev -p 6006",
+    "build:storybook": "storybook build"
+  },
+  "dependencies": {
+    "@emotion/css": "^11.13.5",
+    "react-aria-components": "^1.14.0",
+    "usehooks-ts": "^3.1.1"
+  },
+  "devDependencies": {
+    "@chromatic-com/storybook": "^5.0.0",
+    "@storybook/addon-a11y": "^10.2.0",
+    "@storybook/addon-docs": "^10.2.0",
+    "@storybook/react-vite": "^10.2.0",
+    "@svgr/cli": "^8.1.0",
+    "@types/react": "^19.2.5",
+    "eslint-plugin-storybook": "^10.2.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "storybook": "^10.2.0",
+    "vitest": "^4.0.16"
+  },
+  "peerDependencies": {
+    "react": ">=18.2",
+    "react-dom": ">=18.2"
   }
 }

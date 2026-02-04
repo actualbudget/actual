@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { SchemaConfig } from '../compiler';
+import { type SchemaConfig } from '../compiler';
 
 function f(type: string, opts?: Record<string, unknown>) {
   return { type, ...opts };
@@ -182,8 +182,14 @@ export const schema = {
     goal: f('integer'),
     long_goal: f('integer'),
   },
+  dashboard_pages: {
+    id: f('id'),
+    name: f('string'),
+    tombstone: f('boolean'),
+  },
   dashboard: {
     id: f('id'),
+    dashboard_page_id: f('id', { ref: 'dashboard_pages' }),
     type: f('string', { required: true }),
     width: f('integer', { required: true }),
     height: f('integer', { required: true }),
@@ -306,7 +312,6 @@ export const schemaConfig: SchemaConfig = {
 
     schedules: {
       v_schedules: internalFields => {
-        /* eslint-disable actual/typography */
         const fields = internalFields({
           next_date: `
             CASE
@@ -330,7 +335,6 @@ export const schemaConfig: SchemaConfig = {
         LEFT JOIN rules _rules ON _rules.id = _.rule
         LEFT JOIN payee_mapping pm ON pm.id = json_extract(_rules.conditions, _paths.payee || '.value')
         `;
-        /* eslint-enable actual/typography */
       },
     },
 

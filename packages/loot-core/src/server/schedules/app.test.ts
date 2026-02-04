@@ -8,11 +8,11 @@ import { loadMappings } from '../db/mappings';
 import { loadRules, updateRule } from '../transactions/transaction-rules';
 
 import {
-  updateConditions,
   createSchedule,
-  updateSchedule,
   deleteSchedule,
   setNextDate,
+  updateConditions,
+  updateSchedule,
 } from './app';
 
 beforeEach(async () => {
@@ -41,7 +41,7 @@ describe('schedule app', () => {
       expect(updated[0].value).toBe('bar');
     });
 
-    it('conditions are added if they don’t exist', () => {
+    it("conditions are added if they don't exist", () => {
       const conds = [
         { op: 'contains', field: 'payee', value: 'FOO' },
         { op: 'contains', field: 'notes', value: 'dflksjdflskdjf' },

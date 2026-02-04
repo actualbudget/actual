@@ -6,7 +6,6 @@ import prompts from 'prompts';
 
 async function run() {
   const username = await execAsync(
-    // eslint-disable-next-line actual/typography
     "gh api user --jq '.login'",
     'To avoid having to enter your username, consider installing the official GitHub CLI (https://github.com/cli/cli) and logging in with `gh auth login`.',
   );
@@ -38,7 +37,7 @@ async function run() {
       choices: [
         { title: '✨ Features', value: 'Features' },
         { title: '👍 Enhancements', value: 'Enhancements' },
-        { title: '🐛 Bugfix', value: 'Bugfix' },
+        { title: '🐛 Bugfixes', value: 'Bugfixes' },
         { title: '⚙️  Maintenance', value: 'Maintenance' },
       ],
     },
@@ -161,7 +160,8 @@ category: ${type}
 authors: [${username}]
 ---
 
-${summary}`;
+${summary}
+`;
 }
 
 // simple exec that fails silently and returns an empty string on failure

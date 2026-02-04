@@ -21,8 +21,8 @@ import {
 import { Search } from '@desktop-client/components/common/Search';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import {
-  type Modal as ModalType,
   pushModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -148,8 +148,7 @@ export function ScheduleLink({
               isLoading={isSchedulesLoading}
               allowCompleted={false}
               filter={filter}
-              minimal={true}
-              onAction={() => {}}
+              minimal
               onSelect={id => {
                 onSelect(id);
                 close();

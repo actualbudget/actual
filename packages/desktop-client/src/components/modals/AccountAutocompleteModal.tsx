@@ -7,10 +7,10 @@ import { View } from '@actual-app/components/view';
 
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import {
-  ModalCloseButton,
   Modal,
-  ModalTitle,
+  ModalCloseButton,
   ModalHeader,
+  ModalTitle,
 } from '@desktop-client/components/common/Modal';
 import { SectionLabel } from '@desktop-client/components/forms';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
@@ -77,8 +77,8 @@ export function AccountAutocompleteModal({
             )}
             <View style={{ flex: 1 }}>
               <AccountAutocomplete
-                focused={true}
-                embedded={true}
+                focused
+                embedded
                 closeOnBlur={false}
                 onClose={close}
                 {...defaultAutocompleteProps}

@@ -5,8 +5,8 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
-  type SummaryContent,
   type RuleConditionEntity,
+  type SummaryContent,
 } from 'loot-core/types/models';
 
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';

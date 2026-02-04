@@ -7,11 +7,11 @@
   "bugs": {
     "url": "https://github.com/actualbudget/actual/issues/"
   },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git@github.com:actualbudget/actual.git"
   },
-  "license": "MIT",
   "workspaces": {
     "packages": [
       "packages/*"
@@ -33,6 +33,7 @@
     "start:service-plugins": "yarn workspace plugins-service watch",
     "start:browser-backend": "yarn workspace loot-core watch:browser",
     "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
+    "start:storybook": "yarn workspace @actual-app/components start:storybook",
     "build:browser-backend": "yarn workspace loot-core build:browser",
     "build:server": "yarn build:browser && yarn workspace @actual-app/sync-server build",
     "build:browser": "./bin/package-browser",
@@ -40,6 +41,7 @@
     "build:plugins-service": "yarn workspace plugins-service build",
     "build:api": "yarn workspace @actual-app/api build",
     "build:docs": "yarn workspace docs build",
+    "build:storybook": "yarn workspace @actual-app/components build:storybook",
     "deploy:docs": "yarn workspace docs deploy",
     "generate:i18n": "yarn workspace @actual-app/web generate:i18n",
     "generate:release-notes": "ts-node ./bin/release-note-generator.ts",
@@ -52,8 +54,8 @@
     "vrt:docker": "./bin/run-vrt",
     "rebuild-electron": "./node_modules/.bin/electron-rebuild -m ./packages/loot-core",
     "rebuild-node": "yarn workspace loot-core rebuild",
-    "lint": "oxfmt --check . && oxlint --deny-warnings && eslint . --max-warnings 0",
-    "lint:fix": "oxfmt . && oxlint --deny-warnings --fix && eslint . --max-warnings 0 --fix",
+    "lint": "oxfmt --check . && oxlint --deny-warnings",
+    "lint:fix": "oxfmt . && oxlint --deny-warnings --fix",
     "install:server": "yarn workspaces focus @actual-app/sync-server --production",
     "typecheck": "yarn tsc --incremental && tsc-strict",
     "jq": "./node_modules/node-jq/bin/jq",
@@ -61,16 +63,13 @@
   },
   "devDependencies": {
     "@octokit/rest": "^22.0.1",
-    "@types/node": "^22.19.1",
+    "@types/node": "^22.19.3",
     "@types/prompts": "^2.4.9",
+    "baseline-browser-mapping": "^2.9.14",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
-    "eslint-import-resolver-typescript": "^4.4.4",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-oxlint": "^1.32.0",
     "eslint-plugin-perfectionist": "^4.15.1",
     "eslint-plugin-typescript-paths": "^0.0.33",
-    "globals": "^16.5.0",
     "html-to-image": "^1.11.13",
     "husky": "^9.1.7",
     "lage": "^2.14.15",
@@ -78,36 +77,34 @@
     "minimatch": "^10.1.1",
     "node-jq": "^6.3.1",
     "npm-run-all": "^4.1.5",
-    "oxfmt": "^0.17.0",
-    "oxlint": "^1.32.0",
+    "oxfmt": "^0.26.0",
+    "oxlint": "^1.41.0",
     "p-limit": "^7.2.0",
     "prompts": "^2.4.2",
     "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.4",
     "typescript-strict-plugin": "^2.4.4"
   },
   "resolutions": {
     "rollup": "4.40.1",
     "socks": ">=2.8.3"
   },
-  "engines": {
-    "node": ">=22",
-    "yarn": "^4.9.1"
-  },
   "lint-staged": {
     "*.{js,mjs,jsx,ts,tsx,md,json,yml,yaml}": [
       "oxfmt --no-error-on-unmatched-pattern"
     ],
     "*.{js,mjs,jsx,ts,tsx}": [
-      "oxlint --deny-warnings --fix",
-      "eslint --max-warnings 0 --fix --no-warn-ignored"
+      "oxlint --deny-warnings --fix"
     ]
   },
-  "packageManager": "yarn@4.10.3",
   "browserslist": [
     "electron >= 35.0",
     "defaults"
-  ]
+  ],
+  "engines": {
+    "node": ">=22",
+    "yarn": "^4.9.1"
+  },
+  "packageManager": "yarn@4.10.3"
 }

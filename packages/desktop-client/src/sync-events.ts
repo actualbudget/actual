@@ -326,7 +326,7 @@ export function listenForSyncEvent(store: AppStore) {
           notif = {
             title: t('Update required'),
             message: t(
-              'We couldn’t apply changes from the server. This probably means you ' +
+              "We couldn't apply changes from the server. This probably means you " +
                 'need to update the app to support the latest database.',
             ),
             type: 'warning',
@@ -336,13 +336,23 @@ export function listenForSyncEvent(store: AppStore) {
           console.trace('apply-failure', event.meta);
           notif = {
             message: t(
-              'We couldn’t apply that change to the database. Please report this as a bug by [opening a GitHub issue]({{githubIssueLink}}).',
+              "We couldn't apply that change to the database. Please report this as a bug by [opening a GitHub issue]({{githubIssueLink}}).",
               { githubIssueLink },
             ),
           };
           break;
         case 'network':
           // Show nothing
+          break;
+        case 'clock-drift':
+          notif = {
+            title: t('Time sync issue'),
+            message: t(
+              'Failed to sync because your device time differs too much from the server. Please check your device time settings and ensure they are correct.',
+            ),
+            type: 'warning',
+            sticky: true,
+          };
           break;
         case 'token-expired':
           notif = {

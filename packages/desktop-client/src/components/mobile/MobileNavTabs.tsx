@@ -1,13 +1,13 @@
 import React, {
+  useCallback,
+  useState,
   type ComponentProps,
   type ComponentType,
   type CSSProperties,
-  useCallback,
-  useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
-import { useSpring, animated, config } from 'react-spring';
+import { animated, config, useSpring } from 'react-spring';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {

@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  generateTransaction,
   generateAccount,
   generateCategoryGroups,
+  generateTransaction,
 } from 'loot-core/mocks';
 import { initServer } from 'loot-core/platform/client/fetch';
 import {
@@ -208,8 +208,8 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
                 <TransactionTable
                   {...props}
                   transactions={transactions}
-                  loadMoreTransactions={() => {}}
-                  // @ts-ignore TODO:
+                  loadMoreTransactions={vi.fn()}
+                  // @ts-expect-error TODO: fix me
                   commonPayees={[]}
                   payees={payees}
                   addNotification={console.log}
@@ -218,8 +218,8 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
                   onAdd={onAdd}
                   onAddSplit={onAddSplit}
                   onCreatePayee={onCreatePayee}
-                  showSelection={true}
-                  allowSplitTransaction={true}
+                  showSelection
+                  allowSplitTransaction
                 />
               </SplitsExpandedProvider>
             </SelectedProviderWithItems>
@@ -699,7 +699,7 @@ describe('Transactions', () => {
     expectToBeEditingField(container, 'category', 2);
   });
 
-  test('dropdown hovers but doesn’t change value', async () => {
+  test("dropdown hovers but doesn't change value", async () => {
     const { container, getTransactions } = renderTransactions();
 
     const input = await editField(container, 'category', 2);
@@ -928,18 +928,12 @@ describe('Transactions', () => {
     let input = expectToBeEditingField(container, 'date', 0, true);
     await userEvent.type(input, '[Tab]');
     input = expectToBeEditingField(container, 'account', 0, true);
-    // The first escape closes the dropdown
+
+    await userEvent.type(input, '[Escape]');
     await userEvent.type(input, '[Escape]');
     expect(
       container.querySelector('[data-testid="new-transaction"]'),
-    ).toBeTruthy();
-
-    // TODO: Fix this
-    // Now it should close the new transaction form
-    // await userEvent.type(input, '[Escape]');
-    // expect(
-    //   container.querySelector('[data-testid="new-transaction"]')
-    // ).toBeNull();
+    ).toBeNull();
 
     // The cancel button should also close the new transaction form
     updateProps({ isAdding: true });

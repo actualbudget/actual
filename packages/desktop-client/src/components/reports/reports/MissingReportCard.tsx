@@ -29,6 +29,8 @@ export function MissingReportCard({
           case 'remove':
             onRemove();
             break;
+          default:
+            throw new Error(`Unrecognized menu option: ${item}`);
         }
       }}
     >

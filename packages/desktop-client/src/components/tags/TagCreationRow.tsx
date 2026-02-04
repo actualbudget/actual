@@ -1,10 +1,10 @@
 import React, {
-  type ChangeEvent,
-  type KeyboardEvent,
   useEffect,
   useMemo,
   useRef,
   useState,
+  type ChangeEvent,
+  type KeyboardEvent,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -116,7 +116,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           backgroundColor: theme.tableBackground,
           gap: 5,
         }}
-        collapsed={true}
+        collapsed
       >
         <InputCell
           width={250}
@@ -166,7 +166,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           alignItems: 'center',
           borderBottom: '1px solid ' + theme.tableBorderHover,
         }}
-        collapsed={true}
+        collapsed
       >
         <Trans>Choose Color:</Trans>
         <ColorPicker

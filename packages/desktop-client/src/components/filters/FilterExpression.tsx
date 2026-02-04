@@ -8,7 +8,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { mapField, friendlyOp } from 'loot-core/shared/rules';
+import { friendlyOp, mapField } from 'loot-core/shared/rules';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { FilterEditor } from './FiltersMenu';
@@ -89,7 +89,7 @@ export function FilterExpression<T extends RuleConditionEntity>({
                 <Value
                   value={value}
                   field={field}
-                  inline={true}
+                  inline
                   valueIsRaw={
                     op === 'contains' ||
                     op === 'matches' ||

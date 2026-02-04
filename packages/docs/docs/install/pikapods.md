@@ -25,7 +25,7 @@ If you are technically inclined, just [Click here to create an account and run A
 
 You can leave the resources at their lowest setting (although you will need a non-zero amount of storage for your budget files).
 
-_Your browser does most of Actual's computation,_ so purchasing more resources for the server won’t necessarily result in a better experience.
+_Your browser does most of Actual's computation,_ so purchasing more resources for the server won't necessarily result in a better experience.
 
 After setting up your Pod, head over to our [Starting Fresh](/docs/getting-started/starting-fresh) guide to get started with
 Actual Budget.
@@ -36,7 +36,7 @@ Actual Budget.
 
 You will be greeted with the following screen.
 
-![image PikaPods register](/img/pikapods-setup/pikapods-1-register-login.png)
+![image PikaPods register](/img/pikapods-setup/pikapods-1-register-login.webp)
 
 Click on the **register** link inside the blue banner, which will take you to the user registration screen.
 
@@ -44,19 +44,19 @@ Click on the **register** link inside the blue banner, which will take you to th
 
 A working email address is required, as PikaPods will send an email with a link you need to click on to complete the signup process.
 
-![Image Pikapods email](/img/pikapods-setup/pikapods-2-register-name.png)
+![Image Pikapods email](/img/pikapods-setup/pikapods-2-register-name.webp)
 
 ## Verification email
 
 Click the green button **Activate and Login**. You are now registered as a PikaPods customer. You will be returned to the login screen.
 
-![Image Pikapods email registration](/img/pikapods-setup/pikapods-4-email-activation.png)
+![Image Pikapods email registration](/img/pikapods-setup/pikapods-4-email-activation.webp)
 
 ## Login screen
 
 Enter _your_ registration email address and password.
 
-![Image Pikapods login](/img/pikapods-setup/pikapods-5-login-screen.png)
+![Image Pikapods login](/img/pikapods-setup/pikapods-5-login-screen.webp)
 
 ## Naming your Pod
 
@@ -74,7 +74,7 @@ In 1), you enter a name for your Pod. This name really does not matter unless yo
 
 In 2), you decide which region your Pod should run - choose the most suitable region.
 
-![Image pikapods basic](/img/pikapods-setup/pikapods-6-add-pod-basics.png)
+![Image pikapods basic](/img/pikapods-setup/pikapods-6-add-pod-basics.webp)
 
 ## Assigning storage to your Pod
 
@@ -84,7 +84,7 @@ Example: It takes about 33 megabytes of storage for about 1,200 transactions, 18
 
 Your Pod will be created when you click on the green **ADD POD** button. This step takes less than one minute.
 
-![Image pikapods add resources](/img/pikapods-setup/pikapods-7-add-pod-resoruces.png)
+![Image pikapods add resources](/img/pikapods-setup/pikapods-7-add-pod-resoruces.webp)
 
 ## Your Pod is now ready to be used
 
@@ -92,7 +92,7 @@ Click on the green **OPEN POD** button to be taken to your Pod.
 
 The address for your Actual Budget is found in the Domain field. In the screenshot example, this is `https://berserk-bullmastiff.pikapod.net/budget/`. Yours will be something completely different.
 
-![Image pikapod pod url](/img/pikapods-setup/pikapods-8-running-pod.png)
+![Image pikapod pod url](/img/pikapods-setup/pikapods-8-running-pod.webp)
 
 ## Setting a password for your Actual Budget
 
@@ -104,7 +104,7 @@ Keep your Actual Budget password safe, as it cannot be retrieved. If you forget 
 
 :::
 
-![Image connecting to Actual](/img/a-tour-of-actual/server-connecting-first-time.png)
+![Image connecting to Actual](/img/a-tour-of-actual/server-connecting-first-time.webp)
 <br />
 <br />
 

@@ -2,13 +2,13 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
-  SelectCell,
   Cell,
+  SelectCell,
   TableHeader,
 } from '@desktop-client/components/table';
 import {
-  useSelectedItems,
   useSelectedDispatch,
+  useSelectedItems,
 } from '@desktop-client/hooks/useSelected';
 
 export function UserDirectoryHeader() {
@@ -20,7 +20,7 @@ export function UserDirectoryHeader() {
   return (
     <TableHeader style={{}}>
       <SelectCell
-        exposed={true}
+        exposed
         focused={false}
         selected={selectedItems.size > 0}
         onSelect={e =>

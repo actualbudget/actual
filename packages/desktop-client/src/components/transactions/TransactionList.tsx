@@ -76,9 +76,9 @@ async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
   const remoteDiff = await saveDiff(diff, learnCategories);
   onChange(
     // TODO:
-    // @ts-ignore testing
+    // @ts-expect-error - fix me
     applyTransactionDiff(changes.newTransaction, remoteDiff),
-    // @ts-ignore testing
+    // @ts-expect-error - fix me
     applyChanges(remoteDiff, changes.data),
   );
 }
@@ -381,8 +381,13 @@ export function TransactionList({
       newTransactions = realizeTempTransactions(newTransactions);
 
       const parentTransaction = newTransactions.find(t => !t.is_child);
+      const isLinkedToSchedule = !!parentTransaction?.schedule;
 
-      if (parentTransaction && isFutureTransaction(parentTransaction)) {
+      if (
+        parentTransaction &&
+        isFutureTransaction(parentTransaction) &&
+        !isLinkedToSchedule
+      ) {
         const transactionWithSubtransactions = {
           ...parentTransaction,
           subtransactions: newTransactions.filter(
@@ -440,7 +445,8 @@ export function TransactionList({
         }
       };
 
-      if (isFutureTransaction(transaction)) {
+      const isLinkedToSchedule = !!transaction.schedule;
+      if (isFutureTransaction(transaction) && !isLinkedToSchedule) {
         const originalTransaction = transactionsLatest.current.find(
           t => t.id === transaction.id,
         );
@@ -604,7 +610,7 @@ export function TransactionList({
       showReconciled={showReconciled}
       showCleared={showCleared}
       showAccount={showAccount}
-      showCategory={true}
+      showCategory
       currentAccountId={account && account.id}
       currentCategoryId={category && category.id}
       isAdding={isAdding}

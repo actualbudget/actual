@@ -7,6 +7,7 @@ import { t } from 'i18next';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
+import { currencyToAmount, integerToCurrency } from 'loot-core/shared/util';
 import { type Handlers } from 'loot-core/types/handlers';
 import {
   type CategoryEntity,
@@ -62,7 +63,7 @@ export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
 
 export function makeAmountGrey(value: number | string | null): CSSProperties {
   return value === 0 || value === '0' || value === '' || value == null
-    ? { color: theme.tableTextSubdued }
+    ? { color: theme.budgetNumberZero }
     : null;
 }
 
@@ -71,20 +72,33 @@ export function makeBalanceAmountStyle(
   goalValue?: number | null,
   budgetedValue?: number | null,
 ) {
-  if (value < 0) {
-    return { color: theme.errorText };
+  // Converts an integer currency value to a normalized decimal amount.
+  // First converts the integer to currency format, then to a decimal amount.
+  // Uses integerToCurrency to display the value correctly according to user prefs.
+
+  const normalizeIntegerValue = (val: number | null | undefined) =>
+    typeof val === 'number' ? currencyToAmount(integerToCurrency(val)) : 0;
+
+  const currencyValue = normalizeIntegerValue(value);
+
+  if (currencyValue < 0) {
+    return { color: theme.budgetNumberNegative };
   }
 
   if (goalValue == null) {
-    const greyed = makeAmountGrey(value);
+    const greyed = makeAmountGrey(currencyValue);
     if (greyed) {
       return greyed;
     }
+    return { color: theme.budgetNumberPositive };
   } else {
-    if (budgetedValue < goalValue) {
-      return { color: theme.warningText };
+    const budgetedAmount = normalizeIntegerValue(budgetedValue);
+    const goalAmount = normalizeIntegerValue(goalValue);
+
+    if (budgetedAmount < goalAmount) {
+      return { color: theme.templateNumberUnderFunded };
     }
-    return { color: theme.noticeText };
+    return { color: theme.templateNumberFunded };
   }
 }
 
@@ -96,9 +110,11 @@ export function makeAmountFullStyle(
     zeroColor?: string;
   },
 ) {
-  const positiveColorToUse = colors?.positiveColor || theme.noticeText;
-  const negativeColorToUse = colors?.negativeColor || theme.errorText;
-  const zeroColorToUse = colors?.zeroColor || theme.tableTextSubdued;
+  const positiveColorToUse =
+    colors?.positiveColor || theme.budgetNumberPositive;
+  const negativeColorToUse =
+    colors?.negativeColor || theme.budgetNumberNegative;
+  const zeroColorToUse = colors?.zeroColor || theme.budgetNumberZero;
   return {
     color:
       value < 0

@@ -12,14 +12,14 @@ type BalanceMovementMenuProps = {
   categoryId: string;
   month: string;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-  onClose?: () => void;
+  onClose: () => void;
 };
 
 export function BalanceMovementMenu({
   categoryId,
   month,
   onBudgetAction,
-  onClose = () => {},
+  onClose,
 }: BalanceMovementMenuProps) {
   const format = useFormat();
 
@@ -59,7 +59,7 @@ export function BalanceMovementMenu({
         <TransferMenu
           categoryId={categoryId}
           initialAmount={catBalance}
-          showToBeBudgeted={true}
+          showToBeBudgeted
           onClose={onClose}
           onSubmit={(amount, toCategoryId) => {
             onBudgetAction(month, 'transfer-category', {

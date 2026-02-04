@@ -1,17 +1,17 @@
 // @ts-strict-ignore
 
 import { aqlQuery } from '..';
-import { q, QueryState } from '../../../shared/query';
-import { CategoryEntity } from '../../../types/models';
+import { q, type QueryState } from '../../../shared/query';
+import { type CategoryEntity } from '../../../types/models';
 import * as db from '../../db';
 import { whereIn } from '../../db/util';
 import {
-  CompilerState,
   isAggregateQuery,
-  OutputTypes,
-  SqlPieces,
+  type CompilerState,
+  type OutputTypes,
+  type SqlPieces,
 } from '../compiler';
-import { AqlQueryExecutor, execQuery } from '../exec';
+import { execQuery, type AqlQueryExecutor } from '../exec';
 import { convertOutputType } from '../schema-helpers';
 
 // Transactions executor
@@ -50,7 +50,7 @@ function execTransactions(
     ? (tableOptions.splits as string)
     : 'inline';
   if (!isValidSplitsOption(splitType)) {
-    throw new Error(`Invalid “splits” option for transactions: “${splitType}”`);
+    throw new Error(`Invalid "splits" option for transactions: "${splitType}"`);
   }
 
   if (splitType === 'all' || splitType === 'inline' || splitType === 'none') {
@@ -265,7 +265,7 @@ async function execCategoryGroups(
     : 'all';
   if (!isValidCategoriesOption(categoriesOption)) {
     throw new Error(
-      `Invalid “categories” option for category_groups: “${categoriesOption}”`,
+      `Invalid "categories" option for category_groups: "${categoriesOption}"`,
     );
   }
 

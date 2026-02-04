@@ -1,11 +1,11 @@
 import {
-  type ComponentType,
-  type ReactNode,
-  type SVGProps,
   useCallback,
   useEffect,
   useMemo,
   useState,
+  type ComponentType,
+  type ReactNode,
+  type SVGProps,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -342,7 +342,7 @@ export function CommandBar() {
                             'var(--color-menuItemBackgroundHover)',
                           color: 'var(--color-menuItemTextHover)',
                         },
-                      // eslint-disable-next-line actual/typography
+
                       "&[data-selected='true']": {
                         backgroundColor: 'var(--color-menuItemBackgroundHover)',
                         color: 'var(--color-menuItemTextHover)',

@@ -1,20 +1,23 @@
 import React, {
-  type Ref,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
+  type Ref,
+  type RefObject,
 } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import debounce from 'lodash/debounce';
 
-import { chartTheme } from './chart-theme';
+import { amountToInteger } from 'loot-core/shared/util';
+
 import { LoadingIndicator } from './LoadingIndicator';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
@@ -31,6 +34,7 @@ type FormulaResultProps = {
   fontSizeMode?: 'dynamic' | 'static';
   staticFontSize?: number;
   customColor?: string | null;
+  containerRef?: RefObject<HTMLDivElement | null>;
 };
 
 export function FormulaResult({
@@ -43,10 +47,12 @@ export function FormulaResult({
   fontSizeMode = 'dynamic',
   staticFontSize = 32,
   customColor = null,
+  containerRef,
 }: FormulaResultProps) {
   const [fontSize, setFontSize] = useState<number>(initialFontSize);
   const refDiv = useRef<HTMLDivElement>(null);
   const previousFontSizeRef = useRef<number>(initialFontSize);
+  const format = useFormat();
 
   // Format the display value - just show what we got
   const displayValue = useMemo(() => {
@@ -54,17 +60,27 @@ export function FormulaResult({
       return error;
     } else if (value === null || value === undefined) {
       return '';
+    } else if (typeof value === 'number') {
+      return format(
+        amountToInteger(value, format.currency.decimalPlaces),
+        'financial',
+      );
     } else {
       return String(value);
     }
-  }, [error, value]);
+  }, [error, value, format]);
 
   const calculateFontSize = useCallback(() => {
     if (!refDiv.current) return;
 
-    const { clientWidth, clientHeight } = refDiv.current;
-    const width = clientWidth; // no margin required on left and right
-    const height = clientHeight - CONTAINER_MARGIN * 2; // account for margin top and bottom
+    const elementToMeasure =
+      containerRef?.current || refDiv.current.parentElement || refDiv.current;
+    const { clientWidth, clientHeight } = elementToMeasure;
+
+    const width = clientWidth;
+    const height = clientHeight - CONTAINER_MARGIN * 2;
+
+    if (width <= 0 || height <= 0) return;
 
     // Get the actual display value length at calculation time
     const valueLength = displayValue.length || 1; // Avoid division by zero
@@ -84,7 +100,7 @@ export function FormulaResult({
       previousFontSizeRef.current = calculatedFontSize;
       fontSizeChanged(calculatedFontSize);
     }
-  }, [displayValue, fontSizeChanged]);
+  }, [displayValue, fontSizeChanged, containerRef]);
 
   // Debounce the calculation to avoid too many recalculations
   const debouncedCalculateFontSize = useRef(
@@ -135,7 +151,7 @@ export function FormulaResult({
   const color = customColor
     ? customColor
     : error
-      ? chartTheme.colors.red
+      ? theme.errorText
       : theme.pageText;
 
   return (

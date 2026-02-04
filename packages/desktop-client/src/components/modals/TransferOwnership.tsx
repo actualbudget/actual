@@ -24,8 +24,8 @@ import {
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import {
-  type Modal as ModalType,
   popModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';

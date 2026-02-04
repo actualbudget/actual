@@ -4,7 +4,7 @@ import * as jspb from 'google-protobuf';
 if (typeof globalThis !== 'undefined') {
   // Add a basic require polyfill for CommonJS modules
   if (typeof globalThis.require === 'undefined') {
-    // @ts-ignore - we're creating a minimal require implementation
+    // @ts-expect-error - we're creating a minimal require implementation
     globalThis.require = (moduleId: string) => {
       switch (moduleId) {
         case 'google-protobuf':
@@ -21,7 +21,6 @@ if (typeof globalThis !== 'undefined') {
 // Also set on global for compatibility
 if (typeof global !== 'undefined') {
   if (typeof global.require === 'undefined') {
-    // @ts-ignore - assigning minimal require implementation to global
     global.require = globalThis.require;
   }
 }

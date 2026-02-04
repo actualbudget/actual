@@ -12,11 +12,11 @@ import { type TagEntity } from 'loot-core/types/models';
 import { TagEditor } from './TagEditor';
 
 import {
-  SelectCell,
-  Row,
   Cell,
-  InputCell,
   CellButton,
+  InputCell,
+  Row,
+  SelectCell,
 } from '@desktop-client/components/table';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -84,7 +84,7 @@ export const TagRow = memo(
               ? theme.tableRowBackgroundHover
               : theme.tableBackground,
         }}
-        collapsed={true}
+        collapsed
         onMouseEnter={() => onHover(tag.id)}
         onMouseLeave={() => onHover()}
         onContextMenu={handleContextMenu}

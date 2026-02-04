@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, {
   forwardRef,
-  type Ref,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
@@ -10,6 +9,7 @@ import React, {
   useState,
   type ComponentProps,
   type KeyboardEvent,
+  type Ref,
 } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -20,26 +20,25 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import {
-  type Locale,
+  addDays,
+  format,
+  isValid,
   parse,
   parseISO,
-  format,
   subDays,
-  addDays,
-  isValid,
+  type Locale,
 } from 'date-fns';
 import Pikaday from 'pikaday';
 
 import {
+  currentDate,
   getDayMonthFormat,
   getDayMonthRegex,
   getShortYearFormat,
   getShortYearRegex,
-  currentDate,
 } from 'loot-core/shared/months';
 
 import 'pikaday/css/pikaday.css';
-
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
 
@@ -174,6 +173,7 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
           }
         },
       }),
+      // oxlint-disable-next-line react-hooks/exhaustive-deps
       [],
     );
 
@@ -203,6 +203,7 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
       return () => {
         picker.current.destroy();
       };
+      // oxlint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -316,7 +317,8 @@ function DateSelectDesktop({
         setSelectedValue(value);
       }
     }
-  }, [value]);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, dateFormat]);
 
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (

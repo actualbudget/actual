@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -28,8 +28,8 @@ import { getCountryFromBrowser } from '@desktop-client/components/util/localeToC
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import {
-  type Modal as ModalType,
   pushModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -235,9 +235,9 @@ export function GoCardlessExternalMsgModal({
         <Warning>
           <Trans>
             By enabling bank sync, you will be granting GoCardless (a third
-            party service) read-only access to your entire account’s transaction
+            party service) read-only access to your entire account's transaction
             history. This service is not affiliated with Actual in any way. Make
-            sure you’ve read and understand GoCardless’s{' '}
+            sure you've read and understand GoCardless's{' '}
             <Link
               variant="external"
               to="https://gocardless.com/privacy/"

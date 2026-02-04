@@ -1,8 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { logger } from '../platform/server/log';
 import { type TransactionEntity } from '../types/models';
 
-import { last, diffItems, applyChanges } from './util';
+import { applyChanges, diffItems, last } from './util';
 
 export function isTemporaryId(id: string) {
   return id.indexOf('temp') !== -1;
@@ -68,6 +69,17 @@ function makeNonChild<T extends GenericTransactionEntity>(
     starting_balance_flag: null,
     is_child: false,
     parent_id: null,
+  } as unknown as T;
+}
+
+function makeTransactionWithChildCategory<T extends GenericTransactionEntity>(
+  parent: T,
+  data: Partial<TransactionEntity>,
+) {
+  return {
+    ...parent,
+    is_parent: false,
+    category: data.category || null,
   } as unknown as T;
 }
 
@@ -179,7 +191,7 @@ function replaceTransactions(
   if (trans.is_parent || trans.is_child) {
     const parentIndex = findParentIndex(transactions, idx);
     if (parentIndex == null) {
-      console.log('Cannot find parent index');
+      logger.log('Cannot find parent index');
       return {
         data: [],
         diff: { added: [], deleted: [], updated: [] },
@@ -374,6 +386,21 @@ export function makeAsNonChildTransactions(
     t =>
       !newNonChildTransactions.some(updatedTrans => updatedTrans.id === t.id),
   );
+  if (
+    childTransactions.length === 1 &&
+    childTransactionsToUpdate.length === 1 &&
+    childTransactionsToUpdate[0].id === childTransactions[0].id
+  ) {
+    return {
+      updated: [
+        makeTransactionWithChildCategory(
+          parentTransaction,
+          childTransactionsToUpdate[0],
+        ),
+      ],
+      deleted: [childTransactionsToUpdate[0]],
+    };
+  }
 
   const nonChildTransactionsToUpdate =
     remainingChildTransactions.length === 1

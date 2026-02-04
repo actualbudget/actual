@@ -90,7 +90,14 @@ export function useBootstrapped(redirect = true) {
       }
     }
     run();
-  }, [location]);
+  }, [
+    location,
+    navigate,
+    redirect,
+    setLoginMethods,
+    setMultiuserEnabled,
+    setServerURL,
+  ]);
 
   return { checked };
 }

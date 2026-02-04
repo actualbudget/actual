@@ -5,8 +5,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
-  type CategoryGroupEntity,
   type CategoryEntity,
+  type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { RenderMonths } from './RenderMonths';
@@ -15,9 +15,9 @@ import { SidebarCategory } from './SidebarCategory';
 import { useBudgetComponents } from '.';
 
 import {
+  DropHighlight,
   useDraggable,
   useDroppable,
-  DropHighlight,
   type DragState,
   type OnDragChangeCallback,
   type OnDropCallback,
@@ -79,7 +79,7 @@ export function ExpenseCategory({
   return (
     <Row
       innerRef={dropRef}
-      collapsed={true}
+      collapsed
       style={{
         backgroundColor: theme.tableBackground,
         opacity: cat.hidden || categoryGroup?.hidden ? 0.5 : undefined,

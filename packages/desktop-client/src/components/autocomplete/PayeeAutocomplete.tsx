@@ -1,15 +1,15 @@
 // @ts-strict-ignore
 import React, {
   Fragment,
-  useState,
   useMemo,
+  useState,
   type ComponentProps,
-  type ReactNode,
-  type ComponentType,
-  type SVGProps,
   type ComponentPropsWithoutRef,
-  type ReactElement,
+  type ComponentType,
   type CSSProperties,
+  type ReactElement,
+  type ReactNode,
+  type SVGProps,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -27,8 +27,8 @@ import { type AccountEntity, type PayeeEntity } from 'loot-core/types/models';
 
 import {
   Autocomplete,
-  defaultFilterSuggestion,
   AutocompleteFooter,
+  defaultFilterSuggestion,
 } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
 
@@ -454,7 +454,7 @@ export function PayeeAutocomplete({
   return (
     <Autocomplete
       key={focusTransferPayees ? 'transfers' : 'all'}
-      strict={true}
+      strict
       embedded={embedded}
       value={stripNew(value)}
       suggestions={payeeSuggestions}
@@ -588,7 +588,7 @@ export function CreatePayeeButton({
           style={{ marginRight: 5, display: 'inline-block' }}
         />
       )}
-      <Trans>Create payee “{{ payeeName }}”</Trans>
+      <Trans>Create payee "{{ payeeName }}"</Trans>
     </View>
   );
 }
@@ -642,7 +642,8 @@ function PayeeItem({
     paddingLeftOverFromIcon -= iconSize + 5;
   }
   return (
-    <div
+    <button
+      type="button"
       // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
       // event handler they set on this element. When this code runs
       // in WebKit on touch-enabled devices, taps on this element end
@@ -658,13 +659,13 @@ function PayeeItem({
       // there's some "fast path" logic that can be triggered in various
       // ways to force WebKit to bail on the content observation process.
       // One of those ways is setting `role="button"` (or a number of
-      // other aria roles) on the element, which is what we're doing here.
+      // other aria roles) on the element. Now we use a semantic button
+      // element instead which provides the same fast path behavior.
       //
       // ref:
       // * https://github.com/WebKit/WebKit/blob/447d90b0c52b2951a69df78f06bb5e6b10262f4b/LayoutTests/fast/events/touch/ios/content-observation/400ms-hover-intent.html
       // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
       // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
-      role="button"
       className={cx(
         className,
         css({
@@ -677,6 +678,9 @@ function PayeeItem({
           borderRadius: embedded ? 4 : 0,
           padding: 4,
           paddingLeft: paddingLeftOverFromIcon,
+          border: 'none',
+          font: 'inherit',
+          textAlign: 'left',
           ...narrowStyle,
         }),
       )}
@@ -688,7 +692,7 @@ function PayeeItem({
         {itemIcon}
         {item.name}
       </TextOneLine>
-    </div>
+    </button>
   );
 }
 

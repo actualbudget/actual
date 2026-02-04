@@ -25,8 +25,8 @@ import { AmountInput } from '@desktop-client/components/util/AmountInput';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import {
-  type Modal as ModalType,
   pushModal,
+  type Modal as ModalType,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -108,7 +108,7 @@ export function CoverModal({
             <InitialFocus>
               <AmountInput
                 value={amount}
-                autoDecimals={true}
+                autoDecimals
                 style={{
                   marginLeft: styles.mobileEditingPadding,
                   marginRight: styles.mobileEditingPadding,

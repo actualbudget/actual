@@ -1,13 +1,13 @@
 import React, {
-  PureComponent,
-  type RefObject,
   createRef,
+  PureComponent,
+  useEffect,
   useMemo,
   type ReactElement,
-  useEffect,
+  type RefObject,
 } from 'react';
 import { Trans } from 'react-i18next';
-import { Navigate, useParams, useLocation } from 'react-router';
+import { Navigate, useLocation, useParams } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -17,24 +17,24 @@ import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
 import { v4 as uuidv4 } from 'uuid';
 
-import { send, listen } from 'loot-core/platform/client/fetch';
+import { listen, send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type UndoState } from 'loot-core/server/undo';
 import { currentDay } from 'loot-core/shared/months';
 import { q, type Query } from 'loot-core/shared/query';
 import {
-  updateTransaction,
+  makeAsNonChildTransactions,
+  makeChild,
   realizeTempTransactions,
   ungroupTransaction,
   ungroupTransactions,
-  makeChild,
-  makeAsNonChildTransactions,
+  updateTransaction,
 } from 'loot-core/shared/transactions';
 import { applyChanges, type IntegerAmount } from 'loot-core/shared/util';
 import {
+  type AccountEntity,
   type NewRuleEntity,
   type RuleActionEntity,
-  type AccountEntity,
   type RuleConditionEntity,
   type TransactionEntity,
   type TransactionFilterEntity,
@@ -44,10 +44,10 @@ import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
 
 import {
-  unlinkAccount,
-  reopenAccount,
-  updateAccount,
   markAccountRead,
+  reopenAccount,
+  unlinkAccount,
+  updateAccount,
 } from '@desktop-client/accounts/accountsSlice';
 import { syncAndDownload } from '@desktop-client/app/appSlice';
 import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
@@ -87,7 +87,7 @@ import {
   pagedQuery,
   type PagedQuery,
 } from '@desktop-client/queries/pagedQuery';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
 import { updateNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
@@ -528,6 +528,7 @@ class AccountInternal extends PureComponent<
     });
   }
 
+  // oxlint-disable-next-line react/no-unsafe
   UNSAFE_componentWillReceiveProps(nextProps: AccountInternalProps) {
     if (this.props.accountId !== nextProps.accountId) {
       this.setState(
@@ -1840,7 +1841,7 @@ class AccountInternal extends PureComponent<
               <View style={{ flex: 1 }}>
                 <TransactionList
                   headerContent={undefined}
-                  // @ts-ignore TODO
+                  // @ts-expect-error - fix me
                   tableRef={this.table}
                   account={account}
                   transactions={transactions}

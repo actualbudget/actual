@@ -12,30 +12,30 @@ import {
 import * as monthUtils from '../shared/months';
 import { q } from '../shared/query';
 import {
+  deleteTransaction,
   ungroupTransactions,
   updateTransaction,
-  deleteTransaction,
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
-import { Handlers } from '../types/handlers';
+import { type Handlers } from '../types/handlers';
 import {
-  AccountEntity,
-  CategoryGroupEntity,
-  ScheduleEntity,
+  type AccountEntity,
+  type CategoryGroupEntity,
+  type ScheduleEntity,
 } from '../types/models';
-import { ServerHandlers } from '../types/server-handlers';
+import { type ServerHandlers } from '../types/server-handlers';
 
 import { addTransactions } from './accounts/sync';
 import {
   accountModel,
   budgetModel,
-  categoryModel,
   categoryGroupModel,
+  categoryModel,
   payeeModel,
   remoteFileModel,
   scheduleModel,
-  APIScheduleEntity,
-  AmountOPType,
+  type AmountOPType,
+  type APIScheduleEntity,
 } from './api-models';
 import { aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
@@ -45,7 +45,7 @@ import { APIError } from './errors';
 import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
-import { setSyncingMode, batchMessages } from './sync';
+import { batchMessages, setSyncingMode } from './sync';
 
 let IMPORT_MODE = false;
 
@@ -109,11 +109,11 @@ async function validateExpenseCategory(debug, id) {
   );
 
   if (!row) {
-    throw APIError(`${debug}: category “${id}” does not exist`);
+    throw APIError(`${debug}: category "${id}" does not exist`);
   }
 
   if (row.is_income !== 0) {
-    throw APIError(`${debug}: category “${id}” is not an expense category`);
+    throw APIError(`${debug}: category "${id}" is not an expense category`);
   }
 }
 
@@ -193,7 +193,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     const file = files.find(f => f.groupId === syncId);
     if (!file) {
       throw new Error(
-        `Budget “${syncId}” not found. Check the sync id of your budget in the Advanced section of the settings page.`,
+        `Budget "${syncId}" not found. Check the sync id of your budget in the Advanced section of the settings page.`,
       );
     }
 
@@ -329,7 +329,9 @@ handlers['api/finish-import'] = async function () {
   await handlers['get-budget-bounds']();
   await sheet.waitOnSpreadsheet();
 
-  await cloudStorage.upload().catch(() => {});
+  await cloudStorage.upload().catch(() => {
+    // Ignore errors
+  });
 
   connection.send('finish-import');
   IMPORT_MODE = false;

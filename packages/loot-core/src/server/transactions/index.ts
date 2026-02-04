@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 
 import * as connection from '../../platform/server/connection';
-import { Diff } from '../../shared/util';
-import { PayeeEntity, TransactionEntity } from '../../types/models';
+import { type Diff } from '../../shared/util';
+import { type PayeeEntity, type TransactionEntity } from '../../types/models';
 import * as db from '../db';
 import { incrFetch, whereIn } from '../db/util';
 import { batchMessages } from '../sync';
@@ -31,7 +31,7 @@ async function getTransactionsByIds(
   return incrFetch(
     (query, params) => db.selectWithSchema('transactions', query, params),
     ids,
-    // eslint-disable-next-line actual/typography
+
     id => `id = '${id}'`,
     where => `SELECT * FROM v_transactions_internal WHERE ${where}`,
   );

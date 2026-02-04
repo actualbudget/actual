@@ -6,11 +6,11 @@ import * as asyncStorage from '../../platform/server/asyncStorage';
 import { getLocale } from '../../shared/locale';
 import * as monthUtils from '../../shared/months';
 import {
-  IntegerAmount,
   integerToCurrency,
   safeNumber,
+  type IntegerAmount,
 } from '../../shared/util';
-import { CategoryEntity } from '../../types/models';
+import { type CategoryEntity } from '../../types/models';
 import * as db from '../db';
 import * as sheet from '../sheet';
 import { batchMessages } from '../sync';

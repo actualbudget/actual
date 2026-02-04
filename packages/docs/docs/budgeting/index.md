@@ -44,13 +44,13 @@ Most likely, a common workflow will be to "hold" income you make this month for 
 1. Click the **To Budget** amount.
 2. Select **Hold for next month** in the menu.
 
-![hold funds](/img/how-it-works/buffer-1.png)
+![hold funds](/img/how-it-works/buffer-1.webp)
 
 3. Press <Key k="enter" /> to hold all available money, or enter a custom amount to hold.
 
 This doesn't do anything except take out money from the **To Budget** amount for that month, allowing you to "zero it out" and mark it to be used for later. That money will appear in next month's **To Budget**.
 
-Using Hold for Next Month will ensure that the funds are no longer available to budget in the current month but can still be allocated to the budget in any subsequent month. This will be particularly useful for those who are looking to stop living paycheck to paycheck and instead gradually get one month ahead i.e. living on last month’s income rather than this month’s.
+Using Hold for Next Month will ensure that the funds are no longer available to budget in the current month but can still be allocated to the budget in any subsequent month. This will be particularly useful for those who are looking to stop living paycheck to paycheck and instead gradually get one month ahead i.e. living on last month's income rather than this month's.
 
 You can also just leave the **To Budget** amount alone.
 
@@ -108,15 +108,15 @@ Sometimes, you want to be consistently holding funds for future months.
 For example, if you use the "Month Ahead" strategy and reserve all income from the current month for the next month, keeping the held funds up to date and accurate can be a lot of work.
 You can automate holding funds from specific income categories for future months by clicking the income total and enabling the auto hold for that category.
 
-![Auto hold funds menu](/img/how-it-works/auto-hold.png)
+![Auto hold funds menu](/img/how-it-works/auto-hold.webp)
 
 When the _auto hold_ function has been enabled for an income category, this will be indicated by an arrow.
 The income category will be set for automatic holding starting from the current month and the following 12 months.
 If wanted, the _auto hold_ functionality can be turned off by clicking the income balance and choosing "Disable auto hold".
 
-![Auto hold indicator](/img/how-it-works/auto-hold-carryover.png)
+![Auto hold indicator](/img/how-it-works/auto-hold-carryover.webp)
 
 If you need to modify the _held funds_ later in the month, you can disable the auto hold for the current month by clicking the budget value and choosing "Disable current auto hold."
 You may then set the held funds like normal and the _auto hold_ will still be set in the future.
 
-![Auto hold disable current month](/img/how-it-works/auto-hold-disable.png)
+![Auto hold disable current month](/img/how-it-works/auto-hold-disable.webp)

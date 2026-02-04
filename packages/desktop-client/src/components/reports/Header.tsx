@@ -41,22 +41,28 @@ type HeaderProps = {
     end: TimeFrame['end'],
     mode: TimeFrame['mode'],
   ) => void;
-  conditionsOp: 'and' | 'or';
-  onUpdateFilter: ComponentProps<typeof AppliedFilters>['onUpdate'];
-  onDeleteFilter: ComponentProps<typeof AppliedFilters>['onDelete'];
-  onConditionsOpChange: ComponentProps<
-    typeof AppliedFilters
-  >['onConditionsOpChange'];
   children?: ReactNode;
   inlineContent?: ReactNode;
+  // no separate category filter; use main filters instead
+  filterExclude?: string[];
 } & (
   | {
       filters: RuleConditionEntity[];
       onApply: (conditions: RuleConditionEntity) => void;
+      onUpdateFilter: ComponentProps<typeof AppliedFilters>['onUpdate'];
+      onDeleteFilter: ComponentProps<typeof AppliedFilters>['onDelete'];
+      conditionsOp: 'and' | 'or';
+      onConditionsOpChange: ComponentProps<
+        typeof AppliedFilters
+      >['onConditionsOpChange'];
     }
   | {
       filters?: never;
       onApply?: never;
+      onUpdateFilter?: never;
+      onDeleteFilter?: never;
+      conditionsOp?: never;
+      onConditionsOpChange?: never;
     }
 );
 
@@ -78,10 +84,12 @@ export function Header({
   onConditionsOpChange,
   children,
   inlineContent,
+  filterExclude,
 }: HeaderProps) {
   const locale = useLocale();
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+
   function convertToMonth(
     start: string,
     end: string,
@@ -289,10 +297,11 @@ export function Header({
                 compact={isNarrowWidth}
                 onApply={onApply}
                 hover={false}
+                exclude={filterExclude}
               />
             )}
+            {inlineContent}
           </SpaceBetween>
-          <SpaceBetween gap={0}>{inlineContent}</SpaceBetween>
         </View>
 
         {children && (

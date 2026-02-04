@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 
-import type { RuleEntity, NewRuleEntity } from 'loot-core/types/models';
+import type { NewRuleEntity, RuleEntity } from 'loot-core/types/models';
 
 import {
   Modal,

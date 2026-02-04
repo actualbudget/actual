@@ -1,13 +1,16 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
-import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
-import { Template } from '../../types/models/templates';
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from '../../types/models';
+import { type Template } from '../../types/models/templates';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
 import { batchMessages } from '../sync';
 
-import { isReflectBudget, getSheetValue, setGoal, setBudget } from './actions';
+import { getSheetValue, isReflectBudget, setBudget, setGoal } from './actions';
 import { CategoryTemplateContext } from './category-template-context';
 import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
 

@@ -2,16 +2,26 @@
 import * as dateFns from 'date-fns';
 import * as Handlebars from 'handlebars';
 import { HyperFormula } from 'hyperformula';
+import enUS from 'hyperformula/i18n/languages/enUS';
 
 import { amountToInteger } from 'loot-core/shared/util';
 
 import { logger } from '../../platform/server/log';
-import { parseDate, format, currentDay } from '../../shared/months';
+import { currentDay, format, parseDate } from '../../shared/months';
 import { FIELD_TYPES } from '../../shared/rules';
-import { TransactionForRules } from '../transactions/transaction-rules';
+import { type TransactionForRules } from '../transactions/transaction-rules';
 
-import { CustomFunctionsPlugin } from './customFunctions';
+import {
+  CustomFunctionsPlugin,
+  customFunctionsTranslations,
+} from './customFunctions';
 import { assert } from './rule-utils';
+
+HyperFormula.registerLanguage('enUS', enUS);
+HyperFormula.registerFunctionPlugin(
+  CustomFunctionsPlugin,
+  customFunctionsTranslations,
+);
 
 const ACTION_OPS = [
   'set',
@@ -99,7 +109,7 @@ export class Action {
                     : parseFloat(String(result));
 
                 if (isNaN(numValue)) {
-                  const error = `Formula for “${this.field}” must produce a numeric value. Got: ${JSON.stringify(result)}`;
+                  const error = `Formula for "${this.field}" must produce a numeric value. Got: ${JSON.stringify(result)}`;
                   object._ruleErrors.push(error);
                 } else {
                   object[this.field] = numValue;
@@ -111,7 +121,7 @@ export class Action {
                 if (parsed && dateFns.isValid(parsed)) {
                   object[this.field] = format(parsed, 'yyyy-MM-dd');
                 } else {
-                  const error = `Formula for “${this.field}” must produce a valid date. Got: ${JSON.stringify(result)}`;
+                  const error = `Formula for "${this.field}" must produce a valid date. Got: ${JSON.stringify(result)}`;
                   object._ruleErrors.push(error);
                 }
                 break;
@@ -127,9 +137,12 @@ export class Action {
                 object[this.field] = String(result);
                 break;
               }
+              default: {
+                break;
+              }
             }
           } catch (err) {
-            const error = `Error executing formula for “${this.field}”: ${err instanceof Error ? err.message : String(err)}`;
+            const error = `Error executing formula for "${this.field}": ${err instanceof Error ? err.message : String(err)}`;
             object._ruleErrors.push(error);
             break;
           }
@@ -154,7 +167,7 @@ export class Action {
               } else {
                 // Keep original string; log for diagnostics but avoid hard crash
                 logger.error(
-                  `rules: invalid date produced by template for field “${this.field}”:`,
+                  `rules: invalid date produced by template for field "${this.field}":`,
                   object[this.field],
                 );
                 // Make it stick like a sore thumb
@@ -164,6 +177,8 @@ export class Action {
             }
             case 'boolean':
               object[this.field] = object[this.field] === 'true';
+              break;
+            default:
               break;
           }
         } else {
@@ -180,6 +195,7 @@ export class Action {
             object.amount = this.value;
             break;
           default:
+            break;
         }
         break;
       case 'link-schedule':
@@ -199,6 +215,7 @@ export class Action {
         object['tombstone'] = 1;
         break;
       default:
+        break;
     }
   }
 
@@ -251,10 +268,9 @@ export class Action {
     }
 
     try {
-      HyperFormula.registerFunctionPlugin(CustomFunctionsPlugin);
-
       hfInstance = HyperFormula.buildEmpty({
         licenseKey: 'gpl-v3',
+        language: 'enUS',
       });
 
       const sheetName = hfInstance.addSheet('Sheet1');

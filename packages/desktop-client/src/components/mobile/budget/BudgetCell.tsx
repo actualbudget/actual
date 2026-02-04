@@ -2,6 +2,7 @@ import { useCallback, type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { AutoTextSize } from 'auto-text-size';
 
@@ -72,7 +73,7 @@ export function BudgetCell<
                 category: category.id,
               });
               showUndoNotification({
-                message: `${category.name} budget has been set last to month’s budgeted amount.`,
+                message: `${category.name} budget has been set to last month's budgeted amount.`,
               });
             },
             onSetMonthsAverage: numberOfMonths => {
@@ -150,6 +151,7 @@ export function BudgetCell<
                 maxFontSizePx={12}
                 mode="oneline"
                 style={{
+                  ...styles.tnum,
                   maxWidth: columnWidth,
                   textAlign: 'right',
                   fontSize: 12,

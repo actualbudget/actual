@@ -1,13 +1,13 @@
 // @ts-strict-ignore
 import {
-  makeClock,
-  setClock,
-  serializeClock,
   deserializeClock,
   makeClientId,
+  makeClock,
+  serializeClock,
+  setClock,
   Timestamp,
 } from '@actual-app/crdt';
-import { Database } from '@jlongster/sql.js';
+import { type Database } from '@jlongster/sql.js';
 import { LRUCache } from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -15,38 +15,38 @@ import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
-import { TransactionEntity } from '../../types/models';
-import { WithRequired } from '../../types/util';
+import { type TransactionEntity } from '../../types/models';
+import { type WithRequired } from '../../types/util';
 import {
-  schema,
-  schemaConfig,
   convertForInsert,
   convertForUpdate,
   convertFromSelect,
+  schema,
+  schemaConfig,
 } from '../aql';
 import {
-  toDateRepr,
   accountModel,
-  categoryModel,
   categoryGroupModel,
+  categoryModel,
   payeeModel,
+  toDateRepr,
 } from '../models';
-import { sendMessages, batchMessages } from '../sync';
+import { batchMessages, sendMessages } from '../sync';
 
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
 import {
-  DbAccount,
-  DbBank,
-  DbCategory,
-  DbCategoryGroup,
-  DbCategoryMapping,
-  DbClockMessage,
-  DbPayee,
-  DbPayeeMapping,
-  DbTag,
-  DbTransaction,
-  DbViewTransaction,
-  DbViewTransactionInternalAlive,
+  type DbAccount,
+  type DbBank,
+  type DbCategory,
+  type DbCategoryGroup,
+  type DbCategoryMapping,
+  type DbClockMessage,
+  type DbPayee,
+  type DbPayeeMapping,
+  type DbTag,
+  type DbTransaction,
+  type DbViewTransaction,
+  type DbViewTransactionInternalAlive,
 } from './types';
 
 export * from './types';
@@ -331,13 +331,13 @@ export async function getCategoriesGrouped(
     ? `cg.id IN (${toSqlQueryParameters(ids)}) AND`
     : '';
   const categoryGroupQuery = `SELECT cg.* FROM category_groups cg WHERE ${categoryGroupWhereIn} cg.tombstone = 0
-    ORDER BY cg.is_income, cg.sort_order, cg.id`;
+                              ORDER BY cg.is_income, cg.sort_order, cg.id`;
 
   const categoryWhereIn = ids
     ? `c.cat_group IN (${toSqlQueryParameters(ids)}) AND`
     : '';
   const categoryQuery = `SELECT c.* FROM categories c WHERE ${categoryWhereIn} c.tombstone = 0
-    ORDER BY c.sort_order, c.id`;
+                         ORDER BY c.sort_order, c.id`;
 
   const groups = ids
     ? await all<DbCategoryGroup>(categoryGroupQuery, [...ids])
@@ -365,7 +365,7 @@ export async function insertCategoryGroup(
   );
   if (existingGroup) {
     throw new Error(
-      `A ${existingGroup.hidden ? 'hidden ' : ''}’${existingGroup.name}’ category group already exists.`,
+      `A ${existingGroup.hidden ? 'hidden ' : ''}'${existingGroup.name}' category group already exists.`,
     );
   }
 
@@ -385,9 +385,20 @@ export async function insertCategoryGroup(
   return id;
 }
 
-export function updateCategoryGroup(
-  group: WithRequired<Partial<DbCategoryGroup>, 'name' | 'is_income'>,
+export async function updateCategoryGroup(
+  group: WithRequired<Partial<DbCategoryGroup>, 'id' | 'name' | 'is_income'>,
 ) {
+  const existingGroup = await first<
+    Pick<DbCategoryGroup, 'id' | 'name' | 'hidden'>
+  >(
+    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? AND id != ? AND tombstone = 0 LIMIT 1`,
+    [group.name.toUpperCase(), group.id],
+  );
+  if (existingGroup) {
+    throw new Error(
+      `A ${existingGroup.hidden ? 'hidden ' : ''}'${existingGroup.name}' category group already exists.`,
+    );
+  }
   group = categoryGroupModel.validate(group, { update: true });
   return update('category_groups', group);
 }
@@ -436,7 +447,7 @@ export async function insertCategory(
     );
     if (existingCatInGroup) {
       throw new Error(
-        `Category ‘${category.name}’ already exists in group ‘${category.cat_group}’`,
+        `Category '${category.name}' already exists in group '${category.cat_group}'`,
       );
     }
 
@@ -667,7 +678,6 @@ export function getCommonPayees() {
   `);
 }
 
-/* eslint-disable actual/typography */
 const orphanedPayeesQuery = `
   SELECT p.id
   FROM payees p
@@ -685,7 +695,6 @@ const orphanedPayeesQuery = `
         AND json_extract(cond.value, '$.value') = pm.targetId
     );
 `;
-/* eslint-enable actual/typography */
 
 export function syncGetOrphanedPayees() {
   return all<Pick<DbPayee, 'id'>>(orphanedPayeesQuery);
@@ -841,10 +850,10 @@ export function updateTag(tag) {
 export function findTags() {
   return all<{ notes: string }>(
     `
-    SELECT notes
-    FROM transactions
-    WHERE tombstone = 0 AND notes LIKE ?
-  `,
+      SELECT notes
+      FROM transactions
+      WHERE tombstone = 0 AND notes LIKE ?
+    `,
     ['%#%'],
   );
 }

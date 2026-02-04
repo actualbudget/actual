@@ -1,5 +1,5 @@
 import React, { useState, type ReactNode } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
@@ -37,7 +37,7 @@ function RenderSimple({ error }: RenderSimpleProps) {
     msg = (
       <Text>
         <Trans>
-          Your browser doesn’t support IndexedDB in this environment, a feature
+          Your browser doesn't support IndexedDB in this environment, a feature
           that Actual requires to run. This might happen if you are in private
           browsing mode. Please try a different browser or turn off private
           browsing.
@@ -53,7 +53,7 @@ function RenderSimple({ error }: RenderSimpleProps) {
       <Text>
         <Trans>
           Actual requires access to <code>SharedArrayBuffer</code> in order to
-          function properly. If you’re seeing this error, either your browser
+          function properly. If you're seeing this error, either your browser
           does not support <code>SharedArrayBuffer</code>, or your server is not
           sending the appropriate headers, or you are not using HTTPS. See{' '}
           <Link
@@ -229,7 +229,7 @@ export function FatalError({ error }: FatalErrorProps) {
             <Trans>Restart app</Trans>
           </Button>
         </Paragraph>
-        <Paragraph isLast={true} style={{ fontSize: 11 }}>
+        <Paragraph isLast style={{ fontSize: 11 }}>
           <Link variant="text" onClick={() => setShowError(state => !state)}>
             <Trans>Show Error</Trans>
           </Link>

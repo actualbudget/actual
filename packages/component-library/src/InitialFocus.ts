@@ -2,11 +2,11 @@ import {
   Children,
   cloneElement,
   isValidElement,
-  type ReactElement,
-  Ref,
-  RefObject,
   useEffect,
   useRef,
+  type ReactElement,
+  type Ref,
+  type RefObject,
 } from 'react';
 
 type InitialFocusProps<T extends HTMLElement> = {

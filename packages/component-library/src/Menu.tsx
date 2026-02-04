@@ -1,12 +1,13 @@
 import {
-  type ReactNode,
   useEffect,
   useRef,
   useState,
   type ComponentProps,
   type ComponentType,
-  type SVGProps,
   type CSSProperties,
+  type KeyboardEvent,
+  type ReactNode,
+  type SVGProps,
 } from 'react';
 
 import { Button } from './Button';
@@ -78,62 +79,81 @@ export function Menu<const NameType = string>({
 }: MenuProps<NameType>) {
   const elRef = useRef<HTMLDivElement>(null);
   const items = allItems.filter(x => x);
+  const filteredItems = items.filter(
+    item => item && item !== Menu.line && item.type !== Menu.label,
+  );
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const currentIndex = filteredItems.indexOf(items[hoveredIndex || 0]);
+  const transformIndex = (idx: number) => items.indexOf(filteredItems[idx]);
+
+  function hoverPrevious() {
+    setHoveredIndex(
+      hoveredIndex === null ? 0 : transformIndex(Math.max(currentIndex - 1, 0)),
+    );
+  }
+
+  function hoverNext() {
+    setHoveredIndex(
+      hoveredIndex === null
+        ? 0
+        : transformIndex(Math.min(currentIndex + 1, filteredItems.length - 1)),
+    );
+  }
+
+  function selectItem() {
+    const item = items[hoveredIndex || 0];
+    if (
+      hoveredIndex !== null &&
+      item !== Menu.line &&
+      !isLabel(item) &&
+      !item.disabled
+    ) {
+      onMenuSelect?.(item.name);
+    }
+  }
+
+  function onKeyDown(e: KeyboardEvent) {
+    switch (e.key) {
+      case 'ArrowUp':
+        e.preventDefault();
+        hoverPrevious();
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        hoverNext();
+        break;
+      case 'Enter':
+        e.preventDefault();
+        selectItem();
+        break;
+      default:
+    }
+  }
 
   useEffect(() => {
+    const activeElement = document.activeElement;
+
+    if (
+      activeElement &&
+      (['input', 'select', 'textarea'].includes(
+        activeElement.tagName.toLowerCase(),
+      ) ||
+        activeElement.hasAttribute('contenteditable') ||
+        activeElement.getAttribute('role') === 'textbox')
+    ) {
+      return;
+    }
+
     const el = elRef.current;
     el?.focus();
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      const filteredItems = items.filter(
-        item => item && item !== Menu.line && item.type !== Menu.label,
-      );
-      const currentIndex = filteredItems.indexOf(items[hoveredIndex || 0]);
-
-      const transformIndex = (idx: number) => items.indexOf(filteredItems[idx]);
-
-      switch (e.key) {
-        case 'ArrowUp':
-          e.preventDefault();
-          setHoveredIndex(
-            hoveredIndex === null
-              ? 0
-              : transformIndex(Math.max(currentIndex - 1, 0)),
-          );
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          setHoveredIndex(
-            hoveredIndex === null
-              ? 0
-              : transformIndex(
-                  Math.min(currentIndex + 1, filteredItems.length - 1),
-                ),
-          );
-          break;
-        case 'Enter':
-          e.preventDefault();
-          const item = items[hoveredIndex || 0];
-          if (hoveredIndex !== null && item !== Menu.line && !isLabel(item)) {
-            onMenuSelect?.(item.name);
-          }
-          break;
-        default:
-      }
-    };
-
-    el?.addEventListener('keydown', onKeyDown);
-
-    return () => {
-      el?.removeEventListener('keydown', onKeyDown);
-    };
-  }, [hoveredIndex]);
+  }, []);
 
   return (
     <View
       className={className}
       style={{ outline: 'none', borderRadius: 4, overflow: 'hidden', ...style }}
-      tabIndex={1}
+      tabIndex={0}
+      onKeyDown={onKeyDown}
       innerRef={elRef}
     >
       {header}
@@ -166,6 +186,7 @@ export function Menu<const NameType = string>({
 
         return (
           <Button
+            excludeFromTabOrder
             key={String(item.name)}
             variant="bare"
             slot={slot}
