@@ -2,6 +2,7 @@
 import React, {
   useCallback,
   useEffect,
+  useEffectEvent,
   useState,
   type ComponentProps,
 } from 'react';
@@ -718,7 +719,7 @@ export function ImportTransactionsModal({
     close();
   }
 
-  const runImportPreview = useCallback(async () => {
+  const onImportPreview = useEffectEvent(async () => {
     // always start from the original parsed transactions, not the previewed ones to ensure rules run
     const transactionPreview = await getImportPreview(
       parsedTransactions,
@@ -732,36 +733,15 @@ export function ImportTransactionsModal({
       multiplierAmount,
     );
     setTransactions(transactionPreview);
-  }, [
-    getImportPreview,
-    parsedTransactions,
-    filetype,
-    flipAmount,
-    fieldMappings,
-    splitMode,
-    parseDateFormat,
-    inOutMode,
-    outValue,
-    multiplierAmount,
-  ]);
+  });
 
   useEffect(() => {
     if (parsedTransactions.length === 0 || loadingState === 'parsing') {
       return;
     }
 
-    runImportPreview();
-    // intentionally exclude runImportPreview from dependencies to avoid infinite rerenders
-    // oxlint-disable-next-line react/exhaustive-deps
+    onImportPreview();
   }, [
-    filetype,
-    flipAmount,
-    fieldMappings,
-    splitMode,
-    parseDateFormat,
-    inOutMode,
-    outValue,
-    multiplierAmount,
     loadingState,
     parsedTransactions.length,
   ]);
