@@ -59,7 +59,7 @@ export function NotesTagFormatter({
             );
 
           case 'link':
-            if (isNarrowWidth) {
+            //if (isNarrowWidth) {
               return (
                 <MobileLinkedNotes
                   key={index}
@@ -69,16 +69,16 @@ export function NotesTagFormatter({
                   isFilePath={segment.isFilePath}
                 />
               );
-            }
-            return (
-              <DesktopLinkedNotes
-                key={index}
-                displayText={segment.displayText}
-                url={segment.url}
-                separator={separator}
-                isFilePath={segment.isFilePath}
-              />
-            );
+            //}
+            //return (
+              //<DesktopLinkedNotes
+                //key={index}
+                //displayText={segment.displayText}
+                //url={segment.url}
+                //separator={separator}
+                //isFilePath={segment.isFilePath}
+             // />
+            //);
 
           default:
             return null;
