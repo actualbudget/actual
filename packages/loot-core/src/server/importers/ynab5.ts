@@ -15,6 +15,7 @@ import {
   type RecurConfig,
   type RecurPattern,
   type RuleEntity,
+  type TagEntity,
 } from '../../types/models';
 import { ruleModel } from '../transactions/transaction-rules';
 
@@ -24,6 +25,7 @@ import type {
   ScheduledSubtransaction,
   ScheduledTransactionSummary,
   Subtransaction,
+  TransactionFlagColor,
   TransactionSummary,
 } from './ynab5-types';
 
@@ -876,6 +878,9 @@ export async function doImport(data: Budget) {
   logger.log('Importing Payees...');
   await importPayees(data, entityIdMap);
 
+  logger.log('Importing Tags...');
+  await importYnabFlagTags(data);
+
   logger.log('Importing Transactions...');
   await importTransactions(data, entityIdMap);
 
@@ -929,13 +934,16 @@ function findIdByName<T extends { id: string; name: string }>(
 type FlaggedMemoTransaction = {
   memo?: string | null;
   flag_name?: string | null;
-  flag_color?: string | null;
+  flag_color?: TransactionFlagColor | null;
+};
+
+type YnabFlaggedTransaction = FlaggedMemoTransaction & {
+  deleted?: boolean | null;
 };
 
 function buildTransactionNotes(transaction: FlaggedMemoTransaction) {
   const normalizedMemo = transaction.memo?.trim() ?? '';
-  const normalizedFlag =
-    transaction.flag_name?.trim() ?? transaction.flag_color?.trim() ?? '';
+  const normalizedFlag = getFlagTagName(transaction) ?? '';
   const notes = `${normalizedMemo} ${
     normalizedFlag ? `#${normalizedFlag}` : ''
   }`.trim();
@@ -953,4 +961,77 @@ function buildRuleUpdate(
     conditions: rule.conditions,
     actions,
   };
+}
+
+function getFlagTagName(transaction: FlaggedMemoTransaction) {
+  const normalizedFlag =
+    transaction.flag_name?.trim() ?? transaction.flag_color?.trim() ?? '';
+  return normalizedFlag.length > 0 ? normalizedFlag : null;
+}
+
+function mapYnabFlagColorToHex(
+  flagColor: TransactionFlagColor | null | undefined,
+): string | null {
+  if (!flagColor) {
+    return null;
+  }
+
+  switch (flagColor) {
+    case 'red':
+      return '#F44336';
+    case 'orange':
+      return '#FB8C00';
+    case 'yellow':
+      return '#FDD835';
+    case 'green':
+      return '#43A047';
+    case 'blue':
+      return '#1E88E5';
+    case 'purple':
+      return '#8E24AA';
+    default:
+      return null;
+  }
+}
+
+async function importYnabFlagTags(data: Budget) {
+  const tagsByName = new Map<string, string>();
+  const flaggedTransactions: YnabFlaggedTransaction[] = [
+    ...data.transactions,
+    ...data.scheduled_transactions,
+  ];
+
+  for (const transaction of flaggedTransactions) {
+    if (transaction.deleted) {
+      continue;
+    }
+
+    const tagName = getFlagTagName(transaction);
+    const tagColor = mapYnabFlagColorToHex(transaction.flag_color ?? null);
+    if (!tagName || !tagColor) {
+      continue;
+    }
+
+    if (!tagsByName.has(tagName)) {
+      tagsByName.set(tagName, tagColor);
+    }
+  }
+
+  if (tagsByName.size === 0) {
+    return;
+  }
+
+  const existingTags = (await send('tags-get')) as TagEntity[];
+  const existingTagsByName = new Map(existingTags.map(tag => [tag.tag, tag]));
+
+  await Promise.all(
+    [...tagsByName.entries()].map(async ([tag, color]) => {
+      const existingTag = existingTagsByName.get(tag);
+      if (existingTag?.color) {
+        return;
+      }
+
+      await send('tags-create', { tag, color });
+    }),
+  );
 }
