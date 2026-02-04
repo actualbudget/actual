@@ -24,8 +24,6 @@ import {
 } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
-import { type SavedStatus } from '@desktop-client/components/reports/SaveReportMenu';
-
 import { Warning } from '@desktop-client/components/alerts';
 import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
 import { FinancialText } from '@desktop-client/components/FinancialText';
@@ -55,6 +53,7 @@ import {
 import { ReportSidebar } from '@desktop-client/components/reports/ReportSidebar';
 import { ReportSummary } from '@desktop-client/components/reports/ReportSummary';
 import { ReportTopbar } from '@desktop-client/components/reports/ReportTopbar';
+import { type SavedStatus } from '@desktop-client/components/reports/SaveReportMenu';
 import { setSessionReport } from '@desktop-client/components/reports/setSessionReport';
 import { createCustomSpreadsheet } from '@desktop-client/components/reports/spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '@desktop-client/components/reports/spreadsheets/grouped-spreadsheet';

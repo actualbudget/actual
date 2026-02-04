@@ -18,7 +18,7 @@ import {
 import { LoadingIndicator } from './LoadingIndicator';
 import { SaveReportChoose } from './SaveReportChoose';
 import { SaveReportDelete } from './SaveReportDelete';
-import { type SavedStatus, SaveReportMenu } from './SaveReportMenu';
+import { SaveReportMenu, type SavedStatus } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
 
 import { FormField, FormLabel } from '@desktop-client/components/forms';
