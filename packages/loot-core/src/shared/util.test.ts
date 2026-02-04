@@ -264,4 +264,17 @@ describe('applyFindReplace', () => {
       'Test demo TEST',
     );
   });
+
+  test('empty string replacement', () => {
+    expect(applyFindReplace('test', 'test', '', false)).toBe('');
+    expect(applyFindReplace('hello test world', 'test ', '', false)).toBe(
+      'hello world',
+    );
+  });
+
+  test('replaces multiple occurrences', () => {
+    expect(applyFindReplace('foo foo foo', 'foo', 'bar', false)).toBe(
+      'bar bar bar',
+    );
+  });
 });
