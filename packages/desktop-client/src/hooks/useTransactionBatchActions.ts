@@ -106,6 +106,27 @@ export function useTransactionBatchActions() {
       }
 
       const idSet = new Set(ids);
+      // Track which split transactions have been processed to avoid
+      // processing the same split multiple times when multiple members are selected
+      const processedSplits = new Set<string>();
+
+      // Helper to find the parent ID of a split transaction
+      const findSplitParentId = (trans: TransactionEntity): string => {
+        if (trans.is_parent) {
+          return trans.id;
+        }
+        if (trans.is_child) {
+          // Find the parent in the transactions list
+          const idx = transactionsToChange.findIndex(t => t.id === trans.id);
+          for (let i = idx - 1; i >= 0; i--) {
+            const t = transactionsToChange[i];
+            if (t.is_parent) {
+              return t.id;
+            }
+          }
+        }
+        return trans.id; // Non-split transaction
+      };
 
       transactionsToChange.forEach(trans => {
         if (name === 'cleared' && trans.reconciled) {
@@ -118,6 +139,16 @@ export function useTransactionBatchActions() {
           // Skip transactions which aren't actually selected, since the query
           // above also retrieves the siblings & parent of any selected splits.
           return;
+        }
+
+        // For split transactions, skip if we've already processed this split
+        // to avoid duplicate updates when multiple members are selected
+        if (trans.is_parent || trans.is_child) {
+          const splitParentId = findSplitParentId(trans);
+          if (processedSplits.has(splitParentId)) {
+            return;
+          }
+          processedSplits.add(splitParentId);
         }
 
         let valueToSet = value;
@@ -175,21 +206,7 @@ export function useTransactionBatchActions() {
           : diff.added;
       });
 
-      // Deduplicate changes by ID to prevent duplicate updates when
-      // multiple members of a split transaction are selected
-      const deduplicatedChanges: Diff<TransactionEntity> = {
-        added: Array.from(
-          new Map(changes.added?.map(item => [item.id, item])).values(),
-        ),
-        updated: Array.from(
-          new Map(changes.updated?.map(item => [item.id, item])).values(),
-        ),
-        deleted: Array.from(
-          new Map(changes.deleted?.map(item => [item.id, item])).values(),
-        ),
-      };
-
-      await send('transactions-batch-update', deduplicatedChanges);
+      await send('transactions-batch-update', changes);
 
       onSuccess?.(ids, name, value, mode);
     };
