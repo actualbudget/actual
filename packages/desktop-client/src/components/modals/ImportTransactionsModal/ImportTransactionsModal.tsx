@@ -741,10 +741,7 @@ export function ImportTransactionsModal({
     }
 
     onImportPreview();
-  }, [
-    loadingState,
-    parsedTransactions.length,
-  ]);
+  }, [loadingState, parsedTransactions.length]);
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
     { name: t('Date'), width: 200 },
