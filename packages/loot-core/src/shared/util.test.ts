@@ -1,4 +1,5 @@
 import {
+  applyFindReplace,
   currencyToAmount,
   getNumberFormat,
   looselyParseAmount,
@@ -227,5 +228,40 @@ describe('utility functions', () => {
     expect(stringToInteger('-3')).toBe(-3);
     // Unicode minus
     expect(stringToInteger('−3')).toBe(-3);
+  });
+});
+
+describe('applyFindReplace', () => {
+  test('basic string replacement works', () => {
+    expect(applyFindReplace('hello world', 'world', 'universe', false)).toBe(
+      'hello universe',
+    );
+    expect(applyFindReplace('test test test', 'test', 'demo', false)).toBe(
+      'demo demo demo',
+    );
+  });
+
+  test('handles null and empty values', () => {
+    expect(applyFindReplace(null, 'test', 'replace', false)).toBe('');
+    expect(applyFindReplace(undefined, 'test', 'replace', false)).toBe('');
+    expect(applyFindReplace('', 'test', 'replace', false)).toBe('');
+    expect(applyFindReplace('hello', '', 'replace', false)).toBe('hello');
+  });
+
+  test('regex replacement works', () => {
+    expect(applyFindReplace('test123', '\\d+', 'NUM', true)).toBe('testNUM');
+    expect(applyFindReplace('foo bar baz', 'b\\w+', 'word', true)).toBe(
+      'foo word word',
+    );
+  });
+
+  test('handles invalid regex gracefully', () => {
+    expect(applyFindReplace('test', '[invalid', 'replace', true)).toBe('test');
+  });
+
+  test('case-sensitive replacement', () => {
+    expect(applyFindReplace('Test test TEST', 'test', 'demo', false)).toBe(
+      'Test demo TEST',
+    );
   });
 });

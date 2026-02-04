@@ -175,7 +175,21 @@ export function useTransactionBatchActions() {
           : diff.added;
       });
 
-      await send('transactions-batch-update', changes);
+      // Deduplicate changes by ID to prevent duplicate updates when
+      // multiple members of a split transaction are selected
+      const deduplicatedChanges: Diff<TransactionEntity> = {
+        added: Array.from(
+          new Map(changes.added?.map(item => [item.id, item])).values(),
+        ),
+        updated: Array.from(
+          new Map(changes.updated?.map(item => [item.id, item])).values(),
+        ),
+        deleted: Array.from(
+          new Map(changes.deleted?.map(item => [item.id, item])).values(),
+        ),
+      };
+
+      await send('transactions-batch-update', deduplicatedChanges);
 
       onSuccess?.(ids, name, value, mode);
     };
