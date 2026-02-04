@@ -50,5 +50,25 @@
       "#99ffff",
       "hsl(0, 0%, 35%)"
     ]
+  },
+  {
+    "name":"Catppuccin Latte",
+    "repo":"noahjalex/catppuccin-latte-actual",
+    "colors":["#eff1f5","#dce0e8","#ccd0da","#8839ef","#1e66f5","#4c4f69"]
+  },
+  {
+    "name":"Catppuccin Frappé",
+    "repo":"noahjalex/catppuccin-frappe-actual",
+    "colors":["#303446","#232634","#414559","#ca9ee6","#8caaee","#c6d0f5"]
+  },
+  {
+    "name":"Catppuccin Macchiato",
+    "repo":"noahjalex/catppuccin-macchiato-actual",
+    "colors":["#24273a","#181926","#363a4f","#c6a0f6","#8aadf4","#cad3f5"]
+  },
+  {
+    "name":"Catppuccin Mocha",
+    "repo":"noahjalex/catppuccin-mocha-actual",
+    "colors":["#1e1e2e","#11111b","#313244","#cba6f7","#89b4fa","#cdd6f4"]
   }
 ]
