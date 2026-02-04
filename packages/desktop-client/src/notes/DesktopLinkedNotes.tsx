@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
+import { css } from '@emotion/css';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
