@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useEffectEvent, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import {
@@ -61,7 +61,7 @@ function AppInner() {
     setI18NextLanguage(null);
   }, []);
 
-  useEffect(() => {
+  const onInit = useEffectEvent(async () => {
     const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {
       if (global.Actual.isUpdateReadyForDownload()) {
         dispatch(
@@ -74,7 +74,7 @@ function AppInner() {
       return cb?.();
     };
 
-    async function init() {
+    const init = async () => {
       const serverSocket = await maybeUpdate(() =>
         global.Actual.getServerSocket(),
       );
@@ -124,17 +124,15 @@ function AppInner() {
 
         await maybeUpdate();
       }
-    }
+    };
 
-    async function initAll() {
-      await Promise.all([installPolyfills(), init()]);
-      dispatch(setAppState({ loadingText: null }));
-    }
+    await Promise.all([installPolyfills(), init()]).catch(showErrorBoundary);
+    dispatch(setAppState({ loadingText: null }));
+  });
 
-    initAll().catch(showErrorBoundary);
-    // Removed cloudFileId & t from dependencies to prevent hard crash when closing budget in Electron
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, showErrorBoundary]);
+  useEffect(() => {
+    onInit();
+  }, []);
 
   useEffect(() => {
     if (userData?.tokenExpired) {
