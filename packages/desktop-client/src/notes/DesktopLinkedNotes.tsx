@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 
-import { css } from '@emotion/css';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { css } from '@emotion/css';
 
 import { isElectron } from 'loot-core/shared/environment';
 
