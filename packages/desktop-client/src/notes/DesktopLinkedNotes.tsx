@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
 import { isElectron } from 'loot-core/shared/environment';
@@ -17,13 +18,14 @@ type DesktopLinkedNotesProps = {
   isFilePath: boolean;
 };
 
-const linkStyles = {
+const linkStyles = css({
   color: theme.pageTextLink,
   textDecoration: 'underline',
-  background: 'transparent',
-  padding: 0,
-  whiteSpace: 'nowrap',
-};
+  cursor: 'pointer',
+  '&:hover': {
+    color: theme.pageTextLinkLight,
+  },
+});
 
 export function DesktopLinkedNotes({
   displayText,
@@ -60,9 +62,9 @@ export function DesktopLinkedNotes({
 
   return (
     <>
-      <Button variant="bare" style={linkStyles} onPress={handleClick}>
+      <Text className={linkStyles} onClick={handleClick}>
         {displayText}
-      </Button>
+      </Text>
       {separator}
     </>
   );
