@@ -125,8 +125,8 @@ export function makeAmountFullStyle(
   };
 }
 
-export function findSortDown(
-  arr: Array<{ id: string }>,
+export function findSortDown<T extends { id: string }>(
+  arr: T[],
   pos: DropPosition,
   targetId: string,
 ) {
@@ -149,8 +149,8 @@ export function findSortDown(
   }
 }
 
-export function findSortUp(
-  arr: Array<{ id: string }>,
+export function findSortUp<T extends { id: string }>(
+  arr: T[],
   pos: DropPosition,
   targetId: string,
 ) {
