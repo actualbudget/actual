@@ -24,6 +24,8 @@ import {
 } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
+import { type SavedStatus } from '@desktop-client/components/reports/SaveReportMenu';
+
 import { Warning } from '@desktop-client/components/alerts';
 import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
 import { FinancialText } from '@desktop-client/components/FinancialText';
@@ -280,9 +282,9 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const [latestTransactionDate, setLatestTransactionDate] =
     useState<TransactionEntity['date']>('');
   const [report, setReport] = useState(loadReport);
-  const [savedStatus, setSavedStatus] = useState<'saved' | 'new' | 'modified'>(
+  const [savedStatus, setSavedStatus] = useState<SavedStatus>(
     'savedStatus' in session
-      ? (session.savedStatus as typeof savedStatus)
+      ? (session.savedStatus as SavedStatus)
       : initialReport
         ? 'saved'
         : 'new',
@@ -290,8 +292,8 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
 
   const onApplyFilterConditions = useEffectEvent(
     (
-      currentConditions: RuleConditionEntity[],
-      currentConditionsOp: RuleConditionEntity['conditionsOp'],
+      currentConditions?: RuleConditionEntity[],
+      currentConditionsOp?: RuleConditionEntity['conditionsOp'],
     ) => {
       onApplyFilter(null);
 
@@ -301,7 +303,9 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         savedStatus !== 'saved' ? conditionsOp : currentConditionsOp;
 
       filtersToApply?.forEach(onApplyFilter);
-      onConditionsOpChange(conditionsOpToApply);
+      if (conditionsOpToApply) {
+        onConditionsOpChange(conditionsOpToApply);
+      }
     },
   );
 
