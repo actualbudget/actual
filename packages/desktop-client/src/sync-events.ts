@@ -344,6 +344,16 @@ export function listenForSyncEvent(store: AppStore) {
         case 'network':
           // Show nothing
           break;
+        case 'clock-drift':
+          notif = {
+            title: t('Time sync issue'),
+            message: t(
+              'Failed to sync because your device time differs too much from the server. Please check your device time settings and ensure they are correct.',
+            ),
+            type: 'warning',
+            sticky: true,
+          };
+          break;
         case 'token-expired':
           notif = null;
           store.dispatch(signOut());
