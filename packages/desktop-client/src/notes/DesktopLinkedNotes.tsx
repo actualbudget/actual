@@ -59,7 +59,7 @@ export function DesktopLinkedNotes({
   };
 
   return (
-    <View
+    <View>
       <Button variant="bare" style={linkStyles} onPress={handleClick}>
         {displayText}
       </Button>
