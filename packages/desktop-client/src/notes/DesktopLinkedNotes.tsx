@@ -19,13 +19,13 @@ type DesktopLinkedNotesProps = {
   isFilePath: boolean;
 };
 
-const linkStyles = css({
-  color: theme.pageTextLink,
-  padding: '3px 7px',
-  borderRadius: 16,
-  userSelect: 'none',
-  cursor: 'pointer',
-});
+//const linkStyles = css({
+  //color: theme.pageTextLink,
+  //padding: '3px 7px',
+  //borderRadius: 16,
+  //userSelect: 'none',
+  //cursor: 'pointer',
+//});
 
 export function DesktopLinkedNotes({
   displayText,
@@ -62,7 +62,15 @@ export function DesktopLinkedNotes({
 
   return (
     <View style={{ display: 'inline' }}>
-      <Button variant="bare" style={linkStyles} onPress={handleClick}>
+      <Button 
+        variant="bare" 
+        style={{
+          color: theme.pageTextLink,
+          cursor: 'pointer',
+          textDecoration: 'underline',
+        }} 
+        onPress={handleClick}
+      >
         {displayText}
       </Button>
       {separator}
