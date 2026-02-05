@@ -1,9 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-// import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { css } from '@emotion/css';
 
 import { isElectron } from 'loot-core/shared/environment';
 
@@ -19,17 +17,12 @@ type DesktopLinkedNotesProps = {
   isFilePath: boolean;
 };
 
-const linkStyles = css({
+const linkStyles = {
   color: theme.pageTextLink,
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  flexWrap: 'nowrap',
-  padding: 0,
   textDecoration: 'underline',
-  '&:hover': {
-    color: theme.pageTextLinkLight,
-  },
-});
+  background: 'transparent',
+  padding: 0,
+};
 
 export function DesktopLinkedNotes({
   displayText,
