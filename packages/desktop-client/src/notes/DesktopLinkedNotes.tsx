@@ -61,7 +61,7 @@ export function DesktopLinkedNotes({
   };
 
   return (
-    <View style={{ display: 'inline' }}>
+    <View style={{ display: 'inline-flex' }}>
       <Button 
         variant="bare" 
         style={{
