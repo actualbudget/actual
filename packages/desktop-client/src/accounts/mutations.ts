@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 
 import {
-  useQueryClient,
   useMutation,
+  useQueryClient,
   type QueryClient,
   type QueryKey,
 } from '@tanstack/react-query';
@@ -12,11 +12,11 @@ import { send } from 'loot-core/platform/client/fetch';
 import { logger } from 'loot-core/platform/server/log';
 import { type SyncResponseWithErrors } from 'loot-core/server/accounts/app';
 import {
+  type AccountEntity,
+  type CategoryEntity,
   type SyncServerGoCardlessAccount,
   type SyncServerPluggyAiAccount,
   type SyncServerSimpleFinAccount,
-  type AccountEntity,
-  type CategoryEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
 

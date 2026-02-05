@@ -8,9 +8,9 @@ import {
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import {
-  type ExtraArguments,
   type AppDispatch,
   type AppStore,
+  type ExtraArguments,
   type RootState,
 } from './store';
 
