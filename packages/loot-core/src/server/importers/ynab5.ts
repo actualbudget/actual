@@ -937,8 +937,7 @@ function buildTransactionNotes(
   flagNameConflicts: Set<string>,
 ) {
   const normalizedMemo = transaction.memo?.trim() ?? '';
-  const tags = getFlagTags(transaction, flagNameConflicts);
-  const tagText = tags.map(tag => `#${tag}`).join(' ');
+  const tagText = getFlagTag(transaction, flagNameConflicts);
   const notes = `${normalizedMemo} ${tagText}`.trim();
   return notes.length > 0 ? notes : null;
 }
@@ -972,22 +971,22 @@ const flagColorMap: Record<string, string | null> = {
   '': null,
 };
 
-function getFlagTags(
+function getFlagTag(
   transaction: FlaggedTransaction,
   flagNameConflicts: Set<string>,
 ) {
+  const tagName = transaction.flag_name?.trim() ?? '';
   const colorKey = transaction.flag_color?.trim() ?? '';
-  const nameTag = transaction.flag_name?.trim() ?? '';
-  const tags: string[] = [];
 
-  if (nameTag.length > 0) {
-    if (flagNameConflicts.has(nameTag)) {
-      tags.push(colorKey);
-    }
-    tags.push(nameTag);
+  if (tagName.length === 0) {
+    return colorKey.length > 0 ? `#${colorKey}` : '';
   }
 
-  return tags;
+  if (flagNameConflicts.has(tagName)) {
+    return `#${tagName}-${colorKey}`;
+  }
+
+  return `#${tagName}`;
 }
 
 function getFlagNameConflicts(data: Budget) {
@@ -1002,16 +1001,16 @@ function getFlagNameConflicts(data: Budget) {
       continue;
     }
 
-    const nameTag = transaction.flag_name?.trim() ?? '';
+    const tagName = transaction.flag_name?.trim() ?? '';
     const colorKey = transaction.flag_color?.trim() ?? '';
-    if (nameTag.length === 0 || !flagColorMap[colorKey]) {
+    if (tagName.length === 0 || !flagColorMap[colorKey]) {
       continue;
     }
 
-    if (!colorsByName.has(nameTag)) {
-      colorsByName.set(nameTag, new Set());
+    if (!colorsByName.has(tagName)) {
+      colorsByName.set(tagName, new Set());
     }
-    colorsByName.get(nameTag).add(colorKey);
+    colorsByName.get(tagName).add(colorKey);
   }
 
   const conflicts = new Set<string>();
@@ -1040,16 +1039,23 @@ async function importFlagsAsTags(data: Budget, flagNameConflicts: Set<string>) {
     const colorKey = transaction.flag_color?.trim() ?? '';
     const tagColor = flagColorMap[colorKey] ?? null;
 
-    if (
-      tagColor &&
-      flagNameConflicts.has(tagName) &&
-      !tagsToCreate.has(colorKey)
-    ) {
-      tagsToCreate.set(colorKey, tagColor);
+    if (!tagColor) {
+      continue;
     }
 
-    if (tagName.length > 0 && !tagsToCreate.has(tagName)) {
-      tagsToCreate.set(tagName, tagColor);
+    if (tagName.length === 0) {
+      if (!tagsToCreate.has(colorKey)) {
+        tagsToCreate.set(colorKey, tagColor);
+      }
+      continue;
+    }
+
+    const mappedName = flagNameConflicts.has(tagName)
+      ? `${tagName}-${colorKey}`
+      : tagName;
+
+    if (!tagsToCreate.has(mappedName)) {
+      tagsToCreate.set(mappedName, tagColor);
     }
   }
 
