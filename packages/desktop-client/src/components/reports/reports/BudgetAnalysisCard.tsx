@@ -55,8 +55,10 @@ export function BudgetAnalysisCard({
   };
 
   const [startMonth, endMonth] = calculateTimeRange(timeFrame);
-  const startDate = startMonth + '-01';
-  const endDate = monthUtils.getMonthEnd(endMonth + '-01');
+  const startDate = monthUtils.monthFromDate(startMonth) + '-01';
+  const endDate = monthUtils.getMonthEnd(
+    monthUtils.monthFromDate(endMonth) + '-01',
+  );
 
   const getGraphData = useMemo(() => {
     return createBudgetAnalysisSpreadsheet({
