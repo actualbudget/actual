@@ -158,6 +158,7 @@ export function BudgetAnalysisCard({
             data={data}
             graphType={meta?.graphType || 'Bar'}
             showBalance={meta?.showBalance ?? true}
+            stackBars={meta?.stackBars ?? false}
           />
         ) : (
           <LoadingIndicator />
