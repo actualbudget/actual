@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { Text } from '@actual-app/components/text';
+// import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
@@ -63,11 +63,12 @@ export function DesktopLinkedNotes({
   return (
     <>
       <span
-        role="link"
-        className={linkStyles} 
+        role="button"
+        className={linkStyles}
+        onMouseDown={e => e.stopPropagation()}
         onClick={handleClick}
       >
-      {displayText}
+        {displayText}
       </span>
       {separator}
     </>
