@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+
 import { Button } from '@actual-app/components/button';
 // import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -64,7 +65,7 @@ export function DesktopLinkedNotes({
   };
 
   return (
-   <>
+    <>
       <Button variant="bare" style={linkStyles} onPress={handleClick}>
         {displayText}
       </Button>
