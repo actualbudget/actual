@@ -39,6 +39,7 @@ export function SummaryNumber({
   const [fontSize, setFontSize] = useState<number>(initialFontSize);
   const refDiv = useRef<HTMLDivElement>(null);
   const format = useFormat();
+  const isNumericValue = Number.isFinite(value);
 
   let displayAmount =
     contentType === 'percentage'
@@ -76,11 +77,13 @@ export function SummaryNumber({
         <View
           ref={mergedRef as Ref<HTMLDivElement>}
           aria-label={
-            value === 0
-              ? t('Zero amount')
-              : value < 0
-                ? t('Negative amount: {{amount}}', { amount: displayAmount })
-                : t('Positive amount: {{amount}}', { amount: displayAmount })
+            !isNumericValue
+              ? t('Unknown amount')
+              : value === 0
+                ? t('Zero amount')
+                : value < 0
+                  ? t('Negative amount: {{amount}}', { amount: displayAmount })
+                  : t('Positive amount: {{amount}}', { amount: displayAmount })
           }
           style={{
             alignItems: 'center',
@@ -94,8 +97,9 @@ export function SummaryNumber({
             margin: `${CONTAINER_MARGIN}px 0`,
             justifyContent: 'center',
             transition: animate ? 'font-size 0.3s ease' : '',
-            color:
-              value === 0
+            color: !isNumericValue
+              ? theme.reportsNumberNeutral
+              : value === 0
                 ? theme.reportsNumberNeutral
                 : value < 0
                   ? theme.reportsNumberNegative

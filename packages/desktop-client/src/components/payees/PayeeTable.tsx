@@ -8,6 +8,7 @@ import {
   type ComponentRef,
 } from 'react';
 
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { type PayeeEntity } from 'loot-core/types/models';
@@ -64,6 +65,7 @@ export const PayeeTable = forwardRef<
           navigator={tableNavigator}
           ref={ref}
           items={payees}
+          backgroundColor={theme.tableBackground}
           renderItem={({ item, editing, focusedField, onEdit }) => {
             return (
               <PayeeTableRow

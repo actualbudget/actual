@@ -347,19 +347,19 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
         case 'network':
           // Show nothing
           break;
-        case 'token-expired':
+        case 'clock-drift':
           notif = {
-            title: 'Login expired',
-            message: 'Please login again.',
+            title: t('Time sync issue'),
+            message: t(
+              'Failed to sync because your device time differs too much from the server. Please check your device time settings and ensure they are correct.',
+            ),
+            type: 'warning',
             sticky: true,
-            id: 'login-expired',
-            button: {
-              title: 'Go to login',
-              action: () => {
-                store.dispatch(signOut());
-              },
-            },
           };
+          break;
+        case 'token-expired':
+          notif = null;
+          store.dispatch(signOut());
           break;
         default:
           console.trace('unknown error', event);

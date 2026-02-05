@@ -104,18 +104,19 @@ export function ReportCard({
     </View>
   );
 
-  if (to) {
+  if (to && !isEditing && !disableClick) {
     return (
       <Layout {...layoutProps}>
         <Button
           variant="bare"
-          onPress={isEditing || disableClick ? undefined : () => navigate(to)}
+          onPress={() => navigate(to)}
           style={{
             height: '100%',
             width: '100%',
             background: 'transparent',
             padding: 0,
             textAlign: 'left',
+            overflow: 'visible',
           }}
         >
           {content}

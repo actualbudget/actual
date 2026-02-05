@@ -37,7 +37,7 @@ export function IncomeGroup({
       collapsed
       style={{
         fontWeight: 600,
-        backgroundColor: theme.tableRowHeaderBackground,
+        backgroundColor: theme.budgetHeaderCurrentMonth, //use budget color
       }}
     >
       <SidebarGroup

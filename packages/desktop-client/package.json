@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "26.1.0",
+  "version": "26.2.0",
   "license": "MIT",
   "files": [
     "build"
@@ -58,7 +58,7 @@
     "i18next-parser": "^9.3.0",
     "i18next-resources-to-backend": "^1.2.1",
     "jsdom": "^27.4.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "loot-core": "workspace:*",
     "mdast-util-newline-to-break": "^2.0.0",
     "memoize-one": "^6.0.0",
