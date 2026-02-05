@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
 
 import { isElectron } from 'loot-core/shared/environment';
 
@@ -19,13 +18,11 @@ type DesktopLinkedNotesProps = {
   isFilePath: boolean;
 };
 
-const linkStyles = css({
+const linkStyles = {
   color: theme.pageTextLink,
+  textDecoration: 'underline',
   padding: '3px 7px',
-  borderRadius: 16,
-  userSelect: 'none',
-  cursor: 'pointer',
-});
+};
 
 export function DesktopLinkedNotes({
   displayText,
