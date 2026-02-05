@@ -21,7 +21,6 @@ type DesktopLinkedNotesProps = {
 
 const linkStyles = css({
   color: theme.pageTextLink,
-  display: 'inline-flex',
   padding: '3px 7px',
   borderRadius: 16,
   userSelect: 'none',
