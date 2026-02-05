@@ -9,9 +9,11 @@ installPolyfills();
 global.IS_TESTING = true;
 global.Actual = {} as typeof global.Actual;
 
+type Size = { height: number; width: number };
+
 type AutoSizerProps = {
-  renderProp?: (size: { height: number; width: number }) => ReactNode;
-  children?: (size: { height: number; width: number }) => ReactNode;
+  renderProp?: (size: Size) => ReactNode;
+  children?: (size: Size) => ReactNode;
 };
 
 vi.mock('react-virtualized-auto-sizer', () => {
