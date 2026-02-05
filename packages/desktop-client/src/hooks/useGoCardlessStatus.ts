@@ -4,7 +4,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 
 import { useSyncServerStatus } from './useSyncServerStatus';
 
-export function useGoCardlessStatus() {
+export function useGoCardlessStatus(fileId: string) {
   const [configuredGoCardless, setConfiguredGoCardless] = useState<
     boolean | null
   >(null);
@@ -12,19 +12,25 @@ export function useGoCardlessStatus() {
   const status = useSyncServerStatus();
 
   useEffect(() => {
+    const budgetFileId = fileId;
+
     async function fetch() {
       setIsLoading(true);
 
-      const results = await send('gocardless-status');
+      const results = await send('gocardless-status', {
+        fileId: budgetFileId,
+      });
 
-      setConfiguredGoCardless(results.configured || false);
+      setConfiguredGoCardless(
+        (results as { configured?: boolean })?.configured || false,
+      );
       setIsLoading(false);
     }
 
     if (status === 'online') {
       void fetch();
     }
-  }, [status]);
+  }, [status, fileId]);
 
   return {
     configuredGoCardless,

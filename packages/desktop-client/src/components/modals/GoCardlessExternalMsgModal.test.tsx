@@ -18,6 +18,7 @@ vi.mock('#hooks/useGoCardlessStatus', () => ({
 
 describe('GoCardlessExternalMsgModal - Country Auto-selection', () => {
   const mockProps = {
+    fileId: 'test-file-id',
     onMoveExternal: vi.fn(),
     onSuccess: vi.fn(),
     onClose: vi.fn(),

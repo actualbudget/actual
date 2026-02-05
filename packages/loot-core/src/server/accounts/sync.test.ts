@@ -684,10 +684,13 @@ describe('SimpleFin batch sync', () => {
       transfer_acct: acct2Id,
     });
 
-    const results = await simpleFinBatchSync([
-      { id: 'acct-1', account_id: presentAccountId },
-      { id: 'acct-2', account_id: missingAccountId },
-    ]);
+    const results = await simpleFinBatchSync(
+      [
+        { id: 'acct-1', account_id: presentAccountId },
+        { id: 'acct-2', account_id: missingAccountId },
+      ],
+      'test-file-id',
+    );
 
     // The present account should succeed (no error_code)
     const presentResult = results.find(r => r.accountId === 'acct-1');
@@ -747,10 +750,13 @@ describe('SimpleFin batch sync', () => {
       transfer_acct: acct2Id,
     });
 
-    const results = await simpleFinBatchSync([
-      { id: 'acct-1', account_id: presentAccountId },
-      { id: 'acct-2', account_id: missingAccountId },
-    ]);
+    const results = await simpleFinBatchSync(
+      [
+        { id: 'acct-1', account_id: presentAccountId },
+        { id: 'acct-2', account_id: missingAccountId },
+      ],
+      'test-file-id',
+    );
 
     // The missing account should get the ACCOUNT_MISSING error from the errors map
     const missingResult = results.find(r => r.accountId === 'acct-2');

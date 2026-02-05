@@ -28,6 +28,7 @@ type PluggyAiInitialiseProps = Extract<
 
 export const PluggyAiInitialiseModal = ({
   onSuccess,
+  fileId,
 }: PluggyAiInitialiseProps) => {
   const { t } = useTranslation();
   const [clientId, setClientId] = useState('');
@@ -54,42 +55,50 @@ export const PluggyAiInitialiseModal = ({
 
     setIsLoading(true);
 
-    let { error, reason } =
+    let result =
       (await send('secret-set', {
         name: 'pluggyai_clientId',
         value: clientId,
+        fileId,
       })) || {};
+
+    let { error, reason } = result;
 
     if (error) {
       setIsLoading(false);
       setIsValid(false);
       setError(getSecretsError(error, reason));
       return;
-    } else {
-      ({ error, reason } =
-        (await send('secret-set', {
-          name: 'pluggyai_clientSecret',
-          value: clientSecret,
-        })) || {});
-      if (error) {
-        setIsLoading(false);
-        setIsValid(false);
-        setError(getSecretsError(error, reason));
-        return;
-      } else {
-        ({ error, reason } =
-          (await send('secret-set', {
-            name: 'pluggyai_itemIds',
-            value: itemIds,
-          })) || {});
+    }
 
-        if (error) {
-          setIsLoading(false);
-          setIsValid(false);
-          setError(getSecretsError(error, reason));
-          return;
-        }
-      }
+    result =
+      (await send('secret-set', {
+        name: 'pluggyai_clientSecret',
+        value: clientSecret,
+        fileId,
+      })) || {};
+    ({ error, reason } = result);
+
+    if (error) {
+      setIsLoading(false);
+      setIsValid(false);
+      setError(getSecretsError(error, reason));
+      return;
+    }
+
+    result =
+      (await send('secret-set', {
+        name: 'pluggyai_itemIds',
+        value: itemIds,
+        fileId,
+      })) || {};
+    ({ error, reason } = result);
+
+    if (error) {
+      setIsLoading(false);
+      setIsValid(false);
+      setError(getSecretsError(error, reason));
+      return;
     }
 
     setIsValid(true);

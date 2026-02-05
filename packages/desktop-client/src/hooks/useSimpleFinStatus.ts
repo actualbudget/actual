@@ -4,7 +4,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 
 import { useSyncServerStatus } from './useSyncServerStatus';
 
-export function useSimpleFinStatus() {
+export function useSimpleFinStatus(fileId: string) {
   const [configuredSimpleFin, setConfiguredSimpleFin] = useState<
     boolean | null
   >(null);
@@ -12,19 +12,25 @@ export function useSimpleFinStatus() {
   const status = useSyncServerStatus();
 
   useEffect(() => {
+    const budgetFileId = fileId;
+
     async function fetch() {
       setIsLoading(true);
 
-      const results = await send('simplefin-status');
+      const results = await send('simplefin-status', {
+        fileId: budgetFileId,
+      });
 
-      setConfiguredSimpleFin(results.configured || false);
+      setConfiguredSimpleFin(
+        (results as { configured?: boolean })?.configured || false,
+      );
       setIsLoading(false);
     }
 
     if (status === 'online') {
       void fetch();
     }
-  }, [status]);
+  }, [status, fileId]);
 
   return {
     configuredSimpleFin,

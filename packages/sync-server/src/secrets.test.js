@@ -15,36 +15,51 @@ const enableOpenIdAuth = () => {
 describe('secretsService', () => {
   const testSecretName = SecretName.simplefin_token;
   const testSecretValue = 'testValue';
+  const testOptions = { fileId: 'test-file-id' };
 
   it('should set a secret', () => {
-    const result = secretsService.set(testSecretName, testSecretValue);
+    const result = secretsService.set(
+      testSecretName,
+      testSecretValue,
+      testOptions,
+    );
     expect(result).toBeDefined();
     expect(result.changes).toBe(1);
   });
 
   it('should get a secret', () => {
-    const result = secretsService.get(testSecretName);
+    const result = secretsService.get(testSecretName, testOptions);
     expect(result).toBeDefined();
     expect(result).toBe(testSecretValue);
   });
 
   it('should check if a secret exists', () => {
-    const exists = secretsService.exists(testSecretName);
+    const exists = secretsService.exists(testSecretName, testOptions);
     expect(exists).toBe(true);
 
-    const nonExistent = secretsService.exists('nonExistentSecret');
+    const nonExistent = secretsService.exists('nonExistentSecret', testOptions);
     expect(nonExistent).toBe(false);
   });
 
   it('should update a secret', () => {
     const newValue = 'newValue';
-    const setResult = secretsService.set(testSecretName, newValue);
+    const setResult = secretsService.set(testSecretName, newValue, testOptions);
     expect(setResult).toBeDefined();
     expect(setResult.changes).toBe(1);
 
-    const getResult = secretsService.get(testSecretName);
+    const getResult = secretsService.get(testSecretName, testOptions);
     expect(getResult).toBeDefined();
     expect(getResult).toBe(newValue);
+  });
+
+  it('should throw when fileId is missing', () => {
+    expect(() => secretsService.set(testSecretName, testSecretValue)).toThrow(
+      'missing-file-id',
+    );
+    expect(() => secretsService.get(testSecretName)).toThrow('missing-file-id');
+    expect(() => secretsService.exists(testSecretName)).toThrow(
+      'missing-file-id',
+    );
   });
 
   describe('secrets api', () => {
@@ -53,7 +68,7 @@ describe('secretsService', () => {
     });
 
     it('returns 401 if the user is not authenticated', async () => {
-      secretsService.set(testSecretName, testSecretValue);
+      secretsService.set(testSecretName, testSecretValue, testOptions);
       const res = await request(app).get(`/${testSecretName}`);
 
       expect(res.statusCode).toEqual(401);
@@ -66,7 +81,7 @@ describe('secretsService', () => {
 
     it('returns 404 if secret does not exist', async () => {
       const res = await request(app)
-        .get(`/${SecretName.gocardless_secretKey}`)
+        .get(`/${SecretName.gocardless_secretKey}?fileId=test-file-id`)
         .set('x-actual-token', 'valid-token');
 
       expect(res.statusCode).toEqual(404);
@@ -81,9 +96,9 @@ describe('secretsService', () => {
     });
 
     it('returns 204 if secret exists', async () => {
-      secretsService.set(testSecretName, testSecretValue);
+      secretsService.set(testSecretName, testSecretValue, testOptions);
       const res = await request(app)
-        .get(`/${testSecretName}`)
+        .get(`/${testSecretName}?fileId=test-file-id`)
         .set('x-actual-token', 'valid-token');
 
       expect(res.statusCode).toEqual(204);
@@ -93,7 +108,11 @@ describe('secretsService', () => {
       const res = await request(app)
         .post(`/`)
         .set('x-actual-token', 'valid-token')
-        .send({ name: testSecretName, value: testSecretValue });
+        .send({
+          name: testSecretName,
+          value: testSecretValue,
+          fileId: 'test-file-id',
+        });
 
       expect(res.statusCode).toEqual(200);
       expect(res.body).toEqual({
@@ -118,12 +137,12 @@ describe('secretsService', () => {
     describe('when OpenID is the active auth method', () => {
       beforeEach(() => {
         enableOpenIdAuth();
-        secretsService.set(testSecretName, testSecretValue);
+        secretsService.set(testSecretName, testSecretValue, testOptions);
       });
 
       it('GET returns 403 for non-admin users', async () => {
         const res = await request(app)
-          .get(`/${testSecretName}`)
+          .get(`/${testSecretName}?fileId=test-file-id`)
           .set('x-actual-token', 'valid-token-user');
 
         expect(res.statusCode).toEqual(403);
@@ -136,7 +155,7 @@ describe('secretsService', () => {
 
       it('GET returns 204 for admin users when secret exists', async () => {
         const res = await request(app)
-          .get(`/${testSecretName}`)
+          .get(`/${testSecretName}?fileId=test-file-id`)
           .set('x-actual-token', 'valid-token-admin');
 
         expect(res.statusCode).toEqual(204);
@@ -160,7 +179,11 @@ describe('secretsService', () => {
         const res = await request(app)
           .post('/')
           .set('x-actual-token', 'valid-token-admin')
-          .send({ name: testSecretName, value: 'newValue' });
+          .send({
+            name: testSecretName,
+            value: 'newValue',
+            fileId: 'test-file-id',
+          });
 
         expect(res.statusCode).toEqual(200);
         expect(res.body).toEqual({ status: 'ok' });

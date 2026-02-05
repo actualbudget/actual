@@ -17,6 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { sync } from '#app/appSlice';
 import { useAccounts } from '#hooks/useAccounts';
+import { useMetadataPref } from '#hooks/useMetadataPref';
 import { addNotification } from '#notifications/notificationsSlice';
 import { payeeQueries } from '#payees';
 import { useDispatch, useStore } from '#redux';
@@ -53,6 +54,13 @@ const dispatchErrorNotification = (
     }),
   );
 };
+
+function requireCloudFileId(cloudFileId: string | null | undefined): string {
+  if (!cloudFileId) {
+    throw new Error('missing-file-id');
+  }
+  return cloudFileId;
+}
 
 type CreateAccountPayload = {
   name: string;
@@ -97,6 +105,7 @@ export function useCloseAccountMutation() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const [cloudFileId] = useMetadataPref('cloudFileId');
 
   return useMutation({
     mutationFn: async ({
@@ -110,6 +119,7 @@ export function useCloseAccountMutation() {
         transferAccountId: transferAccountId || undefined,
         categoryId: categoryId || undefined,
         forced,
+        fileId: requireCloudFileId(cloudFileId),
       });
     },
     onSuccess: () => invalidateQueries(queryClient),
@@ -345,10 +355,14 @@ export function useUnlinkAccountMutation() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const [cloudFileId] = useMetadataPref('cloudFileId');
 
   return useMutation({
     mutationFn: async ({ id }: UnlinkAccountPayload) => {
-      await send('account-unlink', { id });
+      await send('account-unlink', {
+        id,
+        fileId: requireCloudFileId(cloudFileId),
+      });
     },
     onSuccess: (_, { id }) => {
       invalidateQueries(queryClient);
@@ -382,6 +396,7 @@ export function useLinkAccountMutation() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const [cloudFileId] = useMetadataPref('cloudFileId');
 
   return useMutation({
     mutationFn: async ({
@@ -392,6 +407,7 @@ export function useLinkAccountMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountPayload) => {
+      const fileId = requireCloudFileId(cloudFileId);
       await send('gocardless-accounts-link', {
         requisitionId,
         account,
@@ -399,6 +415,7 @@ export function useLinkAccountMutation() {
         offBudget,
         startingDate,
         startingBalance,
+        fileId,
       });
     },
     onSuccess: () => {
@@ -424,6 +441,7 @@ export function useLinkAccountSimpleFinMutation() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const [cloudFileId] = useMetadataPref('cloudFileId');
 
   return useMutation({
     mutationFn: async ({
@@ -433,12 +451,14 @@ export function useLinkAccountSimpleFinMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountSimpleFinPayload) => {
+      const fileId = requireCloudFileId(cloudFileId);
       await send('simplefin-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
+        fileId,
       });
     },
     onSuccess: () => {
@@ -466,6 +486,7 @@ export function useLinkAccountPluggyAiMutation() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const [cloudFileId] = useMetadataPref('cloudFileId');
 
   return useMutation({
     mutationFn: async ({
@@ -475,12 +496,14 @@ export function useLinkAccountPluggyAiMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountPluggyAiPayload) => {
+      const fileId = requireCloudFileId(cloudFileId);
       await send('pluggyai-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
+        fileId,
       });
     },
     onSuccess: () => {
@@ -508,6 +531,7 @@ export function useLinkAccountEnableBankingMutation() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const [cloudFileId] = useMetadataPref('cloudFileId');
 
   return useMutation({
     mutationFn: async ({
@@ -517,12 +541,14 @@ export function useLinkAccountEnableBankingMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountEnableBankingPayload) => {
+      const fileId = requireCloudFileId(cloudFileId);
       await send('enablebanking-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
+        fileId,
       });
     },
     onSuccess: () => {
@@ -550,12 +576,14 @@ export function useSyncAccountsMutation() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const [cloudFileId] = useMetadataPref('cloudFileId');
 
   const { data: accounts = [] } = useAccounts();
   const store = useStore();
 
   return useMutation({
     mutationFn: async ({ id }: SyncAccountsPayload) => {
+      const fileId = requireCloudFileId(cloudFileId);
       const {
         account: { accountsSyncing = [] },
       } = store.getState();
@@ -615,6 +643,7 @@ export function useSyncAccountsMutation() {
 
         const res = await send('simplefin-batch-sync', {
           ids: simpleFinAccounts.map(a => a.id),
+          fileId,
         });
 
         for (const account of res) {
@@ -644,6 +673,7 @@ export function useSyncAccountsMutation() {
         // Perform sync operation
         const res = await send('accounts-bank-sync', {
           ids: [accountId],
+          fileId,
         });
 
         const success = handleSyncResponse(

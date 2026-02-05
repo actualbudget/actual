@@ -44,6 +44,7 @@ import {
 describe('goCardlessService', () => {
   const accountId = mockAccountMetaData.id;
   const requisitionId = mockRequisition.id;
+  const options = { fileId: 'test-file-id' };
 
   let getBalancesSpy: MockInstance;
   let getTransactionsSpy: MockInstance;
@@ -82,7 +83,7 @@ describe('goCardlessService', () => {
       );
 
       expect(
-        await goCardlessService.getLinkedRequisition(requisitionId),
+        await goCardlessService.getLinkedRequisition(requisitionId, options),
       ).toEqual(mockRequisition);
     });
 
@@ -95,7 +96,7 @@ describe('goCardlessService', () => {
       });
 
       await expect(() =>
-        goCardlessService.getLinkedRequisition(requisitionId),
+        goCardlessService.getLinkedRequisition(requisitionId, options),
       ).rejects.toThrow(RequisitionNotLinked);
     });
   });
@@ -130,6 +131,7 @@ describe('goCardlessService', () => {
 
       const response = await goCardlessService.getRequisitionWithAccounts(
         mockRequisitionWithExampleAccounts.id,
+        options,
       );
 
       expect(response.accounts.length).toEqual(2);
@@ -173,6 +175,7 @@ describe('goCardlessService', () => {
           accountId,
           undefined,
           undefined,
+          options,
         ),
       ).toEqual(
         expect.objectContaining({
@@ -234,6 +237,7 @@ describe('goCardlessService', () => {
           'some-unknown-account-id' as GoCardlessAccountId,
           undefined,
           undefined,
+          options,
         ),
       ).rejects.toThrow(AccountNotLinkedToRequisition);
     });
@@ -253,7 +257,9 @@ describe('goCardlessService', () => {
 
       createRequisitionSpy.mockResolvedValue(mockCreateRequisition);
 
-      expect(await goCardlessService.createRequisition(params)).toEqual({
+      expect(
+        await goCardlessService.createRequisition(params, options),
+      ).toEqual({
         link: expect.any(String),
         requisitionId: expect.any(String),
       });
@@ -269,10 +275,11 @@ describe('goCardlessService', () => {
       });
       createRequisitionSpy.mockResolvedValue(mockCreateRequisition);
 
-      await goCardlessService.createRequisition(params);
+      await goCardlessService.createRequisition(params, options);
 
       expect(createRequisitionSpy).toHaveBeenCalledWith(
         expect.objectContaining({ maxHistoricalDays: '730' }),
+        options,
       );
     });
 
@@ -285,10 +292,11 @@ describe('goCardlessService', () => {
       });
       createRequisitionSpy.mockResolvedValue(mockCreateRequisition);
 
-      await goCardlessService.createRequisition(params);
+      await goCardlessService.createRequisition(params, options);
 
       expect(createRequisitionSpy).toHaveBeenCalledWith(
         expect.objectContaining({ maxHistoricalDays: 90 }),
+        options,
       );
     });
   });
@@ -302,9 +310,9 @@ describe('goCardlessService', () => {
       getRequisitionsSpy.mockResolvedValue(mockRequisition);
       deleteRequisitionsSpy.mockResolvedValue(mockDeleteRequisition);
 
-      expect(await goCardlessService.deleteRequisition(requisitionId)).toEqual(
-        mockDeleteRequisition,
-      );
+      expect(
+        await goCardlessService.deleteRequisition(requisitionId, options),
+      ).toEqual(mockDeleteRequisition);
 
       expect(getRequisitionsSpy).toBeCalledTimes(1);
       expect(deleteRequisitionsSpy).toBeCalledTimes(1);
@@ -318,9 +326,9 @@ describe('goCardlessService', () => {
       setTokenSpy.mockResolvedValue(undefined);
       getRequisitionsSpy.mockResolvedValue(mockRequisition);
 
-      expect(await goCardlessService.getRequisition(requisitionId)).toEqual(
-        mockRequisition,
-      );
+      expect(
+        await goCardlessService.getRequisition(requisitionId, options),
+      ).toEqual(mockRequisition);
 
       expect(setTokenSpy).toBeCalledTimes(1);
       expect(getRequisitionsSpy).toBeCalledTimes(1);
@@ -332,7 +340,9 @@ describe('goCardlessService', () => {
       getDetailsSpy.mockResolvedValue(mockAccountDetails);
       getMetadataSpy.mockResolvedValue(mockAccountMetaData);
 
-      expect(await goCardlessService.getDetailedAccount(accountId)).toEqual({
+      expect(
+        await goCardlessService.getDetailedAccount(accountId, options),
+      ).toEqual({
         ...mockAccountMetaData,
         ...mockAccountDetails.account,
       });
@@ -354,7 +364,9 @@ describe('goCardlessService', () => {
         name: '',
       });
 
-      expect(await goCardlessService.getDetailedAccount(accountId)).toEqual({
+      expect(
+        await goCardlessService.getDetailedAccount(accountId, options),
+      ).toEqual({
         ...mockAccountMetaData,
         ...mockAccountDetails.account,
         name: 'An Actual Account Name',
@@ -367,9 +379,9 @@ describe('goCardlessService', () => {
     it('calls goCardlessClient and fetch institution details', async () => {
       getInstitutionsSpy.mockResolvedValue([mockInstitution]);
 
-      expect(await goCardlessService.getInstitutions(country)).toEqual([
-        mockInstitution,
-      ]);
+      expect(await goCardlessService.getInstitutions(country, options)).toEqual(
+        [mockInstitution],
+      );
       expect(getInstitutionsSpy).toBeCalledTimes(1);
     });
   });
@@ -379,9 +391,9 @@ describe('goCardlessService', () => {
     it('calls goCardlessClient and fetch institution details', async () => {
       getInstitutionSpy.mockResolvedValue(mockInstitution);
 
-      expect(await goCardlessService.getInstitution(institutionId)).toEqual(
-        mockInstitution,
-      );
+      expect(
+        await goCardlessService.getInstitution(institutionId, options),
+      ).toEqual(mockInstitution);
       expect(getInstitutionSpy).toBeCalledTimes(1);
     });
   });
@@ -479,6 +491,7 @@ describe('goCardlessService', () => {
           accountId,
           startDate: '',
           endDate: '',
+          options,
         }),
       ).toMatchInlineSnapshot(`
         {
@@ -544,7 +557,7 @@ describe('goCardlessService', () => {
     it('calls goCardlessClient and fetch balances for provided accountId', async () => {
       getBalancesSpy.mockResolvedValue(mockedBalances);
 
-      expect(await goCardlessService.getBalances(accountId)).toEqual(
+      expect(await goCardlessService.getBalances(accountId, options)).toEqual(
         mockedBalances,
       );
       expect(getBalancesSpy).toBeCalledTimes(1);

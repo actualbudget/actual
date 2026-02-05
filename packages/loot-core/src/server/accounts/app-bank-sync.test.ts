@@ -58,7 +58,10 @@ describe('simpleFinBatchSync', () => {
         new Error('connection timeout'),
       );
 
-      const result = await simpleFinBatchSyncHandler({ ids: [] });
+      const result = await simpleFinBatchSyncHandler({
+        ids: [],
+        fileId: 'test-file-id',
+      });
 
       expect(result).toHaveLength(3);
 
@@ -83,7 +86,10 @@ describe('simpleFinBatchSync', () => {
         new Error('server error'),
       );
 
-      const result = await simpleFinBatchSyncHandler({ ids: [] });
+      const result = await simpleFinBatchSyncHandler({
+        ids: [],
+        fileId: 'test-file-id',
+      });
 
       expect(result).toHaveLength(2);
 
@@ -120,7 +126,10 @@ describe('simpleFinBatchSync', () => {
         },
       ]);
 
-      const result = await simpleFinBatchSyncHandler({ ids: [] });
+      const result = await simpleFinBatchSyncHandler({
+        ids: [],
+        fileId: 'test-file-id',
+      });
 
       expect(result).toHaveLength(2);
 

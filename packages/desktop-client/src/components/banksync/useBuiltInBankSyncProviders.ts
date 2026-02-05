@@ -16,6 +16,7 @@ import { authorizeBank } from '#gocardless';
 import { useEnableBankingStatus } from '#hooks/useEnableBankingStatus';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '#hooks/useGoCardlessStatus';
+import { useMetadataPref } from '#hooks/useMetadataPref';
 import { usePluggyAiStatus } from '#hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '#hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
@@ -64,7 +65,7 @@ export type BuiltInBankSyncProviderState = {
 };
 
 type SecretSetResponse = {
-  error?: string;
+  error?: string | { message?: string };
   error_code?: string;
   reason?: string;
 };
@@ -82,8 +83,19 @@ async function ensureSuccessResponse(
   }
 
   if (response.error) {
-    throw new Error(response.reason || response.error || fallbackMessage);
+    const errorMessage =
+      typeof response.error === 'string'
+        ? response.error
+        : response.error.message;
+    throw new Error(response.reason || errorMessage || fallbackMessage);
   }
+}
+
+function requireBudgetFileId(fileId: string | null | undefined): string {
+  if (!fileId) {
+    throw new Error('missing-file-id');
+  }
+  return fileId;
 }
 
 export function useBuiltInBankSyncProviders({
@@ -92,6 +104,8 @@ export function useBuiltInBankSyncProviders({
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const syncServerStatus = useSyncServerStatus();
+  const [metadataFileId] = useMetadataPref('cloudFileId');
+  const budgetFileId = requireBudgetFileId(metadataFileId);
   const { hasPermission } = useAuth();
   const multiuserEnabled = useMultiuserEnabled();
   const canConfigureProviders =
@@ -112,9 +126,9 @@ export function useBuiltInBankSyncProviders({
     useState(false);
 
   const enableBankingEnabled = useFeatureFlag('enableBanking');
-  const { configuredGoCardless } = useGoCardlessStatus();
-  const { configuredSimpleFin } = useSimpleFinStatus();
-  const { configuredPluggyAi } = usePluggyAiStatus();
+  const { configuredGoCardless } = useGoCardlessStatus(budgetFileId);
+  const { configuredSimpleFin } = useSimpleFinStatus(budgetFileId);
+  const { configuredPluggyAi } = usePluggyAiStatus(budgetFileId);
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
     useEnableBankingStatus(enableBankingEnabled);
 
@@ -141,11 +155,12 @@ export function useBuiltInBankSyncProviders({
           name: 'gocardless-init',
           options: {
             onSuccess: () => setIsGoCardlessSetupComplete(true),
+            fileId: budgetFileId,
           },
         },
       }),
     );
-  }, [dispatch]);
+  }, [budgetFileId, dispatch]);
 
   const onSimpleFinInit = useCallback(() => {
     dispatch(
@@ -154,11 +169,12 @@ export function useBuiltInBankSyncProviders({
           name: 'simplefin-init',
           options: {
             onSuccess: () => setIsSimpleFinSetupComplete(true),
+            fileId: budgetFileId,
           },
         },
       }),
     );
-  }, [dispatch]);
+  }, [budgetFileId, dispatch]);
 
   const onPluggyAiInit = useCallback(() => {
     dispatch(
@@ -167,11 +183,12 @@ export function useBuiltInBankSyncProviders({
           name: 'pluggyai-init',
           options: {
             onSuccess: () => setIsPluggyAiSetupComplete(true),
+            fileId: budgetFileId,
           },
         },
       }),
     );
-  }, [dispatch]);
+  }, [budgetFileId, dispatch]);
 
   const onEnableBankingInit = useCallback(() => {
     dispatch(
@@ -210,6 +227,7 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'gocardless_secretId',
           value: null,
+          fileId: budgetFileId,
         }),
         'Failed to clear GoCardless secret ID',
       );
@@ -217,6 +235,7 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'gocardless_secretKey',
           value: null,
+          fileId: budgetFileId,
         }),
         'Failed to clear GoCardless secret key',
       );
@@ -224,7 +243,7 @@ export function useBuiltInBankSyncProviders({
     } catch (error) {
       notifyResetFailure('GoCardless', error);
     }
-  }, [notifyResetFailure]);
+  }, [budgetFileId, notifyResetFailure]);
 
   const onSimpleFinReset = useCallback(async () => {
     try {
@@ -232,6 +251,7 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'simplefin_token',
           value: null,
+          fileId: budgetFileId,
         }),
         'Failed to clear SimpleFIN token',
       );
@@ -239,6 +259,7 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'simplefin_accessKey',
           value: null,
+          fileId: budgetFileId,
         }),
         'Failed to clear SimpleFIN access key',
       );
@@ -246,7 +267,7 @@ export function useBuiltInBankSyncProviders({
     } catch (error) {
       notifyResetFailure('SimpleFIN', error);
     }
-  }, [notifyResetFailure]);
+  }, [budgetFileId, notifyResetFailure]);
 
   const onPluggyAiReset = useCallback(async () => {
     try {
@@ -254,6 +275,7 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'pluggyai_clientId',
           value: null,
+          fileId: budgetFileId,
         }),
         'Failed to clear Pluggy.ai client ID',
       );
@@ -261,6 +283,7 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'pluggyai_clientSecret',
           value: null,
+          fileId: budgetFileId,
         }),
         'Failed to clear Pluggy.ai client secret',
       );
@@ -268,6 +291,7 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'pluggyai_itemIds',
           value: null,
+          fileId: budgetFileId,
         }),
         'Failed to clear Pluggy.ai item IDs',
       );
@@ -275,7 +299,7 @@ export function useBuiltInBankSyncProviders({
     } catch (error) {
       notifyResetFailure('Pluggy.ai', error);
     }
-  }, [notifyResetFailure]);
+  }, [budgetFileId, notifyResetFailure]);
 
   const onEnableBankingReset = useCallback(async () => {
     try {
@@ -283,6 +307,7 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'enablebanking_applicationId',
           value: null,
+          fileId: budgetFileId,
         }),
         'Failed to clear Enable Banking application ID',
       );
@@ -290,6 +315,7 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'enablebanking_secretKey',
           value: null,
+          fileId: budgetFileId,
         }),
         'Failed to clear Enable Banking secret key',
       );
@@ -297,7 +323,7 @@ export function useBuiltInBankSyncProviders({
     } catch (error) {
       notifyResetFailure('Enable Banking', error);
     }
-  }, [notifyResetFailure]);
+  }, [budgetFileId, notifyResetFailure]);
 
   const onConnectGoCardless = useCallback(() => {
     if (!isGoCardlessSetupComplete) {
@@ -305,8 +331,9 @@ export function useBuiltInBankSyncProviders({
       return;
     }
 
-    void authorizeBank(dispatch, upgradingAccountId);
+    void authorizeBank(dispatch, budgetFileId, upgradingAccountId);
   }, [
+    budgetFileId,
     dispatch,
     isGoCardlessSetupComplete,
     onGoCardlessInit,
@@ -326,7 +353,9 @@ export function useBuiltInBankSyncProviders({
     setLoadingSimpleFinAccounts(true);
 
     try {
-      const results = await send('simplefin-accounts');
+      const results = await send('simplefin-accounts', {
+        fileId: budgetFileId,
+      });
       if (results.error_code) {
         throw new Error(results.reason);
       }
@@ -363,6 +392,7 @@ export function useBuiltInBankSyncProviders({
       setLoadingSimpleFinAccounts(false);
     }
   }, [
+    budgetFileId,
     dispatch,
     isSimpleFinSetupComplete,
     loadingSimpleFinAccounts,
@@ -406,7 +436,7 @@ export function useBuiltInBankSyncProviders({
     }
 
     try {
-      const results = await send('pluggyai-accounts');
+      const results = await send('pluggyai-accounts', { fileId: budgetFileId });
       if (results.error_code) {
         throw new Error(results.reason);
       }
@@ -457,6 +487,7 @@ export function useBuiltInBankSyncProviders({
       onPluggyAiInit();
     }
   }, [
+    budgetFileId,
     dispatch,
     isPluggyAiSetupComplete,
     onPluggyAiInit,
