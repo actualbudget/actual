@@ -62,12 +62,13 @@ export function DesktopLinkedNotes({
 
   return (
     <>
-      <Text 
+      <span
         role="link"
         className={linkStyles} 
-        onClick={handleClick}>
-        {displayText}
-      </Text>
+        onClick={handleClick}
+      >
+      {displayText}
+      </span>
       {separator}
     </>
   );
