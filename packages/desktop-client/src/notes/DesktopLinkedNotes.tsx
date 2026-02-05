@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
-
+import { css } from '@emotion/css';
 import { isElectron } from 'loot-core/shared/environment';
 
 import { normalizeUrl } from './linkParser';
@@ -17,13 +17,14 @@ type DesktopLinkedNotesProps = {
   isFilePath: boolean;
 };
 
-const linkStyles = {
+const linkStyles = css({
   color: theme.pageTextLink,
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  padding: 0,
-  textDecoration: 'underline',
-};
+  display: 'inline-flex',
+  padding: options.compact ? '0px 7px' : '3px 7px',
+  borderRadius: 16,
+  userSelect: 'none',
+  cursor: 'pointer',
+});
 
 export function DesktopLinkedNotes({
   displayText,
@@ -59,11 +60,15 @@ export function DesktopLinkedNotes({
   };
 
   return (
-    <>
-      <Button variant="bare" style={linkStyles} onPress={handleClick}>
+    <View style={{ display: 'inline' }}>
+      <Button
+        variant="bare"
+        style={linkStyles}
+        onPress={handleClick}
+      >
         {displayText}
       </Button>
       {separator}
-    </>
+    </View>
   );
 }
