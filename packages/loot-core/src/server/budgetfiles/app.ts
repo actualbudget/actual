@@ -63,7 +63,6 @@ export type BudgetFileHandlers = {
   'backups-get': typeof getBackups;
   'backup-load': typeof loadBackup;
   'backup-make': typeof makeBackup;
-  'get-last-opened-backup': typeof getLastOpenedBackup;
 };
 
 export const app = createApp<BudgetFileHandlers>();
@@ -87,7 +86,6 @@ app.method('upload-file-web', uploadFileWeb);
 app.method('backups-get', getBackups);
 app.method('backup-load', loadBackup);
 app.method('backup-make', makeBackup);
-app.method('get-last-opened-backup', getLastOpenedBackup);
 
 async function handleValidateBudgetName({ name }: { name: string }) {
   return validateBudgetName(name);
@@ -260,14 +258,6 @@ async function closeBudget() {
   await mainApp.stopServices();
 
   await db.closeDatabase();
-
-  try {
-    await asyncStorage.setItem('lastBudget', '');
-  } catch {
-    // This might fail if we are shutting down after failing to load a
-    // budget. We want to unload whatever has already been loaded but
-    // be resilient to anything failing
-  }
 
   prefs.unloadPrefs();
   await stopBackupService();
@@ -615,8 +605,6 @@ async function _loadBudget(id: Budget['id']): Promise<{
         setSyncingMode('disabled');
       }
 
-      await asyncStorage.setItem('lastBudget', id);
-
       await cloudStorage.possiblyUpload();
     }
   } else {
@@ -654,18 +642,4 @@ async function loadBackup({ id, backupId }) {
 
 async function makeBackup({ id }) {
   await _makeBackup(id);
-}
-
-async function getLastOpenedBackup() {
-  const id = await asyncStorage.getItem('lastBudget');
-  if (id && id !== '') {
-    const budgetDir = fs.getBudgetDir(id);
-
-    // We never want to give back a budget that does not exist on the
-    // filesystem anymore, so first check that it exists
-    if (await fs.exists(budgetDir)) {
-      return id;
-    }
-  }
-  return null;
 }

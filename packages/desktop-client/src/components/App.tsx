@@ -96,35 +96,6 @@ function AppInner() {
         }),
       );
       await dispatch(loadGlobalPrefs());
-
-      // Open the last opened budget, if any
-      dispatch(
-        setAppState({
-          loadingText: t('Opening last budget...'),
-        }),
-      );
-      const budgetId = await send('get-last-opened-backup');
-      if (budgetId) {
-        await dispatch(loadBudget({ id: budgetId }));
-
-        // Check to see if this file has been remotely deleted (but
-        // don't block on this in case they are offline or something)
-        dispatch(
-          setAppState({
-            loadingText: t('Retrieving remote files...'),
-          }),
-        );
-
-        const files = await send('get-remote-files');
-        if (files) {
-          const remoteFile = files.find(f => f.fileId === cloudFileId);
-          if (remoteFile && remoteFile.deleted) {
-            dispatch(closeBudget());
-          }
-        }
-
-        await maybeUpdate();
-      }
     }
 
     async function initAll() {
