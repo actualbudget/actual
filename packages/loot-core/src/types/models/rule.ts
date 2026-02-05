@@ -48,7 +48,7 @@ type BaseConditionEntity<
     month?: boolean;
     year?: boolean;
   };
-  conditionsOp?: string;
+  conditionsOp?: 'and' | 'or';
   type?: 'id' | 'boolean' | 'date' | 'number' | 'string';
   customName?: string;
   queryFilter?: Record<string, { $oneof: string[] }>;
