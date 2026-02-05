@@ -1397,6 +1397,7 @@ const Transaction = memo(function Transaction({
         style={{
           alignItems: 'baseline',
           overflow: 'hidden',
+          minHeight: '13px',
         }}
         exposed={focusedField === 'notes'}
         focused={focusedField === 'notes'}
