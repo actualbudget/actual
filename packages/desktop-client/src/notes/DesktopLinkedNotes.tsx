@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-
+import { Button } from '@actual-app/components/button';
 // import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
@@ -20,8 +20,11 @@ type DesktopLinkedNotesProps = {
 
 const linkStyles = css({
   color: theme.pageTextLink,
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  flexWrap: 'nowrap',
+  padding: 0,
   textDecoration: 'underline',
-  cursor: 'pointer',
   '&:hover': {
     color: theme.pageTextLinkLight,
   },
@@ -61,15 +64,10 @@ export function DesktopLinkedNotes({
   };
 
   return (
-    <>
-      <span
-        role="button"
-        className={linkStyles}
-        onMouseDown={e => e.stopPropagation()}
-        onClick={handleClick}
-      >
+   <>
+      <Button variant="bare" style={linkStyles} onPress={handleClick}>
         {displayText}
-      </span>
+      </Button>
       {separator}
     </>
   );
