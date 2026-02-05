@@ -59,7 +59,7 @@ export function DesktopLinkedNotes({
   };
 
   return (
-    <View style={{ display: 'inline-flex' }}>
+    <View
       <Button variant="bare" style={linkStyles} onPress={handleClick}>
         {displayText}
       </Button>
