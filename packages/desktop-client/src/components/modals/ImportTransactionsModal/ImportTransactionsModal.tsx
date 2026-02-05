@@ -11,6 +11,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { send } from 'loot-core/platform/client/fetch';
 import type { ParseFileOptions } from 'loot-core/server/transactions/import/parse-file';
@@ -49,8 +50,7 @@ import {
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
-import { reloadPayees } from '@desktop-client/payees/payeesSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { payeeQueries } from '@desktop-client/payees';
 
 function getFileType(filepath: string): string {
   const m = filepath.match(/\.([^.]*)$/);
@@ -159,9 +159,9 @@ export function ImportTransactionsModal({
   onImported,
 }) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const dateFormat = useDateFormat() || ('MM/dd/yyyy' as const);
   const [prefs, savePrefs] = useSyncedPrefs();
-  const dispatch = useDispatch();
   const { list: categories } = useCategories();
 
   const [multiplierAmount, setMultiplierAmount] = useState('');
@@ -656,7 +656,7 @@ export function ImportTransactionsModal({
       {
         onSuccess: async didChange => {
           if (didChange) {
-            await dispatch(reloadPayees());
+            queryClient.invalidateQueries(payeeQueries.list());
           }
 
           if (onImported) {

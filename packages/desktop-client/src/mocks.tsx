@@ -7,21 +7,43 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { configureAppStore } from './redux/store';
 import type { AppStore } from './redux/store';
 
-let mockQueryClient = new QueryClient();
-
-export let mockStore: AppStore = configureAppStore({
-  queryClient: mockQueryClient,
-});
-
-export function resetTestProviders() {
-  mockQueryClient = new QueryClient();
-  mockStore = configureAppStore({ queryClient: mockQueryClient });
+export function createTestQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
 }
 
-export function TestProviders({ children }: { children: ReactNode }) {
+let testQueryClient = createTestQueryClient();
+
+export function createTestAppStore() {
+  return configureAppStore({
+    queryClient: testQueryClient,
+  });
+}
+
+export let testStore: AppStore = createTestAppStore();
+
+export function resetTestProviders() {
+  testQueryClient = createTestQueryClient();
+  testStore = createTestAppStore();
+}
+
+export function TestProviders({
+  children,
+  queryClient,
+  store,
+}: {
+  queryClient?: QueryClient;
+  store?: AppStore;
+  children: ReactNode;
+}) {
   return (
-    <QueryClientProvider client={mockQueryClient}>
-      <Provider store={mockStore}>{children}</Provider>
+    <QueryClientProvider client={queryClient ?? testQueryClient}>
+      <Provider store={store ?? testStore}>{children}</Provider>
     </QueryClientProvider>
   );
 }

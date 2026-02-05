@@ -36,7 +36,7 @@ export function useAccountPreviewTransactions({
 }: UseAccountPreviewTransactionsProps): UseAccountPreviewTransactionsResult {
   const accounts = useAccounts();
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
-  const payees = usePayees();
+  const { data: payees } = usePayees();
   const payeesById = useMemo(() => groupById(payees), [payees]);
 
   const getPayeeByTransferAccount = useCallback(

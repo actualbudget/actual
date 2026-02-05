@@ -25,15 +25,15 @@ import {
   ungroupTransactions,
   updateTransaction,
 } from 'loot-core/shared/transactions';
-import { applyChanges } from 'loot-core/shared/util';
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type {
-  AccountEntity,
-  NewRuleEntity,
-  RuleActionEntity,
-  RuleConditionEntity,
-  TransactionEntity,
-  TransactionFilterEntity,
+import { applyChanges, type IntegerAmount } from 'loot-core/shared/util';
+import {
+  type AccountEntity,
+  type NewRuleEntity,
+  type PayeeEntity,
+  type RuleActionEntity,
+  type RuleConditionEntity,
+  type TransactionEntity,
+  type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
@@ -74,7 +74,7 @@ import {
   replaceModal,
 } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { createPayee, getPayees } from '@desktop-client/payees/payeesSlice';
+import { useCreatePayeeMutation } from '@desktop-client/payees';
 import * as queries from '@desktop-client/queries';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { pagedQuery } from '@desktop-client/queries/pagedQuery';
@@ -238,7 +238,7 @@ type AccountInternalProps = {
   location: ReturnType<typeof useLocation>;
   failedAccounts: ReturnType<typeof useFailedAccounts>;
   dateFormat: ReturnType<typeof useDateFormat>;
-  payees: ReturnType<typeof usePayees>;
+  payees: PayeeEntity[];
   categoryGroups: ReturnType<typeof useCategories>['grouped'];
   hideFraction: boolean;
   accountsSyncing: string[];
@@ -248,6 +248,7 @@ type AccountInternalProps = {
   onUpdateAccount: (account: AccountEntity) => void;
   onUnlinkAccount: (id: AccountEntity['id']) => void;
   onSyncAndDownload: (accountId?: AccountEntity['id']) => void;
+  onCreatePayee: (name: PayeeEntity['name']) => Promise<PayeeEntity['id']>;
 };
 
 type AccountInternalState = {
@@ -380,7 +381,6 @@ class AccountInternal extends PureComponent<
 
     // Important that any async work happens last so that the
     // listeners are set up synchronously
-    await this.props.dispatch(getPayees());
     await this.fetchTransactions(this.state.filterConditions);
 
     // If there is a pending undo, apply it immediately (this happens
@@ -944,7 +944,7 @@ class AccountInternal extends PureComponent<
   onCreatePayee = async (name: string) => {
     const trimmed = name.trim();
     if (trimmed !== '') {
-      return this.props.dispatch(createPayee({ name })).unwrap();
+      return await this.props.onCreatePayee(name);
     }
     return null;
   };
@@ -1964,7 +1964,7 @@ export function Account() {
     state => state.transactions.matchedTransactions,
   );
   const accounts = useAccounts();
-  const payees = usePayees();
+  const { data: payees } = usePayees();
   const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [hideFraction] = useSyncedPref('hideFraction');
@@ -2011,6 +2011,10 @@ export function Account() {
   const onSyncAndDownload = (id?: AccountEntity['id']) =>
     syncAndDownload.mutate({ id });
 
+  const createPayee = useCreatePayeeMutation();
+  const onCreatePayee = (name: PayeeEntity['name']) =>
+    createPayee.mutateAsync({ name });
+
   return (
     <SchedulesProvider query={schedulesQuery}>
       <SplitsExpandedProvider
@@ -2051,6 +2055,7 @@ export function Account() {
           onUpdateAccount={onUpdateAccount}
           onUnlinkAccount={onUnlinkAccount}
           onSyncAndDownload={onSyncAndDownload}
+          onCreatePayee={onCreatePayee}
         />
       </SplitsExpandedProvider>
     </SchedulesProvider>

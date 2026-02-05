@@ -64,7 +64,6 @@ import {
   useSelected,
 } from '@desktop-client/hooks/useSelected';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { getPayees } from '@desktop-client/payees/payeesSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
 import { disableUndo, enableUndo } from '@desktop-client/undo';
@@ -1022,8 +1021,6 @@ export function RuleEditor({
   );
 
   useEffect(() => {
-    dispatch(getPayees());
-
     // Disable undo while this modal is open
     disableUndo();
     return () => enableUndo();

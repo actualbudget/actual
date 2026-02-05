@@ -1,0 +1,79 @@
+import { useTranslation } from 'react-i18next';
+
+import {
+  useMutation,
+  useQueryClient,
+  type QueryClient,
+  type QueryKey,
+} from '@tanstack/react-query';
+import { v4 as uuidv4 } from 'uuid';
+
+import { sendCatch, type send } from 'loot-core/platform/client/fetch';
+import { logger } from 'loot-core/platform/server/log';
+import { type PayeeEntity } from 'loot-core/types/models';
+
+import { payeeQueries } from './queries';
+
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
+import { type AppDispatch } from '@desktop-client/redux/store';
+
+const sendThrow: typeof send = async (name, args) => {
+  const { error, data } = await sendCatch(name, args);
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
+function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
+  queryClient.invalidateQueries({
+    queryKey: queryKey ?? payeeQueries.lists(),
+  });
+}
+
+function dispatchErrorNotification(
+  dispatch: AppDispatch,
+  message: string,
+  error?: Error,
+) {
+  dispatch(
+    addNotification({
+      notification: {
+        id: uuidv4(),
+        type: 'error',
+        message,
+        pre: error ? error.message : undefined,
+      },
+    }),
+  );
+}
+
+type CreatePayeePayload = {
+  name: PayeeEntity['name'];
+};
+
+export function useCreatePayeeMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({ name }: CreatePayeePayload) => {
+      const id: PayeeEntity['id'] = await sendThrow('payee-create', {
+        name: name.trim(),
+      });
+      return id;
+    },
+    onSuccess: () => invalidateQueries(queryClient),
+    onError: error => {
+      logger.error('Error creating payee:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error creating the payee. Please try again.'),
+        error,
+      );
+      throw error;
+    },
+  });
+}
