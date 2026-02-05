@@ -1,5 +1,4 @@
 import '@testing-library/jest-dom';
-
 import { resetTestProviders } from './mocks';
 import { installPolyfills } from './polyfills';
 
