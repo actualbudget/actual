@@ -22,6 +22,7 @@ const linkStyles = {
   color: theme.pageTextLink,
   textDecoration: 'underline',
   padding: '3px 7px',
+  cursor: 'pointer',
 };
 
 export function DesktopLinkedNotes({
