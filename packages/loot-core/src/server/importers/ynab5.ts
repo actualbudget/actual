@@ -23,10 +23,9 @@ import type {
   Budget,
   Payee,
   ScheduledSubtransaction,
-  ScheduledTransactionSummary,
+  ScheduledTransaction,
   Subtransaction,
-  TransactionFlagColor,
-  TransactionSummary,
+  Transaction,
 } from './ynab5-types';
 
 function amountFromYnab(amount: number) {
@@ -129,7 +128,7 @@ function mapYnabFrequency(
 }
 
 function getScheduleDateValue(
-  scheduled: ScheduledTransactionSummary,
+  scheduled: ScheduledTransaction,
 ): RecurConfig | string {
   const dateFirst = scheduled.date_first;
   const frequency = scheduled.frequency;
@@ -566,7 +565,7 @@ async function importTransactions(
     .filter(payee => payee?.transfer_acct)
     .map(payee => [payee.transfer_acct, payee] as [string, Payee]);
   const payeeTransferAcctHashMap = new Map<string, Payee>(payeesByTransferAcct);
-  const orphanTransferMap = new Map<string, TransactionSummary[]>();
+  const orphanTransferMap = new Map<string, Transaction[]>();
   const orphanSubtransfer = [] as Subtransaction[];
   const orphanSubtransferTrxId = [] as string[];
   const orphanSubtransferAcctIdByTrxIdMap = new Map<string, string>();
@@ -633,10 +632,10 @@ async function importTransactions(
   // for every list index in the transactions list, the related subtransaction
   // will be at the same index.
   const orphanTransferComparator = (
-    a: TransactionSummary | Subtransaction,
-    b: TransactionSummary | Subtransaction,
+    a: Transaction | Subtransaction,
+    b: Transaction | Subtransaction,
   ) => {
-    // a and b can be a TransactionSummary (having a date attribute) or a
+    // a and b can be a Transaction (having a date attribute) or a
     // Subtransaction (missing that date attribute)
 
     const date_a =
@@ -766,7 +765,7 @@ async function importTransactions(
 
           // Handle transactions and subtransactions payee
           function transactionPayeeUpdate(
-            trx: TransactionSummary | Subtransaction,
+            trx: Transaction | Subtransaction,
             newTrx,
             fallbackPayeeId?: string | null,
           ) {
@@ -931,17 +930,9 @@ function findIdByName<T extends { id: string; name: string }>(
   return findByNameIgnoreCase<T>(categories, name)?.id;
 }
 
-type FlaggedMemoTransaction = {
-  memo?: string | null;
-  flag_name?: string | null;
-  flag_color?: TransactionFlagColor | null;
-};
-
-type YnabFlaggedTransaction = FlaggedMemoTransaction & {
-  deleted?: boolean | null;
-};
-
-function buildTransactionNotes(transaction: FlaggedMemoTransaction) {
+function buildTransactionNotes(
+  transaction: Transaction | ScheduledTransaction,
+) {
   const normalizedMemo = transaction.memo?.trim() ?? '';
   const normalizedFlag = getFlagTagName(transaction) ?? '';
   const notes = `${normalizedMemo} ${
@@ -963,85 +954,77 @@ function buildRuleUpdate(
   };
 }
 
- function getFlagTagName(transaction: FlaggedMemoTransaction) {
-   const normalizedFlag =
-     transaction.flag_name?.trim() ?? transaction.flag_color?.trim() ?? '';
-   return normalizedFlag.length > 0 ? normalizedFlag : null;
- }
+type FlaggedTransaction = Pick<
+  Transaction | ScheduledTransaction,
+  'flag_name' | 'flag_color' | 'deleted'
+>;
 
- function mapYnabFlagColorToHex(
-   flagColor: TransactionFlagColor | null | undefined,
- ): string | null {
-   if (!flagColor) {
-     return null;
-   }
+function getFlagTagName(transaction: FlaggedTransaction) {
+  const normalizedFlag =
+    transaction.flag_name?.trim() ?? transaction.flag_color?.trim() ?? '';
+  return normalizedFlag.length > 0 ? normalizedFlag : null;
+}
 
-   switch (flagColor) {
-     case 'red':
-//      return '#F44336';
-      return 'rgb(255, 69, 58)';
-     case 'orange':
-//      return '#FB8C00';
-      return 'rgb(255, 159, 10)';
-     case 'yellow':
-//      return '#FDD835';
-      return 'rgb(255, 214, 10)';
-     case 'green':
-//      return '#43A047';
-      return 'rgb(50, 215, 75)';
-     case 'blue':
-//      return '#1E88E5';
-      return 'rgb(100, 210, 255)';
-     case 'purple':
-//      return '#8E24AA';
-      return 'rgb(191, 90, 242)';
-     default:
-       return null;
-   }
- }
+async function importYnabFlagTags(data: Budget) {
+  const tagsByName = new Map<string, string>();
+  const flaggedTransactions: FlaggedTransaction[] = [
+    ...data.transactions,
+    ...data.scheduled_transactions,
+  ];
 
- async function importYnabFlagTags(data: Budget) {
-   const tagsByName = new Map<string, string>();
-   const flaggedTransactions: YnabFlaggedTransaction[] = [
-     ...data.transactions,
-     ...data.scheduled_transactions,
-   ];
+  // const flagColorMap = {
+  //   red: '#F44336',
+  //   orange: '#FB8C00',
+  //   yellow: '#FDD835',
+  //   green: '#43A047',
+  //   blue: '#1E88E5',
+  //   purple: '#8E24AA',
+  // }
 
-   for (const transaction of flaggedTransactions) {
-     if (transaction.deleted) {
-       continue;
-     }
+  // const ynabColorMap = {
+  //   red: 'rgb(255, 69, 58)',
+  //   orange: 'rgb(255, 159, 10)',
+  //   yellow: 'rgb(255, 214, 10)',
+  //   green: 'rgb(50, 215, 75)',
+  //   blue: 'rgb(100, 210, 255)',
+  //   purple: 'rgb(191, 90, 242)',
+  // };
 
-     const tagName = getFlagTagName(transaction);
-     const tagColor = transaction.flag_color ?? null;
-     if (!tagName || !tagColor) {
-       continue;
-     }
+  for (const transaction of flaggedTransactions) {
+    if (transaction.deleted) {
+      continue;
+    }
 
-     if (!tagsByName.has(tagName)) {
-       tagsByName.set(tagName, tagColor);
-     }
-   }
+    const tagName = getFlagTagName(transaction);
+    const tagColor = transaction.flag_color;
+    if (!tagName || !tagColor) {
+      continue;
+    }
 
-   if (tagsByName.size === 0) {
-     return;
-   }
+    if (!tagsByName.has(tagName)) {
+      tagsByName.set(tagName, tagColor);
+    }
+  }
 
-   const existingTags = (await send('tags-get')) as TagEntity[];
-   const existingTagsByName = new Map(existingTags.map(tag => [tag.tag, tag]));
+  if (tagsByName.size === 0) {
+    return;
+  }
 
-   await Promise.all(
-     [...tagsByName.entries()].map(async ([tag, color]) => {
-       const existingTag = existingTagsByName.get(tag);
-       if (existingTag?.color) {
-         return;
-       }
+  const existingTags = (await send('tags-get')) as TagEntity[];
+  const existingTagsByName = new Map(existingTags.map(tag => [tag.tag, tag]));
+
+  await Promise.all(
+    [...tagsByName.entries()].map(async ([tag, color]) => {
+      const existingTag = existingTagsByName.get(tag);
+      if (existingTag?.color) {
+        return;
+      }
 
       await send('tags-create', {
         tag,
         color,
         description: 'Imported from YNAB',
       });
-     }),
-   );
- }
+    }),
+  );
+}
