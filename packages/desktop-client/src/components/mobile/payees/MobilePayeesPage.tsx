@@ -18,19 +18,17 @@ import { usePayeeRuleCounts } from '@desktop-client/hooks/usePayeeRuleCounts';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
+import { useDispatch } from '@desktop-client/redux';
 
 export function MobilePayeesPage() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const payees = usePayees();
+  const { data: payees, isPending } = usePayees();
   const { showUndoNotification } = useUndo();
   const [filter, setFilter] = useState('');
-  const { ruleCounts, isLoading: isRuleCountsLoading } = usePayeeRuleCounts();
-  const isLoading = useSelector(
-    s => s.payees.isPayeesLoading || s.payees.isCommonPayeesLoading,
-  );
+  const { data: ruleCounts, isPending: isRuleCountsLoading } =
+    usePayeeRuleCounts();
 
   const filteredPayees: PayeeEntity[] = useMemo(() => {
     if (!filter) return payees;
@@ -141,7 +139,7 @@ export function MobilePayeesPage() {
         payees={filteredPayees}
         ruleCounts={ruleCounts}
         isRuleCountsLoading={isRuleCountsLoading}
-        isLoading={isLoading}
+        isLoading={isPending}
         onPayeePress={handlePayeePress}
         onPayeeDelete={handlePayeeDelete}
         onPayeeRuleAction={handlePayeeRuleAction}

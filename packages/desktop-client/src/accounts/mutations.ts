@@ -26,7 +26,7 @@ import { accountQueries } from './queries';
 import { sync } from '@desktop-client/app/appSlice';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { markPayeesDirty } from '@desktop-client/payees/payeesSlice';
+import { payeeQueries } from '@desktop-client/payees';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 import type { AppDispatch } from '@desktop-client/redux/store';
 import { setNewTransactions } from '@desktop-client/transactions/transactionsSlice';
@@ -200,9 +200,7 @@ export function useMoveAccountMutation() {
   return useMutation({
     mutationFn: async ({ id, targetId }: MoveAccountPayload) => {
       await sendThrow('account-move', { id, targetId });
-      // TODO: Change to a call to queryClient.invalidateQueries
-      // once payees have been moved to react-query.
-      dispatch(markPayeesDirty());
+      invalidateQueries(queryClient, payeeQueries.lists());
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -408,9 +406,7 @@ export function useLinkAccountMutation() {
         startingDate,
         startingBalance,
       });
-      // TODO: Change to a call to queryClient.invalidateQueries
-      // once payees have been moved to react-query.
-      dispatch(markPayeesDirty());
+      invalidateQueries(queryClient, payeeQueries.lists());
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -449,9 +445,7 @@ export function useLinkAccountSimpleFinMutation() {
         startingDate,
         startingBalance,
       });
-      // TODO: Change to a call to queryClient.invalidateQueries
-      // once payees have been moved to react-query.
-      dispatch(markPayeesDirty());
+      invalidateQueries(queryClient, payeeQueries.lists());
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -492,10 +486,7 @@ export function useLinkAccountPluggyAiMutation() {
         startingDate,
         startingBalance,
       });
-
-      // TODO: Change to a call to queryClient.invalidateQueries
-      // once payees have been moved to react-query.
-      dispatch(markPayeesDirty());
+      invalidateQueries(queryClient, payeeQueries.lists());
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {

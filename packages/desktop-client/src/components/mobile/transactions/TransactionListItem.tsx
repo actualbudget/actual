@@ -89,7 +89,7 @@ export function TransactionListItem({
   const { t } = useTranslation();
   const { data: { list: categories } = { list: [] } } = useCategories();
 
-  const payee = usePayee(transaction?.payee || '');
+  const { data: payee } = usePayee(transaction?.payee);
   const displayPayee = useDisplayPayee({ transaction });
 
   const account = useAccount(transaction?.account || '');
