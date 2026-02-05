@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import { View } from '@actual-app/components/view';
+
 import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
+
 import { isElectron } from 'loot-core/shared/environment';
 
 import { normalizeUrl } from './linkParser';
@@ -61,11 +63,7 @@ export function DesktopLinkedNotes({
 
   return (
     <View style={{ display: 'inline' }}>
-      <Button
-        variant="bare"
-        style={linkStyles}
-        onPress={handleClick}
-      >
+      <Button variant="bare" style={linkStyles} onPress={handleClick}>
         {displayText}
       </Button>
       {separator}
