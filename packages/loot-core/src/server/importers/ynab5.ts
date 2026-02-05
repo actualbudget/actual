@@ -963,75 +963,85 @@ function buildRuleUpdate(
   };
 }
 
-function getFlagTagName(transaction: FlaggedMemoTransaction) {
-  const normalizedFlag =
-    transaction.flag_name?.trim() ?? transaction.flag_color?.trim() ?? '';
-  return normalizedFlag.length > 0 ? normalizedFlag : null;
-}
+ function getFlagTagName(transaction: FlaggedMemoTransaction) {
+   const normalizedFlag =
+     transaction.flag_name?.trim() ?? transaction.flag_color?.trim() ?? '';
+   return normalizedFlag.length > 0 ? normalizedFlag : null;
+ }
 
-function mapYnabFlagColorToHex(
-  flagColor: TransactionFlagColor | null | undefined,
-): string | null {
-  if (!flagColor) {
-    return null;
-  }
+ function mapYnabFlagColorToHex(
+   flagColor: TransactionFlagColor | null | undefined,
+ ): string | null {
+   if (!flagColor) {
+     return null;
+   }
 
-  switch (flagColor) {
-    case 'red':
-      return '#F44336';
-    case 'orange':
-      return '#FB8C00';
-    case 'yellow':
-      return '#FDD835';
-    case 'green':
-      return '#43A047';
-    case 'blue':
-      return '#1E88E5';
-    case 'purple':
-      return '#8E24AA';
-    default:
-      return null;
-  }
-}
+   switch (flagColor) {
+     case 'red':
+//      return '#F44336';
+      return 'rgb(255, 69, 58)';
+     case 'orange':
+//      return '#FB8C00';
+      return 'rgb(255, 159, 10)';
+     case 'yellow':
+//      return '#FDD835';
+      return 'rgb(255, 214, 10)';
+     case 'green':
+//      return '#43A047';
+      return 'rgb(50, 215, 75)';
+     case 'blue':
+//      return '#1E88E5';
+      return 'rgb(100, 210, 255)';
+     case 'purple':
+//      return '#8E24AA';
+      return 'rgb(191, 90, 242)';
+     default:
+       return null;
+   }
+ }
 
-async function importYnabFlagTags(data: Budget) {
-  const tagsByName = new Map<string, string>();
-  const flaggedTransactions: YnabFlaggedTransaction[] = [
-    ...data.transactions,
-    ...data.scheduled_transactions,
-  ];
+ async function importYnabFlagTags(data: Budget) {
+   const tagsByName = new Map<string, string>();
+   const flaggedTransactions: YnabFlaggedTransaction[] = [
+     ...data.transactions,
+     ...data.scheduled_transactions,
+   ];
 
-  for (const transaction of flaggedTransactions) {
-    if (transaction.deleted) {
-      continue;
-    }
+   for (const transaction of flaggedTransactions) {
+     if (transaction.deleted) {
+       continue;
+     }
 
-    const tagName = getFlagTagName(transaction);
-    const tagColor = mapYnabFlagColorToHex(transaction.flag_color ?? null);
-    if (!tagName || !tagColor) {
-      continue;
-    }
+     const tagName = getFlagTagName(transaction);
+     const tagColor = transaction.flag_color ?? null;
+     if (!tagName || !tagColor) {
+       continue;
+     }
 
-    if (!tagsByName.has(tagName)) {
-      tagsByName.set(tagName, tagColor);
-    }
-  }
+     if (!tagsByName.has(tagName)) {
+       tagsByName.set(tagName, tagColor);
+     }
+   }
 
-  if (tagsByName.size === 0) {
-    return;
-  }
+   if (tagsByName.size === 0) {
+     return;
+   }
 
-  const existingTags = (await send('tags-get')) as TagEntity[];
-  const existingTagsByName = new Map(existingTags.map(tag => [tag.tag, tag]));
+   const existingTags = (await send('tags-get')) as TagEntity[];
+   const existingTagsByName = new Map(existingTags.map(tag => [tag.tag, tag]));
 
-  await Promise.all(
-    [...tagsByName.entries()].map(async ([tag, color]) => {
-      const existingTag = existingTagsByName.get(tag);
-      if (existingTag?.color) {
-        return;
-      }
+   await Promise.all(
+     [...tagsByName.entries()].map(async ([tag, color]) => {
+       const existingTag = existingTagsByName.get(tag);
+       if (existingTag?.color) {
+         return;
+       }
 
-      await send('tags-create', { tag, color });
-    }),
-  );
-}
+      await send('tags-create', {
+        tag,
+        color,
+        description: 'Imported from YNAB',
+      });
+     }),
+   );
+ }
