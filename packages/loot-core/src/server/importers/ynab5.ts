@@ -15,6 +15,7 @@ import {
   type RecurConfig,
   type RecurPattern,
   type RuleEntity,
+  type TagEntity,
 } from '../../types/models';
 import { ruleModel } from '../transactions/transaction-rules';
 
@@ -1002,7 +1003,7 @@ async function importYnabFlagTags(data: Budget) {
     return;
   }
 
-  const existingTags = await send('tags-get');
+  const existingTags = (await send('tags-get')) as TagEntity[];
   const existingTagsByName = new Map(existingTags.map(tag => [tag.tag, tag]));
 
   await Promise.all(
