@@ -239,8 +239,8 @@ export function BudgetAnalysisGraph({
         const barFillOpacity = stackBars ? 0.95 : 1;
         // When stacking, calculate bar size based on available space to ensure perfect overlap
         // Use a calculation that adapts to container width and number of data points
-        const calculatedBarSize = stackBars 
-          ? Math.max(20, Math.min(60, (width - 40) / graphData.length * 0.8))
+        const calculatedBarSize = stackBars
+          ? Math.max(20, Math.min(60, ((width - 40) / graphData.length) * 0.8))
           : undefined;
         const barSize = calculatedBarSize;
         const barGap = stackBars && barSize ? -barSize : undefined;

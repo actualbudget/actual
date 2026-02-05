@@ -97,9 +97,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const [showBalance, setShowBalance] = useState(
     widget?.meta?.showBalance ?? true,
   );
-  const [stackBars, setStackBars] = useState(
-    widget?.meta?.stackBars ?? false,
-  );
+  const [stackBars, setStackBars] = useState(widget?.meta?.stackBars ?? false);
   const [latestTransaction, setLatestTransaction] = useState('');
   const [isConcise, setIsConcise] = useState(() => {
     // Default to concise (monthly) view until we load the actual date range
