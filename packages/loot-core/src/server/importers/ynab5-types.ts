@@ -17,9 +17,9 @@ export type Budget = {
   category_groups: CategoryGroup[];
   categories: Category[];
   months: MonthDetail[];
-  transactions: TransactionSummary[];
+  transactions: Transaction[];
   subtransactions: Subtransaction[];
-  scheduled_transactions: ScheduledTransactionSummary[];
+  scheduled_transactions: ScheduledTransaction[];
   scheduled_subtransactions: ScheduledSubtransaction[];
 };
 
@@ -155,7 +155,7 @@ export type Category = {
 export type GoalType = 'TB' | 'TBD' | 'MF' | 'NEED' | 'DEBT';
 
 // Source: https://api.ynab.com/papi/open_api_spec.yaml#/components/schemas/TransactionSummary
-export type TransactionSummary = {
+export type Transaction = {
   id: string;
   date: string;
   amount: number;
@@ -225,7 +225,7 @@ export type Subtransaction = {
 };
 
 // Source: https://api.ynab.com/papi/open_api_spec.yaml#/components/schemas/ScheduledTransactionSummary
-export type ScheduledTransactionSummary = {
+export type ScheduledTransaction = {
   id: string;
   date_first: string;
   date_next: string;
