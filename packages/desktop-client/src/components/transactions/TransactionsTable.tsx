@@ -1393,7 +1393,7 @@ const Transaction = memo(function Transaction({
       <InputCell
         width="flex"
         name="notes"
-        textAlign="left"
+        textAlign="flex"
         style={{
           alignItems: 'baseline',
           overflow: 'hidden',
