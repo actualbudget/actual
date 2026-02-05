@@ -156,6 +156,7 @@ export const schema = {
     show_uncategorized: f('integer', { default: 0 }),
     trim_intervals: f('integer', { default: 0 }),
     include_current: f('integer', { default: 0 }),
+    use_absolute_dates: f('integer', { default: 0 }),
     graph_type: f('string', { default: 'BarGraph' }),
     conditions: f('json'),
     conditions_op: f('string'),

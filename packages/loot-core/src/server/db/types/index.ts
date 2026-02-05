@@ -235,6 +235,7 @@ export type DbCustomReport = {
   color_scheme: string;
   include_current: 1 | 0;
   sort_by: string;
+  use_absolute_dates: 1 | 0;
   tombstone: 1 | 0;
 };
 

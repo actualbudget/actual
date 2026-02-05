@@ -28,6 +28,7 @@ function toJS(rows: CustomReportData[]) {
       includeCurrentInterval: row.include_current === 1,
       showUncategorized: row.show_uncategorized === 1,
       trimIntervals: row.trim_intervals === 1,
+      useAbsoluteDates: row.use_absolute_dates === 1,
       graphType: row.graph_type,
       ...(row.conditions && { conditions: row.conditions }),
       conditionsOp: row.conditions_op ?? 'and',
