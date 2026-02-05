@@ -18,10 +18,18 @@ type AccountRowProps = {
   onHover: (id: AccountEntity['id'] | null) => void;
   onAction: (account: AccountEntity, action: 'link' | 'edit') => void;
   locale: Locale;
+  renderLinkButton?: (account: AccountEntity) => ReactNode;
 };
 
 export const AccountRow = memo(
-  ({ account, hovered, onHover, onAction, locale }: AccountRowProps) => {
+  ({
+    account,
+    hovered,
+    onHover,
+    onAction,
+    locale,
+    renderLinkButton,
+  }: AccountRowProps) => {
     const backgroundFocus = hovered;
 
     const lastSyncString = tsToRelativeTime(account.last_sync, locale, {
@@ -106,9 +114,13 @@ export const AccountRow = memo(
           </Cell>
         ) : (
           <Cell name="link" plain style={{ paddingRight: '10px' }}>
-            <Button onPress={() => onAction(account, 'link')}>
-              <Trans>Link account</Trans>
-            </Button>
+            {renderLinkButton ? (
+              renderLinkButton(account)
+            ) : (
+              <Button onPress={() => onAction(account, 'link')}>
+                <Trans>Link account</Trans>
+              </Button>
+            )}
           </Cell>
         )}
       </Row>

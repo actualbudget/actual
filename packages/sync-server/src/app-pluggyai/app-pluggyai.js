@@ -6,6 +6,12 @@ import { requestLoggerMiddleware } from '../util/middlewares';
 
 import { pluggyaiService } from './pluggyai-service';
 
+function getFileIdFromRequest(req) {
+  const fileId =
+    req.body?.fileId || req.query?.fileId || req.headers['x-actual-file-id'];
+  return fileId && typeof fileId === 'string' ? fileId : undefined;
+}
+
 const app = express();
 export { app as handlers };
 app.use(express.json());
@@ -14,8 +20,9 @@ app.use(requestLoggerMiddleware);
 app.post(
   '/status',
   handleError(async (req, res) => {
-    const clientId = secretsService.get(SecretName.pluggyai_clientId);
-    const configured = clientId != null;
+    const fileId = getFileIdFromRequest(req);
+    const options = fileId ? { fileId } : {};
+    const configured = pluggyaiService.isConfigured(options);
 
     res.send({
       status: 'ok',
@@ -29,16 +36,26 @@ app.post(
 app.post(
   '/accounts',
   handleError(async (req, res) => {
+    const fileId = getFileIdFromRequest(req);
+    const options = fileId ? { fileId } : {};
+
     try {
-      const itemIds = secretsService
-        .get(SecretName.pluggyai_itemIds)
+      const itemIdsRaw = secretsService.get(
+        SecretName.pluggyai_itemIds,
+        options,
+      );
+      const itemIds = (itemIdsRaw || '')
         .split(',')
-        .map(item => item.trim());
+        .map(item => item.trim())
+        .filter(Boolean);
 
       let accounts = [];
 
       for (const item of itemIds) {
-        const partial = await pluggyaiService.getAccountsByItemId(item);
+        const partial = await pluggyaiService.getAccountsByItemId(
+          item,
+          options,
+        );
         accounts = accounts.concat(partial.results);
       }
 
@@ -63,14 +80,17 @@ app.post(
   '/transactions',
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
+    const fileId = getFileIdFromRequest(req);
+    const options = fileId ? { fileId } : {};
 
     try {
       const transactions = await pluggyaiService.getTransactions(
         accountId,
         startDate,
+        options,
       );
 
-      const account = await pluggyaiService.getAccountById(accountId);
+      const account = await pluggyaiService.getAccountById(accountId, options);
 
       let startingBalance = parseInt(
         Math.round(account.balance * 100).toString(),

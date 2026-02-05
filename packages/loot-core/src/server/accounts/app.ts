@@ -488,9 +488,11 @@ async function moveAccount({
 async function setSecret({
   name,
   value,
+  fileId,
 }: {
   name: string;
   value: string | null;
+  fileId?: string;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -509,6 +511,7 @@ async function setSecret({
       {
         name,
         value,
+        ...(fileId ? { fileId } : {}),
       },
       {
         'X-ACTUAL-TOKEN': userToken,
@@ -521,7 +524,7 @@ async function setSecret({
     };
   }
 }
-async function checkSecret(name: string) {
+async function checkSecret(arg: string | { name: string; fileId?: string }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -533,9 +536,18 @@ async function checkSecret(name: string) {
     throw new Error('Failed to get server config.');
   }
 
+  const { name, fileId } =
+    typeof arg === 'string' ? { name: arg, fileId: undefined } : arg;
+
   try {
-    return await get(serverConfig.BASE_SERVER + '/secret/' + name, {
-      'X-ACTUAL-TOKEN': userToken,
+    const url = new URL(serverConfig.BASE_SERVER + '/secret/' + name);
+    if (fileId) {
+      url.searchParams.set('fileId', fileId);
+    }
+    return await get(url.toString(), {
+      headers: {
+        'X-ACTUAL-TOKEN': userToken,
+      },
     });
   } catch (error) {
     logger.error(error);
@@ -646,7 +658,7 @@ async function goCardlessStatus() {
   );
 }
 
-async function simpleFinStatus() {
+async function simpleFinStatus(arg?: { fileId?: string }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -658,16 +670,18 @@ async function simpleFinStatus() {
     throw new Error('Failed to get server config.');
   }
 
-  return post(
-    serverConfig.SIMPLEFIN_SERVER + '/status',
-    {},
-    {
-      'X-ACTUAL-TOKEN': userToken,
-    },
-  );
+  const body = arg?.fileId ? { fileId: arg.fileId } : {};
+  const headers: Record<string, string> = {
+    'X-ACTUAL-TOKEN': userToken,
+  };
+  if (arg?.fileId) {
+    headers['X-Actual-File-Id'] = arg.fileId;
+  }
+
+  return post(serverConfig.SIMPLEFIN_SERVER + '/status', body, headers);
 }
 
-async function pluggyAiStatus() {
+async function pluggyAiStatus(arg?: { fileId?: string }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -679,16 +693,18 @@ async function pluggyAiStatus() {
     throw new Error('Failed to get server config.');
   }
 
-  return post(
-    serverConfig.PLUGGYAI_SERVER + '/status',
-    {},
-    {
-      'X-ACTUAL-TOKEN': userToken,
-    },
-  );
+  const body = arg?.fileId ? { fileId: arg.fileId } : {};
+  const headers: Record<string, string> = {
+    'X-ACTUAL-TOKEN': userToken,
+  };
+  if (arg?.fileId) {
+    headers['X-Actual-File-Id'] = arg.fileId;
+  }
+
+  return post(serverConfig.PLUGGYAI_SERVER + '/status', body, headers);
 }
 
-async function simpleFinAccounts() {
+async function simpleFinAccounts(arg?: { fileId?: string }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -698,15 +714,21 @@ async function simpleFinAccounts() {
   const serverConfig = getServer();
   if (!serverConfig) {
     throw new Error('Failed to get server config.');
+  }
+
+  const body = arg?.fileId ? { fileId: arg.fileId } : {};
+  const headers: Record<string, string> = {
+    'X-ACTUAL-TOKEN': userToken,
+  };
+  if (arg?.fileId) {
+    headers['X-Actual-File-Id'] = arg.fileId;
   }
 
   try {
     return await post(
       serverConfig.SIMPLEFIN_SERVER + '/accounts',
-      {},
-      {
-        'X-ACTUAL-TOKEN': userToken,
-      },
+      body,
+      headers,
       60000,
     );
   } catch {
@@ -714,7 +736,7 @@ async function simpleFinAccounts() {
   }
 }
 
-async function pluggyAiAccounts() {
+async function pluggyAiAccounts(arg?: { fileId?: string }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -726,13 +748,19 @@ async function pluggyAiAccounts() {
     throw new Error('Failed to get server config.');
   }
 
+  const body = arg?.fileId ? { fileId: arg.fileId } : {};
+  const headers: Record<string, string> = {
+    'X-ACTUAL-TOKEN': userToken,
+  };
+  if (arg?.fileId) {
+    headers['X-Actual-File-Id'] = arg.fileId;
+  }
+
   try {
     return await post(
       serverConfig.PLUGGYAI_SERVER + '/accounts',
-      {},
-      {
-        'X-ACTUAL-TOKEN': userToken,
-      },
+      body,
+      headers,
       60000,
     );
   } catch {

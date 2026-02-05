@@ -29,6 +29,8 @@ type PluggyAiInitialiseProps = Extract<
 
 export const PluggyAiInitialiseModal = ({
   onSuccess,
+  scope,
+  fileId,
 }: PluggyAiInitialiseProps) => {
   const { t } = useTranslation();
   const [clientId, setClientId] = useState('');
@@ -41,6 +43,8 @@ export const PluggyAiInitialiseModal = ({
       'It is required to provide both the client id, client secret and at least one item id.',
     ),
   );
+
+  const secretSetOptions = scope === 'file' && fileId ? { fileId } : {};
 
   const onSubmit = async (close: () => void) => {
     if (!clientId || !clientSecret || !itemIds) {
@@ -55,42 +59,50 @@ export const PluggyAiInitialiseModal = ({
 
     setIsLoading(true);
 
-    let { error, reason } =
+    let result =
       (await send('secret-set', {
         name: 'pluggyai_clientId',
         value: clientId,
+        ...secretSetOptions,
       })) || {};
 
-    if (error) {
+    let { error: err, reason } = result;
+
+    if (err) {
       setIsLoading(false);
       setIsValid(false);
-      setError(getSecretsError(error, reason));
+      setError(getSecretsError(err, reason));
       return;
-    } else {
-      ({ error, reason } =
-        (await send('secret-set', {
-          name: 'pluggyai_clientSecret',
-          value: clientSecret,
-        })) || {});
-      if (error) {
-        setIsLoading(false);
-        setIsValid(false);
-        setError(getSecretsError(error, reason));
-        return;
-      } else {
-        ({ error, reason } =
-          (await send('secret-set', {
-            name: 'pluggyai_itemIds',
-            value: itemIds,
-          })) || {});
+    }
 
-        if (error) {
-          setIsLoading(false);
-          setIsValid(false);
-          setError(getSecretsError(error, reason));
-          return;
-        }
-      }
+    result =
+      (await send('secret-set', {
+        name: 'pluggyai_clientSecret',
+        value: clientSecret,
+        ...secretSetOptions,
+      })) || {};
+    ({ error: err, reason } = result);
+
+    if (err) {
+      setIsLoading(false);
+      setIsValid(false);
+      setError(getSecretsError(err, reason));
+      return;
+    }
+
+    result =
+      (await send('secret-set', {
+        name: 'pluggyai_itemIds',
+        value: itemIds,
+        ...secretSetOptions,
+      })) || {};
+    ({ error: err, reason } = result);
+
+    if (err) {
+      setIsLoading(false);
+      setIsValid(false);
+      setError(getSecretsError(err, reason));
+      return;
     }
 
     setIsValid(true);
@@ -99,12 +111,15 @@ export const PluggyAiInitialiseModal = ({
     close();
   };
 
+  const title =
+    scope === 'file' ? t('Set up Pluggy.ai (Scoped)') : t('Set-up Pluggy.ai');
+
   return (
     <Modal name="pluggyai-init" containerProps={{ style: { width: '30vw' } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('Set-up Pluggy.ai')}
+            title={title}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>

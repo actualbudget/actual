@@ -101,12 +101,16 @@ export type Modal =
       name: 'simplefin-init';
       options: {
         onSuccess: () => void;
+        scope?: 'global' | 'file';
+        fileId?: string;
       };
     }
   | {
       name: 'pluggyai-init';
       options: {
         onSuccess: () => void;
+        scope?: 'global' | 'file';
+        fileId?: string;
       };
     }
   | {
@@ -556,6 +560,13 @@ export type Modal =
         accountName: string;
         isViewBankSyncSettings: boolean;
         onUnlink: () => void;
+      };
+    }
+  | {
+      name: 'confirm-reset-credentials';
+      options: {
+        message: string;
+        onConfirm: () => void;
       };
     }
   | {
