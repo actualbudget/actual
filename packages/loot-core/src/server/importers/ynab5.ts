@@ -18,14 +18,52 @@ import {
 } from '../../types/models';
 import { ruleModel } from '../transactions/transaction-rules';
 
-import type {
-  Budget,
-  Payee,
-  ScheduledSubtransaction,
-  ScheduledTransactionSummary,
-  Subtransaction,
-  TransactionSummary,
+import {
+  type Budget,
+  type Payee,
+  type ScheduledSubtransaction,
+  type ScheduledTransaction,
+  type Subtransaction,
+  type Transaction,
 } from './ynab5-types';
+
+type FlaggedTransaction = Pick<
+  Transaction | ScheduledTransaction,
+  'flag_name' | 'flag_color' | 'deleted'
+>;
+
+const flagColorMap: Record<string, string | null> = {
+  red: '#FF6666',
+  orange: '#F57C00',
+  yellow: '#FBC02D',
+  green: '#689F38',
+  blue: '#1976D2',
+  purple: '#512DA8',
+  null: null,
+  '': null,
+};
+
+function equalsIgnoreCase(stringa: string, stringb: string): boolean {
+  return (
+    stringa.localeCompare(stringb, undefined, {
+      sensitivity: 'base',
+    }) === 0
+  );
+}
+
+function findByNameIgnoreCase<T extends { name: string }>(
+  categories: T[],
+  name: string,
+) {
+  return categories.find(cat => equalsIgnoreCase(cat.name, name));
+}
+
+function findIdByName<T extends { id: string; name: string }>(
+  categories: Array<T>,
+  name: string,
+) {
+  return findByNameIgnoreCase<T>(categories, name)?.id;
+}
 
 function amountFromYnab(amount: number) {
   // YNAB multiplies amount by 1000 and Actual by 100
@@ -127,7 +165,7 @@ function mapYnabFrequency(
 }
 
 function getScheduleDateValue(
-  scheduled: ScheduledTransactionSummary,
+  scheduled: ScheduledTransaction,
 ): RecurConfig | string {
   const dateFirst = scheduled.date_first;
   const frequency = scheduled.frequency;
@@ -145,6 +183,84 @@ function getScheduleDateValue(
     weekendSolveMode: 'after',
     endMode: 'never',
     start: dateFirst,
+  };
+}
+
+function getFlaggedTransactions(data: Budget): FlaggedTransaction[] {
+  return [...data.transactions, ...data.scheduled_transactions];
+}
+
+function getFlagTag(
+  transaction: FlaggedTransaction,
+  flagNameConflicts: Set<string>,
+): string {
+  const tagName = transaction.flag_name?.trim() ?? '';
+  const colorKey = transaction.flag_color?.trim() ?? '';
+
+  if (tagName.length === 0) {
+    return colorKey.length > 0 ? `#${colorKey}` : '';
+  }
+
+  if (flagNameConflicts.has(tagName)) {
+    return `#${tagName}-${colorKey}`;
+  }
+
+  return `#${tagName}`;
+}
+
+function getFlagNameConflicts(data: Budget): Set<string> {
+  const colorsByName = new Map<string, Set<string>>();
+  const flaggedTransactions = getFlaggedTransactions(data);
+
+  for (const transaction of flaggedTransactions) {
+    if (transaction.deleted) {
+      continue;
+    }
+
+    const tagName = transaction.flag_name?.trim() ?? '';
+    const colorKey = transaction.flag_color?.trim() ?? '';
+    if (tagName.length === 0 || !flagColorMap[colorKey]) {
+      continue;
+    }
+
+    let colors = colorsByName.get(tagName);
+    if (!colors) {
+      colors = new Set();
+      colorsByName.set(tagName, colors);
+    }
+    colors.add(colorKey);
+  }
+
+  const conflicts = new Set<string>();
+  colorsByName.forEach((colors, name) => {
+    if (colors.size > 1) {
+      conflicts.add(name);
+    }
+  });
+
+  return conflicts;
+}
+
+function buildTransactionNotes(
+  transaction: Transaction | ScheduledTransaction,
+  flagNameConflicts: Set<string>,
+): string | null {
+  const normalizedMemo = transaction.memo?.trim() ?? '';
+  const tagText = getFlagTag(transaction, flagNameConflicts);
+  const notes = `${normalizedMemo} ${tagText}`.trim();
+  return notes.length > 0 ? notes : null;
+}
+
+function buildRuleUpdate(
+  rule: RuleEntity,
+  actions: RuleEntity['actions'],
+): RuleEntity {
+  return {
+    id: rule.id,
+    stage: rule.stage ?? null,
+    conditionsOp: rule.conditionsOp ?? 'and',
+    conditions: rule.conditions,
+    actions,
   };
 }
 
@@ -309,9 +425,337 @@ function importPayees(data: Budget, entityIdMap: Map<string, string>) {
   );
 }
 
+async function importFlagsAsTags(
+  data: Budget,
+  flagNameConflicts: Set<string>,
+): Promise<void> {
+  const tagsToCreate = new Map<string, string | null>();
+  const flaggedTransactions = getFlaggedTransactions(data);
+
+  for (const transaction of flaggedTransactions) {
+    if (transaction.deleted) {
+      continue;
+    }
+
+    const tagName = transaction.flag_name?.trim() ?? '';
+    const colorKey = transaction.flag_color?.trim() ?? '';
+    const tagColor = flagColorMap[colorKey] ?? null;
+
+    if (!tagColor) {
+      continue;
+    }
+
+    if (tagName.length === 0) {
+      if (!tagsToCreate.has(colorKey)) {
+        tagsToCreate.set(colorKey, tagColor);
+      }
+      continue;
+    }
+
+    const mappedName = flagNameConflicts.has(tagName)
+      ? `${tagName}-${colorKey}`
+      : tagName;
+
+    if (!tagsToCreate.has(mappedName)) {
+      tagsToCreate.set(mappedName, tagColor);
+    }
+  }
+
+  if (tagsToCreate.size === 0) {
+    return;
+  }
+
+  await Promise.all(
+    [...tagsToCreate.entries()].map(async ([tag, color]) => {
+      await send('tags-create', {
+        tag,
+        color,
+        description: 'Imported from YNAB',
+      });
+    }),
+  );
+}
+
+async function importTransactions(
+  data: Budget,
+  entityIdMap: Map<string, string>,
+  flagNameConflicts: Set<string>,
+) {
+  const payees = await actual.getPayees();
+  const categories = await actual.getCategories();
+  const incomeCatId = findIdByName(categories, 'Income');
+  const startingBalanceCatId = findIdByName(categories, 'Starting Balances'); //better way to do it?
+
+  const startingPayeeYNAB = findIdByName(data.payees, 'Starting Balance');
+
+  const transactionsGrouped = groupBy(data.transactions, 'account_id');
+  const subtransactionsGrouped = groupBy(
+    data.subtransactions,
+    'transaction_id',
+  );
+
+  const payeesByTransferAcct = payees
+    .filter(payee => payee?.transfer_acct)
+    .map(payee => [payee.transfer_acct, payee] as [string, Payee]);
+  const payeeTransferAcctHashMap = new Map<string, Payee>(payeesByTransferAcct);
+  const orphanTransferMap = new Map<string, Transaction[]>();
+  const orphanSubtransfer = [] as Subtransaction[];
+  const orphanSubtransferTrxId = [] as string[];
+  const orphanSubtransferAcctIdByTrxIdMap = new Map<string, string>();
+  const orphanSubtransferDateByTrxIdMap = new Map<string, string>();
+
+  // Go ahead and generate ids for all of the transactions so we can
+  // reliably resolve transfers
+  // Also identify orphan transfer transactions and subtransactions.
+  for (const transaction of data.subtransactions) {
+    entityIdMap.set(transaction.id, uuidv4());
+
+    if (transaction.transfer_account_id) {
+      orphanSubtransfer.push(transaction);
+      orphanSubtransferTrxId.push(transaction.transaction_id);
+    }
+  }
+
+  for (const transaction of data.transactions) {
+    entityIdMap.set(transaction.id, uuidv4());
+
+    if (
+      transaction.transfer_account_id &&
+      !transaction.transfer_transaction_id
+    ) {
+      const key =
+        transaction.account_id + '#' + transaction.transfer_account_id;
+      if (!orphanTransferMap.has(key)) {
+        orphanTransferMap.set(key, [transaction]);
+      } else {
+        orphanTransferMap.get(key).push(transaction);
+      }
+    }
+
+    if (orphanSubtransferTrxId.includes(transaction.id)) {
+      orphanSubtransferAcctIdByTrxIdMap.set(
+        transaction.id,
+        transaction.account_id,
+      );
+      orphanSubtransferDateByTrxIdMap.set(transaction.id, transaction.date);
+    }
+  }
+
+  // Compute link between subtransaction transfers and orphaned transaction
+  // transfers. The goal is to match each transfer subtransaction to the related
+  // transfer transaction according to the accounts, date, amount and memo.
+  const orphanSubtransferMap = orphanSubtransfer.reduce(
+    (map, subtransaction) => {
+      const key =
+        subtransaction.transfer_account_id +
+        '#' +
+        orphanSubtransferAcctIdByTrxIdMap.get(subtransaction.transaction_id);
+      if (!map.has(key)) {
+        map.set(key, [subtransaction]);
+      } else {
+        map.get(key).push(subtransaction);
+      }
+      return map;
+    },
+    new Map<string, Subtransaction[]>(),
+  );
+
+  // The comparator will be used to order transfer transactions and their
+  // corresponding tranfer subtransaction in two aligned list. Hopefully
+  // for every list index in the transactions list, the related subtransaction
+  // will be at the same index.
+  function orphanTransferComparator(
+    a: Transaction | Subtransaction,
+    b: Transaction | Subtransaction,
+  ) {
+    // a and b can be a Transaction (having a date attribute) or a
+    // Subtransaction (missing that date attribute)
+
+    const date_a =
+      'date' in a
+        ? a.date
+        : orphanSubtransferDateByTrxIdMap.get(a.transaction_id);
+    const date_b =
+      'date' in b
+        ? b.date
+        : orphanSubtransferDateByTrxIdMap.get(b.transaction_id);
+    // A transaction and the related subtransaction have inverted amounts.
+    // To have those in the same order, the subtransaction has to be reversed
+    // to have the same amount.
+    const amount_a = 'date' in a ? a.amount : -a.amount;
+    const amount_b = 'date' in b ? b.amount : -b.amount;
+
+    // Transaction are ordered first by date, then by amount, and lastly by memo
+    if (date_a > date_b) return 1;
+    if (date_a < date_b) return -1;
+    if (amount_a > amount_b) return 1;
+    if (amount_a < amount_b) return -1;
+    if (a.memo > b.memo) return 1;
+    if (a.memo < b.memo) return -1;
+    return 0;
+  }
+
+  const orphanTrxIdSubtrxIdMap = new Map<string, string>();
+  orphanTransferMap.forEach((transactions, key) => {
+    const subtransactions = orphanSubtransferMap.get(key);
+    if (subtransactions) {
+      transactions.sort(orphanTransferComparator);
+      subtransactions.sort(orphanTransferComparator);
+
+      // Iterate on the two sorted lists transactions and subtransactions and
+      // find matching data to identify the related transaction ids.
+      let transactionIdx = 0;
+      let subtransactionIdx = 0;
+      do {
+        switch (
+          orphanTransferComparator(
+            transactions[transactionIdx],
+            subtransactions[subtransactionIdx],
+          )
+        ) {
+          case 0:
+            // The current list indexes are matching: the transaction and
+            // subtransaction are related (same date, amount and memo)
+            orphanTrxIdSubtrxIdMap.set(
+              transactions[transactionIdx].id,
+              entityIdMap.get(subtransactions[subtransactionIdx].id),
+            );
+            orphanTrxIdSubtrxIdMap.set(
+              subtransactions[subtransactionIdx].id,
+              entityIdMap.get(transactions[transactionIdx].id),
+            );
+            transactionIdx++;
+            subtransactionIdx++;
+            break;
+          case -1:
+            // The current list indexes are not matching:
+            // The current transaction is "smaller" than the current subtransaction
+            // (earlier date, smaller amount, memo value sorted before)
+            // So we advance to the next transaction and see if it match with
+            // the current subtransaction
+            transactionIdx++;
+            break;
+          case 1:
+            // Inverse of the previous case:
+            // The current subtransaction is "smaller" than the current transaction
+            // So we advance to the next subtransaction
+            subtransactionIdx++;
+            break;
+          default:
+            throw new Error(`Unrecognized orphan transfer comparator result`);
+        }
+      } while (
+        transactionIdx < transactions.length &&
+        subtransactionIdx < subtransactions.length
+      );
+    }
+  });
+
+  await Promise.all(
+    [...transactionsGrouped.keys()].map(async accountId => {
+      const transactions = transactionsGrouped.get(accountId);
+
+      const toImport = transactions
+        .map(transaction => {
+          if (transaction.deleted) {
+            return null;
+          }
+
+          const subtransactions = subtransactionsGrouped.get(transaction.id);
+
+          // Add transaction
+          const newTransaction = {
+            id: entityIdMap.get(transaction.id),
+            account: entityIdMap.get(transaction.account_id),
+            date: transaction.date,
+            amount: amountFromYnab(transaction.amount),
+            category: entityIdMap.get(transaction.category_id) || null,
+            cleared: ['cleared', 'reconciled'].includes(transaction.cleared),
+            reconciled: transaction.cleared === 'reconciled',
+            notes: buildTransactionNotes(transaction, flagNameConflicts),
+            imported_id: transaction.import_id || null,
+            transfer_id:
+              entityIdMap.get(transaction.transfer_transaction_id) ||
+              orphanTrxIdSubtrxIdMap.get(transaction.id) ||
+              null,
+            subtransactions: subtransactions
+              ? subtransactions.map(subtrans => {
+                  return {
+                    id: entityIdMap.get(subtrans.id),
+                    amount: amountFromYnab(subtrans.amount),
+                    category: entityIdMap.get(subtrans.category_id) || null,
+                    notes: subtrans.memo,
+                    transfer_id:
+                      orphanTrxIdSubtrxIdMap.get(subtrans.id) || null,
+                    payee: null,
+                    imported_payee: null,
+                  };
+                })
+              : null,
+            payee: null,
+            imported_payee: null,
+          };
+
+          // Handle transactions and subtransactions payee
+          function transactionPayeeUpdate(
+            trx: Transaction | Subtransaction,
+            newTrx,
+            fallbackPayeeId?: string | null,
+          ) {
+            if (trx.transfer_account_id) {
+              const mappedTransferAccountId = entityIdMap.get(
+                trx.transfer_account_id,
+              );
+              newTrx.payee = payeeTransferAcctHashMap.get(
+                mappedTransferAccountId,
+              )?.id;
+            } else if (trx.payee_id) {
+              newTrx.payee = entityIdMap.get(trx.payee_id);
+              newTrx.imported_payee = data.payees.find(
+                p => !p.deleted && p.id === trx.payee_id,
+              )?.name;
+            } else if (fallbackPayeeId) {
+              newTrx.payee = fallbackPayeeId;
+            }
+          }
+
+          transactionPayeeUpdate(transaction, newTransaction);
+          if (newTransaction.subtransactions) {
+            subtransactions.forEach(subtrans => {
+              const newSubtransaction = newTransaction.subtransactions.find(
+                newSubtrans => newSubtrans.id === entityIdMap.get(subtrans.id),
+              );
+              transactionPayeeUpdate(
+                subtrans,
+                newSubtransaction,
+                newTransaction.payee,
+              );
+            });
+          }
+
+          // Handle starting balances
+          if (
+            transaction.payee_id === startingPayeeYNAB &&
+            entityIdMap.get(transaction.category_id) === incomeCatId
+          ) {
+            newTransaction.category = startingBalanceCatId;
+            newTransaction.payee = null;
+          }
+          return newTransaction;
+        })
+        .filter(x => x);
+
+      await actual.addTransactions(entityIdMap.get(accountId), toImport, {
+        learnCategories: true,
+      });
+    }),
+  );
+}
+
 async function importScheduledTransactions(
   data: Budget,
   entityIdMap: Map<string, string>,
+  flagNameConflicts: Set<string>,
 ) {
   const scheduledTransactions = data.scheduled_transactions;
   const scheduledSubtransactionsGrouped = groupBy(
@@ -417,7 +861,7 @@ async function importScheduledTransactions(
     });
     schedulePayeeMap.set(scheduleId, mappedPayeeId);
 
-    const scheduleNotes = buildTransactionNotes(scheduled);
+    const scheduleNotes = buildTransactionNotes(scheduled, flagNameConflicts);
     if (scheduleNotes) {
       const rule = await getRuleForSchedule(scheduleId);
       if (rule) {
@@ -543,281 +987,6 @@ async function importScheduledTransactions(
   }
 }
 
-async function importTransactions(
-  data: Budget,
-  entityIdMap: Map<string, string>,
-) {
-  const payees = await actual.getPayees();
-  const categories = await actual.getCategories();
-  const incomeCatId = findIdByName(categories, 'Income');
-  const startingBalanceCatId = findIdByName(categories, 'Starting Balances'); //better way to do it?
-
-  const startingPayeeYNAB = findIdByName(data.payees, 'Starting Balance');
-
-  const transactionsGrouped = groupBy(data.transactions, 'account_id');
-  const subtransactionsGrouped = groupBy(
-    data.subtransactions,
-    'transaction_id',
-  );
-
-  const payeesByTransferAcct = payees
-    .filter(payee => payee?.transfer_acct)
-    .map(payee => [payee.transfer_acct, payee] as [string, Payee]);
-  const payeeTransferAcctHashMap = new Map<string, Payee>(payeesByTransferAcct);
-  const orphanTransferMap = new Map<string, TransactionSummary[]>();
-  const orphanSubtransfer = [] as Subtransaction[];
-  const orphanSubtransferTrxId = [] as string[];
-  const orphanSubtransferAcctIdByTrxIdMap = new Map<string, string>();
-  const orphanSubtransferDateByTrxIdMap = new Map<string, string>();
-
-  // Go ahead and generate ids for all of the transactions so we can
-  // reliably resolve transfers
-  // Also identify orphan transfer transactions and subtransactions.
-  for (const transaction of data.subtransactions) {
-    entityIdMap.set(transaction.id, uuidv4());
-
-    if (transaction.transfer_account_id) {
-      orphanSubtransfer.push(transaction);
-      orphanSubtransferTrxId.push(transaction.transaction_id);
-    }
-  }
-
-  for (const transaction of data.transactions) {
-    entityIdMap.set(transaction.id, uuidv4());
-
-    if (
-      transaction.transfer_account_id &&
-      !transaction.transfer_transaction_id
-    ) {
-      const key =
-        transaction.account_id + '#' + transaction.transfer_account_id;
-      if (!orphanTransferMap.has(key)) {
-        orphanTransferMap.set(key, [transaction]);
-      } else {
-        orphanTransferMap.get(key).push(transaction);
-      }
-    }
-
-    if (orphanSubtransferTrxId.includes(transaction.id)) {
-      orphanSubtransferAcctIdByTrxIdMap.set(
-        transaction.id,
-        transaction.account_id,
-      );
-      orphanSubtransferDateByTrxIdMap.set(transaction.id, transaction.date);
-    }
-  }
-
-  // Compute link between subtransaction transfers and orphaned transaction
-  // transfers. The goal is to match each transfer subtransaction to the related
-  // transfer transaction according to the accounts, date, amount and memo.
-  const orphanSubtransferMap = orphanSubtransfer.reduce(
-    (map, subtransaction) => {
-      const key =
-        subtransaction.transfer_account_id +
-        '#' +
-        orphanSubtransferAcctIdByTrxIdMap.get(subtransaction.transaction_id);
-      if (!map.has(key)) {
-        map.set(key, [subtransaction]);
-      } else {
-        map.get(key).push(subtransaction);
-      }
-      return map;
-    },
-    new Map<string, Subtransaction[]>(),
-  );
-
-  // The comparator will be used to order transfer transactions and their
-  // corresponding tranfer subtransaction in two aligned list. Hopefully
-  // for every list index in the transactions list, the related subtransaction
-  // will be at the same index.
-  const orphanTransferComparator = (
-    a: TransactionSummary | Subtransaction,
-    b: TransactionSummary | Subtransaction,
-  ) => {
-    // a and b can be a TransactionSummary (having a date attribute) or a
-    // Subtransaction (missing that date attribute)
-
-    const date_a =
-      'date' in a
-        ? a.date
-        : orphanSubtransferDateByTrxIdMap.get(a.transaction_id);
-    const date_b =
-      'date' in b
-        ? b.date
-        : orphanSubtransferDateByTrxIdMap.get(b.transaction_id);
-    // A transaction and the related subtransaction have inverted amounts.
-    // To have those in the same order, the subtransaction has to be reversed
-    // to have the same amount.
-    const amount_a = 'date' in a ? a.amount : -a.amount;
-    const amount_b = 'date' in b ? b.amount : -b.amount;
-
-    // Transaction are ordered first by date, then by amount, and lastly by memo
-    if (date_a > date_b) return 1;
-    if (date_a < date_b) return -1;
-    if (amount_a > amount_b) return 1;
-    if (amount_a < amount_b) return -1;
-    if (a.memo > b.memo) return 1;
-    if (a.memo < b.memo) return -1;
-    return 0;
-  };
-
-  const orphanTrxIdSubtrxIdMap = new Map<string, string>();
-  orphanTransferMap.forEach((transactions, key) => {
-    const subtransactions = orphanSubtransferMap.get(key);
-    if (subtransactions) {
-      transactions.sort(orphanTransferComparator);
-      subtransactions.sort(orphanTransferComparator);
-
-      // Iterate on the two sorted lists transactions and subtransactions and
-      // find matching data to identify the related transaction ids.
-      let transactionIdx = 0;
-      let subtransactionIdx = 0;
-      do {
-        switch (
-          orphanTransferComparator(
-            transactions[transactionIdx],
-            subtransactions[subtransactionIdx],
-          )
-        ) {
-          case 0:
-            // The current list indexes are matching: the transaction and
-            // subtransaction are related (same date, amount and memo)
-            orphanTrxIdSubtrxIdMap.set(
-              transactions[transactionIdx].id,
-              entityIdMap.get(subtransactions[subtransactionIdx].id),
-            );
-            orphanTrxIdSubtrxIdMap.set(
-              subtransactions[subtransactionIdx].id,
-              entityIdMap.get(transactions[transactionIdx].id),
-            );
-            transactionIdx++;
-            subtransactionIdx++;
-            break;
-          case -1:
-            // The current list indexes are not matching:
-            // The current transaction is "smaller" than the current subtransaction
-            // (earlier date, smaller amount, memo value sorted before)
-            // So we advance to the next transaction and see if it match with
-            // the current subtransaction
-            transactionIdx++;
-            break;
-          case 1:
-            // Inverse of the previous case:
-            // The current subtransaction is "smaller" than the current transaction
-            // So we advance to the next subtransaction
-            subtransactionIdx++;
-            break;
-          default:
-            throw new Error(`Unrecognized orphan transfer comparator result`);
-        }
-      } while (
-        transactionIdx < transactions.length &&
-        subtransactionIdx < subtransactions.length
-      );
-    }
-  });
-
-  await Promise.all(
-    [...transactionsGrouped.keys()].map(async accountId => {
-      const transactions = transactionsGrouped.get(accountId);
-
-      const toImport = transactions
-        .map(transaction => {
-          if (transaction.deleted) {
-            return null;
-          }
-
-          const subtransactions = subtransactionsGrouped.get(transaction.id);
-
-          // Add transaction
-          const newTransaction = {
-            id: entityIdMap.get(transaction.id),
-            account: entityIdMap.get(transaction.account_id),
-            date: transaction.date,
-            amount: amountFromYnab(transaction.amount),
-            category: entityIdMap.get(transaction.category_id) || null,
-            cleared: ['cleared', 'reconciled'].includes(transaction.cleared),
-            reconciled: transaction.cleared === 'reconciled',
-            notes: buildTransactionNotes(transaction),
-            imported_id: transaction.import_id || null,
-            transfer_id:
-              entityIdMap.get(transaction.transfer_transaction_id) ||
-              orphanTrxIdSubtrxIdMap.get(transaction.id) ||
-              null,
-            subtransactions: subtransactions
-              ? subtransactions.map(subtrans => {
-                  return {
-                    id: entityIdMap.get(subtrans.id),
-                    amount: amountFromYnab(subtrans.amount),
-                    category: entityIdMap.get(subtrans.category_id) || null,
-                    notes: subtrans.memo,
-                    transfer_id:
-                      orphanTrxIdSubtrxIdMap.get(subtrans.id) || null,
-                    payee: null,
-                    imported_payee: null,
-                  };
-                })
-              : null,
-            payee: null,
-            imported_payee: null,
-          };
-
-          // Handle transactions and subtransactions payee
-          function transactionPayeeUpdate(
-            trx: TransactionSummary | Subtransaction,
-            newTrx,
-            fallbackPayeeId?: string | null,
-          ) {
-            if (trx.transfer_account_id) {
-              const mappedTransferAccountId = entityIdMap.get(
-                trx.transfer_account_id,
-              );
-              newTrx.payee = payeeTransferAcctHashMap.get(
-                mappedTransferAccountId,
-              )?.id;
-            } else if (trx.payee_id) {
-              newTrx.payee = entityIdMap.get(trx.payee_id);
-              newTrx.imported_payee = data.payees.find(
-                p => !p.deleted && p.id === trx.payee_id,
-              )?.name;
-            } else if (fallbackPayeeId) {
-              newTrx.payee = fallbackPayeeId;
-            }
-          }
-
-          transactionPayeeUpdate(transaction, newTransaction);
-          if (newTransaction.subtransactions) {
-            subtransactions.forEach(subtrans => {
-              const newSubtransaction = newTransaction.subtransactions.find(
-                newSubtrans => newSubtrans.id === entityIdMap.get(subtrans.id),
-              );
-              transactionPayeeUpdate(
-                subtrans,
-                newSubtransaction,
-                newTransaction.payee,
-              );
-            });
-          }
-
-          // Handle starting balances
-          if (
-            transaction.payee_id === startingPayeeYNAB &&
-            entityIdMap.get(transaction.category_id) === incomeCatId
-          ) {
-            newTransaction.category = startingBalanceCatId;
-            newTransaction.payee = null;
-          }
-          return newTransaction;
-        })
-        .filter(x => x);
-
-      await actual.addTransactions(entityIdMap.get(accountId), toImport, {
-        learnCategories: true,
-      });
-    }),
-  );
-}
-
 async function importBudgets(data: Budget, entityIdMap: Map<string, string>) {
   // There should be info in the docs to deal with
   // no credit card category and how YNAB and Actual
@@ -862,32 +1031,6 @@ async function importBudgets(data: Budget, entityIdMap: Map<string, string>) {
   });
 }
 
-// Utils
-
-export async function doImport(data: Budget) {
-  const entityIdMap = new Map<string, string>();
-
-  logger.log('Importing Accounts...');
-  await importAccounts(data, entityIdMap);
-
-  logger.log('Importing Categories...');
-  await importCategories(data, entityIdMap);
-
-  logger.log('Importing Payees...');
-  await importPayees(data, entityIdMap);
-
-  logger.log('Importing Transactions...');
-  await importTransactions(data, entityIdMap);
-
-  logger.log('Importing Scheduled Transactions...');
-  await importScheduledTransactions(data, entityIdMap);
-
-  logger.log('Importing Budgets...');
-  await importBudgets(data, entityIdMap);
-
-  logger.log('Setting up...');
-}
-
 export function parseFile(buffer: Buffer): Budget {
   let data = JSON.parse(buffer.toString());
   if (data.data) {
@@ -904,53 +1047,30 @@ export function getBudgetName(_filepath: string, data: Budget) {
   return data.budget_name || data.name;
 }
 
-function equalsIgnoreCase(stringa: string, stringb: string): boolean {
-  return (
-    stringa.localeCompare(stringb, undefined, {
-      sensitivity: 'base',
-    }) === 0
-  );
-}
+export async function doImport(data: Budget) {
+  const entityIdMap = new Map<string, string>();
+  const flagNameConflicts = getFlagNameConflicts(data);
 
-function findByNameIgnoreCase<T extends { name: string }>(
-  categories: T[],
-  name: string,
-) {
-  return categories.find(cat => equalsIgnoreCase(cat.name, name));
-}
+  logger.log('Importing Accounts...');
+  await importAccounts(data, entityIdMap);
 
-function findIdByName<T extends { id: string; name: string }>(
-  categories: Array<T>,
-  name: string,
-) {
-  return findByNameIgnoreCase<T>(categories, name)?.id;
-}
+  logger.log('Importing Categories...');
+  await importCategories(data, entityIdMap);
 
-type FlaggedMemoTransaction = {
-  memo?: string | null;
-  flag_name?: string | null;
-  flag_color?: string | null;
-};
+  logger.log('Importing Payees...');
+  await importPayees(data, entityIdMap);
 
-function buildTransactionNotes(transaction: FlaggedMemoTransaction) {
-  const normalizedMemo = transaction.memo?.trim() ?? '';
-  const normalizedFlag =
-    transaction.flag_name?.trim() ?? transaction.flag_color?.trim() ?? '';
-  const notes = `${normalizedMemo} ${
-    normalizedFlag ? `#${normalizedFlag}` : ''
-  }`.trim();
-  return notes.length > 0 ? notes : null;
-}
+  logger.log('Importing Tags...');
+  await importFlagsAsTags(data, flagNameConflicts);
 
-function buildRuleUpdate(
-  rule: RuleEntity,
-  actions: RuleEntity['actions'],
-): RuleEntity {
-  return {
-    id: rule.id,
-    stage: rule.stage ?? null,
-    conditionsOp: rule.conditionsOp ?? 'and',
-    conditions: rule.conditions,
-    actions,
-  };
+  logger.log('Importing Transactions...');
+  await importTransactions(data, entityIdMap, flagNameConflicts);
+
+  logger.log('Importing Scheduled Transactions...');
+  await importScheduledTransactions(data, entityIdMap, flagNameConflicts);
+
+  logger.log('Importing Budgets...');
+  await importBudgets(data, entityIdMap);
+
+  logger.log('Setting up...');
 }
