@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 

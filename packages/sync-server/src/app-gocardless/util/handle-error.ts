@@ -6,6 +6,14 @@ export function handleError(
   return (req: Request, res: Response) => {
     func(req, res).catch(err => {
       console.log('Error', req.originalUrl, err.message || String(err));
+      if (err.message === 'missing-file-id') {
+        res.status(400).send({
+          status: 'error',
+          reason: 'missing-file-id',
+        });
+        return;
+      }
+
       res.send({
         status: 'ok',
         data: {

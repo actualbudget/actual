@@ -4,7 +4,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 
 import { useSyncServerStatus } from './useSyncServerStatus';
 
-export function usePluggyAiStatus() {
+export function usePluggyAiStatus(fileId: string) {
   const [configuredPluggyAi, setConfiguredPluggyAi] = useState<boolean | null>(
     null,
   );
@@ -12,19 +12,25 @@ export function usePluggyAiStatus() {
   const status = useSyncServerStatus();
 
   useEffect(() => {
+    const budgetFileId = fileId;
+
     async function fetch() {
       setIsLoading(true);
 
-      const results = await send('pluggyai-status');
+      const result = await send('pluggyai-status', {
+        fileId: budgetFileId,
+      });
 
-      setConfiguredPluggyAi(results.configured || false);
+      setConfiguredPluggyAi(
+        (result as { configured?: boolean })?.configured || false,
+      );
       setIsLoading(false);
     }
 
     if (status === 'online') {
       void fetch();
     }
-  }, [status]);
+  }, [status, fileId]);
 
   return {
     configuredPluggyAi,

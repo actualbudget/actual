@@ -13,6 +13,7 @@ vi.mock('#shared/errors', () => ({
 
 describe('API handlers', () => {
   const handlers = installAPI({} as unknown as ServerHandlers);
+  const budgetFileId = 'test-file-id';
 
   describe('api/get-server-version', () => {
     beforeEach(() => {
@@ -31,6 +32,18 @@ describe('API handlers', () => {
   });
 
   describe('api/bank-sync', () => {
+    let getPrefsSpy: ReturnType<typeof vi.spyOn<typeof prefs, 'getPrefs'>>;
+
+    beforeEach(() => {
+      getPrefsSpy = vi.spyOn(prefs, 'getPrefs').mockReturnValue({
+        cloudFileId: budgetFileId,
+      } as ReturnType<typeof prefs.getPrefs>);
+    });
+
+    afterEach(() => {
+      getPrefsSpy.mockRestore();
+    });
+
     it('should sync a single account when accountId is provided', async () => {
       handlers['accounts-bank-sync'] = vi
         .fn()
@@ -39,6 +52,7 @@ describe('API handlers', () => {
       await handlers['api/bank-sync']({ accountId: 'account1' });
       expect(handlers['accounts-bank-sync']).toHaveBeenCalledWith({
         ids: ['account1'],
+        fileId: budgetFileId,
       });
     });
 

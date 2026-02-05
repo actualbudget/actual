@@ -47,6 +47,7 @@ type LinkAccountBaseParams = {
   offBudget?: boolean;
   startingDate?: string;
   startingBalance?: number;
+  fileId: string;
 };
 
 export type AccountHandlers = {
@@ -168,6 +169,7 @@ async function linkGoCardlessAccount({
   offBudget = false,
   startingDate,
   startingBalance,
+  fileId,
 }: LinkAccountBaseParams & {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
@@ -218,6 +220,7 @@ async function linkGoCardlessAccount({
     bank.bank_id,
     startingDate,
     startingBalance,
+    fileId,
   );
 
   await handleSyncResponse(syncRes, id);
@@ -236,6 +239,7 @@ async function linkSimpleFinAccount({
   offBudget = false,
   startingDate,
   startingBalance,
+  fileId,
 }: LinkAccountBaseParams & {
   externalAccount: SyncServerSimpleFinAccount;
 }) {
@@ -295,6 +299,7 @@ async function linkSimpleFinAccount({
     bank.bank_id,
     startingDate,
     startingBalance,
+    fileId,
   );
 
   await handleSyncResponse(syncRes, id);
@@ -313,6 +318,7 @@ async function linkPluggyAiAccount({
   offBudget = false,
   startingDate,
   startingBalance,
+  fileId,
 }: LinkAccountBaseParams & {
   externalAccount: SyncServerPluggyAiAccount;
 }) {
@@ -372,6 +378,7 @@ async function linkPluggyAiAccount({
     bank.bank_id,
     startingDate,
     startingBalance,
+    fileId,
   );
 
   await handleSyncResponse(syncRes, id);
@@ -390,6 +397,7 @@ async function linkAkahuAccount({
   offBudget = false,
   startingDate,
   startingBalance,
+  fileId,
 }: LinkAccountBaseParams & {
   externalAccount: SyncServerAkahuAccount;
 }) {
@@ -446,13 +454,14 @@ async function linkAkahuAccount({
     bank.bank_id,
     startingDate,
     startingBalance,
+    fileId,
   );
 
   await handleSyncResponse(syncRes, id);
 
   connection.send('sync-event', {
     type: 'success',
-    tables: ['transactions'],
+    tables: ['transactions', 'accounts'],
   });
 
   return 'ok';
@@ -464,6 +473,7 @@ async function linkEnableBankingAccount({
   offBudget = false,
   startingDate,
   startingBalance,
+  fileId,
 }: LinkAccountBaseParams & {
   externalAccount: SyncServerEnableBankingAccount;
 }) {
@@ -531,6 +541,7 @@ async function linkEnableBankingAccount({
     bank.bank_id,
     startingDate,
     startingBalance,
+    fileId,
   );
 
   await handleSyncResponse(syncRes, id);
@@ -587,16 +598,27 @@ async function closeAccount({
   transferAccountId,
   categoryId,
   forced = false,
+  fileId,
 }: {
   id: AccountEntity['id'];
   transferAccountId?: AccountEntity['id'] | undefined;
   categoryId?: CategoryEntity['id'] | undefined;
   forced?: boolean | undefined;
+  fileId?: string | undefined;
 }) {
   // Unlink the account if it's linked. This makes sure to remove it from
   // bank-sync providers. (This should not be undo-able, as it mutates the
   // remote server and the user will have to link the account again)
-  await unlinkAccount({ id });
+  const accountForUnlink = await db.first<Pick<db.DbAccount, 'bank'>>(
+    'SELECT bank FROM accounts WHERE id = ? AND tombstone = 0',
+    [id],
+  );
+  if (accountForUnlink?.bank) {
+    if (!fileId) {
+      throw new Error('missing-file-id');
+    }
+    await unlinkAccount({ id, fileId });
+  }
 
   return withUndo(async () => {
     const account = await db.first<db.DbAccount>(
@@ -711,9 +733,11 @@ async function moveAccount({
 async function setSecret({
   name,
   value,
+  fileId,
 }: {
   name: string;
   value: string | null;
+  fileId: string;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -732,6 +756,7 @@ async function setSecret({
       {
         name,
         value,
+        fileId,
       },
       {
         'X-ACTUAL-TOKEN': userToken,
@@ -744,7 +769,7 @@ async function setSecret({
     };
   }
 }
-async function checkSecret(name: string) {
+async function checkSecret(arg: { name: string; fileId: string }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -756,9 +781,15 @@ async function checkSecret(name: string) {
     throw new Error('Failed to get server config.');
   }
 
+  const { name, fileId } = arg;
+
   try {
-    return await get(serverConfig.BASE_SERVER + '/secret/' + name, {
-      'X-ACTUAL-TOKEN': userToken,
+    const url = new URL(serverConfig.BASE_SERVER + '/secret/' + name);
+    url.searchParams.set('fileId', fileId);
+    return await get(url.toString(), {
+      headers: {
+        'X-ACTUAL-TOKEN': userToken,
+      },
     });
   } catch (error) {
     logger.error(error);
@@ -770,11 +801,14 @@ let stopPolling = false;
 
 async function pollGoCardlessWebToken({
   requisitionId,
+  fileId,
 }: {
   requisitionId: string;
+  fileId: string;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return { error: 'unknown' };
+  const token: string = userToken;
 
   const startTime = Date.now();
   stopPolling = false;
@@ -801,14 +835,20 @@ async function pollGoCardlessWebToken({
       throw new Error('Failed to get server config.');
     }
 
+    const body: Record<string, string> = { requisitionId };
+    const headers: Record<string, string> = {
+      'X-ACTUAL-TOKEN': token,
+    };
+    if (fileId) {
+      const f = fileId as string;
+      body.fileId = f;
+      headers['X-Actual-File-Id'] = f;
+    }
+
     const data = await post(
       serverConfig.GOCARDLESS_SERVER + '/get-accounts',
-      {
-        requisitionId,
-      },
-      {
-        'X-ACTUAL-TOKEN': userToken,
-      },
+      body,
+      headers,
     );
 
     if (data) {
@@ -848,7 +888,7 @@ async function stopGoCardlessWebTokenPolling() {
   return 'ok';
 }
 
-async function goCardlessStatus() {
+async function goCardlessStatus({ fileId }: { fileId: string }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -862,14 +902,14 @@ async function goCardlessStatus() {
 
   return post(
     serverConfig.GOCARDLESS_SERVER + '/status',
-    {},
+    { fileId },
     {
       'X-ACTUAL-TOKEN': userToken,
     },
   );
 }
 
-async function simpleFinStatus() {
+async function simpleFinStatus({ fileId }: { fileId: string }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -881,16 +921,16 @@ async function simpleFinStatus() {
     throw new Error('Failed to get server config.');
   }
 
-  return post(
-    serverConfig.SIMPLEFIN_SERVER + '/status',
-    {},
-    {
-      'X-ACTUAL-TOKEN': userToken,
-    },
-  );
+  const body = { fileId };
+  const headers: Record<string, string> = {
+    'X-ACTUAL-TOKEN': userToken,
+    'X-Actual-File-Id': fileId,
+  };
+
+  return post(serverConfig.SIMPLEFIN_SERVER + '/status', body, headers);
 }
 
-async function pluggyAiStatus() {
+async function pluggyAiStatus({ fileId }: { fileId: string }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -902,13 +942,13 @@ async function pluggyAiStatus() {
     throw new Error('Failed to get server config.');
   }
 
-  return post(
-    serverConfig.PLUGGYAI_SERVER + '/status',
-    {},
-    {
-      'X-ACTUAL-TOKEN': userToken,
-    },
-  );
+  const body = { fileId };
+  const headers: Record<string, string> = {
+    'X-ACTUAL-TOKEN': userToken,
+    'X-Actual-File-Id': fileId,
+  };
+
+  return post(serverConfig.PLUGGYAI_SERVER + '/status', body, headers);
 }
 
 async function akahuStatus() {
@@ -932,7 +972,7 @@ async function akahuStatus() {
   );
 }
 
-async function simpleFinAccounts() {
+async function simpleFinAccounts({ fileId }: { fileId: string }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -944,13 +984,17 @@ async function simpleFinAccounts() {
     throw new Error('Failed to get server config.');
   }
 
+  const body = { fileId };
+  const headers: Record<string, string> = {
+    'X-ACTUAL-TOKEN': userToken,
+    'X-Actual-File-Id': fileId,
+  };
+
   try {
     return await post(
       serverConfig.SIMPLEFIN_SERVER + '/accounts',
-      {},
-      {
-        'X-ACTUAL-TOKEN': userToken,
-      },
+      body,
+      headers,
       60000,
     );
   } catch {
@@ -958,7 +1002,7 @@ async function simpleFinAccounts() {
   }
 }
 
-async function pluggyAiAccounts() {
+async function pluggyAiAccounts({ fileId }: { fileId: string }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -970,13 +1014,17 @@ async function pluggyAiAccounts() {
     throw new Error('Failed to get server config.');
   }
 
+  const body = { fileId };
+  const headers: Record<string, string> = {
+    'X-ACTUAL-TOKEN': userToken,
+    'X-Actual-File-Id': fileId,
+  };
+
   try {
     return await post(
       serverConfig.PLUGGYAI_SERVER + '/accounts',
-      {},
-      {
-        'X-ACTUAL-TOKEN': userToken,
-      },
+      body,
+      headers,
       60000,
     );
   } catch {
@@ -1010,7 +1058,7 @@ async function akahuAccounts() {
   }
 }
 
-async function enableBankingStatus() {
+async function enableBankingStatus({ fileId }: { fileId: string }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -1022,16 +1070,22 @@ async function enableBankingStatus() {
     throw new Error('Failed to get server config.');
   }
 
-  return post(
-    serverConfig.ENABLEBANKING_SERVER + '/status',
-    {},
-    {
-      'X-ACTUAL-TOKEN': userToken,
-    },
-  );
+  const body = { fileId };
+  const headers: Record<string, string> = {
+    'X-ACTUAL-TOKEN': userToken,
+    'X-Actual-File-Id': fileId,
+  };
+
+  return post(serverConfig.ENABLEBANKING_SERVER + '/status', body, headers);
 }
 
-async function enableBankingAspsps(country: string) {
+async function enableBankingAspsps({
+  country,
+  fileId,
+}: {
+  country: string;
+  fileId: string;
+}) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -1045,9 +1099,10 @@ async function enableBankingAspsps(country: string) {
 
   return post(
     serverConfig.ENABLEBANKING_SERVER + '/aspsps',
-    { country },
+    { country, fileId },
     {
       'X-ACTUAL-TOKEN': userToken,
+      'X-Actual-File-Id': fileId,
     },
   );
 }
@@ -1058,17 +1113,24 @@ async function enableBankingStartAuth({
   redirectUrl,
   maxConsentValidity,
   psuType = 'personal',
+  fileId,
 }: {
   aspspId: string;
   country: string;
   redirectUrl: string;
   maxConsentValidity?: number;
   psuType?: 'personal' | 'business';
+  fileId: string;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
     return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
   }
 
   if (
@@ -1081,11 +1143,6 @@ async function enableBankingStartAuth({
     return { error: 'invalid_max_consent_validity' };
   }
 
-  const serverConfig = getServer();
-  if (!serverConfig) {
-    throw new Error('Failed to get server config.');
-  }
-
   return post(
     serverConfig.ENABLEBANKING_SERVER + '/start-auth',
     {
@@ -1093,9 +1150,11 @@ async function enableBankingStartAuth({
       redirectUrl,
       maxConsentValidity,
       psuType,
+      fileId,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
+      'X-Actual-File-Id': fileId,
     },
   );
 }
@@ -1177,6 +1236,7 @@ async function stopEnableBankingPollAuth({ state }: { state: string }) {
 async function enableBankingConfigure(config: {
   applicationId: string;
   secretKey: string;
+  fileId: string;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -1189,12 +1249,21 @@ async function enableBankingConfigure(config: {
     throw new Error('Failed to get server config.');
   }
 
+  const { fileId } = config;
+
   return post(serverConfig.ENABLEBANKING_SERVER + '/configure', config, {
     'X-ACTUAL-TOKEN': userToken,
+    'X-Actual-File-Id': fileId,
   });
 }
 
-async function getGoCardlessBanks(country: string) {
+async function getGoCardlessBanks({
+  country,
+  fileId,
+}: {
+  country: string;
+  fileId: string;
+}) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -1208,7 +1277,7 @@ async function getGoCardlessBanks(country: string) {
 
   return post(
     serverConfig.GOCARDLESS_SERVER + '/get-banks',
-    { country, showDemo: isNonProductionEnvironment() },
+    { country, showDemo: isNonProductionEnvironment(), fileId },
     {
       'X-ACTUAL-TOKEN': userToken,
     },
@@ -1218,9 +1287,11 @@ async function getGoCardlessBanks(country: string) {
 async function createGoCardlessWebToken({
   institutionId,
   accessValidForDays,
+  fileId,
 }: {
   institutionId: string;
   accessValidForDays: number;
+  fileId: string;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -1233,16 +1304,25 @@ async function createGoCardlessWebToken({
     throw new Error('Failed to get server config.');
   }
 
+  const body: Record<string, unknown> = {
+    institutionId,
+    accessValidForDays,
+  };
+  if (fileId) {
+    body.fileId = fileId;
+  }
+  const headers: Record<string, string> = {
+    'X-ACTUAL-TOKEN': userToken,
+  };
+  if (fileId) {
+    headers['X-Actual-File-Id'] = fileId;
+  }
+
   try {
     return await post(
       serverConfig.GOCARDLESS_SERVER + '/create-web-token',
-      {
-        institutionId,
-        accessValidForDays,
-      },
-      {
-        'X-ACTUAL-TOKEN': userToken,
-      },
+      body,
+      headers,
     );
   } catch (error) {
     logger.error(error);
@@ -1397,8 +1477,10 @@ export type SyncResponseWithErrors = SyncResponse & {
 
 async function accountsBankSync({
   ids = [],
+  fileId,
 }: {
   ids: Array<AccountEntity['id']>;
+  fileId: string;
 }): Promise<SyncResponseWithErrors> {
   const { 'user-id': userId, 'user-key': userKey } =
     await asyncStorage.multiGet(['user-id', 'user-key']);
@@ -1431,6 +1513,9 @@ async function accountsBankSync({
           acct.id,
           acct.account_id,
           acct.bankId,
+          undefined,
+          undefined,
+          fileId,
         );
 
         const syncResponseData = await handleSyncResponse(
@@ -1467,8 +1552,10 @@ async function accountsBankSync({
 
 async function simpleFinBatchSync({
   ids = [],
+  fileId,
 }: {
   ids: Array<AccountEntity['id']>;
+  fileId: string;
 }): Promise<
   Array<{ accountId: AccountEntity['id']; res: SyncResponseWithErrors }>
 > {
@@ -1510,6 +1597,7 @@ async function simpleFinBatchSync({
         id: a.id,
         account_id: a.account_id || null,
       })),
+      fileId,
     );
     for (const syncResponse of syncResponses) {
       const account = accounts.find(a => a.id === syncResponse.accountId);
@@ -1637,7 +1725,13 @@ async function importTransactions({
   }
 }
 
-async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
+async function unlinkAccount({
+  id,
+  fileId,
+}: {
+  id: AccountEntity['id'];
+  fileId: string;
+}) {
   const accRow = await db.first<db.DbAccount>(
     'SELECT * FROM accounts WHERE id = ?',
     [id],
@@ -1700,14 +1794,20 @@ async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
     const requisitionId = bank.bank_id;
 
     try {
+      const body: Record<string, string> = { requisitionId };
+      if (fileId) {
+        body.fileId = fileId;
+      }
+      const headers: Record<string, string> = {
+        'X-ACTUAL-TOKEN': userToken,
+      };
+      if (fileId) {
+        headers['X-Actual-File-Id'] = fileId;
+      }
       await post(
         serverConfig.GOCARDLESS_SERVER + '/remove-account',
-        {
-          requisitionId,
-        },
-        {
-          'X-ACTUAL-TOKEN': userToken,
-        },
+        body,
+        headers,
       );
     } catch (error) {
       logger.log({ error });

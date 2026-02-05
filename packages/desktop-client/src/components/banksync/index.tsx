@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -38,6 +38,11 @@ export function BankSync() {
     providersNeedingConfiguration,
   } = useBuiltInBankSyncProviders();
 
+  const openAccounts = useMemo(
+    () => accounts.filter(account => !account.closed),
+    [accounts],
+  );
+
   const [hoveredAccount, setHoveredAccount] = useState<
     AccountEntity['id'] | null
   >(null);
@@ -49,10 +54,6 @@ export function BankSync() {
   const groupedAccountEntries = useMemo(
     () => getGroupedBankSyncEntries(groupedAccounts),
     [groupedAccounts],
-  );
-  const openAccounts = useMemo(
-    () => accounts.filter(account => !account.closed),
-    [accounts],
   );
 
   const onAction = async (account: AccountEntity, action: 'link' | 'edit') => {

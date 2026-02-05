@@ -12,9 +12,11 @@ function _authorize(
   {
     onSuccess,
     onClose,
+    fileId,
   }: {
     onSuccess: (data: GoCardlessToken) => Promise<void>;
     onClose?: () => void;
+    fileId: string;
   },
 ) {
   dispatch(
@@ -22,10 +24,12 @@ function _authorize(
       modal: {
         name: 'gocardless-external-msg',
         options: {
+          fileId,
           onMoveExternal: async ({ institutionId }) => {
             const resp = await send('gocardless-create-web-token', {
               institutionId,
               accessValidForDays: 90,
+              fileId,
             });
 
             if ('error' in resp) return resp;
@@ -34,6 +38,7 @@ function _authorize(
 
             return send('gocardless-poll-web-token', {
               requisitionId,
+              fileId,
             });
           },
           onClose,
@@ -46,9 +51,11 @@ function _authorize(
 
 export async function authorizeBank(
   dispatch: AppDispatch,
+  fileId: string,
   upgradingAccountId?: AccountEntity['id'],
 ) {
   _authorize(dispatch, {
+    fileId,
     onSuccess: async data => {
       dispatch(
         pushModal({

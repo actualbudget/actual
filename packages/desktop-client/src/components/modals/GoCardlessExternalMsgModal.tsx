@@ -26,7 +26,7 @@ import { pushModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
-function useAvailableBanks(country: string) {
+function useAvailableBanks(country: string, fileId: string) {
   const [banks, setBanks] = useState<GoCardlessInstitution[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -43,7 +43,10 @@ function useAvailableBanks(country: string) {
 
       setIsLoading(true);
 
-      const { data, error } = await sendCatch('gocardless-get-banks', country);
+      const { data, error } = await sendCatch('gocardless-get-banks', {
+        country,
+        fileId,
+      });
 
       if (error || !Array.isArray(data)) {
         setIsError(true);
@@ -56,7 +59,7 @@ function useAvailableBanks(country: string) {
     }
 
     void fetch();
-  }, [setBanks, setIsLoading, country]);
+  }, [setBanks, setIsLoading, country, fileId]);
 
   return {
     data: banks,
@@ -87,6 +90,7 @@ type GoCardlessExternalMsgModalProps = Extract<
 >['options'];
 
 export function GoCardlessExternalMsgModal({
+  fileId,
   onMoveExternal,
   onSuccess,
   onClose,
@@ -122,11 +126,11 @@ export function GoCardlessExternalMsgModal({
     data: bankOptions,
     isLoading: isBankOptionsLoading,
     isError: isBankOptionError,
-  } = useAvailableBanks(country);
+  } = useAvailableBanks(country ?? '', fileId);
   const {
     configuredGoCardless: isConfigured,
     isLoading: isConfigurationLoading,
-  } = useGoCardlessStatus();
+  } = useGoCardlessStatus(fileId);
 
   async function onJump() {
     setError(null);
@@ -154,12 +158,14 @@ export function GoCardlessExternalMsgModal({
   }
 
   const onGoCardlessInit = () => {
+    if (!fileId) return;
     dispatch(
       pushModal({
         modal: {
           name: 'gocardless-init',
           options: {
             onSuccess: () => setIsGoCardlessSetupComplete(true),
+            fileId,
           },
         },
       }),

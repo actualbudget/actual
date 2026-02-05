@@ -27,6 +27,7 @@ type SimpleFinInitialiseModalProps = Extract<
 
 export const SimpleFinInitialiseModal = ({
   onSuccess,
+  fileId,
 }: SimpleFinInitialiseModalProps) => {
   const { t } = useTranslation();
   const [token, setToken] = useState('');
@@ -46,6 +47,7 @@ export const SimpleFinInitialiseModal = ({
       (await send('secret-set', {
         name: 'simplefin_token',
         value: token,
+        fileId,
       })) || {};
 
     if (error) {

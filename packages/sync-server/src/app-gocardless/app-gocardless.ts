@@ -48,6 +48,15 @@ function sanitizeId<T extends string = string>(id: unknown): T {
   return id as T;
 }
 
+function getRequiredFileIdFromRequest(req: express.Request): string {
+  const fileId =
+    req.body?.fileId || req.query?.fileId || req.headers['x-actual-file-id'];
+  if (!fileId || typeof fileId !== 'string') {
+    throw new Error('missing-file-id');
+  }
+  return fileId;
+}
+
 const app = express();
 app.use(requestLoggerMiddleware);
 
@@ -59,26 +68,34 @@ export { app as handlers };
 app.use(express.json());
 app.use(validateSessionMiddleware);
 
-app.post('/status', async (req, res) => {
-  res.send({
-    status: 'ok',
-    data: {
-      configured: goCardlessService.isConfigured(),
-    },
-  });
-});
+app.post(
+  '/status',
+  handleError(async (req, res) => {
+    const fileId = getRequiredFileIdFromRequest(req);
+    res.send({
+      status: 'ok',
+      data: {
+        configured: goCardlessService.isConfigured({ fileId }),
+      },
+    });
+  }),
+);
 
 app.post(
   '/create-web-token',
   handleError(async (req, res) => {
     const { institutionId: rawInstitutionId } = req.body || {};
+    const fileId = getRequiredFileIdFromRequest(req);
     const institutionId = sanitizeId<GoCardlessInstitutionId>(rawInstitutionId);
     const host = validateOrigin(req.headers.origin);
 
-    const { link, requisitionId } = await goCardlessService.createRequisition({
-      institutionId,
-      host,
-    });
+    const { link, requisitionId } = await goCardlessService.createRequisition(
+      {
+        institutionId,
+        host,
+      },
+      { fileId },
+    );
 
     res.send({
       status: 'ok',
@@ -93,13 +110,16 @@ app.post(
 app.post(
   '/get-accounts',
   handleError(async (req, res) => {
+    const fileId = getRequiredFileIdFromRequest(req);
     const requisitionId = sanitizeId<GoCardlessRequisitionId>(
       (req.body || {}).requisitionId,
     );
 
     try {
       const { requisition, accounts } =
-        await goCardlessService.getRequisitionWithAccounts(requisitionId);
+        await goCardlessService.getRequisitionWithAccounts(requisitionId, {
+          fileId,
+        });
 
       res.send({
         status: 'ok',
@@ -132,11 +152,12 @@ app.post(
 app.post(
   '/get-banks',
   handleError(async (req, res) => {
+    const fileId = getRequiredFileIdFromRequest(req);
     const { country: rawCountry, showDemo = false } = req.body || {};
     const country = sanitizeId(rawCountry);
 
-    await goCardlessService.setToken();
-    const data = await goCardlessService.getInstitutions(country);
+    await goCardlessService.setToken({ fileId });
+    const data = await goCardlessService.getInstitutions(country, { fileId });
 
     res.send({
       status: 'ok',
@@ -156,11 +177,14 @@ app.post(
 app.post(
   '/remove-account',
   handleError(async (req, res) => {
+    const fileId = getRequiredFileIdFromRequest(req);
     const requisitionId = sanitizeId<GoCardlessRequisitionId>(
       (req.body || {}).requisitionId,
     );
 
-    const data = await goCardlessService.deleteRequisition(requisitionId);
+    const data = await goCardlessService.deleteRequisition(requisitionId, {
+      fileId,
+    });
     if (data.summary === 'Requisition deleted') {
       res.send({
         status: 'ok',
@@ -181,6 +205,7 @@ app.post(
 app.post(
   '/transactions',
   handleError(async (req, res) => {
+    const fileId = getRequiredFileIdFromRequest(req);
     const {
       requisitionId: rawRequisitionId,
       startDate,
@@ -203,6 +228,7 @@ app.post(
           accountId,
           startDate,
           endDate,
+          { fileId },
         );
 
         res.send({
@@ -227,6 +253,7 @@ app.post(
           accountId,
           startDate,
           endDate,
+          { fileId },
         );
 
         res.send({

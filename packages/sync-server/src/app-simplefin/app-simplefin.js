@@ -10,6 +10,15 @@ import {
 } from '#util/middlewares';
 import { assertUrlAllowed } from '#util/ssrf';
 
+function getFileIdFromRequest(req) {
+  const fileId =
+    req.body?.fileId || req.query?.fileId || req.headers['x-actual-file-id'];
+  if (!fileId || typeof fileId !== 'string') {
+    throw new Error('missing-file-id');
+  }
+  return fileId;
+}
+
 const app = express();
 export { app as handlers };
 app.use(requestLoggerMiddleware);
@@ -19,7 +28,9 @@ app.use(validateSessionMiddleware);
 app.post(
   '/status',
   handleError(async (req, res) => {
-    const token = secretsService.get(SecretName.simplefin_token);
+    const fileId = getFileIdFromRequest(req);
+    const options = { fileId };
+    const token = secretsService.get(SecretName.simplefin_token, options);
     const configured = token != null && token !== 'Forbidden';
 
     res.send({
@@ -34,16 +45,23 @@ app.post(
 app.post(
   '/accounts',
   handleError(async (req, res) => {
-    let accessKey = secretsService.get(SecretName.simplefin_accessKey);
+    const fileId = getFileIdFromRequest(req);
+    const options = { fileId };
+
+    let accessKey = secretsService.get(SecretName.simplefin_accessKey, options);
 
     try {
       if (accessKey == null || accessKey === 'Forbidden') {
-        const token = secretsService.get(SecretName.simplefin_token);
+        const token = secretsService.get(SecretName.simplefin_token, options);
         if (token == null || token === 'Forbidden') {
           throw new Error('No token');
         } else {
           accessKey = await getAccessKey(token);
-          secretsService.set(SecretName.simplefin_accessKey, accessKey);
+          secretsService.set(
+            SecretName.simplefin_accessKey,
+            accessKey,
+            options,
+          );
           if (accessKey == null || accessKey === 'Forbidden') {
             throw new Error('No access key');
           }
@@ -74,8 +92,13 @@ app.post(
   '/transactions',
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
+    const fileId = getFileIdFromRequest(req);
+    const options = { fileId };
 
-    const accessKey = secretsService.get(SecretName.simplefin_accessKey);
+    const accessKey = secretsService.get(
+      SecretName.simplefin_accessKey,
+      options,
+    );
 
     if (accessKey == null || accessKey === 'Forbidden') {
       invalidToken(res);

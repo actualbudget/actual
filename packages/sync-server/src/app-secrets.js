@@ -30,8 +30,7 @@ app.post('/', async (req, res) => {
     });
     return;
   }
-
-  const { name, value } = req.body || {};
+  const { name, value, fileId } = req.body || {};
 
   if (!(name in SecretName)) {
     res.status(400).send({
@@ -42,7 +41,16 @@ app.post('/', async (req, res) => {
     return;
   }
 
-  secretsService.set(name, value);
+  if (!fileId || typeof fileId !== 'string') {
+    res.status(400).send({
+      status: 'error',
+      reason: 'missing-file-id',
+      details: 'fileId is required',
+    });
+    return;
+  }
+
+  secretsService.set(name, value, { fileId });
 
   res.status(200).send({ status: 'ok' });
 });
@@ -63,7 +71,18 @@ app.get('/:name', async (req, res) => {
     return;
   }
 
-  if (secretsService.exists(name)) {
+  const fileId = req.query.fileId || req.headers['x-actual-file-id'];
+  if (!fileId || typeof fileId !== 'string') {
+    res.status(400).send({
+      status: 'error',
+      reason: 'missing-file-id',
+      details: 'fileId is required',
+    });
+    return;
+  }
+
+  const keyExists = secretsService.exists(name, { fileId });
+  if (keyExists) {
     res.sendStatus(204);
   } else {
     res.status(404).send('key not found');
