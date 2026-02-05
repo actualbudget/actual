@@ -19,9 +19,14 @@ type DesktopLinkedNotesProps = {
 
 const linkStyles = {
   color: theme.pageTextLink,
-  textDecoration: 'underline',
-  background: 'transparent',
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  flexWrap: 'nowrap',
   padding: 0,
+  textDecoration: 'underline',
+  '&:hover': {
+    color: theme.pageTextLinkLight,
+  },
 };
 
 export function DesktopLinkedNotes({
