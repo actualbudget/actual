@@ -1393,7 +1393,8 @@ const Transaction = memo(function Transaction({
       <InputCell
         width="flex"
         name="notes"
-        textAlign="flex"
+        textAlign="left"
+        flexWrap="nowrap"
         exposed={focusedField === 'notes'}
         focused={focusedField === 'notes'}
         value={notes ?? (isPreview ? schedule?.name : null) ?? ''}
