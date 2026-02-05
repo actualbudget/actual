@@ -15,7 +15,6 @@ import {
   type RecurConfig,
   type RecurPattern,
   type RuleEntity,
-  type TagEntity,
 } from '../../types/models';
 import { ruleModel } from '../transactions/transaction-rules';
 
@@ -313,6 +312,7 @@ function importPayees(data: Budget, entityIdMap: Map<string, string>) {
 async function importScheduledTransactions(
   data: Budget,
   entityIdMap: Map<string, string>,
+  flagNameConflicts: Set<string>,
 ) {
   const scheduledTransactions = data.scheduled_transactions;
   const scheduledSubtransactionsGrouped = groupBy(
@@ -418,7 +418,7 @@ async function importScheduledTransactions(
     });
     schedulePayeeMap.set(scheduleId, mappedPayeeId);
 
-    const scheduleNotes = buildTransactionNotes(scheduled);
+    const scheduleNotes = buildTransactionNotes(scheduled, flagNameConflicts);
     if (scheduleNotes) {
       const rule = await getRuleForSchedule(scheduleId);
       if (rule) {
@@ -547,6 +547,7 @@ async function importScheduledTransactions(
 async function importTransactions(
   data: Budget,
   entityIdMap: Map<string, string>,
+  flagNameConflicts: Set<string>,
 ) {
   const payees = await actual.getPayees();
   const categories = await actual.getCategories();
@@ -739,7 +740,7 @@ async function importTransactions(
             category: entityIdMap.get(transaction.category_id) || null,
             cleared: ['cleared', 'reconciled'].includes(transaction.cleared),
             reconciled: transaction.cleared === 'reconciled',
-            notes: buildTransactionNotes(transaction),
+            notes: buildTransactionNotes(transaction, flagNameConflicts),
             imported_id: transaction.import_id || null,
             transfer_id:
               entityIdMap.get(transaction.transfer_transaction_id) ||
@@ -867,6 +868,7 @@ async function importBudgets(data: Budget, entityIdMap: Map<string, string>) {
 
 export async function doImport(data: Budget) {
   const entityIdMap = new Map<string, string>();
+  const flagNameConflicts = getFlagNameConflicts(data);
 
   logger.log('Importing Accounts...');
   await importAccounts(data, entityIdMap);
@@ -878,13 +880,13 @@ export async function doImport(data: Budget) {
   await importPayees(data, entityIdMap);
 
   logger.log('Importing Tags...');
-  await importYnabFlagTags(data);
+  await importFlagsAsTags(data, flagNameConflicts);
 
   logger.log('Importing Transactions...');
-  await importTransactions(data, entityIdMap);
+  await importTransactions(data, entityIdMap, flagNameConflicts);
 
   logger.log('Importing Scheduled Transactions...');
-  await importScheduledTransactions(data, entityIdMap);
+  await importScheduledTransactions(data, entityIdMap, flagNameConflicts);
 
   logger.log('Importing Budgets...');
   await importBudgets(data, entityIdMap);
@@ -932,12 +934,12 @@ function findIdByName<T extends { id: string; name: string }>(
 
 function buildTransactionNotes(
   transaction: Transaction | ScheduledTransaction,
+  flagNameConflicts: Set<string>,
 ) {
   const normalizedMemo = transaction.memo?.trim() ?? '';
-  const normalizedFlag = getFlagTagName(transaction) ?? '';
-  const notes = `${normalizedMemo} ${
-    normalizedFlag ? `#${normalizedFlag}` : ''
-  }`.trim();
+  const tags = getFlagTags(transaction, flagNameConflicts);
+  const tagText = tags.map(tag => `#${tag}`).join(' ');
+  const notes = `${normalizedMemo} ${tagText}`.trim();
   return notes.length > 0 ? notes : null;
 }
 
@@ -959,60 +961,104 @@ type FlaggedTransaction = Pick<
   'flag_name' | 'flag_color' | 'deleted'
 >;
 
-function getFlagTagName(transaction: FlaggedTransaction) {
-  const normalizedFlag =
-    transaction.flag_name?.trim() ?? transaction.flag_color?.trim() ?? '';
-  return normalizedFlag.length > 0 ? normalizedFlag : null;
+const flagColorMap: Record<string, string | null> = {
+  red: '#FF6666',
+  orange: '#F57C00',
+  yellow: '#FBC02D',
+  green: '#689F38',
+  blue: '#1976D2',
+  purple: '#512DA8',
+  null: null,
+  '': null,
+};
+
+function getFlagTags(
+  transaction: FlaggedTransaction,
+  flagNameConflicts: Set<string>,
+) {
+  const colorKey = transaction.flag_color?.trim() ?? '';
+  const nameTag = transaction.flag_name?.trim() ?? '';
+  const tags: string[] = [];
+
+  if (nameTag.length > 0) {
+    if (flagNameConflicts.has(nameTag)) {
+      tags.push(colorKey);
+    }
+    tags.push(nameTag);
+  }
+
+  return tags;
 }
 
-async function importYnabFlagTags(data: Budget) {
-  const tagsByName = new Map<string, string>();
+function getFlagNameConflicts(data: Budget) {
+  const colorsByName = new Map<string, Set<string>>();
   const flaggedTransactions: FlaggedTransaction[] = [
     ...data.transactions,
     ...data.scheduled_transactions,
   ];
-
-  const flagColorMap = {
-    red: '#FF6666',
-    orange: '#F57C00',
-    yellow: '#FBC02D',
-    green: '#689F38',
-    blue: '#1976D2',
-    purple: '#512DA8',
-    null: null,
-    '': null,
-  };
 
   for (const transaction of flaggedTransactions) {
     if (transaction.deleted) {
       continue;
     }
 
-    const tagName = getFlagTagName(transaction);
-    const tagColor = flagColorMap[transaction.flag_color] ?? null;
-    if (!tagName || !tagColor) {
+    const nameTag = transaction.flag_name?.trim() ?? '';
+    const colorKey = transaction.flag_color?.trim() ?? '';
+    if (nameTag.length === 0 || !flagColorMap[colorKey]) {
       continue;
     }
 
-    if (!tagsByName.has(tagName)) {
-      tagsByName.set(tagName, tagColor);
+    if (!colorsByName.has(nameTag)) {
+      colorsByName.set(nameTag, new Set());
+    }
+    colorsByName.get(nameTag).add(colorKey);
+  }
+
+  const conflicts = new Set<string>();
+  colorsByName.forEach((colors, name) => {
+    if (colors.size > 1) {
+      conflicts.add(name);
+    }
+  });
+
+  return conflicts;
+}
+
+async function importFlagsAsTags(data: Budget, flagNameConflicts: Set<string>) {
+  const tagsToCreate = new Map<string, string | null>();
+  const flaggedTransactions: FlaggedTransaction[] = [
+    ...data.transactions,
+    ...data.scheduled_transactions,
+  ];
+
+  for (const transaction of flaggedTransactions) {
+    if (transaction.deleted) {
+      continue;
+    }
+
+    const tagName = transaction.flag_name?.trim() ?? '';
+    const colorKey = transaction.flag_color?.trim() ?? '';
+    const tagColor = flagColorMap[colorKey] ?? null;
+
+    if (
+      tagColor &&
+      flagNameConflicts.has(tagName) &&
+      !tagsToCreate.has(colorKey)
+    ) {
+      tagsToCreate.set(colorKey, tagColor);
+    }
+
+    if (tagName.length > 0 && !tagsToCreate.has(tagName)) {
+      tagsToCreate.set(tagName, tagColor);
     }
   }
 
-  if (tagsByName.size === 0) {
+  if (tagsToCreate.size === 0) {
     return;
   }
 
-  const existingTags = (await send('tags-get')) as TagEntity[];
-  const existingTagsByName = new Map(existingTags.map(tag => [tag.tag, tag]));
-
   await Promise.all(
-    [...tagsByName.entries()].map(async ([tag, color]) => {
-      const existingTag = existingTagsByName.get(tag);
-      if (existingTag?.color) {
-        return;
-      }
-
+    [...tagsToCreate.entries()].map(async ([tag, color]) => {
       await send('tags-create', {
         tag,
         color,
