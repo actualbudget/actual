@@ -1773,7 +1773,7 @@
         "memo": null,
         "cleared": "cleared",
         "approved": true,
-        "flag_color": null,
+        "flag_color": "purple",
         "account_id": "125f339b-2a63-481e-84c0-f04d898905d2",
         "payee_id": "c843e030-5a77-4dc5-9b93-f8acc64b74f8",
         "category_id": "36120d44-6c61-4402-985a-891a8d267858",

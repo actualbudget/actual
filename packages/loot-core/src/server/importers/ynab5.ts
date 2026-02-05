@@ -973,15 +973,15 @@ async function importYnabFlagTags(data: Budget) {
   ];
 
   const flagColorMap = {
-    red: '#F44336',
-    orange: '#FB8C00',
-    yellow: '#FDD835',
-    green: '#43A047',
-    blue: '#1E88E5',
-    purple: '#8E24AA',
+    red: '#FF6666',
+    orange: '#F57C00',
+    yellow: '#FBC02D',
+    green: '#689F38',
+    blue: '#1976D2',
+    purple: '#512DA8',
     null: null,
     '': null,
-  }
+  };
 
   for (const transaction of flaggedTransactions) {
     if (transaction.deleted) {
