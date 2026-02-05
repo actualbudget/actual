@@ -935,7 +935,7 @@ function findIdByName<T extends { id: string; name: string }>(
 function buildTransactionNotes(
   transaction: Transaction | ScheduledTransaction,
   flagNameConflicts: Set<string>,
-) {
+): string | null {
   const normalizedMemo = transaction.memo?.trim() ?? '';
   const tagText = getFlagTag(transaction, flagNameConflicts);
   const notes = `${normalizedMemo} ${tagText}`.trim();
@@ -971,10 +971,14 @@ const flagColorMap: Record<string, string | null> = {
   '': null,
 };
 
+function getFlaggedTransactions(data: Budget): FlaggedTransaction[] {
+  return [...data.transactions, ...data.scheduled_transactions];
+}
+
 function getFlagTag(
   transaction: FlaggedTransaction,
   flagNameConflicts: Set<string>,
-) {
+): string {
   const tagName = transaction.flag_name?.trim() ?? '';
   const colorKey = transaction.flag_color?.trim() ?? '';
 
@@ -989,12 +993,9 @@ function getFlagTag(
   return `#${tagName}`;
 }
 
-function getFlagNameConflicts(data: Budget) {
+function getFlagNameConflicts(data: Budget): Set<string> {
   const colorsByName = new Map<string, Set<string>>();
-  const flaggedTransactions: FlaggedTransaction[] = [
-    ...data.transactions,
-    ...data.scheduled_transactions,
-  ];
+  const flaggedTransactions = getFlaggedTransactions(data);
 
   for (const transaction of flaggedTransactions) {
     if (transaction.deleted) {
@@ -1007,10 +1008,12 @@ function getFlagNameConflicts(data: Budget) {
       continue;
     }
 
-    if (!colorsByName.has(tagName)) {
-      colorsByName.set(tagName, new Set());
+    let colors = colorsByName.get(tagName);
+    if (!colors) {
+      colors = new Set();
+      colorsByName.set(tagName, colors);
     }
-    colorsByName.get(tagName).add(colorKey);
+    colors.add(colorKey);
   }
 
   const conflicts = new Set<string>();
@@ -1023,12 +1026,12 @@ function getFlagNameConflicts(data: Budget) {
   return conflicts;
 }
 
-async function importFlagsAsTags(data: Budget, flagNameConflicts: Set<string>) {
+async function importFlagsAsTags(
+  data: Budget,
+  flagNameConflicts: Set<string>,
+): Promise<void> {
   const tagsToCreate = new Map<string, string | null>();
-  const flaggedTransactions: FlaggedTransaction[] = [
-    ...data.transactions,
-    ...data.scheduled_transactions,
-  ];
+  const flaggedTransactions = getFlaggedTransactions(data);
 
   for (const transaction of flaggedTransactions) {
     if (transaction.deleted) {
