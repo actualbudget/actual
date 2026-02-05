@@ -1,8 +1,8 @@
+import { type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
+import { css } from '@emotion/css';
 
 import { isElectron } from 'loot-core/shared/environment';
 
@@ -18,12 +18,14 @@ type DesktopLinkedNotesProps = {
   isFilePath: boolean;
 };
 
-const linkStyles = {
+const linkStyles = css({
   color: theme.pageTextLink,
   textDecoration: 'underline',
-  padding: '3px 7px',
   cursor: 'pointer',
-};
+  '&:hover': {
+    color: theme.pageTextLinkLight,
+  },
+});
 
 export function DesktopLinkedNotes({
   displayText,
@@ -34,7 +36,10 @@ export function DesktopLinkedNotes({
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const handleClick = async () => {
+  const handleClick = async (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
     if (isFilePath) {
       if (isElectron()) {
         // Open file in file manager
@@ -59,11 +64,16 @@ export function DesktopLinkedNotes({
   };
 
   return (
-    <View>
-      <Button variant="bare" style={linkStyles} onPress={handleClick}>
+    <>
+      <span
+        role="button"
+        className={linkStyles}
+        onMouseDown={e => e.stopPropagation()}
+        onClick={handleClick}
+      >
         {displayText}
-      </Button>
+      </span>
       {separator}
-    </View>
+    </>
   );
 }
