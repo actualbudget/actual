@@ -972,23 +972,16 @@ async function importYnabFlagTags(data: Budget) {
     ...data.scheduled_transactions,
   ];
 
-  // const flagColorMap = {
-  //   red: '#F44336',
-  //   orange: '#FB8C00',
-  //   yellow: '#FDD835',
-  //   green: '#43A047',
-  //   blue: '#1E88E5',
-  //   purple: '#8E24AA',
-  // }
-
-  // const ynabColorMap = {
-  //   red: 'rgb(255, 69, 58)',
-  //   orange: 'rgb(255, 159, 10)',
-  //   yellow: 'rgb(255, 214, 10)',
-  //   green: 'rgb(50, 215, 75)',
-  //   blue: 'rgb(100, 210, 255)',
-  //   purple: 'rgb(191, 90, 242)',
-  // };
+  const flagColorMap = {
+    red: '#F44336',
+    orange: '#FB8C00',
+    yellow: '#FDD835',
+    green: '#43A047',
+    blue: '#1E88E5',
+    purple: '#8E24AA',
+    null: null,
+    '': null,
+  }
 
   for (const transaction of flaggedTransactions) {
     if (transaction.deleted) {
@@ -996,7 +989,7 @@ async function importYnabFlagTags(data: Budget) {
     }
 
     const tagName = getFlagTagName(transaction);
-    const tagColor = transaction.flag_color;
+    const tagColor = flagColorMap[transaction.flag_color] ?? null;
     if (!tagName || !tagColor) {
       continue;
     }
