@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-
+import { View } from '@actual-app/components/view';
 import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
@@ -20,7 +20,7 @@ type DesktopLinkedNotesProps = {
 const linkStyles = css({
   color: theme.pageTextLink,
   display: 'inline-flex',
-  padding: options.compact ? '0px 7px' : '3px 7px',
+  padding: '3px 7px',
   borderRadius: 16,
   userSelect: 'none',
   cursor: 'pointer',
