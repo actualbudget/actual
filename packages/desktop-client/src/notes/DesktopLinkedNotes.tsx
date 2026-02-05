@@ -21,12 +21,8 @@ const linkStyles = {
   color: theme.pageTextLink,
   overflow: 'hidden',
   whiteSpace: 'nowrap',
-  flexWrap: 'nowrap',
   padding: 0,
   textDecoration: 'underline',
-  '&:hover': {
-    color: theme.pageTextLinkLight,
-  },
 };
 
 export function DesktopLinkedNotes({
