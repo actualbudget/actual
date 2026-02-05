@@ -23,7 +23,6 @@ const linkStyles = {
   whiteSpace: 'nowrap',
   padding: 0,
   textDecoration: 'underline',
-  display: 'inline',
 };
 
 export function DesktopLinkedNotes({
