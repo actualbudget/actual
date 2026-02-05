@@ -15,17 +15,16 @@ import {
   type RecurConfig,
   type RecurPattern,
   type RuleEntity,
-  type TagEntity,
 } from '../../types/models';
 import { ruleModel } from '../transactions/transaction-rules';
 
-import type {
-  Budget,
-  Payee,
-  ScheduledSubtransaction,
-  ScheduledTransaction,
-  Subtransaction,
-  Transaction,
+import {
+  type Budget,
+  type Payee,
+  type ScheduledSubtransaction,
+  type ScheduledTransaction,
+  type Subtransaction,
+  type Transaction,
 } from './ynab5-types';
 
 function amountFromYnab(amount: number) {
@@ -631,10 +630,10 @@ async function importTransactions(
   // corresponding tranfer subtransaction in two aligned list. Hopefully
   // for every list index in the transactions list, the related subtransaction
   // will be at the same index.
-  const orphanTransferComparator = (
+  function orphanTransferComparator(
     a: Transaction | Subtransaction,
     b: Transaction | Subtransaction,
-  ) => {
+  ) {
     // a and b can be a Transaction (having a date attribute) or a
     // Subtransaction (missing that date attribute)
 
@@ -660,7 +659,7 @@ async function importTransactions(
     if (a.memo > b.memo) return 1;
     if (a.memo < b.memo) return -1;
     return 0;
-  };
+  }
 
   const orphanTrxIdSubtrxIdMap = new Map<string, string>();
   orphanTransferMap.forEach((transactions, key) => {
@@ -1003,7 +1002,7 @@ async function importYnabFlagTags(data: Budget) {
     return;
   }
 
-  const existingTags = (await send('tags-get')) as TagEntity[];
+  const existingTags = await send('tags-get');
   const existingTagsByName = new Map(existingTags.map(tag => [tag.tag, tag]));
 
   await Promise.all(
