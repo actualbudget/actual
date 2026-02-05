@@ -1394,11 +1394,6 @@ const Transaction = memo(function Transaction({
         width="flex"
         name="notes"
         textAlign="flex"
-        style={{
-          alignItems: 'baseline',
-          overflow: 'hidden',
-          minHeight: '13px',
-        }}
         exposed={focusedField === 'notes'}
         focused={focusedField === 'notes'}
         value={notes ?? (isPreview ? schedule?.name : null) ?? ''}
