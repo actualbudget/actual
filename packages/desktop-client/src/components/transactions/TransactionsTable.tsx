@@ -1395,6 +1395,7 @@ const Transaction = memo(function Transaction({
         name="notes"
         textAlign="left"
         style={{
+          alignItems: 'baseline',
           flexWrap: 'nowrap',
           overflow: 'hidden',
         }}
