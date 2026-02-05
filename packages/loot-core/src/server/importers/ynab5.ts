@@ -27,6 +27,44 @@ import {
   type Transaction,
 } from './ynab5-types';
 
+type FlaggedTransaction = Pick<
+  Transaction | ScheduledTransaction,
+  'flag_name' | 'flag_color' | 'deleted'
+>;
+
+const flagColorMap: Record<string, string | null> = {
+  red: '#FF6666',
+  orange: '#F57C00',
+  yellow: '#FBC02D',
+  green: '#689F38',
+  blue: '#1976D2',
+  purple: '#512DA8',
+  null: null,
+  '': null,
+};
+
+function equalsIgnoreCase(stringa: string, stringb: string): boolean {
+  return (
+    stringa.localeCompare(stringb, undefined, {
+      sensitivity: 'base',
+    }) === 0
+  );
+}
+
+function findByNameIgnoreCase<T extends { name: string }>(
+  categories: T[],
+  name: string,
+) {
+  return categories.find(cat => equalsIgnoreCase(cat.name, name));
+}
+
+function findIdByName<T extends { id: string; name: string }>(
+  categories: Array<T>,
+  name: string,
+) {
+  return findByNameIgnoreCase<T>(categories, name)?.id;
+}
+
 function amountFromYnab(amount: number) {
   // YNAB multiplies amount by 1000 and Actual by 100
   // so, this function divides by 10
@@ -145,6 +183,84 @@ function getScheduleDateValue(
     weekendSolveMode: 'after',
     endMode: 'never',
     start: dateFirst,
+  };
+}
+
+function getFlaggedTransactions(data: Budget): FlaggedTransaction[] {
+  return [...data.transactions, ...data.scheduled_transactions];
+}
+
+function getFlagTag(
+  transaction: FlaggedTransaction,
+  flagNameConflicts: Set<string>,
+): string {
+  const tagName = transaction.flag_name?.trim() ?? '';
+  const colorKey = transaction.flag_color?.trim() ?? '';
+
+  if (tagName.length === 0) {
+    return colorKey.length > 0 ? `#${colorKey}` : '';
+  }
+
+  if (flagNameConflicts.has(tagName)) {
+    return `#${tagName}-${colorKey}`;
+  }
+
+  return `#${tagName}`;
+}
+
+function getFlagNameConflicts(data: Budget): Set<string> {
+  const colorsByName = new Map<string, Set<string>>();
+  const flaggedTransactions = getFlaggedTransactions(data);
+
+  for (const transaction of flaggedTransactions) {
+    if (transaction.deleted) {
+      continue;
+    }
+
+    const tagName = transaction.flag_name?.trim() ?? '';
+    const colorKey = transaction.flag_color?.trim() ?? '';
+    if (tagName.length === 0 || !flagColorMap[colorKey]) {
+      continue;
+    }
+
+    let colors = colorsByName.get(tagName);
+    if (!colors) {
+      colors = new Set();
+      colorsByName.set(tagName, colors);
+    }
+    colors.add(colorKey);
+  }
+
+  const conflicts = new Set<string>();
+  colorsByName.forEach((colors, name) => {
+    if (colors.size > 1) {
+      conflicts.add(name);
+    }
+  });
+
+  return conflicts;
+}
+
+function buildTransactionNotes(
+  transaction: Transaction | ScheduledTransaction,
+  flagNameConflicts: Set<string>,
+): string | null {
+  const normalizedMemo = transaction.memo?.trim() ?? '';
+  const tagText = getFlagTag(transaction, flagNameConflicts);
+  const notes = `${normalizedMemo} ${tagText}`.trim();
+  return notes.length > 0 ? notes : null;
+}
+
+function buildRuleUpdate(
+  rule: RuleEntity,
+  actions: RuleEntity['actions'],
+): RuleEntity {
+  return {
+    id: rule.id,
+    stage: rule.stage ?? null,
+    conditionsOp: rule.conditionsOp ?? 'and',
+    conditions: rule.conditions,
+    actions,
   };
 }
 
@@ -309,239 +425,55 @@ function importPayees(data: Budget, entityIdMap: Map<string, string>) {
   );
 }
 
-async function importScheduledTransactions(
+async function importFlagsAsTags(
   data: Budget,
-  entityIdMap: Map<string, string>,
   flagNameConflicts: Set<string>,
-) {
-  const scheduledTransactions = data.scheduled_transactions;
-  const scheduledSubtransactionsGrouped = groupBy(
-    data.scheduled_subtransactions,
-    'scheduled_transaction_id',
-  );
-  if (scheduledTransactions.length === 0) {
+): Promise<void> {
+  const tagsToCreate = new Map<string, string | null>();
+  const flaggedTransactions = getFlaggedTransactions(data);
+
+  for (const transaction of flaggedTransactions) {
+    if (transaction.deleted) {
+      continue;
+    }
+
+    const tagName = transaction.flag_name?.trim() ?? '';
+    const colorKey = transaction.flag_color?.trim() ?? '';
+    const tagColor = flagColorMap[colorKey] ?? null;
+
+    if (!tagColor) {
+      continue;
+    }
+
+    if (tagName.length === 0) {
+      if (!tagsToCreate.has(colorKey)) {
+        tagsToCreate.set(colorKey, tagColor);
+      }
+      continue;
+    }
+
+    const mappedName = flagNameConflicts.has(tagName)
+      ? `${tagName}-${colorKey}`
+      : tagName;
+
+    if (!tagsToCreate.has(mappedName)) {
+      tagsToCreate.set(mappedName, tagColor);
+    }
+  }
+
+  if (tagsToCreate.size === 0) {
     return;
   }
 
-  const payees = await actual.getPayees();
-  const payeesByTransferAcct = payees
-    .filter(payee => payee?.transfer_acct)
-    .map(payee => [payee.transfer_acct, payee] as [string, Payee]);
-  const payeeTransferAcctHashMap = new Map<string, Payee>(payeesByTransferAcct);
-  const scheduleCategoryMap = new Map<string, string>();
-  const scheduleSplitsMap = new Map<string, ScheduledSubtransaction[]>();
-  const schedulePayeeMap = new Map<string, string>();
-
-  async function createScheduleWithUniqueName(params: {
-    name: string;
-    posts_transaction: boolean;
-    payee: string;
-    account: string;
-    amount: number;
-    amountOp: 'is';
-    date: RecurConfig | string;
-  }) {
-    const baseName = params.name;
-    const MAX_RETRY = 50;
-    let count = 1;
-
-    while (true) {
-      try {
-        return await actual.createSchedule({ ...params, name: params.name });
-      } catch (e) {
-        if (count >= MAX_RETRY) {
-          throw Error(e.message);
-        }
-        params.name = `${baseName} (${count})`;
-        count += 1;
-      }
-    }
-  }
-
-  async function getRuleForSchedule(
-    scheduleId: string,
-  ): Promise<RuleEntity | null> {
-    const { data: ruleId } = (await actual.aqlQuery(
-      q('schedules').filter({ id: scheduleId }).calculate('rule'),
-    )) as { data: string | null };
-    if (!ruleId) {
-      return null;
-    }
-
-    const { data: ruleData } = (await actual.aqlQuery(
-      q('rules').filter({ id: ruleId }).select('*'),
-    )) as { data: Array<Record<string, unknown>> };
-    const ruleRow = ruleData?.[0];
-    if (!ruleRow) {
-      return null;
-    }
-
-    return ruleModel.toJS(ruleRow);
-  }
-
-  for (const scheduled of scheduledTransactions) {
-    if (scheduled.deleted) {
-      continue;
-    }
-
-    const mappedAccountId = entityIdMap.get(scheduled.account_id);
-    if (!mappedAccountId) {
-      continue;
-    }
-
-    const scheduleDate = getScheduleDateValue(scheduled);
-
-    let mappedPayeeId: string | undefined;
-    if (scheduled.transfer_account_id) {
-      const mappedTransferAccountId = entityIdMap.get(
-        scheduled.transfer_account_id,
-      );
-      mappedPayeeId = mappedTransferAccountId
-        ? payeeTransferAcctHashMap.get(mappedTransferAccountId)?.id
-        : undefined;
-    } else if (scheduled.payee_id) {
-      mappedPayeeId = entityIdMap.get(scheduled.payee_id);
-    }
-
-    if (!mappedPayeeId) {
-      continue;
-    }
-
-    const scheduleId = await createScheduleWithUniqueName({
-      name: scheduled.memo,
-      posts_transaction: false,
-      payee: mappedPayeeId,
-      account: mappedAccountId,
-      amount: amountFromYnab(scheduled.amount),
-      amountOp: 'is',
-      date: scheduleDate,
-    });
-    schedulePayeeMap.set(scheduleId, mappedPayeeId);
-
-    const scheduleNotes = buildTransactionNotes(scheduled, flagNameConflicts);
-    if (scheduleNotes) {
-      const rule = await getRuleForSchedule(scheduleId);
-      if (rule) {
-        const actions = rule.actions ? [...rule.actions] : [];
-        actions.push({
-          op: 'set',
-          field: 'notes',
-          value: scheduleNotes,
-        });
-
-        await actual.updateRule(buildRuleUpdate(rule, actions));
-      }
-    }
-
-    const scheduledSubtransactions =
-      scheduledSubtransactionsGrouped
-        .get(scheduled.id)
-        ?.filter(subtransaction => !subtransaction.deleted) || [];
-
-    if (scheduledSubtransactions.length > 0) {
-      scheduleSplitsMap.set(scheduleId, scheduledSubtransactions);
-    } else if (!scheduled.transfer_account_id && scheduled.category_id) {
-      const mappedCategoryId = entityIdMap.get(scheduled.category_id);
-      if (mappedCategoryId) {
-        scheduleCategoryMap.set(scheduleId, mappedCategoryId);
-      }
-    }
-  }
-
-  if (scheduleCategoryMap.size > 0 || scheduleSplitsMap.size > 0) {
-    for (const [scheduleId, categoryId] of scheduleCategoryMap.entries()) {
-      const rule = await getRuleForSchedule(scheduleId);
-      if (!rule) {
-        continue;
-      }
-
-      const actions = rule.actions ? [...rule.actions] : [];
-      actions.push({
-        op: 'set',
-        field: 'category',
-        value: categoryId,
+  await Promise.all(
+    [...tagsToCreate.entries()].map(async ([tag, color]) => {
+      await send('tags-create', {
+        tag,
+        color,
+        description: 'Imported from YNAB',
       });
-
-      await actual.updateRule(buildRuleUpdate(rule, actions));
-    }
-
-    for (const [scheduleId, subtransactions] of scheduleSplitsMap.entries()) {
-      const rule = await getRuleForSchedule(scheduleId);
-      if (!rule) {
-        continue;
-      }
-
-      const actions = rule.actions ? [...rule.actions] : [];
-      const parentPayeeId = schedulePayeeMap.get(scheduleId);
-
-      subtransactions.forEach((subtransaction, index) => {
-        const splitIndex = index + 1;
-
-        actions.push({
-          op: 'set-split-amount',
-          value: amountFromYnab(subtransaction.amount),
-          options: { splitIndex, method: 'fixed-amount' },
-        });
-
-        if (subtransaction.memo) {
-          actions.push({
-            op: 'set',
-            field: 'notes',
-            value: subtransaction.memo,
-            options: { splitIndex },
-          });
-        }
-
-        if (subtransaction.transfer_account_id) {
-          const mappedTransferAccountId = entityIdMap.get(
-            subtransaction.transfer_account_id,
-          );
-          const transferPayeeId = mappedTransferAccountId
-            ? payeeTransferAcctHashMap.get(mappedTransferAccountId)?.id
-            : undefined;
-          if (transferPayeeId) {
-            actions.push({
-              op: 'set',
-              field: 'payee',
-              value: transferPayeeId,
-              options: { splitIndex },
-            });
-          }
-        } else if (subtransaction.payee_id) {
-          const mappedPayeeId = entityIdMap.get(subtransaction.payee_id);
-          if (mappedPayeeId) {
-            actions.push({
-              op: 'set',
-              field: 'payee',
-              value: mappedPayeeId,
-              options: { splitIndex },
-            });
-          }
-        } else if (parentPayeeId) {
-          actions.push({
-            op: 'set',
-            field: 'payee',
-            value: parentPayeeId,
-            options: { splitIndex },
-          });
-        }
-
-        if (!subtransaction.transfer_account_id && subtransaction.category_id) {
-          const mappedCategoryId = entityIdMap.get(subtransaction.category_id);
-          if (mappedCategoryId) {
-            actions.push({
-              op: 'set',
-              field: 'category',
-              value: mappedCategoryId,
-              options: { splitIndex },
-            });
-          }
-        }
-      });
-
-      await actual.updateRule(buildRuleUpdate(rule, actions));
-    }
-  }
+    }),
+  );
 }
 
 async function importTransactions(
@@ -820,6 +752,241 @@ async function importTransactions(
   );
 }
 
+async function importScheduledTransactions(
+  data: Budget,
+  entityIdMap: Map<string, string>,
+  flagNameConflicts: Set<string>,
+) {
+  const scheduledTransactions = data.scheduled_transactions;
+  const scheduledSubtransactionsGrouped = groupBy(
+    data.scheduled_subtransactions,
+    'scheduled_transaction_id',
+  );
+  if (scheduledTransactions.length === 0) {
+    return;
+  }
+
+  const payees = await actual.getPayees();
+  const payeesByTransferAcct = payees
+    .filter(payee => payee?.transfer_acct)
+    .map(payee => [payee.transfer_acct, payee] as [string, Payee]);
+  const payeeTransferAcctHashMap = new Map<string, Payee>(payeesByTransferAcct);
+  const scheduleCategoryMap = new Map<string, string>();
+  const scheduleSplitsMap = new Map<string, ScheduledSubtransaction[]>();
+  const schedulePayeeMap = new Map<string, string>();
+
+  async function createScheduleWithUniqueName(params: {
+    name: string;
+    posts_transaction: boolean;
+    payee: string;
+    account: string;
+    amount: number;
+    amountOp: 'is';
+    date: RecurConfig | string;
+  }) {
+    const baseName = params.name;
+    const MAX_RETRY = 50;
+    let count = 1;
+
+    while (true) {
+      try {
+        return await actual.createSchedule({ ...params, name: params.name });
+      } catch (e) {
+        if (count >= MAX_RETRY) {
+          throw Error(e.message);
+        }
+        params.name = `${baseName} (${count})`;
+        count += 1;
+      }
+    }
+  }
+
+  async function getRuleForSchedule(
+    scheduleId: string,
+  ): Promise<RuleEntity | null> {
+    const { data: ruleId } = (await actual.aqlQuery(
+      q('schedules').filter({ id: scheduleId }).calculate('rule'),
+    )) as { data: string | null };
+    if (!ruleId) {
+      return null;
+    }
+
+    const { data: ruleData } = (await actual.aqlQuery(
+      q('rules').filter({ id: ruleId }).select('*'),
+    )) as { data: Array<Record<string, unknown>> };
+    const ruleRow = ruleData?.[0];
+    if (!ruleRow) {
+      return null;
+    }
+
+    return ruleModel.toJS(ruleRow);
+  }
+
+  for (const scheduled of scheduledTransactions) {
+    if (scheduled.deleted) {
+      continue;
+    }
+
+    const mappedAccountId = entityIdMap.get(scheduled.account_id);
+    if (!mappedAccountId) {
+      continue;
+    }
+
+    const scheduleDate = getScheduleDateValue(scheduled);
+
+    let mappedPayeeId: string | undefined;
+    if (scheduled.transfer_account_id) {
+      const mappedTransferAccountId = entityIdMap.get(
+        scheduled.transfer_account_id,
+      );
+      mappedPayeeId = mappedTransferAccountId
+        ? payeeTransferAcctHashMap.get(mappedTransferAccountId)?.id
+        : undefined;
+    } else if (scheduled.payee_id) {
+      mappedPayeeId = entityIdMap.get(scheduled.payee_id);
+    }
+
+    if (!mappedPayeeId) {
+      continue;
+    }
+
+    const scheduleId = await createScheduleWithUniqueName({
+      name: scheduled.memo,
+      posts_transaction: false,
+      payee: mappedPayeeId,
+      account: mappedAccountId,
+      amount: amountFromYnab(scheduled.amount),
+      amountOp: 'is',
+      date: scheduleDate,
+    });
+    schedulePayeeMap.set(scheduleId, mappedPayeeId);
+
+    const scheduleNotes = buildTransactionNotes(scheduled, flagNameConflicts);
+    if (scheduleNotes) {
+      const rule = await getRuleForSchedule(scheduleId);
+      if (rule) {
+        const actions = rule.actions ? [...rule.actions] : [];
+        actions.push({
+          op: 'set',
+          field: 'notes',
+          value: scheduleNotes,
+        });
+
+        await actual.updateRule(buildRuleUpdate(rule, actions));
+      }
+    }
+
+    const scheduledSubtransactions =
+      scheduledSubtransactionsGrouped
+        .get(scheduled.id)
+        ?.filter(subtransaction => !subtransaction.deleted) || [];
+
+    if (scheduledSubtransactions.length > 0) {
+      scheduleSplitsMap.set(scheduleId, scheduledSubtransactions);
+    } else if (!scheduled.transfer_account_id && scheduled.category_id) {
+      const mappedCategoryId = entityIdMap.get(scheduled.category_id);
+      if (mappedCategoryId) {
+        scheduleCategoryMap.set(scheduleId, mappedCategoryId);
+      }
+    }
+  }
+
+  if (scheduleCategoryMap.size > 0 || scheduleSplitsMap.size > 0) {
+    for (const [scheduleId, categoryId] of scheduleCategoryMap.entries()) {
+      const rule = await getRuleForSchedule(scheduleId);
+      if (!rule) {
+        continue;
+      }
+
+      const actions = rule.actions ? [...rule.actions] : [];
+      actions.push({
+        op: 'set',
+        field: 'category',
+        value: categoryId,
+      });
+
+      await actual.updateRule(buildRuleUpdate(rule, actions));
+    }
+
+    for (const [scheduleId, subtransactions] of scheduleSplitsMap.entries()) {
+      const rule = await getRuleForSchedule(scheduleId);
+      if (!rule) {
+        continue;
+      }
+
+      const actions = rule.actions ? [...rule.actions] : [];
+      const parentPayeeId = schedulePayeeMap.get(scheduleId);
+
+      subtransactions.forEach((subtransaction, index) => {
+        const splitIndex = index + 1;
+
+        actions.push({
+          op: 'set-split-amount',
+          value: amountFromYnab(subtransaction.amount),
+          options: { splitIndex, method: 'fixed-amount' },
+        });
+
+        if (subtransaction.memo) {
+          actions.push({
+            op: 'set',
+            field: 'notes',
+            value: subtransaction.memo,
+            options: { splitIndex },
+          });
+        }
+
+        if (subtransaction.transfer_account_id) {
+          const mappedTransferAccountId = entityIdMap.get(
+            subtransaction.transfer_account_id,
+          );
+          const transferPayeeId = mappedTransferAccountId
+            ? payeeTransferAcctHashMap.get(mappedTransferAccountId)?.id
+            : undefined;
+          if (transferPayeeId) {
+            actions.push({
+              op: 'set',
+              field: 'payee',
+              value: transferPayeeId,
+              options: { splitIndex },
+            });
+          }
+        } else if (subtransaction.payee_id) {
+          const mappedPayeeId = entityIdMap.get(subtransaction.payee_id);
+          if (mappedPayeeId) {
+            actions.push({
+              op: 'set',
+              field: 'payee',
+              value: mappedPayeeId,
+              options: { splitIndex },
+            });
+          }
+        } else if (parentPayeeId) {
+          actions.push({
+            op: 'set',
+            field: 'payee',
+            value: parentPayeeId,
+            options: { splitIndex },
+          });
+        }
+
+        if (!subtransaction.transfer_account_id && subtransaction.category_id) {
+          const mappedCategoryId = entityIdMap.get(subtransaction.category_id);
+          if (mappedCategoryId) {
+            actions.push({
+              op: 'set',
+              field: 'category',
+              value: mappedCategoryId,
+              options: { splitIndex },
+            });
+          }
+        }
+      });
+
+      await actual.updateRule(buildRuleUpdate(rule, actions));
+    }
+  }
+}
+
 async function importBudgets(data: Budget, entityIdMap: Map<string, string>) {
   // There should be info in the docs to deal with
   // no credit card category and how YNAB and Actual
@@ -864,7 +1031,21 @@ async function importBudgets(data: Budget, entityIdMap: Map<string, string>) {
   });
 }
 
-// Utils
+export function parseFile(buffer: Buffer): Budget {
+  let data = JSON.parse(buffer.toString());
+  if (data.data) {
+    data = data.data;
+  }
+  if (data.budget) {
+    data = data.budget;
+  }
+
+  return data;
+}
+
+export function getBudgetName(_filepath: string, data: Budget) {
+  return data.budget_name || data.name;
+}
 
 export async function doImport(data: Budget) {
   const entityIdMap = new Map<string, string>();
@@ -892,187 +1073,4 @@ export async function doImport(data: Budget) {
   await importBudgets(data, entityIdMap);
 
   logger.log('Setting up...');
-}
-
-export function parseFile(buffer: Buffer): Budget {
-  let data = JSON.parse(buffer.toString());
-  if (data.data) {
-    data = data.data;
-  }
-  if (data.budget) {
-    data = data.budget;
-  }
-
-  return data;
-}
-
-export function getBudgetName(_filepath: string, data: Budget) {
-  return data.budget_name || data.name;
-}
-
-function equalsIgnoreCase(stringa: string, stringb: string): boolean {
-  return (
-    stringa.localeCompare(stringb, undefined, {
-      sensitivity: 'base',
-    }) === 0
-  );
-}
-
-function findByNameIgnoreCase<T extends { name: string }>(
-  categories: T[],
-  name: string,
-) {
-  return categories.find(cat => equalsIgnoreCase(cat.name, name));
-}
-
-function findIdByName<T extends { id: string; name: string }>(
-  categories: Array<T>,
-  name: string,
-) {
-  return findByNameIgnoreCase<T>(categories, name)?.id;
-}
-
-function buildTransactionNotes(
-  transaction: Transaction | ScheduledTransaction,
-  flagNameConflicts: Set<string>,
-): string | null {
-  const normalizedMemo = transaction.memo?.trim() ?? '';
-  const tagText = getFlagTag(transaction, flagNameConflicts);
-  const notes = `${normalizedMemo} ${tagText}`.trim();
-  return notes.length > 0 ? notes : null;
-}
-
-function buildRuleUpdate(
-  rule: RuleEntity,
-  actions: RuleEntity['actions'],
-): RuleEntity {
-  return {
-    id: rule.id,
-    stage: rule.stage ?? null,
-    conditionsOp: rule.conditionsOp ?? 'and',
-    conditions: rule.conditions,
-    actions,
-  };
-}
-
-type FlaggedTransaction = Pick<
-  Transaction | ScheduledTransaction,
-  'flag_name' | 'flag_color' | 'deleted'
->;
-
-const flagColorMap: Record<string, string | null> = {
-  red: '#FF6666',
-  orange: '#F57C00',
-  yellow: '#FBC02D',
-  green: '#689F38',
-  blue: '#1976D2',
-  purple: '#512DA8',
-  null: null,
-  '': null,
-};
-
-function getFlaggedTransactions(data: Budget): FlaggedTransaction[] {
-  return [...data.transactions, ...data.scheduled_transactions];
-}
-
-function getFlagTag(
-  transaction: FlaggedTransaction,
-  flagNameConflicts: Set<string>,
-): string {
-  const tagName = transaction.flag_name?.trim() ?? '';
-  const colorKey = transaction.flag_color?.trim() ?? '';
-
-  if (tagName.length === 0) {
-    return colorKey.length > 0 ? `#${colorKey}` : '';
-  }
-
-  if (flagNameConflicts.has(tagName)) {
-    return `#${tagName}-${colorKey}`;
-  }
-
-  return `#${tagName}`;
-}
-
-function getFlagNameConflicts(data: Budget): Set<string> {
-  const colorsByName = new Map<string, Set<string>>();
-  const flaggedTransactions = getFlaggedTransactions(data);
-
-  for (const transaction of flaggedTransactions) {
-    if (transaction.deleted) {
-      continue;
-    }
-
-    const tagName = transaction.flag_name?.trim() ?? '';
-    const colorKey = transaction.flag_color?.trim() ?? '';
-    if (tagName.length === 0 || !flagColorMap[colorKey]) {
-      continue;
-    }
-
-    let colors = colorsByName.get(tagName);
-    if (!colors) {
-      colors = new Set();
-      colorsByName.set(tagName, colors);
-    }
-    colors.add(colorKey);
-  }
-
-  const conflicts = new Set<string>();
-  colorsByName.forEach((colors, name) => {
-    if (colors.size > 1) {
-      conflicts.add(name);
-    }
-  });
-
-  return conflicts;
-}
-
-async function importFlagsAsTags(
-  data: Budget,
-  flagNameConflicts: Set<string>,
-): Promise<void> {
-  const tagsToCreate = new Map<string, string | null>();
-  const flaggedTransactions = getFlaggedTransactions(data);
-
-  for (const transaction of flaggedTransactions) {
-    if (transaction.deleted) {
-      continue;
-    }
-
-    const tagName = transaction.flag_name?.trim() ?? '';
-    const colorKey = transaction.flag_color?.trim() ?? '';
-    const tagColor = flagColorMap[colorKey] ?? null;
-
-    if (!tagColor) {
-      continue;
-    }
-
-    if (tagName.length === 0) {
-      if (!tagsToCreate.has(colorKey)) {
-        tagsToCreate.set(colorKey, tagColor);
-      }
-      continue;
-    }
-
-    const mappedName = flagNameConflicts.has(tagName)
-      ? `${tagName}-${colorKey}`
-      : tagName;
-
-    if (!tagsToCreate.has(mappedName)) {
-      tagsToCreate.set(mappedName, tagColor);
-    }
-  }
-
-  if (tagsToCreate.size === 0) {
-    return;
-  }
-
-  await Promise.all(
-    [...tagsToCreate.entries()].map(async ([tag, color]) => {
-      await send('tags-create', {
-        tag,
-        color,
-        description: 'Imported from YNAB',
-      });
-    }),
-  );
 }
