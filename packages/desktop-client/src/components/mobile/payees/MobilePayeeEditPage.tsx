@@ -26,7 +26,7 @@ export function MobilePayeeEditPage() {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
-  const payees = usePayees();
+  const { data: payees } = usePayees();
 
   const [payee, setPayee] = useState<PayeeEntity | null>(null);
   const [editedPayeeName, setEditedPayeeName] = useState('');

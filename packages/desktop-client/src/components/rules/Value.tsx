@@ -42,7 +42,7 @@ export function Value<T>({
   const { t } = useTranslation();
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const payees = usePayees();
+  const { data: payees } = usePayees();
   const { data: { list: categories } = { list: [] } } = useCategories();
   const accounts = useAccounts();
   const valueStyle = {

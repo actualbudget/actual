@@ -13,7 +13,7 @@ import {
   addGenericErrorNotification,
   addNotification,
 } from './notifications/notificationsSlice';
-import { reloadPayees } from './payees/payeesSlice';
+import { payeeQueries } from './payees';
 import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
 import * as syncEvents from './sync-events';
@@ -70,7 +70,9 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
       tables.includes('payees') ||
       tables.includes('payee_mapping')
     ) {
-      promises.push(store.dispatch(reloadPayees()));
+      queryClient.invalidateQueries({
+        queryKey: payeeQueries.lists(),
+      });
     }
 
     if (tables.includes('accounts')) {
