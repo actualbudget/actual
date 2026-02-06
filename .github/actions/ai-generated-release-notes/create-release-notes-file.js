@@ -21,7 +21,7 @@ async function createReleaseNotesFile() {
   try {
     const summaryData = JSON.parse(summaryDataJson);
 
-    console.log('Debug - Summary data:', summaryData);
+    console.log('Summary data:', summaryData);
 
     if (!summaryData) {
       console.log('No summary data available, cannot create file');
@@ -29,9 +29,9 @@ async function createReleaseNotesFile() {
       return;
     }
 
-    console.log('Debug - Category value:', category);
-    console.log('Debug - Category type:', typeof category);
-    console.log('Debug - Category JSON stringified:', JSON.stringify(category));
+    console.log('Category value:', category);
+    console.log('Category type:', typeof category);
+    console.log('Category JSON stringified:', JSON.stringify(category));
 
     if (!category || category === 'null') {
       console.log('No valid category available, cannot create file');
@@ -44,15 +44,14 @@ async function createReleaseNotesFile() {
       typeof category === 'string'
         ? category.replace(/^["']|["']$/g, '')
         : category;
-    console.log('Debug - Clean category:', cleanCategory);
+    console.log('Clean category:', cleanCategory);
 
     const fileContent = `---
 category: ${cleanCategory}
 authors: [${summaryData.author}]
 ---
 
-${summaryData.summary}
-`;
+${summaryData.summary}`;
 
     const fileName = `upcoming-release-notes/${summaryData.prNumber}.md`;
 
