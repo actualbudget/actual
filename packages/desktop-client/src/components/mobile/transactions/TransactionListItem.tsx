@@ -88,7 +88,7 @@ export function TransactionListItem({
   ...itemProps
 }: TransactionListItemProps) {
   const { t } = useTranslation();
-  const { list: categories } = useCategories();
+  const { data: { list: categories } = { list: [] } } = useCategories();
 
   const payee = usePayee(transaction?.payee || '');
   const displayPayee = useDisplayPayee({ transaction });

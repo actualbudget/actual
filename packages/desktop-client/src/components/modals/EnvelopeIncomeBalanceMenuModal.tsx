@@ -41,7 +41,7 @@ export function EnvelopeIncomeBalanceMenuModal({
   };
 
   const { t } = useTranslation();
-  const category = useCategory(categoryId);
+  const { data: category } = useCategory(categoryId);
 
   const carryover = useEnvelopeSheetValue(
     envelopeBudget.catCarryover(categoryId),

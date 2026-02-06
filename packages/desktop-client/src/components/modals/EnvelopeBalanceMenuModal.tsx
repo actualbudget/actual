@@ -40,7 +40,7 @@ export function EnvelopeBalanceMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
 
-  const category = useCategory(categoryId);
+  const { data: category } = useCategory(categoryId);
 
   if (!category) {
     return null;

@@ -29,7 +29,12 @@ export function useOverspentCategories({
   const spreadsheet = useSpreadsheet();
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
-  const { list: categories, grouped: categoryGroups } = useCategories();
+  const {
+    data: { list: categories, grouped: categoryGroups } = {
+      list: [],
+      grouped: [],
+    },
+  } = useCategories();
   const categoryGroupsById = useMemo(
     () => groupById(categoryGroups),
     [categoryGroups],

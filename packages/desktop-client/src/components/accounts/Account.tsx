@@ -33,6 +33,7 @@ import {
 import { applyChanges, type IntegerAmount } from 'loot-core/shared/util';
 import {
   type AccountEntity,
+  type CategoryGroupEntity,
   type NewRuleEntity,
   type RuleActionEntity,
   type RuleConditionEntity,
@@ -247,7 +248,7 @@ type AccountInternalProps = {
   failedAccounts: ReturnType<typeof useFailedAccounts>;
   dateFormat: ReturnType<typeof useDateFormat>;
   payees: ReturnType<typeof usePayees>;
-  categoryGroups: ReturnType<typeof useCategories>['grouped'];
+  categoryGroups: CategoryGroupEntity[];
   hideFraction: boolean;
   accountsSyncing: string[];
   dispatch: AppDispatch;
@@ -1965,7 +1966,8 @@ export function Account() {
   const params = useParams();
   const location = useLocation();
 
-  const { grouped: categoryGroups } = useCategories();
+  const { data: { grouped: categoryGroups } = { grouped: [] } } =
+    useCategories();
   const newTransactions = useSelector(
     state => state.transactions.newTransactions,
   );

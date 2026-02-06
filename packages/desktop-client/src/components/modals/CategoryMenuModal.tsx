@@ -44,8 +44,8 @@ export function CategoryMenuModal({
   onClose,
 }: CategoryMenuModalProps) {
   const { t } = useTranslation();
-  const category = useCategory(categoryId);
-  const categoryGroup = useCategoryGroup(category?.group);
+  const { data: category } = useCategory(categoryId);
+  const { data: categoryGroup } = useCategoryGroup(category?.group);
   const originalNotes = useNotes(category.id);
 
   const onRename = newName => {

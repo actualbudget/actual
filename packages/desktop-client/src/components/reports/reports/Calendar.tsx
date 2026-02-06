@@ -126,7 +126,8 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
   const accounts = useAccounts();
   const payees = usePayees();
-  const { grouped: categoryGroups } = useCategories();
+  const { data: { grouped: categoryGroups } = { grouped: [] } } =
+    useCategories();
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';

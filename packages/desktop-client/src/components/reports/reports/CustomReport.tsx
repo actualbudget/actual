@@ -139,7 +139,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
-  const categories = useCategories();
+  const { data: categories = { grouped: [], list: [] } } = useCategories();
   const { isNarrowWidth } = useResponsive();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';

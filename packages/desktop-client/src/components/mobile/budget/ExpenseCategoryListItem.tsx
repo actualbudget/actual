@@ -11,7 +11,6 @@ import { View } from '@actual-app/components/view';
 
 import { type BudgetType } from 'loot-core/server/prefs';
 import * as monthUtils from 'loot-core/shared/months';
-import { groupById } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { BalanceCell } from './BalanceCell';
@@ -19,7 +18,7 @@ import { BudgetCell } from './BudgetCell';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { SpentCell } from './SpentCell';
 
-import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useCategoriesById } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
@@ -236,8 +235,11 @@ export function ExpenseCategoryListItem({
     `${budgetType as BudgetType}-balance-menu` as const;
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
-  const { list: categories } = useCategories();
-  const categoriesById = groupById(categories);
+  const {
+    data: { list: categoriesById } = {
+      list: {} as Record<string, CategoryEntity>,
+    },
+  } = useCategoriesById();
 
   const onCarryover = useCallback(
     (carryover: boolean) => {

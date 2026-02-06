@@ -194,7 +194,7 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
   });
 
   const categories = useBudgetAutomationCategories();
-  const currentCategory = useCategory(categoryId);
+  const { data: currentCategory } = useCategory(categoryId);
 
   const needsMigration = currentCategory?.template_settings?.source !== 'ui';
 

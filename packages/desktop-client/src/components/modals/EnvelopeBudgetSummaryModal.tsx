@@ -8,7 +8,7 @@ import {
   prevMonth,
   sheetForMonth,
 } from 'loot-core/shared/months';
-import { groupById } from 'loot-core/shared/util';
+import { type CategoryEntity } from 'loot-core/types/models/category';
 
 import { ToBudgetAmount } from '@desktop-client/components/budget/envelope/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '@desktop-client/components/budget/envelope/budgetsummary/TotalsList';
@@ -18,7 +18,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useCategoriesById } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
@@ -53,8 +53,11 @@ export function EnvelopeBudgetSummaryModal({
     }) ?? 0;
 
   const { showUndoNotification } = useUndo();
-  const { list: categories } = useCategories();
-  const categoriesById = groupById(categories);
+  const {
+    data: { list: categoriesById } = {
+      list: {} as Record<string, CategoryEntity>,
+    },
+  } = useCategoriesById();
 
   const openTransferAvailableModal = () => {
     dispatch(

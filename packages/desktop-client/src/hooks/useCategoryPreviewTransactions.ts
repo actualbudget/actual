@@ -26,7 +26,7 @@ export function useCategoryPreviewTransactions({
   categoryId,
   month,
 }: UseCategoryPreviewTransactionsProps): UseCategoryPreviewTransactionsResult {
-  const category = useCategory(categoryId);
+  const { data: category } = useCategory(categoryId);
   const { schedules } = useCategoryScheduleGoalTemplates({
     category,
   });

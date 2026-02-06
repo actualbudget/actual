@@ -81,7 +81,7 @@ function CustomReportListCardsInner({
 
   const payees = usePayees();
   const accounts = useAccounts();
-  const categories = useCategories();
+  const { data: categories = { list: [], grouped: [] } } = useCategories();
 
   const hasWarning = calculateHasWarning(report.conditions ?? [], {
     categories: categories.list,

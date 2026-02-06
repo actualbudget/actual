@@ -584,7 +584,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         ) || [],
       [unserializedTransactions, dateFormat],
     );
-    const { grouped: categoryGroups } = useCategories();
+    const { data: { grouped: categoryGroups } = { grouped: [] } } =
+      useCategories();
 
     useEffect(() => {
       if (window.history.length === 1) {
@@ -1679,7 +1680,7 @@ type TransactionEditProps = Omit<
 >;
 
 export const TransactionEdit = (props: TransactionEditProps) => {
-  const { list: categories } = useCategories();
+  const { data: { list: categories } = { list: [] } } = useCategories();
   const payees = usePayees();
   const lastTransaction = useSelector(
     state => state.transactions.lastTransaction,
