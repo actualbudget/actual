@@ -70,5 +70,10 @@
     "name": "Catppuccin Mocha",
     "repo": "noahjalex/catppuccin-mocha-actual",
     "colors": ["#1e1e2e", "#11111b", "#313244", "#cba6f7", "#89b4fa", "#cdd6f4"]
+  },
+  {
+    "name": "You Need A Dark Mode",
+    "repo": "distantvapor/you-need-a-dark-mode",
+    "colors": ["#121212", "#1E1E1E", "#00B3C4", "#006A84", "#D4D4D4", "#333333"]
   }
 ]
