@@ -74,7 +74,10 @@ export function BudgetPage() {
   const { t } = useTranslation();
   const locale = useLocale();
   const {
-    data: { list: categories, grouped: categoryGroups },
+    data: { list: categories, grouped: categoryGroups } = {
+      list: [],
+      grouped: [],
+    },
   } = useCategories();
   const [budgetTypePref] = useSyncedPref('budgetType');
   const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'envelope';
@@ -727,9 +730,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
   >(envelopeBudget.toBudget);
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
-  const {
-    data: { list: categories },
-  } = useCategories();
+  const { data: { list: categories } = { list: [] } } = useCategories();
   const categoriesById = useMemo(() => groupById(categories), [categories]);
 
   const openCoverOverbudgetedModal = useCallback(() => {
@@ -810,7 +811,10 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
   const { t } = useTranslation();
 
   const {
-    data: { list: categories, grouped: categoryGroups },
+    data: { list: categories, grouped: categoryGroups } = {
+      list: [],
+      grouped: [],
+    },
   } = useCategories();
   const categoriesById = useMemo(() => groupById(categories), [categories]);
 
