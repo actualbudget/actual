@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { format as formatDate, parseISO } from 'date-fns';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -11,6 +10,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { format as formatDate, parseISO } from 'date-fns';
 
 import { currentDay, subDays } from 'loot-core/shared/months';
 import {
