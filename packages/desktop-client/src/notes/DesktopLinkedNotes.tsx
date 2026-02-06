@@ -1,6 +1,6 @@
 import { type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from './common/Link';
+import { Link } from '@desktop-client/components/common/Link';
 //import { theme } from '@actual-app/components/theme';
 //import { css } from '@emotion/css';
 
