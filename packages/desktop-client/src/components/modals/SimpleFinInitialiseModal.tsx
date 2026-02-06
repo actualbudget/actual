@@ -28,6 +28,7 @@ type SimpleFinInitialiseModalProps = Extract<
 
 export const SimpleFinInitialiseModal = ({
   onSuccess,
+  fileId,
 }: SimpleFinInitialiseModalProps) => {
   const { t } = useTranslation();
   const [token, setToken] = useState('');
@@ -43,15 +44,16 @@ export const SimpleFinInitialiseModal = ({
 
     setIsLoading(true);
 
-    const { error, reason } =
+    const { error: err, reason } =
       (await send('secret-set', {
         name: 'simplefin_token',
         value: token,
+        fileId,
       })) || {};
 
-    if (error) {
+    if (err) {
       setIsValid(false);
-      setError(getSecretsError(error, reason));
+      setError(getSecretsError(err, reason));
     } else {
       onSuccess();
     }
@@ -64,7 +66,7 @@ export const SimpleFinInitialiseModal = ({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('Set-up SimpleFIN')}
+            title={t('Set up SimpleFIN')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>

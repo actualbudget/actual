@@ -29,7 +29,15 @@ app.post('/', async (req, res) => {
       details: 'Failed to validate authentication method',
     });
   }
-  const { name, value } = req.body || {};
+  const { name, value, fileId } = req.body || {};
+
+  if (!fileId) {
+    return res.status(400).send({
+      status: 'error',
+      reason: 'missing-file-id',
+      details: 'fileId is required',
+    });
+  }
 
   if (method === 'openid') {
     const canSaveSecrets = isAdmin(res.locals.user_id);
@@ -45,14 +53,19 @@ app.post('/', async (req, res) => {
     }
   }
 
-  secretsService.set(name, value);
+  secretsService.set(name, value, { fileId });
 
   res.status(200).send({ status: 'ok' });
 });
 
 app.get('/:name', async (req, res) => {
   const name = req.params.name;
-  const keyExists = secretsService.exists(name);
+  // Support fileId via query param or header
+  const fileId = req.query.fileId || req.headers['x-actual-file-id'];
+  if (!fileId || typeof fileId !== 'string') {
+    return res.status(400).send('fileId is required');
+  }
+  const keyExists = secretsService.exists(name, { fileId });
   if (keyExists) {
     res.sendStatus(204);
   } else {

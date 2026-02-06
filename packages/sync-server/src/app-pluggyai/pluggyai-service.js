@@ -2,34 +2,41 @@ import { PluggyClient } from 'pluggy-sdk';
 
 import { SecretName, secretsService } from '../services/secrets-service';
 
-let pluggyClient = null;
+const pluggyClientCache = new Map();
 
-function getPluggyClient() {
-  if (!pluggyClient) {
-    const clientId = secretsService.get(SecretName.pluggyai_clientId);
-    const clientSecret = secretsService.get(SecretName.pluggyai_clientSecret);
+function getPluggyClient(options = {}) {
+  const cacheKey = options.fileId;
+  if (!pluggyClientCache.has(cacheKey)) {
+    const clientId = secretsService.get(SecretName.pluggyai_clientId, options);
+    const clientSecret = secretsService.get(
+      SecretName.pluggyai_clientSecret,
+      options,
+    );
 
-    pluggyClient = new PluggyClient({
-      clientId,
-      clientSecret,
-    });
+    pluggyClientCache.set(
+      cacheKey,
+      new PluggyClient({
+        clientId,
+        clientSecret,
+      }),
+    );
   }
 
-  return pluggyClient;
+  return pluggyClientCache.get(cacheKey);
 }
 
 export const pluggyaiService = {
-  isConfigured: () => {
+  isConfigured: (options = {}) => {
     return !!(
-      secretsService.get(SecretName.pluggyai_clientId) &&
-      secretsService.get(SecretName.pluggyai_clientSecret) &&
-      secretsService.get(SecretName.pluggyai_itemIds)
+      secretsService.get(SecretName.pluggyai_clientId, options) &&
+      secretsService.get(SecretName.pluggyai_clientSecret, options) &&
+      secretsService.get(SecretName.pluggyai_itemIds, options)
     );
   },
 
-  getAccountsByItemId: async itemId => {
+  getAccountsByItemId: async (itemId, options = {}) => {
     try {
-      const client = getPluggyClient();
+      const client = getPluggyClient(options);
       const { results, total, ...rest } = await client.fetchAccounts(itemId);
       return {
         results,
@@ -43,9 +50,9 @@ export const pluggyaiService = {
       throw error;
     }
   },
-  getAccountById: async accountId => {
+  getAccountById: async (accountId, options = {}) => {
     try {
-      const client = getPluggyClient();
+      const client = getPluggyClient(options);
       const account = await client.fetchAccount(accountId);
       return {
         ...account,
@@ -58,11 +65,17 @@ export const pluggyaiService = {
     }
   },
 
-  getTransactionsByAccountId: async (accountId, startDate, pageSize, page) => {
+  getTransactionsByAccountId: async (
+    accountId,
+    startDate,
+    pageSize,
+    page,
+    options = {},
+  ) => {
     try {
-      const client = getPluggyClient();
+      const client = getPluggyClient(options);
 
-      const account = await pluggyaiService.getAccountById(accountId);
+      const account = await pluggyaiService.getAccountById(accountId, options);
 
       // the sandbox data doesn't move the dates automatically so the
       // transactions are often older than 90 days. The owner on one of the
@@ -95,13 +108,14 @@ export const pluggyaiService = {
       throw error;
     }
   },
-  getTransactions: async (accountId, startDate) => {
+  getTransactions: async (accountId, startDate, options = {}) => {
     let transactions = [];
     let result = await pluggyaiService.getTransactionsByAccountId(
       accountId,
       startDate,
       500,
       1,
+      options,
     );
     transactions = transactions.concat(result.results);
     const totalPages = result.totalPages;
@@ -111,6 +125,7 @@ export const pluggyaiService = {
         startDate,
         500,
         result.page + 1,
+        options,
       );
       transactions = transactions.concat(result.results);
     }

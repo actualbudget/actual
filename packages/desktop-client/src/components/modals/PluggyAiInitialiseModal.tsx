@@ -29,6 +29,7 @@ type PluggyAiInitialiseProps = Extract<
 
 export const PluggyAiInitialiseModal = ({
   onSuccess,
+  fileId,
 }: PluggyAiInitialiseProps) => {
   const { t } = useTranslation();
   const [clientId, setClientId] = useState('');
@@ -55,42 +56,50 @@ export const PluggyAiInitialiseModal = ({
 
     setIsLoading(true);
 
-    let { error, reason } =
+    let result =
       (await send('secret-set', {
         name: 'pluggyai_clientId',
         value: clientId,
+        fileId,
       })) || {};
 
-    if (error) {
+    let { error: err, reason } = result;
+
+    if (err) {
       setIsLoading(false);
       setIsValid(false);
-      setError(getSecretsError(error, reason));
+      setError(getSecretsError(err, reason));
       return;
-    } else {
-      ({ error, reason } =
-        (await send('secret-set', {
-          name: 'pluggyai_clientSecret',
-          value: clientSecret,
-        })) || {});
-      if (error) {
-        setIsLoading(false);
-        setIsValid(false);
-        setError(getSecretsError(error, reason));
-        return;
-      } else {
-        ({ error, reason } =
-          (await send('secret-set', {
-            name: 'pluggyai_itemIds',
-            value: itemIds,
-          })) || {});
+    }
 
-        if (error) {
-          setIsLoading(false);
-          setIsValid(false);
-          setError(getSecretsError(error, reason));
-          return;
-        }
-      }
+    result =
+      (await send('secret-set', {
+        name: 'pluggyai_clientSecret',
+        value: clientSecret,
+        fileId,
+      })) || {};
+    ({ error: err, reason } = result);
+
+    if (err) {
+      setIsLoading(false);
+      setIsValid(false);
+      setError(getSecretsError(err, reason));
+      return;
+    }
+
+    result =
+      (await send('secret-set', {
+        name: 'pluggyai_itemIds',
+        value: itemIds,
+        fileId,
+      })) || {};
+    ({ error: err, reason } = result);
+
+    if (err) {
+      setIsLoading(false);
+      setIsValid(false);
+      setError(getSecretsError(err, reason));
+      return;
     }
 
     setIsValid(true);
@@ -104,7 +113,7 @@ export const PluggyAiInitialiseModal = ({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('Set-up Pluggy.ai')}
+            title={t('Set up Pluggy.ai')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>

@@ -61,7 +61,7 @@ function useAddBudgetAccountOptions() {
   return { addOnBudgetAccountOption, addOffBudgetAccountOption };
 }
 
-export type SelectLinkedAccountsModalProps =
+export type SelectLinkedAccountsModalProps = (
   | {
       requisitionId: string;
       externalAccounts: SyncServerGoCardlessAccount[];
@@ -76,12 +76,16 @@ export type SelectLinkedAccountsModalProps =
       requisitionId?: undefined;
       externalAccounts: SyncServerPluggyAiAccount[];
       syncSource: 'pluggyai';
-    };
+    }
+) & {
+  upgradingAccountId?: string;
+};
 
 export function SelectLinkedAccountsModal({
   requisitionId = undefined,
   externalAccounts,
   syncSource,
+  upgradingAccountId,
 }: SelectLinkedAccountsModalProps) {
   const propsWithSortedExternalAccounts =
     useMemo<SelectLinkedAccountsModalProps>(() => {
@@ -122,11 +126,22 @@ export function SelectLinkedAccountsModal({
   >(new Map());
   const [chosenAccounts, setChosenAccounts] = useState<Record<string, string>>(
     () => {
-      return Object.fromEntries(
+      const fromLinked = Object.fromEntries(
         localAccounts
           .filter(acc => acc.account_id)
           .map(acc => [acc.account_id, acc.id]),
       );
+      if (
+        upgradingAccountId &&
+        externalAccounts?.length > 0 &&
+        !Object.values(fromLinked).includes(upgradingAccountId)
+      ) {
+        return {
+          ...fromLinked,
+          [externalAccounts[0].account_id]: upgradingAccountId,
+        };
+      }
+      return fromLinked;
     },
   );
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =

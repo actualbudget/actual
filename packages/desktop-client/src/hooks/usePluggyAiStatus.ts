@@ -4,30 +4,45 @@ import { send } from 'loot-core/platform/client/fetch';
 
 import { useSyncServerStatus } from './useSyncServerStatus';
 
-export function usePluggyAiStatus() {
+export function usePluggyAiStatus(fileId?: string) {
   const [configuredPluggyAi, setConfiguredPluggyAi] = useState<boolean | null>(
     null,
   );
+  const [configuredPluggyAiScoped, setConfiguredPluggyAiScoped] = useState<
+    boolean | null
+  >(null);
   const [isLoading, setIsLoading] = useState(false);
   const status = useSyncServerStatus();
 
   useEffect(() => {
-    async function fetch() {
+    if (!fileId) {
+      setConfiguredPluggyAi(false);
+      setConfiguredPluggyAiScoped(null);
+      return;
+    }
+
+    async function fetchStatus() {
       setIsLoading(true);
 
-      const results = await send('pluggyai-status');
+      const result = await send('pluggyai-status', { fileId });
 
-      setConfiguredPluggyAi(results.configured || false);
+      setConfiguredPluggyAi(
+        (result as { configured?: boolean })?.configured || false,
+      );
+      setConfiguredPluggyAiScoped(
+        (result as { configured?: boolean })?.configured || false,
+      );
       setIsLoading(false);
     }
 
     if (status === 'online') {
-      fetch();
+      fetchStatus();
     }
-  }, [status]);
+  }, [status, fileId]);
 
   return {
     configuredPluggyAi,
+    configuredPluggyAiScoped: fileId ? configuredPluggyAiScoped : undefined,
     isLoading,
   };
 }

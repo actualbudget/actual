@@ -95,18 +95,21 @@ export type Modal =
       name: 'gocardless-init';
       options: {
         onSuccess: () => void;
+        fileId: string;
       };
     }
   | {
       name: 'simplefin-init';
       options: {
         onSuccess: () => void;
+        fileId: string;
       };
     }
   | {
       name: 'pluggyai-init';
       options: {
         onSuccess: () => void;
+        fileId: string;
       };
     }
   | {
@@ -121,6 +124,7 @@ export type Modal =
         >;
         onClose?: (() => void) | undefined;
         onSuccess: (data: GoCardlessToken) => Promise<void>;
+        fileId?: string;
       };
     }
   | {
@@ -556,6 +560,13 @@ export type Modal =
         accountName: string;
         isViewBankSyncSettings: boolean;
         onUnlink: () => void;
+      };
+    }
+  | {
+      name: 'confirm-reset-credentials';
+      options: {
+        message: string;
+        onConfirm: () => void;
       };
     }
   | {

@@ -6,6 +6,12 @@ import { handleError } from '../app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '../services/secrets-service';
 import { requestLoggerMiddleware } from '../util/middlewares';
 
+function getFileIdFromRequest(req) {
+  const fileId =
+    req.body?.fileId || req.query?.fileId || req.headers['x-actual-file-id'];
+  return fileId && typeof fileId === 'string' ? fileId : undefined;
+}
+
 const app = express();
 export { app as handlers };
 app.use(express.json());
@@ -14,7 +20,9 @@ app.use(requestLoggerMiddleware);
 app.post(
   '/status',
   handleError(async (req, res) => {
-    const token = secretsService.get(SecretName.simplefin_token);
+    const fileId = getFileIdFromRequest(req);
+    const options = fileId ? { fileId } : {};
+    const token = secretsService.get(SecretName.simplefin_token, options);
     const configured = token != null && token !== 'Forbidden';
 
     res.send({
@@ -29,16 +37,23 @@ app.post(
 app.post(
   '/accounts',
   handleError(async (req, res) => {
-    let accessKey = secretsService.get(SecretName.simplefin_accessKey);
+    const fileId = getFileIdFromRequest(req);
+    const options = fileId ? { fileId } : {};
+
+    let accessKey = secretsService.get(SecretName.simplefin_accessKey, options);
 
     try {
       if (accessKey == null || accessKey === 'Forbidden') {
-        const token = secretsService.get(SecretName.simplefin_token);
+        const token = secretsService.get(SecretName.simplefin_token, options);
         if (token == null || token === 'Forbidden') {
           throw new Error('No token');
         } else {
           accessKey = await getAccessKey(token);
-          secretsService.set(SecretName.simplefin_accessKey, accessKey);
+          secretsService.set(
+            SecretName.simplefin_accessKey,
+            accessKey,
+            options,
+          );
           if (accessKey == null || accessKey === 'Forbidden') {
             throw new Error('No access key');
           }
@@ -69,8 +84,13 @@ app.post(
   '/transactions',
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
+    const fileId = getFileIdFromRequest(req);
+    const options = fileId ? { fileId } : {};
 
-    const accessKey = secretsService.get(SecretName.simplefin_accessKey);
+    const accessKey = secretsService.get(
+      SecretName.simplefin_accessKey,
+      options,
+    );
 
     if (accessKey == null || accessKey === 'Forbidden') {
       invalidToken(res);
