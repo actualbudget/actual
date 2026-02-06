@@ -2,8 +2,8 @@ import { type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { isElectron } from 'loot-core/shared/environment';
-//import { theme } from '@actual-app/components/theme';
-//import { css } from '@emotion/css';
+import { theme } from '@actual-app/components/theme';
+import { css } from '@emotion/css';
 
 import { normalizeUrl } from './linkParser';
 
@@ -18,14 +18,14 @@ type DesktopLinkedNotesProps = {
   isFilePath: boolean;
 };
 
-//const linkStyles = css({
-//color: theme.pageTextLink,
-//textDecoration: 'underline',
-//cursor: 'pointer',
-//'&:hover': {
-//color: theme.pageTextLinkLight,
-//},
-//});
+const linkStyles = css({
+color: theme.pageTextLink,
+textDecoration: 'underline',
+cursor: 'pointer',
+'&:hover': {
+color: theme.pageTextLinkLight,
+},
+});
 
 export function DesktopLinkedNotes({
   displayText,
@@ -65,7 +65,7 @@ export function DesktopLinkedNotes({
 
   return (
     <>
-      <Link variant="text" onClick={handleClick}>
+      <Link variant="text" onClick={handleClick} style={linkStyles}>
         {displayText}
       </Link>
       {separator}
