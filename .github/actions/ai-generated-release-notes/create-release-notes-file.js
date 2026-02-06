@@ -3,6 +3,8 @@
 import * as core from '@actions/core';
 import { Octokit } from '@octokit/rest';
 
+import { buildReleaseNotesFileContent } from './build-file-content.js';
+
 const token = process.env.GITHUB_TOKEN;
 const repo = process.env.GITHUB_REPOSITORY;
 const issueNumber = process.env.GITHUB_EVENT_ISSUE_NUMBER;
@@ -39,19 +41,11 @@ async function createReleaseNotesFile() {
       return;
     }
 
-    // Create file content - ensure category is not quoted
-    const cleanCategory =
-      typeof category === 'string'
-        ? category.replace(/^["']|["']$/g, '')
-        : category;
+    const { cleanCategory, fileContent } = buildReleaseNotesFileContent(
+      summaryData,
+      category,
+    );
     console.log('Clean category:', cleanCategory);
-
-    const fileContent = `---
-category: ${cleanCategory}
-authors: [${summaryData.author}]
----
-
-${summaryData.summary}`;
 
     const fileName = `upcoming-release-notes/${summaryData.prNumber}.md`;
 

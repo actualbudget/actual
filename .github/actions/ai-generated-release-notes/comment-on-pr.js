@@ -2,6 +2,8 @@
 
 import { Octokit } from '@octokit/rest';
 
+import { buildReleaseNotesFileContent } from './build-file-content.js';
+
 const token = process.env.GITHUB_TOKEN;
 const repo = process.env.GITHUB_REPOSITORY;
 const issueNumber = process.env.GITHUB_EVENT_ISSUE_NUMBER;
@@ -31,11 +33,10 @@ async function commentOnPR() {
       return;
     }
 
-    // Clean category for display
-    const cleanCategory =
-      typeof category === 'string'
-        ? category.replace(/^["']|["']$/g, '')
-        : category;
+    const { cleanCategory, fileContent } = buildReleaseNotesFileContent(
+      summaryData,
+      category,
+    );
 
     // Get PR info for the file URL
     const { data: pr } = await octokit.rest.pulls.get({
@@ -52,14 +53,6 @@ async function commentOnPR() {
     const fileUrl = pr.head.repo
       ? `https://github.com/${headOwner}/${headRepo}/blob/${prBranch}/${fileName}`
       : null;
-
-    const fileContent = `---
-category: ${cleanCategory}
-authors: [${summaryData.author}]
----
-
-${summaryData.summary}
-`;
 
     let commentBody = ['🤖 **Auto-generated Release Notes**', ''];
 
