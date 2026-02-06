@@ -488,6 +488,7 @@ export async function reconcileTransactions(
   strictIdChecking = true,
   isPreview = false,
   defaultCleared = true,
+  updateDates = false,
 ): Promise<ReconcileTransactionsResult> {
   logger.log('Performing transaction reconciliation');
 
@@ -536,6 +537,10 @@ export async function reconcileTransactions(
           existing.raw_synced_data ?? trans.raw_synced_data ?? null,
       };
 
+      if (updateDates && trans.date) {
+        updates['date'] = trans.date;
+      }
+
       const fieldsToMarkUpdated = Object.keys(updates).filter(k => {
         // do not mark raw_synced_data if it's gone from falsy to falsy
         if (!existing.raw_synced_data && !trans.raw_synced_data) {
@@ -558,13 +563,27 @@ export async function reconcileTransactions(
         updatedPreview.push({ transaction: trans, ignored: true });
       }
 
-      if (existing.is_parent && existing.cleared !== updates.cleared) {
+      const clearedUpdated = existing.cleared !== updates.cleared;
+      const dateUpdated =
+        updateDates && trans.date && existing.date !== trans.date;
+
+      if (existing.is_parent && (clearedUpdated || dateUpdated)) {
         const children = await db.all<Pick<db.DbViewTransaction, 'id'>>(
           'SELECT id FROM v_transactions WHERE parent_id = ?',
           [existing.id],
         );
+        const childUpdates = {};
+
+        if (clearedUpdated) {
+          childUpdates['cleared'] = updates.cleared;
+        }
+
+        if (dateUpdated) {
+          childUpdates['date'] = trans.date;
+        }
+
         for (const child of children) {
-          updated.push({ id: child.id, cleared: updates.cleared });
+          updated.push({ id: child.id, ...childUpdates });
         }
       }
     } else if (trans.tombstone) {
@@ -895,6 +914,12 @@ async function processBankSyncDownload(
       .select('value'),
   ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
 
+  const updateDates = await aqlQuery(
+    q('preferences')
+      .filter({ id: `sync-update-dates-${id}` })
+      .select('value'),
+  ).then(data => String(data?.data?.[0]?.value ?? 'false') === 'true');
+
   /** Starting balance is actually the current balance of the account. */
   const {
     transactions: originalTransactions,
@@ -948,6 +973,9 @@ async function processBankSyncDownload(
         transactions,
         true,
         useStrictIdChecking,
+        false,
+        true,
+        updateDates,
       );
       return {
         ...result,
@@ -967,6 +995,9 @@ async function processBankSyncDownload(
       importTransactions ? transactions : [],
       true,
       useStrictIdChecking,
+      false,
+      true,
+      updateDates,
     );
 
     if (currentBalance != null) {
