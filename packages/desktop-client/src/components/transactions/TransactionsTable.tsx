@@ -2667,10 +2667,13 @@ export const TransactionTable = forwardRef(
     // - No sort is active (sortField is empty) OR sorted by date
     // - Not filtered (isFiltered is false)
     // - onReorder callback is provided
-    const canDrag =
-      (!props.sortField || props.sortField === 'date') &&
-      !props.isFiltered &&
-      props.onReorder != null;
+    const canDrag = useMemo(
+      () =>
+        (!props.sortField || props.sortField === 'date') &&
+        !props.isFiltered &&
+        props.onReorder != null,
+      [props.sortField, props.isFiltered, props.onReorder],
+    );
 
     const onDragChange = useCallback<OnDragChangeCallback<TransactionEntity>>(
       drag => {

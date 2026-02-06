@@ -375,9 +375,10 @@ export function useDrop<T extends { id: string }>({
       // calculation needed.
       const rect = dropRef.current.getBoundingClientRect();
       const hoverMiddleY = (rect.bottom - rect.top) / 2;
-      const hoverClientY = lastClientY.current
-        ? lastClientY.current - rect.top
-        : hoverMiddleY + 1;
+      const hoverClientY =
+        lastClientY.current != null
+          ? lastClientY.current - rect.top
+          : hoverMiddleY + 1;
       const pos: DropPosition =
         hoverClientY < hoverMiddleY ? 'before' : 'after';
 
