@@ -21,6 +21,7 @@ export function getInternalBankSyncProviders(): InternalBankSyncProvider[] {
 
 type ScopeStatus = {
   configured: boolean;
+  encrypted?: boolean;
   error?: string;
 };
 
@@ -32,24 +33,39 @@ async function getProviderStatus(
 ): Promise<ScopeStatus> {
   try {
     if (slug === 'pluggyai') {
-      const result = await send('pluggyai-status', { fileId });
+      const result = (await send('pluggyai-status', { fileId })) as {
+        configured?: boolean;
+        encrypted?: boolean;
+        error?: string;
+      };
       return {
-        configured: Boolean((result as { configured?: boolean })?.configured),
-        error: (result as { error?: string })?.error,
+        configured: Boolean(result?.configured),
+        encrypted: Boolean(result?.encrypted),
+        error: result?.error,
       };
     }
     if (slug === 'goCardless') {
-      const result = await send('gocardless-status', { fileId });
+      const result = (await send('gocardless-status', { fileId })) as {
+        configured?: boolean;
+        encrypted?: boolean;
+        error?: string;
+      };
       return {
-        configured: Boolean((result as { configured?: boolean })?.configured),
-        error: (result as { error?: string })?.error,
+        configured: Boolean(result?.configured),
+        encrypted: Boolean(result?.encrypted),
+        error: result?.error,
       };
     }
     if (slug === 'simpleFin') {
-      const result = await send('simplefin-status', { fileId });
+      const result = (await send('simplefin-status', { fileId })) as {
+        configured?: boolean;
+        encrypted?: boolean;
+        error?: string;
+      };
       return {
-        configured: Boolean((result as { configured?: boolean })?.configured),
-        error: (result as { error?: string })?.error,
+        configured: Boolean(result?.configured),
+        encrypted: Boolean(result?.encrypted),
+        error: result?.error,
       };
     }
   } catch (err) {

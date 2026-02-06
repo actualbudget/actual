@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import { PluggyClient } from 'pluggy-sdk';
 
 import { SecretName, secretsService } from '../services/secrets-service';
@@ -5,7 +7,10 @@ import { SecretName, secretsService } from '../services/secrets-service';
 const pluggyClientCache = new Map();
 
 function getPluggyClient(options = {}) {
-  const cacheKey = options.fileId;
+  let cacheKey = options.fileId ?? '';
+  if (options.password != null && options.password !== '') {
+    cacheKey += `:${crypto.createHash('sha256').update(options.password).digest('hex')}`;
+  }
   if (!pluggyClientCache.has(cacheKey)) {
     const clientId = secretsService.get(SecretName.pluggyai_clientId, options);
     const clientSecret = secretsService.get(

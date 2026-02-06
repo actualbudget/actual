@@ -2,6 +2,8 @@ import createDebug from 'debug';
 
 import { getAccountDb } from '../account-db';
 
+import { decryptSecret, isEncryptedValue } from './encryption-service';
+
 /**
  * An enum of valid secret names.
  * @readonly
@@ -88,19 +90,72 @@ function _createCacheKey(fileId, name) {
 export const secretsService = {
   /**
    * Retrieves the value of a secret by name.
+   * If the secret is stored encrypted, options.password must be provided to decrypt.
    * @param {SecretName} name - The name of the secret to retrieve.
    * @param {Object} options - Scope configuration.
    * @param {string} options.fileId - The file ID for the secret.
-   * @returns {string|null} The value of the secret, or null if the secret does not exist.
+   * @param {string} [options.password] - Password to decrypt encrypted secrets.
+   * @returns {string|null} The value of the secret (decrypted if encrypted), or null if the secret does not exist.
+   * @throws {Error} If the secret is encrypted and options.password is missing or wrong (reason: 'encrypted-secret-requires-password' or 'decrypt-failure').
    */
   get: (name, options = {}) => {
     const fileId = secretsDb._resolveFileId(options);
     const cacheKey = _createCacheKey(fileId, name);
-    return (
+    const raw =
       _cachedSecrets.get(cacheKey) ??
       secretsDb.get(name, options)?.value ??
-      null
-    );
+      null;
+
+    if (raw == null) return null;
+
+    const rawStr =
+      typeof raw === 'string'
+        ? raw
+        : Buffer.isBuffer(raw)
+          ? raw.toString('utf8')
+          : String(raw);
+
+    if (isEncryptedValue(rawStr)) {
+      const password = options.password;
+      if (password == null || password === '') {
+        const err = new Error('encrypted-secret-requires-password');
+        err.reason = 'encrypted-secret-requires-password';
+        throw err;
+      }
+      try {
+        return decryptSecret(rawStr, password);
+      } catch (e) {
+        const err = new Error(e.message || 'decrypt-failure');
+        err.reason = 'decrypt-failure';
+        throw err;
+      }
+    }
+
+    return rawStr;
+  },
+
+  /**
+   * Determines whether a secret is stored in encrypted format.
+   * @param {SecretName} name - The name of the secret to check.
+   * @param {Object} options - Scope configuration.
+   * @param {string} options.fileId - The file ID for the secret.
+   * @returns {boolean} True if the secret exists and is encrypted, false otherwise.
+   */
+  isEncrypted: (name, options = {}) => {
+    const fileId = secretsDb._resolveFileId(options);
+    const cacheKey = _createCacheKey(fileId, name);
+    const raw =
+      _cachedSecrets.get(cacheKey) ??
+      secretsDb.get(name, options)?.value ??
+      null;
+    if (raw == null) return false;
+    const rawStr =
+      typeof raw === 'string'
+        ? raw
+        : Buffer.isBuffer(raw)
+          ? raw.toString('utf8')
+          : raw;
+    return isEncryptedValue(rawStr);
   },
 
   /**
@@ -124,12 +179,19 @@ export const secretsService = {
 
   /**
    * Determines whether a secret with the given name exists.
+   * Does not require a password for encrypted secrets.
    * @param {SecretName} name - The name of the secret to check for existence.
    * @param {Object} options - Scope configuration.
    * @param {string} options.fileId - The file ID for the secret.
    * @returns {boolean} True if a secret with the given name exists, false otherwise.
    */
   exists: (name, options = {}) => {
-    return Boolean(secretsService.get(name, options));
+    const fileId = secretsDb._resolveFileId(options);
+    const cacheKey = _createCacheKey(fileId, name);
+    const raw =
+      _cachedSecrets.get(cacheKey) ??
+      secretsDb.get(name, options)?.value ??
+      null;
+    return raw != null;
   },
 };

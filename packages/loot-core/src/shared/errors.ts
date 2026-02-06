@@ -130,7 +130,16 @@ export function getSyncError(error, id) {
 }
 
 export function getBankSyncError(error: { message?: string }) {
-  return error.message || t('We had an unknown problem syncing the account.');
+  const msg = error.message;
+  if (msg === 'decrypt-failure') {
+    return t('Incorrect encryption password for bank sync. Please try again.');
+  }
+  if (msg === 'encrypted-secret-requires-password') {
+    return t(
+      'Bank sync secrets are encrypted. Please provide the encryption password when syncing.',
+    );
+  }
+  return msg || t('We had an unknown problem syncing the account.');
 }
 
 export class LazyLoadFailedError extends Error {

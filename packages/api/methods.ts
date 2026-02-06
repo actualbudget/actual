@@ -59,7 +59,8 @@ export async function sync() {
 }
 
 export async function runBankSync(args?: {
-  accountId: APIAccountEntity['id'];
+  accountId?: APIAccountEntity['id'];
+  passwords?: Record<string, string>;
 }) {
   return send('api/bank-sync', args);
 }

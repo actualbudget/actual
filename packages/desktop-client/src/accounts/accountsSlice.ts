@@ -14,6 +14,7 @@ import {
 } from 'loot-core/types/models';
 
 import { resetApp } from '@desktop-client/app/appSlice';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { markPayeesDirty } from '@desktop-client/payees/payeesSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
@@ -377,11 +378,18 @@ function handleSyncResponse(
 
 type SyncAccountsPayload = {
   id?: AccountEntity['id'] | undefined;
+  passwords?: Record<string, string>;
+};
+
+const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
+  goCardless: 'GoCardless',
+  simpleFin: 'SimpleFIN',
+  pluggyai: 'Pluggy.ai',
 };
 
 export const syncAccounts = createAppAsyncThunk(
   `${sliceName}/syncAccounts`,
-  async ({ id }: SyncAccountsPayload, { dispatch, getState }) => {
+  async ({ id, passwords }: SyncAccountsPayload, { dispatch, getState }) => {
     // Disallow two parallel sync operations
     const accountsState = getState().account;
     if (accountsState.accountsSyncing.length > 0) {
@@ -423,13 +431,55 @@ export const syncAccounts = createAppAsyncThunk(
         .map(({ id }) => id);
     }
 
-    dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
-
     // TODO: Force cast to AccountEntity.
     // Server is currently returning the DB model it should return the entity model instead.
     const accountsData = (await send(
       'accounts-get',
     )) as unknown as AccountEntity[];
+
+    // If no passwords provided, check whether any provider in scope uses encryption and show modal
+    if (passwords == null) {
+      const encryptionStatus = (await send('check-provider-encryption')) as
+        | { goCardless?: boolean; simpleFin?: boolean; pluggyai?: boolean }
+        | undefined;
+      const syncSourcesInScope = new Set(
+        accountsData
+          .filter(
+            a =>
+              accountIdsToSync.includes(a.id) && a.account_sync_source != null,
+          )
+          .map(a => a.account_sync_source as string),
+      );
+      const encryptedNeeded =
+        encryptionStatus && syncSourcesInScope.size > 0
+          ? (['goCardless', 'simpleFin', 'pluggyai'] as const).filter(
+              slug => encryptionStatus[slug] && syncSourcesInScope.has(slug),
+            )
+          : [];
+      if (encryptedNeeded.length > 0) {
+        const providers = encryptedNeeded.map(slug => ({
+          slug,
+          displayName: PROVIDER_DISPLAY_NAMES[slug] ?? slug,
+        }));
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'bank-sync-password',
+              options: {
+                providers,
+                onSubmit: (passwordsMap: Record<string, string>) => {
+                  void dispatch(syncAccounts({ id, passwords: passwordsMap }));
+                },
+              },
+            },
+          }),
+        );
+        return false;
+      }
+    }
+
+    dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
+
     const simpleFinAccounts = accountsData.filter(
       a =>
         a.account_sync_source === 'simpleFin' &&
@@ -446,6 +496,7 @@ export const syncAccounts = createAppAsyncThunk(
 
       const res = await send('simplefin-batch-sync', {
         ids: simpleFinAccounts.map(a => a.id),
+        passwords,
       });
 
       for (const account of res) {
@@ -472,6 +523,7 @@ export const syncAccounts = createAppAsyncThunk(
       // Perform sync operation
       const res = await send('accounts-bank-sync', {
         ids: [accountId],
+        passwords,
       });
 
       const success = handleSyncResponse(

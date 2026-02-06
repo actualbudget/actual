@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import { DialogTrigger } from 'react-aria-components';
+import { Dialog, DialogTrigger } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgAdd } from '@actual-app/components/icons/v1';
 import { Menu, type MenuItem } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 
@@ -17,6 +18,7 @@ export function ProviderScopeButton({
   statusMap,
   onSelect,
   isDisabled = false,
+  variant = 'normal',
 }: {
   label: string;
   statusMap: ProviderStatusMap;
@@ -25,6 +27,7 @@ export function ProviderScopeButton({
     provider: InternalBankSyncProvider;
   }) => void;
   isDisabled?: boolean;
+  variant?: 'normal' | 'bare';
 }) {
   const { t } = useTranslation();
   const providers = useMemo(() => getInternalBankSyncProviders(), []);
@@ -48,19 +51,33 @@ export function ProviderScopeButton({
 
   return (
     <DialogTrigger>
-      <Button isDisabled={isDisabled}>{label}</Button>
+      <Button
+        variant={variant}
+        isDisabled={isDisabled}
+        style={variant === 'bare' ? { padding: 0 } : undefined}
+      >
+        {variant === 'bare' && (
+          <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
+        )}
+        {label}
+      </Button>
       <Popover>
-        <Menu
-          items={items}
-          onMenuSelect={itemId => {
-            const providerSlug = String(itemId);
-            if (providerSlug === 'none') return;
-            const provider = providers.find(p => p.slug === providerSlug);
-            if (provider) {
-              onSelect({ providerSlug, provider });
-            }
-          }}
-        />
+        <Dialog>
+          {({ close }) => (
+            <Menu
+              items={items}
+              onMenuSelect={itemId => {
+                const providerSlug = String(itemId);
+                if (providerSlug === 'none') return;
+                const provider = providers.find(p => p.slug === providerSlug);
+                if (provider) {
+                  onSelect({ providerSlug, provider });
+                  close();
+                }
+              }}
+            />
+          )}
+        </Dialog>
       </Popover>
     </DialogTrigger>
   );

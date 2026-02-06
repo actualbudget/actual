@@ -464,9 +464,9 @@ export function CreateAccountModal({
                               <strong>
                                 Link a <em>European</em> bank account
                               </strong>{' '}
-                              to automatically download transactions.
-                              GoCardless provides reliable, up-to-date
-                              information from hundreds of banks.
+                              to automatically download transactions. GoCardless
+                              provides reliable, up-to-date information from
+                              hundreds of banks.
                             </Trans>
                           </Text>
                           <View
@@ -606,9 +606,7 @@ export function CreateAccountModal({
                         </>
                       ) : (
                         <>
-                          <Text
-                            style={{ lineHeight: '1.4em', fontSize: 15 }}
-                          >
+                          <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
                             <Trans>
                               Link bank accounts to automatically download
                               transactions. Set up one or more providers on the

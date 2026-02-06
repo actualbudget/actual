@@ -12,6 +12,16 @@ function getFileIdFromRequest(req) {
   return fileId && typeof fileId === 'string' ? fileId : undefined;
 }
 
+function getOptionsFromRequest(req) {
+  const fileId = getFileIdFromRequest(req);
+  const options = fileId ? { fileId } : {};
+  const password = req.body?.password;
+  if (password != null && password !== '') {
+    options.password = password;
+  }
+  return options;
+}
+
 const app = express();
 export { app as handlers };
 app.use(express.json());
@@ -22,12 +32,19 @@ app.post(
   handleError(async (req, res) => {
     const fileId = getFileIdFromRequest(req);
     const options = fileId ? { fileId } : {};
-    const configured = pluggyaiService.isConfigured(options);
+    const configured =
+      secretsService.exists(SecretName.pluggyai_clientId, options) &&
+      secretsService.exists(SecretName.pluggyai_clientSecret, options) &&
+      secretsService.exists(SecretName.pluggyai_itemIds, options);
 
     res.send({
       status: 'ok',
       data: {
         configured,
+        encrypted: secretsService.isEncrypted(
+          SecretName.pluggyai_clientId,
+          options,
+        ),
       },
     });
   }),
@@ -36,8 +53,7 @@ app.post(
 app.post(
   '/accounts',
   handleError(async (req, res) => {
-    const fileId = getFileIdFromRequest(req);
-    const options = fileId ? { fileId } : {};
+    const options = getOptionsFromRequest(req);
 
     try {
       const itemIdsRaw = secretsService.get(
@@ -80,8 +96,7 @@ app.post(
   '/transactions',
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
-    const fileId = getFileIdFromRequest(req);
-    const options = fileId ? { fileId } : {};
+    const options = getOptionsFromRequest(req);
 
     try {
       const transactions = await pluggyaiService.getTransactions(

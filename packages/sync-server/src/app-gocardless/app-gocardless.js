@@ -3,6 +3,7 @@ import path from 'path';
 import { isAxiosError } from 'axios';
 import express from 'express';
 
+import { SecretName, secretsService } from '../services/secrets-service';
 import { sha256String } from '../util/hash';
 import {
   requestLoggerMiddleware,
@@ -24,6 +25,16 @@ function getFileIdFromRequest(req) {
   return fileId && typeof fileId === 'string' ? fileId : undefined;
 }
 
+function getOptionsFromRequest(req) {
+  const fileId = getFileIdFromRequest(req);
+  const options = fileId ? { fileId } : {};
+  const password = req.body?.password;
+  if (password != null && password !== '') {
+    options.password = password;
+  }
+  return options;
+}
+
 const app = express();
 app.use(requestLoggerMiddleware);
 
@@ -38,10 +49,17 @@ app.use(validateSessionMiddleware);
 app.post('/status', async (req, res) => {
   const fileId = getFileIdFromRequest(req);
   const options = fileId ? { fileId } : {};
+  const configured =
+    secretsService.exists(SecretName.gocardless_secretId, options) &&
+    secretsService.exists(SecretName.gocardless_secretKey, options);
   res.send({
     status: 'ok',
     data: {
-      configured: goCardlessService.isConfigured(options),
+      configured,
+      encrypted: secretsService.isEncrypted(
+        SecretName.gocardless_secretId,
+        options,
+      ),
     },
   });
 });
@@ -51,8 +69,7 @@ app.post(
   handleError(async (req, res) => {
     const { institutionId } = req.body || {};
     const { origin } = req.headers;
-    const fileId = getFileIdFromRequest(req);
-    const options = fileId ? { fileId } : {};
+    const options = getOptionsFromRequest(req);
 
     const { link, requisitionId } = await goCardlessService.createRequisition(
       {
@@ -76,8 +93,7 @@ app.post(
   '/get-accounts',
   handleError(async (req, res) => {
     const { requisitionId } = req.body || {};
-    const fileId = getFileIdFromRequest(req);
-    const options = fileId ? { fileId } : {};
+    const options = getOptionsFromRequest(req);
 
     try {
       const { requisition, accounts } =
@@ -116,8 +132,7 @@ app.post(
   '/get-banks',
   handleError(async (req, res) => {
     const { country, showDemo = false } = req.body || {};
-    const fileId = getFileIdFromRequest(req);
-    const options = fileId ? { fileId } : {};
+    const options = getOptionsFromRequest(req);
 
     await goCardlessService.setToken(options);
     const data = await goCardlessService.getInstitutions(country, options);
@@ -141,8 +156,7 @@ app.post(
   '/remove-account',
   handleError(async (req, res) => {
     const { requisitionId } = req.body || {};
-    const fileId = getFileIdFromRequest(req);
-    const options = fileId ? { fileId } : {};
+    const options = getOptionsFromRequest(req);
 
     const data = await goCardlessService.deleteRequisition(
       requisitionId,
@@ -175,8 +189,7 @@ app.post(
       accountId,
       includeBalance = true,
     } = req.body || {};
-    const fileId = getFileIdFromRequest(req);
-    const options = fileId ? { fileId } : {};
+    const options = getOptionsFromRequest(req);
 
     try {
       if (includeBalance) {

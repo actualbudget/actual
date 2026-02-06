@@ -249,21 +249,28 @@ export function BankSync() {
     async ({
       providerSlug,
       upgradingAccountId: upgradingId,
+      passwords,
     }: {
       providerSlug: string;
       upgradingAccountId?: string;
+      passwords?: Record<string, string>;
     }) => {
       const fileId = budgetId ?? undefined;
       if (!fileId) return;
 
+      const password = passwords?.[providerSlug];
+
       if (providerSlug === 'goCardless') {
-        authorizeBank(dispatch, fileId);
+        authorizeBank(dispatch, fileId, password);
         return;
       }
 
       if (providerSlug === 'simpleFin') {
         try {
-          const results = await send('simplefin-accounts', { fileId });
+          const results = await send('simplefin-accounts', {
+            fileId,
+            ...(password ? { password } : {}),
+          });
           if (results.error_code) {
             throw new Error(results.reason);
           }
@@ -311,10 +318,10 @@ export function BankSync() {
 
       if (providerSlug === 'pluggyai') {
         try {
-          const results = await send(
-            'pluggyai-accounts',
-            fileId ? { fileId } : {},
-          );
+          const results = await send('pluggyai-accounts', {
+            ...(fileId ? { fileId } : {}),
+            ...(password ? { password } : {}),
+          });
           if (results?.error_code) {
             throw new Error(results.reason);
           }
@@ -376,6 +383,44 @@ export function BankSync() {
     [dispatch, budgetId, t],
   );
 
+  const handleOpenProviderAccounts = useCallback(
+    ({
+      providerSlug,
+      provider,
+      upgradingAccountId,
+    }: {
+      providerSlug: string;
+      provider: { slug: string; displayName: string };
+      upgradingAccountId?: string;
+    }) => {
+      if (statusMap[providerSlug]?.encrypted) {
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'bank-sync-password',
+              options: {
+                providers: [provider],
+                onSubmit: (passwords: Record<string, string>) => {
+                  openProviderAccounts({
+                    providerSlug,
+                    upgradingAccountId,
+                    passwords,
+                  });
+                },
+              },
+            },
+          }),
+        );
+      } else {
+        openProviderAccounts({
+          providerSlug,
+          upgradingAccountId,
+        });
+      }
+    },
+    [dispatch, statusMap, openProviderAccounts],
+  );
+
   return (
     <Page
       header={t('Bank Sync')}
@@ -396,11 +441,6 @@ export function BankSync() {
             onConfigure={configureProvider}
             onReset={resetProvider}
           />
-          {!hasConfiguredProviders && (
-            <Text style={{ color: theme.pageTextSubdued, fontStyle: 'italic' }}>
-              <Trans>No providers enabled</Trans>
-            </Text>
-          )}
           {!canConfigureProviders && (
             <Warning>
               <Trans>
@@ -411,61 +451,77 @@ export function BankSync() {
           )}
         </View>
 
-        <View style={{ marginBottom: 18, alignItems: 'flex-start' }}>
-          <ProviderScopeButton
-            label={t('Add bank sync account')}
-            statusMap={statusMap}
-            isDisabled={!hasConfiguredProviders}
-            onSelect={({ providerSlug }) =>
-              openProviderAccounts({ providerSlug })
-            }
-          />
-        </View>
+        {hasConfiguredProviders && (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 12,
+            }}
+          >
+            <ProviderScopeButton
+              label={t('Add bank sync account')}
+              statusMap={statusMap}
+              variant="bare"
+              isDisabled={false}
+              onSelect={({ providerSlug, provider }) =>
+                handleOpenProviderAccounts({ providerSlug, provider })
+              }
+            />
+          </View>
+        )}
 
         {openAccounts.length === 0 ? (
           <Text style={{ color: theme.pageTextSubdued, fontStyle: 'italic' }}>
             <Trans>No bank accounts to link to a provider</Trans>
           </Text>
         ) : (
-          Object.entries(groupedAccounts).map(([syncProvider, accountsList]) => {
-          return (
-            <View key={syncProvider} style={{ minHeight: 'initial' }}>
-              {Object.keys(groupedAccounts).length > 1 && (
-                <Text
-                  style={{ fontWeight: 500, fontSize: 20, margin: '.5em 0' }}
-                >
-                  {syncSourceReadable[syncProvider as SyncProviders]}
-                </Text>
-              )}
-              <View style={styles.tableContainer}>
-                <AccountsHeader unlinked={syncProvider === 'unlinked'} />
-                <AccountsList
-                  accounts={accountsList}
-                  hoveredAccount={hoveredAccount}
-                  onHover={onHover}
-                  onAction={onAction}
-                  renderLinkButton={
-                    hasConfiguredProviders
-                      ? account => (
-                          <ProviderScopeButton
-                            label={t('Link account')}
-                            statusMap={statusMap}
-                            isDisabled={false}
-                            onSelect={({ providerSlug }) =>
-                              openProviderAccounts({
-                                providerSlug,
-                                upgradingAccountId: account.id,
-                              })
-                            }
-                          />
-                        )
-                      : undefined
-                  }
-                />
-              </View>
-            </View>
-          );
-        })
+          Object.entries(groupedAccounts).map(
+            ([syncProvider, accountsList]) => {
+              return (
+                <View key={syncProvider} style={{ minHeight: 'initial' }}>
+                  {Object.keys(groupedAccounts).length > 1 && (
+                    <Text
+                      style={{
+                        fontWeight: 500,
+                        fontSize: 20,
+                        margin: '.5em 0',
+                      }}
+                    >
+                      {syncSourceReadable[syncProvider as SyncProviders]}
+                    </Text>
+                  )}
+                  <View style={styles.tableContainer}>
+                    <AccountsHeader unlinked={syncProvider === 'unlinked'} />
+                    <AccountsList
+                      accounts={accountsList}
+                      hoveredAccount={hoveredAccount}
+                      onHover={onHover}
+                      onAction={onAction}
+                      renderLinkButton={
+                        hasConfiguredProviders
+                          ? account => (
+                              <ProviderScopeButton
+                                label={t('Link account')}
+                                statusMap={statusMap}
+                                isDisabled={false}
+                                onSelect={({ providerSlug, provider }) =>
+                                  handleOpenProviderAccounts({
+                                    providerSlug,
+                                    provider,
+                                    upgradingAccountId: account.id,
+                                  })
+                                }
+                              />
+                            )
+                          : undefined
+                      }
+                    />
+                  </View>
+                </View>
+              );
+            },
+          )
         )}
       </View>
     </Page>

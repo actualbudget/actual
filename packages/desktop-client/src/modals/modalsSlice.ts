@@ -113,6 +113,13 @@ export type Modal =
       };
     }
   | {
+      name: 'bank-sync-password';
+      options: {
+        providers: Array<{ slug: string; displayName: string }>;
+        onSubmit: (passwords: Record<string, string>) => void;
+      };
+    }
+  | {
       name: 'gocardless-external-msg';
       options: {
         onMoveExternal: (arg: {

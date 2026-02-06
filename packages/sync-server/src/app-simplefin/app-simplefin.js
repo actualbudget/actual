@@ -12,6 +12,16 @@ function getFileIdFromRequest(req) {
   return fileId && typeof fileId === 'string' ? fileId : undefined;
 }
 
+function getOptionsFromRequest(req) {
+  const fileId = getFileIdFromRequest(req);
+  const options = fileId ? { fileId } : {};
+  const password = req.body?.password;
+  if (password != null && password !== '') {
+    options.password = password;
+  }
+  return options;
+}
+
 const app = express();
 export { app as handlers };
 app.use(express.json());
@@ -22,13 +32,19 @@ app.post(
   handleError(async (req, res) => {
     const fileId = getFileIdFromRequest(req);
     const options = fileId ? { fileId } : {};
-    const token = secretsService.get(SecretName.simplefin_token, options);
-    const configured = token != null && token !== 'Forbidden';
+    const configured = secretsService.exists(
+      SecretName.simplefin_token,
+      options,
+    );
 
     res.send({
       status: 'ok',
       data: {
         configured,
+        encrypted: secretsService.isEncrypted(
+          SecretName.simplefin_token,
+          options,
+        ),
       },
     });
   }),
@@ -37,8 +53,7 @@ app.post(
 app.post(
   '/accounts',
   handleError(async (req, res) => {
-    const fileId = getFileIdFromRequest(req);
-    const options = fileId ? { fileId } : {};
+    const options = getOptionsFromRequest(req);
 
     let accessKey = secretsService.get(SecretName.simplefin_accessKey, options);
 
@@ -84,8 +99,7 @@ app.post(
   '/transactions',
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
-    const fileId = getFileIdFromRequest(req);
-    const options = fileId ? { fileId } : {};
+    const options = getOptionsFromRequest(req);
 
     const accessKey = secretsService.get(
       SecretName.simplefin_accessKey,

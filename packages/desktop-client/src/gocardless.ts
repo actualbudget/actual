@@ -10,10 +10,12 @@ function _authorize(
     onSuccess,
     onClose,
     fileId,
+    password,
   }: {
     onSuccess: (data: GoCardlessToken) => Promise<void>;
     onClose?: () => void;
     fileId?: string;
+    password?: string;
   },
 ) {
   dispatch(
@@ -27,6 +29,7 @@ function _authorize(
               institutionId,
               accessValidForDays: 90,
               ...(fileId ? { fileId } : {}),
+              ...(password ? { password } : {}),
             });
 
             if ('error' in resp) return resp;
@@ -36,6 +39,7 @@ function _authorize(
             return send('gocardless-poll-web-token', {
               requisitionId,
               ...(fileId ? { fileId } : {}),
+              ...(password ? { password } : {}),
             });
           },
           onClose,
@@ -46,9 +50,14 @@ function _authorize(
   );
 }
 
-export async function authorizeBank(dispatch: AppDispatch, fileId?: string) {
+export async function authorizeBank(
+  dispatch: AppDispatch,
+  fileId?: string,
+  password?: string,
+) {
   _authorize(dispatch, {
     fileId,
+    password,
     onSuccess: async data => {
       dispatch(
         pushModal({

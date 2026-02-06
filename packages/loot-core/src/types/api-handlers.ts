@@ -123,7 +123,8 @@ export type ApiHandlers = {
   'api/sync': () => Promise<void>;
 
   'api/bank-sync': (arg?: {
-    accountId: APIAccountEntity['id'];
+    accountId?: APIAccountEntity['id'];
+    passwords?: Record<string, string>;
   }) => Promise<void>;
 
   'api/accounts-get': () => Promise<APIAccountEntity[]>;

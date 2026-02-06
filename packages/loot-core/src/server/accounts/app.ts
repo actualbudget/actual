@@ -21,6 +21,7 @@ import {
 } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
+import * as encryption from '../encryption';
 import {
   APIError,
   BankSyncError,
@@ -30,6 +31,7 @@ import {
 import { app as mainApp } from '../main-app';
 import { mutator } from '../mutators';
 import { get, post } from '../post';
+import * as prefs from '../prefs';
 import { getServer } from '../server-config';
 import { batchMessages } from '../sync';
 import { undoable, withUndo } from '../undo';
@@ -51,12 +53,14 @@ export type AccountHandlers = {
   'account-reopen': typeof reopenAccount;
   'account-move': typeof moveAccount;
   'secret-set': typeof setSecret;
+  'secret-set-encrypted': typeof setSecretEncrypted;
   'secret-check': typeof checkSecret;
   'gocardless-poll-web-token': typeof pollGoCardlessWebToken;
   'gocardless-poll-web-token-stop': typeof stopGoCardlessWebTokenPolling;
   'gocardless-status': typeof goCardlessStatus;
   'simplefin-status': typeof simpleFinStatus;
   'pluggyai-status': typeof pluggyAiStatus;
+  'check-provider-encryption': typeof checkProviderEncryption;
   'simplefin-accounts': typeof simpleFinAccounts;
   'pluggyai-accounts': typeof pluggyAiAccounts;
   'gocardless-get-banks': typeof getGoCardlessBanks;
@@ -524,6 +528,51 @@ async function setSecret({
     };
   }
 }
+
+/**
+ * Store a secret encrypted on the sync server. Uses the same logic as budget encryption:
+ * client sends plaintext + password; server encrypts and stores (single source of truth).
+ * Salt is ignored; server generates it (kept in signature for backward compat with callers).
+ */
+async function setSecretEncrypted({
+  name,
+  value,
+  password,
+  fileId,
+}: {
+  name: string;
+  value: string;
+  password: string;
+  salt?: string;
+  fileId?: string;
+}) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+  try {
+    return await post(
+      serverConfig.BASE_SERVER + '/secret',
+      {
+        name,
+        value,
+        password,
+        ...(fileId ? { fileId } : {}),
+      },
+      { 'X-ACTUAL-TOKEN': userToken },
+    );
+  } catch (error) {
+    return {
+      error: 'failed',
+      reason: error instanceof PostError ? error.reason : undefined,
+    };
+  }
+}
+
 async function checkSecret(arg: string | { name: string; fileId?: string }) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -560,9 +609,11 @@ let stopPolling = false;
 async function pollGoCardlessWebToken({
   requisitionId,
   fileId,
+  password,
 }: {
   requisitionId: string;
   fileId?: string;
+  password?: string;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return { error: 'unknown' };
@@ -594,13 +645,13 @@ async function pollGoCardlessWebToken({
     }
 
     const body: Record<string, string> = { requisitionId };
+    if (fileId) body.fileId = fileId;
+    if (password) body.password = password;
     const headers: Record<string, string> = {
       'X-ACTUAL-TOKEN': token,
     };
     if (fileId) {
-      const f = fileId as string;
-      body.fileId = f;
-      headers['X-Actual-File-Id'] = f;
+      headers['X-Actual-File-Id'] = fileId;
     }
 
     const data = await post(
@@ -715,7 +766,45 @@ async function pluggyAiStatus(arg?: { fileId?: string }) {
   return post(serverConfig.PLUGGYAI_SERVER + '/status', body, headers);
 }
 
-async function simpleFinAccounts(arg?: { fileId?: string }) {
+async function checkProviderEncryption(arg?: { fileId?: string }) {
+  const fileId = arg?.fileId ?? prefs.getPrefs()?.id;
+  if (!fileId) {
+    return { goCardless: false, simpleFin: false, pluggyai: false };
+  }
+
+  const [goCardlessRes, simpleFinRes, pluggyaiRes] = await Promise.all([
+    goCardlessStatus({ fileId }).catch(() => ({ data: { encrypted: false } })),
+    simpleFinStatus({ fileId }).catch(() => ({ data: { encrypted: false } })),
+    pluggyAiStatus({ fileId }).catch(() => ({ data: { encrypted: false } })),
+  ]);
+
+  const goCardlessEncrypted = Boolean(
+    goCardlessRes &&
+    typeof goCardlessRes === 'object' &&
+    (goCardlessRes as { data?: { encrypted?: boolean } }).data?.encrypted,
+  );
+  const simpleFinEncrypted = Boolean(
+    simpleFinRes &&
+    typeof simpleFinRes === 'object' &&
+    (simpleFinRes as { data?: { encrypted?: boolean } }).data?.encrypted,
+  );
+  const pluggyaiEncrypted = Boolean(
+    pluggyaiRes &&
+    typeof pluggyaiRes === 'object' &&
+    (pluggyaiRes as { data?: { encrypted?: boolean } }).data?.encrypted,
+  );
+
+  return {
+    goCardless: goCardlessEncrypted,
+    simpleFin: simpleFinEncrypted,
+    pluggyai: pluggyaiEncrypted,
+  };
+}
+
+async function simpleFinAccounts(arg?: {
+  fileId?: string;
+  password?: string;
+}) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -727,7 +816,9 @@ async function simpleFinAccounts(arg?: { fileId?: string }) {
     throw new Error('Failed to get server config.');
   }
 
-  const body = arg?.fileId ? { fileId: arg.fileId } : {};
+  const body: Record<string, string> = {};
+  if (arg?.fileId) body.fileId = arg.fileId;
+  if (arg?.password) body.password = arg.password;
   const headers: Record<string, string> = {
     'X-ACTUAL-TOKEN': userToken,
   };
@@ -747,7 +838,10 @@ async function simpleFinAccounts(arg?: { fileId?: string }) {
   }
 }
 
-async function pluggyAiAccounts(arg?: { fileId?: string }) {
+async function pluggyAiAccounts(arg?: {
+  fileId?: string;
+  password?: string;
+}) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -759,7 +853,9 @@ async function pluggyAiAccounts(arg?: { fileId?: string }) {
     throw new Error('Failed to get server config.');
   }
 
-  const body = arg?.fileId ? { fileId: arg.fileId } : {};
+  const body: Record<string, string> = {};
+  if (arg?.fileId) body.fileId = arg.fileId;
+  if (arg?.password) body.password = arg.password;
   const headers: Record<string, string> = {
     'X-ACTUAL-TOKEN': userToken,
   };
@@ -817,10 +913,12 @@ async function createGoCardlessWebToken({
   institutionId,
   accessValidForDays,
   fileId,
+  password,
 }: {
   institutionId: string;
   accessValidForDays: number;
   fileId?: string;
+  password?: string;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -839,6 +937,9 @@ async function createGoCardlessWebToken({
   };
   if (fileId) {
     body.fileId = fileId;
+  }
+  if (password) {
+    body.password = password;
   }
   const headers: Record<string, string> = {
     'X-ACTUAL-TOKEN': userToken,
@@ -958,11 +1059,14 @@ export type SyncResponseWithErrors = SyncResponse & {
 
 async function accountsBankSync({
   ids = [],
+  passwords,
 }: {
   ids: Array<AccountEntity['id']>;
+  passwords?: Record<string, string>;
 }): Promise<SyncResponseWithErrors> {
   const { 'user-id': userId, 'user-key': userKey } =
     await asyncStorage.multiGet(['user-id', 'user-key']);
+  const fileId = prefs.getPrefs()?.id ?? undefined;
 
   const accounts = await db.runQuery<
     db.DbAccount & { bankId: db.DbBank['bank_id'] }
@@ -988,12 +1092,17 @@ async function accountsBankSync({
     if (acct.bankId && acct.account_id) {
       try {
         logger.group('Bank Sync operation for account:', acct.name);
+        const password =
+          (acct.account_sync_source && passwords?.[acct.account_sync_source]) ??
+          undefined;
         const syncResponse = await bankSync.syncAccount(
           userId as string,
           userKey as string,
           acct.id,
           acct.account_id,
           acct.bankId,
+          password,
+          fileId,
         );
 
         const syncResponseData = await handleSyncResponse(syncResponse, acct);
@@ -1026,11 +1135,15 @@ async function accountsBankSync({
 
 async function simpleFinBatchSync({
   ids = [],
+  passwords,
 }: {
   ids: Array<AccountEntity['id']>;
+  passwords?: Record<string, string>;
 }): Promise<
   Array<{ accountId: AccountEntity['id']; res: SyncResponseWithErrors }>
 > {
+  const fileId = prefs.getPrefs()?.id ?? undefined;
+
   const accounts = await db.runQuery<
     db.DbAccount & { bankId: db.DbBank['bank_id'] }
   >(
@@ -1071,6 +1184,8 @@ async function simpleFinBatchSync({
         id: a.id,
         account_id: a.account_id || null,
       })),
+      passwords?.simpleFin,
+      fileId,
     );
     for (const syncResponse of syncResponses) {
       const account = accounts.find(a => a.id === syncResponse.accountId);
@@ -1300,12 +1415,14 @@ app.method('account-close', mutator(closeAccount));
 app.method('account-reopen', mutator(undoable(reopenAccount)));
 app.method('account-move', mutator(undoable(moveAccount)));
 app.method('secret-set', setSecret);
+app.method('secret-set-encrypted', setSecretEncrypted);
 app.method('secret-check', checkSecret);
 app.method('gocardless-poll-web-token', pollGoCardlessWebToken);
 app.method('gocardless-poll-web-token-stop', stopGoCardlessWebTokenPolling);
 app.method('gocardless-status', goCardlessStatus);
 app.method('simplefin-status', simpleFinStatus);
 app.method('pluggyai-status', pluggyAiStatus);
+app.method('check-provider-encryption', checkProviderEncryption);
 app.method('simplefin-accounts', simpleFinAccounts);
 app.method('pluggyai-accounts', pluggyAiAccounts);
 app.method('gocardless-get-banks', getGoCardlessBanks);

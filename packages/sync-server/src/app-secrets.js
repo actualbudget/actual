@@ -1,6 +1,7 @@
 import express from 'express';
 
 import { getAccountDb, isAdmin } from './account-db';
+import { encryptSecret } from './services/encryption-service';
 import { secretsService } from './services/secrets-service';
 import {
   requestLoggerMiddleware,
@@ -29,7 +30,7 @@ app.post('/', async (req, res) => {
       details: 'Failed to validate authentication method',
     });
   }
-  const { name, value, fileId } = req.body || {};
+  const { name, value, fileId, password } = req.body || {};
 
   if (!fileId) {
     return res.status(400).send({
@@ -53,7 +54,14 @@ app.post('/', async (req, res) => {
     }
   }
 
-  secretsService.set(name, value, { fileId });
+  // Same logic as budget encryption: sync server encrypts/decrypts (single source of truth).
+  // If password is provided, value is plaintext and we encrypt on the server.
+  let valueToStore = value;
+  if (password != null && password !== '' && value != null) {
+    valueToStore = encryptSecret(String(value), password);
+  }
+
+  secretsService.set(name, valueToStore, { fileId });
 
   res.status(200).send({ status: 'ok' });
 });

@@ -259,11 +259,13 @@ handlers['api/sync'] = async function () {
 
 handlers['api/bank-sync'] = async function (args) {
   const batchSync = args?.accountId == null;
+  const passwords = args?.passwords;
   const allErrors = [];
 
   if (!batchSync) {
     const { errors } = await handlers['accounts-bank-sync']({
       ids: [args.accountId],
+      passwords,
     });
 
     allErrors.push(...errors);
@@ -278,6 +280,7 @@ handlers['api/bank-sync'] = async function (args) {
     if (simpleFinAccounts.length > 1) {
       const res = await handlers['simplefin-batch-sync']({
         ids: simpleFinAccountIds,
+        passwords,
       });
 
       res.forEach(a => allErrors.push(...a.res.errors));
@@ -285,6 +288,7 @@ handlers['api/bank-sync'] = async function (args) {
 
     const { errors } = await handlers['accounts-bank-sync']({
       ids: accountIdsToSync.filter(a => !simpleFinAccountIds.includes(a)),
+      passwords,
     });
 
     allErrors.push(...errors);

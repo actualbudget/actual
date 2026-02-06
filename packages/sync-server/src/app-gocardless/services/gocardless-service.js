@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import jwt from 'jws';
 import * as nordigenNode from 'nordigen-node';
 import { v4 as uuidv4 } from 'uuid';
@@ -28,7 +30,10 @@ const getGocardlessClient = (options = {}) => {
     secretKey: secretsService.get(SecretName.gocardless_secretKey, options),
   };
 
-  const cacheKey = options.fileId;
+  let cacheKey = options.fileId ?? '';
+  if (options.password != null && options.password !== '') {
+    cacheKey += `:${crypto.createHash('sha256').update(options.password).digest('hex')}`;
+  }
 
   if (!clients.has(cacheKey)) {
     clients.set(cacheKey, new GoCardlessClient(secrets));
