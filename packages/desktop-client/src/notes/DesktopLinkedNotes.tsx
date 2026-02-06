@@ -64,11 +64,14 @@ export function DesktopLinkedNotes({
   };
 
   return (
-    <Link
-      variant="text"
-      onClick={handleClick}
-    >
+    <>
+      <Link
+       variant="text"
+       onClick={handleClick}
+      >
       {displayText}
-    </Link>
+      </Link>
+      {separator}
+    </>
   );
 }
