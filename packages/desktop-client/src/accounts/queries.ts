@@ -17,14 +17,26 @@ export const accountQueries = {
       // Manually invalidated when accounts change
       staleTime: Infinity,
     }),
-  listOnBudget: () =>
+  listActive: () =>
     queryOptions<AccountEntity[]>({
       ...accountQueries.list(),
-      select: accounts => accounts.filter(account => !account.offbudget),
+      select: accounts => accounts.filter(account => !account.closed),
+    }),
+  listClosed: () =>
+    queryOptions<AccountEntity[]>({
+      ...accountQueries.list(),
+      select: accounts => accounts.filter(account => !!account.closed),
+    }),
+  listOnBudget: () =>
+    queryOptions<AccountEntity[]>({
+      ...accountQueries.listActive(),
+      select: accounts =>
+        accounts.filter(account => !account.offbudget && !account.closed),
     }),
   listOffBudget: () =>
     queryOptions<AccountEntity[]>({
-      ...accountQueries.list(),
-      select: accounts => accounts.filter(account => !!account.offbudget),
+      ...accountQueries.listActive(),
+      select: accounts =>
+        accounts.filter(account => !!account.offbudget && !account.closed),
     }),
 };
