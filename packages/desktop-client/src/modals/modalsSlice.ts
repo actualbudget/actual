@@ -95,22 +95,21 @@ export type Modal =
       name: 'gocardless-init';
       options: {
         onSuccess: () => void;
+        fileId: string;
       };
     }
   | {
       name: 'simplefin-init';
       options: {
         onSuccess: () => void;
-        scope?: 'global' | 'file';
-        fileId?: string;
+        fileId: string;
       };
     }
   | {
       name: 'pluggyai-init';
       options: {
         onSuccess: () => void;
-        scope?: 'global' | 'file';
-        fileId?: string;
+        fileId: string;
       };
     }
   | {
@@ -125,6 +124,7 @@ export type Modal =
         >;
         onClose?: (() => void) | undefined;
         onSuccess: (data: GoCardlessToken) => Promise<void>;
+        fileId?: string;
       };
     }
   | {

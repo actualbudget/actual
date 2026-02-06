@@ -28,7 +28,6 @@ type SimpleFinInitialiseModalProps = Extract<
 
 export const SimpleFinInitialiseModal = ({
   onSuccess,
-  scope,
   fileId,
 }: SimpleFinInitialiseModalProps) => {
   const { t } = useTranslation();
@@ -36,8 +35,6 @@ export const SimpleFinInitialiseModal = ({
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(t('It is required to provide a token.'));
-
-  const secretSetOptions = scope === 'file' && fileId ? { fileId } : {};
 
   const onSubmit = async (close: () => void) => {
     if (!token) {
@@ -51,7 +48,7 @@ export const SimpleFinInitialiseModal = ({
       (await send('secret-set', {
         name: 'simplefin_token',
         value: token,
-        ...secretSetOptions,
+        fileId,
       })) || {};
 
     if (err) {
@@ -64,15 +61,12 @@ export const SimpleFinInitialiseModal = ({
     close();
   };
 
-  const title =
-    scope === 'file' ? t('Set up SimpleFIN (Scoped)') : t('Set-up SimpleFIN');
-
   return (
     <Modal name="simplefin-init" containerProps={{ style: { width: 300 } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={title}
+            title={t('Set up SimpleFIN')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>

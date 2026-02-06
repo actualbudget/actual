@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -14,8 +15,8 @@ import {
 
 import { AccountsHeader } from './AccountsHeader';
 import { AccountsList } from './AccountsList';
+import { ProviderList } from './ProviderList';
 import { ProviderScopeButton } from './ProviderScopeButton';
-import { ProviderSetupGrid } from './ProviderSetupGrid';
 import { useProviderStatusMap } from './useProviderStatusMap';
 
 import { useAuth } from '@desktop-client/auth/AuthProvider';
@@ -67,6 +68,16 @@ export function BankSync() {
     refetch: refetchProviderStatuses,
     providers,
   } = useProviderStatusMap({ fileId: budgetId ?? undefined });
+
+  const hasConfiguredProviders = useMemo(
+    () => providers.some(p => Boolean(statusMap[p.slug]?.configured)),
+    [providers, statusMap],
+  );
+
+  const openAccounts = useMemo(
+    () => accounts.filter(a => !a.closed),
+    [accounts],
+  );
 
   const [hoveredAccount, setHoveredAccount] = useState<
     AccountEntity['id'] | null
@@ -123,13 +134,9 @@ export function BankSync() {
   }, []);
 
   const configureProvider = useCallback(
-    ({
-      provider,
-      scope,
-    }: {
-      provider: { slug: string; displayName: string; supportsScope: boolean };
-      scope: 'global' | 'file';
-    }) => {
+    (provider: { slug: string; displayName: string }) => {
+      const fileId = budgetId ?? '';
+      if (!fileId) return;
       if (provider.slug === 'goCardless') {
         dispatch(
           pushModal({
@@ -137,6 +144,7 @@ export function BankSync() {
               name: 'gocardless-init',
               options: {
                 onSuccess: () => refetchProviderStatuses(),
+                fileId,
               },
             },
           }),
@@ -150,8 +158,7 @@ export function BankSync() {
               name: 'simplefin-init',
               options: {
                 onSuccess: () => refetchProviderStatuses(),
-                scope,
-                fileId: scope === 'file' ? (budgetId ?? undefined) : undefined,
+                fileId,
               },
             },
           }),
@@ -165,8 +172,7 @@ export function BankSync() {
               name: 'pluggyai-init',
               options: {
                 onSuccess: () => refetchProviderStatuses(),
-                scope,
-                fileId: scope === 'file' ? (budgetId ?? undefined) : undefined,
+                fileId,
               },
             },
           }),
@@ -177,18 +183,11 @@ export function BankSync() {
   );
 
   const resetProvider = useCallback(
-    ({
-      provider,
-      scope,
-    }: {
-      provider: { slug: string; displayName: string };
-      scope: 'global' | 'file';
-    }) => {
-      const fileId = scope === 'file' ? (budgetId ?? undefined) : undefined;
-      const scopeLabel = scope === 'file' ? t('Scoped') : t('Global');
+    (provider: { slug: string; displayName: string }) => {
+      const fileId = budgetId ?? '';
       const message = t(
-        'Are you sure you want to reset the {{provider}} ({{scope}}) credentials? You will need to set them up again to use bank sync.',
-        { provider: provider.displayName, scope: scopeLabel },
+        'Are you sure you want to reset the {{provider}} credentials? You will need to set them up again to use bank sync.',
+        { provider: provider.displayName },
       );
 
       const doReset = async () => {
@@ -196,37 +195,39 @@ export function BankSync() {
           await send('secret-set', {
             name: 'gocardless_secretId',
             value: null,
+            fileId,
           });
           await send('secret-set', {
             name: 'gocardless_secretKey',
             value: null,
+            fileId,
           });
         } else if (provider.slug === 'simpleFin') {
           await send('secret-set', {
             name: 'simplefin_token',
             value: null,
-            ...(fileId ? { fileId } : {}),
+            fileId,
           });
           await send('secret-set', {
             name: 'simplefin_accessKey',
             value: null,
-            ...(fileId ? { fileId } : {}),
+            fileId,
           });
         } else if (provider.slug === 'pluggyai') {
           await send('secret-set', {
             name: 'pluggyai_clientId',
             value: null,
-            ...(fileId ? { fileId } : {}),
+            fileId,
           });
           await send('secret-set', {
             name: 'pluggyai_clientSecret',
             value: null,
-            ...(fileId ? { fileId } : {}),
+            fileId,
           });
           await send('secret-set', {
             name: 'pluggyai_itemIds',
             value: null,
-            ...(fileId ? { fileId } : {}),
+            fileId,
           });
         }
         refetchProviderStatuses();
@@ -247,26 +248,22 @@ export function BankSync() {
   const openProviderAccounts = useCallback(
     async ({
       providerSlug,
-      scope,
       upgradingAccountId: upgradingId,
     }: {
       providerSlug: string;
-      scope: 'global' | 'file';
       upgradingAccountId?: string;
     }) => {
-      const fileId = scope === 'file' && budgetId ? budgetId : undefined;
+      const fileId = budgetId ?? undefined;
+      if (!fileId) return;
 
       if (providerSlug === 'goCardless') {
-        authorizeBank(dispatch);
+        authorizeBank(dispatch, fileId);
         return;
       }
 
       if (providerSlug === 'simpleFin') {
         try {
-          const results = await send(
-            'simplefin-accounts',
-            fileId ? { fileId } : {},
-          );
+          const results = await send('simplefin-accounts', { fileId });
           if (results.error_code) {
             throw new Error(results.reason);
           }
@@ -393,12 +390,17 @@ export function BankSync() {
           <Text style={{ fontWeight: 600, fontSize: 18 }}>
             <Trans>Providers</Trans>
           </Text>
-          <ProviderSetupGrid
+          <ProviderList
             statusMap={statusMap}
             canConfigure={canConfigureProviders}
             onConfigure={configureProvider}
             onReset={resetProvider}
           />
+          {!hasConfiguredProviders && (
+            <Text style={{ color: theme.pageTextSubdued, fontStyle: 'italic' }}>
+              <Trans>No providers enabled</Trans>
+            </Text>
+          )}
           {!canConfigureProviders && (
             <Warning>
               <Trans>
@@ -413,20 +415,19 @@ export function BankSync() {
           <ProviderScopeButton
             label={t('Add bank sync account')}
             statusMap={statusMap}
-            onSelect={({ providerSlug, scope }) =>
-              openProviderAccounts({ providerSlug, scope })
+            isDisabled={!hasConfiguredProviders}
+            onSelect={({ providerSlug }) =>
+              openProviderAccounts({ providerSlug })
             }
           />
         </View>
 
-        {accounts.length === 0 && (
-          <Text style={{ fontSize: '1.1rem' }}>
-            <Trans>
-              To use the bank syncing features, you must first add an account.
-            </Trans>
+        {openAccounts.length === 0 ? (
+          <Text style={{ color: theme.pageTextSubdued, fontStyle: 'italic' }}>
+            <Trans>No bank accounts to link to a provider</Trans>
           </Text>
-        )}
-        {Object.entries(groupedAccounts).map(([syncProvider, accountsList]) => {
+        ) : (
+          Object.entries(groupedAccounts).map(([syncProvider, accountsList]) => {
           return (
             <View key={syncProvider} style={{ minHeight: 'initial' }}>
               {Object.keys(groupedAccounts).length > 1 && (
@@ -444,16 +445,15 @@ export function BankSync() {
                   onHover={onHover}
                   onAction={onAction}
                   renderLinkButton={
-                    providers.length > 0
+                    hasConfiguredProviders
                       ? account => (
                           <ProviderScopeButton
                             label={t('Link account')}
                             statusMap={statusMap}
                             isDisabled={false}
-                            onSelect={({ providerSlug, scope }) =>
+                            onSelect={({ providerSlug }) =>
                               openProviderAccounts({
                                 providerSlug,
-                                scope,
                                 upgradingAccountId: account.id,
                               })
                             }
@@ -465,7 +465,8 @@ export function BankSync() {
               </View>
             </View>
           );
-        })}
+        })
+        )}
       </View>
     </Page>
   );

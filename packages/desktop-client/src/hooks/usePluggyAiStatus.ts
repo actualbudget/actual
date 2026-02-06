@@ -15,23 +15,22 @@ export function usePluggyAiStatus(fileId?: string) {
   const status = useSyncServerStatus();
 
   useEffect(() => {
+    if (!fileId) {
+      setConfiguredPluggyAi(false);
+      setConfiguredPluggyAiScoped(null);
+      return;
+    }
+
     async function fetchStatus() {
       setIsLoading(true);
 
-      const [globalResult, fileResult] = await Promise.all([
-        send('pluggyai-status'),
-        fileId
-          ? send('pluggyai-status', { fileId })
-          : Promise.resolve({ configured: false }),
-      ]);
+      const result = await send('pluggyai-status', { fileId });
 
       setConfiguredPluggyAi(
-        (globalResult as { configured?: boolean })?.configured || false,
+        (result as { configured?: boolean })?.configured || false,
       );
       setConfiguredPluggyAiScoped(
-        fileId
-          ? (fileResult as { configured?: boolean })?.configured || false
-          : null,
+        (result as { configured?: boolean })?.configured || false,
       );
       setIsLoading(false);
     }

@@ -28,13 +28,16 @@ class SecretsDb {
   }
 
   /**
-   * Compute the scope string from options
+   * Resolve the file ID from options.
    * @param {Object} options
-   * @param {string} [options.fileId] - Optional file ID for file-scoped secrets
-   * @returns {string} The scope string ('global' or 'file:<fileId>')
+   * @param {string} options.fileId - The file ID for the secret.
+   * @returns {string} The file ID.
    */
-  _computeScope(options = {}) {
-    return options.fileId ? `file:${options.fileId}` : 'global';
+  _resolveFileId(options = {}) {
+    if (!options.fileId) {
+      throw new Error('fileId is required for secret operations');
+    }
+    return options.fileId;
   }
 
   set(name, value, options = {}) {
@@ -42,11 +45,11 @@ class SecretsDb {
       this.db = this.open();
     }
 
-    const scope = this._computeScope(options);
-    this.debug(`setting secret '${name}' in scope '${scope}' to '${value}'`);
+    const fileId = this._resolveFileId(options);
+    this.debug(`setting secret '${name}' for file '${fileId}' to '${value}'`);
     const result = this.db.mutate(
-      `INSERT OR REPLACE INTO secrets (scope, name, value) VALUES (?,?,?)`,
-      [scope, name, value],
+      `INSERT OR REPLACE INTO secrets (file_id, name, value) VALUES (?,?,?)`,
+      [fileId, name, value],
     );
     return result;
   }
@@ -56,11 +59,11 @@ class SecretsDb {
       this.db = this.open();
     }
 
-    const scope = this._computeScope(options);
-    this.debug(`getting secret '${name}' from scope '${scope}'`);
+    const fileId = this._resolveFileId(options);
+    this.debug(`getting secret '${name}' for file '${fileId}'`);
     const result = this.db.first(
-      `SELECT value FROM secrets WHERE scope = ? AND name = ?`,
-      [scope, name],
+      `SELECT value FROM secrets WHERE file_id = ? AND name = ?`,
+      [fileId, name],
     );
     return result;
   }
@@ -70,13 +73,13 @@ const secretsDb = new SecretsDb();
 const _cachedSecrets = new Map();
 
 /**
- * Create a cache key from scope and name
- * @param {string} scope
+ * Create a cache key from file ID and name
+ * @param {string} fileId
  * @param {string} name
  * @returns {string}
  */
-function _createCacheKey(scope, name) {
-  return `${scope}:${name}`;
+function _createCacheKey(fileId, name) {
+  return `${fileId}:${name}`;
 }
 
 /**
@@ -86,13 +89,13 @@ export const secretsService = {
   /**
    * Retrieves the value of a secret by name.
    * @param {SecretName} name - The name of the secret to retrieve.
-   * @param {Object} [options] - Optional scope configuration.
-   * @param {string} [options.fileId] - Optional file ID for file-scoped secrets.
+   * @param {Object} options - Scope configuration.
+   * @param {string} options.fileId - The file ID for the secret.
    * @returns {string|null} The value of the secret, or null if the secret does not exist.
    */
   get: (name, options = {}) => {
-    const scope = secretsDb._computeScope(options);
-    const cacheKey = _createCacheKey(scope, name);
+    const fileId = secretsDb._resolveFileId(options);
+    const cacheKey = _createCacheKey(fileId, name);
     return (
       _cachedSecrets.get(cacheKey) ??
       secretsDb.get(name, options)?.value ??
@@ -104,16 +107,16 @@ export const secretsService = {
    * Sets the value of a secret by name.
    * @param {SecretName} name - The name of the secret to set.
    * @param {string} value - The value to set for the secret.
-   * @param {Object} [options] - Optional scope configuration.
-   * @param {string} [options.fileId] - Optional file ID for file-scoped secrets.
+   * @param {Object} options - Scope configuration.
+   * @param {string} options.fileId - The file ID for the secret.
    * @returns {Object}
    */
   set: (name, value, options = {}) => {
     const result = secretsDb.set(name, value, options);
 
     if (result.changes === 1) {
-      const scope = secretsDb._computeScope(options);
-      const cacheKey = _createCacheKey(scope, name);
+      const fileId = secretsDb._resolveFileId(options);
+      const cacheKey = _createCacheKey(fileId, name);
       _cachedSecrets.set(cacheKey, value);
     }
     return result;
@@ -122,8 +125,8 @@ export const secretsService = {
   /**
    * Determines whether a secret with the given name exists.
    * @param {SecretName} name - The name of the secret to check for existence.
-   * @param {Object} [options] - Optional scope configuration.
-   * @param {string} [options.fileId] - Optional file ID for file-scoped secrets.
+   * @param {Object} options - Scope configuration.
+   * @param {string} options.fileId - The file ID for the secret.
    * @returns {boolean} True if a secret with the given name exists, false otherwise.
    */
   exists: (name, options = {}) => {

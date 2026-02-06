@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, type ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';

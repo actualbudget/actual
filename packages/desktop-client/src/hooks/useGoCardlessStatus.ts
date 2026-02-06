@@ -4,7 +4,7 @@ import { send } from 'loot-core/platform/client/fetch';
 
 import { useSyncServerStatus } from './useSyncServerStatus';
 
-export function useGoCardlessStatus() {
+export function useGoCardlessStatus(fileId?: string) {
   const [configuredGoCardless, setConfiguredGoCardless] = useState<
     boolean | null
   >(null);
@@ -12,10 +12,15 @@ export function useGoCardlessStatus() {
   const status = useSyncServerStatus();
 
   useEffect(() => {
+    if (!fileId) {
+      setConfiguredGoCardless(false);
+      return;
+    }
+
     async function fetch() {
       setIsLoading(true);
 
-      const results = await send('gocardless-status');
+      const results = await send('gocardless-status', { fileId });
 
       setConfiguredGoCardless(results.configured || false);
       setIsLoading(false);
@@ -24,7 +29,7 @@ export function useGoCardlessStatus() {
     if (status === 'online') {
       fetch();
     }
-  }, [status]);
+  }, [status, fileId]);
 
   return {
     configuredGoCardless,

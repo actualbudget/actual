@@ -29,7 +29,6 @@ type PluggyAiInitialiseProps = Extract<
 
 export const PluggyAiInitialiseModal = ({
   onSuccess,
-  scope,
   fileId,
 }: PluggyAiInitialiseProps) => {
   const { t } = useTranslation();
@@ -43,8 +42,6 @@ export const PluggyAiInitialiseModal = ({
       'It is required to provide both the client id, client secret and at least one item id.',
     ),
   );
-
-  const secretSetOptions = scope === 'file' && fileId ? { fileId } : {};
 
   const onSubmit = async (close: () => void) => {
     if (!clientId || !clientSecret || !itemIds) {
@@ -63,7 +60,7 @@ export const PluggyAiInitialiseModal = ({
       (await send('secret-set', {
         name: 'pluggyai_clientId',
         value: clientId,
-        ...secretSetOptions,
+        fileId,
       })) || {};
 
     let { error: err, reason } = result;
@@ -79,7 +76,7 @@ export const PluggyAiInitialiseModal = ({
       (await send('secret-set', {
         name: 'pluggyai_clientSecret',
         value: clientSecret,
-        ...secretSetOptions,
+        fileId,
       })) || {};
     ({ error: err, reason } = result);
 
@@ -94,7 +91,7 @@ export const PluggyAiInitialiseModal = ({
       (await send('secret-set', {
         name: 'pluggyai_itemIds',
         value: itemIds,
-        ...secretSetOptions,
+        fileId,
       })) || {};
     ({ error: err, reason } = result);
 
@@ -111,15 +108,12 @@ export const PluggyAiInitialiseModal = ({
     close();
   };
 
-  const title =
-    scope === 'file' ? t('Set up Pluggy.ai (Scoped)') : t('Set-up Pluggy.ai');
-
   return (
     <Modal name="pluggyai-init" containerProps={{ style: { width: '30vw' } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={title}
+            title={t('Set up Pluggy.ai')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>

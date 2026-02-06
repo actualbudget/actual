@@ -4,13 +4,9 @@ import { SecretName, secretsService } from '../services/secrets-service';
 
 const pluggyClientCache = new Map();
 
-function getScopeKey(options = {}) {
-  return options.fileId ? `file:${options.fileId}` : 'global';
-}
-
 function getPluggyClient(options = {}) {
-  const scopeKey = getScopeKey(options);
-  if (!pluggyClientCache.has(scopeKey)) {
+  const cacheKey = options.fileId;
+  if (!pluggyClientCache.has(cacheKey)) {
     const clientId = secretsService.get(SecretName.pluggyai_clientId, options);
     const clientSecret = secretsService.get(
       SecretName.pluggyai_clientSecret,
@@ -18,7 +14,7 @@ function getPluggyClient(options = {}) {
     );
 
     pluggyClientCache.set(
-      scopeKey,
+      cacheKey,
       new PluggyClient({
         clientId,
         clientSecret,
@@ -26,7 +22,7 @@ function getPluggyClient(options = {}) {
     );
   }
 
-  return pluggyClientCache.get(scopeKey);
+  return pluggyClientCache.get(cacheKey);
 }
 
 export const pluggyaiService = {

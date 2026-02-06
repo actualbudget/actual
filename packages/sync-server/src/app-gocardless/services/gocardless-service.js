@@ -22,19 +22,19 @@ const GoCardlessClient = nordigenNode.default;
 
 const clients = new Map();
 
-const getGocardlessClient = () => {
+const getGocardlessClient = (options = {}) => {
   const secrets = {
-    secretId: secretsService.get(SecretName.gocardless_secretId),
-    secretKey: secretsService.get(SecretName.gocardless_secretKey),
+    secretId: secretsService.get(SecretName.gocardless_secretId, options),
+    secretKey: secretsService.get(SecretName.gocardless_secretKey, options),
   };
 
-  const hash = JSON.stringify(secrets);
+  const cacheKey = options.fileId;
 
-  if (!clients.has(hash)) {
-    clients.set(hash, new GoCardlessClient(secrets));
+  if (!clients.has(cacheKey)) {
+    clients.set(cacheKey, new GoCardlessClient(secrets));
   }
 
-  return clients.get(hash);
+  return clients.get(cacheKey);
 };
 
 export const handleGoCardlessError = error => {
@@ -65,19 +65,26 @@ export const handleGoCardlessError = error => {
 export const goCardlessService = {
   /**
    * Check if the GoCardless service is configured to be used.
+   * @param {{ fileId?: string }} [options]
    * @returns {boolean}
    */
-  isConfigured: () => {
-    return !!(
-      getGocardlessClient().secretId && getGocardlessClient().secretKey
+  isConfigured: (options = {}) => {
+    const secretId = secretsService.get(
+      SecretName.gocardless_secretId,
+      options,
     );
+    const secretKey = secretsService.get(
+      SecretName.gocardless_secretKey,
+      options,
+    );
+    return !!(secretId && secretKey);
   },
 
   /**
    *
    * @returns {Promise<void>}
    */
-  setToken: async () => {
+  setToken: async (options = {}) => {
     const isExpiredJwtToken = token => {
       const decodedToken = jwt.decode(token);
       if (!decodedToken) {
@@ -88,11 +95,11 @@ export const goCardlessService = {
       return clockTimestamp >= payload.exp;
     };
 
-    if (isExpiredJwtToken(getGocardlessClient().token)) {
+    if (isExpiredJwtToken(getGocardlessClient(options).token)) {
       // Generate new access token. Token is valid for 24 hours
       // Note: access_token is automatically injected to other requests after you successfully obtain it
       try {
-        await client.generateToken();
+        await client.generateToken(options);
       } catch (error) {
         handleGoCardlessError(error);
       }
@@ -113,8 +120,11 @@ export const goCardlessService = {
    * @throws {ServiceError}
    * @returns {Promise<import('../gocardless-node.types').Requisition>}
    */
-  getLinkedRequisition: async requisitionId => {
-    const requisition = await goCardlessService.getRequisition(requisitionId);
+  getLinkedRequisition: async (requisitionId, options = {}) => {
+    const requisition = await goCardlessService.getRequisition(
+      requisitionId,
+      options,
+    );
 
     const { status } = requisition;
 
@@ -142,14 +152,19 @@ export const goCardlessService = {
    * @throws {ServiceError}
    * @returns {Promise<{requisition: import('../gocardless-node.types').Requisition, accounts: Array<import('../gocardless.types').NormalizedAccountDetails>}>}
    */
-  getRequisitionWithAccounts: async requisitionId => {
-    const requisition =
-      await goCardlessService.getLinkedRequisition(requisitionId);
+  getRequisitionWithAccounts: async (requisitionId, options = {}) => {
+    const requisition = await goCardlessService.getLinkedRequisition(
+      requisitionId,
+      options,
+    );
 
     const institutionIdSet = new Set();
     const detailedAccounts = await Promise.all(
       requisition.accounts.map(async accountId => {
-        const account = await goCardlessService.getDetailedAccount(accountId);
+        const account = await goCardlessService.getDetailedAccount(
+          accountId,
+          options,
+        );
         institutionIdSet.add(account.institution_id);
         return account;
       }),
@@ -157,7 +172,7 @@ export const goCardlessService = {
 
     const institutions = await Promise.all(
       Array.from(institutionIdSet).map(async institutionId => {
-        return await goCardlessService.getInstitution(institutionId);
+        return await goCardlessService.getInstitution(institutionId, options);
       }),
     );
 
@@ -198,9 +213,10 @@ export const goCardlessService = {
     accountId,
     startDate,
     endDate,
+    options = {},
   ) => {
     const { institution_id, accounts: accountIds } =
-      await goCardlessService.getLinkedRequisition(requisitionId);
+      await goCardlessService.getLinkedRequisition(requisitionId, options);
 
     if (!accountIds.includes(accountId)) {
       throw new AccountNotLinkedToRequisition(accountId, requisitionId);
@@ -212,8 +228,9 @@ export const goCardlessService = {
         accountId,
         startDate,
         endDate,
+        options,
       ),
-      goCardlessService.getBalances(accountId),
+      goCardlessService.getBalances(accountId, options),
     ]);
 
     const transactions = normalizedTransactions.transactions;
@@ -256,20 +273,24 @@ export const goCardlessService = {
     accountId,
     startDate,
     endDate,
+    options = {},
   ) => {
     const { institution_id, accounts: accountIds } =
-      await goCardlessService.getLinkedRequisition(requisitionId);
+      await goCardlessService.getLinkedRequisition(requisitionId, options);
 
     if (!accountIds.includes(accountId)) {
       throw new AccountNotLinkedToRequisition(accountId, requisitionId);
     }
 
-    const transactions = await goCardlessService.getTransactions({
-      institutionId: institution_id,
-      accountId,
-      startDate,
-      endDate,
-    });
+    const transactions = await goCardlessService.getTransactions(
+      {
+        institutionId: institution_id,
+        accountId,
+        startDate,
+        endDate,
+      },
+      options,
+    );
 
     const bank = BankFactory(institution_id);
     const sortedBookedTransactions = bank.sortTransactions(
@@ -309,10 +330,13 @@ export const goCardlessService = {
    * @throws {ServiceError}
    * @returns {Promise<{requisitionId, link}>}
    */
-  createRequisition: async ({ institutionId, host }) => {
-    await goCardlessService.setToken();
+  createRequisition: async ({ institutionId, host }, options = {}) => {
+    await goCardlessService.setToken(options);
 
-    const institution = await goCardlessService.getInstitution(institutionId);
+    const institution = await goCardlessService.getInstitution(
+      institutionId,
+      options,
+    );
     const accountSelection =
       institution.supported_features?.includes('account_selection') ?? false;
 
@@ -331,7 +355,7 @@ export const goCardlessService = {
       accountSelection,
     };
     try {
-      response = await client.initSession(body);
+      response = await client.initSession(body, options);
     } catch {
       try {
         console.log('Failed to link using:');
@@ -341,11 +365,14 @@ export const goCardlessService = {
             'and maxHistoricalDays = 89',
         );
 
-        response = await client.initSession({
-          ...body,
-          accessValidForDays: 90,
-          maxHistoricalDays: 89,
-        });
+        response = await client.initSession(
+          {
+            ...body,
+            accessValidForDays: 90,
+            maxHistoricalDays: 89,
+          },
+          options,
+        );
       } catch (error) {
         handleGoCardlessError(error);
       }
@@ -372,12 +399,12 @@ export const goCardlessService = {
    * @throws {ServiceError}
    * @returns {Promise<{summary: string, detail: string}>}
    */
-  deleteRequisition: async requisitionId => {
-    await goCardlessService.getRequisition(requisitionId);
+  deleteRequisition: async (requisitionId, options = {}) => {
+    await goCardlessService.getRequisition(requisitionId, options);
 
     let response;
     try {
-      response = client.deleteRequisition(requisitionId);
+      response = client.deleteRequisition(requisitionId, options);
     } catch (error) {
       handleGoCardlessError(error);
     }
@@ -399,12 +426,12 @@ export const goCardlessService = {
    * @throws {ServiceError}
    * @returns { Promise<import('../gocardless-node.types').Requisition> }
    */
-  getRequisition: async requisitionId => {
-    await goCardlessService.setToken();
+  getRequisition: async (requisitionId, options = {}) => {
+    await goCardlessService.setToken(options);
 
     let response;
     try {
-      response = client.getRequisitionById(requisitionId);
+      response = client.getRequisitionById(requisitionId, options);
     } catch (error) {
       handleGoCardlessError(error);
     }
@@ -417,12 +444,12 @@ export const goCardlessService = {
    * @param accountId
    * @returns {Promise<import('../gocardless.types').DetailedAccount>}
    */
-  getDetailedAccount: async accountId => {
+  getDetailedAccount: async (accountId, options = {}) => {
     let detailedAccount, metadataAccount;
     try {
       [detailedAccount, metadataAccount] = await Promise.all([
-        client.getDetails(accountId),
-        client.getMetadata(accountId),
+        client.getDetails(accountId, options),
+        client.getMetadata(accountId, options),
       ]);
     } catch (error) {
       handleGoCardlessError(error);
@@ -456,10 +483,10 @@ export const goCardlessService = {
    * @param accountId
    * @returns {Promise<import('../gocardless-node.types').GoCardlessAccountMetadata>}
    */
-  getAccountMetadata: async accountId => {
+  getAccountMetadata: async (accountId, options = {}) => {
     let response;
     try {
-      response = await client.getMetadata(accountId);
+      response = await client.getMetadata(accountId, options);
     } catch (error) {
       handleGoCardlessError(error);
     }
@@ -480,10 +507,10 @@ export const goCardlessService = {
    * @throws {ServiceError}
    * @returns {Promise<Array<import('../gocardless-node.types').Institution>>}
    */
-  getInstitutions: async country => {
+  getInstitutions: async (country, options = {}) => {
     let response;
     try {
-      response = await client.getInstitutions(country);
+      response = await client.getInstitutions(country, options);
     } catch (error) {
       handleGoCardlessError(error);
     }
@@ -504,10 +531,10 @@ export const goCardlessService = {
    * @throws {ServiceError}
    * @returns {Promise<import('../gocardless-node.types').Institution>}
    */
-  getInstitution: async institutionId => {
+  getInstitution: async (institutionId, options = {}) => {
     let response;
     try {
-      response = await client.getInstitutionById(institutionId);
+      response = await client.getInstitutionById(institutionId, options);
     } catch (error) {
       handleGoCardlessError(error);
     }
@@ -548,14 +575,20 @@ export const goCardlessService = {
    * @throws {ServiceError}
    * @returns {Promise<import('../gocardless.types').GetTransactionsResponse>}
    */
-  getTransactions: async ({ institutionId, accountId, startDate, endDate }) => {
+  getTransactions: async (
+    { institutionId, accountId, startDate, endDate },
+    options = {},
+  ) => {
     let response;
     try {
-      response = await client.getTransactions({
-        accountId,
-        dateFrom: startDate,
-        dateTo: endDate,
-      });
+      response = await client.getTransactions(
+        {
+          accountId,
+          dateFrom: startDate,
+          dateTo: endDate,
+        },
+        options,
+      );
     } catch (error) {
       handleGoCardlessError(error);
     }
@@ -584,10 +617,10 @@ export const goCardlessService = {
    * @throws {ServiceError}
    * @returns {Promise<import('../gocardless.types').GetBalances>}
    */
-  getBalances: async accountId => {
+  getBalances: async (accountId, options = {}) => {
     let response;
     try {
-      response = await client.getBalances(accountId);
+      response = await client.getBalances(accountId, options);
     } catch (error) {
       handleGoCardlessError(error);
     }
@@ -602,38 +635,47 @@ export const goCardlessService = {
  * In that way we can mock the `client` const instead of nordigen library
  */
 export const client = {
-  getBalances: async accountId =>
-    await getGocardlessClient().account(accountId).getBalances(),
-  getTransactions: async ({ accountId, dateFrom, dateTo }) =>
-    await getGocardlessClient().account(accountId).getTransactions({
+  getBalances: async (accountId, options = {}) =>
+    await getGocardlessClient(options).account(accountId).getBalances(),
+  getTransactions: async ({ accountId, dateFrom, dateTo }, options = {}) =>
+    await getGocardlessClient(options).account(accountId).getTransactions({
       dateFrom,
       dateTo,
       country: undefined,
     }),
-  getInstitutions: async country =>
-    await getGocardlessClient().institution.getInstitutions({ country }),
-  getInstitutionById: async institutionId =>
-    await getGocardlessClient().institution.getInstitutionById(institutionId),
-  getDetails: async accountId =>
-    await getGocardlessClient().account(accountId).getDetails(),
-  getMetadata: async accountId =>
-    await getGocardlessClient().account(accountId).getMetadata(),
-  getRequisitionById: async requisitionId =>
-    await getGocardlessClient().requisition.getRequisitionById(requisitionId),
-  deleteRequisition: async requisitionId =>
-    await getGocardlessClient().requisition.deleteRequisition(requisitionId),
-  initSession: async ({
-    redirectUrl,
-    institutionId,
-    referenceId,
-    accessValidForDays,
-    maxHistoricalDays,
-    userLanguage,
-    ssn,
-    redirectImmediate,
-    accountSelection,
-  }) =>
-    await getGocardlessClient().initSession({
+  getInstitutions: async (country, options = {}) =>
+    await getGocardlessClient(options).institution.getInstitutions({ country }),
+  getInstitutionById: async (institutionId, options = {}) =>
+    await getGocardlessClient(options).institution.getInstitutionById(
+      institutionId,
+    ),
+  getDetails: async (accountId, options = {}) =>
+    await getGocardlessClient(options).account(accountId).getDetails(),
+  getMetadata: async (accountId, options = {}) =>
+    await getGocardlessClient(options).account(accountId).getMetadata(),
+  getRequisitionById: async (requisitionId, options = {}) =>
+    await getGocardlessClient(options).requisition.getRequisitionById(
+      requisitionId,
+    ),
+  deleteRequisition: async (requisitionId, options = {}) =>
+    await getGocardlessClient(options).requisition.deleteRequisition(
+      requisitionId,
+    ),
+  initSession: async (
+    {
+      redirectUrl,
+      institutionId,
+      referenceId,
+      accessValidForDays,
+      maxHistoricalDays,
+      userLanguage,
+      ssn,
+      redirectImmediate,
+      accountSelection,
+    },
+    options = {},
+  ) =>
+    await getGocardlessClient(options).initSession({
       redirectUrl,
       institutionId,
       referenceId,
@@ -644,7 +686,8 @@ export const client = {
       redirectImmediate,
       accountSelection,
     }),
-  generateToken: async () => await getGocardlessClient().generateToken(),
-  exchangeToken: async ({ refreshToken }) =>
-    await getGocardlessClient().exchangeToken({ refreshToken }),
+  generateToken: async (options = {}) =>
+    await getGocardlessClient(options).generateToken(),
+  exchangeToken: async ({ refreshToken }, options = {}) =>
+    await getGocardlessClient(options).exchangeToken({ refreshToken }),
 };

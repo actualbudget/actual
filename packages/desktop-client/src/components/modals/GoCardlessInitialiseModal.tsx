@@ -29,6 +29,7 @@ type GoCardlessInitialiseModalProps = Extract<
 
 export const GoCardlessInitialiseModal = ({
   onSuccess,
+  fileId,
 }: GoCardlessInitialiseModalProps) => {
   const { t } = useTranslation();
   const [secretId, setSecretId] = useState('');
@@ -50,29 +51,30 @@ export const GoCardlessInitialiseModal = ({
 
     setIsLoading(true);
 
-    let { error, reason } =
+    let { error: err, reason } =
       (await send('secret-set', {
         name: 'gocardless_secretId',
         value: secretId,
+        fileId,
       })) || {};
 
-    if (error) {
+    if (err) {
       setIsLoading(false);
       setIsValid(false);
-      setError(getSecretsError(error, reason));
+      setError(getSecretsError(err, reason));
       return;
-    } else {
-      ({ error, reason } =
-        (await send('secret-set', {
-          name: 'gocardless_secretKey',
-          value: secretKey,
-        })) || {});
-      if (error) {
-        setIsLoading(false);
-        setIsValid(false);
-        setError(getSecretsError(error, reason));
-        return;
-      }
+    }
+    ({ error: err, reason } =
+      (await send('secret-set', {
+        name: 'gocardless_secretKey',
+        value: secretKey,
+        fileId,
+      })) || {});
+    if (err) {
+      setIsLoading(false);
+      setIsValid(false);
+      setError(getSecretsError(err, reason));
+      return;
     }
 
     setIsValid(true);

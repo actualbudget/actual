@@ -12,12 +12,6 @@ import {
   type ProviderStatusMap,
 } from './useProviderStatusMap';
 
-export type BankSyncScope = 'global' | 'file';
-
-function makeKey(providerSlug: string, scope: BankSyncScope) {
-  return `${providerSlug}|${scope}`;
-}
-
 export function ProviderScopeButton({
   label,
   statusMap,
@@ -28,7 +22,6 @@ export function ProviderScopeButton({
   statusMap: ProviderStatusMap;
   onSelect: (arg: {
     providerSlug: string;
-    scope: BankSyncScope;
     provider: InternalBankSyncProvider;
   }) => void;
   isDisabled?: boolean;
@@ -37,57 +30,20 @@ export function ProviderScopeButton({
   const providers = useMemo(() => getInternalBankSyncProviders(), []);
 
   const items = useMemo(() => {
-    const menuItems: MenuItem<string>[] = [];
-
-    providers.forEach(provider => {
-      const statuses = statusMap[provider.slug];
-      const globalConfigured = Boolean(statuses?.global?.configured);
-      const fileConfigured = Boolean(
-        provider.supportsScope && statuses?.file?.configured,
-      );
-      const hasAnyConfigured = globalConfigured || fileConfigured;
-
-      if (!hasAnyConfigured) {
-        return;
-      }
-
-      menuItems.push({
-        type: Menu.label,
-        name: provider.displayName,
-        text: provider.displayName,
-      });
-
-      if (globalConfigured) {
-        menuItems.push({
-          name: makeKey(provider.slug, 'global'),
-          text: t('Global'),
-        });
-      }
-
-      if (fileConfigured) {
-        menuItems.push({
-          name: makeKey(provider.slug, 'file'),
-          text: t('Scoped'),
-        });
-      }
-
-      menuItems.push(Menu.line);
-    });
-
-    // Trim trailing divider
-    if (menuItems[menuItems.length - 1] === Menu.line) {
-      menuItems.pop();
+    const configured = providers.filter(p => statusMap[p.slug]?.configured);
+    if (configured.length === 0) {
+      return [
+        {
+          name: 'none',
+          text: t('No providers configured'),
+          disabled: true,
+        },
+      ] as MenuItem<string>[];
     }
-
-    if (menuItems.length === 0) {
-      menuItems.push({
-        name: 'none',
-        text: t('No providers configured'),
-        disabled: true,
-      });
-    }
-
-    return menuItems;
+    return configured.map(p => ({
+      name: p.slug,
+      text: p.displayName,
+    })) as MenuItem<string>[];
   }, [providers, statusMap, t]);
 
   return (
@@ -97,15 +53,11 @@ export function ProviderScopeButton({
         <Menu
           items={items}
           onMenuSelect={itemId => {
-            const [providerSlug, scope] = String(itemId).split('|') as [
-              string,
-              BankSyncScope,
-            ];
-            if (providerSlug && (scope === 'global' || scope === 'file')) {
-              const provider = providers.find(p => p.slug === providerSlug);
-              if (provider) {
-                onSelect({ providerSlug, scope, provider });
-              }
+            const providerSlug = String(itemId);
+            if (providerSlug === 'none') return;
+            const provider = providers.find(p => p.slug === providerSlug);
+            if (provider) {
+              onSelect({ providerSlug, provider });
             }
           }}
         />

@@ -33,7 +33,7 @@ import {
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
-function useAvailableBanks(country: string) {
+function useAvailableBanks(country: string, fileId?: string) {
   const [banks, setBanks] = useState<GoCardlessInstitution[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -50,7 +50,8 @@ function useAvailableBanks(country: string) {
 
       setIsLoading(true);
 
-      const { data, error } = await sendCatch('gocardless-get-banks', country);
+      const payload = fileId ? { country, fileId } : country;
+      const { data, error } = await sendCatch('gocardless-get-banks', payload);
 
       if (error || !Array.isArray(data)) {
         setIsError(true);
@@ -63,7 +64,7 @@ function useAvailableBanks(country: string) {
     }
 
     fetch();
-  }, [setBanks, setIsLoading, country]);
+  }, [country, fileId]);
 
   return {
     data: banks,
@@ -97,6 +98,7 @@ export function GoCardlessExternalMsgModal({
   onMoveExternal,
   onSuccess,
   onClose,
+  fileId,
 }: GoCardlessExternalMsgModalProps) {
   const { t } = useTranslation();
 
@@ -129,11 +131,11 @@ export function GoCardlessExternalMsgModal({
     data: bankOptions,
     isLoading: isBankOptionsLoading,
     isError: isBankOptionError,
-  } = useAvailableBanks(country);
+  } = useAvailableBanks(country ?? '', fileId);
   const {
     configuredGoCardless: isConfigured,
     isLoading: isConfigurationLoading,
-  } = useGoCardlessStatus();
+  } = useGoCardlessStatus(fileId);
 
   async function onJump() {
     setError(null);
@@ -161,12 +163,14 @@ export function GoCardlessExternalMsgModal({
   }
 
   const onGoCardlessInit = () => {
+    if (!fileId) return;
     dispatch(
       pushModal({
         modal: {
           name: 'gocardless-init',
           options: {
             onSuccess: () => setIsGoCardlessSetupComplete(true),
+            fileId,
           },
         },
       }),

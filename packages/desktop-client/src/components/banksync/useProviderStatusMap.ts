@@ -7,13 +7,12 @@ import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 export type InternalBankSyncProvider = {
   slug: string;
   displayName: string;
-  supportsScope: boolean;
 };
 
 const INTERNAL_PROVIDERS: InternalBankSyncProvider[] = [
-  { slug: 'goCardless', displayName: 'GoCardless', supportsScope: false },
-  { slug: 'simpleFin', displayName: 'SimpleFIN', supportsScope: true },
-  { slug: 'pluggyai', displayName: 'Pluggy.ai', supportsScope: true },
+  { slug: 'goCardless', displayName: 'GoCardless' },
+  { slug: 'simpleFin', displayName: 'SimpleFIN' },
+  { slug: 'pluggyai', displayName: 'Pluggy.ai' },
 ];
 
 export function getInternalBankSyncProviders(): InternalBankSyncProvider[] {
@@ -25,45 +24,29 @@ type ScopeStatus = {
   error?: string;
 };
 
-export type ProviderStatusMap = Record<
-  string,
-  {
-    global: ScopeStatus;
-    file: ScopeStatus;
-  }
->;
+export type ProviderStatusMap = Record<string, ScopeStatus>;
 
 async function getProviderStatus(
   slug: string,
-  scope: 'global' | 'file',
-  fileId?: string,
+  fileId: string,
 ): Promise<ScopeStatus> {
-  if (scope === 'file' && !fileId) {
-    return { configured: false };
-  }
   try {
     if (slug === 'pluggyai') {
-      const result = await send(
-        'pluggyai-status',
-        scope === 'file' ? { fileId } : {},
-      );
+      const result = await send('pluggyai-status', { fileId });
       return {
         configured: Boolean((result as { configured?: boolean })?.configured),
         error: (result as { error?: string })?.error,
       };
     }
     if (slug === 'goCardless') {
-      const result = await send('gocardless-status');
+      const result = await send('gocardless-status', { fileId });
       return {
         configured: Boolean((result as { configured?: boolean })?.configured),
         error: (result as { error?: string })?.error,
       };
     }
     if (slug === 'simpleFin') {
-      const result = await send(
-        'simplefin-status',
-        scope === 'file' ? { fileId } : {},
-      );
+      const result = await send('simplefin-status', { fileId });
       return {
         configured: Boolean((result as { configured?: boolean })?.configured),
         error: (result as { error?: string })?.error,
@@ -96,10 +79,11 @@ export function useProviderStatusMap({
   }, []);
 
   useEffect(() => {
-    if (syncServerStatus !== 'online') {
+    if (syncServerStatus !== 'online' || !fileId) {
       return;
     }
 
+    const fid = fileId;
     let didCancel = false;
 
     async function load() {
@@ -109,20 +93,8 @@ export function useProviderStatusMap({
       try {
         const entries = await Promise.all(
           providers.map(async provider => {
-            const [globalResult, fileResult] = await Promise.all([
-              getProviderStatus(provider.slug, 'global'),
-              provider.supportsScope && fileId
-                ? getProviderStatus(provider.slug, 'file', fileId)
-                : Promise.resolve({ configured: false }),
-            ]);
-
-            return [
-              provider.slug,
-              {
-                global: globalResult,
-                file: fileResult,
-              },
-            ] as const;
+            const result = await getProviderStatus(provider.slug, fid);
+            return [provider.slug, result] as const;
           }),
         );
 
