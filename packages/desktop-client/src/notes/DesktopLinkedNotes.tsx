@@ -2,6 +2,7 @@ import { type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
+
 import { isElectron } from 'loot-core/shared/environment';
 
 import { normalizeUrl } from './linkParser';
@@ -18,12 +19,12 @@ type DesktopLinkedNotesProps = {
 };
 
 //const linkStyles = css({
-  //color: theme.pageTextLink,
-  //textDecoration: 'underline',
-  //cursor: 'pointer',
-  //'&:hover': {
-    //color: theme.pageTextLinkLight,
-  //},
+//color: theme.pageTextLink,
+//textDecoration: 'underline',
+//cursor: 'pointer',
+//'&:hover': {
+//color: theme.pageTextLinkLight,
+//},
 //});
 
 export function DesktopLinkedNotes({
@@ -64,10 +65,10 @@ export function DesktopLinkedNotes({
 
   return (
     <>
-      <Link 
-        variant="text" 
-        onClick={handleClick} 
-        style={{ 
+      <Link
+        variant="text"
+        onClick={handleClick}
+        style={{
           color: theme.pageTextLink,
           textDecoration: 'underline',
           cursor: 'pointer',
@@ -76,7 +77,7 @@ export function DesktopLinkedNotes({
           },
         }}
       >
-      {displayText}
+        {displayText}
       </Link>
       {separator}
     </>
