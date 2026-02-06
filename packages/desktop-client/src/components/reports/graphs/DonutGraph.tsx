@@ -251,7 +251,7 @@ export function DonutGraph({
   const splitData = groupBy === 'Interval' ? 'intervalData' : 'data';
 
   const navigate = useNavigate();
-  const categories = useCategories();
+  const { data: categories } = useCategories();
   const accounts = useAccounts();
   const [pointer, setPointer] = useState('');
 
