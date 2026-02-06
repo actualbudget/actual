@@ -119,7 +119,7 @@
     "react/exhaustive-deps": [
       "warn",
       {
-        "additionalHooks": "(useQuery|useEffectAfterMount)"
+        "additionalHooks": "(^useQuery$|^useEffectAfterMount$)"
       }
     ],
     "react/jsx-curly-brace-presence": "warn",
@@ -332,6 +332,10 @@
             "group": ["**/style", "**/colors"],
             "importNames": ["colors"],
             "message": "Please use themes instead of colors"
+          },
+          {
+            "group": ["**/style/themes/*"],
+            "message": "Please do not import theme files directly"
           },
           {
             "group": ["@actual-app/web/**/*"],

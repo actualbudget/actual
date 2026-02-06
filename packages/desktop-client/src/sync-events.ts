@@ -1,11 +1,12 @@
 // @ts-strict-ignore
+import { type QueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 
 import { listen, send } from 'loot-core/platform/client/fetch';
 
 import { reloadAccounts } from './accounts/accountsSlice';
 import { resetSync, sync } from './app/appSlice';
-import { reloadCategories } from './budget/budgetSlice';
+import { categoryQueries } from './budget';
 import {
   closeAndDownloadBudget,
   uploadBudget,
@@ -20,7 +21,7 @@ import { loadPrefs } from './prefs/prefsSlice';
 import { type AppStore } from './redux/store';
 import { signOut } from './users/usersSlice';
 
-export function listenForSyncEvent(store: AppStore) {
+export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
   // TODO: Should this run on mobile too?
   const unlistenUnauthorized = listen('sync-event', async ({ type }) => {
     if (type === 'unauthorized') {
@@ -72,7 +73,9 @@ export function listenForSyncEvent(store: AppStore) {
         tables.includes('category_groups') ||
         tables.includes('category_mapping')
       ) {
-        store.dispatch(reloadCategories());
+        queryClient.invalidateQueries({
+          queryKey: categoryQueries.lists(),
+        });
       }
 
       if (
@@ -355,18 +358,8 @@ export function listenForSyncEvent(store: AppStore) {
           };
           break;
         case 'token-expired':
-          notif = {
-            title: 'Login expired',
-            message: 'Please login again.',
-            sticky: true,
-            id: 'login-expired',
-            button: {
-              title: 'Go to login',
-              action: () => {
-                store.dispatch(signOut());
-              },
-            },
-          };
+          notif = null;
+          store.dispatch(signOut());
           break;
         default:
           console.trace('unknown error', event);
