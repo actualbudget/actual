@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { format as formatDate, parseISO } from 'date-fns';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -45,8 +46,11 @@ import {
 } from '@desktop-client/components/table';
 import { AmountInput } from '@desktop-client/components/util/AmountInput';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { closeModal } from '@desktop-client/modals/modalsSlice';
+import { transactions } from '@desktop-client/queries';
+import { liveQuery } from '@desktop-client/queries/liveQuery';
 import { useDispatch } from '@desktop-client/redux';
 
 function useAddBudgetAccountOptions() {
@@ -398,7 +402,7 @@ export function SelectLinkedAccountsModal({
               <TableHeader>
                 <Cell value={t('Institution to Sync')} width={150} />
                 <Cell value={t('Bank Account To Sync')} width={150} />
-                <Cell value={t('Balance')} width={80} />
+                <Cell value={t('Balance')} width={120} />
                 <Cell value={t('Account in Actual')} width="flex" />
                 <Cell value={t('Starting Date')} width={120} />
                 <Cell value={t('Starting Balance')} width={120} />
@@ -484,6 +488,11 @@ type CustomStartingSettings = {
   balance: number;
 };
 
+type StartingBalanceInfo = {
+  date: string;
+  amount: number;
+};
+
 type SharedAccountRowProps = {
   externalAccount: ExternalAccount;
   chosenAccount: { id: string; name: string } | undefined;
@@ -521,6 +530,37 @@ type TableRowProps = SharedAccountRowProps & {
   showStartingOptions: boolean;
 };
 
+function useStartingBalanceInfo(accountId: string | undefined) {
+  const [info, setInfo] = useState<StartingBalanceInfo | null>(null);
+
+  useEffect(() => {
+    if (!accountId) {
+      setInfo(null);
+      return;
+    }
+
+    const query = transactions(accountId)
+      .filter({ starting_balance_flag: true })
+      .select(['date', 'amount'])
+      .limit(1);
+
+    const live = liveQuery<StartingBalanceInfo>(query, {
+      onData: data => {
+        setInfo(data?.[0] ?? null);
+      },
+      onError: () => {
+        setInfo(null);
+      },
+    });
+
+    return () => {
+      live?.unsubscribe();
+    };
+  }, [accountId]);
+
+  return info;
+}
+
 function TableRow({
   externalAccount,
   chosenAccount,
@@ -534,7 +574,11 @@ function TableRow({
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
   const format = useFormat();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
+  const startingBalanceInfo = useStartingBalanceInfo(
+    showStartingOptions ? undefined : chosenAccount?.id,
+  );
 
   const availableAccountOptions = getAvailableAccountOptions(
     unlinkedAccounts,
@@ -545,6 +589,7 @@ function TableRow({
 
   return (
     <Row style={{ backgroundColor: theme.tableBackground }}>
+      {/* Institution to Sync */}
       <Field width={150}>
         <Tooltip content={getInstitutionName(externalAccount)}>
           <View
@@ -558,6 +603,7 @@ function TableRow({
           </View>
         </Tooltip>
       </Field>
+      {/* Bank Account To Sync */}
       <Field width={150}>
         <Tooltip content={externalAccount.name}>
           <View
@@ -571,7 +617,8 @@ function TableRow({
           </View>
         </Tooltip>
       </Field>
-      <Field width={80}>
+      {/* Balance */}
+      <Field width={120} style={{ textAlign: 'right' }}>
         <PrivacyFilter>
           {externalAccount.balance != null ? (
             <FinancialText>
@@ -582,6 +629,7 @@ function TableRow({
           )}
         </PrivacyFilter>
       </Field>
+      {/* Account in Actual */}
       <Field
         width="flex"
         truncate={focusedField !== 'account'}
@@ -615,10 +663,37 @@ function TableRow({
         />
       ) : (
         <>
-          <Field width={120} truncate={false} />
-          <Field width={120} truncate={false} />
+          {/* Starting Date */}
+          <Field width={120} truncate={false} style={{ textAlign: 'right' }}>
+            {startingBalanceInfo ? (
+              <Text
+                style={{
+                  color: theme.pageTextSubdued,
+                  fontStyle: 'italic',
+                }}
+              >
+                {formatDate(parseISO(startingBalanceInfo.date), dateFormat)}
+              </Text>
+            ) : null}
+          </Field>
+          {/* Starting Balance */}
+          <Field width={120} truncate={false} style={{ textAlign: 'right' }}>
+            {startingBalanceInfo ? (
+              <PrivacyFilter>
+                <FinancialText
+                  style={{
+                    color: theme.pageTextSubdued,
+                    fontStyle: 'italic',
+                  }}
+                >
+                  {format(startingBalanceInfo.amount, 'financial')}
+                </FinancialText>
+              </PrivacyFilter>
+            ) : null}
+          </Field>
         </>
       )}
+      {/* Actions */}
       <Field width={150}>
         {chosenAccount ? (
           <Button
@@ -682,6 +757,7 @@ function StartingOptionsFields({
   if (layout === 'inline') {
     return (
       <>
+        {/* Starting Date */}
         <Field width={120} truncate={false}>
           <Input
             type="date"
@@ -695,7 +771,8 @@ function StartingOptionsFields({
             style={{ width: '100%' }}
           />
         </Field>
-        <Field width={120} truncate={false}>
+        {/* Starting Balance */}
+        <Field width={120} truncate={false} style={{ textAlign: 'right' }}>
           <AmountInput
             value={customStartingDate.balance}
             zeroSign={zeroSign}
