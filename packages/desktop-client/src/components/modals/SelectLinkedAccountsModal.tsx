@@ -151,7 +151,7 @@ export function SelectLinkedAccountsModal({
     },
   );
   const [customStartingDates, setCustomStartingDates] = useState<
-    Record<string, CustomStartingSettings>
+    Record<string, StartingBalanceInfo>
   >({});
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
@@ -188,7 +188,7 @@ export function SelectLinkedAccountsModal({
             ? customSettings.date
             : undefined;
         const startingBalance =
-          customSettings?.balance != null ? customSettings.balance : undefined;
+          customSettings?.amount != null ? customSettings.amount : undefined;
 
         if (propsWithSortedExternalAccounts.syncSource === 'simpleFin') {
           dispatch(
@@ -294,10 +294,10 @@ export function SelectLinkedAccountsModal({
   };
 
   // Memoize default starting settings to avoid repeated calculations
-  const defaultStartingSettings = useMemo<CustomStartingSettings>(
+  const defaultStartingSettings = useMemo<StartingBalanceInfo>(
     () => ({
       date: subDays(currentDay(), 90),
-      balance: 0,
+      amount: 0,
     }),
     [],
   );
@@ -312,7 +312,7 @@ export function SelectLinkedAccountsModal({
 
   const setCustomStartingDate = (
     accountId: string,
-    settings: CustomStartingSettings,
+    settings: StartingBalanceInfo,
   ) => {
     setCustomStartingDates(prev => ({
       ...prev,
@@ -483,11 +483,6 @@ type ExternalAccount =
   | SyncServerSimpleFinAccount
   | SyncServerPluggyAiAccount;
 
-type CustomStartingSettings = {
-  date: string;
-  balance: number;
-};
-
 type StartingBalanceInfo = {
   date: string;
   amount: number;
@@ -522,10 +517,10 @@ function getAvailableAccountOptions(
 }
 
 type TableRowProps = SharedAccountRowProps & {
-  customStartingDate: CustomStartingSettings;
+  customStartingDate: StartingBalanceInfo;
   onSetCustomStartingDate: (
     accountId: string,
-    settings: CustomStartingSettings,
+    settings: StartingBalanceInfo,
   ) => void;
   showStartingOptions: boolean;
 };
@@ -737,10 +732,10 @@ function getInstitutionName(
 type StartingOptionsFieldsProps = {
   accountId: string;
   externalBalance: number | null | undefined;
-  customStartingDate: CustomStartingSettings;
+  customStartingDate: StartingBalanceInfo;
   onSetCustomStartingDate: (
     accountId: string,
-    settings: CustomStartingSettings,
+    settings: StartingBalanceInfo,
   ) => void;
   layout: 'inline' | 'stacked';
 };
@@ -774,12 +769,12 @@ function StartingOptionsFields({
         {/* Starting Balance */}
         <Field width={120} truncate={false} style={{ textAlign: 'right' }}>
           <AmountInput
-            value={customStartingDate.balance}
+            value={customStartingDate.amount}
             zeroSign={zeroSign}
             onUpdate={amount =>
               onSetCustomStartingDate(accountId, {
                 ...customStartingDate,
-                balance: amount,
+                amount,
               })
             }
             style={{ width: '100%' }}
@@ -832,12 +827,12 @@ function StartingOptionsFields({
             <Trans>Balance on that date:</Trans>
           </Text>
           <AmountInput
-            value={customStartingDate.balance}
+            value={customStartingDate.amount}
             zeroSign={zeroSign}
             onUpdate={amount =>
               onSetCustomStartingDate(accountId, {
                 ...customStartingDate,
-                balance: amount,
+                amount,
               })
             }
             style={{ width: '100%' }}
@@ -849,10 +844,10 @@ function StartingOptionsFields({
 }
 
 type AccountCardProps = SharedAccountRowProps & {
-  customStartingDate: CustomStartingSettings;
+  customStartingDate: StartingBalanceInfo;
   onSetCustomStartingDate: (
     accountId: string,
-    settings: CustomStartingSettings,
+    settings: StartingBalanceInfo,
   ) => void;
 };
 
@@ -868,6 +863,7 @@ function AccountCard({
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
   const format = useFormat();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
 
   const availableAccountOptions = getAvailableAccountOptions(
@@ -882,6 +878,9 @@ function AccountCard({
     chosenAccount?.id,
     addOnBudgetAccountOption.id,
     addOffBudgetAccountOption.id,
+  );
+  const startingBalanceInfo = useStartingBalanceInfo(
+    shouldShowStartingOptions ? undefined : chosenAccount?.id,
   );
 
   return (
@@ -959,6 +958,47 @@ function AccountCard({
           </Text>
         )}
       </SpaceBetween>
+
+      {!shouldShowStartingOptions && startingBalanceInfo && (
+        <View
+          style={{
+            fontSize: '0.9em',
+            color: theme.pageTextSubdued,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
+          }}
+        >
+          <View style={{ display: 'flex', flexDirection: 'row', gap: 4 }}>
+            <Text style={{ color: theme.pageTextSubdued }}>
+              <Trans>Starting date:</Trans>
+            </Text>
+            <Text
+              style={{
+                color: theme.pageTextSubdued,
+                fontStyle: 'italic',
+              }}
+            >
+              {formatDate(parseISO(startingBalanceInfo.date), dateFormat)}
+            </Text>
+          </View>
+          <View style={{ display: 'flex', flexDirection: 'row', gap: 4 }}>
+            <Text style={{ color: theme.pageTextSubdued }}>
+              <Trans>Starting balance:</Trans>
+            </Text>
+            <PrivacyFilter>
+              <FinancialText
+                style={{
+                  color: theme.pageTextSubdued,
+                  fontStyle: 'italic',
+                }}
+              >
+                {format(startingBalanceInfo.amount, 'financial')}
+              </FinancialText>
+            </PrivacyFilter>
+          </View>
+        </View>
+      )}
 
       {focusedField === 'account' && (
         <View style={{ marginBottom: 12 }}>
