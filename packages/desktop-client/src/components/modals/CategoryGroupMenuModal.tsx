@@ -52,9 +52,8 @@ export function CategoryGroupMenuModal({
   onApplyBudgetTemplatesInGroup,
 }: CategoryGroupMenuModalProps) {
   const [showMore, setShowMore] = useState(false);
-  const {
-    data: { grouped: categoryGroups },
-  } = useCategories();
+  const { data: { grouped: categoryGroups } = { grouped: [] } } =
+    useCategories();
   const group = categoryGroups.find(g => g.id === groupId);
   const notes = useNotes(group.id);
   const { showUndoNotification } = useUndo();

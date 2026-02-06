@@ -59,7 +59,10 @@ export function CloseAccountModal({
   const { t } = useTranslation(); // Initialize translation hook
   const accounts = useAccounts().filter(a => a.closed === 0);
   const {
-    data: { grouped: categoryGroups, list: categories },
+    data: { grouped: categoryGroups, list: categories } = {
+      grouped: [],
+      list: [],
+    },
   } = useCategories();
   const [loading, setLoading] = useState(false);
   const [transferAccountId, setTransferAccountId] = useState('');

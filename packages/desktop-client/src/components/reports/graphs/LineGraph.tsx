@@ -166,7 +166,7 @@ export function LineGraph({
 }: LineGraphProps) {
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
-  const { data: categories } = useCategories();
+  const { data: categories = { grouped: [], list: [] } } = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
   const format = useFormat();
