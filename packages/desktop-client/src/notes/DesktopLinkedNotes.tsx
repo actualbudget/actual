@@ -64,8 +64,19 @@ export function DesktopLinkedNotes({
 
   return (
     <>
-      <Link variant="text" onClick={handleClick} style={ color: theme.pageTextLink }>
-        {displayText}
+      <Link 
+        variant="text" 
+        onClick={handleClick} 
+        style={{ 
+          color: theme.pageTextLink,
+          textDecoration: 'underline',
+          cursor: 'pointer',
+          '&:hover': {
+            color: theme.pageTextLinkLight,
+          },
+        }}
+      >
+      {displayText}
       </Link>
       {separator}
     </>
