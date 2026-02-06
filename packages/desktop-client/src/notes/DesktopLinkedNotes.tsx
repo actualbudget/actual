@@ -18,15 +18,6 @@ type DesktopLinkedNotesProps = {
   isFilePath: boolean;
 };
 
-//const linkStyles = css({
-//color: theme.pageTextLink,
-//textDecoration: 'underline',
-//cursor: 'pointer',
-//'&:hover': {
-//color: theme.pageTextLinkLight,
-//},
-//});
-
 export function DesktopLinkedNotes({
   displayText,
   url,
