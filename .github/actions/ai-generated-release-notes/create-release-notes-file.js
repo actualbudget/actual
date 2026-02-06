@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import * as core from '@actions/core';
 import { Octokit } from '@octokit/rest';
 
 const token = process.env.GITHUB_TOKEN;
@@ -24,6 +25,7 @@ async function createReleaseNotesFile() {
 
     if (!summaryData) {
       console.log('No summary data available, cannot create file');
+      core.setOutput('status', 'skipped');
       return;
     }
 
@@ -33,6 +35,7 @@ async function createReleaseNotesFile() {
 
     if (!category || category === 'null') {
       console.log('No valid category available, cannot create file');
+      core.setOutput('status', 'skipped');
       return;
     }
 
@@ -64,43 +67,65 @@ ${summaryData.summary}
       pull_number: issueNumber,
     });
 
-    const prBranch = pr.head.ref;
-    const headOwner = pr.head.repo.owner.login;
-    const headRepo = pr.head.repo.name;
-
-    if (pr.head.repo.fork) {
-      console.log(
-        `⚠️ Skipping file commit - PR is from a fork (${headOwner}/${headRepo})`,
-      );
-      console.log(
-        'Fork PRs require manual creation of release notes or the contributor can add them.',
-      );
+    // Check if the head repo still exists (can be null if fork was deleted)
+    if (!pr.head.repo) {
+      console.log('⚠️ Cannot create file - source repository has been deleted');
+      console.log('Please create the release notes file manually.');
+      core.setOutput('status', 'repo_deleted');
       return;
     }
 
+    const prBranch = pr.head.ref;
+    const headOwner = pr.head.repo.owner.login;
+    const headRepo = pr.head.repo.name;
+    const isFork = pr.head.repo.fork;
+
     console.log(
-      `Committing to PR branch: ${headOwner}/${headRepo}:${prBranch}`,
+      `Attempting to commit to ${isFork ? 'fork' : 'branch'}: ${headOwner}/${headRepo}:${prBranch}`,
     );
 
-    // Create the file via GitHub API on the PR branch
-    await octokit.rest.repos.createOrUpdateFileContents({
-      owner: headOwner,
-      repo: headRepo,
-      path: fileName,
-      message: `Add release notes for PR #${summaryData.prNumber}`,
-      content: Buffer.from(fileContent).toString('base64'),
-      branch: prBranch,
-      committer: {
-        name: 'github-actions[bot]',
-        email: 'github-actions[bot]@users.noreply.github.com',
-      },
-      author: {
-        name: 'github-actions[bot]',
-        email: 'github-actions[bot]@users.noreply.github.com',
-      },
-    });
+    // Attempt to create the file via GitHub API on the PR branch
+    // This will succeed for:
+    // - PRs from branches in the main repo
+    // - PRs from forks where the PAT has sufficient permissions
+    try {
+      await octokit.rest.repos.createOrUpdateFileContents({
+        owner: headOwner,
+        repo: headRepo,
+        path: fileName,
+        message: `Add release notes for PR #${summaryData.prNumber}`,
+        content: Buffer.from(fileContent).toString('base64'),
+        branch: prBranch,
+        committer: {
+          name: 'github-actions[bot]',
+          email: 'github-actions[bot]@users.noreply.github.com',
+        },
+        author: {
+          name: 'github-actions[bot]',
+          email: 'github-actions[bot]@users.noreply.github.com',
+        },
+      });
 
-    console.log(`✅ Successfully created release notes file: ${fileName}`);
+      console.log(`✅ Successfully created release notes file: ${fileName}`);
+      core.setOutput('status', 'created');
+    } catch (commitError) {
+      // Handle permission errors gracefully (403 Forbidden, 404 Not Found)
+      if (commitError.status === 403 || commitError.status === 404) {
+        console.log(
+          `⚠️ Cannot commit to ${isFork ? 'fork' : 'repository'} (${commitError.status} ${commitError.message})`,
+        );
+        console.log(
+          'This typically happens when the action does not have write access to the fork.',
+        );
+        console.log(
+          'The contributor can add the release notes file manually, or a maintainer can add it.',
+        );
+        core.setOutput('status', 'manual_required');
+        return;
+      }
+      // Re-throw unexpected errors
+      throw commitError;
+    }
   } catch (error) {
     console.log('Error creating release notes file:', error.message);
     process.exit(1);

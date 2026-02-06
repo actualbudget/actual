@@ -7,6 +7,7 @@ const repo = process.env.GITHUB_REPOSITORY;
 const issueNumber = process.env.GITHUB_EVENT_ISSUE_NUMBER;
 const summaryDataJson = process.env.SUMMARY_DATA;
 const category = process.env.CATEGORY;
+const fileCreationStatus = process.env.FILE_CREATION_STATUS;
 
 if (!token || !repo || !issueNumber || !summaryDataJson || !category) {
   console.log('Missing required environment variables');
@@ -43,12 +44,14 @@ async function commentOnPR() {
       pull_number: issueNumber,
     });
 
+    // Handle case where repo was deleted (pr.head.repo will be null)
+    const headOwner = pr.head.repo?.owner.login || summaryData.author;
+    const headRepo = pr.head.repo?.name || repoName;
     const prBranch = pr.head.ref;
-    const headOwner = pr.head.repo.owner.login;
-    const headRepo = pr.head.repo.name;
-    const isFork = pr.head.repo.fork;
     const fileName = `upcoming-release-notes/${summaryData.prNumber}.md`;
-    const fileUrl = `https://github.com/${headOwner}/${headRepo}/blob/${prBranch}/${fileName}`;
+    const fileUrl = pr.head.repo
+      ? `https://github.com/${headOwner}/${headRepo}/blob/${prBranch}/${fileName}`
+      : null;
 
     const fileContent = `---
 category: ${cleanCategory}
@@ -59,19 +62,10 @@ ${summaryData.summary}
 `;
 
     let commentBody = ['🤖 **Auto-generated Release Notes**', ''];
-    if (isFork) {
-      commentBody = commentBody.concat([
-        `Hey @${summaryData.author}! I've generated release notes based on CodeRabbit's analysis.`,
-        '',
-        `Since this PR is from a fork, I couldn't automatically commit the file. Please create \`${fileName}\` with the following content:`,
-        '',
-        '```markdown',
-        fileContent,
-        '```',
-        '',
-        'You can edit the summary if needed before committing.',
-      ]);
-    } else {
+
+    // Determine message based on file creation status
+    if (fileCreationStatus === 'created') {
+      // File was successfully created and committed
       commentBody = commentBody.concat([
         `Hey @${summaryData.author}! I've automatically created a release notes file based on CodeRabbit's analysis:`,
         '',
@@ -80,6 +74,32 @@ ${summaryData.summary}
         `**File:** [${fileName}](${fileUrl})`,
         '',
         'The release notes file has been committed to your branch. You can edit it if needed before merging.',
+      ]);
+    } else if (fileCreationStatus === 'repo_deleted') {
+      // Source repository was deleted
+      commentBody = commentBody.concat([
+        `Hey @${summaryData.author}! I've generated release notes based on CodeRabbit's analysis.`,
+        '',
+        `Since the source repository has been deleted, I couldn't automatically commit the file. Please create \`${fileName}\` in the base repository with the following content:`,
+        '',
+        '```markdown',
+        fileContent,
+        '```',
+        '',
+        'You can edit the summary if needed before committing.',
+      ]);
+    } else {
+      // Manual creation required (status is 'manual_required' or undefined/fallback)
+      commentBody = commentBody.concat([
+        `Hey @${summaryData.author}! I've generated release notes based on CodeRabbit's analysis.`,
+        '',
+        `I couldn't automatically commit the file to your branch. Please create \`${fileName}\` with the following content:`,
+        '',
+        '```markdown',
+        fileContent,
+        '```',
+        '',
+        'You can edit the summary if needed before committing.',
       ]);
     }
 

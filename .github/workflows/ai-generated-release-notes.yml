@@ -85,6 +85,7 @@ jobs:
 
       - name: Create and commit release notes file via GitHub API
         if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
+        id: create-file
         run: node .github/actions/ai-generated-release-notes/create-release-notes-file.js
         env:
           GITHUB_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
@@ -102,3 +103,4 @@ jobs:
           GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
           SUMMARY_DATA: ${{ steps.generate-summary.outputs.result }}
           CATEGORY: ${{ steps.determine-category.outputs.result }}
+          FILE_CREATION_STATUS: ${{ steps.create-file.outputs.status }}

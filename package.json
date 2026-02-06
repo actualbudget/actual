@@ -62,6 +62,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@actions/core": "^1.11.1",
     "@octokit/rest": "^22.0.1",
     "@types/node": "^22.19.3",
     "@types/prompts": "^2.4.9",
