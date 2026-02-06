@@ -20,19 +20,18 @@ async function createReleaseNotesFile() {
   try {
     const summaryData = JSON.parse(summaryDataJson);
 
+    console.log('Debug - Summary data:', summaryData);
+
     if (!summaryData) {
       console.log('No summary data available, cannot create file');
       return;
     }
 
-    if (!category || category === 'null') {
-      console.log('Debug - Category value:', category);
-      console.log('Debug - Category type:', typeof category);
-      console.log(
-        'Debug - Category JSON stringified:',
-        JSON.stringify(category),
-      );
+    console.log('Debug - Category value:', category);
+    console.log('Debug - Category type:', typeof category);
+    console.log('Debug - Category JSON stringified:', JSON.stringify(category));
 
+    if (!category || category === 'null') {
       console.log('No valid category available, cannot create file');
       return;
     }
