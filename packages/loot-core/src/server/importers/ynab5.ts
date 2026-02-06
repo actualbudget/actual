@@ -27,6 +27,18 @@ import {
   type Transaction,
 } from './ynab5-types';
 
+const MAX_RETRY = 20;
+
+function normalizeError(e: unknown): string {
+  if (e instanceof Error) {
+    return e.message;
+  }
+  if (typeof e === 'string') {
+    return e;
+  }
+  return String(e);
+}
+
 type FlaggedTransaction = Pick<
   Transaction | ScheduledTransaction,
   'flag_name' | 'flag_color' | 'deleted'
@@ -318,9 +330,55 @@ async function importCategories(
   // Can't be done in parallel to have
   // correct sort order.
 
+  async function createCategoryGroupWithUniqueName(params: {
+    name: string;
+    is_income: boolean;
+    hidden: boolean;
+  }) {
+    const baseName = params.hidden ? `${params.name} (hidden)` : params.name;
+    let count = 0;
+
+    while (true) {
+      const name = count === 0 ? baseName : `${baseName} (${count})`;
+      try {
+        const id = await actual.createCategoryGroup({ ...params, name });
+        return { id, name };
+      } catch (e) {
+        if (count >= MAX_RETRY) {
+          const errorMsg = normalizeError(e);
+          throw Error('Unable to create category group: ' + errorMsg);
+        }
+        count += 1;
+      }
+    }
+  }
+
+  async function createCategoryWithUniqueName(params: {
+    name: string;
+    group_id: string;
+    hidden: boolean;
+  }) {
+    const baseName = params.hidden ? `${params.name} (hidden)` : params.name;
+    let count = 0;
+
+    while (true) {
+      const name = count === 0 ? baseName : `${baseName} (${count})`;
+      try {
+        const id = await actual.createCategory({ ...params, name });
+        return { id, name };
+      } catch (e) {
+        if (count >= MAX_RETRY) {
+          const errorMsg = normalizeError(e);
+          throw Error('Unable to create category: ' + errorMsg);
+        }
+        count += 1;
+      }
+    }
+  }
+
   for (const group of data.category_groups) {
     if (!group.deleted) {
-      let groupId;
+      let groupId: string;
       // Ignores internal category and credit cards
       if (
         !equalsIgnoreCase(group.name, 'Internal Master Category') &&
@@ -328,30 +386,15 @@ async function importCategories(
         !equalsIgnoreCase(group.name, 'Hidden Categories') &&
         !equalsIgnoreCase(group.name, 'Income')
       ) {
-        let run = true;
-        const MAX_RETRY = 10;
-        let count = 1;
-        const origName = group.name;
-        while (run) {
-          try {
-            groupId = await actual.createCategoryGroup({
-              name: group.name,
-              is_income: false,
-              hidden: group.hidden,
-            });
-            entityIdMap.set(group.id, groupId);
-            if (group.note) {
-              send('notes-save', { id: groupId, note: group.note });
-            }
-            run = false;
-          } catch (e) {
-            group.name = origName + '-' + count.toString();
-            count += 1;
-            if (count >= MAX_RETRY) {
-              run = false;
-              throw Error(e.message);
-            }
-          }
+        const createdGroup = await createCategoryGroupWithUniqueName({
+          name: group.name,
+          is_income: false,
+          hidden: group.hidden,
+        });
+        groupId = createdGroup.id;
+        entityIdMap.set(group.id, groupId);
+        if (group.note) {
+          send('notes-save', { id: groupId, note: group.note });
         }
       }
 
@@ -379,30 +422,20 @@ async function importCategories(
             case 'internal': // uncategorized is ignored too, handled by actual
               break;
             default: {
-              let run = true;
-              const MAX_RETRY = 10;
-              let count = 1;
-              const origName = cat.name;
-              while (run) {
-                try {
-                  const id = await actual.createCategory({
-                    name: cat.name,
-                    group_id: groupId,
-                    hidden: cat.hidden,
-                  });
-                  entityIdMap.set(cat.id, id);
-                  if (cat.note) {
-                    send('notes-save', { id, note: cat.note });
-                  }
-                  run = false;
-                } catch (e) {
-                  cat.name = origName + '-' + count.toString();
-                  count += 1;
-                  if (count >= MAX_RETRY) {
-                    run = false;
-                    throw Error(e.message);
-                  }
-                }
+              if (!groupId) {
+                break;
+              }
+              const createdCategory = await createCategoryWithUniqueName({
+                name: cat.name,
+                group_id: groupId,
+                hidden: cat.hidden,
+              });
+              entityIdMap.set(cat.id, createdCategory.id);
+              if (cat.note) {
+                send('notes-save', {
+                  id: createdCategory.id,
+                  note: cat.note,
+                });
               }
             }
           }
@@ -785,7 +818,6 @@ async function importScheduledTransactions(
     date: RecurConfig | string;
   }) {
     const baseName = params.name;
-    const MAX_RETRY = 50;
     let count = 1;
 
     while (true) {
@@ -793,7 +825,8 @@ async function importScheduledTransactions(
         return await actual.createSchedule({ ...params, name: params.name });
       } catch (e) {
         if (count >= MAX_RETRY) {
-          throw Error(e.message);
+          const errorMsg = normalizeError(e);
+          throw Error(errorMsg);
         }
         params.name = `${baseName} (${count})`;
         count += 1;
