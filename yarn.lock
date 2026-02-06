@@ -109,6 +109,7 @@ __metadata:
     "@types/express-actuator": "npm:^1.8.3"
     "@types/node": "npm:^22.19.3"
     "@types/supertest": "npm:^6.0.3"
+    akahu: "npm:^2.2.0"
     bcrypt: "npm:^6.0.0"
     better-sqlite3: "npm:^12.5.0"
     convict: "npm:^6.2.4"
@@ -10549,6 +10550,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"akahu@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "akahu@npm:2.2.0"
+  dependencies:
+    axios: "npm:^1.8.3"
+    uuid: "npm:^8.3.2"
+  checksum: 10/e815a3d9901961f6a35796ffc32aab6ca185351d815199dd55bba1d1dc576e177178ba33033cf9bc114e9f8585c760190df9ab0a13bf75f7b8d3b6e40ee67549
+  languageName: node
+  linkType: hard
+
 "algoliasearch-helper@npm:^3.26.0":
   version: 3.26.0
   resolution: "algoliasearch-helper@npm:3.26.0"
@@ -10983,6 +10994,17 @@ __metadata:
     form-data: "npm:^4.0.4"
     proxy-from-env: "npm:^1.1.0"
   checksum: 10/886a79770594eaad76493fecf90344b567bd956240609b5dcd09bd0afe8d3e6f1ad6d3257a93a483b6192b409d4b673d9515a34619e3e3ed1b2c0ec2a83b20ba
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.8.3":
+  version: 1.13.2
+  resolution: "axios@npm:1.13.2"
+  dependencies:
+    follow-redirects: "npm:^1.15.6"
+    form-data: "npm:^4.0.4"
+    proxy-from-env: "npm:^1.1.0"
+  checksum: 10/ae4e06dcd18289f2fd18179256d550d27f9a53ecb2f9c59f2ccc4efd1d7151839ba8c3e0fb533dac793e4a59a576ca8689a19244dce5c396680837674a47a867
   languageName: node
   linkType: hard
 
