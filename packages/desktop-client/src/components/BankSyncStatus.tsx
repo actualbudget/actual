@@ -12,18 +12,10 @@ import { AnimatedRefresh } from './AnimatedRefresh';
 import { useSelector } from '@desktop-client/redux';
 
 export function BankSyncStatus() {
-  const { accountsSyncing, syncQueue, isProcessingQueue } = useSelector(
-    state => state.account,
-  );
+  const { syncQueue, isProcessingQueue } = useSelector(state => state.account);
 
-  // For "Sync All": use accountsSyncing.length (shows actual accounts being processed)
-  // For individual accounts: use syncQueue.length (shows queued requests)
-  const hasAllAccountsRequest = syncQueue.some(
-    req => req.id === 'ALL_ACCOUNTS',
-  );
-  const totalRemaining = hasAllAccountsRequest
-    ? accountsSyncing.length
-    : syncQueue.length;
+  // Use queue length as the count of remaining accounts to sync
+  const totalRemaining = syncQueue.length;
   const showStatus = isProcessingQueue && totalRemaining > 0;
 
   const transitions = useTransition(showStatus ? 'syncing' : null, {

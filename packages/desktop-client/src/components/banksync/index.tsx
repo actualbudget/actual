@@ -1,11 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
-import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -20,9 +18,8 @@ import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTa
 import { Page } from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useSyncAll } from '@desktop-client/hooks/useSyncAll';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
+import { useDispatch } from '@desktop-client/redux';
 
 type SyncProviders = BankSyncProviders | 'unlinked';
 
@@ -48,10 +45,6 @@ export function BankSync() {
   const accounts = useAccounts();
   const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
-
-  // Get sync queue state and sync all functionality
-  const { linkedAccounts, handleSyncAll, isProcessingQueue } = useSyncAll();
-  const { syncQueue } = useSelector(state => state.account);
 
   const [hoveredAccount, setHoveredAccount] = useState<
     AccountEntity['id'] | null
@@ -134,55 +127,6 @@ export function BankSync() {
               To use the bank syncing features, you must first add an account.
             </Trans>
           </Text>
-        )}
-
-        {/* Sync All Button */}
-        {linkedAccounts.length > 0 && (
-          <View
-            style={{
-              marginBottom: '1em',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-            }}
-          >
-            <Button
-              variant="bare"
-              onPress={handleSyncAll}
-              isDisabled={isProcessingQueue}
-              style={{
-                color: isProcessingQueue
-                  ? theme.pageTextSubdued
-                  : theme.pageText,
-                textDecoration: 'underline',
-                textDecorationColor: isProcessingQueue
-                  ? theme.pageTextSubdued
-                  : theme.pageText,
-                padding: 0,
-                minHeight: 'auto',
-              }}
-            >
-              {isProcessingQueue ? t('Syncing...') : t('Sync All Accounts')}
-            </Button>
-            <Text style={{ color: theme.pageTextSubdued }}>
-              {isProcessingQueue ? (
-                syncQueue.some(req => req.id === 'ALL_ACCOUNTS') ? (
-                  <Trans count={linkedAccounts.length}>
-                    Processing {{ count: linkedAccounts.length }} linked
-                    accounts
-                  </Trans>
-                ) : (
-                  <Trans count={syncQueue.length}>
-                    Processing {{ count: syncQueue.length }} accounts
-                  </Trans>
-                )
-              ) : (
-                <Trans count={linkedAccounts.length}>
-                  {{ count: linkedAccounts.length }} linked accounts
-                </Trans>
-              )}
-            </Text>
-          </View>
         )}
 
         {Object.entries(groupedAccounts).map(([syncProvider, accounts]) => {

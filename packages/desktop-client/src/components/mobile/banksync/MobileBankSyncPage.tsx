@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -18,9 +17,8 @@ import { Search } from '@desktop-client/components/common/Search';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSyncAll } from '@desktop-client/hooks/useSyncAll';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
+import { useDispatch } from '@desktop-client/redux';
 
 type SyncProviders = BankSyncProviders | 'unlinked';
 
@@ -44,10 +42,6 @@ export function MobileBankSyncPage() {
   const { syncSourceReadable } = useSyncSourceReadable();
   const accounts = useAccounts();
   const [filter, setFilter] = useState('');
-
-  // Get sync queue state and sync all functionality
-  const { linkedAccounts, handleSyncAll, isProcessingQueue } = useSyncAll();
-  const { syncQueue } = useSelector(state => state.account);
 
   const openAccounts = useMemo(
     () => accounts.filter(a => !a.closed),
@@ -156,59 +150,6 @@ export function MobileBankSyncPage() {
           }}
         />
       </View>
-
-      {/* Mobile Sync All Button */}
-      {linkedAccounts.length > 0 && (
-        <View
-          style={{
-            backgroundColor: theme.mobilePageBackground,
-            padding: 15,
-            borderBottomWidth: 1,
-            borderBottomStyle: 'solid',
-            borderBottomColor: theme.tableBorder,
-          }}
-        >
-          <Button
-            variant="bare"
-            onPress={handleSyncAll}
-            isDisabled={isProcessingQueue}
-            style={{
-              color: isProcessingQueue ? theme.pageTextSubdued : theme.pageText,
-              textDecoration: 'underline',
-              textDecorationColor: isProcessingQueue
-                ? theme.pageTextSubdued
-                : theme.pageText,
-              padding: 0,
-              minHeight: 'auto',
-              marginBottom: 8,
-            }}
-          >
-            {isProcessingQueue ? t('Syncing...') : t('Sync All Accounts')}
-          </Button>
-          <Text
-            style={{
-              color: theme.pageTextSubdued,
-              fontSize: 14,
-            }}
-          >
-            {isProcessingQueue ? (
-              syncQueue.some(req => req.id === 'ALL_ACCOUNTS') ? (
-                <Trans count={linkedAccounts.length}>
-                  Processing {{ count: linkedAccounts.length }} linked accounts
-                </Trans>
-              ) : (
-                <Trans count={syncQueue.length}>
-                  Processing {{ count: syncQueue.length }} accounts
-                </Trans>
-              )
-            ) : (
-              <Trans count={linkedAccounts.length}>
-                {{ count: linkedAccounts.length }} linked accounts
-              </Trans>
-            )}
-          </Text>
-        </View>
-      )}
 
       {openAccounts.length === 0 ? (
         <View

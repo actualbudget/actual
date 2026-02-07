@@ -441,17 +441,47 @@ export const syncAccounts = createAppAsyncThunk(
   `${sliceName}/syncAccounts`,
   async ({ id }: SyncAccountsPayload, { dispatch, getState }) => {
     const { addToSyncQueue } = accountsSlice.actions;
+    const { accounts } = getState().account;
 
-    // Convert id to queue format
-    const queueId = id || 'ALL_ACCOUNTS';
+    // Determine which accounts to sync
+    let accountIdsToSync: string[];
+    if (id === 'uncategorized') {
+      return false;
+    } else if (id === 'offbudget' || id === 'onbudget') {
+      const targetOffbudget = id === 'offbudget' ? 1 : 0;
+      accountIdsToSync = accounts
+        .filter(
+          ({ bank, closed, tombstone, offbudget }) =>
+            !!bank && !closed && !tombstone && offbudget === targetOffbudget,
+        )
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map(({ id }) => id);
+    } else if (id) {
+      accountIdsToSync = [id];
+    } else {
+      // Default: all accounts
+      accountIdsToSync = accounts
+        .filter(
+          ({ bank, closed, tombstone }) => !!bank && !closed && !tombstone,
+        )
+        .sort((a, b) =>
+          a.offbudget === b.offbudget
+            ? a.sort_order - b.sort_order
+            : a.offbudget - b.offbudget,
+        )
+        .map(({ id }) => id);
+    }
 
-    // Add to queue
-    dispatch(
-      addToSyncQueue({
-        id: queueId,
-        timestamp: Date.now(),
-      }),
-    );
+    // Add each account to the queue
+    const timestamp = Date.now();
+    accountIdsToSync.forEach(accountId => {
+      dispatch(
+        addToSyncQueue({
+          id: accountId,
+          timestamp,
+        }),
+      );
+    });
 
     // Only start processing if not already processing (atomic check-and-set)
     const { isProcessingQueue } = getState().account;
@@ -459,7 +489,7 @@ export const syncAccounts = createAppAsyncThunk(
       return dispatch(processQueue()).unwrap();
     }
 
-    // Item queued but processing already active
+    // Items queued but processing already active
     return false;
   },
 );
@@ -481,23 +511,15 @@ export const processQueue = createAppAsyncThunk(
     let hasAnySuccess = false;
 
     try {
-      while (true) {
-        const { syncQueue } = getState().account;
+      // Get initial queue snapshot to prevent infinite loops
+      const initialQueue = [...getState().account.syncQueue];
 
-        if (syncQueue.length === 0) {
-          break;
-        }
-
-        const request = syncQueue[0];
-
-        // Convert back to original format
-        const originalId =
-          request.id === 'ALL_ACCOUNTS' ? undefined : request.id;
-
+      // Process each item in the queue
+      for (const request of initialQueue) {
         try {
           // Process using original sync logic
           const success = await dispatch(
-            processSingleSync({ id: originalId }),
+            processSingleSync({ id: request.id }),
           ).unwrap();
           if (success) {
             hasAnySuccess = true;
@@ -524,122 +546,35 @@ export const processQueue = createAppAsyncThunk(
 
 export const processSingleSync = createAppAsyncThunk(
   `${sliceName}/processSingleSync`,
-  async ({ id }: SyncAccountsPayload, { dispatch, getState }) => {
+  async ({ id }: SyncAccountsPayload, { dispatch }) => {
     const { setAccountsSyncing } = accountsSlice.actions;
 
-    if (id === 'uncategorized') {
+    if (!id || id === 'uncategorized') {
       dispatch(setAccountsSyncing({ ids: [] }));
       return false;
     }
 
-    const { accounts } = getState().account;
-    let accountIdsToSync: string[];
-    if (id === 'offbudget' || id === 'onbudget') {
-      const targetOffbudget = id === 'offbudget' ? 1 : 0;
-      accountIdsToSync = accounts
-        .filter(
-          ({ bank, closed, tombstone, offbudget }) =>
-            !!bank && !closed && !tombstone && offbudget === targetOffbudget,
-        )
-        .sort((a, b) => a.sort_order - b.sort_order)
-        .map(({ id }) => id);
-    } else if (id) {
-      accountIdsToSync = [id];
-    } else {
-      // Default: all accounts
-      accountIdsToSync = accounts
-        .filter(
-          ({ bank, closed, tombstone }) => !!bank && !closed && !tombstone,
-        )
-        .sort((a, b) =>
-          a.offbudget === b.offbudget
-            ? a.sort_order - b.sort_order
-            : a.offbudget - b.offbudget,
-        )
-        .map(({ id }) => id);
-    }
-
-    dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
+    const accountId = id;
+    dispatch(setAccountsSyncing({ ids: [accountId] }));
 
     try {
-      // TODO: Force cast to AccountEntity.
-      // Server is currently returning the DB model it should return the entity model instead.
-      const accountsData = (await send(
-        'accounts-get',
-      )) as unknown as AccountEntity[];
-      const simpleFinAccounts = accountsData.filter(
-        a =>
-          a.account_sync_source === 'simpleFin' &&
-          accountIdsToSync.includes(a.id),
-      );
-
-      let isSyncSuccess = false;
       const newTransactions: Array<TransactionEntity['id']> = [];
       const matchedTransactions: Array<TransactionEntity['id']> = [];
       const updatedAccounts: Array<AccountEntity['id']> = [];
 
-      if (simpleFinAccounts.length > 0) {
-        console.log('Using SimpleFin batch sync');
+      // Perform sync operation for single account
+      const res = await send('accounts-bank-sync', {
+        ids: [accountId],
+      });
 
-        const res = await send('simplefin-batch-sync', {
-          ids: simpleFinAccounts.map(a => a.id),
-        });
-
-        // Process SimpleFin results and update accountsSyncing progressively
-        for (let i = 0; i < res.length; i++) {
-          const account = res[i];
-          const success = handleSyncResponse(
-            account.accountId,
-            account.res,
-            dispatch,
-            newTransactions,
-            matchedTransactions,
-            updatedAccounts,
-          );
-          if (success) isSyncSuccess = true;
-
-          // Update accountsSyncing to show remaining accounts
-          const remainingSimpleFinIds = simpleFinAccounts
-            .slice(i + 1)
-            .map(a => a.id);
-          const remainingOtherIds = accountIdsToSync.filter(
-            id => !simpleFinAccounts.find(sfa => sfa.id === id),
-          );
-          dispatch(
-            setAccountsSyncing({
-              ids: [...remainingSimpleFinIds, ...remainingOtherIds],
-            }),
-          );
-        }
-
-        accountIdsToSync = accountIdsToSync.filter(
-          id => !simpleFinAccounts.find(sfa => sfa.id === id),
-        );
-      }
-
-      // Loop through the accounts and perform sync operation.. one by one
-      for (let idx = 0; idx < accountIdsToSync.length; idx++) {
-        const accountId = accountIdsToSync[idx];
-
-        // Perform sync operation
-        const res = await send('accounts-bank-sync', {
-          ids: [accountId],
-        });
-
-        const success = handleSyncResponse(
-          accountId,
-          res,
-          dispatch,
-          newTransactions,
-          matchedTransactions,
-          updatedAccounts,
-        );
-
-        if (success) isSyncSuccess = true;
-
-        // Dispatch the ids for the accounts that are yet to be synced
-        dispatch(setAccountsSyncing({ ids: accountIdsToSync.slice(idx + 1) }));
-      }
+      const success = handleSyncResponse(
+        accountId,
+        res,
+        dispatch,
+        newTransactions,
+        matchedTransactions,
+        updatedAccounts,
+      );
 
       // Set new transactions
       dispatch(
@@ -649,15 +584,17 @@ export const processSingleSync = createAppAsyncThunk(
         }),
       );
 
+      // Mark accounts as updated
       dispatch(markUpdatedAccounts({ ids: updatedAccounts }));
 
-      return isSyncSuccess;
+      // Clear syncing state
+      dispatch(setAccountsSyncing({ ids: [] }));
+
+      return success;
     } catch (error) {
       console.error('Sync error:', error);
-      throw error;
-    } finally {
-      // Always reset sync state
       dispatch(setAccountsSyncing({ ids: [] }));
+      throw error;
     }
   },
 );
