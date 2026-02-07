@@ -1,0 +1,43 @@
+{
+  "app": {
+    "title": "Stash",
+    "subtitle": "Tu rastreador de ahorros familiar",
+    "total": "Total en Stash",
+    "signIn": "Iniciar sesión con Google",
+    "signOut": "Cerrar Sesión",
+    "welcome": "Bienvenido/a",
+    "dashboard": "Tablero"
+  },
+  "actions": {
+    "add": "Agregar Dinero",
+    "remove": "Retirar Dinero",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "amount": "Cantidad",
+    "note": "Nota (opcional)",
+    "deposit": "Depósito",
+    "withdrawal": "Retiro"
+  },
+  "categories": {
+    "saving": "Ahorro",
+    "giving": "Diezmo",
+    "travel": "Viajes",
+    "kupuri": "Kupuri",
+    "bills": "Cuentas",
+    "emergency": "Emergencia",
+    "pleasure": "Placer",
+    "medical": "Médico"
+  },
+  "history": {
+    "title": "Actividad Reciente",
+    "noTransactions": "No hay transacciones aún",
+    "deposited": "Depositó",
+    "withdrew": "Retiró",
+    "to": "a",
+    "from": "de"
+  },
+  "language": {
+    "en": "English",
+    "es": "Español"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "app": {
+    "title": "Stash",
+    "subtitle": "Your family savings tracker",
+    "total": "Total Stash",
+    "signIn": "Sign in with Google",
+    "signOut": "Sign Out",
+    "welcome": "Welcome",
+    "dashboard": "Dashboard"
+  },
+  "actions": {
+    "add": "Add Money",
+    "remove": "Remove Money",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "amount": "Amount",
+    "note": "Note (optional)",
+    "deposit": "Deposit",
+    "withdrawal": "Withdrawal"
+  },
+  "categories": {
+    "saving": "Saving",
+    "giving": "Giving",
+    "travel": "Travel",
+    "kupuri": "Kupuri",
+    "bills": "Bills",
+    "emergency": "Emergency",
+    "pleasure": "Pleasure",
+    "medical": "Medical"
+  },
+  "history": {
+    "title": "Recent Activity",
+    "noTransactions": "No transactions yet",
+    "deposited": "Deposited",
+    "withdrew": "Withdrew",
+    "to": "to",
+    "from": "from"
+  },
+  "language": {
+    "en": "English",
+    "es": "Español"
+  }
+}
