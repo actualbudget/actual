@@ -54,7 +54,7 @@ export function selectEnableBankingAccounts(
           account,
           requisitionId: token.bank_id,
           upgradingId: accountEntity.id,
-          syncSource: 'enablebanking',
+          syncSource: 'enableBanking',
         }),
       );
       dispatch(
@@ -83,7 +83,7 @@ export function selectEnableBankingAccounts(
         options: {
           requisitionId: token.bank_id,
           externalAccounts: accounts,
-          syncSource: 'enablebanking',
+          syncSource: 'enableBanking',
         },
       },
     }),

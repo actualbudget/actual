@@ -101,7 +101,7 @@ export type SelectLinkedAccountsModalProps =
   | {
       requisitionId: string;
       externalAccounts: SyncServerGoCardlessAccount[]; // we are using this here as the "standard" to avoid clutter in the code.
-      syncSource: 'enablebanking';
+      syncSource: 'enableBanking';
     };
 
 export function SelectLinkedAccountsModal({
@@ -129,7 +129,7 @@ export function SelectLinkedAccountsModal({
             externalAccounts: toSort as SyncServerPluggyAiAccount[],
           };
         case 'goCardless':
-        case 'enablebanking':
+        case 'enableBanking':
           return {
             syncSource,
             requisitionId: requisitionId!,
@@ -230,7 +230,10 @@ export function SelectLinkedAccountsModal({
               startingBalance,
             }),
           );
-        } else {
+        } else if (
+          propsWithSortedExternalAccounts.syncSource === 'goCardless' ||
+          propsWithSortedExternalAccounts.syncSource === 'enableBanking'
+        ) {
           dispatch(
             linkAccount({
               requisitionId: propsWithSortedExternalAccounts.requisitionId,
@@ -244,11 +247,14 @@ export function SelectLinkedAccountsModal({
                   ? chosenLocalAccountId
                   : undefined,
               offBudget,
-              syncSource,
+              syncSource: propsWithSortedExternalAccounts.syncSource,
               startingDate,
               startingBalance,
             }),
           );
+        } else {
+          // This should never happen due to type narrowing
+          throw new Error('Unsupported sync source');
         }
       },
     );

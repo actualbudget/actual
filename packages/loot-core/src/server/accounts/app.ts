@@ -146,13 +146,13 @@ async function linkGoCardlessAccount({
 }: LinkAccountBaseParams & {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
-  syncSource?: string | undefined;
+  syncSource?: 'goCardless' | 'enableBanking';
 }) {
   let id;
   const institution =
-    (account.institution as { name: string }).name !== undefined
-      ? (account.institution as { name: string })
-      : { name: account.institution as string };
+    typeof account.institution === 'string'
+      ? { name: account.institution }
+      : account.institution;
   const bank = await link.findOrCreateBank(institution, requisitionId);
   if (upgradingId) {
     logger.log('upgrading', upgradingId);

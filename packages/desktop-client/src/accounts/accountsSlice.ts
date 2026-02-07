@@ -256,9 +256,7 @@ type LinkAccountBasePayload = {
 type LinkAccountPayload = LinkAccountBasePayload & {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
-  upgradingId?: AccountEntity['id'] | undefined;
-  offBudget?: boolean | undefined;
-  syncSource?: string | undefined;
+  syncSource?: 'goCardless' | 'enableBanking';
 };
 
 export const linkAccount = createAppAsyncThunk(
