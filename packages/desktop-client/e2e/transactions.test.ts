@@ -62,30 +62,27 @@ test.describe('Transactions', () => {
       const autocomplete = page.getByTestId('autocomplete');
       await expect(autocomplete).toMatchThemeScreenshots();
 
+      // Ensure that autocomplete filters properly
+      await page.keyboard.type('C');
+      await expect(autocomplete).toMatchThemeScreenshots();
+
       // Select the active item
       await page.getByTestId('Clothing-category-item').click();
       await filterTooltip.applyButton.click();
 
       // Assert that there are only clothing transactions
-      await expect(accountPage.getNthTransaction(0).category).toHaveText(
-        'Clothing',
-      );
-      await expect(accountPage.getNthTransaction(1).category).toHaveText(
-        'Clothing',
-      );
-      await expect(accountPage.getNthTransaction(2).category).toHaveText(
-        'Clothing',
-      );
-      await expect(accountPage.getNthTransaction(3).category).toHaveText(
-        'Clothing',
-      );
-      await expect(accountPage.getNthTransaction(4).category).toHaveText(
-        'Clothing',
-      );
+      for (let i = 0; i < 5; i++) {
+        await expect(accountPage.getNthTransaction(i).category).toHaveText(
+          'Clothing',
+        );
+      }
       await expect(page).toMatchThemeScreenshots();
     });
 
     test('by category group', async () => {
+      // Use Capital One Checking because it has transactions that aren't just Clothing
+      accountPage = await navigation.goToAccountPage('Capital One Checking');
+
       const filterTooltip = await accountPage.filterBy('Category');
 
       await page.getByTestId('subfield-select-category').click();
@@ -97,26 +94,20 @@ test.describe('Transactions', () => {
       const autocomplete = page.getByTestId('autocomplete');
       await expect(autocomplete).toMatchThemeScreenshots();
 
+      // Ensure that autocomplete filters properly
+      await page.keyboard.type('U');
+      await expect(autocomplete).toMatchThemeScreenshots();
+
       // Select the active item
       await page.getByTestId('Usual Expenses-category-group-item').click();
       await filterTooltip.applyButton.click();
 
       // Assert that there are only transactions with categories in the Usual Expenses group
-      await expect(accountPage.getNthTransaction(0).category).toHaveText(
-        /^(Savings|Medical|Gift|General|Clothing|Entertainment|Restaurants|Food)$/,
-      );
-      await expect(accountPage.getNthTransaction(1).category).toHaveText(
-        /^(Savings|Medical|Gift|General|Clothing|Entertainment|Restaurants|Food)$/,
-      );
-      await expect(accountPage.getNthTransaction(2).category).toHaveText(
-        /^(Savings|Medical|Gift|General|Clothing|Entertainment|Restaurants|Food)$/,
-      );
-      await expect(accountPage.getNthTransaction(3).category).toHaveText(
-        /^(Savings|Medical|Gift|General|Clothing|Entertainment|Restaurants|Food)$/,
-      );
-      await expect(accountPage.getNthTransaction(4).category).toHaveText(
-        /^(Savings|Medical|Gift|General|Clothing|Entertainment|Restaurants|Food)$/,
-      );
+      for (let i = 0; i < 5; i++) {
+        await expect(accountPage.getNthTransaction(i).category).toHaveText(
+          /^(Savings|Medical|Gift|General|Clothing|Entertainment|Restaurants|Food)$/,
+        );
+      }
       await expect(page).toMatchThemeScreenshots();
     });
 
