@@ -459,7 +459,7 @@ function importPayees(data: Budget, entityIdMap: Map<string, string>) {
 }
 
 async function importPayeeLocations(
-  data: YNAB5.Budget,
+  data: Budget,
   entityIdMap: Map<string, string>,
 ) {
   // If no payee locations data provided, skip import
