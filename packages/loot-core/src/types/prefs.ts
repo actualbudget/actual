@@ -44,6 +44,7 @@ export type SyncedPrefs = Partial<
     | `sync-reimport-deleted-${string}`
     | `sync-import-notes-${string}`
     | `sync-import-transactions-${string}`
+    | `sync-update-dates-${string}`
     | `ofx-fallback-missing-payee-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
     | `flags.${FeatureFlag}`

@@ -81,7 +81,7 @@ export function ExpenseCategory({
       innerRef={dropRef}
       collapsed
       style={{
-        backgroundColor: theme.tableBackground,
+        backgroundColor: theme.budgetCurrentMonth,
         opacity: cat.hidden || categoryGroup?.hidden ? 0.5 : undefined,
       }}
     >

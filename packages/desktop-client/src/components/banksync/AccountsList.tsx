@@ -30,7 +30,6 @@ export function AccountsList({
   return (
     <View
       style={{
-        minHeight: 'initial',
         marginBottom: -1,
       }}
     >
