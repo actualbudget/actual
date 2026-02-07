@@ -43,6 +43,10 @@ function renderError(
 ) {
   const error_messages: Partial<Record<EnableBankingErrorCode, string>> = {
     TIME_OUT: t('Timed out. Please try again.'),
+    AUTH_FAILED: t('Authentication failed. Please try again.'),
+    ENABLEBANKING_SESSION_CLOSED: t(
+      'Your bank connection has expired. Please re-link your bank account.',
+    ),
     ENABLEBANKING_APPLICATION_INACTIVE: t(
       'Your Enable Banking application is inactive. Please reconfigure.',
     ),

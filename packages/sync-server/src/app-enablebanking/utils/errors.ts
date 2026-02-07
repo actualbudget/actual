@@ -86,7 +86,9 @@ export function handleErrorResponse(
     case 'REVOKED_SESSION':
       // These errors indicate that the session is no longer valid.
       // The client should re-authenticate.
-      return new ClosedSessionError();
+      return new ClosedSessionError(
+        'Your bank connection has expired. Please re-link your bank account.',
+      );
     case 'SESSION_DOES_NOT_EXIST':
     case 'TRANSACTION_DOES_NOT_EXIST':
     case 'PAYMENT_NOT_FOUND':
@@ -98,12 +100,20 @@ export function handleErrorResponse(
     case 'ACCESS_DENIED':
       // These errors indicate that the client does not have permission to access the resource.
       return new SecretsInvalidError();
+    case 'INVALID_ACCOUNT_ID':
+      // Account no longer valid - user needs to re-link
+      console.warn(
+        `Enable Banking API returned INVALID_ACCOUNT_ID: ${response.message}`,
+      );
+      return new EnableBankingError(
+        'ENABLEBANKING_SESSION_CLOSED',
+        'The linked bank account is no longer valid. Please re-link your bank account.',
+      );
     case 'WRONG_REQUEST_PARAMETERS':
     case 'WRONG_SESSION_STATUS':
     case 'WRONG_DATE_INTERVAL':
     case 'WRONG_TRANSACTIONS_PERIOD':
     case 'WRONG_CREDENTIALS_PROVIDED':
-    case 'INVALID_ACCOUNT_ID':
     case 'INVALID_HOST':
     case 'INVALID_PAYMENT':
     case 'REDIRECT_URI_NOT_ALLOWED':
@@ -132,11 +142,13 @@ export async function handleEnableBankingError(response: globalThis.Response) {
   if (response.status === 200) {
     return await response.json();
   }
-  debug('Enable Banking API error response: %o', response);
+  console.error(
+    `Enable Banking API error response: HTTP ${response.status} ${response.statusText}`,
+  );
 
   const body = await response.json();
   if (!isErrorResponse(body)) {
-    debug('Unexpected error response format: %o', body);
+    console.error('Unexpected error response format:', body);
     throw new EnableBankingError(
       'INTERNAL_ERROR',
       'Unexpected error response from Enable Banking API.',
@@ -168,15 +180,22 @@ export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
       })
       .catch(err => {
         if (!(err instanceof EnableBankingError)) {
-          debug(
-            'Error in Enable Banking %s: %s',
-            req.originalUrl,
+          console.error(
+            `Error in Enable Banking ${req.originalUrl}:`,
             inspect(err, { depth: null }),
           );
           err = new EnableBankingError(
             'INTERNAL_ERROR',
             err.message ??
               'Something went wrong while using the Enable Banking API.',
+          );
+        } else if (
+          err.error_code !== 'NOT_READY' &&
+          err.error_code !== 'BAD_REQUEST'
+        ) {
+          // Log non-trivial errors for debugging
+          console.warn(
+            `Enable Banking error on ${req.originalUrl}: [${err.error_code}] ${err.message}`,
           );
         }
         debug('Returning error: %o', err.data());

@@ -11,6 +11,7 @@ import { enableBankingservice } from './services/enablebanking-services.js';
 import {
   BadRequestError,
   badRequestVariableError,
+  EnableBankingError,
   EnableBankingSetupError,
   handleErrorInHandler,
   NotReadyError,
@@ -116,11 +117,20 @@ post('/get_session', async (req: Request) => {
     );
   }
 
-  const session_id = enableBankingservice.getSessionIdFromState(state);
-  if (!session_id) {
+  const entry = enableBankingservice.getSessionEntry(state);
+  if (!entry) {
     throw new NotReadyError('Authorization flow has not yet finished.');
   }
-  return await enableBankingservice.getAccounts(session_id);
+  if (entry.error) {
+    throw new EnableBankingError(
+      'AUTH_FAILED',
+      `Authentication failed: ${entry.error}`,
+    );
+  }
+  if (!entry.sessionId) {
+    throw new NotReadyError('Authorization flow has not yet finished.');
+  }
+  return await enableBankingservice.getAccounts(entry.sessionId);
 });
 
 post('/complete_auth', async (req: Request) => {
@@ -135,6 +145,18 @@ post('/complete_auth', async (req: Request) => {
   }
 
   await enableBankingservice.authorizeSession(state, code);
+
+  return;
+});
+
+post('/fail_auth', async (req: Request) => {
+  const { state, error } = req.body;
+
+  if (!state) {
+    throw badRequestVariableError('state', '/enable_banking/fail_auth');
+  }
+
+  enableBankingservice.failSession(state, error ?? 'unknown_error');
 
   return;
 });

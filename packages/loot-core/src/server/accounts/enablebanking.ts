@@ -143,6 +143,10 @@ async function completeAuth({ state, code }: { state: string; code: string }) {
   return await post('/complete_auth', { state, code });
 }
 
+async function failAuth({ state, error }: { state: string; error?: string }) {
+  return await post('/fail_auth', { state, error });
+}
+
 export async function downloadEnableBankingTransactions(
   acctId: string,
   startDate: string,
@@ -183,6 +187,7 @@ export type AccountHandlers = {
   'enablebanking-startauth': typeof startAuth;
   'enablebanking-pollauth': typeof pollAuth;
   'enablebanking-completeauth': typeof completeAuth;
+  'enablebanking-failauth': typeof failAuth;
   'enablebanking-stoppolling': typeof stopAuthPoll;
 };
 
@@ -194,4 +199,5 @@ app.method('enablebanking-countries', getCountries);
 app.method('enablebanking-startauth', startAuth);
 app.method('enablebanking-pollauth', pollAuth);
 app.method('enablebanking-completeauth', completeAuth);
+app.method('enablebanking-failauth', failAuth);
 app.method('enablebanking-stoppolling', stopAuthPoll);

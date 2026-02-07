@@ -37,9 +37,10 @@ function isDefined<T>(value: T | undefined): asserts value is T {
   }
 }
 
-// Session entry with expiration timestamp
-type SessionEntry = {
-  sessionId: string;
+// Session entry with expiration timestamp and optional error state
+export type SessionEntry = {
+  sessionId: string | null;
+  error?: string;
   expiresAt: number;
 };
 
@@ -63,6 +64,15 @@ class SessionStore {
   set(state: string, sessionId: string): void {
     this.sessions.set(state, {
       sessionId,
+      error: undefined,
+      expiresAt: Date.now() + SESSION_TTL_MS,
+    });
+  }
+
+  setFailure(state: string, error: string): void {
+    this.sessions.set(state, {
+      sessionId: null,
+      error,
       expiresAt: Date.now() + SESSION_TTL_MS,
     });
   }
@@ -77,7 +87,20 @@ class SessionStore {
       return undefined;
     }
 
-    return entry.sessionId;
+    return entry.sessionId ?? undefined;
+  }
+
+  getEntry(state: string): SessionEntry | undefined {
+    const entry = this.sessions.get(state);
+    if (!entry) return undefined;
+
+    // Check if expired
+    if (Date.now() > entry.expiresAt) {
+      this.sessions.delete(state);
+      return undefined;
+    }
+
+    return entry;
   }
 
   private cleanup(): void {
@@ -265,6 +288,14 @@ export const enableBankingservice = {
 
   getSessionIdFromState: (state: string): string | undefined => {
     return sessionStore.get(state);
+  },
+
+  getSessionEntry: (state: string): SessionEntry | undefined => {
+    return sessionStore.getEntry(state);
+  },
+
+  failSession: (state: string, error: string): void => {
+    sessionStore.setFailure(state, error);
   },
 
   getAccounts: async (

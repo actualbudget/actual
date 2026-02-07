@@ -9,6 +9,7 @@ export type EnableBankingEndpoints = {
   >;
   '/get_session': Endpoint<{ state: string }, EnableBankingToken>;
   '/complete_auth': Endpoint<{ state: string; code: string }, void>;
+  '/fail_auth': Endpoint<{ state: string; error?: string }, void>;
   '/get_accounts': Endpoint<{ session_id: string }, EnableBankingToken>;
   '/transactions': Endpoint<TransactionsBody, TransactionsResponse>;
   '/token': Endpoint<undefined, EnableBankingToken>;
@@ -39,7 +40,8 @@ export type EnableBankingErrorCode =
   | 'BAD_REQUEST'
   | 'NOT_READY'
   | 'NOT_FOUND'
-  | 'TIME_OUT';
+  | 'TIME_OUT'
+  | 'AUTH_FAILED';
 
 export type EnableBankingErrorInterface = {
   error_code: EnableBankingErrorCode;

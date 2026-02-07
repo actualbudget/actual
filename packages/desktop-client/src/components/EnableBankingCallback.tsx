@@ -15,10 +15,22 @@ export function EnableBankingCallback() {
   const { t } = useTranslation();
   const [state] = useUrlParam('state');
   const [code] = useUrlParam('code');
+  const [errorParam] = useUrlParam('error');
+  const [errorDescription] = useUrlParam('error_description');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
+      // If Enable Banking returned an error, fail the auth flow
+      if (errorParam && state) {
+        const errorMessage = errorDescription || errorParam;
+        await send('enablebanking-failauth', { state, error: errorMessage });
+        setError(
+          t('Authentication failed: {{error}}', { error: errorMessage }),
+        );
+        return;
+      }
+
       if (!state || !code) {
         setError(
           t('Something went wrong during authentication. Please try again.'),
@@ -44,7 +56,7 @@ export function EnableBankingCallback() {
       }
     };
     fetchData();
-  }, [state, code, t]);
+  }, [state, code, errorParam, errorDescription, t]);
   return (
     <Modal name="enablebanking-callback" isDismissable={false}>
       <ModalHeader title={t('Account sync')} />
