@@ -41,9 +41,17 @@ class ProcessorRegistry {
       return new FallbackBankProcessor();
     }
 
-    const processor = new Ctor();
-    debug('Using %s to process %s', processor.name, id);
-    return processor;
+    // Security: The registry is only populated from trusted files in the banks/
+    // directory (via @BankProcessorFor decorator), not from user input. However,
+    // wrap instantiation in try-catch to handle any exceptions gracefully.
+    try {
+      const processor = new Ctor();
+      debug('Using %s to process %s', processor.name, id);
+      return processor;
+    } catch (error) {
+      debug('Error instantiating processor for %s: %O', id, error);
+      return new FallbackBankProcessor();
+    }
   }
   list() {
     return [...this.map.keys()].sort();
