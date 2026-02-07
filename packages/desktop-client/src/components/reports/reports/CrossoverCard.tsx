@@ -24,6 +24,7 @@ import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/s
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 // Type for the return value of the recalculate function
 type CrossoverData = {
@@ -68,6 +69,7 @@ export function CrossoverCard({
   onRemove,
   onCopy,
 }: CrossoverCardProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
@@ -102,7 +104,7 @@ export function CrossoverCard({
         .rangeInclusive(earliestDate, latestDate)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM yyyy', locale),
         }))
         .reverse();
 
@@ -152,7 +154,7 @@ export function CrossoverCard({
     return () => {
       isMounted = false;
     };
-  }, [meta?.timeFrame]);
+  }, [meta?.timeFrame, locale]);
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const onCardHover = useCallback(() => setIsCardHovered(true), []);
@@ -171,6 +173,7 @@ export function CrossoverCard({
 
   const swr = meta?.safeWithdrawalRate ?? 0.04;
   const estimatedReturn = meta?.estimatedReturn ?? null;
+  const expectedContribution = meta?.expectedContribution ?? null;
   const projectionType: 'hampel' | 'median' | 'mean' =
     meta?.projectionType ?? 'hampel';
   const expenseAdjustmentFactor = meta?.expenseAdjustmentFactor ?? 1.0;
@@ -183,7 +186,8 @@ export function CrossoverCard({
         expenseCategoryIds,
         incomeAccountIds,
         safeWithdrawalRate: swr,
-        estimatedReturn: estimatedReturn == null ? null : estimatedReturn,
+        estimatedReturn,
+        expectedContribution,
         projectionType,
         expenseAdjustmentFactor,
       }),
@@ -194,6 +198,7 @@ export function CrossoverCard({
       incomeAccountIds,
       swr,
       estimatedReturn,
+      expectedContribution,
       projectionType,
       expenseAdjustmentFactor,
     ],

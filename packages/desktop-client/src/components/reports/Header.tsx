@@ -43,6 +43,8 @@ type HeaderProps = {
   ) => void;
   children?: ReactNode;
   inlineContent?: ReactNode;
+  // no separate category filter; use main filters instead
+  filterExclude?: string[];
 } & (
   | {
       filters: RuleConditionEntity[];
@@ -82,10 +84,12 @@ export function Header({
   onConditionsOpChange,
   children,
   inlineContent,
+  filterExclude,
 }: HeaderProps) {
   const locale = useLocale();
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+
   function convertToMonth(
     start: string,
     end: string,
@@ -149,7 +153,7 @@ export function Header({
                   )
                 }
                 value={start}
-                defaultLabel={monthUtils.format(start, 'MMMM, yyyy', locale)}
+                defaultLabel={monthUtils.format(start, 'MMMM yyyy', locale)}
                 options={allMonths.map(({ name, pretty }) => [name, pretty])}
               />
               <View>{t('to')}</View>
@@ -293,10 +297,11 @@ export function Header({
                 compact={isNarrowWidth}
                 onApply={onApply}
                 hover={false}
+                exclude={filterExclude}
               />
             )}
+            {inlineContent}
           </SpaceBetween>
-          <SpaceBetween gap={0}>{inlineContent}</SpaceBetween>
         </View>
 
         {children && (

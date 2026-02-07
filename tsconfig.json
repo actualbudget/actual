@@ -50,6 +50,7 @@
     "node_modules",
     "**/node_modules/*",
     "**/build/*",
+    "**/build-electron/*",
     "**/client-build/*",
     "**/dist/*",
     "**/lib-dist/*",

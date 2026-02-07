@@ -143,8 +143,8 @@ export function SpendingCard({
                     difference === 0 || difference == null
                       ? theme.reportsNumberNeutral
                       : difference > 0
-                        ? theme.reportsNumberPositive
-                        : theme.reportsNumberNegative,
+                        ? theme.reportsNumberNegative
+                        : theme.reportsNumberPositive,
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>

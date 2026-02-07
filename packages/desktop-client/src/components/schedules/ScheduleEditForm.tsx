@@ -7,6 +7,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -470,9 +471,7 @@ export function ScheduleEditForm({
             transactions={transactions}
             fields={['date', 'payee', 'notes', 'amount']}
             style={{
-              border: '1px solid ' + theme.tableBorder,
-              borderRadius: 4,
-              overflow: 'hidden',
+              ...styles.tableContainer,
               marginTop: 5,
               maxHeight: 200,
             }}
