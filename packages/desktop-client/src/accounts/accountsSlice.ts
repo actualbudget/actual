@@ -276,17 +276,30 @@ export const unlinkAccount = createAppAsyncThunk(
   },
 );
 
-type LinkAccountPayload = {
+// Shared base type for link account payloads
+type LinkAccountBasePayload = {
+  upgradingId?: AccountEntity['id'];
+  offBudget?: boolean;
+  startingDate?: string;
+  startingBalance?: number;
+};
+
+type LinkAccountPayload = LinkAccountBasePayload & {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
-  upgradingId?: AccountEntity['id'] | undefined;
-  offBudget?: boolean | undefined;
 };
 
 export const linkAccount = createAppAsyncThunk(
   `${sliceName}/linkAccount`,
   async (
-    { requisitionId, account, upgradingId, offBudget }: LinkAccountPayload,
+    {
+      requisitionId,
+      account,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountPayload,
     { dispatch },
   ) => {
     await send('gocardless-accounts-link', {
@@ -294,50 +307,64 @@ export const linkAccount = createAppAsyncThunk(
       account,
       upgradingId,
       offBudget,
+      startingDate,
+      startingBalance,
     });
     dispatch(markPayeesDirty());
     dispatch(markAccountsDirty());
   },
 );
 
-type LinkAccountSimpleFinPayload = {
+type LinkAccountSimpleFinPayload = LinkAccountBasePayload & {
   externalAccount: SyncServerSimpleFinAccount;
-  upgradingId?: AccountEntity['id'] | undefined;
-  offBudget?: boolean | undefined;
 };
 
 export const linkAccountSimpleFin = createAppAsyncThunk(
   `${sliceName}/linkAccountSimpleFin`,
   async (
-    { externalAccount, upgradingId, offBudget }: LinkAccountSimpleFinPayload,
+    {
+      externalAccount,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountSimpleFinPayload,
     { dispatch },
   ) => {
     await send('simplefin-accounts-link', {
       externalAccount,
       upgradingId,
       offBudget,
+      startingDate,
+      startingBalance,
     });
     dispatch(markPayeesDirty());
     dispatch(markAccountsDirty());
   },
 );
 
-type LinkAccountPluggyAiPayload = {
+type LinkAccountPluggyAiPayload = LinkAccountBasePayload & {
   externalAccount: SyncServerPluggyAiAccount;
-  upgradingId?: AccountEntity['id'];
-  offBudget?: boolean;
 };
 
 export const linkAccountPluggyAi = createAppAsyncThunk(
   `${sliceName}/linkAccountPluggyAi`,
   async (
-    { externalAccount, upgradingId, offBudget }: LinkAccountPluggyAiPayload,
+    {
+      externalAccount,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountPluggyAiPayload,
     { dispatch },
   ) => {
     await send('pluggyai-accounts-link', {
       externalAccount,
       upgradingId,
       offBudget,
+      startingDate,
+      startingBalance,
     });
     dispatch(markPayeesDirty());
     dispatch(markAccountsDirty());
