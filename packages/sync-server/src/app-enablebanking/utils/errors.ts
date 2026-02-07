@@ -146,17 +146,19 @@ export async function handleEnableBankingError(response: globalThis.Response) {
     `Enable Banking API error response: HTTP ${response.status} ${response.statusText}`,
   );
 
+  // Read response text first, then parse as JSON (body stream is single-use)
+  let rawText: string;
+  try {
+    rawText = await response.text();
+  } catch {
+    rawText = '(unable to read response body)';
+  }
+
   let body: unknown;
   try {
-    body = await response.json();
+    body = JSON.parse(rawText);
   } catch {
     // Non-JSON response (e.g., HTML 502 from a proxy) - preserve HTTP context
-    let rawText: string;
-    try {
-      rawText = await response.text();
-    } catch {
-      rawText = '(unable to read response body)';
-    }
     console.error('Enable Banking API returned non-JSON response:', rawText);
     throw new EnableBankingError(
       'INTERNAL_ERROR',

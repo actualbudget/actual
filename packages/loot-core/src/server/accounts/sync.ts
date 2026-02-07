@@ -945,7 +945,7 @@ async function processBankSyncDownload(
       balanceToUse = previousBalance;
     } else if (
       acctRow.account_sync_source === 'pluggyai' ||
-      acctRow.account_sync_source === 'enablebanking'
+      acctRow.account_sync_source === 'enableBanking'
     ) {
       const currentBalance = download.startingBalance;
       const previousBalance = transactions.reduce(
@@ -1051,7 +1051,7 @@ export async function syncAccount(
       syncStartDate,
       newAccount,
     );
-  } else if (acctRow.account_sync_source === 'enablebanking') {
+  } else if (acctRow.account_sync_source === 'enableBanking') {
     download = await downloadEnableBankingTransactions(
       acctId,
       syncStartDate,

@@ -21,7 +21,6 @@ import {
   isErrorResponse,
   ResourceNotFoundError,
   SecretsInvalidError,
-  type ErrorResponse,
 } from '../utils/errors.js';
 import { getJWT } from '../utils/jwt.js';
 
@@ -171,22 +170,38 @@ export const enableBankingservice = {
       async onResponse(options) {
         const { response } = options;
         if (response.status >= 400) {
-          const error_data = await response
-            .clone()
-            .json()
-            .then(data => {
-              if (isErrorResponse(data)) {
-                return handleErrorResponse(data);
-              } else if ((data as ErrorResponse).code === 403) {
-                return new SecretsInvalidError();
-              } else {
-                console.error(`Enable Banking API returned an error:`, data);
-                return new EnableBankingError(
-                  'INTERNAL_ERROR',
-                  `Something went wrong while using the Enable Banking API. Please try again later.`,
-                );
-              }
-            });
+          let error_data: EnableBankingError;
+          try {
+            const data = await response.clone().json();
+            if (isErrorResponse(data)) {
+              error_data = handleErrorResponse(data);
+            } else if (response.status === 403) {
+              error_data = new SecretsInvalidError();
+            } else {
+              console.error(`Enable Banking API returned an error:`, data);
+              error_data = new EnableBankingError(
+                'INTERNAL_ERROR',
+                `Something went wrong while using the Enable Banking API. Please try again later.`,
+              );
+            }
+          } catch {
+            // Non-JSON response (e.g., HTML 502 from proxy)
+            let rawText: string;
+            try {
+              rawText = await response.clone().text();
+            } catch {
+              rawText = '(unable to read response body)';
+            }
+            console.error(
+              `Enable Banking API returned non-JSON error response: HTTP ${response.status}`,
+              rawText,
+            );
+            error_data = new EnableBankingError(
+              'INTERNAL_ERROR',
+              `Enable Banking API returned HTTP ${response.status} with non-JSON body.`,
+            );
+          }
+          // eslint-disable-next-line no-throw-literal -- error_data is an EnableBankingError (extends Error)
           throw error_data;
         }
         return undefined; // continue with the response

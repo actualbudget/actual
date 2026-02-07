@@ -101,7 +101,7 @@ async function pollAuth({
     while (!controller.signal.aborted) {
       const resp = await post('/get_session', { state });
       logger.debug('poll response', resp);
-      if (resp.data || resp.error.error_code !== 'NOT_READY') {
+      if (resp.data || resp.error?.error_code !== 'NOT_READY') {
         logger.debug('returning');
         return resp;
       }

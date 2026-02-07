@@ -21,6 +21,116 @@ app.use(requestLoggerMiddleware);
 export { app as handlers };
 
 app.use(express.json());
+
+// Public callback endpoint (no session validation required)
+// Enable Banking redirects here after user authentication
+app.get('/auth_callback', (req, res) => {
+  const { state, code, error, error_description } = req.query;
+
+  if (!state || typeof state !== 'string') {
+    res.status(400).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Authentication Error</title></head>
+        <body>
+          <h1>Authentication Error</h1>
+          <p>Missing or invalid state parameter.</p>
+          <script>
+            setTimeout(() => window.close(), 3000);
+          </script>
+        </body>
+      </html>
+    `);
+    return;
+  }
+
+  if (error) {
+    // Enable Banking returned an error
+    const errorMsg =
+      typeof error_description === 'string'
+        ? error_description
+        : typeof error === 'string'
+          ? error
+          : 'unknown_error';
+
+    enableBankingservice.failSession(state, errorMsg);
+
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Authentication Failed</title></head>
+        <body>
+          <h1>Authentication Failed</h1>
+          <p>${errorMsg}</p>
+          <p>You can close this window and try again.</p>
+          <script>
+            setTimeout(() => window.close(), 5000);
+          </script>
+        </body>
+      </html>
+    `);
+    return;
+  }
+
+  if (!code || typeof code !== 'string') {
+    enableBankingservice.failSession(state, 'missing_code');
+    res.status(400).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Authentication Error</title></head>
+        <body>
+          <h1>Authentication Error</h1>
+          <p>Missing authorization code.</p>
+          <script>
+            setTimeout(() => window.close(), 3000);
+          </script>
+        </body>
+      </html>
+    `);
+    return;
+  }
+
+  // Process the authorization
+  enableBankingservice
+    .authorizeSession(state, code)
+    .then(() => {
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+          <head><title>Authentication Successful</title></head>
+          <body>
+            <h1>Authentication Successful</h1>
+            <p>You can now close this window and return to Actual Budget.</p>
+            <script>
+              setTimeout(() => window.close(), 2000);
+            </script>
+          </body>
+        </html>
+      `);
+    })
+    .catch(err => {
+      console.error('Error in auth_callback:', err);
+      enableBankingservice.failSession(
+        state,
+        err instanceof Error ? err.message : 'authorization_failed',
+      );
+      res.status(500).send(`
+        <!DOCTYPE html>
+        <html>
+          <head><title>Authentication Error</title></head>
+          <body>
+            <h1>Authentication Error</h1>
+            <p>Failed to complete authorization. Please try again.</p>
+            <script>
+              setTimeout(() => window.close(), 5000);
+            </script>
+          </body>
+        </html>
+      `);
+    });
+});
+
+// Apply session validation middleware to all routes below this point
 app.use(validateSessionMiddleware);
 
 function post<T extends keyof EnableBankingEndpoints>(
