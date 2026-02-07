@@ -943,7 +943,10 @@ async function processBankSyncDownload(
         );
       }, currentBalance);
       balanceToUse = previousBalance;
-    } else if (acctRow.account_sync_source === 'pluggyai') {
+    } else if (
+      acctRow.account_sync_source === 'pluggyai' ||
+      acctRow.account_sync_source === 'enablebanking'
+    ) {
       const currentBalance = download.startingBalance;
       const previousBalance = transactions.reduce(
         (total, trans) => total - trans.transactionAmount.amount * 100,
