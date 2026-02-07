@@ -215,7 +215,9 @@ export function ExperimentalFeatures() {
               <Trans>Budget Analysis Report</Trans>
             </FeatureToggle>
             <FeatureToggle flag="reactTableTransactions">
-              <Trans>React Table transactions (experimental table rewrite)</Trans>
+              <Trans>
+                React Table transactions (experimental table rewrite)
+              </Trans>
             </FeatureToggle>
             {showServerPrefs && (
               <ServerFeatureToggle

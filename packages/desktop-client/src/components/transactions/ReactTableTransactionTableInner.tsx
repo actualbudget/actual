@@ -6,10 +6,11 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type ReactNode,
   type Ref,
   type RefObject,
+  type UIEvent,
 } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -21,6 +22,7 @@ import {
 
 import type { TransactionEntity } from 'loot-core/types/models';
 
+import { isLastChild } from './table/utils';
 import {
   NewTransaction,
   Transaction,
@@ -32,11 +34,8 @@ import {
 import {
   ROW_HEIGHT,
   type TableHandleRef,
-  type TableNavigator,
 } from '@desktop-client/components/table';
 import { usePrevious } from '@desktop-client/hooks/usePrevious';
-
-import { isLastChild } from './table/utils';
 
 /**
  * Column definitions for the transactions table using TanStack React Table.
@@ -162,12 +161,9 @@ function useVirtualTransactions({
     return () => observer.disconnect();
   }, [containerRef]);
 
-  const handleScroll = useCallback(
-    (e: React.UIEvent<HTMLDivElement>) => {
-      setScrollOffset((e.target as HTMLDivElement).scrollTop);
-    },
-    [],
-  );
+  const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
+    setScrollOffset((e.target as HTMLDivElement).scrollTop);
+  }, []);
 
   const itemSize = rowHeight - 1;
   const totalHeight = items.length * itemSize;
@@ -226,7 +222,6 @@ export function ReactTableTransactionTableInner({
   showHiddenCategories,
   ...props
 }: TransactionTableInnerProps) {
-  const { t } = useTranslation();
   const containerRef = createRef<HTMLDivElement>();
   const isAddingPrev = usePrevious(props.isAdding);
   const [scrollWidth, setScrollWidth] = useState(0);
@@ -296,8 +291,10 @@ export function ReactTableTransactionTableInner({
     showCleared: props.showCleared,
   });
 
-  // TanStack React Table instance
-  const table = useReactTable({
+  // TanStack React Table instance - manages table state and column model.
+  // The table instance is used for future enhancements like column resizing
+  // and reordering. Currently, the row model drives the rendering pipeline.
+  const _table = useReactTable({
     data: transactionsToRender,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -359,8 +356,9 @@ export function ReactTableTransactionTableInner({
     if (typeof tableRef === 'function') {
       tableRef(imperativeRef.current);
     } else if (tableRef && 'current' in tableRef) {
-      (tableRef as { current: TableHandleRef<TransactionEntity> | null }).current =
-        imperativeRef.current;
+      (
+        tableRef as { current: TableHandleRef<TransactionEntity> | null }
+      ).current = imperativeRef.current;
     }
   });
 
@@ -381,10 +379,7 @@ export function ReactTableTransactionTableInner({
       const timer = setTimeout(() => {
         const el = scrollContainerRef.current;
         if (el?.offsetParent) {
-          saveScrollWidth(
-            el.offsetParent.clientWidth,
-            el.clientWidth,
-          );
+          saveScrollWidth(el.offsetParent.clientWidth, el.clientWidth);
         }
       }, 200);
       return () => clearTimeout(timer);
@@ -392,20 +387,22 @@ export function ReactTableTransactionTableInner({
     return;
   });
 
+  const { loadMoreTransactions } = props;
+
   // Load more when approaching the end
   const handleScroll = useCallback(
-    (e: React.UIEvent<HTMLDivElement>) => {
+    (e: UIEvent<HTMLDivElement>) => {
       handleVirtualScroll(e);
-      if (props.loadMoreTransactions) {
+      if (loadMoreTransactions) {
         const target = e.target as HTMLDivElement;
         const scrollBottom =
           target.scrollHeight - target.scrollTop - target.clientHeight;
         if (scrollBottom < ROW_HEIGHT * 100) {
-          props.loadMoreTransactions();
+          loadMoreTransactions();
         }
       }
     },
-    [handleVirtualScroll, props.loadMoreTransactions],
+    [handleVirtualScroll, loadMoreTransactions],
   );
 
   /**
@@ -525,13 +522,11 @@ export function ReactTableTransactionTableInner({
 
   const isEmpty = transactionsToRender.length === 0;
 
-  function getEmptyContent(
-    empty: typeof renderEmpty,
-  ): React.ReactNode | null {
+  function getEmptyContent(empty: typeof renderEmpty): ReactNode | null {
     if (empty == null) {
       return null;
     } else if (typeof empty === 'function') {
-      return (empty as () => React.ReactNode)();
+      return (empty as () => ReactNode)();
     }
 
     return (
@@ -669,10 +664,8 @@ export function ReactTableTransactionTableInner({
                 >
                   {virtualItems.map(virtualRow => {
                     const item = virtualRow.item;
-                    const editing =
-                      tableNavigator.editingId === item.id;
-                    const selected =
-                      props.selectedItems.has(item.id);
+                    const editing = tableNavigator.editingId === item.id;
+                    const selected = props.selectedItems.has(item.id);
 
                     return (
                       <View
@@ -683,14 +676,12 @@ export function ReactTableTransactionTableInner({
                           left: 0,
                           right: 0,
                           height: ROW_HEIGHT,
-                          zIndex:
-                            editing || selected ? 101 : 'auto',
+                          zIndex: editing || selected ? 101 : 'auto',
                           backgroundColor: theme.tableBackground,
                         }}
                         nativeStyle={{
                           '--pos': `${virtualRow.start}px`,
-                          transform:
-                            'translateY(var(--pos))',
+                          transform: 'translateY(var(--pos))',
                         }}
                         data-focus-key={item.id}
                       >

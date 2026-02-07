@@ -17,6 +17,9 @@
     "vrt": "cross-env VRT=true npx playwright test --browser=chromium",
     "playwright": "playwright"
   },
+  "dependencies": {
+    "@tanstack/react-table": "^8.21.3"
+  },
   "devDependencies": {
     "@actual-app/components": "workspace:*",
     "@codemirror/autocomplete": "^6.20.0",
@@ -96,8 +99,5 @@
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^4.0.16",
     "xml2js": "^0.6.2"
-  },
-  "dependencies": {
-    "@tanstack/react-table": "^8.21.3"
   }
 }

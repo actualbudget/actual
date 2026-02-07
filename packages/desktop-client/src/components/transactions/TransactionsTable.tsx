@@ -116,12 +116,12 @@ import {
   SchedulesProvider,
   useCachedSchedules,
 } from '@desktop-client/hooks/useCachedSchedules';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import {
   DisplayPayeeProvider,
   useDisplayPayee,
 } from '@desktop-client/hooks/useDisplayPayee';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { usePrevious } from '@desktop-client/hooks/usePrevious';
@@ -3023,7 +3023,7 @@ export const TransactionTable = forwardRef(
       onAddAndCloseTemporary,
       onAddSplit,
       onDistributeRemainder,
-      onCloseAddTransaction: onCloseAddTransaction,
+      onCloseAddTransaction,
       onToggleSplit,
       newTransactions: newTransactions ?? [],
       tableNavigator,
