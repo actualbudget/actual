@@ -74,6 +74,7 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { ReactTableTransactionTableInner } from './ReactTableTransactionTableInner';
 import {
   deserializeTransaction,
   isLastChild,
@@ -115,6 +116,7 @@ import {
   SchedulesProvider,
   useCachedSchedules,
 } from '@desktop-client/hooks/useCachedSchedules';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import {
   DisplayPayeeProvider,
@@ -139,7 +141,7 @@ import { addNotification } from '@desktop-client/notifications/notificationsSlic
 import { getPayeesById } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
-type TransactionHeaderProps = {
+export type TransactionHeaderProps = {
   hasSelected: boolean;
   showAccount: boolean;
   showCategory: boolean;
@@ -152,7 +154,7 @@ type TransactionHeaderProps = {
   field: string;
 };
 
-const TransactionHeader = memo(
+export const TransactionHeader = memo(
   ({
     hasSelected,
     showAccount,
@@ -826,7 +828,7 @@ function PayeeIcons({
   );
 }
 
-type TransactionProps = {
+export type TransactionProps = {
   allTransactions?: TransactionEntity[];
   transaction: TransactionEntity;
   subtransactions: TransactionEntity[] | null;
@@ -882,7 +884,7 @@ type TransactionProps = {
   showHiddenCategories?: boolean;
 };
 
-const Transaction = memo(function Transaction({
+export const Transaction = memo(function Transaction({
   allTransactions,
   transaction: originalTransaction,
   subtransactions,
@@ -1707,7 +1709,7 @@ const Transaction = memo(function Transaction({
   );
 });
 
-type TransactionErrorProps = {
+export type TransactionErrorProps = {
   error: NonNullable<TransactionEntity['error']>;
   isDeposit: boolean;
   onAddSplit: () => void;
@@ -1716,7 +1718,7 @@ type TransactionErrorProps = {
   canDistributeRemainder: boolean;
 };
 
-function TransactionError({
+export function TransactionError({
   error,
   isDeposit,
   onAddSplit,
@@ -1772,7 +1774,7 @@ function TransactionError({
   }
 }
 
-type NewTransactionProps = {
+export type NewTransactionProps = {
   accounts: AccountEntity[];
   categoryGroups: CategoryGroupEntity[];
   dateFormat: string;
@@ -1809,7 +1811,7 @@ type NewTransactionProps = {
   };
   showHiddenCategories?: boolean;
 };
-function NewTransaction({
+export function NewTransaction({
   transactions,
   accounts,
   categoryGroups,
@@ -1955,7 +1957,7 @@ function NewTransaction({
   );
 }
 
-type TransactionTableInnerProps = {
+export type TransactionTableInnerProps = {
   tableRef: Ref<TableHandleRef<TransactionEntity>>;
   listContainerRef: RefObject<HTMLDivElement>;
   tableNavigator: TableNavigator<TransactionEntity>;
@@ -2993,44 +2995,52 @@ export const TransactionTable = forwardRef(
 
     const allSchedulesQuery = useMemo(() => q('schedules').select('*'), []);
 
+    const isReactTableEnabled = useFeatureFlag('reactTableTransactions');
+
+    const innerProps = {
+      tableRef: mergedRef,
+      listContainerRef,
+      ...props,
+      transactions: transactionsWithExpandedSplits,
+      transactionMap,
+      transactionsByParent,
+      transferAccountsByTransaction,
+      selectedItems,
+      isExpanded: splitsExpanded.isExpanded,
+      onSave,
+      onDelete,
+      onBatchDelete,
+      onBatchDuplicate,
+      onBatchLinkSchedule,
+      onBatchUnlinkSchedule,
+      onCreateRule,
+      onScheduleAction,
+      onMakeAsNonSplitTransactions,
+      onSplit,
+      onCheckNewEnter,
+      onCheckEnter,
+      onAddTemporary,
+      onAddAndCloseTemporary,
+      onAddSplit,
+      onDistributeRemainder,
+      onCloseAddTransaction: onCloseAddTransaction,
+      onToggleSplit,
+      newTransactions: newTransactions ?? [],
+      tableNavigator,
+      newNavigator,
+      showSelection: props.showSelection,
+      allowSplitTransaction: props.allowSplitTransaction,
+      showHiddenCategories,
+    };
+
+    const InnerComponent = isReactTableEnabled
+      ? ReactTableTransactionTableInner
+      : TransactionTableInner;
+
     return (
       <DisplayPayeeProvider transactions={displayPayeeTransactions}>
         <SchedulesProvider query={allSchedulesQuery}>
-          <TransactionTableInner
-            tableRef={mergedRef}
-            listContainerRef={listContainerRef}
-            {...props}
-            transactions={transactionsWithExpandedSplits}
-            transactionMap={transactionMap}
-            transactionsByParent={transactionsByParent}
-            transferAccountsByTransaction={transferAccountsByTransaction}
-            selectedItems={selectedItems}
-            isExpanded={splitsExpanded.isExpanded}
-            onSave={onSave}
-            onDelete={onDelete}
-            onBatchDelete={onBatchDelete}
-            onBatchDuplicate={onBatchDuplicate}
-            onBatchLinkSchedule={onBatchLinkSchedule}
-            onBatchUnlinkSchedule={onBatchUnlinkSchedule}
-            onCreateRule={onCreateRule}
-            onScheduleAction={onScheduleAction}
-            onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
-            onSplit={onSplit}
-            onCheckNewEnter={onCheckNewEnter}
-            onCheckEnter={onCheckEnter}
-            onAddTemporary={onAddTemporary}
-            onAddAndCloseTemporary={onAddAndCloseTemporary}
-            onAddSplit={onAddSplit}
-            onDistributeRemainder={onDistributeRemainder}
-            onCloseAddTransaction={onCloseAddTransaction}
-            onToggleSplit={onToggleSplit}
-            newTransactions={newTransactions ?? []}
-            tableNavigator={tableNavigator}
-            newNavigator={newNavigator}
-            showSelection={props.showSelection}
-            allowSplitTransaction={props.allowSplitTransaction}
-            showHiddenCategories={showHiddenCategories}
-          />
+          <InnerComponent {...innerProps} />
         </SchedulesProvider>
       </DisplayPayeeProvider>
     );
@@ -3039,7 +3049,7 @@ export const TransactionTable = forwardRef(
 
 TransactionTable.displayName = 'TransactionTable';
 
-const getCategoriesById = memoizeOne(
+export const getCategoriesById = memoizeOne(
   (categoryGroups: CategoryGroupEntity[] | null | undefined) => {
     const res: { [id: CategoryEntity['id']]: CategoryEntity } = {};
     categoryGroups?.forEach(group => {
