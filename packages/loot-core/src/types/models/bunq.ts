@@ -9,4 +9,3 @@ export type SyncServerBunqAccount = {
   currency: string;
   balance: number;
 };
-

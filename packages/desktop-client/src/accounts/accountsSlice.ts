@@ -7,10 +7,10 @@ import { groupById } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type CategoryEntity,
+  type SyncServerBunqAccount,
   type SyncServerGoCardlessAccount,
   type SyncServerPluggyAiAccount,
   type SyncServerSimpleFinAccount,
-  type SyncServerBunqAccount,
   type TransactionEntity,
 } from 'loot-core/types/models';
 

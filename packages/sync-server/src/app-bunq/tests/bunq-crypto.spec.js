@@ -32,4 +32,3 @@ describe('bunq-crypto', () => {
     expect(verified).toBe(false);
   });
 });
-

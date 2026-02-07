@@ -1,8 +1,8 @@
-import { bunqService } from '../services/bunq-service';
 import { SecretName, secretsService } from '../../services/secrets-service';
-import { BunqClient } from '../services/bunq-client';
 import { BunqAuthError } from '../errors';
+import { BunqClient } from '../services/bunq-client';
 import { generateBunqKeyPair } from '../services/bunq-crypto';
+import { bunqService } from '../services/bunq-service';
 
 describe('bunq-service auth context recovery', () => {
   afterEach(() => {
@@ -76,4 +76,3 @@ describe('bunq-service auth context recovery', () => {
     expect(secretMap.get(SecretName.bunq_userId)).toBe('44');
   });
 });
-

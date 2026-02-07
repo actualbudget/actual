@@ -27,12 +27,16 @@ type BunqInitialiseModalProps = Extract<
   { name: 'bunq-init' }
 >['options'];
 
-export const BunqInitialiseModal = ({ onSuccess }: BunqInitialiseModalProps) => {
+export const BunqInitialiseModal = ({
+  onSuccess,
+}: BunqInitialiseModalProps) => {
   const { t } = useTranslation();
   const [apiKey, setApiKey] = useState('');
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(t('It is required to provide an API key.'));
+  const [error, setError] = useState(
+    t('It is required to provide an API key.'),
+  );
 
   const onSubmit = async (close: () => void) => {
     if (!apiKey) {

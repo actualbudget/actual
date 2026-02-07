@@ -1,12 +1,12 @@
+import { SecretName, secretsService } from '../../services/secrets-service';
+import { BunqRateLimitError } from '../errors';
+import { BunqClient } from '../services/bunq-client';
+import { generateBunqKeyPair } from '../services/bunq-crypto';
 import {
-  extractPaginationCursor,
   bunqService,
+  extractPaginationCursor,
   normalizeBunqPayment,
 } from '../services/bunq-service';
-import { SecretName, secretsService } from '../../services/secrets-service';
-import { BunqClient } from '../services/bunq-client';
-import { BunqRateLimitError } from '../errors';
-import { generateBunqKeyPair } from '../services/bunq-crypto';
 
 describe('bunq-service', () => {
   afterEach(() => {
@@ -39,8 +39,10 @@ describe('bunq-service', () => {
   it('extracts cursor semantics from pagination links', () => {
     const cursor = extractPaginationCursor({
       Pagination: {
-        older_url: '/v1/user/1/monetary-account/2/payment?older_id=111&count=200',
-        newer_url: '/v1/user/1/monetary-account/2/payment?newer_id=987&count=200',
+        older_url:
+          '/v1/user/1/monetary-account/2/payment?older_id=111&count=200',
+        newer_url:
+          '/v1/user/1/monetary-account/2/payment?newer_id=987&count=200',
       },
     });
 
@@ -273,4 +275,3 @@ describe('bunq-service', () => {
     expect(res.accounts.map(account => account.account_id)).toEqual(['1', '3']);
   });
 });
-

@@ -167,9 +167,11 @@ export class BunqClient {
    */
   async request(path, options) {
     const token = this.getAuthToken(options.tokenType);
-    const body = options.jsonBody == null ? '' : JSON.stringify(options.jsonBody);
+    const body =
+      options.jsonBody == null ? '' : JSON.stringify(options.jsonBody);
     const shouldSign = options.sign ?? true;
-    const shouldVerifyResponseSignature = options.verifyResponseSignature ?? true;
+    const shouldVerifyResponseSignature =
+      options.verifyResponseSignature ?? true;
 
     const headers = {
       'Cache-Control': 'no-cache',
@@ -209,7 +211,10 @@ export class BunqClient {
     if (!response.ok) {
       const responseHeaders = {};
       if (response?.headers?.entries) {
-        Object.assign(responseHeaders, Object.fromEntries(response.headers.entries()));
+        Object.assign(
+          responseHeaders,
+          Object.fromEntries(response.headers.entries()),
+        );
       } else if (response?.headers?.forEach) {
         response.headers.forEach((value, key) => {
           responseHeaders[key] = value;
@@ -223,7 +228,9 @@ export class BunqClient {
         verifyResponseSignature: shouldVerifyResponseSignature,
         requestHeaders: {
           'X-Bunq-Client-Request-Id': headers['X-Bunq-Client-Request-Id'],
-          'X-Bunq-Client-Authentication': headers['X-Bunq-Client-Authentication']
+          'X-Bunq-Client-Authentication': headers[
+            'X-Bunq-Client-Authentication'
+          ]
             ? '[present]'
             : '[missing]',
           'X-Bunq-Client-Signature': headers['X-Bunq-Client-Signature']
@@ -312,9 +319,12 @@ export class BunqClient {
 function getBunqTokenValue(responseJson) {
   const entries = responseJson?.Response;
   if (!Array.isArray(entries)) {
-    throw new BunqProtocolError('Unexpected Bunq response while extracting token', {
-      responseJson,
-    });
+    throw new BunqProtocolError(
+      'Unexpected Bunq response while extracting token',
+      {
+        responseJson,
+      },
+    );
   }
 
   const tokenEntry = entries.find(entry => entry?.Token?.token);
@@ -340,12 +350,17 @@ function getBunqServerPublicKey(responseJson) {
     );
   }
 
-  const keyEntry = entries.find(entry => entry?.ServerPublicKey?.server_public_key);
+  const keyEntry = entries.find(
+    entry => entry?.ServerPublicKey?.server_public_key,
+  );
   const serverPublicKey = keyEntry?.ServerPublicKey?.server_public_key;
   if (!serverPublicKey) {
-    throw new BunqProtocolError('Bunq server public key was missing in response', {
-      responseJson,
-    });
+    throw new BunqProtocolError(
+      'Bunq server public key was missing in response',
+      {
+        responseJson,
+      },
+    );
   }
 
   return serverPublicKey;
@@ -355,13 +370,17 @@ function getBunqServerPublicKey(responseJson) {
 function getBunqUserId(responseJson) {
   const entries = responseJson?.Response;
   if (!Array.isArray(entries)) {
-    throw new BunqProtocolError('Unexpected Bunq response while extracting user ID', {
-      responseJson,
-    });
+    throw new BunqProtocolError(
+      'Unexpected Bunq response while extracting user ID',
+      {
+        responseJson,
+      },
+    );
   }
 
   for (const entry of entries) {
-    const user = entry.UserPerson || entry.UserCompany || entry.UserLight || null;
+    const user =
+      entry.UserPerson || entry.UserCompany || entry.UserLight || null;
     if (user?.id != null) {
       return String(user.id);
     }
@@ -371,4 +390,3 @@ function getBunqUserId(responseJson) {
     responseJson,
   });
 }
-

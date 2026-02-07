@@ -11,10 +11,10 @@ import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
 import {
   type AccountEntity,
-  type SyncServerBunqAccount,
   type CategoryEntity,
   type GoCardlessToken,
   type ImportTransactionEntity,
+  type SyncServerBunqAccount,
   type SyncServerGoCardlessAccount,
   type SyncServerPluggyAiAccount,
   type SyncServerSimpleFinAccount,

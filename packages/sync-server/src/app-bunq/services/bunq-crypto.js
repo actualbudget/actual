@@ -63,4 +63,3 @@ export function verifyResponsePayloadSignature(
   verifier.end();
   return verifier.verify(publicKeyPem, signatureBase64, 'base64');
 }
-

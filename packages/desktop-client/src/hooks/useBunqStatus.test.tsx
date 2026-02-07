@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { useBunqStatus } from './useBunqStatus';
-
 import { send } from 'loot-core/platform/client/fetch';
 
-import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
+import { useBunqStatus } from './useBunqStatus';
+
+import { useSyncServerStatus } from './useSyncServerStatus';
 
 vi.mock('loot-core/platform/client/fetch', () => ({
   send: vi.fn(),

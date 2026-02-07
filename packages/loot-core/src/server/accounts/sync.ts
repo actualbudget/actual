@@ -316,7 +316,8 @@ async function downloadBunqTransactions(
 
   logger.log('Pulling transactions from bunq');
 
-  const cursorKey = `bunq-sync-cursor-${localId}-${acctId}` satisfies keyof SyncedPrefs;
+  const cursorKey =
+    `bunq-sync-cursor-${localId}-${acctId}` satisfies keyof SyncedPrefs;
   const savedCursor = await aqlQuery(
     q('preferences').filter({ id: cursorKey }).select('value'),
   ).then(data => data?.data?.[0]?.value);

@@ -1,14 +1,14 @@
 import {
-  generateBunqKeyPair,
-  signRequestPayload,
-} from '../services/bunq-crypto';
-import { BunqClient } from '../services/bunq-client';
-import {
   BunqInvalidResponseError,
   BunqProtocolError,
   BunqRateLimitError,
   BunqSignatureError,
 } from '../errors';
+import { BunqClient } from '../services/bunq-client';
+import {
+  generateBunqKeyPair,
+  signRequestPayload,
+} from '../services/bunq-crypto';
 
 describe('bunq-client', () => {
   it('verifies server signature and parses session token + user id', async () => {
@@ -22,7 +22,10 @@ describe('bunq-client', () => {
       ],
     });
 
-    const serverSignature = signRequestPayload(serverKeyPair.privateKeyPem, body);
+    const serverSignature = signRequestPayload(
+      serverKeyPair.privateKeyPem,
+      body,
+    );
 
     const fetchImpl = vi.fn().mockResolvedValue({
       ok: true,
@@ -60,7 +63,10 @@ describe('bunq-client', () => {
     const serverKeyPair = generateBunqKeyPair();
 
     const body = JSON.stringify({
-      Response: [{ Token: { token: 'session-token-1' } }, { UserPerson: { id: 7 } }],
+      Response: [
+        { Token: { token: 'session-token-1' } },
+        { UserPerson: { id: 7 } },
+      ],
     });
 
     const invalidSignature = signRequestPayload(
@@ -182,4 +188,3 @@ describe('bunq-client', () => {
     );
   });
 });
-

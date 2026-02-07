@@ -66,4 +66,3 @@ export class BunqProtocolError extends Error {
     this.details = details;
   }
 }
-

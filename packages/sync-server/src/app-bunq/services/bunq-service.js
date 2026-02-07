@@ -1,3 +1,4 @@
+import { SecretName, secretsService } from '../../services/secrets-service';
 import {
   BunqAuthError,
   BunqConfigurationError,
@@ -7,13 +8,9 @@ import {
   BunqRateLimitError,
   BunqSignatureError,
 } from '../errors';
-import { SecretName, secretsService } from '../../services/secrets-service';
 
-import {
-  generateBunqKeyPair,
-  getPublicKeyFromPrivateKey,
-} from './bunq-crypto';
 import { BunqClient } from './bunq-client';
+import { generateBunqKeyPair, getPublicKeyFromPrivateKey } from './bunq-crypto';
 
 const DEFAULT_PAGE_SIZE = 200;
 const MAX_PAGES = 20;
@@ -157,11 +154,15 @@ async function ensureApiContext(fetchImpl) {
           fetchImpl,
         });
 
-        const installation = await bootstrapClient.createInstallation(publicKey);
+        const installation =
+          await bootstrapClient.createInstallation(publicKey);
         installationToken = installation.installationToken;
         serverPublicKey = installation.serverPublicKey;
 
-        secretsService.set(SecretName.bunq_installationToken, installationToken);
+        secretsService.set(
+          SecretName.bunq_installationToken,
+          installationToken,
+        );
         secretsService.set(SecretName.bunq_serverPublicKey, serverPublicKey);
 
         const authClient = new BunqClient({
@@ -329,7 +330,9 @@ export function extractPaginationCursor(responseJson) {
 function extractPayments(responseJson) {
   const entries = responseJson?.Response;
   if (!Array.isArray(entries)) {
-    throw new BunqInvalidResponseError('Unexpected Bunq payment response shape');
+    throw new BunqInvalidResponseError(
+      'Unexpected Bunq payment response shape',
+    );
   }
 
   return entries
@@ -570,10 +573,14 @@ export const bunqService = {
         let newerId = incomingCursor.newerId;
 
         for (let i = 0; i < MAX_PAGES && newerId; i++) {
-          const response = await client.listPayments(context.userId, accountId, {
-            count: DEFAULT_PAGE_SIZE,
-            newerId,
-          });
+          const response = await client.listPayments(
+            context.userId,
+            accountId,
+            {
+              count: DEFAULT_PAGE_SIZE,
+              newerId,
+            },
+          );
 
           const pagePayments = extractPayments(response);
           for (const payment of pagePayments) {
@@ -595,10 +602,14 @@ export const bunqService = {
         let stop = false;
 
         for (let i = 0; i < MAX_PAGES && !stop; i++) {
-          const response = await client.listPayments(context.userId, accountId, {
-            count: DEFAULT_PAGE_SIZE,
-            olderId,
-          });
+          const response = await client.listPayments(
+            context.userId,
+            accountId,
+            {
+              count: DEFAULT_PAGE_SIZE,
+              olderId,
+            },
+          );
 
           const pagePayments = extractPayments(response);
           for (const payment of pagePayments) {
@@ -654,4 +665,3 @@ export const bunqService = {
     throw new BunqNotImplementedYetError(operation);
   },
 };
-

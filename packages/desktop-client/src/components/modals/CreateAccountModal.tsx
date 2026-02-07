@@ -25,10 +25,10 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
 import { authorizeBank } from '@desktop-client/gocardless';
+import { useBunqStatus } from '@desktop-client/hooks/useBunqStatus';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
-import { useBunqStatus } from '@desktop-client/hooks/useBunqStatus';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 import {
   pushModal,

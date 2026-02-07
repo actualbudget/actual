@@ -108,12 +108,24 @@ describe('bunq sync cursor integration', () => {
         cursor: { newerId: '99' },
       });
 
-    await syncAccount(undefined, undefined, accountId, firstRemoteAccountId, '');
+    await syncAccount(
+      undefined,
+      undefined,
+      accountId,
+      firstRemoteAccountId,
+      '',
+    );
     await db.update('accounts', {
       id: accountId,
       account_id: secondRemoteAccountId,
     });
-    await syncAccount(undefined, undefined, accountId, secondRemoteAccountId, '');
+    await syncAccount(
+      undefined,
+      undefined,
+      accountId,
+      secondRemoteAccountId,
+      '',
+    );
 
     expect(postSpy).toHaveBeenNthCalledWith(
       2,
@@ -139,4 +151,3 @@ describe('bunq sync cursor integration', () => {
     expect(secondCursor.value).toBe('{"newerId":"99"}');
   });
 });
-

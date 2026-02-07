@@ -20,4 +20,8 @@ export type BankSyncResponse = {
   error_code: string;
 };
 
-export type BankSyncProviders = 'goCardless' | 'simpleFin' | 'pluggyai' | 'bunq';
+export type BankSyncProviders =
+  | 'goCardless'
+  | 'simpleFin'
+  | 'pluggyai'
+  | 'bunq';

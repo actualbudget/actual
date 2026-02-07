@@ -15,17 +15,17 @@ import { format as formatDate, parseISO } from 'date-fns';
 import { currentDay, subDays } from 'loot-core/shared/months';
 import {
   type AccountEntity,
+  type SyncServerBunqAccount,
   type SyncServerGoCardlessAccount,
   type SyncServerPluggyAiAccount,
   type SyncServerSimpleFinAccount,
-  type SyncServerBunqAccount,
 } from 'loot-core/types/models';
 
 import {
   linkAccount,
+  linkAccountBunq,
   linkAccountPluggyAi,
   linkAccountSimpleFin,
-  linkAccountBunq,
   unlinkAccount,
 } from '@desktop-client/accounts/accountsSlice';
 import {
