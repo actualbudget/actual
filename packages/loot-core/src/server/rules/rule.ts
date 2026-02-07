@@ -48,6 +48,7 @@ function execSplitActions(actions: Action[], transaction) {
       transaction.amount,
     );
     action.exec(newTransactions[splitTransactionIndex]);
+    delete newTransactions[splitTransactionIndex].parent_amount;
   });
 
   // Distribute to fixed-percent splits.

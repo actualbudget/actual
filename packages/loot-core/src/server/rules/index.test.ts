@@ -876,6 +876,15 @@ describe('Rule', () => {
               value: 0,
               options: { splitIndex: 1, method: 'formula', formula: '=300' },
             },
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: {
+                splitIndex: 2,
+                method: 'remainder',
+              },
+            },
           ],
         });
 
@@ -900,6 +909,15 @@ describe('Rule', () => {
                 splitIndex: 1,
                 method: 'formula',
                 formula: '=parent_amount * 0.5',
+              },
+            },
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: {
+                splitIndex: 2,
+                method: 'remainder',
               },
             },
           ],
