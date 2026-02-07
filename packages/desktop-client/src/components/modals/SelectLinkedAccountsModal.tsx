@@ -18,12 +18,14 @@ import {
   type SyncServerGoCardlessAccount,
   type SyncServerPluggyAiAccount,
   type SyncServerSimpleFinAccount,
+  type SyncServerBunqAccount,
 } from 'loot-core/types/models';
 
 import {
   linkAccount,
   linkAccountPluggyAi,
   linkAccountSimpleFin,
+  linkAccountBunq,
   unlinkAccount,
 } from '@desktop-client/accounts/accountsSlice';
 import {
@@ -97,6 +99,11 @@ export type SelectLinkedAccountsModalProps =
       requisitionId?: undefined;
       externalAccounts: SyncServerPluggyAiAccount[];
       syncSource: 'pluggyai';
+    }
+  | {
+      requisitionId?: undefined;
+      externalAccounts: SyncServerBunqAccount[];
+      syncSource: 'bunq';
     };
 
 export function SelectLinkedAccountsModal({
@@ -122,6 +129,11 @@ export function SelectLinkedAccountsModal({
           return {
             syncSource: 'pluggyai',
             externalAccounts: toSort as SyncServerPluggyAiAccount[],
+          };
+        case 'bunq':
+          return {
+            syncSource: 'bunq',
+            externalAccounts: toSort as SyncServerBunqAccount[],
           };
         case 'goCardless':
           return {
@@ -224,6 +236,23 @@ export function SelectLinkedAccountsModal({
               startingBalance,
             }),
           );
+        } else if (propsWithSortedExternalAccounts.syncSource === 'bunq') {
+          dispatch(
+            linkAccountBunq({
+              externalAccount:
+                propsWithSortedExternalAccounts.externalAccounts[
+                  externalAccountIndex
+                ],
+              upgradingId:
+                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+                chosenLocalAccountId !== addOffBudgetAccountOption.id
+                  ? chosenLocalAccountId
+                  : undefined,
+              offBudget,
+              startingDate,
+              startingBalance,
+            }),
+          );
         } else {
           dispatch(
             linkAccount({
@@ -257,7 +286,8 @@ export function SelectLinkedAccountsModal({
     externalAccount:
       | SyncServerGoCardlessAccount
       | SyncServerSimpleFinAccount
-      | SyncServerPluggyAiAccount,
+      | SyncServerPluggyAiAccount
+      | SyncServerBunqAccount,
     localAccountId: string | null | undefined,
   ) {
     setChosenAccounts(accounts => {
@@ -481,7 +511,8 @@ export function SelectLinkedAccountsModal({
 type ExternalAccount =
   | SyncServerGoCardlessAccount
   | SyncServerSimpleFinAccount
-  | SyncServerPluggyAiAccount;
+  | SyncServerPluggyAiAccount
+  | SyncServerBunqAccount;
 
 type StartingBalanceInfo = {
   date: string;
@@ -719,7 +750,8 @@ function getInstitutionName(
   externalAccount:
     | SyncServerGoCardlessAccount
     | SyncServerSimpleFinAccount
-    | SyncServerPluggyAiAccount,
+    | SyncServerPluggyAiAccount
+    | SyncServerBunqAccount,
 ) {
   if (typeof externalAccount?.institution === 'string') {
     return externalAccount?.institution ?? '';

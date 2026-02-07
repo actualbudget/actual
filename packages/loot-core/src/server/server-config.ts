@@ -8,6 +8,7 @@ type ServerConfig = {
   GOCARDLESS_SERVER: string;
   SIMPLEFIN_SERVER: string;
   PLUGGYAI_SERVER: string;
+  BUNQ_SERVER: string;
 };
 
 let config: ServerConfig | null = null;
@@ -45,6 +46,7 @@ export function getServer(url?: string): ServerConfig | null {
         GOCARDLESS_SERVER: joinURL(url, '/gocardless'),
         SIMPLEFIN_SERVER: joinURL(url, '/simplefin'),
         PLUGGYAI_SERVER: joinURL(url, '/pluggyai'),
+        BUNQ_SERVER: joinURL(url, '/bunq'),
       };
     } catch (error) {
       logger.warn(

@@ -21,6 +21,7 @@ import {
   type SimpleFinBatchSyncResponse,
   type TransactionEntity,
 } from '../../types/models';
+import { type SyncedPrefs } from '../../types/prefs';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
 import { runMutator } from '../mutators';
@@ -39,6 +40,15 @@ import { title } from './title';
 
 function BankSyncError(type: string, code: string, details?: object) {
   return { type: 'BankSyncError', category: type, code, details };
+}
+
+async function upsertPreference(id: string, value: string) {
+  const existing = await db.select('preferences', id);
+  if (existing) {
+    await db.update('preferences', { id, value });
+  } else {
+    await db.insert('preferences', { id, value });
+  }
 }
 
 function makeSplitTransaction(trans, subtransactions) {
@@ -287,6 +297,82 @@ async function downloadPluggyAiTransactions(
   let retVal = {};
   const singleRes = res as BankSyncResponse;
   retVal = {
+    transactions: singleRes.transactions.all,
+    accountBalance: singleRes.balances,
+    startingBalance: singleRes.startingBalance,
+  };
+
+  logger.log('Response:', retVal);
+  return retVal;
+}
+
+async function downloadBunqTransactions(
+  localId: AccountEntity['id'],
+  acctId: AccountEntity['id'],
+  since: string,
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  logger.log('Pulling transactions from bunq');
+
+  const cursorKey = `bunq-sync-cursor-${localId}-${acctId}` satisfies keyof SyncedPrefs;
+  const savedCursor = await aqlQuery(
+    q('preferences').filter({ id: cursorKey }).select('value'),
+  ).then(data => data?.data?.[0]?.value);
+
+  let parsedCursor: { newerId?: string | null } | null = null;
+  if (savedCursor) {
+    try {
+      parsedCursor = JSON.parse(savedCursor);
+    } catch {
+      parsedCursor = null;
+    }
+  }
+
+  logger.log('bunq sync request context', {
+    localAccountId: localId,
+    remoteAccountId: acctId,
+    since,
+    cursorKey,
+    hasSavedCursor: Boolean(savedCursor),
+    parsedCursor,
+  });
+
+  const res = await post(
+    getServer().BUNQ_SERVER + '/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+      cursor: parsedCursor,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+    60000,
+  );
+
+  if (res.error_code) {
+    throw BankSyncError(res.reason || res.error_type, res.error_code);
+  } else if ('error' in res) {
+    throw BankSyncError('Connection', res.error);
+  }
+
+  if (res.cursor) {
+    await upsertPreference(cursorKey, JSON.stringify(res.cursor));
+  }
+
+  logger.log('bunq sync response summary', {
+    localAccountId: localId,
+    remoteAccountId: acctId,
+    downloadedCount: Array.isArray(res?.transactions?.all)
+      ? res.transactions.all.length
+      : null,
+    nextCursor: res?.cursor || null,
+  });
+
+  const singleRes = res as BankSyncResponse;
+  const retVal = {
     transactions: singleRes.transactions.all,
     accountBalance: singleRes.balances,
     startingBalance: singleRes.startingBalance,
@@ -1037,6 +1123,8 @@ export async function syncAccount(
     download = await downloadSimpleFinTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'pluggyai') {
     download = await downloadPluggyAiTransactions(acctId, syncStartDate);
+  } else if (acctRow.account_sync_source === 'bunq') {
+    download = await downloadBunqTransactions(id, acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'goCardless') {
     download = await downloadGoCardlessTransactions(
       userId,

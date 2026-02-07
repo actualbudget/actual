@@ -1,6 +1,7 @@
 export type * from './account';
 export type * from './bank';
 export type * from './bank-sync';
+export type * from './bunq';
 export type * from './category';
 export type * from './category-group';
 export type * from './dashboard';

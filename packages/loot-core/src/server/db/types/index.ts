@@ -21,7 +21,7 @@ export type DbAccount = {
   type?: string | null;
   subtype?: string | null;
   bank?: string | null;
-  account_sync_source?: 'simpleFin' | 'goCardless' | null;
+  account_sync_source?: 'simpleFin' | 'goCardless' | 'pluggyai' | 'bunq' | null;
 };
 
 export type DbBank = {

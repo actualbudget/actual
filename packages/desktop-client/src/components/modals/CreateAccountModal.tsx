@@ -28,6 +28,7 @@ import { authorizeBank } from '@desktop-client/gocardless';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
+import { useBunqStatus } from '@desktop-client/hooks/useBunqStatus';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 import {
   pushModal,
@@ -55,6 +56,9 @@ export function CreateAccountModal({
     boolean | null
   >(null);
   const [isPluggyAiSetupComplete, setIsPluggyAiSetupComplete] = useState<
+    boolean | null
+  >(null);
+  const [isBunqSetupComplete, setIsBunqSetupComplete] = useState<
     boolean | null
   >(null);
   const { hasPermission } = useAuth();
@@ -219,6 +223,44 @@ export function CreateAccountModal({
     }
   };
 
+  const onConnectBunq = async () => {
+    if (!isBunqSetupComplete) {
+      onBunqInit();
+      return;
+    }
+
+    try {
+      const results = await send('bunq-accounts');
+      if (results.error_code) {
+        throw new Error(results.reason);
+      }
+
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'select-linked-accounts',
+            options: {
+              externalAccounts: results.accounts ?? [],
+              syncSource: 'bunq',
+            },
+          },
+        }),
+      );
+    } catch (err) {
+      console.error(err);
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'bunq-init',
+            options: {
+              onSuccess: () => setIsBunqSetupComplete(true),
+            },
+          },
+        }),
+      );
+    }
+  };
+
   const onGoCardlessInit = () => {
     dispatch(
       pushModal({
@@ -252,6 +294,19 @@ export function CreateAccountModal({
           name: 'pluggyai-init',
           options: {
             onSuccess: () => setIsPluggyAiSetupComplete(true),
+          },
+        },
+      }),
+    );
+  };
+
+  const onBunqInit = () => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'bunq-init',
+          options: {
+            onSuccess: () => setIsBunqSetupComplete(true),
           },
         },
       }),
@@ -305,6 +360,45 @@ export function CreateAccountModal({
     });
   };
 
+  const onBunqReset = () => {
+    send('secret-set', {
+      name: 'bunq_apiKey',
+      value: null,
+    }).then(() => {
+      send('secret-set', {
+        name: 'bunq_clientPrivateKey',
+        value: null,
+      }).then(() => {
+        send('secret-set', {
+          name: 'bunq_clientPublicKey',
+          value: null,
+        }).then(() => {
+          send('secret-set', {
+            name: 'bunq_installationToken',
+            value: null,
+          }).then(() => {
+            send('secret-set', {
+              name: 'bunq_serverPublicKey',
+              value: null,
+            }).then(() => {
+              send('secret-set', {
+                name: 'bunq_sessionToken',
+                value: null,
+              }).then(() => {
+                send('secret-set', {
+                  name: 'bunq_userId',
+                  value: null,
+                }).then(() => {
+                  setIsBunqSetupComplete(false);
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  };
+
   const onCreateLocalAccount = () => {
     dispatch(pushModal({ modal: { name: 'add-local-account' } }));
   };
@@ -323,6 +417,11 @@ export function CreateAccountModal({
   useEffect(() => {
     setIsPluggyAiSetupComplete(configuredPluggyAi);
   }, [configuredPluggyAi]);
+
+  const { configuredBunq } = useBunqStatus();
+  useEffect(() => {
+    setIsBunqSetupComplete(configuredBunq);
+  }, [configuredBunq]);
 
   let title = t('Add account');
   const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
@@ -576,12 +675,72 @@ export function CreateAccountModal({
                           hundreds of banks.
                         </Trans>
                       </Text>
+
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          gap: 10,
+                          marginTop: '18px',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <ButtonWithLoading
+                          isDisabled={syncServerStatus !== 'online'}
+                          style={{
+                            padding: '10px 0',
+                            fontSize: 15,
+                            fontWeight: 600,
+                            flex: 1,
+                          }}
+                          onPress={onConnectBunq}
+                        >
+                          {isBunqSetupComplete
+                            ? t('Link bank account with bunq')
+                            : t('Set up bunq for bank sync')}
+                        </ButtonWithLoading>
+                        {isBunqSetupComplete && (
+                          <DialogTrigger>
+                            <Button variant="bare" aria-label={t('bunq menu')}>
+                              <SvgDotsHorizontalTriple
+                                width={15}
+                                height={15}
+                                style={{ transform: 'rotateZ(90deg)' }}
+                              />
+                            </Button>
+
+                            <Popover>
+                              <Dialog>
+                                <Menu
+                                  onMenuSelect={item => {
+                                    if (item === 'reconfigure') {
+                                      onBunqReset();
+                                    }
+                                  }}
+                                  items={[
+                                    {
+                                      name: 'reconfigure',
+                                      text: t('Reset bunq credentials'),
+                                    },
+                                  ]}
+                                />
+                              </Dialog>
+                            </Popover>
+                          </DialogTrigger>
+                        )}
+                      </View>
+                      <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                        <Trans>
+                          <strong>Link a bunq account</strong> to automatically
+                          download transactions.
+                        </Trans>
+                      </Text>
                     </>
                   )}
 
                   {(!isGoCardlessSetupComplete ||
                     !isSimpleFinSetupComplete ||
-                    !isPluggyAiSetupComplete) &&
+                    !isPluggyAiSetupComplete ||
+                    !isBunqSetupComplete) &&
                     !canSetSecrets && (
                       <Warning>
                         <Trans>
@@ -592,6 +751,7 @@ export function CreateAccountModal({
                           isGoCardlessSetupComplete ? '' : 'GoCardless',
                           isSimpleFinSetupComplete ? '' : 'SimpleFIN',
                           isPluggyAiSetupComplete ? '' : 'Pluggy.ai',
+                          isBunqSetupComplete ? '' : 'bunq',
                         ]
                           .filter(Boolean)
                           .join(' or ')}

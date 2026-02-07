@@ -10,6 +10,7 @@ import {
   type SyncServerGoCardlessAccount,
   type SyncServerPluggyAiAccount,
   type SyncServerSimpleFinAccount,
+  type SyncServerBunqAccount,
   type TransactionEntity,
 } from 'loot-core/types/models';
 
@@ -329,6 +330,34 @@ export const linkAccountPluggyAi = createAppAsyncThunk(
     { dispatch },
   ) => {
     await send('pluggyai-accounts-link', {
+      externalAccount,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    });
+    dispatch(markPayeesDirty());
+    dispatch(markAccountsDirty());
+  },
+);
+
+type LinkAccountBunqPayload = LinkAccountBasePayload & {
+  externalAccount: SyncServerBunqAccount;
+};
+
+export const linkAccountBunq = createAppAsyncThunk(
+  `${sliceName}/linkAccountBunq`,
+  async (
+    {
+      externalAccount,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountBunqPayload,
+    { dispatch },
+  ) => {
+    await send('bunq-accounts-link', {
       externalAccount,
       upgradingId,
       offBudget,

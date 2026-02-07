@@ -15,6 +15,14 @@ export const SecretName = {
   pluggyai_clientId: 'pluggyai_clientId',
   pluggyai_clientSecret: 'pluggyai_clientSecret',
   pluggyai_itemIds: 'pluggyai_itemIds',
+  bunq_apiKey: 'bunq_apiKey',
+  bunq_environment: 'bunq_environment',
+  bunq_clientPrivateKey: 'bunq_clientPrivateKey',
+  bunq_clientPublicKey: 'bunq_clientPublicKey',
+  bunq_installationToken: 'bunq_installationToken',
+  bunq_serverPublicKey: 'bunq_serverPublicKey',
+  bunq_sessionToken: 'bunq_sessionToken',
+  bunq_userId: 'bunq_userId',
 };
 
 class SecretsDb {
