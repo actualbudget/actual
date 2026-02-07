@@ -325,7 +325,9 @@ export const enableBankingservice = {
       );
       isDefined(balance);
       if (!balance.balances.length) {
-        throw new Error(`No balance data for account ${account_id}`);
+        throw new ResourceNotFoundError(
+          `No balance data for account ${account_id}`,
+        );
       }
       const name = account.account_id
         ? (account.account_id.iban ?? 'unknown')
