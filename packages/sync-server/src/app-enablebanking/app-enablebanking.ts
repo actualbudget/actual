@@ -22,6 +22,16 @@ export { app as handlers };
 
 app.use(express.json());
 
+// Utility function to escape HTML to prevent XSS attacks
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // Public callback endpoint (no session validation required)
 // Enable Banking redirects here after user authentication
 app.get('/auth_callback', (req, res) => {
@@ -61,7 +71,7 @@ app.get('/auth_callback', (req, res) => {
         <head><title>Authentication Failed</title></head>
         <body>
           <h1>Authentication Failed</h1>
-          <p>${errorMsg}</p>
+          <p>${escapeHtml(errorMsg)}</p>
           <p>You can close this window and try again.</p>
           <script>
             setTimeout(() => window.close(), 5000);
