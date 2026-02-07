@@ -38,6 +38,13 @@ function post<T extends keyof EnableBankingEndpoints>(
 post('/configure', async req => {
   const { applicationId, secret } = req.body;
 
+  if (!applicationId) {
+    throw badRequestVariableError('applicationId', '/enablebanking/configure');
+  }
+  if (!secret) {
+    throw badRequestVariableError('secret', '/enablebanking/configure');
+  }
+
   await enableBankingservice.setupSecrets(applicationId, secret);
   return;
 });
