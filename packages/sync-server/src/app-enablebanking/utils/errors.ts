@@ -181,9 +181,7 @@ export async function handleEnableBankingError(response: globalThis.Response) {
 }
 
 export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
-  func: (
-    req: Request,
-  ) => Promise<EnableBankingEndpoints[T]['response']> | never,
+  func: (req: Request) => Promise<EnableBankingEndpoints[T]['response']>,
 ) {
   return (
     req: Request,
@@ -206,9 +204,13 @@ export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
             'Error:',
             inspect(err, { depth: null }),
           );
+          const safeMessage =
+            typeof err === 'object' && err !== null && 'message' in err
+              ? (err as Error).message
+              : String(err);
           err = new EnableBankingError(
             'INTERNAL_ERROR',
-            err.message ??
+            safeMessage ??
               'Something went wrong while using the Enable Banking API.',
           );
         } else if (

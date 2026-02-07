@@ -41,9 +41,14 @@ async function post(path: keyof EBE, body?: unknown) {
     throw new Error('Failed to get server config.');
   }
 
-  return await _post(serverConfig.ENABLEBANKING_SERVER + path, body, {
-    'X-ACTUAL-TOKEN': userToken,
-  });
+  return await _post(
+    serverConfig.ENABLEBANKING_SERVER + path,
+    body,
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+    60_000,
+  );
 }
 
 async function configure({

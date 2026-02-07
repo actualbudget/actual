@@ -99,6 +99,7 @@ export type Transaction = {
 
 export type TransactionsResponse = {
   transactions: Transaction[];
+  startingBalance: number;
 };
 
 export type Account = {
