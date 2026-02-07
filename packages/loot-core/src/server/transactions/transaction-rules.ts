@@ -1037,5 +1037,17 @@ export async function finalizeTransactionForRules(
     delete trans.parent_amount;
   }
 
+  if (trans.subtransactions?.length) {
+    trans.subtransactions.forEach(stx => {
+      if ('balance' in stx) {
+        delete stx.balance;
+      }
+
+      if ('parent_amount' in stx) {
+        delete stx.parent_amount;
+      }
+    });
+  }
+
   return trans;
 }
