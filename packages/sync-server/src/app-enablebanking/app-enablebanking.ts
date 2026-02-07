@@ -200,13 +200,15 @@ post('/transactions', async (req: Request) => {
   const currentBalance =
     await enableBankingservice.getCurrentBalance(account_id);
 
-  const startingBalance = transactions.reduce(
-    (acc, t) => acc - t.amount,
-    currentBalance,
+  // Convert to integer cents before arithmetic to avoid floating-point errors
+  const currentBalanceCents = Math.round(currentBalance * 100);
+  const startingBalanceCents = transactions.reduce(
+    (acc, t) => acc - Math.round(t.amount * 100),
+    currentBalanceCents,
   );
 
   return {
     transactions,
-    startingBalance: Math.round(startingBalance * 100), // We are sending cents because that is how it is stored in the DB.
+    startingBalance: startingBalanceCents, // Already in cents (integer)
   };
 });
