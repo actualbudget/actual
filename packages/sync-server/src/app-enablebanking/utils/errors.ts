@@ -146,7 +146,24 @@ export async function handleEnableBankingError(response: globalThis.Response) {
     `Enable Banking API error response: HTTP ${response.status} ${response.statusText}`,
   );
 
-  const body = await response.json();
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch {
+    // Non-JSON response (e.g., HTML 502 from a proxy) - preserve HTTP context
+    let rawText: string;
+    try {
+      rawText = await response.text();
+    } catch {
+      rawText = '(unable to read response body)';
+    }
+    console.error('Enable Banking API returned non-JSON response:', rawText);
+    throw new EnableBankingError(
+      'INTERNAL_ERROR',
+      `Enable Banking API returned HTTP ${response.status} with non-JSON body.`,
+    );
+  }
+
   if (!isErrorResponse(body)) {
     console.error('Unexpected error response format:', body);
     throw new EnableBankingError(
