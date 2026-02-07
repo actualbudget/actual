@@ -34,7 +34,7 @@ function escapeHtml(unsafe: string): string {
 
 // Public callback endpoint (no session validation required)
 // Enable Banking redirects here after user authentication
-app.get('/auth_callback', (req, res) => {
+app.get('/auth_callback', async (req, res) => {
   const { state, code, error, error_description } = req.query;
 
   if (!state || typeof state !== 'string') {
@@ -100,44 +100,42 @@ app.get('/auth_callback', (req, res) => {
     return;
   }
 
-  // Process the authorization
-  enableBankingservice
-    .authorizeSession(state, code)
-    .then(() => {
-      res.send(`
-        <!DOCTYPE html>
-        <html>
-          <head><title>Authentication Successful</title></head>
-          <body>
-            <h1>Authentication Successful</h1>
-            <p>You can now close this window and return to Actual Budget.</p>
-            <script>
-              setTimeout(() => window.close(), 2000);
-            </script>
-          </body>
-        </html>
-      `);
-    })
-    .catch(err => {
-      console.error('Error in auth_callback:', err);
-      enableBankingservice.failSession(
-        state,
-        err instanceof Error ? err.message : 'authorization_failed',
-      );
-      res.status(500).send(`
-        <!DOCTYPE html>
-        <html>
-          <head><title>Authentication Error</title></head>
-          <body>
-            <h1>Authentication Error</h1>
-            <p>Failed to complete authorization. Please try again.</p>
-            <script>
-              setTimeout(() => window.close(), 5000);
-            </script>
-          </body>
-        </html>
-      `);
-    });
+  // Process the authorization (await to prevent race condition)
+  try {
+    await enableBankingservice.authorizeSession(state, code);
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Authentication Successful</title></head>
+        <body>
+          <h1>Authentication Successful</h1>
+          <p>You can now close this window and return to Actual Budget.</p>
+          <script>
+            setTimeout(() => window.close(), 2000);
+          </script>
+        </body>
+      </html>
+    `);
+  } catch (err) {
+    console.error('Error in auth_callback:', err);
+    enableBankingservice.failSession(
+      state,
+      err instanceof Error ? err.message : 'authorization_failed',
+    );
+    res.status(500).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Authentication Error</title></head>
+        <body>
+          <h1>Authentication Error</h1>
+          <p>Failed to complete authorization. Please try again.</p>
+          <script>
+            setTimeout(() => window.close(), 5000);
+          </script>
+        </body>
+      </html>
+    `);
+  }
 });
 
 // Apply session validation middleware to all routes below this point

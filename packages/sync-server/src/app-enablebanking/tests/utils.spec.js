@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 describe('Enable Banking Utils', () => {
   describe('Bank ID Parsing', () => {
@@ -20,7 +20,7 @@ describe('Enable Banking Utils', () => {
       expect(result2.aspsp).toBe('BANK_OF_AMERICA');
     });
 
-    it('should handle malformed bank_id safely',  () => {
+    it('should handle malformed bank_id safely', () => {
       const parseBankIdSafe = bank_id => {
         const match = bank_id.match(/^([A-Z]{2})_(.+)$/);
         if (!match) {
@@ -63,7 +63,7 @@ describe('Enable Banking Utils', () => {
 
   describe('Floating Point Arithmetic', () => {
     it('should convert to integer cents before arithmetic', () => {
-      const amount = 100.50;
+      const amount = 100.5;
       const currentBalance = 1000.75;
 
       // Convert to cents first

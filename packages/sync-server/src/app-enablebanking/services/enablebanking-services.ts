@@ -1,4 +1,5 @@
 import createClient from 'openapi-fetch';
+import pLimit from 'p-limit';
 
 import { SecretName, secretsService } from '../../services/secrets-service.js';
 import { getLoadedRegistry } from '../banks/bank-registry.js';
@@ -23,6 +24,9 @@ import {
   SecretsInvalidError,
 } from '../utils/errors.js';
 import { getJWT } from '../utils/jwt.js';
+
+// Rate limiter: max 5 concurrent API requests to prevent API throttling
+const apiLimiter = pLimit(5);
 
 function isDefined<T>(value: T | undefined): asserts value is T {
   if (value === undefined) {
@@ -211,27 +215,31 @@ export const enableBankingservice = {
   },
 
   getApplication: async (jwt?: string) => {
-    const { data } = await enableBankingservice
-      .getClient(jwt)
-      .GET('/application');
-    isDefined(data);
-    if (!data.active) {
-      throw new ApplicationInactiveError();
-    }
-    return data;
+    return await apiLimiter(async () => {
+      const { data } = await enableBankingservice
+        .getClient(jwt)
+        .GET('/application');
+      isDefined(data);
+      if (!data.active) {
+        throw new ApplicationInactiveError();
+      }
+      return data;
+    });
   },
 
   getASPSPs: async (country?: string) => {
-    const { data } = await enableBankingservice.getClient().GET('/aspsps', {
-      params: {
-        query: {
-          service: 'AIS',
-          country,
+    return await apiLimiter(async () => {
+      const { data } = await enableBankingservice.getClient().GET('/aspsps', {
+        params: {
+          query: {
+            service: 'AIS',
+            country,
+          },
         },
-      },
+      });
+      isDefined(data);
+      return data;
     });
-    isDefined(data);
-    return data;
   },
 
   getASPSP: async (country: string, name: string) => {

@@ -87,20 +87,26 @@ async function startAuth({
   return await post('/start_auth', { country, aspsp });
 }
 
-// AbortController for cancelling polling - one per active poll session
-let currentPollController: AbortController | null = null;
+// Track multiple concurrent polling sessions by state
+const activePollControllers = new Map<string, AbortController>();
 
 async function pollAuth({
   state,
 }: {
   state: string;
 }): Promise<EnableBankingResponse<'/get_session'>> {
+  // Cancel any existing poll for this specific state
+  const existing = activePollControllers.get(state);
+  if (existing) {
+    existing.abort();
+  }
+
   // Create a new controller for this poll session
   const controller = new AbortController();
-  currentPollController = controller;
+  activePollControllers.set(state, controller);
 
   const startTime = Date.now();
-  logger.debug('starting poll');
+  logger.debug('starting poll', { state });
 
   try {
     while (!controller.signal.aborted) {
@@ -130,17 +136,17 @@ async function pollAuth({
       },
     };
   } finally {
-    // Clear the controller if this was the current poll
-    if (currentPollController === controller) {
-      currentPollController = null;
-    }
+    // Clean up this controller
+    activePollControllers.delete(state);
   }
 }
 
 async function stopAuthPoll() {
-  if (currentPollController) {
-    currentPollController.abort();
+  // Stop all active polls
+  for (const controller of activePollControllers.values()) {
+    controller.abort();
   }
+  activePollControllers.clear();
 }
 
 async function completeAuth({ state, code }: { state: string; code: string }) {
