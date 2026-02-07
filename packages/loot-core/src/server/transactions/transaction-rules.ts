@@ -1033,5 +1033,9 @@ export async function finalizeTransactionForRules(
     delete trans.balance;
   }
 
+  if ('parent_amount' in trans) {
+    delete trans.parent_amount;
+  }
+
   return trans;
 }

@@ -6,7 +6,6 @@ import {
   splitTransaction,
   ungroupTransaction,
 } from '../../shared/transactions';
-import { integerToAmount } from '../../shared/util';
 import { type RuleEntity } from '../../types/models';
 import { type TransactionForRules } from '../transactions/transaction-rules';
 
@@ -44,11 +43,9 @@ function execSplitActions(actions: Action[], transaction) {
       const { data } = addSplitTransaction(newTransactions, transaction.id);
       newTransactions = data;
     }
-    newTransactions[splitTransactionIndex].parent_amount = integerToAmount(
-      transaction.amount,
-    );
+    newTransactions[splitTransactionIndex].parent_amount = transaction.amount;
+    newTransactions[splitTransactionIndex].balance = transaction.balance;
     action.exec(newTransactions[splitTransactionIndex]);
-    delete newTransactions[splitTransactionIndex].parent_amount;
   });
 
   // Distribute to fixed-percent splits.
