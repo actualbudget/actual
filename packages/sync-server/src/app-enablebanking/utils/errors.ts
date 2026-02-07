@@ -198,8 +198,10 @@ export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
       .catch(err => {
         if (!(err instanceof EnableBankingError)) {
           console.error(
-            'Error in Enable Banking:',
+            'Error in Enable Banking endpoint:',
+            'URL:',
             req.originalUrl,
+            'Error:',
             inspect(err, { depth: null }),
           );
           err = new EnableBankingError(
@@ -214,7 +216,9 @@ export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
           // Log non-trivial errors for debugging
           console.warn(
             'Enable Banking error:',
+            'URL:',
             req.originalUrl,
+            'Error:',
             `[${err.error_code}] ${err.message}`,
           );
         }
