@@ -1,10 +1,12 @@
 // @ts-strict-ignore
+import { type QueryClient } from '@tanstack/react-query';
+
 import { listen } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 
 import { reloadAccounts } from './accounts/accountsSlice';
 import { setAppState } from './app/appSlice';
-import { reloadCategories } from './budget/budgetSlice';
+import { categoryQueries } from './budget';
 import { closeBudgetUI } from './budgetfiles/budgetfilesSlice';
 import { closeModal, pushModal, replaceModal } from './modals/modalsSlice';
 import {
@@ -16,7 +18,7 @@ import { loadPrefs } from './prefs/prefsSlice';
 import { type AppStore } from './redux/store';
 import * as syncEvents from './sync-events';
 
-export function handleGlobalEvents(store: AppStore) {
+export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
   const unlistenServerError = listen('server-error', () => {
     store.dispatch(addGenericErrorNotification());
   });
@@ -45,7 +47,7 @@ export function handleGlobalEvents(store: AppStore) {
     );
   });
 
-  const unlistenSync = syncEvents.listenForSyncEvent(store);
+  const unlistenSync = syncEvents.listenForSyncEvent(store, queryClient);
 
   const unlistenUndo = listen('undo-event', undoState => {
     const { tables, undoTag } = undoState;
@@ -56,7 +58,11 @@ export function handleGlobalEvents(store: AppStore) {
       tables.includes('category_groups') ||
       tables.includes('category_mapping')
     ) {
-      promises.push(store.dispatch(reloadCategories()));
+      promises.push(
+        queryClient.invalidateQueries({
+          queryKey: categoryQueries.lists(),
+        }),
+      );
     }
 
     if (
