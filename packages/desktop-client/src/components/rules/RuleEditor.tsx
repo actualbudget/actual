@@ -458,8 +458,8 @@ function getSplitActionFields() {
     ([field]) => !parentOnlyFields.includes(field),
   );
 }
-function getAllocationMethodOptions() {
-  return Object.entries(getAllocationMethods());
+function getAllocationMethodOptions(isFormulaEnabled = false) {
+  return Object.entries(getAllocationMethods(isFormulaEnabled));
 }
 
 type ActionEditorProps = {
@@ -622,7 +622,7 @@ function ActionEditor({
           </View>
 
           <SplitAmountMethodSelect
-            options={getAllocationMethodOptions()}
+            options={getAllocationMethodOptions(isFormulaEnabled)}
             value={options.method}
             onChange={onChange}
           />
