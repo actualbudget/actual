@@ -148,6 +148,8 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     setReimportDeleted,
     importTransactions,
     setImportTransactions,
+    updateDates,
+    setUpdateDates,
     mappings,
     setMapping,
     fields,
@@ -222,6 +224,8 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             setReimportDeleted={setReimportDeleted}
             importTransactions={importTransactions}
             setImportTransactions={setImportTransactions}
+            updateDates={updateDates}
+            setUpdateDates={setUpdateDates}
             helpMode="desktop"
           />
 
