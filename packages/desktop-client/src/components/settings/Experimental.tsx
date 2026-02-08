@@ -214,7 +214,10 @@ export function ExperimentalFeatures() {
             >
               <Trans>Budget Analysis Report</Trans>
             </FeatureToggle>
-            <FeatureToggle flag="budgetedAmountsInReport">
+            <FeatureToggle
+              flag="budgetedAmountsInReport"
+              feedbackLink="https://github.com/actualbudget/actual/pull/6903"
+            >
               <Trans>Budgeted amounts in custom reports</Trans>
             </FeatureToggle>
             {showServerPrefs && (
