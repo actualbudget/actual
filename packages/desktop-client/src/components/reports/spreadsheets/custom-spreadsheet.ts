@@ -256,6 +256,8 @@ export function createCustomSpreadsheet({
           totalDebts: perIntervalDebts,
           netAssets: perIntervalNetAssets,
           netDebts: perIntervalNetDebts,
+          // `totalBudgeted` intentionally mirrors `totalTotals`; the difference is
+          // the underlying dataset when `balanceTypeOp === 'totalBudgeted'`.
           totalTotals: perIntervalTotals,
           totalBudgeted: perIntervalTotals,
         });
@@ -326,6 +328,8 @@ export function createCustomSpreadsheet({
       totalDebts,
       netAssets,
       netDebts,
+      // `totalBudgeted` intentionally mirrors `totalTotals`; the difference is
+      // the underlying dataset when `balanceTypeOp === 'totalBudgeted'`.
       totalTotals: totalAssets + totalDebts,
       totalBudgeted: totalAssets + totalDebts,
     });

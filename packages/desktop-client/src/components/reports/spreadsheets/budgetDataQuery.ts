@@ -6,6 +6,8 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
+import { type BudgetMonthCell } from './budgetMonthCell';
+
 import { type QueryDataEntity } from '@desktop-client/components/reports/ReportOptions';
 
 type BudgetDataConditionsOp = 'and' | 'or';
@@ -162,7 +164,7 @@ export async function fetchBudgetData({
         continue;
       }
 
-      const budgetCell = monthData.find((cell: { name: string }) =>
+      const budgetCell = monthData.find((cell: BudgetMonthCell) =>
         cell.name.endsWith(`budget-${cat.id}`),
       );
 
