@@ -191,6 +191,7 @@ export function ReportSidebar({
       ) {
         setSessionReport('groupBy', 'Category');
         setGroupBy('Category');
+        defaultItems('Category');
       }
       // Budgeted only supports Monthly and Yearly intervals
       if (

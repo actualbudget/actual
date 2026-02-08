@@ -123,7 +123,9 @@ function useSelectedCategories(
 export function CustomReport() {
   const params = useParams();
   const { data: report, isLoading } = useCustomReport(params.id ?? '');
-  const showBudgetedType = useFeatureFlag('budgetedAmountsInReport');
+  const showBudgetedTypeFlag = useFeatureFlag('budgetedAmountsInReport');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+  const showBudgetedType = showBudgetedTypeFlag && budgetType !== 'tracking';
 
   if (isLoading) {
     return <LoadingIndicator />;
@@ -186,7 +188,27 @@ function CustomReportInner({
     ? JSON.parse(reportFromSessionStorage)
     : {};
   const combine = initialReport ?? defaultReport;
-  const loadReport: CustomReportEntity = { ...combine, ...session };
+
+  const validateReportBalanceType = (
+    balanceType: CustomReportEntity['balanceType'],
+  ): CustomReportEntity['balanceType'] => {
+    if (!showBudgetedType && balanceType === 'Budgeted') {
+      return 'Payment';
+    }
+    return balanceType;
+  };
+
+  const validateReport = (input: CustomReportEntity): CustomReportEntity => {
+    const validatedBalanceType = validateReportBalanceType(input.balanceType);
+    return validatedBalanceType === input.balanceType
+      ? input
+      : { ...input, balanceType: validatedBalanceType };
+  };
+
+  const loadReport: CustomReportEntity = validateReport({
+    ...combine,
+    ...session,
+  });
 
   const [allIntervals, setAllIntervals] = useState<
     Array<{
@@ -262,6 +284,13 @@ function CustomReportInner({
   const [interval, setInterval] = useState(loadReport.interval);
   const [balanceType, setBalanceType] = useState(loadReport.balanceType);
   const [sortBy, setSortBy] = useState(loadReport.sortBy);
+
+  useEffect(() => {
+    if (!showBudgetedType && balanceType === 'Budgeted') {
+      setSessionReport('balanceType', 'Payment');
+      setBalanceType('Payment');
+    }
+  }, [showBudgetedType, balanceType]);
 
   const [showEmpty, setShowEmpty] = useState(loadReport.showEmpty);
   const [showOffBudget, setShowOffBudget] = useState(loadReport.showOffBudget);
@@ -569,7 +598,7 @@ function CustomReportInner({
   const groupedData = useReport('grouped', getGroupData);
 
   const data: DataEntity | null = graphData
-    ? ({ ...graphData, groupedData } as DataEntity)
+    ? { ...graphData, groupedData }
     : null;
 
   const customReportItems: CustomReportEntity = {
@@ -608,7 +637,7 @@ function CustomReportInner({
     }
   }, [setViewLegendPref, setViewLabelsPref, mode, graphType]);
 
-  if (!allIntervals) {
+  if (allIntervals.length === 0) {
     return null;
   }
 
@@ -721,25 +750,29 @@ function CustomReportInner({
   };
 
   const setReportData = (input: CustomReportEntity) => {
-    setStartDate(input.startDate);
-    setEndDate(input.endDate);
-    setIsDateStatic(input.isDateStatic);
-    setDateRange(input.dateRange);
-    setMode(input.mode);
-    setGroupBy(input.groupBy);
-    setInterval(input.interval);
-    setBalanceType(input.balanceType);
-    setSortBy(input.sortBy);
-    setShowEmpty(input.showEmpty);
-    setShowOffBudget(input.showOffBudget);
-    setShowHiddenCategories(input.showHiddenCategories);
-    setIncludeCurrentInterval(input.includeCurrentInterval);
-    setShowUncategorized(input.showUncategorized);
-    setTrimIntervals(input.trimIntervals);
-    setGraphType(input.graphType);
+    const validatedInput = validateReport(input);
+
+    setStartDate(validatedInput.startDate);
+    setEndDate(validatedInput.endDate);
+    setIsDateStatic(validatedInput.isDateStatic);
+    setDateRange(validatedInput.dateRange);
+    setMode(validatedInput.mode);
+    setGroupBy(validatedInput.groupBy);
+    setInterval(validatedInput.interval);
+    setBalanceType(validatedInput.balanceType);
+    setSortBy(validatedInput.sortBy);
+    setShowEmpty(validatedInput.showEmpty);
+    setShowOffBudget(validatedInput.showOffBudget);
+    setShowHiddenCategories(validatedInput.showHiddenCategories);
+    setIncludeCurrentInterval(validatedInput.includeCurrentInterval);
+    setShowUncategorized(validatedInput.showUncategorized);
+    setTrimIntervals(validatedInput.trimIntervals);
+    setGraphType(validatedInput.graphType);
     onApplyFilter(null);
-    (input.conditions || []).forEach(condition => onApplyFilter(condition));
-    onConditionsOpChange(input.conditionsOp);
+    (validatedInput.conditions || []).forEach(condition =>
+      onApplyFilter(condition),
+    );
+    onConditionsOpChange(validatedInput.conditionsOp);
   };
 
   const onReportChange = (
@@ -771,7 +804,7 @@ function CustomReportInner({
         sessionStorage.clear();
         setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
-        setReport(params.savedReport);
+        setReport(validateReport(params.savedReport));
 
         if (params.savedReport.id !== initialReport?.id) {
           navigate(`/reports/custom/${params.savedReport.id}`);
@@ -800,7 +833,7 @@ function CustomReportInner({
         break;
       case 'choose':
         sessionStorage.clear();
-        const newReport = params.savedReport || report;
+        const newReport = validateReport(params.savedReport || report);
         setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReport(newReport);
