@@ -413,8 +413,8 @@ function DateSelectDesktop({
             // Otherwise the input is reset to whatever is already
             // selected
             if (value === '') {
-              setSelectedValue(null);
-              onSelect(null);
+              setSelectedValue('');
+              onSelect('');
             } else {
               setValue(selectedValue || '');
 
