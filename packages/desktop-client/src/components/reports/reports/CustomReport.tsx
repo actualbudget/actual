@@ -64,6 +64,7 @@ import {
 } from '@desktop-client/components/reports/util';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
@@ -122,19 +123,30 @@ function useSelectedCategories(
 export function CustomReport() {
   const params = useParams();
   const { data: report, isLoading } = useCustomReport(params.id ?? '');
+  const showBudgetedType = useFeatureFlag('budgetedAmountsInReport');
 
   if (isLoading) {
     return <LoadingIndicator />;
   }
 
-  return <CustomReportInner key={report?.id} report={report} />;
+  return (
+    <CustomReportInner
+      key={report?.id}
+      report={report}
+      showBudgetedType={showBudgetedType}
+    />
+  );
 }
 
 type CustomReportInnerProps = {
   report?: CustomReportEntity;
+  showBudgetedType: boolean;
 };
 
-function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
+function CustomReportInner({
+  report: initialReport,
+  showBudgetedType,
+}: CustomReportInnerProps) {
   const locale = useLocale();
   const { t } = useTranslation();
   const format = useFormat();
@@ -266,7 +278,6 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const [graphType, setGraphType] = useState(loadReport.graphType);
 
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
-  const [dataCheck, setDataCheck] = useState(false);
   const dateRangeLine =
     interval === 'Daily'
       ? 0
@@ -514,8 +525,6 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   ]);
 
   const getGraphData = useMemo(() => {
-    // TODO: fix me - state mutations should not happen inside `useMemo`
-    setDataCheck(false);
     return createCustomSpreadsheet({
       startDate,
       endDate,
@@ -535,7 +544,6 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       accounts,
       graphType,
       firstDayOfWeekIdx,
-      setDataCheck,
     });
   }, [
     startDate,
@@ -560,7 +568,9 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
 
-  const data: DataEntity = { ...graphData, groupedData } as DataEntity;
+  const data: DataEntity | null = graphData
+    ? ({ ...graphData, groupedData } as DataEntity)
+    : null;
 
   const customReportItems: CustomReportEntity = {
     id: '',
@@ -598,7 +608,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     }
   }, [setViewLegendPref, setViewLabelsPref, mode, graphType]);
 
-  if (!allIntervals || !data) {
+  if (!allIntervals) {
     return null;
   }
 
@@ -877,6 +887,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
             latestTransaction={latestTransactionDate}
             firstDayOfWeekIdx={firstDayOfWeekIdx}
             isComplexCategoryCondition={isComplexCategoryCondition}
+            showBudgetedType={showBudgetedType}
           />
         )}
         <View
@@ -967,7 +978,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
                 padding: 10,
               }}
             >
-              {graphType !== 'TableGraph' && (
+              {graphType !== 'TableGraph' && data && (
                 <View
                   style={{
                     alignItems: 'flex-end',
@@ -995,7 +1006,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
                 </View>
               )}
               <View style={{ flex: 1, overflow: 'auto' }}>
-                {dataCheck ? (
+                {data ? (
                   <ChooseGraph
                     data={data}
                     filters={conditions}

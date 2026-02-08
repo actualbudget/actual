@@ -16,6 +16,7 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
+import { fetchBudgetData } from './budgetDataQuery';
 import { calculateLegend } from './calculateLegend';
 import { filterEmptyRows } from './filterEmptyRows';
 import { filterHiddenItems } from './filterHiddenItems';
@@ -93,6 +94,20 @@ export function createCustomSpreadsheet({
     setData: (data: DataEntity) => void,
   ) => {
     if (groupByList.length === 0) {
+      setData({
+        data: [],
+        intervalData: [],
+        legend: [],
+        startDate,
+        endDate,
+        totalAssets: 0,
+        totalDebts: 0,
+        netAssets: 0,
+        netDebts: 0,
+        totalTotals: 0,
+        totalBudgeted: 0,
+      });
+      setDataCheck?.(true);
       return;
     }
 
@@ -103,30 +118,41 @@ export function createCustomSpreadsheet({
 
     let assets: QueryDataEntity[];
     let debts: QueryDataEntity[];
-    [assets, debts] = await Promise.all([
-      aqlQuery(
-        makeQuery(
-          'assets',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-      aqlQuery(
-        makeQuery(
-          'debts',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-    ]);
 
-    if (interval === 'Weekly') {
+    if (balanceTypeOp === 'totalBudgeted') {
+      ({ assets, debts } = await fetchBudgetData({
+        startDate,
+        endDate,
+        interval,
+        categories: categories.list,
+        categoryGroups: categories.grouped,
+      }));
+    } else {
+      [assets, debts] = await Promise.all([
+        aqlQuery(
+          makeQuery(
+            'assets',
+            startDate,
+            endDate,
+            interval,
+            conditionsOpKey,
+            filters,
+          ),
+        ).then(({ data }) => data),
+        aqlQuery(
+          makeQuery(
+            'debts',
+            startDate,
+            endDate,
+            interval,
+            conditionsOpKey,
+            filters,
+          ),
+        ).then(({ data }) => data),
+      ]);
+    }
+
+    if (interval === 'Weekly' && balanceTypeOp !== 'totalBudgeted') {
       debts = debts.map(d => {
         return {
           ...d,
@@ -219,6 +245,9 @@ export function createCustomSpreadsheet({
           if (balanceTypeOp === 'totalTotals') {
             stackAmounts += netAmounts;
           }
+          if (balanceTypeOp === 'totalBudgeted') {
+            stackAmounts += netAmounts;
+          }
 
           // Use id as key to prevent collisions when categories have the same name
           stacked[item.id || item.name] = stackAmounts;
@@ -250,6 +279,7 @@ export function createCustomSpreadsheet({
           netAssets: perIntervalNetAssets,
           netDebts: perIntervalNetDebts,
           totalTotals: perIntervalTotals,
+          totalBudgeted: perIntervalTotals,
         });
 
         return arr;
@@ -319,6 +349,7 @@ export function createCustomSpreadsheet({
       netAssets,
       netDebts,
       totalTotals: totalAssets + totalDebts,
+      totalBudgeted: totalAssets + totalDebts,
     });
     setDataCheck?.(true);
   };

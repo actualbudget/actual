@@ -30,7 +30,8 @@ export type balanceTypeOpType =
   | 'totalDebts'
   | 'totalTotals'
   | 'netAssets'
-  | 'netDebts';
+  | 'netDebts'
+  | 'totalBudgeted';
 
 export type sortByOpType = 'asc' | 'desc' | 'name' | 'budget';
 
@@ -80,6 +81,7 @@ export type DataEntity = {
   netAssets: number;
   netDebts: number;
   totalTotals: number;
+  totalBudgeted: number;
 };
 
 export type LegendEntity = {
@@ -99,6 +101,7 @@ export type IntervalEntity = {
   netAssets: number;
   netDebts: number;
   totalTotals: number;
+  totalBudgeted: number;
 };
 
 export type GroupedEntity = {
@@ -111,6 +114,7 @@ export type GroupedEntity = {
   totalTotals: number;
   netAssets: number;
   netDebts: number;
+  totalBudgeted: number;
   categories?: GroupedEntity[];
 };
 

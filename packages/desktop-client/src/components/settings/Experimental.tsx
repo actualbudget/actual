@@ -214,6 +214,9 @@ export function ExperimentalFeatures() {
             >
               <Trans>Budget Analysis Report</Trans>
             </FeatureToggle>
+            <FeatureToggle flag="budgetedAmountsInReport">
+              <Trans>Budgeted amounts in custom reports</Trans>
+            </FeatureToggle>
             {showServerPrefs && (
               <ServerFeatureToggle
                 prefName="flags.plugins"

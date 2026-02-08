@@ -116,7 +116,9 @@ export function ReportSummary({
             ? t('TOTAL SPENDING')
             : balanceTypeOp === 'totalAssets'
               ? t('TOTAL DEPOSITS')
-              : t('NET {{net}}', { net })}
+              : balanceTypeOp === 'totalBudgeted'
+                ? t('TOTAL BUDGETED')
+                : t('NET {{net}}', { net })}
         </Text>
         <FinancialText
           style={{
@@ -155,7 +157,9 @@ export function ReportSummary({
             ? t('AVERAGE SPENDING')
             : balanceTypeOp === 'totalAssets'
               ? t('AVERAGE DEPOSIT')
-              : t('AVERAGE NET')}
+              : balanceTypeOp === 'totalBudgeted'
+                ? t('AVERAGE BUDGETED')
+                : t('AVERAGE NET')}
         </Text>
         <FinancialText
           style={{
