@@ -83,3 +83,62 @@ export const black = '#000000';
 export const hover = '#fafafa';
 export const border = '#e8ecf0';
 export const selected = '#b3d9ff';
+
+// Chart colors - Qualitative scale (9 colors)
+export const chartQual1 = '#45B29D'; // Dark Teal
+export const chartQual2 = '#EFC94C'; // Yellow
+export const chartQual3 = '#E27A3F'; // Orange
+export const chartQual4 = '#DF5A49'; // Light Red
+export const chartQual5 = '#5F91B8'; // Blue
+export const chartQual6 = '#E2A37F'; // Peach
+export const chartQual7 = '#55DBC1'; // Light Teal
+export const chartQual8 = '#EFDA97'; // Light Yellow
+export const chartQual9 = '#DF948A'; // Light Red
+
+// Chart colors - Grayscale (4 colors)
+export const chartGray1 = '#cccccc';
+export const chartGray2 = '#969696';
+export const chartGray3 = '#636363';
+export const chartGray4 = '#252525';
+
+// Chart colors - Heatmap (5 colors)
+export const chartHeat1 = '#428517';
+export const chartHeat2 = '#77D200';
+export const chartHeat3 = '#D6D305';
+export const chartHeat4 = '#EC8E19';
+export const chartHeat5 = '#C92B05';
+
+// Chart colors - Warm (5 colors)
+export const chartWarm1 = '#940031';
+export const chartWarm2 = '#C43343';
+export const chartWarm3 = '#DC5429';
+export const chartWarm4 = '#FF821D';
+export const chartWarm5 = '#FFAF55';
+
+// Chart colors - Cool (5 colors)
+export const chartCool1 = '#2746B9';
+export const chartCool2 = '#0B69D4';
+export const chartCool3 = '#2794DB';
+export const chartCool4 = '#31BB76';
+export const chartCool5 = '#60E83B';
+
+// Chart colors - Red (5 colors)
+export const chartRed1 = '#FCAE91';
+export const chartRed2 = '#FB6A4A';
+export const chartRed3 = '#DE2D26';
+export const chartRed4 = '#A50F15';
+export const chartRed5 = '#750B0E';
+
+// Chart colors - Blue (5 colors)
+export const chartBlue1 = '#002C61';
+export const chartBlue2 = '#004B8F';
+export const chartBlue3 = '#006BC9';
+export const chartBlue4 = '#3795E5';
+export const chartBlue5 = '#65B4F4';
+
+// Chart colors - Green (5 colors)
+export const chartGreen1 = '#354722';
+export const chartGreen2 = '#466631';
+export const chartGreen3 = '#649146';
+export const chartGreen4 = '#8AB25C';
+export const chartGreen5 = '#A9C97E';

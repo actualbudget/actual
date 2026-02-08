@@ -239,3 +239,62 @@ export const tooltipBorder = colorPalette.gray600;
 export const calendarCellBackground = colorPalette.navy900;
 
 export const overlayBackground = 'rgba(0, 0, 0, 0.3)';
+
+// Chart colors - Qualitative scale (9 colors)
+export const chartQual1 = colorPalette.chartQual1;
+export const chartQual2 = colorPalette.chartQual2;
+export const chartQual3 = colorPalette.chartQual3;
+export const chartQual4 = colorPalette.chartQual4;
+export const chartQual5 = colorPalette.chartQual5;
+export const chartQual6 = colorPalette.chartQual6;
+export const chartQual7 = colorPalette.chartQual7;
+export const chartQual8 = colorPalette.chartQual8;
+export const chartQual9 = colorPalette.chartQual9;
+
+// Chart colors - Grayscale (4 colors)
+export const chartGray1 = colorPalette.chartGray1;
+export const chartGray2 = colorPalette.chartGray2;
+export const chartGray3 = colorPalette.chartGray3;
+export const chartGray4 = colorPalette.chartGray4;
+
+// Chart colors - Heatmap (5 colors)
+export const chartHeat1 = colorPalette.chartHeat1;
+export const chartHeat2 = colorPalette.chartHeat2;
+export const chartHeat3 = colorPalette.chartHeat3;
+export const chartHeat4 = colorPalette.chartHeat4;
+export const chartHeat5 = colorPalette.chartHeat5;
+
+// Chart colors - Warm (5 colors)
+export const chartWarm1 = colorPalette.chartWarm1;
+export const chartWarm2 = colorPalette.chartWarm2;
+export const chartWarm3 = colorPalette.chartWarm3;
+export const chartWarm4 = colorPalette.chartWarm4;
+export const chartWarm5 = colorPalette.chartWarm5;
+
+// Chart colors - Cool (5 colors)
+export const chartCool1 = colorPalette.chartCool1;
+export const chartCool2 = colorPalette.chartCool2;
+export const chartCool3 = colorPalette.chartCool3;
+export const chartCool4 = colorPalette.chartCool4;
+export const chartCool5 = colorPalette.chartCool5;
+
+// Chart colors - Red (5 colors)
+export const chartRed1 = colorPalette.chartRed1;
+export const chartRed2 = colorPalette.chartRed2;
+export const chartRed3 = colorPalette.chartRed3;
+export const chartRed4 = colorPalette.chartRed4;
+export const chartRed5 = colorPalette.chartRed5;
+
+// Chart colors - Blue (5 colors)
+export const chartBlue1 = colorPalette.chartBlue1;
+export const chartBlue2 = colorPalette.chartBlue2;
+export const chartBlue3 = colorPalette.chartBlue3;
+export const chartBlue4 = colorPalette.chartBlue4;
+export const chartBlue5 = colorPalette.chartBlue5;
+
+// Chart colors - Green (5 colors)
+export const chartGreen1 = colorPalette.chartGreen1;
+export const chartGreen2 = colorPalette.chartGreen2;
+export const chartGreen3 = colorPalette.chartGreen3;
+export const chartGreen4 = colorPalette.chartGreen4;
+export const chartGreen5 = colorPalette.chartGreen5;
