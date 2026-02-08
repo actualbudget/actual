@@ -2638,8 +2638,10 @@ export const TransactionTable = forwardRef(
         if (e.metaKey || e.ctrlKey) {
           e.preventDefault();
           e.stopPropagation();
-          shouldAddAndClose.current = true;
-          forceRerender({});
+          afterSave(() => {
+            shouldAddAndClose.current = true;
+            forceRerender({});
+          });
         } else if (!e.shiftKey) {
           function getLastTransaction(state: RefObject<TableState>) {
             const { newTransactions } = state.current;
@@ -2710,8 +2712,10 @@ export const TransactionTable = forwardRef(
     }, []);
 
     const onAddAndCloseTemporary = useCallback(() => {
-      shouldAddAndClose.current = true;
-      forceRerender({});
+      afterSave(() => {
+        shouldAddAndClose.current = true;
+        forceRerender({});
+      });
     }, []);
 
     const {
