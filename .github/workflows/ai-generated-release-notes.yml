@@ -83,7 +83,7 @@ jobs:
           PR_DETAILS: ${{ steps.pr-details.outputs.result }}
           SUMMARY_DATA: ${{ steps.generate-summary.outputs.result }}
 
-      #INTERNAL BOT DOESN'T TRIGGER WORKFLOWS ON COKMMIT. CHANGING TO ACTUAL BOT APP
+      # Internal bot doesn't trigger workflows on commit; switching to Actual Bot App
       - name: Generate GitHub App token
         if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
         id: app-token
