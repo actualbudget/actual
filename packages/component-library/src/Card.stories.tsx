@@ -6,7 +6,7 @@ import { Paragraph } from './Paragraph';
 import { theme } from './theme';
 
 const meta = {
-  title: 'Card',
+  title: 'Components/Card',
   component: Card,
   parameters: {
     layout: 'centered',

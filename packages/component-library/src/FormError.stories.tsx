@@ -5,7 +5,7 @@ import { Input } from './Input';
 import { View } from './View';
 
 const meta = {
-  title: 'FormError',
+  title: 'Components/FormError',
   component: FormError,
   parameters: {
     layout: 'centered',
