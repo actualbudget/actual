@@ -1,4 +1,5 @@
 import {
+  BunqAuthError,
   BunqInvalidResponseError,
   BunqRateLimitError,
   BunqSignatureError,
@@ -277,6 +278,149 @@ describe('bunq-client', () => {
     expect(fetchImpl).toHaveBeenCalledTimes(2);
     expect(sleepImpl).toHaveBeenCalledTimes(1);
     expect(sleepImpl).toHaveBeenCalledWith(200);
+  });
+
+  it('refreshes expired session once and retries the original request', async () => {
+    const { privateKeyPem } = generateBunqKeyPair();
+
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        text: async () => 'expired session',
+        headers: {
+          get() {
+            return null;
+          },
+        },
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () =>
+          JSON.stringify({
+            Response: [{ Token: { token: 'session-token-new' } }, { UserPerson: { id: 42 } }],
+          }),
+        headers: {
+          get() {
+            return null;
+          },
+        },
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({ Response: [] }),
+        headers: {
+          get() {
+            return null;
+          },
+        },
+      });
+
+    const onSessionTokenRefreshed = vi.fn();
+
+    const client = new BunqClient({
+      apiKey: 'api-key',
+      environment: 'sandbox',
+      clientPrivateKey: privateKeyPem,
+      installationToken: 'installation-token',
+      sessionToken: 'session-token-old',
+      fetchImpl,
+      onSessionTokenRefreshed,
+    });
+
+    await client.request('/user/42/monetary-account-bank', {
+      method: 'GET',
+      tokenType: 'session',
+      jsonBody: null,
+    });
+
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
+    expect(fetchImpl).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('/user/42/monetary-account-bank'),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'X-Bunq-Client-Authentication': 'session-token-old',
+        }),
+      }),
+    );
+    expect(fetchImpl).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('/session-server'),
+      expect.any(Object),
+    );
+    expect(fetchImpl).toHaveBeenNthCalledWith(
+      3,
+      expect.stringContaining('/user/42/monetary-account-bank'),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'X-Bunq-Client-Authentication': 'session-token-new',
+        }),
+      }),
+    );
+    expect(client.sessionToken).toBe('session-token-new');
+    expect(onSessionTokenRefreshed).toHaveBeenCalledWith('session-token-new');
+  });
+
+  it('does not retry indefinitely when refreshed session is still unauthorized', async () => {
+    const { privateKeyPem } = generateBunqKeyPair();
+
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        text: async () => 'expired session',
+        headers: {
+          get() {
+            return null;
+          },
+        },
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () =>
+          JSON.stringify({
+            Response: [{ Token: { token: 'session-token-new' } }, { UserPerson: { id: 42 } }],
+          }),
+        headers: {
+          get() {
+            return null;
+          },
+        },
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        text: async () => 'still unauthorized',
+        headers: {
+          get() {
+            return null;
+          },
+        },
+      });
+
+    const client = new BunqClient({
+      apiKey: 'api-key',
+      environment: 'sandbox',
+      clientPrivateKey: privateKeyPem,
+      installationToken: 'installation-token',
+      sessionToken: 'session-token-old',
+      fetchImpl,
+    });
+
+    await expect(() =>
+      client.request('/user/42/monetary-account-bank', {
+        method: 'GET',
+        tokenType: 'session',
+        jsonBody: null,
+      }),
+    ).rejects.toThrow(BunqAuthError);
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
   });
 
   it('throws rate-limit error after retry budget is exhausted', async () => {

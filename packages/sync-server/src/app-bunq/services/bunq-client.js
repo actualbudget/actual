@@ -36,6 +36,7 @@ const DEFAULT_GEOLOCATION = '0 0 0 0 000';
  *   sleepImpl?: (ms: number) => Promise<void>;
  *   randomImpl?: () => number;
  *   nowImpl?: () => number;
+ *   onSessionTokenRefreshed?: (sessionToken: string) => void | Promise<void>;
  * }} BunqClientOptions
  */
 
@@ -66,6 +67,7 @@ export class BunqClient {
     this.sleepImpl = options.sleepImpl ?? sleep;
     this.randomImpl = options.randomImpl ?? Math.random;
     this.nowImpl = options.nowImpl ?? Date.now;
+    this.onSessionTokenRefreshed = options.onSessionTokenRefreshed;
   }
 
   get baseUrl() {
@@ -250,12 +252,13 @@ export class BunqClient {
    */
   async request(path, options) {
     const normalizedPath = this.normalizeRequestPath(path);
-    const token = this.getAuthToken(options.tokenType);
     const body =
       options.jsonBody == null ? '' : JSON.stringify(options.jsonBody);
     const shouldSign = options.sign ?? true;
     const shouldVerifyResponseSignature =
       options.verifyResponseSignature ?? true;
+    const isSessionRequest = options.tokenType === 'session';
+    let hasRetriedAfterSessionRefresh = false;
 
     const headers = {
       'Cache-Control': 'no-cache',
@@ -263,10 +266,6 @@ export class BunqClient {
       'X-Bunq-Client-Request-Id': randomUUID(),
       'X-Bunq-Geolocation': DEFAULT_GEOLOCATION,
     };
-
-    if (token) {
-      headers['X-Bunq-Client-Authentication'] = token;
-    }
 
     if (options.jsonBody != null) {
       headers['Content-Type'] = 'application/json';
@@ -285,120 +284,158 @@ export class BunqClient {
     }
 
     const requestStartedAt = this.nowImpl();
-    let attempt = 0;
-    let response = null;
-    let responseBody = '';
 
     for (;;) {
-      attempt += 1;
-      response = await this.fetchImpl(`${this.baseUrl}${normalizedPath}`, {
-        method: options.method,
-        headers,
-        body: options.jsonBody == null ? undefined : body,
-      });
-
-      responseBody = await response.text();
-
-      if (response.status !== 429 || attempt > this.maxRateLimitRetries) {
-        break;
+      const token = this.getAuthToken(options.tokenType);
+      if (token) {
+        headers['X-Bunq-Client-Authentication'] = token;
+      } else {
+        delete headers['X-Bunq-Client-Authentication'];
       }
 
-      const retryDelayMs = this.getRetryDelayMs(attempt);
-      console.warn('bunq request rate limited; retrying with backoff', {
-        path: normalizedPath,
-        method: options.method,
-        attempt,
-        maxRateLimitRetries: this.maxRateLimitRetries,
-        status: response.status,
-        retryDelayMs,
-        elapsedMs: this.nowImpl() - requestStartedAt,
-      });
+      let attempt = 0;
+      let response = null;
+      let responseBody = '';
 
-      await this.sleepImpl(retryDelayMs);
-    }
+      for (;;) {
+        attempt += 1;
+        const requestHeaders = { ...headers };
+        response = await this.fetchImpl(`${this.baseUrl}${normalizedPath}`, {
+          method: options.method,
+          headers: requestHeaders,
+          body: options.jsonBody == null ? undefined : body,
+        });
 
-    if (!response.ok) {
-      const responseHeaders = this.extractResponseHeaders(response);
-      const details = {
-        path: normalizedPath,
-        method: options.method,
-        tokenType: options.tokenType,
-        sign: shouldSign,
-        verifyResponseSignature: shouldVerifyResponseSignature,
-        requestHeaders: {
-          'X-Bunq-Client-Request-Id': headers['X-Bunq-Client-Request-Id'],
-          'X-Bunq-Client-Authentication': headers[
-            'X-Bunq-Client-Authentication'
-          ]
-            ? '[present]'
-            : '[missing]',
-          'X-Bunq-Client-Signature': headers['X-Bunq-Client-Signature']
-            ? '[present]'
-            : '[missing]',
-          'Content-Type': headers['Content-Type'] || '[none]',
-        },
-        status: response.status,
-        attempts: attempt,
-        elapsedMs: this.nowImpl() - requestStartedAt,
-        responseBody,
-        responseHeaders,
-      };
+        responseBody = await response.text();
 
-      console.error('bunq request failed', details);
+        if (response.status !== 429 || attempt > this.maxRateLimitRetries) {
+          break;
+        }
 
-      if (response.status === 401 || response.status === 403) {
-        throw new BunqAuthError('Bunq authentication failed', details);
+        const retryDelayMs = this.getRetryDelayMs(attempt);
+        console.warn('bunq request rate limited; retrying with backoff', {
+          path: normalizedPath,
+          method: options.method,
+          attempt,
+          maxRateLimitRetries: this.maxRateLimitRetries,
+          status: response.status,
+          retryDelayMs,
+          elapsedMs: this.nowImpl() - requestStartedAt,
+        });
+
+        await this.sleepImpl(retryDelayMs);
       }
 
-      if (response.status === 429) {
-        throw new BunqRateLimitError('Bunq rate limit exceeded', details);
+      if (
+        !response.ok &&
+        isSessionRequest &&
+        !hasRetriedAfterSessionRefresh &&
+        (response.status === 401 || response.status === 403)
+      ) {
+        console.warn('bunq session rejected; refreshing session and retrying once', {
+          path: normalizedPath,
+          method: options.method,
+          status: response.status,
+          elapsedMs: this.nowImpl() - requestStartedAt,
+        });
+
+        hasRetriedAfterSessionRefresh = true;
+        await this.refreshSessionToken();
+        continue;
       }
 
-      throw new BunqProtocolError('Bunq request failed', details);
-    }
+      if (!response.ok) {
+        const responseHeaders = this.extractResponseHeaders(response);
+        const details = {
+          path: normalizedPath,
+          method: options.method,
+          tokenType: options.tokenType,
+          sign: shouldSign,
+          verifyResponseSignature: shouldVerifyResponseSignature,
+          requestHeaders: {
+            'X-Bunq-Client-Request-Id': headers['X-Bunq-Client-Request-Id'],
+            'X-Bunq-Client-Authentication': headers[
+              'X-Bunq-Client-Authentication'
+            ]
+              ? '[present]'
+              : '[missing]',
+            'X-Bunq-Client-Signature': headers['X-Bunq-Client-Signature']
+              ? '[present]'
+              : '[missing]',
+            'Content-Type': headers['Content-Type'] || '[none]',
+          },
+          status: response.status,
+          attempts: attempt,
+          elapsedMs: this.nowImpl() - requestStartedAt,
+          responseBody,
+          responseHeaders,
+        };
 
-    if (attempt > 1) {
-      console.debug('bunq request recovered after retry', {
-        path: normalizedPath,
-        method: options.method,
-        attempts: attempt,
-        elapsedMs: this.nowImpl() - requestStartedAt,
-        status: response.status,
-      });
-    }
+        console.error('bunq request failed', details);
 
-    const serverSignature = response.headers.get('X-Bunq-Server-Signature');
-    if (
-      shouldVerifyResponseSignature &&
-      serverSignature &&
-      this.serverPublicKey &&
-      responseBody
-    ) {
-      const isValid = verifyResponsePayloadSignature(
-        this.serverPublicKey,
-        responseBody,
-        serverSignature,
-      );
+        if (response.status === 401 || response.status === 403) {
+          throw new BunqAuthError('Bunq authentication failed', details);
+        }
 
-      if (!isValid) {
-        throw new BunqSignatureError('Invalid Bunq response signature', {
+        if (response.status === 429) {
+          throw new BunqRateLimitError('Bunq rate limit exceeded', details);
+        }
+
+        throw new BunqProtocolError('Bunq request failed', details);
+      }
+
+      if (attempt > 1) {
+        console.debug('bunq request recovered after retry', {
+          path: normalizedPath,
+          method: options.method,
+          attempts: attempt,
+          elapsedMs: this.nowImpl() - requestStartedAt,
+          status: response.status,
+        });
+      }
+
+      const serverSignature = response.headers.get('X-Bunq-Server-Signature');
+      if (
+        shouldVerifyResponseSignature &&
+        serverSignature &&
+        this.serverPublicKey &&
+        responseBody
+      ) {
+        const isValid = verifyResponsePayloadSignature(
+          this.serverPublicKey,
+          responseBody,
+          serverSignature,
+        );
+
+        if (!isValid) {
+          throw new BunqSignatureError('Invalid Bunq response signature', {
+            path: normalizedPath,
+            status: response.status,
+          });
+        }
+      }
+
+      if (!responseBody) {
+        return {};
+      }
+
+      try {
+        return JSON.parse(responseBody);
+      } catch {
+        throw new BunqInvalidResponseError('Bunq response JSON was invalid', {
           path: normalizedPath,
           status: response.status,
         });
       }
     }
+  }
 
-    if (!responseBody) {
-      return {};
-    }
+  async refreshSessionToken() {
+    const session = await this.createSession();
+    this.sessionToken = session.sessionToken;
 
-    try {
-      return JSON.parse(responseBody);
-    } catch {
-      throw new BunqInvalidResponseError('Bunq response JSON was invalid', {
-        path: normalizedPath,
-        status: response.status,
-      });
+    if (this.onSessionTokenRefreshed) {
+      await this.onSessionTokenRefreshed(session.sessionToken);
     }
   }
 

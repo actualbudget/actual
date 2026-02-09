@@ -100,6 +100,9 @@ function createClient(fetchImpl) {
     sessionToken: getSessionToken(),
     serverPublicKey: getServerPublicKey(),
     fetchImpl,
+    onSessionTokenRefreshed: sessionToken => {
+      secretsService.set(SecretName.bunq_sessionToken, sessionToken);
+    },
   });
 }
 
