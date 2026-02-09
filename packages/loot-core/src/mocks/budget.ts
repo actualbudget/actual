@@ -605,15 +605,20 @@ export async function createTestBudget(handlers: Handlers) {
   await db.runQuery('DELETE FROM categories;');
   await db.runQuery('DELETE FROM category_groups');
 
-  const accounts: { name: string; offBudget?: boolean; id?: string }[] = [
-    { name: 'Bank of America' },
-    { name: 'Ally Savings' },
-    { name: 'Capital One Checking' },
-    { name: 'HSBC' },
-    { name: 'Vanguard 401k', offBudget: true },
-    { name: 'Mortgage', offBudget: true },
-    { name: 'House Asset', offBudget: true },
-    { name: 'Roth IRA', offBudget: true },
+  const accounts: {
+    name: string;
+    type?: string;
+    offBudget?: boolean;
+    id?: string;
+  }[] = [
+    { name: 'Bank of America', type: 'Checking' },
+    { name: 'Ally Savings', type: 'Savings' },
+    { name: 'Capital One Checking', type: 'Checking' },
+    { name: 'HSBC', type: 'Checking' },
+    { name: 'Vanguard 401k', type: 'Retirement', offBudget: true },
+    { name: 'Mortgage', type: 'Mortgage', offBudget: true },
+    { name: 'House Asset', type: 'Other Asset', offBudget: true },
+    { name: 'Roth IRA', type: 'Retirement', offBudget: true },
   ];
 
   await runMutator(async () => {

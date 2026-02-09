@@ -5,6 +5,7 @@ import { captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
 import { logger } from '../../platform/server/log';
+import { camelToTitleCase } from '../../shared/accounts';
 import { isNonProductionEnvironment } from '../../shared/environment';
 import { dayFromDate } from '../../shared/months';
 import * as monthUtils from '../../shared/months';
@@ -46,6 +47,31 @@ type LinkAccountBaseParams = {
   startingBalance?: number;
 };
 
+function normalizeLinkedAccountType(type?: string | null): string | null {
+  if (!type) {
+    return null;
+  }
+
+  const trimmed = type.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  if (/[a-z][A-Z]/.test(trimmed)) {
+    return camelToTitleCase(trimmed);
+  }
+
+  if (/[ _-]/.test(trimmed) || trimmed === trimmed.toUpperCase()) {
+    return trimmed
+      .replace(/[_-]+/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, c => c.toUpperCase())
+      .trim();
+  }
+
+  return camelToTitleCase(trimmed.toLowerCase());
+}
+
 export type AccountHandlers = {
   'account-update': typeof updateAccount;
   'accounts-get': typeof getAccounts;
@@ -78,12 +104,17 @@ export type AccountHandlers = {
 async function updateAccount({
   id,
   name,
+  type,
   last_reconciled,
 }: Pick<AccountEntity, 'id' | 'name'> &
-  Partial<Pick<AccountEntity, 'last_reconciled'>>) {
+  Partial<Pick<AccountEntity, 'last_reconciled' | 'type'>>) {
   await db.update('accounts', {
     id,
     name,
+    // `type` may be explicitly null (to clear the type), so we always
+    // include it when present in the payload.
+    ...(type !== undefined && { type }),
+    // Intentionally truthy-only: null/empty should not overwrite existing value.
     ...(last_reconciled && { last_reconciled }),
   });
   return {};
@@ -200,7 +231,6 @@ async function linkSimpleFinAccount({
   externalAccount: SyncServerSimpleFinAccount;
 }) {
   let id;
-
   const institution = {
     name: externalAccount.institution ?? t('Unknown'),
   };
@@ -272,6 +302,7 @@ async function linkPluggyAiAccount({
   externalAccount: SyncServerPluggyAiAccount;
 }) {
   let id;
+  const normalizedType = normalizeLinkedAccountType(externalAccount.subtype);
 
   const institution = {
     name: externalAccount.institution ?? t('Unknown'),
@@ -292,12 +323,15 @@ async function linkPluggyAiAccount({
       throw new Error(`Account with ID ${upgradingId} not found.`);
     }
 
+    const shouldSetType = normalizedType != null && !accRow.type?.trim();
+
     id = accRow.id;
     await db.update('accounts', {
       id,
       account_id: externalAccount.account_id,
       bank: bank.id,
       account_sync_source: 'pluggyai',
+      ...(shouldSetType ? { type: normalizedType } : {}),
     });
   } else {
     id = uuidv4();
@@ -308,6 +342,7 @@ async function linkPluggyAiAccount({
       official_name: externalAccount.name,
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
+      type: normalizedType,
       account_sync_source: 'pluggyai',
     });
     await db.insertPayee({
@@ -336,17 +371,20 @@ async function linkPluggyAiAccount({
 
 async function createAccount({
   name,
+  type,
   balance = 0,
   offBudget = false,
   closed = false,
 }: {
   name: string;
+  type?: string | undefined;
   balance?: number | undefined;
   offBudget?: boolean | undefined;
   closed?: boolean | undefined;
 }) {
   const id: AccountEntity['id'] = await db.insertAccount({
     name,
+    type: type || null,
     offbudget: offBudget ? 1 : 0,
     closed: closed ? 1 : 0,
   });

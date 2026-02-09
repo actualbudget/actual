@@ -15,10 +15,12 @@ export function generateAccount(
   name: AccountEntity['name'],
   isConnected?: boolean,
   offbudget?: boolean,
+  type?: string,
 ): AccountEntity {
   const offlineAccount: AccountEntity = {
     id: uuidv4(),
     name,
+    type: type || null,
     offbudget: offbudget ? 1 : 0,
     sort_order: 0,
     last_reconciled: null,

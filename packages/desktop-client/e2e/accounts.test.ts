@@ -29,6 +29,7 @@ test.describe('Accounts', () => {
   test('creates a new account and views the initial balance transaction', async () => {
     accountPage = await navigation.createAccount({
       name: 'New Account',
+      type: 'Checking',
       offBudget: false,
       balance: 100,
     });

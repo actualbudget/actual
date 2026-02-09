@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useRef } from 'react';
+import React, { forwardRef, useCallback, useMemo, useRef } from 'react';
 import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import type { DragItem } from 'react-aria';
 import {
@@ -340,8 +340,8 @@ function AllAccountList({
               amount={getOnBudgetBalance()}
             />
           )}
-          <AccountList
-            aria-label={t('On budget accounts')}
+          <AccountListByType
+            ariaLabel={t('On budget accounts')}
             accounts={onBudgetAccounts}
             getAccountBalance={getAccountBalance}
             onOpenAccount={onOpenAccount}
@@ -353,8 +353,8 @@ function AllAccountList({
               amount={getOffBudgetBalance()}
             />
           )}
-          <AccountList
-            aria-label={t('Off budget accounts')}
+          <AccountListByType
+            ariaLabel={t('Off budget accounts')}
             accounts={offBudgetAccounts}
             getAccountBalance={getAccountBalance}
             onOpenAccount={onOpenAccount}
@@ -371,7 +371,7 @@ function AllAccountList({
           )}
           {showClosedAccounts && (
             <AccountList
-              aria-label={t('Closed accounts')}
+              ariaLabel={t('Closed accounts')}
               accounts={closedAccounts}
               getAccountBalance={getAccountBalance}
               onOpenAccount={onOpenAccount}
@@ -387,7 +387,7 @@ function AllAccountList({
 }
 
 type AccountListProps = {
-  'aria-label': string;
+  ariaLabel: string;
   accounts: AccountEntity[];
   getAccountBalance: (
     accountId: AccountEntity['id'],
@@ -398,7 +398,7 @@ type AccountListProps = {
 const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
   (
     {
-      'aria-label': ariaLabel,
+      ariaLabel,
       accounts,
       getAccountBalance: getBalanceBinding,
       onOpenAccount,
@@ -507,6 +507,99 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
 );
 
 AccountList.displayName = 'AccountList';
+
+/**
+ * Groups accounts by their `type` field and renders separate AccountList
+ * sections for each type, with untyped accounts first.
+ * Drag-and-drop reordering works within each rendered list; changing an
+ * account's type is handled via the account menu's "Set Type" action or
+ * dragging onto a type group header.
+ */
+type AccountListByTypeProps = {
+  ariaLabel: string;
+  accounts: AccountEntity[];
+  getAccountBalance: (
+    accountId: AccountEntity['id'],
+  ) => Binding<'account', 'balance'>;
+  onOpenAccount: (account: AccountEntity) => void;
+};
+
+function splitAccountsByType(accounts: AccountEntity[]): {
+  untypedAccounts: AccountEntity[];
+  typedEntries: Array<[string, AccountEntity[]]>;
+} {
+  // TODO: extract shared account-type grouping utility with sidebar tree logic.
+  const untypedAccounts: AccountEntity[] = [];
+  const typedMap = new Map<string, AccountEntity[]>();
+
+  for (const account of accounts) {
+    if (!account.type) {
+      untypedAccounts.push(account);
+      continue;
+    }
+
+    const typedAccounts = typedMap.get(account.type);
+    if (typedAccounts) {
+      typedAccounts.push(account);
+    } else {
+      typedMap.set(account.type, [account]);
+    }
+  }
+
+  const typedEntries = [...typedMap.entries()].sort(([a], [b]) =>
+    a.localeCompare(b),
+  );
+
+  return { untypedAccounts, typedEntries };
+}
+
+function AccountListByType({
+  ariaLabel,
+  accounts,
+  getAccountBalance,
+  onOpenAccount,
+}: AccountListByTypeProps) {
+  const { untypedAccounts, typedEntries } = useMemo(
+    () => splitAccountsByType(accounts),
+    [accounts],
+  );
+
+  return (
+    <>
+      {untypedAccounts.length > 0 && (
+        <AccountList
+          ariaLabel={ariaLabel}
+          accounts={untypedAccounts}
+          getAccountBalance={getAccountBalance}
+          onOpenAccount={onOpenAccount}
+        />
+      )}
+      {typedEntries.map(([typeName, typedAccounts]) => (
+        <View key={typeName}>
+          <Text
+            style={{
+              ...styles.text,
+              fontSize: 12,
+              fontWeight: 500,
+              color: theme.pageTextLight,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              padding: '8px 18px 2px',
+            }}
+          >
+            {typeName}
+          </Text>
+          <AccountList
+            ariaLabel={`${ariaLabel} - ${typeName}`}
+            accounts={typedAccounts}
+            getAccountBalance={getAccountBalance}
+            onOpenAccount={onOpenAccount}
+          />
+        </View>
+      ))}
+    </>
+  );
+}
 
 export function AccountsPage() {
   const dispatch = useDispatch();

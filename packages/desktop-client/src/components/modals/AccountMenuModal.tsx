@@ -9,6 +9,7 @@ import {
   SvgLockOpen,
 } from '@actual-app/components/icons/v1';
 import { SvgNotesPaper } from '@actual-app/components/icons/v2';
+import { InlineField } from '@actual-app/components/inline-field';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
@@ -17,6 +18,7 @@ import { View } from '@actual-app/components/view';
 
 import type { AccountEntity } from 'loot-core/types/models';
 
+import { AccountTypeAutocomplete } from '@desktop-client/components/autocomplete/AccountTypeAutocomplete';
 import {
   Modal,
   ModalCloseButton,
@@ -154,6 +156,18 @@ export function AccountMenuModal({
                 flex: 1,
               }}
             >
+              <InlineField label={t('Type')} width="100%">
+                <AccountTypeAutocomplete
+                  value={account.type || ''}
+                  embedded
+                  onSelect={value => {
+                    onSave?.({
+                      ...account,
+                      type: value || null,
+                    });
+                  }}
+                />
+              </InlineField>
               <Notes
                 notes={
                   originalNotes && originalNotes.length > 0

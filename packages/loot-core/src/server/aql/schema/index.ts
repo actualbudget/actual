@@ -68,6 +68,7 @@ export const schema = {
   accounts: {
     id: f('id'),
     name: f('string', { required: true }),
+    type: f('string'),
     offbudget: f('boolean'),
     closed: f('boolean'),
     sort_order: f('float'),

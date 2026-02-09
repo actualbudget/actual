@@ -583,6 +583,7 @@ handlers['api/account-create'] = withMutation(async function ({
   checkFileOpen();
   return handlers['account-create']({
     name: account.name,
+    type: account.type,
     offBudget: account.offbudget,
     closed: account.closed,
     // Current the API expects an amount but it really should expect

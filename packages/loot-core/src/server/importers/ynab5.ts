@@ -8,6 +8,7 @@ import * as actual from '@actual-app/api/methods';
 import { v4 as uuidv4 } from 'uuid';
 
 import { logger } from '../../platform/server/log';
+import { camelToTitleCase } from '../../shared/accounts';
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
 import { groupBy, sortByKey } from '../../shared/util';
@@ -278,6 +279,7 @@ function importAccounts(data: Budget, entityIdMap: Map<string, string>) {
       if (!account.deleted) {
         const id = await actual.createAccount({
           name: account.name,
+          type: account.type ? camelToTitleCase(account.type) : undefined,
           offbudget: account.on_budget ? false : true,
           closed: account.closed,
         });
