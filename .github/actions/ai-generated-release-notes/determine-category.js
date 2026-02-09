@@ -79,14 +79,15 @@ try {
           'Enhancements',
           'Maintenance',
         ];
-        const category = validCategories.find(cat =>
-          rawContent.includes(cat),
-        );
+        const category = validCategories.find(cat => rawContent.includes(cat));
         if (category) {
           console.log('OpenAI categorized as:', category);
           setOutput('result', category);
         } else {
-          console.log('No valid category found in OpenAI response:', rawContent);
+          console.log(
+            'No valid category found in OpenAI response:',
+            rawContent,
+          );
           console.log('Valid categories are:', validCategories);
           setOutput('result', 'null');
         }
