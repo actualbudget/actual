@@ -83,11 +83,22 @@ jobs:
           PR_DETAILS: ${{ steps.pr-details.outputs.result }}
           SUMMARY_DATA: ${{ steps.generate-summary.outputs.result }}
 
+      #INTERNAL BOT DOESN'T TRIGGER WORKFLOWS ON COKMMIT. CHANGING TO ACTUAL BOT APP
+      - name: Generate GitHub App token
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.ACTUAL_BOT_APP_ID }}
+          private-key: ${{ secrets.ACTUAL_BOT_PRIVATE_KEY }}
+          owner: actualbudget
+          repositories: actual
+
       - name: Create and commit release notes file via GitHub API
         if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
         run: node .github/actions/ai-generated-release-notes/create-release-notes-file.js
         env:
-          GITHUB_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
           SUMMARY_DATA: ${{ steps.generate-summary.outputs.result }}
@@ -97,7 +108,7 @@ jobs:
         if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
         run: node .github/actions/ai-generated-release-notes/comment-on-pr.js
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
           SUMMARY_DATA: ${{ steps.generate-summary.outputs.result }}

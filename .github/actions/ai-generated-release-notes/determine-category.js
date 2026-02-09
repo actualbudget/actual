@@ -28,7 +28,7 @@ try {
   }
 
   const data = JSON.stringify({
-    model: 'gpt-4o-mini',
+    model: 'gpt-4.1-mini',
     messages: [
       {
         role: 'system',
@@ -71,30 +71,22 @@ try {
         const rawContent = response.choices[0].message.content.trim();
         console.log('Raw content from OpenAI:', rawContent);
 
-        let category;
-        try {
-          category = JSON.parse(rawContent);
-          console.log('Parsed category:', category);
-        } catch (parseError) {
-          console.log(
-            'JSON parse error, using raw content:',
-            parseError.message,
-          );
-          category = rawContent;
-        }
+        //CHANGED HOW IT READS THE CATEGORY TO AVOID ERRORS WHEN LLM DOESNT ANSWER A JSON
 
-        // Validate the category response
         const validCategories = [
           'Features',
           'Bugfixes',
           'Enhancements',
           'Maintenance',
         ];
-        if (validCategories.includes(category)) {
+        const category = validCategories.find(cat =>
+          rawContent.includes(cat),
+        );
+        if (category) {
           console.log('OpenAI categorized as:', category);
           setOutput('result', category);
         } else {
-          console.log('Invalid category from OpenAI:', category);
+          console.log('No valid category found in OpenAI response:', rawContent);
           console.log('Valid categories are:', validCategories);
           setOutput('result', 'null');
         }
