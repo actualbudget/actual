@@ -6,11 +6,11 @@ import type { TFunction } from 'i18next';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { getUpcomingDays } from 'loot-core/shared/schedules';
+import type { ScheduleStatusType } from 'loot-core/shared/schedules';
 import type { CategoryEntity, ScheduleEntity } from 'loot-core/types/models';
 
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
 import { useLocale } from './useLocale';
-import type { ScheduleStatusType } from './useSchedules';
 import { useSyncedPref } from './useSyncedPref';
 
 type UseCategoryScheduleGoalTemplateProps = {
