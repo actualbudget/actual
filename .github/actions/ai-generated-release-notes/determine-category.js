@@ -79,7 +79,10 @@ try {
           'Enhancements',
           'Maintenance',
         ];
-        const category = validCategories.find(cat => rawContent.includes(cat));
+        const lowerContent = rawContent.toLowerCase();
+        const category = validCategories.find(cat =>
+          lowerContent.includes(cat.toLowerCase()),
+        );
         if (category) {
           console.log('OpenAI categorized as:', category);
           setOutput('result', category);
