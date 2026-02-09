@@ -345,7 +345,7 @@ export const GenericInput = ({
           break;
 
         default:
-          if (typeof props.value !== 'string') {
+          if (props.value != null && typeof props.value !== 'string') {
             content = (
               <RecurringSchedulePicker
                 value={props.value}
@@ -357,7 +357,7 @@ export const GenericInput = ({
             content = (
               <DateSelect
                 ref={ref}
-                value={props.value}
+                value={typeof props.value === 'string' ? props.value : ''}
                 dateFormat={dateFormat}
                 openOnFocus={false}
                 inputProps={{ placeholder: dateFormat.toLowerCase() }}
