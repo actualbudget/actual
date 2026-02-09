@@ -166,7 +166,8 @@ export const objects = {
       type: 'number | null',
       description: (
         <span>
-          The current balance of the account as reported by bank sync. Can also be set manually. Defaults to <code>null</code>
+          The current balance of the account as reported by bank sync. Can also
+          be set manually. Defaults to <code>null</code>
         </span>
       ),
     },
