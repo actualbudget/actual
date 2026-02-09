@@ -6,6 +6,7 @@ import * as monthUtils from '../../shared/months';
 import { amountToInteger, integerToAmount } from '../../shared/util';
 import { type CategoryEntity } from '../../types/models';
 import {
+  type AddTemplate,
   type AverageTemplate,
   type ByTemplate,
   type CopyTemplate,
@@ -211,6 +212,10 @@ export class CategoryTemplateContext {
         }
         case 'average': {
           newBudget = await CategoryTemplateContext.runAverage(template, this);
+          break;
+        }
+        case 'add': {
+          newBudget = CategoryTemplateContext.runAdd(template, this);
           break;
         }
         default: {
@@ -551,6 +556,17 @@ export class CategoryTemplateContext {
     } else {
       return templateContext.limitAmount - templateContext.fromLastMonth;
     }
+  }
+
+  static runAdd(
+    template: AddTemplate,
+    templateContext: CategoryTemplateContext,
+  ): number {
+    const templateAmount = amountToInteger(
+      template.amount,
+      templateContext.currency.decimalPlaces,
+    );
+    return templateContext.previouslyBudgeted + templateAmount;
   }
 
   static async runCopy(

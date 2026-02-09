@@ -1,4 +1,5 @@
 import {
+  type AddTemplate,
   type AverageTemplate,
   type CopyTemplate,
   type PercentageTemplate,
@@ -9,6 +10,7 @@ import {
 
 export const displayTemplateTypes = [
   ['simple', 'Fixed (monthly)'] as const,
+  ['add', 'Add amount'] as const,
   ['week', 'Fixed (weekly)'] as const,
   ['schedule', 'Schedule'] as const,
   ['percentage', 'Percent of category'] as const,
@@ -21,6 +23,10 @@ export type ReducerState =
   | {
       template: SimpleTemplate;
       displayType: 'simple';
+    }
+  | {
+      template: AddTemplate;
+      displayType: 'add';
     }
   | {
       template: PeriodicTemplate;

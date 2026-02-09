@@ -79,6 +79,11 @@ export type CopyTemplate = {
   lookBack: number;
 } & BaseTemplateWithPriority;
 
+export type AddTemplate = {
+  type: 'add';
+  amount: number;
+} & BaseTemplateWithPriority;
+
 export type RemainderTemplate = {
   type: 'remainder';
   weight: number;
@@ -126,5 +131,6 @@ export type Template =
   | AverageTemplate
   | GoalTemplate
   | CopyTemplate
+  | AddTemplate
   | LimitTemplate
   | ErrorTemplate;

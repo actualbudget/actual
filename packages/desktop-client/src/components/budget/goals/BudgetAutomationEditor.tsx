@@ -43,6 +43,12 @@ const displayTypeToDescription = {
       example, $100 per week would be $400 per month in a 4-week month.
     </Trans>
   ),
+  add: (
+    <Trans>
+      Add a fixed amount on top of the existing budget for this category each
+      time when running the overwrite with budget template option.
+    </Trans>
+  ),
   schedule: (
     <Trans>
       Add enough to this category to cover the selected schedule. If the
