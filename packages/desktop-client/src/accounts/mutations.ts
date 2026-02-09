@@ -9,7 +9,6 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { logger } from 'loot-core/platform/server/log';
 import { type SyncResponseWithErrors } from 'loot-core/server/accounts/app';
 import {
   type AccountEntity,
@@ -89,7 +88,7 @@ export function useCreateAccountMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error creating account:', error);
+      console.error('Error creating account:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error creating the account. Please try again.'),
@@ -128,7 +127,7 @@ export function useCloseAccountMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error closing account:', error);
+      console.error('Error closing account:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error closing the account. Please try again.'),
@@ -154,7 +153,7 @@ export function useReopenAccountMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error re-opening account:', error);
+      console.error('Error re-opening account:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error re-opening the account. Please try again.'),
@@ -181,7 +180,7 @@ export function useUpdateAccountMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error updating account:', error);
+      console.error('Error updating account:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error updating the account. Please try again.'),
@@ -211,7 +210,7 @@ export function useMoveAccountMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error moving account:', error);
+      console.error('Error moving account:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error moving the account. Please try again.'),
@@ -261,7 +260,7 @@ export function useImportPreviewTransactionsMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error importing preview transactions to account:', error);
+      console.error('Error importing preview transactions to account:', error);
       dispatchErrorNotification(
         dispatch,
         t(
@@ -338,7 +337,7 @@ export function useImportTransactionsMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error importing transactions to account:', error);
+      console.error('Error importing transactions to account:', error);
       dispatchErrorNotification(
         dispatch,
         t(
@@ -367,7 +366,7 @@ export function useUnlinkAccountMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error unlinking account:', error);
+      console.error('Error unlinking account:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error unlinking the account. Please try again.'),
@@ -419,7 +418,7 @@ export function useLinkAccountMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error linking account:', error);
+      console.error('Error linking account:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error linking the account. Please try again.'),
@@ -460,7 +459,7 @@ export function useLinkAccountSimpleFinMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error linking account to SimpleFIN:', error);
+      console.error('Error linking account to SimpleFIN:', error);
       dispatchErrorNotification(
         dispatch,
         t(
@@ -504,7 +503,7 @@ export function useLinkAccountPluggyAiMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error linking account to PluggyAI:', error);
+      console.error('Error linking account to PluggyAI:', error);
       dispatchErrorNotification(
         dispatch,
         t(
@@ -584,7 +583,7 @@ export function useSyncAccountsMutation() {
       const updatedAccounts: Array<AccountEntity['id']> = [];
 
       if (simpleFinAccounts.length > 0) {
-        logger.log('Using SimpleFin batch sync');
+        console.log('Using SimpleFin batch sync');
 
         const res = await sendThrow('simplefin-batch-sync', {
           ids: simpleFinAccounts.map(a => a.id),
@@ -650,7 +649,7 @@ export function useSyncAccountsMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error syncing accounts:', error);
+      console.error('Error syncing accounts:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error syncing accounts. Please try again.'),
@@ -763,7 +762,7 @@ export function useSyncAndDownloadMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error syncing accounts:', error);
+      console.error('Error syncing accounts:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error syncing accounts. Please try again.'),

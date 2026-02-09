@@ -5,13 +5,11 @@ import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import type { TFunction } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { sendCatch } from 'loot-core/platform/client/fetch';
-import type { send } from 'loot-core/platform/client/fetch';
-import { logger } from 'loot-core/platform/server/log';
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type {
-  CategoryEntity,
-  CategoryGroupEntity,
+import { sendCatch, type send } from 'loot-core/platform/client/fetch';
+import { type IntegerAmount } from 'loot-core/shared/util';
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { categoryQueries } from './queries';
@@ -99,7 +97,7 @@ export function useCreateCategoryMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error creating category:', error);
+      console.error('Error creating category:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error creating the category. Please try again.'),
@@ -125,7 +123,7 @@ export function useUpdateCategoryMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error updating category:', error);
+      console.error('Error updating category:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error updating the category. Please try again.'),
@@ -229,7 +227,7 @@ export function useDeleteCategoryMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error deleting category:', error);
+      console.error('Error deleting category:', error);
 
       if (error) {
         switch (error.cause) {
@@ -273,7 +271,7 @@ export function useMoveCategoryMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error moving category:', error);
+      console.error('Error moving category:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error moving the category. Please try again.'),
@@ -340,7 +338,7 @@ export function useCreateCategoryGroupMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error creating category group:', error);
+      console.error('Error creating category group:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error creating the category group. Please try again.'),
@@ -388,7 +386,7 @@ export function useUpdateCategoryGroupMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error updating category group:', error);
+      console.error('Error updating category group:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error updating the category group. Please try again.'),
@@ -471,7 +469,7 @@ export function useDeleteCategoryGroupMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error deleting category group:', error);
+      console.error('Error deleting category group:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error deleting the category group. Please try again.'),
@@ -498,7 +496,7 @@ export function useMoveCategoryGroupMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error moving category group:', error);
+      console.error('Error moving category group:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error moving the category group. Please try again.'),
@@ -827,7 +825,7 @@ export function useBudgetActions() {
       }
     },
     onError: error => {
-      logger.error('Error applying budget action:', error);
+      console.error('Error applying budget action:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error applying the budget action. Please try again.'),
