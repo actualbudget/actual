@@ -14,6 +14,8 @@ expr
       from,
       priority: template.priority, directive: template.directive
     }}
+  / template: template _ 'add'i _ amount: amount
+    { return { type: 'add', amount, priority: template.priority, directive: template.directive } }
   / template: template _ monthly: amount limit: limit?
     { return { type: 'simple', monthly, limit, priority: template.priority, directive: template.directive }}
   / template: template _ limit: limit
