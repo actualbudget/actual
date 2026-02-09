@@ -16,6 +16,11 @@ export const getInitialState = (template: Template | null): ReducerState => {
         template,
         displayType: 'simple',
       };
+    case 'add':
+      return {
+        template,
+        displayType: 'add',
+      };
     case 'percentage':
       return {
         template,
@@ -68,6 +73,19 @@ const changeType = (
           directive: 'template',
           type: 'simple',
           monthly: 5,
+          priority: DEFAULT_PRIORITY,
+        },
+      };
+      case 'add':
+      if (prevState.template.type === 'add') {
+        return prevState;
+      }
+      return {
+        displayType: visualType,
+        template: {
+          directive: 'template',
+          type: 'add',
+          amount: 5,
           priority: DEFAULT_PRIORITY,
         },
       };
