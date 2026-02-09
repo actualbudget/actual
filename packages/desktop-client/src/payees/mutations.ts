@@ -9,7 +9,6 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 
 import { sendCatch, type send } from 'loot-core/platform/client/fetch';
-import { logger } from 'loot-core/platform/server/log';
 import { type PayeeEntity } from 'loot-core/types/models';
 
 import { payeeQueries } from './queries';
@@ -67,7 +66,7 @@ export function useCreatePayeeMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error creating payee:', error);
+      console.error('Error creating payee:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error creating the payee. Please try again.'),
