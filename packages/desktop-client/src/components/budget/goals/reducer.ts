@@ -76,7 +76,7 @@ const changeType = (
           priority: DEFAULT_PRIORITY,
         },
       };
-      case 'add':
+    case 'add':
       if (prevState.template.type === 'add') {
         return prevState;
       }

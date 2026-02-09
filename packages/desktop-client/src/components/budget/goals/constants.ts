@@ -1,11 +1,11 @@
 import {
+  type AddTemplate,
   type AverageTemplate,
   type CopyTemplate,
   type PercentageTemplate,
   type PeriodicTemplate,
   type ScheduleTemplate,
   type SimpleTemplate,
-  type AddTemplate,
 } from 'loot-core/types/models/templates';
 
 export const displayTemplateTypes = [
