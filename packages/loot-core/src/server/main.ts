@@ -305,6 +305,7 @@ export async function init(config: InitConfig) {
         const { TokenExpiredError } = await import('./errors');
         throw new TokenExpiredError();
       }
+<<<<<<< HEAD
     } else if ('sessionToken' in config && config.sessionToken) {
       // Session token authentication
       await runHandler(handlers['subscribe-set-token'], {
