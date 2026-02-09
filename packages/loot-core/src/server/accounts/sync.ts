@@ -459,8 +459,179 @@ async function normalizeTransactions(
 
 async function normalizeBankSyncTransactions(transactions, acctId) {
   const payeesToCreate = new Map();
+  const CATEGORY_GROUP_FALLBACK_NAME = 'Imported';
 
-  const [customMappingsRaw, importPending, importNotes] = await Promise.all([
+  let categoryCacheLoaded = false;
+  let defaultExpenseCategoryGroupId: string | null = null;
+  const categoriesByNormalizedName = new Map<string, db.DbCategory>();
+
+  function normalizeCategoryLookupKey(name: string): string {
+    return name
+      .trim()
+      .toLowerCase()
+      .split(/[\s_]+/)
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  async function reloadCategoryCache() {
+    const categories = await db.getCategories();
+    categoriesByNormalizedName.clear();
+
+    for (const category of categories) {
+      const key = normalizeCategoryLookupKey(category.name);
+      if (!categoriesByNormalizedName.has(key)) {
+        categoriesByNormalizedName.set(key, category);
+      }
+    }
+
+    categoryCacheLoaded = true;
+  }
+
+  async function getOrCreateDefaultExpenseCategoryGroupId() {
+    if (defaultExpenseCategoryGroupId) {
+      return defaultExpenseCategoryGroupId;
+    }
+
+    const groups = await db.getCategoriesGrouped();
+    const visibleExpenseGroup = groups.find(
+      group => group.is_income === 0 && group.hidden === 0,
+    );
+    if (visibleExpenseGroup) {
+      defaultExpenseCategoryGroupId = visibleExpenseGroup.id;
+      logger.log('Bank sync category group selected', {
+        accountId: acctId,
+        decision: 'existing-visible-expense-group',
+        groupId: visibleExpenseGroup.id,
+        groupName: visibleExpenseGroup.name,
+      });
+      return defaultExpenseCategoryGroupId;
+    }
+
+    const anyExpenseGroup = groups.find(group => group.is_income === 0);
+    if (anyExpenseGroup) {
+      defaultExpenseCategoryGroupId = anyExpenseGroup.id;
+      logger.log('Bank sync category group selected', {
+        accountId: acctId,
+        decision: 'existing-expense-group',
+        groupId: anyExpenseGroup.id,
+        groupName: anyExpenseGroup.name,
+      });
+      return defaultExpenseCategoryGroupId;
+    }
+
+    try {
+      defaultExpenseCategoryGroupId = await db.insertCategoryGroup({
+        name: CATEGORY_GROUP_FALLBACK_NAME,
+        is_income: 0,
+        hidden: 0,
+      });
+      logger.log('Bank sync category group selected', {
+        accountId: acctId,
+        decision: 'created-fallback-group',
+        groupId: defaultExpenseCategoryGroupId,
+        groupName: CATEGORY_GROUP_FALLBACK_NAME,
+      });
+      return defaultExpenseCategoryGroupId;
+    } catch {
+      const refreshedGroups = await db.getCategoriesGrouped();
+      const fallbackGroup = refreshedGroups.find(
+        group =>
+          group.is_income === 0 &&
+          normalizeCategoryLookupKey(group.name) ===
+            normalizeCategoryLookupKey(CATEGORY_GROUP_FALLBACK_NAME),
+      );
+
+      if (!fallbackGroup) {
+        throw new Error(
+          'Unable to resolve a category group for bank-sync imported categories',
+        );
+      }
+
+      defaultExpenseCategoryGroupId = fallbackGroup.id;
+      logger.log('Bank sync category group selected', {
+        accountId: acctId,
+        decision: 'reused-race-created-fallback-group',
+        groupId: fallbackGroup.id,
+        groupName: fallbackGroup.name,
+      });
+      return defaultExpenseCategoryGroupId;
+    }
+  }
+
+  async function resolveOrCreateCategoryId(categoryName: string) {
+    const normalizedCategoryName = normalizeCategoryLookupKey(categoryName);
+    if (!categoryCacheLoaded) {
+      await reloadCategoryCache();
+    }
+
+    const existingCategory = categoriesByNormalizedName.get(normalizedCategoryName);
+    if (existingCategory) {
+      return {
+        categoryId: existingCategory.id,
+        decision: 'resolved-existing-category',
+      };
+    }
+
+    const groupId = await getOrCreateDefaultExpenseCategoryGroupId();
+
+    try {
+      const categoryId = await db.insertCategory({
+        name: categoryName,
+        cat_group: groupId,
+        is_income: 0,
+      });
+
+      const insertedCategory = await db.getCategory(categoryId);
+      if (insertedCategory) {
+        categoriesByNormalizedName.set(normalizedCategoryName, insertedCategory);
+      }
+
+      return {
+        categoryId,
+        decision: 'created-category',
+      };
+    } catch {
+      await reloadCategoryCache();
+      const fallback = categoriesByNormalizedName.get(normalizedCategoryName);
+      if (!fallback) {
+        throw new Error(
+          `Unable to create or resolve imported category: ${categoryName}`,
+        );
+      }
+
+      return {
+        categoryId: fallback.id,
+        decision: 'resolved-after-create-race',
+      };
+    }
+  }
+
+  function normalizeCategoryTag(tag: unknown): string | null {
+    if (typeof tag !== 'string') {
+      return null;
+    }
+
+    const normalized = tag.trim().replace(/^#+/, '');
+
+    return normalized || null;
+  }
+
+  function normalizeImportedCategory(category: string | null): string | null {
+    if (!category) {
+      return null;
+    }
+
+    return category
+      .toLowerCase()
+      .split(/[\s_]+/)
+      .filter(Boolean)
+      .map(part => part[0].toUpperCase() + part.slice(1))
+      .join(' ');
+  }
+
+  const [customMappingsRaw, importPending, importNotes, importCategory] =
+    await Promise.all([
     aqlQuery(
       q('preferences')
         .filter({ id: `custom-sync-mappings-${acctId}` })
@@ -474,6 +645,11 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     aqlQuery(
       q('preferences')
         .filter({ id: `sync-import-notes-${acctId}` })
+        .select('value'),
+    ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
+    aqlQuery(
+      q('preferences')
+        .filter({ id: `sync-import-category-${acctId}` })
         .select('value'),
     ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
   ]);
@@ -497,6 +673,45 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     const date = trans[mapping.get('date')] ?? trans.date;
     const payeeName = trans[mapping.get('payee')] ?? trans.payeeName;
     const notes = trans[mapping.get('notes')];
+    const categoryMappingField = mapping.get('category');
+    const categoryValue = categoryMappingField
+      ? normalizeCategoryTag(trans[categoryMappingField])
+      : null;
+    const importedCategoryName = normalizeImportedCategory(categoryValue);
+    let selectedCategory = trans.category ?? null;
+
+    if (!importCategory) {
+      logger.log('Bank sync category assignment skipped', {
+        accountId: acctId,
+        reason: 'import-category-disabled',
+        receivedCategoryValue: categoryValue,
+      });
+    } else if (!categoryMappingField) {
+      logger.log('Bank sync category assignment skipped', {
+        accountId: acctId,
+        reason: 'category-field-unmapped',
+        receivedCategoryValue: null,
+      });
+    } else if (!importedCategoryName) {
+      logger.log('Bank sync category assignment skipped', {
+        accountId: acctId,
+        reason: 'no-category-value',
+        receivedCategoryValue: categoryValue,
+      });
+    } else {
+      const { categoryId, decision } = await resolveOrCreateCategoryId(
+        importedCategoryName,
+      );
+      selectedCategory = categoryId;
+
+      logger.log('Bank sync category assignment resolved', {
+        accountId: acctId,
+        receivedCategoryValue: categoryValue,
+        normalizedCategoryValue: importedCategoryName,
+        categoryId,
+        decision,
+      });
+    }
 
     // Validate the date because we do some stuff with it. The db
     // layer does better validation, but this will give nicer errors
@@ -532,7 +747,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         account: trans.account,
         date,
         notes: importNotes && notes ? notes.trim().replace(/#/g, '##') : null,
-        category: trans.category ?? null,
+        category: selectedCategory,
         imported_id,
         imported_payee: trans.imported_payee,
         cleared: trans.cleared,

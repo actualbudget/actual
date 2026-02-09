@@ -134,6 +134,43 @@ describe('bunq-client', () => {
     );
   });
 
+  it('supports event listing with monetary account filter and pagination params', async () => {
+    const { privateKeyPem } = generateBunqKeyPair();
+
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({ Response: [] }),
+      headers: {
+        get() {
+          return null;
+        },
+      },
+    });
+
+    const client = new BunqClient({
+      apiKey: 'api-key',
+      environment: 'sandbox',
+      clientPrivateKey: privateKeyPem,
+      sessionToken: 'session-token',
+      fetchImpl,
+    });
+
+    await client.listEvents('44', {
+      count: 25,
+      olderId: '500',
+      monetaryAccountId: 'acc-1',
+      displayUserEvent: false,
+    });
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '/user/44/event?count=25&older_id=500&monetary_account_id=acc-1&display_user_event=false',
+      ),
+      expect.any(Object),
+    );
+  });
+
   it('maps 429 responses to rate limit errors', async () => {
     const { privateKeyPem } = generateBunqKeyPair();
 

@@ -14,6 +14,7 @@ import { generateBunqKeyPair, getPublicKeyFromPrivateKey } from './bunq-crypto';
 
 const DEFAULT_PAGE_SIZE = 200;
 const MAX_PAGES = 20;
+const MAX_EVENT_PAGES = 20;
 
 /** @typedef {'sandbox'|'production'} BunqEnvironment */
 
@@ -341,7 +342,676 @@ function extractPayments(responseJson) {
     .map(payment => ({ ...payment, id: String(payment.id) }));
 }
 
-export function normalizeBunqPayment(payment) {
+function extractEvents(responseJson) {
+  const entries = responseJson?.Response;
+  if (!Array.isArray(entries)) {
+    throw new BunqInvalidResponseError('Unexpected Bunq event response shape');
+  }
+
+  return entries
+    .map(entry => entry?.Event)
+    .filter(Boolean)
+    .map(event => ({ ...event, id: String(event.id) }));
+}
+
+function getPaymentIdFromEvent(event) {
+  const candidates = [
+    event?.object?.Payment?.id,
+    event?.object_data_at_event?.Payment?.id,
+    event?.object?.PaymentBatch?.payment?.id,
+    event?.object_data_at_event?.PaymentBatch?.payment?.id,
+  ];
+
+  for (const candidate of candidates) {
+    if (candidate != null && String(candidate).trim() !== '') {
+      return String(candidate);
+    }
+  }
+
+  return null;
+}
+
+function normalizeCategoryType(categoryType) {
+  if (typeof categoryType !== 'string') {
+    return null;
+  }
+
+  const trimmed = categoryType.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  return trimmed
+    .toLowerCase()
+    .split(/[\s_]+/)
+    .filter(Boolean)
+    .map(part => part[0].toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function getEventCategoryType(event) {
+  const categoryType =
+    event?.additional_transaction_information?.category?.description ||
+    event?.additional_transaction_information?.category?.type ||
+    null;
+
+  return normalizeCategoryType(categoryType);
+}
+
+function normalizeDay(value) {
+  if (value == null) {
+    return null;
+  }
+
+  const day = String(value).slice(0, 10);
+  return day || null;
+}
+
+function normalizeAmount(value) {
+  const parsed = Number(value ?? NaN);
+  if (!Number.isFinite(parsed)) {
+    return null;
+  }
+  return parsed.toFixed(2);
+}
+
+function normalizeCounterpartyIdentity(alias) {
+  if (!alias) {
+    return null;
+  }
+
+  const candidate = Array.isArray(alias) ? alias[0] : alias;
+  if (!candidate || typeof candidate !== 'object') {
+    return null;
+  }
+
+  const labelUser = candidate.label_user;
+  const identityParts = [
+    candidate.iban,
+    candidate.email,
+    candidate.phone_number,
+    labelUser?.uuid,
+    candidate.display_name,
+  ]
+    .filter(Boolean)
+    .map(part => String(part).trim().toLowerCase());
+
+  if (identityParts.length === 0) {
+    return null;
+  }
+
+  return identityParts.join('|');
+}
+
+function getEventPaymentLike(event) {
+  const normalizeMasterCardAction = masterCardAction => {
+    if (!masterCardAction || typeof masterCardAction !== 'object') {
+      return null;
+    }
+
+    return {
+      created: masterCardAction.created,
+      amount: masterCardAction.amount_billing || masterCardAction.amount_local || null,
+      monetary_account_id: masterCardAction.monetary_account_id,
+      counterparty_alias:
+        masterCardAction.counterparty_alias ||
+        masterCardAction.merchant_alias ||
+        masterCardAction.alias ||
+        null,
+    };
+  };
+
+  const directObject = event?.object?.Payment;
+  if (directObject && typeof directObject === 'object') {
+    return directObject;
+  }
+
+  const directMasterCardAction = normalizeMasterCardAction(
+    event?.object?.MasterCardAction,
+  );
+  if (directMasterCardAction) {
+    return directMasterCardAction;
+  }
+
+  const objectDataAtEvent = event?.object_data_at_event?.Payment;
+  if (objectDataAtEvent && typeof objectDataAtEvent === 'object') {
+    return objectDataAtEvent;
+  }
+
+  const objectDataAtEventMasterCardAction = normalizeMasterCardAction(
+    event?.object_data_at_event?.MasterCardAction,
+  );
+  if (objectDataAtEventMasterCardAction) {
+    return objectDataAtEventMasterCardAction;
+  }
+
+  const batchPayment =
+    event?.object?.PaymentBatch?.payment ||
+    event?.object_data_at_event?.PaymentBatch?.payment;
+
+  if (Array.isArray(batchPayment)) {
+    return batchPayment[0] || null;
+  }
+
+  return batchPayment && typeof batchPayment === 'object' ? batchPayment : null;
+}
+
+function getEventObjectTypes(event) {
+  const types = [];
+
+  const objectTypes = event?.object && typeof event.object === 'object' ? Object.keys(event.object) : [];
+  for (const type of objectTypes) {
+    types.push(`object.${type}`);
+  }
+
+  const objectDataTypes =
+    event?.object_data_at_event && typeof event.object_data_at_event === 'object'
+      ? Object.keys(event.object_data_at_event)
+      : [];
+  for (const type of objectDataTypes) {
+    types.push(`object_data_at_event.${type}`);
+  }
+
+  return types.length > 0 ? [...new Set(types)] : ['[none]'];
+}
+
+function getEventRequestInquiryLike(event) {
+  const findRequestLikeCandidate = source => {
+    if (!source || typeof source !== 'object') {
+      return null;
+    }
+
+    const directCandidates = [source, source?.RequestInquiry];
+    for (const directCandidate of directCandidates) {
+      if (!directCandidate || typeof directCandidate !== 'object') {
+        continue;
+      }
+
+      if (directCandidate.amount_responded || directCandidate.amount_inquired) {
+        return directCandidate;
+      }
+    }
+
+    for (const value of Object.values(source)) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        continue;
+      }
+
+      if (value.amount_responded || value.amount_inquired) {
+        return value;
+      }
+    }
+
+    return null;
+  };
+
+  const candidates = [event?.object, event?.object_data_at_event];
+
+  for (const candidate of candidates) {
+    const requestLikeCandidate = findRequestLikeCandidate(candidate);
+    if (requestLikeCandidate) {
+      return requestLikeCandidate;
+    }
+  }
+
+  return null;
+}
+
+function flipNormalizedAmount(amount) {
+  if (!amount) {
+    return null;
+  }
+
+  const parsed = Number(amount);
+  if (!Number.isFinite(parsed)) {
+    return null;
+  }
+
+  return (-parsed).toFixed(2);
+}
+
+function buildMatchKey({ day, amount, currency, accountId, counterpartyIdentity }) {
+  if (!day || !amount || !currency || !accountId) {
+    return null;
+  }
+
+  const baseKey = [
+    day,
+    amount,
+    String(currency).trim().toUpperCase(),
+    String(accountId).trim(),
+  ].join('|');
+
+  if (counterpartyIdentity) {
+    return `${baseKey}|${counterpartyIdentity}`;
+  }
+
+  return baseKey;
+}
+
+function getPaymentMatchKeys(payment, fallbackAccountId) {
+  const day = normalizeDay(payment?.created);
+  const amount = normalizeAmount(payment?.amount?.value);
+  const currency = payment?.amount?.currency;
+  const accountId = payment?.monetary_account_id || fallbackAccountId;
+  const counterpartyIdentity = normalizeCounterpartyIdentity(
+    payment?.counterparty_alias,
+  );
+
+  return {
+    strictKey: buildMatchKey({
+      day,
+      amount,
+      currency,
+      accountId,
+      counterpartyIdentity,
+    }),
+    broadKey: buildMatchKey({
+      day,
+      amount,
+      currency,
+      accountId,
+      counterpartyIdentity: null,
+    }),
+  };
+}
+
+function getEventMatchKeys(event, fallbackAccountId) {
+  const paymentLike = getEventPaymentLike(event);
+  const requestInquiryLike = paymentLike ? null : getEventRequestInquiryLike(event);
+  const objectTypes = getEventObjectTypes(event);
+
+  const inquiryAmountSource =
+    requestInquiryLike?.amount_responded || requestInquiryLike?.amount_inquired;
+
+  const dayCandidates = [
+    normalizeDay(event?.created),
+    normalizeDay(paymentLike?.created),
+    normalizeDay(requestInquiryLike?.time_responded),
+    normalizeDay(requestInquiryLike?.created),
+  ].filter(Boolean);
+  const uniqueDayCandidates = [...new Set(dayCandidates)];
+  const day = uniqueDayCandidates[0] || null;
+  const amount = normalizeAmount(
+    paymentLike?.amount?.value || inquiryAmountSource?.value,
+  );
+  const currency = paymentLike?.amount?.currency || inquiryAmountSource?.currency;
+  const accountId =
+    paymentLike?.monetary_account_id ||
+    requestInquiryLike?.monetary_account_id ||
+    event?.monetary_account_id ||
+    fallbackAccountId;
+  const counterpartyIdentity = normalizeCounterpartyIdentity(
+    paymentLike?.counterparty_alias || requestInquiryLike?.counterparty_alias,
+  );
+
+  const strictKey = buildMatchKey({
+    day,
+    amount,
+    currency,
+    accountId,
+    counterpartyIdentity,
+  });
+  const broadKey = buildMatchKey({
+    day,
+    amount,
+    currency,
+    accountId,
+    counterpartyIdentity: null,
+  });
+
+  const flippedAmount = flipNormalizedAmount(amount);
+  const flippedStrictKey = buildMatchKey({
+    day,
+    amount: flippedAmount,
+    currency,
+    accountId,
+    counterpartyIdentity,
+  });
+  const flippedBroadKey = buildMatchKey({
+    day,
+    amount: flippedAmount,
+    currency,
+    accountId,
+    counterpartyIdentity: null,
+  });
+
+  return {
+    strictKey,
+    broadKey,
+    flippedStrictKey,
+    flippedBroadKey,
+    alternateDays: uniqueDayCandidates.slice(1),
+    fields: {
+      amount,
+      currency,
+      accountId,
+      counterpartyIdentity,
+    },
+    hasComputedKey: Boolean(strictKey || broadKey),
+    objectTypes,
+    missing: {
+      amount: !amount,
+      currency: !currency,
+      account: !accountId,
+      counterparty: !counterpartyIdentity,
+    },
+  };
+}
+
+function appendToIndex(index, key, paymentId) {
+  if (!key) {
+    return;
+  }
+
+  const existing = index.get(key);
+  if (!existing) {
+    index.set(key, [paymentId]);
+    return;
+  }
+
+  if (!existing.includes(paymentId)) {
+    existing.push(paymentId);
+  }
+}
+
+function getFallbackCandidates({
+  event,
+  accountId,
+  strictIndex,
+  broadIndex,
+  paymentIdSet,
+  categorizedPaymentIds,
+}) {
+  const eventKeys = getEventMatchKeys(event, accountId);
+
+  const resolveCandidates = (strictKey, broadKey) => {
+    const strictCandidates = strictKey ? strictIndex.get(strictKey) || [] : [];
+    let currentCandidates = strictCandidates;
+    if (currentCandidates.length === 0 && broadKey) {
+      currentCandidates = broadIndex.get(broadKey) || [];
+    }
+    return currentCandidates;
+  };
+
+  const buildDayKeys = day => {
+    const amount = eventKeys.fields?.amount || null;
+    const currency = eventKeys.fields?.currency || null;
+    const accountIdFromKey = eventKeys.fields?.accountId || null;
+    const counterpartyIdentity = eventKeys.fields?.counterpartyIdentity || null;
+
+    const strictKey = buildMatchKey({
+      day,
+      amount,
+      currency,
+      accountId: accountIdFromKey,
+      counterpartyIdentity,
+    });
+    const broadKey = buildMatchKey({
+      day,
+      amount,
+      currency,
+      accountId: accountIdFromKey,
+      counterpartyIdentity: null,
+    });
+    const flippedAmount = flipNormalizedAmount(amount);
+    const flippedStrictKey = buildMatchKey({
+      day,
+      amount: flippedAmount,
+      currency,
+      accountId: accountIdFromKey,
+      counterpartyIdentity,
+    });
+    const flippedBroadKey = buildMatchKey({
+      day,
+      amount: flippedAmount,
+      currency,
+      accountId: accountIdFromKey,
+      counterpartyIdentity: null,
+    });
+
+    return { strictKey, broadKey, flippedStrictKey, flippedBroadKey };
+  };
+
+  let usedSignFlip = false;
+  let candidates = resolveCandidates(eventKeys.strictKey, eventKeys.broadKey);
+
+  if (candidates.length === 0) {
+    const flippedCandidates = resolveCandidates(
+      eventKeys.flippedStrictKey,
+      eventKeys.flippedBroadKey,
+    );
+    if (flippedCandidates.length > 0) {
+      usedSignFlip = true;
+      candidates = flippedCandidates;
+    }
+  }
+
+  if (candidates.length === 0 && Array.isArray(eventKeys.alternateDays)) {
+    for (const alternateDay of eventKeys.alternateDays) {
+      const dayKeys = buildDayKeys(alternateDay);
+      candidates = resolveCandidates(dayKeys.strictKey, dayKeys.broadKey);
+      if (candidates.length === 0) {
+        const flippedCandidates = resolveCandidates(
+          dayKeys.flippedStrictKey,
+          dayKeys.flippedBroadKey,
+        );
+        if (flippedCandidates.length > 0) {
+          usedSignFlip = true;
+          candidates = flippedCandidates;
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+  }
+
+  const filteredCandidates = candidates.filter(candidateId => {
+    if (categorizedPaymentIds.has(candidateId)) {
+      return false;
+    }
+    if (paymentIdSet && !paymentIdSet.has(candidateId)) {
+      return false;
+    }
+    return true;
+  });
+
+  return {
+    candidates: filteredCandidates,
+    usedSignFlip,
+    hasComputedKey: eventKeys.hasComputedKey,
+    objectTypes: eventKeys.objectTypes,
+    missing: eventKeys.missing,
+  };
+}
+
+function incrementObjectTypeMissCoverage(bucket, objectTypes) {
+  if (!bucket || typeof bucket !== 'object') {
+    return;
+  }
+
+  const keys = Array.isArray(objectTypes) && objectTypes.length > 0 ? objectTypes : ['[unknown]'];
+  for (const objectType of keys) {
+    bucket[objectType] = (bucket[objectType] || 0) + 1;
+  }
+}
+
+async function listEventsForAccount(client, userId, accountId, payments = []) {
+  const paymentIdSet =
+    Array.isArray(payments) && payments.length > 0
+      ? new Set(payments.map(payment => String(payment.id)))
+      : null;
+  const categoryByPaymentId = new Map();
+  const seenEventIds = new Set();
+  const strictFallbackIndex = new Map();
+  const broadFallbackIndex = new Map();
+  const stats = {
+    pagesFetched: 0,
+    eventsScanned: 0,
+    idMatches: 0,
+    fallbackMatches: 0,
+    fallbackSignFlipMatches: 0,
+    ambiguousFallbacks: 0,
+    eventsWithCategory: 0,
+    fallbackEligibleEvents: 0,
+    fallbackEventsWithComputedKey: 0,
+    fallbackEventsMissingKey: 0,
+    fallbackMissReasons: {
+      missingAmount: 0,
+      missingCurrency: 0,
+      missingAccount: 0,
+      missingCounterparty: 0,
+      noCandidate: 0,
+      ambiguous: 0,
+    },
+    fallbackMissObjectTypes: {
+      missingKey: {},
+      noCandidate: {},
+    },
+  };
+
+  if (Array.isArray(payments) && payments.length > 0) {
+    for (const payment of payments) {
+      const paymentId = String(payment.id);
+      const keys = getPaymentMatchKeys(payment, accountId);
+      appendToIndex(strictFallbackIndex, keys.strictKey, paymentId);
+      appendToIndex(broadFallbackIndex, keys.broadKey, paymentId);
+    }
+  }
+  let olderId = null;
+
+  for (let i = 0; i < MAX_EVENT_PAGES; i++) {
+    const response = await client.listEvents(userId, {
+      count: DEFAULT_PAGE_SIZE,
+      olderId,
+      monetaryAccountId: accountId,
+      displayUserEvent: false,
+    });
+    stats.pagesFetched += 1;
+
+    const pageEvents = extractEvents(response);
+    for (const event of pageEvents) {
+      if (seenEventIds.has(event.id)) {
+        continue;
+      }
+
+      seenEventIds.add(event.id);
+      stats.eventsScanned += 1;
+
+      const categoryType = getEventCategoryType(event);
+      if (!categoryType) {
+        continue;
+      }
+      stats.eventsWithCategory += 1;
+
+      const paymentId = getPaymentIdFromEvent(event);
+      if (paymentId) {
+        if (!categoryByPaymentId.has(paymentId)) {
+          if (!paymentIdSet || paymentIdSet.has(paymentId)) {
+            categoryByPaymentId.set(paymentId, categoryType);
+            stats.idMatches += 1;
+          }
+        }
+        continue;
+      }
+
+      if (!paymentIdSet || paymentIdSet.size === 0) {
+        continue;
+      }
+
+      stats.fallbackEligibleEvents += 1;
+
+      const fallback = getFallbackCandidates({
+        event,
+        accountId,
+        strictIndex: strictFallbackIndex,
+        broadIndex: broadFallbackIndex,
+        paymentIdSet,
+        categorizedPaymentIds: categoryByPaymentId,
+      });
+
+      if (fallback.hasComputedKey) {
+        stats.fallbackEventsWithComputedKey += 1;
+      } else {
+        stats.fallbackEventsMissingKey += 1;
+        incrementObjectTypeMissCoverage(
+          stats.fallbackMissObjectTypes.missingKey,
+          fallback.objectTypes,
+        );
+      }
+
+      const fallbackCandidates = fallback.candidates;
+
+      if (fallbackCandidates.length === 1) {
+        categoryByPaymentId.set(fallbackCandidates[0], categoryType);
+        stats.fallbackMatches += 1;
+        if (fallback.usedSignFlip) {
+          stats.fallbackSignFlipMatches += 1;
+        }
+      } else if (fallbackCandidates.length > 1) {
+        stats.ambiguousFallbacks += 1;
+        stats.fallbackMissReasons.ambiguous += 1;
+        if (fallback.missing.counterparty) {
+          stats.fallbackMissReasons.missingCounterparty += 1;
+        }
+      } else {
+        stats.fallbackMissReasons.noCandidate += 1;
+        incrementObjectTypeMissCoverage(
+          stats.fallbackMissObjectTypes.noCandidate,
+          fallback.objectTypes,
+        );
+        if (fallback.missing.amount) {
+          stats.fallbackMissReasons.missingAmount += 1;
+        }
+        if (fallback.missing.currency) {
+          stats.fallbackMissReasons.missingCurrency += 1;
+        }
+        if (fallback.missing.account) {
+          stats.fallbackMissReasons.missingAccount += 1;
+        }
+        if (fallback.missing.counterparty) {
+          stats.fallbackMissReasons.missingCounterparty += 1;
+        }
+      }
+    }
+
+    if (paymentIdSet && categoryByPaymentId.size >= paymentIdSet.size) {
+      break;
+    }
+
+    const pagination = extractPaginationCursor(response);
+    if (!pagination.olderId || pagination.olderId === olderId) {
+      break;
+    }
+
+    olderId = pagination.olderId;
+  }
+
+  /*console.log('bunq: event category match coverage', {
+    accountId,
+    pagesFetched: stats.pagesFetched,
+    eventsScanned: stats.eventsScanned,
+    eventsWithCategory: stats.eventsWithCategory,
+    idMatches: stats.idMatches,
+    fallbackMatches: stats.fallbackMatches,
+    fallbackSignFlipMatches: stats.fallbackSignFlipMatches,
+    ambiguousFallbacks: stats.ambiguousFallbacks,
+    fallbackEligibleEvents: stats.fallbackEligibleEvents,
+    fallbackEventsWithComputedKey: stats.fallbackEventsWithComputedKey,
+    fallbackEventsMissingKey: stats.fallbackEventsMissingKey,
+    fallbackMissReasons: stats.fallbackMissReasons,
+    fallbackMissObjectTypes: stats.fallbackMissObjectTypes,
+    unmatchedPayments:
+      paymentIdSet?.size != null
+        ? Math.max(paymentIdSet.size - categoryByPaymentId.size, 0)
+        : null,
+  });*/
+
+  return categoryByPaymentId;
+}
+
+export function normalizeBunqPayment(payment, categoryType = null) {
   const value = Number(payment?.amount?.value ?? 0);
   const amount = Number.isFinite(value) ? value.toFixed(2) : '0.00';
 
@@ -362,6 +1032,20 @@ export function normalizeBunqPayment(payment) {
     payment?.description ||
     'bunq';
 
+  const notesBase = typeof payment?.description === 'string' ? payment.description.trim() : '';
+  const notes = notesBase || null;
+  const normalizedCategoryType = normalizeCategoryType(categoryType);
+
+  /*console.log('bunq: normalized payment', {
+    paymentId: payment?.id,
+    date,
+    amount,
+    currency: payment?.amount?.currency,
+    payeeName,
+    notes,
+    categoryType,
+    normalizedCategoryType,
+  });*/
   return {
     booked: true,
     date,
@@ -371,7 +1055,8 @@ export function normalizeBunqPayment(payment) {
     transactedDate: date,
     sortOrder: Date.parse(payment.created || date),
     payeeName,
-    notes: payment?.description || null,
+    notes,
+    transactionCategory: normalizedCategoryType,
     transactionAmount: {
       amount,
       currency: payment?.amount?.currency || 'EUR',
@@ -409,16 +1094,7 @@ function mergeNewerId(currentNewerId, payments) {
 }
 
 async function getCurrentAccountBalance(client, userId, accountId) {
-  console.log('bunq: fetching monetary accounts for current balance', {
-    userId,
-    accountId,
-  });
   const accountsResponse = await client.listMonetaryAccounts(userId);
-  console.log('bunq: received monetary accounts response', {
-    JSON: JSON.stringify(accountsResponse),
-    accountId,
-    responseItems: (accountsResponse?.Response || []).length,
-  });
   const account = (accountsResponse?.Response || [])
     .map(normalizeMonetaryAccountItem)
     .find(acc => acc?.account_id === String(accountId));
@@ -496,15 +1172,15 @@ export const bunqService = {
       client.sessionToken = context.sessionToken;
       client.serverPublicKey = context.serverPublicKey;
 
-      console.log('bunq: listing monetary accounts', {
+      /*console.log('bunq: listing monetary accounts', {
         userId: context.userId,
-      });
+      });*/
       const response = await client.listMonetaryAccounts(context.userId);
-      console.log('bunq: listed monetary accounts', {
+      /*console.log('bunq: listed monetary accounts', {
         userId: context.userId,
         response: JSON.stringify(response),
         responseItems: (response?.Response || []).length,
-      });
+      });*/
       const responseItems = response?.Response || [];
       const activeResponseItems = responseItems.filter(isActiveMonetaryAccount);
       const filteredItems = [];
@@ -634,9 +1310,39 @@ export const bunqService = {
         }
       }
 
+      let paymentCategoryTypeById = new Map();
+      try {
+        paymentCategoryTypeById = await listEventsForAccount(
+          client,
+          context.userId,
+          accountId,
+          payments,
+        );
+      } catch (error) {
+        console.warn(
+          'bunq: failed to fetch or map events; importing transactions without category tags',
+          {
+            userId: context.userId,
+            accountId,
+            error: error instanceof Error ? error.message : String(error),
+          },
+        );
+      }
+
       const all = payments
-        .map(normalizeBunqPayment)
+        .map(payment => {
+          const categoryType = paymentCategoryTypeById.get(String(payment.id)) || null;
+          return normalizeBunqPayment(payment, categoryType);
+        })
         .sort((a, b) => (b.sortOrder || 0) - (a.sortOrder || 0));
+
+      const categorizedTransactions = all.filter(tx => tx.transactionCategory).length;
+      /*console.log('bunq: transaction category assignment summary', {
+        accountId,
+        totalTransactions: all.length,
+        categorizedTransactions,
+        uncategorizedTransactions: all.length - categorizedTransactions,
+      });*/
 
       const startingBalance = await getCurrentAccountBalance(
         client,

@@ -156,6 +156,43 @@ export class BunqClient {
   }
 
   /**
+   * @param {string} userId
+   * @param {{
+   *   count?: number;
+   *   olderId?: string | null;
+   *   monetaryAccountId?: string | null;
+   *   displayUserEvent?: boolean;
+   * }} [pagination]
+   */
+  async listEvents(userId, pagination) {
+    const query = new URLSearchParams();
+
+    if (pagination?.count != null) {
+      query.set('count', String(pagination.count));
+    }
+    if (pagination?.olderId) {
+      query.set('older_id', String(pagination.olderId));
+    }
+    if (pagination?.monetaryAccountId) {
+      query.set('monetary_account_id', String(pagination.monetaryAccountId));
+    }
+    if (pagination?.displayUserEvent != null) {
+      query.set('display_user_event', String(Boolean(pagination.displayUserEvent)));
+    }
+
+    const queryString = query.toString();
+
+    return await this.request(
+      `/user/${userId}/event${queryString ? `?${queryString}` : ''}`,
+      {
+        method: 'GET',
+        tokenType: 'session',
+        jsonBody: null,
+      },
+    );
+  }
+
+  /**
    * @param {string} path
    * @param {{
    *   method: 'GET' | 'POST';

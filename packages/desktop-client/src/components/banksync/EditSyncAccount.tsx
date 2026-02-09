@@ -24,7 +24,7 @@ import { useDispatch } from '@desktop-client/redux';
 
 export type TransactionDirection = 'payment' | 'deposit';
 
-type MappableActualFields = 'date' | 'payee' | 'notes';
+type MappableActualFields = 'date' | 'payee' | 'notes' | 'category';
 
 type MappableField = {
   actualField: MappableActualFields;
@@ -92,6 +92,14 @@ const mappableFields: MappableField[] = [
       'merchant.cnpj',
     ],
   },
+  {
+    actualField: 'category',
+    syncFields: [
+      'transactionCategory',
+      'category',
+      'notes',
+    ],
+  },
 ];
 
 function getByPath(obj: unknown, path: string): unknown {
@@ -120,7 +128,7 @@ export const getFields = (
     syncFields: field.syncFields
       .map(syncField => {
         const value = getByPath(transaction, syncField);
-        return value !== undefined
+        return value !== undefined || field.actualField === 'category'
           ? { field: syncField, example: String(value) }
           : null;
       })
@@ -144,6 +152,8 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     setImportPending,
     importNotes,
     setImportNotes,
+    importCategory,
+    setImportCategory,
     reimportDeleted,
     setReimportDeleted,
     importTransactions,
@@ -220,6 +230,8 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             setImportPending={setImportPending}
             importNotes={importNotes}
             setImportNotes={setImportNotes}
+            importCategory={importCategory}
+            setImportCategory={setImportCategory}
             reimportDeleted={reimportDeleted}
             setReimportDeleted={setReimportDeleted}
             importTransactions={importTransactions}

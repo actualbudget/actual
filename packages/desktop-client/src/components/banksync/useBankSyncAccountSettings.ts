@@ -31,6 +31,9 @@ export function useBankSyncAccountSettings(accountId: string) {
   );
   const [savedImportTransactions = true, setSavedImportTransactions] =
     useSyncedPref(`sync-import-transactions-${accountId}`);
+  const [savedImportCategory = true, setSavedImportCategory] = useSyncedPref(
+    `sync-import-category-${accountId}`,
+  );
 
   const [savedUpdateDates = false, setSavedUpdateDates] = useSyncedPref(
     `sync-update-dates-${accountId}`,
@@ -52,6 +55,9 @@ export function useBankSyncAccountSettings(accountId: string) {
   );
   const [importTransactions, setImportTransactions] = useState(
     String(savedImportTransactions) === 'true',
+  );
+  const [importCategory, setImportCategory] = useState(
+    String(savedImportCategory) === 'true',
   );
   const [updateDates, setUpdateDates] = useState(
     String(savedUpdateDates) === 'true',
@@ -91,6 +97,7 @@ export function useBankSyncAccountSettings(accountId: string) {
     setSavedImportNotes(String(importNotes));
     setSavedReimportDeleted(String(reimportDeleted));
     setSavedImportTransactions(String(importTransactions));
+    setSavedImportCategory(String(importCategory));
     setSavedUpdateDates(String(updateDates));
   };
 
@@ -118,6 +125,8 @@ export function useBankSyncAccountSettings(accountId: string) {
     setReimportDeleted,
     importTransactions,
     setImportTransactions,
+    importCategory,
+    setImportCategory,
     updateDates,
     setUpdateDates,
     mappings,

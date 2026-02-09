@@ -42,6 +42,7 @@ export type SyncedPrefs = Partial<
     | `sync-import-pending-${string}`
     | `sync-reimport-deleted-${string}`
     | `sync-import-notes-${string}`
+    | `sync-import-category-${string}`
     | `sync-import-transactions-${string}`
     | `sync-update-dates-${string}`
     | `bunq-sync-cursor-${string}`

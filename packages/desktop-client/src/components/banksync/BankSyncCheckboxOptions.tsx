@@ -148,6 +148,8 @@ type BankSyncCheckboxOptionsProps = {
   setImportPending: (value: boolean) => void;
   importNotes: boolean;
   setImportNotes: (value: boolean) => void;
+  importCategory: boolean;
+  setImportCategory: (value: boolean) => void;
   reimportDeleted: boolean;
   setReimportDeleted: (value: boolean) => void;
   importTransactions: boolean;
@@ -162,6 +164,8 @@ export function BankSyncCheckboxOptions({
   setImportPending,
   importNotes,
   setImportNotes,
+  importCategory,
+  setImportCategory,
   reimportDeleted,
   setReimportDeleted,
   importTransactions,
@@ -192,6 +196,16 @@ export function BankSyncCheckboxOptions({
         helpMode={helpMode}
       >
         <Trans>Import transaction notes</Trans>
+      </CheckboxOption>
+
+      <CheckboxOption
+        id="form_category"
+        checked={importCategory}
+        onChange={() => setImportCategory(!importCategory)}
+        disabled={!importTransactions}
+        helpMode={helpMode}
+      >
+        <Trans>Import transaction categories</Trans>
       </CheckboxOption>
 
       <CheckboxOptionWithHelp

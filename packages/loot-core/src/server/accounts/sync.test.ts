@@ -70,6 +70,15 @@ async function getAllPayees() {
   return (await db.getPayees()).filter(p => p.transfer_acct == null);
 }
 
+async function upsertPreference(id: string, value: string) {
+  const existing = await db.select('preferences', id);
+  if (existing) {
+    await db.update('preferences', { id, value });
+  } else {
+    await db.insert('preferences', { id, value });
+  }
+}
+
 describe('Account sync', () => {
   test('reconcile creates payees correctly', async () => {
     const { id } = await prepareDatabase();
@@ -545,4 +554,143 @@ describe('Account sync', () => {
       expect(transactions[0].amount).toBe(-1239);
     },
   );
+
+  test('bank sync resolves existing category by imported tag and assigns category id', async () => {
+    const { id: acctId } = await prepareDatabase();
+
+    await db.insertCategoryGroup({
+      id: 'group-expense',
+      name: 'Expenses',
+      is_income: 0,
+      hidden: 0,
+    });
+    const existingCategoryId = await db.insertCategory({
+      name: 'Dining Out',
+      cat_group: 'group-expense',
+      is_income: 0,
+    });
+
+    await reconcileTransactions(
+      acctId,
+      [
+        {
+          booked: true,
+          date: '2024-07-11',
+          payeeName: 'Cafe',
+          amount: -12.34,
+          transactionCategory: 'dining_out',
+          transactionAmount: { amount: '-12.34', currency: 'EUR' },
+          transactionId: 'bunq-existing-category-1',
+        },
+      ],
+      true,
+    );
+
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(1);
+    expect(transactions[0].category).toBe(existingCategoryId);
+
+    const categories = await db.getCategories();
+    expect(categories.filter(c => c.name === 'Dining Out').length).toBe(1);
+  });
+
+  test('bank sync auto-creates missing category in existing expense group and assigns it', async () => {
+    const { id: acctId } = await prepareDatabase();
+
+    await db.insertCategoryGroup({
+      id: 'group-expense',
+      name: 'Expenses',
+      is_income: 0,
+      hidden: 0,
+    });
+
+    await reconcileTransactions(
+      acctId,
+      [
+        {
+          booked: true,
+          date: '2024-07-12',
+          payeeName: 'Coffee Shop',
+          amount: -8.55,
+          transactionCategory: 'coffee',
+          transactionAmount: { amount: '-8.55', currency: 'EUR' },
+          transactionId: 'bunq-create-category-1',
+        },
+      ],
+      true,
+    );
+
+    const categories = await db.getCategories();
+    const createdCategory = categories.find(c => c.name === 'Coffee');
+    expect(createdCategory).toBeTruthy();
+    expect(createdCategory.cat_group).toBe('group-expense');
+
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(1);
+    expect(transactions[0].category).toBe(createdCategory.id);
+  });
+
+  test('bank sync creates fallback default group when no expense group exists and assigns created category', async () => {
+    const { id: acctId } = await prepareDatabase();
+
+    await reconcileTransactions(
+      acctId,
+      [
+        {
+          booked: true,
+          date: '2024-07-13',
+          payeeName: 'Transit Operator',
+          amount: -23.1,
+          transactionCategory: 'transport',
+          transactionAmount: { amount: '-23.10', currency: 'EUR' },
+          transactionId: 'bunq-fallback-group-1',
+        },
+      ],
+      true,
+    );
+
+    const groupedCategories = await db.getCategoriesGrouped();
+    const importedGroup = groupedCategories.find(g => g.name === 'Imported');
+    expect(importedGroup).toBeTruthy();
+    expect(importedGroup.is_income).toBe(0);
+
+    const createdCategory = importedGroup.categories.find(
+      category => category.name === 'Transport',
+    );
+    expect(createdCategory).toBeTruthy();
+
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(1);
+    expect(transactions[0].category).toBe(createdCategory.id);
+  });
+
+  test('bank sync keeps assignment skipped when import-category is disabled', async () => {
+    const { id: acctId } = await prepareDatabase();
+
+    const importCategoryKey = `sync-import-category-${acctId}` satisfies keyof SyncedPrefs;
+    await upsertPreference(importCategoryKey, 'false');
+
+    await reconcileTransactions(
+      acctId,
+      [
+        {
+          booked: true,
+          date: '2024-07-14',
+          payeeName: 'Grocer',
+          amount: -31.42,
+          transactionCategory: 'groceries',
+          transactionAmount: { amount: '-31.42', currency: 'EUR' },
+          transactionId: 'bunq-import-category-disabled-1',
+        },
+      ],
+      true,
+    );
+
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(1);
+    expect(transactions[0].category).toBe(null);
+
+    const categories = await db.getCategories();
+    expect(categories.find(c => c.name === 'Groceries')).toBeUndefined();
+  });
 });
