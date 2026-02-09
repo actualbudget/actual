@@ -41,11 +41,12 @@ app.post(
 app.post(
   '/transactions',
   handleError(async (req, res) => {
-    const { accountId, startDate, cursor } = req.body || {};
+    const { accountId, startDate, cursor, importCategory } = req.body || {};
     const data = await bunqService.listTransactions({
       accountId,
       startDate,
       cursor,
+      importCategory,
     });
 
     res.send({

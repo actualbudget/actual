@@ -15,6 +15,14 @@ import { generateBunqKeyPair, getPublicKeyFromPrivateKey } from './bunq-crypto';
 const DEFAULT_PAGE_SIZE = 200;
 const MAX_PAGES = 20;
 const MAX_EVENT_PAGES = 20;
+const PAYMENTS_TIME_BUDGET_MS = 20_000;
+const EVENTS_TIME_BUDGET_MS = 30_000;
+const EVENT_NO_PROGRESS_PAGE_LIMIT = 4;
+const EVENT_NO_PROGRESS_MIN_EVENTS_SCANNED = DEFAULT_PAGE_SIZE * 5;
+
+function nowMs() {
+  return Date.now();
+}
 
 /** @typedef {'sandbox'|'production'} BunqEnvironment */
 
@@ -28,6 +36,20 @@ function getEnvironment() {
 
 function getApiKey() {
   return secretsService.get(SecretName.bunq_apiKey);
+}
+
+function getPermittedIps() {
+  const raw = secretsService.get(SecretName.bunq_permittedIps);
+  if (typeof raw !== 'string') {
+    return ['*'];
+  }
+
+  const permittedIps = raw
+    .split(',')
+    .map(ip => ip.trim())
+    .filter(Boolean);
+
+  return permittedIps.length > 0 ? permittedIps : ['*'];
 }
 
 function getClientPrivateKey() {
@@ -71,6 +93,7 @@ function createClient(fetchImpl) {
 
   return new BunqClient({
     apiKey,
+    permittedIps: getPermittedIps(),
     environment: getEnvironment(),
     clientPrivateKey: getClientPrivateKey(),
     installationToken: getInstallationToken(),
@@ -95,6 +118,8 @@ async function ensureApiContext(fetchImpl) {
     throw new BunqConfigurationError('bunq_apiKey secret is required');
   }
 
+  const permittedIps = getPermittedIps();
+
   const environment = getEnvironment();
 
   const resetAuthContext = () => {
@@ -107,6 +132,7 @@ async function ensureApiContext(fetchImpl) {
   if (!installationToken || !serverPublicKey) {
     const bootstrapClient = new BunqClient({
       apiKey,
+      permittedIps,
       environment,
       clientPrivateKey: privateKey,
       fetchImpl,
@@ -124,6 +150,7 @@ async function ensureApiContext(fetchImpl) {
     try {
       const authClient = new BunqClient({
         apiKey,
+        permittedIps,
         environment,
         clientPrivateKey: privateKey,
         installationToken,
@@ -150,6 +177,7 @@ async function ensureApiContext(fetchImpl) {
 
         const bootstrapClient = new BunqClient({
           apiKey,
+          permittedIps,
           environment,
           clientPrivateKey: privateKey,
           fetchImpl,
@@ -168,6 +196,7 @@ async function ensureApiContext(fetchImpl) {
 
         const authClient = new BunqClient({
           apiKey,
+          permittedIps,
           environment,
           clientPrivateKey: privateKey,
           installationToken,
@@ -325,6 +354,18 @@ export function extractPaginationCursor(responseJson) {
       String(
         pagination?.future_id || pagination?.futureId || fromFutureUrl || '',
       ) || null,
+    olderUrl:
+      typeof pagination?.older_url === 'string' && pagination.older_url
+        ? pagination.older_url
+        : null,
+    newerUrl:
+      typeof pagination?.newer_url === 'string' && pagination.newer_url
+        ? pagination.newer_url
+        : null,
+    futureUrl:
+      typeof pagination?.future_url === 'string' && pagination.future_url
+        ? pagination.future_url
+        : null,
   };
 }
 
@@ -838,6 +879,7 @@ function incrementObjectTypeMissCoverage(bucket, objectTypes) {
 }
 
 async function listEventsForAccount(client, userId, accountId, payments = []) {
+  const startedAt = nowMs();
   const paymentIdSet =
     Array.isArray(payments) && payments.length > 0
       ? new Set(payments.map(payment => String(payment.id)))
@@ -880,17 +922,51 @@ async function listEventsForAccount(client, userId, accountId, payments = []) {
     }
   }
   let olderId = null;
+  let olderUrl = null;
+  let stopReason = 'max_pages_reached';
+  let pagesWithoutNewMappings = 0;
+
+  console.debug('bunq listEvents pagination start', {
+    userId,
+    accountId,
+    pageSize: DEFAULT_PAGE_SIZE,
+    maxPages: MAX_EVENT_PAGES,
+    timeBudgetMs: EVENTS_TIME_BUDGET_MS,
+    paymentCount: paymentIdSet?.size ?? null,
+  });
 
   for (let i = 0; i < MAX_EVENT_PAGES; i++) {
+    if (nowMs() - startedAt >= EVENTS_TIME_BUDGET_MS) {
+      stopReason = 'time_budget_exceeded';
+      break;
+    }
+
+    const mappedCategoriesBeforePage = categoryByPaymentId.size;
     const response = await client.listEvents(userId, {
-      count: DEFAULT_PAGE_SIZE,
-      olderId,
-      monetaryAccountId: accountId,
-      displayUserEvent: false,
+      count: olderUrl ? undefined : DEFAULT_PAGE_SIZE,
+      olderId: olderUrl ? undefined : olderId,
+      monetaryAccountId: olderUrl ? undefined : accountId,
+      displayUserEvent: olderUrl ? undefined : false,
+      paginationUrl: olderUrl,
     });
     stats.pagesFetched += 1;
 
     const pageEvents = extractEvents(response);
+    const pagination = extractPaginationCursor(response);
+
+    console.debug('bunq listEvents page fetched', {
+      userId,
+      accountId,
+      pageNumber: i + 1,
+      mode: olderUrl ? 'pagination_url' : 'query_params',
+      requestOlderId: olderId,
+      requestOlderUrl: olderUrl ? '[present]' : '[none]',
+      eventsInPage: pageEvents.length,
+      nextOlderId: pagination.olderId,
+      nextOlderUrl: pagination.olderUrl ? '[present]' : '[none]',
+      elapsedMs: nowMs() - startedAt,
+    });
+
     for (const event of pageEvents) {
       if (seenEventIds.has(event.id)) {
         continue;
@@ -976,17 +1052,54 @@ async function listEventsForAccount(client, userId, accountId, payments = []) {
       }
     }
 
+    const mappedCategoriesAfterPage = categoryByPaymentId.size;
+    if (mappedCategoriesAfterPage > mappedCategoriesBeforePage) {
+      pagesWithoutNewMappings = 0;
+    } else {
+      pagesWithoutNewMappings += 1;
+    }
+
     if (paymentIdSet && categoryByPaymentId.size >= paymentIdSet.size) {
+      stopReason = 'all_payment_categories_mapped';
       break;
     }
 
-    const pagination = extractPaginationCursor(response);
-    if (!pagination.olderId || pagination.olderId === olderId) {
+    if (
+      paymentIdSet &&
+      paymentIdSet.size > 0 &&
+      stats.eventsScanned >= EVENT_NO_PROGRESS_MIN_EVENTS_SCANNED &&
+      pagesWithoutNewMappings >= EVENT_NO_PROGRESS_PAGE_LIMIT
+    ) {
+      stopReason = 'mapping_progress_stalled';
+      break;
+    }
+
+    if (!pagination.olderId && !pagination.olderUrl) {
+      stopReason = 'pagination_end';
+      break;
+    }
+
+    if (
+      pagination.olderId === olderId &&
+      (!pagination.olderUrl || pagination.olderUrl === olderUrl)
+    ) {
+      stopReason = 'pagination_cursor_not_advanced';
       break;
     }
 
     olderId = pagination.olderId;
+    olderUrl = pagination.olderUrl;
   }
+
+  console.debug('bunq listEvents pagination complete', {
+    userId,
+    accountId,
+    pagesFetched: stats.pagesFetched,
+    eventsScanned: stats.eventsScanned,
+    categoriesMapped: categoryByPaymentId.size,
+    stopReason,
+    elapsedMs: nowMs() - startedAt,
+  });
 
   /*console.log('bunq: event category match coverage', {
     accountId,
@@ -1221,13 +1334,14 @@ export const bunqService = {
   },
 
   /**
-   * @param {{
-   *   accountId: string;
-   *   startDate?: string;
-   *   cursor?: { newerId?: string | null } | null;
-   *   fetchImpl?: typeof fetch;
-   * }} options
-   */
+ * @param {{
+ *   accountId: string;
+ *   startDate?: string;
+ *   cursor?: { newerId?: string | null } | null;
+ *   importCategory?: boolean;
+ *   fetchImpl?: typeof fetch;
+ * }} options
+ */
   async listTransactions(options) {
     try {
       const context = await ensureApiContext(options.fetchImpl);
@@ -1240,25 +1354,64 @@ export const bunqService = {
       const accountId = String(options.accountId);
       const startDate = options.startDate || null;
       const incomingCursor = options.cursor || null;
+      const importCategory = options.importCategory ?? true;
 
       const seenIds = new Set();
       const payments = [];
       const useIncremental = Boolean(incomingCursor?.newerId);
+      const paymentsStartedAt = nowMs();
+      let paymentPagesFetched = 0;
+
+      console.debug('bunq listPayments pagination start', {
+        userId: context.userId,
+        accountId,
+        mode: useIncremental ? 'incremental_newer' : 'historical_older',
+        startDate,
+      incomingCursor: incomingCursor?.newerId || null,
+      pageSize: DEFAULT_PAGE_SIZE,
+      maxPages: MAX_PAGES,
+      timeBudgetMs: PAYMENTS_TIME_BUDGET_MS,
+    });
+
+      let paymentsStopReason = 'max_pages_reached';
 
       if (useIncremental) {
         let newerId = incomingCursor.newerId;
+        let newerUrl = null;
 
         for (let i = 0; i < MAX_PAGES && newerId; i++) {
+          if (nowMs() - paymentsStartedAt >= PAYMENTS_TIME_BUDGET_MS) {
+            paymentsStopReason = 'time_budget_exceeded';
+            break;
+          }
+
+          paymentPagesFetched += 1;
           const response = await client.listPayments(
             context.userId,
             accountId,
             {
-              count: DEFAULT_PAGE_SIZE,
-              newerId,
+              count: newerUrl ? undefined : DEFAULT_PAGE_SIZE,
+              newerId: newerUrl ? undefined : newerId,
+              paginationUrl: newerUrl,
             },
           );
 
           const pagePayments = extractPayments(response);
+          const pagination = extractPaginationCursor(response);
+
+          /*console.debug('bunq listPayments page fetched', {
+            userId: context.userId,
+            accountId,
+            pageNumber: i + 1,
+            mode: newerUrl ? 'pagination_url' : 'query_params',
+            requestNewerId: newerId,
+            requestNewerUrl: newerUrl ? '[present]' : '[none]',
+            paymentsInPage: pagePayments.length,
+            nextNewerId: pagination.newerId,
+            nextNewerUrl: pagination.newerUrl ? '[present]' : '[none]',
+            elapsedMs: nowMs() - paymentsStartedAt,
+          });*/
+
           for (const payment of pagePayments) {
             if (seenIds.has(payment.id)) {
               continue;
@@ -1267,31 +1420,65 @@ export const bunqService = {
             payments.push(payment);
           }
 
-          const pagination = extractPaginationCursor(response);
-          if (!pagination.newerId || pagination.newerId === newerId) {
+          if (!pagination.newerId && !pagination.newerUrl) {
+            paymentsStopReason = 'pagination_end';
             break;
           }
+
+          if (
+            pagination.newerId === newerId &&
+            (!pagination.newerUrl || pagination.newerUrl === newerUrl)
+          ) {
+            paymentsStopReason = 'pagination_cursor_not_advanced';
+            break;
+          }
+
           newerId = pagination.newerId;
+          newerUrl = pagination.newerUrl;
         }
       } else {
         let olderId = null;
+        let olderUrl = null;
         let stop = false;
 
         for (let i = 0; i < MAX_PAGES && !stop; i++) {
+          if (nowMs() - paymentsStartedAt >= PAYMENTS_TIME_BUDGET_MS) {
+            paymentsStopReason = 'time_budget_exceeded';
+            break;
+          }
+
+          paymentPagesFetched += 1;
           const response = await client.listPayments(
             context.userId,
             accountId,
             {
-              count: DEFAULT_PAGE_SIZE,
-              olderId,
+              count: olderUrl ? undefined : DEFAULT_PAGE_SIZE,
+              olderId: olderUrl ? undefined : olderId,
+              paginationUrl: olderUrl,
             },
           );
 
           const pagePayments = extractPayments(response);
+          const pagination = extractPaginationCursor(response);
+
+          console.debug('bunq listPayments page fetched', {
+            userId: context.userId,
+            accountId,
+            pageNumber: i + 1,
+            mode: olderUrl ? 'pagination_url' : 'query_params',
+            requestOlderId: olderId,
+            requestOlderUrl: olderUrl ? '[present]' : '[none]',
+            paymentsInPage: pagePayments.length,
+            nextOlderId: pagination.olderId,
+            nextOlderUrl: pagination.olderUrl ? '[present]' : '[none]',
+            elapsedMs: nowMs() - paymentsStartedAt,
+          });
+
           for (const payment of pagePayments) {
             const paymentDate = String(payment?.created || '').slice(0, 10);
             if (startDate && paymentDate && paymentDate < startDate) {
               stop = true;
+              paymentsStopReason = 'start_date_boundary';
               continue;
             }
 
@@ -1302,31 +1489,58 @@ export const bunqService = {
             payments.push(payment);
           }
 
-          const pagination = extractPaginationCursor(response);
-          if (!pagination.olderId || pagination.olderId === olderId) {
+          if (stop) {
             break;
           }
+
+          if (!pagination.olderId && !pagination.olderUrl) {
+            paymentsStopReason = 'pagination_end';
+            break;
+          }
+
+          if (
+            pagination.olderId === olderId &&
+            (!pagination.olderUrl || pagination.olderUrl === olderUrl)
+          ) {
+            paymentsStopReason = 'pagination_cursor_not_advanced';
+            break;
+          }
+
           olderId = pagination.olderId;
+          olderUrl = pagination.olderUrl;
         }
       }
 
+      /*console.debug('bunq listPayments pagination complete', {
+        userId: context.userId,
+        accountId,
+        mode: useIncremental ? 'incremental_newer' : 'historical_older',
+        pagesFetched: paymentPagesFetched,
+        paymentsFetched: payments.length,
+        uniquePaymentIds: seenIds.size,
+        stopReason: paymentsStopReason,
+        elapsedMs: nowMs() - paymentsStartedAt,
+      });*/
+
       let paymentCategoryTypeById = new Map();
-      try {
-        paymentCategoryTypeById = await listEventsForAccount(
-          client,
-          context.userId,
-          accountId,
-          payments,
-        );
-      } catch (error) {
-        console.warn(
-          'bunq: failed to fetch or map events; importing transactions without category tags',
-          {
-            userId: context.userId,
+      if (importCategory) {
+        try {
+          paymentCategoryTypeById = await listEventsForAccount(
+            client,
+            context.userId,
             accountId,
-            error: error instanceof Error ? error.message : String(error),
-          },
-        );
+            payments,
+          );
+        } catch (error) {
+          console.warn(
+            'bunq: failed to fetch or map events; importing transactions without category tags',
+            {
+              userId: context.userId,
+              accountId,
+              error: error instanceof Error ? error.message : String(error),
+            },
+          );
+        }
       }
 
       const all = payments
@@ -1336,12 +1550,12 @@ export const bunqService = {
         })
         .sort((a, b) => (b.sortOrder || 0) - (a.sortOrder || 0));
 
-      const categorizedTransactions = all.filter(tx => tx.transactionCategory).length;
+      const _categorizedTransactions = all.filter(tx => tx.transactionCategory).length;
       /*console.log('bunq: transaction category assignment summary', {
         accountId,
         totalTransactions: all.length,
-        categorizedTransactions,
-        uncategorizedTransactions: all.length - categorizedTransactions,
+        categorizedTransactions: _categorizedTransactions,
+        uncategorizedTransactions: all.length - _categorizedTransactions,
       });*/
 
       const startingBalance = await getCurrentAccountBalance(

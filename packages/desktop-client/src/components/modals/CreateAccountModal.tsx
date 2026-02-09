@@ -389,7 +389,12 @@ export function CreateAccountModal({
                   name: 'bunq_userId',
                   value: null,
                 }).then(() => {
-                  setIsBunqSetupComplete(false);
+                  send('secret-set', {
+                    name: 'bunq_permittedIps',
+                    value: null,
+                  }).then(() => {
+                    setIsBunqSetupComplete(false);
+                  });
                 });
               });
             });

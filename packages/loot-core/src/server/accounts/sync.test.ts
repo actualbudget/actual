@@ -1,13 +1,15 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
+import * as asyncStorage from '../../platform/server/asyncStorage';
 import { type SyncedPrefs } from '../../types/prefs';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
 import { post } from '../post';
+import * as postModule from '../post';
 import { getServer } from '../server-config';
 import { insertRule, loadRules } from '../transactions/transaction-rules';
 
-import { addTransactions, reconcileTransactions } from './sync';
+import { addTransactions, reconcileTransactions, syncAccount } from './sync';
 
 vi.mock('../../shared/months', async () => ({
   ...(await vi.importActual('../../shared/months')),
@@ -692,5 +694,71 @@ describe('Account sync', () => {
 
     const categories = await db.getCategories();
     expect(categories.find(c => c.name === 'Groceries')).toBeUndefined();
+  });
+
+  test('bunq initial sync derives starting balance from current balance minus imported transactions', async () => {
+    const localAccountId = 'bunq-local-account';
+    const remoteAccountId = 'bunq-remote-account';
+
+    await db.insertAccount({
+      id: localAccountId,
+      account_id: remoteAccountId,
+      name: 'bunq account',
+      balance_current: 0,
+      account_sync_source: 'bunq',
+    });
+
+    await db.insertPayee({
+      id: `transfer-${localAccountId}`,
+      name: '',
+      transfer_acct: localAccountId,
+    });
+
+    vi.spyOn(asyncStorage, 'getItem').mockResolvedValue('user-token');
+
+    vi.spyOn(postModule, 'post').mockResolvedValueOnce({
+      transactions: {
+        all: [
+          {
+            booked: true,
+            date: '2026-01-10',
+            payeeName: 'Merchant A',
+            transactionId: 'bunq-starting-balance-1',
+            transactionAmount: { amount: '-12.34', currency: 'EUR' },
+          },
+          {
+            booked: true,
+            date: '2026-01-09',
+            payeeName: 'Merchant B',
+            transactionId: 'bunq-starting-balance-2',
+            transactionAmount: { amount: '-14.48', currency: 'EUR' },
+          },
+        ],
+        booked: [],
+        pending: [],
+      },
+      balances: [],
+      startingBalance: 7809,
+      cursor: { newerId: '111' },
+    });
+
+    await syncAccount(undefined, undefined, localAccountId, remoteAccountId, '');
+
+    const transactions = await getAllTransactions();
+
+    expect(transactions).toHaveLength(3);
+
+    const startingBalanceTransaction = transactions.find(
+      transaction => transaction.starting_balance_flag === 1,
+    );
+
+    expect(startingBalanceTransaction?.amount).toBe(10491);
+
+    const computedCurrentBalance = transactions.reduce(
+      (total, transaction) => total + transaction.amount,
+      0,
+    );
+
+    expect(computedCurrentBalance).toBe(7809);
   });
 });

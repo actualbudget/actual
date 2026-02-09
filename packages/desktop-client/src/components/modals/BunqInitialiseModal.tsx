@@ -32,6 +32,7 @@ export const BunqInitialiseModal = ({
 }: BunqInitialiseModalProps) => {
   const { t } = useTranslation();
   const [apiKey, setApiKey] = useState('');
+  const [permittedIps, setPermittedIps] = useState('*');
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(
@@ -47,11 +48,19 @@ export const BunqInitialiseModal = ({
 
     setIsLoading(true);
 
-    const { error, reason } =
+    let { error, reason } =
       (await send('secret-set', {
         name: 'bunq_apiKey',
         value: apiKey,
       })) || {};
+
+    if (!error) {
+      ({ error, reason } =
+        (await send('secret-set', {
+          name: 'bunq_permittedIps',
+          value: permittedIps,
+        })) || {});
+    }
 
     if (error) {
       setIsLoading(false);
@@ -81,12 +90,20 @@ export const BunqInitialiseModal = ({
                 bunq API key. You can learn how to generate it in the{' '}
                 <Link
                   variant="external"
-                  to="https://actualbudget.org/docs/advanced/bank-sync/"
+                  to="https://doc.bunq.com/basics/authentication/api-keys#production-api-key/"
                   linkColor="purple"
                 >
                   bank sync documentation
                 </Link>
                 .
+              </Trans>
+            </Text>
+            <Text>
+              <Trans>
+                Guard your API key carefully, as it provides access to sensitive
+                financial information similar to actual banking details. Make
+                sure not to commit it to your source control. If you end up
+                doing so you can always revoke the key from your bunq app.
               </Trans>
             </Text>
 
@@ -103,6 +120,27 @@ export const BunqInitialiseModal = ({
                   }}
                 />
               </InitialFocus>
+            </FormField>
+
+            <FormField>
+              <FormLabel
+                title={t('Permitted IPs:')}
+                htmlFor="bunq-permitted-ips-field"
+              />
+              <Input
+                id="bunq-permitted-ips-field"
+                value={permittedIps}
+                onChangeValue={value => {
+                  setPermittedIps(value);
+                }}
+              />
+              <Text>
+                <Trans>
+                  Use * to allow any IP address (less secure). For improved
+                  security, provide a comma-separated list of trusted IP
+                  addresses.
+                </Trans>
+              </Text>
             </FormField>
 
             {!isValid && <Error>{error}</Error>}

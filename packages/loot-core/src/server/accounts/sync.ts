@@ -331,6 +331,12 @@ async function downloadBunqTransactions(
     }
   }
 
+  const importCategory = await aqlQuery(
+    q('preferences')
+      .filter({ id: `sync-import-category-${localId}` })
+      .select('value'),
+  ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+
   logger.log('bunq sync request context', {
     localAccountId: localId,
     remoteAccountId: acctId,
@@ -346,6 +352,7 @@ async function downloadBunqTransactions(
       accountId: acctId,
       startDate: since,
       cursor: parsedCursor,
+      importCategory,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -1251,6 +1258,21 @@ async function processBankSyncDownload(
         currentBalance,
       );
       balanceToUse = Math.round(previousBalance);
+    } else if (acctRow.account_sync_source === 'bunq') {
+      const previousBalance = transactions.reduce((total, trans) => {
+        const amount =
+          trans?.transactionAmount?.amount != null
+            ? trans.transactionAmount.amount
+            : trans.amount;
+
+        if (amount == null) {
+          return total;
+        }
+
+        return total - amountToInteger(amount);
+      }, currentBalance);
+
+      balanceToUse = previousBalance;
     }
 
     const oldestTransaction = transactions[transactions.length - 1];

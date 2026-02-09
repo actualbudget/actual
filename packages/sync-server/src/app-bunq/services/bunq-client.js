@@ -23,25 +23,49 @@ const DEFAULT_GEOLOCATION = '0 0 0 0 000';
 /**
  * @typedef {{
  *   apiKey: string;
+ *   permittedIps?: string[];
  *   environment: BunqEnvironment;
  *   clientPrivateKey?: string | null;
  *   installationToken?: string | null;
  *   sessionToken?: string | null;
  *   serverPublicKey?: string | null;
  *   fetchImpl?: typeof fetch;
+ *   maxRateLimitRetries?: number;
+ *   retryBaseDelayMs?: number;
+ *   retryJitterMs?: number;
+ *   sleepImpl?: (ms: number) => Promise<void>;
+ *   randomImpl?: () => number;
+ *   nowImpl?: () => number;
  * }} BunqClientOptions
  */
+
+const DEFAULT_MAX_RATE_LIMIT_RETRIES = 3;
+const DEFAULT_RETRY_BASE_DELAY_MS = 300;
+const DEFAULT_RETRY_JITTER_MS = 150;
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 export class BunqClient {
   /** @param {BunqClientOptions} options */
   constructor(options) {
     this.apiKey = options.apiKey;
+    this.permittedIps =
+      Array.isArray(options.permittedIps) && options.permittedIps.length > 0
+        ? options.permittedIps
+        : ['*'];
     this.environment = options.environment;
     this.clientPrivateKey = options.clientPrivateKey;
     this.installationToken = options.installationToken;
     this.sessionToken = options.sessionToken;
     this.serverPublicKey = options.serverPublicKey;
     this.fetchImpl = options.fetchImpl ?? fetch;
+    this.maxRateLimitRetries =
+      options.maxRateLimitRetries ?? DEFAULT_MAX_RATE_LIMIT_RETRIES;
+    this.retryBaseDelayMs = options.retryBaseDelayMs ?? DEFAULT_RETRY_BASE_DELAY_MS;
+    this.retryJitterMs = options.retryJitterMs ?? DEFAULT_RETRY_JITTER_MS;
+    this.sleepImpl = options.sleepImpl ?? sleep;
+    this.randomImpl = options.randomImpl ?? Math.random;
+    this.nowImpl = options.nowImpl ?? Date.now;
   }
 
   get baseUrl() {
@@ -81,7 +105,7 @@ export class BunqClient {
       jsonBody: {
         secret: this.apiKey,
         description: 'Actual Budget Sync Server',
-        permitted_ips: ['*'],
+        permitted_ips: this.permittedIps,
       },
     });
   }
@@ -128,9 +152,22 @@ export class BunqClient {
   /**
    * @param {string} userId
    * @param {string} monetaryAccountId
-   * @param {{ count?: number; newerId?: string | null; olderId?: string | null }} [pagination]
+   * @param {{
+   *   count?: number;
+   *   newerId?: string | null;
+   *   olderId?: string | null;
+   *   paginationUrl?: string | null;
+   * }} [pagination]
    */
   async listPayments(userId, monetaryAccountId, pagination) {
+    if (pagination?.paginationUrl) {
+      return await this.request(pagination.paginationUrl, {
+        method: 'GET',
+        tokenType: 'session',
+        jsonBody: null,
+      });
+    }
+
     const query = new URLSearchParams();
 
     if (pagination?.count != null) {
@@ -162,9 +199,18 @@ export class BunqClient {
    *   olderId?: string | null;
    *   monetaryAccountId?: string | null;
    *   displayUserEvent?: boolean;
+   *   paginationUrl?: string | null;
    * }} [pagination]
    */
   async listEvents(userId, pagination) {
+    if (pagination?.paginationUrl) {
+      return await this.request(pagination.paginationUrl, {
+        method: 'GET',
+        tokenType: 'session',
+        jsonBody: null,
+      });
+    }
+
     const query = new URLSearchParams();
 
     if (pagination?.count != null) {
@@ -203,6 +249,7 @@ export class BunqClient {
    * }} options
    */
   async request(path, options) {
+    const normalizedPath = this.normalizeRequestPath(path);
     const token = this.getAuthToken(options.tokenType);
     const body =
       options.jsonBody == null ? '' : JSON.stringify(options.jsonBody);
@@ -237,28 +284,43 @@ export class BunqClient {
       );
     }
 
-    const response = await this.fetchImpl(`${this.baseUrl}${path}`, {
-      method: options.method,
-      headers,
-      body: options.jsonBody == null ? undefined : body,
-    });
+    const requestStartedAt = this.nowImpl();
+    let attempt = 0;
+    let response = null;
+    let responseBody = '';
 
-    const responseBody = await response.text();
+    for (;;) {
+      attempt += 1;
+      response = await this.fetchImpl(`${this.baseUrl}${normalizedPath}`, {
+        method: options.method,
+        headers,
+        body: options.jsonBody == null ? undefined : body,
+      });
+
+      responseBody = await response.text();
+
+      if (response.status !== 429 || attempt > this.maxRateLimitRetries) {
+        break;
+      }
+
+      const retryDelayMs = this.getRetryDelayMs(attempt);
+      console.warn('bunq request rate limited; retrying with backoff', {
+        path: normalizedPath,
+        method: options.method,
+        attempt,
+        maxRateLimitRetries: this.maxRateLimitRetries,
+        status: response.status,
+        retryDelayMs,
+        elapsedMs: this.nowImpl() - requestStartedAt,
+      });
+
+      await this.sleepImpl(retryDelayMs);
+    }
 
     if (!response.ok) {
-      const responseHeaders = {};
-      if (response?.headers?.entries) {
-        Object.assign(
-          responseHeaders,
-          Object.fromEntries(response.headers.entries()),
-        );
-      } else if (response?.headers?.forEach) {
-        response.headers.forEach((value, key) => {
-          responseHeaders[key] = value;
-        });
-      }
+      const responseHeaders = this.extractResponseHeaders(response);
       const details = {
-        path,
+        path: normalizedPath,
         method: options.method,
         tokenType: options.tokenType,
         sign: shouldSign,
@@ -276,6 +338,8 @@ export class BunqClient {
           'Content-Type': headers['Content-Type'] || '[none]',
         },
         status: response.status,
+        attempts: attempt,
+        elapsedMs: this.nowImpl() - requestStartedAt,
         responseBody,
         responseHeaders,
       };
@@ -293,6 +357,16 @@ export class BunqClient {
       throw new BunqProtocolError('Bunq request failed', details);
     }
 
+    if (attempt > 1) {
+      console.debug('bunq request recovered after retry', {
+        path: normalizedPath,
+        method: options.method,
+        attempts: attempt,
+        elapsedMs: this.nowImpl() - requestStartedAt,
+        status: response.status,
+      });
+    }
+
     const serverSignature = response.headers.get('X-Bunq-Server-Signature');
     if (
       shouldVerifyResponseSignature &&
@@ -308,7 +382,7 @@ export class BunqClient {
 
       if (!isValid) {
         throw new BunqSignatureError('Invalid Bunq response signature', {
-          path,
+          path: normalizedPath,
           status: response.status,
         });
       }
@@ -322,10 +396,48 @@ export class BunqClient {
       return JSON.parse(responseBody);
     } catch {
       throw new BunqInvalidResponseError('Bunq response JSON was invalid', {
-        path,
+        path: normalizedPath,
         status: response.status,
       });
     }
+  }
+
+  /** @param {number} attempt */
+  getRetryDelayMs(attempt) {
+    const exponential = this.retryBaseDelayMs * 2 ** Math.max(0, attempt - 1);
+    const jitter = Math.floor(this.randomImpl() * this.retryJitterMs);
+    return exponential + jitter;
+  }
+
+  /** @param {string} path */
+  normalizeRequestPath(path) {
+    if (/^https?:\/\//i.test(path)) {
+      const parsed = new URL(path);
+      const normalizedPath = `${parsed.pathname}${parsed.search}`;
+      if (normalizedPath.startsWith('/v1/')) {
+        return normalizedPath.slice(3);
+      }
+      return normalizedPath;
+    }
+
+    if (path.startsWith('/v1/')) {
+      return path.slice(3);
+    }
+
+    return path;
+  }
+
+  /** @param {Response & { headers?: any }} response */
+  extractResponseHeaders(response) {
+    const responseHeaders = {};
+    if (response?.headers?.entries) {
+      Object.assign(responseHeaders, Object.fromEntries(response.headers.entries()));
+    } else if (response?.headers?.forEach) {
+      response.headers.forEach((value, key) => {
+        responseHeaders[key] = value;
+      });
+    }
+    return responseHeaders;
   }
 
   /** @param {'none' | 'installation' | 'session'} tokenType */

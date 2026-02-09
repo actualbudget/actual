@@ -150,4 +150,49 @@ describe('bunq sync cursor integration', () => {
     expect(firstCursor.value).toBe('{"newerId":"55"}');
     expect(secondCursor.value).toBe('{"newerId":"99"}');
   });
+
+  test('forwards importCategory preference to bunq transactions request', async () => {
+    const accountId = 'bunq-local-account';
+    const remoteAccountId = 'bunq-remote-account';
+
+    await db.insertAccount({
+      id: accountId,
+      account_id: remoteAccountId,
+      name: 'bunq account',
+      balance_current: 0,
+      account_sync_source: 'bunq',
+    });
+
+    await db.insertPayee({
+      id: `transfer-${accountId}`,
+      name: '',
+      transfer_acct: accountId,
+    });
+
+    await db.insert('preferences', {
+      id: `sync-import-category-${accountId}`,
+      value: 'false',
+    });
+
+    vi.spyOn(asyncStorage, 'getItem').mockResolvedValue('user-token');
+
+    const postSpy = vi.spyOn(postModule, 'post').mockResolvedValue({
+      transactions: { all: [], booked: [], pending: [] },
+      balances: [],
+      startingBalance: 1000,
+      cursor: { newerId: '55' },
+    });
+
+    await syncAccount(undefined, undefined, accountId, remoteAccountId, '');
+
+    expect(postSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        accountId: remoteAccountId,
+        importCategory: false,
+      }),
+      expect.any(Object),
+      60000,
+    );
+  });
 });

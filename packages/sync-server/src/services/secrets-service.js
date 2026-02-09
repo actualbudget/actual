@@ -16,6 +16,7 @@ export const SecretName = {
   pluggyai_clientSecret: 'pluggyai_clientSecret',
   pluggyai_itemIds: 'pluggyai_itemIds',
   bunq_apiKey: 'bunq_apiKey',
+  bunq_permittedIps: 'bunq_permittedIps',
   bunq_environment: 'bunq_environment',
   bunq_clientPrivateKey: 'bunq_clientPrivateKey',
   bunq_clientPublicKey: 'bunq_clientPublicKey',
