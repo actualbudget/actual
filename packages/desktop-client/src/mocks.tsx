@@ -1,9 +1,11 @@
-import React, { type ReactNode } from 'react';
+import React from 'react';
+import type { ReactNode } from 'react';
 import { Provider } from 'react-redux';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { configureAppStore, type AppStore } from './redux/store';
+import { configureAppStore } from './redux/store';
+import type { AppStore } from './redux/store';
 
 let mockQueryClient = new QueryClient();
 

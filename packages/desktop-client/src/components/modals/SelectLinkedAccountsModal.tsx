@@ -26,10 +26,8 @@ import {
   useLinkAccountSimpleFinMutation,
   useUnlinkAccountMutation,
 } from '@desktop-client/accounts';
-import {
-  Autocomplete,
-  type AutocompleteItem,
-} from '@desktop-client/components/autocomplete/Autocomplete';
+import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
+import type { AutocompleteItem } from '@desktop-client/components/autocomplete/Autocomplete';
 import {
   Modal,
   ModalCloseButton,

@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
 export const accountQueries = {
   all: () => ['accounts'],

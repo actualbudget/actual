@@ -3,7 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { getUploadError } from 'loot-core/shared/errors';
-import { type AtLeastOne } from 'loot-core/types/util';
+import type { AtLeastOne } from 'loot-core/types/util';
 
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { loadPrefs } from '@desktop-client/prefs/prefsSlice';

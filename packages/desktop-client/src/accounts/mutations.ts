@@ -1,22 +1,18 @@
 import { useTranslation } from 'react-i18next';
 
-import {
-  useMutation,
-  useQueryClient,
-  type QueryClient,
-  type QueryKey,
-} from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { type SyncResponseWithErrors } from 'loot-core/server/accounts/app';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type SyncServerGoCardlessAccount,
-  type SyncServerPluggyAiAccount,
-  type SyncServerSimpleFinAccount,
-  type TransactionEntity,
+import type { SyncResponseWithErrors } from 'loot-core/server/accounts/app';
+import type {
+  AccountEntity,
+  CategoryEntity,
+  SyncServerGoCardlessAccount,
+  SyncServerPluggyAiAccount,
+  SyncServerSimpleFinAccount,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 import {
@@ -32,7 +28,7 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { markPayeesDirty } from '@desktop-client/payees/payeesSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
-import { type AppDispatch } from '@desktop-client/redux/store';
+import type { AppDispatch } from '@desktop-client/redux/store';
 import { setNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
 const sendThrow: typeof send = async function (name, args) {

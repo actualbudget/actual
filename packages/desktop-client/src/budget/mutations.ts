@@ -5,11 +5,12 @@ import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import type { TFunction } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { sendCatch, type send } from 'loot-core/platform/client/fetch';
-import { type IntegerAmount } from 'loot-core/shared/util';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
+import { sendCatch } from 'loot-core/platform/client/fetch';
+import type { send } from 'loot-core/platform/client/fetch';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { categoryQueries } from './queries';

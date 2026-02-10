@@ -46,7 +46,7 @@ import {
   useUpdateAccountMutation,
 } from '@desktop-client/accounts';
 import { markAccountRead } from '@desktop-client/accounts/accountsSlice';
-import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
+import type { SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
 import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
 import { validateAccountName } from '@desktop-client/components/util/accountValidation';
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';

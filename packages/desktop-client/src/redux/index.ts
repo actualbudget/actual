@@ -7,12 +7,7 @@ import {
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-import {
-  type AppDispatch,
-  type AppStore,
-  type ExtraArguments,
-  type RootState,
-} from './store';
+import type { AppDispatch, AppStore, ExtraArguments, RootState } from './store';
 
 export const createAppAsyncThunk = createAsyncThunk.withTypes<{
   state: RootState;

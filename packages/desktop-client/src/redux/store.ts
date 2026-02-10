@@ -4,7 +4,7 @@ import {
   createListenerMiddleware,
   isRejected,
 } from '@reduxjs/toolkit';
-import { type QueryClient } from '@tanstack/react-query';
+import type { QueryClient } from '@tanstack/react-query';
 
 import {
   name as accountsSliceName,
