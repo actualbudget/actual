@@ -62,4 +62,7 @@ async function createReleaseNotesFile() {
   }
 }
 
-createReleaseNotesFile();
+createReleaseNotesFile().catch(error => {
+  console.log('Unhandled error:', error.message);
+  process.exit(1);
+});

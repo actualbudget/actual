@@ -53,6 +53,9 @@ async function commentOnPR() {
     const fileUrl = pr.head.repo
       ? `https://github.com/${headOwner}/${headRepo}/blob/${prBranch}/${fileName}`
       : null;
+    const fileReference = fileUrl
+      ? `[${fileName}](${fileUrl})`
+      : `\`${fileName}\` (repository unavailable)`;
 
     let commentBody = ['🤖 **Auto-generated Release Notes**', ''];
 
@@ -67,7 +70,7 @@ async function commentOnPR() {
         '',
         `**Category:** ${cleanCategory}`,
         `**Summary:** ${summaryData.summary}`,
-        `**File:** [${fileName}](${fileUrl})`,
+        `**File:** ${fileReference}`,
         '',
         fileCreationStatus === 'created'
           ? 'The release notes file has been committed to your branch. You can edit it if needed before merging.'
@@ -115,4 +118,7 @@ async function commentOnPR() {
   }
 }
 
-commentOnPR();
+commentOnPR().catch(error => {
+  console.log('Unhandled error:', error.message);
+  process.exit(1);
+});

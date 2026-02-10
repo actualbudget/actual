@@ -30,6 +30,7 @@ async function checkReleaseNotesExists() {
     }
 
     const fileName = `upcoming-release-notes/${prDetails.number}.md`;
+    const usedBaseRepoFallback = !prDetails.headRepoFullName;
     const headRepoFullName = prDetails.headRepoFullName || repo;
     const headRef = prDetails.headRef;
 
@@ -49,6 +50,11 @@ async function checkReleaseNotesExists() {
     console.log(
       `Checking for file on PR branch: ${headRepoFullName}@${headRef}`,
     );
+    if (usedBaseRepoFallback) {
+      console.log(
+        `Source fork repository is unavailable; checking base repository ${headRepoFullName} with head ref ${headRef}.`,
+      );
+    }
 
     // Check if file exists
     try {
@@ -80,4 +86,8 @@ async function checkReleaseNotesExists() {
   }
 }
 
-checkReleaseNotesExists();
+checkReleaseNotesExists().catch(error => {
+  console.log('Unhandled error:', error.message);
+  setOutput('result', 'false');
+  process.exit(1);
+});

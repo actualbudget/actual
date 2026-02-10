@@ -104,8 +104,8 @@ jobs:
           repository: ${{ steps.pr-details.outputs.head_repo_full_name }}
           ref: ${{ steps.pr-details.outputs.head_ref }}
           token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
-          persist-credentials: false
-          fetch-depth: 0
+          persist-credentials: true
+          fetch-depth: 1
           path: pr-branch
 
       - name: Prepare release notes file
@@ -142,7 +142,14 @@ jobs:
 
           git -C pr-branch commit -m "Add release notes for PR #${{ github.event.issue.number }}"
 
-          git -C pr-branch remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${HEAD_REPO}.git"
+          git -C pr-branch remote set-url origin "https://github.com/${HEAD_REPO}.git"
+          cat > "$RUNNER_TEMP/askpass.sh" <<EOF
+          #!/usr/bin/env sh
+          printf '%s\n' "$GITHUB_TOKEN"
+          EOF
+          chmod +x "$RUNNER_TEMP/askpass.sh"
+          export GIT_ASKPASS="$RUNNER_TEMP/askpass.sh"
+          export GIT_TERMINAL_PROMPT=0
           if git -C pr-branch push origin "HEAD:refs/heads/$HEAD_REF"; then
             echo "status=created" >> "$GITHUB_OUTPUT"
           else
