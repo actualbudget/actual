@@ -330,6 +330,10 @@ export class CategoryTemplateContext {
     // sort the template lines into regular template, goals, and remainder templates
     if (templates) {
       templates.forEach(t => {
+        // Skip expired templates (where month > until)
+        if (CategoryTemplateContext.isTemplateExpired(t, month)) {
+          return;
+        }
         if (
           t.directive === 'template' &&
           t.type !== 'remainder' &&
@@ -439,6 +443,26 @@ export class CategoryTemplateContext {
         );
       }
     });
+  }
+
+  private static isTemplateExpired(template: Template, month: string): boolean {
+    // Check if template hasn't started yet (if starting is set)
+    if ('starting' in template && template.starting) {
+      const startingMonth = template.starting.substring(0, 7);
+      if (monthUtils.differenceInCalendarMonths(month, startingMonth) < 0) {
+        return true;
+      }
+    }
+    // Check if template has expired (if until is set)
+    if ('until' in template && template.until) {
+      // Extract the month part if until is a full date (YYYY-MM-DD), otherwise use as-is (YYYY-MM)
+      const untilMonth = template.until.substring(0, 7);
+      // Return true if current month is after the until month
+      if (monthUtils.differenceInCalendarMonths(month, untilMonth) > 0) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private checkLimit(templates: Template[]) {
