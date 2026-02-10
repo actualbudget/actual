@@ -1,5 +1,3 @@
-import { start } from 'repl';
-
 import type { Template } from '../../types/models/templates';
 import * as db from '../db';
 
