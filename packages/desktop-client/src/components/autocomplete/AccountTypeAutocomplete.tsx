@@ -130,14 +130,13 @@ function AccountTypeList({
             embedded,
           })}
 
-        {usedTypes.length > 0 &&
-          renderItemGroupHeader({ title: t('Used Types') })}
+        {usedTypes.length > 0 && renderItemGroupHeader({ title: t('In Use') })}
         {usedTypes.map(item => (
           <Fragment key={item.id}>{renderAccountTypeItem(item)}</Fragment>
         ))}
 
         {otherTypes.length > 0 &&
-          renderItemGroupHeader({ title: t('Other Types') })}
+          renderItemGroupHeader({ title: t('Suggested') })}
         {otherTypes.map(item => (
           <Fragment key={item.id}>{renderAccountTypeItem(item)}</Fragment>
         ))}

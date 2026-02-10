@@ -100,14 +100,14 @@ export function TypeGroupHeader<FieldName extends SheetFields<'account'>>({
       }}
     >
       <ExpandChevron isExpanded={isExpanded} onToggle={onToggle} />
-      <View style={{ flex: 1, minWidth: 0, marginLeft: 1 }}>
+      <View
+        style={{ ...styles.verySmallText, flex: 1, minWidth: 0, marginLeft: 1 }}
+      >
         <AlignedText
           left={typeName}
           right={
             query ? (
-              <span
-                style={{ fontStyle: 'italic', textDecoration: 'underline' }}
-              >
+              <span style={{ ...styles.tnum, textDecoration: 'underline' }}>
                 <CellValue binding={query} type="financial" />
               </span>
             ) : null
