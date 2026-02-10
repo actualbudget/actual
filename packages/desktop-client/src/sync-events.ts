@@ -12,10 +12,8 @@ import {
   uploadBudget,
 } from './budgetfiles/budgetfilesSlice';
 import { pushModal } from './modals/modalsSlice';
-import {
-  addNotification,
-  type Notification,
-} from './notifications/notificationsSlice';
+import { addNotification } from './notifications/notificationsSlice';
+import type { Notification } from './notifications/notificationsSlice';
 import { payeeQueries } from './payees';
 import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';

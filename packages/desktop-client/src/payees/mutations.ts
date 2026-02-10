@@ -1,21 +1,18 @@
 import { useTranslation } from 'react-i18next';
 
-import {
-  useMutation,
-  useQueryClient,
-  type QueryClient,
-  type QueryKey,
-} from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 
-import { sendCatch, type send } from 'loot-core/platform/client/fetch';
-import { type PayeeEntity } from 'loot-core/types/models';
+import { sendCatch } from 'loot-core/platform/client/fetch';
+import type { send } from 'loot-core/platform/client/fetch';
+import type { PayeeEntity } from 'loot-core/types/models';
 
 import { payeeQueries } from './queries';
 
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { type AppDispatch } from '@desktop-client/redux/store';
+import type { AppDispatch } from '@desktop-client/redux/store';
 
 const sendThrow: typeof send = async (name, args) => {
   const { error, data } = await sendCatch(name, args);
