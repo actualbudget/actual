@@ -1,9 +1,10 @@
-import React, { type ReactNode } from 'react';
+import React from 'react';
+import type { ReactNode } from 'react';
 import { Provider } from 'react-redux';
 
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 
-import { type store as realStore } from './store';
+import type { store as realStore } from './store';
 
 import {
   name as accountsSliceName,
@@ -13,10 +14,6 @@ import {
   name as appSliceName,
   reducer as appSliceReducer,
 } from '@desktop-client/app/appSlice';
-import {
-  name as budgetSliceName,
-  reducer as budgetSliceReducer,
-} from '@desktop-client/budget/budgetSlice';
 import {
   name as budgetfilesSliceName,
   reducer as budgetfilesSliceReducer,
@@ -53,7 +50,6 @@ import {
 const appReducer = combineReducers({
   [accountsSliceName]: accountsSliceReducer,
   [appSliceName]: appSliceReducer,
-  [budgetSliceName]: budgetSliceReducer,
   [budgetfilesSliceName]: budgetfilesSliceReducer,
   [modalsSliceName]: modalsSliceReducer,
   [notificationsSliceName]: notificationsSliceReducer,

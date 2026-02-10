@@ -1,7 +1,7 @@
-import {
-  type balanceTypeOpType,
-  type GroupedEntity,
-  type sortByOpType,
+import type {
+  balanceTypeOpType,
+  GroupedEntity,
+  sortByOpType,
 } from 'loot-core/types/models';
 
 const reverseSort: Partial<Record<sortByOpType, sortByOpType>> = {

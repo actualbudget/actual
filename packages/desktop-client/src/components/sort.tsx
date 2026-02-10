@@ -6,8 +6,8 @@ import React, {
   useLayoutEffect,
   useRef,
   useState,
-  type Context,
 } from 'react';
+import type { Context } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 
 import { theme } from '@actual-app/components/theme';

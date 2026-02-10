@@ -4,12 +4,10 @@ import { HyperFormula } from 'hyperformula';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { q, type Query } from 'loot-core/shared/query';
+import { q } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 import { integerToAmount } from 'loot-core/shared/util';
-import {
-  type RuleConditionEntity,
-  type TimeFrame,
-} from 'loot-core/types/models';
+import type { RuleConditionEntity, TimeFrame } from 'loot-core/types/models';
 
 import { useLocale } from './useLocale';
 

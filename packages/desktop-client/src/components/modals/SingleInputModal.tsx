@@ -1,10 +1,6 @@
 // @ts-strict-ignore
-import React, {
-  useState,
-  type ComponentPropsWithoutRef,
-  type ComponentType,
-  type FormEvent,
-} from 'react';
+import React, { useState } from 'react';
+import type { ComponentPropsWithoutRef, ComponentType, FormEvent } from 'react';
 import { Form } from 'react-aria-components';
 
 import { Button } from '@actual-app/components/button';
@@ -16,8 +12,8 @@ import { View } from '@actual-app/components/view';
 import {
   Modal,
   ModalCloseButton,
-  type ModalHeader,
 } from '@desktop-client/components/common/Modal';
+import type { ModalHeader } from '@desktop-client/components/common/Modal';
 import { InputField } from '@desktop-client/components/mobile/MobileForms';
 
 type SingleInputModalProps = {

@@ -1,7 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Menu, type MenuItem } from '@actual-app/components/menu';
+import { Menu } from '@actual-app/components/menu';
+import type { MenuItem } from '@actual-app/components/menu';
+
+export type SavedStatus = 'saved' | 'new' | 'modified';
 
 export function SaveReportMenu({
   onMenuSelect,
@@ -9,7 +12,7 @@ export function SaveReportMenu({
   listReports,
 }: {
   onMenuSelect: (item: string) => void;
-  savedStatus: string;
+  savedStatus: SavedStatus;
   listReports: number;
 }) {
   const { t } = useTranslation();
