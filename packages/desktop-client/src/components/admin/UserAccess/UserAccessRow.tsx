@@ -7,7 +7,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
-import { type UserAvailable } from 'loot-core/types/models';
+import type { UserAvailable } from 'loot-core/types/models';
 
 import { Checkbox } from '@desktop-client/components/forms';
 import { Cell, Row } from '@desktop-client/components/table';

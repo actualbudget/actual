@@ -1,4 +1,5 @@
-import React, { type CSSProperties } from 'react';
+import React from 'react';
+import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -73,10 +74,10 @@ export function Saved({ projected, style }: SavedProps) {
           className={css({
             fontSize: 25,
             color: projected
-              ? theme.warningText
+              ? theme.templateNumberUnderFunded
               : isNegative
-                ? theme.errorTextDark
-                : theme.upcomingText,
+                ? theme.budgetNumberNegative
+                : theme.templateNumberFunded,
           })}
         >
           <PrivacyFilter>

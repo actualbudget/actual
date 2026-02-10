@@ -8,10 +8,11 @@ import {
   getShortYearFormat,
   getShortYearRegex,
 } from 'loot-core/shared/months';
-import { q, type Query } from 'loot-core/shared/query';
+import { q } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 import { amountToInteger, currencyToAmount } from 'loot-core/shared/util';
-import { type AccountEntity } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { AccountEntity } from 'loot-core/types/models';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 export function accountFilter(
   accountId?:

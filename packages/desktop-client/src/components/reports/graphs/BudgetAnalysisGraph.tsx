@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
-import { type CSSProperties } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
@@ -20,7 +20,8 @@ import * as monthUtils from 'loot-core/shared/months';
 
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import { Container } from '@desktop-client/components/reports/Container';
-import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -169,7 +170,7 @@ function CustomTooltip({
                     style={{
                       width: 10,
                       height: 10,
-                      backgroundColor: theme.reportsNumberNeutral,
+                      backgroundColor: theme.reportsGray,
                       display: 'inline-block',
                     }}
                   />
@@ -285,7 +286,7 @@ export function BudgetAnalysisGraph({
               <Line
                 type="monotone"
                 dataKey="balance"
-                stroke={theme.reportsNumberNeutral}
+                stroke={theme.reportsGray}
                 strokeWidth={2}
                 name={balanceLabel}
                 dot={false}
@@ -356,7 +357,7 @@ export function BudgetAnalysisGraph({
               <Line
                 type="monotone"
                 dataKey="balance"
-                stroke={theme.reportsNumberNeutral}
+                stroke={theme.reportsGray}
                 strokeWidth={2}
                 name={balanceLabel}
                 dot={false}

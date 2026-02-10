@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import { getCurrency, type Currency } from 'loot-core/shared/currencies';
+import { getCurrency } from 'loot-core/shared/currencies';
+import type { Currency } from 'loot-core/shared/currencies';
 import {
   amountToInteger,
   currencyToAmount,
@@ -10,8 +11,8 @@ import {
   integerToCurrency,
   parseNumberFormat,
   setNumberFormat,
-  type IntegerAmount,
 } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
 
 import { useSyncedPref } from './useSyncedPref';
 
@@ -259,10 +260,14 @@ export function useFormat(): UseFormatResult {
         return defaultValue;
       }
 
-      let numericValue: number | null = evalArithmetic(trimmed, null);
+      // strip directional formatting characters and letters
+      const normalized = trimmed
+        .replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '')
+        .replace(/\p{L}+/gu, '');
+      let numericValue: number | null = evalArithmetic(normalized, null);
 
       if (numericValue === null || isNaN(numericValue)) {
-        numericValue = currencyToAmount(trimmed);
+        numericValue = currencyToAmount(normalized);
       }
 
       if (numericValue !== null && !isNaN(numericValue)) {

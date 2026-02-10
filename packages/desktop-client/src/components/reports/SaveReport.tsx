@@ -10,15 +10,16 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
-import {
-  type CustomReportEntity,
-  type DashboardEntity,
+import type {
+  CustomReportEntity,
+  DashboardEntity,
 } from 'loot-core/types/models';
 
 import { LoadingIndicator } from './LoadingIndicator';
 import { SaveReportChoose } from './SaveReportChoose';
 import { SaveReportDelete } from './SaveReportDelete';
 import { SaveReportMenu } from './SaveReportMenu';
+import type { SavedStatus } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
 
 import { FormField, FormLabel } from '@desktop-client/components/forms';
@@ -28,7 +29,7 @@ import { useReports } from '@desktop-client/hooks/useReports';
 type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
   customReportItems: T;
   report: CustomReportEntity;
-  savedStatus: string;
+  savedStatus: SavedStatus;
   onReportChange: (
     params:
       | {

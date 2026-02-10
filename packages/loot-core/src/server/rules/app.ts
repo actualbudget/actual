@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import { logger } from '../../platform/server/log';
-import {
-  type RuleActionEntity,
-  type RuleEntity,
-  type TransactionEntity,
+import type {
+  RuleActionEntity,
+  RuleEntity,
+  TransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import { RuleError } from '../errors';

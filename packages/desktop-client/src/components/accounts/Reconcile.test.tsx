@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 
 import { generateAccount } from 'loot-core/mocks';
 import { q } from 'loot-core/shared/query';
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
@@ -174,12 +174,12 @@ describe('ReconcileMenu arithmetic evaluation', () => {
     const input = screen.getByRole('textbox');
     // Replace with arithmetic expression
     await userEvent.clear(input);
-    await userEvent.type(input, '100+25.50-abcd-10');
+    await userEvent.type(input, 'abcd');
 
     // Submit
     await userEvent.click(screen.getByRole('button', { name: 'Reconcile' }));
 
-    // Input contains invalid characters, so it should use cleared balance for reconciliation
+    // Input has no digits, so it should use cleared balance for reconciliation
     expect(onReconcile).toHaveBeenCalledWith(123456);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
