@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
-import type { InfiniteData, UseInfiniteQueryResult } from '@tanstack/react-query';
+import type {
+  InfiniteData,
+  UseInfiniteQueryResult,
+} from '@tanstack/react-query';
 
 import type { Query } from 'loot-core/shared/query';
 import type { IntegerAmount } from 'loot-core/shared/util';
