@@ -27,10 +27,8 @@ import {
 } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
-import {
-  useFormat,
-  type UseFormatResult,
-} from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { UseFormatResult } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type NetWorthDataPoint = {
@@ -45,10 +43,11 @@ type NetWorthDataPoint = {
 
 type TrendTooltipProps = TooltipContentProps<number, string> & {
   style?: CSSProperties;
-  t: (key: string) => string;
 };
 
-function TrendTooltip({ active, payload, style, t }: TrendTooltipProps) {
+function TrendTooltip({ active, payload, style }: TrendTooltipProps) {
+  const { t } = useTranslation();
+
   if (active && payload && payload.length) {
     return (
       <div
@@ -334,8 +333,6 @@ export function NetWorthGraph({
       .map(point => point.x);
   }, [interval, graphData.data]);
 
-  const { t } = useTranslation();
-
   return (
     <Container
       style={{
@@ -398,9 +395,7 @@ export function NetWorthGraph({
               />
               {effectiveShowTooltip && mode === 'trend' && (
                 <Tooltip<number, string>
-                  content={props => (
-                    <TrendTooltip {...props} style={style} t={t} />
-                  )}
+                  content={props => <TrendTooltip {...props} style={style} />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
