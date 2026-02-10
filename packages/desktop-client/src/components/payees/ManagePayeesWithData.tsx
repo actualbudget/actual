@@ -26,11 +26,12 @@ export function ManagePayeesWithData({
   initialSelectedIds,
 }: ManagePayeesWithDataProps) {
   const queryClient = useQueryClient();
-  const { data: payees, refetch: refetchPayees } = usePayees();
-  const { data: orphanedPayees, refetch: refetchOrphanedPayees } =
+  const { data: payees = [], refetch: refetchPayees } = usePayees();
+  const { data: orphanedPayees = [], refetch: refetchOrphanedPayees } =
     useOrphanedPayees();
   const dispatch = useDispatch();
-  const { data: ruleCounts, refetch: refetchRuleCounts } = usePayeeRuleCounts();
+  const { data: ruleCounts = new Map(), refetch: refetchRuleCounts } =
+    usePayeeRuleCounts();
 
   useEffect(() => {
     const unlisten = listen('sync-event', async event => {
@@ -114,7 +115,7 @@ export function ManagePayeesWithData({
         await send('payees-batch-change', changes);
         queryClient.setQueryData(
           payeeQueries.listOrphaned().queryKey,
-          existing => applyChanges(changes, existing),
+          existing => applyChanges(changes, existing || []),
         );
       }}
       onMerge={async ([targetId, ...mergeIds]) => {

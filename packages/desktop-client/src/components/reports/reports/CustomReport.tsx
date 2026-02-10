@@ -470,7 +470,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const balanceTypeOp: balanceTypeOpType =
     ReportOptions.balanceTypeMap.get(balanceType) || 'totalDebts';
   const sortByOp: sortByOpType = sortBy || 'desc';
-  const { data: payees } = usePayees();
+  const { data: payees = [] } = usePayees();
   const accounts = useAccounts();
 
   const hasWarning = calculateHasWarning(conditions, {

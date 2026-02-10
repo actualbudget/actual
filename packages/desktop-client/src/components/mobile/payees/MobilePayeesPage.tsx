@@ -24,10 +24,10 @@ export function MobilePayeesPage() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { data: payees, isPending } = usePayees();
+  const { data: payees = [], isPending } = usePayees();
   const { showUndoNotification } = useUndo();
   const [filter, setFilter] = useState('');
-  const { data: ruleCounts, isPending: isRuleCountsLoading } =
+  const { data: ruleCounts = new Map(), isPending: isRuleCountsLoading } =
     usePayeeRuleCounts();
 
   const filteredPayees: PayeeEntity[] = useMemo(() => {

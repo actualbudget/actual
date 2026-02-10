@@ -26,7 +26,7 @@ export function PayeeAutocompleteModal({
   onClose,
 }: PayeeAutocompleteModalProps) {
   const { t } = useTranslation();
-  const { data: payees } = usePayees();
+  const { data: payees = [] } = usePayees();
   const accounts = useAccounts() || [];
   const navigate = useNavigate();
 
