@@ -1,4 +1,4 @@
-import { type MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
