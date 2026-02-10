@@ -1965,7 +1965,7 @@ export function Account() {
     state => state.transactions.matchedTransactions,
   );
   const accounts = useAccounts();
-  const { data: payees } = usePayees();
+  const { data: payees = [] } = usePayees();
   const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [hideFraction] = useSyncedPref('hideFraction');
