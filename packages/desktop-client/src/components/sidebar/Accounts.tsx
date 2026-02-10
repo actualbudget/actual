@@ -529,8 +529,14 @@ export function Accounts() {
     }
   }
 
+  // Track the keys currently being dragged so getDropOperation can
+  // validate cross-budget drops.  Updated every time getItems fires
+  // (i.e. at the start of each drag).
+  const draggedKeysRef = useRef<Set<Key>>(new Set());
+
   const { dragAndDropHooks } = useDragAndDrop({
     getItems(keys) {
+      draggedKeysRef.current = new Set(keys);
       // Only allow dragging accounts and type groups – not structural
       // nodes (all-accounts, onbudget, offbudget, closed).
       const draggable = [...keys].filter(
@@ -622,6 +628,28 @@ export function Accounts() {
         target.dropPosition === 'on' &&
         (isTypeGroupKey(key) || key === ON_BUDGET_KEY || key === OFF_BUDGET_KEY)
       ) {
+        // Validate cross-budget drops: prevent dropping an account from
+        // one budget group onto the opposite budget group header.
+        // The offbudget status is immutable via drag-and-drop, so show
+        // no drop indicator for invalid targets.
+        if (key === ON_BUDGET_KEY || key === OFF_BUDGET_KEY) {
+          const isTargetOffBudget = key === OFF_BUDGET_KEY;
+          for (const draggedKey of draggedKeysRef.current) {
+            const draggedKeyStr = String(draggedKey);
+            if (
+              !isTypeGroupKey(draggedKeyStr) &&
+              !NON_DRAGGABLE_KEYS.has(draggedKeyStr)
+            ) {
+              const account = findAccountById(draggedKeyStr);
+              if (
+                account &&
+                Boolean(account.offbudget) !== isTargetOffBudget
+              ) {
+                return 'cancel';
+              }
+            }
+          }
+        }
         return 'move';
       }
 
