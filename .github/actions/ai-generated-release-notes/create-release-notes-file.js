@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import * as core from '@actions/core';
+import fs from 'fs';
 
 import { buildReleaseNotesFileContent } from './build-file-content.js';
 
@@ -12,6 +12,10 @@ if (!summaryDataJson || !category) {
   process.exit(1);
 }
 
+function setOutput(name, value) {
+  fs.appendFileSync(process.env.GITHUB_OUTPUT, `${name}=${value}\n`);
+}
+
 async function createReleaseNotesFile() {
   try {
     const summaryData = JSON.parse(summaryDataJson);
@@ -20,7 +24,7 @@ async function createReleaseNotesFile() {
 
     if (!summaryData) {
       console.log('No summary data available, cannot create file');
-      core.setOutput('status', 'skipped');
+      setOutput('status', 'skipped');
       return;
     }
 
@@ -30,7 +34,7 @@ async function createReleaseNotesFile() {
 
     if (!category || category === 'null') {
       console.log('No valid category available, cannot create file');
-      core.setOutput('status', 'skipped');
+      setOutput('status', 'skipped');
       return;
     }
 
@@ -46,9 +50,9 @@ async function createReleaseNotesFile() {
     console.log('File content:');
     console.log(fileContent);
 
-    core.setOutput('status', 'generated');
-    core.setOutput('file_name', fileName);
-    core.setOutput(
+    setOutput('status', 'generated');
+    setOutput('file_name', fileName);
+    setOutput(
       'file_content_base64',
       Buffer.from(fileContent, 'utf8').toString('base64'),
     );

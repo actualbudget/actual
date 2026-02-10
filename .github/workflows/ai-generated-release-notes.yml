@@ -92,11 +92,11 @@ jobs:
           echo "maintainer_can_modify=${{ steps.pr-details.outputs.maintainer_can_modify }}"
           echo "summary_generated=${{ steps.generate-summary.outputs.result != 'null' }}"
           echo "category_generated=${{ steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != '' }}"
-          echo "checkout_allowed=${{ steps.pr-details.outputs.maintainer_can_modify == 'true' || steps.pr-details.outputs.head_repo_full_name == github.repository }}"
+          echo "checkout_allowed=${{ steps.pr-details.outputs.head_repo_full_name != '' && steps.pr-details.outputs.head_ref != '' }}"
           echo "release_notes_exists=${{ steps.check-release-notes-exists.outputs.result }}"
 
       - name: Checkout PR branch
-        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != '' && (steps.pr-details.outputs.maintainer_can_modify == 'true' || steps.pr-details.outputs.head_repo_full_name == github.repository)
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != '' && steps.pr-details.outputs.head_repo_full_name != '' && steps.pr-details.outputs.head_ref != ''
         id: checkout-pr-branch
         continue-on-error: true
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
