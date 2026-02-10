@@ -91,6 +91,8 @@ describe('storeNoteTemplates', () => {
           type: 'simple',
           monthly: 12,
           limit: null,
+          starting: null, 
+          until: null,     
           priority: 0,
           directive: 'template',
         },

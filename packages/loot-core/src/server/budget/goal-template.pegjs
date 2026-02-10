@@ -103,13 +103,13 @@ currencySymbol 'currency symbol' = symbol: . & { return /\p{Sc}/u.test(symbol) }
 rawScheduleName = $(
   (
     !('['('increase'i/'decrease'i))
-    !(_ 'starting'i)
-    !(_ 'until'i)
+    !(__ 'starting'i (__ / !.))
+    !(__ 'until'i (__ / !.))
     [^ \t\r\n]
     (
       !(_ '['('increase'i/'decrease'i))
-      !(_ 'starting'i)
-      !(_ 'until'i)
+      !(__ 'starting'i (__ / !.))
+      !(__ 'until'i (__ / !.))
       [^\r\n]
     )*
   )
