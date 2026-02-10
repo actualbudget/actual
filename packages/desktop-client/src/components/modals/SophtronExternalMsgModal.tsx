@@ -9,7 +9,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { sendCatch } from 'loot-core/platform/client/fetch';
-import { type SophtronToken } from 'loot-core/types/models/sophtron';
+import type { SophtronToken } from 'loot-core/types/models/sophtron';
 
 import {
   Error as AlertError,
@@ -24,10 +24,8 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { useSophtronStatus } from '@desktop-client/hooks/useSophtronStatus';
-import {
-  pushModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type RawSophtronAccount = {

@@ -10,8 +10,8 @@ import type {
   CategoryEntity,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
-  SyncServerSophtronAccount,
   SyncServerSimpleFinAccount,
+  SyncServerSophtronAccount,
   TransactionEntity,
 } from 'loot-core/types/models';
 
