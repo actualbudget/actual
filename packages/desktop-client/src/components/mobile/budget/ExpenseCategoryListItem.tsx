@@ -13,7 +13,7 @@ import { View } from '@actual-app/components/view';
 
 import type { BudgetType } from 'loot-core/server/prefs';
 import * as monthUtils from 'loot-core/shared/months';
-import { type CategoryEntity } from 'loot-core/types/models';
+import type { CategoryEntity } from 'loot-core/types/models';
 
 import { BalanceCell } from './BalanceCell';
 import { BudgetCell } from './BudgetCell';

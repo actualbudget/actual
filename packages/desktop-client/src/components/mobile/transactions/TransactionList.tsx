@@ -32,15 +32,9 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
-import {
-  groupById,
-  integerToCurrency,
-  type IntegerAmount,
-} from 'loot-core/shared/util';
-import {
-  type CategoryEntity,
-  type TransactionEntity,
-} from 'loot-core/types/models';
+import { groupById, integerToCurrency } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { CategoryEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { ROW_HEIGHT, TransactionListItem } from './TransactionListItem';
 

@@ -8,7 +8,7 @@ import {
   prevMonth,
   sheetForMonth,
 } from 'loot-core/shared/months';
-import { type CategoryEntity } from 'loot-core/types/models/category';
+import type { CategoryEntity } from 'loot-core/types/models/category';
 
 import { ToBudgetAmount } from '@desktop-client/components/budget/envelope/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '@desktop-client/components/budget/envelope/budgetsummary/TotalsList';
