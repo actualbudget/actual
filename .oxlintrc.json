@@ -101,6 +101,7 @@
     "typescript/no-var-requires": "warn",
 
     // Import rules
+    "import/consistent-type-specifier-style": "warn",
     "import/first": "error",
     "import/no-amd": "error",
     "import/no-default-export": "warn",
@@ -111,7 +112,7 @@
     "import/no-duplicates": [
       "warn",
       {
-        "prefer-inline": true
+        "prefer-inline": false
       }
     ],
 

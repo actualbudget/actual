@@ -4,9 +4,8 @@ import React, {
   useMemo,
   useRef,
   useState,
-  type Ref,
-  type RefObject,
 } from 'react';
+import type { Ref, RefObject } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';

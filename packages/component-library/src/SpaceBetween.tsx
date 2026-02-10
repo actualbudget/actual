@@ -1,6 +1,7 @@
-import React, { type ReactNode } from 'react';
+import React from 'react';
+import type { ReactNode } from 'react';
 
-import { type CSSProperties } from './styles';
+import type { CSSProperties } from './styles';
 import { View } from './View';
 
 type SpaceBetweenProps = {

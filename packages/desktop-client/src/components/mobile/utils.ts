@@ -1,9 +1,9 @@
-import { type useTranslation } from 'react-i18next';
+import type { useTranslation } from 'react-i18next';
 
-import {
-  type AccountEntity,
-  type PayeeEntity,
-  type TransactionEntity,
+import type {
+  AccountEntity,
+  PayeeEntity,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 type GetPrettyPayeeProps = {

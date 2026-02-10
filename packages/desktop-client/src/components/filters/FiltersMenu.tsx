@@ -30,8 +30,9 @@ import {
   mapField,
   unparse,
 } from 'loot-core/shared/rules';
-import { titleFirst, type IntegerAmount } from 'loot-core/shared/util';
-import { type RuleConditionEntity } from 'loot-core/types/models';
+import { titleFirst } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { RuleConditionEntity } from 'loot-core/types/models';
 
 import { CompactFiltersButton } from './CompactFiltersButton';
 import { FiltersButton } from './FiltersButton';

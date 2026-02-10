@@ -1,11 +1,10 @@
 // @ts-strict-ignore
-import React, {
-  Fragment,
-  useMemo,
-  type ComponentProps,
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-  type ReactElement,
+import React, { Fragment, useMemo } from 'react';
+import type {
+  ComponentProps,
+  ComponentPropsWithoutRef,
+  CSSProperties,
+  ReactElement,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -16,7 +15,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
 import { Autocomplete } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';

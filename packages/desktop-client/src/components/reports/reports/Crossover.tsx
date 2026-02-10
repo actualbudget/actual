@@ -17,10 +17,10 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type CategoryEntity,
-  type CrossoverWidget,
-  type TimeFrame,
+import type {
+  CategoryEntity,
+  CrossoverWidget,
+  TimeFrame,
 } from 'loot-core/types/models';
 
 import { Link } from '@desktop-client/components/common/Link';
@@ -47,7 +47,7 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useWidget } from '@desktop-client/hooks/useWidget';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';

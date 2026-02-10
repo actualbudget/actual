@@ -1,4 +1,4 @@
-import { type NewWidget } from '../types/models';
+import type { NewWidget } from '../types/models';
 
 export const DEFAULT_DASHBOARD_STATE: NewWidget[] = [
   // Top row: Key metrics at a glance

@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components';
-import ReactGridLayout, { type Layout } from 'react-grid-layout';
+import ReactGridLayout from 'react-grid-layout';
+import type { Layout } from 'react-grid-layout';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';

@@ -8,12 +8,14 @@ import {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
-  type ForwardedRef,
-  type KeyboardEvent,
-  type ReactNode,
-  type Ref,
-  type RefObject,
+} from 'react';
+import type {
+  CSSProperties,
+  ForwardedRef,
+  KeyboardEvent,
+  ReactNode,
+  Ref,
+  RefObject,
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
@@ -62,16 +64,16 @@ import {
   currencyToAmount,
   integerToCurrency,
   titleFirst,
-  type IntegerAmount,
 } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type CategoryGroupEntity,
-  type PayeeEntity,
-  type RuleEntity,
-  type ScheduleEntity,
-  type TransactionEntity,
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type {
+  AccountEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+  PayeeEntity,
+  RuleEntity,
+  ScheduleEntity,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 import {
@@ -80,9 +82,11 @@ import {
   makeTemporaryTransactions,
   selectAscDesc,
   serializeTransaction,
-  type SerializedTransaction,
-  type TransactionEditFunction,
-  type TransactionUpdateFunction,
+} from './table/utils';
+import type {
+  SerializedTransaction,
+  TransactionEditFunction,
+  TransactionUpdateFunction,
 } from './table/utils';
 import { TransactionMenu } from './TransactionMenu';
 
@@ -90,10 +94,8 @@ import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
-import {
-  getStatusProps,
-  type StatusTypes,
-} from '@desktop-client/components/schedules/StatusBadge';
+import { getStatusProps } from '@desktop-client/components/schedules/StatusBadge';
+import type { StatusTypes } from '@desktop-client/components/schedules/StatusBadge';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import {
   Cell,
@@ -107,9 +109,11 @@ import {
   Table,
   UnexposedCellContent,
   useTableNavigator,
-  type TableHandleRef,
-  type TableNavigator,
-  type TableProps,
+} from '@desktop-client/components/table';
+import type {
+  TableHandleRef,
+  TableNavigator,
+  TableProps,
 } from '@desktop-client/components/table';
 import {
   SchedulesProvider,
@@ -129,10 +133,8 @@ import {
   useSelectedItems,
 } from '@desktop-client/hooks/useSelected';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import {
-  useSplitsExpanded,
-  type SplitsExpandedContextValue,
-} from '@desktop-client/hooks/useSplitsExpanded';
+import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
+import type { SplitsExpandedContextValue } from '@desktop-client/hooks/useSplitsExpanded';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
