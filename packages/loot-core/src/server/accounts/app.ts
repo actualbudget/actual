@@ -18,6 +18,7 @@ import type {
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
+  SyncServerSophtronAccount,
   TransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
