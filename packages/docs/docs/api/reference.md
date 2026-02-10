@@ -191,7 +191,7 @@ This method is mainly for custom importers that want to skip all the automatic s
 
 #### `importTransactions`
 
-<Method name="importTransactions" args={[{ name: 'accountId', type: 'id'}, { name: 'transactions', type: 'Transaction[]'}]} returns="Promise<{ errors, added, updated }>" />
+<Method name="importTransactions" args={[{ name: 'accountId', type: 'id'}, { name: 'transactions', type: 'Transaction[]'}, { name: 'opts = {}', type: 'object?'}]} returns="Promise<{ errors, added, updated }>" />
 
 Adds multiple transactions at once, while going through the same process as importing a file or downloading transactions from a bank.
 In particular, all rules are run on the specified transactions before adding them.
@@ -200,6 +200,21 @@ Use `addTransactions` instead for adding raw transactions without post-processin
 The import will "reconcile" transactions to avoid adding duplicates. Transactions with the same `imported_id` will never be added more than once. Otherwise, the system will match transactions with the same amount and with similar dates and payees and try to avoid duplicates. If not using `imported_id` you should check the results after importing.
 
 It will also create transfers if a transfer payee is specified. See [transfers](#transfers).
+
+This method has the following optional flags (passed as the `opts` object):
+
+- `defaultCleared`: whether imported transactions should be marked as cleared (defaults to `true`)
+- `dryRun`: if `true`, returns what would be added/updated without actually modifying the database (defaults to `false`)
+- `reimportDeleted`: if `true`, transactions that were previously imported and then deleted will be reimported; if `false`, they will be skipped (defaults to `true`)
+
+Example using opts:
+
+```js
+await api.importTransactions(accountId, transactions, {
+  reimportDeleted: false,
+  defaultCleared: false,
+});
+```
 
 This method returns an object with the following fields:
 
