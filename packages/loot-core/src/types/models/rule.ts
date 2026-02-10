@@ -1,4 +1,4 @@
-import { type RecurConfig, type ScheduleEntity } from './schedule';
+import type { RecurConfig, ScheduleEntity } from './schedule';
 
 export type NewRuleEntity = {
   stage: 'pre' | null | 'post';
@@ -48,7 +48,7 @@ type BaseConditionEntity<
     year?: boolean;
     group?: boolean;
   };
-  conditionsOp?: string;
+  conditionsOp?: 'and' | 'or';
   type?: 'id' | 'boolean' | 'date' | 'number' | 'string';
   customName?: string;
   queryFilter?: Record<string, { $oneof: string[] }>;

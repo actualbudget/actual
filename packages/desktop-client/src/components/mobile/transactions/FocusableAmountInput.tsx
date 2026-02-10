@@ -1,12 +1,9 @@
-import React, {
-  memo,
-  useEffect,
-  useRef,
-  useState,
-  type ComponentPropsWithRef,
-  type CSSProperties,
-  type HTMLProps,
-  type Ref,
+import React, { memo, useEffect, useRef, useState } from 'react';
+import type {
+  ComponentPropsWithRef,
+  CSSProperties,
+  HTMLProps,
+  Ref,
 } from 'react';
 
 import { Button } from '@actual-app/components/button';

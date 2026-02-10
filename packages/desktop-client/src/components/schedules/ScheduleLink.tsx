@@ -20,10 +20,8 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { Search } from '@desktop-client/components/common/Search';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import {
-  pushModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type ScheduleLinkProps = Extract<

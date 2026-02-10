@@ -1,9 +1,6 @@
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
-} from '../../types/models';
+import type { CategoryEntity, CategoryGroupEntity } from '../../types/models';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
 import * as db from '../db';

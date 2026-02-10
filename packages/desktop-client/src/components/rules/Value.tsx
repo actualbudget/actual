@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useState, type CSSProperties } from 'react';
+import React, { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';

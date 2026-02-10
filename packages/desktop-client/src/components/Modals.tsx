@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useEffectEvent } from 'react';
 import { useLocation } from 'react-router';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -90,12 +90,15 @@ export function Modals() {
   const { modalStack } = useModalState();
   const [budgetId] = useMetadataPref('id');
 
-  useEffect(() => {
+  const onCloseModal = useEffectEvent(() => {
     if (modalStack.length > 0) {
       dispatch(closeModal());
     }
-    // oxlint-disable-next-line react/exhaustive-deps
-  }, [dispatch, location]);
+  });
+
+  useEffect(() => {
+    onCloseModal();
+  }, [location]);
 
   const modals = modalStack
     .map((modal, idx) => {

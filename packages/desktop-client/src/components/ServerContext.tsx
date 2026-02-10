@@ -4,13 +4,13 @@ import React, {
   useContext,
   useEffect,
   useState,
-  type ReactNode,
 } from 'react';
+import type { ReactNode } from 'react';
 
 import { t } from 'i18next';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { type Handlers } from 'loot-core/types/handlers';
+import type { Handlers } from 'loot-core/types/handlers';
 
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';

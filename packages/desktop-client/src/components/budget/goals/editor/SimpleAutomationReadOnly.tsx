@@ -1,7 +1,7 @@
 import { Trans } from 'react-i18next';
 
 import type { SimpleTemplate } from 'loot-core/types/models/templates';
-import { type TransObjectLiteral } from 'loot-core/types/util';
+import type { TransObjectLiteral } from 'loot-core/types/util';
 
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat } from '@desktop-client/hooks/useFormat';
