@@ -27,10 +27,8 @@ function nowMs() {
 /** @typedef {'sandbox'|'production'} BunqEnvironment */
 
 function getEnvironment() {
-  const raw = secretsService.get(SecretName.bunq_environment);
-  if (raw === 'production') {
-    return 'production';
-  }
+  // The current Bunq setup flow stores only API key + permitted IPs.
+  // If you need sandbox for local testing, temporarily return 'sandbox' here.
   return 'production';
 }
 
@@ -495,7 +493,10 @@ function getEventPaymentLike(event) {
 
     return {
       created: masterCardAction.created,
-      amount: masterCardAction.amount_billing || masterCardAction.amount_local || null,
+      amount:
+        masterCardAction.amount_billing ||
+        masterCardAction.amount_local ||
+        null,
       monetary_account_id: masterCardAction.monetary_account_id,
       counterparty_alias:
         masterCardAction.counterparty_alias ||
@@ -543,13 +544,17 @@ function getEventPaymentLike(event) {
 function getEventObjectTypes(event) {
   const types = [];
 
-  const objectTypes = event?.object && typeof event.object === 'object' ? Object.keys(event.object) : [];
+  const objectTypes =
+    event?.object && typeof event.object === 'object'
+      ? Object.keys(event.object)
+      : [];
   for (const type of objectTypes) {
     types.push(`object.${type}`);
   }
 
   const objectDataTypes =
-    event?.object_data_at_event && typeof event.object_data_at_event === 'object'
+    event?.object_data_at_event &&
+    typeof event.object_data_at_event === 'object'
       ? Object.keys(event.object_data_at_event)
       : [];
   for (const type of objectDataTypes) {
@@ -614,7 +619,13 @@ function flipNormalizedAmount(amount) {
   return (-parsed).toFixed(2);
 }
 
-function buildMatchKey({ day, amount, currency, accountId, counterpartyIdentity }) {
+function buildMatchKey({
+  day,
+  amount,
+  currency,
+  accountId,
+  counterpartyIdentity,
+}) {
   if (!day || !amount || !currency || !accountId) {
     return null;
   }
@@ -662,7 +673,9 @@ function getPaymentMatchKeys(payment, fallbackAccountId) {
 
 function getEventMatchKeys(event, fallbackAccountId) {
   const paymentLike = getEventPaymentLike(event);
-  const requestInquiryLike = paymentLike ? null : getEventRequestInquiryLike(event);
+  const requestInquiryLike = paymentLike
+    ? null
+    : getEventRequestInquiryLike(event);
   const objectTypes = getEventObjectTypes(event);
 
   const inquiryAmountSource =
@@ -679,7 +692,8 @@ function getEventMatchKeys(event, fallbackAccountId) {
   const amount = normalizeAmount(
     paymentLike?.amount?.value || inquiryAmountSource?.value,
   );
-  const currency = paymentLike?.amount?.currency || inquiryAmountSource?.currency;
+  const currency =
+    paymentLike?.amount?.currency || inquiryAmountSource?.currency;
   const accountId =
     paymentLike?.monetary_account_id ||
     requestInquiryLike?.monetary_account_id ||
@@ -870,17 +884,6 @@ function getFallbackCandidates({
   };
 }
 
-function incrementObjectTypeMissCoverage(bucket, objectTypes) {
-  if (!bucket || typeof bucket !== 'object') {
-    return;
-  }
-
-  const keys = Array.isArray(objectTypes) && objectTypes.length > 0 ? objectTypes : ['[unknown]'];
-  for (const objectType of keys) {
-    bucket[objectType] = (bucket[objectType] || 0) + 1;
-  }
-}
-
 async function listEventsForAccount(client, userId, accountId, payments = []) {
   const startedAt = nowMs();
   const paymentIdSet =
@@ -894,26 +897,6 @@ async function listEventsForAccount(client, userId, accountId, payments = []) {
   const stats = {
     pagesFetched: 0,
     eventsScanned: 0,
-    idMatches: 0,
-    fallbackMatches: 0,
-    fallbackSignFlipMatches: 0,
-    ambiguousFallbacks: 0,
-    eventsWithCategory: 0,
-    fallbackEligibleEvents: 0,
-    fallbackEventsWithComputedKey: 0,
-    fallbackEventsMissingKey: 0,
-    fallbackMissReasons: {
-      missingAmount: 0,
-      missingCurrency: 0,
-      missingAccount: 0,
-      missingCounterparty: 0,
-      noCandidate: 0,
-      ambiguous: 0,
-    },
-    fallbackMissObjectTypes: {
-      missingKey: {},
-      noCandidate: {},
-    },
   };
 
   if (Array.isArray(payments) && payments.length > 0) {
@@ -926,21 +909,10 @@ async function listEventsForAccount(client, userId, accountId, payments = []) {
   }
   let olderId = null;
   let olderUrl = null;
-  let stopReason = 'max_pages_reached';
   let pagesWithoutNewMappings = 0;
-
-  console.debug('bunq listEvents pagination start', {
-    userId,
-    accountId,
-    pageSize: DEFAULT_PAGE_SIZE,
-    maxPages: MAX_EVENT_PAGES,
-    timeBudgetMs: EVENTS_TIME_BUDGET_MS,
-    paymentCount: paymentIdSet?.size ?? null,
-  });
 
   for (let i = 0; i < MAX_EVENT_PAGES; i++) {
     if (nowMs() - startedAt >= EVENTS_TIME_BUDGET_MS) {
-      stopReason = 'time_budget_exceeded';
       break;
     }
 
@@ -957,19 +929,6 @@ async function listEventsForAccount(client, userId, accountId, payments = []) {
     const pageEvents = extractEvents(response);
     const pagination = extractPaginationCursor(response);
 
-    console.debug('bunq listEvents page fetched', {
-      userId,
-      accountId,
-      pageNumber: i + 1,
-      mode: olderUrl ? 'pagination_url' : 'query_params',
-      requestOlderId: olderId,
-      requestOlderUrl: olderUrl ? '[present]' : '[none]',
-      eventsInPage: pageEvents.length,
-      nextOlderId: pagination.olderId,
-      nextOlderUrl: pagination.olderUrl ? '[present]' : '[none]',
-      elapsedMs: nowMs() - startedAt,
-    });
-
     for (const event of pageEvents) {
       if (seenEventIds.has(event.id)) {
         continue;
@@ -982,14 +941,11 @@ async function listEventsForAccount(client, userId, accountId, payments = []) {
       if (!categoryType) {
         continue;
       }
-      stats.eventsWithCategory += 1;
-
       const paymentId = getPaymentIdFromEvent(event);
       if (paymentId) {
         if (!categoryByPaymentId.has(paymentId)) {
           if (!paymentIdSet || paymentIdSet.has(paymentId)) {
             categoryByPaymentId.set(paymentId, categoryType);
-            stats.idMatches += 1;
           }
         }
         continue;
@@ -998,8 +954,6 @@ async function listEventsForAccount(client, userId, accountId, payments = []) {
       if (!paymentIdSet || paymentIdSet.size === 0) {
         continue;
       }
-
-      stats.fallbackEligibleEvents += 1;
 
       const fallback = getFallbackCandidates({
         event,
@@ -1010,48 +964,10 @@ async function listEventsForAccount(client, userId, accountId, payments = []) {
         categorizedPaymentIds: categoryByPaymentId,
       });
 
-      if (fallback.hasComputedKey) {
-        stats.fallbackEventsWithComputedKey += 1;
-      } else {
-        stats.fallbackEventsMissingKey += 1;
-        incrementObjectTypeMissCoverage(
-          stats.fallbackMissObjectTypes.missingKey,
-          fallback.objectTypes,
-        );
-      }
-
       const fallbackCandidates = fallback.candidates;
 
       if (fallbackCandidates.length === 1) {
         categoryByPaymentId.set(fallbackCandidates[0], categoryType);
-        stats.fallbackMatches += 1;
-        if (fallback.usedSignFlip) {
-          stats.fallbackSignFlipMatches += 1;
-        }
-      } else if (fallbackCandidates.length > 1) {
-        stats.ambiguousFallbacks += 1;
-        stats.fallbackMissReasons.ambiguous += 1;
-        if (fallback.missing.counterparty) {
-          stats.fallbackMissReasons.missingCounterparty += 1;
-        }
-      } else {
-        stats.fallbackMissReasons.noCandidate += 1;
-        incrementObjectTypeMissCoverage(
-          stats.fallbackMissObjectTypes.noCandidate,
-          fallback.objectTypes,
-        );
-        if (fallback.missing.amount) {
-          stats.fallbackMissReasons.missingAmount += 1;
-        }
-        if (fallback.missing.currency) {
-          stats.fallbackMissReasons.missingCurrency += 1;
-        }
-        if (fallback.missing.account) {
-          stats.fallbackMissReasons.missingAccount += 1;
-        }
-        if (fallback.missing.counterparty) {
-          stats.fallbackMissReasons.missingCounterparty += 1;
-        }
       }
     }
 
@@ -1063,7 +979,6 @@ async function listEventsForAccount(client, userId, accountId, payments = []) {
     }
 
     if (paymentIdSet && categoryByPaymentId.size >= paymentIdSet.size) {
-      stopReason = 'all_payment_categories_mapped';
       break;
     }
 
@@ -1073,12 +988,10 @@ async function listEventsForAccount(client, userId, accountId, payments = []) {
       stats.eventsScanned >= EVENT_NO_PROGRESS_MIN_EVENTS_SCANNED &&
       pagesWithoutNewMappings >= EVENT_NO_PROGRESS_PAGE_LIMIT
     ) {
-      stopReason = 'mapping_progress_stalled';
       break;
     }
 
     if (!pagination.olderId && !pagination.olderUrl) {
-      stopReason = 'pagination_end';
       break;
     }
 
@@ -1086,43 +999,12 @@ async function listEventsForAccount(client, userId, accountId, payments = []) {
       pagination.olderId === olderId &&
       (!pagination.olderUrl || pagination.olderUrl === olderUrl)
     ) {
-      stopReason = 'pagination_cursor_not_advanced';
       break;
     }
 
     olderId = pagination.olderId;
     olderUrl = pagination.olderUrl;
   }
-
-  console.debug('bunq listEvents pagination complete', {
-    userId,
-    accountId,
-    pagesFetched: stats.pagesFetched,
-    eventsScanned: stats.eventsScanned,
-    categoriesMapped: categoryByPaymentId.size,
-    stopReason,
-    elapsedMs: nowMs() - startedAt,
-  });
-
-  /*console.log('bunq: event category match coverage', {
-    accountId,
-    pagesFetched: stats.pagesFetched,
-    eventsScanned: stats.eventsScanned,
-    eventsWithCategory: stats.eventsWithCategory,
-    idMatches: stats.idMatches,
-    fallbackMatches: stats.fallbackMatches,
-    fallbackSignFlipMatches: stats.fallbackSignFlipMatches,
-    ambiguousFallbacks: stats.ambiguousFallbacks,
-    fallbackEligibleEvents: stats.fallbackEligibleEvents,
-    fallbackEventsWithComputedKey: stats.fallbackEventsWithComputedKey,
-    fallbackEventsMissingKey: stats.fallbackEventsMissingKey,
-    fallbackMissReasons: stats.fallbackMissReasons,
-    fallbackMissObjectTypes: stats.fallbackMissObjectTypes,
-    unmatchedPayments:
-      paymentIdSet?.size != null
-        ? Math.max(paymentIdSet.size - categoryByPaymentId.size, 0)
-        : null,
-  });*/
 
   return categoryByPaymentId;
 }
@@ -1148,20 +1030,11 @@ export function normalizeBunqPayment(payment, categoryType = null) {
     payment?.description ||
     'bunq';
 
-  const notesBase = typeof payment?.description === 'string' ? payment.description.trim() : '';
+  const notesBase =
+    typeof payment?.description === 'string' ? payment.description.trim() : '';
   const notes = notesBase || null;
   const normalizedCategoryType = normalizeCategoryType(categoryType);
 
-  /*console.log('bunq: normalized payment', {
-    paymentId: payment?.id,
-    date,
-    amount,
-    currency: payment?.amount?.currency,
-    payeeName,
-    notes,
-    categoryType,
-    normalizedCategoryType,
-  });*/
   return {
     booked: true,
     date,
@@ -1288,15 +1161,7 @@ export const bunqService = {
       client.sessionToken = context.sessionToken;
       client.serverPublicKey = context.serverPublicKey;
 
-      /*console.log('bunq: listing monetary accounts', {
-        userId: context.userId,
-      });*/
       const response = await client.listMonetaryAccounts(context.userId);
-      /*console.log('bunq: listed monetary accounts', {
-        userId: context.userId,
-        response: JSON.stringify(response),
-        responseItems: (response?.Response || []).length,
-      });*/
       const responseItems = response?.Response || [];
       const activeResponseItems = responseItems.filter(isActiveMonetaryAccount);
       const filteredItems = [];
@@ -1324,7 +1189,6 @@ export const bunqService = {
           totalResponseItems: responseItems.length,
           filteredCount: filteredItems.length,
           filteredItems,
-          filteredItemsJson: JSON.stringify(filteredItems),
         });
       }
 
@@ -1337,14 +1201,14 @@ export const bunqService = {
   },
 
   /**
- * @param {{
- *   accountId: string;
- *   startDate?: string;
- *   cursor?: { newerId?: string | null } | null;
- *   importCategory?: boolean;
- *   fetchImpl?: typeof fetch;
- * }} options
- */
+   * @param {{
+   *   accountId: string;
+   *   startDate?: string;
+   *   cursor?: { newerId?: string | null } | null;
+   *   importCategory?: boolean;
+   *   fetchImpl?: typeof fetch;
+   * }} options
+   */
   async listTransactions(options) {
     try {
       const context = await ensureApiContext(options.fetchImpl);
@@ -1363,20 +1227,6 @@ export const bunqService = {
       const payments = [];
       const useIncremental = Boolean(incomingCursor?.newerId);
       const paymentsStartedAt = nowMs();
-      let paymentPagesFetched = 0;
-
-      console.debug('bunq listPayments pagination start', {
-        userId: context.userId,
-        accountId,
-        mode: useIncremental ? 'incremental_newer' : 'historical_older',
-        startDate,
-      incomingCursor: incomingCursor?.newerId || null,
-      pageSize: DEFAULT_PAGE_SIZE,
-      maxPages: MAX_PAGES,
-      timeBudgetMs: PAYMENTS_TIME_BUDGET_MS,
-    });
-
-      let paymentsStopReason = 'max_pages_reached';
 
       if (useIncremental) {
         let newerId = incomingCursor.newerId;
@@ -1384,11 +1234,9 @@ export const bunqService = {
 
         for (let i = 0; i < MAX_PAGES && newerId; i++) {
           if (nowMs() - paymentsStartedAt >= PAYMENTS_TIME_BUDGET_MS) {
-            paymentsStopReason = 'time_budget_exceeded';
             break;
           }
 
-          paymentPagesFetched += 1;
           const response = await client.listPayments(
             context.userId,
             accountId,
@@ -1402,19 +1250,6 @@ export const bunqService = {
           const pagePayments = extractPayments(response);
           const pagination = extractPaginationCursor(response);
 
-          /*console.debug('bunq listPayments page fetched', {
-            userId: context.userId,
-            accountId,
-            pageNumber: i + 1,
-            mode: newerUrl ? 'pagination_url' : 'query_params',
-            requestNewerId: newerId,
-            requestNewerUrl: newerUrl ? '[present]' : '[none]',
-            paymentsInPage: pagePayments.length,
-            nextNewerId: pagination.newerId,
-            nextNewerUrl: pagination.newerUrl ? '[present]' : '[none]',
-            elapsedMs: nowMs() - paymentsStartedAt,
-          });*/
-
           for (const payment of pagePayments) {
             if (seenIds.has(payment.id)) {
               continue;
@@ -1424,7 +1259,6 @@ export const bunqService = {
           }
 
           if (!pagination.newerId && !pagination.newerUrl) {
-            paymentsStopReason = 'pagination_end';
             break;
           }
 
@@ -1432,7 +1266,6 @@ export const bunqService = {
             pagination.newerId === newerId &&
             (!pagination.newerUrl || pagination.newerUrl === newerUrl)
           ) {
-            paymentsStopReason = 'pagination_cursor_not_advanced';
             break;
           }
 
@@ -1446,11 +1279,9 @@ export const bunqService = {
 
         for (let i = 0; i < MAX_PAGES && !stop; i++) {
           if (nowMs() - paymentsStartedAt >= PAYMENTS_TIME_BUDGET_MS) {
-            paymentsStopReason = 'time_budget_exceeded';
             break;
           }
 
-          paymentPagesFetched += 1;
           const response = await client.listPayments(
             context.userId,
             accountId,
@@ -1464,24 +1295,10 @@ export const bunqService = {
           const pagePayments = extractPayments(response);
           const pagination = extractPaginationCursor(response);
 
-          console.debug('bunq listPayments page fetched', {
-            userId: context.userId,
-            accountId,
-            pageNumber: i + 1,
-            mode: olderUrl ? 'pagination_url' : 'query_params',
-            requestOlderId: olderId,
-            requestOlderUrl: olderUrl ? '[present]' : '[none]',
-            paymentsInPage: pagePayments.length,
-            nextOlderId: pagination.olderId,
-            nextOlderUrl: pagination.olderUrl ? '[present]' : '[none]',
-            elapsedMs: nowMs() - paymentsStartedAt,
-          });
-
           for (const payment of pagePayments) {
             const paymentDate = String(payment?.created || '').slice(0, 10);
             if (startDate && paymentDate && paymentDate < startDate) {
               stop = true;
-              paymentsStopReason = 'start_date_boundary';
               continue;
             }
 
@@ -1497,7 +1314,6 @@ export const bunqService = {
           }
 
           if (!pagination.olderId && !pagination.olderUrl) {
-            paymentsStopReason = 'pagination_end';
             break;
           }
 
@@ -1505,7 +1321,6 @@ export const bunqService = {
             pagination.olderId === olderId &&
             (!pagination.olderUrl || pagination.olderUrl === olderUrl)
           ) {
-            paymentsStopReason = 'pagination_cursor_not_advanced';
             break;
           }
 
@@ -1513,17 +1328,6 @@ export const bunqService = {
           olderUrl = pagination.olderUrl;
         }
       }
-
-      /*console.debug('bunq listPayments pagination complete', {
-        userId: context.userId,
-        accountId,
-        mode: useIncremental ? 'incremental_newer' : 'historical_older',
-        pagesFetched: paymentPagesFetched,
-        paymentsFetched: payments.length,
-        uniquePaymentIds: seenIds.size,
-        stopReason: paymentsStopReason,
-        elapsedMs: nowMs() - paymentsStartedAt,
-      });*/
 
       let paymentCategoryTypeById = new Map();
       if (importCategory) {
@@ -1548,18 +1352,11 @@ export const bunqService = {
 
       const all = payments
         .map(payment => {
-          const categoryType = paymentCategoryTypeById.get(String(payment.id)) || null;
+          const categoryType =
+            paymentCategoryTypeById.get(String(payment.id)) || null;
           return normalizeBunqPayment(payment, categoryType);
         })
         .sort((a, b) => (b.sortOrder || 0) - (a.sortOrder || 0));
-
-      const _categorizedTransactions = all.filter(tx => tx.transactionCategory).length;
-      /*console.log('bunq: transaction category assignment summary', {
-        accountId,
-        totalTransactions: all.length,
-        categorizedTransactions: _categorizedTransactions,
-        uncategorizedTransactions: all.length - _categorizedTransactions,
-      });*/
 
       const startingBalance = await getCurrentAccountBalance(
         client,

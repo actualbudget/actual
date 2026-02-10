@@ -62,7 +62,8 @@ export class BunqClient {
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.maxRateLimitRetries =
       options.maxRateLimitRetries ?? DEFAULT_MAX_RATE_LIMIT_RETRIES;
-    this.retryBaseDelayMs = options.retryBaseDelayMs ?? DEFAULT_RETRY_BASE_DELAY_MS;
+    this.retryBaseDelayMs =
+      options.retryBaseDelayMs ?? DEFAULT_RETRY_BASE_DELAY_MS;
     this.retryJitterMs = options.retryJitterMs ?? DEFAULT_RETRY_JITTER_MS;
     this.sleepImpl = options.sleepImpl ?? sleep;
     this.randomImpl = options.randomImpl ?? Math.random;
@@ -225,7 +226,10 @@ export class BunqClient {
       query.set('monetary_account_id', String(pagination.monetaryAccountId));
     }
     if (pagination?.displayUserEvent != null) {
-      query.set('display_user_event', String(Boolean(pagination.displayUserEvent)));
+      query.set(
+        'display_user_event',
+        String(Boolean(pagination.displayUserEvent)),
+      );
     }
 
     const queryString = query.toString();
@@ -332,12 +336,15 @@ export class BunqClient {
         !hasRetriedAfterSessionRefresh &&
         (response.status === 401 || response.status === 403)
       ) {
-        console.warn('bunq session rejected; refreshing session and retrying once', {
-          path: normalizedPath,
-          method: options.method,
-          status: response.status,
-          elapsedMs: this.nowImpl() - requestStartedAt,
-        });
+        console.warn(
+          'bunq session rejected; refreshing session and retrying once',
+          {
+            path: normalizedPath,
+            method: options.method,
+            status: response.status,
+            elapsedMs: this.nowImpl() - requestStartedAt,
+          },
+        );
 
         hasRetriedAfterSessionRefresh = true;
         await this.refreshSessionToken();
@@ -382,16 +389,6 @@ export class BunqClient {
         }
 
         throw new BunqProtocolError('Bunq request failed', details);
-      }
-
-      if (attempt > 1) {
-        console.debug('bunq request recovered after retry', {
-          path: normalizedPath,
-          method: options.method,
-          attempts: attempt,
-          elapsedMs: this.nowImpl() - requestStartedAt,
-          status: response.status,
-        });
       }
 
       const serverSignature = response.headers.get('X-Bunq-Server-Signature');
@@ -468,7 +465,10 @@ export class BunqClient {
   extractResponseHeaders(response) {
     const responseHeaders = {};
     if (response?.headers?.entries) {
-      Object.assign(responseHeaders, Object.fromEntries(response.headers.entries()));
+      Object.assign(
+        responseHeaders,
+        Object.fromEntries(response.headers.entries()),
+      );
     } else if (response?.headers?.forEach) {
       response.headers.forEach((value, key) => {
         responseHeaders[key] = value;

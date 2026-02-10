@@ -337,15 +337,6 @@ async function downloadBunqTransactions(
       .select('value'),
   ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
 
-  logger.log('bunq sync request context', {
-    localAccountId: localId,
-    remoteAccountId: acctId,
-    since,
-    cursorKey,
-    hasSavedCursor: Boolean(savedCursor),
-    parsedCursor,
-  });
-
   const res = await post(
     getServer().BUNQ_SERVER + '/transactions',
     {
@@ -369,15 +360,6 @@ async function downloadBunqTransactions(
   if (res.cursor) {
     await upsertPreference(cursorKey, JSON.stringify(res.cursor));
   }
-
-  logger.log('bunq sync response summary', {
-    localAccountId: localId,
-    remoteAccountId: acctId,
-    downloadedCount: Array.isArray(res?.transactions?.all)
-      ? res.transactions.all.length
-      : null,
-    nextCursor: res?.cursor || null,
-  });
 
   const singleRes = res as BankSyncResponse;
   const retVal = {
@@ -572,7 +554,9 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
       await reloadCategoryCache();
     }
 
-    const existingCategory = categoriesByNormalizedName.get(normalizedCategoryName);
+    const existingCategory = categoriesByNormalizedName.get(
+      normalizedCategoryName,
+    );
     if (existingCategory) {
       return {
         categoryId: existingCategory.id,
@@ -591,7 +575,10 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
 
       const insertedCategory = await db.getCategory(categoryId);
       if (insertedCategory) {
-        categoriesByNormalizedName.set(normalizedCategoryName, insertedCategory);
+        categoriesByNormalizedName.set(
+          normalizedCategoryName,
+          insertedCategory,
+        );
       }
 
       return {
@@ -639,27 +626,27 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
 
   const [customMappingsRaw, importPending, importNotes, importCategory] =
     await Promise.all([
-    aqlQuery(
-      q('preferences')
-        .filter({ id: `custom-sync-mappings-${acctId}` })
-        .select('value'),
-    ).then(data => data?.data?.[0]?.value),
-    aqlQuery(
-      q('preferences')
-        .filter({ id: `sync-import-pending-${acctId}` })
-        .select('value'),
-    ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
-    aqlQuery(
-      q('preferences')
-        .filter({ id: `sync-import-notes-${acctId}` })
-        .select('value'),
-    ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
-    aqlQuery(
-      q('preferences')
-        .filter({ id: `sync-import-category-${acctId}` })
-        .select('value'),
-    ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
-  ]);
+      aqlQuery(
+        q('preferences')
+          .filter({ id: `custom-sync-mappings-${acctId}` })
+          .select('value'),
+      ).then(data => data?.data?.[0]?.value),
+      aqlQuery(
+        q('preferences')
+          .filter({ id: `sync-import-pending-${acctId}` })
+          .select('value'),
+      ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
+      aqlQuery(
+        q('preferences')
+          .filter({ id: `sync-import-notes-${acctId}` })
+          .select('value'),
+      ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
+      aqlQuery(
+        q('preferences')
+          .filter({ id: `sync-import-category-${acctId}` })
+          .select('value'),
+      ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
+    ]);
 
   const mappings = customMappingsRaw
     ? mappingsFromString(customMappingsRaw)
@@ -687,37 +674,10 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     const importedCategoryName = normalizeImportedCategory(categoryValue);
     let selectedCategory = trans.category ?? null;
 
-    if (!importCategory) {
-      logger.log('Bank sync category assignment skipped', {
-        accountId: acctId,
-        reason: 'import-category-disabled',
-        receivedCategoryValue: categoryValue,
-      });
-    } else if (!categoryMappingField) {
-      logger.log('Bank sync category assignment skipped', {
-        accountId: acctId,
-        reason: 'category-field-unmapped',
-        receivedCategoryValue: null,
-      });
-    } else if (!importedCategoryName) {
-      logger.log('Bank sync category assignment skipped', {
-        accountId: acctId,
-        reason: 'no-category-value',
-        receivedCategoryValue: categoryValue,
-      });
-    } else {
-      const { categoryId, decision } = await resolveOrCreateCategoryId(
-        importedCategoryName,
-      );
+    if (importCategory && categoryMappingField && importedCategoryName) {
+      const { categoryId } =
+        await resolveOrCreateCategoryId(importedCategoryName);
       selectedCategory = categoryId;
-
-      logger.log('Bank sync category assignment resolved', {
-        accountId: acctId,
-        receivedCategoryValue: categoryValue,
-        normalizedCategoryValue: importedCategoryName,
-        categoryId,
-        decision,
-      });
     }
 
     // Validate the date because we do some stuff with it. The db
