@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import {
   Button as AriaButton,
@@ -10,16 +10,7 @@ import {
 } from 'react-aria-components';
 import type { Key } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
-import { useMatch } from 'react-router';
 
-import { AlignedText } from '@actual-app/components/aligned-text';
-import {
-  SvgCheveronDown,
-  SvgCheveronRight,
-} from '@actual-app/components/icons/v1';
-import { Menu } from '@actual-app/components/menu';
-import { Popover } from '@actual-app/components/popover';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
@@ -27,17 +18,16 @@ import { css } from '@emotion/css';
 import type { AccountEntity } from 'loot-core/types/models';
 
 import { Account } from './Account';
+import { AccountGroupHeader } from './AccountGroupHeader';
+import { ExpandChevron } from './ExpandChevron';
+import { TypeGroupHeader } from './TypeGroupHeader';
 
 import {
   moveAccount,
   updateAccount,
 } from '@desktop-client/accounts/accountsSlice';
-import { AccountTypeAutocomplete } from '@desktop-client/components/autocomplete/AccountTypeAutocomplete';
-import { Link } from '@desktop-client/components/common/Link';
-import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useClosedAccounts } from '@desktop-client/hooks/useClosedAccounts';
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useOffBudgetAccounts } from '@desktop-client/hooks/useOffBudgetAccounts';
@@ -111,6 +101,19 @@ function getTypeNameFromTypeGroupKey(typeGroupKey: string): string {
 
 function getTypeGroupKey(budgetPrefix: string, typeName: string): string {
   return `${budgetPrefix}${TYPE_GROUP_SEPARATOR}${typeName}`;
+}
+
+function getIsOffBudgetForDropTargetKey(key: string): boolean | null {
+  if (key === ON_BUDGET_KEY) {
+    return false;
+  }
+  if (key === OFF_BUDGET_KEY) {
+    return true;
+  }
+  if (isTypeGroupKey(key)) {
+    return getBudgetPrefixFromTypeGroupKey(key) === OFF_BUDGET_KEY;
+  }
+  return null;
 }
 
 function isTextDragItem(item: { kind: string }): item is {
@@ -502,9 +505,13 @@ export function Accounts() {
         }
       }
 
-      return accounts.map(account => account.id);
+      console.warn(
+        'Unable to find sibling accounts for drag target account id:',
+        targetAccountId,
+      );
+      return [];
     },
-    [accounts, treeItems],
+    [treeItems],
   );
 
   function applyAccountTypeToItems(
@@ -587,7 +594,13 @@ export function Accounts() {
           dispatch(moveAccount({ id: accountId, targetId: targetAccountId }));
         } else if (e.target.dropPosition === 'after') {
           const siblingIds = getAccountSiblingIdsForTarget(targetAccountId);
+          if (siblingIds.length === 0) {
+            return;
+          }
           const targetIdx = siblingIds.findIndex(id => id === targetAccountId);
+          if (targetIdx < 0) {
+            return;
+          }
           const nextAccountId =
             targetIdx >= 0 ? siblingIds[targetIdx + 1] : undefined;
           dispatch(
@@ -631,12 +644,12 @@ export function Accounts() {
         target.dropPosition === 'on' &&
         (isTypeGroupKey(key) || key === ON_BUDGET_KEY || key === OFF_BUDGET_KEY)
       ) {
+        const isTargetOffBudget = getIsOffBudgetForDropTargetKey(key);
         // Validate cross-budget drops: prevent dropping an account from
-        // one budget group onto the opposite budget group header.
+        // one budget group onto the opposite budget group or type-group.
         // The offbudget status is immutable via drag-and-drop, so show
         // no drop indicator for invalid targets.
-        if (key === ON_BUDGET_KEY || key === OFF_BUDGET_KEY) {
-          const isTargetOffBudget = key === OFF_BUDGET_KEY;
+        if (isTargetOffBudget != null) {
           for (const draggedKey of draggedKeysRef.current) {
             const draggedKeyStr = String(draggedKey);
             if (
@@ -775,7 +788,7 @@ export function Accounts() {
                           ≡
                         </AriaButton>
                         <TypeGroupHeader
-                          node={node}
+                          typeName={node.name}
                           isExpanded={isExpanded}
                           onToggle={() => toggleExpanded(node.id)}
                           onRename={newName =>
@@ -844,293 +857,6 @@ export function Accounts() {
           }}
         </Tree>
       </View>
-    </View>
-  );
-}
-
-/**
- * TODO: Extract sidebar tree components into dedicated files as this module grows.
- * Chevron that toggles the expanded/collapsed state of a tree node.
- * Uses a plain `<button>` with an explicit `onToggle` callback so we
- * bypass the react-aria slot mechanism (which doesn't reliably fire
- * in all configurations) and directly update `expandedKeys`.
- */
-function ExpandChevron({
-  isExpanded,
-  onToggle,
-}: {
-  isExpanded: boolean;
-  onToggle: () => void;
-}) {
-  const { t } = useTranslation();
-  return (
-    <button
-      type="button"
-      aria-label={isExpanded ? t('Collapse') : t('Expand')}
-      onPointerDownCapture={e => {
-        e.stopPropagation();
-      }}
-      onClick={e => {
-        e.stopPropagation();
-        onToggle();
-      }}
-      onPointerDown={e => e.stopPropagation()}
-      style={{
-        all: 'unset',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-        flexShrink: 0,
-        width: 12,
-        height: 12,
-      }}
-    >
-      {isExpanded ? (
-        <SvgCheveronDown width={12} height={12} />
-      ) : (
-        <SvgCheveronRight width={12} height={12} />
-      )}
-    </button>
-  );
-}
-
-/**
- * Budget group / root header with a chevron, navigable link, and
- * aggregate balance.
- *
- * The chevron calls `onToggle` to expand/collapse.  Clicking the text
- * navigates to the aggregate account page.  `onPointerDown`
- * propagation is stopped on the outer container so the tree-row press
- * handler never fires – this ensures that only the chevron controls
- * expansion.
- */
-function AccountGroupHeader<FieldName extends SheetFields<'account'>>({
-  name,
-  to,
-  query,
-  isRoot,
-  isExpanded,
-  onToggle,
-}: {
-  name: string;
-  to?: string;
-  query: Binding<'account', FieldName>;
-  isRoot?: boolean;
-  isExpanded: boolean;
-  onToggle: () => void;
-}) {
-  const match = useMatch({ path: to || '', end: !!isRoot });
-
-  const wrapperStyle = {
-    ...styles.smallText,
-    fontWeight,
-    color: match ? theme.sidebarItemTextSelected : theme.sidebarItemText,
-    paddingTop: 4,
-    paddingBottom: 4,
-    paddingRight: 15,
-    paddingLeft: 4,
-    marginTop: isRoot ? 15 : 13,
-    marginBottom: isRoot ? 0 : 5,
-    ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
-    borderLeft: `4px solid ${match ? theme.sidebarItemAccentSelected : 'transparent'}`,
-    display: 'flex' as const,
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    gap: 2,
-  };
-
-  const textContent = (
-    <AlignedText
-      style={{
-        borderBottom: `1.5px solid ${theme.tableBorder}`,
-        paddingBottom: '3px',
-      }}
-      left={name}
-      right={<CellValue binding={query} type="financial" />}
-    />
-  );
-
-  return (
-    <View onPointerDown={e => e.stopPropagation()} style={wrapperStyle}>
-      <ExpandChevron isExpanded={isExpanded} onToggle={onToggle} />
-      {to ? (
-        <Link
-          variant="internal"
-          to={to}
-          style={{
-            flex: 1,
-            minWidth: 0,
-            textDecoration: 'none' as const,
-            color: 'inherit',
-          }}
-        >
-          {textContent}
-        </Link>
-      ) : (
-        <View style={{ flex: 1, minWidth: 0 }}>{textContent}</View>
-      )}
-    </View>
-  );
-}
-
-/**
- * Type group header with a collapse/expand chevron, inline rename, and
- * a right-click context menu offering Rename and Delete.
- *
- * - **Rename** replaces the type name on all accounts in this group.
- * - **Delete** clears the type (sets to null) on all accounts in this group.
- */
-function TypeGroupHeader<FieldName extends SheetFields<'account'>>({
-  node,
-  isExpanded,
-  onToggle,
-  onRename,
-  onDelete,
-  query,
-}: {
-  node: TreeNode;
-  isExpanded: boolean;
-  onToggle: () => void;
-  onRename: (newName: string) => void;
-  onDelete: () => void;
-  query?: Binding<'account', FieldName>;
-}) {
-  const { t } = useTranslation();
-  const triggerRef = useRef<HTMLDivElement>(null);
-  const { setMenuOpen, menuOpen, handleContextMenu, position } =
-    useContextMenu();
-  const [isRenaming, setIsRenaming] = useState(false);
-  const [renameDraftValue, setRenameDraftValue] = useState(node.name);
-  const hasSubmittedRenameRef = useRef(false);
-  const isEventInsidePopover = (target: EventTarget | null) =>
-    target instanceof HTMLElement && !!target.closest('[data-popover]');
-
-  function submitRename(rawValue: string) {
-    if (hasSubmittedRenameRef.current) {
-      return;
-    }
-
-    hasSubmittedRenameRef.current = true;
-    const trimmedValue = rawValue.trim();
-    if (trimmedValue !== '' && trimmedValue !== node.name) {
-      onRename(trimmedValue);
-    }
-  }
-
-  return (
-    <View
-      innerRef={triggerRef}
-      onContextMenu={handleContextMenu}
-      onPointerDownCapture={e => {
-        if (isEventInsidePopover(e.target)) {
-          return;
-        }
-        e.stopPropagation();
-      }}
-      onPointerDown={e => {
-        if (isEventInsidePopover(e.target)) {
-          return;
-        }
-        e.stopPropagation();
-      }}
-      onClick={e => {
-        if (!isRenaming && !isEventInsidePopover(e.target)) {
-          onToggle();
-        }
-      }}
-      style={{
-        ...styles.smallText,
-        color: theme.sidebarItemText,
-        paddingTop: 4,
-        paddingBottom: 4,
-        paddingLeft: 4,
-        paddingRight: 15,
-        marginTop: 3,
-        marginBottom: 1,
-        textTransform: 'uppercase',
-        borderLeft: '4px solid transparent',
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        cursor: 'pointer',
-      }}
-    >
-      <ExpandChevron isExpanded={isExpanded} onToggle={onToggle} />
-      <View style={{ flex: 1, minWidth: 0, marginLeft: 1 }}>
-        <AlignedText
-          left={node.name}
-          right={
-            query ? (
-              <span
-                style={{ fontStyle: 'italic', textDecoration: 'underline' }}
-              >
-                <CellValue binding={query} type="financial" />
-              </span>
-            ) : null
-          }
-        />
-      </View>
-      <Popover
-        triggerRef={triggerRef}
-        placement="bottom start"
-        isOpen={menuOpen}
-        onOpenChange={() => setMenuOpen(false)}
-        style={{ width: 200, margin: 1 }}
-        isNonModal
-        {...position}
-      >
-        <Menu
-          onMenuSelect={menuAction => {
-            switch (menuAction) {
-              case 'rename': {
-                hasSubmittedRenameRef.current = false;
-                setRenameDraftValue(node.name);
-                setIsRenaming(true);
-                break;
-              }
-              case 'delete': {
-                onDelete();
-                break;
-              }
-              default: {
-                throw new Error(`Unrecognized menu option: ${menuAction}`);
-              }
-            }
-            setMenuOpen(false);
-          }}
-          items={[
-            { name: 'rename', text: t('Rename') },
-            { name: 'delete', text: t('Delete') },
-          ]}
-        />
-      </Popover>
-      <Popover
-        triggerRef={triggerRef}
-        placement="bottom start"
-        isOpen={isRenaming}
-        onOpenChange={nextOpen => {
-          if (!nextOpen) {
-            submitRename(renameDraftValue);
-            setIsRenaming(false);
-          }
-        }}
-        style={{ width: 200, padding: 5 }}
-        isNonModal
-        {...position}
-      >
-        <AccountTypeAutocomplete
-          value={renameDraftValue}
-          embedded
-          onUpdate={(_id, rawInputValue) => {
-            setRenameDraftValue(rawInputValue);
-          }}
-          onSelect={(newType, rawInputValue) => {
-            submitRename(newType ?? rawInputValue);
-            setIsRenaming(false);
-          }}
-        />
-      </Popover>
     </View>
   );
 }
