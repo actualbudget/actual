@@ -26,6 +26,7 @@ import type {
 export type ImportTransactionsOpts = {
   defaultCleared?: boolean;
   dryRun?: boolean;
+  reimportDeleted?: boolean;
 };
 
 export type ApiHandlers = {
