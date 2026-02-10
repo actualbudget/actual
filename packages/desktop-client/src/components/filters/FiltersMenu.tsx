@@ -175,7 +175,6 @@ function ConfigureField<T extends RuleConditionEntity>({
             <Select
               options={subfieldSelectOptions(field)}
               value={subfield}
-              testId={`subfield-select-${field}`}
               onChange={sub => {
                 setSubfield(sub);
 

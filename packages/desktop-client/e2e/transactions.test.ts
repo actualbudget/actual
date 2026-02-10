@@ -85,8 +85,10 @@ test.describe('Transactions', () => {
 
       const filterTooltip = await accountPage.filterBy('Category');
 
-      await page.getByTestId('subfield-select-category').click();
-      await page.getByTestId('subfield-select-category-category-group').click();
+      await filterTooltip.locator
+        .getByRole('button', { name: 'Category', exact: true })
+        .click();
+      await page.getByRole('button', { name: 'Group', exact: true }).click();
 
       await expect(filterTooltip.locator).toMatchThemeScreenshots();
 
