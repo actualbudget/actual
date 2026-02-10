@@ -46,7 +46,9 @@ async function checkReleaseNotesExists() {
       return;
     }
 
-    console.log(`Checking for file on PR branch: ${headRepoFullName}@${headRef}`);
+    console.log(
+      `Checking for file on PR branch: ${headRepoFullName}@${headRef}`,
+    );
 
     // Check if file exists
     try {

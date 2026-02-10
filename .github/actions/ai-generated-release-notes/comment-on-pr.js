@@ -57,7 +57,10 @@ async function commentOnPR() {
     let commentBody = ['🤖 **Auto-generated Release Notes**', ''];
 
     // Determine message based on file creation status
-    if (fileCreationStatus === 'created' || fileCreationStatus === 'no_changes') {
+    if (
+      fileCreationStatus === 'created' ||
+      fileCreationStatus === 'no_changes'
+    ) {
       // File was successfully created and committed
       commentBody = commentBody.concat([
         `Hey @${summaryData.author}! I've automatically created a release notes file based on CodeRabbit's analysis:`,
