@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { theme as themeStyle } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
-import { type Theme } from 'loot-core/types/prefs';
+import type { Theme } from 'loot-core/types/prefs';
 
 import { useTags } from './useTags';
 

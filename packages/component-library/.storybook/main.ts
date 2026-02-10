@@ -26,6 +26,7 @@ const config: StorybookConfig = {
   core: {
     disableTelemetry: true,
   },
+  staticDirs: ['./public'],
   async viteFinal(config) {
     const { mergeConfig } = await import('vite');
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { q, type Query } from 'loot-core/shared/query';
+import { q } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 import {
   getHasTransactionsQuery,
   getStatus,
@@ -15,7 +16,8 @@ import type {
 import { useSyncedPref } from './useSyncedPref';
 
 import { accountFilter } from '@desktop-client/queries';
-import { liveQuery, type LiveQuery } from '@desktop-client/queries/liveQuery';
+import { liveQuery } from '@desktop-client/queries/liveQuery';
+import type { LiveQuery } from '@desktop-client/queries/liveQuery';
 
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;

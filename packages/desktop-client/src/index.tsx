@@ -7,9 +7,10 @@ import './i18n';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
-import { type NavigateFunction } from 'react-router';
+import type { NavigateFunction } from 'react-router';
 
 import { bindActionCreators } from '@reduxjs/toolkit';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
@@ -17,7 +18,6 @@ import { q } from 'loot-core/shared/query';
 import * as accountsSlice from './accounts/accountsSlice';
 import * as appSlice from './app/appSlice';
 import { AuthProvider } from './auth/AuthProvider';
-import * as budgetSlice from './budget/budgetSlice';
 import * as budgetfilesSlice from './budgetfiles/budgetfilesSlice';
 import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
@@ -36,7 +36,6 @@ const boundActions = bindActionCreators(
   {
     ...accountsSlice.actions,
     ...appSlice.actions,
-    ...budgetSlice.actions,
     ...budgetfilesSlice.actions,
     ...modalsSlice.actions,
     ...notificationsSlice.actions,
@@ -83,13 +82,18 @@ window.$send = send;
 window.$query = aqlQuery;
 window.$q = q;
 
+const queryClient = new QueryClient();
+window.__TANSTACK_QUERY_CLIENT__ = queryClient;
+
 const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(
   <Provider store={store}>
     <ServerProvider>
       <AuthProvider>
-        <App />
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
       </AuthProvider>
     </ServerProvider>
   </Provider>,
@@ -109,6 +113,8 @@ declare global {
     $send: typeof send;
     $query: typeof aqlQuery;
     $q: typeof q;
+
+    __TANSTACK_QUERY_CLIENT__: QueryClient;
   }
 }
 

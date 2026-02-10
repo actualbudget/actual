@@ -1,4 +1,5 @@
-import React, { type CSSProperties, type MouseEventHandler } from 'react';
+import React from 'react';
+import type { CSSProperties, MouseEventHandler } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';

@@ -1,8 +1,11 @@
-import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { useCategories } from './useCategories';
+import { categoryQueries } from '@desktop-client/budget';
 
 export function useCategory(id: string) {
-  const { list: categories } = useCategories();
-  return useMemo(() => categories.find(c => c.id === id), [id, categories]);
+  const query = useQuery({
+    ...categoryQueries.list(),
+    select: data => data.list.find(c => c.id === id),
+  });
+  return query.data;
 }

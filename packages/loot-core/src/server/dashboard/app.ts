@@ -5,13 +5,13 @@ import { captureException } from '../../platform/exceptions';
 import * as fs from '../../platform/server/fs';
 import { DEFAULT_DASHBOARD_STATE } from '../../shared/dashboard';
 import { q } from '../../shared/query';
-import {
-  type ExportImportCustomReportWidget,
-  type ExportImportDashboard,
-  type ExportImportDashboardWidget,
-  type Widget,
+import type {
+  ExportImportCustomReportWidget,
+  ExportImportDashboard,
+  ExportImportDashboardWidget,
+  Widget,
 } from '../../types/models';
-import { type EverythingButIdOptional } from '../../types/util';
+import type { EverythingButIdOptional } from '../../types/util';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
 import * as db from '../db';

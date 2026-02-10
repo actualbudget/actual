@@ -1,19 +1,16 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { type Locale } from 'date-fns';
-import { type TFunction } from 'i18next';
+import type { Locale } from 'date-fns';
+import type { TFunction } from 'i18next';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { getUpcomingDays } from 'loot-core/shared/schedules';
-import {
-  type CategoryEntity,
-  type ScheduleEntity,
-} from 'loot-core/types/models';
+import type { CategoryEntity, ScheduleEntity } from 'loot-core/types/models';
 
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
 import { useLocale } from './useLocale';
-import { type ScheduleStatusType } from './useSchedules';
+import type { ScheduleStatusType } from './useSchedules';
 import { useSyncedPref } from './useSyncedPref';
 
 type UseCategoryScheduleGoalTemplateProps = {

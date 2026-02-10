@@ -2,9 +2,9 @@ import * as d from 'date-fns';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
-import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 type MonthlyAgg = { date: string; amount: number };
@@ -48,6 +48,30 @@ function calculateHampelFilteredMedian(expenses: number[]): number {
 
   return calculateMedian(filteredExpenses);
 }
+
+// Type for the return value of the recalculate function
+export type CrossoverData = {
+  graphData: {
+    data: Array<{
+      x: string;
+      investmentIncome: number;
+      expenses: number;
+      nestEgg: number;
+      adjustedExpenses?: number;
+      isProjection?: boolean;
+    }>;
+    start: string;
+    end: string;
+    crossoverXLabel: string | null;
+  };
+  lastKnownBalance: number;
+  lastKnownMonthlyIncome: number;
+  lastKnownMonthlyExpenses: number;
+  historicalReturn: number | null;
+  yearsToRetire: number | null;
+  targetMonthlyIncome: number | null;
+  targetNestEgg: number | null;
+};
 
 export type CrossoverParams = {
   start: string;

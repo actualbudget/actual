@@ -49,6 +49,14 @@ describe('arithmetic', () => {
     expect(evalArithmetic(`1\u2019222.45`)).toEqual(1222.45);
   });
 
+  test('ignores leftover characters', () => {
+    expect(evalArithmetic('1+2)')).toBe(3);
+    expect(evalArithmetic('1+2)foo')).toBe(3);
+    expect(evalArithmetic('(1+2)x')).toBe(3);
+    expect(evalArithmetic('10+20 trailing')).toBe(30);
+    expect(evalArithmetic('1+2(3')).toBe(3);
+  });
+
   test('handles apostrophe-dot format with keyboard apostrophe (U+0027)', () => {
     setNumberFormat({ format: 'apostrophe-dot', hideFraction: false });
 
