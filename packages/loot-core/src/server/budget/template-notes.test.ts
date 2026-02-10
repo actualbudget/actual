@@ -1,4 +1,5 @@
 import { start } from 'repl';
+
 import type { Template } from '../../types/models/templates';
 import * as db from '../db';
 
@@ -52,8 +53,8 @@ describe('storeNoteTemplates', () => {
           type: 'simple',
           monthly: 10,
           limit: null,
-          starting: null,  
-          until: null,    
+          starting: null,
+          until: null,
           priority: 0,
           directive: 'template',
         },
