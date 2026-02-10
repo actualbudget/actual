@@ -41,7 +41,11 @@ import {
   unparse,
 } from 'loot-core/shared/rules';
 import type { ScheduleStatus } from 'loot-core/shared/schedules';
-import type { NewRuleEntity, RuleActionEntity, RuleEntity } from 'loot-core/types/models';
+import type {
+  NewRuleEntity,
+  RuleActionEntity,
+  RuleEntity,
+} from 'loot-core/types/models';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
 
