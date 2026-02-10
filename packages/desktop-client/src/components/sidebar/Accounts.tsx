@@ -155,6 +155,8 @@ function groupAccountsByType(
     }
   }
 
+  const isOffBudget = budgetPrefix === OFF_BUDGET_KEY;
+
   const typeGroups: TreeNode[] = [...byType.entries()]
     .sort(([a], [b]) => {
       const aKey = `${budgetPrefix}${TYPE_GROUP_SEPARATOR}${a}`;
@@ -173,6 +175,7 @@ function groupAccountsByType(
       id: `${budgetPrefix}${TYPE_GROUP_SEPARATOR}${typeName}`,
       name: typeName,
       isTypeGroup: true,
+      query: bindings.accountTypeBalance(typeName, isOffBudget),
       children: accts.map(account => ({
         id: account.id,
         name: account.name,
@@ -782,6 +785,7 @@ export function Accounts() {
                             handleRenameType(node.id, node.name, newName)
                           }
                           onDelete={() => handleDeleteType(node.id, node.name)}
+                          query={node.query}
                         />
                       </>
                     )}
@@ -980,18 +984,20 @@ function AccountGroupHeader<FieldName extends SheetFields<'account'>>({
  * - **Rename** replaces the type name on all accounts in this group.
  * - **Delete** clears the type (sets to null) on all accounts in this group.
  */
-function TypeGroupHeader({
+function TypeGroupHeader<FieldName extends SheetFields<'account'>>({
   node,
   isExpanded,
   onToggle,
   onRename,
   onDelete,
+  query,
 }: {
   node: TreeNode;
   isExpanded: boolean;
   onToggle: () => void;
   onRename: (newName: string) => void;
   onDelete: () => void;
+  query?: Binding<'account', FieldName>;
 }) {
   const { t } = useTranslation();
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -1054,7 +1060,18 @@ function TypeGroupHeader({
       }}
     >
       <ExpandChevron isExpanded={isExpanded} onToggle={onToggle} />
-      <span style={{ marginLeft: 1 }}>{node.name}</span>
+      <View style={{ flex: 1, minWidth: 0, marginLeft: 1 }}>
+        <AlignedText
+          left={node.name}
+          right={
+            query ? (
+              <span style={{ fontStyle: 'italic', textDecoration: 'underline' }}>
+                <CellValue binding={query} type="financial" />
+              </span>
+            ) : null
+          }
+        />
+      </View>
       <Popover
         triggerRef={triggerRef}
         placement="bottom start"

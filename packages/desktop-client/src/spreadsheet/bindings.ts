@@ -82,6 +82,22 @@ export function closedAccountBalance() {
   } satisfies Binding<'account', 'closed-accounts-balance'>;
 }
 
+export function accountTypeBalance(typeName: string, offbudget: boolean) {
+  return {
+    name: accountParametrizedField('balance')(
+      `type-${offbudget ? 'off' : 'on'}-${typeName}`,
+    ),
+    query: q('transactions')
+      .filter({
+        'account.type': typeName,
+        'account.offbudget': offbudget,
+        'account.closed': false,
+      })
+      .options({ splits: 'none' })
+      .calculate({ $sum: '$amount' }),
+  } satisfies Binding<'account', 'balance'>;
+}
+
 export function categoryBalance(
   categoryId: CategoryEntity['id'],
   month: string,
