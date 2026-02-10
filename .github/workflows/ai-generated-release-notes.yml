@@ -59,7 +59,7 @@ jobs:
         id: check-release-notes-exists
         run: node .github/actions/ai-generated-release-notes/check-release-notes-exists.js
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
           PR_DETAILS: ${{ steps.pr-details.outputs.result }}
@@ -83,16 +83,71 @@ jobs:
           PR_DETAILS: ${{ steps.pr-details.outputs.result }}
           SUMMARY_DATA: ${{ steps.generate-summary.outputs.result }}
 
-      - name: Create and commit release notes file via GitHub API
+      - name: Debug release-notes branch write eligibility
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false'
+        run: |
+          echo "Debug: release notes auto-commit eligibility"
+          echo "head_repo_full_name=${{ steps.pr-details.outputs.head_repo_full_name }}"
+          echo "head_ref=${{ steps.pr-details.outputs.head_ref }}"
+          echo "maintainer_can_modify=${{ steps.pr-details.outputs.maintainer_can_modify }}"
+          echo "summary_generated=${{ steps.generate-summary.outputs.result != 'null' }}"
+          echo "category_generated=${{ steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != '' }}"
+          echo "checkout_allowed=${{ steps.pr-details.outputs.maintainer_can_modify == 'true' || steps.pr-details.outputs.head_repo_full_name == github.repository }}"
+          echo "release_notes_exists=${{ steps.check-release-notes-exists.outputs.result }}"
+
+      - name: Checkout PR branch
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != '' && (steps.pr-details.outputs.maintainer_can_modify == 'true' || steps.pr-details.outputs.head_repo_full_name == github.repository)
+        id: checkout-pr-branch
+        continue-on-error: true
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          repository: ${{ steps.pr-details.outputs.head_repo_full_name }}
+          ref: ${{ steps.pr-details.outputs.head_ref }}
+          token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
+          persist-credentials: false
+          fetch-depth: 0
+          path: pr-branch
+
+      - name: Prepare release notes file
         if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
         id: create-file
+        continue-on-error: true
         run: node .github/actions/ai-generated-release-notes/create-release-notes-file.js
         env:
-          GITHUB_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
           SUMMARY_DATA: ${{ steps.generate-summary.outputs.result }}
           CATEGORY: ${{ steps.determine-category.outputs.result }}
+
+      - name: Commit and push release notes file
+        if: steps.checkout-pr-branch.outcome == 'success' && steps.create-file.outputs.status == 'generated'
+        id: commit-file
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
+          FILE_NAME: ${{ steps.create-file.outputs.file_name }}
+          FILE_CONTENT_BASE64: ${{ steps.create-file.outputs.file_content_base64 }}
+          HEAD_REPO: ${{ steps.pr-details.outputs.head_repo_full_name }}
+          HEAD_REF: ${{ steps.pr-details.outputs.head_ref }}
+        run: |
+          mkdir -p "pr-branch/$(dirname "$FILE_NAME")"
+          printf '%s' "$FILE_CONTENT_BASE64" | base64 --decode > "pr-branch/$FILE_NAME"
+
+          git -C pr-branch config user.name "github-actions[bot]"
+          git -C pr-branch config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git -C pr-branch add "$FILE_NAME"
+          if git -C pr-branch diff --staged --quiet; then
+            echo "status=no_changes" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git -C pr-branch commit -m "Add release notes for PR #${{ github.event.issue.number }}"
+
+          git -C pr-branch remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${HEAD_REPO}.git"
+          if git -C pr-branch push origin "HEAD:refs/heads/$HEAD_REF"; then
+            echo "status=created" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=manual_required" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Comment on PR
         if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
@@ -103,4 +158,4 @@ jobs:
           GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
           SUMMARY_DATA: ${{ steps.generate-summary.outputs.result }}
           CATEGORY: ${{ steps.determine-category.outputs.result }}
-          FILE_CREATION_STATUS: ${{ steps.create-file.outputs.status }}
+          FILE_CREATION_STATUS: ${{ steps.commit-file.outputs.status || 'manual_required' }}

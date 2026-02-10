@@ -14,7 +14,6 @@ if (!token || !repo || !issueNumber || !prDetailsJson) {
   process.exit(1);
 }
 
-const [owner, repoName] = repo.split('/');
 const octokit = new Octokit({ auth: token });
 
 function setOutput(name, value) {
@@ -31,26 +30,31 @@ async function checkReleaseNotesExists() {
     }
 
     const fileName = `upcoming-release-notes/${prDetails.number}.md`;
+    const headRepoFullName = prDetails.headRepoFullName || repo;
+    const headRef = prDetails.headRef;
 
-    // Get PR info to get head SHA
-    const { data: pr } = await octokit.rest.pulls.get({
-      owner,
-      repo: repoName,
-      pull_number: issueNumber,
-    });
+    if (!headRepoFullName || !headRef) {
+      console.log('Missing head repository or branch details, skipping check');
+      setOutput('result', 'false');
+      return;
+    }
 
-    const prHeadSha = pr.head.sha;
-    console.log(
-      `Checking for file on PR branch: ${pr.head.ref} (${prHeadSha})`,
-    );
+    const [headOwner, headRepoName] = headRepoFullName.split('/');
+    if (!headOwner || !headRepoName) {
+      console.log('Invalid head repository format, skipping check');
+      setOutput('result', 'false');
+      return;
+    }
+
+    console.log(`Checking for file on PR branch: ${headRepoFullName}@${headRef}`);
 
     // Check if file exists
     try {
       await octokit.rest.repos.getContent({
-        owner,
-        repo: repoName,
+        owner: headOwner,
+        repo: headRepoName,
         path: fileName,
-        ref: prHeadSha,
+        ref: headRef,
       });
 
       console.log(

@@ -57,7 +57,7 @@ async function commentOnPR() {
     let commentBody = ['🤖 **Auto-generated Release Notes**', ''];
 
     // Determine message based on file creation status
-    if (fileCreationStatus === 'created') {
+    if (fileCreationStatus === 'created' || fileCreationStatus === 'no_changes') {
       // File was successfully created and committed
       commentBody = commentBody.concat([
         `Hey @${summaryData.author}! I've automatically created a release notes file based on CodeRabbit's analysis:`,
@@ -66,7 +66,9 @@ async function commentOnPR() {
         `**Summary:** ${summaryData.summary}`,
         `**File:** [${fileName}](${fileUrl})`,
         '',
-        'The release notes file has been committed to your branch. You can edit it if needed before merging.',
+        fileCreationStatus === 'created'
+          ? 'The release notes file has been committed to your branch. You can edit it if needed before merging.'
+          : 'The release notes file was already up to date on your branch.',
       ]);
     } else if (fileCreationStatus === 'repo_deleted') {
       // Source repository was deleted
