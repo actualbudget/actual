@@ -644,10 +644,7 @@ export function Accounts() {
               !NON_DRAGGABLE_KEYS.has(draggedKeyStr)
             ) {
               const account = findAccountById(draggedKeyStr);
-              if (
-                account &&
-                Boolean(account.offbudget) !== isTargetOffBudget
-              ) {
+              if (account && Boolean(account.offbudget) !== isTargetOffBudget) {
                 return 'cancel';
               }
             }
@@ -1065,7 +1062,9 @@ function TypeGroupHeader<FieldName extends SheetFields<'account'>>({
           left={node.name}
           right={
             query ? (
-              <span style={{ fontStyle: 'italic', textDecoration: 'underline' }}>
+              <span
+                style={{ fontStyle: 'italic', textDecoration: 'underline' }}
+              >
                 <CellValue binding={query} type="financial" />
               </span>
             ) : null
