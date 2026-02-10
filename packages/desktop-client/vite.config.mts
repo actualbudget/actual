@@ -208,10 +208,7 @@ export default defineConfig(async ({ mode }) => {
         },
       }),
       viteTsconfigPaths({ root: '../..' }),
-      visualizer({
-        template: 'raw-data',
-        filename: 'build-stats/web-stats.json',
-      }),
+      visualizer({ template: 'raw-data' }),
       !!env.HTTPS && basicSsl(),
     ],
     test: {
