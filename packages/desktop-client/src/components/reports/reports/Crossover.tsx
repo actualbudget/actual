@@ -40,7 +40,10 @@ import { CrossoverGraph } from '@desktop-client/components/reports/graphs/Crosso
 import { Header } from '@desktop-client/components/reports/Header';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { createCrossoverSpreadsheet, CrossoverData } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
+import {
+  createCrossoverSpreadsheet,
+  type CrossoverData,
+} from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';

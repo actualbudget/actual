@@ -17,7 +17,10 @@ import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndi
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { createCrossoverSpreadsheet, CrossoverData } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
+import {
+  createCrossoverSpreadsheet,
+  type CrossoverData,
+} from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
