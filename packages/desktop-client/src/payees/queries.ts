@@ -74,7 +74,7 @@ export const getActivePayees = memoizeOne(
 
 export const getPayeesById = memoizeOne(
   (payees: PayeeEntity[] | null | undefined) =>
-    groupById(translatePayees(payees)),
+    groupById(translatePayees(payees || [])),
 );
 
 function translatePayees(payees: PayeeEntity[]): PayeeEntity[] {

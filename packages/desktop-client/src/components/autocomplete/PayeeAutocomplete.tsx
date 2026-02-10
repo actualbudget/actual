@@ -348,7 +348,7 @@ export function PayeeAutocomplete({
   const { t } = useTranslation();
 
   const { data: commonPayees } = useCommonPayees();
-  const { data: retrievedPayees } = usePayees();
+  const { data: retrievedPayees = [] } = usePayees();
   if (!payees) {
     payees = retrievedPayees;
   }
