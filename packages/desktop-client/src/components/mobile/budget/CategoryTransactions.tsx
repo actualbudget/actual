@@ -3,10 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { listen } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
-import {
-  type CategoryEntity,
-  type TransactionEntity,
-} from 'loot-core/types/models';
+import type { CategoryEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';

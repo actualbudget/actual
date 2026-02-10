@@ -1,15 +1,10 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  type ReactNode,
-} from 'react';
+import { createContext, useContext, useEffect, useMemo } from 'react';
+import type { ReactNode } from 'react';
 
 import { LRUCache } from 'lru-cache';
 
 import { listen, send } from 'loot-core/platform/client/fetch';
-import { type Query } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 
 type SpreadsheetContextValue = ReturnType<typeof makeSpreadsheet>;
 const SpreadsheetContext = createContext<SpreadsheetContextValue | undefined>(

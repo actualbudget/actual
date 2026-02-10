@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useRef, useState, type CSSProperties } from 'react';
+import React, { useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -20,7 +21,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
 import {
   reopenAccount,
@@ -33,8 +34,10 @@ import {
   DropHighlight,
   useDraggable,
   useDroppable,
-  type OnDragChangeCallback,
-  type OnDropCallback,
+} from '@desktop-client/components/sort';
+import type {
+  OnDragChangeCallback,
+  OnDropCallback,
 } from '@desktop-client/components/sort';
 import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
@@ -44,7 +47,7 @@ import { useNotes } from '@desktop-client/hooks/useNotes';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { openAccountCloseModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { type Binding, type SheetFields } from '@desktop-client/spreadsheet';
+import type { Binding, SheetFields } from '@desktop-client/spreadsheet';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,

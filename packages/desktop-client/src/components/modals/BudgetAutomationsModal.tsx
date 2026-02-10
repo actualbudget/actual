@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState, type CSSProperties } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -10,9 +11,9 @@ import uniqueId from 'lodash/uniqueId';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
-import {
-  type CategoryGroupEntity,
-  type ScheduleEntity,
+import type {
+  CategoryGroupEntity,
+  ScheduleEntity,
 } from 'loot-core/types/models';
 import type { Template } from 'loot-core/types/models/templates';
 

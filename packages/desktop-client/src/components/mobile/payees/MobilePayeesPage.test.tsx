@@ -3,7 +3,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { type PayeeEntity } from 'loot-core/types/models';
+import type { PayeeEntity } from 'loot-core/types/models';
 
 import { MobilePayeesPage } from './MobilePayeesPage';
 

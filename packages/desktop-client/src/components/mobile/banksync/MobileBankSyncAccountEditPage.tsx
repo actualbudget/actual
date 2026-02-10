@@ -37,6 +37,8 @@ export function MobileBankSyncAccountEditPage() {
     setReimportDeleted,
     importTransactions,
     setImportTransactions,
+    updateDates,
+    setUpdateDates,
     mappings,
     setMapping,
     fields,
@@ -146,6 +148,8 @@ export function MobileBankSyncAccountEditPage() {
               setReimportDeleted={setReimportDeleted}
               importTransactions={importTransactions}
               setImportTransactions={setImportTransactions}
+              updateDates={updateDates}
+              setUpdateDates={setUpdateDates}
               helpMode="mobile"
             />
           </View>

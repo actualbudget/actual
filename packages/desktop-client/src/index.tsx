@@ -7,7 +7,7 @@ import './i18n';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
-import { type NavigateFunction } from 'react-router';
+import type { NavigateFunction } from 'react-router';
 
 import { bindActionCreators } from '@reduxjs/toolkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

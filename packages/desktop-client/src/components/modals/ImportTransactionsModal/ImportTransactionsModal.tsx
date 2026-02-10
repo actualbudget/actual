@@ -1,10 +1,6 @@
 // @ts-strict-ignore
-import React, {
-  useCallback,
-  useEffect,
-  useState,
-  type ComponentProps,
-} from 'react';
+import React, { useCallback, useEffect, useEffectEvent, useState } from 'react';
+import type { ComponentProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -17,7 +13,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { type ParseFileOptions } from 'loot-core/server/transactions/import/parse-file';
+import type { ParseFileOptions } from 'loot-core/server/transactions/import/parse-file';
 import { amountToInteger } from 'loot-core/shared/util';
 
 import { DateFormatSelect } from './DateFormatSelect';
@@ -32,10 +28,8 @@ import {
   parseAmountFields,
   parseDate,
   stripCsvImportTransaction,
-  type DateFormat,
-  type FieldMapping,
-  type ImportTransaction,
 } from './utils';
+import type { DateFormat, FieldMapping, ImportTransaction } from './utils';
 
 import {
   importPreviewTransactions,
@@ -718,7 +712,7 @@ export function ImportTransactionsModal({
     close();
   }
 
-  const runImportPreview = useCallback(async () => {
+  const onImportPreview = useEffectEvent(async () => {
     // always start from the original parsed transactions, not the previewed ones to ensure rules run
     const transactionPreview = await getImportPreview(
       parsedTransactions,
@@ -732,39 +726,15 @@ export function ImportTransactionsModal({
       multiplierAmount,
     );
     setTransactions(transactionPreview);
-  }, [
-    getImportPreview,
-    parsedTransactions,
-    filetype,
-    flipAmount,
-    fieldMappings,
-    splitMode,
-    parseDateFormat,
-    inOutMode,
-    outValue,
-    multiplierAmount,
-  ]);
+  });
 
   useEffect(() => {
     if (parsedTransactions.length === 0 || loadingState === 'parsing') {
       return;
     }
 
-    runImportPreview();
-    // intentionally exclude runImportPreview from dependencies to avoid infinite rerenders
-    // oxlint-disable-next-line react/exhaustive-deps
-  }, [
-    filetype,
-    flipAmount,
-    fieldMappings,
-    splitMode,
-    parseDateFormat,
-    inOutMode,
-    outValue,
-    multiplierAmount,
-    loadingState,
-    parsedTransactions.length,
-  ]);
+    onImportPreview();
+  }, [loadingState, parsedTransactions.length]);
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
     { name: t('Date'), width: 200 },

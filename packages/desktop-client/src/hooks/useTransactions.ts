@@ -6,9 +6,9 @@ import {
   type UseInfiniteQueryResult,
 } from '@tanstack/react-query';
 
-import { type Query } from 'loot-core/shared/query';
-import { type IntegerAmount } from 'loot-core/shared/util';
-import { type TransactionEntity } from 'loot-core/types/models';
+import type { Query } from 'loot-core/shared/query';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { TransactionEntity } from 'loot-core/types/models';
 
 import { transactionQueries } from '@desktop-client/transactions';
 

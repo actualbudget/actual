@@ -1,6 +1,7 @@
-import React, { type CSSProperties } from 'react';
+import React from 'react';
+import type { CSSProperties } from 'react';
 import { mergeProps } from 'react-aria';
-import { type ListBoxItemRenderProps } from 'react-aria-components';
+import type { ListBoxItemRenderProps } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -27,11 +28,9 @@ import {
 } from '@react-aria/interactions';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
-import { integerToCurrency, type IntegerAmount } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type TransactionEntity,
-} from 'loot-core/types/models';
+import { integerToCurrency } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { AccountEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { lookupName, Status } from './TransactionEdit';
 

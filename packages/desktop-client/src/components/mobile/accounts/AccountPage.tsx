@@ -3,13 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
-import { styles, type CSSProperties } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
 import { AccountTransactions } from './AccountTransactions';
 import { AllAccountTransactions } from './AllAccountTransactions';

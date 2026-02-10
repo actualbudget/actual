@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 
 import { q } from 'loot-core/shared/query';
-import {
-  type CustomReportData,
-  type CustomReportEntity,
+import type {
+  CustomReportData,
+  CustomReportEntity,
 } from 'loot-core/types/models';
 
 import { useQuery } from './useQuery';

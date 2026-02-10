@@ -16,7 +16,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { SectionLabel } from '@desktop-client/components/forms';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type CategoryAutocompleteModalProps = Extract<
   ModalType,
