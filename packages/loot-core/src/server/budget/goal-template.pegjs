@@ -99,15 +99,27 @@ date = $(month '-' day)
 currencySymbol 'currency symbol' = symbol: . & { return /\p{Sc}/u.test(symbol) }
 
 // Match schedule name including spaces and brackets, but stop before percentage modifiers
+// Also stop before 'starting' and 'until' keywords
 rawScheduleName = $(
   (
-    !('['('increase'i/'decrease'i)) // Don't start with [increase/decrease
-    [^ \t\r\n]                     // First character can't be whitespace
+    !('['('increase'i/'decrease'i))
+    !(_ 'starting'i)
+    !(_ 'until'i)
+    [^ \t\r\n]
     (
-      !(_ '['('increase'i/'decrease'i)) // Don't match if followed by [increase/decrease modifier
-      [^\r\n]                       // Any character except newlines
+      !(_ '['('increase'i/'decrease'i))
+      !(_ 'starting'i)
+      !(_ 'until'i)
+      [^\r\n]
     )*
   )
 ) { return text().trim() }
 
-name 'Name' = $([^\r\n\t]+) { return text() }
+// Match name but stop before 'starting' and 'until' keywords
+name 'Name' = $(
+  (
+    !('starting'i _)
+    !('until'i _)
+    [^\r\n\t]
+  )+
+) { return text().trim() }
