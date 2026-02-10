@@ -1,6 +1,8 @@
-import React, { type ComponentPropsWithoutRef, type ElementType } from 'react';
+import React from 'react';
+import type { ComponentPropsWithoutRef, ElementType } from 'react';
 
-import { styles, type CSSProperties } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 
 type FinancialTextProps<T extends ElementType = typeof Text> = {

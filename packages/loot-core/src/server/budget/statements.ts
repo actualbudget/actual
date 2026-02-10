@@ -1,5 +1,5 @@
 import * as db from '../db';
-import { type DbSchedule } from '../db';
+import type { DbSchedule } from '../db';
 
 import { GOAL_PREFIX, TEMPLATE_PREFIX } from './template-notes';
 

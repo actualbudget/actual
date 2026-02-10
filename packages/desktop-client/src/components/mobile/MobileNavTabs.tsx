@@ -1,10 +1,5 @@
-import React, {
-  useCallback,
-  useState,
-  type ComponentProps,
-  type ComponentType,
-  type CSSProperties,
-} from 'react';
+import React, { useCallback, useState } from 'react';
+import type { ComponentProps, ComponentType, CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 import { animated, config, useSpring } from 'react-spring';

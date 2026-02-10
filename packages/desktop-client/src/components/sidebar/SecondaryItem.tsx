@@ -1,9 +1,10 @@
 // @ts-strict-ignore
-import React, {
-  type ComponentProps,
-  type ComponentType,
-  type CSSProperties,
-  type SVGProps,
+import React from 'react';
+import type {
+  ComponentProps,
+  ComponentType,
+  CSSProperties,
+  SVGProps,
 } from 'react';
 
 import { Block } from '@actual-app/components/block';

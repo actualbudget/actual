@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import { q } from '../../shared/query';
-import { type TransactionEntity } from '../../types/models';
+import type { TransactionEntity } from '../../types/models';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
 import * as db from '../db';

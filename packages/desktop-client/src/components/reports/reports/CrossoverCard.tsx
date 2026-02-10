@@ -9,10 +9,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type AccountEntity,
-  type CrossoverWidget,
-} from 'loot-core/types/models';
+import type { AccountEntity, CrossoverWidget } from 'loot-core/types/models';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { CrossoverGraph } from '@desktop-client/components/reports/graphs/CrossoverGraph';
