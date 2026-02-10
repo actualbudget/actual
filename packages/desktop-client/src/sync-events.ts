@@ -17,6 +17,7 @@ import type { Notification } from './notifications/notificationsSlice';
 import { reloadPayees } from './payees/payeesSlice';
 import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
+import { scheduleQueries } from './schedules';
 import { signOut } from './users/usersSlice';
 
 export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
@@ -87,6 +88,12 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
 
       if (tables.includes('accounts')) {
         store.dispatch(reloadAccounts());
+      }
+
+      if (tables.includes('schedules')) {
+        queryClient.invalidateQueries({
+          queryKey: scheduleQueries.all(),
+        });
       }
     } else if (event.type === 'error') {
       let notif: Notification | null = null;

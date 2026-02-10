@@ -35,10 +35,9 @@ type AqlOptions = {
 
 export const scheduleQueries = {
   all: () => ['schedules'],
-  lists: () => [...scheduleQueries.all(), 'lists'],
   aql: ({ query }: AqlOptions) =>
     queryOptions<ScheduleEntity[]>({
-      queryKey: [...scheduleQueries.lists(), query],
+      queryKey: [...scheduleQueries.all(), 'aql', query],
       queryFn: async () => {
         if (!query) {
           // Shouldn't happen because of the enabled flag, but needed to satisfy TS
@@ -60,7 +59,11 @@ export const scheduleQueries = {
     upcomingLength: string;
   }) =>
     queryOptions<ScheduleStatusData>({
-      queryKey: [...scheduleQueries.lists(), 'statuses', schedules],
+      queryKey: [
+        ...scheduleQueries.all(),
+        'statuses',
+        { schedules, upcomingLength },
+      ],
       queryFn: async () => {
         const { data: transactions }: { data: TransactionEntity[] } =
           await aqlQuery(getHasTransactionsQuery(schedules));
