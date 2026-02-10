@@ -7,10 +7,9 @@ import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 export const transactionQueries = {
   all: () => ['transactions'],
-  lists: () => [...transactionQueries.all(), 'lists'],
   aql: ({ query, pageSize = 50 }: { query?: Query; pageSize?: number }) =>
     infiniteQueryOptions<TransactionEntity[]>({
-      queryKey: [...transactionQueries.lists(), query, pageSize],
+      queryKey: [...transactionQueries.all(), 'aql', query, pageSize],
       queryFn: async ({ pageParam }) => {
         if (!query) {
           // Shouldn't happen because of the enabled flag, but needed to satisfy TS
