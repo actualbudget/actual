@@ -104,7 +104,7 @@ export const closeBudget = createAppAsyncThunk(
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       await dispatch(resetApp());
-      queryClient.clear()
+      queryClient.clear();
       await dispatch(setAppState({ loadingText: t('Closing...') }));
       await send('close-budget');
       await dispatch(setAppState({ loadingText: null }));
