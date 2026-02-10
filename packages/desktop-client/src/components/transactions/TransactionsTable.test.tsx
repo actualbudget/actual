@@ -978,6 +978,69 @@ describe('Transactions', () => {
     );
   });
 
+  test('ctrl/cmd+enter saves amount value when pressed immediately after typing', async () => {
+    // Regression test for issue #6901: Ctrl+Enter should wait for the amount
+    // field value to be committed before adding the transaction
+    const { container, getTransactions, updateProps } = renderTransactions({
+      onCloseAddTransaction: () => {
+        updateProps({ isAdding: false });
+      },
+    });
+
+    expect(getTransactions().length).toBe(5);
+    updateProps({ isAdding: true });
+
+    // Type in notes field
+    let input = await editNewField(container, 'notes');
+    await userEvent.clear(input);
+    await userEvent.type(input, 'quick entry test');
+
+    // Type amount and immediately press Ctrl+Enter without tabbing away
+    input = await editNewField(container, 'debit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '150.75');
+
+    // Press Ctrl+Enter immediately while still in the debit field
+    await userEvent.keyboard('{Control>}{Enter}{/Control}');
+
+    // The transaction should be added with the correct amount, not zero
+    expect(getTransactions().length).toBe(6);
+    expect(getTransactions()[0].amount).toBe(-15075); // 150.75 in cents
+    expect(getTransactions()[0].notes).toBe('quick entry test');
+
+    // Form should be closed
+    expect(container.querySelector('[data-testid="new-transaction"]')).toBe(
+      null,
+    );
+  });
+
+  test('ctrl/cmd+enter saves credit amount when pressed immediately after typing', async () => {
+    // Test the same fix for credit field (issue #6901)
+    const { container, getTransactions, updateProps } = renderTransactions({
+      onCloseAddTransaction: () => {
+        updateProps({ isAdding: false });
+      },
+    });
+
+    expect(getTransactions().length).toBe(5);
+    updateProps({ isAdding: true });
+
+    // Type amount in credit field and immediately press Ctrl+Enter
+    const input = await editNewField(container, 'credit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '99.99');
+
+    await userEvent.keyboard('{Control>}{Enter}{/Control}');
+
+    // The transaction should be added with the correct positive amount
+    expect(getTransactions().length).toBe(6);
+    expect(getTransactions()[0].amount).toBe(9999); // 99.99 in cents
+
+    expect(container.querySelector('[data-testid="new-transaction"]')).toBe(
+      null,
+    );
+  });
+
   test('ctrl/cmd+click on add button adds transaction and closes form', async () => {
     const { container, getTransactions, updateProps } = renderTransactions({
       onCloseAddTransaction: () => {

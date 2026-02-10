@@ -20,22 +20,26 @@ import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
 import { prewarmAllMonths, prewarmMonth } from './util';
 
 import {
-  applyBudgetAction,
-  getCategories,
-} from '@desktop-client/budget/budgetSlice';
+  useBudgetActions,
+  useDeleteCategoryGroupMutation,
+  useDeleteCategoryMutation,
+  useReorderCategoryGroupMutation,
+  useReorderCategoryMutation,
+  useSaveCategoryGroupMutation,
+  useSaveCategoryMutation,
+} from '@desktop-client/budget';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useCategoryActions } from '@desktop-client/hooks/useCategoryActions';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useDispatch } from '@desktop-client/redux';
 
 export function Budget() {
   const currentMonth = monthUtils.currentMonth();
   const spreadsheet = useSpreadsheet();
-  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
     'budget.summaryCollapsed',
   );
@@ -53,8 +57,6 @@ export function Budget() {
 
   const init = useEffectEvent(() => {
     async function run() {
-      await dispatch(getCategories());
-
       const { start, end } = await send('get-budget-bounds');
       setBounds({ start, end });
 
@@ -113,35 +115,63 @@ export function Budget() {
     }
   };
 
-  const onApplyBudgetTemplatesInGroup = async categories => {
-    dispatch(
-      applyBudgetAction({
-        month: startMonth,
-        type: 'apply-multiple-templates',
-        args: {
-          categories,
-        },
-      }),
-    );
-  };
-
-  const onBudgetAction = (month, type, args) => {
-    dispatch(applyBudgetAction({ month, type, args }));
-  };
-
   const onToggleCollapse = () => {
     setSummaryCollapsedPref(!summaryCollapsed);
   };
 
-  const {
-    onSaveCategory,
-    onDeleteCategory,
-    onSaveGroup,
-    onDeleteGroup,
-    onShowActivity,
-    onReorderCategory,
-    onReorderGroup,
-  } = useCategoryActions();
+  const onApplyBudgetTemplatesInGroup = async categories => {
+    applyBudgetAction.mutate({
+      month: startMonth,
+      type: 'apply-multiple-templates',
+      args: {
+        categories,
+      },
+    });
+  };
+
+  const onShowActivity = (categoryId, month) => {
+    const filterConditions = [
+      { field: 'category', op: 'is', value: categoryId, type: 'id' },
+      {
+        field: 'date',
+        op: 'is',
+        value: month,
+        options: { month: true },
+        type: 'date',
+      },
+    ];
+    navigate('/accounts', {
+      state: {
+        goBack: true,
+        filterConditions,
+        categoryId,
+      },
+    });
+  };
+
+  const saveCategory = useSaveCategoryMutation();
+  const onSaveCategory = category => {
+    saveCategory.mutate({ category });
+  };
+  const deleteCategory = useDeleteCategoryMutation();
+  const onDeleteCategory = id => {
+    deleteCategory.mutate({ id });
+  };
+  const reorderCategory = useReorderCategoryMutation();
+  const saveCategoryGroup = useSaveCategoryGroupMutation();
+  const onSaveCategoryGroup = group => {
+    saveCategoryGroup.mutate({ group });
+  };
+  const deleteCategoryGroup = useDeleteCategoryGroupMutation();
+  const onDeleteCategoryGroup = id => {
+    deleteCategoryGroup.mutate({ id });
+  };
+  const reorderCategoryGroup = useReorderCategoryGroupMutation();
+  const applyBudgetAction = useBudgetActions();
+
+  const onBudgetAction = (month, type, args) => {
+    applyBudgetAction.mutate({ month, type, args });
+  };
 
   if (!initialized || !categoryGroups) {
     return null;
@@ -163,13 +193,13 @@ export function Budget() {
           maxMonths={maxMonths}
           onMonthSelect={onMonthSelect}
           onDeleteCategory={onDeleteCategory}
-          onDeleteGroup={onDeleteGroup}
+          onDeleteGroup={onDeleteCategoryGroup}
           onSaveCategory={onSaveCategory}
-          onSaveGroup={onSaveGroup}
+          onSaveGroup={onSaveCategoryGroup}
           onBudgetAction={onBudgetAction}
           onShowActivity={onShowActivity}
-          onReorderCategory={onReorderCategory}
-          onReorderGroup={onReorderGroup}
+          onReorderCategory={reorderCategory.mutate}
+          onReorderGroup={reorderCategoryGroup.mutate}
           onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
         />
       </TrackingBudgetProvider>
@@ -189,13 +219,13 @@ export function Budget() {
           maxMonths={maxMonths}
           onMonthSelect={onMonthSelect}
           onDeleteCategory={onDeleteCategory}
-          onDeleteGroup={onDeleteGroup}
+          onDeleteGroup={onDeleteCategoryGroup}
           onSaveCategory={onSaveCategory}
-          onSaveGroup={onSaveGroup}
+          onSaveGroup={onSaveCategoryGroup}
           onBudgetAction={onBudgetAction}
           onShowActivity={onShowActivity}
-          onReorderCategory={onReorderCategory}
-          onReorderGroup={onReorderGroup}
+          onReorderCategory={reorderCategory.mutate}
+          onReorderGroup={reorderCategoryGroup.mutate}
           onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
         />
       </EnvelopeBudgetProvider>

@@ -98,7 +98,7 @@ export function ExpenseGroup({
       style={{
         fontWeight: 600,
         opacity: group.hidden ? 0.33 : undefined,
-        backgroundColor: theme.tableRowHeaderBackground,
+        backgroundColor: theme.budgetHeaderCurrentMonth, //use budget colors
       }}
     >
       {dragState && !dragState.preview && dragState.type === 'group' && (

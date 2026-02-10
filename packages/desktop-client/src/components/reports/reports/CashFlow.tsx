@@ -100,13 +100,15 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   );
   const [latestTransaction, setLatestTransaction] = useState('');
 
-  const [isConcise, setIsConcise] = useState(() => {
+  const [isConcise, setIsConcise] = useState(false);
+
+  useEffect(() => {
     const numDays = d.differenceInCalendarDays(
       d.parseISO(end),
       d.parseISO(start),
     );
-    return numDays > 31 * 3;
-  });
+    setIsConcise(numDays > 31 * 3);
+  }, [start, end]);
 
   const params = useMemo(
     () =>
@@ -154,7 +156,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
         .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
+          pretty: monthUtils.format(month, 'MMMM yyyy', locale),
         }))
         .reverse();
 
@@ -177,16 +179,9 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   }, [latestTransaction, widget?.meta?.timeFrame]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
-    const numDays = d.differenceInCalendarDays(
-      d.parseISO(end),
-      d.parseISO(start),
-    );
-    const isConcise = numDays > 31 * 3;
-
     setStart(start);
     setEnd(end);
     setMode(mode);
-    setIsConcise(isConcise);
   }
 
   const navigate = useNavigate();

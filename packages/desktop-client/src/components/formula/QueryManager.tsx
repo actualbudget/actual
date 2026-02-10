@@ -33,6 +33,7 @@ import {
   validateStart,
 } from '@desktop-client/components/reports/reportRanges';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -204,6 +205,7 @@ function QueryItem({
   onUpdate,
   onRemove,
 }: QueryItemProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const [importJsonText, setImportJsonText] = useState('');
   const dispatch = useDispatch<AppDispatch>();
@@ -290,14 +292,14 @@ function QueryItem({
         .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM yyyy', locale),
         }))
         .reverse();
 
       setAllMonths(allMonths);
     }
     run();
-  }, []);
+  }, [locale]);
 
   const filters = useRuleConditionFilters(
     conditionsRef.current,

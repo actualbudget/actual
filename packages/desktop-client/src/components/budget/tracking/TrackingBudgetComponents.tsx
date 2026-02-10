@@ -66,7 +66,7 @@ const headerLabelStyle: CSSProperties = {
 };
 
 const cellStyle: CSSProperties = {
-  color: theme.pageTextLight,
+  color: theme.tableHeaderText,
   fontWeight: 600,
 };
 
@@ -82,7 +82,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>
+        <Text style={{ color: theme.tableHeaderText }}>
           <Trans>Budgeted</Trans>
         </Text>
         <TrackingCellValue
@@ -93,7 +93,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         </TrackingCellValue>
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>
+        <Text style={{ color: theme.tableHeaderText }}>
           <Trans>Spent</Trans>
         </Text>
         <TrackingCellValue binding={trackingBudget.totalSpent} type="financial">
@@ -101,7 +101,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         </TrackingCellValue>
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>
+        <Text style={{ color: theme.tableHeaderText }}>
           <Trans>Balance</Trans>
         </Text>
         <TrackingCellValue
@@ -125,12 +125,12 @@ export function IncomeHeaderMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>
+        <Text style={{ color: theme.tableHeaderText }}>
           <Trans>Budgeted</Trans>
         </Text>
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>
+        <Text style={{ color: theme.tableHeaderText }}>
           <Trans>Received</Trans>
         </Text>
       </View>
@@ -279,6 +279,7 @@ export const CategoryMonth = memo(function CategoryMonth({
               variant="bare"
               onPress={() => setMenuOpen(true)}
               style={{
+                color: theme.budgetNumberNeutral, //make sure button is visible when hovered
                 padding: 3,
               }}
             >
@@ -346,8 +347,8 @@ export const CategoryMonth = memo(function CategoryMonth({
             padding: '0 4px',
             borderRadius: 4,
             ':hover': {
-              boxShadow: 'inset 0 0 0 1px ' + theme.mobileAccountShadow,
-              backgroundColor: theme.tableBackground,
+              boxShadow: 'inset 0 0 0 1px ' + theme.pageTextSubdued,
+              backgroundColor: theme.budgetCurrentMonth,
             },
           }}
           valueProps={{
@@ -362,7 +363,7 @@ export const CategoryMonth = memo(function CategoryMonth({
               onEdit(null);
             },
             style: {
-              backgroundColor: theme.tableBackground,
+              backgroundColor: theme.budgetCurrentMonth,
             },
           }}
           onSave={(parsedIntegerAmount: number | null) => {
@@ -393,9 +394,9 @@ export const CategoryMonth = memo(function CategoryMonth({
                 style={{
                   color:
                     scheduleStatus === 'missed'
-                      ? theme.errorText
+                      ? theme.budgetNumberNegative
                       : scheduleStatus === 'due'
-                        ? theme.warningText
+                        ? theme.templateNumberUnderFunded
                         : theme.upcomingText,
                 }}
                 onPress={() =>

@@ -29,7 +29,6 @@ import {
 } from '@desktop-client/components/ServerContext';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useDispatch } from '@desktop-client/redux';
-import { warningBackground } from '@desktop-client/style/themes/dark';
 import { loggedIn } from '@desktop-client/users/usersSlice';
 
 function PasswordLogin({ setError, dispatch }) {
@@ -171,13 +170,11 @@ function OpenIdLogin({ setError }) {
             <Button
               variant="primary"
               onPress={onSubmitOpenId}
-              style={
-                warningBackground && {
-                  padding: 6,
-                  fontSize: 14,
-                  width: 170,
-                }
-              }
+              style={{
+                padding: 6,
+                fontSize: 14,
+                width: 170,
+              }}
               isDisabled={
                 firstLoginPassword === '' &&
                 askForPassword &&

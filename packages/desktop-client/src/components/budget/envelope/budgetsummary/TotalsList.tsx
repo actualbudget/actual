@@ -11,7 +11,35 @@ import { View } from '@actual-app/components/view';
 import { EnvelopeCellValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
 import { CellValueText } from '@desktop-client/components/spreadsheet/CellValue';
 import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
+
+/**
+ * Creates a formatter that displays values with explicit +/- signs.
+ * Uses Math.abs to avoid double-negative display (e.g., "--$0.00").
+ *
+ * @param format - The format function from useFormat hook
+ * @param invert - If true, shows '-' for positive and '+' for negative
+ */
+function makeSignedFormatter(
+  format: ReturnType<typeof useFormat>,
+  invert = false,
+) {
+  return (value: number, type?: FormatType) => {
+    const v = format(Math.abs(value), type);
+    if (value === 0) {
+      return '-' + v;
+    }
+    const isPositive = value > 0;
+    return invert
+      ? isPositive
+        ? '-' + v
+        : '+' + v
+      : isPositive
+        ? '+' + v
+        : '-' + v;
+  };
+}
 
 type TotalsListProps = {
   prevMonthName: string;
@@ -20,6 +48,8 @@ type TotalsListProps = {
 
 export function TotalsList({ prevMonthName, style }: TotalsListProps) {
   const format = useFormat();
+  const signedFormatter = makeSignedFormatter(format);
+  const invertedSignedFormatter = makeSignedFormatter(format, true);
   return (
     <View
       style={{
@@ -79,10 +109,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
             <CellValueText
               {...props}
               style={{ fontWeight: 600 }}
-              formatter={(value, type) => {
-                const v = format(value, type);
-                return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
-              }}
+              formatter={signedFormatter}
             />
           )}
         </EnvelopeCellValue>
@@ -95,10 +122,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
             <CellValueText
               {...props}
               style={{ fontWeight: 600 }}
-              formatter={(value, type) => {
-                const v = format(value, type);
-                return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
-              }}
+              formatter={signedFormatter}
             />
           )}
         </EnvelopeCellValue>
@@ -111,10 +135,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
             <CellValueText
               {...props}
               style={{ fontWeight: 600 }}
-              formatter={(value, type) => {
-                const v = format(Math.abs(value), type);
-                return value >= 0 ? '-' + v : '+' + v;
-              }}
+              formatter={invertedSignedFormatter}
             />
           )}
         </EnvelopeCellValue>

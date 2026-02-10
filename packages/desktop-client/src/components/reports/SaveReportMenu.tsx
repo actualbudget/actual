@@ -4,13 +4,15 @@ import { useTranslation } from 'react-i18next';
 import { Menu } from '@actual-app/components/menu';
 import type { MenuItem } from '@actual-app/components/menu';
 
+export type SavedStatus = 'saved' | 'new' | 'modified';
+
 export function SaveReportMenu({
   onMenuSelect,
   savedStatus,
   listReports,
 }: {
   onMenuSelect: (item: string) => void;
-  savedStatus: string;
+  savedStatus: SavedStatus;
   listReports: number;
 }) {
   const { t } = useTranslation();

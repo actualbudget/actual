@@ -4,6 +4,10 @@
   transition: none;
 }
 
+.react-grid-item:hover {
+  z-index: 1;
+}
+
 .react-grid-item.react-grid-placeholder {
   background-color: #8719e0;
 }
@@ -11,8 +15,4 @@
 .react-grid-item > .react-resizable-handle::after {
   border-right: 2px solid var(--color-pageTextLight);
   border-bottom: 2px solid var(--color-pageTextLight);
-}
-
-.react-grid-item:hover {
-  z-index: 1000 !important;
 }

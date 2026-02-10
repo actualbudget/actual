@@ -10,6 +10,7 @@ import { BrowserRouter } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
 
@@ -170,8 +171,9 @@ function ErrorFallback({ error }: FallbackProps) {
 export function App() {
   const store = useStore();
   const isTestEnv = useIsTestEnv();
+  const queryClient = useQueryClient();
 
-  useEffect(() => handleGlobalEvents(store), [store]);
+  useEffect(() => handleGlobalEvents(store, queryClient), [store, queryClient]);
 
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),

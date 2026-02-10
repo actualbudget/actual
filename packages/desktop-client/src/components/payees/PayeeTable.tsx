@@ -1,5 +1,11 @@
 // @ts-strict-ignore
-import { forwardRef, useCallback, useLayoutEffect, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffectEvent,
+  useLayoutEffect,
+  useState,
+} from 'react';
 import type { ComponentProps, ComponentRef } from 'react';
 
 import { theme } from '@actual-app/components/theme';
@@ -35,12 +41,15 @@ export const PayeeTable = forwardRef<
     const [hovered, setHovered] = useState(null);
     const selectedItems = useSelectedItems();
 
-    useLayoutEffect(() => {
+    const onScrollToSelected = useEffectEvent(() => {
       const firstSelected = [...selectedItems][0] as string;
       if (typeof ref !== 'function') {
         ref.current.scrollTo(firstSelected, 'center');
       }
-      // oxlint-disable-next-line react-hooks/exhaustive-deps
+    });
+
+    useLayoutEffect(() => {
+      onScrollToSelected();
     }, []);
 
     const onHover = useCallback(id => {

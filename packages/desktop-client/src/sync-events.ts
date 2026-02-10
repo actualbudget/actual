@@ -1,11 +1,12 @@
 // @ts-strict-ignore
+import type { QueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 
 import { listen, send } from 'loot-core/platform/client/fetch';
 
 import { reloadAccounts } from './accounts/accountsSlice';
 import { resetSync, sync } from './app/appSlice';
-import { reloadCategories } from './budget/budgetSlice';
+import { categoryQueries } from './budget';
 import {
   closeAndDownloadBudget,
   uploadBudget,
@@ -18,7 +19,7 @@ import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
 import { signOut } from './users/usersSlice';
 
-export function listenForSyncEvent(store: AppStore) {
+export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
   // TODO: Should this run on mobile too?
   const unlistenUnauthorized = listen('sync-event', async ({ type }) => {
     if (type === 'unauthorized') {
@@ -70,7 +71,9 @@ export function listenForSyncEvent(store: AppStore) {
         tables.includes('category_groups') ||
         tables.includes('category_mapping')
       ) {
-        store.dispatch(reloadCategories());
+        queryClient.invalidateQueries({
+          queryKey: categoryQueries.lists(),
+        });
       }
 
       if (
@@ -342,19 +345,19 @@ export function listenForSyncEvent(store: AppStore) {
         case 'network':
           // Show nothing
           break;
-        case 'token-expired':
+        case 'clock-drift':
           notif = {
-            title: 'Login expired',
-            message: 'Please login again.',
+            title: t('Time sync issue'),
+            message: t(
+              'Failed to sync because your device time differs too much from the server. Please check your device time settings and ensure they are correct.',
+            ),
+            type: 'warning',
             sticky: true,
-            id: 'login-expired',
-            button: {
-              title: 'Go to login',
-              action: () => {
-                store.dispatch(signOut());
-              },
-            },
           };
+          break;
+        case 'token-expired':
+          notif = null;
+          store.dispatch(signOut());
           break;
         default:
           console.trace('unknown error', event);

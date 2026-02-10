@@ -16,6 +16,7 @@ import { BudgetAnalysisGraph } from '@desktop-client/components/reports/graphs/B
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
+import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createBudgetAnalysisSpreadsheet } from '@desktop-client/components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
@@ -53,15 +54,11 @@ export function BudgetAnalysisCard({
     mode: 'sliding-window' as const,
   };
 
-  // Calculate date range
-  let startDate = timeFrame.start + '-01';
-  let endDate = monthUtils.getMonthEnd(timeFrame.end + '-01');
-
-  if (timeFrame.mode === 'sliding-window') {
-    const currentMonth = monthUtils.currentMonth();
-    startDate = monthUtils.subMonths(currentMonth, 5) + '-01';
-    endDate = monthUtils.getMonthEnd(currentMonth + '-01');
-  }
+  const [startMonth, endMonth] = calculateTimeRange(timeFrame);
+  const startDate = monthUtils.monthFromDate(startMonth) + '-01';
+  const endDate = monthUtils.getMonthEnd(
+    monthUtils.monthFromDate(endMonth) + '-01',
+  );
 
   const getGraphData = useMemo(() => {
     return createBudgetAnalysisSpreadsheet({

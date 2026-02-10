@@ -26,6 +26,7 @@ import type {
 
 import { GraphButton } from './GraphButton';
 import { SaveReportWrapper } from './SaveReport';
+import type { SavedStatus } from './SaveReportMenu';
 import { setSessionReport } from './setSessionReport';
 import { SnapshotButton } from './SnapshotButton';
 
@@ -34,7 +35,7 @@ import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
 type ReportTopbarProps = {
   customReportItems: CustomReportEntity;
   report: CustomReportEntity;
-  savedStatus: string;
+  savedStatus: SavedStatus;
   setGraphType: (value: string) => void;
   viewLegend: boolean;
   viewSummary: boolean;

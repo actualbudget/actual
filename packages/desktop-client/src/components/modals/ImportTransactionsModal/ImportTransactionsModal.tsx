@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useEffectEvent, useState } from 'react';
 import type { ComponentProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -162,7 +162,7 @@ export function ImportTransactionsModal({
   const dateFormat = useDateFormat() || ('MM/dd/yyyy' as const);
   const [prefs, savePrefs] = useSyncedPrefs();
   const dispatch = useDispatch();
-  const categories = useCategories();
+  const { list: categories } = useCategories();
 
   const [multiplierAmount, setMultiplierAmount] = useState('');
   const [loadingState, setLoadingState] = useState<
@@ -283,7 +283,7 @@ export function ImportTransactionsModal({
           break;
         }
 
-        const category_id = parseCategoryFields(trans, categories.list);
+        const category_id = parseCategoryFields(trans, categories);
         if (category_id != null) {
           trans.category = category_id;
         }
@@ -344,7 +344,7 @@ export function ImportTransactionsModal({
             // add the updated existing transaction in the list, with the
             // isMatchedTransaction flag to identify it in display and not send it again
             existing_trx.isMatchedTransaction = true;
-            existing_trx.category = categories.list.find(
+            existing_trx.category = categories.find(
               cat => cat.id === existing_trx.category,
             )?.name;
             // add parent transaction attribute to mimic behaviour
@@ -359,7 +359,7 @@ export function ImportTransactionsModal({
           return next;
         }, []);
     },
-    [accountId, categories.list, clearOnImport, dispatch],
+    [accountId, categories, clearOnImport, dispatch],
   );
 
   const parse = useCallback(
@@ -620,7 +620,7 @@ export function ImportTransactionsModal({
         break;
       }
 
-      const category_id = parseCategoryFields(trans, categories.list);
+      const category_id = parseCategoryFields(trans, categories);
       trans.category = category_id;
 
       const {
@@ -712,7 +712,7 @@ export function ImportTransactionsModal({
     close();
   }
 
-  const runImportPreview = useCallback(async () => {
+  const onImportPreview = useEffectEvent(async () => {
     // always start from the original parsed transactions, not the previewed ones to ensure rules run
     const transactionPreview = await getImportPreview(
       parsedTransactions,
@@ -726,39 +726,15 @@ export function ImportTransactionsModal({
       multiplierAmount,
     );
     setTransactions(transactionPreview);
-  }, [
-    getImportPreview,
-    parsedTransactions,
-    filetype,
-    flipAmount,
-    fieldMappings,
-    splitMode,
-    parseDateFormat,
-    inOutMode,
-    outValue,
-    multiplierAmount,
-  ]);
+  });
 
   useEffect(() => {
     if (parsedTransactions.length === 0 || loadingState === 'parsing') {
       return;
     }
 
-    runImportPreview();
-    // intentionally exclude runImportPreview from dependencies to avoid infinite rerenders
-    // oxlint-disable-next-line react/exhaustive-deps
-  }, [
-    filetype,
-    flipAmount,
-    fieldMappings,
-    splitMode,
-    parseDateFormat,
-    inOutMode,
-    outValue,
-    multiplierAmount,
-    loadingState,
-    parsedTransactions.length,
-  ]);
+    onImportPreview();
+  }, [loadingState, parsedTransactions.length]);
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
     { name: t('Date'), width: 200 },
@@ -864,7 +840,7 @@ export function ImportTransactionsModal({
                       outValue={outValue}
                       flipAmount={flipAmount}
                       multiplierAmount={multiplierAmount}
-                      categories={categories.list}
+                      categories={categories}
                       onCheckTransaction={onCheckTransaction}
                       reconcile={reconcile}
                     />

@@ -153,6 +153,8 @@ type BankSyncCheckboxOptionsProps = {
   setReimportDeleted: (value: boolean) => void;
   importTransactions: boolean;
   setImportTransactions: (value: boolean) => void;
+  updateDates: boolean;
+  setUpdateDates: (value: boolean) => void;
   helpMode?: 'desktop' | 'mobile';
 };
 
@@ -165,6 +167,8 @@ export function BankSyncCheckboxOptions({
   setReimportDeleted,
   importTransactions,
   setImportTransactions,
+  updateDates,
+  setUpdateDates,
   helpMode = 'desktop',
 }: BankSyncCheckboxOptionsProps) {
   const { t } = useTranslation();
@@ -214,6 +218,18 @@ export function BankSyncCheckboxOptions({
         helpMode={helpMode}
       >
         <Trans>Investment Account</Trans>
+      </CheckboxOptionWithHelp>
+
+      <CheckboxOptionWithHelp
+        id="form_update_dates"
+        checked={updateDates}
+        onChange={() => setUpdateDates(!updateDates)}
+        helpText={t(
+          'By enabling this, the transaction date will be overwritten by the one provided by the bank.',
+        )}
+        helpMode={helpMode}
+      >
+        <Trans>Update Dates</Trans>
       </CheckboxOptionWithHelp>
     </>
   );
