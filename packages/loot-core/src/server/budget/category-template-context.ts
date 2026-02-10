@@ -330,8 +330,8 @@ export class CategoryTemplateContext {
     // sort the template lines into regular template, goals, and remainder templates
     if (templates) {
       templates.forEach(t => {
-        // Skip expired templates (where month > until)
-        if (CategoryTemplateContext.isTemplateExpired(t, month)) {
+        // Only process templates that are active for this month
+        if (!CategoryTemplateContext.isTemplateActiveForMonth(t, month)) {
           return;
         }
         if (
@@ -445,7 +445,10 @@ export class CategoryTemplateContext {
     });
   }
 
-  private static isTemplateExpired(template: Template, month: string): boolean {
+  private static isTemplateActiveForMonth(
+    template: Template,
+    month: string,
+  ): boolean {
     // Check if template hasn't started yet (if starting is set)
     if ('starting' in template && template.starting) {
       const startingMonth = template.starting.substring(0, 7);
