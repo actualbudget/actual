@@ -1,7 +1,7 @@
 import { infiniteQueryOptions, keepPreviousData } from '@tanstack/react-query';
 
-import { type Query } from 'loot-core/shared/query';
-import { type TransactionEntity } from 'loot-core/types/models';
+import type { Query } from 'loot-core/shared/query';
+import type { TransactionEntity } from 'loot-core/types/models';
 
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
