@@ -1,11 +1,10 @@
-import React, {
-  Fragment,
-  useMemo,
-  type ComponentProps,
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-  type ReactElement,
-  type ReactNode,
+import React, { Fragment, useMemo } from 'react';
+import type {
+  ComponentProps,
+  ComponentPropsWithoutRef,
+  CSSProperties,
+  ReactElement,
+  ReactNode,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -16,7 +15,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import { type CategoryGroupEntity } from 'loot-core/types/models';
+import type { CategoryGroupEntity } from 'loot-core/types/models';
 
 import { Autocomplete } from './Autocomplete';
 
