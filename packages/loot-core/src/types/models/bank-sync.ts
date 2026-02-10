@@ -3,7 +3,11 @@ import type {
   GoCardlessBalance,
   GoCardlessTransaction,
 } from './gocardless';
-import type { SophtronAmount, SophtronBalance, SophtronTransaction } from './sophtron';
+import type {
+  SophtronAmount,
+  SophtronBalance,
+  SophtronTransaction,
+} from './sophtron';
 
 export type BankSyncBalance = GoCardlessBalance | SophtronBalance;
 export type BankSyncAmount = GoCardlessAmount | SophtronAmount;
