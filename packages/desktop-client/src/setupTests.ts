@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { resetTestProviders } from './mocks';
 import { installPolyfills } from './polyfills';
