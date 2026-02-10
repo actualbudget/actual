@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type TransactionEntity } from '../../types/models';
+import type { TransactionEntity } from '../../types/models';
 import * as db from '../db';
 
 import { mergeTransactions } from './merge';

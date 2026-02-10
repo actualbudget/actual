@@ -39,6 +39,7 @@
     "@testing-library/react": "16.3.0",
     "@testing-library/user-event": "14.6.1",
     "@types/lodash": "^4",
+    "@types/pikaday": "^1.7.10",
     "@types/promise-retry": "^1.1.6",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",

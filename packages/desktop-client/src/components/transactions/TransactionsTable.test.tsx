@@ -18,12 +18,12 @@ import {
   updateTransaction,
 } from 'loot-core/shared/transactions';
 import { integerToCurrency } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type CategoryGroupEntity,
-  type PayeeEntity,
-  type TransactionEntity,
+import type {
+  AccountEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+  PayeeEntity,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 import { TransactionTable } from './TransactionsTable';

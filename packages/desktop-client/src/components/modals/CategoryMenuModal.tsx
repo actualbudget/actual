@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useRef, useState, type CSSProperties } from 'react';
+import React, { useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -28,7 +29,7 @@ import { Notes } from '@desktop-client/components/Notes';
 import { useCategory } from '@desktop-client/hooks/useCategory';
 import { useCategoryGroup } from '@desktop-client/hooks/useCategoryGroup';
 import { useNotes } from '@desktop-client/hooks/useNotes';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type CategoryMenuModalProps = Extract<
   ModalType,

@@ -5,12 +5,12 @@ import { currentDay } from 'loot-core/shared/months';
 import {
   amountToInteger,
   integerToCurrencyWithDecimal,
-  type CurrencyAmount,
 } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type TransactionEntity,
+import type { CurrencyAmount } from 'loot-core/shared/util';
+import type {
+  AccountEntity,
+  CategoryEntity,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 export type SerializedTransaction = Omit<TransactionEntity, 'date'> & {

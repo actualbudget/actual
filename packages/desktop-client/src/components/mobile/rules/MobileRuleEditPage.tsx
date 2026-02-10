@@ -8,7 +8,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
-import { type NewRuleEntity, type RuleEntity } from 'loot-core/types/models';
+import type { NewRuleEntity, RuleEntity } from 'loot-core/types/models';
 
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';

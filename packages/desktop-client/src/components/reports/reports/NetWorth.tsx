@@ -21,7 +21,7 @@ import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { type NetWorthWidget, type TimeFrame } from 'loot-core/types/models';
+import type { NetWorthWidget, TimeFrame } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { FinancialText } from '@desktop-client/components/FinancialText';

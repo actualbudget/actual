@@ -1,7 +1,8 @@
-import React, { type ComponentProps } from 'react';
+import React from 'react';
+import type { ComponentProps } from 'react';
 import BasePullToRefresh from 'react-simple-pull-to-refresh';
 
-import { type CSSProperties } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { css } from '@emotion/css';
 
 type PullToRefreshProps = ComponentProps<typeof BasePullToRefresh> & {

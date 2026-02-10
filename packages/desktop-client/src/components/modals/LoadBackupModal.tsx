@@ -8,7 +8,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { listen, send } from 'loot-core/platform/client/fetch';
-import { type Backup } from 'loot-core/server/budgetfiles/backups';
+import type { Backup } from 'loot-core/server/budgetfiles/backups';
 
 import {
   loadBackup,
@@ -21,7 +21,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { Cell, Row } from '@desktop-client/components/table';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type BackupTableProps = {

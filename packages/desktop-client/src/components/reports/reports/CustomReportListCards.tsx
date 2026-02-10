@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { type CustomReportEntity } from 'loot-core/types/models';
+import type { CustomReportEntity } from 'loot-core/types/models';
 
 import { GetCardData } from './GetCardData';
 import { MissingReportCard } from './MissingReportCard';

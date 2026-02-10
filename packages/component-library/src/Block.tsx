@@ -1,8 +1,8 @@
-import { type HTMLProps, type Ref } from 'react';
+import type { HTMLProps, Ref } from 'react';
 
 import { css, cx } from '@emotion/css';
 
-import { type CSSProperties } from './styles';
+import type { CSSProperties } from './styles';
 
 type BlockProps = HTMLProps<HTMLDivElement> & {
   innerRef?: Ref<HTMLDivElement>;
