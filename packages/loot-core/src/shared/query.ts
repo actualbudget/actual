@@ -1,4 +1,4 @@
-import { type WithRequired } from '../types/util';
+import type { WithRequired } from '../types/util';
 
 type ObjectExpression = {
   [key: string]: ObjectExpression | unknown;

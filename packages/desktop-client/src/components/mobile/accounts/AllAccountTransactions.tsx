@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { listen, send } from 'loot-core/platform/client/fetch';
-import { type Query } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
-import { type TransactionEntity } from 'loot-core/types/models';
+import type { TransactionEntity } from 'loot-core/types/models';
 
 import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';

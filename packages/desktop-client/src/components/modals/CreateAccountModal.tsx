@@ -29,10 +29,8 @@ import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
-import {
-  pushModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
