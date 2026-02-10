@@ -167,6 +167,88 @@ describe('Account sync', () => {
     expect(transactions2).toMatchSnapshot();
   });
 
+  test('reconcile doesnt rematch deleted transactions with reimportDeleted override false', async () => {
+    const { id: acctId } = await prepareDatabase();
+
+    await reconcileTransactions(acctId, [
+      { date: '2020-01-01', imported_id: 'finid-override' },
+    ]);
+
+    const transactions1 = await getAllTransactions();
+    expect(transactions1.length).toBe(1);
+
+    await db.deleteTransaction(transactions1[0]);
+
+    await reconcileTransactions(
+      acctId,
+      [{ date: '2020-01-01', imported_id: 'finid-override' }],
+      false,
+      true,
+      false,
+      true,
+      false,
+      false,
+    );
+    const transactions2 = await getAllTransactions();
+    expect(transactions2.length).toBe(1);
+  });
+
+  test('reconcile does rematch deleted transactions with reimportDeleted override true', async () => {
+    const { id: acctId } = await prepareDatabase();
+
+    await reconcileTransactions(acctId, [
+      { date: '2020-01-01', imported_id: 'finid-override2' },
+    ]);
+
+    const transactions1 = await getAllTransactions();
+    expect(transactions1.length).toBe(1);
+
+    await db.deleteTransaction(transactions1[0]);
+
+    await reconcileTransactions(
+      acctId,
+      [{ date: '2020-01-01', imported_id: 'finid-override2' }],
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+    );
+    const transactions2 = await getAllTransactions();
+    expect(transactions2.length).toBe(2);
+  });
+
+  test('reimportDeleted override takes precedence over stored preference', async () => {
+    const { id: acctId } = await prepareDatabase();
+    const reimportKey =
+      `sync-reimport-deleted-${acctId}` satisfies keyof SyncedPrefs;
+    // Preference says reimport (true), but override says don't (false)
+    await db.update('preferences', { id: reimportKey, value: 'true' });
+
+    await reconcileTransactions(acctId, [
+      { date: '2020-01-01', imported_id: 'finid-precedence' },
+    ]);
+
+    const transactions1 = await getAllTransactions();
+    expect(transactions1.length).toBe(1);
+
+    await db.deleteTransaction(transactions1[0]);
+
+    await reconcileTransactions(
+      acctId,
+      [{ date: '2020-01-01', imported_id: 'finid-precedence' }],
+      false,
+      true,
+      false,
+      true,
+      false,
+      false,
+    );
+    const transactions2 = await getAllTransactions();
+    expect(transactions2.length).toBe(1);
+  });
+
   test('reconcile run rules with inferred payee', async () => {
     const { id: acctId } = await prepareDatabase();
     await db.insertCategoryGroup({

@@ -550,18 +550,24 @@ export const moveAccount = createAppAsyncThunk(
 type ImportPreviewTransactionsPayload = {
   accountId: string;
   transactions: TransactionEntity[];
+  reimportDeleted?: boolean;
 };
 
 export const importPreviewTransactions = createAppAsyncThunk(
   `${sliceName}/importPreviewTransactions`,
   async (
-    { accountId, transactions }: ImportPreviewTransactionsPayload,
+    {
+      accountId,
+      transactions,
+      reimportDeleted,
+    }: ImportPreviewTransactionsPayload,
     { dispatch },
   ) => {
     const { errors = [], updatedPreview } = await send('transactions-import', {
       accountId,
       transactions,
       isPreview: true,
+      opts: reimportDeleted !== undefined ? { reimportDeleted } : undefined,
     });
 
     errors.forEach(error => {
@@ -583,12 +589,18 @@ type ImportTransactionsPayload = {
   accountId: string;
   transactions: TransactionEntity[];
   reconcile: boolean;
+  reimportDeleted?: boolean;
 };
 
 export const importTransactions = createAppAsyncThunk(
   `${sliceName}/importTransactions`,
   async (
-    { accountId, transactions, reconcile }: ImportTransactionsPayload,
+    {
+      accountId,
+      transactions,
+      reconcile,
+      reimportDeleted,
+    }: ImportTransactionsPayload,
     { dispatch },
   ) => {
     if (!reconcile) {
@@ -608,6 +620,7 @@ export const importTransactions = createAppAsyncThunk(
       accountId,
       transactions,
       isPreview: false,
+      opts: reimportDeleted !== undefined ? { reimportDeleted } : undefined,
     });
 
     errors.forEach(error => {

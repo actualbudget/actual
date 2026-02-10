@@ -128,6 +128,7 @@ export function addTransactions(
 export type ImportTransactionsOpts = {
   defaultCleared?: boolean;
   dryRun?: boolean;
+  reimportDeleted?: boolean;
 };
 
 export function importTransactions(

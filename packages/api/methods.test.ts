@@ -740,6 +740,77 @@ describe('API CRUD operations', () => {
     );
     expect(transactions[0].notes).toBeNull();
   });
+
+  test('Transactions: reimportDeleted=false prevents reimporting deleted transactions', async () => {
+    const accountId = await api.createAccount({ name: 'test-account' }, 0);
+
+    // Import a transaction
+    const result1 = await api.importTransactions(accountId, [
+      {
+        date: '2023-11-03',
+        imported_id: 'reimport-test-1',
+        amount: 100,
+        account: accountId,
+      },
+    ]);
+    expect(result1.added).toHaveLength(1);
+
+    // Delete the transaction
+    await api.deleteTransaction(result1.added[0]);
+
+    // Reimport the same transaction with reimportDeleted=false
+    const result2 = await api.importTransactions(
+      accountId,
+      [
+        {
+          date: '2023-11-03',
+          imported_id: 'reimport-test-1',
+          amount: 100,
+          account: accountId,
+        },
+      ],
+      { reimportDeleted: false },
+    );
+
+    // Should match the deleted transaction and not create a new one
+    expect(result2.added).toHaveLength(0);
+    expect(result2.updated).toHaveLength(0);
+  });
+
+  test('Transactions: reimportDeleted=true reimports deleted transactions', async () => {
+    const accountId = await api.createAccount({ name: 'test-account' }, 0);
+
+    // Import a transaction
+    const result1 = await api.importTransactions(accountId, [
+      {
+        date: '2023-11-03',
+        imported_id: 'reimport-test-2',
+        amount: 200,
+        account: accountId,
+      },
+    ]);
+    expect(result1.added).toHaveLength(1);
+
+    // Delete the transaction
+    await api.deleteTransaction(result1.added[0]);
+
+    // Reimport the same transaction with reimportDeleted=true (default behavior)
+    const result2 = await api.importTransactions(
+      accountId,
+      [
+        {
+          date: '2023-11-03',
+          imported_id: 'reimport-test-2',
+          amount: 200,
+          account: accountId,
+        },
+      ],
+      { reimportDeleted: true },
+    );
+
+    // Should create a new transaction since deleted ones are ignored
+    expect(result2.added).toHaveLength(1);
+  });
 });
 
 //apis: createSchedule, getSchedules, updateSchedule, deleteSchedule
