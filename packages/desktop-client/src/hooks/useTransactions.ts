@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useEffectEvent, useState } from 'react';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import type {
@@ -6,9 +6,11 @@ import type {
   UseInfiniteQueryResult,
 } from '@tanstack/react-query';
 
+import { listen } from 'loot-core/platform/client/fetch';
 import type { Query } from 'loot-core/shared/query';
 import type { IntegerAmount } from 'loot-core/shared/util';
 import type { TransactionEntity } from 'loot-core/types/models';
+import type { ServerEvents } from 'loot-core/types/server-events';
 
 import { transactionQueries } from '@desktop-client/transactions';
 
@@ -62,6 +64,12 @@ type UseTransactionsProps = {
      * @default 0
      */
     startingBalance?: IntegerAmount;
+
+    /**
+     * Whether to refetch transactions when a sync event is emitted.
+     * @default true
+     */
+    refetchOnSync?: boolean;
   };
 };
 
@@ -83,7 +91,11 @@ type UseTransactionsResult = UseInfiniteQueryResult<
 
 export function useTransactions({
   query,
-  options = { pageSize: 50, calculateRunningBalances: false },
+  options = {
+    pageSize: 50,
+    calculateRunningBalances: false,
+    refetchOnSync: true,
+  },
 }: UseTransactionsProps): UseTransactionsResult {
   const [runningBalances, setRunningBalances] = useState<
     Map<TransactionEntity['id'], IntegerAmount>
@@ -92,6 +104,28 @@ export function useTransactions({
   const queryResult = useInfiniteQuery(
     transactionQueries.aql({ query, pageSize: options.pageSize }),
   );
+
+  const onSyncEvent = useEffectEvent((event: ServerEvents['sync-event']) => {
+    if (event.type === 'applied') {
+      const tables = event.tables;
+      if (
+        tables.includes('transactions') ||
+        tables.includes('category_mapping') ||
+        tables.includes('payee_mapping')
+      ) {
+        queryResult.refetch();
+      }
+    }
+  });
+
+  const refetchOnSyncOption = options?.refetchOnSync ?? true;
+
+  useEffect(() => {
+    if (!refetchOnSyncOption) {
+      return;
+    }
+    return listen('sync-event', onSyncEvent);
+  }, [refetchOnSyncOption]);
 
   const calculateRunningBalancesOptionFn = getCalculateRunningBalancesFn(
     options?.calculateRunningBalances,
@@ -108,7 +142,7 @@ export function useTransactions({
   useEffect(() => {
     if (calculateRunningBalancesOptionFn) {
       if (queryResult.isSuccess) {
-        const transactions = queryResult.data.pages.flat();
+        const transactions = flattenPages(queryResult.data);
         setRunningBalances(
           calculateRunningBalancesOptionFn(
             transactions,
@@ -130,7 +164,7 @@ export function useTransactions({
 
   return {
     ...queryResult,
-    transactions: queryResult.data ? queryResult.data.pages.flat() : [],
+    transactions: flattenPages(queryResult.data),
     runningBalances,
   };
 }
@@ -223,4 +257,10 @@ export function calculateRunningBalancesTopDown(
       acc.set(transaction.id, currentRunningBalance);
       return acc;
     }, new Map<TransactionEntity['id'], IntegerAmount>());
+}
+
+function flattenPages(
+  data?: InfiniteData<TransactionEntity[]>,
+): TransactionEntity[] {
+  return data ? data.pages.flat() : [];
 }
