@@ -9,6 +9,7 @@ import type { Query } from 'loot-core/shared/query';
 import { integerToAmount } from 'loot-core/shared/util';
 import type { RuleConditionEntity, TimeFrame } from 'loot-core/types/models';
 
+import { useFormat } from './useFormat';
 import { useLocale } from './useLocale';
 
 import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
@@ -32,6 +33,7 @@ export function useFormulaExecution(
   namedExpressions?: Record<string, number | string>,
 ) {
   const locale = useLocale();
+  const decimalPlaces = useFormat().currency.decimalPlaces;
   const [result, setResult] = useState<number | string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +82,7 @@ export function useFormulaExecution(
           }
 
           const data = await fetchQuerySum(queryConfig);
-          queryData[queryName] = integerToAmount(data, 2);
+          queryData[queryName] = integerToAmount(data, decimalPlaces);
         }
 
         for (const queryName of queryCountNames) {
@@ -185,7 +187,14 @@ export function useFormulaExecution(
     return () => {
       cancelled = true;
     };
-  }, [formula, queriesVersion, locale, queries, namedExpressions]);
+  }, [
+    formula,
+    queriesVersion,
+    locale,
+    queries,
+    namedExpressions,
+    decimalPlaces,
+  ]);
 
   return { result, isLoading, error };
 }

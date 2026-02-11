@@ -13,13 +13,14 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import {
-  amountToCurrency,
+  amountToInteger,
   appendDecimals,
   currencyToAmount,
   reapplyThousandSeparators,
 } from 'loot-core/shared/util';
 
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
@@ -48,6 +49,8 @@ const AmountInput = memo(function AmountInput({
   const [value, setValue] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const [hideFraction] = useSyncedPref('hideFraction');
+  const format = useFormat();
+  const decimalPlaces = format.currency.decimalPlaces;
 
   const mergedInputRef = useMergedRefs<HTMLInputElement>(
     props.inputRef,
@@ -112,7 +115,7 @@ const AmountInput = memo(function AmountInput({
 
   const onChangeText = (text: string) => {
     text = reapplyThousandSeparators(text);
-    text = appendDecimals(text, String(hideFraction) === 'true');
+    text = appendDecimals(text, String(hideFraction) === 'true', decimalPlaces);
     setEditing(true);
     setText(text);
     props.onChangeValue?.(text);
@@ -155,7 +158,7 @@ const AmountInput = memo(function AmountInput({
         }}
         data-testid="amount-input-text"
       >
-        {editing ? text : amountToCurrency(value)}
+        {editing ? text : format.forEdit(amountToInteger(value, decimalPlaces))}
       </Text>
     </View>
   );
@@ -185,6 +188,8 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   onBlur,
   ...props
 }: FocusableAmountInputProps) {
+  const format = useFormat();
+  const decimalPlaces = format.currency.decimalPlaces;
   const [isNegative, setIsNegative] = useState(true);
 
   const maybeApplyNegative = (amount: number, negative: boolean) => {
@@ -286,7 +291,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
                 ...textStyle,
               }}
             >
-              {amountToCurrency(Math.abs(value))}
+              {format.forEdit(amountToInteger(Math.abs(value), decimalPlaces))}
             </Text>
           </View>
         </Button>

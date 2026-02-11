@@ -61,7 +61,7 @@ export const currencies: Currency[] = [
   { code: 'UAH', name: 'Ukrainian Hryvnia', symbol: '₴', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'USD', name: 'US Dollar', symbol: '$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'UZS', name: 'Uzbek Soum', symbol: 'UZS', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
-  { code: 'VND', name: 'Vietnamese Dong', symbol: '₫', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
+  { code: 'VND', name: 'Vietnamese Dong', symbol: '₫', decimalPlaces: 0, numberFormat: 'dot-comma', symbolFirst: false },
 ];
 
 export function getCurrency(code: string): Currency {

@@ -20,6 +20,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { FocusableAmountInput } from '@desktop-client/components/mobile/transactions/FocusableAmountInput';
 import { useCategory } from '@desktop-client/hooks/useCategory';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
@@ -35,6 +36,7 @@ export function EnvelopeBudgetMenuModal({
   onSetMonthsAverage,
   onApplyBudgetTemplate,
 }: EnvelopeBudgetMenuModalProps) {
+  const decimalPlaces = useFormat().currency.decimalPlaces;
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -49,7 +51,7 @@ export function EnvelopeBudgetMenuModal({
   const [amountFocused, setAmountFocused] = useState(false);
 
   const _onUpdateBudget = (amount: number) => {
-    onUpdateBudget?.(amountToInteger(amount));
+    onUpdateBudget?.(amountToInteger(amount, decimalPlaces));
   };
 
   useEffect(() => {
@@ -88,7 +90,7 @@ export function EnvelopeBudgetMenuModal({
               <Trans>Budgeted</Trans>
             </Text>
             <FocusableAmountInput
-              value={integerToAmount(budgeted || 0)}
+              value={integerToAmount(budgeted || 0, decimalPlaces)}
               focused={amountFocused}
               onFocus={() => setAmountFocused(true)}
               onBlur={() => setAmountFocused(false)}

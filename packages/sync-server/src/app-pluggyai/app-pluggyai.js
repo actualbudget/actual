@@ -1,5 +1,8 @@
 import express from 'express';
 
+import { getCurrency } from 'loot-core/shared/currencies';
+import { amountToInteger } from 'loot-core/shared/util';
+
 import { handleError } from '../app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '../services/secrets-service';
 import { requestLoggerMiddleware } from '../util/middlewares';
@@ -10,6 +13,12 @@ const app = express();
 export { app as handlers };
 app.use(express.json());
 app.use(requestLoggerMiddleware);
+
+function roundToCurrencyDecimals(amount, currencyCode) {
+  const decimalPlaces = getCurrency(currencyCode || '').decimalPlaces;
+  const multiplier = Math.pow(10, decimalPlaces);
+  return Math.round(amount * multiplier) / multiplier;
+}
 
 app.post(
   '/status',
@@ -72,8 +81,9 @@ app.post(
 
       const account = await pluggyaiService.getAccountById(accountId);
 
-      let startingBalance = parseInt(
-        Math.round(account.balance * 100).toString(),
+      let startingBalance = amountToInteger(
+        account.balance,
+        getCurrency(account.currencyCode || '').decimalPlaces,
       );
       if (account.type === 'CREDIT') {
         startingBalance = -startingBalance;
@@ -119,7 +129,10 @@ app.post(
         }
 
         let amountInCurrency = trans.amountInAccountCurrency ?? trans.amount;
-        amountInCurrency = Math.round(amountInCurrency * 100) / 100;
+        amountInCurrency = roundToCurrencyDecimals(
+          amountInCurrency,
+          trans.currencyCode || account.currencyCode,
+        );
 
         newTrans.transactionAmount = {
           amount: amountInCurrency,

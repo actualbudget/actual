@@ -41,6 +41,7 @@ import { ROW_HEIGHT, TransactionListItem } from './TransactionListItem';
 import { FloatingActionBar } from '@desktop-client/components/mobile/FloatingActionBar';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategoriesById } from '@desktop-client/hooks/useCategories';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
@@ -280,6 +281,7 @@ function SelectedTransactionsFloatingActionBar({
   showMakeTransfer,
 }: SelectedTransactionsFloatingActionBarProps) {
   const { t } = useTranslation();
+  const decimalPlaces = useFormat().currency.decimalPlaces;
   const editMenuTriggerRef = useRef(null);
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
   const moreOptionsMenuTriggerRef = useRef(null);
@@ -503,7 +505,11 @@ function SelectedTransactionsFloatingActionBar({
                       case 'amount':
                         displayValue = Number.isNaN(Number(value))
                           ? value
-                          : integerToCurrency(Number(value));
+                          : integerToCurrency(
+                              Number(value),
+                              undefined,
+                              decimalPlaces,
+                            );
                         break;
                       case 'notes':
                         displayValue = `${mode} with ${value}`;

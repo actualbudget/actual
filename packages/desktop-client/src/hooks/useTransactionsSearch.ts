@@ -4,6 +4,8 @@ import debounce from 'lodash/debounce';
 
 import type { Query } from 'loot-core/shared/query';
 
+import { useFormat } from './useFormat';
+
 import * as queries from '@desktop-client/queries';
 
 type UseTransactionsSearchProps = {
@@ -24,6 +26,7 @@ export function useTransactionsSearch({
   delayMs = 150,
 }: UseTransactionsSearchProps): UseTransactionsSearchResult {
   const [isSearching, setIsSearching] = useState(false);
+  const decimalPlaces = useFormat().currency.decimalPlaces;
 
   const updateQueryRef = useRef(updateQuery);
   updateQueryRef.current = updateQuery;
@@ -40,12 +43,17 @@ export function useTransactionsSearch({
         } else if (searchText) {
           resetQueryRef.current?.();
           updateQueryRef.current(previousQuery =>
-            queries.transactionsSearch(previousQuery, searchText, dateFormat),
+            queries.transactionsSearch(
+              previousQuery,
+              searchText,
+              dateFormat,
+              decimalPlaces,
+            ),
           );
           setIsSearching(true);
         }
       }, delayMs),
-    [dateFormat, delayMs],
+    [dateFormat, delayMs, decimalPlaces],
   );
 
   useEffect(() => {

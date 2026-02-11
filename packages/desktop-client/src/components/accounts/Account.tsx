@@ -56,6 +56,7 @@ import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
@@ -242,6 +243,7 @@ type AccountInternalProps = {
   payees: ReturnType<typeof usePayees>;
   categoryGroups: CategoryGroupEntity[];
   hideFraction: boolean;
+  decimalPlaces: number;
   accountsSyncing: string[];
   dispatch: AppDispatch;
   onSetTransfer: ReturnType<typeof useTransactionBatchActions>['onSetTransfer'];
@@ -558,6 +560,7 @@ class AccountInternal extends PureComponent<
           this.currentQuery,
           this.state.search,
           this.props.dateFormat,
+          this.props.decimalPlaces,
         ),
         true,
       );
@@ -1970,6 +1973,7 @@ export function Account() {
   const payees = usePayees();
   const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const decimalPlaces = useFormat().currency.decimalPlaces;
   const [hideFraction] = useSyncedPref('hideFraction');
   const [expandSplits] = useLocalPref('expand-splits');
   const [showBalances, setShowBalances] = useSyncedPref(
@@ -2010,6 +2014,7 @@ export function Account() {
           failedAccounts={failedAccounts}
           dateFormat={dateFormat}
           hideFraction={String(hideFraction) === 'true'}
+          decimalPlaces={decimalPlaces}
           expandSplits={expandSplits}
           showBalances={String(showBalances) === 'true'}
           setShowBalances={showBalances =>

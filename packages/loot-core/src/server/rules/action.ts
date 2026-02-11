@@ -317,7 +317,7 @@ export class Action {
       }
 
       if (typeof cellValue === 'number') {
-        return amountToInteger(Math.round(cellValue * 100) / 100);
+        return amountToInteger(cellValue);
       }
 
       return cellValue;

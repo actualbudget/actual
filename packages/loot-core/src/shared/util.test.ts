@@ -1,6 +1,8 @@
 import {
+  appendDecimals,
   currencyToAmount,
   getNumberFormat,
+  integerToCurrencyWithDecimal,
   looselyParseAmount,
   setNumberFormat,
   stringToInteger,
@@ -213,6 +215,23 @@ describe('utility functions', () => {
     expect(currencyToAmount('3.')).toBe(3);
     expect(currencyToAmount('3.000')).toBe(3000);
     expect(currencyToAmount('3.000,')).toBe(3000);
+  });
+
+  test('integerToCurrencyWithDecimal respects decimalPlaces including three-decimal currencies', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: false });
+
+    expect(integerToCurrencyWithDecimal(1000000, 0)).toBe('1,000,000');
+    expect(integerToCurrencyWithDecimal(1000001, 0)).toBe('1,000,001');
+    expect(integerToCurrencyWithDecimal(1234567, 3)).toBe('1,234.567');
+    expect(integerToCurrencyWithDecimal(1000000, 3)).toBe('1,000.000');
+  });
+
+  test('appendDecimals respects decimalPlaces including three-decimal currencies', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: false });
+
+    expect(appendDecimals('1000000', false, 0)).toBe('1,000,000');
+    expect(appendDecimals('1000000', false, 2)).toBe('10,000.00');
+    expect(appendDecimals('1000000', false, 3)).toBe('1,000.000');
   });
 
   test('titleFirst works with all inputs', () => {

@@ -1,4 +1,4 @@
-import { amountToInteger } from '../utils';
+import { amountToInteger } from 'loot-core/shared/util';
 
 import Fallback from './integration-bank';
 
@@ -32,9 +32,18 @@ export default {
   calculateStartingBalance(sortedTransactions = [], balances = []) {
     return sortedTransactions.reduce(
       (total, trans) => {
-        return total - amountToInteger(trans.transactionAmount.amount);
+        return (
+          total -
+          amountToInteger(
+            trans.transactionAmount.amount,
+            trans.transactionAmount.currency,
+          )
+        );
       },
-      amountToInteger(balances[0]?.balanceAmount?.amount || 0),
+      amountToInteger(
+        balances[0]?.balanceAmount?.amount || 0,
+        balances[0]?.balanceAmount?.currency,
+      ),
     );
   },
 };

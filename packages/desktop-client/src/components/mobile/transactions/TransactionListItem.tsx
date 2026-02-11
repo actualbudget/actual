@@ -42,6 +42,7 @@ import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePayee } from '@desktop-client/hooks/usePayee';
 import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { useSelector } from '@desktop-client/redux';
@@ -91,6 +92,7 @@ export function TransactionListItem({
 
   const payee = usePayee(transaction?.payee || '');
   const displayPayee = useDisplayPayee({ transaction });
+  const decimalPlaces = useFormat().currency.decimalPlaces;
 
   const account = useAccount(transaction?.account || '');
   const transferAccount = useAccount(payee?.transfer_acct || '');
@@ -287,7 +289,7 @@ export function TransactionListItem({
                 ...textStyle,
               }}
             >
-              {integerToCurrency(amount)}
+              {integerToCurrency(amount, undefined, decimalPlaces)}
             </Text>
             {showRunningBalance && runningBalance !== undefined && (
               <Text
@@ -298,7 +300,7 @@ export function TransactionListItem({
                   ...makeBalanceAmountStyle(runningBalance),
                 }}
               >
-                {integerToCurrency(runningBalance)}
+                {integerToCurrency(runningBalance, undefined, decimalPlaces)}
               </Text>
             )}
           </View>

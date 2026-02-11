@@ -124,6 +124,7 @@ import {
   DisplayPayeeProvider,
   useDisplayPayee,
 } from '@desktop-client/hooks/useDisplayPayee';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { usePrevious } from '@desktop-client/hooks/usePrevious';
@@ -931,27 +932,36 @@ const Transaction = memo(function Transaction({
   showHiddenCategories,
 }: TransactionProps) {
   const { t } = useTranslation();
+  const format = useFormat();
+  const decimalPlaces = format.currency.decimalPlaces;
 
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
   const triggerRef = useRef(null);
 
   const [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
+  const [prevDecimalPlaces, setPrevDecimalPlaces] = useState(decimalPlaces);
   const [prevTransaction, setPrevTransaction] = useState(originalTransaction);
   const [transaction, setTransaction] = useState(() =>
-    serializeTransaction(originalTransaction, showZeroInDeposit),
+    serializeTransaction(originalTransaction, showZeroInDeposit, decimalPlaces),
   );
   const isPreview = isPreviewId(transaction.id);
 
   if (
     originalTransaction !== prevTransaction ||
-    showZeroInDeposit !== prevShowZero
+    showZeroInDeposit !== prevShowZero ||
+    decimalPlaces !== prevDecimalPlaces
   ) {
     setTransaction(
-      serializeTransaction(originalTransaction, showZeroInDeposit),
+      serializeTransaction(
+        originalTransaction,
+        showZeroInDeposit,
+        decimalPlaces,
+      ),
     );
     setPrevTransaction(originalTransaction);
     setPrevShowZero(showZeroInDeposit);
+    setPrevDecimalPlaces(decimalPlaces);
   }
 
   const [showReconciliationWarning, setShowReconciliationWarning] =
@@ -1062,10 +1072,13 @@ const Transaction = memo(function Transaction({
       const deserialized = deserializeTransaction(
         newTransaction,
         originalTransaction,
+        decimalPlaces,
       );
       // Run the transaction through the formatting so that we know
       // it's always showing the formatted result
-      setTransaction(serializeTransaction(deserialized, showZeroInDeposit));
+      setTransaction(
+        serializeTransaction(deserialized, showZeroInDeposit, decimalPlaces),
+      );
 
       const deserializedName = ['credit', 'debit'].includes(name)
         ? 'amount'
@@ -1669,7 +1682,7 @@ const Transaction = memo(function Transaction({
           value={
             runningBalance == null || isChild || isTemporaryId(id)
               ? ''
-              : integerToCurrency(runningBalance)
+              : integerToCurrency(runningBalance, undefined, decimalPlaces)
           }
           valueStyle={{
             color:
@@ -1712,6 +1725,7 @@ const Transaction = memo(function Transaction({
 type TransactionErrorProps = {
   error: NonNullable<TransactionEntity['error']>;
   isDeposit: boolean;
+  decimalPlaces: number;
   onAddSplit: () => void;
   onDistributeRemainder: () => void;
   style?: CSSProperties;
@@ -1721,6 +1735,7 @@ type TransactionErrorProps = {
 function TransactionError({
   error,
   isDeposit,
+  decimalPlaces,
   onAddSplit,
   onDistributeRemainder,
   style,
@@ -1744,6 +1759,8 @@ function TransactionError({
               <Text style={{ fontWeight: 500 }}>
                 {integerToCurrency(
                   isDeposit ? error.difference : -error.difference,
+                  undefined,
+                  decimalPlaces,
                 )}
               </Text>
             </Text>
@@ -1842,6 +1859,7 @@ function NewTransaction({
   balance,
   showHiddenCategories,
 }: NewTransactionProps) {
+  const decimalPlaces = useFormat().currency.decimalPlaces;
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
 
@@ -1935,6 +1953,7 @@ function NewTransaction({
           <TransactionError
             error={error}
             isDeposit={isDeposit}
+            decimalPlaces={decimalPlaces}
             onAddSplit={() => onAddSplit(transactions[0].id)}
             onDistributeRemainder={() =>
               onDistributeRemainder(transactions[0].id)
@@ -2044,6 +2063,7 @@ function TransactionTableInner({
   showHiddenCategories,
   ...props
 }: TransactionTableInnerProps) {
+  const decimalPlaces = useFormat().currency.decimalPlaces;
   const containerRef = createRef<HTMLDivElement>();
   const isAddingPrev = usePrevious(props.isAdding);
   const [scrollWidth, setScrollWidth] = useState(0);
@@ -2195,6 +2215,7 @@ function TransactionTableInner({
             <TransactionError
               error={error}
               isDeposit={!!isChildDeposit}
+              decimalPlaces={decimalPlaces}
               onAddSplit={() => props.onAddSplit(trans.id)}
               onDistributeRemainder={() =>
                 props.onDistributeRemainder(trans.id)
