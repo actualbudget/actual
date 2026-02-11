@@ -91,18 +91,21 @@ type UseTransactionsResult = UseInfiniteQueryResult<
 
 export function useTransactions({
   query,
-  options = {
-    pageSize: 50,
-    calculateRunningBalances: false,
-    refetchOnSync: true,
-  },
+  options,
 }: UseTransactionsProps): UseTransactionsResult {
+  const {
+    pageSize = 50,
+    calculateRunningBalances = false,
+    startingBalance,
+    refetchOnSync = true,
+  } = options ?? {};
+
   const [runningBalances, setRunningBalances] = useState<
     Map<TransactionEntity['id'], IntegerAmount>
   >(new Map());
 
   const queryResult = useInfiniteQuery(
-    transactionQueries.aql({ query, pageSize: options.pageSize }),
+    transactionQueries.aql({ query, pageSize }),
   );
 
   const onSyncEvent = useEffectEvent((event: ServerEvents['sync-event']) => {
@@ -118,19 +121,16 @@ export function useTransactions({
     }
   });
 
-  const refetchOnSyncOption = options?.refetchOnSync ?? true;
-
   useEffect(() => {
-    if (!refetchOnSyncOption) {
+    if (!refetchOnSync) {
       return;
     }
     return listen('sync-event', onSyncEvent);
-  }, [refetchOnSyncOption]);
+  }, [refetchOnSync]);
 
   const calculateRunningBalancesOptionFn = getCalculateRunningBalancesFn(
-    options?.calculateRunningBalances,
+    calculateRunningBalances,
   );
-  const startingBalanceOption = options?.startingBalance;
   const splitsOption = query?.state.tableOptions
     ?.splits as TransactionSplitsOption;
 
@@ -147,7 +147,7 @@ export function useTransactions({
           calculateRunningBalancesOptionFn(
             transactions,
             splitsOption,
-            startingBalanceOption,
+            startingBalance,
           ),
         );
       }
@@ -158,7 +158,7 @@ export function useTransactions({
     queryResult.data,
     queryResult.isSuccess,
     calculateRunningBalancesOptionFn,
-    startingBalanceOption,
+    startingBalance,
     splitsOption,
   ]);
 
