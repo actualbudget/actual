@@ -1,12 +1,7 @@
 import path from 'node:path';
 
-import {
-  _electron,
-  test as base,
-  type ElectronApplication,
-  type Page,
-  type TestInfo,
-} from '@playwright/test';
+import { _electron, test as base } from '@playwright/test';
+import type { ElectronApplication, Page, TestInfo } from '@playwright/test';
 import { ensureDir, remove } from 'fs-extra';
 
 type ElectronFixtures = {

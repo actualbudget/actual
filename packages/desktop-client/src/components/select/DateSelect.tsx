@@ -1,5 +1,4 @@
-// @ts-strict-ignore
-import React, {
+import {
   forwardRef,
   useEffect,
   useEffectEvent,
@@ -8,27 +7,25 @@ import React, {
   useMemo,
   useRef,
   useState,
-  type ComponentProps,
-  type KeyboardEvent,
-  type Ref,
+} from 'react';
+import type {
+  ChangeEvent,
+  ComponentProps,
+  JSX,
+  KeyboardEvent,
+  Ref,
 } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
-import { styles, type CSSProperties } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
-import {
-  addDays,
-  format,
-  isValid,
-  parse,
-  parseISO,
-  subDays,
-  type Locale,
-} from 'date-fns';
+import { addDays, format, isValid, parse, parseISO, subDays } from 'date-fns';
+import type { Locale } from 'date-fns';
 import Pikaday from 'pikaday';
 
 import {
@@ -130,8 +127,8 @@ type DatePickerProps = {
   value: string;
   firstDayOfWeekIdx: string;
   dateFormat: string;
-  onUpdate?: (selectedDate: Date) => void;
-  onSelect: (selectedDate: Date | null) => void;
+  onUpdate: (selectedDate: Date) => void;
+  onSelect: (selectedDate: Date) => void;
 };
 
 type DatePickerForwardedRef = {
@@ -140,8 +137,8 @@ type DatePickerForwardedRef = {
 const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
   ({ value, firstDayOfWeekIdx, dateFormat, onUpdate, onSelect }, ref) => {
     const locale = useLocale();
-    const picker = useRef(null);
-    const mountPoint = useRef(null);
+    const picker = useRef<Pikaday | null>(null);
+    const mountPoint = useRef<HTMLDivElement | null>(null);
 
     const onUpdateEffect = useEffectEvent(onUpdate);
 
@@ -149,29 +146,32 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
       ref,
       () => ({
         handleInputKeyDown(e) {
+          const currentDate = picker.current?.getDate();
+          if (!currentDate) return;
+
           let newDate = null;
           switch (e.key) {
             case 'ArrowLeft':
               e.preventDefault();
-              newDate = subDays(picker.current.getDate(), 1);
+              newDate = subDays(currentDate, 1);
               break;
             case 'ArrowUp':
               e.preventDefault();
-              newDate = subDays(picker.current.getDate(), 7);
+              newDate = subDays(currentDate, 7);
               break;
             case 'ArrowRight':
               e.preventDefault();
-              newDate = addDays(picker.current.getDate(), 1);
+              newDate = addDays(currentDate, 1);
               break;
             case 'ArrowDown':
               e.preventDefault();
-              newDate = addDays(picker.current.getDate(), 7);
+              newDate = addDays(currentDate, 7);
               break;
             default:
           }
 
           if (newDate) {
-            picker.current.setDate(newDate, true);
+            picker.current?.setDate(newDate, true);
             onUpdateEffect?.(newDate);
           }
         },
@@ -202,16 +202,16 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
 
     useLayoutEffect(() => {
       picker.current = initPikaday();
-      mountPoint.current.appendChild(picker.current.el);
+      mountPoint.current?.appendChild(picker.current.el);
 
       return () => {
-        picker.current.destroy();
+        picker.current?.destroy();
       };
     }, []);
 
     useEffect(() => {
-      if (value && picker.current.getDate() !== value) {
-        picker.current.setDate(parse(value, dateFormat, new Date()), true);
+      if (value) {
+        picker.current?.setDate(parse(value, dateFormat, new Date()), true);
       }
     }, [value, dateFormat]);
 
@@ -226,7 +226,7 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
 
 DatePicker.displayName = 'DatePicker';
 
-function defaultShouldSaveFromKey(e) {
+function defaultShouldSaveFromKey(e: KeyboardEvent<HTMLInputElement>) {
   return e.key === 'Enter';
 }
 
@@ -271,7 +271,7 @@ function DateSelectDesktop({
     return '';
   }, [defaultValue, dateFormat]);
 
-  const picker = useRef(null);
+  const picker = useRef<DatePickerForwardedRef | null>(null);
   const [value, setValue] = useState(parsedDefaultValue);
   const [open, setOpen] = useState(embedded || isOpen || false);
   const innerRef = useRef<HTMLInputElement | null>(null);
@@ -323,7 +323,7 @@ function DateSelectDesktop({
       !e.altKey &&
       open
     ) {
-      picker.current.handleInputKeyDown(e);
+      picker.current?.handleInputKeyDown(e);
     } else if (e.key === 'Escape') {
       setValue(parsedDefaultValue);
       setSelectedValue(parsedDefaultValue);
@@ -365,11 +365,11 @@ function DateSelectDesktop({
     }
   }
 
-  function onChange(e) {
+  function onChange(e: ChangeEvent<HTMLInputElement>) {
     setValue(e.target.value);
   }
 
-  const maybeWrapTooltip = content => {
+  const maybeWrapTooltip = (content: JSX.Element) => {
     if (embedded) {
       return open ? content : null;
     }
@@ -421,8 +421,8 @@ function DateSelectDesktop({
             // Otherwise the input is reset to whatever is already
             // selected
             if (value === '') {
-              setSelectedValue(null);
-              onSelect(null);
+              setSelectedValue('');
+              onSelect('');
             } else {
               setValue(selectedValue || '');
 

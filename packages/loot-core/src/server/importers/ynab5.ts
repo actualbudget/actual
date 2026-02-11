@@ -11,20 +11,16 @@ import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
 import { groupBy, sortByKey } from '../../shared/util';
-import {
-  type RecurConfig,
-  type RecurPattern,
-  type RuleEntity,
-} from '../../types/models';
+import type { RecurConfig, RecurPattern, RuleEntity } from '../../types/models';
 import { ruleModel } from '../transactions/transaction-rules';
 
-import {
-  type Budget,
-  type Payee,
-  type ScheduledSubtransaction,
-  type ScheduledTransaction,
-  type Subtransaction,
-  type Transaction,
+import type {
+  Budget,
+  Payee,
+  ScheduledSubtransaction,
+  ScheduledTransaction,
+  Subtransaction,
+  Transaction,
 } from './ynab5-types';
 
 const MAX_RETRY = 20;

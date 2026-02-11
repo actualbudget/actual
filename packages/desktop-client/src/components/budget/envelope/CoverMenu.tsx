@@ -9,12 +9,9 @@ import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import {
-  amountToInteger,
-  integerToCurrency,
-  type IntegerAmount,
-} from 'loot-core/shared/util';
-import { type CategoryEntity } from 'loot-core/types/models';
+import { amountToInteger, integerToCurrency } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { CategoryEntity } from 'loot-core/types/models';
 
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import {

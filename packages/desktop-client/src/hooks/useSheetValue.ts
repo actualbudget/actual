@@ -3,12 +3,12 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { useSheetName } from './useSheetName';
 import { useSpreadsheet } from './useSpreadsheet';
 
-import {
-  type Binding,
-  type BindingObject,
-  type SheetFields,
-  type SheetNames,
-  type Spreadsheets,
+import type {
+  Binding,
+  BindingObject,
+  SheetFields,
+  SheetNames,
+  Spreadsheets,
 } from '@desktop-client/spreadsheet';
 
 type SheetValueResult<

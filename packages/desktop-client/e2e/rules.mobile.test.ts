@@ -1,9 +1,9 @@
-import { type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
-import { type MobileRulesPage } from './page-models/mobile-rules-page';
+import type { MobileRulesPage } from './page-models/mobile-rules-page';
 
 test.describe('Mobile Rules', () => {
   let page: Page;

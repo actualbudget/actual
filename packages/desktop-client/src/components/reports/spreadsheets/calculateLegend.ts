@@ -1,10 +1,10 @@
 import { theme } from '@actual-app/components/theme';
 
-import {
-  type balanceTypeOpType,
-  type GroupedEntity,
-  type IntervalEntity,
-  type LegendEntity,
+import type {
+  balanceTypeOpType,
+  GroupedEntity,
+  IntervalEntity,
+  LegendEntity,
 } from 'loot-core/types/models';
 
 import { getColorScale } from '@desktop-client/components/reports/chart-theme';

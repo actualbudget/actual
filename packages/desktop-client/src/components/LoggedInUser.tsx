@@ -1,10 +1,5 @@
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
@@ -17,8 +12,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { listen } from 'loot-core/platform/client/fetch';
-import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
-import { type TransObjectLiteral } from 'loot-core/types/util';
+import type { RemoteFile, SyncedLocalFile } from 'loot-core/types/file';
+import type { TransObjectLiteral } from 'loot-core/types/util';
 
 import { PrivacyFilter } from './PrivacyFilter';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';

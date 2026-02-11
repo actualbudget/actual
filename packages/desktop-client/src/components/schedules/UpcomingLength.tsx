@@ -6,7 +6,7 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
 import { View } from '@actual-app/components/view';
 
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { CustomUpcomingLength } from './CustomUpcomingLength';
 

@@ -6,8 +6,8 @@ import {
   getActiveSchedules,
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
-  type CategoryWithTemplateNote,
 } from './statements';
+import type { CategoryWithTemplateNote } from './statements';
 
 type Notification = {
   type?: 'message' | 'error' | 'warning' | undefined;
