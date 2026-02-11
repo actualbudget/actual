@@ -7,7 +7,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { sendCatch } from 'loot-core/platform/client/fetch';
 import type { send } from 'loot-core/platform/client/fetch';
 import { logger } from 'loot-core/platform/server/log';
-import type { GlobalPrefs, MetadataPrefs, SyncedPrefs } from 'loot-core/types/prefs';
+import type {
+  GlobalPrefs,
+  MetadataPrefs,
+  SyncedPrefs,
+} from 'loot-core/types/prefs';
 
 import { prefQueries } from './queries';
 

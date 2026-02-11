@@ -3,7 +3,12 @@ import { queryOptions } from '@tanstack/react-query';
 import { sendCatch } from 'loot-core/platform/client/fetch';
 import type { send } from 'loot-core/platform/client/fetch';
 import { parseNumberFormat, setNumberFormat } from 'loot-core/shared/util';
-import type { GlobalPrefs, MetadataPrefs, ServerPrefs, SyncedPrefs } from 'loot-core/types/prefs';
+import type {
+  GlobalPrefs,
+  MetadataPrefs,
+  ServerPrefs,
+  SyncedPrefs,
+} from 'loot-core/types/prefs';
 
 import { setI18NextLanguage } from '@desktop-client/i18n';
 
