@@ -7,6 +7,7 @@ import {
   getStatus,
   getStatusLabel,
 } from 'loot-core/shared/schedules';
+import type { ScheduleStatuses } from 'loot-core/shared/schedules';
 import type {
   AccountEntity,
   ScheduleEntity,
@@ -18,9 +19,6 @@ import { useSyncedPref } from './useSyncedPref';
 import { accountFilter } from '@desktop-client/queries';
 import { liveQuery } from '@desktop-client/queries/liveQuery';
 import type { LiveQuery } from '@desktop-client/queries/liveQuery';
-
-export type ScheduleStatusType = ReturnType<typeof getStatus>;
-export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
 
 export type ScheduleStatusLabelType = ReturnType<typeof getStatusLabel>;
 export type ScheduleStatusLabels = Map<

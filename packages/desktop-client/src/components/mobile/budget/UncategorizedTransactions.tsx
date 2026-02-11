@@ -27,10 +27,10 @@ export function UncategorizedTransactions() {
   );
   const {
     transactions,
-    isLoading,
-    isLoadingMore,
-    loadMore: loadMoreTransactions,
-    reload: reloadTransactions,
+    isPending: isTransactionsLoading,
+    isFetchingNextPage: isLoadingMoreTransactions,
+    fetchNextPage: fetchMoreTransactions,
+    refetch: reloadTransactions,
   } = useTransactions({
     query: transactionsQuery,
   });
@@ -73,13 +73,13 @@ export function UncategorizedTransactions() {
   return (
     <SchedulesProvider>
       <TransactionListWithBalances
-        isLoading={isLoading}
+        isLoading={isTransactionsLoading}
         transactions={transactions}
         balance={balance}
         searchPlaceholder="Search uncategorized transactions"
         onSearch={onSearch}
-        isLoadingMore={isLoadingMore}
-        onLoadMore={loadMoreTransactions}
+        isLoadingMore={isLoadingMoreTransactions}
+        onLoadMore={fetchMoreTransactions}
         onOpenTransaction={onOpenTransaction}
       />
     </SchedulesProvider>

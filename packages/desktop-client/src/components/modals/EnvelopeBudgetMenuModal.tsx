@@ -45,7 +45,7 @@ export function EnvelopeBudgetMenuModal({
   const budgeted = useEnvelopeSheetValue(
     envelopeBudget.catBudgeted(categoryId),
   );
-  const category = useCategory(categoryId);
+  const { data: category } = useCategory(categoryId);
   const [amountFocused, setAmountFocused] = useState(false);
 
   const _onUpdateBudget = (amount: number) => {

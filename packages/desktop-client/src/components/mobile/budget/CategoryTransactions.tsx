@@ -59,10 +59,10 @@ function TransactionListWithPreviews({
   );
   const {
     transactions,
-    isLoading: isTransactionsLoading,
-    isLoadingMore,
-    loadMore: loadMoreTransactions,
-    reload: reloadTransactions,
+    isPending: isTransactionsLoading,
+    isFetchingNextPage: isLoadingMoreTransactions,
+    fetchNextPage: fetchMoreTransactions,
+    refetch: reloadTransactions,
   } = useTransactions({
     query: transactionsQuery,
   });
@@ -130,8 +130,8 @@ function TransactionListWithPreviews({
       balanceUncleared={balanceUncleared}
       searchPlaceholder={`Search ${category.name}`}
       onSearch={onSearch}
-      isLoadingMore={isLoadingMore}
-      onLoadMore={loadMoreTransactions}
+      isLoadingMore={isLoadingMoreTransactions}
+      onLoadMore={fetchMoreTransactions}
       onOpenTransaction={onOpenTransaction}
     />
   );

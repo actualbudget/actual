@@ -45,7 +45,7 @@ export function TrackingBudgetMenuModal({
   const budgeted = useTrackingSheetValue(
     trackingBudget.catBudgeted(categoryId),
   );
-  const category = useCategory(categoryId);
+  const { data: category } = useCategory(categoryId);
   const [amountFocused, setAmountFocused] = useState(false);
 
   const _onUpdateBudget = (amount: number) => {
