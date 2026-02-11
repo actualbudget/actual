@@ -59,6 +59,14 @@ import APIList from './APIList';
 "mergePayees"
 ]} />
 
+<APIList title="Tags" sections={[
+"Tag",
+"getTags",
+"createTag",
+"updateTag",
+"deleteTag"
+]} />
+
 <APIList title="Rules" sections={[
 "ConditionOrAction",
 "Rule",
