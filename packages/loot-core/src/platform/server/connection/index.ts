@@ -79,7 +79,7 @@ export const init: T.Init = function (serverChn, handlers) {
                 result: { error, data: null },
               });
             } else {
-              serverChannel.postMessage({ type: 'error', id });
+              serverChannel.postMessage({ type: 'error', id, error });
             }
 
             // Only report internal errors
@@ -94,16 +94,25 @@ export const init: T.Init = function (serverChn, handlers) {
           },
         );
       } else {
-        logger.warn('Unknown method: ' + name);
-        const unknownMethodError = APIError('Unknown method: ' + name);
-        serverChannel.postMessage({
-          type: 'reply',
-          id,
-          result: catchErrors
-            ? { error: unknownMethodError, data: null }
-            : null,
-          error: unknownMethodError,
-        });
+        logger.error('Unknown server method: ' + name);
+        captureException(new Error('Unknown server method: ' + name));
+        const unknownMethodError = APIError('Unknown server method: ' + name);
+
+        if (catchErrors) {
+          serverChannel.postMessage({
+            type: 'reply',
+            id,
+            result: catchErrors
+              ? { error: unknownMethodError, data: null }
+              : null,
+          });
+        } else {
+          serverChannel.postMessage({
+            type: 'error',
+            id,
+            error: unknownMethodError,
+          });
+        }
       }
     },
     false,
