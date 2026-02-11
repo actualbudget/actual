@@ -201,6 +201,7 @@ function ExpenseCategoryCells({
           aria-label={t('Open balance menu for {{categoryName}} category', {
             categoryName: category.name,
           })}
+          month={month}
         />
       </View>
     </View>

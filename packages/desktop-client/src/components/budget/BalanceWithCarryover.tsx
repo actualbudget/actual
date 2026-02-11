@@ -15,6 +15,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+import * as monthUtils from 'loot-core/shared/months';
 import type { TransObjectLiteral } from 'loot-core/types/util';
 
 import { makeBalanceAmountStyle } from './util';
@@ -99,6 +100,7 @@ type BalanceWithCarryoverProps = Omit<
   shouldInlineGoalStatus?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
   tooltipDisabled?: boolean;
+  month?: string;
 };
 
 export function BalanceWithCarryover({
@@ -112,6 +114,7 @@ export function BalanceWithCarryover({
   CarryoverIndicator: CarryoverIndicatorComponent = CarryoverIndicator,
   tooltipDisabled,
   children,
+  month,
   ...props
 }: BalanceWithCarryoverProps) {
   const { t } = useTranslation();
@@ -154,6 +157,25 @@ export function BalanceWithCarryover({
       }),
     [getBalanceAmountStyle, isDisabled],
   );
+
+  const getDailyAverage = useCallback(
+    (balanceValue: number) => {
+      if (
+        !month ||
+        !monthUtils.isCurrentMonth(month) ||
+        balanceValue <= 0
+      ) {
+        return null;
+      }
+      const today = monthUtils.currentDay();
+      const endOfMonth = monthUtils.lastDayOfMonth(today);
+      const daysRemaining =
+        monthUtils.differenceInCalendarDays(endOfMonth, today) + 1;
+      return Math.round(balanceValue / daysRemaining);
+    },
+    [month],
+  );
+
   const GoalStatusDisplay = useCallback(
     (balanceValue, type) => {
       return (
@@ -289,6 +311,25 @@ export function BalanceWithCarryover({
               style={getBalanceAmountStyle(balanceValue)}
             />
           )}
+
+          {(() => {
+            const dailyAvg = getDailyAverage(balanceValue);
+            if (dailyAvg === null) return null;
+            return (
+              <span
+                style={{
+                  fontSize: isNarrowWidth ? 9 : 10,
+                  color: theme.pageTextSubdued,
+                  whiteSpace: 'nowrap',
+                  textAlign: 'right',
+                  marginTop: 1,
+                }}
+              >
+                {format(dailyAvg, 'financial')}/d
+              </span>
+            );
+          })()}
+
           {shouldInlineGoalStatus &&
             isGoalTemplatesEnabled &&
             goalValue !== null && (
