@@ -13,6 +13,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/shared/errors';
@@ -27,7 +28,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { loadGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
+import { prefQueries } from '@desktop-client/prefs';
 import { useDispatch } from '@desktop-client/redux';
 
 type CreateEncryptionKeyModalProps = Extract<
@@ -45,6 +46,7 @@ export function CreateEncryptionKeyModal({
   const [showPassword, setShowPassword] = useState(false);
   const { isNarrowWidth } = useResponsive();
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
   const isRecreating = recreate;
 
@@ -60,7 +62,9 @@ export function CreateEncryptionKeyModal({
         return;
       }
 
-      dispatch(loadGlobalPrefs());
+      queryClient.invalidateQueries({
+        queryKey: prefQueries.listGlobal().queryKey,
+      });
       dispatch(loadAllFiles());
       dispatch(sync());
 

@@ -14,7 +14,7 @@ import {
   addNotification,
 } from './notifications/notificationsSlice';
 import { payeeQueries } from './payees';
-import { loadPrefs } from './prefs/prefsSlice';
+import { prefQueries } from './prefs';
 import type { AppStore } from './redux/store';
 import * as syncEvents from './sync-events';
 
@@ -141,7 +141,9 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
   const unlistenFinishLoad = listen('finish-load', () => {
     store.dispatch(closeModal());
     store.dispatch(setAppState({ loadingText: null }));
-    store.dispatch(loadPrefs());
+    queryClient.invalidateQueries({
+      queryKey: prefQueries.lists(),
+    });
   });
 
   const unlistenStartImport = listen('start-import', () => {
@@ -151,7 +153,9 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
   const unlistenFinishImport = listen('finish-import', () => {
     store.dispatch(closeModal());
     store.dispatch(setAppState({ loadingText: null }));
-    store.dispatch(loadPrefs());
+    queryClient.invalidateQueries({
+      queryKey: prefQueries.lists(),
+    });
   });
 
   const unlistenShowBudgets = listen('show-budgets', () => {
@@ -161,6 +165,12 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
 
   const unlistenApiFetchRedirected = listen('api-fetch-redirected', () => {
     window.Actual.reload();
+  });
+
+  const unlistenPrefsUpdated = listen('prefs-updated', () => {
+    queryClient.invalidateQueries({
+      queryKey: prefQueries.lists(),
+    });
   });
 
   return () => {
@@ -176,5 +186,6 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     unlistenFinishImport();
     unlistenShowBudgets();
     unlistenApiFetchRedirected();
+    unlistenPrefsUpdated();
   };
 }

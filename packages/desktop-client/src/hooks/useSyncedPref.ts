@@ -1,9 +1,8 @@
-import { useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import type { SyncedPrefs } from 'loot-core/types/prefs';
 
-import { saveSyncedPrefs } from '@desktop-client/prefs/prefsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
+import { prefQueries, useSaveSyncedPrefsMutation } from '@desktop-client/prefs';
 
 type SetSyncedPrefAction<K extends keyof SyncedPrefs> = (
   value: SyncedPrefs[K],
@@ -12,18 +11,17 @@ type SetSyncedPrefAction<K extends keyof SyncedPrefs> = (
 export function useSyncedPref<K extends keyof SyncedPrefs>(
   prefName: K,
 ): [SyncedPrefs[K], SetSyncedPrefAction<K>] {
-  const dispatch = useDispatch();
-  const setPref = useCallback<SetSyncedPrefAction<K>>(
-    value => {
-      dispatch(
-        saveSyncedPrefs({
-          prefs: { [prefName]: value },
-        }),
-      );
-    },
-    [prefName, dispatch],
-  );
-  const pref = useSelector(state => state.prefs.synced[prefName]);
+  const saveSyncedPrefsMutation = useSaveSyncedPrefsMutation();
+  const saveSyncedPref: SetSyncedPrefAction<K> = value => {
+    saveSyncedPrefsMutation.mutate({ [prefName]: value });
+  };
 
-  return [pref, setPref];
+  const syncedPrefsQuery = useQuery({
+    ...prefQueries.listSynced(),
+    select: prefs => prefs?.[prefName],
+    enabled: !!prefName,
+    notifyOnChangeProps: ['data'],
+  });
+
+  return [syncedPrefsQuery.data as SyncedPrefs[K], saveSyncedPref];
 }

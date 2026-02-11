@@ -1,9 +1,8 @@
-import { useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import type { GlobalPrefs } from 'loot-core/types/prefs';
 
-import { saveGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
+import { prefQueries, useSaveGlobalPrefsMutation } from '@desktop-client/prefs';
 
 type SetGlobalPrefAction<K extends keyof GlobalPrefs> = (
   value: GlobalPrefs[K],
@@ -13,23 +12,24 @@ export function useGlobalPref<K extends keyof GlobalPrefs>(
   prefName: K,
   onSaveGlobalPrefs?: () => void,
 ): [GlobalPrefs[K], SetGlobalPrefAction<K>] {
-  const dispatch = useDispatch();
-  const setGlobalPref = useCallback<SetGlobalPrefAction<K>>(
-    value => {
-      dispatch(
-        saveGlobalPrefs({
-          prefs: {
-            [prefName]: value,
-          },
-          onSaveGlobalPrefs,
-        }),
-      );
-    },
-    [prefName, dispatch, onSaveGlobalPrefs],
-  );
-  const globalPref = useSelector(
-    state => state.prefs.global?.[prefName] as GlobalPrefs[K],
-  );
+  const saveGlobalPrefsMutation = useSaveGlobalPrefsMutation();
+  const saveGlobalPref: SetGlobalPrefAction<K> = value => {
+    saveGlobalPrefsMutation.mutate(
+      {
+        [prefName]: value,
+      },
+      {
+        onSuccess: onSaveGlobalPrefs,
+      },
+    );
+  };
 
-  return [globalPref, setGlobalPref];
+  const globalPrefsQuery = useQuery({
+    ...prefQueries.listGlobal(),
+    select: prefs => prefs?.[prefName],
+    enabled: !!prefName,
+    notifyOnChangeProps: ['data'],
+  });
+
+  return [globalPrefsQuery.data as GlobalPrefs[K], saveGlobalPref];
 }

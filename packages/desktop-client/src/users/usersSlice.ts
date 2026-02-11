@@ -9,7 +9,7 @@ import {
   closeBudget,
   loadAllFiles,
 } from '@desktop-client/budgetfiles/budgetfilesSlice';
-import { loadGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
+import { prefQueries } from '@desktop-client/prefs';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 
 const sliceName = 'user';
@@ -48,11 +48,13 @@ export const loggedIn = createAppAsyncThunk(
 
 export const signOut = createAppAsyncThunk(
   `${sliceName}/signOut`,
-  async (_, { dispatch }) => {
+  async (_, { dispatch, extra: { queryClient } }) => {
     await send('subscribe-sign-out');
 
     dispatch(getUserData());
-    dispatch(loadGlobalPrefs());
+    queryClient.invalidateQueries({
+      queryKey: prefQueries.listGlobal().queryKey,
+    });
     dispatch(closeBudget());
     // Handled in budgetSlice
     // dispatch({ type: constants.SIGN_OUT });

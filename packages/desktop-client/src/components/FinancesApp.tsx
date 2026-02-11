@@ -7,7 +7,7 @@ import { Navigate, Route, Routes, useHref, useLocation } from 'react-router';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { useQuery } from '@tanstack/react-query';
+import { usePrefetchQuery, useQuery } from '@tanstack/react-query';
 
 import * as undo from 'loot-core/platform/client/undo';
 
@@ -39,7 +39,9 @@ import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { ScrollProvider } from '@desktop-client/hooks/useScrollListener';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { prefQueries } from '@desktop-client/prefs';
 import { useDispatch, useSelector } from '@desktop-client/redux';
+import { CustomThemeStyle } from '@desktop-client/style';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -85,11 +87,6 @@ export function FinancesApp() {
 
   const dispatch = useDispatch();
   const { t } = useTranslation();
-
-  // TODO: Replace with `useAccounts` hook once it's updated to return the useQuery results.
-  const { data: accounts, isSuccess: isAccountsLoaded } = useQuery(
-    accountQueries.list(),
-  );
 
   const versionInfo = useSelector(state => state.app.versionInfo);
   const [notifyWhenUpdateIsAvailable] = useGlobalPref(
@@ -188,11 +185,15 @@ export function FinancesApp() {
 
   const scrollableRef = useRef<HTMLDivElement>(null);
 
+  // Prefetch preferences
+  usePrefetchQuery(prefQueries.list());
+
   return (
     <View style={{ height: '100%' }}>
       <RouterBehaviors />
       <GlobalKeys />
       <CommandBar />
+      <CustomThemeStyle />
       <View
         style={{
           flexDirection: 'row',
@@ -237,22 +238,7 @@ export function FinancesApp() {
               <BankSyncStatus />
 
               <Routes>
-                <Route
-                  path="/"
-                  element={
-                    isAccountsLoaded ? (
-                      accounts.length > 0 ? (
-                        <Navigate to="/budget" replace />
-                      ) : (
-                        // If there are no accounts, we want to redirect the user to
-                        // the All Accounts screen which will prompt them to add an account
-                        <Navigate to="/accounts" replace />
-                      )
-                    ) : (
-                      <LoadingIndicator />
-                    )
-                  }
-                />
+                <Route path="/" element={<Navigate to="/budget" replace />} />
 
                 <Route path="/reports/*" element={<Reports />} />
 

@@ -1,9 +1,11 @@
-import { useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import type { MetadataPrefs } from 'loot-core/types/prefs';
 
-import { savePrefs } from '@desktop-client/prefs/prefsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
+import {
+  prefQueries,
+  useSaveMetadataPrefsMutation,
+} from '@desktop-client/prefs';
 
 type SetMetadataPrefAction<K extends keyof MetadataPrefs> = (
   value: MetadataPrefs[K],
@@ -12,14 +14,17 @@ type SetMetadataPrefAction<K extends keyof MetadataPrefs> = (
 export function useMetadataPref<K extends keyof MetadataPrefs>(
   prefName: K,
 ): [MetadataPrefs[K], SetMetadataPrefAction<K>] {
-  const dispatch = useDispatch();
-  const setLocalPref = useCallback<SetMetadataPrefAction<K>>(
-    value => {
-      dispatch(savePrefs({ prefs: { [prefName]: value } }));
-    },
-    [prefName, dispatch],
-  );
-  const localPref = useSelector(state => state.prefs.local?.[prefName]);
+  const saveMetadataPrefMutation = useSaveMetadataPrefsMutation();
+  const saveMetadataPref: SetMetadataPrefAction<K> = value => {
+    saveMetadataPrefMutation.mutate({ [prefName]: value });
+  };
 
-  return [localPref, setLocalPref];
+  const metadataPrefsQuery = useQuery({
+    ...prefQueries.listMetadata(),
+    select: prefs => prefs?.[prefName],
+    enabled: !!prefName,
+    notifyOnChangeProps: ['data'],
+  });
+
+  return [metadataPrefsQuery.data as MetadataPrefs[K], saveMetadataPref];
 }

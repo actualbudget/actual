@@ -25,7 +25,7 @@ import {
 } from '@desktop-client/components/ServerContext';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { saveGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
+import { useSaveGlobalPrefsMutation } from '@desktop-client/prefs';
 import { useDispatch } from '@desktop-client/redux';
 import { loggedIn, signOut } from '@desktop-client/users/usersSlice';
 
@@ -40,7 +40,6 @@ export function ElectronServerConfig({
   const navigate = useNavigate();
   const setServerUrl = useSetServerURL();
   const currentUrl = useServerURL();
-  const dispatch = useDispatch();
 
   const [syncServerConfig, setSyncServerConfig] =
     useGlobalPref('syncServerConfig');
@@ -54,6 +53,7 @@ export function ElectronServerConfig({
   const hasInternalServerConfig = syncServerConfig?.port;
 
   const [startingSyncServer, setStartingSyncServer] = useState(false);
+  const saveGlobalPrefs = useSaveGlobalPrefsMutation();
 
   const onConfigureSyncServer = async () => {
     if (startingSyncServer) {
@@ -73,17 +73,13 @@ export function ElectronServerConfig({
       setConfigError(null);
       setStartingSyncServer(true);
       // Ensure config is saved before starting the server
-      await dispatch(
-        saveGlobalPrefs({
-          prefs: {
-            syncServerConfig: {
-              ...syncServerConfig,
-              port: electronServerPort,
-              autoStart: true,
-            },
-          },
-        }),
-      ).unwrap();
+      await saveGlobalPrefs.mutateAsync({
+        syncServerConfig: {
+          ...syncServerConfig,
+          port: electronServerPort,
+          autoStart: true,
+        },
+      });
 
       await window.globalThis.Actual.stopSyncServer();
       await window.globalThis.Actual.startSyncServer();

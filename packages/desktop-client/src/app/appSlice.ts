@@ -6,7 +6,7 @@ import { getUploadError } from 'loot-core/shared/errors';
 import type { AtLeastOne } from 'loot-core/types/util';
 
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { loadPrefs } from '@desktop-client/prefs/prefsSlice';
+import { prefQueries } from '@desktop-client/prefs';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 import { getIsOutdated, getLatestVersion } from '@desktop-client/util/versions';
 
@@ -89,8 +89,8 @@ export const resetSync = createAppAsyncThunk(
 
 export const sync = createAppAsyncThunk(
   `${sliceName}/sync`,
-  async (_, { dispatch, getState }) => {
-    const prefs = getState().prefs.local;
+  async (_, { extra: { queryClient } }) => {
+    const prefs = await queryClient.ensureQueryData(prefQueries.listMetadata());
     if (prefs && prefs.id) {
       const result = await send('sync');
       if (result && 'error' in result) {
@@ -98,7 +98,9 @@ export const sync = createAppAsyncThunk(
       }
 
       // Update the prefs
-      await dispatch(loadPrefs());
+      queryClient.invalidateQueries({
+        queryKey: prefQueries.lists(),
+      });
     }
 
     return {};
@@ -107,8 +109,10 @@ export const sync = createAppAsyncThunk(
 
 export const getLatestAppVersion = createAppAsyncThunk(
   `${sliceName}/getLatestAppVersion`,
-  async (_, { dispatch, getState }) => {
-    const globalPrefs = getState().prefs.global;
+  async (_, { dispatch, extra: { queryClient } }) => {
+    const globalPrefs = await queryClient.ensureQueryData(
+      prefQueries.listGlobal(),
+    );
     if (globalPrefs && globalPrefs.notifyWhenUpdateIsAvailable) {
       const theLatestVersion = await getLatestVersion();
       dispatch(
