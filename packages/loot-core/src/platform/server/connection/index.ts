@@ -95,11 +95,14 @@ export const init: T.Init = function (serverChn, handlers) {
         );
       } else {
         logger.warn('Unknown method: ' + name);
+        const unknownMethodError = APIError('Unknown method: ' + name);
         serverChannel.postMessage({
           type: 'reply',
           id,
-          result: null,
-          error: APIError('Unknown method: ' + name),
+          result: catchErrors
+            ? { error: unknownMethodError, data: null }
+            : null,
+          error: unknownMethodError,
         });
       }
     },

@@ -68,11 +68,12 @@ export const init: T.Init = function (_socketName, handlers) {
     } else {
       logger.warn('Unknown method: ' + name);
       captureException(new Error('Unknown server method: ' + name));
+      const unknownMethodError = APIError('Unknown method: ' + name);
       process.parentPort.postMessage({
         type: 'reply',
         id,
-        result: null,
-        error: APIError('Unknown method: ' + name),
+        result: catchErrors ? { error: unknownMethodError, data: null } : null,
+        error: unknownMethodError,
       });
     }
   });
