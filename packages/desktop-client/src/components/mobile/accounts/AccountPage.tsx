@@ -98,10 +98,14 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   const failedAccounts = useFailedAccounts();
   const { t } = useTranslation();
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
-  const pending = useMemo(
-    () => syncingAccountIds.includes(account.id),
-    [syncingAccountIds, account.id],
-  );
+  const syncQueue = useSelector(state => state.account.syncQueue);
+  const pending = useMemo(() => {
+    // An account is pending if it's in the sync queue or currently syncing
+    return (
+      syncingAccountIds.includes(account.id) ||
+      syncQueue.some(req => req.id === account.id)
+    );
+  }, [syncingAccountIds, syncQueue, account.id]);
   const failed = useMemo(
     () => failedAccounts.has(account.id),
     [failedAccounts, account.id],

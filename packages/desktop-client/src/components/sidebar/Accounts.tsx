@@ -33,6 +33,13 @@ export function Accounts() {
   const onBudgetAccounts = useOnBudgetAccounts();
   const closedAccounts = useClosedAccounts();
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
+  const syncQueue = useSelector(state => state.account.syncQueue);
+
+  // An account is pending if it's in the sync queue or currently syncing
+  const pendingAccountIds = new Set([
+    ...syncingAccountIds,
+    ...syncQueue.map(req => req.id),
+  ]);
 
   const getAccountPath = (account: AccountEntity) => `/accounts/${account.id}`;
 
@@ -119,7 +126,7 @@ export function Accounts() {
             name={account.name}
             account={account}
             connected={!!account.bank}
-            pending={syncingAccountIds.includes(account.id)}
+            pending={pendingAccountIds.has(account.id)}
             failed={failedAccounts.has(account.id)}
             updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
@@ -150,7 +157,7 @@ export function Accounts() {
             name={account.name}
             account={account}
             connected={!!account.bank}
-            pending={syncingAccountIds.includes(account.id)}
+            pending={pendingAccountIds.has(account.id)}
             failed={failedAccounts.has(account.id)}
             updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}

@@ -414,8 +414,15 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
     const syncingAccountIds = useSelector(
       state => state.account.accountsSyncing,
     );
+    const syncQueue = useSelector(state => state.account.syncQueue);
     const updatedAccounts = useSelector(state => state.account.updatedAccounts);
     const dispatch = useDispatch();
+
+    // An account is pending if it's in the sync queue or currently syncing
+    const pendingAccountIds = new Set([
+      ...syncingAccountIds,
+      ...syncQueue.map(req => req.id),
+    ]);
 
     const { dragAndDropHooks } = useDragAndDrop({
       getItems: keys =>
@@ -500,7 +507,7 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
             value={account}
             isUpdated={updatedAccounts && updatedAccounts.includes(account.id)}
             isConnected={!!account.bank}
-            isPending={syncingAccountIds.includes(account.id)}
+            isPending={pendingAccountIds.has(account.id)}
             isFailed={failedAccounts && failedAccounts.has(account.id)}
             getBalanceQuery={getBalanceBinding}
             onSelect={onOpenAccount}

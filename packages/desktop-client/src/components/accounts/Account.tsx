@@ -1995,7 +1995,13 @@ export function Account() {
   );
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
+  const syncQueue = useSelector(state => state.account.syncQueue);
   const filterConditions = location?.state?.filterConditions || [];
+
+  // An account is pending if it's in the sync queue or currently syncing
+  const pendingAccountIds = [
+    ...new Set([...accountsSyncing, ...syncQueue.map(req => req.id)]),
+  ];
 
   const savedFiters = useTransactionFilters();
 
@@ -2033,7 +2039,7 @@ export function Account() {
           }
           payees={payees}
           modalShowing={modalShowing}
-          accountsSyncing={accountsSyncing}
+          accountsSyncing={pendingAccountIds}
           filterConditions={filterConditions}
           categoryGroups={categoryGroups}
           accountId={params.id}
