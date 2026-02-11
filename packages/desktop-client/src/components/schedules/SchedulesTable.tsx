@@ -16,6 +16,10 @@ import { View } from '@actual-app/components/view';
 import { format as monthUtilFormat } from 'loot-core/shared/months';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { getScheduledAmount } from 'loot-core/shared/schedules';
+import type {
+  ScheduleStatuses,
+  ScheduleStatusType,
+} from 'loot-core/shared/schedules';
 import type { ScheduleEntity } from 'loot-core/types/models';
 
 import { StatusBadge } from './StatusBadge';
@@ -35,11 +39,6 @@ import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePayees } from '@desktop-client/hooks/usePayees';
-import type {
-  ScheduleStatuses,
-  ScheduleStatusType,
-} from '@desktop-client/hooks/useSchedules';
-
 type SchedulesTableProps = {
   isLoading?: boolean;
   schedules: readonly ScheduleEntity[];
