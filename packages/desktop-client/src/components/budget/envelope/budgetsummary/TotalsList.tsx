@@ -1,4 +1,5 @@
-import React, { type CSSProperties } from 'react';
+import React from 'react';
+import type { CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -9,7 +10,8 @@ import { View } from '@actual-app/components/view';
 
 import { EnvelopeCellValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
 import { CellValueText } from '@desktop-client/components/spreadsheet/CellValue';
-import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 /**

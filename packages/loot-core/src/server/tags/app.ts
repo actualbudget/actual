@@ -1,4 +1,4 @@
-import { type TagEntity } from '../../types/models';
+import type { TagEntity } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
 import { mutator } from '../mutators';
@@ -54,7 +54,7 @@ async function createTag({
   return { id, tag, color, description };
 }
 
-async function deleteTag(tag: TagEntity): Promise<TagEntity['id']> {
+async function deleteTag(tag: Pick<TagEntity, 'id'>): Promise<TagEntity['id']> {
   await db.deleteTag(tag);
   return tag.id;
 }
@@ -70,7 +70,9 @@ async function deleteAllTags(
   return ids;
 }
 
-async function updateTag(tag: TagEntity): Promise<TagEntity> {
+async function updateTag(
+  tag: Partial<TagEntity> & Pick<TagEntity, 'id'>,
+): Promise<Partial<TagEntity>> {
   await db.updateTag(tag);
   return tag;
 }

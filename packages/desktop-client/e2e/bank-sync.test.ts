@@ -1,7 +1,7 @@
-import { type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
-import { type BankSyncPage } from './page-models/bank-sync-page';
+import type { BankSyncPage } from './page-models/bank-sync-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
 

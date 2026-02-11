@@ -1,18 +1,18 @@
 import * as d from 'date-fns';
-import { type Locale } from 'date-fns';
+import type { Locale } from 'date-fns';
 import keyBy from 'lodash/keyBy';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import {
-  type AccountEntity,
-  type RuleConditionEntity,
+import type {
+  AccountEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
-import { type FormatType } from '@desktop-client/hooks/useFormat';
-import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
+import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 type Balance = {

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
-import { type TagEntity } from 'loot-core/types/models';
+import type { TagEntity } from 'loot-core/types/models';
 
 import { TagRow } from './TagRow';
 

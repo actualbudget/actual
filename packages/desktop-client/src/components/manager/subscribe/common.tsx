@@ -5,7 +5,7 @@ import { useLocation } from 'react-router';
 import { theme } from '@actual-app/components/theme';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { type Handlers } from 'loot-core/types/handlers';
+import type { Handlers } from 'loot-core/types/handlers';
 
 import {
   useSetLoginMethods,

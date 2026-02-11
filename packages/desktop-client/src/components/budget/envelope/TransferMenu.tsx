@@ -6,8 +6,8 @@ import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { View } from '@actual-app/components/view';
 
-import { type IntegerAmount } from 'loot-core/shared/util';
-import { type CategoryEntity } from 'loot-core/types/models';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { CategoryEntity } from 'loot-core/types/models';
 
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import {

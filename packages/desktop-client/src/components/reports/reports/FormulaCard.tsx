@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
 
-import { type FormulaWidget } from 'loot-core/types/models';
+import type { FormulaWidget } from 'loot-core/types/models';
 
 import { FormulaResult } from '@desktop-client/components/reports/FormulaResult';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';

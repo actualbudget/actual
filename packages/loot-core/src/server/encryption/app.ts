@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import { logger } from '../../platform/server/log';
-import { type Budget } from '../../types/budget';
+import type { Budget } from '../../types/budget';
 import { createApp } from '../app';
 import { post } from '../post';
 import * as prefs from '../prefs';

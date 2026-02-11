@@ -3,11 +3,11 @@ import * as dateFns from 'date-fns';
 
 import { logger } from '../../platform/server/log';
 import { recurConfigToRSchedule } from '../../shared/schedules';
-import { type RuleConditionEntity } from '../../types/models';
+import type { RuleConditionEntity } from '../../types/models';
 import { RuleError } from '../errors';
 import { RSchedule } from '../util/rschedule';
 
-import { type Rule } from './rule';
+import type { Rule } from './rule';
 
 export function assert(test: unknown, type: string, msg: string): asserts test {
   if (!test) {

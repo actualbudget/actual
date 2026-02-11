@@ -1,11 +1,8 @@
 // oxlint-disable eslint/no-script-url
 import { describe, expect, it } from 'vitest';
 
-import {
-  parseInstalledTheme,
-  validateThemeCss,
-  type InstalledTheme,
-} from './customThemes';
+import { parseInstalledTheme, validateThemeCss } from './customThemes';
+import type { InstalledTheme } from './customThemes';
 
 describe('validateThemeCss', () => {
   describe('valid CSS', () => {
