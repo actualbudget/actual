@@ -37,7 +37,8 @@ export function CoverMenu({
 }: CoverMenuProps) {
   const { t } = useTranslation();
 
-  const { grouped: originalCategoryGroups } = useCategories();
+  const { data: { grouped: originalCategoryGroups } = { grouped: [] } } =
+    useCategories();
 
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
 

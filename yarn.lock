@@ -161,6 +161,7 @@ __metadata:
     "@testing-library/react": "npm:16.3.0"
     "@testing-library/user-event": "npm:14.6.1"
     "@types/lodash": "npm:^4"
+    "@types/pikaday": "npm:^1.7.10"
     "@types/promise-retry": "npm:^1.1.6"
     "@types/react": "npm:^19.2.5"
     "@types/react-dom": "npm:^19.2.3"
@@ -9428,6 +9429,15 @@ __metadata:
   version: 0.10.6
   resolution: "@types/pegjs@npm:0.10.6"
   checksum: 10/be219504714e219b37daee7ef3214b6876d98405cc56b2d084763134032fd46394c5d0e387216ee3e52bd519fe7341e25bdec855f2a911c49a593b21fd8ea4a6
+  languageName: node
+  linkType: hard
+
+"@types/pikaday@npm:^1.7.10":
+  version: 1.7.10
+  resolution: "@types/pikaday@npm:1.7.10"
+  dependencies:
+    moment: "npm:>=2.29.2"
+  checksum: 10/638bc31725f4663c6266bb527d34d08740d8dc98c1c71efe53ef5bc63e177718e960f96f2719ee97f18ec7caf15e9f70d225e07f4d9ae1235384bb6da31a34a7
   languageName: node
   linkType: hard
 
@@ -20765,6 +20775,13 @@ __metadata:
   version: 3.0.5
   resolution: "mockdate@npm:3.0.5"
   checksum: 10/ff74f43f56a12e1339e838aee623e37b6e4c378173905697f2a006a5c581eea9c71da54fcea76c27e7e744422e49395c668932bf09e67f024841240ffef91fd2
+  languageName: node
+  linkType: hard
+
+"moment@npm:>=2.29.2":
+  version: 2.30.1
+  resolution: "moment@npm:2.30.1"
+  checksum: 10/ae42d876d4ec831ef66110bdc302c0657c664991e45cf2afffc4b0f6cd6d251dde11375c982a5c0564ccc0fa593fc564576ddceb8c8845e87c15f58aa6baca69
   languageName: node
   linkType: hard
 

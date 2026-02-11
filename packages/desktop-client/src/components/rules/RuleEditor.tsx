@@ -40,6 +40,7 @@ import {
   parse,
   unparse,
 } from 'loot-core/shared/rules';
+import type { ScheduleStatusType } from 'loot-core/shared/schedules';
 import type {
   NewRuleEntity,
   RuleActionEntity,
@@ -58,7 +59,6 @@ import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import type { ScheduleStatusType } from '@desktop-client/hooks/useSchedules';
 import {
   SelectedProvider,
   useSelected,
