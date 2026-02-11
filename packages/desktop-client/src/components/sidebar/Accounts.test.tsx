@@ -8,7 +8,7 @@ import type { AccountEntity } from 'loot-core/types/models';
 
 import { Accounts } from './Accounts';
 
-import { TestProvider } from '@desktop-client/redux/mock';
+import { TestProviders } from '@desktop-client/mocks';
 
 function makeAccount({
   id,
@@ -137,7 +137,7 @@ function getGroupToggleButton(label: string): HTMLButtonElement {
 
 describe('Accounts sidebar expansion', () => {
   test('allows collapsing and expanding structural groups', async () => {
-    render(<Accounts />, { wrapper: TestProvider });
+    render(<Accounts />, { wrapper: TestProviders });
     const user = userEvent.setup();
 
     expect(screen.getByText('On Budget One')).toBeInTheDocument();
@@ -156,7 +156,7 @@ describe('Accounts sidebar expansion', () => {
   });
 
   test('does not toggle previously toggled sibling groups', async () => {
-    render(<Accounts />, { wrapper: TestProvider });
+    render(<Accounts />, { wrapper: TestProviders });
     const user = userEvent.setup();
 
     await user.click(getGroupToggleButton('On budget'));
