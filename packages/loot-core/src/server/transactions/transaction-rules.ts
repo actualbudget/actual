@@ -451,7 +451,7 @@ export function conditionsToAQL(
       } else {
         op = 'false';
       }
-    } else if (field === 'category' && options?.group) {
+    } else if (field === 'category_group') {
       field = 'category.group';
     }
 

@@ -88,7 +88,9 @@ test.describe('Transactions', () => {
       await filterTooltip.locator
         .getByRole('button', { name: 'Category', exact: true })
         .click();
-      await page.getByRole('button', { name: 'Group', exact: true }).click();
+      await page
+        .getByRole('button', { name: 'Category group', exact: true })
+        .click();
 
       await expect(filterTooltip.locator).toMatchThemeScreenshots();
 

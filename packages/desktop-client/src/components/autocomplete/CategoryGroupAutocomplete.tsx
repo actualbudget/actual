@@ -46,7 +46,7 @@ function CategoryGroupList({
   renderCategoryGroupItem = defaultRenderCategoryItem,
   showHiddenItems,
 }: CategoryGroupListProps) {
-  const { categoryGroups } = useMemo(() => {
+  const categoryGroups = useMemo(() => {
     return items.reduce(
       (acc, item, index) => {
         const itemWithIndex = {
@@ -54,17 +54,11 @@ function CategoryGroupList({
           highlightedIndex: index,
         };
 
-        acc.categoryGroups.push(itemWithIndex);
+        acc.push(itemWithIndex);
 
         return acc;
       },
-      {
-        categoryGroups: [],
-      } as {
-        categoryGroups: Array<
-          CategoryGroupAutocompleteItem & { highlightedIndex: number }
-        >;
-      },
+      [] as (CategoryGroupAutocompleteItem & { highlightedIndex: number })[],
     );
   }, [items]);
 
@@ -183,7 +177,6 @@ function CategoryGroupItem({
     <button
       type="button"
       style={style}
-      // See comment above.
       className={cx(
         className,
         css({

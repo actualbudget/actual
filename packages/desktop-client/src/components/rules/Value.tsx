@@ -64,7 +64,7 @@ export function Value<T>({
       case 'category':
         return categories;
 
-      case 'category-group':
+      case 'category_group':
         return categoryGroups;
 
       case 'account':
@@ -115,7 +115,7 @@ export function Value<T>({
           return value;
         case 'payee':
         case 'category':
-        case 'category-group':
+        case 'category_group':
         case 'account':
         case 'rule':
           if (valueIsRaw) {

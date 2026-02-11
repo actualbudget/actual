@@ -27,15 +27,6 @@ export function subfieldToOptions(field: string, subfield: string) {
           break;
       }
       break;
-    case 'category':
-      switch (subfield) {
-        case 'category-group':
-          setOptions = { group: true };
-          break;
-        default:
-          break;
-      }
-      break;
     default:
       break;
   }

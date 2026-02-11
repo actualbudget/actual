@@ -186,14 +186,15 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   // Complex category conditions are:
   // - conditions with multiple "category" fields
   // - conditions with "category" field that use "contains", "doesNotContain", "matches", "hasTags" operations
-  // - conditions with "category" field that has "group" option
+  // - conditions with a "category_group" field
   const isComplexCategoryCondition =
     !!conditions.find(
-      ({ field, op, options }) =>
+      ({ field, op }) =>
         field === 'category' &&
-        (['contains', 'doesNotContain', 'matches', 'hasTags'].includes(op) ||
-          options?.group),
-    ) || conditions.filter(({ field }) => field === 'category').length >= 2;
+        ['contains', 'doesNotContain', 'matches', 'hasTags'].includes(op),
+    ) ||
+    conditions.filter(({ field }) => field === 'category').length >= 2 ||
+    conditions.filter(({ field }) => field === 'category_group').length >= 1;
 
   const setSelectedCategories = (newCategories: CategoryEntity[]) => {
     const newCategoryIdSet = new Set(newCategories.map(({ id }) => id));

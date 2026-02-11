@@ -18,6 +18,7 @@ export type FieldValueTypes = {
   account: string;
   amount: number;
   category: string;
+  category_group: string;
   date: string | RecurConfig;
   notes: string;
   payee: string;
@@ -46,7 +47,6 @@ type BaseConditionEntity<
     outflow?: boolean;
     month?: boolean;
     year?: boolean;
-    group?: boolean;
   };
   conditionsOp?: 'and' | 'or';
   type?: 'id' | 'boolean' | 'date' | 'number' | 'string';
@@ -69,6 +69,16 @@ export type RuleConditionEntity =
     >
   | BaseConditionEntity<
       'category',
+      | 'is'
+      | 'isNot'
+      | 'oneOf'
+      | 'notOneOf'
+      | 'contains'
+      | 'doesNotContain'
+      | 'matches'
+    >
+  | BaseConditionEntity<
+      'category_group',
       | 'is'
       | 'isNot'
       | 'oneOf'

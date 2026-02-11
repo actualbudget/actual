@@ -82,8 +82,8 @@ type ConfigureFieldProps<T extends RuleConditionEntity> =
     };
 
 function ConfigureField<T extends RuleConditionEntity>({
-  field,
-  initialSubfield = field,
+  field: initialField,
+  initialSubfield = initialField,
   op,
   value,
   dispatch,
@@ -92,6 +92,7 @@ function ConfigureField<T extends RuleConditionEntity>({
   const { t } = useTranslation();
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const field = initialField === 'category_group' ? 'category' : initialField;
   const [subfield, setSubfield] = useState(initialSubfield);
   const inputRef = useRef<AmountInputRef>(null);
   const prevOp = useRef<T['op'] | null>(null);
@@ -160,7 +161,7 @@ function ConfigureField<T extends RuleConditionEntity>({
       case 'category':
         return [
           ['category', t('Category')],
-          ['category-group', t('Group')],
+          ['category_group', t('Category group')],
         ];
 
       default:
@@ -260,6 +261,7 @@ function ConfigureField<T extends RuleConditionEntity>({
           e.preventDefault();
 
           let submitValue = value;
+          let storableField = field;
 
           if (field === 'amount' && inputRef.current) {
             try {
@@ -281,9 +283,13 @@ function ConfigureField<T extends RuleConditionEntity>({
             }
           }
 
+          if (field === 'category') {
+            storableField = subfield;
+          }
+
           // @ts-expect-error - fix me
           onApply({
-            field,
+            field: storableField,
             op,
             value: submitValue,
             options: subfieldToOptions(field, subfield),

@@ -75,6 +75,11 @@ const FIELD_INFO = {
     disallowedOps: new Set(['onBudget', 'offBudget']),
     internalOps: new Set(['and']),
   },
+  category_group: {
+    type: 'id',
+    disallowedOps: new Set(['onBudget', 'offBudget']),
+    internalOps: new Set(['and']),
+  },
   account: { type: 'id' },
   cleared: { type: 'boolean' },
   reconciled: { type: 'boolean' },
@@ -145,12 +150,9 @@ export function mapField(field, opts?) {
     case 'date':
       return t('date');
     case 'category':
-      if (opts.group) {
-        return t('group');
-      }
       return t('category');
-    case 'category-group':
-      return t('group');
+    case 'category_group':
+      return t('category group');
     case 'notes':
       return t('notes');
     case 'payee':
