@@ -1,26 +1,19 @@
 import { useTranslation } from 'react-i18next';
 
-import {
-  type QueryClient,
-  type QueryKey,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 
-import { sendCatch, type send } from 'loot-core/platform/client/fetch';
+import { sendCatch } from 'loot-core/platform/client/fetch';
+import type { send } from 'loot-core/platform/client/fetch';
 import { logger } from 'loot-core/platform/server/log';
-import {
-  type GlobalPrefs,
-  type MetadataPrefs,
-  type SyncedPrefs,
-} from 'loot-core/types/prefs';
+import type { GlobalPrefs, MetadataPrefs, SyncedPrefs } from 'loot-core/types/prefs';
 
 import { prefQueries } from './queries';
 
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { type AppDispatch } from '@desktop-client/redux/store';
+import type { AppDispatch } from '@desktop-client/redux/store';
 
 const sendThrow: typeof send = async (name, args) => {
   const { error, data } = await sendCatch(name, args);
