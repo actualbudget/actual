@@ -15,11 +15,11 @@ import { useDispatch } from '@desktop-client/redux';
 import type { AppDispatch } from '@desktop-client/redux/store';
 
 const sendThrow: typeof send = async (name, args) => {
-  const result = await sendCatch(name, args);
-  if (result?.error) {
-    throw result.error;
+  const { error, data } = await sendCatch(name, args);
+  if (error) {
+    throw error;
   }
-  return result?.data;
+  return data;
 };
 
 function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
