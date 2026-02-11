@@ -330,8 +330,8 @@ export class CategoryTemplateContext {
     // sort the template lines into regular template, goals, and remainder templates
     if (templates) {
       templates.forEach(t => {
-        // Only process templates that are active for this month
-        if (!CategoryTemplateContext.isTemplateActiveForMonth(t, month)) {
+        // Skip expired templates
+        if (CategoryTemplateContext.isTemplateActiveForMonth(t, month)) {
           return;
         }
         if (
