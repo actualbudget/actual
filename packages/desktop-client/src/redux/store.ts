@@ -86,6 +86,17 @@ export const store = configureStore({
     }).prepend(notifyOnRejectedActionsMiddleware.middleware),
 });
 
+export function configureAppStore() {
+  return configureStore({
+    reducer: rootReducer,
+    middleware: getDefaultMiddleware =>
+      getDefaultMiddleware({
+        // TODO: Fix this in a separate PR. Remove non-serializable states in the store.
+        serializableCheck: false,
+      }).prepend(notifyOnRejectedActionsMiddleware.middleware),
+  });
+}
+
 export type AppStore = typeof store;
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
