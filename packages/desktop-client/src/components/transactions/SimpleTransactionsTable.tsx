@@ -63,7 +63,7 @@ const TransactionRow = memo(function TransactionRow({
 }: TransactionRowProps) {
   const { t } = useTranslation();
 
-  const category = useCategory(transaction.category || '');
+  const { data: category } = useCategory(transaction.category);
   const account = useAccount(transaction.account);
 
   const dispatchSelected = useSelectedDispatch();

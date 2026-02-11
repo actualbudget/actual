@@ -162,7 +162,7 @@ export function ImportTransactionsModal({
   const dateFormat = useDateFormat() || ('MM/dd/yyyy' as const);
   const [prefs, savePrefs] = useSyncedPrefs();
   const dispatch = useDispatch();
-  const { list: categories } = useCategories();
+  const { data: { list: categories } = { list: [] } } = useCategories();
 
   const [multiplierAmount, setMultiplierAmount] = useState('');
   const [loadingState, setLoadingState] = useState<

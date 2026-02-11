@@ -40,7 +40,7 @@ export function MobileRulesPage() {
   const { schedules = [] } = useSchedules({
     query: useMemo(() => q('schedules').select('*'), []),
   });
-  const { list: categories } = useCategories();
+  const { data: { list: categories } = { list: [] } } = useCategories();
   const payees = usePayees();
   const accounts = useAccounts();
   const filterData = useMemo(

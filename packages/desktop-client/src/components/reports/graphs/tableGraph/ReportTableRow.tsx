@@ -74,7 +74,7 @@ export const ReportTableRow = memo(
 
     const navigate = useNavigate();
     const { isNarrowWidth } = useResponsive();
-    const categories = useCategories();
+    const { data: categories = { grouped: [], list: [] } } = useCategories();
     const accounts = useAccounts();
 
     const pointer =

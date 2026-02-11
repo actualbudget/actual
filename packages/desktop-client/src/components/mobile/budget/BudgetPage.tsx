@@ -73,7 +73,12 @@ function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
 export function BudgetPage() {
   const { t } = useTranslation();
   const locale = useLocale();
-  const { list: categories, grouped: categoryGroups } = useCategories();
+  const {
+    data: { list: categories, grouped: categoryGroups } = {
+      list: [],
+      grouped: [],
+    },
+  } = useCategories();
   const [budgetTypePref] = useSyncedPref('budgetType');
   const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'envelope';
   const spreadsheet = useSpreadsheet();
@@ -725,7 +730,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
   >(envelopeBudget.toBudget);
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
-  const { list: categories } = useCategories();
+  const { data: { list: categories } = { list: [] } } = useCategories();
   const categoriesById = useMemo(() => groupById(categories), [categories]);
 
   const openCoverOverbudgetedModal = useCallback(() => {
@@ -805,7 +810,12 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
 function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
   const { t } = useTranslation();
 
-  const { list: categories, grouped: categoryGroups } = useCategories();
+  const {
+    data: { list: categories, grouped: categoryGroups } = {
+      list: [],
+      grouped: [],
+    },
+  } = useCategories();
   const categoriesById = useMemo(() => groupById(categories), [categories]);
 
   const dispatch = useDispatch();
