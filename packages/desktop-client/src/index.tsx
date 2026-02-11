@@ -26,11 +26,16 @@ import * as notificationsSlice from './notifications/notificationsSlice';
 import * as payeesSlice from './payees/payeesSlice';
 import * as prefsSlice from './prefs/prefsSlice';
 import { aqlQuery } from './queries/aqlQuery';
-import { store } from './redux/store';
+import { configureAppStore } from './redux/store';
 import * as tagsSlice from './tags/tagsSlice';
 import * as transactionsSlice from './transactions/transactionsSlice';
 import { redo, undo } from './undo';
 import * as usersSlice from './users/usersSlice';
+
+const queryClient = new QueryClient();
+window.__TANSTACK_QUERY_CLIENT__ = queryClient;
+
+const store = configureAppStore();
 
 const boundActions = bindActionCreators(
   {
@@ -81,9 +86,6 @@ window.__actionsForMenu = {
 window.$send = send;
 window.$query = aqlQuery;
 window.$q = q;
-
-const queryClient = new QueryClient();
-window.__TANSTACK_QUERY_CLIENT__ = queryClient;
 
 const container = document.getElementById('root');
 const root = createRoot(container);

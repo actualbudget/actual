@@ -80,7 +80,10 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const accounts = useAccounts();
-  const categories = useCategories();
+  const {
+    data: categories = { grouped: [], list: [] },
+    isPending: isCategoriesLoading,
+  } = useCategories();
   const format = useFormat();
 
   const expenseCategoryGroups = categories.grouped.filter(
@@ -126,11 +129,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
   // initialize once when data is available
   useEffect(() => {
-    if (
-      selectionsInitialized ||
-      accounts.length === 0 ||
-      categories.list.length === 0
-    ) {
+    if (selectionsInitialized || accounts.length === 0 || isCategoriesLoading) {
       return;
     }
 
@@ -162,7 +161,13 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     setShowHiddenCategories(widget?.meta?.showHiddenCategories ?? false);
 
     setSelectionsInitialized(true);
-  }, [selectionsInitialized, accounts, categories.list, widget?.meta]);
+  }, [
+    selectionsInitialized,
+    accounts,
+    categories.list,
+    isCategoriesLoading,
+    widget?.meta,
+  ]);
 
   useEffect(() => {
     async function run() {
@@ -400,7 +405,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     !data ||
     !start ||
     !end ||
-    categories.list.length === 0 ||
+    isCategoriesLoading ||
     accounts.length === 0
   ) {
     return <LoadingIndicator />;

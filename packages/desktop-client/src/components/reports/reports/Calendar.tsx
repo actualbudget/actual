@@ -110,8 +110,10 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const [dirty, setDirty] = useState(false);
   const [latestTransaction, setLatestTransaction] = useState('');
 
-  const { transactions: transactionsGrouped, loadMore: loadMoreTransactions } =
-    useTransactions({ query });
+  const {
+    transactions: transactionsGrouped,
+    fetchNextPage: loadMoreTransactions,
+  } = useTransactions({ query });
 
   const allTransactions = useMemo(
     () => ungroupTransactions(transactionsGrouped as TransactionEntity[]),
@@ -120,7 +122,8 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
   const accounts = useAccounts();
   const payees = usePayees();
-  const { grouped: categoryGroups } = useCategories();
+  const { data: { grouped: categoryGroups } = { grouped: [] } } =
+    useCategories();
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';

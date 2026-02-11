@@ -33,7 +33,7 @@ import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
 import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
 import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
-import { TestProvider } from '@desktop-client/redux/mock';
+import { TestProviders } from '@desktop-client/mocks';
 
 vi.mock('loot-core/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({
@@ -195,7 +195,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
   // implementation properly uses the right latest state even if the
   // hook dependencies haven't changed
   return (
-    <TestProvider>
+    <TestProviders>
       <AuthProvider>
         <SpreadsheetProvider>
           <SchedulesProvider>
@@ -226,7 +226,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
           </SchedulesProvider>
         </SpreadsheetProvider>
       </AuthProvider>
-    </TestProvider>
+    </TestProviders>
   );
 }
 
