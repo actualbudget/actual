@@ -764,9 +764,9 @@ function PayeeIcons({
   const { t } = useTranslation();
 
   const scheduleId = transaction.schedule;
-  const { isPending, data: schedules = [] } = useCachedSchedules();
+  const { isFetching, data: schedules = [] } = useCachedSchedules();
 
-  if (isPending) {
+  if (isFetching) {
     return null;
   }
 

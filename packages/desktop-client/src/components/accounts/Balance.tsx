@@ -94,9 +94,9 @@ function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
 
   let scheduleBalance = 0;
 
-  const { data: schedules = [], isPending } = useCachedSchedules();
+  const { data: schedules = [], isFetching } = useCachedSchedules();
 
-  if (isPending) {
+  if (isFetching) {
     return null;
   }
 
