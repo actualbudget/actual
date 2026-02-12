@@ -6,9 +6,12 @@ import { render, screen } from '@testing-library/react';
 
 import { Change } from './Change';
 
-import { configureAppStore } from '@desktop-client/redux/store';
+import {
+  configureTestAppStore,
+  createTestQueryClient,
+} from '@desktop-client/mocks';
 
-const store = configureAppStore();
+const store = configureTestAppStore({ queryClient: createTestQueryClient() });
 
 describe('Change', () => {
   it('renders a positive amount with a plus sign and positive color', () => {
