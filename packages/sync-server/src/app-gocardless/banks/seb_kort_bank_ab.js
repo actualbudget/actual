@@ -1,3 +1,4 @@
+import { getCurrency } from 'loot-core/shared/currencies';
 import { amountToInteger } from 'loot-core/shared/util';
 
 import Fallback from './integration-bank';
@@ -74,17 +75,17 @@ export default {
           total -
           amountToInteger(
             trans.transactionAmount.amount,
-            trans.transactionAmount.currency,
+            getCurrency(trans.transactionAmount.currency || '').decimalPlaces,
           )
         );
       },
       -amountToInteger(
         currentBalance.balanceAmount.amount,
-        currentBalance.balanceAmount.currency,
+        getCurrency(currentBalance.balanceAmount.currency || '').decimalPlaces,
       ) +
         amountToInteger(
           nonInvoiced.balanceAmount.amount,
-          nonInvoiced.balanceAmount.currency,
+          getCurrency(nonInvoiced.balanceAmount.currency || '').decimalPlaces,
         ),
     );
   },

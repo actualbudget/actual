@@ -1,3 +1,4 @@
+import { getCurrency } from 'loot-core/shared/currencies';
 import { amountToInteger } from 'loot-core/shared/util';
 
 import Fallback from './integration-bank';
@@ -30,11 +31,14 @@ export default {
         sortedTransactions[sortedTransactions.length - 1];
       const oldestKnownBalance = amountToInteger(
         oldestTransaction.balanceAfterTransaction.balanceAmount.amount,
-        oldestTransaction.balanceAfterTransaction.balanceAmount.currency,
+        getCurrency(
+          oldestTransaction.balanceAfterTransaction.balanceAmount.currency || '',
+        ).decimalPlaces,
       );
       const oldestTransactionAmount = amountToInteger(
         oldestTransaction.transactionAmount.amount,
-        oldestTransaction.transactionAmount.currency,
+        getCurrency(oldestTransaction.transactionAmount.currency || '')
+          .decimalPlaces,
       );
 
       return oldestKnownBalance - oldestTransactionAmount;
@@ -42,7 +46,10 @@ export default {
       const balance = balances.find(
         balance => 'interimBooked' === balance.balanceType,
       ).balanceAmount;
-      return amountToInteger(balance.amount, balance.currency);
+      return amountToInteger(
+        balance.amount,
+        getCurrency(balance.currency || '').decimalPlaces,
+      );
     }
   },
 };

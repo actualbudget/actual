@@ -231,7 +231,7 @@ function getAccountResponse(results, accountId, startDate) {
     newTrans.notes = trans.description;
     newTrans.transactionAmount = {
       amount: trans.amount,
-      currency: account.currency || 'USD',
+      currency: account.currency || '',
     };
     newTrans.transactionId = trans.id;
     newTrans.valueDate = newTrans.bookingDate;
