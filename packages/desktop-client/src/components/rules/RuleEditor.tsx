@@ -58,7 +58,6 @@ import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import { useScheduleStatus } from '@desktop-client/hooks/useScheduleStatus';
 import {
   SelectedProvider,
@@ -69,6 +68,7 @@ import { getPayees } from '@desktop-client/payees/payeesSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
 import { disableUndo, enableUndo } from '@desktop-client/undo';
+import { useSchedule } from '@desktop-client/hooks/useSchedule';
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));
@@ -367,23 +367,18 @@ function ScheduleDescription({ id }) {
   const { isNarrowWidth } = useResponsive();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const format = useFormat();
-  const { data: schedules = [], isFetching: isSchedulesLoading } = useSchedules(
-    {
-      query: q('schedules').filter({ id }).select('*'),
-    },
-  );
+  const { data: schedule, isPending: isSchedulesLoading } = useSchedule(id);
 
   const {
-    data: { statusLookup = {} },
-  } = useScheduleStatus({ schedules });
+    data: { statusLookup = {} } = {},
+    isPending: isScheduleStatusLoading,
+  } = useScheduleStatus({ schedules: [schedule] });
 
-  if (isSchedulesLoading) {
+  if (isSchedulesLoading || isScheduleStatusLoading) {
     return null;
   }
 
-  const [schedule] = schedules;
-
-  if (schedule && schedules.length === 0) {
+  if (!schedule) {
     return <View style={{ flex: 1 }}>{id}</View>;
   }
 
