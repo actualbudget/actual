@@ -35,7 +35,7 @@ import * as usersSlice from './users/usersSlice';
 const queryClient = new QueryClient();
 window.__TANSTACK_QUERY_CLIENT__ = queryClient;
 
-const store = configureAppStore();
+const store = configureAppStore({ queryClient });
 
 const boundActions = bindActionCreators(
   {
@@ -90,15 +90,15 @@ window.$q = q;
 const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(
-  <Provider store={store}>
-    <ServerProvider>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
+  <QueryClientProvider client={queryClient}>
+    <Provider store={store}>
+      <ServerProvider>
+        <AuthProvider>
           <App />
-        </QueryClientProvider>
-      </AuthProvider>
-    </ServerProvider>
-  </Provider>,
+        </AuthProvider>
+      </ServerProvider>
+    </Provider>
+  </QueryClientProvider>,
 );
 
 declare global {
