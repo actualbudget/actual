@@ -12,7 +12,7 @@ import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { init as initConnection, send } from 'loot-core/platform/client/fetch';
+import { init as initConnection, send } from 'loot-core/platform/client/connection';
 
 import { AppBackground } from './AppBackground';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';

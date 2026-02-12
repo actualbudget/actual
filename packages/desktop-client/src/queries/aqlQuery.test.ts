@@ -1,4 +1,4 @@
-import * as fetch from 'loot-core/platform/client/fetch';
+import * as fetch from 'loot-core/platform/client/connection';
 import { q } from 'loot-core/shared/query';
 
 import { aqlQuery } from './aqlQuery';

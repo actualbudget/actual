@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 
 import { t } from 'i18next';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import type { Handlers } from 'loot-core/types/handlers';
 
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';

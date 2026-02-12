@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import * as fetch from 'loot-core/platform/client/fetch';
+import * as fetch from 'loot-core/platform/client/connection';
 import { q } from 'loot-core/shared/query';
 import { resetTracer, tracer } from 'loot-core/shared/test-helpers';
 

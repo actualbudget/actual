@@ -10,7 +10,7 @@ import {
   generateCategoryGroups,
   generateTransaction,
 } from 'loot-core/mocks';
-import { initServer } from 'loot-core/platform/client/fetch';
+import { initServer } from 'loot-core/platform/client/connection';
 import {
   addSplitTransaction,
   realizeTempTransactions,
