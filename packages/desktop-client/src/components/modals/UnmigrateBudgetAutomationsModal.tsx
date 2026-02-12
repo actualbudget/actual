@@ -27,7 +27,7 @@ export function UnmigrateBudgetAutomationsModal({
   templates: Template[];
 }) {
   const { t } = useTranslation();
-  const category = useCategory(categoryId);
+  const { data: category } = useCategory(categoryId);
   const existingNotes = useNotes(categoryId) || '';
   const [editedNotes, setEditedNotes] = useState<string>('');
 

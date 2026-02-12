@@ -11,7 +11,7 @@ import type { PayeeAutocompleteProps } from './PayeeAutocomplete';
 
 import { AuthProvider } from '@desktop-client/auth/AuthProvider';
 import { useCommonPayees } from '@desktop-client/hooks/usePayees';
-import { TestProvider } from '@desktop-client/redux/mock';
+import { TestProviders } from '@desktop-client/mocks';
 
 const PAYEE_SELECTOR = '[data-testid][role=option]';
 const PAYEE_SECTION_SELECTOR = '[data-testid$="-item-group"]';
@@ -74,7 +74,7 @@ function renderPayeeAutocomplete(
   };
 
   render(
-    <TestProvider>
+    <TestProviders>
       <AuthProvider>
         <div data-testid="autocomplete-test">
           <PayeeAutocomplete
@@ -86,7 +86,7 @@ function renderPayeeAutocomplete(
           />
         </div>
       </AuthProvider>
-    </TestProvider>,
+    </TestProviders>,
   );
   return screen.getByTestId('autocomplete-test');
 }
