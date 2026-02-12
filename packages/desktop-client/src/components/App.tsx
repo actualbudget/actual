@@ -12,7 +12,10 @@ import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { init as initConnection, send } from 'loot-core/platform/client/connection';
+import {
+  init as initConnection,
+  send,
+} from 'loot-core/platform/client/connection';
 
 import { AppBackground } from './AppBackground';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
@@ -73,10 +76,7 @@ function AppInner() {
     };
 
     async function init() {
-      const serverSocket = await maybeUpdate(() =>
-        global.Actual.getServerSocket(),
-      );
-
+      await maybeUpdate();
       dispatch(
         setAppState({
           loadingText: t(
@@ -84,7 +84,7 @@ function AppInner() {
           ),
         }),
       );
-      await initConnection(serverSocket);
+      await initConnection();
 
       // Load any global prefs
       dispatch(
