@@ -39,9 +39,11 @@ export function MobileSchedulesPage() {
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
-  const { isPending: isSchedulesLoading, data: schedules = [] } = useSchedules({
-    query: q('schedules').select('*'),
-  });
+  const { isFetching: isSchedulesLoading, data: schedules = [] } = useSchedules(
+    {
+      query: q('schedules').select('*'),
+    },
+  );
   const { data: { statusLookup = {} } = {} } = useScheduleStatus({ schedules });
 
   const payees = usePayees();

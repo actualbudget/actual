@@ -41,9 +41,11 @@ export function ScheduleLink({
 
   const dispatch = useDispatch();
   const [filter, setFilter] = useState(accountName || '');
-  const { isPending: isSchedulesLoading, data: schedules = [] } = useSchedules({
-    query: q('schedules').filter({ completed: false }).select('*'),
-  });
+  const { isFetching: isSchedulesLoading, data: schedules = [] } = useSchedules(
+    {
+      query: q('schedules').filter({ completed: false }).select('*'),
+    },
+  );
 
   const {
     data: { statusLookup = {} },

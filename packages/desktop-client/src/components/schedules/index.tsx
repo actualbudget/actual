@@ -81,9 +81,11 @@ export function Schedules() {
     [],
   );
 
-  const { isPending: isSchedulesLoading, data: schedules = [] } = useSchedules({
-    query: q('schedules').select('*'),
-  });
+  const { isFetching: isSchedulesLoading, data: schedules = [] } = useSchedules(
+    {
+      query: q('schedules').select('*'),
+    },
+  );
 
   const { data: { statusLookup = {} } = {} } = useScheduleStatus({ schedules });
 
