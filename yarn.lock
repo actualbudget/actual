@@ -121,6 +121,7 @@ __metadata:
     http-proxy-middleware: "npm:^3.0.5"
     ipaddr.js: "npm:^2.3.0"
     jws: "npm:^4.0.1"
+    loot-core: "workspace:*"
     migrate: "npm:^2.1.0"
     nodemon: "npm:^3.1.11"
     nordigen-node: "npm:^1.4.1"

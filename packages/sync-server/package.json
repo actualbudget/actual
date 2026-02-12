@@ -17,7 +17,7 @@
     "start-monitor": "nodemon --exec 'yarn build && node build/app' --ignore './build/**/*' --ext 'ts,js' build/app",
     "build": "tsc && yarn add-import-extensions && yarn copy-static-assets",
     "add-import-extensions": "node bin/add-import-extensions.mjs",
-    "copy-static-assets": "rm -rf build/src/sql && cp -r src/sql build/src/sql",
+    "copy-static-assets": "rm -rf build/src/sql build/sync-server/src/sql && mkdir -p build/src build/sync-server/src && cp -r src/sql build/src/sql && cp -r src/sql build/sync-server/src/sql",
     "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --import ./register-loader.mjs --trace-warnings' vitest --run",
     "db:migrate": "yarn build && cross-env NODE_ENV=development node build/src/scripts/run-migrations.js up",
     "db:downgrade": "yarn build && cross-env NODE_ENV=development node build/src/scripts/run-migrations.js down",
