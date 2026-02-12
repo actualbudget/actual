@@ -115,9 +115,14 @@ const accountsSlice = createSlice({
       _markAccountsDirty(state);
     },
     addToSyncQueue(state, action: PayloadAction<SyncRequest>) {
-      // Prevent duplicate requests
-      const exists = state.syncQueue.some(req => req.id === action.payload.id);
-      if (!exists) {
+      // Prevent duplicate requests - check both queue and currently syncing accounts
+      const existsInQueue = state.syncQueue.some(
+        req => req.id === action.payload.id,
+      );
+      const isCurrentlySyncing = state.accountsSyncing.includes(
+        action.payload.id,
+      );
+      if (!existsInQueue && !isCurrentlySyncing) {
         state.syncQueue.push(action.payload);
       }
     },
@@ -512,11 +517,19 @@ export const processQueue = createAppAsyncThunk(
     let hasAnySuccess = false;
 
     try {
-      // Get initial queue snapshot to prevent infinite loops
-      const initialQueue = [...getState().account.syncQueue];
+      // Continue processing until queue is empty
+      // This handles cases where items are added to the queue while processing
+      while (true) {
+        const currentQueue = getState().account.syncQueue;
 
-      // Process each item in the queue
-      for (const request of initialQueue) {
+        // Exit if queue is empty
+        if (currentQueue.length === 0) {
+          break;
+        }
+
+        // Get the next item from the queue
+        const request = currentQueue[0];
+
         try {
           // Process using original sync logic
           const success = await dispatch(
