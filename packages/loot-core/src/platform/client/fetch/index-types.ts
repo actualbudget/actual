@@ -12,7 +12,7 @@ export declare function send<K extends keyof Handlers>(
   | { data: Awaited<ReturnType<Handlers[K]>>; error: undefined }
   | {
       data: undefined;
-      error: { type: 'APIError' | 'InternalError'; message: string };
+      error: { type: 'APIError' | 'InternalError'; message: string; cause: unknown };
     }
 >;
 export declare function send<K extends keyof Handlers>(
@@ -29,7 +29,7 @@ export declare function sendCatch<K extends keyof Handlers>(
   | { data: Awaited<ReturnType<Handlers[K]>>; error: undefined }
   | {
       data: undefined;
-      error: { type: 'APIError' | 'InternalError'; message: string };
+      error: { type: 'APIError' | 'InternalError'; message: string; cause: unknown };
     }
 >;
 export type SendCatch = typeof sendCatch;

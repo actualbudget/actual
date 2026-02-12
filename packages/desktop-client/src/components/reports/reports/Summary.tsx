@@ -43,23 +43,24 @@ import { summarySpreadsheet } from '@desktop-client/components/reports/spreadshe
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { FieldSelect } from '@desktop-client/components/rules/RuleEditor';
+import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useWidget } from '@desktop-client/hooks/useWidget';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
 
 export function Summary() {
   const params = useParams();
-  const { data: widget, isLoading } = useWidget<SummaryWidget>(
+  const { data: widget, isPending } = useDashboardWidget<SummaryWidget>(
     params.id ?? '',
     'summary-card',
   );
 
-  if (isLoading) {
+  if (isPending) {
     return <LoadingIndicator />;
   }
 
@@ -234,6 +235,8 @@ function SummaryInner({ widget }: SummaryInnerProps) {
   const { isNarrowWidth } = useResponsive();
   const title = widget?.meta?.name || t('Summary');
 
+  const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
+
   const onSaveWidgetName = async (newName: string) => {
     if (!widget) {
       dispatch(
@@ -248,12 +251,14 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     }
 
     const name = newName || t('Summary');
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        name,
-        content: JSON.stringify(content),
+    updateDashboardWidgetMutation.mutate({
+      widget: {
+        id: widget.id,
+        meta: {
+          ...(widget.meta ?? {}),
+          name,
+          content: JSON.stringify(content),
+        },
       },
     });
   };
@@ -276,27 +281,36 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       );
       return;
     }
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        conditions: dividendFilters.conditions,
-        conditionsOp: dividendFilters.conditionsOp,
-        timeFrame: {
-          start,
-          end,
-          mode,
+
+    updateDashboardWidgetMutation.mutate(
+      {
+        widget: {
+          id: widget.id,
+          meta: {
+            ...(widget.meta ?? {}),
+            conditions: dividendFilters.conditions,
+            conditionsOp: dividendFilters.conditionsOp,
+            timeFrame: {
+              start,
+              end,
+              mode,
+            },
+            content: JSON.stringify(content),
+          },
         },
-        content: JSON.stringify(content),
       },
-    });
-    dispatch(
-      addNotification({
-        notification: {
-          type: 'message',
-          message: t('Dashboard widget successfully saved.'),
+      {
+        onSuccess: () => {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'message',
+                message: t('Dashboard widget successfully saved.'),
+              },
+            }),
+          );
         },
-      }),
+      },
     );
   }
 

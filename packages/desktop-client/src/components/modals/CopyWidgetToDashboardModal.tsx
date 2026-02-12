@@ -11,7 +11,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { useDashboardPages } from '@desktop-client/hooks/useDashboard';
+import { useDashboardPages } from '@desktop-client/hooks/useDashboardPages';
 import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type CopyWidgetToDashboardModalProps = Extract<
