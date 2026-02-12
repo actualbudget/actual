@@ -16,7 +16,7 @@ import * as rules from '../server/transactions/transaction-rules';
 import { updateVersion } from '../server/update';
 import { resetTracer, tracer } from '../shared/test-helpers';
 
-vi.mock('../platform/client/fetch');
+vi.mock('../platform/client/connection');
 vi.mock('../platform/exceptions');
 vi.mock('../platform/server/asyncStorage');
 vi.mock('../platform/server/connection');

@@ -35,7 +35,7 @@ import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded'
 import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
 import { TestProviders } from '@desktop-client/mocks';
 
-vi.mock('loot-core/platform/client/fetch');
+vi.mock('loot-core/platform/client/connection');
 vi.mock('../../hooks/useFeatureFlag', () => ({
   default: vi.fn().mockReturnValue(false),
 }));
