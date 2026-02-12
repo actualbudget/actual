@@ -1,7 +1,11 @@
+import { useEffect, useEffectEvent } from 'react';
+
 import { useQuery } from '@tanstack/react-query';
 import type { UseQueryResult } from '@tanstack/react-query';
 
+import { listen } from 'loot-core/platform/client/fetch';
 import type { ScheduleEntity } from 'loot-core/types/models';
+import type { ServerEvents } from 'loot-core/types/server-events';
 
 import { useSyncedPref } from './useSyncedPref';
 
@@ -20,10 +24,23 @@ export function useScheduleStatus({
   const [upcomingLength = '7'] = useSyncedPref(
     'upcomingScheduledTransactionLength',
   );
-  return useQuery(
+  const queryResult = useQuery(
     scheduleQueries.statuses({
       schedules,
       upcomingLength,
     }),
   );
+
+  const onSyncEvent = useEffectEvent((event: ServerEvents['sync-event']) => {
+    if (event.type === 'applied') {
+      const tables = event.tables;
+      if (tables.includes('schedules') || tables.includes('transactions')) {
+        queryResult.refetch();
+      }
+    }
+  });
+
+  useEffect(() => listen('sync-event', onSyncEvent), []);
+
+  return queryResult;
 }
