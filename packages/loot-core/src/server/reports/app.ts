@@ -1,7 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { q } from 'loot-core/shared/query';
+
 import type { CustomReportData, CustomReportEntity } from '../../types/models';
 import { createApp } from '../app';
+import { aqlQuery } from '../aql';
 import * as db from '../db';
 import { ValidationError } from '../errors';
 import { requiredFields } from '../models';
@@ -26,7 +29,7 @@ export const reportModel = {
     return report;
   },
 
-  toJS(row: CustomReportData) {
+  toJS(row: CustomReportData): CustomReportEntity {
     return {
       id: row.id,
       name: row.name,
@@ -46,8 +49,9 @@ export const reportModel = {
       trimIntervals: row.trim_intervals === 1,
       includeCurrentInterval: row.include_current === 1,
       graphType: row.graph_type,
-      conditions: row.conditions,
-      conditionsOp: row.conditions_op,
+      conditions: row.conditions ?? [],
+      conditionsOp: row.conditions_op ?? 'and',
+      metadata: row.metadata,
     };
   },
 
@@ -89,10 +93,11 @@ function sort(reports: CustomReportEntity[]) {
 }
 
 async function getReports() {
-  const reports = await db.all<CustomReportData>(
-    'SELECT * FROM custom_reports WHERE tombstone = 0',
+  // Use aql because it auto deserialized json columns e.g. conditions
+  const { data }: { data: CustomReportData[] } = await aqlQuery(
+    q('custom_reports').select('*'),
   );
-  return sort(reports.map(reportModel.toJS));
+  return sort(data.map(reportModel.toJS));
 }
 
 async function reportNameExists(
