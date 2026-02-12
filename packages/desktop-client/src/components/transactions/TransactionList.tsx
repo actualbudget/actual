@@ -699,15 +699,10 @@ export function TransactionList({
       } else {
         const aboveIdx = targetTransIdx - 1;
         const aboveTrans = aboveIdx >= 0 ? reorderable[aboveIdx] : null;
-        // If above is a split parent, anchor to its last child instead
+        // For parent-level reordering, always anchor to parent transactions.
+        // Using a child id here makes the backend miss the target and append.
         if (aboveTrans?.is_parent) {
-          const children = allTransactions.filter(
-            t => t.parent_id === aboveTrans.id && !isPreviewId(t.id),
-          );
-          const lastChild =
-            children.length > 0 ? children[children.length - 1] : null;
-          apiTargetId =
-            lastChild && aboveTrans.date === trans.date ? lastChild.id : null;
+          apiTargetId = aboveTrans.date === trans.date ? aboveTrans.id : null;
         } else {
           apiTargetId =
             aboveTrans && aboveTrans.date === trans.date ? aboveTrans.id : null;
