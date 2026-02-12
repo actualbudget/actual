@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { listen, send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/fetch';
 import type { Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import type { IntegerAmount } from 'loot-core/shared/util';
@@ -87,7 +87,6 @@ function TransactionListWithPreviews({
     transactions,
     runningBalances,
     isPending: isTransactionsLoading,
-    refetch: reloadTransactions,
     isFetchingNextPage: isLoadingMoreTransactions,
     fetchNextPage: fetchMoreTransactions,
   } = useTransactions({
@@ -129,21 +128,6 @@ function TransactionListWithPreviews({
       dispatch(markAccountRead({ id: account.id }));
     }
   }, [account.id, dispatch]);
-
-  useEffect(() => {
-    return listen('sync-event', event => {
-      if (event.type === 'applied') {
-        const tables = event.tables;
-        if (
-          tables.includes('transactions') ||
-          tables.includes('category_mapping') ||
-          tables.includes('payee_mapping')
-        ) {
-          reloadTransactions();
-        }
-      }
-    });
-  }, [dispatch, reloadTransactions]);
 
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {
