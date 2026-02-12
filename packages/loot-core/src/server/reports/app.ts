@@ -77,6 +77,24 @@ export const reportModel = {
   },
 };
 
+// Sort reports by alphabetical order
+function sort(reports: CustomReportEntity[]) {
+  return reports.sort((a, b) =>
+    a.name && b.name
+      ? a.name.trim().localeCompare(b.name.trim(), undefined, {
+          ignorePunctuation: true,
+        })
+      : 0,
+  );
+}
+
+async function getReports() {
+  const reports = await db.all<CustomReportData>(
+    'SELECT * FROM custom_reports WHERE tombstone = 0',
+  );
+  return sort(reports.map(reportModel.toJS));
+}
+
 async function reportNameExists(
   name: string,
   reportId: string,
@@ -150,6 +168,7 @@ async function deleteReport(id: CustomReportEntity['id']) {
 }
 
 export type ReportsHandlers = {
+  'report/get': typeof getReports;
   'report/create': typeof createReport;
   'report/update': typeof updateReport;
   'report/delete': typeof deleteReport;
@@ -158,6 +177,7 @@ export type ReportsHandlers = {
 // Expose functions to the client
 export const app = createApp<ReportsHandlers>();
 
+app.method('report/get', getReports);
 app.method('report/create', mutator(undoable(createReport)));
 app.method('report/update', mutator(undoable(updateReport)));
 app.method('report/delete', mutator(undoable(deleteReport)));

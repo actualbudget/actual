@@ -77,7 +77,7 @@ export function SaveReport({
   onReportChange,
   dashboardPages,
 }: SaveReportProps) {
-  const { data: listReports } = useReports();
+  const { data: listReports = [] } = useReports();
   const triggerRef = useRef(null);
   const [deleteMenuOpen, setDeleteMenuOpen] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
