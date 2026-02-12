@@ -21,8 +21,8 @@ import {
   ModalTitle,
 } from '@desktop-client/components/common/Modal';
 import { useLocale } from '@desktop-client/hooks/useLocale';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useSchedule } from '@desktop-client/hooks/useSchedule';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type ScheduledTransactionMenuModalProps = Extract<
   ModalType,
@@ -43,7 +43,8 @@ export function ScheduledTransactionMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
   const scheduleId = transactionId?.split('/')?.[1];
-  const { isPending: isSchedulesLoading, data: schedule } = useSchedule(scheduleId);
+  const { isPending: isSchedulesLoading, data: schedule } =
+    useSchedule(scheduleId);
   if (isSchedulesLoading || !schedule) {
     return null;
   }

@@ -58,6 +58,7 @@ import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useFormat } from '@desktop-client/hooks/useFormat';
+import { useSchedule } from '@desktop-client/hooks/useSchedule';
 import { useScheduleStatus } from '@desktop-client/hooks/useScheduleStatus';
 import {
   SelectedProvider,
@@ -68,7 +69,6 @@ import { getPayees } from '@desktop-client/payees/payeesSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
 import { disableUndo, enableUndo } from '@desktop-client/undo';
-import { useSchedule } from '@desktop-client/hooks/useSchedule';
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));

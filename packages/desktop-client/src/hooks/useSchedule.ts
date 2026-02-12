@@ -1,7 +1,9 @@
-import { scheduleQueries } from "@desktop-client/schedules";
-import { useQuery } from "@tanstack/react-query";
-import { q } from "loot-core/shared/query";
+import { useQuery } from '@tanstack/react-query';
+
+import { q } from 'loot-core/shared/query';
 import type { ScheduleEntity } from 'loot-core/types/models';
+
+import { scheduleQueries } from '@desktop-client/schedules';
 
 export function useSchedule(id?: ScheduleEntity['id'] | null) {
   return useQuery({
@@ -12,5 +14,5 @@ export function useSchedule(id?: ScheduleEntity['id'] | null) {
     }),
     select: schedules => schedules.find(schedule => schedule.id === id),
     enabled: !!id,
-  })
+  });
 }
