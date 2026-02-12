@@ -1,24 +1,18 @@
 import React from 'react';
-import { Provider } from 'react-redux';
 
 import { theme } from '@actual-app/components/theme';
 import { render, screen } from '@testing-library/react';
 
 import { Change } from './Change';
 
-import {
-  configureTestAppStore,
-  createTestQueryClient,
-} from '@desktop-client/mocks';
-
-const store = configureTestAppStore({ queryClient: createTestQueryClient() });
+import { TestProviders } from '@desktop-client/mocks';
 
 describe('Change', () => {
   it('renders a positive amount with a plus sign and positive color', () => {
     render(
-      <Provider store={store}>
+      <TestProviders>
         <Change amount={12345} />
-      </Provider>,
+      </TestProviders>,
     );
     const el = screen.getByText('+123.45');
     expect(el).toBeInTheDocument();
@@ -27,9 +21,9 @@ describe('Change', () => {
 
   it('renders zero with a plus sign and neutral color', () => {
     render(
-      <Provider store={store}>
+      <TestProviders>
         <Change amount={0} />
-      </Provider>,
+      </TestProviders>,
     );
     const el = screen.getByText('+0.00');
     expect(el).toBeInTheDocument();
@@ -38,9 +32,9 @@ describe('Change', () => {
 
   it('renders a negative amount with a minus sign and negative color', () => {
     render(
-      <Provider store={store}>
+      <TestProviders>
         <Change amount={-9876} />
-      </Provider>,
+      </TestProviders>,
     );
     const el = screen.getByText('-98.76');
     expect(el).toBeInTheDocument();
@@ -49,9 +43,9 @@ describe('Change', () => {
 
   it('merges custom style prop', () => {
     render(
-      <Provider store={store}>
+      <TestProviders>
         <Change amount={1000} style={{ fontWeight: 'bold' }} />
-      </Provider>,
+      </TestProviders>,
     );
     const el = screen.getByText('+10.00');
     expect(el).toHaveStyle('font-weight: bold');

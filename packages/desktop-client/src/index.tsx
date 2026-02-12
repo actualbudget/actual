@@ -11,7 +11,6 @@ import type { NavigateFunction } from 'react-router';
 
 import { bindActionCreators } from '@reduxjs/toolkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { QueryClientConfig } from '@tanstack/react-query';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
@@ -33,11 +32,7 @@ import * as transactionsSlice from './transactions/transactionsSlice';
 import { redo, undo } from './undo';
 import * as usersSlice from './users/usersSlice';
 
-export function createQueryClient(config?: QueryClientConfig) {
-  return new QueryClient(config);
-}
-
-const queryClient = createQueryClient();
+const queryClient = new QueryClient();
 window.__TANSTACK_QUERY_CLIENT__ = queryClient;
 
 const store = configureAppStore({ queryClient });
