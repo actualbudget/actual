@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useEffectEvent } from 'react';
 import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -11,7 +11,6 @@ import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { listen } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
 
 import { AuthSettings } from './AuthSettings';
@@ -43,7 +42,6 @@ import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { loadPrefs } from '@desktop-client/prefs/prefsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 
 function About() {
@@ -183,20 +181,17 @@ export function Settings() {
     dispatch(closeBudget());
   };
 
-  useEffect(() => {
-    const unlisten = listen('prefs-updated', () => {
-      dispatch(loadPrefs());
-    });
+  const onSetDefaultCurrencyCodePref = useEffectEvent(
+    (isCurrencyExperimentalEnabled: boolean) => {
+      if (!isCurrencyExperimentalEnabled) {
+        setDefaultCurrencyCodePref('');
+      }
+    },
+  );
 
-    dispatch(loadPrefs());
-    return () => unlisten();
-  }, [dispatch]);
-
   useEffect(() => {
-    if (!isCurrencyExperimentalEnabled) {
-      setDefaultCurrencyCodePref('');
-    }
-  }, [isCurrencyExperimentalEnabled, setDefaultCurrencyCodePref]);
+    onSetDefaultCurrencyCodePref(isCurrencyExperimentalEnabled);
+  }, [isCurrencyExperimentalEnabled]);
 
   const { isNarrowWidth } = useResponsive();
 

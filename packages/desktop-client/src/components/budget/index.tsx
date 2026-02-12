@@ -4,6 +4,7 @@ import type { ComponentType } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
+import { useQuery } from '@tanstack/react-query';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -19,6 +20,7 @@ import * as trackingBudget from './tracking/TrackingBudgetComponents';
 import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
 import { prewarmAllMonths, prewarmMonth } from './util';
 
+import { accountQueries } from '@desktop-client/accounts';
 import {
   useBudgetActions,
   useDeleteCategoryGroupMutation,
@@ -28,6 +30,7 @@ import {
   useSaveCategoryGroupMutation,
   useSaveCategoryMutation,
 } from '@desktop-client/budget';
+import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
@@ -74,6 +77,17 @@ export function Budget() {
     run();
   });
   useEffect(() => init(), []);
+
+  const { data: accounts, isPending: isAccountsLoading } = useQuery(
+    accountQueries.list(),
+  );
+
+  useEffect(() => {
+    if (!isAccountsLoading && accounts.length === 0) {
+      // New budget file, no accounts exists
+      navigate('/accounts');
+    }
+  }, [isAccountsLoading, accounts, navigate]);
 
   const loadBoundBudgets = useEffectEvent(() => {
     send('get-budget-bounds').then(({ start, end }) => {
@@ -174,8 +188,8 @@ export function Budget() {
     applyBudgetAction.mutate({ month, type, args });
   };
 
-  if (!initialized || !categoryGroups) {
-    return null;
+  if (!initialized || !categoryGroups || isAccountsLoading) {
+    return <LoadingIndicator />;
   }
 
   let table;

@@ -11,7 +11,7 @@ import type { Handlers } from 'loot-core/types/handlers';
 
 import { resetApp, setAppState } from '@desktop-client/app/appSlice';
 import { closeModal, pushModal } from '@desktop-client/modals/modalsSlice';
-import { loadGlobalPrefs, loadPrefs } from '@desktop-client/prefs/prefsSlice';
+import { prefQueries } from '@desktop-client/prefs';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 import { signOut } from '@desktop-client/users/usersSlice';
 
@@ -55,7 +55,7 @@ type LoadBudgetPayload = {
 
 export const loadBudget = createAppAsyncThunk(
   `${sliceName}/loadBudget`,
-  async ({ id, options = {} }: LoadBudgetPayload, { dispatch }) => {
+  async ({ id, options = {} }: LoadBudgetPayload, { dispatch, extra }) => {
     await dispatch(setAppState({ loadingText: t('Loading...') }));
 
     // Loading a budget may fail
@@ -91,7 +91,10 @@ export const loadBudget = createAppAsyncThunk(
       }
     } else {
       await dispatch(closeModal());
-      await dispatch(loadPrefs());
+      extra.queryClient.invalidateQueries({
+        queryKey: prefQueries.lists(),
+        refetchType: 'none',
+      });
     }
 
     await dispatch(setAppState({ loadingText: null }));
@@ -100,8 +103,8 @@ export const loadBudget = createAppAsyncThunk(
 
 export const closeBudget = createAppAsyncThunk(
   `${sliceName}/closeBudget`,
-  async (_, { dispatch, getState, extra: { queryClient } }) => {
-    const prefs = getState().prefs.local;
+  async (_, { dispatch, extra: { queryClient } }) => {
+    const prefs = await queryClient.ensureQueryData(prefQueries.listMetadata());
     if (prefs && prefs.id) {
       await dispatch(resetApp());
       queryClient.clear();
@@ -117,8 +120,8 @@ export const closeBudget = createAppAsyncThunk(
 
 export const closeBudgetUI = createAppAsyncThunk(
   `${sliceName}/closeBudgetUI`,
-  async (_, { dispatch, getState, extra: { queryClient } }) => {
-    const prefs = getState().prefs.local;
+  async (_, { dispatch, extra: { queryClient } }) => {
+    const prefs = await queryClient.ensureQueryData(prefQueries.listMetadata());
     if (prefs && prefs.id) {
       await dispatch(resetApp());
       queryClient.clear();
@@ -148,7 +151,7 @@ export const createBudget = createAppAsyncThunk(
   `${sliceName}/createBudget`,
   async (
     { testMode = false, demoMode = false }: CreateBudgetPayload,
-    { dispatch },
+    { dispatch, extra: { queryClient } },
   ) => {
     await dispatch(
       setAppState({
@@ -166,7 +169,9 @@ export const createBudget = createAppAsyncThunk(
     await dispatch(closeModal());
 
     await dispatch(loadAllFiles());
-    await dispatch(loadPrefs());
+    queryClient.invalidateQueries({
+      queryKey: prefQueries.lists(),
+    });
 
     // Set the loadingText to null after we've loaded the budget prefs
     // so that the existing manager page doesn't flash
@@ -245,14 +250,19 @@ type ImportBudgetPayload = {
 
 export const importBudget = createAppAsyncThunk(
   `${sliceName}/importBudget`,
-  async ({ filepath, type }: ImportBudgetPayload, { dispatch }) => {
+  async (
+    { filepath, type }: ImportBudgetPayload,
+    { dispatch, extra: { queryClient } },
+  ) => {
     const { error } = await send('import-budget', { filepath, type });
     if (error) {
       throw new Error(error);
     }
 
     await dispatch(closeModal());
-    await dispatch(loadPrefs());
+    queryClient.invalidateQueries({
+      queryKey: prefQueries.lists(),
+    });
   },
 );
 
@@ -306,7 +316,7 @@ export const downloadBudget = createAppAsyncThunk(
   `${sliceName}/downloadBudget`,
   async (
     { cloudFileId, replace = false }: DownloadBudgetPayload,
-    { dispatch },
+    { dispatch, extra: { queryClient } },
   ): Promise<string | null> => {
     await dispatch(
       setAppState({
@@ -370,8 +380,10 @@ export const downloadBudget = createAppAsyncThunk(
       if (!id) {
         throw new Error('No id returned from download.');
       }
+      queryClient.invalidateQueries({
+        queryKey: prefQueries.listGlobal().queryKey,
+      });
       await Promise.all([
-        dispatch(loadGlobalPrefs()),
         dispatch(loadAllFiles()),
         dispatch(loadBudget({ id })),
       ]);
@@ -389,8 +401,11 @@ type LoadBackupPayload = {
 // Take in the budget id so that backups can be loaded when a budget isn't opened
 export const loadBackup = createAppAsyncThunk(
   `${sliceName}/loadBackup`,
-  async ({ budgetId, backupId }: LoadBackupPayload, { dispatch, getState }) => {
-    const prefs = getState().prefs.local;
+  async (
+    { budgetId, backupId }: LoadBackupPayload,
+    { dispatch, extra: { queryClient } },
+  ) => {
+    const prefs = await queryClient.ensureQueryData(prefQueries.listMetadata());
     if (prefs && prefs.id) {
       await dispatch(closeBudget());
     }
@@ -402,8 +417,8 @@ export const loadBackup = createAppAsyncThunk(
 
 export const makeBackup = createAppAsyncThunk(
   `${sliceName}/makeBackup`,
-  async (_, { getState }) => {
-    const prefs = getState().prefs.local;
+  async (_, { extra: { queryClient } }) => {
+    const prefs = await queryClient.ensureQueryData(prefQueries.listMetadata());
     if (prefs && prefs.id) {
       await send('backup-make', { id: prefs.id });
     }
