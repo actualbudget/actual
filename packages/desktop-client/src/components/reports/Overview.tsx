@@ -83,7 +83,7 @@ export function Overview({ dashboard }: OverviewProps) {
     ? 'mobile'
     : 'desktop';
 
-  const { data: customReports, isLoading: isCustomReportsLoading } =
+  const { data: customReports = [], isPending: isCustomReportsLoading } =
     useReports();
 
   const customReportMap = useMemo(
