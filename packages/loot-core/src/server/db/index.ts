@@ -39,19 +39,19 @@ import {
   SORT_INCREMENT,
   TRANSACTION_SORT_INCREMENT,
 } from './sort';
-import {
-  type DbAccount,
-  type DbBank,
-  type DbCategory,
-  type DbCategoryGroup,
-  type DbCategoryMapping,
-  type DbClockMessage,
-  type DbPayee,
-  type DbPayeeMapping,
-  type DbTag,
-  type DbTransaction,
-  type DbViewTransaction,
-  type DbViewTransactionInternalAlive,
+import type {
+  DbAccount,
+  DbBank,
+  DbCategory,
+  DbCategoryGroup,
+  DbCategoryMapping,
+  DbClockMessage,
+  DbPayee,
+  DbPayeeMapping,
+  DbTag,
+  DbTransaction,
+  DbViewTransaction,
+  DbViewTransactionInternalAlive,
 } from './types';
 
 export * from './types';

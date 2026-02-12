@@ -17,7 +17,8 @@ import type {
   Ref,
   RefObject,
 } from 'react';
-import { DragPreview, type DragPreviewRenderer } from 'react-aria';
+import { DragPreview } from 'react-aria';
+import type { DragPreviewRenderer } from 'react-aria';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -130,9 +131,11 @@ import {
   isValidBoundaryDrop,
   useDrag,
   useDrop,
-  type DropPosition,
-  type OnDragChangeCallback,
-  type OnDropCallback,
+} from '@desktop-client/hooks/useDragDrop';
+import type {
+  DropPosition,
+  OnDragChangeCallback,
+  OnDropCallback,
 } from '@desktop-client/hooks/useDragDrop';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';

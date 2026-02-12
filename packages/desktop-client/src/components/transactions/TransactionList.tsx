@@ -33,17 +33,14 @@ import type {
 import { TransactionTable } from './TransactionsTable';
 import type { TransactionTableProps } from './TransactionsTable';
 
-import { type TableHandleRef } from '@desktop-client/components/table';
-import {
-  isValidBoundaryDrop,
-  type DropPosition,
-} from '@desktop-client/hooks/useDragDrop';
+import type { TableHandleRef } from '@desktop-client/components/table';
+import { isValidBoundaryDrop } from '@desktop-client/hooks/useDragDrop';
+import type { DropPosition } from '@desktop-client/hooks/useDragDrop';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
-
 // When data changes, there are two ways to update the UI:
 //
 // * Optimistic updates: we apply the needed updates to local data

@@ -5,15 +5,16 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  type Context,
-  type RefObject,
 } from 'react';
+import type { Context, RefObject } from 'react';
 import {
   useDrag as useReactAriaDrag,
   useDrop as useReactAriaDrop,
-  type DragPreviewRenderer,
-  type DropPosition,
-  type TextDropItem,
+} from 'react-aria';
+import type {
+  DragPreviewRenderer,
+  DropPosition,
+  TextDropItem,
 } from 'react-aria';
 
 import { theme } from '@actual-app/components/theme';

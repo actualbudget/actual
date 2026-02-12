@@ -8,7 +8,7 @@ import React, {
   useState,
 } from 'react';
 import type { Context } from 'react';
-import { type DropPosition as AriaDropPosition } from 'react-aria';
+import type { DropPosition as AriaDropPosition } from 'react-aria';
 import { useDrag, useDrop } from 'react-dnd';
 
 import { theme } from '@actual-app/components/theme';
