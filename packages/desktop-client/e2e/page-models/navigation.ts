@@ -104,8 +104,8 @@ export class Navigation {
     await this.page.getByLabel('Name:').fill(data.name);
 
     if (data.type) {
-      await this.page.getByLabel('Account Type').fill(data.type);
-      await this.page.getByTestId(`${data.type}-account-type-item`).click();
+      await this.page.getByLabel('Account Subgroup').fill(data.type);
+      await this.page.getByTestId(`${data.type}-account-subgroup-item`).click();
     }
 
     await this.page.getByLabel('Balance:').fill(String(data.balance));

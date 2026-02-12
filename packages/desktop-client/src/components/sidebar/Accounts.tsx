@@ -19,8 +19,7 @@ import type { AccountEntity } from 'loot-core/types/models';
 
 import { Account } from './Account';
 import { AccountGroupHeader } from './AccountGroupHeader';
-import { ExpandChevron } from './ExpandChevron';
-import { TypeGroupHeader } from './TypeGroupHeader';
+import { AccountSubgroupHeader } from './AccountSubgroupHeader';
 
 import {
   moveAccount,
@@ -64,7 +63,7 @@ const STRUCTURAL_EXPANDED_KEYS = [
   OFF_BUDGET_KEY,
 ];
 
-const TYPE_GROUP_SEPARATOR = '-type-';
+const SUBGROUP_SEPARATOR = '-subgroup-';
 
 type TreeNode = {
   id: string;
@@ -76,7 +75,7 @@ type TreeNode = {
   to?: string;
   query?: Binding<'account', SheetFields<'account'>>;
   isTitle?: boolean;
-  isTypeGroup?: boolean;
+  isSubgroup?: boolean;
 };
 
 /** Keys that represent structural nodes which must not be dragged. */
@@ -87,20 +86,16 @@ const NON_DRAGGABLE_KEYS = new Set([
   CLOSED_ACCOUNTS_KEY,
 ]);
 
-function isTypeGroupKey(key: string): boolean {
-  return key.includes(TYPE_GROUP_SEPARATOR);
+function isSubgroupKey(key: string): boolean {
+  return key.includes(SUBGROUP_SEPARATOR);
 }
 
-function getBudgetPrefixFromTypeGroupKey(typeGroupKey: string): string {
-  return typeGroupKey.split(TYPE_GROUP_SEPARATOR)[0];
+function getBudgetPrefixFromSubgroupKey(subgroupKey: string): string {
+  return subgroupKey.split(SUBGROUP_SEPARATOR)[0];
 }
 
-function getTypeNameFromTypeGroupKey(typeGroupKey: string): string {
-  return typeGroupKey.split(TYPE_GROUP_SEPARATOR)[1];
-}
-
-function getTypeGroupKey(budgetPrefix: string, typeName: string): string {
-  return `${budgetPrefix}${TYPE_GROUP_SEPARATOR}${typeName}`;
+function getSubgroupNameFromKey(subgroupKey: string): string {
+  return subgroupKey.split(SUBGROUP_SEPARATOR)[1];
 }
 
 function getIsOffBudgetForDropTargetKey(key: string): boolean | null {
@@ -110,8 +105,8 @@ function getIsOffBudgetForDropTargetKey(key: string): boolean | null {
   if (key === OFF_BUDGET_KEY) {
     return true;
   }
-  if (isTypeGroupKey(key)) {
-    return getBudgetPrefixFromTypeGroupKey(key) === OFF_BUDGET_KEY;
+  if (isSubgroupKey(key)) {
+    return getBudgetPrefixFromSubgroupKey(key) === OFF_BUDGET_KEY;
   }
   return null;
 }
@@ -130,19 +125,19 @@ function isTextDragItem(item: { kind: string }): item is {
 /**
  * Group a list of accounts by their `type` field, returning:
  * - untyped accounts (type is null/empty) as direct children
- * - typed accounts nested under type group nodes
+ * - typed accounts nested under subgroup nodes
  *
- * `typeOrder` is a persisted list of type-group keys
- * (e.g. "onbudget-type-Checking") that defines the sort order.
+ * `subgroupOrder` is a persisted list of subgroup keys
+ * (e.g. "onbudget-subgroup-Checking") that defines the sort order.
  * Types not in the list are appended alphabetically.
  */
-function groupAccountsByType(
+function groupAccountsBySubgroup(
   accounts: AccountEntity[],
   budgetPrefix: string,
-  typeOrder: string[],
+  subgroupOrder: string[],
 ): TreeNode[] {
   const untyped: TreeNode[] = [];
-  const byType = new Map<string, AccountEntity[]>();
+  const bySubgroup = new Map<string, AccountEntity[]>();
 
   for (const account of accounts) {
     if (!account.type) {
@@ -152,20 +147,20 @@ function groupAccountsByType(
         account,
       });
     } else {
-      const list = byType.get(account.type) || [];
+      const list = bySubgroup.get(account.type) || [];
       list.push(account);
-      byType.set(account.type, list);
+      bySubgroup.set(account.type, list);
     }
   }
 
   const isOffBudget = budgetPrefix === OFF_BUDGET_KEY;
 
-  const typeGroups: TreeNode[] = [...byType.entries()]
+  const subgroupNodes: TreeNode[] = [...bySubgroup.entries()]
     .sort(([a], [b]) => {
-      const aKey = `${budgetPrefix}${TYPE_GROUP_SEPARATOR}${a}`;
-      const bKey = `${budgetPrefix}${TYPE_GROUP_SEPARATOR}${b}`;
-      const aIdx = typeOrder.indexOf(aKey);
-      const bIdx = typeOrder.indexOf(bKey);
+      const aKey = `${budgetPrefix}${SUBGROUP_SEPARATOR}${a}`;
+      const bKey = `${budgetPrefix}${SUBGROUP_SEPARATOR}${b}`;
+      const aIdx = subgroupOrder.indexOf(aKey);
+      const bIdx = subgroupOrder.indexOf(bKey);
       // Both in the saved order → use saved positions
       if (aIdx >= 0 && bIdx >= 0) return aIdx - bIdx;
       // Only one in the saved order → it comes first
@@ -174,11 +169,11 @@ function groupAccountsByType(
       // Neither saved → alphabetical
       return a.localeCompare(b);
     })
-    .map(([typeName, accts]) => ({
-      id: `${budgetPrefix}${TYPE_GROUP_SEPARATOR}${typeName}`,
-      name: typeName,
-      isTypeGroup: true,
-      query: bindings.accountTypeBalance(typeName, isOffBudget),
+    .map(([subgroupName, accts]) => ({
+      id: `${budgetPrefix}${SUBGROUP_SEPARATOR}${subgroupName}`,
+      name: subgroupName,
+      isSubgroup: true,
+      query: bindings.accountSubgroupBalance(subgroupName, isOffBudget),
       children: accts.map(account => ({
         id: account.id,
         name: account.name,
@@ -186,7 +181,7 @@ function groupAccountsByType(
       })),
     }));
 
-  return [...untyped, ...typeGroups];
+  return [...untyped, ...subgroupNodes];
 }
 
 export function Accounts() {
@@ -205,9 +200,10 @@ export function Accounts() {
     'sidebar.expandedKeys',
   );
 
-  // Persisted type-group ordering
-  const [savedTypeOrder = [], setSavedTypeOrder] =
-    useLocalPref('sidebar.typeOrder');
+  // Persisted subgroup ordering
+  const [savedSubgroupOrder = [], setSavedSubgroupOrder] = useLocalPref(
+    'sidebar.subgroupOrder',
+  );
 
   // Build the tree data structure
   const treeItems = useMemo(() => {
@@ -220,10 +216,10 @@ export function Accounts() {
         to: '/accounts/onbudget',
         query: bindings.onBudgetAccountBalance(),
         isTitle: true,
-        children: groupAccountsByType(
+        children: groupAccountsBySubgroup(
           onBudgetAccounts,
           ON_BUDGET_KEY,
-          savedTypeOrder,
+          savedSubgroupOrder,
         ),
       });
     }
@@ -235,10 +231,10 @@ export function Accounts() {
         to: '/accounts/offbudget',
         query: bindings.offBudgetAccountBalance(),
         isTitle: true,
-        children: groupAccountsByType(
+        children: groupAccountsBySubgroup(
           offbudgetAccounts,
           OFF_BUDGET_KEY,
-          savedTypeOrder,
+          savedSubgroupOrder,
         ),
       });
     }
@@ -270,14 +266,20 @@ export function Accounts() {
         children,
       },
     ];
-  }, [onBudgetAccounts, offbudgetAccounts, closedAccounts, savedTypeOrder, t]);
+  }, [
+    onBudgetAccounts,
+    offbudgetAccounts,
+    closedAccounts,
+    savedSubgroupOrder,
+    t,
+  ]);
 
-  // Collect all type group IDs so they can be expanded by default
-  const allTypeGroupKeys = useMemo(() => {
+  // Collect all subgroup IDs so they can be expanded by default
+  const allSubgroupKeys = useMemo(() => {
     const keys: string[] = [];
     function walk(nodes: TreeNode[]) {
       for (const node of nodes) {
-        if (node.isTypeGroup) {
+        if (node.isSubgroup) {
           keys.push(node.id);
         }
         if (node.children) {
@@ -305,19 +307,19 @@ export function Accounts() {
     return { expanded, seen };
   }, [savedExpandedKeys]);
 
-  // Default expanded: structural keys + all type groups.
-  // When the user has a saved pref, only auto-expand *new* type groups
+  // Default expanded: structural keys + all subgroups.
+  // When the user has a saved pref, only auto-expand *new* subgroups
   // that the user has not seen before.
   const expandedKeys = useMemo(() => {
     if (!savedExpanded) {
       // No saved state yet — expand everything except closed
-      return new Set<Key>([...STRUCTURAL_EXPANDED_KEYS, ...allTypeGroupKeys]);
+      return new Set<Key>([...STRUCTURAL_EXPANDED_KEYS, ...allSubgroupKeys]);
     }
-    const unseenTypeGroupKeys = allTypeGroupKeys.filter(
+    const unseenSubgroupKeys = allSubgroupKeys.filter(
       key => !savedExpanded.seen.has(key),
     );
-    return new Set<Key>([...savedExpanded.expanded, ...unseenTypeGroupKeys]);
-  }, [savedExpanded, allTypeGroupKeys]);
+    return new Set<Key>([...savedExpanded.expanded, ...unseenSubgroupKeys]);
+  }, [savedExpanded, allSubgroupKeys]);
 
   const expandedKeysRef = useRef<Set<Key>>(new Set(expandedKeys));
   useEffect(() => {
@@ -327,12 +329,12 @@ export function Accounts() {
   const persistExpandedKeys = useCallback(
     (keys: Set<Key>) => {
       expandedKeysRef.current = new Set(keys);
-      const seenMarkers = allTypeGroupKeys.map(
+      const seenMarkers = allSubgroupKeys.map(
         key => `${SEEN_KEY_PREFIX}${key}`,
       );
       setSavedExpandedKeys([...keys].map(String).concat(seenMarkers));
     },
-    [allTypeGroupKeys, setSavedExpandedKeys],
+    [allSubgroupKeys, setSavedExpandedKeys],
   );
 
   const onExpandedChange = useCallback(
@@ -348,7 +350,7 @@ export function Accounts() {
     }
     const next = savedExpandedKeys
       .filter(key => !key.startsWith(SEEN_KEY_PREFIX))
-      .concat(allTypeGroupKeys.map(key => `${SEEN_KEY_PREFIX}${key}`));
+      .concat(allSubgroupKeys.map(key => `${SEEN_KEY_PREFIX}${key}`));
     const currentSet = new Set(savedExpandedKeys);
     const nextSet = new Set(next);
     const isSame =
@@ -357,7 +359,7 @@ export function Accounts() {
     if (!isSame) {
       setSavedExpandedKeys(next);
     }
-  }, [allTypeGroupKeys, savedExpandedKeys, setSavedExpandedKeys]);
+  }, [allSubgroupKeys, savedExpandedKeys, setSavedExpandedKeys]);
 
   /** Toggle a single key in the expanded set. */
   const toggleExpanded = useCallback(
@@ -373,106 +375,31 @@ export function Accounts() {
     [persistExpandedKeys],
   );
 
-  /** Rename a type: update all accounts with the old type, then fix persisted keys. */
-  const handleRenameType = useCallback(
-    (nodeId: string, oldName: string, newName: string) => {
-      const budgetPrefix = getBudgetPrefixFromTypeGroupKey(nodeId);
-      const isOffBudgetGroup = budgetPrefix === OFF_BUDGET_KEY;
-      const oldKey = getTypeGroupKey(budgetPrefix, oldName);
-      const newKey = getTypeGroupKey(budgetPrefix, newName);
-      const accountsToRename = accounts.filter(
-        account =>
-          account.type === oldName &&
-          Boolean(account.offbudget) === isOffBudgetGroup,
-      );
-
-      // Update every account that has this type
-      // TODO: switch to a batch account update endpoint when available to
-      // avoid emitting one sync message per renamed account.
-      for (const account of accountsToRename) {
-        dispatch(updateAccount({ account: { ...account, type: newName } }));
-      }
-
-      // Update persisted type order
-      setSavedTypeOrder(savedTypeOrder.map(k => (k === oldKey ? newKey : k)));
-
-      // Update expanded keys
-      const next = new Set(
-        [...expandedKeysRef.current].map(k =>
-          String(k) === oldKey ? newKey : String(k),
-        ),
-      );
-      persistExpandedKeys(next);
-    },
-    [
-      accounts,
-      dispatch,
-      savedTypeOrder,
-      setSavedTypeOrder,
-      persistExpandedKeys,
-    ],
-  );
-
-  /** Delete a type: clear the type on all affected accounts and remove persisted keys. */
-  const handleDeleteType = useCallback(
-    (nodeId: string, typeName: string) => {
-      const budgetPrefix = getBudgetPrefixFromTypeGroupKey(nodeId);
-      const isOffBudgetGroup = budgetPrefix === OFF_BUDGET_KEY;
-      const key = getTypeGroupKey(budgetPrefix, typeName);
-
-      // Clear the type on every affected account
-      for (const account of accounts) {
-        if (
-          account.type === typeName &&
-          Boolean(account.offbudget) === isOffBudgetGroup
-        ) {
-          dispatch(updateAccount({ account: { ...account, type: null } }));
-        }
-      }
-
-      // Remove from persisted type order
-      setSavedTypeOrder(savedTypeOrder.filter(k => k !== key));
-
-      // Remove from expanded keys
-      const next = new Set(
-        [...expandedKeysRef.current].filter(k => String(k) !== key),
-      );
-      persistExpandedKeys(next);
-    },
-    [
-      accounts,
-      dispatch,
-      savedTypeOrder,
-      setSavedTypeOrder,
-      persistExpandedKeys,
-    ],
-  );
-
   // Find the account node for a given tree key
   function findAccountById(id: string): AccountEntity | undefined {
     return accounts.find(a => a.id === id);
   }
 
-  // Find what type group a tree key belongs to
-  function findTypeGroupForKey(key: Key): string | null {
+  // Find what subgroup a tree key belongs to
+  function findSubgroupForKey(key: Key): string | null {
     const keyStr = String(key);
-    // Check if the key itself is a type group
-    if (isTypeGroupKey(keyStr)) {
-      return getTypeNameFromTypeGroupKey(keyStr);
+    // Check if the key itself is a subgroup
+    if (isSubgroupKey(keyStr)) {
+      return getSubgroupNameFromKey(keyStr);
     }
     return null;
   }
 
   /**
-   * Compute the ordered list of type-group keys for a given budget
+   * Compute the ordered list of subgroup keys for a given budget
    * prefix from the current tree, so we can splice into it when
    * reordering.
    */
-  const getTypeGroupKeysForPrefix = useCallback(
+  const getSubgroupKeysForPrefix = useCallback(
     (prefix: string): string[] => {
       const budgetNode = treeItems[0]?.children?.find(c => c.id === prefix);
       return (
-        budgetNode?.children?.filter(c => c.isTypeGroup).map(c => c.id) ?? []
+        budgetNode?.children?.filter(c => c.isSubgroup).map(c => c.id) ?? []
       );
     },
     [treeItems],
@@ -492,7 +419,7 @@ export function Accounts() {
         }
 
         for (const node of groupChildren) {
-          if (!node.isTypeGroup) {
+          if (!node.isSubgroup) {
             continue;
           }
           const typedGroupIds =
@@ -514,9 +441,9 @@ export function Accounts() {
     [treeItems],
   );
 
-  function applyAccountTypeToItems(
+  function applyAccountSubgroupToItems(
     items: Iterable<{ kind: string }>,
-    nextType: string | null,
+    nextSubgroup: string | null,
   ) {
     for (const item of items) {
       if (isTextDragItem(item)) {
@@ -527,7 +454,7 @@ export function Accounts() {
             if (account) {
               dispatch(
                 updateAccount({
-                  account: { ...account, type: nextType },
+                  account: { ...account, type: nextSubgroup },
                 }),
               );
             }
@@ -547,7 +474,7 @@ export function Accounts() {
   const { dragAndDropHooks } = useDragAndDrop({
     getItems(keys) {
       draggedKeysRef.current = new Set(keys);
-      // Only allow dragging accounts and type groups – not structural
+      // Only allow dragging accounts and subgroups – not structural
       // nodes (all-accounts, onbudget, offbudget, closed).
       const draggable = [...keys].filter(
         key => !NON_DRAGGABLE_KEYS.has(String(key)),
@@ -560,13 +487,13 @@ export function Accounts() {
       const [key] = e.keys;
       const keyStr = String(key);
       const targetStr = String(e.target.key);
-      const isTypeGroupDrag = isTypeGroupKey(keyStr);
-      const isTypeGroupTarget = isTypeGroupKey(targetStr);
+      const isSubgroupDrag = isSubgroupKey(keyStr);
+      const isSubgroupTarget = isSubgroupKey(targetStr);
 
-      // ── Type-group reorder ──
-      if (isTypeGroupDrag && isTypeGroupTarget) {
-        const prefix = getBudgetPrefixFromTypeGroupKey(keyStr);
-        const currentOrder = getTypeGroupKeysForPrefix(prefix);
+      // ── Subgroup reorder ──
+      if (isSubgroupDrag && isSubgroupTarget) {
+        const prefix = getBudgetPrefixFromSubgroupKey(keyStr);
+        const currentOrder = getSubgroupKeysForPrefix(prefix);
         const newOrder = currentOrder.filter(id => id !== keyStr);
         const targetIdx = newOrder.indexOf(targetStr);
 
@@ -578,15 +505,15 @@ export function Accounts() {
 
         // Merge: keep order entries for other prefixes, replace for
         // this prefix.
-        const otherEntries = savedTypeOrder.filter(
-          id => !id.startsWith(prefix + TYPE_GROUP_SEPARATOR),
+        const otherEntries = savedSubgroupOrder.filter(
+          id => !id.startsWith(prefix + SUBGROUP_SEPARATOR),
         );
-        setSavedTypeOrder([...otherEntries, ...newOrder]);
+        setSavedSubgroupOrder([...otherEntries, ...newOrder]);
         return;
       }
 
       // ── Account reorder ──
-      if (!isTypeGroupDrag) {
+      if (!isSubgroupDrag) {
         const accountId = keyStr;
         const targetAccountId = targetStr;
 
@@ -613,22 +540,22 @@ export function Accounts() {
       }
     },
     onItemDrop(e) {
-      // Dropping onto a type group node changes the account's type
+      // Dropping onto a subgroup node changes the account's subgroup
       if (e.target.dropPosition !== 'on') {
         return;
       }
 
       const targetKey = String(e.target.key);
-      const typeName = findTypeGroupForKey(e.target.key);
+      const subgroupName = findSubgroupForKey(e.target.key);
 
-      if (typeName) {
-        applyAccountTypeToItems(e.items, typeName);
+      if (subgroupName) {
+        applyAccountSubgroupToItems(e.items, subgroupName);
         return;
       }
 
-      // Dropping directly on a budget group clears the type
+      // Dropping directly on a budget group clears the subgroup
       if (targetKey === ON_BUDGET_KEY || targetKey === OFF_BUDGET_KEY) {
-        applyAccountTypeToItems(e.items, null);
+        applyAccountSubgroupToItems(e.items, null);
       }
     },
     acceptedDragTypes: ['text/plain'],
@@ -638,22 +565,22 @@ export function Accounts() {
       }
       const key = String(target.key);
 
-      // Allow dropping ON type groups and budget groups (changes the
-      // account's type or clears it).
+      // Allow dropping ON subgroups and budget groups (changes the
+      // account's subgroup or clears it).
       if (
         target.dropPosition === 'on' &&
-        (isTypeGroupKey(key) || key === ON_BUDGET_KEY || key === OFF_BUDGET_KEY)
+        (isSubgroupKey(key) || key === ON_BUDGET_KEY || key === OFF_BUDGET_KEY)
       ) {
         const isTargetOffBudget = getIsOffBudgetForDropTargetKey(key);
         // Validate cross-budget drops: prevent dropping an account from
-        // one budget group onto the opposite budget group or type-group.
+        // one budget group onto the opposite budget group or subgroup.
         // The offbudget status is immutable via drag-and-drop, so show
         // no drop indicator for invalid targets.
         if (isTargetOffBudget != null) {
           for (const draggedKey of draggedKeysRef.current) {
             const draggedKeyStr = String(draggedKey);
             if (
-              !isTypeGroupKey(draggedKeyStr) &&
+              !isSubgroupKey(draggedKeyStr) &&
               !NON_DRAGGABLE_KEYS.has(draggedKeyStr)
             ) {
               const account = findAccountById(draggedKeyStr);
@@ -666,8 +593,8 @@ export function Accounts() {
         return 'move';
       }
 
-      // Allow reorder between type-group siblings (before / after)
-      if (isTypeGroupKey(key) && target.dropPosition !== 'on') {
+      // Allow reorder between subgroup siblings (before / after)
+      if (isSubgroupKey(key) && target.dropPosition !== 'on') {
         return 'move';
       }
 
@@ -724,7 +651,7 @@ export function Accounts() {
             },
             // ── Drag-and-drop visual feedback ──
             // Highlight a tree row when it is a valid "drop on" target
-            // (e.g. dropping an account onto a type group).
+            // (e.g. dropping an account onto a subgroup).
             '& [role="row"][data-drop-target]': {
               backgroundColor: theme.sidebarItemBackgroundHover,
               boxShadow: `inset 0 0 0 1px ${theme.sidebarItemAccentSelected}`,
@@ -757,6 +684,7 @@ export function Accounts() {
                     <Account
                       name={node.account.name}
                       account={node.account}
+                      style={{ paddingLeft: 8 }}
                       connected={!!node.account.bank}
                       pending={syncingAccountIds.includes(node.account.id)}
                       failed={failedAccounts.has(node.account.id)}
@@ -772,9 +700,8 @@ export function Accounts() {
               );
             }
 
-            // Type group header — compact row with a collapse/expand chevron
-            // and right-click context menu for Rename / Delete.
-            if (node.isTypeGroup) {
+            // Subgroup header — compact row with collapse/expand chevron.
+            if (node.isSubgroup) {
               return (
                 <TreeItem key={node.id} id={node.id} textValue={node.name}>
                   <TreeItemContent>
@@ -787,14 +714,10 @@ export function Accounts() {
                         <AriaButton slot="drag" style={visuallyHiddenStyle}>
                           ≡
                         </AriaButton>
-                        <TypeGroupHeader
-                          typeName={node.name}
+                        <AccountSubgroupHeader
+                          subgroupName={node.name}
                           isExpanded={isExpanded}
                           onToggle={() => toggleExpanded(node.id)}
-                          onRename={newName =>
-                            handleRenameType(node.id, node.name, newName)
-                          }
-                          onDelete={() => handleDeleteType(node.id, node.name)}
                           query={node.query}
                         />
                       </>
@@ -828,6 +751,10 @@ export function Accounts() {
                         />
                       ) : (
                         <View
+                          onClick={e => {
+                            e.stopPropagation();
+                            toggleExpanded(node.id);
+                          }}
                           style={{
                             fontWeight,
                             color: theme.sidebarItemText,
@@ -835,13 +762,10 @@ export function Accounts() {
                             display: 'flex',
                             flexDirection: 'row',
                             alignItems: 'center',
+                            cursor: 'pointer',
                           }}
                         >
-                          <ExpandChevron
-                            isExpanded={isExpanded}
-                            onToggle={() => toggleExpanded(node.id)}
-                          />
-                          {node.name}
+                          {isExpanded ? node.name : `${node.name}...`}
                         </View>
                       )}
                     </>

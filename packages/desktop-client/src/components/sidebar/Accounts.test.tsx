@@ -46,9 +46,33 @@ function makeAccount({
 
 const onBudgetAccountsMock = [
   makeAccount({ id: 'on-1', name: 'On Budget One', offbudget: 0 }),
+  makeAccount({
+    id: 'on-2',
+    name: 'Checking Account',
+    offbudget: 0,
+    type: 'Checking',
+  }),
+  makeAccount({
+    id: 'on-3',
+    name: 'Savings Account',
+    offbudget: 0,
+    type: 'Savings',
+  }),
 ];
 const offBudgetAccountsMock = [
   makeAccount({ id: 'off-1', name: 'Off Budget One', offbudget: 1 }),
+  makeAccount({
+    id: 'off-2',
+    name: 'Mortgage Account',
+    offbudget: 1,
+    type: 'Mortgage',
+  }),
+  makeAccount({
+    id: 'off-3',
+    name: 'Other Debt Account',
+    offbudget: 1,
+    type: 'Other Debt',
+  }),
 ];
 const accountsMock = [...onBudgetAccountsMock, ...offBudgetAccountsMock];
 
@@ -90,7 +114,7 @@ vi.mock('@desktop-client/hooks/useLocalPref', async () => {
       if (prefName === 'sidebar.expandedKeys') {
         return [expandedKeys, setExpandedKeys, vi.fn()] as const;
       }
-      if (prefName === 'sidebar.typeOrder') {
+      if (prefName === 'sidebar.subgroupOrder') {
         return [typeOrder, setTypeOrder, vi.fn()] as const;
       }
       return [other, setOther, vi.fn()] as const;
@@ -120,6 +144,7 @@ vi.mock('@desktop-client/spreadsheet/bindings', () => ({
   offBudgetAccountBalance: vi.fn(() => 'binding'),
   closedAccountBalance: vi.fn(() => 'binding'),
   accountBalance: vi.fn(() => 'binding'),
+  accountSubgroupBalance: vi.fn(() => 'binding'),
 }));
 
 function getGroupToggleButton(label: string): HTMLButtonElement {
@@ -170,5 +195,14 @@ describe('Accounts sidebar expansion', () => {
     });
 
     expect(screen.queryByText('On Budget One')).not.toBeInTheDocument();
+  });
+
+  test('renders all subgroups in the test budget', () => {
+    render(<Accounts />, { wrapper: TestProviders });
+
+    expect(screen.getByText('Checking')).toBeInTheDocument();
+    expect(screen.getByText('Savings')).toBeInTheDocument();
+    expect(screen.getByText('Mortgage')).toBeInTheDocument();
+    expect(screen.getByText('Other Debt')).toBeInTheDocument();
   });
 });

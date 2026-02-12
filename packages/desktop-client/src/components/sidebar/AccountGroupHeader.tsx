@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useMatch } from 'react-router';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -41,6 +42,7 @@ export function AccountGroupHeader<FieldName extends SheetFields<'account'>>({
   onToggle,
 }: AccountGroupHeaderProps<FieldName>) {
   const match = useMatch({ path: to || '', end: !!isRoot });
+  const [showChevron, setShowChevron] = useState(false);
 
   const wrapperStyle = {
     ...styles.smallText,
@@ -49,7 +51,7 @@ export function AccountGroupHeader<FieldName extends SheetFields<'account'>>({
     paddingTop: 4,
     paddingBottom: 4,
     paddingRight: 15,
-    paddingLeft: 4,
+    paddingLeft: 8,
     marginTop: isRoot ? 15 : 13,
     marginBottom: isRoot ? 0 : 5,
     ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
@@ -57,7 +59,7 @@ export function AccountGroupHeader<FieldName extends SheetFields<'account'>>({
     display: 'flex' as const,
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    gap: 2,
+    position: 'relative' as const,
   };
 
   const textContent = (
@@ -72,8 +74,31 @@ export function AccountGroupHeader<FieldName extends SheetFields<'account'>>({
   );
 
   return (
-    <View onPointerDown={e => e.stopPropagation()} style={wrapperStyle}>
-      <ExpandChevron isExpanded={isExpanded} onToggle={onToggle} />
+    <View
+      onMouseEnter={() => setShowChevron(true)}
+      onMouseLeave={() => setShowChevron(false)}
+      onFocusCapture={() => setShowChevron(true)}
+      onBlurCapture={e => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+          setShowChevron(false);
+        }
+      }}
+      onPointerDown={e => e.stopPropagation()}
+      style={wrapperStyle}
+    >
+      <ExpandChevron
+        isExpanded={isExpanded}
+        onToggle={onToggle}
+        style={{
+          position: 'absolute',
+          left: -4,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          opacity: showChevron ? 1 : 0,
+          pointerEvents: showChevron ? 'auto' : 'none',
+          transition: 'opacity 0.15s ease',
+        }}
+      />
       {to ? (
         <Link
           variant="internal"

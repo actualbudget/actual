@@ -82,14 +82,17 @@ export function closedAccountBalance() {
   } satisfies Binding<'account', 'closed-accounts-balance'>;
 }
 
-export function accountTypeBalance(typeName: string, offbudget: boolean) {
+export function accountSubgroupBalance(
+  subgroupName: string,
+  offbudget: boolean,
+) {
   return {
     name: accountParametrizedField('balance')(
-      `type-${offbudget ? 'off' : 'on'}-${typeName}`,
+      `subgroup-${offbudget ? 'off' : 'on'}-${subgroupName}`,
     ),
     query: q('transactions')
       .filter({
-        'account.type': typeName,
+        'account.type': subgroupName,
         'account.offbudget': offbudget,
         'account.closed': false,
       })

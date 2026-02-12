@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -8,6 +9,8 @@ import {
 type ExpandChevronProps = {
   isExpanded: boolean;
   onToggle: () => void;
+  className?: string;
+  style?: CSSProperties;
 };
 
 /**
@@ -16,11 +19,17 @@ type ExpandChevronProps = {
  * bypass the react-aria slot mechanism (which doesn't reliably fire
  * in all configurations) and directly update `expandedKeys`.
  */
-export function ExpandChevron({ isExpanded, onToggle }: ExpandChevronProps) {
+export function ExpandChevron({
+  isExpanded,
+  onToggle,
+  className,
+  style,
+}: ExpandChevronProps) {
   const { t } = useTranslation();
   return (
     <button
       type="button"
+      className={className}
       aria-label={isExpanded ? t('Collapse') : t('Expand')}
       onPointerDownCapture={e => {
         e.stopPropagation();
@@ -39,6 +48,7 @@ export function ExpandChevron({ isExpanded, onToggle }: ExpandChevronProps) {
         flexShrink: 0,
         width: 12,
         height: 12,
+        ...style,
       }}
     >
       {isExpanded ? (

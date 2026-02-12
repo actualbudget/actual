@@ -18,7 +18,7 @@ import { View } from '@actual-app/components/view';
 
 import type { AccountEntity } from 'loot-core/types/models';
 
-import { AccountTypeAutocomplete } from '@desktop-client/components/autocomplete/AccountTypeAutocomplete';
+import { AccountSubgroupAutocomplete } from '@desktop-client/components/autocomplete/AccountSubgroupAutocomplete';
 import {
   Modal,
   ModalCloseButton,
@@ -156,8 +156,8 @@ export function AccountMenuModal({
                 flex: 1,
               }}
             >
-              <InlineField label={t('Type')} width="100%">
-                <AccountTypeAutocomplete
+              <InlineField label={t('Subgroup')} width="100%">
+                <AccountSubgroupAutocomplete
                   value={account.type || ''}
                   embedded
                   onSelect={value => {

@@ -16,7 +16,7 @@ import { View } from '@actual-app/components/view';
 import { toRelaxedNumber } from 'loot-core/shared/util';
 
 import { createAccount } from '@desktop-client/accounts/accountsSlice';
-import { AccountTypeAutocomplete } from '@desktop-client/components/autocomplete/AccountTypeAutocomplete';
+import { AccountSubgroupAutocomplete } from '@desktop-client/components/autocomplete/AccountSubgroupAutocomplete';
 import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
@@ -111,7 +111,7 @@ export function CreateLocalAccountModal() {
                 </FormError>
               )}
 
-              <InlineField label={t('Type')} width="100%">
+              <InlineField label={t('Subgroup')} width="100%">
                 <View
                   style={{
                     display: 'flex',
@@ -122,7 +122,7 @@ export function CreateLocalAccountModal() {
                   }}
                 >
                   <View style={{ flex: 1, minWidth: 0 }}>
-                    <AccountTypeAutocomplete
+                    <AccountSubgroupAutocomplete
                       value={type}
                       onSelect={value => {
                         if (typeof value === 'string') {

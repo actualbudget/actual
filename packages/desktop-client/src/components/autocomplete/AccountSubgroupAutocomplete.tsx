@@ -24,7 +24,7 @@ import { ItemHeader } from './ItemHeader';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 
-type AccountTypeItem = AutocompleteItem & {
+type AccountSubgroupItem = AutocompleteItem & {
   id: string;
   name: string;
   group: 'used' | 'other';
@@ -47,26 +47,30 @@ function stripNew(value: string | null | undefined): string | null {
   return value ?? null;
 }
 
-type AccountTypeItemWithIndex = AccountTypeItem & { highlightedIndex: number };
+type AccountSubgroupItemWithIndex = AccountSubgroupItem & {
+  highlightedIndex: number;
+};
 
-type AccountTypeListProps = {
-  items: AccountTypeItem[];
-  getItemProps: (arg: { item: AccountTypeItem }) => ComponentProps<typeof View>;
+type AccountSubgroupListProps = {
+  items: AccountSubgroupItem[];
+  getItemProps: (arg: {
+    item: AccountSubgroupItem;
+  }) => ComponentProps<typeof View>;
   highlightedIndex: number;
   embedded?: boolean;
   inputValue: string;
   renderCreateButton?: (
-    props: ComponentPropsWithoutRef<typeof CreateAccountTypeButton>,
-  ) => ReactElement<typeof CreateAccountTypeButton>;
+    props: ComponentPropsWithoutRef<typeof CreateAccountSubgroupButton>,
+  ) => ReactElement<typeof CreateAccountSubgroupButton>;
   renderItemGroupHeader?: (
     props: ComponentPropsWithoutRef<typeof ItemHeader>,
   ) => ReactElement<typeof ItemHeader>;
   renderItem?: (
-    props: ComponentPropsWithoutRef<typeof AccountTypeItemComponent>,
-  ) => ReactElement<typeof AccountTypeItemComponent>;
+    props: ComponentPropsWithoutRef<typeof AccountSubgroupItemComponent>,
+  ) => ReactElement<typeof AccountSubgroupItemComponent>;
 };
 
-function AccountTypeList({
+function AccountSubgroupList({
   items,
   getItemProps,
   highlightedIndex,
@@ -75,14 +79,14 @@ function AccountTypeList({
   renderCreateButton = defaultRenderCreateButton,
   renderItemGroupHeader = defaultRenderItemGroupHeader,
   renderItem = defaultRenderItem,
-}: AccountTypeListProps) {
+}: AccountSubgroupListProps) {
   const { t } = useTranslation();
 
-  const { newItem, usedTypes, otherTypes } = useMemo(() => {
+  const { newItem, usedSubgroups, otherSubgroups } = useMemo(() => {
     let currentIndex = 0;
-    let newItem: AccountTypeItemWithIndex | null = null;
-    const usedTypes: AccountTypeItemWithIndex[] = [];
-    const otherTypes: AccountTypeItemWithIndex[] = [];
+    let newItem: AccountSubgroupItemWithIndex | null = null;
+    const usedSubgroups: AccountSubgroupItemWithIndex[] = [];
+    const otherSubgroups: AccountSubgroupItemWithIndex[] = [];
 
     for (const item of items) {
       const indexedItem = { ...item, highlightedIndex: currentIndex++ };
@@ -90,20 +94,20 @@ function AccountTypeList({
       if (item.id === NEW_ITEM_ID) {
         newItem = indexedItem;
       } else if (item.group === 'used') {
-        usedTypes.push(indexedItem);
+        usedSubgroups.push(indexedItem);
       } else {
-        otherTypes.push(indexedItem);
+        otherSubgroups.push(indexedItem);
       }
     }
 
     return {
       newItem,
-      usedTypes,
-      otherTypes,
+      usedSubgroups,
+      otherSubgroups,
     };
   }, [items]);
 
-  function renderAccountTypeItem(item: AccountTypeItemWithIndex) {
+  function renderAccountSubgroupItem(item: AccountSubgroupItemWithIndex) {
     const { type: _type, ...itemProps } = getItemProps({ item });
     return renderItem({
       ...itemProps,
@@ -125,27 +129,28 @@ function AccountTypeList({
         {newItem &&
           renderCreateButton({
             ...getItemProps({ item: newItem }),
-            typeName: inputValue,
+            subgroupName: inputValue,
             highlighted: newItem.highlightedIndex === highlightedIndex,
             embedded,
           })}
 
-        {usedTypes.length > 0 && renderItemGroupHeader({ title: t('In Use') })}
-        {usedTypes.map(item => (
-          <Fragment key={item.id}>{renderAccountTypeItem(item)}</Fragment>
+        {usedSubgroups.length > 0 &&
+          renderItemGroupHeader({ title: t('In Use') })}
+        {usedSubgroups.map(item => (
+          <Fragment key={item.id}>{renderAccountSubgroupItem(item)}</Fragment>
         ))}
 
-        {otherTypes.length > 0 &&
+        {otherSubgroups.length > 0 &&
           renderItemGroupHeader({ title: t('Suggested') })}
-        {otherTypes.map(item => (
-          <Fragment key={item.id}>{renderAccountTypeItem(item)}</Fragment>
+        {otherSubgroups.map(item => (
+          <Fragment key={item.id}>{renderAccountSubgroupItem(item)}</Fragment>
         ))}
       </View>
     </View>
   );
 }
 
-function customSort(obj: AccountTypeItem, value: string): number {
+function customSort(obj: AccountSubgroupItem, value: string): number {
   const name = getNormalisedString(obj.name);
   if (obj.id === NEW_ITEM_ID) {
     return -3;
@@ -159,27 +164,27 @@ function customSort(obj: AccountTypeItem, value: string): number {
   return 1;
 }
 
-export type AccountTypeAutocompleteProps = {
+export type AccountSubgroupAutocompleteProps = {
   value?: string | null;
   inputProps?: ComponentProps<
-    typeof Autocomplete<AccountTypeItem>
+    typeof Autocomplete<AccountSubgroupItem>
   >['inputProps'];
   embedded?: boolean;
   closeOnBlur?: boolean;
   onUpdate?: (id: string, value: string) => void;
   onSelect?: (id: string, value: string) => void;
   renderCreateButton?: (
-    props: ComponentPropsWithoutRef<typeof CreateAccountTypeButton>,
-  ) => ReactElement<typeof CreateAccountTypeButton>;
+    props: ComponentPropsWithoutRef<typeof CreateAccountSubgroupButton>,
+  ) => ReactElement<typeof CreateAccountSubgroupButton>;
   renderItemGroupHeader?: (
     props: ComponentPropsWithoutRef<typeof ItemHeader>,
   ) => ReactElement<typeof ItemHeader>;
   renderItem?: (
-    props: ComponentPropsWithoutRef<typeof AccountTypeItemComponent>,
-  ) => ReactElement<typeof AccountTypeItemComponent>;
+    props: ComponentPropsWithoutRef<typeof AccountSubgroupItemComponent>,
+  ) => ReactElement<typeof AccountSubgroupItemComponent>;
 };
 
-export function AccountTypeAutocomplete({
+export function AccountSubgroupAutocomplete({
   value,
   inputProps,
   embedded,
@@ -189,16 +194,16 @@ export function AccountTypeAutocomplete({
   renderCreateButton = defaultRenderCreateButton,
   renderItemGroupHeader = defaultRenderItemGroupHeader,
   renderItem = defaultRenderItem,
-}: AccountTypeAutocompleteProps) {
+}: AccountSubgroupAutocompleteProps) {
   const { t } = useTranslation();
   const accounts = useAccounts();
-  const [savedTypeOrder = []] = useLocalPref('sidebar.typeOrder');
+  const [savedSubgroupOrder = []] = useLocalPref('sidebar.subgroupOrder');
 
   const [rawInput, setRawInput] = useState('');
   const hasInput = !!rawInput;
 
   // Derive used types from existing accounts
-  const { usedOnBudgetTypes, usedOffBudgetTypes } = useMemo(() => {
+  const { usedOnBudgetSubgroups, usedOffBudgetSubgroups } = useMemo(() => {
     const onBudget = new Set<string>();
     const offBudget = new Set<string>();
     for (const account of accounts) {
@@ -211,52 +216,55 @@ export function AccountTypeAutocomplete({
         onBudget.add(account.type);
       }
     }
-    return { usedOnBudgetTypes: onBudget, usedOffBudgetTypes: offBudget };
+    return {
+      usedOnBudgetSubgroups: onBudget,
+      usedOffBudgetSubgroups: offBudget,
+    };
   }, [accounts]);
 
-  const usedTypeNames = useMemo(() => {
-    const types = new Set<string>();
-    for (const name of usedOnBudgetTypes) {
-      types.add(name);
+  const usedSubgroupNames = useMemo(() => {
+    const subgroupNames = new Set<string>();
+    for (const name of usedOnBudgetSubgroups) {
+      subgroupNames.add(name);
     }
-    for (const name of usedOffBudgetTypes) {
-      types.add(name);
+    for (const name of usedOffBudgetSubgroups) {
+      subgroupNames.add(name);
     }
-    return types;
-  }, [usedOnBudgetTypes, usedOffBudgetTypes]);
+    return subgroupNames;
+  }, [usedOnBudgetSubgroups, usedOffBudgetSubgroups]);
 
-  const suggestions: AccountTypeItem[] = useMemo(() => {
+  const suggestions: AccountSubgroupItem[] = useMemo(() => {
     const orderedOnBudget: string[] = [];
     const orderedOffBudget: string[] = [];
 
-    for (const key of savedTypeOrder) {
-      const splitIndex = key.indexOf('-type-');
+    for (const key of savedSubgroupOrder) {
+      const splitIndex = key.indexOf('-subgroup-');
       if (splitIndex === -1) {
         continue;
       }
       const prefix = key.slice(0, splitIndex);
-      const typeName = key.slice(splitIndex + '-type-'.length);
-      if (prefix === 'onbudget' && usedOnBudgetTypes.has(typeName)) {
-        if (!orderedOnBudget.includes(typeName)) {
-          orderedOnBudget.push(typeName);
+      const subgroupName = key.slice(splitIndex + '-subgroup-'.length);
+      if (prefix === 'onbudget' && usedOnBudgetSubgroups.has(subgroupName)) {
+        if (!orderedOnBudget.includes(subgroupName)) {
+          orderedOnBudget.push(subgroupName);
         }
       }
-      if (prefix === 'offbudget' && usedOffBudgetTypes.has(typeName)) {
-        if (!orderedOffBudget.includes(typeName)) {
-          orderedOffBudget.push(typeName);
+      if (prefix === 'offbudget' && usedOffBudgetSubgroups.has(subgroupName)) {
+        if (!orderedOffBudget.includes(subgroupName)) {
+          orderedOffBudget.push(subgroupName);
         }
       }
     }
 
-    const remainingOnBudget = [...usedOnBudgetTypes]
+    const remainingOnBudget = [...usedOnBudgetSubgroups]
       .filter(name => !orderedOnBudget.includes(name))
       .sort((a, b) => a.localeCompare(b));
-    const remainingOffBudget = [...usedOffBudgetTypes]
+    const remainingOffBudget = [...usedOffBudgetSubgroups]
       .filter(name => !orderedOffBudget.includes(name))
       .sort((a, b) => a.localeCompare(b));
 
     const seenNames = new Set<string>();
-    const usedItems: AccountTypeItem[] = [];
+    const usedItems: AccountSubgroupItem[] = [];
     for (const name of [
       ...orderedOnBudget,
       ...remainingOnBudget,
@@ -274,8 +282,8 @@ export function AccountTypeAutocomplete({
       });
     }
 
-    const otherItems: AccountTypeItem[] = ACCOUNT_TYPES.filter(
-      name => !usedTypeNames.has(name),
+    const otherItems: AccountSubgroupItem[] = ACCOUNT_TYPES.filter(
+      name => !usedSubgroupNames.has(name),
     ).map(name => ({
       id: name,
       name,
@@ -293,14 +301,14 @@ export function AccountTypeAutocomplete({
         id: 'new',
         name: '',
         group: 'other' as const,
-      } satisfies AccountTypeItem,
+      } satisfies AccountSubgroupItem,
       ...allItems,
     ];
   }, [
-    savedTypeOrder,
-    usedOnBudgetTypes,
-    usedOffBudgetTypes,
-    usedTypeNames,
+    savedSubgroupOrder,
+    usedOnBudgetSubgroups,
+    usedOffBudgetSubgroups,
+    usedSubgroupNames,
     hasInput,
   ]);
 
@@ -313,7 +321,7 @@ export function AccountTypeAutocomplete({
   }
 
   const filterSuggestions = (
-    allSuggestions: AccountTypeItem[],
+    allSuggestions: AccountSubgroupItem[],
     filterValue: string,
   ) => {
     const normalizedValue = getNormalisedString(filterValue);
@@ -363,7 +371,7 @@ export function AccountTypeAutocomplete({
         onBlur: () => {
           setRawInput('');
         },
-        'aria-label': t('Account Type'),
+        'aria-label': t('Account Subgroup'),
         onChangeValue: setRawInput,
       }}
       onUpdate={(id, inputValue) => onUpdate?.(id, makeNew(id, inputValue))}
@@ -379,7 +387,7 @@ export function AccountTypeAutocomplete({
       }}
       filterSuggestions={filterSuggestions}
       renderItems={(items, getItemProps, idx, inputValue) => (
-        <AccountTypeList
+        <AccountSubgroupList
           items={items}
           getItemProps={getItemProps}
           highlightedIndex={idx}
@@ -396,26 +404,28 @@ export function AccountTypeAutocomplete({
 
 // --- Create button ---
 
-type CreateAccountTypeButtonProps = ComponentPropsWithoutRef<typeof View> & {
-  typeName: string;
+type CreateAccountSubgroupButtonProps = ComponentPropsWithoutRef<
+  typeof View
+> & {
+  subgroupName: string;
   highlighted?: boolean;
   embedded?: boolean;
 };
 
-export function CreateAccountTypeButton({
-  typeName,
+export function CreateAccountSubgroupButton({
+  subgroupName,
   highlighted,
   embedded,
   style,
   ...props
-}: CreateAccountTypeButtonProps) {
+}: CreateAccountSubgroupButtonProps) {
   const { isNarrowWidth } = useResponsive();
   const narrowStyle = isNarrowWidth ? { ...styles.mobileMenuItem } : {};
   const iconSize = isNarrowWidth ? 14 : 8;
 
   return (
     <View
-      data-testid="create-account-type-button"
+      data-testid="create-account-subgroup-button"
       style={{
         display: 'block',
         flex: '1 0',
@@ -442,38 +452,40 @@ export function CreateAccountTypeButton({
         height={iconSize}
         style={{ marginRight: 5, display: 'inline-block' }}
       />
-      <Trans>Create type "{{ typeName }}"</Trans>
+      <Trans>Create subgroup "{{ subgroupName }}"</Trans>
     </View>
   );
 }
 
 function defaultRenderCreateButton(
-  props: ComponentPropsWithoutRef<typeof CreateAccountTypeButton>,
-): ReactElement<typeof CreateAccountTypeButton> {
-  return <CreateAccountTypeButton {...props} />;
+  props: ComponentPropsWithoutRef<typeof CreateAccountSubgroupButton>,
+): ReactElement<typeof CreateAccountSubgroupButton> {
+  return <CreateAccountSubgroupButton {...props} />;
 }
 
 function defaultRenderItemGroupHeader(
   props: ComponentPropsWithoutRef<typeof ItemHeader>,
 ): ReactElement<typeof ItemHeader> {
-  return <ItemHeader {...props} type="account-type" />;
+  return <ItemHeader {...props} type="account-subgroup" />;
 }
 
 // --- Account type item ---
 
-type AccountTypeItemComponentProps = ComponentPropsWithoutRef<typeof View> & {
-  item: AccountTypeItem;
+type AccountSubgroupItemComponentProps = ComponentPropsWithoutRef<
+  typeof View
+> & {
+  item: AccountSubgroupItem;
   highlighted?: boolean;
   embedded?: boolean;
 };
 
-function AccountTypeItemComponent({
+function AccountSubgroupItemComponent({
   item,
   className,
   highlighted,
   embedded,
   ...props
-}: AccountTypeItemComponentProps) {
+}: AccountSubgroupItemComponentProps) {
   const { isNarrowWidth } = useResponsive();
   const narrowStyle = isNarrowWidth
     ? {
@@ -492,8 +504,8 @@ function AccountTypeItemComponent({
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
           color: highlighted
-            ? theme.menuAutoCompleteItemTextHover
-            : theme.menuAutoCompleteItemText,
+            ? theme.menuAutoCompleteTextHover
+            : theme.menuAutoCompleteText,
           borderRadius: embedded ? 4 : 0,
           padding: 4,
           paddingLeft: 20,
@@ -503,17 +515,25 @@ function AccountTypeItemComponent({
           ...narrowStyle,
         }),
       )}
-      data-testid={`${item.name}-account-type-item`}
+      data-testid={`${item.name}-account-subgroup-item`}
       data-highlighted={highlighted || undefined}
       {...props}
     >
-      <TextOneLine>{item.name}</TextOneLine>
+      <TextOneLine
+        style={{
+          display: 'block',
+          width: '100%',
+          color: 'currentColor',
+        }}
+      >
+        {item.name}
+      </TextOneLine>
     </View>
   );
 }
 
 function defaultRenderItem(
-  props: ComponentPropsWithoutRef<typeof AccountTypeItemComponent>,
-): ReactElement<typeof AccountTypeItemComponent> {
-  return <AccountTypeItemComponent {...props} />;
+  props: ComponentPropsWithoutRef<typeof AccountSubgroupItemComponent>,
+): ReactElement<typeof AccountSubgroupItemComponent> {
+  return <AccountSubgroupItemComponent {...props} />;
 }

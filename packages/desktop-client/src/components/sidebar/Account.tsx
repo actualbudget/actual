@@ -27,7 +27,6 @@ import {
   updateAccount,
 } from '@desktop-client/accounts/accountsSlice';
 import { BalanceHistoryGraph } from '@desktop-client/components/accounts/BalanceHistoryGraph';
-import { AccountTypeAutocomplete } from '@desktop-client/components/autocomplete/AccountTypeAutocomplete';
 import { Link } from '@desktop-client/components/common/Link';
 import { Notes } from '@desktop-client/components/Notes';
 import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
@@ -111,7 +110,6 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const dispatch = useDispatch();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [isSettingType, setIsSettingType] = useState(false);
 
   const accountNote = useNotes(`account-${account?.id}`);
   const isTouchDevice =
@@ -222,76 +220,44 @@ export function Account<FieldName extends SheetFields<'account'>>({
           />
         </Link>
         {account && (
-          <>
-            <Popover
-              triggerRef={triggerRef}
-              placement="bottom start"
-              isOpen={menuOpen}
-              onOpenChange={() => setMenuOpen(false)}
-              style={{ width: 200, margin: 1 }}
-              isNonModal
-              {...position}
-            >
-              <Menu
-                onMenuSelect={menuAction => {
-                  switch (menuAction) {
-                    case 'close': {
-                      dispatch(
-                        openAccountCloseModal({ accountId: account.id }),
-                      );
-                      break;
-                    }
-                    case 'reopen': {
-                      dispatch(reopenAccount({ id: account.id }));
-                      break;
-                    }
-                    case 'rename': {
-                      setIsEditing(true);
-                      break;
-                    }
-                    case 'set-type': {
-                      setIsSettingType(true);
-                      break;
-                    }
-                    default: {
-                      throw new Error(
-                        `Unrecognized menu option: ${menuAction}`,
-                      );
-                    }
+          <Popover
+            triggerRef={triggerRef}
+            placement="bottom start"
+            isOpen={menuOpen}
+            onOpenChange={() => setMenuOpen(false)}
+            style={{ width: 200, margin: 1 }}
+            isNonModal
+            {...position}
+          >
+            <Menu
+              onMenuSelect={menuAction => {
+                switch (menuAction) {
+                  case 'close': {
+                    dispatch(openAccountCloseModal({ accountId: account.id }));
+                    break;
                   }
-                  setMenuOpen(false);
-                }}
-                items={[
-                  { name: 'rename', text: t('Rename') },
-                  { name: 'set-type', text: t('Set Type') },
-                  account.closed
-                    ? { name: 'reopen', text: t('Reopen') }
-                    : { name: 'close', text: t('Close') },
-                ]}
-              />
-            </Popover>
-            <Popover
-              triggerRef={triggerRef}
-              placement="bottom start"
-              isOpen={isSettingType}
-              onOpenChange={() => setIsSettingType(false)}
-              style={{ width: 200, padding: 5 }}
-              isNonModal
-            >
-              <AccountTypeAutocomplete
-                value={account.type ?? null}
-                embedded
-                onSelect={id => {
-                  dispatch(
-                    updateAccount({
-                      account: { ...account, type: id || null },
-                    }),
-                  );
-                  setIsSettingType(false);
-                }}
-              />
-            </Popover>
-          </>
+                  case 'reopen': {
+                    dispatch(reopenAccount({ id: account.id }));
+                    break;
+                  }
+                  case 'rename': {
+                    setIsEditing(true);
+                    break;
+                  }
+                  default: {
+                    throw new Error(`Unrecognized menu option: ${menuAction}`);
+                  }
+                }
+                setMenuOpen(false);
+              }}
+              items={[
+                { name: 'rename', text: t('Rename') },
+                account.closed
+                  ? { name: 'reopen', text: t('Reopen') }
+                  : { name: 'close', text: t('Close') },
+              ]}
+            />
+          </Popover>
         )}
       </View>
     </View>

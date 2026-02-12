@@ -511,9 +511,8 @@ AccountList.displayName = 'AccountList';
 /**
  * Groups accounts by their `type` field and renders separate AccountList
  * sections for each type, with untyped accounts first.
- * Drag-and-drop reordering works within each rendered list; changing an
- * account's type is handled via the account menu's "Set Type" action or
- * dragging onto a type group header.
+ * Drag-and-drop reordering works within each rendered list. Group
+ * assignment is managed from account edit flows and sidebar drag/drop.
  */
 type AccountListByTypeProps = {
   ariaLabel: string;
@@ -528,7 +527,7 @@ function splitAccountsByType(accounts: AccountEntity[]): {
   untypedAccounts: AccountEntity[];
   typedEntries: Array<[string, AccountEntity[]]>;
 } {
-  // TODO: extract shared account-type grouping utility with sidebar tree logic.
+  // TODO: extract shared account-subgroup grouping utility with sidebar tree logic.
   const untypedAccounts: AccountEntity[] = [];
   const typedMap = new Map<string, AccountEntity[]>();
 
