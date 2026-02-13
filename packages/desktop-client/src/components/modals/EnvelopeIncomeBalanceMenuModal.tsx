@@ -21,8 +21,8 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { CellValueText } from '@desktop-client/components/spreadsheet/CellValue';
 import { useCategory } from '@desktop-client/hooks/useCategory';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type EnvelopeIncomeBalanceMenuModalProps = Omit<
