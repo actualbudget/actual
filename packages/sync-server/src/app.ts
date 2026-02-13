@@ -10,6 +10,7 @@ import { bootstrap } from './account-db';
 import * as accountApp from './app-account';
 import * as adminApp from './app-admin';
 import * as corsApp from './app-cors-proxy';
+import * as enablebankingApp from './app-enablebanking/app-enablebanking';
 import * as goCardlessApp from './app-gocardless/app-gocardless';
 import * as openidApp from './app-openid';
 import * as pluggai from './app-pluggyai/app-pluggyai';
@@ -20,8 +21,19 @@ import { config } from './load-config';
 
 const app = express();
 
-process.on('unhandledRejection', reason => {
-  console.log('Rejection:', reason);
+// Enhanced error handlers to prevent container crashes
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Promise Rejection at:', promise);
+  console.error('Rejection reason:', reason);
+  // Log but don't crash - let the process continue
+});
+
+process.on('uncaughtException', error => {
+  console.error('Uncaught Exception:', error);
+  // For uncaught exceptions, we should exit gracefully after logging
+  // This prevents the container from being in an undefined state
+  console.error('Server will exit due to uncaught exception');
+  process.exit(1);
 });
 
 app.disable('x-powered-by');
@@ -59,6 +71,7 @@ app.use('/account', accountApp.handlers);
 app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
 app.use('/pluggyai', pluggai.handlers);
+app.use('/enablebanking', enablebankingApp.handlers);
 app.use('/secret', secretApp.handlers);
 
 if (config.get('corsProxy.enabled')) {
@@ -130,6 +143,7 @@ app.use((req, res, next) => {
   res.set('Cross-Origin-Embedder-Policy', 'require-corp');
   next();
 });
+
 if (process.env.NODE_ENV === 'development') {
   console.log(
     'Running in development mode - Proxying frontend routes to React Dev Server',
@@ -153,6 +167,32 @@ if (process.env.NODE_ENV === 'development') {
     res.sendFile('index.html', { root: config.get('webRoot') }),
   );
 }
+
+// Global error handler - must be after all routes
+app.use(
+  (
+    err: Error,
+    req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction,
+  ) => {
+    console.error('Unhandled error in Express route:', err);
+
+    // If headers already sent, delegate to default Express error handler
+    if (res.headersSent) {
+      return _next(err);
+    }
+
+    res.status(500).send({
+      status: 'error',
+      reason: 'internal-error',
+      details:
+        process.env.NODE_ENV === 'development'
+          ? err.message
+          : 'An unexpected error occurred',
+    });
+  },
+);
 
 function parseHTTPSConfig(value: string) {
   if (value.startsWith('-----BEGIN')) {

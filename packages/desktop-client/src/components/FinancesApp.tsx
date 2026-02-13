@@ -1,6 +1,10 @@
 // @ts-strict-ignore
-import React, { useEffect, useEffectEvent, useRef } from 'react';
-import type { ReactElement } from 'react';
+import React, {
+  useEffect,
+  useEffectEvent,
+  useRef,
+  type ReactElement,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, Route, Routes, useHref, useLocation } from 'react-router';
 
@@ -311,6 +315,15 @@ export function FinancesApp() {
                   element={
                     <NarrowNotSupported>
                       <WideComponent name="GoCardlessLink" />
+                    </NarrowNotSupported>
+                  }
+                />
+
+                <Route
+                  path="/enablebanking/auth_callback"
+                  element={
+                    <NarrowNotSupported>
+                      <WideComponent name="EnableBankingCallback" />
                     </NarrowNotSupported>
                   }
                 />

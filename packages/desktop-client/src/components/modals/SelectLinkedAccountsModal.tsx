@@ -13,11 +13,11 @@ import { View } from '@actual-app/components/view';
 import { format as formatDate, parseISO } from 'date-fns';
 
 import { currentDay, subDays } from 'loot-core/shared/months';
-import type {
-  AccountEntity,
-  SyncServerGoCardlessAccount,
-  SyncServerPluggyAiAccount,
-  SyncServerSimpleFinAccount,
+import {
+  type AccountEntity,
+  type SyncServerGoCardlessAccount,
+  type SyncServerPluggyAiAccount,
+  type SyncServerSimpleFinAccount,
 } from 'loot-core/types/models';
 
 import {
@@ -26,8 +26,10 @@ import {
   linkAccountSimpleFin,
   unlinkAccount,
 } from '@desktop-client/accounts/accountsSlice';
-import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
-import type { AutocompleteItem } from '@desktop-client/components/autocomplete/Autocomplete';
+import {
+  Autocomplete,
+  type AutocompleteItem,
+} from '@desktop-client/components/autocomplete/Autocomplete';
 import {
   Modal,
   ModalCloseButton,
@@ -95,6 +97,11 @@ export type SelectLinkedAccountsModalProps =
       requisitionId?: undefined;
       externalAccounts: SyncServerPluggyAiAccount[];
       syncSource: 'pluggyai';
+    }
+  | {
+      requisitionId: string;
+      externalAccounts: SyncServerGoCardlessAccount[]; // we are using this here as the "standard" to avoid clutter in the code.
+      syncSource: 'enableBanking';
     };
 
 export function SelectLinkedAccountsModal({
@@ -122,8 +129,9 @@ export function SelectLinkedAccountsModal({
             externalAccounts: toSort as SyncServerPluggyAiAccount[],
           };
         case 'goCardless':
+        case 'enableBanking':
           return {
-            syncSource: 'goCardless',
+            syncSource,
             requisitionId: requisitionId!,
             externalAccounts: toSort as SyncServerGoCardlessAccount[],
           };
@@ -222,7 +230,10 @@ export function SelectLinkedAccountsModal({
               startingBalance,
             }),
           );
-        } else {
+        } else if (
+          propsWithSortedExternalAccounts.syncSource === 'goCardless' ||
+          propsWithSortedExternalAccounts.syncSource === 'enableBanking'
+        ) {
           dispatch(
             linkAccount({
               requisitionId: propsWithSortedExternalAccounts.requisitionId,
@@ -236,10 +247,14 @@ export function SelectLinkedAccountsModal({
                   ? chosenLocalAccountId
                   : undefined,
               offBudget,
+              syncSource: propsWithSortedExternalAccounts.syncSource,
               startingDate,
               startingBalance,
             }),
           );
+        } else {
+          // This should never happen due to type narrowing
+          throw new Error('Unsupported sync source');
         }
       },
     );

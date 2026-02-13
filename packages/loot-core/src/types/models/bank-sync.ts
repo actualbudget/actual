@@ -1,7 +1,7 @@
-import type {
-  GoCardlessAmount,
-  GoCardlessBalance,
-  GoCardlessTransaction,
+import {
+  type GoCardlessAmount,
+  type GoCardlessBalance,
+  type GoCardlessTransaction,
 } from './gocardless';
 
 export type BankSyncBalance = GoCardlessBalance;
@@ -20,4 +20,8 @@ export type BankSyncResponse = {
   error_code: string;
 };
 
-export type BankSyncProviders = 'goCardless' | 'simpleFin' | 'pluggyai';
+export type BankSyncProviders =
+  | 'goCardless'
+  | 'simpleFin'
+  | 'pluggyai'
+  | 'enablebanking';

@@ -3,7 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as db from '../db';
 
-export async function findOrCreateBank(institution, requisitionId) {
+export async function findOrCreateBank(
+  institution: { name: string },
+  requisitionId: string,
+) {
   const bank = await db.first<Pick<db.DbBank, 'id' | 'bank_id'>>(
     'SELECT id, bank_id FROM banks WHERE bank_id = ?',
     [requisitionId],
@@ -18,7 +21,6 @@ export async function findOrCreateBank(institution, requisitionId) {
     bank_id: requisitionId,
     name: institution.name,
   };
-
   await db.insertWithUUID('banks', bankData);
 
   return bankData;

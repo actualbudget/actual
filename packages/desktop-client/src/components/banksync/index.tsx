@@ -6,7 +6,10 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import type { AccountEntity, BankSyncProviders } from 'loot-core/types/models';
+import {
+  type AccountEntity,
+  type BankSyncProviders,
+} from 'loot-core/types/models';
 
 import { AccountsHeader } from './AccountsHeader';
 import { AccountsList } from './AccountsList';
@@ -27,6 +30,7 @@ const useSyncSourceReadable = () => {
     goCardless: 'GoCardless',
     simpleFin: 'SimpleFIN',
     pluggyai: 'Pluggy.ai',
+    enablebanking: 'Enable Banking',
     unlinked: t('Unlinked'),
   };
 

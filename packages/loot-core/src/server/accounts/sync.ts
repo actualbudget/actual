@@ -15,11 +15,11 @@ import {
   hasFieldsChanged,
   integerToAmount,
 } from '../../shared/util';
-import type {
-  AccountEntity,
-  BankSyncResponse,
-  SimpleFinBatchSyncResponse,
-  TransactionEntity,
+import {
+  type AccountEntity,
+  type BankSyncResponse,
+  type SimpleFinBatchSyncResponse,
+  type TransactionEntity,
 } from '../../types/models';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
@@ -34,6 +34,7 @@ import {
   mappingsFromString,
 } from '../util/custom-sync-mapping';
 
+import { downloadEnableBankingTransactions } from './enablebanking';
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
 
@@ -90,9 +91,9 @@ async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
 }
 
 async function getAccountSyncStartDate(id) {
-  // Many GoCardless integrations do not support getting more than 90 days
-  // worth of data, so make that the earliest possible limit.
-  const dates = [monthUtils.subDays(monthUtils.currentDay(), 90)];
+  // Bank sync providers may support different historical data windows depending on the institution.
+  // Request up to 1 year of data - the provider will return what the bank supports.
+  const dates = [monthUtils.subDays(monthUtils.currentDay(), 365)];
 
   const oldestTransaction = await getAccountOldestTransaction(id);
 
@@ -942,7 +943,10 @@ async function processBankSyncDownload(
         );
       }, currentBalance);
       balanceToUse = previousBalance;
-    } else if (acctRow.account_sync_source === 'pluggyai') {
+    } else if (
+      acctRow.account_sync_source === 'pluggyai' ||
+      acctRow.account_sync_source === 'enableBanking'
+    ) {
       const currentBalance = download.startingBalance;
       const previousBalance = transactions.reduce(
         (total, trans) => total - trans.transactionAmount.amount * 100,
@@ -1030,6 +1034,7 @@ export async function syncAccount(
   const syncStartDate =
     customStartingDate ?? (await getAccountSyncStartDate(id));
   const oldestTransaction = await getAccountOldestTransaction(id);
+  logger.log(syncStartDate, oldestTransaction);
   const newAccount = oldestTransaction == null;
 
   let download;
@@ -1045,6 +1050,12 @@ export async function syncAccount(
       bankId,
       syncStartDate,
       newAccount,
+    );
+  } else if (acctRow.account_sync_source === 'enableBanking') {
+    download = await downloadEnableBankingTransactions(
+      acctId,
+      syncStartDate,
+      bankId,
     );
   } else {
     throw new Error(

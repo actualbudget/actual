@@ -2,7 +2,7 @@
 import React, { Fragment, useEffect, useEffectEvent } from 'react';
 import { useLocation } from 'react-router';
 
-import { send } from 'loot-core/platform/client/connection';
+import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';
@@ -28,6 +28,8 @@ import { EditUserAccess } from './modals/EditAccess';
 import { EditFieldModal } from './modals/EditFieldModal';
 import { EditRuleModal } from './modals/EditRuleModal';
 import { EditUserFinanceApp } from './modals/EditUser';
+import { EnableBankingInitialiseModal } from './modals/EnableBankingInitialiseModal';
+import { EnableBankingSetupAccountModal } from './modals/EnableBankingSetupAccountModal';
 import { EnvelopeBalanceMenuModal } from './modals/EnvelopeBalanceMenuModal';
 import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
 import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
@@ -178,6 +180,14 @@ export function Modals() {
 
         case 'simplefin-init':
           return <SimpleFinInitialiseModal key={key} {...modal.options} />;
+
+        case 'enablebanking-init':
+          return <EnableBankingInitialiseModal key={key} {...modal.options} />;
+
+        case 'enablebanking-setup-account':
+          return (
+            <EnableBankingSetupAccountModal key={key} {...modal.options} />
+          );
 
         case 'pluggyai-init':
           return <PluggyAiInitialiseModal key={key} {...modal.options} />;

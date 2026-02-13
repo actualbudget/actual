@@ -1,24 +1,23 @@
-import { createSlice } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import memoizeOne from 'memoize-one';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { SyncResponseWithErrors } from 'loot-core/server/accounts/app';
+import { send } from 'loot-core/platform/client/fetch';
+import { type SyncResponseWithErrors } from 'loot-core/server/accounts/app';
 import { groupById } from 'loot-core/shared/util';
-import type {
-  AccountEntity,
-  CategoryEntity,
-  SyncServerGoCardlessAccount,
-  SyncServerPluggyAiAccount,
-  SyncServerSimpleFinAccount,
-  TransactionEntity,
+import {
+  type AccountEntity,
+  type CategoryEntity,
+  type SyncServerGoCardlessAccount,
+  type SyncServerPluggyAiAccount,
+  type SyncServerSimpleFinAccount,
+  type TransactionEntity,
 } from 'loot-core/types/models';
 
 import { resetApp } from '@desktop-client/app/appSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { markPayeesDirty } from '@desktop-client/payees/payeesSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
-import type { AppDispatch } from '@desktop-client/redux/store';
+import { type AppDispatch } from '@desktop-client/redux/store';
 import { setNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
 const sliceName = 'account';
@@ -257,6 +256,7 @@ type LinkAccountBasePayload = {
 type LinkAccountPayload = LinkAccountBasePayload & {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
+  syncSource?: 'goCardless' | 'enableBanking';
 };
 
 export const linkAccount = createAppAsyncThunk(
@@ -267,16 +267,21 @@ export const linkAccount = createAppAsyncThunk(
       account,
       upgradingId,
       offBudget,
+      syncSource,
       startingDate,
       startingBalance,
     }: LinkAccountPayload,
     { dispatch },
   ) => {
+    if (syncSource === undefined) {
+      syncSource = 'goCardless';
+    }
     await send('gocardless-accounts-link', {
       requisitionId,
       account,
       upgradingId,
       offBudget,
+      syncSource,
       startingDate,
       startingBalance,
     });
@@ -424,9 +429,11 @@ export const syncAccounts = createAppAsyncThunk(
       return false;
     }
 
+    // Figure out which accounts to sync
     const { accounts } = getState().account;
     let accountIdsToSync: string[];
     if (id === 'offbudget' || id === 'onbudget') {
+      // Sync only offbudget or onbudget accounts
       const targetOffbudget = id === 'offbudget' ? 1 : 0;
       accountIdsToSync = accounts
         .filter(
@@ -436,6 +443,7 @@ export const syncAccounts = createAppAsyncThunk(
         .sort((a, b) => a.sort_order - b.sort_order)
         .map(({ id }) => id);
     } else if (id) {
+      // Sync only the specified account
       accountIdsToSync = [id];
     } else {
       // Default: all accounts
@@ -458,6 +466,8 @@ export const syncAccounts = createAppAsyncThunk(
     const accountsData = (await send(
       'accounts-get',
     )) as unknown as AccountEntity[];
+
+    // Filter out the SimpleFin Accounts
     const simpleFinAccounts = accountsData.filter(
       a =>
         a.account_sync_source === 'simpleFin' &&
@@ -465,6 +475,9 @@ export const syncAccounts = createAppAsyncThunk(
     );
 
     let isSyncSuccess = false;
+
+    // These variables will be used to store the results of the sync.
+    // THESE ARE CHANGED IN PLACE by handleSyncResponse.
     const newTransactions: Array<TransactionEntity['id']> = [];
     const matchedTransactions: Array<TransactionEntity['id']> = [];
     const updatedAccounts: Array<AccountEntity['id']> = [];
@@ -491,6 +504,8 @@ export const syncAccounts = createAppAsyncThunk(
       accountIdsToSync = accountIdsToSync.filter(
         id => !simpleFinAccounts.find(sfa => sfa.id === id),
       );
+      // Update the accounts state to remove the SimpleFin accounts
+      dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
     }
 
     // Loop through the accounts and perform sync operation.. one by one
