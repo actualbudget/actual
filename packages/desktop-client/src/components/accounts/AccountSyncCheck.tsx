@@ -12,7 +12,7 @@ import type { AccountEntity } from 'loot-core/types/models';
 
 import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
 import { authorizeEnableBankingSession } from '@desktop-client/banksync/enablebanking';
-import { authorizeBank } from '@desktop-client/banksync/gocardless';
+import { authorizeBank } from '@desktop-client/gocardless';
 import { Link } from '@desktop-client/components/common/Link';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';

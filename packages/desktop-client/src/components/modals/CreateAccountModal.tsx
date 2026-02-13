@@ -20,7 +20,7 @@ import {
   authorizeEnableBankingSession,
   deconfigureEnableBanking,
 } from '@desktop-client/banksync/enablebanking';
-import { authorizeBank } from '@desktop-client/banksync/gocardless';
+import { authorizeBank } from '@desktop-client/gocardless';
 import { Warning } from '@desktop-client/components/alerts';
 import { Link } from '@desktop-client/components/common/Link';
 import {

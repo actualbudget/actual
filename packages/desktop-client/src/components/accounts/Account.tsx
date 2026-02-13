@@ -232,7 +232,7 @@ type AccountInternalProps = {
   failedAccounts: ReturnType<typeof useFailedAccounts>;
   dateFormat: ReturnType<typeof useDateFormat>;
   payees: ReturnType<typeof usePayees>;
-  categoryGroups: ReturnType<typeof useCategories>['grouped'];
+  categoryGroups: ReturnType<typeof useCategories>['data']['grouped'];
   hideFraction: boolean;
   accountsSyncing: string[];
   dispatch: AppDispatch;
@@ -1951,7 +1951,8 @@ export function Account() {
   const params = useParams();
   const location = useLocation();
 
-  const { grouped: categoryGroups } = useCategories();
+  const { data } = useCategories();
+  const categoryGroups = data?.grouped;
   const newTransactions = useSelector(
     state => state.transactions.newTransactions,
   );
