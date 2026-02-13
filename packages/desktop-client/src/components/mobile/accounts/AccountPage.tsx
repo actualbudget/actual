@@ -109,11 +109,11 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   );
 
   const dispatch = useDispatch();
-  const updateAccount = useUpdateAccountMutation();
+  const { mutate: updateAccount } = useUpdateAccountMutation();
 
   const onSave = useCallback(
     (account: AccountEntity) => {
-      updateAccount.mutate({ account });
+      updateAccount({ account });
     },
     [updateAccount],
   );
@@ -144,10 +144,10 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     dispatch(openAccountCloseModal({ accountId: account.id }));
   }, [account.id, dispatch]);
 
-  const reopenAccount = useReopenAccountMutation();
+  const { mutate: reopenAccount } = useReopenAccountMutation();
 
   const onReopenAccount = useCallback(() => {
-    reopenAccount.mutate({ id: account.id });
+    reopenAccount({ id: account.id });
   }, [account.id, reopenAccount]);
 
   const [showRunningBalances, setShowRunningBalances] = useSyncedPref(

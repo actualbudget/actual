@@ -603,8 +603,7 @@ export const openAccountCloseModal = createAppAsyncThunk(
       },
     );
     const queryClient = extra.queryClient;
-    const accounts =
-      queryClient.getQueryData(accountQueries.list().queryKey) ?? [];
+    const accounts = await queryClient.ensureQueryData(accountQueries.list());
     const account = accounts.find(acct => acct.id === accountId);
 
     if (!account) {

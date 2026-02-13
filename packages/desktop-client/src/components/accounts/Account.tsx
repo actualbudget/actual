@@ -1997,21 +1997,19 @@ export function Account() {
     [params.id],
   );
 
-  const reopenAccount = useReopenAccountMutation();
-  const onReopenAccount = (id: AccountEntity['id']) =>
-    reopenAccount.mutate({ id });
+  const { mutate: reopenAccount } = useReopenAccountMutation();
+  const onReopenAccount = (id: AccountEntity['id']) => reopenAccount({ id });
 
-  const updateAccount = useUpdateAccountMutation();
+  const { mutate: updateAccount } = useUpdateAccountMutation();
   const onUpdateAccount = (account: AccountEntity) =>
-    updateAccount.mutate({ account });
+    updateAccount({ account });
 
-  const unlinkAccount = useUnlinkAccountMutation();
-  const onUnlinkAccount = (id: AccountEntity['id']) =>
-    unlinkAccount.mutate({ id });
+  const { mutate: unlinkAccount } = useUnlinkAccountMutation();
+  const onUnlinkAccount = (id: AccountEntity['id']) => unlinkAccount({ id });
 
-  const syncAndDownload = useSyncAndDownloadMutation();
+  const { mutate: syncAndDownload } = useSyncAndDownloadMutation();
   const onSyncAndDownload = (id?: AccountEntity['id']) =>
-    syncAndDownload.mutate({ id });
+    syncAndDownload({ id });
 
   return (
     <SchedulesProvider query={schedulesQuery}>

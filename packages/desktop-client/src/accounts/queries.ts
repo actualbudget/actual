@@ -3,6 +3,10 @@ import { queryOptions } from '@tanstack/react-query';
 import { send } from 'loot-core/platform/client/connection';
 import type { AccountEntity } from 'loot-core/types/models';
 
+function selectActive(accounts: AccountEntity[]) {
+  return accounts.filter(account => !account.closed);
+}
+
 export const accountQueries = {
   all: () => ['accounts'],
   lists: () => [...accountQueries.all(), 'lists'],
@@ -20,7 +24,7 @@ export const accountQueries = {
   listActive: () =>
     queryOptions<AccountEntity[]>({
       ...accountQueries.list(),
-      select: accounts => accounts.filter(account => !account.closed),
+      select: selectActive,
     }),
   listClosed: () =>
     queryOptions<AccountEntity[]>({
@@ -29,14 +33,14 @@ export const accountQueries = {
     }),
   listOnBudget: () =>
     queryOptions<AccountEntity[]>({
-      ...accountQueries.listActive(),
+      ...accountQueries.list(),
       select: accounts =>
-        accounts.filter(account => !account.offbudget && !account.closed),
+        selectActive(accounts).filter(account => !account.offbudget),
     }),
   listOffBudget: () =>
     queryOptions<AccountEntity[]>({
-      ...accountQueries.listActive(),
+      ...accountQueries.list(),
       select: accounts =>
-        accounts.filter(account => !!account.offbudget && !account.closed),
+        selectActive(accounts).filter(account => !!account.offbudget),
     }),
 };
