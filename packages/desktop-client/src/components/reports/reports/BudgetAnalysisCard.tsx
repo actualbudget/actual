@@ -18,8 +18,8 @@ import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createBudgetAnalysisSpreadsheet } from '@desktop-client/components/reports/spreadsheets/budget-analysis-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type BudgetAnalysisCardProps = {
@@ -46,7 +46,7 @@ export function BudgetAnalysisCard({
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useWidgetCopyMenu(onCopy);
+    useDashboardWidgetCopyMenu(onCopy);
 
   const timeFrame = meta?.timeFrame ?? {
     start: monthUtils.subMonths(monthUtils.currentMonth(), 5),

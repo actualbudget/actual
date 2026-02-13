@@ -62,10 +62,10 @@ export const defaultTimeFrame = {
 
 export function Crossover() {
   const params = useParams();
-  const { data: widget, isPending } = useDashboardWidget<CrossoverWidget>(
-    params.id ?? '',
-    'crossover-card',
-  );
+  const { data: widget, isPending } = useDashboardWidget<CrossoverWidget>({
+    id: params.id,
+    type: 'crossover-card',
+  });
 
   if (isPending) {
     return <LoadingIndicator />;

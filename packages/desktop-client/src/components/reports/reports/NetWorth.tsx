@@ -54,10 +54,10 @@ import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutati
 
 export function NetWorth() {
   const params = useParams();
-  const { data: widget, isLoading } = useDashboardWidget<NetWorthWidget>(
-    params.id ?? '',
-    'net-worth-card',
-  );
+  const { data: widget, isLoading } = useDashboardWidget<NetWorthWidget>({
+    id: params.id,
+    type: 'net-worth-card',
+  });
 
   if (isLoading) {
     return <LoadingIndicator />;

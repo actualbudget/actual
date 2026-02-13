@@ -50,10 +50,10 @@ import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutati
 
 export function BudgetAnalysis() {
   const params = useParams();
-  const { data: widget, isPending } = useDashboardWidget<BudgetAnalysisWidget>(
-    params.id ?? '',
-    'budget-analysis-card',
-  );
+  const { data: widget, isPending } = useDashboardWidget<BudgetAnalysisWidget>({
+    id: params.id,
+    type: 'budget-analysis-card',
+  });
 
   if (isPending) {
     return <LoadingIndicator />;

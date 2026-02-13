@@ -52,10 +52,10 @@ import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutati
 
 export function Spending() {
   const params = useParams();
-  const { data: widget, isPending } = useDashboardWidget<SpendingWidget>(
-    params.id ?? '',
-    'spending-card',
-  );
+  const { data: widget, isPending } = useDashboardWidget<SpendingWidget>({
+    id: params.id,
+    type: 'spending-card',
+  });
 
   if (isPending) {
     return <LoadingIndicator />;

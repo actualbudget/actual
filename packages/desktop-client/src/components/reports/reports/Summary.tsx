@@ -55,10 +55,10 @@ import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutati
 
 export function Summary() {
   const params = useParams();
-  const { data: widget, isPending } = useDashboardWidget<SummaryWidget>(
-    params.id ?? '',
-    'summary-card',
-  );
+  const { data: widget, isPending } = useDashboardWidget<SummaryWidget>({
+    id: params.id,
+    type: 'summary-card',
+  });
 
   if (isPending) {
     return <LoadingIndicator />;

@@ -4,10 +4,14 @@ import type { DashboardWidgetEntity } from 'loot-core/types/models';
 
 import { dashboardQueries } from '@desktop-client/reports';
 
-export function useDashboardWidget<W extends DashboardWidgetEntity>(
-  id: W['id'],
-  type: W['type'],
-) {
+type UseDashboardWidgetProps<W extends DashboardWidgetEntity> = Partial<
+  Pick<W, 'id' | 'type'>
+>;
+
+export function useDashboardWidget<W extends DashboardWidgetEntity>({
+  id,
+  type,
+}: UseDashboardWidgetProps<W>) {
   return useQuery({
     ...dashboardQueries.listDashboardWidgets<W>(),
     select: widgets => widgets.find(w => w.id === id && w.type === type),
