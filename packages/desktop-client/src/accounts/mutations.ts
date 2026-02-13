@@ -31,14 +31,6 @@ import { useDispatch, useSelector } from '@desktop-client/redux';
 import type { AppDispatch } from '@desktop-client/redux/store';
 import { setNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
-const sendThrow: typeof send = async function (name, args) {
-  const { data, error } = await send(name, args, { catchErrors: true });
-  if (error) {
-    throw error;
-  }
-  return data;
-};
-
 const invalidateQueries = (queryClient: QueryClient, queryKey?: QueryKey) => {
   queryClient.invalidateQueries({
     queryKey: queryKey ?? accountQueries.lists(),
@@ -75,7 +67,7 @@ export function useCreateAccountMutation() {
 
   return useMutation({
     mutationFn: async ({ name, balance, offBudget }: CreateAccountPayload) => {
-      const id = await sendThrow('account-create', {
+      const id = await send('account-create', {
         name,
         balance,
         offBudget,
@@ -90,7 +82,6 @@ export function useCreateAccountMutation() {
         t('There was an error creating the account. Please try again.'),
         error,
       );
-      throw error;
     },
   });
 }
@@ -114,7 +105,7 @@ export function useCloseAccountMutation() {
       categoryId,
       forced,
     }: CloseAccountPayload) => {
-      await sendThrow('account-close', {
+      await send('account-close', {
         id,
         transferAccountId: transferAccountId || undefined,
         categoryId: categoryId || undefined,
@@ -129,7 +120,6 @@ export function useCloseAccountMutation() {
         t('There was an error closing the account. Please try again.'),
         error,
       );
-      throw error;
     },
   });
 }
@@ -145,7 +135,7 @@ export function useReopenAccountMutation() {
 
   return useMutation({
     mutationFn: async ({ id }: ReopenAccountPayload) => {
-      await sendThrow('account-reopen', { id });
+      await send('account-reopen', { id });
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -155,7 +145,6 @@ export function useReopenAccountMutation() {
         t('There was an error re-opening the account. Please try again.'),
         error,
       );
-      throw error;
     },
   });
 }
@@ -171,7 +160,7 @@ export function useUpdateAccountMutation() {
 
   return useMutation({
     mutationFn: async ({ account }: UpdateAccountPayload) => {
-      await sendThrow('account-update', account);
+      await send('account-update', account);
       return account;
     },
     onSuccess: () => invalidateQueries(queryClient),
@@ -182,7 +171,6 @@ export function useUpdateAccountMutation() {
         t('There was an error updating the account. Please try again.'),
         error,
       );
-      throw error;
     },
   });
 }
@@ -199,12 +187,14 @@ export function useMoveAccountMutation() {
 
   return useMutation({
     mutationFn: async ({ id, targetId }: MoveAccountPayload) => {
-      await sendThrow('account-move', { id, targetId });
+      await send('account-move', { id, targetId });
+    },
+    onSuccess: () => {
+      invalidateQueries(queryClient);
       // TODO: Change to a call to queryClient.invalidateQueries
       // once payees have been moved to react-query.
       dispatch(markPayeesDirty());
     },
-    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
       console.error('Error moving account:', error);
       dispatchErrorNotification(
@@ -212,7 +202,6 @@ export function useMoveAccountMutation() {
         t('There was an error moving the account. Please try again.'),
         error,
       );
-      throw error;
     },
   });
 }
@@ -232,7 +221,7 @@ export function useImportPreviewTransactionsMutation() {
       accountId,
       transactions,
     }: ImportPreviewTransactionsPayload) => {
-      const { errors = [], updatedPreview } = await sendThrow(
+      const { errors = [], updatedPreview } = await send(
         'transactions-import',
         {
           accountId,
@@ -264,7 +253,6 @@ export function useImportPreviewTransactionsMutation() {
         ),
         error,
       );
-      throw error;
     },
   });
 }
@@ -287,7 +275,7 @@ export function useImportTransactionsMutation() {
       reconcile,
     }: ImportTransactionsPayload) => {
       if (!reconcile) {
-        await sendThrow('api/transactions-add', {
+        await send('api/transactions-add', {
           accountId,
           transactions,
         });
@@ -299,7 +287,7 @@ export function useImportTransactionsMutation() {
         errors = [],
         added,
         updated,
-      } = await sendThrow('transactions-import', {
+      } = await send('transactions-import', {
         accountId,
         transactions,
         isPreview: false,
@@ -341,7 +329,6 @@ export function useImportTransactionsMutation() {
         ),
         error,
       );
-      throw error;
     },
   });
 }
@@ -357,10 +344,12 @@ export function useUnlinkAccountMutation() {
 
   return useMutation({
     mutationFn: async ({ id }: UnlinkAccountPayload) => {
-      await sendThrow('account-unlink', { id });
+      await send('account-unlink', { id });
+    },
+    onSuccess: (_, { id }) => {
+      invalidateQueries(queryClient);
       dispatch(markAccountSuccess({ id }));
     },
-    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
       console.error('Error unlinking account:', error);
       dispatchErrorNotification(
@@ -368,7 +357,6 @@ export function useUnlinkAccountMutation() {
         t('There was an error unlinking the account. Please try again.'),
         error,
       );
-      throw error;
     },
   });
 }
@@ -400,7 +388,7 @@ export function useLinkAccountMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountPayload) => {
-      await sendThrow('gocardless-accounts-link', {
+      await send('gocardless-accounts-link', {
         requisitionId,
         account,
         upgradingId,
@@ -408,11 +396,13 @@ export function useLinkAccountMutation() {
         startingDate,
         startingBalance,
       });
+    },
+    onSuccess: () => {
+      invalidateQueries(queryClient);
       // TODO: Change to a call to queryClient.invalidateQueries
       // once payees have been moved to react-query.
       dispatch(markPayeesDirty());
     },
-    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
       console.error('Error linking account:', error);
       dispatchErrorNotification(
@@ -420,7 +410,6 @@ export function useLinkAccountMutation() {
         t('There was an error linking the account. Please try again.'),
         error,
       );
-      throw error;
     },
   });
 }
@@ -442,18 +431,20 @@ export function useLinkAccountSimpleFinMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountSimpleFinPayload) => {
-      await sendThrow('simplefin-accounts-link', {
+      await send('simplefin-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
       });
+    },
+    onSuccess: () => {
+      invalidateQueries(queryClient);
       // TODO: Change to a call to queryClient.invalidateQueries
       // once payees have been moved to react-query.
       dispatch(markPayeesDirty());
     },
-    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
       console.error('Error linking account to SimpleFIN:', error);
       dispatchErrorNotification(
@@ -463,7 +454,6 @@ export function useLinkAccountSimpleFinMutation() {
         ),
         error,
       );
-      throw error;
     },
   });
 }
@@ -485,19 +475,20 @@ export function useLinkAccountPluggyAiMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountPluggyAiPayload) => {
-      await sendThrow('pluggyai-accounts-link', {
+      await send('pluggyai-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
       });
-
+    },
+    onSuccess: () => {
+      invalidateQueries(queryClient);
       // TODO: Change to a call to queryClient.invalidateQueries
       // once payees have been moved to react-query.
       dispatch(markPayeesDirty());
     },
-    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
       console.error('Error linking account to PluggyAI:', error);
       dispatchErrorNotification(
@@ -507,7 +498,6 @@ export function useLinkAccountPluggyAiMutation() {
         ),
         error,
       );
-      throw error;
     },
   });
 }
@@ -581,7 +571,7 @@ export function useSyncAccountsMutation() {
       if (simpleFinAccounts.length > 0) {
         console.log('Using SimpleFin batch sync');
 
-        const res = await sendThrow('simplefin-batch-sync', {
+        const res = await send('simplefin-batch-sync', {
           ids: simpleFinAccounts.map(a => a.id),
         });
 
@@ -608,7 +598,7 @@ export function useSyncAccountsMutation() {
         const accountId = accountIdsToSync[idx];
 
         // Perform sync operation
-        const res = await sendThrow('accounts-bank-sync', {
+        const res = await send('accounts-bank-sync', {
           ids: [accountId],
         });
 
@@ -651,7 +641,6 @@ export function useSyncAccountsMutation() {
         t('There was an error syncing accounts. Please try again.'),
         error,
       );
-      throw error;
     },
   });
 }
@@ -764,7 +753,6 @@ export function useSyncAndDownloadMutation() {
         t('There was an error syncing accounts. Please try again.'),
         error,
       );
-      throw error;
     },
   });
 }
