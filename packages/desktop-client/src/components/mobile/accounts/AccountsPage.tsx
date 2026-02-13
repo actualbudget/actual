@@ -24,7 +24,10 @@ import { css } from '@emotion/css';
 
 import type { AccountEntity } from 'loot-core/types/models';
 
-import { moveAccount } from '@desktop-client/accounts/accountsSlice';
+import {
+  getPendingAccountIds,
+  moveAccount,
+} from '@desktop-client/accounts/accountsSlice';
 import { syncAndDownload } from '@desktop-client/app/appSlice';
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
@@ -414,10 +417,7 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
     const dispatch = useDispatch();
 
     // An account is pending if it's in the sync queue or currently syncing
-    const pendingAccountIds = new Set([
-      ...syncingAccountIds,
-      ...syncQueue.map(req => req.id),
-    ]);
+    const pendingAccountIds = getPendingAccountIds(syncingAccountIds, syncQueue);
 
     const { dragAndDropHooks } = useDragAndDrop({
       getItems: keys =>

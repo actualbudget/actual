@@ -41,6 +41,7 @@ import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
 
 import {
+  getPendingAccountIds,
   markAccountRead,
   reopenAccount,
   unlinkAccount,
@@ -1994,7 +1995,7 @@ export function Account() {
 
   // An account is pending if it's in the sync queue or currently syncing
   const pendingAccountIds = [
-    ...new Set([...accountsSyncing, ...syncQueue.map(req => req.id)]),
+    ...getPendingAccountIds(accountsSyncing, syncQueue),
   ];
 
   const savedFiters = useTransactionFilters();

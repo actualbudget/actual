@@ -137,10 +137,6 @@ const accountsSlice = createSlice({
     ) {
       state.isProcessingQueue = action.payload.isProcessing;
     },
-    clearSyncQueue(state) {
-      state.syncQueue = [];
-      state.isProcessingQueue = false;
-    },
   },
   extraReducers: builder => {
     builder.addCase(resetApp, () => initialState);
@@ -519,32 +515,72 @@ export const processQueue = createAppAsyncThunk(
     try {
       // Continue processing until queue is empty
       // This handles cases where items are added to the queue while processing
-      while (true) {
+      while (getState().account.syncQueue.length > 0) {
         const currentQueue = getState().account.syncQueue;
-
-        // Exit if queue is empty
-        if (currentQueue.length === 0) {
-          break;
-        }
+        const { accounts } = getState().account;
+        const accountsById = new Map(accounts.map(a => [a.id, a]));
 
         // Get the next item from the queue
         const request = currentQueue[0];
+        const account = accountsById.get(request.id);
 
-        try {
-          // Process using original sync logic
-          const success = await dispatch(
-            processSingleSync({ id: request.id }),
-          ).unwrap();
-          if (success) {
-            hasAnySuccess = true;
+        // Check if this is a SimpleFin account and if there are more SimpleFin accounts in the queue
+        const isSimpleFin = account?.account_sync_source === 'simpleFin';
+        if (isSimpleFin) {
+          // Collect all consecutive SimpleFin accounts from the queue
+          const simpleFinBatch: string[] = [];
+          for (const req of currentQueue) {
+            const acc = accountsById.get(req.id);
+            if (acc?.account_sync_source === 'simpleFin') {
+              simpleFinBatch.push(req.id);
+            } else {
+              // Stop at the first non-SimpleFin account
+              break;
+            }
           }
 
-          // Only remove from queue if processing succeeded
-          dispatch(removeFromSyncQueue({ id: request.id }));
-        } catch (error) {
-          console.error(`Sync failed for ${request.id}:`, error);
-          // Remove failed item from queue to prevent infinite retry
-          dispatch(removeFromSyncQueue({ id: request.id }));
+          // Set accounts as syncing BEFORE starting the async operation
+          dispatch(setAccountsSyncing({ ids: simpleFinBatch }));
+
+          // Process SimpleFin accounts as a batch
+          try {
+            const success = await dispatch(
+              processBatchSync({ ids: simpleFinBatch }),
+            ).unwrap();
+            if (success) {
+              hasAnySuccess = true;
+            }
+          } catch (error) {
+            console.error(
+              `Batch sync failed for SimpleFin accounts:`,
+              error,
+            );
+          } finally {
+            // Always remove processed accounts from syncing state and queue
+            simpleFinBatch.forEach(id => {
+              dispatch(removeFromSyncQueue({ id }));
+            });
+            dispatch(setAccountsSyncing({ ids: [] }));
+          }
+        } else {
+          // Set account as syncing BEFORE starting the async operation
+          dispatch(setAccountsSyncing({ ids: [request.id] }));
+
+          // Process non-SimpleFin accounts individually
+          try {
+            const success = await dispatch(
+              processSingleSync({ id: request.id }),
+            ).unwrap();
+            if (success) {
+              hasAnySuccess = true;
+            }
+          } catch (error) {
+            console.error(`Sync failed for ${request.id}:`, error);
+          } finally {
+            // Always remove from syncing state and queue
+            dispatch(removeFromSyncQueue({ id: request.id }));
+            dispatch(setAccountsSyncing({ ids: [] }));
+          }
         }
       }
     } catch (error) {
@@ -558,28 +594,27 @@ export const processQueue = createAppAsyncThunk(
   },
 );
 
-export const processSingleSync = createAppAsyncThunk(
-  `${sliceName}/processSingleSync`,
-  async ({ id }: SyncAccountsPayload, { dispatch }) => {
-    const { setAccountsSyncing } = accountsSlice.actions;
-
-    if (!id || id === 'uncategorized') {
-      dispatch(setAccountsSyncing({ ids: [] }));
+export const processBatchSync = createAppAsyncThunk(
+  `${sliceName}/processBatchSync`,
+  async ({ ids }: { ids: Array<AccountEntity['id']> }, { dispatch }) => {
+    if (!ids || ids.length === 0) {
       return false;
     }
 
-    const accountId = id;
-    dispatch(setAccountsSyncing({ ids: [accountId] }));
+    // Call SimpleFin batch sync API
+    const results = await send('simplefin-batch-sync', { ids });
 
-    try {
+    let hasAnySuccess = false;
+    const allNewTransactions: Array<TransactionEntity['id']> = [];
+    const allMatchedTransactions: Array<TransactionEntity['id']> = [];
+    const allUpdatedAccounts: Array<AccountEntity['id']> = [];
+
+    // Process each account's result
+    for (const result of results) {
+      const { accountId, res } = result;
       const newTransactions: Array<TransactionEntity['id']> = [];
       const matchedTransactions: Array<TransactionEntity['id']> = [];
       const updatedAccounts: Array<AccountEntity['id']> = [];
-
-      // Perform sync operation for single account
-      const res = await send('accounts-bank-sync', {
-        ids: [accountId],
-      });
 
       const success = handleSyncResponse(
         accountId,
@@ -590,26 +625,68 @@ export const processSingleSync = createAppAsyncThunk(
         updatedAccounts,
       );
 
-      // Set new transactions
-      dispatch(
-        setNewTransactions({
-          newTransactions,
-          matchedTransactions,
-        }),
-      );
+      if (success) {
+        hasAnySuccess = true;
+      }
 
-      // Mark accounts as updated
-      dispatch(markUpdatedAccounts({ ids: updatedAccounts }));
-
-      // Clear syncing state
-      dispatch(setAccountsSyncing({ ids: [] }));
-
-      return success;
-    } catch (error) {
-      console.error('Sync error:', error);
-      dispatch(setAccountsSyncing({ ids: [] }));
-      throw error;
+      allNewTransactions.push(...newTransactions);
+      allMatchedTransactions.push(...matchedTransactions);
+      allUpdatedAccounts.push(...updatedAccounts);
     }
+
+    // Set new transactions
+    dispatch(
+      setNewTransactions({
+        newTransactions: allNewTransactions,
+        matchedTransactions: allMatchedTransactions,
+      }),
+    );
+
+    // Mark accounts as updated
+    dispatch(markUpdatedAccounts({ ids: allUpdatedAccounts }));
+
+    return hasAnySuccess;
+  },
+);
+
+export const processSingleSync = createAppAsyncThunk(
+  `${sliceName}/processSingleSync`,
+  async ({ id }: SyncAccountsPayload, { dispatch }) => {
+    if (!id || id === 'uncategorized') {
+      return false;
+    }
+
+    const accountId = id;
+    const newTransactions: Array<TransactionEntity['id']> = [];
+    const matchedTransactions: Array<TransactionEntity['id']> = [];
+    const updatedAccounts: Array<AccountEntity['id']> = [];
+
+    // Perform sync operation for single account
+    const res = await send('accounts-bank-sync', {
+      ids: [accountId],
+    });
+
+    const success = handleSyncResponse(
+      accountId,
+      res,
+      dispatch,
+      newTransactions,
+      matchedTransactions,
+      updatedAccounts,
+    );
+
+    // Set new transactions
+    dispatch(
+      setNewTransactions({
+        newTransactions,
+        matchedTransactions,
+      }),
+    );
+
+    // Mark accounts as updated
+    dispatch(markUpdatedAccounts({ ids: updatedAccounts }));
+
+    return success;
   },
 );
 
@@ -720,6 +797,16 @@ export const importTransactions = createAppAsyncThunk(
 
 export const getAccountsById = memoizeOne(
   (accounts: AccountEntity[] | null | undefined) => groupById(accounts),
+);
+
+// Selector to get all pending account IDs (in queue or actively syncing)
+export const getPendingAccountIds = memoizeOne(
+  (
+    syncingAccountIds: Array<AccountEntity['id']>,
+    syncQueue: Array<SyncRequest>,
+  ): Set<AccountEntity['id']> => {
+    return new Set([...syncingAccountIds, ...syncQueue.map(req => req.id)]);
+  },
 );
 
 export const { name, reducer, getInitialState } = accountsSlice;
