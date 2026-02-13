@@ -27,7 +27,6 @@ import * as payeesSlice from './payees/payeesSlice';
 import * as prefsSlice from './prefs/prefsSlice';
 import { aqlQuery } from './queries/aqlQuery';
 import { configureAppStore } from './redux/store';
-import * as tagsSlice from './tags/tagsSlice';
 import * as transactionsSlice from './transactions/transactionsSlice';
 import { redo, undo } from './undo';
 import * as usersSlice from './users/usersSlice';
@@ -47,7 +46,6 @@ const boundActions = bindActionCreators(
     ...payeesSlice.actions,
     ...prefsSlice.actions,
     ...transactionsSlice.actions,
-    ...tagsSlice.actions,
     ...usersSlice.actions,
   },
   store.dispatch,

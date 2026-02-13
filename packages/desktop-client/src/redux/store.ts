@@ -36,10 +36,6 @@ import {
   reducer as prefsSliceReducer,
 } from '@desktop-client/prefs/prefsSlice';
 import {
-  name as tagsSliceName,
-  reducer as tagsSliceReducer,
-} from '@desktop-client/tags/tagsSlice';
-import {
   name as transactionsSliceName,
   reducer as transactionsSliceReducer,
 } from '@desktop-client/transactions/transactionsSlice';
@@ -57,7 +53,6 @@ const rootReducer = combineReducers({
   [payeesSliceName]: payeesSliceReducer,
   [prefsSliceName]: prefsSliceReducer,
   [transactionsSliceName]: transactionsSliceReducer,
-  [tagsSliceName]: tagsSliceReducer,
   [usersSliceName]: usersSliceReducer,
 });
 
