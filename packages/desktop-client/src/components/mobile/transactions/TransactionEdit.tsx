@@ -460,7 +460,7 @@ const ChildTransactionEdit = forwardRef<
                   onClearActiveEdit();
                 }
               }}
-              autoDecimals={!hideFraction}
+              autoDecimals={String(hideFraction) !== 'true'}
             />
           </View>
         </View>
