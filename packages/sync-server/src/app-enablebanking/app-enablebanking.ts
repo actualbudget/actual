@@ -1,5 +1,6 @@
-import express, { type Request, type Response } from 'express';
-import { type ParamsDictionary } from 'express-serve-static-core';
+import express from 'express';
+import type { Request, Response } from 'express';
+import type { ParamsDictionary } from 'express-serve-static-core';
 
 import { isAdmin } from '../account-db.js';
 import {

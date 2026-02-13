@@ -5,7 +5,14 @@ import memoizeOne from 'memoize-one';
 import { send } from 'loot-core/platform/client/connection';
 import type { SyncResponseWithErrors } from 'loot-core/server/accounts/app';
 import { groupById } from 'loot-core/shared/util';
-import type { AccountEntity, CategoryEntity, SyncServerGoCardlessAccount, SyncServerPluggyAiAccount, SyncServerSimpleFinAccount, TransactionEntity } from 'loot-core/types/models';
+import type {
+  AccountEntity,
+  CategoryEntity,
+  SyncServerGoCardlessAccount,
+  SyncServerPluggyAiAccount,
+  SyncServerSimpleFinAccount,
+  TransactionEntity,
+} from 'loot-core/types/models';
 
 import { resetApp } from '@desktop-client/app/appSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';

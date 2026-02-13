@@ -11,9 +11,9 @@ import { View } from '@actual-app/components/view';
 import type { AccountEntity } from 'loot-core/types/models';
 
 import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
+import { Link } from '@desktop-client/components/common/Link';
 import { authorizeEnableBankingSession } from '@desktop-client/enablebanking';
 import { authorizeBank } from '@desktop-client/gocardless';
-import { Link } from '@desktop-client/components/common/Link';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useDispatch } from '@desktop-client/redux';

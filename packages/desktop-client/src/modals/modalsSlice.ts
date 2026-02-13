@@ -4,7 +4,20 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { send } from 'loot-core/platform/client/connection';
 import type { IntegerAmount } from 'loot-core/shared/util';
 import type { File } from 'loot-core/types/file';
-import type { AccountEntity, CategoryEntity, CategoryGroupEntity, GoCardlessToken, NewRuleEntity, NewUserEntity, NoteEntity, RuleEntity, ScheduleEntity, TransactionEntity, UserAccessEntity, UserEntity } from 'loot-core/types/models';
+import type {
+  AccountEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+  GoCardlessToken,
+  NewRuleEntity,
+  NewUserEntity,
+  NoteEntity,
+  RuleEntity,
+  ScheduleEntity,
+  TransactionEntity,
+  UserAccessEntity,
+  UserEntity,
+} from 'loot-core/types/models';
 import type { EnableBankingToken } from 'loot-core/types/models/enablebanking';
 import type { Template } from 'loot-core/types/models/templates';
 

@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
+import { BankProcessorFor, getLoadedRegistry } from '../banks/bank-registry.js';
 import { DanishBankProcessor } from '../banks/danish.bank.js';
 import { FallbackBankProcessor } from '../banks/fallback.bank.js';
-import { BankProcessorFor, getLoadedRegistry } from '../banks/bank-registry.js';
-import { type BankProcessor } from '../models/bank-processor.js';
+import type { BankProcessor } from '../models/bank-processor.js';
 
 describe('Bank Registry', () => {
   describe('ProcessorRegistry', () => {
@@ -31,7 +31,7 @@ describe('Bank Registry', () => {
       expect(Array.isArray(ids)).toBe(true);
       expect(ids.length).toBeGreaterThan(0);
       // Should include at least one Danish bank
-      expect(ids.some((id) => id.startsWith('DK_'))).toBe(true);
+      expect(ids.some(id => id.startsWith('DK_'))).toBe(true);
     });
 
     it('should return sorted list of bank IDs', async () => {
@@ -164,10 +164,12 @@ describe('Bank Registry', () => {
       const uniqueId = `duplicate-test-${Date.now()}`;
 
       @BankProcessorFor([uniqueId])
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       class FirstProcessor extends FallbackBankProcessor {}
 
       expect(() => {
         @BankProcessorFor([uniqueId])
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         class SecondProcessor extends FallbackBankProcessor {}
       }).toThrow('Duplicate bank processor id');
     });
@@ -176,13 +178,9 @@ describe('Bank Registry', () => {
   describe('Real Bank IDs', () => {
     it('should have processors for major Danish banks', async () => {
       const registry = await getLoadedRegistry();
-      const danishBanks = [
-        'DK_Danske Bank',
-        'DK_Nordea',
-        'DK_Jyske Bank',
-      ];
+      const danishBanks = ['DK_Danske Bank', 'DK_Nordea', 'DK_Jyske Bank'];
 
-      danishBanks.forEach((bankId) => {
+      danishBanks.forEach(bankId => {
         const processor = registry.get(bankId);
         expect(processor).toBeInstanceOf(DanishBankProcessor);
       });
@@ -193,7 +191,7 @@ describe('Bank Registry', () => {
       // These should use fallback processor
       const otherBanks = ['SomeBank_SE_TESTXXXX', 'AnotherBank_NO_TESTXXXX'];
 
-      otherBanks.forEach((bankId) => {
+      otherBanks.forEach(bankId => {
         const processor = registry.get(bankId);
         expect(processor).toBeInstanceOf(FallbackBankProcessor);
         expect(processor.name).toBe('FallbackBankProcessor');

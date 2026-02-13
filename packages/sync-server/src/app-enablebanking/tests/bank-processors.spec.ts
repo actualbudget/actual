@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { DanishBankProcessor } from '../banks/danish.bank.js';
 import { FallbackBankProcessor } from '../banks/fallback.bank.js';
-import { type components } from '../models/enablebanking-openapi.js';
+import type { components } from '../models/enablebanking-openapi.js';
 
 describe('Bank Processors', () => {
   afterEach(() => {

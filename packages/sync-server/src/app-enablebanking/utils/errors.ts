@@ -4,7 +4,12 @@ import createDebug from 'debug';
 import type { Request, Response } from 'express';
 
 import type { components } from '../models/enablebanking-openapi.js';
-import type { EnableBankingEndpoints, EnableBankingErrorCode, EnableBankingErrorInterface, EnableBankingResponse } from '../models/enablebanking.js';
+import type {
+  EnableBankingEndpoints,
+  EnableBankingErrorCode,
+  EnableBankingErrorInterface,
+  EnableBankingResponse,
+} from '../models/enablebanking.js';
 
 const debug = createDebug('actual:enablebanking:errors');
 

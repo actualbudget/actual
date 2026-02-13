@@ -13,7 +13,12 @@ import { View } from '@actual-app/components/view';
 import { format as formatDate, parseISO } from 'date-fns';
 
 import { currentDay, subDays } from 'loot-core/shared/months';
-import type { AccountEntity, SyncServerGoCardlessAccount, SyncServerPluggyAiAccount, SyncServerSimpleFinAccount } from 'loot-core/types/models';
+import type {
+  AccountEntity,
+  SyncServerGoCardlessAccount,
+  SyncServerPluggyAiAccount,
+  SyncServerSimpleFinAccount,
+} from 'loot-core/types/models';
 
 import {
   linkAccount,

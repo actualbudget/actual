@@ -9,7 +9,16 @@ import { isNonProductionEnvironment } from '../../shared/environment';
 import { dayFromDate } from '../../shared/months';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
-import type { AccountEntity, CategoryEntity, GoCardlessToken, ImportTransactionEntity, SyncServerGoCardlessAccount, SyncServerPluggyAiAccount, SyncServerSimpleFinAccount, TransactionEntity } from '../../types/models';
+import type {
+  AccountEntity,
+  CategoryEntity,
+  GoCardlessToken,
+  ImportTransactionEntity,
+  SyncServerGoCardlessAccount,
+  SyncServerPluggyAiAccount,
+  SyncServerSimpleFinAccount,
+  TransactionEntity,
+} from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
 import {

@@ -29,7 +29,8 @@ describe('SessionStore', () => {
     });
 
     it('should return undefined for non-existent state', () => {
-      const retrieved = enableBankingservice.getSessionIdFromState('non-existent');
+      const retrieved =
+        enableBankingservice.getSessionIdFromState('non-existent');
       expect(retrieved).toBeUndefined();
     });
 
@@ -133,20 +134,18 @@ describe('SessionStore', () => {
       // Session should still exist
       expect(enableBankingservice.getSessionEntry(state)).toBeDefined();
     });
-
-
   });
 
   describe('Multiple Sessions', () => {
     it('should handle multiple concurrent sessions', () => {
       const states = ['concurrent-1', 'concurrent-2', 'concurrent-3'];
 
-      states.forEach((state) => {
+      states.forEach(state => {
         enableBankingservice.failSession(state, `Error for ${state}`);
       });
 
       // Verify all sessions are retrievable
-      states.forEach((state) => {
+      states.forEach(state => {
         expect(enableBankingservice.getSessionEntry(state)).toBeDefined();
       });
     });
@@ -155,10 +154,14 @@ describe('SessionStore', () => {
       const state = 'overwrite-test-state';
 
       enableBankingservice.failSession(state, 'First error');
-      expect(enableBankingservice.getSessionEntry(state)?.error).toBe('First error');
+      expect(enableBankingservice.getSessionEntry(state)?.error).toBe(
+        'First error',
+      );
 
       enableBankingservice.failSession(state, 'Second error');
-      expect(enableBankingservice.getSessionEntry(state)?.error).toBe('Second error');
+      expect(enableBankingservice.getSessionEntry(state)?.error).toBe(
+        'Second error',
+      );
     });
   });
 });

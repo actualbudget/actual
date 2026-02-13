@@ -3,8 +3,17 @@ import pLimit from 'p-limit';
 
 import { SecretName, secretsService } from '../../services/secrets-service.js';
 import { getLoadedRegistry } from '../banks/bank-registry.js';
-import type { components, operations, paths } from '../models/enablebanking-openapi.js';
-import type { Account, EnableBankingAuthenticationStartResponse, EnableBankingToken, Transaction } from '../models/enablebanking.js';
+import type {
+  components,
+  operations,
+  paths,
+} from '../models/enablebanking-openapi.js';
+import type {
+  Account,
+  EnableBankingAuthenticationStartResponse,
+  EnableBankingToken,
+  Transaction,
+} from '../models/enablebanking.js';
 import {
   ApplicationInactiveError,
   EnableBankingError,

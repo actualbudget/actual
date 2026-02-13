@@ -15,7 +15,12 @@ import {
   hasFieldsChanged,
   integerToAmount,
 } from '../../shared/util';
-import type { AccountEntity, BankSyncResponse, SimpleFinBatchSyncResponse, TransactionEntity } from '../../types/models';
+import type {
+  AccountEntity,
+  BankSyncResponse,
+  SimpleFinBatchSyncResponse,
+  TransactionEntity,
+} from '../../types/models';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
 import { runMutator } from '../mutators';

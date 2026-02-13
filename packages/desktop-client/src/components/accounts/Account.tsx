@@ -27,7 +27,15 @@ import {
 } from 'loot-core/shared/transactions';
 import { applyChanges } from 'loot-core/shared/util';
 import type { IntegerAmount } from 'loot-core/shared/util';
-import type { AccountEntity, CategoryGroupEntity, NewRuleEntity, RuleActionEntity, RuleConditionEntity, TransactionEntity, TransactionFilterEntity } from 'loot-core/types/models';
+import type {
+  AccountEntity,
+  CategoryGroupEntity,
+  NewRuleEntity,
+  RuleActionEntity,
+  RuleConditionEntity,
+  TransactionEntity,
+  TransactionFilterEntity,
+} from 'loot-core/types/models';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';

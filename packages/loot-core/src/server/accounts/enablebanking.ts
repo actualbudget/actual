@@ -1,6 +1,9 @@
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import { logger } from '../../platform/server/log';
-import type { EnableBankingEndpoints, EnableBankingResponse } from '../../types/models/enablebanking';
+import type {
+  EnableBankingEndpoints,
+  EnableBankingResponse,
+} from '../../types/models/enablebanking';
 import { createApp } from '../app';
 import { get as _get, post as _post } from '../post';
 import { getServer } from '../server-config';
