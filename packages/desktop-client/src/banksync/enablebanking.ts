@@ -1,6 +1,6 @@
 import { t } from 'i18next';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import {
   type AccountEntity,
   type SyncServerGoCardlessAccount,

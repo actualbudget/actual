@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 
 import { Error as ErrorAlert } from './alerts';
 import { Modal, ModalHeader } from './common/Modal';
