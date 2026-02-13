@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import type { QueryClient } from '@tanstack/react-query';
 
-import { listen } from 'loot-core/platform/client/fetch';
+import { listen } from 'loot-core/platform/client/connection';
 import * as undo from 'loot-core/platform/client/undo';
 
 import { reloadAccounts } from './accounts/accountsSlice';

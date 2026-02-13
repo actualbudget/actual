@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import type { TagEntity } from 'loot-core/types/models';
 
 import { resetApp } from '@desktop-client/app/appSlice';

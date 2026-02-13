@@ -31,7 +31,7 @@ import {
   parseISO,
 } from 'date-fns';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { DEFAULT_MAX_DISTANCE_METERS } from 'loot-core/shared/constants';
 import { locationService } from 'loot-core/shared/location';
 import { calculateDistance } from 'loot-core/shared/location-utils';

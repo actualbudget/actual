@@ -6,7 +6,7 @@ import type { Locale } from 'date-fns';
 import * as d from 'date-fns';
 import { t } from 'i18next';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import type { RuleConditionEntity } from 'loot-core/types/models';

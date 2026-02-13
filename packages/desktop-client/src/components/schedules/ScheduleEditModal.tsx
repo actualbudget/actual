@@ -5,7 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
 
-import { send, sendCatch } from 'loot-core/platform/client/fetch';
+import { send, sendCatch } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import type { RecurConfig, ScheduleEntity } from 'loot-core/types/models';
