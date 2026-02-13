@@ -4,8 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 
-import { sendCatch } from 'loot-core/platform/client/fetch';
-import type { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/fetch';
 import type { TagEntity } from 'loot-core/types/models';
 
 import { tagQueries } from './queries';
@@ -13,14 +12,6 @@ import { tagQueries } from './queries';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import type { AppDispatch } from '@desktop-client/redux/store';
-
-const sendThrow: typeof send = async (name, args) => {
-  const { error, data } = await sendCatch(name, args);
-  if (error) {
-    throw error;
-  }
-  return data;
-};
 
 function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
   queryClient.invalidateQueries({
@@ -45,7 +36,9 @@ function dispatchErrorNotification(
   );
 }
 
-type CreateTagPayload = Omit<TagEntity, 'id'>;
+type CreateTagPayload = {
+  tag: Omit<TagEntity, 'id'>;
+};
 
 export function useCreateTagMutation() {
   const queryClient = useQueryClient();
@@ -53,8 +46,8 @@ export function useCreateTagMutation() {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (tag: CreateTagPayload) => {
-      return await sendThrow('tags-create', tag);
+    mutationFn: async ({ tag }: CreateTagPayload) => {
+      return await send('tags-create', tag);
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -79,7 +72,7 @@ export function useUpdateTagMutation() {
 
   return useMutation({
     mutationFn: async ({ tag }: UpdateTagPayload) => {
-      return await sendThrow('tags-update', tag);
+      return await send('tags-update', tag);
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -104,7 +97,7 @@ export function useDeleteTagMutation() {
 
   return useMutation({
     mutationFn: async ({ id }: DeleteTagPayload) => {
-      return await sendThrow('tags-delete', { id });
+      return await send('tags-delete', { id });
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -129,7 +122,7 @@ export function useDeleteTagsMutation() {
 
   return useMutation({
     mutationFn: async ({ ids }: DeleteTagsPayload) => {
-      return await sendThrow('tags-delete-all', ids);
+      return await send('tags-delete-all', ids);
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -150,7 +143,7 @@ export function useDiscoverTagsMutation() {
 
   return useMutation({
     mutationFn: async () => {
-      return await sendThrow('tags-discover');
+      return await send('tags-discover');
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {

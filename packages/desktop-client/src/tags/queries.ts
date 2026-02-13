@@ -14,7 +14,7 @@ export const tagQueries = {
         return tags;
       },
       placeholderData: [],
-      // Manually invalidated when categories change
+      // Manually invalidated when tags change
       staleTime: Infinity,
     }),
 };

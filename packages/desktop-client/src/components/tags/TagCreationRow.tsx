@@ -72,7 +72,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
       return;
     }
 
-    createTag({ tag, color, description });
+    createTag({ tag: { tag, color, description } });
     resetInputs();
   };
 
