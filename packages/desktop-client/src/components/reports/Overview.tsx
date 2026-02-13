@@ -224,8 +224,10 @@ export function Overview({ dashboard }: OverviewProps) {
         id: dashboard.id,
       },
       {
-        onSuccess: () => {
+        onSettled: () => {
           setIsImporting(false);
+        },
+        onSuccess: () => {
           onDispatchSucessNotification(
             t(
               "Dashboard has been successfully reset to default state. Don't like what you see? You can always press [ctrl+z](#undo) to undo.",
