@@ -1115,7 +1115,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   right: '20px',
                   transform: 'translateY(-50%)',
                   backgroundColor: theme.errorBackground,
-                  border: theme.errorBorder,
+                  border: `1px solid ${theme.errorBorder}`,
                   color: theme.pageText,
                   fontSize: '11px',
                   padding: '4px 8px',

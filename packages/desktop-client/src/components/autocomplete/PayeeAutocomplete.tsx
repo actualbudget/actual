@@ -913,7 +913,7 @@ function NearbyPayeeItem({
           onPress={handleForgetClick}
           style={{
             backgroundColor: theme.errorBackground,
-            border: theme.errorBorder,
+            border: `1px solid ${theme.errorBorder}`,
             color: theme.pageText,
             fontSize: '11px',
             padding: '2px 6px',
