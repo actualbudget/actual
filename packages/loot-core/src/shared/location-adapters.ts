@@ -1,4 +1,4 @@
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import type { PayeeEntity, PayeeLocationEntity } from 'loot-core/types/models';
 
 import type { LocationCoordinates } from './location-utils';
