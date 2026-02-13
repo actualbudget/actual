@@ -58,6 +58,7 @@ export const sidebarItemBackgroundFailed = colorPalette.red300;
 export const sidebarItemAccentSelected = colorPalette.purple200;
 export const sidebarItemBackgroundHover = colorPalette.gray700;
 export const sidebarItemText = colorPalette.gray100;
+export const sidebarTextLight = colorPalette.gray300;
 export const sidebarItemTextSelected = colorPalette.purple200;
 export const sidebarBudgetName = colorPalette.gray300;
 

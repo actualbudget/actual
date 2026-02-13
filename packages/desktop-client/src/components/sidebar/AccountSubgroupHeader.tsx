@@ -55,14 +55,13 @@ export function AccountSubgroupHeader<
       onClick={() => onToggle()}
       style={{
         ...styles.smallText,
-        color: theme.sidebarItemText,
+        color: theme.sidebarTextLight,
         paddingTop: 4,
         paddingBottom: 4,
         paddingLeft: 7,
         paddingRight: 15,
         marginTop: 3,
         marginBottom: 1,
-        textTransform: 'uppercase',
         borderLeft: '4px solid transparent',
         display: 'flex',
         flexDirection: 'row',

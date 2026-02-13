@@ -45,6 +45,7 @@ export const theme = {
   sidebarItemAccentSelected: 'var(--color-sidebarItemAccentSelected)',
   sidebarItemBackgroundHover: 'var(--color-sidebarItemBackgroundHover)',
   sidebarItemText: 'var(--color-sidebarItemText)',
+  sidebarTextLight: 'var(--color-sidebarTextLight)',
   sidebarItemTextSelected: 'var(--color-sidebarItemTextSelected)',
   sidebarBudgetName: 'var(--color-sidebarBudgetName)',
   menuBackground: 'var(--color-menuBackground)',
