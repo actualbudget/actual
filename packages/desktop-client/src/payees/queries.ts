@@ -2,7 +2,7 @@ import { queryOptions } from '@tanstack/react-query';
 import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { groupById } from 'loot-core/shared/util';
 import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 
