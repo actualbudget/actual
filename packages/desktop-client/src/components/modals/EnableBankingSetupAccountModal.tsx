@@ -190,8 +190,9 @@ const AspspSelector = ({
 
   // Cleanup timeout on unmount
   useEffect(() => {
+    const timeoutRef = reopenTimeoutRef;
     return () => {
-      const timeout = reopenTimeoutRef.current;
+      const timeout = timeoutRef.current;
       if (timeout) {
         clearTimeout(timeout);
       }

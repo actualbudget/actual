@@ -42,12 +42,18 @@ export function selectEnableBankingAccounts(
   );
   if (accountEntity && accountEntity.official_name) {
     //Find appropriate account
-    const account = accounts
-      .filter(
-        tokenAccount =>
-          tokenAccount.official_name === accountEntity.official_name,
-      )
-      .at(0);
+    const account = accounts.find(tokenAccount => {
+      // Try matching on account_id first (strongest match)
+      if (
+        tokenAccount.account_id &&
+        accountEntity.account_id &&
+        tokenAccount.account_id === accountEntity.account_id
+      ) {
+        return true;
+      }
+      // Fall back to official_name match
+      return tokenAccount.official_name === accountEntity.official_name;
+    });
     if (account) {
       dispatch(
         linkAccount({

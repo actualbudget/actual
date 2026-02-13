@@ -149,6 +149,9 @@ export function CreateAccountModal({
   };
 
   const onConnectEnableBanking = async () => {
+    if (configuredEnableBankingIsLoading) {
+      return;
+    }
     if (!isEnableBankingSetupComplete) {
       onEnableBankingInit();
       return;

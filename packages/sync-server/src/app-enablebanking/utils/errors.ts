@@ -160,7 +160,26 @@ export function handleErrorResponse(
 
 export async function handleEnableBankingError(response: globalThis.Response) {
   if (response.status === 200) {
-    return await response.json();
+    try {
+      return await response.json();
+    } catch (parseError) {
+      // Failed to parse JSON response
+      let rawText: string;
+      try {
+        rawText = await response.text();
+      } catch {
+        rawText = '(unable to read response body)';
+      }
+      console.error(
+        `Failed to parse JSON from Enable Banking API response:`,
+        parseError,
+        `Raw response: ${rawText}`,
+      );
+      throw new EnableBankingError(
+        'INTERNAL_ERROR',
+        'Invalid JSON response from Enable Banking API',
+      );
+    }
   }
   console.error(
     `Enable Banking API error response: HTTP ${response.status} ${response.statusText}`,

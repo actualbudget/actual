@@ -261,7 +261,7 @@ post('/get_session', async (req: Request) => {
   const { state } = req.body;
   if (!state) {
     throw new BadRequestError(
-      "Variable 'state' should be passed to '/enable_banking/get_session'.",
+      "Variable 'state' should be passed to '/get_session'.",
     );
   }
 
@@ -285,11 +285,11 @@ post('/complete_auth', async (req: Request) => {
   const { state, code } = req.body;
 
   if (!state) {
-    throw badRequestVariableError('state', '/enable_banking/complete_auth');
+    throw badRequestVariableError('state', '/complete_auth');
   }
 
   if (!code) {
-    throw badRequestVariableError('code', '/enable_banking/complete_auth');
+    throw badRequestVariableError('code', '/complete_auth');
   }
 
   await enableBankingservice.authorizeSession(state, code);
@@ -301,7 +301,7 @@ post('/fail_auth', async (req: Request) => {
   const { state, error } = req.body;
 
   if (!state) {
-    throw badRequestVariableError('state', '/enable_banking/fail_auth');
+    throw badRequestVariableError('state', '/fail_auth');
   }
 
   enableBankingservice.failSession(state, error ?? 'unknown_error');
@@ -316,7 +316,7 @@ post('/get_accounts', async (req: Request) => {
   const { session_id } = req.body;
 
   if (!session_id) {
-    throw badRequestVariableError('session_id', '/enable_banking/get_accounts');
+    throw badRequestVariableError('session_id', '/get_accounts');
   }
 
   return await enableBankingservice.getAccounts(session_id);
@@ -329,7 +329,7 @@ post('/transactions', async (req: Request) => {
   const { startDate, endDate, account_id, bank_id } = req.body;
 
   if (!account_id) {
-    throw badRequestVariableError('account_id', '/enablebanking/transactions');
+    throw badRequestVariableError('account_id', '/enable_banking/transactions');
   }
   const transactions = await enableBankingservice.getTransactions(
     account_id,

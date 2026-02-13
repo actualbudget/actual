@@ -131,7 +131,7 @@ async function pollAuth({
 
     return {
       error: {
-        error_code: 'TIME_OUT',
+        error_code: 'POLLING_ABORTED',
         error_type: 'Polling was stopped',
       },
     };

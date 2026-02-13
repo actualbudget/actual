@@ -42,8 +42,9 @@ export function useEnableBankingStatus() {
                   },
                 }),
               );
-            } catch {
+            } catch (error) {
               // Deconfiguration failed, but we still mark as unconfigured
+              console.error('Deconfiguration failed:', error);
             } finally {
               setConfiguredEnableBanking(false);
               setIsLoading(false);

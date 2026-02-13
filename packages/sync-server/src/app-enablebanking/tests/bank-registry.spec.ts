@@ -67,6 +67,7 @@ describe('Bank Registry', () => {
 
       // Create a test processor
       @BankProcessorFor(testIds)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       class TestBankProcessor extends FallbackBankProcessor {
         override name = 'TestBankProcessor';
       }
@@ -101,6 +102,7 @@ describe('Bank Registry', () => {
       const registry = await getLoadedRegistry();
       const uniqueId = `invalid-${Date.now()}`;
       // Manually register an invalid constructor
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const invalidCtor = 'not-a-function' as any;
       registry['map'].set(uniqueId, invalidCtor);
 
@@ -134,11 +136,13 @@ describe('Bank Registry', () => {
       class InvalidProcessor implements BankProcessor {
         debug = false;
         name = 'InvalidProcessor';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         normalizeTransaction(t: any) {
           return t;
         }
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       registry['map'].set(uniqueId, InvalidProcessor as any);
       const processor = registry.get(uniqueId);
 
@@ -186,7 +190,7 @@ describe('Bank Registry', () => {
       });
     });
 
-    it('should return fallback for non-Danish European banks', async () => {
+    it('should return fallback for unregistered bank IDs with non-Danish prefixes', async () => {
       const registry = await getLoadedRegistry();
       // These should use fallback processor
       const otherBanks = ['SomeBank_SE_TESTXXXX', 'AnotherBank_NO_TESTXXXX'];

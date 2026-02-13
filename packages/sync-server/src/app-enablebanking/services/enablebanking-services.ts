@@ -58,6 +58,30 @@ function parseAmountSafe(amount: string | undefined): number {
   return parsed;
 }
 
+// Helper function to select the preferred balance from an array of balances
+function selectPreferredBalance(
+  balances: Array<{
+    balance_type: string;
+    balance_amount: { amount: string };
+  }>,
+): { balance_type: string; balance_amount: { amount: string } } {
+  if (balances.length === 0) {
+    throw new ResourceNotFoundError('No balance data available');
+  }
+
+  const preferredBalanceTypes = ['ITBD', 'ITAV', 'CLBD'];
+  const sorted = balances.sort((a, b) => {
+    const aIndex = preferredBalanceTypes.indexOf(a.balance_type);
+    const bIndex = preferredBalanceTypes.indexOf(b.balance_type);
+    return (
+      (aIndex === -1 ? preferredBalanceTypes.length : aIndex) -
+      (bIndex === -1 ? preferredBalanceTypes.length : bIndex)
+    );
+  });
+
+  return sorted[0];
+}
+
 // Session entry with expiration timestamp and optional error state
 export type SessionEntry = {
   sessionId: string | null;
@@ -296,9 +320,15 @@ export const enableBankingservice = {
     aspsp: string,
     host: string,
     exp: number,
-  ): Promise<EnableBankingAuthenticationStartResponse> | never => {
+  ): Promise<EnableBankingAuthenticationStartResponse> => {
     const aspspData = await enableBankingservice.getASPSP(country, aspsp);
-    exp = Math.min(exp, aspspData.maximum_consent_validity - 3600);
+    // Validate and clamp maximum_consent_validity
+    const maxValidity =
+      typeof aspspData.maximum_consent_validity === 'number' &&
+      aspspData.maximum_consent_validity >= 3600
+        ? aspspData.maximum_consent_validity
+        : 3600;
+    exp = Math.min(exp, maxValidity - 3600);
 
     const valid_until = new Date();
     valid_until.setSeconds(valid_until.getSeconds() + exp);
@@ -423,10 +453,12 @@ export const enableBankingservice = {
           ? (account.account_id.iban ?? 'unknown')
           : 'unknown';
 
+        const selectedBalance = selectPreferredBalance(balance.balances);
+
         return {
           account_id,
           name,
-          balance: parseAmountSafe(balance.balances[0].balance_amount.amount),
+          balance: parseAmountSafe(selectedBalance.balance_amount.amount),
           institution: data.aspsp.name,
         };
       }),
@@ -529,20 +561,8 @@ export const enableBankingservice = {
     });
     isDefined(data);
 
-    if (data.balances.length === 0) {
-      throw new ResourceNotFoundError('No balance data available');
-    }
+    const selectedBalance = selectPreferredBalance(data.balances);
 
-    const preferredBalanceTypes = ['ITBD', 'ITAV', 'CLBD'];
-    const balance = data.balances.sort((a, b) => {
-      const aIndex = preferredBalanceTypes.indexOf(a.balance_type);
-      const bIndex = preferredBalanceTypes.indexOf(b.balance_type);
-      return (
-        (aIndex === -1 ? preferredBalanceTypes.length : aIndex) -
-        (bIndex === -1 ? preferredBalanceTypes.length : bIndex)
-      );
-    })[0];
-
-    return parseAmountSafe(balance.balance_amount.amount);
+    return parseAmountSafe(selectedBalance.balance_amount.amount);
   },
 };
