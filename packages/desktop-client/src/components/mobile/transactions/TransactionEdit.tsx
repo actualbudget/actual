@@ -1687,13 +1687,13 @@ function TransactionEditUnconnected({
               deletePayeeLocation(mostRecentLocation.id),
             ).unwrap();
 
-            if (!result.success) {
+            if (result.success) {
+              setShouldShowForgetLocation(false);
+            } else {
               throw new Error('deletePayeeLocation failed');
             }
           }
         }
-
-        setShouldShowForgetLocation(false);
       }
     } catch (error) {
       console.error('Failed to forget location', { error });
