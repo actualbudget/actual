@@ -42,7 +42,7 @@ const schema = {
     mask: 'text',
     official_name: 'text',
     type: 'text',
-    group: 'text',
+    subgroup: 'text',
     subtype: 'text',
     bank: 'text',
     offbudget: 'integer',
@@ -81,9 +81,10 @@ const schema = {
     sort_order: 'real',
     tombstone: 'integer',
   },
-  account_groups: {
+  account_subgroups: {
     name: 'text',
     sort_order: 'real',
+    tombstone: 'integer',
   },
   category_mapping: { transferId: 'text' },
   payees: {

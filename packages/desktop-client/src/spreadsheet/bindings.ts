@@ -92,7 +92,7 @@ export function accountSubgroupBalance(
     ),
     query: q('transactions')
       .filter({
-        'account.group': subgroupName,
+        'account.subgroup.name': subgroupName,
         'account.offbudget': offbudget,
         'account.closed': false,
       })

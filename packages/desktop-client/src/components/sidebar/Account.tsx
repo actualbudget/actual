@@ -241,7 +241,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
             <Menu
               onMenuSelect={menuAction => {
                 switch (menuAction) {
-                  case 'group': {
+                  case 'subgroup': {
                     setGroupMenuOpen(true);
                     break;
                   }
@@ -264,7 +264,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                 setMenuOpen(false);
               }}
               items={[
-                { name: 'group', text: t('Group') },
+                { name: 'subgroup', text: t('Subgroup') },
                 { name: 'rename', text: t('Rename') },
                 account.closed
                   ? { name: 'reopen', text: t('Reopen') }
@@ -285,7 +285,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
           >
             <View style={{ padding: '6px 8px' }}>
               <AccountSubgroupAutocomplete
-                value={account.group || ''}
+                value={account.subgroup || ''}
                 embedded
                 maxHeight={150}
                 closeOnBlur={false}
@@ -294,7 +294,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                     updateAccount({
                       account: {
                         ...account,
-                        group: value || null,
+                        subgroup: value || null,
                       },
                     }),
                   );

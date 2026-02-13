@@ -584,7 +584,7 @@ handlers['api/account-create'] = withMutation(async function ({
   return handlers['account-create']({
     name: account.name,
     type: account.type,
-    group: account.group,
+    subgroup: account.subgroup,
     offBudget: account.offbudget,
     closed: account.closed,
     // Current the API expects an amount but it really should expect
@@ -600,7 +600,7 @@ handlers['api/account-update'] = withMutation(async function ({ id, fields }) {
     id,
     name: account.name,
     type: account.type,
-    group: account.group,
+    subgroup: account.subgroup,
     last_reconciled: account.last_reconciled,
   });
 });

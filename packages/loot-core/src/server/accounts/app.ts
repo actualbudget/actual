@@ -105,19 +105,19 @@ async function updateAccount({
   id,
   name,
   type,
-  group,
+  subgroup,
   last_reconciled,
 }: Pick<AccountEntity, 'id' | 'name'> &
-  Partial<Pick<AccountEntity, 'last_reconciled' | 'type' | 'group'>>) {
-  if (group !== undefined) {
-    let accountGroupId: string | null = null;
-    if (group?.trim()) {
-      accountGroupId = await db.getOrCreateAccountGroup(group);
+  Partial<Pick<AccountEntity, 'last_reconciled' | 'type' | 'subgroup'>>) {
+  if (subgroup !== undefined) {
+    let accountSubgroupId: string | null = null;
+    if (subgroup?.trim()) {
+      accountSubgroupId = await db.getOrCreateAccountSubgroup(subgroup);
     }
 
     await db.update('accounts', {
       id,
-      group: accountGroupId,
+      subgroup: accountSubgroupId,
     });
   }
 
@@ -384,27 +384,27 @@ async function linkPluggyAiAccount({
 async function createAccount({
   name,
   type,
-  group,
+  subgroup,
   balance = 0,
   offBudget = false,
   closed = false,
 }: {
   name: string;
   type?: string | undefined;
-  group?: string | undefined;
+  subgroup?: string | undefined;
   balance?: number | undefined;
   offBudget?: boolean | undefined;
   closed?: boolean | undefined;
 }) {
-  let accountGroupId: string | null = null;
-  if (group?.trim()) {
-    accountGroupId = await db.getOrCreateAccountGroup(group);
+  let accountSubgroupId: string | null = null;
+  if (subgroup?.trim()) {
+    accountSubgroupId = await db.getOrCreateAccountSubgroup(subgroup);
   }
 
   const id: AccountEntity['id'] = await db.insertAccount({
     name,
     type: type || null,
-    group: accountGroupId,
+    subgroup: accountSubgroupId,
     offbudget: offBudget ? 1 : 0,
     closed: closed ? 1 : 0,
   });

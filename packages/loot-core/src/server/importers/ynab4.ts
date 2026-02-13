@@ -29,7 +29,7 @@ async function importAccounts(
       if (!account.isTombstone) {
         const id = await actual.createAccount({
           name: account.accountName,
-          group: account.accountType
+          subgroup: account.accountType
             ? camelToTitleCase(account.accountType)
             : undefined,
           offbudget: account.onBudget ? false : true,

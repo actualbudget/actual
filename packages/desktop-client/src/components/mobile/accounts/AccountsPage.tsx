@@ -532,16 +532,16 @@ function splitAccountsBySubgroup(accounts: AccountEntity[]): {
   const subgroupMap = new Map<string, AccountEntity[]>();
 
   for (const account of accounts) {
-    if (!account.group) {
+    if (!account.subgroup) {
       ungroupedAccounts.push(account);
       continue;
     }
 
-    const groupedAccounts = subgroupMap.get(account.group);
+    const groupedAccounts = subgroupMap.get(account.subgroup);
     if (groupedAccounts) {
       groupedAccounts.push(account);
     } else {
-      subgroupMap.set(account.group, [account]);
+      subgroupMap.set(account.subgroup, [account]);
     }
   }
 

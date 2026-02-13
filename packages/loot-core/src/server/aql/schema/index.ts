@@ -69,7 +69,7 @@ export const schema = {
     id: f('id'),
     name: f('string', { required: true }),
     type: f('string'),
-    group: f('string'),
+    subgroup: f('id', { ref: 'account_subgroups' }),
     offbudget: f('boolean'),
     closed: f('boolean'),
     sort_order: f('float'),
@@ -80,7 +80,7 @@ export const schema = {
     last_reconciled: f('string'),
     last_sync: f('string'),
   },
-  account_groups: {
+  account_subgroups: {
     id: f('id'),
     name: f('string'),
     sort_order: f('float'),
@@ -244,8 +244,8 @@ export const schemaConfig: SchemaConfig = {
       case 'accounts':
         return 'v_accounts';
 
-      case 'account_groups':
-        return 'v_account_groups';
+      case 'account_subgroups':
+        return 'v_account_subgroups';
 
       default:
     }
@@ -273,7 +273,7 @@ export const schemaConfig: SchemaConfig = {
           ];
         case 'category_groups':
           return ['is_income', 'sort_order', 'id'];
-        case 'account_groups':
+        case 'account_subgroups':
           return ['sort_order', 'id'];
         case 'categories':
           return ['sort_order', 'id'];
@@ -356,36 +356,20 @@ export const schemaConfig: SchemaConfig = {
 
     accounts: {
       v_accounts: internalFields => {
-        const fields = internalFields({
-          group: '__account_groups.name',
-        });
+        const fields = internalFields();
 
         return `
           SELECT ${fields} FROM accounts _
-          LEFT JOIN account_groups __account_groups
-            ON _."group" = __account_groups.id
         `;
       },
     },
 
-    account_groups: {
-      v_account_groups: internalFields => {
-        const fields = internalFields({
-          tombstone: `
-            CASE
-              WHEN _.id NOT IN (
-                SELECT DISTINCT "group"
-                FROM accounts
-                WHERE "group" IS NOT NULL AND tombstone = 0
-              )
-              THEN 1
-              ELSE 0
-            END
-          `,
-        });
+    account_subgroups: {
+      v_account_subgroups: internalFields => {
+        const fields = internalFields();
 
         return `
-          SELECT ${fields} FROM account_groups _
+          SELECT ${fields} FROM account_subgroups _
         `;
       },
     },

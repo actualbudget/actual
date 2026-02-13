@@ -212,13 +212,13 @@ export function AccountSubgroupAutocomplete({
     const onBudget = new Set<string>();
     const offBudget = new Set<string>();
     for (const account of accounts) {
-      if (!account.group) {
+      if (!account.subgroup) {
         continue;
       }
       if (account.offbudget) {
-        offBudget.add(account.group);
+        offBudget.add(account.subgroup);
       } else {
-        onBudget.add(account.group);
+        onBudget.add(account.subgroup);
       }
     }
     return {

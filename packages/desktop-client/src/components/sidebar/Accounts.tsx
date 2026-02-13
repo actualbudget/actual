@@ -123,8 +123,8 @@ function isTextDragItem(item: { kind: string }): item is {
 }
 
 /**
- * Group a list of accounts by their group field, returning:
- * - ungrouped accounts (group is null/empty) as direct children
+ * Group a list of accounts by their subgroup field, returning:
+ * - ungrouped accounts (subgroup is null/empty) as direct children
  * - grouped accounts nested under subgroup nodes
  *
  * `subgroupOrder` is a persisted list of subgroup keys
@@ -140,16 +140,16 @@ function groupAccountsBySubgroup(
   const bySubgroup = new Map<string, AccountEntity[]>();
 
   for (const account of accounts) {
-    if (!account.group) {
+    if (!account.subgroup) {
       untyped.push({
         id: account.id,
         name: account.name,
         account,
       });
     } else {
-      const list = bySubgroup.get(account.group) || [];
+      const list = bySubgroup.get(account.subgroup) || [];
       list.push(account);
-      bySubgroup.set(account.group, list);
+      bySubgroup.set(account.subgroup, list);
     }
   }
 
@@ -454,7 +454,7 @@ export function Accounts() {
             if (account) {
               dispatch(
                 updateAccount({
-                  account: { ...account, group: nextSubgroup },
+                  account: { ...account, subgroup: nextSubgroup },
                 }),
               );
             }

@@ -1,5 +1,5 @@
 import type {
-  AccountGroupEntity,
+  AccountSubgroupEntity,
   CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
@@ -14,7 +14,7 @@ import {
 } from './aql';
 import type {
   DbAccount,
-  DbAccountGroup,
+  DbAccountSubgroup,
   DbCategory,
   DbCategoryGroup,
   DbPayee,
@@ -76,38 +76,48 @@ export const accountModel = {
   },
 };
 
-export const accountGroupModel = {
+export const accountSubgroupModel = {
   validate(
-    accountGroup: Partial<DbAccountGroup>,
+    accountSubgroup: Partial<DbAccountSubgroup>,
     { update }: { update?: boolean } = {},
-  ): DbAccountGroup {
+  ): DbAccountSubgroup {
     requiredFields(
-      'accountGroup',
-      accountGroup,
+      'accountSubgroup',
+      accountSubgroup,
       update ? ['name'] : ['name'],
       update,
     );
 
-    const { sort_order: _sort_order, ...rest } = accountGroup;
-    return { ...rest } as DbAccountGroup;
+    const { sort_order: _sort_order, ...rest } = accountSubgroup;
+    return { ...rest } as DbAccountSubgroup;
   },
   toDb(
-    accountGroup: AccountGroupEntity,
+    accountSubgroup: AccountSubgroupEntity,
     { update }: { update?: boolean } = {},
-  ): DbAccountGroup {
+  ): DbAccountSubgroup {
     return (
       update
-        ? convertForUpdate(schema, schemaConfig, 'account_groups', accountGroup)
-        : convertForInsert(schema, schemaConfig, 'account_groups', accountGroup)
-    ) as DbAccountGroup;
+        ? convertForUpdate(
+            schema,
+            schemaConfig,
+            'account_subgroups',
+            accountSubgroup,
+          )
+        : convertForInsert(
+            schema,
+            schemaConfig,
+            'account_subgroups',
+            accountSubgroup,
+          )
+    ) as DbAccountSubgroup;
   },
-  fromDb(accountGroup: DbAccountGroup): AccountGroupEntity {
+  fromDb(accountSubgroup: DbAccountSubgroup): AccountSubgroupEntity {
     return convertFromSelect(
       schema,
       schemaConfig,
-      'account_groups',
-      accountGroup,
-    ) as AccountGroupEntity;
+      'account_subgroups',
+      accountSubgroup,
+    ) as AccountSubgroupEntity;
   },
 };
 
