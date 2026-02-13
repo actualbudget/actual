@@ -18,8 +18,7 @@ import {
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
-import { useDispatch } from '@desktop-client/redux';
-import { createTag } from '@desktop-client/tags/tagsSlice';
+import { useCreateTagMutation } from '@desktop-client/tags';
 
 type TagCreationRowProps = {
   tags: TagEntity[];
@@ -28,7 +27,6 @@ type TagCreationRowProps = {
 
 export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
   const [tag, setTag] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState<string | null>(null);
@@ -67,12 +65,14 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
     );
   };
 
+  const { mutate: createTag } = useCreateTagMutation();
+
   const onAddTag = () => {
     if (!isTagValid()) {
       return;
     }
 
-    dispatch(createTag({ tag, color, description }));
+    createTag({ tag: { tag, color, description } });
     resetInputs();
   };
 
