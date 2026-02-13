@@ -23,7 +23,6 @@ import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
 import * as modalsSlice from './modals/modalsSlice';
 import * as notificationsSlice from './notifications/notificationsSlice';
-import * as payeesSlice from './payees/payeesSlice';
 import * as prefsSlice from './prefs/prefsSlice';
 import { aqlQuery } from './queries/aqlQuery';
 import { configureAppStore } from './redux/store';
@@ -43,7 +42,6 @@ const boundActions = bindActionCreators(
     ...budgetfilesSlice.actions,
     ...modalsSlice.actions,
     ...notificationsSlice.actions,
-    ...payeesSlice.actions,
     ...prefsSlice.actions,
     ...transactionsSlice.actions,
     ...usersSlice.actions,

@@ -31,6 +31,7 @@ import type {
   AccountEntity,
   CategoryGroupEntity,
   NewRuleEntity,
+  PayeeEntity,
   RuleActionEntity,
   RuleConditionEntity,
   TransactionEntity,
@@ -41,12 +42,12 @@ import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
 
 import {
-  markAccountRead,
-  reopenAccount,
-  unlinkAccount,
-  updateAccount,
-} from '@desktop-client/accounts/accountsSlice';
-import { syncAndDownload } from '@desktop-client/app/appSlice';
+  useReopenAccountMutation,
+  useSyncAndDownloadMutation,
+  useUnlinkAccountMutation,
+  useUpdateAccountMutation,
+} from '@desktop-client/accounts';
+import { markAccountRead } from '@desktop-client/accounts/accountsSlice';
 import type { SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
 import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
 import { validateAccountName } from '@desktop-client/components/util/accountValidation';
@@ -75,7 +76,7 @@ import {
   replaceModal,
 } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { createPayee, getPayees } from '@desktop-client/payees/payeesSlice';
+import { useCreatePayeeMutation } from '@desktop-client/payees';
 import * as queries from '@desktop-client/queries';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { pagedQuery } from '@desktop-client/queries/pagedQuery';
@@ -239,13 +240,19 @@ type AccountInternalProps = {
   location: ReturnType<typeof useLocation>;
   failedAccounts: ReturnType<typeof useFailedAccounts>;
   dateFormat: ReturnType<typeof useDateFormat>;
-  payees: ReturnType<typeof usePayees>;
+  payees: PayeeEntity[];
   categoryGroups: CategoryGroupEntity[];
   hideFraction: boolean;
   accountsSyncing: string[];
   dispatch: AppDispatch;
   onSetTransfer: ReturnType<typeof useTransactionBatchActions>['onSetTransfer'];
+  onReopenAccount: (id: AccountEntity['id']) => void;
+  onUpdateAccount: (account: AccountEntity) => void;
+  onUnlinkAccount: (id: AccountEntity['id']) => void;
+  onSyncAndDownload: (accountId?: AccountEntity['id']) => void;
+  onCreatePayee: (name: PayeeEntity['name']) => Promise<PayeeEntity['id']>;
 };
+
 type AccountInternalState = {
   search: string;
   filterConditions: ConditionEntity[];
@@ -376,7 +383,6 @@ class AccountInternal extends PureComponent<
 
     // Important that any async work happens last so that the
     // listeners are set up synchronously
-    await this.props.dispatch(getPayees());
     await this.fetchTransactions(this.state.filterConditions);
 
     // If there is a pending undo, apply it immediately (this happens
@@ -568,9 +574,7 @@ class AccountInternal extends PureComponent<
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(acct => acct.id === accountId);
 
-    await this.props.dispatch(
-      syncAndDownload({ accountId: account ? account.id : accountId }),
-    );
+    this.props.onSyncAndDownload(account ? account.id : accountId);
   };
 
   onImport = async () => {
@@ -756,7 +760,7 @@ class AccountInternal extends PureComponent<
       if (!account) {
         throw new Error(`Account with ID ${this.props.accountId} not found.`);
       }
-      this.props.dispatch(updateAccount({ account: { ...account, name } }));
+      this.props.onUpdateAccount({ ...account, name });
       this.setState({ nameError: '' });
     }
   };
@@ -805,7 +809,7 @@ class AccountInternal extends PureComponent<
                 accountName: account.name,
                 isViewBankSyncSettings: false,
                 onUnlink: () => {
-                  this.props.dispatch(unlinkAccount({ id: accountId }));
+                  this.props.onUnlinkAccount(accountId);
                 },
               },
             },
@@ -816,7 +820,7 @@ class AccountInternal extends PureComponent<
         this.props.dispatch(openAccountCloseModal({ accountId }));
         break;
       case 'reopen':
-        this.props.dispatch(reopenAccount({ id: accountId }));
+        this.props.onReopenAccount(accountId);
         break;
       case 'export':
         const accountName = this.getAccountTitle(account, accountId);
@@ -942,7 +946,7 @@ class AccountInternal extends PureComponent<
   onCreatePayee = async (name: string) => {
     const trimmed = name.trim();
     if (trimmed !== '') {
-      return this.props.dispatch(createPayee({ name })).unwrap();
+      return await this.props.onCreatePayee(name);
     }
     return null;
   };
@@ -1023,11 +1027,7 @@ class AccountInternal extends PureComponent<
     }
 
     const lastReconciled = new Date().getTime().toString();
-    this.props.dispatch(
-      updateAccount({
-        account: { ...account, last_reconciled: lastReconciled },
-      }),
-    );
+    this.props.onUpdateAccount({ ...account, last_reconciled: lastReconciled });
 
     this.setState({
       reconcileAmount: null,
@@ -1967,7 +1967,7 @@ export function Account() {
     state => state.transactions.matchedTransactions,
   );
   const accounts = useAccounts();
-  const payees = usePayees();
+  const { data: payees = [] } = usePayees();
   const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [hideFraction] = useSyncedPref('hideFraction');
@@ -1997,6 +1997,26 @@ export function Account() {
     () => getSchedulesQuery(params.id),
     [params.id],
   );
+
+  const reopenAccount = useReopenAccountMutation();
+  const onReopenAccount = (id: AccountEntity['id']) =>
+    reopenAccount.mutate({ id });
+
+  const updateAccount = useUpdateAccountMutation();
+  const onUpdateAccount = (account: AccountEntity) =>
+    updateAccount.mutate({ account });
+
+  const unlinkAccount = useUnlinkAccountMutation();
+  const onUnlinkAccount = (id: AccountEntity['id']) =>
+    unlinkAccount.mutate({ id });
+
+  const syncAndDownload = useSyncAndDownloadMutation();
+  const onSyncAndDownload = (id?: AccountEntity['id']) =>
+    syncAndDownload.mutate({ id });
+
+  const createPayee = useCreatePayeeMutation();
+  const onCreatePayee = (name: PayeeEntity['name']) =>
+    createPayee.mutateAsync({ name });
 
   return (
     <SchedulesProvider query={schedulesQuery}>
@@ -2034,6 +2054,11 @@ export function Account() {
           categoryId={location?.state?.categoryId}
           location={location}
           savedFilters={savedFiters}
+          onReopenAccount={onReopenAccount}
+          onUpdateAccount={onUpdateAccount}
+          onUnlinkAccount={onUnlinkAccount}
+          onSyncAndDownload={onSyncAndDownload}
+          onCreatePayee={onCreatePayee}
         />
       </SplitsExpandedProvider>
     </SchedulesProvider>

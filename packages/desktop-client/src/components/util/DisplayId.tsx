@@ -42,7 +42,7 @@ function AccountDisplayId({ id, noneColor }) {
 
 function PayeeDisplayId({ id, noneColor }) {
   const { t } = useTranslation();
-  const payee = usePayee(id);
+  const { data: payee } = usePayee(id);
   return (
     <TextOneLine
       style={payee == null ? { color: noneColor } : null}

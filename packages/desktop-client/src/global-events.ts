@@ -4,7 +4,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { listen } from 'loot-core/platform/client/connection';
 import * as undo from 'loot-core/platform/client/undo';
 
-import { reloadAccounts } from './accounts/accountsSlice';
+import { accountQueries } from './accounts';
 import { setAppState } from './app/appSlice';
 import { categoryQueries } from './budget';
 import { closeBudgetUI } from './budgetfiles/budgetfilesSlice';
@@ -13,7 +13,7 @@ import {
   addGenericErrorNotification,
   addNotification,
 } from './notifications/notificationsSlice';
-import { reloadPayees } from './payees/payeesSlice';
+import { payeeQueries } from './payees';
 import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
 import * as syncEvents from './sync-events';
@@ -70,11 +70,17 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
       tables.includes('payees') ||
       tables.includes('payee_mapping')
     ) {
-      promises.push(store.dispatch(reloadPayees()));
+      queryClient.invalidateQueries({
+        queryKey: payeeQueries.lists(),
+      });
     }
 
     if (tables.includes('accounts')) {
-      promises.push(store.dispatch(reloadAccounts()));
+      promises.push(
+        queryClient.invalidateQueries({
+          queryKey: accountQueries.lists(),
+        }),
+      );
     }
 
     const tagged = undo.getTaggedState(undoTag);
