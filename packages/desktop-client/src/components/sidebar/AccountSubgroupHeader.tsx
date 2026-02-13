@@ -25,7 +25,7 @@ export type AccountSubgroupHeaderProps<
 
 /**
  * Account subgroup header with a collapse/expand chevron and optional
- * aggregate balance shown on hover.
+ * aggregate balance.
  */
 export function AccountSubgroupHeader<
   FieldName extends SheetFields<'account'>,
@@ -37,6 +37,15 @@ export function AccountSubgroupHeader<
 }: AccountSubgroupHeaderProps<FieldName>) {
   const format = useFormat();
   const [showChevron, setShowChevron] = useState(false);
+  const subtotalValue = query ? (
+    <CellValue binding={query} type="financial">
+      {({ value }) => (
+        <FinancialText style={styles.tnum}>
+          <PrivacyFilter>{format(value, 'financial')}</PrivacyFilter>
+        </FinancialText>
+      )}
+    </CellValue>
+  ) : null;
 
   const headerRow = (
     <View
@@ -86,28 +95,21 @@ export function AccountSubgroupHeader<
       <View
         style={{ ...styles.verySmallText, flex: 1, minWidth: 0, marginLeft: 1 }}
       >
-        <AlignedText left={subgroupName} right={null} />
+        <AlignedText
+          left={subgroupName}
+          right={!isExpanded ? subtotalValue : null}
+        />
       </View>
     </View>
   );
 
-  if (!query) {
+  if (!query || !isExpanded) {
     return headerRow;
   }
 
   return (
     <Tooltip
-      content={
-        <View style={{ padding: '6px 8px' }}>
-          <CellValue binding={query} type="financial">
-            {({ value }) => (
-              <FinancialText style={{ ...styles.tnum }}>
-                <PrivacyFilter>{format(value, 'financial')}</PrivacyFilter>
-              </FinancialText>
-            )}
-          </CellValue>
-        </View>
-      }
+      content={<View style={{ padding: '6px 8px' }}>{subtotalValue}</View>}
       style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
       placement="right top"
       triggerProps={{ delay: 500, closeDelay: 150 }}
