@@ -1,4 +1,4 @@
-import { abnamroAbnanl2a } from '../abnamro_abnanl2a';
+import AbnamroAbnanl2a from '../abnamro_abnanl2a';
 
 describe('AbnamroAbnanl2a', () => {
   describe('#normalizeTransaction', () => {
@@ -19,7 +19,7 @@ describe('AbnamroAbnanl2a', () => {
         ],
       };
 
-      const normalizedTransaction = abnamroAbnanl2a.normalizeTransaction(
+      const normalizedTransaction = AbnamroAbnanl2a.normalizeTransaction(
         transaction,
         false,
       );
@@ -47,7 +47,7 @@ describe('AbnamroAbnanl2a', () => {
         ],
       };
 
-      const normalizedTransaction = abnamroAbnanl2a.normalizeTransaction(
+      const normalizedTransaction = AbnamroAbnanl2a.normalizeTransaction(
         transaction,
         false,
       );

@@ -10,29 +10,16 @@ const banksDir = path.resolve(dirname, 'banks');
 async function loadBanks() {
   const bankHandlers = fs
     .readdirSync(banksDir)
-    .filter(
-      filename =>
-        filename.includes('_') &&
-        (filename.endsWith('.js') ||
-          (filename.endsWith('.ts') && !filename.endsWith('.d.ts'))),
-    );
+    .filter(filename => filename.includes('_') && filename.endsWith('.js'));
 
   const imports = await Promise.all(
     bankHandlers.map(file => {
       const fileUrlToBank = pathToFileURL(path.resolve(banksDir, file)); // pathToFileURL for ESM compatibility
-      return import(fileUrlToBank.toString()).then(handler => {
-        if (handler.default) {
-          return handler.default;
-        }
-
-        return Object.values(handler).find(
-          value => value?.institutionIds && value?.normalizeTransaction,
-        );
-      });
+      return import(fileUrlToBank.toString()).then(handler => handler.default);
     }),
   );
 
-  return imports.filter(Boolean);
+  return imports;
 }
 
 export const banks = await loadBanks();

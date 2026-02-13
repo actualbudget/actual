@@ -1,30 +1,17 @@
 import { getCurrency } from 'loot-core/shared/currencies';
 import { amountToInteger } from 'loot-core/shared/util';
 
-import type { Transaction } from '../gocardless-node.types';
-
-import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
 
-type TransactionWithBalance = Transaction & {
-  balanceAfterTransaction: {
-    balanceAmount: {
-      amount: string;
-      currency: string;
-    };
-  };
-};
-
-function hasBalanceAfterTransaction(
-  transaction: Transaction,
-): transaction is TransactionWithBalance {
+function hasBalanceAfterTransaction(transaction) {
   return (
     transaction.balanceAfterTransaction?.balanceAmount?.amount != null &&
     transaction.balanceAfterTransaction?.balanceAmount?.currency != null
   );
 }
 
-export const abnamroAbnanl2a: IBank = {
+/** @type {import('./bank.interface').IBank} */
+export default {
   ...Fallback,
 
   institutionIds: ['ABNAMRO_ABNANL2A'],
