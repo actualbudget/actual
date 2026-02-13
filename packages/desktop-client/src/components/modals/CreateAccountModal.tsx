@@ -19,7 +19,7 @@ import { Permissions } from '@desktop-client/auth/types';
 import {
   authorizeEnableBankingSession,
   deconfigureEnableBanking,
-} from '@desktop-client/banksync/enablebanking';
+} from '@desktop-client/enablebanking';
 import { authorizeBank } from '@desktop-client/gocardless';
 import { Warning } from '@desktop-client/components/alerts';
 import { Link } from '@desktop-client/components/common/Link';
