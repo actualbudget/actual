@@ -2,22 +2,16 @@ import {
   DEFAULT_MAX_DISTANCE_METERS,
   DEFAULT_RECENT_DUPLICATE_INTERVAL_MS,
 } from 'loot-core/shared/constants';
-import {
-  type PayeeEntity,
-  type PayeeLocationEntity,
-} from 'loot-core/types/models';
+import type { PayeeEntity, PayeeLocationEntity } from 'loot-core/types/models';
 
 import { logger } from '../platform/server/log';
 
-import {
-  type GeolocationAdapter,
-  type LocationApiClient,
+import type {
+  GeolocationAdapter,
+  LocationApiClient,
 } from './location-adapters';
-import {
-  calculateDistance,
-  formatDistance,
-  type LocationCoordinates,
-} from './location-utils';
+import { calculateDistance, formatDistance } from './location-utils';
+import type { LocationCoordinates } from './location-utils';
 
 // Geographic utilities
 

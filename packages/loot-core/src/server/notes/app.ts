@@ -1,4 +1,4 @@
-import { type NoteEntity } from '../../types/models';
+import type { NoteEntity } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
 import { mutator } from '../mutators';

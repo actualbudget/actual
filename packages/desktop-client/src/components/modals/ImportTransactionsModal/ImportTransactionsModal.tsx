@@ -1,11 +1,6 @@
 // @ts-strict-ignore
-import React, {
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useState,
-  type ComponentProps,
-} from 'react';
+import React, { useCallback, useEffect, useEffectEvent, useState } from 'react';
+import type { ComponentProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -18,7 +13,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { type ParseFileOptions } from 'loot-core/server/transactions/import/parse-file';
+import type { ParseFileOptions } from 'loot-core/server/transactions/import/parse-file';
 import { amountToInteger } from 'loot-core/shared/util';
 
 import { DateFormatSelect } from './DateFormatSelect';
@@ -33,10 +28,8 @@ import {
   parseAmountFields,
   parseDate,
   stripCsvImportTransaction,
-  type DateFormat,
-  type FieldMapping,
-  type ImportTransaction,
 } from './utils';
+import type { DateFormat, FieldMapping, ImportTransaction } from './utils';
 
 import {
   importPreviewTransactions,
@@ -169,7 +162,7 @@ export function ImportTransactionsModal({
   const dateFormat = useDateFormat() || ('MM/dd/yyyy' as const);
   const [prefs, savePrefs] = useSyncedPrefs();
   const dispatch = useDispatch();
-  const { list: categories } = useCategories();
+  const { data: { list: categories } = { list: [] } } = useCategories();
 
   const [multiplierAmount, setMultiplierAmount] = useState('');
   const [loadingState, setLoadingState] = useState<

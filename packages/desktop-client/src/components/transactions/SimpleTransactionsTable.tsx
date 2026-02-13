@@ -1,10 +1,5 @@
-import React, {
-  memo,
-  useCallback,
-  useMemo,
-  type CSSProperties,
-  type ReactNode,
-} from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgArrowsSynchronize } from '@actual-app/components/icons/v2';
@@ -16,7 +11,7 @@ import {
 } from 'date-fns';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { type TransactionEntity } from 'loot-core/types/models';
+import type { TransactionEntity } from 'loot-core/types/models';
 
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import {
@@ -30,7 +25,8 @@ import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCategory } from '@desktop-client/hooks/useCategory';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import {
   useSelectedDispatch,
   useSelectedItems,
@@ -67,7 +63,7 @@ const TransactionRow = memo(function TransactionRow({
 }: TransactionRowProps) {
   const { t } = useTranslation();
 
-  const category = useCategory(transaction.category || '');
+  const { data: category } = useCategory(transaction.category);
   const account = useAccount(transaction.account);
 
   const dispatchSelected = useSelectedDispatch();

@@ -4,17 +4,14 @@ import {
   DEFAULT_MAX_DISTANCE_METERS,
   DEFAULT_RECENT_DUPLICATE_INTERVAL_MS,
 } from 'loot-core/shared/constants';
-import {
-  type PayeeEntity,
-  type PayeeLocationEntity,
-} from 'loot-core/types/models';
+import type { PayeeEntity, PayeeLocationEntity } from 'loot-core/types/models';
 
-import {
-  type GeolocationAdapter,
-  type LocationApiClient,
+import type {
+  GeolocationAdapter,
+  LocationApiClient,
 } from './location-adapters';
 import { LocationService } from './location-service';
-import { type LocationCoordinates } from './location-utils';
+import type { LocationCoordinates } from './location-utils';
 
 // Clean test implementations - no complex mocking needed
 class TestGeolocationAdapter implements GeolocationAdapter {

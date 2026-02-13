@@ -1,6 +1,6 @@
 import * as monthUtils from 'loot-core/shared/months';
-import { type TimeFrame } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { TimeFrame } from 'loot-core/types/models';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { ReportOptions } from './ReportOptions';
 import { getSpecificRange, validateRange } from './reportRanges';

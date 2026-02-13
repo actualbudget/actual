@@ -1,12 +1,6 @@
 // @ts-strict-ignore
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -46,10 +40,11 @@ import {
   parse,
   unparse,
 } from 'loot-core/shared/rules';
-import {
-  type NewRuleEntity,
-  type RuleActionEntity,
-  type RuleEntity,
+import type { ScheduleStatusType } from 'loot-core/shared/schedules';
+import type {
+  NewRuleEntity,
+  RuleActionEntity,
+  RuleEntity,
 } from 'loot-core/types/models';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
@@ -63,10 +58,7 @@ import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useFormat } from '@desktop-client/hooks/useFormat';
-import {
-  useSchedules,
-  type ScheduleStatusType,
-} from '@desktop-client/hooks/useSchedules';
+import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import {
   SelectedProvider,
   useSelected,

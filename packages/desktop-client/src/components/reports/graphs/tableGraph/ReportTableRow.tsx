@@ -1,18 +1,14 @@
-import React, {
-  memo,
-  type CSSProperties,
-  type RefObject,
-  type UIEventHandler,
-} from 'react';
+import React, { memo } from 'react';
+import type { CSSProperties, RefObject, UIEventHandler } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  type balanceTypeOpType,
-  type GroupedEntity,
-  type RuleConditionEntity,
+import type {
+  balanceTypeOpType,
+  GroupedEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { FinancialText } from '@desktop-client/components/FinancialText';
@@ -78,7 +74,7 @@ export const ReportTableRow = memo(
 
     const navigate = useNavigate();
     const { isNarrowWidth } = useResponsive();
-    const categories = useCategories();
+    const { data: categories = { grouped: [], list: [] } } = useCategories();
     const accounts = useAccounts();
 
     const pointer =

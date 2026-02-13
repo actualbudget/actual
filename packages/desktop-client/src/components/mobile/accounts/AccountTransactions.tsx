@@ -1,14 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { listen, send } from 'loot-core/platform/client/fetch';
-import { type Query } from 'loot-core/shared/query';
+import { send } from 'loot-core/platform/client/fetch';
+import type { Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
-import { type IntegerAmount } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type TransactionEntity,
-} from 'loot-core/types/models';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { AccountEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { markAccountRead } from '@desktop-client/accounts/accountsSlice';
 import { syncAndDownload } from '@desktop-client/app/appSlice';
@@ -89,10 +86,9 @@ function TransactionListWithPreviews({
   const {
     transactions,
     runningBalances,
-    isLoading: isTransactionsLoading,
-    reload: reloadTransactions,
-    isLoadingMore,
-    loadMore: loadMoreTransactions,
+    isPending: isTransactionsLoading,
+    isFetchingNextPage: isLoadingMoreTransactions,
+    fetchNextPage: fetchMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
     options: {
@@ -131,21 +127,6 @@ function TransactionListWithPreviews({
       dispatch(markAccountRead({ id: account.id }));
     }
   }, [account.id, dispatch]);
-
-  useEffect(() => {
-    return listen('sync-event', event => {
-      if (event.type === 'applied') {
-        const tables = event.tables;
-        if (
-          tables.includes('transactions') ||
-          tables.includes('category_mapping') ||
-          tables.includes('payee_mapping')
-        ) {
-          reloadTransactions();
-        }
-      }
-    });
-  }, [dispatch, reloadTransactions]);
 
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {
@@ -226,8 +207,8 @@ function TransactionListWithPreviews({
       balanceUncleared={balanceBindings.uncleared}
       runningBalances={allBalances}
       showRunningBalances={shouldCalculateRunningBalances}
-      isLoadingMore={isLoadingMore}
-      onLoadMore={loadMoreTransactions}
+      isLoadingMore={isLoadingMoreTransactions}
+      onLoadMore={fetchMoreTransactions}
       searchPlaceholder={t('Search {{accountName}}', {
         accountName: account.name,
       })}

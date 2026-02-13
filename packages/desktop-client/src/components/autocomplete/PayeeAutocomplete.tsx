@@ -1,15 +1,13 @@
 // @ts-strict-ignore
-import {
-  Fragment,
-  useMemo,
-  useState,
-  type ComponentProps,
-  type ComponentPropsWithoutRef,
-  type ComponentType,
-  type CSSProperties,
-  type ReactElement,
-  type ReactNode,
-  type SVGProps,
+import React, { Fragment, useMemo, useState } from 'react';
+import type {
+  ComponentProps,
+  ComponentPropsWithoutRef,
+  ComponentType,
+  CSSProperties,
+  ReactElement,
+  ReactNode,
+  SVGProps,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -28,7 +26,7 @@ import { css, cx } from '@emotion/css';
 
 import { formatDistance } from 'loot-core/shared/location-utils';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { type AccountEntity, type PayeeEntity } from 'loot-core/types/models';
+import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 
 import {
   Autocomplete,

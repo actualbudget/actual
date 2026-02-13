@@ -1,4 +1,4 @@
-import { type Request, type Response } from 'express';
+import type { Request, Response } from 'express';
 import ipaddr from 'ipaddr.js';
 
 import { getSession } from '../account-db';

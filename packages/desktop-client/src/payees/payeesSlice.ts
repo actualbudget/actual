@@ -5,7 +5,7 @@ import memoizeOne from 'memoize-one';
 import { send } from 'loot-core/platform/client/fetch';
 import { locationService } from 'loot-core/shared/location';
 import { groupById } from 'loot-core/shared/util';
-import { type AccountEntity, type PayeeEntity } from 'loot-core/types/models';
+import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 
 import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
 import { resetApp } from '@desktop-client/app/appSlice';

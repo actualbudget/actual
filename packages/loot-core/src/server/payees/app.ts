@@ -1,10 +1,10 @@
 import { DEFAULT_MAX_DISTANCE_METERS } from 'loot-core/shared/constants';
 
-import { type Diff } from '../../shared/util';
-import {
-  type PayeeEntity,
-  type PayeeLocationEntity,
-  type RuleEntity,
+import type { Diff } from '../../shared/util';
+import type {
+  PayeeEntity,
+  PayeeLocationEntity,
+  RuleEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';

@@ -1,5 +1,5 @@
-import { type AccountEntity } from './account';
-import { type PayeeLocationEntity } from './payee-location';
+import type { AccountEntity } from './account';
+import type { PayeeLocationEntity } from './payee-location';
 
 export type PayeeEntity = {
   id: string;

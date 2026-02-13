@@ -1,11 +1,6 @@
 // @ts-strict-ignore
-import {
-  Children,
-  useLayoutEffect,
-  useRef,
-  type ComponentPropsWithRef,
-  type ReactNode,
-} from 'react';
+import { Children, useLayoutEffect, useRef } from 'react';
+import type { ComponentPropsWithRef, ReactNode } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { View } from '@actual-app/components/view';

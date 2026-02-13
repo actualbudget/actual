@@ -5,9 +5,8 @@ import React, {
   useEffect,
   useMemo,
   useRef,
-  type ReactNode,
-  type RefObject,
 } from 'react';
+import type { ReactNode, RefObject } from 'react';
 
 import debounce from 'lodash/debounce';
 

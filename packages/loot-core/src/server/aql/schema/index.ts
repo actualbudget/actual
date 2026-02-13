@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type SchemaConfig } from '../compiler';
+import type { SchemaConfig } from '../compiler';
 
 function f(type: string, opts?: Record<string, unknown>) {
   return { type, ...opts };

@@ -1,10 +1,7 @@
 import { send } from 'loot-core/platform/client/fetch';
-import {
-  type PayeeEntity,
-  type PayeeLocationEntity,
-} from 'loot-core/types/models';
+import type { PayeeEntity, PayeeLocationEntity } from 'loot-core/types/models';
 
-import { type LocationCoordinates } from './location-utils';
+import type { LocationCoordinates } from './location-utils';
 
 /**
  * Abstraction for geolocation functionality

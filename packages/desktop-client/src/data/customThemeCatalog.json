@@ -75,5 +75,10 @@
     "name": "You Need A Dark Mode",
     "repo": "distantvapor/you-need-a-dark-mode",
     "colors": ["#121212", "#1E1E1E", "#00B3C4", "#006A84", "#D4D4D4", "#333333"]
+  },
+  {
+    "name": "Butterfly",
+    "repo": "samekh248/actual-butterfly-theme",
+    "colors": ["#12110F", "#22201D", "#F35B16", "#3D261C", "#E5E7EB", "#1B8366"]
   }
 ]
