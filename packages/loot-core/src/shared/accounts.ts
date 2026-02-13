@@ -1,5 +1,5 @@
 /**
- * Pre-populated account type choices based on the YNAB5 AccountType enum,
+ * Suggested account type choices based on the YNAB5 AccountType enum,
  * stored and displayed in title case.
  */
 export const ACCOUNT_TYPES = [
@@ -7,7 +7,7 @@ export const ACCOUNT_TYPES = [
   'Savings',
   'Cash',
   'Credit Card',
-  'Line Of Credit',
+  'Line of Credit',
   'Other Asset',
   'Other Liability',
   'Mortgage',

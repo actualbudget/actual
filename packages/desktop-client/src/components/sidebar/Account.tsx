@@ -27,6 +27,7 @@ import {
   updateAccount,
 } from '@desktop-client/accounts/accountsSlice';
 import { BalanceHistoryGraph } from '@desktop-client/components/accounts/BalanceHistoryGraph';
+import { AccountSubgroupAutocomplete } from '@desktop-client/components/autocomplete/AccountSubgroupAutocomplete';
 import { Link } from '@desktop-client/components/common/Link';
 import { Notes } from '@desktop-client/components/Notes';
 import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
@@ -110,6 +111,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const dispatch = useDispatch();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [groupMenuOpen, setGroupMenuOpen] = useState(false);
 
   const accountNote = useNotes(`account-${account?.id}`);
   const isTouchDevice =
@@ -120,7 +122,14 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const accountRow = (
     <View
       style={{ flexShrink: 0, ...outerStyle }}
-      onContextMenu={needsTooltip ? handleContextMenu : undefined}
+      onContextMenu={
+        needsTooltip
+          ? e => {
+              setGroupMenuOpen(false);
+              handleContextMenu(e);
+            }
+          : undefined
+      }
     >
       <View innerRef={triggerRef}>
         <Link
@@ -232,6 +241,10 @@ export function Account<FieldName extends SheetFields<'account'>>({
             <Menu
               onMenuSelect={menuAction => {
                 switch (menuAction) {
+                  case 'group': {
+                    setGroupMenuOpen(true);
+                    break;
+                  }
                   case 'close': {
                     dispatch(openAccountCloseModal({ accountId: account.id }));
                     break;
@@ -251,12 +264,44 @@ export function Account<FieldName extends SheetFields<'account'>>({
                 setMenuOpen(false);
               }}
               items={[
+                { name: 'group', text: t('Group') },
                 { name: 'rename', text: t('Rename') },
                 account.closed
                   ? { name: 'reopen', text: t('Reopen') }
                   : { name: 'close', text: t('Close') },
               ]}
             />
+          </Popover>
+        )}
+        {account && (
+          <Popover
+            triggerRef={triggerRef}
+            placement="bottom start"
+            isOpen={groupMenuOpen}
+            onOpenChange={() => setGroupMenuOpen(false)}
+            style={{ width: 175, margin: 1 }}
+            isNonModal
+            {...position}
+          >
+            <View style={{ padding: '6px 8px' }}>
+              <AccountSubgroupAutocomplete
+                value={account.type || ''}
+                embedded
+                maxHeight={150}
+                closeOnBlur={false}
+                onSelect={value => {
+                  dispatch(
+                    updateAccount({
+                      account: {
+                        ...account,
+                        type: value || null,
+                      },
+                    }),
+                  );
+                  setGroupMenuOpen(false);
+                }}
+              />
+            </View>
           </Popover>
         )}
       </View>

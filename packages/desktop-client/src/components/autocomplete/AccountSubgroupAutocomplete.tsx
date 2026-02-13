@@ -58,6 +58,7 @@ type AccountSubgroupListProps = {
   }) => ComponentProps<typeof View>;
   highlightedIndex: number;
   embedded?: boolean;
+  maxHeight?: number;
   inputValue: string;
   renderCreateButton?: (
     props: ComponentPropsWithoutRef<typeof CreateAccountSubgroupButton>,
@@ -75,6 +76,7 @@ function AccountSubgroupList({
   getItemProps,
   highlightedIndex,
   embedded,
+  maxHeight,
   inputValue,
   renderCreateButton = defaultRenderCreateButton,
   renderItemGroupHeader = defaultRenderItemGroupHeader,
@@ -123,7 +125,8 @@ function AccountSubgroupList({
         style={{
           overflow: 'auto',
           padding: '5px 0',
-          ...(!embedded && { maxHeight: 175 }),
+          ...(maxHeight ? { maxHeight } : {}),
+          ...(!maxHeight && !embedded ? { maxHeight: 175 } : {}),
         }}
       >
         {newItem &&
@@ -170,6 +173,7 @@ export type AccountSubgroupAutocompleteProps = {
     typeof Autocomplete<AccountSubgroupItem>
   >['inputProps'];
   embedded?: boolean;
+  maxHeight?: number;
   closeOnBlur?: boolean;
   onUpdate?: (id: string, value: string) => void;
   onSelect?: (id: string, value: string) => void;
@@ -188,6 +192,7 @@ export function AccountSubgroupAutocomplete({
   value,
   inputProps,
   embedded,
+  maxHeight,
   closeOnBlur,
   onUpdate,
   onSelect,
@@ -393,6 +398,7 @@ export function AccountSubgroupAutocomplete({
           highlightedIndex={idx}
           inputValue={inputValue ?? ''}
           embedded={embedded}
+          maxHeight={maxHeight}
           renderCreateButton={renderCreateButton}
           renderItemGroupHeader={renderItemGroupHeader}
           renderItem={renderItem}
@@ -496,7 +502,8 @@ function AccountSubgroupItemComponent({
     : {};
 
   return (
-    <View
+    <button
+      type="button"
       className={cx(
         className,
         css({
@@ -504,8 +511,8 @@ function AccountSubgroupItemComponent({
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
           color: highlighted
-            ? theme.menuAutoCompleteTextHover
-            : theme.menuAutoCompleteText,
+            ? theme.menuAutoCompleteItemTextHover
+            : theme.menuAutoCompleteItemText,
           borderRadius: embedded ? 4 : 0,
           padding: 4,
           paddingLeft: 20,
@@ -519,16 +526,8 @@ function AccountSubgroupItemComponent({
       data-highlighted={highlighted || undefined}
       {...props}
     >
-      <TextOneLine
-        style={{
-          display: 'block',
-          width: '100%',
-          color: 'currentColor',
-        }}
-      >
-        {item.name}
-      </TextOneLine>
-    </View>
+      <TextOneLine>{item.name}</TextOneLine>
+    </button>
   );
 }
 
