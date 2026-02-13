@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import * as fetch from 'loot-core/platform/client/fetch';
+import * as connection from 'loot-core/platform/client/connection';
 import { subDays } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { resetTracer, tracer } from 'loot-core/shared/test-helpers';
@@ -125,10 +125,10 @@ async function mockSend(name, args, { delay }) {
 }
 
 function mockServer({ send = mockSend, listen = mockListen }) {
-  vi.spyOn(fetch, 'send').mockImplementation((name, args) => {
+  vi.spyOn(connection, 'send').mockImplementation((name, args) => {
     return send(name, args, { delay: 0 });
   });
-  vi.spyOn(fetch, 'listen').mockImplementation(listen);
+  vi.spyOn(connection, 'listen').mockImplementation(listen);
 }
 
 function clearMockServer() {

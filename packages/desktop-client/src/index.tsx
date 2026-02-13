@@ -12,7 +12,7 @@ import type { NavigateFunction } from 'react-router';
 import { bindActionCreators } from '@reduxjs/toolkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { q } from 'loot-core/shared/query';
 
 import * as accountsSlice from './accounts/accountsSlice';
