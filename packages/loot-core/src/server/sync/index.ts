@@ -487,7 +487,7 @@ export async function batchMessages(func: () => Promise<void>): Promise<void> {
     await func();
   } catch (e) {
     errorHandler(e);
-    // TODO: if it fails, it shouldn't apply them?
+    throw e;
   } finally {
     IS_BATCHING = false;
     batched = _BATCHED;
