@@ -516,7 +516,9 @@ export function useSyncAccountsMutation() {
 
   return useMutation({
     mutationFn: async ({ id }: SyncAccountsPayload) => {
-      const { account: { accountsSyncing = [] } } = store.getState();
+      const {
+        account: { accountsSyncing = [] },
+      } = store.getState();
 
       // Disallow two parallel sync operations
       if (accountsSyncing.length > 0) {
