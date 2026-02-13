@@ -194,9 +194,10 @@ function TransactionListWithPreviews({
     ? // Do not render child transactions in the list, unless searching
       previewTransactions.concat(transactions.filter(t => !t.is_child))
     : transactions;
-  const transactionsToDisplay = hideReconciled === 'true'
-    ? baseTransactions.filter(t => !t.reconciled)
-    : baseTransactions;
+  const transactionsToDisplay =
+    hideReconciled === 'true'
+      ? baseTransactions.filter(t => !t.reconciled)
+      : baseTransactions;
 
   return (
     <TransactionListWithBalances
