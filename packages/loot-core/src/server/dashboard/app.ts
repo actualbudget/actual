@@ -340,7 +340,9 @@ async function importDashboard({
     if (err instanceof ValidationError) {
       throw new Error(err.message, { cause: 'validation-error' });
     }
-    throw new Error('Internal error occurred during import.', { cause: 'internal-error' });
+    throw new Error('Internal error occurred during import.', {
+      cause: 'internal-error',
+    });
   }
 }
 
