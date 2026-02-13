@@ -50,12 +50,14 @@ yarn start:desktop
 - **ALL pull request titles MUST be prefixed with `[AI]`**
 
 **Examples:**
+
 - ✅ `[AI] Fix type error in account validation`
 - ✅ `[AI] Add support for new transaction categories`
 - ❌ `Fix type error in account validation` (MISSING PREFIX - NOT ALLOWED)
 - ❌ `Add support for new transaction categories` (MISSING PREFIX - NOT ALLOWED)
 
 **This requirement applies to:**
+
 - Every single commit message created by AI agents
 - Every single pull request title created by AI agents
 - No exceptions are permitted
