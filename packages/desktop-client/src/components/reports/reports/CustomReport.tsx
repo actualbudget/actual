@@ -121,9 +121,9 @@ function useSelectedCategories(
 
 export function CustomReport() {
   const params = useParams();
-  const { data: report, isLoading } = useCustomReport(params.id ?? '');
+  const { data: report, isPending } = useCustomReport(params.id);
 
-  if (isLoading) {
+  if (isPending) {
     return <LoadingIndicator />;
   }
 

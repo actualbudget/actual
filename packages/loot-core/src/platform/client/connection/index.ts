@@ -17,12 +17,14 @@ function connectSocket(onOpen) {
 
       if (msg.type === 'error') {
         // An error happened while handling a message so cleanup the
-        // current reply handler. We don't care about the actual error -
-        // generic backend errors are handled separately and if you want
-        // more specific handling you should manually forward the error
-        // through a normal reply.
-        const { id } = msg;
-        replyHandlers.delete(id);
+        // current reply handler and reject the promise. The error will
+        // be propagated to the caller through this promise rejection.
+        const { id, error } = msg;
+        const handler = replyHandlers.get(id);
+        if (handler) {
+          replyHandlers.delete(id);
+          handler.reject(error);
+        }
       } else if (msg.type === 'reply') {
         let { result } = msg;
         const { id, mutated, undoTag } = msg;
