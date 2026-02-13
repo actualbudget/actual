@@ -65,7 +65,11 @@ app.get('/auth_callback', async (req, res) => {
           ? error
           : 'unknown_error';
 
-    enableBankingservice.failSession(state, errorMsg);
+    try {
+      enableBankingservice.failSession(state, errorMsg);
+    } catch (error) {
+      console.error('Failed to mark session as failed:', error);
+    }
 
     res.send(`
       <!DOCTYPE html>
@@ -85,7 +89,11 @@ app.get('/auth_callback', async (req, res) => {
   }
 
   if (!code || typeof code !== 'string') {
-    enableBankingservice.failSession(state, 'missing_code');
+    try {
+      enableBankingservice.failSession(state, 'missing_code');
+    } catch (error) {
+      console.error('Failed to mark session as failed:', error);
+    }
     res.status(400).send(`
       <!DOCTYPE html>
       <html>
@@ -193,6 +201,11 @@ post('/get_aspsps', async req => {
     throw new EnableBankingSetupError();
   }
   const { country } = req.body;
+
+  if (!country || typeof country !== 'string' || country.trim() === '') {
+    throw new BadRequestError("Variable 'country' must be a non-empty string.");
+  }
+
   const responseData = (await enableBankingservice.getASPSPs(country)).aspsps;
   return responseData;
 });
@@ -202,6 +215,14 @@ post('/start_auth', async (req: Request) => {
     throw new EnableBankingSetupError();
   }
   const { aspsp, country } = req.body;
+
+  if (!country || typeof country !== 'string' || country.trim() === '') {
+    throw new BadRequestError("Variable 'country' must be a non-empty string.");
+  }
+
+  if (!aspsp || typeof aspsp !== 'string' || aspsp.trim() === '') {
+    throw new BadRequestError("Variable 'aspsp' must be a non-empty string.");
+  }
 
   const origin = req.headers.origin;
   if (!origin) {

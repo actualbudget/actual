@@ -120,6 +120,7 @@ const AspspSelector = ({
   );
   const [startingAuth, setStartingAuth] = useState<boolean>(false);
   const autoTriggeredRef = useRef(false);
+  const reopenTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-trigger authentication when both init values are provided (reauth scenario)
   useEffect(() => {
@@ -187,6 +188,16 @@ const AspspSelector = ({
     }
   }, [country]);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      const timeout = reopenTimeoutRef.current;
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
+  }, []);
+
   const onSelectCountry = (country_id: string) => {
     if (!country || country_id !== country.id) {
       setCountry(
@@ -211,6 +222,14 @@ const AspspSelector = ({
       if (error) {
         // Handle the error from start auth.
         onErrorRef.current(error);
+        return;
+      }
+
+      if (data === undefined) {
+        onErrorRef.current({
+          error_code: 'INTERNAL_ERROR',
+          error_type: 'No data returned from enablebanking-startauth',
+        });
         return;
       }
 
@@ -428,6 +447,10 @@ export function EnableBankingSetupAccountModal({
   useEffect(() => {
     return () => {
       void send('enablebanking-stoppolling');
+      // Clear reopen timeout if modal unmounts before timeout fires
+      if (reopenTimeoutRef.current) {
+        clearTimeout(reopenTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -437,6 +460,9 @@ export function EnableBankingSetupAccountModal({
   const [authenticationStartResponse, setAuthenticationStartResponse] =
     useState<EnableBankingAuthenticationStartResponse | null>(null);
   const [token, setToken] = useState<EnableBankingToken | null>(null);
+
+  // Ref to track timeout for reopening modal during credential error handling
+  const reopenTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const resetState = () => {
     setPhase('checkingAvailable');
@@ -499,7 +525,7 @@ export function EnableBankingSetupAccountModal({
                           // Close the init modal first
                           closeInitModal();
                           // Then open account selection modal
-                          const timeoutId = setTimeout(() => {
+                          reopenTimeoutRef.current = setTimeout(() => {
                             try {
                               dispatch(
                                 pushModal({
@@ -521,9 +547,6 @@ export function EnableBankingSetupAccountModal({
                               );
                             }
                           }, MODAL_TRANSITION_DELAY_MS);
-
-                          // Store timeout ID for potential cleanup
-                          return () => clearTimeout(timeoutId);
                         },
                       },
                     },

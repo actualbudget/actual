@@ -579,7 +579,7 @@ export function CreateAccountModal({
                           <DialogTrigger>
                             <Button
                               variant="bare"
-                              aria-label={t('EnableBanking menu')}
+                              aria-label={t('Enable Banking menu')}
                             >
                               <SvgDotsHorizontalTriple
                                 width={15}
@@ -599,7 +599,7 @@ export function CreateAccountModal({
                                     {
                                       name: 'reconfigure',
                                       text: t(
-                                        'Reset EnableBanking credentials',
+                                        'Reset Enable Banking credentials',
                                       ),
                                     },
                                   ]}

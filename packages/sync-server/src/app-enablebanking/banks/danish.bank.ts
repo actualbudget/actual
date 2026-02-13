@@ -111,7 +111,7 @@ export class DanishBankProcessor extends FallbackBankProcessor {
     const payeeObject = isDebtor ? t.creditor : t.debtor;
 
     const notes = t.remittance_information
-      ? t.remittance_information.join(' ')
+      ? t.remittance_information.filter(x => x != null).join(' ')
       : '';
 
     // Use creditor/debtor name if available, otherwise extract from notes

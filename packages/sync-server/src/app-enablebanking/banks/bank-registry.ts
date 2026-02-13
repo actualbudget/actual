@@ -66,6 +66,7 @@ export function BankProcessorFor(bankIds: string[]) {
     for (const bankId of bankIds) {
       registry.register(bankId, ctor);
     }
+    return ctor;
   };
 }
 

@@ -40,6 +40,24 @@ function isDefined<T>(value: T | undefined): asserts value is T {
   }
 }
 
+// Helper function to safely parse amount strings
+function parseAmountSafe(amount: string | undefined): number {
+  if (!amount || typeof amount !== 'string') {
+    throw new EnableBankingError(
+      'BAD_REQUEST',
+      'Invalid amount: expected a numeric string',
+    );
+  }
+  const parsed = parseFloat(amount);
+  if (isNaN(parsed)) {
+    throw new EnableBankingError(
+      'BAD_REQUEST',
+      `Invalid amount: cannot parse "${amount}" as a number`,
+    );
+  }
+  return parsed;
+}
+
 // Session entry with expiration timestamp and optional error state
 export type SessionEntry = {
   sessionId: string | null;
@@ -55,6 +73,7 @@ const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 
 class SessionStore {
   private sessions = new Map<string, SessionEntry>();
+  private pendingCreations = new Map<string, Promise<string>>();
   private cleanupTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
@@ -78,6 +97,18 @@ class SessionStore {
       error,
       expiresAt: Date.now() + SESSION_TTL_MS,
     });
+  }
+
+  setPending(state: string, promise: Promise<string>): void {
+    this.pendingCreations.set(state, promise);
+  }
+
+  getPending(state: string): Promise<string> | undefined {
+    return this.pendingCreations.get(state);
+  }
+
+  deletePending(state: string): void {
+    this.pendingCreations.delete(state);
   }
 
   get(state: string): string | undefined {
@@ -307,12 +338,31 @@ export const enableBankingservice = {
     if (existingSessionId) {
       return existingSessionId;
     }
-    const { data } = await enableBankingservice.getClient().POST('/sessions', {
-      body: { code },
-    });
-    isDefined(data);
-    sessionStore.set(state, data.session_id);
-    return data.session_id;
+
+    // Check if there's already a pending creation for this state
+    const pendingCreation = sessionStore.getPending(state);
+    if (pendingCreation) {
+      return await pendingCreation;
+    }
+
+    // Create a new session and store the promise to prevent race conditions
+    const creationPromise = (async () => {
+      try {
+        const { data } = await enableBankingservice
+          .getClient()
+          .POST('/sessions', {
+            body: { code },
+          });
+        isDefined(data);
+        sessionStore.set(state, data.session_id);
+        return data.session_id;
+      } finally {
+        sessionStore.deletePending(state);
+      }
+    })();
+
+    sessionStore.setPending(state, creationPromise);
+    return await creationPromise;
   },
 
   getSessionIdFromState: (state: string): string | undefined => {
@@ -348,35 +398,42 @@ export const enableBankingservice = {
     isDefined(data);
     const bank_id = [data.aspsp.country, data.aspsp.name].join('_');
     const accounts: Account[] = [];
-    for (const account_id of data.accounts) {
-      const { data: account } = await client.GET(
-        `/accounts/{account_id}/details`,
-        {
-          params: { path: { account_id } },
-        },
-      );
-      isDefined(account);
-      const { data: balance } = await client.GET(
-        `/accounts/{account_id}/balances`,
-        { params: { path: { account_id } } },
-      );
-      isDefined(balance);
-      if (!balance.balances.length) {
-        throw new ResourceNotFoundError(
-          `No balance data for account ${account_id}`,
-        );
-      }
-      const name = account.account_id
-        ? (account.account_id.iban ?? 'unknown')
-        : 'unknown';
 
-      accounts.push({
-        account_id,
-        name,
-        balance: parseFloat(balance.balances[0].balance_amount.amount),
-        institution: data.aspsp.name,
-      });
-    }
+    // Process accounts in parallel with rate limiting
+    const accountPromises = data.accounts.map(account_id =>
+      apiLimiter(async () => {
+        const { data: account } = await client.GET(
+          `/accounts/{account_id}/details`,
+          {
+            params: { path: { account_id } },
+          },
+        );
+        isDefined(account);
+        const { data: balance } = await client.GET(
+          `/accounts/{account_id}/balances`,
+          { params: { path: { account_id } } },
+        );
+        isDefined(balance);
+        if (!balance.balances.length) {
+          throw new ResourceNotFoundError(
+            `No balance data for account ${account_id}`,
+          );
+        }
+        const name = account.account_id
+          ? (account.account_id.iban ?? 'unknown')
+          : 'unknown';
+
+        return {
+          account_id,
+          name,
+          balance: parseAmountSafe(balance.balances[0].balance_amount.amount),
+          institution: data.aspsp.name,
+        };
+      }),
+    );
+
+    accounts.push(...(await Promise.all(accountPromises)));
+
     return {
       session_id,
       bank_id,
@@ -422,12 +479,36 @@ export const enableBankingservice = {
         `--- Debugging '${bankProcessor.name}': showing first 2 transactions with processed transactions.---`,
       );
       transactions.slice(0, 2).forEach(transaction => {
-        console.debug('# ORIGINAL:');
-        console.debug(JSON.stringify(transaction, null, 2));
+        // Sanitize sensitive data before logging
+        const sanitized = {
+          transaction_id: transaction.transaction_id,
+          booking_date: transaction.booking_date,
+          value_date: transaction.value_date,
+          amount: transaction.transaction_amount?.amount,
+          currency: transaction.transaction_amount?.currency,
+          credit_debit_indicator: transaction.credit_debit_indicator,
+          status: transaction.status,
+          // Sensitive fields masked
+          debtor: transaction.debtor?.name ? '[REDACTED]' : undefined,
+          creditor: transaction.creditor?.name ? '[REDACTED]' : undefined,
+          remittance_information: transaction.remittance_information
+            ? '[REDACTED]'
+            : undefined,
+        };
+        console.debug('# ORIGINAL (sanitized):');
+        console.debug(JSON.stringify(sanitized, null, 2));
         console.debug('## BECOMES:');
+        const normalized = bankProcessor.normalizeTransaction(transaction);
         console.debug(
           JSON.stringify(
-            bankProcessor.normalizeTransaction(transaction),
+            {
+              imported_id: normalized.imported_id,
+              date: normalized.date,
+              amount: normalized.amount,
+              // Sensitive fields masked
+              payee_name: normalized.payee_name ? '[REDACTED]' : undefined,
+              notes: normalized.notes ? '[REDACTED]' : undefined,
+            },
             null,
             2,
           ),
@@ -462,6 +543,6 @@ export const enableBankingservice = {
       );
     })[0];
 
-    return parseFloat(balance.balance_amount.amount);
+    return parseAmountSafe(balance.balance_amount.amount);
   },
 };

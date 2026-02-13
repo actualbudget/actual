@@ -146,50 +146,54 @@ export const EnableBankingInitialiseModal = ({
                 <Text style={{ fontFamily: 'monospace' }}>
                   {window.location.origin}/enablebanking/auth_callback
                 </Text>
+
+                <FormField>
+                  <FormLabel
+                    title={t('Application Id:')}
+                    htmlFor="application-id-field"
+                  />
+                  <InitialFocus>
+                    <Input
+                      id="application-id-field"
+                      type="password"
+                      value={applicationId}
+                      onChangeValue={value => {
+                        setApplicationId(value);
+                        setIsValid(true);
+                      }}
+                    />
+                  </InitialFocus>
+                </FormField>
+
+                <FormField>
+                  <FormLabel
+                    title={t('Secret Key:')}
+                    htmlFor="secret-key-field"
+                  />
+                  <Input
+                    id="secret-key-field"
+                    type="file"
+                    defaultValue=""
+                    accept=".pem"
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        onSecretKey(file);
+                      }
+                    }}
+                  />
+                </FormField>
+
+                {!isValid && <ErrorAlert>{error}</ErrorAlert>}
               </>
             )}
-
-            <FormField>
-              <FormLabel
-                title={t('Application Id:')}
-                htmlFor="application-id-field"
-              />
-              <InitialFocus>
-                <Input
-                  id="application-id-field"
-                  type="password"
-                  value={applicationId}
-                  onChangeValue={value => {
-                    setApplicationId(value);
-                    setIsValid(true);
-                  }}
-                />
-              </InitialFocus>
-            </FormField>
-
-            <FormField>
-              <FormLabel title={t('Secret Key:')} htmlFor="secret-key-field" />
-              <Input
-                id="secret-key-field"
-                type="file"
-                defaultValue=""
-                accept=".pem"
-                onChange={e => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    onSecretKey(file);
-                  }
-                }}
-              />
-            </FormField>
-
-            {!isValid && <ErrorAlert>{error}</ErrorAlert>}
           </View>
 
           <ModalButtons>
             <ButtonWithLoading
               variant="primary"
               isLoading={isLoading}
+              isDisabled={window.location.protocol === 'http:'}
               onPress={() => {
                 onSubmit(close);
               }}

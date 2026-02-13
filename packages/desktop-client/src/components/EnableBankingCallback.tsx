@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Paragraph } from '@actual-app/components/paragraph';
@@ -18,8 +18,14 @@ export function EnableBankingCallback() {
   const [errorParam] = useUrlParam('error');
   const [errorDescription] = useUrlParam('error_description');
   const [error, setError] = useState<string | null>(null);
+  const ranRef = useRef<boolean>(false);
 
   useEffect(() => {
+    if (ranRef.current) {
+      return;
+    }
+    ranRef.current = true;
+
     const fetchData = async () => {
       // If Enable Banking returned an error, fail the auth flow
       if (errorParam && state) {
