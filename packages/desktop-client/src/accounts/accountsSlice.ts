@@ -11,6 +11,7 @@ import type {
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
+  SyncServerSophtronAccount,
   TransactionEntity,
 } from 'loot-core/types/models';
 
@@ -341,6 +342,28 @@ export const linkAccountPluggyAi = createAppAsyncThunk(
   },
 );
 
+type LinkAccountSophtronPayload = {
+  externalAccount: SyncServerSophtronAccount;
+  upgradingId?: AccountEntity['id'];
+  offBudget?: boolean;
+};
+
+export const linkAccountSophtron = createAppAsyncThunk(
+  `${sliceName}/linkAccountSophtron`,
+  async (
+    { externalAccount, upgradingId, offBudget }: LinkAccountSophtronPayload,
+    { dispatch },
+  ) => {
+    await send('sophtron-accounts-link', {
+      externalAccount,
+      upgradingId,
+      offBudget,
+    });
+    dispatch(markPayeesDirty());
+    dispatch(markAccountsDirty());
+  },
+);
+
 function handleSyncResponse(
   accountId: AccountEntity['id'],
   res: SyncResponseWithErrors,
@@ -655,6 +678,7 @@ export const actions = {
   linkAccount,
   linkAccountSimpleFin,
   linkAccountPluggyAi,
+  linkAccountSophtron,
   moveAccount,
   unlinkAccount,
   syncAccounts,

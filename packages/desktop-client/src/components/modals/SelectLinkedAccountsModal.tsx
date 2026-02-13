@@ -18,12 +18,14 @@ import type {
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
+  SyncServerSophtronAccount,
 } from 'loot-core/types/models';
 
 import {
   linkAccount,
   linkAccountPluggyAi,
   linkAccountSimpleFin,
+  linkAccountSophtron,
   unlinkAccount,
 } from '@desktop-client/accounts/accountsSlice';
 import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
@@ -95,6 +97,12 @@ export type SelectLinkedAccountsModalProps =
       requisitionId?: undefined;
       externalAccounts: SyncServerPluggyAiAccount[];
       syncSource: 'pluggyai';
+    }
+  | {
+      requisitionId?: undefined;
+      userInstitutionId?: string;
+      externalAccounts: SyncServerSophtronAccount[];
+      syncSource: 'sophtron';
     };
 
 export function SelectLinkedAccountsModal({
@@ -120,6 +128,11 @@ export function SelectLinkedAccountsModal({
           return {
             syncSource: 'pluggyai',
             externalAccounts: toSort as SyncServerPluggyAiAccount[],
+          };
+        case 'sophtron':
+          return {
+            syncSource: 'sophtron',
+            externalAccounts: toSort as SyncServerSophtronAccount[],
           };
         case 'goCardless':
           return {
@@ -220,6 +233,21 @@ export function SelectLinkedAccountsModal({
               offBudget,
               startingDate,
               startingBalance,
+            }),
+          );
+        } else if (propsWithSortedExternalAccounts.syncSource === 'sophtron') {
+          dispatch(
+            linkAccountSophtron({
+              externalAccount:
+                propsWithSortedExternalAccounts.externalAccounts[
+                  externalAccountIndex
+                ],
+              upgradingId:
+                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+                chosenLocalAccountId !== addOffBudgetAccountOption.id
+                  ? chosenLocalAccountId
+                  : undefined,
+              offBudget,
             }),
           );
         } else {
@@ -717,7 +745,8 @@ function getInstitutionName(
   externalAccount:
     | SyncServerGoCardlessAccount
     | SyncServerSimpleFinAccount
-    | SyncServerPluggyAiAccount,
+    | SyncServerPluggyAiAccount
+    | SyncServerSophtronAccount,
 ) {
   if (typeof externalAccount?.institution === 'string') {
     return externalAccount?.institution ?? '';

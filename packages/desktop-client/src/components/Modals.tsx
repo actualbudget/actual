@@ -14,6 +14,7 @@ import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
 import { CloseAccountModal } from './modals/CloseAccountModal';
+import { ConfigureSophtronModal } from './modals/ConfigureSophtronModal';
 import { ConfirmCategoryDeleteModal } from './modals/ConfirmCategoryDeleteModal';
 import { ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
 import { ConfirmTransactionEditModal } from './modals/ConfirmTransactionEditModal';
@@ -63,6 +64,7 @@ import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
+import { SophtronExternalMsgModal } from './modals/SophtronExternalMsgModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
 import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
 import { TrackingBudgetMonthMenuModal } from './modals/TrackingBudgetMonthMenuModal';
@@ -182,6 +184,9 @@ export function Modals() {
         case 'pluggyai-init':
           return <PluggyAiInitialiseModal key={key} {...modal.options} />;
 
+        case 'configure-sophtron':
+          return <ConfigureSophtronModal key={key} {...modal.options} />;
+
         case 'gocardless-external-msg':
           return (
             <GoCardlessExternalMsgModal
@@ -190,6 +195,18 @@ export function Modals() {
               onClose={() => {
                 modal.options.onClose?.();
                 send('gocardless-poll-web-token-stop');
+              }}
+            />
+          );
+
+        case 'sophtron-external-msg':
+          return (
+            <SophtronExternalMsgModal
+              key={key}
+              {...modal.options}
+              onClose={() => {
+                modal.options.onClose?.();
+                send('sophtron-poll-web-token-stop');
               }}
             />
           );

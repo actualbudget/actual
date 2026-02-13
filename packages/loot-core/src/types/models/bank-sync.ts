@@ -3,10 +3,15 @@ import type {
   GoCardlessBalance,
   GoCardlessTransaction,
 } from './gocardless';
+import type {
+  SophtronAmount,
+  SophtronBalance,
+  SophtronTransaction,
+} from './sophtron';
 
-export type BankSyncBalance = GoCardlessBalance;
-export type BankSyncAmount = GoCardlessAmount;
-export type BankSyncTransaction = GoCardlessTransaction;
+export type BankSyncBalance = GoCardlessBalance | SophtronBalance;
+export type BankSyncAmount = GoCardlessAmount | SophtronAmount;
+export type BankSyncTransaction = GoCardlessTransaction | SophtronTransaction;
 
 export type BankSyncResponse = {
   transactions: {
@@ -20,4 +25,8 @@ export type BankSyncResponse = {
   error_code: string;
 };
 
-export type BankSyncProviders = 'goCardless' | 'simpleFin' | 'pluggyai';
+export type BankSyncProviders =
+  | 'goCardless'
+  | 'simpleFin'
+  | 'pluggyai'
+  | 'sophtron';

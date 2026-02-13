@@ -14,6 +14,7 @@ import type {
   NoteEntity,
   RuleEntity,
   ScheduleEntity,
+  SophtronToken,
   TransactionEntity,
   UserAccessEntity,
   UserEntity,
@@ -111,6 +112,12 @@ export type Modal =
       };
     }
   | {
+      name: 'configure-sophtron';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
       name: 'gocardless-external-msg';
       options: {
         onMoveExternal: (arg: {
@@ -122,6 +129,20 @@ export type Modal =
         >;
         onClose?: (() => void) | undefined;
         onSuccess: (data: GoCardlessToken) => Promise<void>;
+      };
+    }
+  | {
+      name: 'sophtron-external-msg';
+      options: {
+        onMoveExternal: (arg: {
+          institutionId: string;
+        }) => Promise<
+          | { error: 'timeout' }
+          | { error: 'unknown'; message?: string }
+          | { data: SophtronToken }
+        >;
+        onClose?: (() => void) | undefined;
+        onSuccess: (data: SophtronToken) => Promise<void>;
       };
     }
   | {

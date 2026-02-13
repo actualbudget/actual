@@ -178,6 +178,7 @@ const sidebars = {
               items: [
                 'advanced/bank-sync/gocardless',
                 'advanced/bank-sync/simplefin',
+                'advanced/bank-sync/sophtron',
               ],
             },
             'advanced/scripts/modify-transfers',

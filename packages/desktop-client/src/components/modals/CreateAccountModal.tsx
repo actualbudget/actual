@@ -28,11 +28,13 @@ import { authorizeBank } from '@desktop-client/gocardless';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
+import { useSophtronStatus } from '@desktop-client/hooks/useSophtronStatus';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { authorizeBank as authorizeBankSophtron } from '@desktop-client/sophtron';
 
 type CreateAccountModalProps = Extract<
   ModalType,
@@ -53,6 +55,9 @@ export function CreateAccountModal({
     boolean | null
   >(null);
   const [isPluggyAiSetupComplete, setIsPluggyAiSetupComplete] = useState<
+    boolean | null
+  >(null);
+  const [isSophtronSetupComplete, setIsSophtronSetupComplete] = useState<
     boolean | null
   >(null);
   const { hasPermission } = useAuth();
@@ -303,6 +308,46 @@ export function CreateAccountModal({
     });
   };
 
+  const onConnectSophtron = () => {
+    if (!isSophtronSetupComplete) {
+      onSophtronInit();
+      return;
+    }
+
+    if (upgradingAccountId == null) {
+      authorizeBankSophtron(dispatch);
+    } else {
+      authorizeBankSophtron(dispatch);
+    }
+  };
+
+  const onSophtronInit = () => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'configure-sophtron',
+          options: {
+            onSuccess: () => setIsSophtronSetupComplete(true),
+          },
+        },
+      }),
+    );
+  };
+
+  const onSophtronReset = () => {
+    send('secret-set', {
+      name: 'sophtron_userId',
+      value: null,
+    }).then(() => {
+      send('secret-set', {
+        name: 'sophtron_userKey',
+        value: null,
+      }).then(() => {
+        setIsSophtronSetupComplete(false);
+      });
+    });
+  };
+
   const onCreateLocalAccount = () => {
     dispatch(pushModal({ modal: { name: 'add-local-account' } }));
   };
@@ -321,6 +366,11 @@ export function CreateAccountModal({
   useEffect(() => {
     setIsPluggyAiSetupComplete(configuredPluggyAi);
   }, [configuredPluggyAi]);
+
+  const { configuredSophtron } = useSophtronStatus();
+  useEffect(() => {
+    setIsSophtronSetupComplete(configuredSophtron);
+  }, [configuredSophtron]);
 
   let title = t('Add account');
   const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
@@ -574,12 +624,80 @@ export function CreateAccountModal({
                           hundreds of banks.
                         </Trans>
                       </Text>
+
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          gap: 10,
+                          marginTop: '18px',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <ButtonWithLoading
+                          isDisabled={syncServerStatus !== 'online'}
+                          style={{
+                            padding: '10px 0',
+                            fontSize: 15,
+                            fontWeight: 600,
+                            flex: 1,
+                          }}
+                          onPress={onConnectSophtron}
+                        >
+                          {isSophtronSetupComplete
+                            ? t('Link bank account with Sophtron')
+                            : t('Set up Sophtron for bank sync')}
+                        </ButtonWithLoading>
+                        {isSophtronSetupComplete && (
+                          <DialogTrigger>
+                            <Button
+                              variant="bare"
+                              aria-label={t('Sophtron menu')}
+                            >
+                              <SvgDotsHorizontalTriple
+                                width={15}
+                                height={15}
+                                style={{ transform: 'rotateZ(90deg)' }}
+                              />
+                            </Button>
+
+                            <Popover>
+                              <Dialog>
+                                <Menu
+                                  onMenuSelect={item => {
+                                    if (item === 'reconfigure') {
+                                      onSophtronReset();
+                                    }
+                                  }}
+                                  items={[
+                                    {
+                                      name: 'reconfigure',
+                                      text: t('Reset Sophtron credentials'),
+                                    },
+                                  ]}
+                                />
+                              </Dialog>
+                            </Popover>
+                          </DialogTrigger>
+                        )}
+                      </View>
+                      <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                        <Trans>
+                          {' '}
+                          <strong>
+                            Link a <em>US or Canadian</em> bank account{' '}
+                          </strong>{' '}
+                          to automatically download transactions. Sophtron
+                          provides reliable, up-to-date information from
+                          hundreds of banks.
+                        </Trans>
+                      </Text>
                     </>
                   )}
 
                   {(!isGoCardlessSetupComplete ||
                     !isSimpleFinSetupComplete ||
-                    !isPluggyAiSetupComplete) &&
+                    !isPluggyAiSetupComplete ||
+                    !isSophtronSetupComplete) &&
                     !canSetSecrets && (
                       <Warning>
                         <Trans>
@@ -590,6 +708,7 @@ export function CreateAccountModal({
                           isGoCardlessSetupComplete ? '' : 'GoCardless',
                           isSimpleFinSetupComplete ? '' : 'SimpleFIN',
                           isPluggyAiSetupComplete ? '' : 'Pluggy.ai',
+                          isSophtronSetupComplete ? '' : t('Sophtron'),
                         ]
                           .filter(Boolean)
                           .join(' or ')}
