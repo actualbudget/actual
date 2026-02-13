@@ -154,6 +154,10 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   const [showRunningBalances, setShowRunningBalances] = useSyncedPref(
     `show-balances-${account.id}`,
   );
+  const [hideReconciled, setHideReconciled] = useSyncedPref(
+    `hide-reconciled-${account.id}`,
+  );
+
   const onToggleRunningBalance = useCallback(() => {
     setShowRunningBalances(showRunningBalances === 'true' ? 'false' : 'true');
     dispatch(
@@ -162,6 +166,15 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
       }),
     );
   }, [showRunningBalances, setShowRunningBalances, dispatch]);
+
+  const onToggleReconciled = useCallback(() => {
+    setHideReconciled(hideReconciled === 'true' ? 'false' : 'true');
+    dispatch(
+      collapseModals({
+        rootModalName: 'account-menu',
+      }),
+    );
+  }, [hideReconciled, setHideReconciled, dispatch]);
 
   const onClick = useCallback(() => {
     dispatch(
@@ -175,6 +188,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
             onCloseAccount,
             onReopenAccount,
             onToggleRunningBalance,
+            onToggleReconciled,
           },
         },
       }),
@@ -187,6 +201,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     onReopenAccount,
     onSave,
     onToggleRunningBalance,
+    onToggleReconciled,
   ]);
 
   return (
