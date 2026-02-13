@@ -15,23 +15,23 @@ export function ReportsDashboardRouter() {
   const { t } = useTranslation();
   const { dashboardId } = useParams<{ dashboardId?: string }>();
   const navigate = useNavigate();
-  const { data: dashboard_pages, isPending } = useDashboardPages();
+  const { data: dashboardPages = [], isPending } = useDashboardPages();
 
   // Redirect to first dashboard if no dashboardId in URL
   useEffect(() => {
-    if (!dashboardId && !isPending && dashboard_pages.length > 0) {
-      navigate(`/reports/${dashboard_pages[0].id}`, { replace: true });
+    if (!dashboardId && !isPending && dashboardPages.length > 0) {
+      navigate(`/reports/${dashboardPages[0].id}`, { replace: true });
     }
-  }, [dashboardId, isPending, dashboard_pages, navigate]);
+  }, [dashboardId, isPending, dashboardPages, navigate]);
 
   // Show loading while we're fetching dashboards or redirecting
-  if (isPending || (!dashboardId && dashboard_pages.length > 0)) {
+  if (isPending || (!dashboardId && dashboardPages.length > 0)) {
     return <LoadingIndicator message={t('Loading dashboards...')} />;
   }
 
   // If we have a dashboardId, render Overview with it
   if (dashboardId) {
-    const dashboard = dashboard_pages.find(d => d.id === dashboardId);
+    const dashboard = dashboardPages.find(d => d.id === dashboardId);
     if (dashboard) {
       return <Overview dashboard={dashboard} />;
     } else {

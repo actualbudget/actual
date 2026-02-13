@@ -36,7 +36,7 @@ export const dashboardQueries = {
       },
     }),
   listDashboardPageWidgets: <T extends DashboardWidgetEntity>(
-    dashboardPageId: DashboardPageEntity['id'],
+    dashboardPageId?: DashboardPageEntity['id'] | null,
   ) =>
     queryOptions<T[]>({
       ...dashboardQueries.listDashboardWidgets<T>(),

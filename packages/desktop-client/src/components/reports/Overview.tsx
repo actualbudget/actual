@@ -104,7 +104,7 @@ export function Overview({ dashboard }: OverviewProps) {
   const { data: dashboardPages = [], isPending: isDashboardPageLoading } =
     useDashboardPages();
 
-  const { data: widgets, isPending: isWidgetsLoading } =
+  const { data: widgets = [], isPending: isWidgetsLoading } =
     useDashboardPageWidgets(dashboard.id);
 
   const isLoading =
