@@ -27,7 +27,7 @@ import {
 } from 'loot-core/shared/transactions';
 import { applyChanges } from 'loot-core/shared/util';
 import type { IntegerAmount } from 'loot-core/shared/util';
-import type { AccountEntity, NewRuleEntity, RuleActionEntity, RuleConditionEntity, TransactionEntity, TransactionFilterEntity } from 'loot-core/types/models';
+import type { AccountEntity, CategoryGroupEntity, NewRuleEntity, RuleActionEntity, RuleConditionEntity, TransactionEntity, TransactionFilterEntity } from 'loot-core/types/models';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
@@ -232,7 +232,7 @@ type AccountInternalProps = {
   failedAccounts: ReturnType<typeof useFailedAccounts>;
   dateFormat: ReturnType<typeof useDateFormat>;
   payees: ReturnType<typeof usePayees>;
-  categoryGroups: ReturnType<typeof useCategories>['data']['grouped'];
+  categoryGroups: CategoryGroupEntity[];
   hideFraction: boolean;
   accountsSyncing: string[];
   dispatch: AppDispatch;
@@ -1951,8 +1951,8 @@ export function Account() {
   const params = useParams();
   const location = useLocation();
 
-  const { data } = useCategories();
-  const categoryGroups = data?.grouped;
+  const { data: { grouped: categoryGroups } = { grouped: [] } } =
+    useCategories();
   const newTransactions = useSelector(
     state => state.transactions.newTransactions,
   );
