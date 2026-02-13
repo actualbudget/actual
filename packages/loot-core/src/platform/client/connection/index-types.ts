@@ -26,7 +26,7 @@ export declare function send<K extends keyof Handlers>(
       error: {
         type: 'APIError' | 'InternalError';
         message: string;
-        cause: unknown;
+        cause?: unknown;
       };
     }
 >;
@@ -55,7 +55,7 @@ export declare function sendCatch<K extends keyof Handlers>(
       error: {
         type: 'APIError' | 'InternalError';
         message: string;
-        cause: unknown;
+        cause?: unknown;
       };
     }
 >;
