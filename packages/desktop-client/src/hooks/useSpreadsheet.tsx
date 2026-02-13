@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 import { LRUCache } from 'lru-cache';
 
-import { listen, send } from 'loot-core/platform/client/fetch';
+import { listen, send } from 'loot-core/platform/client/connection';
 import type { Query } from 'loot-core/shared/query';
 
 type SpreadsheetContextValue = ReturnType<typeof makeSpreadsheet>;
