@@ -69,6 +69,7 @@ export const schema = {
     id: f('id'),
     name: f('string', { required: true }),
     type: f('string'),
+    group: f('string'),
     offbudget: f('boolean'),
     closed: f('boolean'),
     sort_order: f('float'),
@@ -78,6 +79,12 @@ export const schema = {
     account_sync_source: f('string'),
     last_reconciled: f('string'),
     last_sync: f('string'),
+  },
+  account_groups: {
+    id: f('id'),
+    name: f('string'),
+    sort_order: f('float'),
+    tombstone: f('boolean'),
   },
   categories: {
     id: f('id'),
@@ -234,6 +241,12 @@ export const schemaConfig: SchemaConfig = {
       case 'payees':
         return 'v_payees';
 
+      case 'accounts':
+        return 'v_accounts';
+
+      case 'account_groups':
+        return 'v_account_groups';
+
       default:
     }
     return name;
@@ -260,6 +273,8 @@ export const schemaConfig: SchemaConfig = {
           ];
         case 'category_groups':
           return ['is_income', 'sort_order', 'id'];
+        case 'account_groups':
+          return ['sort_order', 'id'];
         case 'categories':
           return ['sort_order', 'id'];
         case 'payees':
@@ -335,6 +350,42 @@ export const schemaConfig: SchemaConfig = {
         LEFT JOIN schedules_json_paths _paths ON _paths.schedule_id = _.id
         LEFT JOIN rules _rules ON _rules.id = _.rule
         LEFT JOIN payee_mapping pm ON pm.id = json_extract(_rules.conditions, _paths.payee || '.value')
+        `;
+      },
+    },
+
+    accounts: {
+      v_accounts: internalFields => {
+        const fields = internalFields({
+          group: '__account_groups.name',
+        });
+
+        return `
+          SELECT ${fields} FROM accounts _
+          LEFT JOIN account_groups __account_groups
+            ON _."group" = __account_groups.id
+        `;
+      },
+    },
+
+    account_groups: {
+      v_account_groups: internalFields => {
+        const fields = internalFields({
+          tombstone: `
+            CASE
+              WHEN _.id NOT IN (
+                SELECT DISTINCT "group"
+                FROM accounts
+                WHERE "group" IS NOT NULL AND tombstone = 0
+              )
+              THEN 1
+              ELSE 0
+            END
+          `,
+        });
+
+        return `
+          SELECT ${fields} FROM account_groups _
         `;
       },
     },

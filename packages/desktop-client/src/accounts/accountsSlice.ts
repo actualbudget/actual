@@ -141,17 +141,17 @@ const accountsSlice = createSlice({
 });
 type CreateAccountPayload = {
   name: string;
-  type?: string;
+  group?: string;
   balance: number;
   offBudget: boolean;
 };
 
 export const createAccount = createAppAsyncThunk(
   `${sliceName}/createAccount`,
-  async ({ name, type, balance, offBudget }: CreateAccountPayload) => {
+  async ({ name, group, balance, offBudget }: CreateAccountPayload) => {
     const id = await send('account-create', {
       name,
-      type,
+      group,
       balance,
       offBudget,
     });

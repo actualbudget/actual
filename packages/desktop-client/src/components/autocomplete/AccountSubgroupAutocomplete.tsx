@@ -207,18 +207,18 @@ export function AccountSubgroupAutocomplete({
   const [rawInput, setRawInput] = useState('');
   const hasInput = !!rawInput;
 
-  // Derive used types from existing accounts
+  // Derive used group names from existing accounts
   const { usedOnBudgetSubgroups, usedOffBudgetSubgroups } = useMemo(() => {
     const onBudget = new Set<string>();
     const offBudget = new Set<string>();
     for (const account of accounts) {
-      if (!account.type) {
+      if (!account.group) {
         continue;
       }
       if (account.offbudget) {
-        offBudget.add(account.type);
+        offBudget.add(account.group);
       } else {
-        onBudget.add(account.type);
+        onBudget.add(account.group);
       }
     }
     return {
@@ -492,6 +492,7 @@ function AccountSubgroupItemComponent({
   embedded,
   ...props
 }: AccountSubgroupItemComponentProps) {
+  const { type: _type, ...itemProps } = props;
   const { isNarrowWidth } = useResponsive();
   const narrowStyle = isNarrowWidth
     ? {
@@ -524,7 +525,7 @@ function AccountSubgroupItemComponent({
       )}
       data-testid={`${item.name}-account-subgroup-item`}
       data-highlighted={highlighted || undefined}
-      {...props}
+      {...(itemProps as unknown as ComponentPropsWithoutRef<'button'>)}
     >
       <TextOneLine>{item.name}</TextOneLine>
     </button>

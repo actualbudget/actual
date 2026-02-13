@@ -12,6 +12,7 @@ export type DbAccount = {
   closed: 1 | 0;
   tombstone: 1 | 0;
   sort_order: number;
+  group?: DbAccountGroup['id'] | null;
   account_id?: string | null;
   balance_current?: number | null;
   balance_available?: number | null;
@@ -22,6 +23,12 @@ export type DbAccount = {
   subtype?: string | null;
   bank?: string | null;
   account_sync_source?: 'simpleFin' | 'goCardless' | null;
+};
+
+export type DbAccountGroup = {
+  id: string;
+  name: string;
+  sort_order: number;
 };
 
 export type DbBank = {

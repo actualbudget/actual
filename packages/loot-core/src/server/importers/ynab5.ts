@@ -279,7 +279,7 @@ function importAccounts(data: Budget, entityIdMap: Map<string, string>) {
       if (!account.deleted) {
         const id = await actual.createAccount({
           name: account.name,
-          type: account.type ? camelToTitleCase(account.type) : undefined,
+          group: account.type ? camelToTitleCase(account.type) : undefined,
           offbudget: account.on_budget ? false : true,
           closed: account.closed,
         });

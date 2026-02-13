@@ -13,6 +13,7 @@ import * as models from './models';
 
 export type APIAccountEntity = Pick<AccountEntity, 'id' | 'name'> & {
   type?: string | null;
+  group?: string | null;
   offbudget?: boolean;
   closed?: boolean;
   balance_current?: number | null;
@@ -26,6 +27,7 @@ export const accountModel = {
       id: account.id,
       name: account.name,
       type: account.type || null,
+      group: account.group || null,
       offbudget: account.offbudget ? true : false,
       closed: account.closed ? true : false,
       balance_current: account.balance_current ?? null,

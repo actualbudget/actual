@@ -25,6 +25,7 @@ import {
   schemaConfig,
 } from '../aql';
 import {
+  accountGroupModel,
   accountModel,
   categoryGroupModel,
   categoryModel,
@@ -36,6 +37,7 @@ import { batchMessages, sendMessages } from '../sync';
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
 import type {
   DbAccount,
+  DbAccountGroup,
   DbBank,
   DbCategory,
   DbCategoryGroup,
@@ -719,11 +721,53 @@ export function getAccounts() {
       bankId: DbBank['id'];
     }
   >(
-    `SELECT a.*, b.name as bankName, b.id as bankId FROM accounts a
+    `SELECT a.*, ag.name as "group", b.name as bankName, b.id as bankId FROM accounts a
+       LEFT JOIN account_groups ag ON a."group" = ag.id
        LEFT JOIN banks b ON a.bank = b.id
        WHERE a.tombstone = 0
        ORDER BY sort_order, name`,
   );
+}
+
+export async function getOrCreateAccountGroup(
+  groupName: string,
+): Promise<DbAccountGroup['id']> {
+  const trimmed = groupName.trim();
+  if (!trimmed) {
+    throw new Error('Account group name is required');
+  }
+
+  const existingGroup = await first<Pick<DbAccountGroup, 'id'>>(
+    `
+      SELECT id
+      FROM account_groups
+      WHERE UPPER(name) = ?
+      LIMIT 1
+    `,
+    [trimmed.toUpperCase()],
+  );
+  if (existingGroup) {
+    return existingGroup.id;
+  }
+
+  const lastGroup = await first<Pick<DbAccountGroup, 'sort_order'>>(
+    `
+      SELECT sort_order
+      FROM account_groups
+      ORDER BY sort_order DESC, id DESC
+      LIMIT 1
+    `,
+  );
+  const sort_order = (lastGroup ? lastGroup.sort_order : 0) + SORT_INCREMENT;
+
+  const group = {
+    ...accountGroupModel.validate({
+      name: trimmed,
+    }),
+    sort_order,
+  };
+
+  return insertWithUUID('account_groups', group);
 }
 
 export async function insertAccount(account) {

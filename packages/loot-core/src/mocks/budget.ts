@@ -607,18 +607,18 @@ export async function createTestBudget(handlers: Handlers) {
 
   const accounts: {
     name: string;
-    type?: string;
+    group?: string;
     offBudget?: boolean;
     id?: string;
   }[] = [
-    { name: 'Bank of America', type: 'Checking' },
-    { name: 'Ally Savings', type: 'Savings' },
-    { name: 'Capital One Checking', type: 'Checking' },
-    { name: 'HSBC', type: 'Checking' },
-    { name: 'Vanguard 401k', type: 'Retirement', offBudget: true },
-    { name: 'Mortgage', type: 'Mortgage', offBudget: true },
-    { name: 'House Asset', type: 'Other Asset', offBudget: true },
-    { name: 'Roth IRA', type: 'Retirement', offBudget: true },
+    { name: 'Bank of America', group: 'Checking' },
+    { name: 'Ally Savings', group: 'Savings' },
+    { name: 'Capital One Checking', group: 'Checking' },
+    { name: 'HSBC', group: 'Checking' },
+    { name: 'Vanguard 401k', group: 'Retirement', offBudget: true },
+    { name: 'Mortgage', group: 'Mortgage', offBudget: true },
+    { name: 'House Asset', group: 'Other Asset', offBudget: true },
+    { name: 'Roth IRA', group: 'Retirement', offBudget: true },
   ];
 
   await runMutator(async () => {

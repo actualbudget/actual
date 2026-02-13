@@ -1,4 +1,5 @@
 import type {
+  AccountGroupEntity,
   CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
@@ -11,7 +12,13 @@ import {
   schema,
   schemaConfig,
 } from './aql';
-import type { DbAccount, DbCategory, DbCategoryGroup, DbPayee } from './db';
+import type {
+  DbAccount,
+  DbAccountGroup,
+  DbCategory,
+  DbCategoryGroup,
+  DbPayee,
+} from './db';
 import { ValidationError } from './errors';
 
 export function requiredFields<T extends object, K extends keyof T>(
@@ -66,6 +73,41 @@ export const accountModel = {
     );
 
     return account as DbAccount;
+  },
+};
+
+export const accountGroupModel = {
+  validate(
+    accountGroup: Partial<DbAccountGroup>,
+    { update }: { update?: boolean } = {},
+  ): DbAccountGroup {
+    requiredFields(
+      'accountGroup',
+      accountGroup,
+      update ? ['name'] : ['name'],
+      update,
+    );
+
+    const { sort_order: _sort_order, ...rest } = accountGroup;
+    return { ...rest } as DbAccountGroup;
+  },
+  toDb(
+    accountGroup: AccountGroupEntity,
+    { update }: { update?: boolean } = {},
+  ): DbAccountGroup {
+    return (
+      update
+        ? convertForUpdate(schema, schemaConfig, 'account_groups', accountGroup)
+        : convertForInsert(schema, schemaConfig, 'account_groups', accountGroup)
+    ) as DbAccountGroup;
+  },
+  fromDb(accountGroup: DbAccountGroup): AccountGroupEntity {
+    return convertFromSelect(
+      schema,
+      schemaConfig,
+      'account_groups',
+      accountGroup,
+    ) as AccountGroupEntity;
   },
 };
 

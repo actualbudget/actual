@@ -14,17 +14,17 @@ function makeAccount({
   id,
   name,
   offbudget,
-  type = null,
+  group = null,
 }: {
   id: string;
   name: string;
   offbudget: 0 | 1;
-  type?: string | null;
+  group?: string | null;
 }): AccountEntity {
   return {
     id,
     name,
-    type,
+    group,
     offbudget,
     closed: 0,
     sort_order: 0,
@@ -50,13 +50,13 @@ const onBudgetAccountsMock = [
     id: 'on-2',
     name: 'Checking Account',
     offbudget: 0,
-    type: 'Checking',
+    group: 'Checking',
   }),
   makeAccount({
     id: 'on-3',
     name: 'Savings Account',
     offbudget: 0,
-    type: 'Savings',
+    group: 'Savings',
   }),
 ];
 const offBudgetAccountsMock = [
@@ -65,13 +65,13 @@ const offBudgetAccountsMock = [
     id: 'off-2',
     name: 'Mortgage Account',
     offbudget: 1,
-    type: 'Mortgage',
+    group: 'Mortgage',
   }),
   makeAccount({
     id: 'off-3',
     name: 'Other Debt Account',
     offbudget: 1,
-    type: 'Other Debt',
+    group: 'Other Debt',
   }),
 ];
 const accountsMock = [...onBudgetAccountsMock, ...offBudgetAccountsMock];

@@ -105,9 +105,22 @@ async function updateAccount({
   id,
   name,
   type,
+  group,
   last_reconciled,
 }: Pick<AccountEntity, 'id' | 'name'> &
-  Partial<Pick<AccountEntity, 'last_reconciled' | 'type'>>) {
+  Partial<Pick<AccountEntity, 'last_reconciled' | 'type' | 'group'>>) {
+  if (group !== undefined) {
+    let accountGroupId: string | null = null;
+    if (group?.trim()) {
+      accountGroupId = await db.getOrCreateAccountGroup(group);
+    }
+
+    await db.update('accounts', {
+      id,
+      group: accountGroupId,
+    });
+  }
+
   await db.update('accounts', {
     id,
     name,
@@ -117,7 +130,6 @@ async function updateAccount({
     // Intentionally truthy-only: null/empty should not overwrite existing value.
     ...(last_reconciled && { last_reconciled }),
   });
-  return {};
 }
 
 async function getAccounts() {
@@ -372,19 +384,27 @@ async function linkPluggyAiAccount({
 async function createAccount({
   name,
   type,
+  group,
   balance = 0,
   offBudget = false,
   closed = false,
 }: {
   name: string;
   type?: string | undefined;
+  group?: string | undefined;
   balance?: number | undefined;
   offBudget?: boolean | undefined;
   closed?: boolean | undefined;
 }) {
+  let accountGroupId: string | null = null;
+  if (group?.trim()) {
+    accountGroupId = await db.getOrCreateAccountGroup(group);
+  }
+
   const id: AccountEntity['id'] = await db.insertAccount({
     name,
     type: type || null,
+    group: accountGroupId,
     offbudget: offBudget ? 1 : 0,
     closed: closed ? 1 : 0,
   });

@@ -285,7 +285,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
           >
             <View style={{ padding: '6px 8px' }}>
               <AccountSubgroupAutocomplete
-                value={account.type || ''}
+                value={account.group || ''}
                 embedded
                 maxHeight={150}
                 closeOnBlur={false}
@@ -294,7 +294,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                     updateAccount({
                       account: {
                         ...account,
-                        type: value || null,
+                        group: value || null,
                       },
                     }),
                   );

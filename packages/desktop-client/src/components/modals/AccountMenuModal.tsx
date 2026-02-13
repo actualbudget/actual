@@ -158,11 +158,11 @@ export function AccountMenuModal({
             >
               <InlineField label={t('Subgroup')} width="100%">
                 <AccountSubgroupAutocomplete
-                  value={account.type || ''}
+                  value={account.group || ''}
                   onSelect={value => {
                     onSave?.({
                       ...account,
-                      type: value || null,
+                      group: value || null,
                     });
                   }}
                 />

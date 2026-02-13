@@ -81,14 +81,17 @@ function apply(msg: Message, prev?: boolean) {
   } else {
     let query;
     try {
+      const quotedDataset = `"${dataset.replace(/"/g, '""')}"`;
+      const quotedColumn = `"${column.replace(/"/g, '""')}"`;
+
       if (prev) {
         query = {
-          sql: `UPDATE ${dataset} SET ${column} = ? WHERE id = ?`,
+          sql: `UPDATE ${quotedDataset} SET ${quotedColumn} = ? WHERE id = ?`,
           params: [value, row],
         };
       } else {
         query = {
-          sql: `INSERT INTO ${dataset} (id, ${column}) VALUES (?, ?)`,
+          sql: `INSERT INTO ${quotedDataset} (id, ${quotedColumn}) VALUES (?, ?)`,
           params: [row, value],
         };
       }

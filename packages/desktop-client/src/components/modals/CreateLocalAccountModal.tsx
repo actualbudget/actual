@@ -38,7 +38,7 @@ export function CreateLocalAccountModal() {
   const dispatch = useDispatch();
   const accounts = useAccounts();
   const [name, setName] = useState('');
-  const [type, setType] = useState('');
+  const [group, setGroup] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
 
@@ -70,7 +70,7 @@ export function CreateLocalAccountModal() {
       const id = await dispatch(
         createAccount({
           name,
-          type: type || undefined,
+          group: group || undefined,
           balance: toRelaxedNumber(balance),
           offBudget: offbudget,
         }),
@@ -123,10 +123,10 @@ export function CreateLocalAccountModal() {
                 >
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <AccountSubgroupAutocomplete
-                      value={type}
+                      value={group}
                       onSelect={value => {
                         if (typeof value === 'string') {
-                          setType(value);
+                          setGroup(value);
                         }
                       }}
                     />

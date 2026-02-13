@@ -123,9 +123,9 @@ function isTextDragItem(item: { kind: string }): item is {
 }
 
 /**
- * Group a list of accounts by their `type` field, returning:
- * - untyped accounts (type is null/empty) as direct children
- * - typed accounts nested under subgroup nodes
+ * Group a list of accounts by their group field, returning:
+ * - ungrouped accounts (group is null/empty) as direct children
+ * - grouped accounts nested under subgroup nodes
  *
  * `subgroupOrder` is a persisted list of subgroup keys
  * (e.g. "onbudget-subgroup-Checking") that defines the sort order.
@@ -140,16 +140,16 @@ function groupAccountsBySubgroup(
   const bySubgroup = new Map<string, AccountEntity[]>();
 
   for (const account of accounts) {
-    if (!account.type) {
+    if (!account.group) {
       untyped.push({
         id: account.id,
         name: account.name,
         account,
       });
     } else {
-      const list = bySubgroup.get(account.type) || [];
+      const list = bySubgroup.get(account.group) || [];
       list.push(account);
-      bySubgroup.set(account.type, list);
+      bySubgroup.set(account.group, list);
     }
   }
 
@@ -454,7 +454,7 @@ export function Accounts() {
             if (account) {
               dispatch(
                 updateAccount({
-                  account: { ...account, type: nextSubgroup },
+                  account: { ...account, group: nextSubgroup },
                 }),
               );
             }

@@ -509,8 +509,8 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
 AccountList.displayName = 'AccountList';
 
 /**
- * Groups accounts by their `type` field and renders separate AccountList
- * sections for each type, with untyped accounts first.
+ * Groups accounts by subgroup and renders separate AccountList sections
+ * for each subgroup, with ungrouped accounts first.
  * Drag-and-drop reordering works within each rendered list. Group
  * assignment is managed from account edit flows and sidebar drag/drop.
  */
@@ -523,33 +523,33 @@ type AccountListByTypeProps = {
   onOpenAccount: (account: AccountEntity) => void;
 };
 
-function splitAccountsByType(accounts: AccountEntity[]): {
-  untypedAccounts: AccountEntity[];
-  typedEntries: Array<[string, AccountEntity[]]>;
+function splitAccountsBySubgroup(accounts: AccountEntity[]): {
+  ungroupedAccounts: AccountEntity[];
+  subgroupEntries: Array<[string, AccountEntity[]]>;
 } {
   // TODO: extract shared account-subgroup grouping utility with sidebar tree logic.
-  const untypedAccounts: AccountEntity[] = [];
-  const typedMap = new Map<string, AccountEntity[]>();
+  const ungroupedAccounts: AccountEntity[] = [];
+  const subgroupMap = new Map<string, AccountEntity[]>();
 
   for (const account of accounts) {
-    if (!account.type) {
-      untypedAccounts.push(account);
+    if (!account.group) {
+      ungroupedAccounts.push(account);
       continue;
     }
 
-    const typedAccounts = typedMap.get(account.type);
-    if (typedAccounts) {
-      typedAccounts.push(account);
+    const groupedAccounts = subgroupMap.get(account.group);
+    if (groupedAccounts) {
+      groupedAccounts.push(account);
     } else {
-      typedMap.set(account.type, [account]);
+      subgroupMap.set(account.group, [account]);
     }
   }
 
-  const typedEntries = [...typedMap.entries()].sort(([a], [b]) =>
+  const subgroupEntries = [...subgroupMap.entries()].sort(([a], [b]) =>
     a.localeCompare(b),
   );
 
-  return { untypedAccounts, typedEntries };
+  return { ungroupedAccounts, subgroupEntries };
 }
 
 function AccountListByType({
@@ -558,23 +558,23 @@ function AccountListByType({
   getAccountBalance,
   onOpenAccount,
 }: AccountListByTypeProps) {
-  const { untypedAccounts, typedEntries } = useMemo(
-    () => splitAccountsByType(accounts),
+  const { ungroupedAccounts, subgroupEntries } = useMemo(
+    () => splitAccountsBySubgroup(accounts),
     [accounts],
   );
 
   return (
     <>
-      {untypedAccounts.length > 0 && (
+      {ungroupedAccounts.length > 0 && (
         <AccountList
           ariaLabel={ariaLabel}
-          accounts={untypedAccounts}
+          accounts={ungroupedAccounts}
           getAccountBalance={getAccountBalance}
           onOpenAccount={onOpenAccount}
         />
       )}
-      {typedEntries.map(([typeName, typedAccounts]) => (
-        <View key={typeName}>
+      {subgroupEntries.map(([subgroupName, subgroupAccounts]) => (
+        <View key={subgroupName}>
           <Text
             style={{
               ...styles.text,
@@ -586,11 +586,11 @@ function AccountListByType({
               padding: '8px 18px 2px',
             }}
           >
-            {typeName}
+            {subgroupName}
           </Text>
           <AccountList
-            ariaLabel={`${ariaLabel} - ${typeName}`}
-            accounts={typedAccounts}
+            ariaLabel={`${ariaLabel} - ${subgroupName}`}
+            accounts={subgroupAccounts}
             getAccountBalance={getAccountBalance}
             onOpenAccount={onOpenAccount}
           />
