@@ -90,13 +90,13 @@ export default {
         return (
           total -
           amountToInteger(
-            trans.transactionAmount.amount,
+            Number(trans.transactionAmount.amount),
             getCurrency(trans.transactionAmount.currency || '').decimalPlaces,
           )
         );
       },
       amountToInteger(
-        currentBalance?.balanceAmount?.amount || 0,
+        Number(currentBalance?.balanceAmount?.amount || 0),
         getCurrency(currentBalance?.balanceAmount?.currency || '')
           .decimalPlaces,
       ),

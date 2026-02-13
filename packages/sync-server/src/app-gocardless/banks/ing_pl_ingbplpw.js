@@ -44,12 +44,13 @@ export default {
 
       return oldestKnownBalance - oldestTransactionAmount;
     } else {
-      const balance = balances.find(
+      const interimBalance = balances.find(
         balance => 'interimBooked' === balance.balanceType,
-      ).balanceAmount;
+      );
+      const balance = interimBalance?.balanceAmount;
       return amountToInteger(
-        balance.amount,
-        getCurrency(balance.currency || '').decimalPlaces,
+        Number(balance?.amount || 0),
+        getCurrency(balance?.currency || '').decimalPlaces,
       );
     }
   },

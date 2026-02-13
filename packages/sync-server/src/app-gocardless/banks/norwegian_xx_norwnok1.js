@@ -67,20 +67,23 @@ export default {
     const currentBalance = balances.find(
       balance => 'expected' === balance.balanceType,
     );
+    const balanceCurrencyDecimals = getCurrency(
+      currentBalance?.balanceAmount?.currency || '',
+    ).decimalPlaces;
 
     return sortedTransactions.reduce(
       (total, trans) => {
         return (
           total -
           amountToInteger(
-            trans.transactionAmount.amount,
-            getCurrency(trans.transactionAmount.currency || '').decimalPlaces,
+            Number(trans.transactionAmount.amount),
+            balanceCurrencyDecimals,
           )
         );
       },
       amountToInteger(
-        currentBalance.balanceAmount.amount,
-        getCurrency(currentBalance.balanceAmount.currency || '').decimalPlaces,
+        Number(currentBalance?.balanceAmount?.amount || 0),
+        balanceCurrencyDecimals,
       ),
     );
   },

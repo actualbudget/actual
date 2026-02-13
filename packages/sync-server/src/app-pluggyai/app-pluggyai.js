@@ -128,16 +128,21 @@ app.post(
           trans.amount *= -1;
         }
 
-        const effectiveCurrency = trans.currencyCode || account.currencyCode;
-        let amountInCurrency = trans.amountInAccountCurrency ?? trans.amount;
+        const hasAccountCurrencyAmount = trans.amountInAccountCurrency != null;
+        const roundingCurrency = hasAccountCurrencyAmount
+          ? account.currencyCode
+          : trans.currencyCode || account.currencyCode;
+        let amountInCurrency = hasAccountCurrencyAmount
+          ? trans.amountInAccountCurrency
+          : trans.amount;
         amountInCurrency = roundToCurrencyDecimals(
           amountInCurrency,
-          effectiveCurrency,
+          roundingCurrency,
         );
 
         newTrans.transactionAmount = {
           amount: amountInCurrency,
-          currency: effectiveCurrency,
+          currency: roundingCurrency,
         };
 
         newTrans.transactionId = trans.id;

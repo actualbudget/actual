@@ -27,13 +27,13 @@ export default {
         return (
           total -
           amountToInteger(
-            trans.transactionAmount.amount,
+            Number(trans.transactionAmount.amount),
             getCurrency(trans.transactionAmount.currency || '').decimalPlaces,
           )
         );
       },
       amountToInteger(
-        currentBalance.balanceAmount.amount,
+        Number(currentBalance.balanceAmount.amount),
         getCurrency(currentBalance.balanceAmount.currency || '').decimalPlaces,
       ),
     );
