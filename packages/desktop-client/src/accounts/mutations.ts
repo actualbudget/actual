@@ -27,7 +27,7 @@ import { sync } from '@desktop-client/app/appSlice';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { markPayeesDirty } from '@desktop-client/payees/payeesSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
+import { useDispatch, useStore } from '@desktop-client/redux';
 import type { AppDispatch } from '@desktop-client/redux/store';
 import { setNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
@@ -512,11 +512,11 @@ export function useSyncAccountsMutation() {
   const { t } = useTranslation();
 
   const accounts = useAccounts();
-  const accountState = useSelector(state => state.account);
+  const store = useStore();
 
   return useMutation({
     mutationFn: async ({ id }: SyncAccountsPayload) => {
-      const { accountsSyncing } = accountState;
+      const { account: { accountsSyncing = [] } } = store.getState();
 
       // Disallow two parallel sync operations
       if (accountsSyncing.length > 0) {

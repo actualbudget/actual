@@ -154,10 +154,8 @@ export function useSaveCategoryMutation() {
       const group = categoryGroups.find(g => g.id === category.group);
       const categoriesInGroup = group?.categories ?? [];
       const exists = categoriesInGroup.some(c =>
-        category.id === 'new'
-          ? true
-          : c.id !== category.id &&
-            c.name.toUpperCase() === category.name.toUpperCase(),
+        c.id !== category.id &&
+        c.name.toUpperCase() === category.name.toUpperCase(),
       );
 
       if (exists) {
