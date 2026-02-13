@@ -3,17 +3,8 @@ import pLimit from 'p-limit';
 
 import { SecretName, secretsService } from '../../services/secrets-service.js';
 import { getLoadedRegistry } from '../banks/bank-registry.js';
-import {
-  type components,
-  type operations,
-  type paths,
-} from '../models/enablebanking-openapi.js';
-import {
-  type Account,
-  type EnableBankingAuthenticationStartResponse,
-  type EnableBankingToken,
-  type Transaction,
-} from '../models/enablebanking.js';
+import type { components, operations, paths } from '../models/enablebanking-openapi.js';
+import type { Account, EnableBankingAuthenticationStartResponse, EnableBankingToken, Transaction } from '../models/enablebanking.js';
 import {
   ApplicationInactiveError,
   EnableBankingError,
@@ -113,6 +104,12 @@ class SessionStore {
         this.sessions.delete(state);
       }
     }
+  }
+
+  clear(): number {
+    const count = this.sessions.size;
+    this.sessions.clear();
+    return count;
   }
 }
 
@@ -319,6 +316,14 @@ export const enableBankingservice = {
 
   failSession: (state: string, error: string): void => {
     sessionStore.setFailure(state, error);
+  },
+
+  clearAllSessions: (): number => {
+    const clearedCount = sessionStore.clear();
+    console.info(
+      `[AUDIT] clearAllSessions: Cleared ${clearedCount} session(s) at ${new Date().toISOString()}`,
+    );
+    return clearedCount;
   },
 
   getAccounts: async (

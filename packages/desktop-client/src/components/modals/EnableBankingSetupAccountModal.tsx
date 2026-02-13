@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -8,13 +9,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/connection';
-import {
-  type EnableBankingAuthenticationStartResponse,
-  type EnableBankingBank,
-  type EnableBankingErrorCode,
-  type EnableBankingErrorInterface,
-  type EnableBankingToken,
-} from 'loot-core/types/models/enablebanking';
+import type { EnableBankingAuthenticationStartResponse, EnableBankingBank, EnableBankingErrorCode, EnableBankingErrorInterface, EnableBankingToken } from 'loot-core/types/models/enablebanking';
 
 import {
   Error as ErrorAlert,
@@ -30,11 +25,8 @@ import {
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { COUNTRY_OPTIONS } from '@desktop-client/components/util/countries';
 import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
-import {
-  popModal,
-  pushModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
+import { popModal, pushModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 function renderError(

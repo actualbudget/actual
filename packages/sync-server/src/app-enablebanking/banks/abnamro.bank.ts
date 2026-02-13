@@ -1,5 +1,5 @@
-import { type components } from '../models/enablebanking-openapi.js';
-import { type Transaction } from '../models/enablebanking.js';
+import type { components } from '../models/enablebanking-openapi.js';
+import type { Transaction } from '../models/enablebanking.js';
 
 import { BankProcessorFor } from './bank-registry.js';
 import { FallbackBankProcessor } from './fallback.bank.js';

@@ -13,12 +13,7 @@ import { View } from '@actual-app/components/view';
 import { format as formatDate, parseISO } from 'date-fns';
 
 import { currentDay, subDays } from 'loot-core/shared/months';
-import {
-  type AccountEntity,
-  type SyncServerGoCardlessAccount,
-  type SyncServerPluggyAiAccount,
-  type SyncServerSimpleFinAccount,
-} from 'loot-core/types/models';
+import type { AccountEntity, SyncServerGoCardlessAccount, SyncServerPluggyAiAccount, SyncServerSimpleFinAccount } from 'loot-core/types/models';
 
 import {
   linkAccount,
@@ -26,10 +21,8 @@ import {
   linkAccountSimpleFin,
   unlinkAccount,
 } from '@desktop-client/accounts/accountsSlice';
-import {
-  Autocomplete,
-  type AutocompleteItem,
-} from '@desktop-client/components/autocomplete/Autocomplete';
+import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
+import type { AutocompleteItem } from '@desktop-client/components/autocomplete/Autocomplete';
 import {
   Modal,
   ModalCloseButton,

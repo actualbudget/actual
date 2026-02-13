@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import createDebug from 'debug';
 import fg from 'fast-glob';
 
-import { type BankProcessor } from '../models/bank-processor.js';
+import type { BankProcessor } from '../models/bank-processor.js';
 
 import { FallbackBankProcessor } from './fallback.bank.js';
 

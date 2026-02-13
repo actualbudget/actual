@@ -1,15 +1,10 @@
 import { inspect } from 'util';
 
 import createDebug from 'debug';
-import { type Request, type Response } from 'express';
+import type { Request, Response } from 'express';
 
-import { type components } from '../models/enablebanking-openapi.js';
-import {
-  type EnableBankingEndpoints,
-  type EnableBankingErrorCode,
-  type EnableBankingErrorInterface,
-  type EnableBankingResponse,
-} from '../models/enablebanking.js';
+import type { components } from '../models/enablebanking-openapi.js';
+import type { EnableBankingEndpoints, EnableBankingErrorCode, EnableBankingErrorInterface, EnableBankingResponse } from '../models/enablebanking.js';
 
 const debug = createDebug('actual:enablebanking:errors');
 
@@ -109,10 +104,22 @@ export function handleErrorResponse(
         'ENABLEBANKING_SESSION_CLOSED',
         'The linked bank account is no longer valid. Please re-link your bank account.',
       );
+    case 'ASPSP_ERROR':
+    case 'ASPSP_TIMEOUT':
+    case 'ASPSP_RATE_LIMIT_EXCEEDED':
+    case 'ASPSP_ACCOUNT_NOT_ACCESSIBLE':
+    case 'ASPSP_PSU_ACTION_REQUIRED':
+      // Bank-side errors - temporary issues or user action required
+      console.warn(
+        `Enable Banking API returned bank-side error: ${response.error} - ${response.message}`,
+      );
+      return new EnableBankingError(
+        'INTERNAL_ERROR',
+        `The bank encountered an issue: ${response.message}. This is usually temporary - please try syncing again later.`,
+      );
     case 'WRONG_REQUEST_PARAMETERS':
     case 'WRONG_SESSION_STATUS':
     case 'WRONG_DATE_INTERVAL':
-    case 'WRONG_TRANSACTIONS_PERIOD':
     case 'WRONG_CREDENTIALS_PROVIDED':
     case 'INVALID_HOST':
     case 'INVALID_PAYMENT':
@@ -125,6 +132,14 @@ export function handleErrorResponse(
       return new EnableBankingError(
         'INTERNAL_ERROR',
         'Something went wrong while using the Enable Banking API. Please try again later.',
+      );
+    case 'WRONG_TRANSACTIONS_PERIOD':
+      console.warn(
+        `Enable Banking API returned WRONG_TRANSACTIONS_PERIOD: ${response.message}`,
+      );
+      return new EnableBankingError(
+        'INTERNAL_ERROR',
+        'The requested transaction date range is not valid. The bank may have limitations on how far back transactions can be retrieved. Try adjusting your sync start date.',
       );
     default:
       // For all other errors, we throw a generic EnableBankingError.

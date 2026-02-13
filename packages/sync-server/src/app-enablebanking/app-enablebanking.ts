@@ -1,12 +1,13 @@
-import express, { type Request } from 'express';
+import express, { type Request, type Response } from 'express';
 import { type ParamsDictionary } from 'express-serve-static-core';
 
+import { isAdmin } from '../account-db.js';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '../util/middlewares.js';
 
-import { type EnableBankingEndpoints } from './models/enablebanking.js';
+import type { EnableBankingEndpoints } from './models/enablebanking.js';
 import { enableBankingservice } from './services/enablebanking-services.js';
 import {
   BadRequestError,
@@ -330,3 +331,22 @@ post('/transactions', async (req: Request) => {
     startingBalance: startingBalanceCents, // Already in cents (integer)
   };
 });
+
+// Admin-only endpoint to clear all Enable Banking sessions
+app.post(
+  '/admin/clear_sessions',
+  validateSessionMiddleware,
+  async (req: Request, res: Response) => {
+    if (!isAdmin(res.locals.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'forbidden',
+        details: 'permission-not-found',
+      });
+      return;
+    }
+
+    const cleared = enableBankingservice.clearAllSessions();
+    res.send({ status: 'ok', data: { cleared } });
+  },
+);

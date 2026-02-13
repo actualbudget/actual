@@ -1,4 +1,5 @@
-import { sign, type Header } from 'jws';
+import { sign } from 'jws';
+import type { Header } from 'jws';
 
 const getJWTHeader = (applicationId: string): Header => {
   return {

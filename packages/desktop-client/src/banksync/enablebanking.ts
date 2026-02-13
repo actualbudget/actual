@@ -1,16 +1,13 @@
 import { t } from 'i18next';
 
 import { send } from 'loot-core/platform/client/connection';
-import {
-  type AccountEntity,
-  type SyncServerGoCardlessAccount,
-} from 'loot-core/types/models';
-import { type EnableBankingToken } from 'loot-core/types/models/enablebanking';
+import type { AccountEntity, SyncServerGoCardlessAccount } from 'loot-core/types/models';
+import type { EnableBankingToken } from 'loot-core/types/models/enablebanking';
 
 import { linkAccount } from '@desktop-client/accounts/accountsSlice';
 import { closeModal, pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { type AppDispatch } from '@desktop-client/redux/store';
+import type { AppDispatch } from '@desktop-client/redux/store';
 
 // export function handleEnableBankingError(error: EnableBankingErrorInterface){
 //   const dispatch = useDispatch();

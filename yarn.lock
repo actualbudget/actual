@@ -128,6 +128,7 @@ __metadata:
     nordigen-node: "npm:^1.4.1"
     openapi-fetch: "npm:^0.14.0"
     openid-client: "npm:^5.7.1"
+    p-limit: "npm:^7.3.0"
     pluggy-sdk: "npm:^0.79.0"
     supertest: "npm:^7.2.2"
     typescript: "npm:^5.9.3"
@@ -21847,6 +21848,15 @@ __metadata:
   dependencies:
     yocto-queue: "npm:^1.2.1"
   checksum: 10/ea1cae6e8bbf84a65cc832e4d6a802ec34902bfe0da2fba0c6fadb72f0c51d48db67b7fb2df8433dde5f4a970cf482b9c2cb4edbfa8cfadd7f4341c6fdb38a5d
+  languageName: node
+  linkType: hard
+
+"p-limit@npm:^7.3.0":
+  version: 7.3.0
+  resolution: "p-limit@npm:7.3.0"
+  dependencies:
+    yocto-queue: "npm:^1.2.1"
+  checksum: 10/bd3f3487ec84401e2cbf243122eef11813edacb621a27808e60a425646d0e75a79514acc2c01e39c41911550dbae5ef0f0ab01caa61cfc1c541cd17a19e8f01b
   languageName: node
   linkType: hard
 

@@ -94,6 +94,10 @@ export type Transaction = {
   payeeName: string;
   notes: string;
   date: string;
+  transactionAmount: {
+    amount: number;
+    currency: string;
+  };
   [x: string]: unknown;
 };
 

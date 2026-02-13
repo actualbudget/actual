@@ -9,16 +9,7 @@ import { isNonProductionEnvironment } from '../../shared/environment';
 import { dayFromDate } from '../../shared/months';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type GoCardlessToken,
-  type ImportTransactionEntity,
-  type SyncServerGoCardlessAccount,
-  type SyncServerPluggyAiAccount,
-  type SyncServerSimpleFinAccount,
-  type TransactionEntity,
-} from '../../types/models';
+import type { AccountEntity, CategoryEntity, GoCardlessToken, ImportTransactionEntity, SyncServerGoCardlessAccount, SyncServerPluggyAiAccount, SyncServerSimpleFinAccount, TransactionEntity } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
 import {
@@ -34,10 +25,8 @@ import { getServer } from '../server-config';
 import { batchMessages } from '../sync';
 import { undoable, withUndo } from '../undo';
 
-import {
-  app as enableBankingApp,
-  type AccountHandlers as EnableBankingAccountHandlers,
-} from './enablebanking';
+import { app as enableBankingApp } from './enablebanking';
+import type { AccountHandlers as EnableBankingAccountHandlers } from './enablebanking';
 import * as link from './link';
 import { getStartingBalancePayee } from './payees';
 import * as bankSync from './sync';
@@ -898,10 +887,14 @@ function isBankSyncError(err: unknown): err is BankSyncError {
 /**
  * Converts a sync error into a standardized SyncError response object.
  */
-function handleSyncError(
+async function handleSyncError(
   err: Error | PostError | BankSyncError,
   acct: db.DbAccount,
-): SyncError {
+): Promise<SyncError> {
+  // Always update last_sync timestamp even on error so users know when last attempt was made
+  const ts = new Date().getTime().toString();
+  await db.update('accounts', { id: acct.id, last_sync: ts });
+
   if (isBankSyncError(err)) {
     const syncError = {
       type: 'SyncError',
@@ -965,7 +958,7 @@ async function accountsBankSync({
     true,
   );
 
-  const errors: ReturnType<typeof handleSyncError>[] = [];
+  const errors: Awaited<ReturnType<typeof handleSyncError>>[] = [];
   const newTransactions: Array<TransactionEntity['id']> = [];
   const matchedTransactions: Array<TransactionEntity['id']> = [];
   const updatedAccounts: Array<AccountEntity['id']> = [];
@@ -989,7 +982,7 @@ async function accountsBankSync({
         updatedAccounts.push(...syncResponseData.updatedAccounts);
       } catch (err) {
         const error = err as Error;
-        errors.push(handleSyncError(error, acct));
+        errors.push(await handleSyncError(error, acct));
         captureException({
           ...error,
           message: 'Failed syncing account "' + acct.name + '."',
@@ -1035,7 +1028,7 @@ async function simpleFinBatchSync({
   const retVal: Array<{
     accountId: AccountEntity['id'];
     res: {
-      errors: ReturnType<typeof handleSyncError>[];
+      errors: Awaited<ReturnType<typeof handleSyncError>>[];
       newTransactions: Array<TransactionEntity['id']>;
       matchedTransactions: Array<TransactionEntity['id']>;
       updatedAccounts: Array<AccountEntity['id']>;
@@ -1067,14 +1060,14 @@ async function simpleFinBatchSync({
         continue;
       }
 
-      const errors: ReturnType<typeof handleSyncError>[] = [];
+      const errors: Awaited<ReturnType<typeof handleSyncError>>[] = [];
       const newTransactions: Array<TransactionEntity['id']> = [];
       const matchedTransactions: Array<TransactionEntity['id']> = [];
       const updatedAccounts: Array<AccountEntity['id']> = [];
 
       if (syncResponse.res.error_code) {
         errors.push(
-          handleSyncError(
+          await handleSyncError(
             {
               type: 'BankSyncError',
               reason: 'Failed syncing account "' + account.name + '."',
@@ -1113,7 +1106,7 @@ async function simpleFinBatchSync({
         },
       });
       const error = err as Error;
-      errors.push(handleSyncError(error, account));
+      errors.push(await handleSyncError(error, account));
     }
   }
 

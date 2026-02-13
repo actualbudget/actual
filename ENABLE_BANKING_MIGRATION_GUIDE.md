@@ -5,6 +5,7 @@ This guide provides a complete checklist for recreating the Enable Banking integ
 ## Prerequisites
 
 1. Create new branch from origin/master:
+
    ```bash
    git fetch origin
    git checkout -b feature/enable-banking-integration-clean origin/master
@@ -48,32 +49,18 @@ Copy these complete files from the original branch:
 8. **packages/sync-server/src/app-enablebanking/app-enablebanking.ts**
    - Main Enable Banking Express router
 
-**Banks:**
-9. **packages/sync-server/src/app-enablebanking/banks/abnamro.bank.ts**
-10. **packages/sync-server/src/app-enablebanking/banks/bank-registry.ts**
-11. **packages/sync-server/src/app-enablebanking/banks/danish.bank.ts**
-12. **packages/sync-server/src/app-enablebanking/banks/fallback.bank.ts**
-13. **packages/sync-server/src/app-enablebanking/banks/rabobank.bank.ts**
-14. **packages/sync-server/src/app-enablebanking/banks/utils.ts**
+**Banks:** 9. **packages/sync-server/src/app-enablebanking/banks/abnamro.bank.ts** 10. **packages/sync-server/src/app-enablebanking/banks/bank-registry.ts** 11. **packages/sync-server/src/app-enablebanking/banks/danish.bank.ts** 12. **packages/sync-server/src/app-enablebanking/banks/fallback.bank.ts** 13. **packages/sync-server/src/app-enablebanking/banks/rabobank.bank.ts** 14. **packages/sync-server/src/app-enablebanking/banks/utils.ts**
 
 15. **packages/sync-server/src/app-enablebanking/link.html**
     - OAuth callback HTML page
 
-**Models:**
-16. **packages/sync-server/src/app-enablebanking/models/bank-processor.ts**
-17. **packages/sync-server/src/app-enablebanking/models/enablebanking-openapi.ts**
-18. **packages/sync-server/src/app-enablebanking/models/enablebanking.ts**
+**Models:** 16. **packages/sync-server/src/app-enablebanking/models/bank-processor.ts** 17. **packages/sync-server/src/app-enablebanking/models/enablebanking-openapi.ts** 18. **packages/sync-server/src/app-enablebanking/models/enablebanking.ts**
 
-**Services:**
-19. **packages/sync-server/src/app-enablebanking/services/enablebanking-services.ts**
+**Services:** 19. **packages/sync-server/src/app-enablebanking/services/enablebanking-services.ts**
 
-**Utils:**
-20. **packages/sync-server/src/app-enablebanking/utils/errors.ts**
-21. **packages/sync-server/src/app-enablebanking/utils/jwt.ts**
+**Utils:** 20. **packages/sync-server/src/app-enablebanking/utils/errors.ts** 21. **packages/sync-server/src/app-enablebanking/utils/jwt.ts**
 
-**Tests:**
-22. **packages/sync-server/src/app-enablebanking/tests/errors.spec.ts**
-23. **packages/sync-server/src/app-enablebanking/tests/utils.spec.ts**
+**Tests:** 22. **packages/sync-server/src/app-enablebanking/tests/errors.spec.ts** 23. **packages/sync-server/src/app-enablebanking/tests/utils.spec.ts**
 
 ### Documentation
 
@@ -103,23 +90,24 @@ Add these dependencies:
 
 ## PART 3: EXISTING FILES TO MODIFY
 
-
 ### 1. packages/desktop-client/src/accounts/accountsSlice.ts
 
 **Location:** After line 256
 
 **Add syncSource parameter to LinkAccountPayload:**
+
 ```typescript
 type LinkAccountPayload = LinkAccountBasePayload & {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
-  syncSource?: 'goCardless' | 'enableBanking';  // ← ADD THIS LINE
+  syncSource?: 'goCardless' | 'enableBanking'; // ← ADD THIS LINE
 };
 ```
 
 **Location:** In linkAccount function, after line 266
 
 **Add syncSource to destructuring and pass to backend:**
+
 ```typescript
 export const linkAccount = createAppAsyncThunk(
   `${sliceName}/linkAccount`,
@@ -156,6 +144,7 @@ export const linkAccount = createAppAsyncThunk(
 **Location:** After imports section (around line 30)
 
 **Add imports:**
+
 ```typescript
 import { EnableBankingInitialiseModal } from './modals/EnableBankingInitialiseModal';
 import { EnableBankingSetupAccountModal } from './modals/EnableBankingSetupAccountModal';
@@ -164,6 +153,7 @@ import { EnableBankingSetupAccountModal } from './modals/EnableBankingSetupAccou
 **Location:** In Modals component, after 'simplefin-init' case (around line 181)
 
 **Add modal cases:**
+
 ```typescript
         case 'enablebanking-init':
           return <EnableBankingInitialiseModal key={key} {...modal.options} />;
@@ -181,6 +171,7 @@ import { EnableBankingSetupAccountModal } from './modals/EnableBankingSetupAccou
 **Location:** After imports (around line 19)
 
 **Add import:**
+
 ```typescript
 import { type EnableBankingToken } from 'loot-core/types/models/enablebanking';
 ```
@@ -188,6 +179,7 @@ import { type EnableBankingToken } from 'loot-core/types/models/enablebanking';
 **Location:** In Modal type union, after 'simplefin-init' (around line 106)
 
 **Add modal types:**
+
 ```typescript
   | {
       name: 'enablebanking-init';
@@ -212,6 +204,7 @@ import { type EnableBankingToken } from 'loot-core/types/models/enablebanking';
 **Location:** After '/gocardless/link' route (around line 321)
 
 **Add route:**
+
 ```typescript
                 <Route
                   path="/enablebanking/auth_callback"
@@ -230,6 +223,7 @@ import { type EnableBankingToken } from 'loot-core/types/models/enablebanking';
 **Location:** After GoCardlessLink export (around line 6)
 
 **Add export:**
+
 ```typescript
 export { EnableBankingCallback } from '../EnableBankingCallback';
 ```
@@ -241,18 +235,20 @@ export { EnableBankingCallback } from '../EnableBankingCallback';
 **Location:** In SelectLinkedAccountsModalProps type
 
 **Update requisition/authorization ID types to support both:**
+
 ```typescript
 type SelectLinkedAccountsModalProps = {
   externalAccounts: SyncServerGoCardlessAccount[];
-  requisitionId?: string;  // ← Make optional if not already
-  authorizationId?: string;  // ← ADD THIS for Enable Banking
-  syncSource: 'goCardless' | 'enableBanking';  // ← ADD THIS
+  requisitionId?: string; // ← Make optional if not already
+  authorizationId?: string; // ← ADD THIS for Enable Banking
+  syncSource: 'goCardless' | 'enableBanking'; // ← ADD THIS
 };
 ```
 
 **Location:** In the component body where requisitionId is used
 
 **Update to use authorizationId for Enable Banking:**
+
 ```typescript
   const handleLinkedAccountAdd = useCallback(
     async (externalAccount: SyncServerGoCardlessAccount) => {
@@ -276,6 +272,7 @@ type SelectLinkedAccountsModalProps = {
 **Location:** In imports section (around line 20)
 
 **Add imports:**
+
 ```typescript
 import {
   authorizeEnableBankingSession,
@@ -295,6 +292,7 @@ Look for where other bank sync providers are configured and add similar Enable B
 **Location:** In imports (around line 14)
 
 **Add import:**
+
 ```typescript
 import { authorizeEnableBankingSession } from '@desktop-client/banksync/enablebanking';
 ```
@@ -310,14 +308,15 @@ import { authorizeEnableBankingSession } from '@desktop-client/banksync/enableba
 **Location:** In useSyncSourceReadable hook (around line 32)
 
 **Add to readable names:**
+
 ```typescript
-  const syncSourceReadable = {
-    goCardless: 'GoCardless',
-    simpleFin: 'SimpleFIN',
-    pluggyai: 'Pluggy.ai',
-    enablebanking: 'Enable Banking',  // ← ADD THIS
-    unlinked: t('Unlinked'),
-  };
+const syncSourceReadable = {
+  goCardless: 'GoCardless',
+  simpleFin: 'SimpleFIN',
+  pluggyai: 'Pluggy.ai',
+  enablebanking: 'Enable Banking', // ← ADD THIS
+  unlinked: t('Unlinked'),
+};
 ```
 
 ---
@@ -327,18 +326,18 @@ import { authorizeEnableBankingSession } from '@desktop-client/banksync/enableba
 **Location:** In useSyncSourceReadable hook (around line 31)
 
 **Add to readable names:**
+
 ```typescript
-  const syncSourceReadable = {
-    goCardless: 'GoCardless',
-    simpleFin: 'SimpleFIN',
-    pluggyai: 'Pluggy.ai',
-    enablebanking: 'Enable Banking',  // ← ADD THIS
-    unlinked: t('Unlinked'),
-  };
+const syncSourceReadable = {
+  goCardless: 'GoCardless',
+  simpleFin: 'SimpleFIN',
+  pluggyai: 'Pluggy.ai',
+  enablebanking: 'Enable Banking', // ← ADD THIS
+  unlinked: t('Unlinked'),
+};
 ```
 
 ---
-
 
 ## PART 4: LOOT-CORE MODIFICATIONS
 
@@ -347,6 +346,7 @@ import { authorizeEnableBankingSession } from '@desktop-client/banksync/enableba
 **Location:** In imports section (after other imports, around line 37)
 
 **Add Enable Banking imports:**
+
 ```typescript
 import {
   app as enableBankingApp,
@@ -357,22 +357,24 @@ import {
 **Location:** In AccountHandlers type (around line 58)
 
 **Add handlers:**
+
 ```typescript
 export type AccountHandlers = {
   'accounts-get': typeof getAccounts;
   'account-balance': typeof getAccountBalance;
   'account-properties': typeof getAccountProperties;
-  'get-bank': typeof getBank;  // ← ADD THIS
+  'get-bank': typeof getBank; // ← ADD THIS
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
   // ... other handlers ...
-} & EnableBankingAccountHandlers;  // ← ADD THIS
+} & EnableBankingAccountHandlers; // ← ADD THIS
 ```
 
 **Location:** After getAccountProperties function (around line 130)
 
 **Add getBank function:**
+
 ```typescript
 async function getBank({ id }: { id: string }) {
   return await db.first<db.DbBank>(
@@ -385,6 +387,7 @@ async function getBank({ id }: { id: string }) {
 **Location:** In linkGoCardlessAccount function signature (around line 138)
 
 **Update function to support syncSource:**
+
 ```typescript
 async function linkGoCardlessAccount({
   requisitionId,
@@ -433,11 +436,12 @@ async function linkGoCardlessAccount({
 **Location:** At bottom of file, in handlers export (around line 1200+)
 
 **Add Enable Banking handlers:**
+
 ```typescript
 export const handlers = {
   // ... existing handlers ...
   'get-bank': getBank,
-  ...enableBankingApp,  // ← ADD THIS to spread Enable Banking handlers
+  ...enableBankingApp, // ← ADD THIS to spread Enable Banking handlers
 };
 ```
 
@@ -448,6 +452,7 @@ export const handlers = {
 **Location:** findOrCreateBank function signature (line 6)
 
 **Add TypeScript types:**
+
 ```typescript
 export async function findOrCreateBank(
   institution: { name: string },  // ← ADD TYPE
@@ -462,6 +467,7 @@ export async function findOrCreateBank(
 **Location:** In imports section (around line 37)
 
 **Add import:**
+
 ```typescript
 import { downloadEnableBankingTransactions } from './enablebanking';
 ```
@@ -469,6 +475,7 @@ import { downloadEnableBankingTransactions } from './enablebanking';
 **Location:** In getAccountSyncStartDate function (around line 93)
 
 **Update sync date window:**
+
 ```typescript
 async function getAccountSyncStartDate(id) {
   // Bank sync providers may support different historical data windows depending on the institution.
@@ -479,6 +486,7 @@ async function getAccountSyncStartDate(id) {
 **Location:** In processBankSyncDownload, balance calculation section (around line 945)
 
 **Add Enable Banking to balance calculation:**
+
 ```typescript
     } else if (
       acctRow.account_sync_source === 'pluggyai' ||
@@ -492,6 +500,7 @@ async function getAccountSyncStartDate(id) {
 **Location:** In syncAccount function (around line 1050)
 
 **Add Enable Banking download handler:**
+
 ```typescript
   } else if (acctRow.account_sync_source === 'goCardless') {
     download = await downloadGoCardlessTransactions(
@@ -519,12 +528,13 @@ async function getAccountSyncStartDate(id) {
 **Location:** AccountSyncSource type definition (line 25)
 
 **Add 'enablebanking':**
+
 ```typescript
 export type AccountSyncSource =
   | 'simpleFin'
   | 'goCardless'
   | 'pluggyai'
-  | 'enablebanking';  // ← ADD THIS
+  | 'enablebanking'; // ← ADD THIS
 ```
 
 ---
@@ -534,12 +544,13 @@ export type AccountSyncSource =
 **Location:** BankSyncProviders type definition (line 23)
 
 **Add 'enablebanking':**
+
 ```typescript
 export type BankSyncProviders =
   | 'goCardless'
   | 'simpleFin'
   | 'pluggyai'
-  | 'enablebanking';  // ← ADD THIS
+  | 'enablebanking'; // ← ADD THIS
 ```
 
 ---
@@ -559,6 +570,7 @@ Check if Enable Banking feature flag needs to be added. This may depend on how t
 **Location:** In imports section (around line 13)
 
 **Add Enable Banking import:**
+
 ```typescript
 import * as enablebankingApp from './app-enablebanking/app-enablebanking';
 ```
@@ -566,11 +578,12 @@ import * as enablebankingApp from './app-enablebanking/app-enablebanking';
 **Location:** In Express route mounting section (around line 73)
 
 **Add route:**
+
 ```typescript
 app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
 app.use('/pluggyai', pluggai.handlers);
-app.use('/enablebanking', enablebankingApp.handlers);  // ← ADD THIS
+app.use('/enablebanking', enablebankingApp.handlers); // ← ADD THIS
 app.use('/secret', secretApp.handlers);
 ```
 
@@ -581,14 +594,15 @@ app.use('/secret', secretApp.handlers);
 **Location:** In SecretName object (around line 17)
 
 **Add Enable Banking secrets:**
+
 ```typescript
 export const SecretName = {
   // ... existing secrets ...
   pluggyai_clientId: 'pluggyai_clientId',
   pluggyai_clientSecret: 'pluggyai_clientSecret',
   pluggyai_itemIds: 'pluggyai_itemIds',
-  enablebanking_applicationId: 'enablebanking_applicationId',  // ← ADD THIS
-  enablebanking_secret: 'enablebanking_secret',                 // ← ADD THIS
+  enablebanking_applicationId: 'enablebanking_applicationId', // ← ADD THIS
+  enablebanking_secret: 'enablebanking_secret', // ← ADD THIS
 };
 ```
 
@@ -603,12 +617,14 @@ export const SecretName = {
 ## PART 6: YARN LOCK
 
 **Action:** After adding all files and running `yarn install`, the yarn.lock will be automatically updated with:
+
 - fast-glob
 - openapi-fetch
 - @types/jws
 - And their transitive dependencies
 
 **Command:**
+
 ```bash
 yarn install
 ```
@@ -638,10 +654,12 @@ After applying all changes, verify:
 ## PART 8: TESTING ENABLE BANKING
 
 ### Prerequisites for testing:
+
 1. Enable Banking API credentials (applicationId and secret)
 2. Configure secrets via admin panel or server
 
 ### Manual test flow:
+
 1. Open Create Account modal
 2. Select "Link Bank Account"
 3. Choose Enable Banking option
@@ -686,6 +704,7 @@ gh pr create --title "[WIP] Integrate Enable Banking for Bank Sync" \
 ## NOTES
 
 ### Key Architecture Decisions:
+
 1. **Reuses GoCardless account linking** - Enable Banking uses the same account structure
 2. **syncSource parameter** - Discriminates between 'goCardless' and 'enableBanking'
 3. **Bank-specific processors** - Handle institution-specific quirks (ABN AMRO PSUs, Danish bank formats)
@@ -694,8 +713,8 @@ gh pr create --title "[WIP] Integrate Enable Banking for Bank Sync" \
 6. **1-year sync window** - Changed from 90 days to support more transaction history
 
 ### Common Issues:
+
 - **Import paths**: Ensure `@desktop-client/*` aliases work
 - **TypeScript types**: Some types are shared between packages
 - **Secrets**: Must configure Enable Banking API credentials before testing
 - **CORS**: Enable Banking callback must be whitelisted in API console
-
