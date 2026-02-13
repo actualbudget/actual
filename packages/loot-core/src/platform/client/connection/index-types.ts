@@ -1,7 +1,7 @@
 import type { Handlers } from '../../../types/handlers';
 import type { ServerEvents } from '../../../types/server-events';
 
-export declare function init(worker: Worker): Promise<unknown>;
+export declare function init(): Promise<unknown>;
 export type Init = typeof init;
 
 /**

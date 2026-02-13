@@ -25,7 +25,7 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { v4 as uuid } from 'uuid';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {

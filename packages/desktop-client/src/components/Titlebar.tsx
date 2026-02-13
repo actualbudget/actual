@@ -20,7 +20,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { listen } from 'loot-core/platform/client/fetch';
+import { listen } from 'loot-core/platform/client/connection';
 import { isDevelopmentEnvironment } from 'loot-core/shared/environment';
 import * as Platform from 'loot-core/shared/platform';
 
