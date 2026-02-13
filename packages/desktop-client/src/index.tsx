@@ -12,7 +12,7 @@ import type { NavigateFunction } from 'react-router';
 import { bindActionCreators } from '@reduxjs/toolkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { q } from 'loot-core/shared/query';
 
 import * as accountsSlice from './accounts/accountsSlice';
@@ -34,7 +34,7 @@ import * as usersSlice from './users/usersSlice';
 const queryClient = new QueryClient();
 window.__TANSTACK_QUERY_CLIENT__ = queryClient;
 
-const store = configureAppStore();
+const store = configureAppStore({ queryClient });
 
 const boundActions = bindActionCreators(
   {
@@ -88,15 +88,15 @@ window.$q = q;
 const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(
-  <Provider store={store}>
-    <ServerProvider>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
+  <QueryClientProvider client={queryClient}>
+    <Provider store={store}>
+      <ServerProvider>
+        <AuthProvider>
           <App />
-        </QueryClientProvider>
-      </AuthProvider>
-    </ServerProvider>
-  </Provider>,
+        </AuthProvider>
+      </ServerProvider>
+    </Provider>
+  </QueryClientProvider>,
 );
 
 declare global {

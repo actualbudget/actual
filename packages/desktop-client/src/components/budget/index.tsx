@@ -5,7 +5,7 @@ import type { ComponentType } from 'react';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import type {
   CategoryEntity,

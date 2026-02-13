@@ -2,7 +2,7 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 
-import { listen, send } from 'loot-core/platform/client/fetch';
+import { listen, send } from 'loot-core/platform/client/connection';
 
 import { reloadAccounts } from './accounts/accountsSlice';
 import { resetSync, sync } from './app/appSlice';

@@ -103,7 +103,7 @@ export function ReportCard({
       <Layout {...layoutProps}>
         <Button
           variant="bare"
-          onPress={() => navigate(to)}
+          onPress={() => navigate(to, { state: { goBack: true } })}
           style={{
             height: '100%',
             width: '100%',
