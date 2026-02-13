@@ -372,13 +372,12 @@ describe('Categories', () => {
 
     // Transfering an income category to an expense just doesn't make
     // sense. Make sure this doesn't do anything.
-    expect(
-      async () =>
-        await runHandler(handlers['category-delete'], {
-          id: 'income1',
-          transferId: 'bar',
-        }),
-    ).toThrow('Cannot transfer between income and expense categories.');
+    await expect(
+      runHandler(handlers['category-delete'], {
+        id: 'income1',
+        transferId: 'bar',
+      }),
+    ).rejects.toThrow('Cannot transfer between income and expense categories.');
 
     let categories = await db.getCategories();
     expect(categories.find(cat => cat.id === 'income1')).toBeDefined();
