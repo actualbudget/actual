@@ -551,10 +551,7 @@ export const processQueue = createAppAsyncThunk(
               hasAnySuccess = true;
             }
           } catch (error) {
-            console.error(
-              `Batch sync failed for SimpleFin accounts:`,
-              error,
-            );
+            console.error(`Batch sync failed for SimpleFin accounts:`, error);
           } finally {
             // Always remove processed accounts from syncing state and queue
             simpleFinBatch.forEach(id => {

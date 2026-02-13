@@ -417,7 +417,10 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
     const dispatch = useDispatch();
 
     // An account is pending if it's in the sync queue or currently syncing
-    const pendingAccountIds = getPendingAccountIds(syncingAccountIds, syncQueue);
+    const pendingAccountIds = getPendingAccountIds(
+      syncingAccountIds,
+      syncQueue,
+    );
 
     const { dragAndDropHooks } = useDragAndDrop({
       getItems: keys =>
