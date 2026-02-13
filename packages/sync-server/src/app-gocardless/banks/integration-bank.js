@@ -1,11 +1,10 @@
 import * as d from 'date-fns';
 
+import { getCurrency } from 'loot-core/shared/currencies';
+import { amountToInteger } from 'loot-core/shared/util';
+
 import { formatPayeeName } from '../../util/payee-name';
-import {
-  amountToInteger,
-  printIban,
-  sortByBookingDateOrValueDate,
-} from '../utils';
+import { printIban, sortByBookingDateOrValueDate } from '../utils';
 
 const SORTED_BALANCE_TYPE_LIST = [
   'closingBooked',
@@ -92,13 +91,13 @@ export default {
           total -
           amountToInteger(
             trans.transactionAmount.amount,
-            trans.transactionAmount.currency,
+            getCurrency(trans.transactionAmount.currency || '').decimalPlaces,
           )
         );
       },
       amountToInteger(
         currentBalance?.balanceAmount?.amount || 0,
-        currentBalance?.balanceAmount?.currency,
+        getCurrency(currentBalance?.balanceAmount?.currency || '').decimalPlaces,
       ),
     );
   },
