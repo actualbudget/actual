@@ -362,7 +362,7 @@ async function deleteCategory({
       transfer &&
       row.is_income !== transfer.is_income
     ) {
-      throw new Error(`Cannot transfer between income and expense categories.`);
+      throw new Error('Cannot transfer between income and expense categories.');
     }
 
     // Update spreadsheet values if it's an expense category
