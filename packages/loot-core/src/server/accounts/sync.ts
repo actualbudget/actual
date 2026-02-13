@@ -406,7 +406,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
 
     if (!importPending && !trans.cleared) continue;
 
-    if (!trans.amount) {
+    if (trans.amount == null) {
       trans.amount = Number(trans.transactionAmount?.amount ?? 0);
     }
 
@@ -955,7 +955,7 @@ async function processBankSyncDownload(
         return (
           total -
           amountToInteger(
-            trans.transactionAmount.amount,
+            Number(trans.transactionAmount.amount),
             getCurrencyDecimalPlaces(trans.transactionAmount.currency),
           )
         );
@@ -967,7 +967,7 @@ async function processBankSyncDownload(
         (total, trans) =>
           total -
           amountToInteger(
-            trans.transactionAmount.amount,
+            Number(trans.transactionAmount.amount),
             getCurrencyDecimalPlaces(trans.transactionAmount.currency),
           ),
         currentBalance,

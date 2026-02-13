@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { getCurrency } from 'loot-core/shared/currencies';
-import { amountToInteger } from 'loot-core/shared/util';
+import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
 import { handleError } from '../app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '../services/secrets-service';
@@ -16,8 +16,7 @@ app.use(requestLoggerMiddleware);
 
 function roundToCurrencyDecimals(amount, currencyCode) {
   const decimalPlaces = getCurrency(currencyCode || '').decimalPlaces;
-  const multiplier = Math.pow(10, decimalPlaces);
-  return Math.round(amount * multiplier) / multiplier;
+  return integerToAmount(amountToInteger(amount, decimalPlaces), decimalPlaces);
 }
 
 app.post(
