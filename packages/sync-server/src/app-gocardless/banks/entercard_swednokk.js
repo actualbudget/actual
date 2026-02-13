@@ -31,19 +31,25 @@ export default {
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {
+    const currentBalanceDecimals = getCurrency(
+      balances[0]?.balanceAmount?.currency ||
+        sortedTransactions[0]?.transactionAmount?.currency ||
+        '',
+    ).decimalPlaces;
+
     return sortedTransactions.reduce(
       (total, trans) => {
         return (
           total -
           amountToInteger(
-            trans.transactionAmount.amount,
-            getCurrency(trans.transactionAmount.currency || '').decimalPlaces,
+            Number(trans.transactionAmount.amount || 0),
+            currentBalanceDecimals,
           )
         );
       },
       amountToInteger(
-        balances[0]?.balanceAmount?.amount || 0,
-        getCurrency(balances[0]?.balanceAmount?.currency || '').decimalPlaces,
+        Number(balances[0]?.balanceAmount?.amount || 0),
+        currentBalanceDecimals,
       ),
     );
   },

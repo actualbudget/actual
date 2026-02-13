@@ -85,20 +85,23 @@ export default {
           SORTED_BALANCE_TYPE_LIST.indexOf(a.balanceType) -
           SORTED_BALANCE_TYPE_LIST.indexOf(b.balanceType),
       )[0];
+    const currentBalanceDecimals = getCurrency(
+      currentBalance?.balanceAmount?.currency || '',
+    ).decimalPlaces;
+
     return sortedTransactions.reduce(
       (total, trans) => {
         return (
           total -
           amountToInteger(
-            Number(trans.transactionAmount.amount),
-            getCurrency(trans.transactionAmount.currency || '').decimalPlaces,
+            Number(trans.transactionAmount.amount || 0),
+            currentBalanceDecimals,
           )
         );
       },
       amountToInteger(
         Number(currentBalance?.balanceAmount?.amount || 0),
-        getCurrency(currentBalance?.balanceAmount?.currency || '')
-          .decimalPlaces,
+        currentBalanceDecimals,
       ),
     );
   },

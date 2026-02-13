@@ -67,7 +67,7 @@ export default {
     const currentBalance = balances.find(
       balance => 'expected' === balance.balanceType,
     );
-    const balanceCurrencyDecimals = getCurrency(
+    const currentBalanceDecimals = getCurrency(
       currentBalance?.balanceAmount?.currency || '',
     ).decimalPlaces;
 
@@ -76,14 +76,14 @@ export default {
         return (
           total -
           amountToInteger(
-            Number(trans.transactionAmount.amount),
-            balanceCurrencyDecimals,
+            Number(trans.transactionAmount.amount || 0),
+            currentBalanceDecimals,
           )
         );
       },
       amountToInteger(
         Number(currentBalance?.balanceAmount?.amount || 0),
-        balanceCurrencyDecimals,
+        currentBalanceDecimals,
       ),
     );
   },

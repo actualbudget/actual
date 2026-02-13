@@ -29,17 +29,18 @@ export default {
     if (sortedTransactions.length) {
       const oldestTransaction =
         sortedTransactions[sortedTransactions.length - 1];
+      const currentBalanceDecimals = getCurrency(
+        oldestTransaction.balanceAfterTransaction.balanceAmount.currency || '',
+      ).decimalPlaces;
       const oldestKnownBalance = amountToInteger(
-        oldestTransaction.balanceAfterTransaction.balanceAmount.amount,
-        getCurrency(
-          oldestTransaction.balanceAfterTransaction.balanceAmount.currency ||
-            '',
-        ).decimalPlaces,
+        Number(
+          oldestTransaction.balanceAfterTransaction.balanceAmount.amount || 0,
+        ),
+        currentBalanceDecimals,
       );
       const oldestTransactionAmount = amountToInteger(
-        oldestTransaction.transactionAmount.amount,
-        getCurrency(oldestTransaction.transactionAmount.currency || '')
-          .decimalPlaces,
+        Number(oldestTransaction.transactionAmount.amount || 0),
+        currentBalanceDecimals,
       );
 
       return oldestKnownBalance - oldestTransactionAmount;
@@ -48,9 +49,12 @@ export default {
         balance => 'interimBooked' === balance.balanceType,
       );
       const balance = interimBalance?.balanceAmount;
+      const currentBalanceDecimals = getCurrency(
+        balance?.currency || '',
+      ).decimalPlaces;
       return amountToInteger(
         Number(balance?.amount || 0),
-        getCurrency(balance?.currency || '').decimalPlaces,
+        currentBalanceDecimals,
       );
     }
   },

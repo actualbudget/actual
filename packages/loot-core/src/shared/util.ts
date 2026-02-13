@@ -477,6 +477,7 @@ export function integerToCurrencyWithDecimal(
     integerAmount,
     getNumberFormat({
       format: numberFormatConfig.format,
+      hideFraction: numberFormatConfig.hideFraction,
       decimalPlaces,
     }).formatter,
     decimalPlaces,

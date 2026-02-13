@@ -44,7 +44,7 @@ export default {
     editedTrans.creditorName = transaction.additionalInformation;
     transaction.transactionAmount = {
       // Flip transaction amount sign
-      amount: (-parseFloat(transaction.transactionAmount.amount)).toString(),
+      amount: (-Number(transaction.transactionAmount.amount || 0)).toString(),
       currency: transaction.transactionAmount.currency,
     };
 
@@ -68,24 +68,29 @@ export default {
     const nonInvoiced = balances.find(
       balance => 'nonInvoiced' === balance.balanceType,
     );
+    const currentBalanceDecimals = getCurrency(
+      currentBalance?.balanceAmount?.currency ||
+        nonInvoiced?.balanceAmount?.currency ||
+        '',
+    ).decimalPlaces;
 
     return sortedTransactions.reduce(
       (total, trans) => {
         return (
           total -
           amountToInteger(
-            trans.transactionAmount.amount,
-            getCurrency(trans.transactionAmount.currency || '').decimalPlaces,
+            Number(trans.transactionAmount.amount || 0),
+            currentBalanceDecimals,
           )
         );
       },
       -amountToInteger(
-        currentBalance.balanceAmount.amount,
-        getCurrency(currentBalance.balanceAmount.currency || '').decimalPlaces,
+        Number(currentBalance?.balanceAmount?.amount || 0),
+        currentBalanceDecimals,
       ) +
         amountToInteger(
-          nonInvoiced.balanceAmount.amount,
-          getCurrency(nonInvoiced.balanceAmount.currency || '').decimalPlaces,
+          Number(nonInvoiced?.balanceAmount?.amount || 0),
+          currentBalanceDecimals,
         ),
     );
   },

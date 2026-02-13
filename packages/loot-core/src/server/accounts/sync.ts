@@ -407,10 +407,17 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     if (!importPending && !trans.cleared) continue;
 
     if (!trans.amount) {
-      trans.amount = trans.transactionAmount.amount;
+      trans.amount = Number(trans.transactionAmount?.amount ?? 0);
     }
 
-    const mapping = mappings.get(trans.amount <= 0 ? 'payment' : 'deposit');
+    const normalizedAmount = Number(trans.amount);
+    if (Number.isNaN(normalizedAmount)) {
+      throw new Error(
+        `Invalid transaction amount for transactionId ${trans.transactionId ?? 'unknown'}`,
+      );
+    }
+
+    const mapping = mappings.get(normalizedAmount <= 0 ? 'payment' : 'deposit');
 
     const date = trans[mapping.get('date')] ?? trans.date;
     const payeeName = trans[mapping.get('payee')] ?? trans.payeeName;
@@ -446,7 +453,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
       payee_name: payeeName,
       trans: {
         amount: amountToInteger(
-          trans.amount,
+          normalizedAmount,
           getCurrencyDecimalPlaces(trans.transactionAmount?.currency),
         ),
         payee: trans.payee,

@@ -49,20 +49,23 @@ export default {
     const currentBalance = balances.find(
       balance => 'interimBooked' === balance.balanceType,
     );
+    const currentBalanceDecimals = getCurrency(
+      currentBalance?.balanceAmount?.currency || '',
+    ).decimalPlaces;
 
     return sortedTransactions.reduce(
       (total, trans) => {
         return (
           total -
           amountToInteger(
-            trans.transactionAmount.amount,
-            getCurrency(trans.transactionAmount.currency || '').decimalPlaces,
+            Number(trans.transactionAmount.amount || 0),
+            currentBalanceDecimals,
           )
         );
       },
       amountToInteger(
-        currentBalance.balanceAmount.amount,
-        getCurrency(currentBalance.balanceAmount.currency || '').decimalPlaces,
+        Number(currentBalance?.balanceAmount?.amount || 0),
+        currentBalanceDecimals,
       ),
     );
   },

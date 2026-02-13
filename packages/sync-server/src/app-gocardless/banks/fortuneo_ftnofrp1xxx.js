@@ -30,7 +30,7 @@ export default {
     const payeeName = details.replace(regex, '').trim();
 
     // The amount is negative for outgoing transactions, positive for incoming transactions.
-    const isCreditorPayee = parseFloat(amount) < 0;
+    const isCreditorPayee = Number(amount || 0) < 0;
 
     // The payee name is the creditor name for outgoing transactions and the debtor name for incoming transactions.
     const creditorName = isCreditorPayee ? payeeName : null;
