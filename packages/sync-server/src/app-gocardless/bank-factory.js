@@ -20,11 +20,19 @@ async function loadBanks() {
   const imports = await Promise.all(
     bankHandlers.map(file => {
       const fileUrlToBank = pathToFileURL(path.resolve(banksDir, file)); // pathToFileURL for ESM compatibility
-      return import(fileUrlToBank.toString()).then(handler => handler.default);
+      return import(fileUrlToBank.toString()).then(handler => {
+        if (handler.default) {
+          return handler.default;
+        }
+
+        return Object.values(handler).find(
+          value => value?.institutionIds && value?.normalizeTransaction,
+        );
+      });
     }),
   );
 
-  return imports;
+  return imports.filter(Boolean);
 }
 
 export const banks = await loadBanks();

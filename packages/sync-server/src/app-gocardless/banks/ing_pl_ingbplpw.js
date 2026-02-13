@@ -32,7 +32,8 @@ export default {
       const oldestKnownBalance = amountToInteger(
         oldestTransaction.balanceAfterTransaction.balanceAmount.amount,
         getCurrency(
-          oldestTransaction.balanceAfterTransaction.balanceAmount.currency || '',
+          oldestTransaction.balanceAfterTransaction.balanceAmount.currency ||
+            '',
         ).decimalPlaces,
       );
       const oldestTransactionAmount = amountToInteger(

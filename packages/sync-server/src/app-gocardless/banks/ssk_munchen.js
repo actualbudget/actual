@@ -1,8 +1,8 @@
+import { getCurrency } from 'loot-core/shared/currencies';
 /**
  *  Credit for this code goes to Nebukadneza at https://github.com/Nebukadneza
  */
 import { amountToInteger } from 'loot-core/shared/util';
-import { getCurrency } from 'loot-core/shared/currencies';
 
 import Fallback from './integration-bank';
 /** @type {import('./bank.interface').IBank} */

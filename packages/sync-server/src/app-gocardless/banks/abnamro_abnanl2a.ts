@@ -1,10 +1,10 @@
 import { getCurrency } from 'loot-core/shared/currencies';
 import { amountToInteger } from 'loot-core/shared/util';
 
-import type { Balance, Transaction } from '../gocardless-node.types';
+import type { Transaction } from '../gocardless-node.types';
 
-import Fallback from './integration-bank';
 import type { IBank } from './bank.interface';
+import Fallback from './integration-bank';
 
 type TransactionWithBalance = Transaction & {
   balanceAfterTransaction: {
@@ -24,7 +24,7 @@ function hasBalanceAfterTransaction(
   );
 }
 
-const AbnamroAbnanl2a: IBank = {
+export const abnamroAbnanl2a: IBank = {
   ...Fallback,
 
   institutionIds: ['ABNAMRO_ABNANL2A'],
@@ -51,13 +51,20 @@ const AbnamroAbnanl2a: IBank = {
   },
 
   sortTransactions(transactions = []) {
-    return transactions.sort(
-      (a, b) => +new Date(b.valueDateTime) - +new Date(a.valueDateTime),
-    );
+    return transactions.sort((a, b) => {
+      const leftDate =
+        a.valueDateTime || a.valueDate || a.bookingDateTime || a.bookingDate;
+      const rightDate =
+        b.valueDateTime || b.valueDate || b.bookingDateTime || b.bookingDate;
+      return +new Date(rightDate || 0) - +new Date(leftDate || 0);
+    });
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {
-    if (sortedTransactions.length && hasBalanceAfterTransaction(sortedTransactions[0])) {
+    if (
+      sortedTransactions.length &&
+      hasBalanceAfterTransaction(sortedTransactions[0])
+    ) {
       const oldestTransaction =
         sortedTransactions[sortedTransactions.length - 1];
 
@@ -66,9 +73,12 @@ const AbnamroAbnanl2a: IBank = {
       }
 
       const oldestKnownBalance = amountToInteger(
-        parseFloat(oldestTransaction.balanceAfterTransaction.balanceAmount.amount),
+        parseFloat(
+          oldestTransaction.balanceAfterTransaction.balanceAmount.amount,
+        ),
         getCurrency(
-          oldestTransaction.balanceAfterTransaction.balanceAmount.currency || '',
+          oldestTransaction.balanceAfterTransaction.balanceAmount.currency ||
+            '',
         ).decimalPlaces,
       );
       const oldestTransactionAmount = amountToInteger(
@@ -90,5 +100,3 @@ const AbnamroAbnanl2a: IBank = {
     );
   },
 };
-
-export default AbnamroAbnanl2a;

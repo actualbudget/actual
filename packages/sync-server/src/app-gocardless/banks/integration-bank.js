@@ -97,7 +97,8 @@ export default {
       },
       amountToInteger(
         currentBalance?.balanceAmount?.amount || 0,
-        getCurrency(currentBalance?.balanceAmount?.currency || '').decimalPlaces,
+        getCurrency(currentBalance?.balanceAmount?.currency || '')
+          .decimalPlaces,
       ),
     );
   },
