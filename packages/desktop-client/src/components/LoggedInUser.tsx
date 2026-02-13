@@ -11,7 +11,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { listen } from 'loot-core/platform/client/fetch';
+import { listen } from 'loot-core/platform/client/connection';
 import type { RemoteFile, SyncedLocalFile } from 'loot-core/types/file';
 import type { TransObjectLiteral } from 'loot-core/types/util';
 

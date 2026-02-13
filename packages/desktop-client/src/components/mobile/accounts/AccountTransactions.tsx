@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import type { Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import type { IntegerAmount } from 'loot-core/shared/util';

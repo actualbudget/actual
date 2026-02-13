@@ -20,7 +20,7 @@ import {
   parse as parseDate,
 } from 'date-fns';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { getMonthYearFormat } from 'loot-core/shared/months';
 import {
   deserializeField,
