@@ -289,6 +289,7 @@ export type Modal =
         onEditNotes: (id: NoteEntity['id']) => void;
         onClose?: () => void;
         onToggleRunningBalance?: () => void;
+        onToggleReconciled?: () => void;
       };
     }
   | {
