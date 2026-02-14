@@ -24,7 +24,7 @@ export function calculateDistance(
   const phi1 = (pos1.latitude * Math.PI) / 180;
   const phi2 = (pos2.latitude * Math.PI) / 180;
   const deltaPhi = ((pos2.latitude - pos1.latitude) * Math.PI) / 180;
-  const deltaLamda = ((pos2.longitude - pos1.longitude) * Math.PI) / 180;
+  const deltaLambda = ((pos2.longitude - pos1.longitude) * Math.PI) / 180;
 
   const a =
     Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
