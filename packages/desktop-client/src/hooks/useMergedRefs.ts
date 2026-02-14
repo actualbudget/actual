@@ -1,4 +1,5 @@
-import { useCallback, type Ref, type RefCallback, type RefObject } from 'react';
+import { useCallback } from 'react';
+import type { Ref, RefCallback, RefObject } from 'react';
 
 export function useMergedRefs<T>(
   ...refs: (

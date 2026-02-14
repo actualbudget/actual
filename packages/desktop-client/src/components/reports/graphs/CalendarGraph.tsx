@@ -1,4 +1,5 @@
-import { useEffect, useState, type Ref } from 'react';
+import { useEffect, useState } from 'react';
+import type { Ref } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -15,7 +16,7 @@ import {
   startOfWeek,
 } from 'date-fns';
 
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';

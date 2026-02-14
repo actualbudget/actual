@@ -1,4 +1,5 @@
-import { forwardRef, type CSSProperties, type ReactNode } from 'react';
+import { forwardRef } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 import { styles } from './styles';
 import { Text } from './Text';

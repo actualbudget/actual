@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
-import { type TransactionFilterEntity } from '../../types/models';
+import type { TransactionFilterEntity } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
 import { requiredFields } from '../models';

@@ -5,12 +5,9 @@ import { getCurrency } from 'loot-core/shared/currencies';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import { getLocale } from '../../shared/locale';
 import * as monthUtils from '../../shared/months';
-import {
-  integerToCurrency,
-  safeNumber,
-  type IntegerAmount,
-} from '../../shared/util';
-import { type CategoryEntity } from '../../types/models';
+import { integerToCurrency, safeNumber } from '../../shared/util';
+import type { IntegerAmount } from '../../shared/util';
+import type { CategoryEntity } from '../../types/models';
 import * as db from '../db';
 import * as sheet from '../sheet';
 import { batchMessages } from '../sync';

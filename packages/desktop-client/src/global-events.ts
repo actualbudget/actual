@@ -1,7 +1,7 @@
 // @ts-strict-ignore
-import { type QueryClient } from '@tanstack/react-query';
+import type { QueryClient } from '@tanstack/react-query';
 
-import { listen } from 'loot-core/platform/client/fetch';
+import { listen } from 'loot-core/platform/client/connection';
 import * as undo from 'loot-core/platform/client/undo';
 
 import { reloadAccounts } from './accounts/accountsSlice';
@@ -15,7 +15,7 @@ import {
 } from './notifications/notificationsSlice';
 import { reloadPayees } from './payees/payeesSlice';
 import { loadPrefs } from './prefs/prefsSlice';
-import { type AppStore } from './redux/store';
+import type { AppStore } from './redux/store';
 import * as syncEvents from './sync-events';
 
 export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {

@@ -1,12 +1,5 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ComponentType,
-  type ReactNode,
-  type SVGProps,
-} from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ComponentType, ReactNode, SVGProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -149,7 +142,7 @@ export function CommandBar() {
   }, [open]);
 
   const allAccounts = useAccounts();
-  const { data: customReports } = useReports();
+  const { data: customReports = [] } = useReports();
 
   const accounts = allAccounts.filter(acc => !acc.closed);
 

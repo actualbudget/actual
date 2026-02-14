@@ -8,9 +8,9 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { send, sendCatch } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import { type CustomReportEntity } from 'loot-core/types/models';
+import type { CustomReportEntity } from 'loot-core/types/models';
 
 import { GetCardData } from './GetCardData';
 import { MissingReportCard } from './MissingReportCard';
@@ -26,6 +26,7 @@ import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { useUpdateReportMutation } from '@desktop-client/reports/mutations';
 
 type CustomReportListCardsProps = {
   isEditing?: boolean;
@@ -81,7 +82,7 @@ function CustomReportListCardsInner({
 
   const payees = usePayees();
   const accounts = useAccounts();
-  const categories = useCategories();
+  const { data: categories = { list: [], grouped: [] } } = useCategories();
 
   const hasWarning = calculateHasWarning(report.conditions ?? [], {
     categories: categories.list,
@@ -106,30 +107,35 @@ function CustomReportListCardsInner({
     run();
   }, []);
 
+  const updateReportMutation = useUpdateReportMutation();
+
   const onSaveName = async (name: string) => {
     const updatedReport = {
       ...report,
       name,
     };
 
-    const response = await sendCatch('report/update', updatedReport);
-
-    if (response.error) {
-      dispatch(
-        addNotification({
-          notification: {
-            type: 'error',
-            message: t('Failed saving report name: {{error}}', {
-              error: response.error.message,
+    updateReportMutation.mutate(
+      { report: updatedReport },
+      {
+        onSuccess: () => {
+          setNameMenuOpen(false);
+        },
+        onError: error => {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: t('Failed saving report name: {{error}}', {
+                  error: error.message,
+                }),
+              },
             }),
-          },
-        }),
-      );
-      setNameMenuOpen(true);
-      return;
-    }
-
-    setNameMenuOpen(false);
+          );
+          setNameMenuOpen(true);
+        },
+      },
+    );
   };
 
   return (

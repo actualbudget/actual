@@ -1,13 +1,13 @@
-import { type JSX, type Ref } from 'react';
+import type { JSX, Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
-import { type CSSProperties } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import { getMonthYearFormat } from 'loot-core/shared/months';
-import { type RecurConfig, type RuleConditionOp } from 'loot-core/types/models';
+import type { RecurConfig, RuleConditionOp } from 'loot-core/types/models';
 
 import { AmountInput } from './AmountInput';
 import { PercentInput } from './PercentInput';
@@ -123,7 +123,8 @@ export const GenericInput = ({
   const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
   const { t } = useTranslation();
-  const { grouped: categoryGroups } = useCategories();
+  const { data: { grouped: categoryGroups } = { grouped: [] } } =
+    useCategories();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   let content: JSX.Element | null = null;
