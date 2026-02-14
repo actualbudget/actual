@@ -21,6 +21,7 @@ export async function findOrCreateBank(
     bank_id: requisitionId,
     name: institution.name,
   };
+
   await db.insertWithUUID('banks', bankData);
 
   return bankData;
