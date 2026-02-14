@@ -177,18 +177,22 @@ describe('CategoryTemplateContext', () => {
         group: 'test-group',
         is_income: false,
       };
-      const template: Template = {
+      const limitTemplate: Template = {
         type: 'limit',
         amount: 150,
         hold: false,
         period: 'monthly',
-        refill: true,
+        directive: 'template',
+        priority: null,
+      };
+      const refillTemplate: Template = {
+        type: 'refill',
         directive: 'template',
         priority: 1,
       };
 
       const instance = new TestCategoryTemplateContext(
-        [template],
+        [limitTemplate, refillTemplate],
         category,
         '2024-01',
         9000,
@@ -206,19 +210,23 @@ describe('CategoryTemplateContext', () => {
         group: 'test-group',
         is_income: false,
       };
-      const template: Template = {
+      const limitTemplate: Template = {
         type: 'limit',
         amount: 100,
         hold: false,
         period: 'weekly',
         start: '2024-01-01',
-        refill: true,
+        directive: 'template',
+        priority: null,
+      };
+      const refillTemplate: Template = {
+        type: 'refill',
         directive: 'template',
         priority: 1,
       };
 
       const instance = new TestCategoryTemplateContext(
-        [template],
+        [limitTemplate, refillTemplate],
         category,
         '2024-01',
         0,
@@ -235,17 +243,21 @@ describe('CategoryTemplateContext', () => {
         group: 'test-group',
         is_income: false,
       };
-      const template: Template = {
+      const limitTemplate: Template = {
         type: 'limit',
         amount: 10,
         hold: false,
         period: 'daily',
-        refill: true,
+        directive: 'template',
+        priority: null,
+      };
+      const refillTemplate: Template = {
+        type: 'refill',
         directive: 'template',
         priority: 1,
       };
       const instance = new TestCategoryTemplateContext(
-        [template],
+        [limitTemplate, refillTemplate],
         category,
         '2024-01',
         0,

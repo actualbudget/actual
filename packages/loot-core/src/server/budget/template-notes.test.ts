@@ -364,8 +364,12 @@ describe('unparse limit templates', () => {
         hold: false,
         period: 'monthly',
         directive: 'template',
+        priority: null,
+      },
+      {
+        type: 'refill',
+        directive: 'template',
         priority: 2,
-        refill: true,
       },
     ]);
 
@@ -380,8 +384,7 @@ describe('unparse limit templates', () => {
         hold: false,
         period: 'monthly',
         directive: 'template',
-        priority: 0,
-        refill: false,
+        priority: null,
       },
     ]);
 
