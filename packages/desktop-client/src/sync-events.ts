@@ -1,10 +1,10 @@
 // @ts-strict-ignore
-import { type QueryClient } from '@tanstack/react-query';
+import type { QueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 
-import { listen, send } from 'loot-core/platform/client/fetch';
+import { listen, send } from 'loot-core/platform/client/connection';
 
-import { reloadAccounts } from './accounts/accountsSlice';
+import { accountQueries } from './accounts';
 import { resetSync, sync } from './app/appSlice';
 import { categoryQueries } from './budget';
 import {
@@ -12,13 +12,11 @@ import {
   uploadBudget,
 } from './budgetfiles/budgetfilesSlice';
 import { pushModal } from './modals/modalsSlice';
-import {
-  addNotification,
-  type Notification,
-} from './notifications/notificationsSlice';
+import { addNotification } from './notifications/notificationsSlice';
+import type { Notification } from './notifications/notificationsSlice';
 import { reloadPayees } from './payees/payeesSlice';
 import { loadPrefs } from './prefs/prefsSlice';
-import { type AppStore } from './redux/store';
+import type { AppStore } from './redux/store';
 import { signOut } from './users/usersSlice';
 
 export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
@@ -88,7 +86,9 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
       }
 
       if (tables.includes('accounts')) {
-        store.dispatch(reloadAccounts());
+        queryClient.invalidateQueries({
+          queryKey: accountQueries.lists(),
+        });
       }
     } else if (event.type === 'error') {
       let notif: Notification | null = null;

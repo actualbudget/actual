@@ -20,7 +20,7 @@ import {
   parse as parseDate,
 } from 'date-fns';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { getMonthYearFormat } from 'loot-core/shared/months';
 import {
   deserializeField,
@@ -30,8 +30,9 @@ import {
   mapField,
   unparse,
 } from 'loot-core/shared/rules';
-import { titleFirst, type IntegerAmount } from 'loot-core/shared/util';
-import { type RuleConditionEntity } from 'loot-core/types/models';
+import { titleFirst } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { RuleConditionEntity } from 'loot-core/types/models';
 
 import { CompactFiltersButton } from './CompactFiltersButton';
 import { FiltersButton } from './FiltersButton';

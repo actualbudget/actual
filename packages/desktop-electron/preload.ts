@@ -1,9 +1,10 @@
-import { contextBridge, ipcRenderer, type IpcRenderer } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
+import type { IpcRenderer } from 'electron';
 
-import {
-  type GetBootstrapDataPayload,
-  type OpenFileDialogPayload,
-  type SaveFileDialogPayload,
+import type {
+  GetBootstrapDataPayload,
+  OpenFileDialogPayload,
+  SaveFileDialogPayload,
 } from './index';
 
 const { version: VERSION, isDev: IS_DEV }: GetBootstrapDataPayload =

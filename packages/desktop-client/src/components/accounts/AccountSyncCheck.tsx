@@ -8,12 +8,12 @@ import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
 import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
-import { authorizeEnableBankingSession } from '@desktop-client/banksync/enablebanking';
-import { authorizeBank } from '@desktop-client/banksync/gocardless';
 import { Link } from '@desktop-client/components/common/Link';
+import { authorizeEnableBankingSession } from '@desktop-client/enablebanking';
+import { authorizeBank } from '@desktop-client/gocardless';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useDispatch } from '@desktop-client/redux';
@@ -119,16 +119,23 @@ export function AccountSyncCheck() {
             authorizeBank(dispatch);
             return;
           case 'enablebanking':
-            await authorizeEnableBankingSession(dispatch, acc, () =>
-              unlink(acc),
+            await authorizeEnableBankingSession(dispatch, acc);
+            return;
+          case 'simpleFin':
+            // SimpleFin reauthorization requires manual token update
+            console.warn(
+              'SimpleFin reauthorization is not automated. Please update your token manually.',
             );
             return;
           default:
+            console.warn(
+              `Reauthorization not supported for sync source: ${acc.account_sync_source}`,
+            );
             break;
         }
       }
     },
-    [dispatch, unlink],
+    [dispatch],
   );
 
   if (!failedAccounts || !id) {
@@ -146,10 +153,14 @@ export function AccountSyncCheck() {
   }
 
   const { type, code } = error;
+  const canReauth =
+    account.account_sync_source === 'goCardless' ||
+    account.account_sync_source === 'enablebanking';
   const showAuth =
-    (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
-    (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN') ||
-    type === 'ENABLEBANKING_SESSION_CLOSED';
+    canReauth &&
+    ((type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
+      (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN') ||
+      type === 'ENABLEBANKING_SESSION_CLOSED');
 
   return (
     <View>

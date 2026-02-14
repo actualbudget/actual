@@ -6,14 +6,12 @@ import React, {
   useEffect,
   useReducer,
   useRef,
-  type Dispatch,
-  type ReactElement,
-  type ReactNode,
 } from 'react';
+import type { Dispatch, ReactElement, ReactNode } from 'react';
 
-import { listen } from 'loot-core/platform/client/fetch';
+import { listen } from 'loot-core/platform/client/connection';
 import * as undo from 'loot-core/platform/client/undo';
-import { type UndoState } from 'loot-core/server/undo';
+import type { UndoState } from 'loot-core/server/undo';
 
 type Range<T> = { start: T; end: T | null };
 type Item = { id: string };

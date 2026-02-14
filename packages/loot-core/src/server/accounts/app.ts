@@ -9,15 +9,15 @@ import { isNonProductionEnvironment } from '../../shared/environment';
 import { dayFromDate } from '../../shared/months';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type GoCardlessToken,
-  type ImportTransactionEntity,
-  type SyncServerGoCardlessAccount,
-  type SyncServerPluggyAiAccount,
-  type SyncServerSimpleFinAccount,
-  type TransactionEntity,
+import type {
+  AccountEntity,
+  CategoryEntity,
+  GoCardlessToken,
+  ImportTransactionEntity,
+  SyncServerGoCardlessAccount,
+  SyncServerPluggyAiAccount,
+  SyncServerSimpleFinAccount,
+  TransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
@@ -94,8 +94,31 @@ async function updateAccount({
   return {};
 }
 
-async function getAccounts() {
-  return db.getAccounts();
+async function getAccounts(): Promise<AccountEntity[]> {
+  const dbAccounts = await db.getAccounts();
+  return dbAccounts.map(
+    dbAccount =>
+      ({
+        id: dbAccount.id,
+        name: dbAccount.name,
+        offbudget: dbAccount.offbudget,
+        closed: dbAccount.closed,
+        sort_order: dbAccount.sort_order,
+        last_reconciled: dbAccount.last_reconciled ?? null,
+        tombstone: dbAccount.tombstone,
+        account_id: dbAccount.account_id ?? null,
+        bank: dbAccount.bank ?? null,
+        bankName: dbAccount.bankName ?? null,
+        bankId: dbAccount.bankId ?? null,
+        mask: dbAccount.mask ?? null,
+        official_name: dbAccount.official_name ?? null,
+        balance_current: dbAccount.balance_current ?? null,
+        balance_available: dbAccount.balance_available ?? null,
+        balance_limit: dbAccount.balance_limit ?? null,
+        account_sync_source: dbAccount.account_sync_source ?? null,
+        last_sync: dbAccount.last_sync ?? null,
+      }) as AccountEntity,
+  );
 }
 
 async function getAccountBalance({

@@ -17,13 +17,13 @@ import {
   updateTransaction,
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
-import { type Handlers } from '../types/handlers';
-import {
-  type AccountEntity,
-  type CategoryGroupEntity,
-  type ScheduleEntity,
+import type { Handlers } from '../types/handlers';
+import type {
+  AccountEntity,
+  CategoryGroupEntity,
+  ScheduleEntity,
 } from '../types/models';
-import { type ServerHandlers } from '../types/server-handlers';
+import type { ServerHandlers } from '../types/server-handlers';
 
 import { addTransactions } from './accounts/sync';
 import {
@@ -34,12 +34,12 @@ import {
   payeeModel,
   remoteFileModel,
   scheduleModel,
-  type AmountOPType,
-  type APIScheduleEntity,
+  tagModel,
 } from './api-models';
+import type { AmountOPType, APIScheduleEntity } from './api-models';
 import { aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
-import { type RemoteFile } from './cloud-storage';
+import type { RemoteFile } from './cloud-storage';
 import * as db from './db';
 import { APIError } from './errors';
 import { runMutator } from './mutators';
@@ -571,8 +571,7 @@ handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
 
 handlers['api/accounts-get'] = async function () {
   checkFileOpen();
-  // TODO: Force cast to AccountEntity. This should be updated to an AQL query.
-  const accounts = (await db.getAccounts()) as AccountEntity[];
+  const accounts: AccountEntity[] = await handlers['accounts-get']();
   return accounts.map(account => accountModel.toExternal(account));
 };
 
@@ -739,6 +738,32 @@ handlers['api/payees-merge'] = withMutation(async function ({
 }) {
   checkFileOpen();
   return handlers['payees-merge']({ targetId, mergeIds });
+});
+
+handlers['api/tags-get'] = async function () {
+  checkFileOpen();
+  const tags = await handlers['tags-get']();
+  return tags.map(tagModel.toExternal);
+};
+
+handlers['api/tag-create'] = withMutation(async function ({ tag }) {
+  checkFileOpen();
+  const result = await handlers['tags-create']({
+    tag: tag.tag,
+    color: tag.color,
+    description: tag.description,
+  });
+  return result.id;
+});
+
+handlers['api/tag-update'] = withMutation(async function ({ id, fields }) {
+  checkFileOpen();
+  await handlers['tags-update']({ id, ...tagModel.fromExternal(fields) });
+});
+
+handlers['api/tag-delete'] = withMutation(async function ({ id }) {
+  checkFileOpen();
+  await handlers['tags-delete']({ id });
 });
 
 handlers['api/rules-get'] = async function () {

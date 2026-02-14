@@ -14,7 +14,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { getCreateKeyError } from 'loot-core/shared/errors';
 
 import { sync } from '@desktop-client/app/appSlice';
@@ -26,7 +26,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { loadGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
 import { useDispatch } from '@desktop-client/redux';
 

@@ -1,21 +1,21 @@
 // @ts-strict-ignore
 import { useEffect, useEffectEvent, useReducer, useState } from 'react';
 
-import { send, sendCatch } from 'loot-core/platform/client/fetch';
+import { send, sendCatch } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
   extractScheduleConds,
   getScheduledAmount,
 } from 'loot-core/shared/schedules';
-import {
-  type RecurConfig,
-  type ScheduleEntity,
-  type TransactionEntity,
+import type {
+  RecurConfig,
+  ScheduleEntity,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 import { updateScheduleConditions } from '@desktop-client/components/schedules/schedule-edit-utils';
-import { type ScheduleFormFields } from '@desktop-client/components/schedules/ScheduleEditForm';
+import type { ScheduleFormFields } from '@desktop-client/components/schedules/ScheduleEditForm';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { liveQuery } from '@desktop-client/queries/liveQuery';
 
