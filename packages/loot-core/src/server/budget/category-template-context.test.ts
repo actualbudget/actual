@@ -1,8 +1,8 @@
 import { vi } from 'vitest';
 
 import { amountToInteger } from '../../shared/util';
-import { type CategoryEntity } from '../../types/models';
-import { type Template } from '../../types/models/templates';
+import type { CategoryEntity } from '../../types/models';
+import type { Template } from '../../types/models/templates';
 import * as aql from '../aql';
 import * as db from '../db';
 
@@ -13,6 +13,7 @@ import { CategoryTemplateContext } from './category-template-context';
 vi.mock('./actions', () => ({
   getSheetValue: vi.fn(),
   getSheetBoolean: vi.fn(),
+  isReflectBudget: vi.fn(),
 }));
 
 vi.mock('../db', () => ({
@@ -678,6 +679,137 @@ describe('CategoryTemplateContext', () => {
       );
       expect(result).toBe(67); // Average of -100, 200, -300
     });
+
+    it('should handle positive percent adjustments', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 1,
+        adjustment: 10,
+        adjustmentType: 'percent',
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100);
+
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
+      expect(result).toBe(110);
+    });
+
+    it('should handle negative percent adjustments', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 1,
+        adjustment: -10,
+        adjustmentType: 'percent',
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100);
+
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
+      expect(result).toBe(90);
+    });
+    it('should handle zero percent adjustments', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 1,
+        adjustment: 0,
+        adjustmentType: 'percent',
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100);
+
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
+      expect(result).toBe(100);
+    });
+
+    it('should handle zero amount adjustments', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 1,
+        adjustment: 0,
+        adjustmentType: 'fixed',
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(-100);
+
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
+      expect(result).toBe(100);
+    });
+
+    it('should handle positive amount adjustments', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 1,
+        adjustment: 11,
+        adjustmentType: 'fixed',
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-10000)
+        .mockResolvedValueOnce(-10000)
+        .mockResolvedValueOnce(-10000);
+
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
+      expect(result).toBe(11100);
+    });
+
+    it('should handle negative amount adjustments', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 1,
+        adjustment: -1,
+        adjustmentType: 'fixed',
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-10000)
+        .mockResolvedValueOnce(-10000)
+        .mockResolvedValueOnce(-10000);
+
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
+      expect(result).toBe(9900);
+    });
   });
 
   describe('runBy', () => {
@@ -1007,6 +1139,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
       mockPreferences(false, 'USD');
 
       // Initialize the template
@@ -1071,6 +1204,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
       mockPreferences(false, 'USD');
 
       // Initialize the template
@@ -1125,6 +1259,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
       mockPreferences(false, 'USD');
 
       // Initialize the template
@@ -1184,6 +1319,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
       mockPreferences(false, 'USD');
 
       // Initialize the template
@@ -1226,6 +1362,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(10000); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
       mockPreferences(false, 'USD');
 
       // Initialize the template
@@ -1270,6 +1407,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
       mockPreferences(true, 'USD');
 
       // Initialize the template
@@ -1312,6 +1450,7 @@ describe('CategoryTemplateContext', () => {
 
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
       mockPreferences(true, 'JPY');
 
       const instance = await CategoryTemplateContext.init(
@@ -1343,6 +1482,7 @@ describe('CategoryTemplateContext', () => {
 
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
       mockPreferences(true, 'JPY');
 
       const instance = await CategoryTemplateContext.init(

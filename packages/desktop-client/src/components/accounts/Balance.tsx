@@ -1,4 +1,5 @@
-import React, { useRef, type RefObject } from 'react';
+import React, { useRef } from 'react';
+import type { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -8,11 +9,13 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { useHover } from 'usehooks-ts';
 
-import { q, type Query } from 'loot-core/shared/query';
+import { q } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 import { getScheduledAmount } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import {
   CellValue,
@@ -22,7 +25,7 @@ import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { type Binding } from '@desktop-client/spreadsheet';
+import type { Binding } from '@desktop-client/spreadsheet';
 
 type DetailedBalanceProps = {
   name: string;
@@ -47,10 +50,10 @@ function DetailedBalance({
     >
       {name}{' '}
       <PrivacyFilter>
-        <Text style={{ fontWeight: 600 }}>
+        <FinancialText style={{ fontWeight: 600 }}>
           {!isExactBalance && '~ '}
           {format(balance, 'financial')}
-        </Text>
+        </FinancialText>
       </PrivacyFilter>
     </Text>
   );
@@ -232,9 +235,9 @@ export function Balances({
                 fontWeight: 400,
                 color:
                   props.value < 0
-                    ? theme.errorText
+                    ? theme.numberNegative
                     : props.value > 0
-                      ? theme.noticeTextLight
+                      ? theme.numberPositive
                       : theme.pageTextSubdued,
               }}
             />

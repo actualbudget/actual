@@ -4,28 +4,22 @@ import { Trans } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
-import {
-  autocompletion,
-  type Completion,
-  type CompletionContext,
-} from '@codemirror/autocomplete';
+import { autocompletion } from '@codemirror/autocomplete';
+import type { Completion, CompletionContext } from '@codemirror/autocomplete';
 import {
   HighlightStyle,
   StreamLanguage,
   syntaxHighlighting,
-  type StreamParser,
 } from '@codemirror/language';
-import { type Extension } from '@codemirror/state';
-import {
-  EditorView,
-  hoverTooltip,
-  tooltips,
-  type Tooltip,
-} from '@codemirror/view';
+import type { StreamParser } from '@codemirror/language';
+import type { Extension } from '@codemirror/state';
+import { EditorView, hoverTooltip, tooltips } from '@codemirror/view';
+import type { Tooltip } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 import { t } from 'i18next';
 
-import { queryModeFunctions, type FunctionDef } from './queryModeFunctions';
+import { queryModeFunctions } from './queryModeFunctions';
+import type { FunctionDef } from './queryModeFunctions';
 import { transactionModeFunctions } from './transactionModeFunctions';
 
 // Tooltip components using the same styles as Tooltip.tsx
@@ -148,6 +142,7 @@ const LOGICAL_FUNCTIONS = new Set([
 
 const TEXT_FUNCTIONS = new Set([
   'TEXT',
+  'FIXED',
   'CONCATENATE',
   'LEFT',
   'RIGHT',

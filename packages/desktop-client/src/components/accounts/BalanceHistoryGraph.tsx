@@ -1,11 +1,6 @@
-import React, {
-  useEffect,
-  useMemo,
-  useState,
-  type CSSProperties,
-  type Ref,
-} from 'react';
-import AutoSizer from 'react-virtualized-auto-sizer';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { CSSProperties, Ref } from 'react';
+import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
@@ -208,8 +203,12 @@ export function BalanceHistoryGraph({
 
   return (
     <View ref={ref} style={{ margin: 10, ...style }}>
-      <AutoSizer>
-        {({ width, height }: { width: number; height: number }) => {
+      <AutoSizer
+        renderProp={({ width = 0, height = 0 }) => {
+          if (width === 0 || height === 0) {
+            return null;
+          }
+
           if (loading) {
             return (
               <div style={{ width, height }}>
@@ -326,7 +325,7 @@ export function BalanceHistoryGraph({
             </View>
           );
         }}
-      </AutoSizer>
+      />
     </View>
   );
 }

@@ -5,10 +5,11 @@ import { Trans, useTranslation } from 'react-i18next';
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { q } from 'loot-core/shared/query';
 import { getRecurringDescription } from 'loot-core/shared/schedules';
 import type { DiscoverScheduleEntity } from 'loot-core/types/models';
@@ -117,7 +118,7 @@ function DiscoverSchedulesTable({
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.tableContainer}>
       <TableHeader height={ROW_HEIGHT} inset={15}>
         <SelectCell
           exposed={!loading}

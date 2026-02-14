@@ -8,7 +8,7 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { q } from 'loot-core/shared/query';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
@@ -20,10 +20,8 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { Search } from '@desktop-client/components/common/Search';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import {
-  pushModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type ScheduleLinkProps = Extract<

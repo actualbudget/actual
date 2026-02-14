@@ -1,12 +1,6 @@
 // @ts-strict-ignore
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -31,7 +25,7 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { v4 as uuid } from 'uuid';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
@@ -46,14 +40,16 @@ import {
   parse,
   unparse,
 } from 'loot-core/shared/rules';
-import {
-  type NewRuleEntity,
-  type RuleActionEntity,
-  type RuleEntity,
+import type { ScheduleStatusType } from 'loot-core/shared/schedules';
+import type {
+  NewRuleEntity,
+  RuleActionEntity,
+  RuleEntity,
 } from 'loot-core/types/models';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { StatusBadge } from '@desktop-client/components/schedules/StatusBadge';
 import { SimpleTransactionsTable } from '@desktop-client/components/transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '@desktop-client/components/util/AmountInput';
@@ -62,10 +58,7 @@ import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useFormat } from '@desktop-client/hooks/useFormat';
-import {
-  useSchedules,
-  type ScheduleStatusType,
-} from '@desktop-client/hooks/useSchedules';
+import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import {
   SelectedProvider,
   useSelected,
@@ -421,7 +414,10 @@ function ScheduleDescription({ id }) {
 
         <Text style={{ flexShrink: 0 }}>
           <Text> — </Text>
-          <Trans>Amount:</Trans> {formatAmount(schedule._amount, format)}
+          <Trans>Amount:</Trans>{' '}
+          <FinancialText>
+            {formatAmount(schedule._amount, format)}
+          </FinancialText>
         </Text>
 
         <Text style={{ flexShrink: 0 }}>

@@ -4,21 +4,20 @@
 import './browser-preload';
 import './fonts.scss';
 import './i18n';
-
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
-import { type NavigateFunction } from 'react-router';
+import type { NavigateFunction } from 'react-router';
 
 import { bindActionCreators } from '@reduxjs/toolkit';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { q } from 'loot-core/shared/query';
 
 import * as accountsSlice from './accounts/accountsSlice';
 import * as appSlice from './app/appSlice';
 import { AuthProvider } from './auth/AuthProvider';
-import * as budgetSlice from './budget/budgetSlice';
 import * as budgetfilesSlice from './budgetfiles/budgetfilesSlice';
 import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
@@ -27,24 +26,26 @@ import * as notificationsSlice from './notifications/notificationsSlice';
 import * as payeesSlice from './payees/payeesSlice';
 import * as prefsSlice from './prefs/prefsSlice';
 import { aqlQuery } from './queries/aqlQuery';
-import { store } from './redux/store';
-import * as tagsSlice from './tags/tagsSlice';
+import { configureAppStore } from './redux/store';
 import * as transactionsSlice from './transactions/transactionsSlice';
 import { redo, undo } from './undo';
 import * as usersSlice from './users/usersSlice';
+
+const queryClient = new QueryClient();
+window.__TANSTACK_QUERY_CLIENT__ = queryClient;
+
+const store = configureAppStore({ queryClient });
 
 const boundActions = bindActionCreators(
   {
     ...accountsSlice.actions,
     ...appSlice.actions,
-    ...budgetSlice.actions,
     ...budgetfilesSlice.actions,
     ...modalsSlice.actions,
     ...notificationsSlice.actions,
     ...payeesSlice.actions,
     ...prefsSlice.actions,
     ...transactionsSlice.actions,
-    ...tagsSlice.actions,
     ...usersSlice.actions,
   },
   store.dispatch,
@@ -87,13 +88,15 @@ window.$q = q;
 const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(
-  <Provider store={store}>
-    <ServerProvider>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </ServerProvider>
-  </Provider>,
+  <QueryClientProvider client={queryClient}>
+    <Provider store={store}>
+      <ServerProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </ServerProvider>
+    </Provider>
+  </QueryClientProvider>,
 );
 
 declare global {
@@ -110,6 +113,8 @@ declare global {
     $send: typeof send;
     $query: typeof aqlQuery;
     $q: typeof q;
+
+    __TANSTACK_QUERY_CLIENT__: QueryClient;
   }
 }
 

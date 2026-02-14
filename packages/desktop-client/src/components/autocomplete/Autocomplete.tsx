@@ -1,13 +1,10 @@
 // @ts-strict-ignore
-import React, {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ComponentProps,
-  type HTMLProps,
-  type KeyboardEvent,
-  type ReactNode,
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type {
+  ComponentProps,
+  HTMLProps,
+  KeyboardEvent,
+  ReactNode,
 } from 'react';
 
 import { Button } from '@actual-app/components/button';
@@ -19,7 +16,8 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
-import Downshift, { type StateChangeTypes } from 'downshift';
+import Downshift from 'downshift';
+import type { StateChangeTypes } from 'downshift';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 
@@ -180,6 +178,7 @@ function defaultRenderItems<T extends AutocompleteItem>(
             // * https://github.com/WebKit/WebKit/blob/447d90b0c52b2951a69df78f06bb5e6b10262f4b/LayoutTests/fast/events/touch/ios/content-observation/400ms-hover-intent.html
             // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
             // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
+            // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
             role="button"
             className={css({
               padding: 5,

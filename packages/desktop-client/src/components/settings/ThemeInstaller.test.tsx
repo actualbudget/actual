@@ -7,6 +7,7 @@ import { ThemeInstaller } from './ThemeInstaller';
 import { useThemeCatalog } from '@desktop-client/hooks/useThemeCatalog';
 import {
   fetchThemeCss,
+  generateThemeId,
   validateThemeCss,
 } from '@desktop-client/style/customThemes';
 
@@ -16,12 +17,15 @@ vi.mock('@desktop-client/style/customThemes', async () => {
     ...actual,
     fetchThemeCss: vi.fn(),
     validateThemeCss: vi.fn(),
+    generateThemeId: vi.fn((repo: string) => {
+      // Generate predictable IDs for testing
+      if (repo.includes('demo-theme')) return 'theme-demo123';
+      if (repo.includes('ocean-theme')) return 'theme-ocean456';
+      if (repo.includes('forest-theme')) return 'theme-forest789';
+      return `theme-${repo.replace(/[^a-z0-9]/gi, '')}`;
+    }),
     normalizeGitHubRepo: vi.fn((repo: string) =>
       repo.startsWith('http') ? repo : `https://github.com/${repo}`,
-    ),
-    getThemeScreenshotUrl: vi.fn(
-      (repo: string) =>
-        `https://raw.githubusercontent.com/${repo}/refs/heads/main/screenshot.png`,
     ),
   };
 });
@@ -43,14 +47,38 @@ describe('ThemeInstaller', () => {
     {
       name: 'Demo Theme',
       repo: 'actualbudget/demo-theme',
+      colors: [
+        '#1a1a2e',
+        '#16213e',
+        '#0f3460',
+        '#e94560',
+        '#533483',
+        '#f1f1f1',
+      ],
     },
     {
       name: 'Ocean Blue',
       repo: 'actualbudget/ocean-theme',
+      colors: [
+        '#0d47a1',
+        '#1565c0',
+        '#1976d2',
+        '#1e88e5',
+        '#42a5f5',
+        '#90caf9',
+      ],
     },
     {
       name: 'Forest Green',
       repo: 'actualbudget/forest-theme',
+      colors: [
+        '#1b5e20',
+        '#2e7d32',
+        '#388e3c',
+        '#43a047',
+        '#66bb6a',
+        '#a5d6a7',
+      ],
     },
   ];
 
@@ -60,6 +88,13 @@ describe('ThemeInstaller', () => {
     mockOnClose.mockClear();
     vi.mocked(fetchThemeCss).mockResolvedValue(mockValidCss);
     vi.mocked(validateThemeCss).mockImplementation(css => css.trim());
+    // Reset generateThemeId mock to default behavior
+    vi.mocked(generateThemeId).mockImplementation((repo: string) => {
+      if (repo.includes('demo-theme')) return 'theme-demo123';
+      if (repo.includes('ocean-theme')) return 'theme-ocean456';
+      if (repo.includes('forest-theme')) return 'theme-forest789';
+      return `theme-${repo.replace(/[^a-z0-9]/gi, '')}`;
+    });
 
     // Mock useThemeCatalog to return catalog data immediately
     vi.mocked(useThemeCatalog).mockReturnValue({
@@ -189,6 +224,66 @@ describe('ThemeInstaller', () => {
 
       // Since error is displayed, onInstall should NOT be called
       expect(testOnInstall).not.toHaveBeenCalled();
+    });
+
+    it('shows error styling on erroring theme and keeps previous active theme active', async () => {
+      const user = userEvent.setup();
+      const validationError = 'Invalid CSS format';
+
+      // Set up a previously installed theme (Ocean Blue)
+      const installedTheme = {
+        id: 'theme-ocean456',
+        name: 'Ocean Blue',
+        repo: 'https://github.com/actualbudget/ocean-theme',
+        cssContent: mockValidCss,
+      };
+
+      // Make validation fail for Demo Theme
+      vi.mocked(validateThemeCss).mockImplementationOnce(() => {
+        throw new Error(validationError);
+      });
+
+      render(
+        <ThemeInstaller
+          onInstall={mockOnInstall}
+          onClose={mockOnClose}
+          installedTheme={installedTheme}
+        />,
+      );
+
+      // Click on Demo Theme which will fail validation
+      const demoThemeButton = screen.getByRole('button', {
+        name: 'Demo Theme',
+      });
+      await user.click(demoThemeButton);
+
+      // Wait for error to appear
+      await waitFor(() => {
+        expect(screen.getByText(validationError)).toBeInTheDocument();
+      });
+
+      // Verify erroring theme (Demo Theme) has error styling
+      await waitFor(() => {
+        const demoButton = screen.getByRole('button', { name: 'Demo Theme' });
+        const demoButtonStyle = demoButton.getAttribute('style') || '';
+        // Check that error styling is applied - should contain CSS variable for errorText in border
+        // and errorBackground in backgroundColor
+        // The style will contain something like: border: "2px solid var(--color-errorText)"
+        expect(demoButtonStyle).toMatch(/errorText/);
+        expect(demoButtonStyle).toMatch(/errorBackground/);
+      });
+
+      // Verify previously active theme (Ocean Blue) still shows as active (not the erroring one)
+      const oceanButton = screen.getByRole('button', { name: 'Ocean Blue' });
+      const oceanButtonStyle = oceanButton.getAttribute('style') || '';
+      // Active theme should have buttonPrimaryBackground in border (indicating it's active)
+      expect(oceanButtonStyle).toMatch(/buttonPrimaryBackground/);
+      // Should not have error styling - the previous active theme should remain active
+      expect(oceanButtonStyle).not.toMatch(/errorText/);
+      expect(oceanButtonStyle).not.toMatch(/errorBackground/);
+
+      // Verify onInstall was not called (theme installation failed)
+      expect(mockOnInstall).not.toHaveBeenCalled();
     });
 
     it('displays generic error when fetchThemeCss fails with non-Error object', async () => {
@@ -487,21 +582,21 @@ describe('ThemeInstaller', () => {
   });
 
   describe('catalog theme display', () => {
-    it('displays theme screenshot URL correctly', () => {
+    it('displays theme color palette correctly', () => {
       render(
         <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
       );
 
-      const images = screen.getAllByRole('img');
-      expect(images.length).toBeGreaterThan(0);
+      // Check that color palettes are rendered instead of images
+      const images = screen.queryAllByRole('img');
+      expect(images.length).toBe(0);
 
-      // Check that images have the correct src pattern
-      images.forEach(img => {
-        expect(img).toHaveAttribute(
-          'src',
-          expect.stringContaining('raw.githubusercontent.com'),
-        );
+      // Check that color swatches are rendered (6 divs per theme)
+      const demoThemeButton = screen.getByRole('button', {
+        name: 'Demo Theme',
       });
+      const colorSwatches = demoThemeButton.querySelectorAll('[data-swatch]');
+      expect(colorSwatches.length).toBe(6);
     });
 
     it('displays theme author correctly', () => {

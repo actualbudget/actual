@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useState, type CSSProperties } from 'react';
+import React, { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -17,23 +18,25 @@ import {
   YAxis,
 } from 'recharts';
 
-import {
-  type balanceTypeOpType,
-  type DataEntity,
-  type RuleConditionEntity,
+import type {
+  balanceTypeOpType,
+  DataEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -96,34 +99,50 @@ const CustomTooltip = ({
             {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Assets:')}
-                right={format(payload[0].payload.totalAssets, 'financial')}
+                right={
+                  <FinancialText>
+                    {format(payload[0].payload.totalAssets, 'financial')}
+                  </FinancialText>
+                }
               />
             )}
             {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Debts:')}
-                right={format(payload[0].payload.totalDebts, 'financial')}
+                right={
+                  <FinancialText>
+                    {format(payload[0].payload.totalDebts, 'financial')}
+                  </FinancialText>
+                }
               />
             )}
             {['netAssets'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Assets:')}
-                right={format(payload[0].payload.netAssets, 'financial')}
+                right={
+                  <FinancialText>
+                    {format(payload[0].payload.netAssets, 'financial')}
+                  </FinancialText>
+                }
               />
             )}
             {['netDebts'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Debts:')}
-                right={format(payload[0].payload.netDebts, 'financial')}
+                right={
+                  <FinancialText>
+                    {format(payload[0].payload.netDebts, 'financial')}
+                  </FinancialText>
+                }
               />
             )}
             {['totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net:')}
                 right={
-                  <strong>
+                  <FinancialText as="strong">
                     {format(payload[0].payload.totalTotals, 'financial')}
-                  </strong>
+                  </FinancialText>
                 }
               />
             )}
@@ -176,7 +195,7 @@ export function BarGraph({
 }: BarGraphProps) {
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
-  const categories = useCategories();
+  const { data: categories = { grouped: [], list: [] } } = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
   const format = useFormat();

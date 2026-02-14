@@ -5,7 +5,7 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 
 export function useBudgetAutomationCategories() {
   const { t } = useTranslation();
-  const { grouped } = useCategories();
+  const { data: { grouped } = { grouped: [] } } = useCategories();
   const categories = useMemo(() => {
     const incomeGroup = grouped.filter(group => group.name === 'Income')[0];
     return [

@@ -1,15 +1,14 @@
 // @ts-strict-ignore
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useEffectEvent } from 'react';
 import { useLocation } from 'react-router';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
-import { BudgetFileSelectionModal } from './modals/BudgetFileSelectionModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
@@ -62,7 +61,6 @@ import { PasswordEnableModal } from './modals/PasswordEnableModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
-import { SchedulesPageMenuModal } from './modals/SchedulesPageMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
@@ -91,12 +89,15 @@ export function Modals() {
   const { modalStack } = useModalState();
   const [budgetId] = useMetadataPref('id');
 
-  useEffect(() => {
+  const onCloseModal = useEffectEvent(() => {
     if (modalStack.length > 0) {
       dispatch(closeModal());
     }
-    // oxlint-disable-next-line react/exhaustive-deps
-  }, [dispatch, location]);
+  });
+
+  useEffect(() => {
+    onCloseModal();
+  }, [location]);
 
   const modals = modalStack
     .map((modal, idx) => {
@@ -345,9 +346,6 @@ export function Modals() {
         case 'budget-page-menu':
           return <BudgetPageMenuModal key={key} {...modal.options} />;
 
-        case 'schedules-page-menu':
-          return <SchedulesPageMenuModal key={key} />;
-
         case 'envelope-budget-month-menu':
           return (
             <SheetNameProvider
@@ -368,8 +366,6 @@ export function Modals() {
             </SheetNameProvider>
           );
 
-        case 'budget-file-selection':
-          return <BudgetFileSelectionModal key={name} />;
         case 'delete-budget':
           return <DeleteFileModal key={key} {...modal.options} />;
         case 'duplicate-budget':

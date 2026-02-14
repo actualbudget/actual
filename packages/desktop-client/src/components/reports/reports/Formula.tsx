@@ -1,12 +1,5 @@
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-} from 'react';
+import { lazy, Suspense, useCallback, useMemo, useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -18,8 +11,8 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
-import { type FormulaWidget } from 'loot-core/types/models';
+import { send } from 'loot-core/platform/client/connection';
+import type { FormulaWidget } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { QueryManager } from '@desktop-client/components/formula/QueryManager';

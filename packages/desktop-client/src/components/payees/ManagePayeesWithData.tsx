@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { listen, send } from 'loot-core/platform/client/fetch';
+import { listen, send } from 'loot-core/platform/client/connection';
 import * as undo from 'loot-core/platform/client/undo';
-import { type UndoState } from 'loot-core/server/undo';
-import { applyChanges, type Diff } from 'loot-core/shared/util';
-import { type NewRuleEntity, type PayeeEntity } from 'loot-core/types/models';
+import type { UndoState } from 'loot-core/server/undo';
+import { applyChanges } from 'loot-core/shared/util';
+import type { Diff } from 'loot-core/shared/util';
+import type { NewRuleEntity, PayeeEntity } from 'loot-core/types/models';
 
 import { ManagePayees } from './ManagePayees';
 

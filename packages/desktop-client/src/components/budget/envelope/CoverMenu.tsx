@@ -5,15 +5,13 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import {
-  amountToInteger,
-  integerToCurrency,
-  type IntegerAmount,
-} from 'loot-core/shared/util';
-import { type CategoryEntity } from 'loot-core/types/models';
+import { amountToInteger, integerToCurrency } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { CategoryEntity } from 'loot-core/types/models';
 
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import {
@@ -39,7 +37,8 @@ export function CoverMenu({
 }: CoverMenuProps) {
   const { t } = useTranslation();
 
-  const { grouped: originalCategoryGroups } = useCategories();
+  const { data: { grouped: originalCategoryGroups } = { grouped: [] } } =
+    useCategories();
 
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
 
@@ -77,7 +76,11 @@ export function CoverMenu({
         </View>
         <View>
           <InitialFocus>
-            <Input defaultValue={_initialAmount} onUpdate={setAmount} />
+            <Input
+              defaultValue={_initialAmount}
+              onUpdate={setAmount}
+              style={styles.tnum}
+            />
           </InitialFocus>
         </View>
         <View style={{ margin: '10px 0 5px 0' }}>

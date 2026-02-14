@@ -8,10 +8,10 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { sendCatch } from 'loot-core/platform/client/fetch';
-import {
-  type GoCardlessInstitution,
-  type GoCardlessToken,
+import { sendCatch } from 'loot-core/platform/client/connection';
+import type {
+  GoCardlessInstitution,
+  GoCardlessToken,
 } from 'loot-core/types/models';
 
 import { Error, Warning } from '@desktop-client/components/alerts';
@@ -27,10 +27,8 @@ import { COUNTRY_OPTIONS } from '@desktop-client/components/util/countries';
 import { getCountryFromBrowser } from '@desktop-client/components/util/localeToCountry';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
-import {
-  pushModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 function useAvailableBanks(country: string) {

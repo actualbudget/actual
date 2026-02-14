@@ -1,4 +1,4 @@
-import { type RuleConditionEntity } from './rule';
+import type { RuleConditionEntity } from './rule';
 
 export type CustomReportEntity = {
   id: string;
@@ -21,7 +21,7 @@ export type CustomReportEntity = {
   graphType: string;
   conditions?: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
-  data?: GroupedEntity;
+  metadata?: GroupedEntity;
   tombstone?: boolean;
 };
 
@@ -86,6 +86,7 @@ export type LegendEntity = {
   name: string;
   id: string | null;
   color: string;
+  dataKey: string; // Uses id for unique data lookup when categories have same name
 };
 
 export type IntervalEntity = {

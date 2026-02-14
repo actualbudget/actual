@@ -1,10 +1,6 @@
 // @ts-strict-ignore
-import React, {
-  useEffect,
-  useEffectEvent,
-  useRef,
-  type ReactElement,
-} from 'react';
+import React, { useEffect, useEffectEvent, useRef } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, Route, Routes, useHref, useLocation } from 'react-router';
 
@@ -375,6 +371,7 @@ export function FinancesApp() {
               <Route path="/accounts" element={<MobileNavTabs />} />
               <Route path="/settings" element={<MobileNavTabs />} />
               <Route path="/reports" element={<MobileNavTabs />} />
+              <Route path="/reports/:dashboardId" element={<MobileNavTabs />} />
               <Route path="/bank-sync" element={<MobileNavTabs />} />
               <Route path="/rules" element={<MobileNavTabs />} />
               <Route path="/payees" element={<MobileNavTabs />} />

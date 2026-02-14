@@ -16,11 +16,11 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type RuleConditionEntity,
-  type SpendingWidget,
+import type {
+  RuleConditionEntity,
+  SpendingWidget,
 } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
@@ -128,7 +128,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
+          pretty: monthUtils.format(month, 'MMMM yyyy', locale),
         }))
         .reverse();
 
@@ -470,14 +470,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 <View>
                   <LegendItem
                     color={theme.reportsGreen}
-                    label={monthUtils.format(compare, 'MMM, yyyy', locale)}
+                    label={monthUtils.format(compare, 'MMM yyyy', locale)}
                     style={{ padding: 0, paddingBottom: 10 }}
                   />
                   <LegendItem
                     color={theme.reportsGray}
                     label={
                       reportMode === 'single-month'
-                        ? monthUtils.format(compareTo, 'MMM, yyyy', locale)
+                        ? monthUtils.format(compareTo, 'MMM yyyy', locale)
                         : reportMode === 'budget'
                           ? t('Budgeted')
                           : t('Average')
@@ -502,14 +502,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                               ? t('Spent {{monthYearFormatted}} MTD', {
                                   monthYearFormatted: monthUtils.format(
                                     compare,
-                                    'MMM, yyyy',
+                                    'MMM yyyy',
                                     locale,
                                   ),
                                 })
-                              : t('Spent {{monthYearFormatted}}:', {
+                              : t('Spent {{monthYearFormatted}}', {
                                   monthYearFormatted: monthUtils.format(
                                     compare,
-                                    'MMM, yyyy',
+                                    'MMM yyyy',
                                     locale,
                                   ),
                                 })}
@@ -537,14 +537,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                               ? t('Spent {{monthYearFormatted}} MTD:', {
                                   monthYearFormatted: monthUtils.format(
                                     compareTo,
-                                    'MMM, yyyy',
+                                    'MMM yyyy',
                                     locale,
                                   ),
                                 })
                               : t('Spent {{monthYearFormatted}}:', {
                                   monthYearFormatted: monthUtils.format(
                                     compareTo,
-                                    'MMM, yyyy',
+                                    'MMM yyyy',
                                     locale,
                                   ),
                                 })}
@@ -598,13 +598,15 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                             ? t('Spent Average {{monthYearFormatted}} MTD:', {
                                 monthYearFormatted: monthUtils.format(
                                   compare,
-                                  'MMM, yyyy',
+                                  'MMM yyyy',
+                                  locale,
                                 ),
                               })
                             : t('Spent Average {{monthYearFormatted}}:', {
                                 monthYearFormatted: monthUtils.format(
                                   compare,
-                                  'MMM, yyyy',
+                                  'MMM yyyy',
+                                  locale,
                                 ),
                               })}
                         </Block>

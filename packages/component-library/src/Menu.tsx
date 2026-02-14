@@ -1,13 +1,11 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ComponentProps,
-  type ComponentType,
-  type CSSProperties,
-  type KeyboardEvent,
-  type ReactNode,
-  type SVGProps,
+import { useEffect, useRef, useState } from 'react';
+import type {
+  ComponentProps,
+  ComponentType,
+  CSSProperties,
+  KeyboardEvent,
+  ReactNode,
+  SVGProps,
 } from 'react';
 
 import { Button } from './Button';
@@ -152,7 +150,7 @@ export function Menu<const NameType = string>({
     <View
       className={className}
       style={{ outline: 'none', borderRadius: 4, overflow: 'hidden', ...style }}
-      tabIndex={1}
+      tabIndex={0}
       onKeyDown={onKeyDown}
       innerRef={elRef}
     >

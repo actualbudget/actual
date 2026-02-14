@@ -1,26 +1,27 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { send } from 'loot-core/platform/client/fetch';
-import { type IntegerAmount } from 'loot-core/shared/util';
-import { type File } from 'loot-core/types/file';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type CategoryGroupEntity,
-  type GoCardlessToken,
-  type NewRuleEntity,
-  type NewUserEntity,
-  type NoteEntity,
-  type RuleEntity,
-  type ScheduleEntity,
-  type TransactionEntity,
-  type UserAccessEntity,
-  type UserEntity,
+import { send } from 'loot-core/platform/client/connection';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { File } from 'loot-core/types/file';
+import type {
+  AccountEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+  GoCardlessToken,
+  NewRuleEntity,
+  NewUserEntity,
+  NoteEntity,
+  RuleEntity,
+  ScheduleEntity,
+  TransactionEntity,
+  UserAccessEntity,
+  UserEntity,
 } from 'loot-core/types/models';
-import { type Template } from 'loot-core/types/models/templates';
+import type { Template } from 'loot-core/types/models/templates';
 
 import { resetApp, setAppState } from '@desktop-client/app/appSlice';
-import { type SelectLinkedAccountsModalProps } from '@desktop-client/components/modals/SelectLinkedAccountsModal';
+import type { SelectLinkedAccountsModalProps } from '@desktop-client/components/modals/SelectLinkedAccountsModal';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 import { signOut } from '@desktop-client/users/usersSlice';
 
@@ -288,6 +289,7 @@ export type Modal =
         onEditNotes: (id: NoteEntity['id']) => void;
         onClose?: () => void;
         onToggleRunningBalance?: () => void;
+        onToggleReconciled?: () => void;
       };
     }
   | {
@@ -472,9 +474,6 @@ export type Modal =
       };
     }
   | {
-      name: 'schedules-page-menu';
-    }
-  | {
       name: 'envelope-budget-month-menu';
       options: {
         month: string;
@@ -489,9 +488,6 @@ export type Modal =
         onBudgetAction: (month: string, action: string, arg?: unknown) => void;
         onEditNotes: (id: NoteEntity['id']) => void;
       };
-    }
-  | {
-      name: 'budget-file-selection';
     }
   | {
       name: 'confirm-transaction-edit';

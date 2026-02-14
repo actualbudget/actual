@@ -1,6 +1,8 @@
 import React from 'react';
 
-import { type TagEntity } from 'loot-core/types/models';
+import { theme } from '@actual-app/components/theme';
+
+import type { TagEntity } from 'loot-core/types/models';
 
 import { TagRow } from './TagRow';
 
@@ -29,7 +31,7 @@ export function TagsList({
     <Table
       navigator={tableNavigator}
       items={tags}
-      backgroundColor="none"
+      backgroundColor={theme.tableBackground}
       renderItem={({ item: tag, focusedField, onEdit }) => {
         const hovered = hoveredTag === tag.id;
         const selected = selectedItems.has(tag.id);

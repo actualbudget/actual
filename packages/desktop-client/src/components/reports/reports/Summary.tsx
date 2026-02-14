@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -15,17 +16,18 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { parseISO } from 'date-fns';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type SummaryContent,
-  type SummaryWidget,
-  type TimeFrame,
+import type {
+  SummaryContent,
+  SummaryWidget,
+  TimeFrame,
 } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
 import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { Checkbox } from '@desktop-client/components/forms';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
@@ -34,7 +36,6 @@ import {
   PageHeader,
 } from '@desktop-client/components/Page';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { chartTheme } from '@desktop-client/components/reports/chart-theme';
 import { Header } from '@desktop-client/components/reports/Header';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
@@ -202,7 +203,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
+          pretty: monthUtils.format(month, 'MMMM yyyy', locale),
         }))
         .reverse();
 
@@ -458,7 +459,9 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                   }}
                 >
                   <PrivacyFilter>
-                    {format(data?.dividend ?? 0, 'financial')}
+                    <FinancialText>
+                      {format(data?.dividend ?? 0, 'financial')}
+                    </FinancialText>
                   </PrivacyFilter>
                 </Text>
                 <div
@@ -497,9 +500,11 @@ function SummaryInner({ widget }: SummaryInnerProps) {
               fontSize: '50px',
               justifyContent: 'center',
               color:
-                (data?.total ?? 0) < 0
-                  ? chartTheme.colors.red
-                  : chartTheme.colors.blue,
+                (data?.total ?? 0) === 0
+                  ? theme.reportsNumberNeutral
+                  : (data?.total ?? 0) < 0
+                    ? theme.reportsNumberNegative
+                    : theme.reportsNumberPositive,
             }}
           >
             <PrivacyFilter>

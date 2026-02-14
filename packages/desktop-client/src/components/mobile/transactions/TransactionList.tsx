@@ -4,12 +4,13 @@ import React, {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
 } from 'react';
+import type { CSSProperties } from 'react';
 import {
   Collection,
   Header,
   ListBox,
+  ListBoxItem,
   ListBoxSection,
   ListLayout,
   Virtualizer,
@@ -20,11 +21,8 @@ import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgDelete } from '@actual-app/components/icons/v0';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
-import {
-  Menu,
-  type MenuItem,
-  type MenuItemObject,
-} from '@actual-app/components/menu';
+import { Menu } from '@actual-app/components/menu';
+import type { MenuItem, MenuItemObject } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -34,18 +32,15 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
-import {
-  groupById,
-  integerToCurrency,
-  type IntegerAmount,
-} from 'loot-core/shared/util';
-import { type TransactionEntity } from 'loot-core/types/models';
+import { groupById, integerToCurrency } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { CategoryEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { ROW_HEIGHT, TransactionListItem } from './TransactionListItem';
 
 import { FloatingActionBar } from '@desktop-client/components/mobile/FloatingActionBar';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useCategoriesById } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
@@ -161,14 +156,14 @@ export function TransactionList({
   );
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
       {isLoading && (
         <Loading
-          style={{ paddingBottom: 8 }}
+          style={{ flex: 'none', paddingBottom: 8 }}
           aria-label={t('Loading transactions...')}
         />
       )}
-      <View style={{ flex: 1, overflow: 'auto' }}>
+      <View style={{ flex: 1 }}>
         <Virtualizer
           layout={ListLayout}
           layoutOptions={{
@@ -181,6 +176,7 @@ export function TransactionList({
             selectionMode={
               selectedTransactions.size > 0 ? 'multiple' : 'single'
             }
+            style={{ flex: 1, overflow: 'auto' }}
             selectedKeys={selectedTransactions}
             dependencies={[
               selectedTransactions,
@@ -232,14 +228,18 @@ export function TransactionList({
                   )}
                 >
                   {transaction => (
-                    <TransactionListItem
-                      key={transaction.id}
-                      showRunningBalance={showRunningBalances}
-                      runningBalance={runningBalances?.get(transaction.id)}
-                      value={transaction}
-                      onPress={trans => onTransactionPress(trans)}
-                      onLongPress={trans => onTransactionPress(trans, true)}
-                    />
+                    <ListBoxItem textValue={transaction.id} value={transaction}>
+                      {itemProps => (
+                        <TransactionListItem
+                          {...itemProps}
+                          showRunningBalance={showRunningBalances}
+                          runningBalance={runningBalances?.get(transaction.id)}
+                          transaction={transaction}
+                          onPress={trans => onTransactionPress(trans)}
+                          onLongPress={trans => onTransactionPress(trans, true)}
+                        />
+                      )}
+                    </ListBoxItem>
                   )}
                 </Collection>
               </ListBoxSection>
@@ -264,7 +264,7 @@ export function TransactionList({
           showMakeTransfer={showMakeTransfer}
         />
       )}
-    </>
+    </View>
   );
 }
 
@@ -340,8 +340,11 @@ function SelectedTransactionsFloatingActionBar({
   const payees = usePayees();
   const payeesById = useMemo(() => groupById(payees), [payees]);
 
-  const { list: categories } = useCategories();
-  const categoriesById = useMemo(() => groupById(categories), [categories]);
+  const {
+    data: { list: categoriesById } = {
+      list: {} as Record<string, CategoryEntity>,
+    },
+  } = useCategoriesById();
 
   const dispatch = useDispatch();
   useEffect(() => {

@@ -7,12 +7,9 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type AccountEntity,
-  type CrossoverWidget,
-} from 'loot-core/types/models';
+import type { AccountEntity, CrossoverWidget } from 'loot-core/types/models';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { CrossoverGraph } from '@desktop-client/components/reports/graphs/CrossoverGraph';
@@ -21,33 +18,11 @@ import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
+import type { CrossoverData } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
-
-// Type for the return value of the recalculate function
-type CrossoverData = {
-  graphData: {
-    data: Array<{
-      x: string;
-      investmentIncome: number;
-      expenses: number;
-      nestEgg: number;
-      adjustedExpenses?: number;
-      isProjection?: boolean;
-    }>;
-    start: string;
-    end: string;
-    crossoverXLabel: string | null;
-  };
-  lastKnownBalance: number;
-  lastKnownMonthlyIncome: number;
-  lastKnownMonthlyExpenses: number;
-  historicalReturn: number | null;
-  yearsToRetire: number | null;
-  targetMonthlyIncome: number | null;
-  targetNestEgg: number | null;
-};
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type CrossoverCardProps = {
   widgetId: string;
@@ -68,6 +43,7 @@ export function CrossoverCard({
   onRemove,
   onCopy,
 }: CrossoverCardProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
@@ -102,7 +78,7 @@ export function CrossoverCard({
         .rangeInclusive(earliestDate, latestDate)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM yyyy', locale),
         }))
         .reverse();
 
@@ -152,7 +128,7 @@ export function CrossoverCard({
     return () => {
       isMounted = false;
     };
-  }, [meta?.timeFrame]);
+  }, [meta?.timeFrame, locale]);
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const onCardHover = useCallback(() => setIsCardHovered(true), []);
@@ -171,6 +147,7 @@ export function CrossoverCard({
 
   const swr = meta?.safeWithdrawalRate ?? 0.04;
   const estimatedReturn = meta?.estimatedReturn ?? null;
+  const expectedContribution = meta?.expectedContribution ?? null;
   const projectionType: 'hampel' | 'median' | 'mean' =
     meta?.projectionType ?? 'hampel';
   const expenseAdjustmentFactor = meta?.expenseAdjustmentFactor ?? 1.0;
@@ -183,7 +160,8 @@ export function CrossoverCard({
         expenseCategoryIds,
         incomeAccountIds,
         safeWithdrawalRate: swr,
-        estimatedReturn: estimatedReturn == null ? null : estimatedReturn,
+        estimatedReturn,
+        expectedContribution,
         projectionType,
         expenseAdjustmentFactor,
       }),
@@ -194,6 +172,7 @@ export function CrossoverCard({
       incomeAccountIds,
       swr,
       estimatedReturn,
+      expectedContribution,
       projectionType,
       expenseAdjustmentFactor,
     ],

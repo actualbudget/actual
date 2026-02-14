@@ -1,13 +1,10 @@
-import {
-  createAction,
-  createSlice,
-  type PayloadAction,
-} from '@reduxjs/toolkit';
+import { createAction, createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { getUploadError } from 'loot-core/shared/errors';
-import { type AccountEntity } from 'loot-core/types/models';
-import { type AtLeastOne } from 'loot-core/types/util';
+import type { AccountEntity } from 'loot-core/types/models';
+import type { AtLeastOne } from 'loot-core/types/util';
 
 import { syncAccounts } from '@desktop-client/accounts/accountsSlice';
 import { pushModal } from '@desktop-client/modals/modalsSlice';

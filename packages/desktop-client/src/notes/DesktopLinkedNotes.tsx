@@ -1,13 +1,13 @@
-import { type MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
-import { css } from '@emotion/css';
 
 import { isElectron } from 'loot-core/shared/environment';
 
 import { normalizeUrl } from './linkParser';
 
+import { Link } from '@desktop-client/components/common/Link';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -17,15 +17,6 @@ type DesktopLinkedNotesProps = {
   separator: string;
   isFilePath: boolean;
 };
-
-const linkStyles = css({
-  color: theme.pageTextLink,
-  textDecoration: 'underline',
-  cursor: 'pointer',
-  '&:hover': {
-    color: theme.pageTextLinkLight,
-  },
-});
 
 export function DesktopLinkedNotes({
   displayText,
@@ -65,14 +56,20 @@ export function DesktopLinkedNotes({
 
   return (
     <>
-      <span
-        role="button"
-        className={linkStyles}
-        onMouseDown={e => e.stopPropagation()}
+      <Link
+        variant="text"
         onClick={handleClick}
+        style={{
+          color: theme.pageTextLink,
+          textDecoration: 'underline',
+          cursor: 'pointer',
+          '&:hover': {
+            color: theme.pageTextLinkLight,
+          },
+        }}
       >
         {displayText}
-      </span>
+      </Link>
       {separator}
     </>
   );

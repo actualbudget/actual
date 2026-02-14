@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useMemo, useRef, type CSSProperties } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -7,6 +8,7 @@ import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import { SvgCheck } from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -14,10 +16,15 @@ import { View } from '@actual-app/components/view';
 import { format as monthUtilFormat } from 'loot-core/shared/months';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { getScheduledAmount } from 'loot-core/shared/schedules';
-import { type ScheduleEntity } from 'loot-core/types/models';
+import type {
+  ScheduleStatuses,
+  ScheduleStatusType,
+} from 'loot-core/shared/schedules';
+import type { ScheduleEntity } from 'loot-core/types/models';
 
 import { StatusBadge } from './StatusBadge';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import {
   Cell,
@@ -31,13 +38,7 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { usePayees } from '@desktop-client/hooks/usePayees';
-import {
-  type ScheduleStatuses,
-  type ScheduleStatusType,
-} from '@desktop-client/hooks/useSchedules';
-
 type SchedulesTableProps = {
   isLoading?: boolean;
   schedules: readonly ScheduleEntity[];
@@ -175,7 +176,7 @@ export function ScheduleAmountCell({
           ~
         </View>
       )}
-      <Text
+      <FinancialText
         style={{
           flex: 1,
           color: num > 0 ? theme.noticeTextLight : theme.tableText,
@@ -192,7 +193,7 @@ export function ScheduleAmountCell({
         <PrivacyFilter>
           {num > 0 ? `+${currencyAmount}` : `${currencyAmount}`}
         </PrivacyFilter>
-      </Text>
+      </FinancialText>
     </Cell>
   );
 }
@@ -336,9 +337,7 @@ export function SchedulesTable({
   const format = useFormat();
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [showCompleted = false, setShowCompleted] = useLocalPref(
-    'schedules.showCompleted',
-  );
+  const [showCompleted, setShowCompleted] = useState(false);
 
   const payees = usePayees();
   const accounts = useAccounts();
@@ -430,7 +429,7 @@ export function SchedulesTable({
   }
 
   return (
-    <View style={{ flex: 1, ...tableStyle }}>
+    <View style={{ ...styles.tableContainer, ...tableStyle }}>
       <TableHeader height={ROW_HEIGHT} inset={15}>
         <Field width="flex">
           <Trans>Name</Trans>

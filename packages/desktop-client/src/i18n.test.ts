@@ -71,7 +71,7 @@ describe('setI18NextLanguage', () => {
     setI18NextLanguage('uk-ZZ');
 
     expect(console.info).toHaveBeenCalledWith(
-      'Unknown locale uk-ZZ, falling back to uk',
+      'Unknown locale uk-ZZ, falling back to uk-zz',
     );
     expect(i18n.changeLanguage).toHaveBeenCalledWith('uk');
   });

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { HyperFormula } from 'hyperformula';
+
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import { q, type Query } from 'loot-core/shared/query';
+import { q } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 import { integerToAmount } from 'loot-core/shared/util';
-import {
-  type RuleConditionEntity,
-  type TimeFrame,
-} from 'loot-core/types/models';
+import type { RuleConditionEntity, TimeFrame } from 'loot-core/types/models';
 
 import { useLocale } from './useLocale';
 
@@ -40,7 +40,6 @@ export function useFormulaExecution(
     let cancelled = false;
 
     async function executeFormula() {
-      const { HyperFormula } = await import('hyperformula');
       let hfInstance: ReturnType<typeof HyperFormula.buildEmpty> | null = null;
 
       if (!formula || !formula.startsWith('=')) {
@@ -118,6 +117,7 @@ export function useFormulaExecution(
         hfInstance = HyperFormula.buildEmpty({
           licenseKey: 'gpl-v3',
           localeLang: typeof locale === 'string' ? locale : 'en-US',
+          language: 'enUS',
         });
 
         // Add a sheet and set the formula in cell A1

@@ -1,20 +1,20 @@
 import * as d from 'date-fns';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type AccountEntity,
-  type balanceTypeOpType,
-  type CategoryEntity,
-  type CategoryGroupEntity,
-  type DataEntity,
-  type GroupedEntity,
-  type IntervalEntity,
-  type PayeeEntity,
-  type RuleConditionEntity,
-  type sortByOpType,
+import type {
+  AccountEntity,
+  balanceTypeOpType,
+  CategoryEntity,
+  CategoryGroupEntity,
+  DataEntity,
+  GroupedEntity,
+  IntervalEntity,
+  PayeeEntity,
+  RuleConditionEntity,
+  sortByOpType,
 } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { calculateLegend } from './calculateLegend';
 import { filterEmptyRows } from './filterEmptyRows';
@@ -32,10 +32,12 @@ import {
   categoryLists,
   groupBySelections,
   ReportOptions,
-  type QueryDataEntity,
-  type UncategorizedEntity,
 } from '@desktop-client/components/reports/ReportOptions';
-import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import type {
+  QueryDataEntity,
+  UncategorizedEntity,
+} from '@desktop-client/components/reports/ReportOptions';
+import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 export type createCustomSpreadsheetProps = {
@@ -220,7 +222,8 @@ export function createCustomSpreadsheet({
             stackAmounts += netAmounts;
           }
 
-          stacked[item.name] = stackAmounts;
+          // Use id as key to prevent collisions when categories have the same name
+          stacked[item.id || item.name] = stackAmounts;
 
           perIntervalTotals += netAmounts;
 

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useMemo, useState, type CSSProperties } from 'react';
+import React, { useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -15,22 +16,25 @@ import {
   YAxis,
 } from 'recharts';
 
-import {
-  type balanceTypeOpType,
-  type DataEntity,
-  type RuleConditionEntity,
+import type {
+  balanceTypeOpType,
+  DataEntity,
+  LegendEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -47,6 +51,7 @@ type PayloadItem = {
 type CustomTooltipProps = {
   compact: boolean;
   tooltip: string;
+  legend: LegendEntity[];
   active?: boolean;
   payload?: PayloadItem[];
   label?: string;
@@ -56,12 +61,18 @@ type CustomTooltipProps = {
 const CustomTooltip = ({
   compact,
   tooltip,
+  legend,
   active,
   payload,
   label,
   format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
+
+  const dataKeyToName = useMemo(() => {
+    return new Map(legend.map(entry => [entry.dataKey, entry.name]));
+  }, [legend]);
+
   const { sumTotals, items } = useMemo(() => {
     return (payload ?? [])
       .slice(0)
@@ -98,13 +109,18 @@ const CustomTooltip = ({
           </div>
           <div style={{ lineHeight: 1.4 }}>
             {items.map((pay, i) => {
+              const displayName = dataKeyToName.get(pay.name) ?? pay.name;
               return (
                 pay.value !== 0 &&
                 (compact ? i < 5 : true) && (
                   <AlignedText
                     key={pay.name}
-                    left={pay.name}
-                    right={format(pay.value, 'financial')}
+                    left={displayName}
+                    right={
+                      <FinancialText>
+                        {format(pay.value, 'financial')}
+                      </FinancialText>
+                    }
                     style={{
                       color: pay.color,
                       textDecoration:
@@ -117,7 +133,9 @@ const CustomTooltip = ({
             {payload.length > 5 && compact && '...'}
             <AlignedText
               left={t('Total')}
-              right={format(sumTotals, 'financial')}
+              right={
+                <FinancialText>{format(sumTotals, 'financial')}</FinancialText>
+              }
               style={{
                 fontWeight: 600,
               }}
@@ -181,7 +199,7 @@ export function StackedBarGraph({
 }: StackedBarGraphProps) {
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
-  const categories = useCategories();
+  const { data: categories = { grouped: [], list: [] } } = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
   const format = useFormat();
@@ -222,6 +240,7 @@ export function StackedBarGraph({
                     <CustomTooltip
                       compact={compact}
                       tooltip={tooltip}
+                      legend={data.legend}
                       format={format}
                     />
                   }
@@ -254,8 +273,8 @@ export function StackedBarGraph({
                 .reverse()
                 .map(entry => (
                   <Bar
-                    key={entry.name}
-                    dataKey={entry.name}
+                    key={entry.dataKey}
+                    dataKey={entry.dataKey}
                     stackId="a"
                     fill={entry.color}
                     {...animationProps}
@@ -264,7 +283,7 @@ export function StackedBarGraph({
                       setTooltip('');
                     }}
                     onMouseEnter={() => {
-                      setTooltip(entry.name);
+                      setTooltip(entry.dataKey);
                       if (!['Group', 'Interval'].includes(groupBy)) {
                         setPointer('pointer');
                       }
@@ -291,7 +310,7 @@ export function StackedBarGraph({
                   >
                     {viewLabels && !compact && (
                       <LabelList
-                        dataKey={entry.name}
+                        dataKey={entry.dataKey}
                         content={customLabelWithFormat}
                       />
                     )}

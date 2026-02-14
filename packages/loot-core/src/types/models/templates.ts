@@ -64,11 +64,14 @@ export type ScheduleTemplate = {
   name: string;
   full?: boolean;
   adjustment?: number;
+  adjustmentType?: 'percent' | 'fixed';
 } & BaseTemplateWithPriority;
 
 export type AverageTemplate = {
   type: 'average';
   numMonths: number;
+  adjustment?: number;
+  adjustmentType?: 'percent' | 'fixed';
 } & BaseTemplateWithPriority;
 
 export type CopyTemplate = {

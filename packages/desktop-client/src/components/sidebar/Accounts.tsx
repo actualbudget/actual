@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
 import { Account } from './Account';
 import { SecondaryItem } from './SecondaryItem';
@@ -96,6 +96,7 @@ export function Accounts() {
           to="/accounts"
           query={bindings.allAccountBalance()}
           style={{ fontWeight, marginTop: 15 }}
+          isExactPathMatch
         />
 
         {onBudgetAccounts.length > 0 && (

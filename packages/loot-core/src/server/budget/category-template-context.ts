@@ -1,10 +1,11 @@
 // @ts-strict-ignore
-import { getCurrency, type Currency } from 'loot-core/shared/currencies';
+import { getCurrency } from 'loot-core/shared/currencies';
+import type { Currency } from 'loot-core/shared/currencies';
 import { q } from 'loot-core/shared/query';
 
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, integerToAmount } from '../../shared/util';
-import { type CategoryEntity } from '../../types/models';
+import type { CategoryEntity } from '../../types/models';
 import type {
   AverageTemplate,
   ByTemplate,
@@ -21,7 +22,7 @@ import type {
 import { aqlQuery } from '../aql';
 import * as db from '../db';
 
-import { getSheetBoolean, getSheetValue } from './actions';
+import { getSheetBoolean, getSheetValue, isReflectBudget } from './actions';
 import { runSchedule } from './schedule-template';
 import { getActiveSchedules } from './statements';
 
@@ -55,7 +56,7 @@ export class CategoryTemplateContext {
     const lastMonthSheet = monthUtils.sheetForMonth(
       monthUtils.subMonths(month, 1),
     );
-    const lastMonthBalance = await getSheetValue(
+    let fromLastMonth = await getSheetValue(
       lastMonthSheet,
       `leftover-${category.id}`,
     );
@@ -63,15 +64,15 @@ export class CategoryTemplateContext {
       lastMonthSheet,
       `carryover-${category.id}`,
     );
-    let fromLastMonth;
-    if (lastMonthBalance < 0 && !carryover) {
+
+    if (
+      (fromLastMonth < 0 && !carryover) || // overspend no carryover
+      category.is_income || // tracking budget income categories
+      (isReflectBudget() && !carryover) // tracking budget regular categories
+    ) {
       fromLastMonth = 0;
-    } else if (category.is_income) {
-      //for tracking budget
-      fromLastMonth = 0;
-    } else {
-      fromLastMonth = lastMonthBalance;
     }
+
     // run all checks
     await CategoryTemplateContext.checkByAndScheduleAndSpend(templates, month);
     await CategoryTemplateContext.checkPercentage(templates);
@@ -204,6 +205,7 @@ export class CategoryTemplateContext {
               toBudget,
               [],
               this.category,
+              this.currency,
             );
             // Schedules assume that its to budget value is the whole thing so this
             // needs to remove the previous funds so they aren't double counted
@@ -750,7 +752,31 @@ export class CategoryTemplateContext {
         `sum-amount-${templateContext.category.id}`,
       );
     }
-    return -Math.round(sum / template.numMonths);
+
+    // negate as sheet value is cost ie negative
+    let average = -(sum / template.numMonths);
+
+    if (template.adjustment !== undefined && template.adjustmentType) {
+      switch (template.adjustmentType) {
+        case 'percent': {
+          const adjustmentFactor = 1 + template.adjustment / 100;
+          average = adjustmentFactor * average;
+          break;
+        }
+        case 'fixed': {
+          average += amountToInteger(
+            template.adjustment,
+            templateContext.currency.decimalPlaces,
+          );
+          break;
+        }
+
+        default:
+        //no valid adjustment was found
+      }
+    }
+
+    return Math.round(average);
   }
 
   static runBy(templateContext: CategoryTemplateContext): number {

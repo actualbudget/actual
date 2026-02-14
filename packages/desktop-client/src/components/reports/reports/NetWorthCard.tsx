@@ -6,13 +6,11 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type AccountEntity,
-  type NetWorthWidget,
-} from 'loot-core/types/models';
+import type { AccountEntity, NetWorthWidget } from 'loot-core/types/models';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { Change } from '@desktop-client/components/reports/Change';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
@@ -167,7 +165,9 @@ export function NetWorthCard({
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  {format(data.netWorth, 'financial')}
+                  <FinancialText>
+                    {format(data.netWorth, 'financial')}
+                  </FinancialText>
                 </PrivacyFilter>
               </Block>
               <PrivacyFilter activationFilters={[!isCardHovered]}>
@@ -180,9 +180,11 @@ export function NetWorthCard({
         {data ? (
           <NetWorthGraph
             graphData={data.graphData}
+            accounts={data.accounts}
             compact
             showTooltip={!isEditing && !isNarrowWidth}
             interval={meta?.interval || 'Monthly'}
+            mode={meta?.mode || 'trend'}
             style={{ height: 'auto', flex: 1 }}
           />
         ) : (

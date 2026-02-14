@@ -1,24 +1,24 @@
 // @ts-strict-ignore
-import { type CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { t } from 'i18next';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { currencyToAmount, integerToCurrency } from 'loot-core/shared/util';
-import { type Handlers } from 'loot-core/types/handlers';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
+import type { Handlers } from 'loot-core/types/handlers';
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { getValidMonthBounds } from './MonthsContext';
 
-import { type DropPosition } from '@desktop-client/components/sort';
-import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import type { DropPosition } from '@desktop-client/components/sort';
+import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   return [
@@ -63,7 +63,7 @@ export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
 
 export function makeAmountGrey(value: number | string | null): CSSProperties {
   return value === 0 || value === '0' || value === '' || value == null
-    ? { color: theme.tableTextSubdued }
+    ? { color: theme.budgetNumberZero }
     : null;
 }
 
@@ -82,7 +82,7 @@ export function makeBalanceAmountStyle(
   const currencyValue = normalizeIntegerValue(value);
 
   if (currencyValue < 0) {
-    return { color: theme.errorText };
+    return { color: theme.budgetNumberNegative };
   }
 
   if (goalValue == null) {
@@ -90,14 +90,15 @@ export function makeBalanceAmountStyle(
     if (greyed) {
       return greyed;
     }
+    return { color: theme.budgetNumberPositive };
   } else {
     const budgetedAmount = normalizeIntegerValue(budgetedValue);
     const goalAmount = normalizeIntegerValue(goalValue);
 
     if (budgetedAmount < goalAmount) {
-      return { color: theme.warningText };
+      return { color: theme.templateNumberUnderFunded };
     }
-    return { color: theme.noticeText };
+    return { color: theme.templateNumberFunded };
   }
 }
 
@@ -109,9 +110,11 @@ export function makeAmountFullStyle(
     zeroColor?: string;
   },
 ) {
-  const positiveColorToUse = colors?.positiveColor || theme.noticeText;
-  const negativeColorToUse = colors?.negativeColor || theme.errorText;
-  const zeroColorToUse = colors?.zeroColor || theme.tableTextSubdued;
+  const positiveColorToUse =
+    colors?.positiveColor || theme.budgetNumberPositive;
+  const negativeColorToUse =
+    colors?.negativeColor || theme.budgetNumberNegative;
+  const zeroColorToUse = colors?.zeroColor || theme.budgetNumberZero;
   return {
     color:
       value < 0
@@ -122,8 +125,8 @@ export function makeAmountFullStyle(
   };
 }
 
-export function findSortDown(
-  arr: CategoryGroupEntity[],
+export function findSortDown<T extends { id: string }>(
+  arr: T[],
   pos: DropPosition,
   targetId: string,
 ) {
@@ -146,8 +149,8 @@ export function findSortDown(
   }
 }
 
-export function findSortUp(
-  arr: CategoryGroupEntity[],
+export function findSortUp<T extends { id: string }>(
+  arr: T[],
   pos: DropPosition,
   targetId: string,
 ) {

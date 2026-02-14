@@ -1,23 +1,24 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import memoizeOne from 'memoize-one';
 
-import { send } from 'loot-core/platform/client/fetch';
-import { type SyncResponseWithErrors } from 'loot-core/server/accounts/app';
+import { send } from 'loot-core/platform/client/connection';
+import type { SyncResponseWithErrors } from 'loot-core/server/accounts/app';
 import { groupById } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type SyncServerGoCardlessAccount,
-  type SyncServerPluggyAiAccount,
-  type SyncServerSimpleFinAccount,
-  type TransactionEntity,
+import type {
+  AccountEntity,
+  CategoryEntity,
+  SyncServerGoCardlessAccount,
+  SyncServerPluggyAiAccount,
+  SyncServerSimpleFinAccount,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 import { resetApp } from '@desktop-client/app/appSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { markPayeesDirty } from '@desktop-client/payees/payeesSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
-import { type AppDispatch } from '@desktop-client/redux/store';
+import type { AppDispatch } from '@desktop-client/redux/store';
 import { setNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
 const sliceName = 'account';
@@ -245,17 +246,30 @@ export const unlinkAccount = createAppAsyncThunk(
   },
 );
 
-type LinkAccountPayload = {
+// Shared base type for link account payloads
+type LinkAccountBasePayload = {
+  upgradingId?: AccountEntity['id'];
+  offBudget?: boolean;
+  startingDate?: string;
+  startingBalance?: number;
+};
+
+type LinkAccountPayload = LinkAccountBasePayload & {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
-  upgradingId?: AccountEntity['id'] | undefined;
-  offBudget?: boolean | undefined;
 };
 
 export const linkAccount = createAppAsyncThunk(
   `${sliceName}/linkAccount`,
   async (
-    { requisitionId, account, upgradingId, offBudget }: LinkAccountPayload,
+    {
+      requisitionId,
+      account,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountPayload,
     { dispatch },
   ) => {
     await send('gocardless-accounts-link', {
@@ -263,50 +277,64 @@ export const linkAccount = createAppAsyncThunk(
       account,
       upgradingId,
       offBudget,
+      startingDate,
+      startingBalance,
     });
     dispatch(markPayeesDirty());
     dispatch(markAccountsDirty());
   },
 );
 
-type LinkAccountSimpleFinPayload = {
+type LinkAccountSimpleFinPayload = LinkAccountBasePayload & {
   externalAccount: SyncServerSimpleFinAccount;
-  upgradingId?: AccountEntity['id'] | undefined;
-  offBudget?: boolean | undefined;
 };
 
 export const linkAccountSimpleFin = createAppAsyncThunk(
   `${sliceName}/linkAccountSimpleFin`,
   async (
-    { externalAccount, upgradingId, offBudget }: LinkAccountSimpleFinPayload,
+    {
+      externalAccount,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountSimpleFinPayload,
     { dispatch },
   ) => {
     await send('simplefin-accounts-link', {
       externalAccount,
       upgradingId,
       offBudget,
+      startingDate,
+      startingBalance,
     });
     dispatch(markPayeesDirty());
     dispatch(markAccountsDirty());
   },
 );
 
-type LinkAccountPluggyAiPayload = {
+type LinkAccountPluggyAiPayload = LinkAccountBasePayload & {
   externalAccount: SyncServerPluggyAiAccount;
-  upgradingId?: AccountEntity['id'];
-  offBudget?: boolean;
 };
 
 export const linkAccountPluggyAi = createAppAsyncThunk(
   `${sliceName}/linkAccountPluggyAi`,
   async (
-    { externalAccount, upgradingId, offBudget }: LinkAccountPluggyAiPayload,
+    {
+      externalAccount,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountPluggyAiPayload,
     { dispatch },
   ) => {
     await send('pluggyai-accounts-link', {
       externalAccount,
       upgradingId,
       offBudget,
+      startingDate,
+      startingBalance,
     });
     dispatch(markPayeesDirty());
     dispatch(markAccountsDirty());

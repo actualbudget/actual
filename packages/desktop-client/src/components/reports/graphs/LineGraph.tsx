@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useMemo, useState, type CSSProperties } from 'react';
+import React, { useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -14,21 +15,24 @@ import {
   YAxis,
 } from 'recharts';
 
-import {
-  type balanceTypeOpType,
-  type DataEntity,
-  type RuleConditionEntity,
+import type {
+  balanceTypeOpType,
+  DataEntity,
+  LegendEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { showActivity } from './showActivity';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -45,6 +49,7 @@ type PayloadItem = {
 type CustomTooltipProps = {
   compact: boolean;
   tooltip: string;
+  legend: LegendEntity[];
   active?: boolean;
   payload?: PayloadItem[];
   format: (value: unknown, type: FormatType) => string;
@@ -53,11 +58,17 @@ type CustomTooltipProps = {
 const CustomTooltip = ({
   compact,
   tooltip,
+  legend,
   active,
   payload,
   format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
+
+  const dataKeyToName = useMemo(() => {
+    return new Map(legend.map(entry => [entry.dataKey, entry.name]));
+  }, [legend]);
+
   const { sumTotals, items } = useMemo(() => {
     return (payload ?? [])
       .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
@@ -93,12 +104,17 @@ const CustomTooltip = ({
           </div>
           <div style={{ lineHeight: 1.5 }}>
             {items.map((p: PayloadItem, index: number) => {
+              const displayName = dataKeyToName.get(p.dataKey) ?? p.dataKey;
               return (
                 (compact ? index < 4 : true) && (
                   <AlignedText
                     key={index}
-                    left={p.dataKey}
-                    right={format(p.value, 'financial')}
+                    left={displayName}
+                    right={
+                      <FinancialText>
+                        {format(p.value, 'financial')}
+                      </FinancialText>
+                    }
                     style={{
                       color: p.color,
                       textDecoration:
@@ -111,7 +127,9 @@ const CustomTooltip = ({
             {payload.length > 5 && compact && '...'}
             <AlignedText
               left={t('Total')}
-              right={format(sumTotals, 'financial')}
+              right={
+                <FinancialText>{format(sumTotals, 'financial')}</FinancialText>
+              }
               style={{
                 fontWeight: 600,
               }}
@@ -150,7 +168,7 @@ export function LineGraph({
 }: LineGraphProps) {
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
-  const categories = useCategories();
+  const { data: categories = { grouped: [], list: [] } } = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
   const format = useFormat();
@@ -207,6 +225,7 @@ export function LineGraph({
                     <CustomTooltip
                       compact={compact}
                       tooltip={tooltip}
+                      legend={data.legend}
                       format={format}
                     />
                   }
@@ -241,13 +260,13 @@ export function LineGraph({
                     key={index}
                     strokeWidth={2}
                     type="monotone"
-                    dataKey={entry.name}
+                    dataKey={entry.dataKey}
                     stroke={entry.color}
                     {...animationProps}
                     activeDot={{
-                      r: entry.name === tooltip && !compact ? 8 : 3,
+                      r: entry.dataKey === tooltip && !compact ? 8 : 3,
                       onMouseEnter: () => {
-                        setTooltip(entry.name);
+                        setTooltip(entry.dataKey);
                         if (!['Group', 'Interval'].includes(groupBy)) {
                           setPointer('pointer');
                         }

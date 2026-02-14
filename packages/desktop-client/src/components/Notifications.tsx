@@ -1,12 +1,6 @@
 // @ts-strict-ignore
-import React, {
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useState,
-  type CSSProperties,
-  type SetStateAction,
-} from 'react';
+import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
+import type { CSSProperties, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
 import { animated, to, useSpring } from 'react-spring';
 import { useSwipeable } from 'react-swipeable';
@@ -25,10 +19,8 @@ import { css } from '@emotion/css';
 import { Link } from './common/Link';
 import { MODAL_Z_INDEX } from './common/Modal';
 
-import {
-  removeNotification,
-  type NotificationWithId,
-} from '@desktop-client/notifications/notificationsSlice';
+import { removeNotification } from '@desktop-client/notifications/notificationsSlice';
+import type { NotificationWithId } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 
 // Notification stacking configuration
@@ -387,6 +379,7 @@ export function Notifications({ style }: { style?: CSSProperties }) {
         right: notificationInset?.right || 13,
         left: notificationInset?.left || (isNarrowWidth ? 13 : undefined),
         zIndex: MODAL_Z_INDEX - 1,
+        width: isNarrowWidth ? undefined : 400,
         ...style,
       }}
     >

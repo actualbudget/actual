@@ -1,7 +1,9 @@
 import { Trans } from 'react-i18next';
 
 import type { PeriodicTemplate } from 'loot-core/types/models/templates';
+import type { TransObjectLiteral } from 'loot-core/types/util';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type WeekAutomationReadOnlyProps = {
@@ -16,9 +18,13 @@ export const WeekAutomationReadOnly = ({
   return (
     <Trans>
       Budget{' '}
-      {{
-        amount: format(template.amount, 'financial'),
-      }}{' '}
+      <FinancialText>
+        {
+          {
+            amount: format(template.amount, 'financial'),
+          } as TransObjectLiteral
+        }
+      </FinancialText>{' '}
       each week
     </Trans>
   );

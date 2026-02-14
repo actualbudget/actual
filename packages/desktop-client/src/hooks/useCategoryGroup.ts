@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { useCategories } from './useCategories';
+import { categoryQueries } from '@desktop-client/budget';
 
-export function useCategoryGroup(id: string) {
-  const { grouped: categoryGroups } = useCategories();
-  return useMemo(
-    () => categoryGroups.find(g => g.id === id),
-    [id, categoryGroups],
-  );
+export function useCategoryGroup(id?: string | null) {
+  return useQuery({
+    ...categoryQueries.list(),
+    select: data => data.grouped.find(g => g.id === id),
+    enabled: !!id,
+  });
 }

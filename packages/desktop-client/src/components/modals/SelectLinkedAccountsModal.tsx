@@ -1,19 +1,23 @@
-import React, { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { Input } from '@actual-app/components/input';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { format as formatDate, parseISO } from 'date-fns';
 
-import {
-  type AccountEntity,
-  type SyncServerGoCardlessAccount,
-  type SyncServerPluggyAiAccount,
-  type SyncServerSimpleFinAccount,
+import { currentDay, subDays } from 'loot-core/shared/months';
+import type {
+  AccountEntity,
+  SyncServerGoCardlessAccount,
+  SyncServerPluggyAiAccount,
+  SyncServerSimpleFinAccount,
 } from 'loot-core/types/models';
 
 import {
@@ -22,15 +26,14 @@ import {
   linkAccountSimpleFin,
   unlinkAccount,
 } from '@desktop-client/accounts/accountsSlice';
-import {
-  Autocomplete,
-  type AutocompleteItem,
-} from '@desktop-client/components/autocomplete/Autocomplete';
+import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
+import type { AutocompleteItem } from '@desktop-client/components/autocomplete/Autocomplete';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import {
   Cell,
@@ -39,9 +42,13 @@ import {
   Table,
   TableHeader,
 } from '@desktop-client/components/table';
+import { AmountInput } from '@desktop-client/components/util/AmountInput';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { closeModal } from '@desktop-client/modals/modalsSlice';
+import { transactions } from '@desktop-client/queries';
+import { liveQuery } from '@desktop-client/queries/liveQuery';
 import { useDispatch } from '@desktop-client/redux';
 
 function useAddBudgetAccountOptions() {
@@ -57,6 +64,20 @@ function useAddBudgetAccountOptions() {
   };
 
   return { addOnBudgetAccountOption, addOffBudgetAccountOption };
+}
+
+/**
+ * Helper to determine if the chosen account option represents creating a new account.
+ */
+function isNewAccountOption(
+  chosenAccountId: string | undefined,
+  addOnBudgetOptionId: string,
+  addOffBudgetOptionId: string,
+): boolean {
+  return (
+    chosenAccountId === addOnBudgetOptionId ||
+    chosenAccountId === addOffBudgetOptionId
+  );
 }
 
 export type SelectLinkedAccountsModalProps =
@@ -127,6 +148,9 @@ export function SelectLinkedAccountsModal({
       );
     },
   );
+  const [customStartingDates, setCustomStartingDates] = useState<
+    Record<string, StartingBalanceInfo>
+  >({});
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
 
@@ -156,6 +180,14 @@ export function SelectLinkedAccountsModal({
         }
 
         // Finally link the matched account
+        const customSettings = customStartingDates[chosenExternalAccountId];
+        const startingDate =
+          customSettings?.date && customSettings.date.trim() !== ''
+            ? customSettings.date
+            : undefined;
+        const startingBalance =
+          customSettings?.amount != null ? customSettings.amount : undefined;
+
         if (propsWithSortedExternalAccounts.syncSource === 'simpleFin') {
           dispatch(
             linkAccountSimpleFin({
@@ -169,6 +201,8 @@ export function SelectLinkedAccountsModal({
                   ? chosenLocalAccountId
                   : undefined,
               offBudget,
+              startingDate,
+              startingBalance,
             }),
           );
         } else if (propsWithSortedExternalAccounts.syncSource === 'pluggyai') {
@@ -184,6 +218,8 @@ export function SelectLinkedAccountsModal({
                   ? chosenLocalAccountId
                   : undefined,
               offBudget,
+              startingDate,
+              startingBalance,
             }),
           );
         } else {
@@ -200,6 +236,8 @@ export function SelectLinkedAccountsModal({
                   ? chosenLocalAccountId
                   : undefined,
               offBudget,
+              startingDate,
+              startingBalance,
             }),
           );
         }
@@ -251,6 +289,33 @@ export function SelectLinkedAccountsModal({
     }
 
     return localAccounts.find(acc => acc.id === chosenId);
+  };
+
+  // Memoize default starting settings to avoid repeated calculations
+  const defaultStartingSettings = useMemo<StartingBalanceInfo>(
+    () => ({
+      date: subDays(currentDay(), 90),
+      amount: 0,
+    }),
+    [],
+  );
+
+  const getCustomStartingDate = (accountId: string) => {
+    if (customStartingDates[accountId]) {
+      return customStartingDates[accountId];
+    }
+    // Default to 90 days ago (matches server default)
+    return defaultStartingSettings;
+  };
+
+  const setCustomStartingDate = (
+    accountId: string,
+    settings: StartingBalanceInfo,
+  ) => {
+    setCustomStartingDates(prev => ({
+      ...prev,
+      [accountId]: settings,
+    }));
   };
 
   const label = useMemo(() => {
@@ -323,47 +388,54 @@ export function SelectLinkedAccountsModal({
                   chosenAccount={getChosenAccount(account.account_id)}
                   unlinkedAccounts={unlinkedAccounts}
                   onSetLinkedAccount={onSetLinkedAccount}
+                  customStartingDate={getCustomStartingDate(account.account_id)}
+                  onSetCustomStartingDate={setCustomStartingDate}
                 />
               ))}
             </View>
           ) : (
             <View
-              style={{
-                flex: 'unset',
-                height: 300,
-                border: '1px solid ' + theme.tableBorder,
-              }}
+              style={{ ...styles.tableContainer, height: 300, flex: 'unset' }}
             >
               <TableHeader>
-                <Cell value={t('Institution to Sync')} width={175} />
-                <Cell value={t('Bank Account To Sync')} width={175} />
-                <Cell value={t('Balance')} width={80} />
+                <Cell value={t('Institution to Sync')} width={150} />
+                <Cell value={t('Bank Account To Sync')} width={150} />
+                <Cell value={t('Balance')} width={120} />
                 <Cell value={t('Account in Actual')} width="flex" />
-                <Cell value={t('Actions')} width={150} />
+                <Cell value={t('Starting Date')} width={120} />
+                <Cell value={t('Starting Balance')} width={120} />
+                <Cell value={t('Actions')} width={150} textAlign="center" />
               </TableHeader>
 
-              <Table<
-                SelectLinkedAccountsModalProps['externalAccounts'][number] & {
-                  id: string;
-                }
-              >
+              <Table<ExternalAccount & { id: string }>
                 items={propsWithSortedExternalAccounts.externalAccounts.map(
-                  account => ({
-                    ...account,
-                    id: account.account_id,
-                  }),
+                  acc => ({ ...acc, id: acc.account_id }),
                 )}
                 style={{ backgroundColor: theme.tableHeaderBackground }}
-                renderItem={({ item }) => (
-                  <View key={item.id}>
+                renderItem={({ item }) => {
+                  const chosenAccount = getChosenAccount(item.account_id);
+                  // Only show starting options for new accounts being created
+                  const shouldShowStartingOptions = isNewAccountOption(
+                    chosenAccount?.id,
+                    addOnBudgetAccountOption.id,
+                    addOffBudgetAccountOption.id,
+                  );
+
+                  return (
                     <TableRow
+                      key={item.id}
                       externalAccount={item}
-                      chosenAccount={getChosenAccount(item.account_id)}
+                      chosenAccount={chosenAccount}
                       unlinkedAccounts={unlinkedAccounts}
                       onSetLinkedAccount={onSetLinkedAccount}
+                      customStartingDate={getCustomStartingDate(
+                        item.account_id,
+                      )}
+                      onSetCustomStartingDate={setCustomStartingDate}
+                      showStartingOptions={shouldShowStartingOptions}
                     />
-                  </View>
-                )}
+                  );
+                }}
               />
             </View>
           )}
@@ -409,6 +481,11 @@ type ExternalAccount =
   | SyncServerSimpleFinAccount
   | SyncServerPluggyAiAccount;
 
+type StartingBalanceInfo = {
+  date: string;
+  amount: number;
+};
+
 type SharedAccountRowProps = {
   externalAccount: ExternalAccount;
   chosenAccount: { id: string; name: string } | undefined;
@@ -437,19 +514,64 @@ function getAvailableAccountOptions(
   return options;
 }
 
-type TableRowProps = SharedAccountRowProps;
+type TableRowProps = SharedAccountRowProps & {
+  customStartingDate: StartingBalanceInfo;
+  onSetCustomStartingDate: (
+    accountId: string,
+    settings: StartingBalanceInfo,
+  ) => void;
+  showStartingOptions: boolean;
+};
+
+function useStartingBalanceInfo(accountId: string | undefined) {
+  const [info, setInfo] = useState<StartingBalanceInfo | null>(null);
+
+  useEffect(() => {
+    if (!accountId) {
+      setInfo(null);
+      return;
+    }
+
+    const query = transactions(accountId)
+      .filter({ starting_balance_flag: true })
+      .select(['date', 'amount'])
+      .limit(1);
+
+    const live = liveQuery<StartingBalanceInfo>(query, {
+      onData: data => {
+        setInfo(data?.[0] ?? null);
+      },
+      onError: () => {
+        setInfo(null);
+      },
+    });
+
+    return () => {
+      live?.unsubscribe();
+    };
+  }, [accountId]);
+
+  return info;
+}
 
 function TableRow({
   externalAccount,
   chosenAccount,
   unlinkedAccounts,
   onSetLinkedAccount,
+  customStartingDate,
+  onSetCustomStartingDate,
+  showStartingOptions,
 }: TableRowProps) {
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
   const format = useFormat();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
+  const startingBalanceInfo = useStartingBalanceInfo(
+    showStartingOptions ? undefined : chosenAccount?.id,
+  );
 
   const availableAccountOptions = getAvailableAccountOptions(
     unlinkedAccounts,
@@ -460,7 +582,8 @@ function TableRow({
 
   return (
     <Row style={{ backgroundColor: theme.tableBackground }}>
-      <Field width={175}>
+      {/* Institution to Sync */}
+      <Field width={150}>
         <Tooltip content={getInstitutionName(externalAccount)}>
           <View
             style={{
@@ -473,7 +596,8 @@ function TableRow({
           </View>
         </Tooltip>
       </Field>
-      <Field width={175}>
+      {/* Bank Account To Sync */}
+      <Field width={150}>
         <Tooltip content={externalAccount.name}>
           <View
             style={{
@@ -486,13 +610,19 @@ function TableRow({
           </View>
         </Tooltip>
       </Field>
-      <Field width={80}>
+      {/* Balance */}
+      <Field width={120} style={{ textAlign: 'right' }}>
         <PrivacyFilter>
-          {externalAccount.balance != null
-            ? format(externalAccount.balance.toString(), 'financial')
-            : t('Unknown')}
+          {externalAccount.balance != null ? (
+            <FinancialText>
+              {format(externalAccount.balance.toString(), 'financial')}
+            </FinancialText>
+          ) : (
+            t('Unknown')
+          )}
         </PrivacyFilter>
       </Field>
+      {/* Account in Actual */}
       <Field
         width="flex"
         truncate={focusedField !== 'account'}
@@ -516,6 +646,47 @@ function TableRow({
           chosenAccount?.name
         )}
       </Field>
+      {showStartingOptions ? (
+        <StartingOptionsFields
+          accountId={externalAccount.account_id}
+          externalBalance={externalAccount.balance}
+          customStartingDate={customStartingDate}
+          onSetCustomStartingDate={onSetCustomStartingDate}
+          layout="inline"
+        />
+      ) : (
+        <>
+          {/* Starting Date */}
+          <Field width={120} truncate={false} style={{ textAlign: 'right' }}>
+            {startingBalanceInfo ? (
+              <Text
+                style={{
+                  color: theme.pageTextSubdued,
+                  fontStyle: 'italic',
+                }}
+              >
+                {formatDate(parseISO(startingBalanceInfo.date), dateFormat)}
+              </Text>
+            ) : null}
+          </Field>
+          {/* Starting Balance */}
+          <Field width={120} truncate={false} style={{ textAlign: 'right' }}>
+            {startingBalanceInfo ? (
+              <PrivacyFilter>
+                <FinancialText
+                  style={{
+                    color: theme.pageTextSubdued,
+                    fontStyle: 'italic',
+                  }}
+                >
+                  {format(startingBalanceInfo.amount, 'financial')}
+                </FinancialText>
+              </PrivacyFilter>
+            ) : null}
+          </Field>
+        </>
+      )}
+      {/* Actions */}
       <Field width={150}>
         {chosenAccount ? (
           <Button
@@ -556,18 +727,141 @@ function getInstitutionName(
   return '';
 }
 
-type AccountCardProps = SharedAccountRowProps;
+type StartingOptionsFieldsProps = {
+  accountId: string;
+  externalBalance: number | null | undefined;
+  customStartingDate: StartingBalanceInfo;
+  onSetCustomStartingDate: (
+    accountId: string,
+    settings: StartingBalanceInfo,
+  ) => void;
+  layout: 'inline' | 'stacked';
+};
+
+function StartingOptionsFields({
+  accountId,
+  externalBalance,
+  customStartingDate,
+  onSetCustomStartingDate,
+  layout,
+}: StartingOptionsFieldsProps) {
+  const zeroSign = externalBalance != null && externalBalance < 0 ? '-' : '+';
+
+  if (layout === 'inline') {
+    return (
+      <>
+        {/* Starting Date */}
+        <Field width={120} truncate={false}>
+          <Input
+            type="date"
+            value={customStartingDate.date}
+            onChange={e =>
+              onSetCustomStartingDate(accountId, {
+                ...customStartingDate,
+                date: e.target.value,
+              })
+            }
+            style={{ width: '100%' }}
+          />
+        </Field>
+        {/* Starting Balance */}
+        <Field width={120} truncate={false} style={{ textAlign: 'right' }}>
+          <AmountInput
+            value={customStartingDate.amount}
+            zeroSign={zeroSign}
+            onUpdate={amount =>
+              onSetCustomStartingDate(accountId, {
+                ...customStartingDate,
+                amount,
+              })
+            }
+            style={{ width: '100%' }}
+          />
+        </Field>
+      </>
+    );
+  }
+
+  return (
+    <View
+      style={{
+        marginTop: 8,
+        padding: '12px',
+        backgroundColor: theme.tableHeaderBackground,
+        borderRadius: 4,
+      }}
+    >
+      <View style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <View>
+          <Text
+            style={{
+              marginBottom: 4,
+              fontSize: 13,
+              color: theme.pageTextSubdued,
+            }}
+          >
+            <Trans>Starting date:</Trans>
+          </Text>
+          <Input
+            type="date"
+            value={customStartingDate.date}
+            onChange={e =>
+              onSetCustomStartingDate(accountId, {
+                ...customStartingDate,
+                date: e.target.value,
+              })
+            }
+            style={{ width: '100%' }}
+          />
+        </View>
+        <View>
+          <Text
+            style={{
+              marginBottom: 4,
+              fontSize: 13,
+              color: theme.pageTextSubdued,
+            }}
+          >
+            <Trans>Balance on that date:</Trans>
+          </Text>
+          <AmountInput
+            value={customStartingDate.amount}
+            zeroSign={zeroSign}
+            onUpdate={amount =>
+              onSetCustomStartingDate(accountId, {
+                ...customStartingDate,
+                amount,
+              })
+            }
+            style={{ width: '100%' }}
+          />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+type AccountCardProps = SharedAccountRowProps & {
+  customStartingDate: StartingBalanceInfo;
+  onSetCustomStartingDate: (
+    accountId: string,
+    settings: StartingBalanceInfo,
+  ) => void;
+};
 
 function AccountCard({
   externalAccount,
   chosenAccount,
   unlinkedAccounts,
   onSetLinkedAccount,
+  customStartingDate,
+  onSetCustomStartingDate,
 }: AccountCardProps) {
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
   const format = useFormat();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
 
   const availableAccountOptions = getAvailableAccountOptions(
@@ -575,6 +869,16 @@ function AccountCard({
     chosenAccount,
     addOnBudgetAccountOption,
     addOffBudgetAccountOption,
+  );
+
+  // Only show starting date options for new accounts being created
+  const shouldShowStartingOptions = isNewAccountOption(
+    chosenAccount?.id,
+    addOnBudgetAccountOption.id,
+    addOffBudgetAccountOption.id,
+  );
+  const startingBalanceInfo = useStartingBalanceInfo(
+    shouldShowStartingOptions ? undefined : chosenAccount?.id,
   );
 
   return (
@@ -621,9 +925,13 @@ function AccountCard({
       >
         <Trans>Balance:</Trans>{' '}
         <PrivacyFilter>
-          {externalAccount.balance != null
-            ? format(externalAccount.balance.toString(), 'financial')
-            : t('Unknown')}
+          {externalAccount.balance != null ? (
+            <FinancialText>
+              {format(externalAccount.balance.toString(), 'financial')}
+            </FinancialText>
+          ) : (
+            t('Unknown')
+          )}
         </PrivacyFilter>
       </View>
 
@@ -649,6 +957,47 @@ function AccountCard({
         )}
       </SpaceBetween>
 
+      {!shouldShowStartingOptions && startingBalanceInfo && (
+        <View
+          style={{
+            fontSize: '0.9em',
+            color: theme.pageTextSubdued,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
+          }}
+        >
+          <View style={{ display: 'flex', flexDirection: 'row', gap: 4 }}>
+            <Text style={{ color: theme.pageTextSubdued }}>
+              <Trans>Starting date:</Trans>
+            </Text>
+            <Text
+              style={{
+                color: theme.pageTextSubdued,
+                fontStyle: 'italic',
+              }}
+            >
+              {formatDate(parseISO(startingBalanceInfo.date), dateFormat)}
+            </Text>
+          </View>
+          <View style={{ display: 'flex', flexDirection: 'row', gap: 4 }}>
+            <Text style={{ color: theme.pageTextSubdued }}>
+              <Trans>Starting balance:</Trans>
+            </Text>
+            <PrivacyFilter>
+              <FinancialText
+                style={{
+                  color: theme.pageTextSubdued,
+                  fontStyle: 'italic',
+                }}
+              >
+                {format(startingBalanceInfo.amount, 'financial')}
+              </FinancialText>
+            </PrivacyFilter>
+          </View>
+        </View>
+      )}
+
       {focusedField === 'account' && (
         <View style={{ marginBottom: 12 }}>
           <Autocomplete
@@ -667,6 +1016,16 @@ function AccountCard({
             value={chosenAccount?.id}
           />
         </View>
+      )}
+
+      {shouldShowStartingOptions && (
+        <StartingOptionsFields
+          accountId={externalAccount.account_id}
+          externalBalance={externalAccount.balance}
+          customStartingDate={customStartingDate}
+          onSetCustomStartingDate={onSetCustomStartingDate}
+          layout="stacked"
+        />
       )}
 
       {chosenAccount ? (

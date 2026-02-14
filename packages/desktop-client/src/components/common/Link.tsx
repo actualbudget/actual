@@ -1,12 +1,10 @@
-import React, {
-  type ComponentProps,
-  type MouseEventHandler,
-  type ReactNode,
-} from 'react';
+import React from 'react';
+import type { ComponentProps, MouseEventHandler, ReactNode } from 'react';
 import { NavLink, useMatch } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
-import { styles, type CSSProperties } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
@@ -31,6 +29,7 @@ type InternalLinkProps = {
   activeStyle?: CSSProperties;
   children?: ReactNode;
   isDisabled?: boolean;
+  isExactPathMatch?: boolean;
 };
 
 const externalLinkColors = {
@@ -91,7 +90,7 @@ const TextLink = ({ style, onClick, children, ...props }: TextLinkProps) => {
 const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
   const navigate = useNavigate();
   const path = to ?? '';
-  const match = useMatch({ path });
+  const match = useMatch({ path, end: false });
   return (
     <Button
       className={() =>
@@ -119,9 +118,10 @@ const InternalLink = ({
   activeStyle,
   children,
   isDisabled,
+  isExactPathMatch = false,
 }: InternalLinkProps) => {
   const path = to ?? '';
-  const match = useMatch({ path });
+  const match = useMatch({ path, end: isExactPathMatch });
 
   return (
     <NavLink

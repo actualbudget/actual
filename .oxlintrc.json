@@ -18,43 +18,7 @@
     "FS": "readonly"
   },
   "rules": {
-    // TODO fix all these and re-enable
-    "jsx-a11y/click-events-have-key-events": "off",
-    "jsx-a11y/prefer-tag-over-role": "off",
-    "jsx-a11y/tabindex-no-positive": "off",
-
     // Import sorting
-    // TODO replace once oxfmt supports this: https://github.com/oxc-project/oxc/issues/17076
-    "perfectionist/sort-imports": [
-      "warn",
-      {
-        "groups": [
-          "react",
-          "builtin",
-          "external",
-          "loot-core",
-          "parent",
-          "sibling",
-          "index",
-          "desktop-client"
-        ],
-        "customGroups": [
-          {
-            "groupName": "react",
-            "elementNamePattern": "^react(-.*)?$"
-          },
-          {
-            "groupName": "loot-core",
-            "elementNamePattern": "^loot-core"
-          },
-          {
-            "groupName": "desktop-client",
-            "elementNamePattern": "^@desktop-client"
-          }
-        ],
-        "newlinesBetween": "always"
-      }
-    ],
     "perfectionist/sort-named-imports": [
       "warn",
       {
@@ -137,6 +101,7 @@
     "typescript/no-var-requires": "warn",
 
     // Import rules
+    "import/consistent-type-specifier-style": "warn",
     "import/first": "error",
     "import/no-amd": "error",
     "import/no-default-export": "warn",
@@ -147,7 +112,7 @@
     "import/no-duplicates": [
       "warn",
       {
-        "prefer-inline": true
+        "prefer-inline": false
       }
     ],
 
@@ -155,7 +120,7 @@
     "react/exhaustive-deps": [
       "warn",
       {
-        "additionalHooks": "(useQuery|useEffectAfterMount)"
+        "additionalHooks": "(^useQuery$|^useEffectAfterMount$)"
       }
     ],
     "react/jsx-curly-brace-presence": "warn",
@@ -370,6 +335,10 @@
             "message": "Please use themes instead of colors"
           },
           {
+            "group": ["**/style/themes/*"],
+            "message": "Please do not import theme files directly"
+          },
+          {
             "group": ["@actual-app/web/**/*"],
             "message": "Please do not import `@actual-app/web` in `loot-core`"
           }
@@ -419,6 +388,12 @@
           { "preferPathOverBaseUrl": true }
         ],
         "typescript-paths/absolute-import": ["error", { "enableAlias": false }]
+      }
+    },
+    {
+      "files": ["packages/desktop-client/src/style/themes/*"],
+      "rules": {
+        "eslint/no-restricted-imports": "off"
       }
     },
     // TODO: enable these

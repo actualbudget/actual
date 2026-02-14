@@ -1,18 +1,20 @@
-import { type Budget } from '../types/budget';
+import type { Budget } from '../types/budget';
 import type {
   AccountEntity,
   CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
   ScheduleEntity,
+  TagEntity,
 } from '../types/models';
 
-import { type RemoteFile } from './cloud-storage';
+import type { RemoteFile } from './cloud-storage';
 import * as models from './models';
 
 export type APIAccountEntity = Pick<AccountEntity, 'id' | 'name'> & {
   offbudget?: boolean;
   closed?: boolean;
+  balance_current?: number | null;
 };
 
 export const accountModel = {
@@ -24,6 +26,7 @@ export const accountModel = {
       name: account.name,
       offbudget: account.offbudget ? true : false,
       closed: account.closed ? true : false,
+      balance_current: account.balance_current ?? null,
     };
   },
 
@@ -114,6 +117,26 @@ export const payeeModel = {
   fromExternal(payee: APIPayeeEntity) {
     // No translation is needed
     return payee as PayeeEntity;
+  },
+};
+
+export type APITagEntity = Pick<
+  TagEntity,
+  'id' | 'tag' | 'color' | 'description'
+>;
+
+export const tagModel = {
+  toExternal(tag: TagEntity): APITagEntity {
+    return {
+      id: tag.id,
+      tag: tag.tag,
+      color: tag.color ?? null,
+      description: tag.description ?? null,
+    };
+  },
+
+  fromExternal(tag: Partial<APITagEntity>): Partial<TagEntity> {
+    return tag;
   },
 };
 

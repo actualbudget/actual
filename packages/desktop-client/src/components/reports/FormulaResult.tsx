@@ -4,9 +4,8 @@ import React, {
   useMemo,
   useRef,
   useState,
-  type Ref,
-  type RefObject,
 } from 'react';
+import type { Ref, RefObject } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -14,7 +13,6 @@ import debounce from 'lodash/debounce';
 
 import { amountToInteger } from 'loot-core/shared/util';
 
-import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
@@ -152,7 +150,7 @@ export function FormulaResult({
   const color = customColor
     ? customColor
     : error
-      ? chartTheme.colors.red
+      ? theme.errorText
       : theme.pageText;
 
   return (

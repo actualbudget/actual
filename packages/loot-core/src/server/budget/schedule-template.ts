@@ -1,15 +1,16 @@
 // @ts-strict-ignore
+
+import type { Currency } from 'loot-core/shared/currencies';
+import { amountToInteger } from 'loot-core/shared/util';
+
 import * as monthUtils from '../../shared/months';
 import {
   extractScheduleConds,
   getDateWithSkippedWeekend,
   getNextDate,
 } from '../../shared/schedules';
-import { type CategoryEntity } from '../../types/models';
-import {
-  type ScheduleTemplate,
-  type Template,
-} from '../../types/models/templates';
+import type { CategoryEntity } from '../../types/models';
+import type { ScheduleTemplate, Template } from '../../types/models/templates';
 import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
 
@@ -31,6 +32,7 @@ async function createScheduleList(
   templates: ScheduleTemplate[],
   current_month: string,
   category: CategoryEntity,
+  currency: Currency,
 ) {
   const t: Array<ScheduleTemplateTarget> = [];
   const errors: string[] = [];
@@ -52,10 +54,27 @@ async function createScheduleList(
           2
         : amountCondition.value;
     // Apply adjustment percentage if specified
-    if (template.adjustment) {
-      const adjustmentFactor = 1 + template.adjustment / 100;
-      scheduleAmount = Math.round(scheduleAmount * adjustmentFactor);
+    if (template.adjustment !== undefined && template.adjustmentType) {
+      switch (template.adjustmentType) {
+        case 'percent': {
+          const adjustmentFactor = 1 + template.adjustment / 100;
+          scheduleAmount = scheduleAmount * adjustmentFactor;
+          break;
+        }
+        case 'fixed': {
+          const sign = scheduleAmount < 0 ? -1 : 1;
+          scheduleAmount +=
+            sign * amountToInteger(template.adjustment, currency.decimalPlaces);
+          break;
+        }
+
+        default:
+        //no valid adjustment was found
+      }
     }
+
+    scheduleAmount = Math.round(scheduleAmount);
+
     const { amount: postRuleAmount, subtransactions } = rule.execActions({
       amount: scheduleAmount,
       category: category.id,
@@ -265,6 +284,7 @@ export async function runSchedule(
   to_budget: number,
   errors: string[],
   category: CategoryEntity,
+  currency: Currency,
 ) {
   const scheduleTemplates = template_lines.filter(t => t.type === 'schedule');
 
@@ -272,6 +292,7 @@ export async function runSchedule(
     scheduleTemplates,
     current_month,
     category,
+    currency,
   );
   errors = errors.concat(t.errors);
 
