@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 // This file will initialize the app if we are in a real browser
 // environment (not electron)
 import './browser-preload';
@@ -86,6 +85,9 @@ window.$query = aqlQuery;
 window.$q = q;
 
 const container = document.getElementById('root');
+if (!container) {
+  throw new Error('Root container not found');
+}
 const root = createRoot(container);
 root.render(
   <QueryClientProvider client={queryClient}>
