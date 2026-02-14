@@ -59,6 +59,7 @@ import { useDispatch } from '@desktop-client/redux';
 import {
   useAddDashboardWidgetMutation,
   useCopyDashboardWidgetMutation,
+  useCreateDashboardPageMutation,
   useDeleteDashboardPageMutation,
   useImportDashboardPageMutation,
   useRemoveDashboardWidgetMutation,
@@ -432,6 +433,20 @@ export function Overview({ dashboard }: OverviewProps) {
     });
   };
 
+  const createDashboardPageMutation = useCreateDashboardPageMutation();
+
+  const onAddDashboard = async () => {
+    const defaultName = t('New dashboard');
+    createDashboardPageMutation.mutate(
+      { name: defaultName },
+      {
+        onSuccess: id => {
+          navigate(`/reports/${id}`);
+        },
+      },
+    );
+  };
+
   const deleteDashboardPageMutation = useDeleteDashboardPageMutation();
 
   const onDeleteDashboard = async (id: string) => {
@@ -506,22 +521,6 @@ export function Overview({ dashboard }: OverviewProps) {
             >
               {currentBreakpoint === 'desktop' && (
                 <>
-                  {/* Dashboard Selector */}
-                  <DashboardSelector
-                    dashboards={dashboardPages}
-                    currentDashboard={dashboard}
-                  />
-
-                  <View
-                    style={{
-                      height: 'auto',
-                      borderLeft: `1.5px solid ${theme.pillBorderDark}`,
-                      borderRadius: 0.75,
-                      marginLeft: 7,
-                      marginRight: 7,
-                    }}
-                  />
-
                   <DialogTrigger>
                     <Button variant="primary" isDisabled={isImporting}>
                       <Trans>Add new widget</Trans>
@@ -666,6 +665,9 @@ export function Overview({ dashboard }: OverviewProps) {
                               case 'import':
                                 onImport();
                                 break;
+                              case 'add-new':
+                                onAddDashboard();
+                                break;
                               case 'delete':
                                 onDeleteDashboard(dashboard.id);
                                 break;
@@ -693,6 +695,10 @@ export function Overview({ dashboard }: OverviewProps) {
                               disabled: isImporting,
                             },
                             Menu.line,
+                            {
+                              name: 'add-new',
+                              text: t('Add dashboard'),
+                            },
                             {
                               name: 'delete',
                               text: t('Delete dashboard'),
