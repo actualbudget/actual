@@ -515,8 +515,8 @@ export const processQueue = createAppAsyncThunk(
     try {
       // Continue processing until queue is empty
       // This handles cases where items are added to the queue while processing
-      while (getState().account.syncQueue.length > 0) {
-        const currentQueue = getState().account.syncQueue;
+      let currentQueue = getState().account.syncQueue;
+      while (currentQueue.length > 0) {
         const { accounts } = getState().account;
         const accountsById = new Map(accounts.map(a => [a.id, a]));
 
@@ -579,6 +579,9 @@ export const processQueue = createAppAsyncThunk(
             dispatch(setAccountsSyncing({ ids: [] }));
           }
         }
+
+        // Get fresh queue for next iteration
+        currentQueue = getState().account.syncQueue;
       }
     } catch (error) {
       console.error('Queue processing error:', error);
@@ -794,16 +797,6 @@ export const importTransactions = createAppAsyncThunk(
 
 export const getAccountsById = memoizeOne(
   (accounts: AccountEntity[] | null | undefined) => groupById(accounts),
-);
-
-// Selector to get all pending account IDs (in queue or actively syncing)
-export const getPendingAccountIds = memoizeOne(
-  (
-    syncingAccountIds: Array<AccountEntity['id']>,
-    syncQueue: Array<SyncRequest>,
-  ): Set<AccountEntity['id']> => {
-    return new Set([...syncingAccountIds, ...syncQueue.map(req => req.id)]);
-  },
 );
 
 export const { name, reducer, getInitialState } = accountsSlice;

@@ -9,10 +9,7 @@ import type { AccountEntity } from 'loot-core/types/models';
 import { Account } from './Account';
 import { SecondaryItem } from './SecondaryItem';
 
-import {
-  getPendingAccountIds,
-  moveAccount,
-} from '@desktop-client/accounts/accountsSlice';
+import { moveAccount } from '@desktop-client/accounts/accountsSlice';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useClosedAccounts } from '@desktop-client/hooks/useClosedAccounts';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
@@ -35,11 +32,10 @@ export function Accounts() {
   const offbudgetAccounts = useOffBudgetAccounts();
   const onBudgetAccounts = useOnBudgetAccounts();
   const closedAccounts = useClosedAccounts();
-  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const syncQueue = useSelector(state => state.account.syncQueue);
 
-  // An account is pending if it's in the sync queue or currently syncing
-  const pendingAccountIds = getPendingAccountIds(syncingAccountIds, syncQueue);
+  // An account is pending if it's in the sync queue
+  const pendingAccountIds = new Set(syncQueue.map(req => req.id));
 
   const getAccountPath = (account: AccountEntity) => `/accounts/${account.id}`;
 

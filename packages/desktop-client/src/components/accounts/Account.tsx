@@ -41,7 +41,6 @@ import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
 
 import {
-  getPendingAccountIds,
   markAccountRead,
   reopenAccount,
   unlinkAccount,
@@ -1989,14 +1988,11 @@ export function Account() {
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
-  const accountsSyncing = useSelector(state => state.account.accountsSyncing);
   const syncQueue = useSelector(state => state.account.syncQueue);
   const filterConditions = location?.state?.filterConditions || [];
 
-  // An account is pending if it's in the sync queue or currently syncing
-  const pendingAccountIds = [
-    ...getPendingAccountIds(accountsSyncing, syncQueue),
-  ];
+  // An account is pending if it's in the sync queue
+  const pendingAccountIds = syncQueue.map(req => req.id);
 
   const savedFiters = useTransactionFilters();
 
