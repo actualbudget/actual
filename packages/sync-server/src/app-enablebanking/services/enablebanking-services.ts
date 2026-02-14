@@ -3,16 +3,16 @@ import pLimit from 'p-limit';
 
 import { SecretName, secretsService } from '../../services/secrets-service.js';
 import { getLoadedRegistry } from '../banks/bank-registry.js';
-import {
-  type components,
-  type operations,
-  type paths,
+import type {
+  components,
+  operations,
+  paths,
 } from '../models/enablebanking-openapi.js';
-import {
-  type Account,
-  type EnableBankingAuthenticationStartResponse,
-  type EnableBankingToken,
-  type Transaction,
+import type {
+  Account,
+  EnableBankingAuthenticationStartResponse,
+  EnableBankingToken,
+  Transaction,
 } from '../models/enablebanking.js';
 import {
   ApplicationInactiveError,
@@ -40,6 +40,48 @@ function isDefined<T>(value: T | undefined): asserts value is T {
   }
 }
 
+// Helper function to safely parse amount strings
+function parseAmountSafe(amount: string | undefined): number {
+  if (!amount || typeof amount !== 'string') {
+    throw new EnableBankingError(
+      'BAD_REQUEST',
+      'Invalid amount: expected a numeric string',
+    );
+  }
+  const parsed = parseFloat(amount);
+  if (isNaN(parsed)) {
+    throw new EnableBankingError(
+      'BAD_REQUEST',
+      `Invalid amount: cannot parse "${amount}" as a number`,
+    );
+  }
+  return parsed;
+}
+
+// Helper function to select the preferred balance from an array of balances
+function selectPreferredBalance(
+  balances: Array<{
+    balance_type: string;
+    balance_amount: { amount: string };
+  }>,
+): { balance_type: string; balance_amount: { amount: string } } {
+  if (balances.length === 0) {
+    throw new ResourceNotFoundError('No balance data available');
+  }
+
+  const preferredBalanceTypes = ['ITBD', 'ITAV', 'CLBD'];
+  const sorted = [...balances].sort((a, b) => {
+    const aIndex = preferredBalanceTypes.indexOf(a.balance_type);
+    const bIndex = preferredBalanceTypes.indexOf(b.balance_type);
+    return (
+      (aIndex === -1 ? preferredBalanceTypes.length : aIndex) -
+      (bIndex === -1 ? preferredBalanceTypes.length : bIndex)
+    );
+  });
+
+  return sorted[0];
+}
+
 // Session entry with expiration timestamp and optional error state
 export type SessionEntry = {
   sessionId: string | null;
@@ -55,6 +97,7 @@ const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 
 class SessionStore {
   private sessions = new Map<string, SessionEntry>();
+  private pendingCreations = new Map<string, Promise<string>>();
   private cleanupTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
@@ -78,6 +121,18 @@ class SessionStore {
       error,
       expiresAt: Date.now() + SESSION_TTL_MS,
     });
+  }
+
+  setPending(state: string, promise: Promise<string>): void {
+    this.pendingCreations.set(state, promise);
+  }
+
+  getPending(state: string): Promise<string> | undefined {
+    return this.pendingCreations.get(state);
+  }
+
+  deletePending(state: string): void {
+    this.pendingCreations.delete(state);
   }
 
   get(state: string): string | undefined {
@@ -113,6 +168,12 @@ class SessionStore {
         this.sessions.delete(state);
       }
     }
+  }
+
+  clear(): number {
+    const count = this.sessions.size;
+    this.sessions.clear();
+    return count;
   }
 }
 
@@ -259,9 +320,20 @@ export const enableBankingservice = {
     aspsp: string,
     host: string,
     exp: number,
-  ): Promise<EnableBankingAuthenticationStartResponse> | never => {
+  ): Promise<EnableBankingAuthenticationStartResponse> => {
     const aspspData = await enableBankingservice.getASPSP(country, aspsp);
-    exp = Math.min(exp, aspspData.maximum_consent_validity - 3600);
+    // Minimum consent duration in seconds
+    const MIN_CONSENT_SECONDS = 60;
+    // Validate and clamp maximum_consent_validity
+    const allowedWindow = Math.max(
+      MIN_CONSENT_SECONDS,
+      typeof aspspData.maximum_consent_validity === 'number' &&
+        aspspData.maximum_consent_validity >= 3600
+        ? aspspData.maximum_consent_validity - 3600
+        : 0,
+    );
+    exp = Math.min(exp, allowedWindow);
+    exp = Math.max(exp, MIN_CONSENT_SECONDS);
 
     const valid_until = new Date();
     valid_until.setSeconds(valid_until.getSeconds() + exp);
@@ -301,12 +373,31 @@ export const enableBankingservice = {
     if (existingSessionId) {
       return existingSessionId;
     }
-    const { data } = await enableBankingservice.getClient().POST('/sessions', {
-      body: { code },
-    });
-    isDefined(data);
-    sessionStore.set(state, data.session_id);
-    return data.session_id;
+
+    // Check if there's already a pending creation for this state
+    const pendingCreation = sessionStore.getPending(state);
+    if (pendingCreation) {
+      return await pendingCreation;
+    }
+
+    // Create a new session and store the promise to prevent race conditions
+    const creationPromise = (async () => {
+      try {
+        const { data } = await enableBankingservice
+          .getClient()
+          .POST('/sessions', {
+            body: { code },
+          });
+        isDefined(data);
+        sessionStore.set(state, data.session_id);
+        return data.session_id;
+      } finally {
+        sessionStore.deletePending(state);
+      }
+    })();
+
+    sessionStore.setPending(state, creationPromise);
+    return await creationPromise;
   },
 
   getSessionIdFromState: (state: string): string | undefined => {
@@ -319,6 +410,14 @@ export const enableBankingservice = {
 
   failSession: (state: string, error: string): void => {
     sessionStore.setFailure(state, error);
+  },
+
+  clearAllSessions: (): number => {
+    const clearedCount = sessionStore.clear();
+    console.info(
+      `[AUDIT] clearAllSessions: Cleared ${clearedCount} session(s) at ${new Date().toISOString()}`,
+    );
+    return clearedCount;
   },
 
   getAccounts: async (
@@ -334,35 +433,44 @@ export const enableBankingservice = {
     isDefined(data);
     const bank_id = [data.aspsp.country, data.aspsp.name].join('_');
     const accounts: Account[] = [];
-    for (const account_id of data.accounts) {
-      const { data: account } = await client.GET(
-        `/accounts/{account_id}/details`,
-        {
-          params: { path: { account_id } },
-        },
-      );
-      isDefined(account);
-      const { data: balance } = await client.GET(
-        `/accounts/{account_id}/balances`,
-        { params: { path: { account_id } } },
-      );
-      isDefined(balance);
-      if (!balance.balances.length) {
-        throw new ResourceNotFoundError(
-          `No balance data for account ${account_id}`,
-        );
-      }
-      const name = account.account_id
-        ? (account.account_id.iban ?? 'unknown')
-        : 'unknown';
 
-      accounts.push({
-        account_id,
-        name,
-        balance: parseFloat(balance.balances[0].balance_amount.amount),
-        institution: data.aspsp.name,
-      });
-    }
+    // Process accounts in parallel with rate limiting
+    const accountPromises = data.accounts.map(account_id =>
+      apiLimiter(async () => {
+        const { data: account } = await client.GET(
+          `/accounts/{account_id}/details`,
+          {
+            params: { path: { account_id } },
+          },
+        );
+        isDefined(account);
+        const { data: balance } = await client.GET(
+          `/accounts/{account_id}/balances`,
+          { params: { path: { account_id } } },
+        );
+        isDefined(balance);
+        if (!balance.balances.length) {
+          throw new ResourceNotFoundError(
+            `No balance data for account ${account_id}`,
+          );
+        }
+        const name = account.account_id
+          ? (account.account_id.iban ?? 'unknown')
+          : 'unknown';
+
+        const selectedBalance = selectPreferredBalance(balance.balances);
+
+        return {
+          account_id,
+          name,
+          balance: parseAmountSafe(selectedBalance.balance_amount.amount),
+          institution: data.aspsp.name,
+        };
+      }),
+    );
+
+    accounts.push(...(await Promise.all(accountPromises)));
+
     return {
       session_id,
       bank_id,
@@ -388,13 +496,17 @@ export const enableBankingservice = {
 
     const transactions: components['schemas']['Transaction'][] = [];
     do {
-      const { data }: { data?: components['schemas']['HalTransactions'] } =
-        await client.GET('/accounts/{account_id}/transactions', {
-          params: {
-            path: { account_id },
-            query,
-          },
-        });
+      const { data } = await apiLimiter(
+        async (): Promise<{
+          data?: components['schemas']['HalTransactions'];
+        }> =>
+          client.GET('/accounts/{account_id}/transactions', {
+            params: {
+              path: { account_id },
+              query,
+            },
+          }),
+      );
       isDefined(data);
       transactions.push(...(data.transactions || []));
       query.continuation_key = data.continuation_key;
@@ -408,12 +520,36 @@ export const enableBankingservice = {
         `--- Debugging '${bankProcessor.name}': showing first 2 transactions with processed transactions.---`,
       );
       transactions.slice(0, 2).forEach(transaction => {
-        console.debug('# ORIGINAL:');
-        console.debug(JSON.stringify(transaction, null, 2));
+        // Sanitize sensitive data before logging
+        const sanitized = {
+          transaction_id: transaction.transaction_id,
+          booking_date: transaction.booking_date,
+          value_date: transaction.value_date,
+          amount: transaction.transaction_amount?.amount,
+          currency: transaction.transaction_amount?.currency,
+          credit_debit_indicator: transaction.credit_debit_indicator,
+          status: transaction.status,
+          // Sensitive fields masked
+          debtor: transaction.debtor?.name ? '[REDACTED]' : undefined,
+          creditor: transaction.creditor?.name ? '[REDACTED]' : undefined,
+          remittance_information: transaction.remittance_information
+            ? '[REDACTED]'
+            : undefined,
+        };
+        console.debug('# ORIGINAL (sanitized):');
+        console.debug(JSON.stringify(sanitized, null, 2));
         console.debug('## BECOMES:');
+        const normalized = bankProcessor.normalizeTransaction(transaction);
         console.debug(
           JSON.stringify(
-            bankProcessor.normalizeTransaction(transaction),
+            {
+              imported_id: normalized.imported_id,
+              date: normalized.date,
+              amount: normalized.amount,
+              // Sensitive fields masked
+              payee_name: normalized.payee_name ? '[REDACTED]' : undefined,
+              notes: normalized.notes ? '[REDACTED]' : undefined,
+            },
             null,
             2,
           ),
@@ -434,20 +570,8 @@ export const enableBankingservice = {
     });
     isDefined(data);
 
-    if (data.balances.length === 0) {
-      throw new ResourceNotFoundError('No balance data available');
-    }
+    const selectedBalance = selectPreferredBalance(data.balances);
 
-    const preferredBalanceTypes = ['ITBD', 'ITAV', 'CLBD'];
-    const balance = data.balances.sort((a, b) => {
-      const aIndex = preferredBalanceTypes.indexOf(a.balance_type);
-      const bIndex = preferredBalanceTypes.indexOf(b.balance_type);
-      return (
-        (aIndex === -1 ? preferredBalanceTypes.length : aIndex) -
-        (bIndex === -1 ? preferredBalanceTypes.length : bIndex)
-      );
-    })[0];
-
-    return parseFloat(balance.balance_amount.amount);
+    return parseAmountSafe(selectedBalance.balance_amount.amount);
   },
 };

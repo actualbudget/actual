@@ -46,6 +46,7 @@
     "nordigen-node": "^1.4.1",
     "openapi-fetch": "^0.14.0",
     "openid-client": "^5.7.1",
+    "p-limit": "^7.3.0",
     "pluggy-sdk": "^0.79.0",
     "uuid": "^13.0.0",
     "winston": "^3.19.0"

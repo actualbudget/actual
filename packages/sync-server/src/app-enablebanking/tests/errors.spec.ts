@@ -37,7 +37,7 @@ describe('EnableBankingSetupError', () => {
   });
 });
 
-describe('Resource NotFoundError', () => {
+describe('ResourceNotFoundError', () => {
   it('should create not found error with custom message', () => {
     const error = new ResourceNotFoundError('Account not found');
 

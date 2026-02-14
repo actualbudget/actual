@@ -7,7 +7,7 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 
 import { Error as ErrorAlert } from '@desktop-client/components/alerts';
 import { Link } from '@desktop-client/components/common/Link';
@@ -18,7 +18,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type EnableBankingInitialiseModalProps = Extract<
   ModalType,
@@ -92,7 +92,7 @@ export const EnableBankingInitialiseModal = ({
       }
 
       setIsValid(true);
-      onSuccess(close);
+      onSuccess?.(close);
     } catch {
       setIsValid(false);
       setError(t('Something went wrong. Please try again later.'));
@@ -146,50 +146,54 @@ export const EnableBankingInitialiseModal = ({
                 <Text style={{ fontFamily: 'monospace' }}>
                   {window.location.origin}/enablebanking/auth_callback
                 </Text>
+
+                <FormField>
+                  <FormLabel
+                    title={t('Application Id:')}
+                    htmlFor="application-id-field"
+                  />
+                  <InitialFocus>
+                    <Input
+                      id="application-id-field"
+                      type="password"
+                      value={applicationId}
+                      onChangeValue={value => {
+                        setApplicationId(value);
+                        setIsValid(true);
+                      }}
+                    />
+                  </InitialFocus>
+                </FormField>
+
+                <FormField>
+                  <FormLabel
+                    title={t('Secret Key:')}
+                    htmlFor="secret-key-field"
+                  />
+                  <Input
+                    id="secret-key-field"
+                    type="file"
+                    defaultValue=""
+                    accept=".pem"
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        onSecretKey(file);
+                      }
+                    }}
+                  />
+                </FormField>
+
+                {!isValid && <ErrorAlert>{error}</ErrorAlert>}
               </>
             )}
-
-            <FormField>
-              <FormLabel
-                title={t('Application Id:')}
-                htmlFor="application-id-field"
-              />
-              <InitialFocus>
-                <Input
-                  id="application-id-field"
-                  type="password"
-                  value={applicationId}
-                  onChangeValue={value => {
-                    setApplicationId(value);
-                    setIsValid(true);
-                  }}
-                />
-              </InitialFocus>
-            </FormField>
-
-            <FormField>
-              <FormLabel title={t('Secret Key:')} htmlFor="secret-key-field" />
-              <Input
-                id="secret-key-field"
-                type="file"
-                defaultValue=""
-                accept=".pem"
-                onChange={e => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    onSecretKey(file);
-                  }
-                }}
-              />
-            </FormField>
-
-            {!isValid && <ErrorAlert>{error}</ErrorAlert>}
           </View>
 
           <ModalButtons>
             <ButtonWithLoading
               variant="primary"
               isLoading={isLoading}
+              isDisabled={window.location.protocol === 'http:'}
               onPress={() => {
                 onSubmit(close);
               }}

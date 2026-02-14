@@ -1,12 +1,14 @@
-import express, { type Request } from 'express';
-import { type ParamsDictionary } from 'express-serve-static-core';
+import express from 'express';
+import type { Request, Response } from 'express';
+import type { ParamsDictionary } from 'express-serve-static-core';
 
+import { isAdmin } from '../account-db.js';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '../util/middlewares.js';
 
-import { type EnableBankingEndpoints } from './models/enablebanking.js';
+import type { EnableBankingEndpoints } from './models/enablebanking.js';
 import { enableBankingservice } from './services/enablebanking-services.js';
 import {
   BadRequestError,
@@ -63,7 +65,11 @@ app.get('/auth_callback', async (req, res) => {
           ? error
           : 'unknown_error';
 
-    enableBankingservice.failSession(state, errorMsg);
+    try {
+      enableBankingservice.failSession(state, errorMsg);
+    } catch (error) {
+      console.error('Failed to mark session as failed:', error);
+    }
 
     res.send(`
       <!DOCTYPE html>
@@ -83,7 +89,11 @@ app.get('/auth_callback', async (req, res) => {
   }
 
   if (!code || typeof code !== 'string') {
-    enableBankingservice.failSession(state, 'missing_code');
+    try {
+      enableBankingservice.failSession(state, 'missing_code');
+    } catch (error) {
+      console.error('Failed to mark session as failed:', error);
+    }
     res.status(400).send(`
       <!DOCTYPE html>
       <html>
@@ -118,10 +128,14 @@ app.get('/auth_callback', async (req, res) => {
     `);
   } catch (err) {
     console.error('Error in auth_callback:', err);
-    enableBankingservice.failSession(
-      state,
-      err instanceof Error ? err.message : 'authorization_failed',
-    );
+    try {
+      enableBankingservice.failSession(
+        state,
+        err instanceof Error ? err.message : 'authorization_failed',
+      );
+    } catch (failError) {
+      console.error('Failed to mark session as failed:', failError);
+    }
     res.status(500).send(`
       <!DOCTYPE html>
       <html>
@@ -191,6 +205,11 @@ post('/get_aspsps', async req => {
     throw new EnableBankingSetupError();
   }
   const { country } = req.body;
+
+  if (!country || typeof country !== 'string' || country.trim() === '') {
+    throw new BadRequestError("Variable 'country' must be a non-empty string.");
+  }
+
   const responseData = (await enableBankingservice.getASPSPs(country)).aspsps;
   return responseData;
 });
@@ -200,6 +219,14 @@ post('/start_auth', async (req: Request) => {
     throw new EnableBankingSetupError();
   }
   const { aspsp, country } = req.body;
+
+  if (!country || typeof country !== 'string' || country.trim() === '') {
+    throw new BadRequestError("Variable 'country' must be a non-empty string.");
+  }
+
+  if (!aspsp || typeof aspsp !== 'string' || aspsp.trim() === '') {
+    throw new BadRequestError("Variable 'aspsp' must be a non-empty string.");
+  }
 
   const origin = req.headers.origin;
   if (!origin) {
@@ -235,10 +262,13 @@ post('/start_auth', async (req: Request) => {
 });
 
 post('/get_session', async (req: Request) => {
+  if (!enableBankingservice.secretsAreSetup()) {
+    throw new EnableBankingSetupError();
+  }
   const { state } = req.body;
   if (!state) {
     throw new BadRequestError(
-      "Variable 'state' should be passed to '/enable_banking/get_session'.",
+      "Variable 'state' should be passed to '/get_session'.",
     );
   }
 
@@ -262,11 +292,11 @@ post('/complete_auth', async (req: Request) => {
   const { state, code } = req.body;
 
   if (!state) {
-    throw badRequestVariableError('state', '/enable_banking/complete_auth');
+    throw badRequestVariableError('state', '/complete_auth');
   }
 
   if (!code) {
-    throw badRequestVariableError('code', '/enable_banking/complete_auth');
+    throw badRequestVariableError('code', '/complete_auth');
   }
 
   await enableBankingservice.authorizeSession(state, code);
@@ -278,7 +308,7 @@ post('/fail_auth', async (req: Request) => {
   const { state, error } = req.body;
 
   if (!state) {
-    throw badRequestVariableError('state', '/enable_banking/fail_auth');
+    throw badRequestVariableError('state', '/fail_auth');
   }
 
   enableBankingservice.failSession(state, error ?? 'unknown_error');
@@ -293,7 +323,7 @@ post('/get_accounts', async (req: Request) => {
   const { session_id } = req.body;
 
   if (!session_id) {
-    throw badRequestVariableError('session_id', '/enable_banking/get_accounts');
+    throw badRequestVariableError('session_id', '/get_accounts');
   }
 
   return await enableBankingservice.getAccounts(session_id);
@@ -306,7 +336,7 @@ post('/transactions', async (req: Request) => {
   const { startDate, endDate, account_id, bank_id } = req.body;
 
   if (!account_id) {
-    throw badRequestVariableError('account_id', '/enablebanking/transactions');
+    throw badRequestVariableError('account_id', '/transactions');
   }
   const transactions = await enableBankingservice.getTransactions(
     account_id,
@@ -330,3 +360,22 @@ post('/transactions', async (req: Request) => {
     startingBalance: startingBalanceCents, // Already in cents (integer)
   };
 });
+
+// Admin-only endpoint to clear all Enable Banking sessions
+app.post(
+  '/admin/clear_sessions',
+  validateSessionMiddleware,
+  async (req: Request, res: Response) => {
+    if (!isAdmin(res.locals.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'forbidden',
+        details: 'permission-not-found',
+      });
+      return;
+    }
+
+    const cleared = enableBankingservice.clearAllSessions();
+    res.send({ status: 'ok', data: { cleared } });
+  },
+);

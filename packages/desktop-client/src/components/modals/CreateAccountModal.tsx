@@ -16,11 +16,6 @@ import { send } from 'loot-core/platform/client/connection';
 
 import { useAuth } from '@desktop-client/auth/AuthProvider';
 import { Permissions } from '@desktop-client/auth/types';
-import {
-  authorizeEnableBankingSession,
-  deconfigureEnableBanking,
-} from '@desktop-client/banksync/enablebanking';
-import { authorizeBank } from '@desktop-client/banksync/gocardless';
 import { Warning } from '@desktop-client/components/alerts';
 import { Link } from '@desktop-client/components/common/Link';
 import {
@@ -29,6 +24,11 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
+import {
+  authorizeEnableBankingSession,
+  deconfigureEnableBanking,
+} from '@desktop-client/enablebanking';
+import { authorizeBank } from '@desktop-client/gocardless';
 import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
@@ -149,6 +149,9 @@ export function CreateAccountModal({
   };
 
   const onConnectEnableBanking = async () => {
+    if (configuredEnableBankingIsLoading) {
+      return;
+    }
     if (!isEnableBankingSetupComplete) {
       onEnableBankingInit();
       return;
@@ -579,7 +582,7 @@ export function CreateAccountModal({
                           <DialogTrigger>
                             <Button
                               variant="bare"
-                              aria-label={t('EnableBanking menu')}
+                              aria-label={t('Enable Banking menu')}
                             >
                               <SvgDotsHorizontalTriple
                                 width={15}
@@ -599,7 +602,7 @@ export function CreateAccountModal({
                                     {
                                       name: 'reconfigure',
                                       text: t(
-                                        'Reset EnableBanking credentials',
+                                        'Reset Enable Banking credentials',
                                       ),
                                     },
                                   ]}

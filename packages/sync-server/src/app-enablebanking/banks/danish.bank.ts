@@ -1,5 +1,5 @@
-import { type components } from '../models/enablebanking-openapi.js';
-import { type Transaction } from '../models/enablebanking.js';
+import type { components } from '../models/enablebanking-openapi.js';
+import type { Transaction } from '../models/enablebanking.js';
 
 import { BankProcessorFor } from './bank-registry.js';
 import { FallbackBankProcessor } from './fallback.bank.js';
@@ -111,7 +111,7 @@ export class DanishBankProcessor extends FallbackBankProcessor {
     const payeeObject = isDebtor ? t.creditor : t.debtor;
 
     const notes = t.remittance_information
-      ? t.remittance_information.join(' ')
+      ? t.remittance_information.filter(x => x != null).join(' ')
       : '';
 
     // Use creditor/debtor name if available, otherwise extract from notes
@@ -123,12 +123,29 @@ export class DanishBankProcessor extends FallbackBankProcessor {
     // Clean metadata from notes for display
     const cleanNotes = notes.replace(/\s*\|\s*col\d+=.*$/i, '').trim();
 
+    const parsedAmount = t.transaction_amount?.amount
+      ? parseFloat(t.transaction_amount.amount)
+      : 0;
+    const amount = Number.isNaN(parsedAmount)
+      ? 0
+      : parsedAmount * (isDebtor ? -1 : 1);
+
+    const currency = t.transaction_amount?.currency;
+    if (!currency) {
+      console.warn(
+        `Missing currency for transaction ${t.transaction_id || 'unknown'}, using empty string. This may indicate a data quality issue.`,
+      );
+    }
+
     return {
       ...t,
       payeeObject,
-      amount: t.transaction_amount?.amount
-        ? parseFloat(t.transaction_amount.amount) * (isDebtor ? -1 : 1)
-        : 0,
+      amount,
+      // Add camelCase transactionAmount for compatibility with sync.ts
+      transactionAmount: {
+        amount,
+        currency: currency ?? '',
+      },
       payeeName,
       notes: cleanNotes,
       date: t.transaction_date ?? t.booking_date ?? t.value_date ?? '',

@@ -17,10 +17,10 @@ export function isKeyValueCache(remittance_information: string[]):
       }
     } else if (currentKey) {
       //no match but key already found;
-      const currentValue = map.get(currentKey);
-      map.set(currentKey, currentValue + line);
+      const currentValue = map.get(currentKey) ?? '';
+      map.set(currentKey, currentValue + '\n' + line);
     } else {
-      header = (header ?? '') + line;
+      header = header ? header + '\n' + line : line;
     }
   }
 

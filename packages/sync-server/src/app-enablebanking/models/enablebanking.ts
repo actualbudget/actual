@@ -41,6 +41,7 @@ export type EnableBankingErrorCode =
   | 'NOT_READY'
   | 'NOT_FOUND'
   | 'TIME_OUT'
+  | 'POLLING_ABORTED'
   | 'AUTH_FAILED';
 
 export type EnableBankingErrorInterface = {
@@ -94,6 +95,10 @@ export type Transaction = {
   payeeName: string;
   notes: string;
   date: string;
+  transactionAmount: {
+    amount: number;
+    currency: string;
+  };
   [x: string]: unknown;
 };
 
@@ -101,9 +106,5 @@ export type TransactionsResponse = {
   transactions: Transaction[];
 };
 
-export type Account = {
-  account_id: string;
-  name: string;
-  institution: string;
-  balance: number;
-};
+// Alias for backward compatibility
+export type Account = SyncServerEnableBankingAccount;

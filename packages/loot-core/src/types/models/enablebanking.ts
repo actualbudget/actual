@@ -41,6 +41,7 @@ export type EnableBankingErrorCode =
   | 'NOT_READY'
   | 'NOT_FOUND'
   | 'TIME_OUT'
+  | 'POLLING_ABORTED'
   | 'AUTH_FAILED';
 
 export type EnableBankingErrorInterface = {

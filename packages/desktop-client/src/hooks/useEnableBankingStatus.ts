@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 
 import { useSyncServerStatus } from './useSyncServerStatus';
 
-import { deconfigureEnableBanking } from '@desktop-client/banksync/enablebanking';
+import { deconfigureEnableBanking } from '@desktop-client/enablebanking';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -42,8 +42,9 @@ export function useEnableBankingStatus() {
                   },
                 }),
               );
-            } catch {
+            } catch (error) {
               // Deconfiguration failed, but we still mark as unconfigured
+              console.error('Deconfiguration failed:', error);
             } finally {
               setConfiguredEnableBanking(false);
               setIsLoading(false);

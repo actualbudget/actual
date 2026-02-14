@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import createDebug from 'debug';
 import fg from 'fast-glob';
 
-import { type BankProcessor } from '../models/bank-processor.js';
+import type { BankProcessor } from '../models/bank-processor.js';
 
 import { FallbackBankProcessor } from './fallback.bank.js';
 
@@ -60,12 +60,13 @@ class ProcessorRegistry {
 
 export const registry = new ProcessorRegistry();
 
-//This is a decorator that allows a class to be added to the registry when in'app-enablebanking/banks/*.banks.*'.
+//This is a decorator that allows a class to be added to the registry when in 'app-enablebanking/banks/*.bank.*'.
 export function BankProcessorFor(bankIds: string[]) {
   return function <T extends new () => BankProcessor>(ctor: T) {
     for (const bankId of bankIds) {
       registry.register(bankId, ctor);
     }
+    return ctor;
   };
 }
 
@@ -83,7 +84,12 @@ function ensureBankProcessorsLoaded() {
         const rp = await fs.realpath(abs).catch(() => abs);
         if (seen.has(rp)) continue;
         seen.add(rp);
-        await import(pathToFileURL(rp).href); // decorators run -> registry fills
+        try {
+          await import(pathToFileURL(rp).href); // decorators run -> registry fills
+        } catch (error) {
+          console.error(`Failed to import bank processor from ${rp}:`, error);
+          // Continue loading other processors
+        }
       }
     })();
   }

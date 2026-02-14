@@ -1,5 +1,5 @@
-import { type components } from './enablebanking-openapi.js';
-import { type Transaction } from './enablebanking.js';
+import type { components } from './enablebanking-openapi.js';
+import type { Transaction } from './enablebanking.js';
 
 export type BankProcessor = {
   debug: boolean;

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -7,13 +8,13 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
-import {
-  type EnableBankingAuthenticationStartResponse,
-  type EnableBankingBank,
-  type EnableBankingErrorCode,
-  type EnableBankingErrorInterface,
-  type EnableBankingToken,
+import { send } from 'loot-core/platform/client/connection';
+import type {
+  EnableBankingAuthenticationStartResponse,
+  EnableBankingBank,
+  EnableBankingErrorCode,
+  EnableBankingErrorInterface,
+  EnableBankingToken,
 } from 'loot-core/types/models/enablebanking';
 
 import {
@@ -30,11 +31,8 @@ import {
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { COUNTRY_OPTIONS } from '@desktop-client/components/util/countries';
 import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
-import {
-  popModal,
-  pushModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
+import { popModal, pushModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 function renderError(
@@ -134,7 +132,7 @@ const AspspSelector = ({
       !autoTriggeredRef.current
     ) {
       autoTriggeredRef.current = true;
-      onLink();
+      void onLink();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [country, aspsp]); // Only trigger when country/aspsp are set
@@ -213,6 +211,14 @@ const AspspSelector = ({
       if (error) {
         // Handle the error from start auth.
         onErrorRef.current(error);
+        return;
+      }
+
+      if (data === undefined) {
+        onErrorRef.current({
+          error_code: 'INTERNAL_ERROR',
+          error_type: 'No data returned from enablebanking-startauth',
+        });
         return;
       }
 
@@ -426,10 +432,19 @@ export function EnableBankingSetupAccountModal({
 
   const { isLoading: isConfigurationLoading } = useEnableBankingStatus();
 
+  // Ref to track timeout for reopening modal during credential error handling
+  const reopenTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Stop polling when modal is unmounted
   useEffect(() => {
+    const timeoutRef = reopenTimeoutRef;
     return () => {
       void send('enablebanking-stoppolling');
+      // Clear reopen timeout if modal unmounts before timeout fires
+      const timeout = timeoutRef.current;
+      if (timeout) {
+        clearTimeout(timeout);
+      }
     };
   }, []);
 
@@ -500,8 +515,9 @@ export function EnableBankingSetupAccountModal({
                         onSuccess: closeInitModal => {
                           // Close the init modal first
                           closeInitModal();
-                          // Then open account selection modal
-                          const timeoutId = setTimeout(() => {
+                          // Then open account selection modal with a brief delay
+                          // Note: Cannot use parent's reopenTimeoutRef since parent modal is unmounted
+                          setTimeout(() => {
                             try {
                               dispatch(
                                 pushModal({
@@ -523,9 +539,6 @@ export function EnableBankingSetupAccountModal({
                               );
                             }
                           }, MODAL_TRANSITION_DELAY_MS);
-
-                          // Store timeout ID for potential cleanup
-                          return () => clearTimeout(timeoutId);
                         },
                       },
                     },

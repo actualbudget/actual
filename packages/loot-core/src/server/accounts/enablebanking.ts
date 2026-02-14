@@ -1,8 +1,8 @@
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import { logger } from '../../platform/server/log';
-import {
-  type EnableBankingEndpoints,
-  type EnableBankingResponse,
+import type {
+  EnableBankingEndpoints,
+  EnableBankingResponse,
 } from '../../types/models/enablebanking';
 import { createApp } from '../app';
 import { get as _get, post as _post } from '../post';
@@ -131,7 +131,7 @@ async function pollAuth({
 
     return {
       error: {
-        error_code: 'TIME_OUT',
+        error_code: 'POLLING_ABORTED',
         error_type: 'Polling was stopped',
       },
     };

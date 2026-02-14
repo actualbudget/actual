@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Paragraph } from '@actual-app/components/paragraph';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 
 import { Error as ErrorAlert } from './alerts';
 import { Modal, ModalHeader } from './common/Modal';
@@ -18,8 +18,14 @@ export function EnableBankingCallback() {
   const [errorParam] = useUrlParam('error');
   const [errorDescription] = useUrlParam('error_description');
   const [error, setError] = useState<string | null>(null);
+  const ranRef = useRef<boolean>(false);
 
   useEffect(() => {
+    if (ranRef.current) {
+      return;
+    }
+    ranRef.current = true;
+
     const fetchData = async () => {
       // If Enable Banking returned an error, fail the auth flow
       if (errorParam && state) {
