@@ -1,5 +1,8 @@
 import express from 'express';
 
+import { getCurrency } from 'loot-core/shared/currencies';
+import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
+
 import { handleError } from '../app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '../services/secrets-service';
 import { requestLoggerMiddleware } from '../util/middlewares';
@@ -10,6 +13,11 @@ const app = express();
 export { app as handlers };
 app.use(express.json());
 app.use(requestLoggerMiddleware);
+
+function roundToCurrencyDecimals(amount, currencyCode) {
+  const decimalPlaces = getCurrency(currencyCode || '').decimalPlaces;
+  return integerToAmount(amountToInteger(amount, decimalPlaces), decimalPlaces);
+}
 
 app.post(
   '/status',
@@ -72,8 +80,9 @@ app.post(
 
       const account = await pluggyaiService.getAccountById(accountId);
 
-      let startingBalance = parseInt(
-        Math.round(account.balance * 100).toString(),
+      let startingBalance = amountToInteger(
+        account.balance,
+        getCurrency(account.currencyCode || '').decimalPlaces,
       );
       if (account.type === 'CREDIT') {
         startingBalance = -startingBalance;
@@ -118,12 +127,21 @@ app.post(
           trans.amount *= -1;
         }
 
-        let amountInCurrency = trans.amountInAccountCurrency ?? trans.amount;
-        amountInCurrency = Math.round(amountInCurrency * 100) / 100;
+        const hasAccountCurrencyAmount = trans.amountInAccountCurrency != null;
+        const roundingCurrency = hasAccountCurrencyAmount
+          ? account.currencyCode
+          : trans.currencyCode || account.currencyCode;
+        let amountInCurrency = hasAccountCurrencyAmount
+          ? trans.amountInAccountCurrency
+          : trans.amount;
+        amountInCurrency = roundToCurrencyDecimals(
+          amountInCurrency,
+          roundingCurrency,
+        );
 
         newTrans.transactionAmount = {
           amount: amountInCurrency,
-          currency: trans.currencyCode,
+          currency: roundingCurrency,
         };
 
         newTrans.transactionId = trans.id;

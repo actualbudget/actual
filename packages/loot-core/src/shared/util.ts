@@ -241,6 +241,7 @@ export function reapplyThousandSeparators(amountText: string) {
 export function appendDecimals(
   amountText: string,
   hideDecimals = false,
+  decimalPlaces: number = 2,
 ): string {
   const { decimalSeparator: separator } = getNumberFormat();
   let result = amountText;
@@ -250,10 +251,19 @@ export function appendDecimals(
   if (!hideDecimals) {
     result = result.replaceAll(/[,.]/g, '');
     result = result.replace(/^0+(?!$)/, '');
-    result = result.padStart(3, '0');
-    result = result.slice(0, -2) + separator + result.slice(-2);
+    result = result.padStart(decimalPlaces + 1, '0');
+    if (decimalPlaces > 0) {
+      result =
+        result.slice(0, -decimalPlaces) +
+        separator +
+        result.slice(-decimalPlaces);
+    }
   }
-  return amountToCurrency(currencyToAmount(result));
+  const amount = currencyToAmount(result) || 0;
+  const formatter = getNumberFormat({
+    decimalPlaces: hideDecimals ? 0 : decimalPlaces,
+  }).formatter;
+  return formatter.format(amount);
 }
 
 const NUMBER_FORMATS = [
@@ -445,19 +455,33 @@ export function integerToCurrency(
   return formatter.format(amount);
 }
 
-export function integerToCurrencyWithDecimal(integerAmount: IntegerAmount) {
+export function integerToCurrencyWithDecimal(
+  integerAmount: IntegerAmount,
+  decimalPlaces: number = 2,
+) {
+  const divisor = Math.pow(10, decimalPlaces);
   // If decimal digits exist, keep them. Otherwise format them as usual.
-  if (integerAmount % 100 !== 0) {
+  if (integerAmount % divisor !== 0) {
     return integerToCurrency(
       integerAmount,
       getNumberFormat({
-        ...numberFormatConfig,
+        format: numberFormatConfig.format,
         hideFraction: false,
+        decimalPlaces,
       }).formatter,
+      decimalPlaces,
     );
   }
 
-  return integerToCurrency(integerAmount);
+  return integerToCurrency(
+    integerAmount,
+    getNumberFormat({
+      format: numberFormatConfig.format,
+      hideFraction: numberFormatConfig.hideFraction,
+      decimalPlaces,
+    }).formatter,
+    decimalPlaces,
+  );
 }
 
 export function amountToCurrency(amount: Amount): CurrencyAmount {

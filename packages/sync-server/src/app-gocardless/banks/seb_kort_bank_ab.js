@@ -1,4 +1,5 @@
-import { amountToInteger } from '../utils';
+import { getCurrency } from 'loot-core/shared/currencies';
+import { amountToInteger } from 'loot-core/shared/util';
 
 import Fallback from './integration-bank';
 
@@ -43,7 +44,7 @@ export default {
     editedTrans.creditorName = transaction.additionalInformation;
     transaction.transactionAmount = {
       // Flip transaction amount sign
-      amount: (-parseFloat(transaction.transactionAmount.amount)).toString(),
+      amount: (-Number(transaction.transactionAmount.amount || 0)).toString(),
       currency: transaction.transactionAmount.currency,
     };
 
@@ -67,13 +68,30 @@ export default {
     const nonInvoiced = balances.find(
       balance => 'nonInvoiced' === balance.balanceType,
     );
+    const currentBalanceDecimals = getCurrency(
+      currentBalance?.balanceAmount?.currency ||
+        nonInvoiced?.balanceAmount?.currency ||
+        '',
+    ).decimalPlaces;
 
     return sortedTransactions.reduce(
       (total, trans) => {
-        return total - amountToInteger(trans.transactionAmount.amount);
+        return (
+          total -
+          amountToInteger(
+            Number(trans.transactionAmount.amount || 0),
+            currentBalanceDecimals,
+          )
+        );
       },
-      -amountToInteger(currentBalance.balanceAmount.amount) +
-        amountToInteger(nonInvoiced.balanceAmount.amount),
+      -amountToInteger(
+        Number(currentBalance?.balanceAmount?.amount || 0),
+        currentBalanceDecimals,
+      ) +
+        amountToInteger(
+          Number(nonInvoiced?.balanceAmount?.amount || 0),
+          currentBalanceDecimals,
+        ),
     );
   },
 };

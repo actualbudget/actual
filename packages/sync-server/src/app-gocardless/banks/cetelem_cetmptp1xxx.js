@@ -15,7 +15,7 @@ export default {
     transaction.transactionAmount = {
       // Flip transaction amount sign
       ...transaction.transactionAmount,
-      amount: (-parseFloat(transaction.transactionAmount.amount)).toString(),
+      amount: (-Number(transaction.transactionAmount.amount || 0)).toString(),
     };
 
     return Fallback.normalizeTransaction(transaction, booked, editedTrans);

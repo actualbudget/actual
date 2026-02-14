@@ -41,5 +41,3 @@ export const sortByBookingDateOrValueDate = (transactions = []) =>
     }
     return 0;
   });
-
-export const amountToInteger = n => Math.round(n * 100);

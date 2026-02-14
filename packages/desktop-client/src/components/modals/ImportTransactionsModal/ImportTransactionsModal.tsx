@@ -48,6 +48,7 @@ import {
 } from '@desktop-client/components/table';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
 import { reloadPayees } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -160,6 +161,7 @@ export function ImportTransactionsModal({
 }) {
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || ('MM/dd/yyyy' as const);
+  const decimalPlaces = useFormat().currency.decimalPlaces;
   const [prefs, savePrefs] = useSyncedPrefs();
   const dispatch = useDispatch();
   const { data: { list: categories } = { list: [] } } = useCategories();
@@ -302,7 +304,7 @@ export function ImportTransactionsModal({
         previewTransactions.push({
           ...finalTransaction,
           date,
-          amount: amountToInteger(amount),
+          amount: amountToInteger(amount, decimalPlaces),
           cleared: clearOnImport,
         });
       }
@@ -359,7 +361,7 @@ export function ImportTransactionsModal({
           return next;
         }, []);
     },
-    [accountId, categories, clearOnImport, dispatch],
+    [accountId, categories, clearOnImport, decimalPlaces, dispatch],
   );
 
   const parse = useCallback(
@@ -649,7 +651,7 @@ export function ImportTransactionsModal({
       finalTransactions.push({
         ...finalTransaction,
         date,
-        amount: amountToInteger(amount),
+        amount: amountToInteger(amount, decimalPlaces),
         cleared: clearOnImport,
         notes: importNotes ? finalTransaction.notes : null,
       });

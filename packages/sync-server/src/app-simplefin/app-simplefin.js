@@ -2,6 +2,9 @@ import https from 'https';
 
 import express from 'express';
 
+import { getCurrency } from 'loot-core/shared/currencies';
+import { amountToInteger } from 'loot-core/shared/util';
+
 import { handleError } from '../app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '../services/secrets-service';
 import { requestLoggerMiddleware } from '../util/middlewares';
@@ -174,7 +177,10 @@ function getAccountResponse(results, accountId, startDate) {
     });
   }
 
-  const startingBalance = parseInt(account.balance.replace('.', ''));
+  const startingBalance = amountToInteger(
+    parseFloat(account.balance),
+    getCurrency(account.currency || '').decimalPlaces,
+  );
   const date = getDate(new Date(account['balance-date'] * 1000));
 
   const balances = [
@@ -223,7 +229,10 @@ function getAccountResponse(results, accountId, startDate) {
     newTrans.date = getDate(transactionDate);
     newTrans.payeeName = trans.payee;
     newTrans.notes = trans.description;
-    newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
+    newTrans.transactionAmount = {
+      amount: trans.amount,
+      currency: account.currency || '',
+    };
     newTrans.transactionId = trans.id;
     newTrans.valueDate = newTrans.bookingDate;
 

@@ -1,4 +1,5 @@
-import { amountToInteger } from '../utils';
+import { getCurrency } from 'loot-core/shared/currencies';
+import { amountToInteger } from 'loot-core/shared/util';
 
 import Fallback from './integration-bank';
 
@@ -20,9 +21,24 @@ export default {
     const currentBalance = balances.find(
       balance => 'interimAvailable' === balance.balanceType,
     );
+    const currentBalanceDecimals = getCurrency(
+      currentBalance?.balanceAmount?.currency || '',
+    ).decimalPlaces;
 
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance.balanceAmount.amount));
+    return sortedTransactions.reduce(
+      (total, trans) => {
+        return (
+          total -
+          amountToInteger(
+            Number(trans.transactionAmount.amount || 0),
+            currentBalanceDecimals,
+          )
+        );
+      },
+      amountToInteger(
+        Number(currentBalance?.balanceAmount?.amount || 0),
+        currentBalanceDecimals,
+      ),
+    );
   },
 };

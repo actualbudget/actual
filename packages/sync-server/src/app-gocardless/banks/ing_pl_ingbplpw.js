@@ -1,4 +1,5 @@
-import { amountToInteger } from '../utils';
+import { getCurrency } from 'loot-core/shared/currencies';
+import { amountToInteger } from 'loot-core/shared/util';
 
 import Fallback from './integration-bank';
 
@@ -28,18 +29,32 @@ export default {
     if (sortedTransactions.length) {
       const oldestTransaction =
         sortedTransactions[sortedTransactions.length - 1];
+      const currentBalanceDecimals = getCurrency(
+        oldestTransaction.balanceAfterTransaction.balanceAmount.currency || '',
+      ).decimalPlaces;
       const oldestKnownBalance = amountToInteger(
-        oldestTransaction.balanceAfterTransaction.balanceAmount.amount,
+        Number(
+          oldestTransaction.balanceAfterTransaction.balanceAmount.amount || 0,
+        ),
+        currentBalanceDecimals,
       );
       const oldestTransactionAmount = amountToInteger(
-        oldestTransaction.transactionAmount.amount,
+        Number(oldestTransaction.transactionAmount.amount || 0),
+        currentBalanceDecimals,
       );
 
       return oldestKnownBalance - oldestTransactionAmount;
     } else {
+      const interimBalance = balances.find(
+        balance => 'interimBooked' === balance.balanceType,
+      );
+      const balance = interimBalance?.balanceAmount;
+      const currentBalanceDecimals = getCurrency(
+        balance?.currency || '',
+      ).decimalPlaces;
       return amountToInteger(
-        balances.find(balance => 'interimBooked' === balance.balanceType)
-          .balanceAmount.amount,
+        Number(balance?.amount || 0),
+        currentBalanceDecimals,
       );
     }
   },

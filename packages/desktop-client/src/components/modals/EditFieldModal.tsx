@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 import { format as formatDate, parse as parseDate, parseISO } from 'date-fns';
 
 import { currentDay, dayFromDate } from 'loot-core/shared/months';
-import { amountToInteger, currencyToInteger } from 'loot-core/shared/util';
+import { amountToInteger, currencyToAmount } from 'loot-core/shared/util';
 
 import {
   Modal,
@@ -21,6 +21,7 @@ import { SectionLabel } from '@desktop-client/components/forms';
 import { LabeledCheckbox } from '@desktop-client/components/forms/LabeledCheckbox';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 const itemStyle: CSSProperties = {
@@ -52,6 +53,7 @@ export function EditFieldModal({
   onClose,
 }: EditFieldModalProps) {
   const { t } = useTranslation();
+  const decimalPlaces = useFormat().currency.decimalPlaces;
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const noteInputRef = useRef<HTMLInputElement | null>(null);
   const noteReplaceInputRef = useRef<HTMLInputElement | null>(null);
@@ -67,14 +69,14 @@ export function EditFieldModal({
       // Process the value if needed
       if (name === 'amount') {
         if (typeof value === 'string') {
-          const parsed = currencyToInteger(value);
-          if (parsed === null) {
+          const parsed = currencyToAmount(value);
+          if (parsed == null) {
             alert(t('Invalid amount value'));
             return;
           }
-          value = parsed;
+          value = amountToInteger(parsed, decimalPlaces);
         } else if (typeof value === 'number') {
-          value = amountToInteger(value);
+          value = amountToInteger(value, decimalPlaces);
         }
       }
 

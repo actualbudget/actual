@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import { logger } from '../../platform/server/log';
+import { getCurrency } from '../../shared/currencies';
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
 import {
@@ -36,6 +37,10 @@ import {
 
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
+
+function getCurrencyDecimalPlaces(currencyCode?: string | null): number {
+  return getCurrency(currencyCode || '').decimalPlaces;
+}
 
 function BankSyncError(type: string, code: string, details?: object) {
   return { type: 'BankSyncError', category: type, code, details };
@@ -401,11 +406,18 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
 
     if (!importPending && !trans.cleared) continue;
 
-    if (!trans.amount) {
-      trans.amount = trans.transactionAmount.amount;
+    if (trans.amount == null) {
+      trans.amount = Number(trans.transactionAmount?.amount ?? 0);
     }
 
-    const mapping = mappings.get(trans.amount <= 0 ? 'payment' : 'deposit');
+    const normalizedAmount = Number(trans.amount);
+    if (Number.isNaN(normalizedAmount)) {
+      throw new Error(
+        `Invalid transaction amount for transactionId ${trans.transactionId ?? 'unknown'}`,
+      );
+    }
+
+    const mapping = mappings.get(normalizedAmount <= 0 ? 'payment' : 'deposit');
 
     const date = trans[mapping.get('date')] ?? trans.date;
     const payeeName = trans[mapping.get('payee')] ?? trans.payeeName;
@@ -440,7 +452,10 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     normalized.push({
       payee_name: payeeName,
       trans: {
-        amount: amountToInteger(trans.amount),
+        amount: amountToInteger(
+          normalizedAmount,
+          getCurrencyDecimalPlaces(trans.transactionAmount?.currency),
+        ),
         payee: trans.payee,
         account: trans.account,
         date,
@@ -938,14 +953,23 @@ async function processBankSyncDownload(
     } else if (acctRow.account_sync_source === 'simpleFin') {
       const previousBalance = transactions.reduce((total, trans) => {
         return (
-          total - parseInt(trans.transactionAmount.amount.replace('.', ''))
+          total -
+          amountToInteger(
+            Number(trans.transactionAmount.amount),
+            getCurrencyDecimalPlaces(trans.transactionAmount.currency),
+          )
         );
       }, currentBalance);
       balanceToUse = previousBalance;
     } else if (acctRow.account_sync_source === 'pluggyai') {
       const currentBalance = download.startingBalance;
       const previousBalance = transactions.reduce(
-        (total, trans) => total - trans.transactionAmount.amount * 100,
+        (total, trans) =>
+          total -
+          amountToInteger(
+            Number(trans.transactionAmount.amount),
+            getCurrencyDecimalPlaces(trans.transactionAmount.currency),
+          ),
         currentBalance,
       );
       balanceToUse = Math.round(previousBalance);

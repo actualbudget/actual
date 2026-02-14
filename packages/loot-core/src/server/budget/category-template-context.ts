@@ -259,10 +259,10 @@ export class CategoryTemplateContext {
     if (this.hideDecimal) {
       // handle hideDecimal
       toBudget = this.removeFraction(toBudget);
-      smallest = 100;
+      smallest = Math.pow(10, this.currency.decimalPlaces);
     }
 
-    //check possible overbudget from rounding, 1cent leftover
+    // check possible overbudget from rounding
     if (toBudget > budgetAvail || budgetAvail - toBudget <= smallest) {
       toBudget = budgetAvail;
     }

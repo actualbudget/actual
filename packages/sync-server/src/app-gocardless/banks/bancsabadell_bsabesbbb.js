@@ -13,7 +13,7 @@ export default {
     const amount = transaction.transactionAmount.amount;
 
     // The amount is negative for outgoing transactions, positive for incoming transactions.
-    const isCreditorPayee = Number.parseFloat(amount) < 0;
+    const isCreditorPayee = Number(amount || 0) < 0;
 
     const payeeName = transaction.remittanceInformationUnstructuredArray
       .join(' ')
