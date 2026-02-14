@@ -570,7 +570,6 @@ class AccountInternal extends PureComponent<
   }, 150);
 
   onSync = async () => {
-    // This is where we trigger bankSync.
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(acct => acct.id === accountId);
 
