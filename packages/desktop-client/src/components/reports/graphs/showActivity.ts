@@ -70,7 +70,7 @@ export function showActivity({
     },
     !(
       ['netAssets', 'netDebts'].includes(balanceTypeOp) ||
-      (balanceTypeOp === 'totalTotals' &&
+      (['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) &&
         (type === 'totals' || type === 'time'))
     ) && {
       field: 'amount',
