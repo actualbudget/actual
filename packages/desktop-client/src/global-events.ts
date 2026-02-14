@@ -4,7 +4,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { listen } from 'loot-core/platform/client/connection';
 import * as undo from 'loot-core/platform/client/undo';
 
-import { reloadAccounts } from './accounts/accountsSlice';
+import { accountQueries } from './accounts';
 import { setAppState } from './app/appSlice';
 import { categoryQueries } from './budget';
 import { closeBudgetUI } from './budgetfiles/budgetfilesSlice';
@@ -74,7 +74,11 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     }
 
     if (tables.includes('accounts')) {
-      promises.push(store.dispatch(reloadAccounts()));
+      promises.push(
+        queryClient.invalidateQueries({
+          queryKey: accountQueries.lists(),
+        }),
+      );
     }
 
     const tagged = undo.getTaggedState(undoTag);

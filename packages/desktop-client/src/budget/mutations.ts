@@ -7,14 +7,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { sendCatch } from 'loot-core/platform/client/connection';
 import type { send } from 'loot-core/platform/client/connection';
-import { logger } from 'loot-core/platform/server/log';
 import type { IntegerAmount } from 'loot-core/shared/util';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { categoryQueries } from '.';
+import { categoryQueries } from './queries';
 
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
@@ -99,7 +98,7 @@ export function useCreateCategoryMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error creating category:', error);
+      console.error('Error creating category:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error creating the category. Please try again.'),
@@ -125,7 +124,7 @@ export function useUpdateCategoryMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error updating category:', error);
+      console.error('Error updating category:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error updating the category. Please try again.'),
@@ -149,17 +148,15 @@ export function useSaveCategoryMutation() {
 
   return useMutation({
     mutationFn: async ({ category }: SaveCategoryPayload) => {
-      const { grouped: categoryGroups } = await queryClient.ensureQueryData(
-        categoryQueries.list(),
-      );
+      const { grouped: categoryGroups = [] } =
+        await queryClient.ensureQueryData(categoryQueries.list());
 
       const group = categoryGroups.find(g => g.id === category.group);
       const categoriesInGroup = group?.categories ?? [];
-      const exists = categoriesInGroup.some(c =>
-        category.id === 'new'
-          ? true
-          : c.id !== category.id &&
-            c.name.toUpperCase() === category.name.toUpperCase(),
+      const exists = categoriesInGroup.some(
+        c =>
+          c.id !== category.id &&
+          c.name.toUpperCase() === category.name.toUpperCase(),
       );
 
       if (exists) {
@@ -230,7 +227,7 @@ export function useDeleteCategoryMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error deleting category:', error);
+      console.error('Error deleting category:', error);
 
       if (error) {
         switch (error.cause) {
@@ -274,7 +271,7 @@ export function useMoveCategoryMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error moving category:', error);
+      console.error('Error moving category:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error moving the category. Please try again.'),
@@ -299,7 +296,7 @@ export function useReorderCategoryMutation() {
 
   return useMutation({
     mutationFn: async ({ id, groupId, targetId }: ReoderCategoryPayload) => {
-      const { grouped: categoryGroups, list: categories } =
+      const { grouped: categoryGroups = [], list: categories = [] } =
         await queryClient.ensureQueryData(categoryQueries.list());
 
       const moveCandidate = categories.filter(c => c.id === id)[0];
@@ -341,7 +338,7 @@ export function useCreateCategoryGroupMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error creating category group:', error);
+      console.error('Error creating category group:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error creating the category group. Please try again.'),
@@ -389,7 +386,7 @@ export function useUpdateCategoryGroupMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error updating category group:', error);
+      console.error('Error updating category group:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error updating the category group. Please try again.'),
@@ -472,7 +469,7 @@ export function useDeleteCategoryGroupMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error deleting category group:', error);
+      console.error('Error deleting category group:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error deleting the category group. Please try again.'),
@@ -499,7 +496,7 @@ export function useMoveCategoryGroupMutation() {
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
-      logger.error('Error moving category group:', error);
+      console.error('Error moving category group:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error moving the category group. Please try again.'),
@@ -828,7 +825,7 @@ export function useBudgetActions() {
       }
     },
     onError: error => {
-      logger.error('Error applying budget action:', error);
+      console.error('Error applying budget action:', error);
       dispatchErrorNotification(
         dispatch,
         t('There was an error applying the budget action. Please try again.'),
