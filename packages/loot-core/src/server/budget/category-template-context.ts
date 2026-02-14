@@ -588,7 +588,8 @@ export class CategoryTemplateContext {
     );
     const period = template.period.period;
     const numPeriods = template.period.amount;
-    let date = template.starting;
+    let date =
+      template.starting ?? monthUtils.firstDayOfMonth(templateContext.month);
 
     let dateShiftFunction;
     switch (period) {
