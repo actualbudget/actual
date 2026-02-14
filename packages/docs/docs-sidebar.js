@@ -326,6 +326,7 @@ const sidebars = {
             'contributing/leadership/funding',
             'contributing/leadership/triaging-issues',
             'contributing/leadership/new-core-contributors-guide',
+            'contributing/leadership/architecture-decision-records',
             'contributing/leadership/cursor-ide',
             'contributing/leadership/paying-contributors',
           ],

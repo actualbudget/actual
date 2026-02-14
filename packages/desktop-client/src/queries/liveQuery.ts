@@ -1,6 +1,6 @@
 // @ts-strict-ignore
-import { listen } from 'loot-core/platform/client/fetch';
-import { type Query } from 'loot-core/shared/query';
+import { listen } from 'loot-core/platform/client/connection';
+import type { Query } from 'loot-core/shared/query';
 
 import { aqlQuery } from './aqlQuery';
 

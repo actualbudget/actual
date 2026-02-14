@@ -30,7 +30,7 @@ import {
   parseISO,
 } from 'date-fns';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import * as Platform from 'loot-core/shared/platform';
 import { q } from 'loot-core/shared/query';
@@ -54,11 +54,11 @@ import {
   integerToCurrency,
   titleFirst,
 } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type PayeeEntity,
-  type TransactionEntity,
+import type {
+  AccountEntity,
+  CategoryEntity,
+  PayeeEntity,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
@@ -460,7 +460,7 @@ const ChildTransactionEdit = forwardRef<
                   onClearActiveEdit();
                 }
               }}
-              autoDecimals={!hideFraction}
+              autoDecimals={String(hideFraction) !== 'true'}
             />
           </View>
         </View>
@@ -584,7 +584,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         ) || [],
       [unserializedTransactions, dateFormat],
     );
-    const { grouped: categoryGroups } = useCategories();
+    const { data: { grouped: categoryGroups } = { grouped: [] } } =
+      useCategories();
 
     useEffect(() => {
       if (window.history.length === 1) {
@@ -1679,7 +1680,7 @@ type TransactionEditProps = Omit<
 >;
 
 export const TransactionEdit = (props: TransactionEditProps) => {
-  const { list: categories } = useCategories();
+  const { data: { list: categories } = { list: [] } } = useCategories();
   const payees = usePayees();
   const lastTransaction = useSelector(
     state => state.transactions.lastTransaction,

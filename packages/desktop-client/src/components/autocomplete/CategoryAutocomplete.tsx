@@ -1,14 +1,12 @@
-import React, {
-  Fragment,
-  useCallback,
-  useMemo,
-  type ComponentProps,
-  type ComponentPropsWithoutRef,
-  type ComponentType,
-  type CSSProperties,
-  type ReactElement,
-  type ReactNode,
-  type SVGProps,
+import React, { Fragment, useCallback, useMemo } from 'react';
+import type {
+  ComponentProps,
+  ComponentPropsWithoutRef,
+  ComponentType,
+  CSSProperties,
+  ReactElement,
+  ReactNode,
+  SVGProps,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -23,9 +21,9 @@ import { css, cx } from '@emotion/css';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { integerToCurrency } from 'loot-core/shared/util';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
@@ -236,7 +234,8 @@ export function CategoryAutocomplete({
   showHiddenCategories,
   ...props
 }: CategoryAutocompleteProps) {
-  const { grouped: defaultCategoryGroups } = useCategories();
+  const { data: { grouped: defaultCategoryGroups } = { grouped: [] } } =
+    useCategories();
   const categorySuggestions: CategoryAutocompleteItem[] = useMemo(() => {
     const allSuggestions = (categoryGroups || defaultCategoryGroups).reduce(
       (list, group) =>

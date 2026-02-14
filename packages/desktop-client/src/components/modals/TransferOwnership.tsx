@@ -9,11 +9,11 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
-import { type Budget } from 'loot-core/types/budget';
-import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
-import { type Handlers } from 'loot-core/types/handlers';
+import type { Budget } from 'loot-core/types/budget';
+import type { RemoteFile, SyncedLocalFile } from 'loot-core/types/file';
+import type { Handlers } from 'loot-core/types/handlers';
 
 import { closeAndLoadBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import {
@@ -23,10 +23,8 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import {
-  popModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
+import { popModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 

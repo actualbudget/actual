@@ -1,11 +1,12 @@
-import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { q } from 'loot-core/shared/query';
-import {
-  type AccountEntity,
-  type PayeeEntity,
-  type TransactionEntity,
+import type {
+  AccountEntity,
+  PayeeEntity,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 import { useAccounts } from './useAccounts';
@@ -39,7 +40,7 @@ export function DisplayPayeeProvider({
   );
   const { transactions: allSubtransactions = [] } = useTransactions({
     query: subtransactionsQuery,
-    options: { pageCount: transactions.length * 5 },
+    options: { pageSize: transactions.length * 5 },
   });
 
   const accounts = useAccounts();

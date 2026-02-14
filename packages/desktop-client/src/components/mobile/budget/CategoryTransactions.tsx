@@ -1,12 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import { listen } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
-import {
-  type CategoryEntity,
-  type TransactionEntity,
-} from 'loot-core/types/models';
+import type { CategoryEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
@@ -15,7 +11,6 @@ import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
-import { useDispatch } from '@desktop-client/redux';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 type CategoryTransactionsProps = {
@@ -45,7 +40,6 @@ function TransactionListWithPreviews({
   category,
   month,
 }: TransactionListWithPreviewsProps) {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const baseTransactionsQuery = useCallback(
@@ -62,30 +56,14 @@ function TransactionListWithPreviews({
   );
   const {
     transactions,
-    isLoading: isTransactionsLoading,
-    isLoadingMore,
-    loadMore: loadMoreTransactions,
-    reload: reloadTransactions,
+    isPending: isTransactionsLoading,
+    isFetchingNextPage: isLoadingMoreTransactions,
+    fetchNextPage: fetchMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
   });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-
-  useEffect(() => {
-    return listen('sync-event', event => {
-      if (event.type === 'applied') {
-        const tables = event.tables;
-        if (
-          tables.includes('transactions') ||
-          tables.includes('category_mapping') ||
-          tables.includes('payee_mapping')
-        ) {
-          reloadTransactions();
-        }
-      }
-    });
-  }, [dispatch, reloadTransactions]);
 
   const { isSearching, search: onSearch } = useTransactionsSearch({
     updateQuery: setTransactionsQuery,
@@ -133,8 +111,8 @@ function TransactionListWithPreviews({
       balanceUncleared={balanceUncleared}
       searchPlaceholder={`Search ${category.name}`}
       onSearch={onSearch}
-      isLoadingMore={isLoadingMore}
-      onLoadMore={loadMoreTransactions}
+      isLoadingMore={isLoadingMoreTransactions}
+      onLoadMore={fetchMoreTransactions}
       onOpenTransaction={onOpenTransaction}
     />
   );

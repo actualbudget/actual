@@ -7,12 +7,12 @@ import './i18n';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
-import { type NavigateFunction } from 'react-router';
+import type { NavigateFunction } from 'react-router';
 
 import { bindActionCreators } from '@reduxjs/toolkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { q } from 'loot-core/shared/query';
 
 import * as accountsSlice from './accounts/accountsSlice';
@@ -26,11 +26,15 @@ import * as notificationsSlice from './notifications/notificationsSlice';
 import * as payeesSlice from './payees/payeesSlice';
 import * as prefsSlice from './prefs/prefsSlice';
 import { aqlQuery } from './queries/aqlQuery';
-import { store } from './redux/store';
-import * as tagsSlice from './tags/tagsSlice';
+import { configureAppStore } from './redux/store';
 import * as transactionsSlice from './transactions/transactionsSlice';
 import { redo, undo } from './undo';
 import * as usersSlice from './users/usersSlice';
+
+const queryClient = new QueryClient();
+window.__TANSTACK_QUERY_CLIENT__ = queryClient;
+
+const store = configureAppStore({ queryClient });
 
 const boundActions = bindActionCreators(
   {
@@ -42,7 +46,6 @@ const boundActions = bindActionCreators(
     ...payeesSlice.actions,
     ...prefsSlice.actions,
     ...transactionsSlice.actions,
-    ...tagsSlice.actions,
     ...usersSlice.actions,
   },
   store.dispatch,
@@ -82,21 +85,18 @@ window.$send = send;
 window.$query = aqlQuery;
 window.$q = q;
 
-const queryClient = new QueryClient();
-window.__TANSTACK_QUERY_CLIENT__ = queryClient;
-
 const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(
-  <Provider store={store}>
-    <ServerProvider>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
+  <QueryClientProvider client={queryClient}>
+    <Provider store={store}>
+      <ServerProvider>
+        <AuthProvider>
           <App />
-        </QueryClientProvider>
-      </AuthProvider>
-    </ServerProvider>
-  </Provider>,
+        </AuthProvider>
+      </ServerProvider>
+    </Provider>
+  </QueryClientProvider>,
 );
 
 declare global {

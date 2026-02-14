@@ -1,8 +1,8 @@
-import { send } from 'loot-core/platform/client/fetch';
-import { type GoCardlessToken } from 'loot-core/types/models';
+import { send } from 'loot-core/platform/client/connection';
+import type { GoCardlessToken } from 'loot-core/types/models';
 
 import { pushModal } from './modals/modalsSlice';
-import { type AppDispatch } from './redux/store';
+import type { AppDispatch } from './redux/store';
 
 function _authorize(
   dispatch: AppDispatch,

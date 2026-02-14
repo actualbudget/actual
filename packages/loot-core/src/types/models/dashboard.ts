@@ -1,5 +1,5 @@
-import { type CustomReportEntity } from './reports';
-import { type RuleConditionEntity } from './rule';
+import type { CustomReportEntity } from './reports';
+import type { RuleConditionEntity } from './rule';
 
 export type DashboardEntity = {
   id: string;

@@ -1,15 +1,10 @@
-import {
-  createAction,
-  createSlice,
-  type PayloadAction,
-} from '@reduxjs/toolkit';
+import { createAction, createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { getUploadError } from 'loot-core/shared/errors';
-import { type AccountEntity } from 'loot-core/types/models';
-import { type AtLeastOne } from 'loot-core/types/util';
+import type { AtLeastOne } from 'loot-core/types/util';
 
-import { syncAccounts } from '@desktop-client/accounts/accountsSlice';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { loadPrefs } from '@desktop-client/prefs/prefsSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
@@ -130,42 +125,6 @@ export const getLatestAppVersion = createAppAsyncThunk(
   },
 );
 
-type SyncAndDownloadPayload = {
-  accountId?: AccountEntity['id'] | string;
-};
-
-export const syncAndDownload = createAppAsyncThunk(
-  `${sliceName}/syncAndDownload`,
-  async ({ accountId }: SyncAndDownloadPayload, { dispatch }) => {
-    // It is *critical* that we sync first because of transaction
-    // reconciliation. We want to get all transactions that other
-    // clients have already made, so that imported transactions can be
-    // reconciled against them. Otherwise, two clients will each add
-    // new transactions from the bank and create duplicate ones.
-    const syncState = await dispatch(sync()).unwrap();
-    if (syncState.error) {
-      return { error: syncState.error };
-    }
-
-    const hasDownloaded = await dispatch(
-      syncAccounts({ id: accountId }),
-    ).unwrap();
-
-    if (hasDownloaded) {
-      // Sync again afterwards if new transactions were created
-      const syncState = await dispatch(sync()).unwrap();
-      if (syncState.error) {
-        return { error: syncState.error };
-      }
-
-      // `hasDownloaded` is already true, we know there has been
-      // updates
-      return true;
-    }
-    return { hasUpdated: hasDownloaded };
-  },
-);
-
 // Workaround for partial types in actions.
 // https://github.com/reduxjs/redux-toolkit/issues/1423#issuecomment-902680573
 type SetAppStatePayload = AtLeastOne<AppState>;
@@ -198,7 +157,6 @@ export const actions = {
   updateApp,
   resetSync,
   sync,
-  syncAndDownload,
   getLatestAppVersion,
 };
 

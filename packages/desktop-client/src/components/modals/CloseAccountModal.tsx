@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useState, type CSSProperties, type FormEvent } from 'react';
+import React, { useState } from 'react';
+import type { CSSProperties, FormEvent } from 'react';
 import { Form } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -13,10 +14,10 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { integerToCurrency } from 'loot-core/shared/util';
-import { type AccountEntity } from 'loot-core/types/models';
-import { type TransObjectLiteral } from 'loot-core/types/util';
+import type { AccountEntity } from 'loot-core/types/models';
+import type { TransObjectLiteral } from 'loot-core/types/util';
 
-import { closeAccount } from '@desktop-client/accounts/accountsSlice';
+import { useCloseAccountMutation } from '@desktop-client/accounts';
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import { Link } from '@desktop-client/components/common/Link';
@@ -27,10 +28,8 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import {
-  pushModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 function needsCategory(
@@ -58,7 +57,12 @@ export function CloseAccountModal({
 }: CloseAccountModalProps) {
   const { t } = useTranslation(); // Initialize translation hook
   const accounts = useAccounts().filter(a => a.closed === 0);
-  const { grouped: categoryGroups, list: categories } = useCategories();
+  const {
+    data: { grouped: categoryGroups, list: categories } = {
+      grouped: [],
+      list: [],
+    },
+  } = useCategories();
   const [loading, setLoading] = useState(false);
   const [transferAccountId, setTransferAccountId] = useState('');
   const transferAccount = accounts.find(a => a.id === transferAccountId);
@@ -92,6 +96,8 @@ export function CloseAccountModal({
       }
     : {};
 
+  const closeAccount = useCloseAccountMutation();
+
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -108,13 +114,12 @@ export function CloseAccountModal({
 
     setLoading(true);
 
-    dispatch(
-      closeAccount({
-        id: account.id,
-        transferAccountId: transferAccountId || null,
-        categoryId: categoryId || null,
-      }),
-    );
+    closeAccount.mutate({
+      id: account.id,
+      transferAccountId: transferAccountId || null,
+      categoryId: categoryId || null,
+    });
+
     return true;
   };
 
@@ -276,12 +281,10 @@ export function CloseAccountModal({
                         variant="text"
                         onClick={() => {
                           setLoading(true);
-                          dispatch(
-                            closeAccount({
-                              id: account.id,
-                              forced: true,
-                            }),
-                          );
+                          closeAccount.mutate({
+                            id: account.id,
+                            forced: true,
+                          });
                           close();
                         }}
                         style={{ color: theme.errorText }}

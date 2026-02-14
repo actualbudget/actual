@@ -8,8 +8,8 @@ import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
-import { type DashboardEntity } from 'loot-core/types/models';
+import { send } from 'loot-core/platform/client/connection';
+import type { DashboardEntity } from 'loot-core/types/models';
 
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 

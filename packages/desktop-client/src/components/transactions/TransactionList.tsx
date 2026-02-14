@@ -1,11 +1,12 @@
 // @ts-strict-ignore
 // TODO: remove strict
-import { useCallback, useLayoutEffect, useRef, type RefObject } from 'react';
+import { useCallback, useLayoutEffect, useRef } from 'react';
+import type { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { getUpcomingDays } from 'loot-core/shared/schedules';
@@ -17,23 +18,21 @@ import {
   updateTransaction,
 } from 'loot-core/shared/transactions';
 import { applyChanges, getChangedValues } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type PayeeEntity,
-  type RuleActionEntity,
-  type RuleConditionEntity,
-  type ScheduleEntity,
-  type TransactionEntity,
-  type TransactionFilterEntity,
+import type {
+  AccountEntity,
+  CategoryEntity,
+  PayeeEntity,
+  RuleActionEntity,
+  RuleConditionEntity,
+  ScheduleEntity,
+  TransactionEntity,
+  TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import {
-  TransactionTable,
-  type TransactionTableProps,
-} from './TransactionsTable';
+import { TransactionTable } from './TransactionsTable';
+import type { TransactionTableProps } from './TransactionsTable';
 
-import { type TableHandleRef } from '@desktop-client/components/table';
+import type { TableHandleRef } from '@desktop-client/components/table';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
