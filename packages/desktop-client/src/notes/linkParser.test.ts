@@ -171,6 +171,18 @@ describe('linkParser', () => {
           expect(linkSegments).toHaveLength(0);
         });
 
+        it('should detect single-segment paths with trailing slash', () => {
+          const result = parseNotes('Navigate to /transaction/ page');
+          const linkSegment = result.find(s => s.type === 'link');
+          expect(linkSegment).toEqual({
+            type: 'link',
+            content: '/transaction/',
+            displayText: '/transaction/',
+            url: '/transaction/',
+            isFilePath: true,
+          });
+        });
+
         it('should detect paths with dashes and underscores', () => {
           const result = parseNotes('See /opt/my-app/config_file.yml');
           const linkSegment = result.find(s => s.type === 'link');
