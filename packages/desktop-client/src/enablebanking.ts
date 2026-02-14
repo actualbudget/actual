@@ -7,9 +7,9 @@ import type {
 } from 'loot-core/types/models';
 import type { EnableBankingToken } from 'loot-core/types/models/enablebanking';
 
-import { linkAccount } from './accounts/accountsSlice';
 import { closeModal, pushModal } from './modals/modalsSlice';
 import { addNotification } from './notifications/notificationsSlice';
+import { markPayeesDirty } from './payees/payeesSlice';
 import type { AppDispatch } from './redux/store';
 
 // export function handleEnableBankingError(error: EnableBankingErrorInterface){
@@ -23,7 +23,7 @@ export async function deconfigureEnableBanking() {
   await send('enablebanking-configure', { applicationId: null, secret: null });
 }
 
-export function selectEnableBankingAccounts(
+export async function selectEnableBankingAccounts(
   dispatch: AppDispatch,
   token: EnableBankingToken,
   accountEntity?: AccountEntity,
@@ -58,27 +58,41 @@ export function selectEnableBankingAccounts(
       return tokenAccount.official_name === accountEntity.official_name;
     });
     if (account) {
-      dispatch(
-        linkAccount({
+      try {
+        await send('gocardless-accounts-link', {
           account,
           requisitionId: token.bank_id,
           upgradingId: accountEntity.id,
           syncSource: 'enableBanking',
-        }),
-      );
-      dispatch(
-        addNotification({
-          notification: {
-            type: 'message',
-            message: t(
-              'Reauthorized bank sync via Enable Banking for {{accountName}}',
-              {
-                accountName: accountEntity.name,
-              },
-            ),
-          },
-        }),
-      );
+        });
+        // Mark payees dirty since we linked an account
+        dispatch(markPayeesDirty());
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'message',
+              message: t(
+                'Reauthorized bank sync via Enable Banking for {{accountName}}',
+                {
+                  accountName: accountEntity.name,
+                },
+              ),
+            },
+          }),
+        );
+      } catch (error) {
+        console.error('Error linking account:', error);
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: t(
+                'There was an error linking the account. Please try again.',
+              ),
+            },
+          }),
+        );
+      }
       dispatch(closeModal());
       return;
     }

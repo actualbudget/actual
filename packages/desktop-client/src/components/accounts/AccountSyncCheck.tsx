@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 
 import type { AccountEntity } from 'loot-core/types/models';
 
-import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
+import { useUnlinkAccountMutation } from '@desktop-client/accounts/mutations';
 import { Link } from '@desktop-client/components/common/Link';
 import { authorizeEnableBankingSession } from '@desktop-client/enablebanking';
 import { authorizeBank } from '@desktop-client/gocardless';
@@ -97,16 +97,17 @@ export function AccountSyncCheck() {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
   const { getErrorMessage } = useErrorMessage();
+  const unlinkAccountMutation = useUnlinkAccountMutation();
 
   const unlink = useCallback(
     (acc: AccountEntity) => {
       if (acc.id) {
-        dispatch(unlinkAccount({ id: acc.id }));
+        unlinkAccountMutation.mutate({ id: acc.id });
       }
 
       setOpen(false);
     },
-    [dispatch],
+    [unlinkAccountMutation],
   );
 
   const reauth = useCallback(
