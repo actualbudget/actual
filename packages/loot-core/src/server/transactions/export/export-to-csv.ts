@@ -111,7 +111,7 @@ export async function exportQueryToCSV(query) {
             ') ' +
             (trans.Notes || '')
           : trans.Notes,
-      CategoryGroup: trans.CategoryGroup,
+      Category_Group: trans.CategoryGroup,
       Category: trans.Category,
       Amount: trans.IsParent
         ? 0
