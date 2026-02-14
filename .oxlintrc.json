@@ -20,72 +20,72 @@
   "rules": {
     // Import sorting
     "perfectionist/sort-named-imports": [
-      "warn",
+      "error",
       {
         "groups": ["value-import", "type-import"]
       }
     ],
 
     // Actual rules
-    "actual/typography": "warn",
+    "actual/typography": "error",
     "actual/no-untranslated-strings": "error",
     "actual/prefer-trans-over-t": "error",
-    "actual/prefer-if-statement": "warn",
+    "actual/prefer-if-statement": "error",
     "actual/prefer-logger-over-console": "error",
-    "actual/object-shorthand-properties": "warn",
-    "actual/prefer-const": "warn",
-    "actual/no-anchor-tag": "warn",
-    "actual/no-react-default-import": "warn",
+    "actual/object-shorthand-properties": "error",
+    "actual/prefer-const": "error",
+    "actual/no-anchor-tag": "error",
+    "actual/no-react-default-import": "error",
 
     // JSX A11y rules
     "jsx-a11y/no-autofocus": [
-      "warn",
+      "error",
       {
         "ignoreNonDOM": true
       }
     ],
-    "jsx-a11y/alt-text": "warn",
-    "jsx-a11y/anchor-has-content": "warn",
+    "jsx-a11y/alt-text": "error",
+    "jsx-a11y/anchor-has-content": "error",
     "jsx-a11y/anchor-is-valid": [
-      "warn",
+      "error",
       {
         "aspects": ["noHref", "invalidHref"]
       }
     ],
-    "jsx-a11y/aria-activedescendant-has-tabindex": "warn",
-    "jsx-a11y/aria-props": "warn",
-    "jsx-a11y/aria-proptypes": "warn",
+    "jsx-a11y/aria-activedescendant-has-tabindex": "error",
+    "jsx-a11y/aria-props": "error",
+    "jsx-a11y/aria-proptypes": "error",
     "jsx-a11y/aria-role": [
-      "warn",
+      "error",
       {
         "ignoreNonDOM": true
       }
     ],
-    "jsx-a11y/aria-unsupported-elements": "warn",
-    "jsx-a11y/heading-has-content": "warn",
-    "jsx-a11y/iframe-has-title": "warn",
-    "jsx-a11y/img-redundant-alt": "warn",
-    "jsx-a11y/no-access-key": "warn",
-    "jsx-a11y/no-distracting-elements": "warn",
-    "jsx-a11y/no-redundant-roles": "warn",
-    "jsx-a11y/role-has-required-aria-props": "warn",
-    "jsx-a11y/role-supports-aria-props": "warn",
-    "jsx-a11y/scope": "warn",
+    "jsx-a11y/aria-unsupported-elements": "error",
+    "jsx-a11y/heading-has-content": "error",
+    "jsx-a11y/iframe-has-title": "error",
+    "jsx-a11y/img-redundant-alt": "error",
+    "jsx-a11y/no-access-key": "error",
+    "jsx-a11y/no-distracting-elements": "error",
+    "jsx-a11y/no-redundant-roles": "error",
+    "jsx-a11y/role-has-required-aria-props": "error",
+    "jsx-a11y/role-supports-aria-props": "error",
+    "jsx-a11y/scope": "error",
 
     // Typescript rules
-    "typescript/ban-ts-comment": ["warn"],
-    "typescript/consistent-type-definitions": ["warn", "type"],
+    "typescript/ban-ts-comment": ["error"],
+    "typescript/consistent-type-definitions": ["error", "type"],
     "typescript/consistent-type-imports": [
-      "warn",
+      "error",
       {
         "prefer": "type-imports",
         "fixStyle": "inline-type-imports"
       }
     ],
-    "typescript/no-implied-eval": "warn",
-    "typescript/no-explicit-any": "warn",
+    "typescript/no-implied-eval": "error",
+    "typescript/no-explicit-any": "error",
     "typescript/no-restricted-types": [
-      "warn",
+      "error",
       {
         "types": {
           // forbid FC as superfluous
@@ -98,19 +98,19 @@
         }
       }
     ],
-    "typescript/no-var-requires": "warn",
+    "typescript/no-var-requires": "error",
 
     // Import rules
-    "import/consistent-type-specifier-style": "warn",
+    "import/consistent-type-specifier-style": "error",
     "import/first": "error",
     "import/no-amd": "error",
-    "import/no-default-export": "warn",
+    "import/no-default-export": "error",
     "import/no-webpack-loader-syntax": "error",
-    "import/no-useless-path-segments": "warn",
-    "import/no-unresolved": "warn",
-    "import/no-unused-modules": "warn",
+    "import/no-useless-path-segments": "error",
+    "import/no-unresolved": "error",
+    "import/no-unused-modules": "error",
     "import/no-duplicates": [
-      "warn",
+      "error",
       {
         "prefer-inline": false
       }
@@ -118,122 +118,122 @@
 
     // React rules
     "react/exhaustive-deps": [
-      "warn",
+      "error",
       {
         "additionalHooks": "(^useQuery$|^useEffectAfterMount$)"
       }
     ],
-    "react/jsx-curly-brace-presence": "warn",
+    "react/jsx-curly-brace-presence": "error",
     "react/jsx-filename-extension": [
-      "warn",
+      "error",
       {
         "extensions": [".jsx", ".tsx"],
         "allow": "as-needed"
       }
     ],
-    "react/jsx-no-comment-textnodes": "warn",
-    "react/jsx-no-duplicate-props": "warn",
-    "react/jsx-no-target-blank": "warn",
+    "react/jsx-no-comment-textnodes": "error",
+    "react/jsx-no-duplicate-props": "error",
+    "react/jsx-no-target-blank": "error",
     "react/jsx-no-undef": "error",
-    "react/jsx-no-useless-fragment": "warn",
+    "react/jsx-no-useless-fragment": "error",
     "react/jsx-pascal-case": [
-      "warn",
+      "error",
       {
         "allowAllCaps": true,
         "ignore": []
       }
     ],
-    "react/no-danger-with-children": "warn",
-    "react/no-direct-mutation-state": "warn",
-    "react/no-is-mounted": "warn",
-    "react/no-unstable-nested-components": "warn",
+    "react/no-danger-with-children": "error",
+    "react/no-direct-mutation-state": "error",
+    "react/no-is-mounted": "error",
+    "react/no-unstable-nested-components": "error",
     "react/require-render-return": "error",
     "react/rules-of-hooks": "error",
-    "react/self-closing-comp": "warn",
-    "react/style-prop-object": "warn",
-    "react/jsx-boolean-value": "warn",
+    "react/self-closing-comp": "error",
+    "react/style-prop-object": "error",
+    "react/jsx-boolean-value": "error",
 
     // ESLint rules
-    "eslint/array-callback-return": "warn",
-    "eslint/curly": ["warn", "multi-line", "consistent"],
+    "eslint/array-callback-return": "error",
+    "eslint/curly": ["error", "multi-line", "consistent"],
     "eslint/default-case": [
-      "warn",
+      "error",
       {
         "commentPattern": "^no default$"
       }
     ],
-    "eslint/eqeqeq": ["warn", "smart"],
-    "eslint/no-array-constructor": "warn",
-    "eslint/no-caller": "warn",
-    "eslint/no-cond-assign": ["warn", "except-parens"],
-    "eslint/no-const-assign": "warn",
-    "eslint/no-control-regex": "warn",
-    "eslint/no-delete-var": "warn",
-    "eslint/no-dupe-class-members": "warn",
-    "eslint/no-dupe-keys": "warn",
-    "eslint/no-duplicate-case": "warn",
-    "eslint/no-empty-character-class": "warn",
-    "eslint/no-empty-function": "warn",
-    "eslint/no-empty-pattern": "warn",
-    "eslint/no-eval": "warn",
-    "eslint/no-ex-assign": "warn",
-    "eslint/no-extend-native": "warn",
-    "eslint/no-extra-bind": "warn",
-    "eslint/no-extra-label": "warn",
-    "eslint/no-fallthrough": "warn",
-    "eslint/no-func-assign": "warn",
-    "eslint/no-invalid-regexp": "warn",
-    "eslint/no-iterator": "warn",
-    "eslint/no-label-var": "warn",
-    "eslint/no-var": "warn",
+    "eslint/eqeqeq": ["error", "smart"],
+    "eslint/no-array-constructor": "error",
+    "eslint/no-caller": "error",
+    "eslint/no-cond-assign": ["error", "except-parens"],
+    "eslint/no-const-assign": "error",
+    "eslint/no-control-regex": "error",
+    "eslint/no-delete-var": "error",
+    "eslint/no-dupe-class-members": "error",
+    "eslint/no-dupe-keys": "error",
+    "eslint/no-duplicate-case": "error",
+    "eslint/no-empty-character-class": "error",
+    "eslint/no-empty-function": "error",
+    "eslint/no-empty-pattern": "error",
+    "eslint/no-eval": "error",
+    "eslint/no-ex-assign": "error",
+    "eslint/no-extend-native": "error",
+    "eslint/no-extra-bind": "error",
+    "eslint/no-extra-label": "error",
+    "eslint/no-fallthrough": "error",
+    "eslint/no-func-assign": "error",
+    "eslint/no-invalid-regexp": "error",
+    "eslint/no-iterator": "error",
+    "eslint/no-label-var": "error",
+    "eslint/no-var": "error",
     "eslint/no-labels": [
-      "warn",
+      "error",
       {
         "allowLoop": true,
         "allowSwitch": false
       }
     ],
-    "eslint/no-new-func": "warn",
-    "eslint/no-script-url": "warn",
-    "eslint/no-self-assign": "warn",
-    "eslint/no-self-compare": "warn",
-    "eslint/no-sequences": "warn",
-    "eslint/no-shadow-restricted-names": "warn",
-    "eslint/no-sparse-arrays": "warn",
-    "eslint/no-template-curly-in-string": "warn",
-    "eslint/no-this-before-super": "warn",
-    "eslint/no-throw-literal": "warn",
-    "eslint/no-unreachable": "warn",
-    "eslint/no-obj-calls": "warn",
-    "eslint/no-new-wrappers": "warn",
-    "eslint/no-unsafe-negation": "warn",
-    "eslint/no-multi-str": "warn",
-    "eslint/no-global-assign": "warn",
-    "eslint/no-lone-blocks": "warn",
-    "eslint/no-unused-labels": "warn",
-    "eslint/no-object-constructor": "warn",
-    "eslint/no-new-native-nonconstructor": "warn",
-    "eslint/no-redeclare": "warn",
-    "eslint/no-useless-computed-key": "warn",
-    "eslint/no-useless-concat": "warn",
-    "eslint/no-useless-escape": "warn",
-    "eslint/require-yield": "warn",
-    "eslint/getter-return": "warn",
-    "eslint/unicode-bom": ["warn", "never"],
-    "eslint/no-use-isnan": "warn",
-    "eslint/valid-typeof": "warn",
+    "eslint/no-new-func": "error",
+    "eslint/no-script-url": "error",
+    "eslint/no-self-assign": "error",
+    "eslint/no-self-compare": "error",
+    "eslint/no-sequences": "error",
+    "eslint/no-shadow-restricted-names": "error",
+    "eslint/no-sparse-arrays": "error",
+    "eslint/no-template-curly-in-string": "error",
+    "eslint/no-this-before-super": "error",
+    "eslint/no-throw-literal": "error",
+    "eslint/no-unreachable": "error",
+    "eslint/no-obj-calls": "error",
+    "eslint/no-new-wrappers": "error",
+    "eslint/no-unsafe-negation": "error",
+    "eslint/no-multi-str": "error",
+    "eslint/no-global-assign": "error",
+    "eslint/no-lone-blocks": "error",
+    "eslint/no-unused-labels": "error",
+    "eslint/no-object-constructor": "error",
+    "eslint/no-new-native-nonconstructor": "error",
+    "eslint/no-redeclare": "error",
+    "eslint/no-useless-computed-key": "error",
+    "eslint/no-useless-concat": "error",
+    "eslint/no-useless-escape": "error",
+    "eslint/require-yield": "error",
+    "eslint/getter-return": "error",
+    "eslint/unicode-bom": ["error", "never"],
+    "eslint/no-use-isnan": "error",
+    "eslint/valid-typeof": "error",
     "eslint/no-useless-rename": [
-      "warn",
+      "error",
       {
         "ignoreDestructuring": false,
         "ignoreImport": false,
         "ignoreExport": false
       }
     ],
-    "eslint/no-with": "warn",
-    "eslint/no-regex-spaces": "warn",
+    "eslint/no-with": "error",
+    "eslint/no-regex-spaces": "error",
     "eslint/no-restricted-globals": [
-      "warn",
+      "error",
 
       // https://github.com/facebook/create-react-app/tree/main/packages/confusing-browser-globals
       "addEventListener",
@@ -295,7 +295,7 @@
       "top"
     ],
     "eslint/no-restricted-imports": [
-      "warn",
+      "error",
       {
         "paths": [
           {
@@ -345,9 +345,9 @@
         ]
       }
     ],
-    "eslint/no-useless-constructor": "warn",
-    "eslint/no-undef": "warn",
-    "eslint/no-unused-expressions": "warn"
+    "eslint/no-useless-constructor": "error",
+    "eslint/no-undef": "error",
+    "eslint/no-unused-expressions": "error"
   },
   "overrides": [
     {
