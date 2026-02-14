@@ -1,12 +1,13 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 
-import { send } from 'loot-core/platform/client/fetch';
-import { type RemoteFile } from 'loot-core/server/cloud-storage';
+import { send } from 'loot-core/platform/client/connection';
+import type { RemoteFile } from 'loot-core/server/cloud-storage';
 import { getDownloadError, getSyncError } from 'loot-core/shared/errors';
-import { type Budget } from 'loot-core/types/budget';
-import { type File } from 'loot-core/types/file';
-import { type Handlers } from 'loot-core/types/handlers';
+import type { Budget } from 'loot-core/types/budget';
+import type { File } from 'loot-core/types/file';
+import type { Handlers } from 'loot-core/types/handlers';
 
 import { resetApp, setAppState } from '@desktop-client/app/appSlice';
 import { closeModal, pushModal } from '@desktop-client/modals/modalsSlice';
@@ -99,10 +100,11 @@ export const loadBudget = createAppAsyncThunk(
 
 export const closeBudget = createAppAsyncThunk(
   `${sliceName}/closeBudget`,
-  async (_, { dispatch, getState }) => {
+  async (_, { dispatch, getState, extra: { queryClient } }) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       await dispatch(resetApp());
+      queryClient.clear();
       await dispatch(setAppState({ loadingText: t('Closing...') }));
       await send('close-budget');
       await dispatch(setAppState({ loadingText: null }));
@@ -115,10 +117,11 @@ export const closeBudget = createAppAsyncThunk(
 
 export const closeBudgetUI = createAppAsyncThunk(
   `${sliceName}/closeBudgetUI`,
-  async (_, { dispatch, getState }) => {
+  async (_, { dispatch, getState, extra: { queryClient } }) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       await dispatch(resetApp());
+      queryClient.clear();
     }
   },
 );

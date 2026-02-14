@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components';
-import ReactGridLayout, { type Layout } from 'react-grid-layout';
+import ReactGridLayout from 'react-grid-layout';
+import type { Layout } from 'react-grid-layout';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
@@ -13,7 +14,7 @@ import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import type {
   CustomReportWidget,
   DashboardEntity,
@@ -85,7 +86,7 @@ export function Overview({ dashboard }: OverviewProps) {
     ? 'mobile'
     : 'desktop';
 
-  const { data: customReports, isLoading: isCustomReportsLoading } =
+  const { data: customReports = [], isPending: isCustomReportsLoading } =
     useReports();
 
   const customReportMap = useMemo(

@@ -1,14 +1,14 @@
-import {
-  type balanceTypeOpType,
-  type CategoryEntity,
-  type CategoryGroupEntity,
-  type RuleConditionEntity,
+import type {
+  balanceTypeOpType,
+  CategoryEntity,
+  CategoryGroupEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { fetchBudgetData } from './budgetDataQuery';
 import { makeQuery } from './makeQuery';
 
-import { type QueryDataEntity } from '@desktop-client/components/reports/ReportOptions';
+import type { QueryDataEntity } from '@desktop-client/components/reports/ReportOptions';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 export async function fetchSpreadsheetQueryData({

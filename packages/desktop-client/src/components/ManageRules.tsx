@@ -1,12 +1,6 @@
 // @ts-strict-ignore
-import React, {
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useState,
-  type Dispatch,
-  type SetStateAction,
-} from 'react';
+import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -16,16 +10,16 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as undo from 'loot-core/platform/client/undo';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { q } from 'loot-core/shared/query';
 import { friendlyOp, mapField } from 'loot-core/shared/rules';
 import { describeSchedule } from 'loot-core/shared/schedules';
-import {
-  type NewRuleEntity,
-  type RuleEntity,
-  type ScheduleEntity,
+import type {
+  NewRuleEntity,
+  RuleEntity,
+  ScheduleEntity,
 } from 'loot-core/types/models';
 
 import { InfiniteScrollWrapper } from './common/InfiniteScrollWrapper';
@@ -140,7 +134,7 @@ export function ManageRules({
   const { schedules = [] } = useSchedules({
     query: useMemo(() => q('schedules').select('*'), []),
   });
-  const { list: categories } = useCategories();
+  const { data: { list: categories } = { list: [] } } = useCategories();
   const payees = usePayees();
   const accounts = useAccounts();
   const filterData = useMemo(

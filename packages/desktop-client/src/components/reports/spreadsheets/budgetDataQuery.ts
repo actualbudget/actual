@@ -1,14 +1,14 @@
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
-  type RuleConditionEntity,
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { type BudgetMonthCell } from './budgetMonthCell';
+import type { BudgetMonthCell } from './budgetMonthCell';
 
-import { type QueryDataEntity } from '@desktop-client/components/reports/ReportOptions';
+import type { QueryDataEntity } from '@desktop-client/components/reports/ReportOptions';
 
 type BudgetDataConditionsOp = 'and' | 'or';
 

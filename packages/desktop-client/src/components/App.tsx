@@ -2,11 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import {
-  ErrorBoundary,
-  useErrorBoundary,
-  type FallbackProps,
-} from 'react-error-boundary';
+import { ErrorBoundary, useErrorBoundary } from 'react-error-boundary';
+import type { FallbackProps } from 'react-error-boundary';
 import { HotkeysProvider } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 import { BrowserRouter } from 'react-router';
@@ -15,7 +12,10 @@ import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { init as initConnection, send } from 'loot-core/platform/client/fetch';
+import {
+  init as initConnection,
+  send,
+} from 'loot-core/platform/client/connection';
 
 import { AppBackground } from './AppBackground';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
@@ -76,10 +76,7 @@ function AppInner() {
     };
 
     async function init() {
-      const serverSocket = await maybeUpdate(() =>
-        global.Actual.getServerSocket(),
-      );
-
+      await maybeUpdate();
       dispatch(
         setAppState({
           loadingText: t(
@@ -87,7 +84,7 @@ function AppInner() {
           ),
         }),
       );
-      await initConnection(serverSocket);
+      await initConnection();
 
       // Load any global prefs
       dispatch(

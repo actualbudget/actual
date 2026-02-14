@@ -1,11 +1,11 @@
 import { t } from 'i18next';
 
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
-  type CustomReportEntity,
-  type sortByOpType,
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
+  CustomReportEntity,
+  sortByOpType,
 } from 'loot-core/types/models';
 
 const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5) + '-01';

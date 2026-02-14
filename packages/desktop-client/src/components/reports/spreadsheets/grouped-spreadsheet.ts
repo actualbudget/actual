@@ -1,8 +1,8 @@
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import { type GroupedEntity } from 'loot-core/types/models';
+import type { GroupedEntity } from 'loot-core/types/models';
 
-import { type createCustomSpreadsheetProps } from './custom-spreadsheet';
+import type { createCustomSpreadsheetProps } from './custom-spreadsheet';
 import { fetchSpreadsheetQueryData } from './fetchSpreadsheetQueryData';
 import { filterEmptyRows } from './filterEmptyRows';
 import { recalculate } from './recalculate';
@@ -15,9 +15,9 @@ import {
 import {
   categoryLists,
   ReportOptions,
-  type QueryDataEntity,
 } from '@desktop-client/components/reports/ReportOptions';
-import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import type { QueryDataEntity } from '@desktop-client/components/reports/ReportOptions';
+import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 export function createGroupedSpreadsheet({
   startDate,

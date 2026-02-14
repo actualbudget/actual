@@ -43,6 +43,7 @@ export function CurrencySettings() {
         ['INR', t('Indian Rupee')],
         ['JMD', t('Jamaican Dollar')],
         ['JPY', t('Japanese Yen')],
+        ['KRW', t('South Korean Won')],
         ['LKR', t('Sri Lankan Rupee')],
         ['MDL', t('Moldovan Leu')],
         ['MYR', t('Malaysian Ringgit')],
@@ -60,6 +61,7 @@ export function CurrencySettings() {
         ['UAH', t('Ukrainian Hryvnia')],
         ['USD', t('US Dollar')],
         ['UZS', t('Uzbek Soum')],
+        ['VND', t('Vietnamese Dong')],
       ]),
     [t],
   );

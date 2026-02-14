@@ -9,21 +9,27 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { send, sendCatch } from 'loot-core/platform/client/fetch';
-import {
-  type CustomReportEntity,
-  type DashboardEntity,
+import { send } from 'loot-core/platform/client/connection';
+import type {
+  CustomReportEntity,
+  DashboardEntity,
 } from 'loot-core/types/models';
 
 import { LoadingIndicator } from './LoadingIndicator';
 import { SaveReportChoose } from './SaveReportChoose';
 import { SaveReportDelete } from './SaveReportDelete';
-import { SaveReportMenu, type SavedStatus } from './SaveReportMenu';
+import { SaveReportMenu } from './SaveReportMenu';
+import type { SavedStatus } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
 
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { useDashboardPages } from '@desktop-client/hooks/useDashboard';
 import { useReports } from '@desktop-client/hooks/useReports';
+import {
+  useCreateReportMutation,
+  useDeleteReportMutation,
+  useUpdateReportMutation,
+} from '@desktop-client/reports/mutations';
 
 type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
   customReportItems: T;
@@ -76,7 +82,7 @@ export function SaveReport({
   onReportChange,
   dashboardPages,
 }: SaveReportProps) {
-  const { data: listReports } = useReports();
+  const { data: listReports = [] } = useReports();
   const triggerRef = useRef(null);
   const [deleteMenuOpen, setDeleteMenuOpen] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
@@ -90,6 +96,9 @@ export function SaveReport({
   const [saveDashboardId, setSaveDashboardId] = useState<string | null>(
     dashboardPages.length > 0 ? dashboardPages[0].id : null,
   );
+
+  const createReportMutation = useCreateReportMutation();
+  const updateReportMutation = useUpdateReportMutation();
 
   async function onApply(cond: string) {
     const chooseSavedReport = listReports.find(r => cond === r.id);
@@ -114,29 +123,34 @@ export function SaveReport({
         return;
       }
 
-      const response = await sendCatch('report/create', newSavedReport);
+      createReportMutation.mutate(
+        { report: newSavedReport },
+        {
+          onSuccess: async id => {
+            await send('dashboard-add-widget', {
+              type: 'custom-report',
+              width: 4,
+              height: 2,
+              meta: { id },
+              dashboard_page_id: saveDashboardId,
+            });
 
-      if (response.error) {
-        setErr(response.error.message);
-        setNameMenuOpen(true);
-        return;
-      }
-      await send('dashboard-add-widget', {
-        type: 'custom-report',
-        width: 4,
-        height: 2,
-        meta: { id: response.data },
-        dashboard_page_id: saveDashboardId,
-      });
-
-      setNameMenuOpen(false);
-      onReportChange({
-        savedReport: {
-          ...newSavedReport,
-          id: response.data,
+            setNameMenuOpen(false);
+            onReportChange({
+              savedReport: {
+                ...newSavedReport,
+                id,
+              },
+              type: 'add-update',
+            });
+          },
+          onError: error => {
+            setErr(error.message);
+            setNameMenuOpen(true);
+          },
         },
-        type: 'add-update',
-      });
+      );
+
       return;
     }
 
@@ -147,25 +161,37 @@ export function SaveReport({
       ...(menuChoice === 'rename-report' ? { name: newName } : props),
     };
 
-    const response = await sendCatch('report/update', updatedReport);
-
-    if (response.error) {
-      setErr(response.error.message);
-      setNameMenuOpen(true);
-      return;
-    }
-    setNameMenuOpen(false);
-    onReportChange({
-      savedReport: updatedReport,
-      type: menuChoice === 'rename-report' ? 'rename' : 'add-update',
-    });
+    updateReportMutation.mutate(
+      { report: updatedReport },
+      {
+        onSuccess: () => {
+          setNameMenuOpen(false);
+          onReportChange({
+            savedReport: updatedReport,
+            type: menuChoice === 'rename-report' ? 'rename' : 'add-update',
+          });
+        },
+        onError: error => {
+          setErr(error.message);
+          setNameMenuOpen(true);
+        },
+      },
+    );
   };
 
+  const deleteReportMutation = useDeleteReportMutation();
+
   const onDelete = async () => {
-    setNewName('');
-    await send('report/delete', report.id);
-    onReportChange({ type: 'reset' });
-    setDeleteMenuOpen(false);
+    deleteReportMutation.mutate(
+      { id: report.id },
+      {
+        onSuccess: () => {
+          setNewName('');
+          onReportChange({ type: 'reset' });
+          setDeleteMenuOpen(false);
+        },
+      },
+    );
   };
 
   const onMenuSelect = async (item: string) => {

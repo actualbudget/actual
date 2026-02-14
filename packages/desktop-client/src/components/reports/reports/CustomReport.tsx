@@ -11,18 +11,18 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type balanceTypeOpType,
-  type CategoryEntity,
-  type CustomReportEntity,
-  type DataEntity,
-  type RuleConditionEntity,
-  type sortByOpType,
-  type TransactionEntity,
+import type {
+  balanceTypeOpType,
+  CategoryEntity,
+  CustomReportEntity,
+  DataEntity,
+  RuleConditionEntity,
+  sortByOpType,
+  TransactionEntity,
 } from 'loot-core/types/models';
-import { type TransObjectLiteral } from 'loot-core/types/util';
+import type { TransObjectLiteral } from 'loot-core/types/util';
 
 import { Warning } from '@desktop-client/components/alerts';
 import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
@@ -48,12 +48,12 @@ import { ReportLegend } from '@desktop-client/components/reports/ReportLegend';
 import {
   defaultReport,
   ReportOptions,
-  type dateRangeProps,
 } from '@desktop-client/components/reports/ReportOptions';
+import type { dateRangeProps } from '@desktop-client/components/reports/ReportOptions';
 import { ReportSidebar } from '@desktop-client/components/reports/ReportSidebar';
 import { ReportSummary } from '@desktop-client/components/reports/ReportSummary';
 import { ReportTopbar } from '@desktop-client/components/reports/ReportTopbar';
-import { type SavedStatus } from '@desktop-client/components/reports/SaveReportMenu';
+import type { SavedStatus } from '@desktop-client/components/reports/SaveReportMenu';
 import { setSessionReport } from '@desktop-client/components/reports/setSessionReport';
 import { createCustomSpreadsheet } from '@desktop-client/components/reports/spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '@desktop-client/components/reports/spreadsheets/grouped-spreadsheet';
@@ -145,12 +145,12 @@ function validateReport(
 
 export function CustomReport() {
   const params = useParams();
-  const { data: report, isLoading } = useCustomReport(params.id ?? '');
+  const { data: report, isPending } = useCustomReport(params.id);
   const showBudgetedTypeFlag = useFeatureFlag('budgetedAmountsInReport');
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const showBudgetedType = showBudgetedTypeFlag && budgetType !== 'tracking';
 
-  if (isLoading) {
+  if (isPending) {
     return <LoadingIndicator />;
   }
 
@@ -176,7 +176,7 @@ function CustomReportInner({
   const { t } = useTranslation();
   const format = useFormat();
 
-  const categories = useCategories();
+  const { data: categories = { grouped: [], list: [] } } = useCategories();
   const { isNarrowWidth } = useResponsive();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';

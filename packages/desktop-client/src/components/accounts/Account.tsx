@@ -1,11 +1,5 @@
-import React, {
-  createRef,
-  PureComponent,
-  useEffect,
-  useMemo,
-  type ReactElement,
-  type RefObject,
-} from 'react';
+import React, { createRef, PureComponent, useEffect, useMemo } from 'react';
+import type { ReactElement, RefObject } from 'react';
 import { Trans } from 'react-i18next';
 import { Navigate, useLocation, useParams } from 'react-router';
 
@@ -17,11 +11,12 @@ import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
 import { v4 as uuidv4 } from 'uuid';
 
-import { listen, send } from 'loot-core/platform/client/fetch';
+import { listen, send } from 'loot-core/platform/client/connection';
 import * as undo from 'loot-core/platform/client/undo';
-import { type UndoState } from 'loot-core/server/undo';
+import type { UndoState } from 'loot-core/server/undo';
 import { currentDay } from 'loot-core/shared/months';
-import { q, type Query } from 'loot-core/shared/query';
+import { q } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 import {
   makeAsNonChildTransactions,
   makeChild,
@@ -30,27 +25,29 @@ import {
   ungroupTransactions,
   updateTransaction,
 } from 'loot-core/shared/transactions';
-import { applyChanges, type IntegerAmount } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type NewRuleEntity,
-  type RuleActionEntity,
-  type RuleConditionEntity,
-  type TransactionEntity,
-  type TransactionFilterEntity,
+import { applyChanges } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type {
+  AccountEntity,
+  CategoryGroupEntity,
+  NewRuleEntity,
+  RuleActionEntity,
+  RuleConditionEntity,
+  TransactionEntity,
+  TransactionFilterEntity,
 } from 'loot-core/types/models';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
 
 import {
-  markAccountRead,
-  reopenAccount,
-  unlinkAccount,
-  updateAccount,
-} from '@desktop-client/accounts/accountsSlice';
-import { syncAndDownload } from '@desktop-client/app/appSlice';
-import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
+  useReopenAccountMutation,
+  useSyncAndDownloadMutation,
+  useUnlinkAccountMutation,
+  useUpdateAccountMutation,
+} from '@desktop-client/accounts';
+import { markAccountRead } from '@desktop-client/accounts/accountsSlice';
+import type { SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
 import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
 import { validateAccountName } from '@desktop-client/components/util/accountValidation';
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
@@ -62,10 +59,8 @@ import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
-import {
-  SelectedProviderWithItems,
-  type Actions,
-} from '@desktop-client/hooks/useSelected';
+import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
+import type { Actions } from '@desktop-client/hooks/useSelected';
 import {
   SplitsExpandedProvider,
   useSplitsExpanded,
@@ -83,12 +78,10 @@ import { addNotification } from '@desktop-client/notifications/notificationsSlic
 import { createPayee, getPayees } from '@desktop-client/payees/payeesSlice';
 import * as queries from '@desktop-client/queries';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import {
-  pagedQuery,
-  type PagedQuery,
-} from '@desktop-client/queries/pagedQuery';
+import { pagedQuery } from '@desktop-client/queries/pagedQuery';
+import type { PagedQuery } from '@desktop-client/queries/pagedQuery';
 import { useDispatch, useSelector } from '@desktop-client/redux';
-import { type AppDispatch } from '@desktop-client/redux/store';
+import type { AppDispatch } from '@desktop-client/redux/store';
 import { updateNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
@@ -247,12 +240,17 @@ type AccountInternalProps = {
   failedAccounts: ReturnType<typeof useFailedAccounts>;
   dateFormat: ReturnType<typeof useDateFormat>;
   payees: ReturnType<typeof usePayees>;
-  categoryGroups: ReturnType<typeof useCategories>['grouped'];
+  categoryGroups: CategoryGroupEntity[];
   hideFraction: boolean;
   accountsSyncing: string[];
   dispatch: AppDispatch;
   onSetTransfer: ReturnType<typeof useTransactionBatchActions>['onSetTransfer'];
+  onReopenAccount: (id: AccountEntity['id']) => void;
+  onUpdateAccount: (account: AccountEntity) => void;
+  onUnlinkAccount: (id: AccountEntity['id']) => void;
+  onSyncAndDownload: (accountId?: AccountEntity['id']) => void;
 };
+
 type AccountInternalState = {
   search: string;
   filterConditions: ConditionEntity[];
@@ -575,9 +573,7 @@ class AccountInternal extends PureComponent<
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(acct => acct.id === accountId);
 
-    await this.props.dispatch(
-      syncAndDownload({ accountId: account ? account.id : accountId }),
-    );
+    this.props.onSyncAndDownload(account ? account.id : accountId);
   };
 
   onImport = async () => {
@@ -763,7 +759,7 @@ class AccountInternal extends PureComponent<
       if (!account) {
         throw new Error(`Account with ID ${this.props.accountId} not found.`);
       }
-      this.props.dispatch(updateAccount({ account: { ...account, name } }));
+      this.props.onUpdateAccount({ ...account, name });
       this.setState({ nameError: '' });
     }
   };
@@ -812,7 +808,7 @@ class AccountInternal extends PureComponent<
                 accountName: account.name,
                 isViewBankSyncSettings: false,
                 onUnlink: () => {
-                  this.props.dispatch(unlinkAccount({ id: accountId }));
+                  this.props.onUnlinkAccount(accountId);
                 },
               },
             },
@@ -823,7 +819,7 @@ class AccountInternal extends PureComponent<
         this.props.dispatch(openAccountCloseModal({ accountId }));
         break;
       case 'reopen':
-        this.props.dispatch(reopenAccount({ id: accountId }));
+        this.props.onReopenAccount(accountId);
         break;
       case 'export':
         const accountName = this.getAccountTitle(account, accountId);
@@ -1030,11 +1026,7 @@ class AccountInternal extends PureComponent<
     }
 
     const lastReconciled = new Date().getTime().toString();
-    this.props.dispatch(
-      updateAccount({
-        account: { ...account, last_reconciled: lastReconciled },
-      }),
-    );
+    this.props.onUpdateAccount({ ...account, last_reconciled: lastReconciled });
 
     this.setState({
       reconcileAmount: null,
@@ -1965,7 +1957,8 @@ export function Account() {
   const params = useParams();
   const location = useLocation();
 
-  const { grouped: categoryGroups } = useCategories();
+  const { data: { grouped: categoryGroups } = { grouped: [] } } =
+    useCategories();
   const newTransactions = useSelector(
     state => state.transactions.newTransactions,
   );
@@ -2004,6 +1997,20 @@ export function Account() {
     [params.id],
   );
 
+  const { mutate: reopenAccount } = useReopenAccountMutation();
+  const onReopenAccount = (id: AccountEntity['id']) => reopenAccount({ id });
+
+  const { mutate: updateAccount } = useUpdateAccountMutation();
+  const onUpdateAccount = (account: AccountEntity) =>
+    updateAccount({ account });
+
+  const { mutate: unlinkAccount } = useUnlinkAccountMutation();
+  const onUnlinkAccount = (id: AccountEntity['id']) => unlinkAccount({ id });
+
+  const { mutate: syncAndDownload } = useSyncAndDownloadMutation();
+  const onSyncAndDownload = (id?: AccountEntity['id']) =>
+    syncAndDownload({ id });
+
   return (
     <SchedulesProvider query={schedulesQuery}>
       <SplitsExpandedProvider
@@ -2040,6 +2047,10 @@ export function Account() {
           categoryId={location?.state?.categoryId}
           location={location}
           savedFilters={savedFiters}
+          onReopenAccount={onReopenAccount}
+          onUpdateAccount={onUpdateAccount}
+          onUnlinkAccount={onUnlinkAccount}
+          onSyncAndDownload={onSyncAndDownload}
         />
       </SplitsExpandedProvider>
     </SchedulesProvider>

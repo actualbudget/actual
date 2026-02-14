@@ -5,9 +5,8 @@ import React, {
   useMemo,
   useReducer,
   useRef,
-  type Dispatch,
-  type ReactNode,
 } from 'react';
+import type { Dispatch, ReactNode } from 'react';
 
 type SplitMode = 'collapse' | 'expand';
 type SplitState = {

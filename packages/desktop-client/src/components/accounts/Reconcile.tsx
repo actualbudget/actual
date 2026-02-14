@@ -1,4 +1,5 @@
-import React, { useEffect, useState, type FormEvent } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { Form } from 'react-aria-components';
 import { Trans } from 'react-i18next';
 
@@ -13,10 +14,10 @@ import { View } from '@actual-app/components/view';
 import { format as formatDate } from 'date-fns';
 import { t } from 'i18next';
 
-import { type Query } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 import { tsToRelativeTime } from 'loot-core/shared/util';
-import { type AccountEntity } from 'loot-core/types/models';
-import { type TransObjectLiteral } from 'loot-core/types/util';
+import type { AccountEntity } from 'loot-core/types/models';
+import type { TransObjectLiteral } from 'loot-core/types/util';
 
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';

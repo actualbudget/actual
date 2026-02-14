@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
@@ -210,7 +211,7 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             <FeatureToggle
               flag="budgetAnalysisReport"
-              feedbackLink="https://github.com/actualbudget/actual/pull/6137"
+              feedbackLink="https://github.com/actualbudget/actual/pull/6742"
             >
               <Trans>Budget Analysis Report</Trans>
             </FeatureToggle>
@@ -224,7 +225,7 @@ export function ExperimentalFeatures() {
               <ServerFeatureToggle
                 prefName="flags.plugins"
                 disableToggle
-                feedbackLink="https://github.com/actualbudget/actual/issues/6742"
+                feedbackLink="https://github.com/actualbudget/actual/issues/5950"
               >
                 <Trans>Client-Side plugins (soon)</Trans>
               </ServerFeatureToggle>

@@ -8,7 +8,7 @@ import {
   useMultiuserEnabled,
 } from '@desktop-client/components/ServerContext';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
-import { TestProvider } from '@desktop-client/redux/mock';
+import { TestProviders } from '@desktop-client/mocks';
 
 vi.mock('@desktop-client/hooks/useSyncServerStatus', () => ({
   useSyncServerStatus: vi.fn(),
@@ -28,7 +28,7 @@ describe('AuthSettings', () => {
     vi.mocked(useMultiuserEnabled).mockReturnValue(false);
     vi.mocked(useLoginMethod).mockReturnValue('password');
 
-    const { container } = render(<AuthSettings />, { wrapper: TestProvider });
+    const { container } = render(<AuthSettings />, { wrapper: TestProviders });
 
     expect(container.firstChild).toBeNull();
   });
@@ -42,7 +42,7 @@ describe('AuthSettings', () => {
       vi.mocked(useMultiuserEnabled).mockReturnValue(false);
       vi.mocked(useLoginMethod).mockReturnValue('password');
 
-      render(<AuthSettings />, { wrapper: TestProvider });
+      render(<AuthSettings />, { wrapper: TestProviders });
 
       const startUsingButton = screen.getByRole('button', {
         name: /start using openid/i,
@@ -59,7 +59,7 @@ describe('AuthSettings', () => {
       vi.mocked(useMultiuserEnabled).mockReturnValue(false);
       vi.mocked(useLoginMethod).mockReturnValue('openid');
 
-      render(<AuthSettings />, { wrapper: TestProvider });
+      render(<AuthSettings />, { wrapper: TestProviders });
 
       const disableButton = screen.getByRole('button', {
         name: /disable openid/i,
@@ -82,7 +82,7 @@ describe('AuthSettings', () => {
       vi.mocked(useMultiuserEnabled).mockReturnValue(false);
       vi.mocked(useLoginMethod).mockReturnValue('password');
 
-      render(<AuthSettings />, { wrapper: TestProvider });
+      render(<AuthSettings />, { wrapper: TestProviders });
 
       const startUsingButton = screen.getByRole('button', {
         name: /start using openid/i,
@@ -99,7 +99,7 @@ describe('AuthSettings', () => {
       vi.mocked(useMultiuserEnabled).mockReturnValue(false);
       vi.mocked(useLoginMethod).mockReturnValue('openid');
 
-      render(<AuthSettings />, { wrapper: TestProvider });
+      render(<AuthSettings />, { wrapper: TestProviders });
 
       const disableButton = screen.getByRole('button', {
         name: /disable openid/i,
@@ -116,7 +116,7 @@ describe('AuthSettings', () => {
       vi.mocked(useMultiuserEnabled).mockReturnValue(true);
       vi.mocked(useLoginMethod).mockReturnValue('openid');
 
-      render(<AuthSettings />, { wrapper: TestProvider });
+      render(<AuthSettings />, { wrapper: TestProviders });
 
       const warningText = screen.getByText(
         /disabling openid will deactivate multi-user mode\./i,

@@ -1,13 +1,10 @@
 // @ts-strict-ignore
-import React, {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ComponentProps,
-  type HTMLProps,
-  type KeyboardEvent,
-  type ReactNode,
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type {
+  ComponentProps,
+  HTMLProps,
+  KeyboardEvent,
+  ReactNode,
 } from 'react';
 
 import { Button } from '@actual-app/components/button';
@@ -19,7 +16,8 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
-import Downshift, { type StateChangeTypes } from 'downshift';
+import Downshift from 'downshift';
+import type { StateChangeTypes } from 'downshift';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 
