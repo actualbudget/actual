@@ -21,7 +21,7 @@ export type PeriodicTemplate = {
     period: 'day' | 'week' | 'month' | 'year';
     amount: number;
   };
-  starting?: string;
+  starting: string;
   limit?: {
     amount: number;
     hold: boolean;
