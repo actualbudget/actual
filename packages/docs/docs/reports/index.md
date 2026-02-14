@@ -10,7 +10,7 @@ If one dashboard is not enough, you can make as many dashboards as you like, eac
 All of the available reports can be tuned with filters and live or static date ranges.
 This flexibility gives each user the tools they need to understand their finances in a very deep, very personal way.
 
-![Reports Dashboard](/img/reports/reports-dashboard.webp)
+![Default Reports Dashboard](/img/reports/dashboard.png)
 
 Currently, Actual comes with the following built-in widgets and reports:
 
