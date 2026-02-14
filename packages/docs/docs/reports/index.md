@@ -3,7 +3,7 @@
 Actual features a robust report dashboard.
 It is here to allow each user to do deep analysis of their transaction data.
 
-A default dashboard is provided to get you aquainted with the capabilities of the Actual reporting system.
+A default dashboard is provided to get you acquainted with the capabilities of the Actual reporting system.
 The dashboard is fully customizable, with many available reports and widgets.
 If one dashboard is not enough, you can make as many dashboards as you like, each with it's own set of reports and widgets.
 
