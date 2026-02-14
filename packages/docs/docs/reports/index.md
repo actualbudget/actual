@@ -29,7 +29,7 @@ The following are available as experimental features:
 
 ## Cash Flow Graph
 
-![Cash flow Report](/img/reports/cash-flow.webp)
+![Cash flow Graph](/img/reports/cash-flow.webp)
 
 Cash flow shows your spending over time. It only looks at budgeted accounts and shows their balance over time, and includes separate income and expense visualizations. It's a quick way to see how your income and expenses affected your available money over time. Your budgeted accounts are considered to be "cash on hand," so this gives you a picture of how available money fluctuates.
 
