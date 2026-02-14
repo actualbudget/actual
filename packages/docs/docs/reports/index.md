@@ -49,7 +49,7 @@ A spending analysis report tracks and compares expenses over a specified period,
 
 ![Text Widget](/img/reports/text-widget.webp)
 
-Use markdown to generate a text box to use as report headings and organizational labels.
+Use Markdown to generate a text box to use as report headings and organizational labels.
 
 ## Summary Card
 
