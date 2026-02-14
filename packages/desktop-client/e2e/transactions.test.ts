@@ -62,26 +62,56 @@ test.describe('Transactions', () => {
       const autocomplete = page.getByTestId('autocomplete');
       await expect(autocomplete).toMatchThemeScreenshots();
 
+      // Ensure that autocomplete filters properly
+      await page.keyboard.type('C');
+      await expect(autocomplete).toMatchThemeScreenshots();
+
       // Select the active item
       await page.getByTestId('Clothing-category-item').click();
       await filterTooltip.applyButton.click();
 
       // Assert that there are only clothing transactions
-      await expect(accountPage.getNthTransaction(0).category).toHaveText(
-        'Clothing',
-      );
-      await expect(accountPage.getNthTransaction(1).category).toHaveText(
-        'Clothing',
-      );
-      await expect(accountPage.getNthTransaction(2).category).toHaveText(
-        'Clothing',
-      );
-      await expect(accountPage.getNthTransaction(3).category).toHaveText(
-        'Clothing',
-      );
-      await expect(accountPage.getNthTransaction(4).category).toHaveText(
-        'Clothing',
-      );
+      for (let i = 0; i < 5; i++) {
+        await expect(accountPage.getNthTransaction(i).category).toHaveText(
+          'Clothing',
+        );
+      }
+      await expect(page).toMatchThemeScreenshots();
+    });
+
+    test('by category group', async () => {
+      // Use Capital One Checking because it has transactions that aren't just Clothing
+      accountPage = await navigation.goToAccountPage('Capital One Checking');
+
+      const filterTooltip = await accountPage.filterBy('Category');
+
+      await filterTooltip.locator
+        .getByRole('button', { name: 'Category', exact: true })
+        .click();
+      await page
+        .getByRole('button', { name: 'Category group', exact: true })
+        .click();
+
+      await expect(filterTooltip.locator).toMatchThemeScreenshots();
+
+      // Type in the autocomplete box
+      const autocomplete = page.getByTestId('autocomplete');
+      await expect(autocomplete).toMatchThemeScreenshots();
+
+      // Ensure that autocomplete filters properly
+      await page.keyboard.type('U');
+      await expect(autocomplete).toMatchThemeScreenshots();
+
+      // Select the active item
+      await page.getByTestId('Usual Expenses-category-group-item').click();
+      await filterTooltip.applyButton.click();
+
+      // Assert that there are only transactions with categories in the Usual Expenses group
+      for (let i = 0; i < 5; i++) {
+        await expect(accountPage.getNthTransaction(i).category).toHaveText(
+          /^(Savings|Medical|Gift|General|Clothing|Entertainment|Restaurants|Food)$/,
+        );
+      }
       await expect(page).toMatchThemeScreenshots();
     });
 

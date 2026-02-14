@@ -42,6 +42,28 @@ yarn start:desktop
 - Use `yarn workspace <workspace-name> run <command>` for workspace-specific tasks
 - Tests run once and exit by default (using `vitest --run`)
 
+### ⚠️ CRITICAL REQUIREMENT: AI-Generated Commit Messages and PR Titles
+
+**THIS IS A MANDATORY REQUIREMENT THAT MUST BE FOLLOWED WITHOUT EXCEPTION:**
+
+- **ALL commit messages MUST be prefixed with `[AI]`**
+- **ALL pull request titles MUST be prefixed with `[AI]`**
+
+**Examples:**
+
+- ✅ `[AI] Fix type error in account validation`
+- ✅ `[AI] Add support for new transaction categories`
+- ❌ `Fix type error in account validation` (MISSING PREFIX - NOT ALLOWED)
+- ❌ `Add support for new transaction categories` (MISSING PREFIX - NOT ALLOWED)
+
+**This requirement applies to:**
+
+- Every single commit message created by AI agents
+- Every single pull request title created by AI agents
+- No exceptions are permitted
+
+**This is a hard requirement that agents MUST follow. Failure to include the `[AI]` prefix is a violation of these instructions.**
+
 ### Task Orchestration with Lage
 
 The project uses **[lage](https://microsoft.github.io/lage/)** (a task runner for JavaScript monorepos) to efficiently run tests and other tasks across multiple workspaces:
@@ -338,6 +360,8 @@ Always maintain newlines between import groups.
 
 **Git Commands:**
 
+- **MANDATORY: ALL commit messages MUST be prefixed with `[AI]`** - This is a hard requirement with no exceptions
+- **MANDATORY: ALL pull request titles MUST be prefixed with `[AI]`** - This is a hard requirement with no exceptions
 - Never update git config
 - Never run destructive git operations (force push, hard reset) unless explicitly requested
 - Never skip hooks (--no-verify, --no-gpg-sign)
@@ -541,6 +565,7 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 
 Before committing changes, ensure:
 
+- [ ] **MANDATORY: Commit message is prefixed with `[AI]`** - This is a hard requirement with no exceptions
 - [ ] `yarn typecheck` passes
 - [ ] `yarn lint:fix` has been run
 - [ ] Relevant tests pass
@@ -555,6 +580,9 @@ Before committing changes, ensure:
 
 When creating pull requests:
 
+- **MANDATORY PREFIX REQUIREMENT**: **ALL pull request titles MUST be prefixed with `[AI]`** - This is a hard requirement that MUST be followed without exception
+  - ✅ Correct: `[AI] Fix type error in account validation`
+  - ❌ Incorrect: `Fix type error in account validation` (MISSING PREFIX - NOT ALLOWED)
 - **AI-Generated PRs**: If you create a PR using AI assistance, add the **"AI generated"** label to the pull request. This helps maintainers understand the nature of the contribution.
 
 ## Code Review Guidelines

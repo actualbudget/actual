@@ -4,7 +4,7 @@ import { t } from 'i18next';
 
 import { listen, send } from 'loot-core/platform/client/connection';
 
-import { reloadAccounts } from './accounts/accountsSlice';
+import { accountQueries } from './accounts';
 import { resetSync, sync } from './app/appSlice';
 import { categoryQueries } from './budget';
 import {
@@ -86,7 +86,9 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
       }
 
       if (tables.includes('accounts')) {
-        store.dispatch(reloadAccounts());
+        queryClient.invalidateQueries({
+          queryKey: accountQueries.lists(),
+        });
       }
     } else if (event.type === 'error') {
       let notif: Notification | null = null;

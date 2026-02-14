@@ -20,6 +20,7 @@ import type {
 } from 'loot-core/types/models';
 import type { Template } from 'loot-core/types/models/templates';
 
+import { accountQueries } from '@desktop-client/accounts';
 import { resetApp, setAppState } from '@desktop-client/app/appSlice';
 import type { SelectLinkedAccountsModalProps } from '@desktop-client/components/modals/SelectLinkedAccountsModal';
 import { createAppAsyncThunk } from '@desktop-client/redux';
@@ -223,6 +224,19 @@ export type Modal =
         title?: string;
         categoryGroups?: CategoryGroupEntity[];
         onSelect: (categoryId: string, categoryName: string) => void;
+        month?: string | undefined;
+        showHiddenCategories?: boolean;
+        closeOnSelect?: boolean;
+        clearOnSelect?: boolean;
+        onClose?: () => void;
+      };
+    }
+  | {
+      name: 'category-group-autocomplete';
+      options: {
+        title?: string;
+        categoryGroups?: CategoryGroupEntity[];
+        onSelect: (categoryGroupId: string, categoryGroupName: string) => void;
         month?: string | undefined;
         showHiddenCategories?: boolean;
         closeOnSelect?: boolean;
@@ -593,10 +607,7 @@ type OpenAccountCloseModalPayload = {
 
 export const openAccountCloseModal = createAppAsyncThunk(
   `${sliceName}/openAccountCloseModal`,
-  async (
-    { accountId }: OpenAccountCloseModalPayload,
-    { dispatch, getState },
-  ) => {
+  async ({ accountId }: OpenAccountCloseModalPayload, { dispatch, extra }) => {
     const {
       balance,
       numTransactions,
@@ -606,9 +617,9 @@ export const openAccountCloseModal = createAppAsyncThunk(
         id: accountId,
       },
     );
-    const account = getState().account.accounts.find(
-      acct => acct.id === accountId,
-    );
+    const queryClient = extra.queryClient;
+    const accounts = await queryClient.ensureQueryData(accountQueries.list());
+    const account = accounts.find(acct => acct.id === accountId);
 
     if (!account) {
       throw new Error(`Account with ID ${accountId} does not exist.`);
