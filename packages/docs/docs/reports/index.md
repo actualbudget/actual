@@ -1,4 +1,4 @@
-# Reports Dashboards
+# Reports Dashboard
 
 Actual features a robust report dashboard.
 It is here to allow each user to do deep analysis of their transaction data.
