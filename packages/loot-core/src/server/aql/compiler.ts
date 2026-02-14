@@ -179,7 +179,7 @@ function transformField(state, name) {
     pathInfo = refPathInfo;
   }
 
-  const fieldStr = pathInfo.tableId + '.' + field;
+  const fieldStr = pathInfo.tableId + '.' + quoteAlias(field);
   return typed(fieldStr, fieldDesc.type);
 }
 

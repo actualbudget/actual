@@ -10,6 +10,7 @@ import normalizePathSep from 'slash';
 import { v4 as uuidv4 } from 'uuid';
 
 import { logger } from '../../platform/server/log';
+import { camelToTitleCase } from '../../shared/accounts';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, groupBy, sortByKey } from '../../shared/util';
 
@@ -28,6 +29,9 @@ async function importAccounts(
       if (!account.isTombstone) {
         const id = await actual.createAccount({
           name: account.accountName,
+          subgroup: account.accountType
+            ? camelToTitleCase(account.accountType)
+            : undefined,
           offbudget: account.onBudget ? false : true,
           closed: account.hidden ? true : false,
         });

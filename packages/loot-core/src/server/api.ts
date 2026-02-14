@@ -583,6 +583,8 @@ handlers['api/account-create'] = withMutation(async function ({
   checkFileOpen();
   return handlers['account-create']({
     name: account.name,
+    type: account.type,
+    subgroup: account.subgroup,
     offBudget: account.offbudget,
     closed: account.closed,
     // Current the API expects an amount but it really should expect
@@ -593,7 +595,14 @@ handlers['api/account-create'] = withMutation(async function ({
 
 handlers['api/account-update'] = withMutation(async function ({ id, fields }) {
   checkFileOpen();
-  return db.updateAccount({ id, ...accountModel.fromExternal(fields) });
+  const account = accountModel.fromExternal(fields);
+  return handlers['account-update']({
+    id,
+    name: account.name,
+    type: account.type,
+    subgroup: account.subgroup,
+    last_reconciled: account.last_reconciled,
+  });
 });
 
 handlers['api/account-close'] = withMutation(async function ({

@@ -26,6 +26,7 @@ import {
 } from '../aql';
 import {
   accountModel,
+  accountSubgroupModel,
   categoryGroupModel,
   categoryModel,
   payeeModel,
@@ -36,6 +37,7 @@ import { batchMessages, sendMessages } from '../sync';
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
 import type {
   DbAccount,
+  DbAccountSubgroup,
   DbBank,
   DbCategory,
   DbCategoryGroup,
@@ -719,11 +721,54 @@ export function getAccounts() {
       bankId: DbBank['id'];
     }
   >(
-    `SELECT a.*, b.name as bankName, b.id as bankId FROM accounts a
+    `SELECT a.*, asg.name as subgroup, b.name as bankName, b.id as bankId FROM accounts a
+       LEFT JOIN account_subgroups asg ON a.subgroup = asg.id
        LEFT JOIN banks b ON a.bank = b.id
        WHERE a.tombstone = 0
        ORDER BY sort_order, name`,
   );
+}
+
+export async function getOrCreateAccountSubgroup(
+  subgroupName: string,
+): Promise<DbAccountSubgroup['id']> {
+  const trimmed = subgroupName.trim();
+  if (!trimmed) {
+    throw new Error('Account subgroup name is required');
+  }
+
+  const existingSubgroup = await first<Pick<DbAccountSubgroup, 'id'>>(
+    `
+      SELECT id
+      FROM account_subgroups
+      WHERE UPPER(name) = ?
+      LIMIT 1
+    `,
+    [trimmed.toUpperCase()],
+  );
+  if (existingSubgroup) {
+    return existingSubgroup.id;
+  }
+
+  const lastSubgroup = await first<Pick<DbAccountSubgroup, 'sort_order'>>(
+    `
+      SELECT sort_order
+      FROM account_subgroups
+      ORDER BY sort_order DESC, id DESC
+      LIMIT 1
+    `,
+  );
+  const sort_order =
+    (lastSubgroup ? lastSubgroup.sort_order : 0) + SORT_INCREMENT;
+
+  const subgroup = {
+    ...accountSubgroupModel.validate({
+      name: trimmed,
+    }),
+    sort_order,
+  };
+
+  return insertWithUUID('account_subgroups', subgroup);
 }
 
 export async function insertAccount(account) {

@@ -1,4 +1,5 @@
 import type {
+  AccountSubgroupEntity,
   CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
@@ -11,7 +12,13 @@ import {
   schema,
   schemaConfig,
 } from './aql';
-import type { DbAccount, DbCategory, DbCategoryGroup, DbPayee } from './db';
+import type {
+  DbAccount,
+  DbAccountSubgroup,
+  DbCategory,
+  DbCategoryGroup,
+  DbPayee,
+} from './db';
 import { ValidationError } from './errors';
 
 export function requiredFields<T extends object, K extends keyof T>(
@@ -66,6 +73,51 @@ export const accountModel = {
     );
 
     return account as DbAccount;
+  },
+};
+
+export const accountSubgroupModel = {
+  validate(
+    accountSubgroup: Partial<DbAccountSubgroup>,
+    { update }: { update?: boolean } = {},
+  ): DbAccountSubgroup {
+    requiredFields(
+      'accountSubgroup',
+      accountSubgroup,
+      update ? ['name'] : ['name'],
+      update,
+    );
+
+    const { sort_order: _sort_order, ...rest } = accountSubgroup;
+    return { ...rest } as DbAccountSubgroup;
+  },
+  toDb(
+    accountSubgroup: AccountSubgroupEntity,
+    { update }: { update?: boolean } = {},
+  ): DbAccountSubgroup {
+    return (
+      update
+        ? convertForUpdate(
+            schema,
+            schemaConfig,
+            'account_subgroups',
+            accountSubgroup,
+          )
+        : convertForInsert(
+            schema,
+            schemaConfig,
+            'account_subgroups',
+            accountSubgroup,
+          )
+    ) as DbAccountSubgroup;
+  },
+  fromDb(accountSubgroup: DbAccountSubgroup): AccountSubgroupEntity {
+    return convertFromSelect(
+      schema,
+      schemaConfig,
+      'account_subgroups',
+      accountSubgroup,
+    ) as AccountSubgroupEntity;
   },
 };
 

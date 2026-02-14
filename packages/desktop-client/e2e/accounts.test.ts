@@ -29,6 +29,7 @@ test.describe('Accounts', () => {
   test('creates a new account and views the initial balance transaction', async () => {
     accountPage = await navigation.createAccount({
       name: 'New Account',
+      type: 'Checking',
       offBudget: false,
       balance: 100,
     });
@@ -40,6 +41,31 @@ test.describe('Accounts', () => {
     await expect(transaction.debit).toHaveText('');
     await expect(transaction.credit).toHaveText('100.00');
     await expect(page).toMatchThemeScreenshots();
+  });
+
+  test('supports Home and End keys in account subgroup input', async () => {
+    await page.getByRole('button', { name: 'Add account' }).click();
+    await page.getByRole('button', { name: 'Create a local account' }).click();
+
+    const subgroupInput = page.getByLabel('Account Subgroup');
+    await subgroupInput.fill('Checking');
+    await subgroupInput.press('ArrowLeft');
+    await subgroupInput.press('ArrowLeft');
+
+    await subgroupInput.press('Home');
+    const startCaretPosition = await subgroupInput.evaluate(
+      element => (element as HTMLInputElement).selectionStart,
+    );
+    expect(startCaretPosition).toBe(0);
+
+    await subgroupInput.press('End');
+    const [endCaretPosition, inputLength] = await subgroupInput.evaluate(
+      element => {
+        const input = element as HTMLInputElement;
+        return [input.selectionStart, input.value.length];
+      },
+    );
+    expect(endCaretPosition).toBe(inputLength);
   });
 
   test('closes an account', async () => {
@@ -118,7 +144,9 @@ test.describe('Accounts', () => {
 
     async function importCsv(screenshot = false) {
       const fileChooserPromise = page.waitForEvent('filechooser');
-      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      await accountPage.page
+        .getByRole('button', { name: 'Import', exact: true })
+        .click();
 
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
@@ -144,7 +172,9 @@ test.describe('Accounts', () => {
       await importCsv(false);
 
       const fileChooserPromise = page.waitForEvent('filechooser');
-      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      await accountPage.page
+        .getByRole('button', { name: 'Import', exact: true })
+        .click();
 
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
@@ -169,7 +199,9 @@ test.describe('Accounts', () => {
 
     test('import notes checkbox is not shown for CSV files', async () => {
       const fileChooserPromise = page.waitForEvent('filechooser');
-      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      await accountPage.page
+        .getByRole('button', { name: 'Import', exact: true })
+        .click();
 
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(join(__dirname, 'data/test.csv'));

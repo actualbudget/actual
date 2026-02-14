@@ -82,6 +82,25 @@ export function closedAccountBalance() {
   } satisfies Binding<'account', 'closed-accounts-balance'>;
 }
 
+export function accountSubgroupBalance(
+  subgroupName: string,
+  offbudget: boolean,
+) {
+  return {
+    name: accountParametrizedField('balance')(
+      `subgroup-${offbudget ? 'off' : 'on'}-${subgroupName}`,
+    ),
+    query: q('transactions')
+      .filter({
+        'account.subgroup.name': subgroupName,
+        'account.offbudget': offbudget,
+        'account.closed': false,
+      })
+      .options({ splits: 'none' })
+      .calculate({ $sum: '$amount' }),
+  } satisfies Binding<'account', 'balance'>;
+}
+
 export function categoryBalance(
   categoryId: CategoryEntity['id'],
   month: string,

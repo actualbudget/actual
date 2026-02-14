@@ -164,6 +164,7 @@ export function CreateAccountModal({
         orgDomain: string | null;
         orgId: string;
         balance: number;
+        subtype?: string | null;
       };
 
       for (const oldAccount of results.accounts) {
@@ -178,6 +179,7 @@ export function CreateAccountModal({
               ? oldAccount.bankData.automaticallyInvestedBalance +
                 oldAccount.bankData.closingBalance
               : oldAccount.balance,
+          subtype: oldAccount.subtype ?? null,
         };
 
         newAccounts.push(newAccount);

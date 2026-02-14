@@ -16,6 +16,7 @@ import { View } from '@actual-app/components/view';
 import { toRelaxedNumber } from 'loot-core/shared/util';
 
 import { createAccount } from '@desktop-client/accounts/accountsSlice';
+import { AccountSubgroupAutocomplete } from '@desktop-client/components/autocomplete/AccountSubgroupAutocomplete';
 import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
@@ -37,6 +38,7 @@ export function CreateLocalAccountModal() {
   const dispatch = useDispatch();
   const accounts = useAccounts();
   const [name, setName] = useState('');
+  const [subgroup, setSubgroup] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
 
@@ -68,6 +70,7 @@ export function CreateLocalAccountModal() {
       const id = await dispatch(
         createAccount({
           name,
+          subgroup: subgroup || undefined,
           balance: toRelaxedNumber(balance),
           offBudget: offbudget,
         }),
@@ -91,6 +94,7 @@ export function CreateLocalAccountModal() {
                 <InitialFocus>
                   <Input
                     name="name"
+                    autoFocus
                     value={name}
                     onChangeValue={setName}
                     onUpdate={value => {
@@ -106,6 +110,39 @@ export function CreateLocalAccountModal() {
                   {nameError}
                 </FormError>
               )}
+
+              <InlineField label={t('Subgroup')} width="100%">
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    flex: 1,
+                    minWidth: 0,
+                  }}
+                >
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <AccountSubgroupAutocomplete
+                      value={subgroup}
+                      onSelect={value => {
+                        if (typeof value === 'string') {
+                          setSubgroup(value);
+                        }
+                      }}
+                    />
+                  </View>
+                  <Text
+                    style={{
+                      color: theme.pageTextLight,
+                      fontSize: 11,
+                      marginLeft: 8,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    <Trans>Optional</Trans>
+                  </Text>
+                </View>
+              </InlineField>
 
               <View
                 style={{

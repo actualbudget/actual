@@ -30,7 +30,7 @@ test.describe('Mobile Accounts', () => {
     const accountsPage = await navigation.goToAccountsPage();
     await accountsPage.waitFor();
 
-    const account = await accountsPage.getNthAccount(1);
+    const account = await accountsPage.getAccountByName('Ally Savings');
 
     await expect(account.name).toHaveText('Ally Savings');
     await expect(account.balance).toHaveText('7,653.00');

@@ -522,6 +522,15 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                   onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
                     const { onKeyDown } = inputProps || {};
 
+                    // Preserve native cursor movement in text inputs.
+                    // Downshift also handles these keys for menu navigation,
+                    // which prevents jumping to line start/end in some cases.
+                    if (e.key === 'Home' || e.key === 'End') {
+                      e.nativeEvent['preventDownshiftDefault'] = true;
+                      onKeyDown?.(e);
+                      return;
+                    }
+
                     // If the dropdown is open, an item is highlighted, and the user
                     // pressed enter, always capture that and handle it ourselves
                     if (isOpen) {

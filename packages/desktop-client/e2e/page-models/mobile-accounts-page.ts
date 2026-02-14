@@ -31,6 +31,31 @@ export class MobileAccountsPage {
   }
 
   /**
+   * Get the name and balance of a specific account by exact account name.
+   */
+  async getAccountByName(accountName: string) {
+    const accountCount = await this.accountListItems.count();
+
+    for (let idx = 0; idx < accountCount; idx++) {
+      const accountRow = this.accountListItems.nth(idx);
+      const name = (
+        await accountRow.getByTestId('account-name').innerText()
+      ).trim();
+
+      if (name === accountName) {
+        return {
+          name: accountRow.getByTestId('account-name'),
+          balance: accountRow.getByTestId('account-balance'),
+        };
+      }
+    }
+
+    throw new Error(
+      `Account "${accountName}" not found in mobile account list.`,
+    );
+  }
+
+  /**
    * Click on the n-th account to open it up
    */
   async openNthAccount(idx: number) {
