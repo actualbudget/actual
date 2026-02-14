@@ -60,7 +60,7 @@ class ProcessorRegistry {
 
 export const registry = new ProcessorRegistry();
 
-//This is a decorator that allows a class to be added to the registry when in 'app-enablebanking/banks/*.banks.*'.
+//This is a decorator that allows a class to be added to the registry when in 'app-enablebanking/banks/*.bank.*'.
 export function BankProcessorFor(bankIds: string[]) {
   return function <T extends new () => BankProcessor>(ctor: T) {
     for (const bankId of bankIds) {

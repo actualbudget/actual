@@ -128,10 +128,14 @@ app.get('/auth_callback', async (req, res) => {
     `);
   } catch (err) {
     console.error('Error in auth_callback:', err);
-    enableBankingservice.failSession(
-      state,
-      err instanceof Error ? err.message : 'authorization_failed',
-    );
+    try {
+      enableBankingservice.failSession(
+        state,
+        err instanceof Error ? err.message : 'authorization_failed',
+      );
+    } catch (failError) {
+      console.error('Failed to mark session as failed:', failError);
+    }
     res.status(500).send(`
       <!DOCTYPE html>
       <html>
@@ -329,7 +333,7 @@ post('/transactions', async (req: Request) => {
   const { startDate, endDate, account_id, bank_id } = req.body;
 
   if (!account_id) {
-    throw badRequestVariableError('account_id', '/enable_banking/transactions');
+    throw badRequestVariableError('account_id', '/transactions');
   }
   const transactions = await enableBankingservice.getTransactions(
     account_id,

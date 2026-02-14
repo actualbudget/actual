@@ -40,7 +40,10 @@ export function selectEnableBankingAccounts(
       };
     },
   );
-  if (accountEntity && accountEntity.official_name) {
+  if (
+    accountEntity &&
+    (accountEntity.account_id || accountEntity.official_name)
+  ) {
     //Find appropriate account
     const account = accounts.find(tokenAccount => {
       // Try matching on account_id first (strongest match)

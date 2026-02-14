@@ -70,7 +70,7 @@ function selectPreferredBalance(
   }
 
   const preferredBalanceTypes = ['ITBD', 'ITAV', 'CLBD'];
-  const sorted = balances.sort((a, b) => {
+  const sorted = [...balances].sort((a, b) => {
     const aIndex = preferredBalanceTypes.indexOf(a.balance_type);
     const bIndex = preferredBalanceTypes.indexOf(b.balance_type);
     return (
@@ -322,13 +322,18 @@ export const enableBankingservice = {
     exp: number,
   ): Promise<EnableBankingAuthenticationStartResponse> => {
     const aspspData = await enableBankingservice.getASPSP(country, aspsp);
+    // Minimum consent duration in seconds
+    const MIN_CONSENT_SECONDS = 60;
     // Validate and clamp maximum_consent_validity
-    const maxValidity =
+    const allowedWindow = Math.max(
+      MIN_CONSENT_SECONDS,
       typeof aspspData.maximum_consent_validity === 'number' &&
-      aspspData.maximum_consent_validity >= 3600
-        ? aspspData.maximum_consent_validity
-        : 3600;
-    exp = Math.min(exp, maxValidity - 3600);
+        aspspData.maximum_consent_validity >= 3600
+        ? aspspData.maximum_consent_validity - 3600
+        : 0,
+    );
+    exp = Math.min(exp, allowedWindow);
+    exp = Math.max(exp, MIN_CONSENT_SECONDS);
 
     const valid_until = new Date();
     valid_until.setSeconds(valid_until.getSeconds() + exp);
@@ -491,13 +496,17 @@ export const enableBankingservice = {
 
     const transactions: components['schemas']['Transaction'][] = [];
     do {
-      const { data }: { data?: components['schemas']['HalTransactions'] } =
-        await client.GET('/accounts/{account_id}/transactions', {
-          params: {
-            path: { account_id },
-            query,
-          },
-        });
+      const { data } = await apiLimiter(
+        async (): Promise<{
+          data?: components['schemas']['HalTransactions'];
+        }> =>
+          client.GET('/accounts/{account_id}/transactions', {
+            params: {
+              path: { account_id },
+              query,
+            },
+          }),
+      );
       isDefined(data);
       transactions.push(...(data.transactions || []));
       query.continuation_key = data.continuation_key;

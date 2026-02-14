@@ -133,7 +133,7 @@ const AspspSelector = ({
       !autoTriggeredRef.current
     ) {
       autoTriggeredRef.current = true;
-      onLink();
+      void onLink();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [country, aspsp]); // Only trigger when country/aspsp are set
@@ -444,6 +444,9 @@ export function EnableBankingSetupAccountModal({
 
   const { isLoading: isConfigurationLoading } = useEnableBankingStatus();
 
+  // Ref to track timeout for reopening modal during credential error handling
+  const reopenTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Stop polling when modal is unmounted
   useEffect(() => {
     return () => {
@@ -461,9 +464,6 @@ export function EnableBankingSetupAccountModal({
   const [authenticationStartResponse, setAuthenticationStartResponse] =
     useState<EnableBankingAuthenticationStartResponse | null>(null);
   const [token, setToken] = useState<EnableBankingToken | null>(null);
-
-  // Ref to track timeout for reopening modal during credential error handling
-  const reopenTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const resetState = () => {
     setPhase('checkingAvailable');
