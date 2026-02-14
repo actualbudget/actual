@@ -346,7 +346,7 @@ async function getNearbyPayees({
         created_at: row.created_at,
         distance: row.distance,
       },
-    } as PayeeEntity;
+    } satisfies PayeeEntity;
   });
 
   return nearbyPayees;
