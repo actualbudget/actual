@@ -410,3 +410,29 @@ export function useImportDashboardPageMutation() {
     },
   });
 }
+
+type MoveDashboardPagePayload = {
+  id: DashboardPageEntity['id'];
+  targetId: DashboardPageEntity['id'] | null;
+};
+
+export function useMoveDashboardPageMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({ id, targetId }: MoveDashboardPagePayload) => {
+      await sendThrow('dashboard-page-move', { id, targetId });
+    },
+    onSuccess: () => invalidateDashboardQueries(queryClient),
+    onError: error => {
+      console.error('Error moving dashboard page:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error moving the dashboard page. Please try again.'),
+        error,
+      );
+    },
+  });
+}

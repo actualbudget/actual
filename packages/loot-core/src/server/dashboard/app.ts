@@ -6,6 +6,7 @@ import * as fs from '../../platform/server/fs';
 import { DEFAULT_DASHBOARD_STATE } from '../../shared/dashboard';
 import { q } from '../../shared/query';
 import type {
+  DashboardPageEntity,
   DashboardWidgetEntity,
   ExportImportCustomReportWidget,
   ExportImportDashboard,
@@ -346,6 +347,16 @@ async function importDashboard({
   }
 }
 
+async function moveDashboardPage({
+  id,
+  targetId,
+}: {
+  id: DashboardPageEntity['id'];
+  targetId: DashboardPageEntity['id'] | null;
+}) {
+  await db.moveDashboardPage(id, targetId);
+}
+
 export type DashboardHandlers = {
   'dashboard-create': typeof createDashboardPage;
   'dashboard-delete': typeof deleteDashboardPage;
@@ -357,6 +368,7 @@ export type DashboardHandlers = {
   'dashboard-remove-widget': typeof removeDashboardWidget;
   'dashboard-copy-widget': typeof copyDashboardWidget;
   'dashboard-import': typeof importDashboard;
+  'dashboard-page-move': typeof moveDashboardPage;
 };
 
 export const app = createApp<DashboardHandlers>();
@@ -371,3 +383,4 @@ app.method('dashboard-add-widget', mutator(undoable(addDashboardWidget)));
 app.method('dashboard-remove-widget', mutator(undoable(removeDashboardWidget)));
 app.method('dashboard-copy-widget', mutator(undoable(copyDashboardWidget)));
 app.method('dashboard-import', mutator(undoable(importDashboard)));
+app.method('dashboard-page-move', mutator(undoable(moveDashboardPage)));

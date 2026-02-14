@@ -49,7 +49,7 @@ export const dashboardQueries = {
       queryKey: [...dashboardQueries.lists(), 'pages'],
       queryFn: async () => {
         const { data }: { data: DashboardPageEntity[] } = await aqlQuery(
-          q('dashboard_pages').select('*'),
+          q('dashboard_pages').select('*').orderBy('sort_order'),
         );
         return data;
       },

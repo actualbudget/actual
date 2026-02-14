@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgPencil1 } from '@actual-app/components/icons/v2';
@@ -62,17 +62,6 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
         justifyContent: 'flex-start',
       }}
     >
-      <View
-        style={{
-          fontSize: 25,
-          fontWeight: 500,
-          flexGrow: 0,
-          flexShrink: 0,
-          flexBasis: 'auto',
-        }}
-      >
-        <Trans>Reports</Trans>:
-      </View>
       {editingName ? (
         <InitialFocus>
           <Input

@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgExpandArrow } from '@actual-app/components/icons/v0';
@@ -11,7 +10,6 @@ import { View } from '@actual-app/components/view';
 import type { DashboardPageEntity } from 'loot-core/types/models';
 
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useCreateDashboardPageMutation } from '@desktop-client/reports/mutations';
 
 type DashboardSelectorProps = {
   dashboards: readonly DashboardPageEntity[];
@@ -22,24 +20,9 @@ export function DashboardSelector({
   dashboards,
   currentDashboard,
 }: DashboardSelectorProps) {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const createDashboardPageMutation = useCreateDashboardPageMutation();
-
-  const handleAddDashboard = async () => {
-    const defaultName = t('New dashboard');
-    createDashboardPageMutation.mutate(
-      { name: defaultName },
-      {
-        onSuccess: id => {
-          navigate(`/reports/${id}`);
-        },
-      },
-    );
-  };
 
   return (
     <DialogTrigger>
@@ -96,11 +79,7 @@ export function DashboardSelector({
             <Menu
               slot="close"
               onMenuSelect={item => {
-                if (item === 'add-new') {
-                  handleAddDashboard();
-                } else {
-                  navigate(`/reports/${item}`);
-                }
+                navigate(`/reports/${item}`);
                 setMenuOpen(false);
               }}
               items={[
@@ -108,11 +87,6 @@ export function DashboardSelector({
                   name: dashboard.id,
                   text: dashboard.name,
                 })),
-                Menu.line,
-                {
-                  name: 'add-new',
-                  text: t('Add new dashboard'),
-                },
               ]}
             />
           </Dialog>

@@ -40,9 +40,12 @@ export function Item({
   forceHover = false,
   forceActive = false,
 }: ItemProps) {
-  const hoverStyle = {
-    backgroundColor: theme.sidebarItemBackgroundHover,
-  };
+  const hoverStyle =
+    onClick || to
+      ? {
+          backgroundColor: theme.sidebarItemBackgroundHover,
+        }
+      : {};
 
   const content = (
     <View

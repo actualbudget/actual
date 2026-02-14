@@ -7,7 +7,6 @@ import {
   SvgCheveronRight,
   SvgCog,
   SvgCreditCard,
-  SvgReports,
   SvgStoreFront,
   SvgTag,
   SvgTuning,
@@ -17,6 +16,7 @@ import { SvgCalendar3 } from '@actual-app/components/icons/v2';
 import { View } from '@actual-app/components/view';
 
 import { Item } from './Item';
+import { Reports } from './Reports';
 import { SecondaryItem } from './SecondaryItem';
 
 import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
@@ -49,7 +49,7 @@ export function PrimaryButtons() {
   return (
     <View style={{ flexShrink: 0 }}>
       <Item title={t('Budget')} Icon={SvgWallet} to="/budget" />
-      <Item title={t('Reports')} Icon={SvgReports} to="/reports" />
+      <Reports />
       <Item title={t('Schedules')} Icon={SvgCalendar3} to="/schedules" />
       <Item
         title={t('More')}

@@ -1,0 +1,5 @@
+BEGIN TRANSACTION;
+
+ALTER TABLE dashboard_pages ADD COLUMN sort_order REAL AFTER name;
+
+COMMIT;
