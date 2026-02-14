@@ -1124,6 +1124,7 @@ async function importTransactions({
   isPreview: boolean;
   opts?: {
     defaultCleared?: boolean;
+    reimportDeleted?: boolean;
   };
 }): Promise<ImportTransactionsResult> {
   if (typeof accountId !== 'string') {
@@ -1138,6 +1139,8 @@ async function importTransactions({
       true,
       isPreview,
       opts?.defaultCleared,
+      false,
+      opts?.reimportDeleted,
     );
     return {
       errors: [],

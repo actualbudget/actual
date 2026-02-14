@@ -183,6 +183,7 @@ export function ImportTransactionsModal({
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
   const [reconcile, setReconcile] = useState(true);
+  const [reimportDeleted, setReimportDeleted] = useState(false);
   const [importNotes, setImportNotes] = useState(true);
 
   // This cannot be set after parsing the file, because changing it
@@ -312,6 +313,7 @@ export function ImportTransactionsModal({
         importPreviewTransactions({
           accountId,
           transactions: previewTransactions,
+          reimportDeleted,
         }),
       ).unwrap();
       const matchedUpdateMap = previewTrx.reduce((map, entry) => {
@@ -359,7 +361,7 @@ export function ImportTransactionsModal({
           return next;
         }, []);
     },
-    [accountId, categories, clearOnImport, dispatch],
+    [accountId, categories, clearOnImport, dispatch, reimportDeleted],
   );
 
   const parse = useCallback(
@@ -700,6 +702,7 @@ export function ImportTransactionsModal({
         accountId,
         transactions: finalTransactions,
         reconcile,
+        reimportDeleted,
       }),
     ).unwrap();
     if (didChange) {
@@ -734,7 +737,7 @@ export function ImportTransactionsModal({
     }
 
     onImportPreview();
-  }, [loadingState, parsedTransactions.length]);
+  }, [loadingState, parsedTransactions.length, reimportDeleted]);
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
     { name: t('Date'), width: 200 },
@@ -917,6 +920,18 @@ export function ImportTransactionsModal({
             </LabeledCheckbox>
           )}
 
+          {(isOfxFile(filetype) || isCamtFile(filetype)) && reconcile && (
+            <LabeledCheckbox
+              id="form_reimport_deleted"
+              checked={reimportDeleted}
+              onChange={() => {
+                setReimportDeleted(!reimportDeleted);
+              }}
+            >
+              <Trans>Reimport deleted transactions</Trans>
+            </LabeledCheckbox>
+          )}
+
           {/*Import Options */}
           {(filetype === 'qif' || filetype === 'csv') && (
             <View style={{ marginTop: 10 }}>
@@ -1039,6 +1054,17 @@ export function ImportTransactionsModal({
                     >
                       <Trans>Merge with existing transactions</Trans>
                     </LabeledCheckbox>
+                    {reconcile && (
+                      <LabeledCheckbox
+                        id="form_reimport_deleted_csv"
+                        checked={reimportDeleted}
+                        onChange={() => {
+                          setReimportDeleted(!reimportDeleted);
+                        }}
+                      >
+                        <Trans>Reimport deleted transactions</Trans>
+                      </LabeledCheckbox>
+                    )}
                   </View>
                 )}
 
