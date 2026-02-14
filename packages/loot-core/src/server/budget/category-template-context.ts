@@ -593,58 +593,84 @@ export class CategoryTemplateContext {
     );
   }
 
-  static runPeriodic(
-    template: PeriodicTemplate,
-    templateContext: CategoryTemplateContext,
-  ): number {
-    let toBudget = 0;
-    const amount = amountToInteger(
-      template.amount,
-      templateContext.currency.decimalPlaces,
-    );
-    const period = template.period.period;
-    const numPeriods = template.period.amount;
-    let date = template.starting;
+static runPeriodic(
+  template: PeriodicTemplate,
+  templateContext: CategoryTemplateContext,
+): number {
+  let toBudget = 0;
 
-    let dateShiftFunction;
-    switch (period) {
-      case 'day':
-        dateShiftFunction = monthUtils.addDays;
-        break;
-      case 'week':
-        dateShiftFunction = monthUtils.addWeeks;
-        break;
-      case 'month':
-        dateShiftFunction = monthUtils.addMonths;
-        break;
-      case 'year':
-        // the addYears function doesn't return the month number, so use addMonths
-        dateShiftFunction = (date, numPeriods) =>
-          monthUtils.addMonths(date, numPeriods * 12);
-        break;
-      default:
-        throw new Error(`Unrecognized periodic period: ${period}`);
-    }
+  const amount = amountToInteger(
+    template.amount,
+    templateContext.currency.decimalPlaces,
+  );
 
-    //shift the starting date until its in our month or in the future
-    while (templateContext.month > date) {
-      date = dateShiftFunction(date, numPeriods);
-    }
+  const period = template.period.period;
+  const numPeriods = template.period.amount;
 
-    if (
-      monthUtils.differenceInCalendarMonths(templateContext.month, date) < 0
-    ) {
-      return 0;
-    } // nothing needed this month
+  const currentMonth = templateContext.month;
+  const nextMonth = monthUtils.addMonths(currentMonth, 1);
 
-    const nextMonth = monthUtils.addMonths(templateContext.month, 1);
-    while (date < nextMonth) {
-      toBudget += amount;
-      date = dateShiftFunction(date, numPeriods);
-    }
+  // Determine start date
+  let date = template.starting;
 
-    return toBudget;
+  if (!date) {
+    // Default: first day of current month
+    date = currentMonth.length === 7
+      ? currentMonth + '-01'
+      : currentMonth;
   }
+
+  // Normalize YYYY-MM → YYYY-MM-01 for day/week logic
+  if (date.length === 7) {
+    date = date + '-01';
+  }
+
+  let dateShiftFunction;
+  switch (period) {
+    case 'day':
+      dateShiftFunction = monthUtils.addDays;
+      break;
+    case 'week':
+      dateShiftFunction = monthUtils.addWeeks;
+      break;
+    case 'month':
+      dateShiftFunction = monthUtils.addMonths;
+      break;
+    case 'year':
+      dateShiftFunction = (d, n) =>
+        monthUtils.addMonths(d, n * 12);
+      break;
+    default:
+      throw new Error(`Unrecognized periodic period: ${period}`);
+  }
+
+  while (date < currentMonth) {
+    date = dateShiftFunction(date, numPeriods);
+  }
+
+  // Respect "until"
+  let until = template.until;
+  if (until) {
+    if (until.length === 7) {
+      until = until + '-01';
+    }
+  }
+
+  // If entire period is already after until → nothing
+  if (until && currentMonth > until.substring(0, 7)) {
+    return 0;
+  }
+
+  // Count occurrences inside current month
+  while (date < nextMonth) {
+    if (until && date > until) break;
+
+    toBudget += amount;
+    date = dateShiftFunction(date, numPeriods);
+  }
+
+  return toBudget;
+}
 
   static async runSpend(
     template: SpendTemplate,

@@ -3,7 +3,7 @@
 expr
   = template: template _ percentOf:percentOf category: name starting: startingDate? until:until?
     { return { type: 'percentage', percent: +percentOf.percent, previous: percentOf.prev, category, starting, until, priority: template.priority, directive: template.directive }}
-  / template: template _ amount: amount _ repeatEvery _ period: periodCount _ starting: startingDate limit: limit? until: until?
+  / template: template _ amount: amount _ repeatEvery _ period: periodCount _ starting: startingDate? limit: limit? until: until?
     { return {
       type: 'periodic',
       amount,
