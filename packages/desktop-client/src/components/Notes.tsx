@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
@@ -49,7 +48,7 @@ export function Notes({
 
   useEffect(() => {
     if (focused && editable) {
-      textAreaRef.current.focus();
+      textAreaRef.current?.focus();
     }
   }, [focused, editable]);
 
@@ -71,7 +70,7 @@ export function Notes({
       placeholder={t('Notes (markdown supported)')}
     />
   ) : (
-    <Text className={css([markdownStyles, getStyle?.(editable)])}>
+    <Text className={css([markdownStyles, getStyle?.(editable ?? false)])}>
       <ReactMarkdown
         remarkPlugins={remarkPlugins}
         rehypePlugins={[

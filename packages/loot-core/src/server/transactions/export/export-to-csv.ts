@@ -69,6 +69,7 @@ export async function exportQueryToCSV(query) {
         { IsChild: 'is_child' },
         { SortOrder: 'sort_order' },
         { Notes: 'notes' },
+        { CategoryGroup: 'category.group.name' },
         { Category: 'category.name' },
         { Amount: 'amount' },
         { Cleared: 'cleared' },
@@ -110,6 +111,7 @@ export async function exportQueryToCSV(query) {
             ') ' +
             (trans.Notes || '')
           : trans.Notes,
+      Category_Group: trans.CategoryGroup,
       Category: trans.Category,
       Amount: trans.IsParent
         ? 0
