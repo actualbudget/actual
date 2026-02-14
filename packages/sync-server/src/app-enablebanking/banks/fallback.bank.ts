@@ -36,7 +36,11 @@ export class FallbackBankProcessor implements BankProcessor {
       },
       payeeName,
       notes: t.remittance_information ? t.remittance_information.join(' ') : '',
-      date: t.transaction_date ?? t.booking_date ?? t.value_date ?? '',
+      date:
+        (t.transaction_date && t.transaction_date.trim()) ||
+        (t.booking_date && t.booking_date.trim()) ||
+        (t.value_date && t.value_date.trim()) ||
+        '',
     };
   }
 }

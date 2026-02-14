@@ -92,7 +92,7 @@ export const EnableBankingInitialiseModal = ({
       }
 
       setIsValid(true);
-      onSuccess(close);
+      onSuccess?.(close);
     } catch {
       setIsValid(false);
       setError(t('Something went wrong. Please try again later.'));

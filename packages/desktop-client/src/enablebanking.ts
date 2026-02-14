@@ -110,14 +110,19 @@ export async function authorizeEnableBankingSession(
   let initialAspsp: string | undefined;
 
   if (account?.bank && account.account_sync_source === 'enablebanking') {
-    // Fetch the bank record from the database
-    const bankRecord = await send('get-bank', { id: account.bank });
-    if (bankRecord?.bank_id) {
-      const underscoreIndex = bankRecord.bank_id.indexOf('_');
-      if (underscoreIndex > 0) {
-        initialCountry = bankRecord.bank_id.substring(0, underscoreIndex);
-        initialAspsp = bankRecord.bank_id.substring(underscoreIndex + 1);
+    try {
+      // Fetch the bank record from the database
+      const bankRecord = await send('get-bank', { id: account.bank });
+      if (bankRecord?.bank_id) {
+        const underscoreIndex = bankRecord.bank_id.indexOf('_');
+        if (underscoreIndex > 0) {
+          initialCountry = bankRecord.bank_id.substring(0, underscoreIndex);
+          initialAspsp = bankRecord.bank_id.substring(underscoreIndex + 1);
+        }
       }
+    } catch (error) {
+      console.error('Failed to fetch bank record for reauth:', error);
+      // Continue with undefined initialCountry and initialAspsp
     }
   }
 

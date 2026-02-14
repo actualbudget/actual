@@ -106,9 +106,5 @@ export type TransactionsResponse = {
   transactions: Transaction[];
 };
 
-export type Account = {
-  account_id: string;
-  name: string;
-  institution: string;
-  balance: number;
-};
+// Alias for backward compatibility
+export type Account = SyncServerEnableBankingAccount;

@@ -155,7 +155,7 @@ describe('Bank Processors', () => {
 
       const normalized = processor.normalizeTransaction(transaction);
 
-      expect(normalized.notes).toBe('Line 1Line 2Line 3');
+      expect(normalized.notes).toBe('Line 1 Line 2 Line 3');
     });
 
     it('should use transaction_date as priority for date field', () => {

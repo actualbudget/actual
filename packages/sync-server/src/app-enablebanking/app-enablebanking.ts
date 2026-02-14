@@ -262,6 +262,9 @@ post('/start_auth', async (req: Request) => {
 });
 
 post('/get_session', async (req: Request) => {
+  if (!enableBankingservice.secretsAreSetup()) {
+    throw new EnableBankingSetupError();
+  }
   const { state } = req.body;
   if (!state) {
     throw new BadRequestError(

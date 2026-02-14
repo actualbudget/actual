@@ -119,16 +119,23 @@ export function AccountSyncCheck() {
             authorizeBank(dispatch);
             return;
           case 'enablebanking':
-            await authorizeEnableBankingSession(dispatch, acc, () =>
-              unlink(acc),
+            await authorizeEnableBankingSession(dispatch, acc);
+            return;
+          case 'simpleFin':
+            // SimpleFin reauthorization requires manual token update
+            console.warn(
+              'SimpleFin reauthorization is not automated. Please update your token manually.',
             );
             return;
           default:
+            console.warn(
+              `Reauthorization not supported for sync source: ${acc.account_sync_source}`,
+            );
             break;
         }
       }
     },
-    [dispatch, unlink],
+    [dispatch],
   );
 
   if (!failedAccounts || !id) {
@@ -146,10 +153,14 @@ export function AccountSyncCheck() {
   }
 
   const { type, code } = error;
+  const canReauth =
+    account.account_sync_source === 'goCardless' ||
+    account.account_sync_source === 'enablebanking';
   const showAuth =
-    (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
-    (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN') ||
-    type === 'ENABLEBANKING_SESSION_CLOSED';
+    canReauth &&
+    ((type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
+      (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN') ||
+      type === 'ENABLEBANKING_SESSION_CLOSED');
 
   return (
     <View>

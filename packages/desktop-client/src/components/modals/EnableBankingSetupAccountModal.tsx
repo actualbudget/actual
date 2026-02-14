@@ -120,7 +120,6 @@ const AspspSelector = ({
   );
   const [startingAuth, setStartingAuth] = useState<boolean>(false);
   const autoTriggeredRef = useRef(false);
-  const reopenTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-trigger authentication when both init values are provided (reauth scenario)
   useEffect(() => {
@@ -187,17 +186,6 @@ const AspspSelector = ({
       };
     }
   }, [country]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    const timeoutRef = reopenTimeoutRef;
-    return () => {
-      const timeout = timeoutRef.current;
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-    };
-  }, []);
 
   const onSelectCountry = (country_id: string) => {
     if (!country || country_id !== country.id) {
@@ -449,11 +437,13 @@ export function EnableBankingSetupAccountModal({
 
   // Stop polling when modal is unmounted
   useEffect(() => {
+    const timeoutRef = reopenTimeoutRef;
     return () => {
       void send('enablebanking-stoppolling');
       // Clear reopen timeout if modal unmounts before timeout fires
-      if (reopenTimeoutRef.current) {
-        clearTimeout(reopenTimeoutRef.current);
+      const timeout = timeoutRef.current;
+      if (timeout) {
+        clearTimeout(timeout);
       }
     };
   }, []);
@@ -525,8 +515,9 @@ export function EnableBankingSetupAccountModal({
                         onSuccess: closeInitModal => {
                           // Close the init modal first
                           closeInitModal();
-                          // Then open account selection modal
-                          reopenTimeoutRef.current = setTimeout(() => {
+                          // Then open account selection modal with a brief delay
+                          // Note: Cannot use parent's reopenTimeoutRef since parent modal is unmounted
+                          setTimeout(() => {
                             try {
                               dispatch(
                                 pushModal({
