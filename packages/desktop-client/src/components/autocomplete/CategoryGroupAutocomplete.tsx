@@ -47,19 +47,18 @@ function CategoryGroupList({
   showHiddenItems,
 }: CategoryGroupListProps) {
   const categoryGroups = useMemo(() => {
-    return items.reduce(
-      (acc, item, index) => {
-        const itemWithIndex = {
-          ...item,
-          highlightedIndex: index,
-        };
+    return items.reduce<
+      (CategoryGroupAutocompleteItem & { highlightedIndex: number })[]
+    >((acc, item, index) => {
+      const itemWithIndex = {
+        ...item,
+        highlightedIndex: index,
+      };
 
-        acc.push(itemWithIndex);
+      acc.push(itemWithIndex);
 
-        return acc;
-      },
-      [] as (CategoryGroupAutocompleteItem & { highlightedIndex: number })[],
-    );
+      return acc;
+    }, []);
   }, [items]);
 
   return (
