@@ -4,28 +4,9 @@ expr
   = template: template _ percentOf:percentOf category: name starting: startingDate? until:until?
     { return { type: 'percentage', percent: +percentOf.percent, previous: percentOf.prev, category, starting, until, priority: template.priority, directive: template.directive }}
   / template: template _ amount: amount _ repeatEvery _ period: periodCount _ starting: startingDate? limit: limit? until: until?
-    { return {
-      type: 'periodic',
-      amount,
-      period,
-      // Wenn repeat every week/day und starting ist YYYY-MM (7 Zeichen), ergänze -01
-      starting: (period.period === 'week' || period.period === 'day') && starting?.length === 7 ? starting + '-01' : starting,
-      limit,
-      until,
-      priority: template.priority,
-      directive: template.directive
-    }}
+    { return { type: 'periodic', amount, period, starting: (period.period === 'week' || period.period === 'day') && starting?.length === 7 ? starting + '-01' : starting, limit, until, priority: template.priority, directive: template.directive }}
   / template: template _ amount: amount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ repeat)? starting: startingDate? until: until?
-    { return {
-      type: from ? 'spend' : 'by',
-      amount,
-      month,
-      ...(repeat ? repeat[3] : {}),
-      from,
-      starting,
-      until,
-      priority: template.priority, directive: template.directive
-    }}
+    { return { type: from ? 'spend' : 'by', amount, month, ...(repeat ? repeat[3] : {}), from, starting, until, priority: template.priority, directive: template.directive }}
   / template: template _ monthly: amount limit: limit? starting: startingDate? until: until?
     { return { type: 'simple', monthly, limit, starting, until, priority: template.priority, directive: template.directive }}
   / template: template _ limit: limit starting: startingDate? until: until?
