@@ -56,6 +56,7 @@ type BudgetAnalysisGraphProps = {
   graphType?: 'Line' | 'Bar';
   showBalance?: boolean;
   isConcise?: boolean;
+  stackBars?: boolean;
 };
 
 type CustomTooltipProps = {
@@ -196,6 +197,7 @@ export function BudgetAnalysisGraph({
   graphType = 'Line',
   showBalance = true,
   isConcise = true,
+  stackBars = false,
 }: BudgetAnalysisGraphProps) {
   const { t } = useTranslation();
   const format = useFormat();
@@ -230,10 +232,22 @@ export function BudgetAnalysisGraph({
   return (
     <Container style={style}>
       {(width, height) => {
-        const chartProps = { ...commonProps, width, height };
+        const chartProps = {
+          ...commonProps,
+          width,
+          height,
+        };
+        const barFillOpacity = stackBars ? 0.95 : 1;
+        // When stacking, calculate bar size based on available space to ensure perfect overlap
+        // Use a calculation that adapts to container width and number of data points
+        const calculatedBarSize = stackBars
+          ? Math.max(20, Math.min(60, ((width - 40) / graphData.length) * 0.8))
+          : undefined;
+        const barSize = calculatedBarSize;
+        const barGap = stackBars && barSize ? -barSize : undefined;
 
         return graphType === 'Bar' ? (
-          <ComposedChart {...chartProps}>
+          <ComposedChart {...chartProps} barGap={barGap}>
             <CartesianGrid strokeDasharray="3 3" stroke={theme.pillBorder} />
             <XAxis
               dataKey="date"
@@ -269,18 +283,24 @@ export function BudgetAnalysisGraph({
               fill={theme.reportsNumberPositive}
               name={budgetedLabel}
               animationDuration={1000}
+              fillOpacity={barFillOpacity}
+              barSize={barSize}
             />
             <Bar
               dataKey="spent"
               fill={theme.reportsNumberNegative}
               name={spentLabel}
               animationDuration={1000}
+              fillOpacity={barFillOpacity}
+              barSize={barSize}
             />
             <Bar
               dataKey="overspendingAdjustment"
               fill={theme.templateNumberUnderFunded}
               name={overspendingLabel}
               animationDuration={1000}
+              fillOpacity={barFillOpacity}
+              barSize={barSize}
             />
             {showBalance && (
               <Line
