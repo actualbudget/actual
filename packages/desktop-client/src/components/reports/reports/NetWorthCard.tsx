@@ -25,6 +25,7 @@ import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetC
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useNetWorthProjectionRefresh } from '@desktop-client/components/reports/useNetWorthProjectionRefresh';
 
 type NetWorthCardProps = {
   widgetId: string;
@@ -51,6 +52,16 @@ export function NetWorthCard({
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const format = useFormat();
+  const [budgetTypePref] = useSyncedPref('budgetType');
+  const budgetType = budgetTypePref || 'envelope';
+  const isProjectionEnabled =
+    (meta?.showProjection ?? false) &&
+    (meta?.mode ?? 'trend') === 'trend' &&
+    (meta?.interval ?? 'Monthly') === 'Monthly';
+  const projectionRevision = useNetWorthProjectionRefresh({
+    budgetType,
+    enabled: isProjectionEnabled,
+  });
 
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
@@ -78,8 +89,9 @@ export function NetWorthCard({
   const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
 
   const params = useMemo(
-    () =>
-      netWorthSpreadsheet(
+    () => {
+      void projectionRevision;
+      return netWorthSpreadsheet(
         start,
         end,
         accounts,
@@ -89,7 +101,10 @@ export function NetWorthCard({
         meta?.interval || 'Monthly',
         firstDayOfWeekIdx,
         format,
-      ),
+        isProjectionEnabled,
+        budgetType,
+      );
+    },
     [
       start,
       end,
@@ -100,6 +115,9 @@ export function NetWorthCard({
       meta?.interval,
       firstDayOfWeekIdx,
       format,
+      isProjectionEnabled,
+      budgetType,
+      projectionRevision,
     ],
   );
   const data = useReport('net_worth', params);

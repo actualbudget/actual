@@ -50,6 +50,8 @@ import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useWidget } from '@desktop-client/hooks/useWidget';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { Checkbox } from '@desktop-client/components/forms';
+import { useNetWorthProjectionRefresh } from '@desktop-client/components/reports/useNetWorthProjectionRefresh';
 
 export function NetWorth() {
   const params = useParams();
@@ -112,6 +114,9 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [graphMode, setGraphMode] = useState<'trend' | 'stacked'>(
     widget?.meta?.mode || 'trend',
   );
+  const [showProjection, setShowProjection] = useState(
+    widget?.meta?.showProjection ?? false,
+  );
   // Combined setter: set mode and update interval (unless interval was set in widget meta)
   const setModeAndInterval = useCallback(
     (newMode: TimeFrame['mode']) => {
@@ -127,10 +132,19 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+
+  const isProjectionEnabled =
+    showProjection && graphMode === 'trend' && interval === 'Monthly';
+  const projectionRevision = useNetWorthProjectionRefresh({
+    budgetType,
+    enabled: isProjectionEnabled,
+  });
 
   const reportParams = useMemo(
-    () =>
-      netWorthSpreadsheet(
+    () => {
+      void projectionRevision;
+      return netWorthSpreadsheet(
         start,
         end,
         accounts,
@@ -140,7 +154,10 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         interval,
         firstDayOfWeekIdx,
         format,
-      ),
+        isProjectionEnabled,
+        budgetType,
+      );
+    },
     [
       start,
       end,
@@ -151,6 +168,9 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
       interval,
       firstDayOfWeekIdx,
       format,
+      isProjectionEnabled,
+      budgetType,
+      projectionRevision,
     ],
   );
   const data = useReport('net_worth', reportParams);
@@ -238,6 +258,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         conditionsOp,
         interval,
         mode: graphMode,
+        showProjection,
         timeFrame: {
           start,
           end,
@@ -326,6 +347,26 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
           <>
             <IntervalSelector interval={interval} onChange={setInterval} />
             <ModeSelector mode={graphMode} onChange={setGraphMode} />
+            {graphMode === 'trend' && interval === 'Monthly' && (
+              <label
+                htmlFor="net-worth-projection"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  marginLeft: 8,
+                }}
+              >
+                <Checkbox
+                  id="net-worth-projection"
+                  checked={showProjection}
+                  onChange={event => setShowProjection(event.target.checked)}
+                  style={{ marginRight: 6 }}
+                />
+                <Trans>Show projection</Trans>
+              </label>
+            )}
           </>
         }
       >
