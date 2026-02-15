@@ -348,16 +348,12 @@ post('/transactions', async (req: Request) => {
   const currentBalance =
     await enableBankingservice.getCurrentBalance(account_id);
 
-  // Convert to integer cents before arithmetic to avoid floating-point errors
+  // Convert to integer cents
   const currentBalanceCents = Math.round(currentBalance * 100);
-  const startingBalanceCents = transactions.reduce(
-    (acc, t) => acc - Math.round(t.amount * 100),
-    currentBalanceCents,
-  );
 
   return {
     transactions,
-    startingBalance: startingBalanceCents, // Already in cents (integer)
+    startingBalance: currentBalanceCents, // Return current balance, client will calculate starting balance
   };
 });
 

@@ -9,15 +9,15 @@ import { isNonProductionEnvironment } from '../../shared/environment';
 import { dayFromDate } from '../../shared/months';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type SyncServerGoCardlessAccount,
-  type TransactionEntity,
-  type SyncServerSimpleFinAccount,
-  type SyncServerPluggyAiAccount,
-  type GoCardlessToken,
-  type ImportTransactionEntity,
+import type {
+  AccountEntity,
+  CategoryEntity,
+  GoCardlessToken,
+  ImportTransactionEntity,
+  SyncServerGoCardlessAccount,
+  SyncServerPluggyAiAccount,
+  SyncServerSimpleFinAccount,
+  TransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
