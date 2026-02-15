@@ -1,10 +1,5 @@
 # Pluggy.ai Setup
 
-:::note
-Client Version 25.4.0 and
-Server Version 25.4.0 or higher are required to use this feature.
-:::
-
 ### Create CLIENT ID and CLIENT SECRET for Actual
 
 1. Create an account at [https://pluggy.ai](https://pluggy.ai).
