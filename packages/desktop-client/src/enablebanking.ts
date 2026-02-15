@@ -12,13 +12,6 @@ import { addNotification } from './notifications/notificationsSlice';
 import { markPayeesDirty } from './payees/payeesSlice';
 import type { AppDispatch } from './redux/store';
 
-// export function handleEnableBankingError(error: EnableBankingErrorInterface){
-//   const dispatch = useDispatch();
-//   switch(error.error_code){
-
-//   }
-// }
-
 export async function deconfigureEnableBanking() {
   await send('enablebanking-configure', { applicationId: null, secret: null });
 }
@@ -29,7 +22,6 @@ export async function selectEnableBankingAccounts(
   accountEntity?: AccountEntity,
 ) {
   // converting accounts to "GoCardlessAccounts"
-  // RANT: it seems BankSync could be much more standardized. Apart from init ofcourse.
   const accounts: SyncServerGoCardlessAccount[] = token.accounts.map(
     enableBankingAccount => {
       return {
@@ -63,7 +55,7 @@ export async function selectEnableBankingAccounts(
           account,
           requisitionId: token.bank_id,
           upgradingId: accountEntity.id,
-          syncSource: 'enableBanking',
+          syncSource: 'enablebanking',
         });
         // Mark payees dirty since we linked an account
         dispatch(markPayeesDirty());
@@ -106,7 +98,7 @@ export async function selectEnableBankingAccounts(
         options: {
           requisitionId: token.bank_id,
           externalAccounts: accounts,
-          syncSource: 'enableBanking',
+          syncSource: 'enablebanking',
         },
       },
     }),

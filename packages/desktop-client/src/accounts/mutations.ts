@@ -372,7 +372,7 @@ type LinkAccountBasePayload = {
 type LinkAccountPayload = LinkAccountBasePayload & {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
-  syncSource?: 'goCardless' | 'enableBanking';
+  syncSource?: 'goCardless' | 'enablebanking';
 };
 
 export function useLinkAccountMutation() {

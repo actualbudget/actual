@@ -950,7 +950,7 @@ async function processBankSyncDownload(
         currentBalance,
       );
       balanceToUse = Math.round(previousBalance);
-    } else if (acctRow.account_sync_source === 'enableBanking') {
+    } else if (acctRow.account_sync_source === 'enablebanking') {
       const currentBalance = download.startingBalance;
       const previousBalance = transactions.reduce(
         (total, trans) => total - trans.transactionAmount.amount * 100,
@@ -1038,7 +1038,6 @@ export async function syncAccount(
   const syncStartDate =
     customStartingDate ?? (await getAccountSyncStartDate(id));
   const oldestTransaction = await getAccountOldestTransaction(id);
-  logger.log(syncStartDate, oldestTransaction);
   const newAccount = oldestTransaction == null;
 
   let download;
@@ -1055,7 +1054,7 @@ export async function syncAccount(
       syncStartDate,
       newAccount,
     );
-  } else if (acctRow.account_sync_source === 'enableBanking') {
+  } else if (acctRow.account_sync_source === 'enablebanking') {
     download = await downloadEnableBankingTransactions(
       acctId,
       syncStartDate,

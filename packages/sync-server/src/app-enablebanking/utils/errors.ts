@@ -158,69 +158,6 @@ export function handleErrorResponse(
   }
 }
 
-export async function handleEnableBankingError(response: globalThis.Response) {
-  if (response.status === 200) {
-    // Read response body once
-    let rawText: string;
-    try {
-      rawText = await response.text();
-    } catch {
-      rawText = '(unable to read response body)';
-    }
-
-    try {
-      return JSON.parse(rawText);
-    } catch (parseError) {
-      // Failed to parse JSON response
-      console.error(
-        `Failed to parse JSON from Enable Banking API response:`,
-        parseError,
-        `Raw response: ${rawText}`,
-      );
-      throw new EnableBankingError(
-        'INTERNAL_ERROR',
-        'Invalid JSON response from Enable Banking API',
-      );
-    }
-  }
-  console.error(
-    `Enable Banking API error response: HTTP ${response.status} ${response.statusText}`,
-  );
-
-  // Read response text first, then parse as JSON (body stream is single-use)
-  let rawText: string;
-  try {
-    rawText = await response.text();
-  } catch {
-    rawText = '(unable to read response body)';
-  }
-
-  let body: unknown;
-  try {
-    body = JSON.parse(rawText);
-  } catch {
-    // Non-JSON response (e.g., HTML 502 from a proxy) - preserve HTTP context
-    console.error('Enable Banking API returned non-JSON response:', rawText);
-    throw new EnableBankingError(
-      'INTERNAL_ERROR',
-      `Enable Banking API returned HTTP ${response.status} with non-JSON body.`,
-    );
-  }
-
-  if (!isErrorResponse(body)) {
-    console.error('Unexpected error response format:', body);
-    throw new EnableBankingError(
-      'INTERNAL_ERROR',
-      'Unexpected error response from Enable Banking API.',
-    );
-  }
-
-  const errorResponse = body;
-  debug('Enable Banking API error response body: %o', errorResponse);
-
-  throw handleErrorResponse(errorResponse);
-}
-
 export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
   func: (req: Request) => Promise<EnableBankingEndpoints[T]['response']>,
 ) {

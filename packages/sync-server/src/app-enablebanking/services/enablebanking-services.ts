@@ -9,9 +9,9 @@ import type {
   paths,
 } from '../models/enablebanking-openapi.js';
 import type {
-  Account,
   EnableBankingAuthenticationStartResponse,
   EnableBankingToken,
+  SyncServerEnableBankingAccount,
   Transaction,
 } from '../models/enablebanking.js';
 import {
@@ -432,7 +432,7 @@ export const enableBankingservice = {
     });
     isDefined(data);
     const bank_id = [data.aspsp.country, data.aspsp.name].join('_');
-    const accounts: Account[] = [];
+    const accounts: SyncServerEnableBankingAccount[] = [];
 
     // Process accounts in parallel with rate limiting
     const accountPromises = data.accounts.map(account_id =>

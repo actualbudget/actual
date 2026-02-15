@@ -6,6 +6,5 @@ export type BankProcessor = {
   name: string;
   normalizeTransaction: (
     transaction: components['schemas']['Transaction'],
-    edited_transaction?: Transaction,
   ) => Transaction;
 };

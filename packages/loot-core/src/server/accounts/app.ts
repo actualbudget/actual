@@ -167,7 +167,7 @@ async function linkGoCardlessAccount({
 }: LinkAccountBaseParams & {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
-  syncSource?: 'goCardless' | 'enableBanking';
+  syncSource?: 'goCardless' | 'enablebanking';
 }) {
   let id;
   const institution =
@@ -176,7 +176,6 @@ async function linkGoCardlessAccount({
       : account.institution;
   const bank = await link.findOrCreateBank(institution, requisitionId);
   if (upgradingId) {
-    logger.log('upgrading', upgradingId);
     const accRow = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
       [upgradingId],
@@ -194,7 +193,6 @@ async function linkGoCardlessAccount({
       official_name: account.official_name,
       account_sync_source: syncSource,
     });
-    logger.log('upgrading finished.');
   } else {
     id = uuidv4();
     await db.insertWithUUID('accounts', {
@@ -248,7 +246,7 @@ async function linkSimpleFinAccount({
 
   const bank = await link.findOrCreateBank(
     institution,
-    externalAccount.orgDomain ?? externalAccount.orgId ?? 'unknown',
+    externalAccount.orgDomain ?? externalAccount.orgId,
   );
 
   if (upgradingId) {
@@ -320,7 +318,7 @@ async function linkPluggyAiAccount({
 
   const bank = await link.findOrCreateBank(
     institution,
-    externalAccount.orgDomain ?? externalAccount.orgId ?? 'unknown',
+    externalAccount.orgDomain ?? externalAccount.orgId,
   );
 
   if (upgradingId) {
@@ -548,6 +546,7 @@ async function setSecret({
   value: string | null;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
+
   if (!userToken) {
     return { error: 'unauthorized' };
   }
@@ -569,7 +568,6 @@ async function setSecret({
       },
     );
   } catch (error) {
-    logger.error('Error saving secret:', error);
     return {
       error: 'failed',
       reason: error instanceof PostError ? error.reason : undefined,
@@ -590,9 +588,7 @@ async function checkSecret(name: string) {
 
   try {
     return await get(serverConfig.BASE_SERVER + '/secret/' + name, {
-      headers: {
-        'X-ACTUAL-TOKEN': userToken,
-      },
+      'X-ACTUAL-TOKEN': userToken,
     });
   } catch (error) {
     logger.error(error);
@@ -919,14 +915,10 @@ function isBankSyncError(err: unknown): err is BankSyncError {
 /**
  * Converts a sync error into a standardized SyncError response object.
  */
-async function handleSyncError(
+function handleSyncError(
   err: Error | PostError | BankSyncError,
   acct: db.DbAccount,
-): Promise<SyncError> {
-  // Always update last_sync timestamp even on error so users know when last attempt was made
-  const ts = new Date().getTime().toString();
-  await db.update('accounts', { id: acct.id, last_sync: ts });
-
+): SyncError {
   if (isBankSyncError(err)) {
     const syncError = {
       type: 'SyncError',
@@ -990,7 +982,7 @@ async function accountsBankSync({
     true,
   );
 
-  const errors: Awaited<ReturnType<typeof handleSyncError>>[] = [];
+  const errors: ReturnType<typeof handleSyncError>[] = [];
   const newTransactions: Array<TransactionEntity['id']> = [];
   const matchedTransactions: Array<TransactionEntity['id']> = [];
   const updatedAccounts: Array<AccountEntity['id']> = [];
@@ -1014,7 +1006,7 @@ async function accountsBankSync({
         updatedAccounts.push(...syncResponseData.updatedAccounts);
       } catch (err) {
         const error = err as Error;
-        errors.push(await handleSyncError(error, acct));
+        errors.push(handleSyncError(error, acct));
         captureException({
           ...error,
           message: 'Failed syncing account "' + acct.name + '."',
@@ -1060,7 +1052,7 @@ async function simpleFinBatchSync({
   const retVal: Array<{
     accountId: AccountEntity['id'];
     res: {
-      errors: Awaited<ReturnType<typeof handleSyncError>>[];
+      errors: ReturnType<typeof handleSyncError>[];
       newTransactions: Array<TransactionEntity['id']>;
       matchedTransactions: Array<TransactionEntity['id']>;
       updatedAccounts: Array<AccountEntity['id']>;
@@ -1092,14 +1084,14 @@ async function simpleFinBatchSync({
         continue;
       }
 
-      const errors: Awaited<ReturnType<typeof handleSyncError>>[] = [];
+      const errors: ReturnType<typeof handleSyncError>[] = [];
       const newTransactions: Array<TransactionEntity['id']> = [];
       const matchedTransactions: Array<TransactionEntity['id']> = [];
       const updatedAccounts: Array<AccountEntity['id']> = [];
 
       if (syncResponse.res.error_code) {
         errors.push(
-          await handleSyncError(
+          handleSyncError(
             {
               type: 'BankSyncError',
               reason: 'Failed syncing account "' + account.name + '."',
@@ -1138,7 +1130,7 @@ async function simpleFinBatchSync({
         },
       });
       const error = err as Error;
-      errors.push(await handleSyncError(error, account));
+      errors.push(handleSyncError(error, account));
     }
   }
 

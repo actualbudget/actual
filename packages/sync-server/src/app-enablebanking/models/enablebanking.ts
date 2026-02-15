@@ -12,8 +12,6 @@ export type EnableBankingEndpoints = {
   '/fail_auth': Endpoint<{ state: string; error?: string }, void>;
   '/get_accounts': Endpoint<{ session_id: string }, EnableBankingToken>;
   '/transactions': Endpoint<TransactionsBody, TransactionsResponse>;
-  '/token': Endpoint<undefined, EnableBankingToken>;
-  '/accounts': Endpoint<undefined, SyncServerEnableBankingAccount[]>;
 };
 
 export type Endpoint<BodyType, ResponseType> = {
@@ -106,5 +104,3 @@ export type TransactionsResponse = {
   transactions: Transaction[];
 };
 
-// Alias for backward compatibility
-export type Account = SyncServerEnableBankingAccount;

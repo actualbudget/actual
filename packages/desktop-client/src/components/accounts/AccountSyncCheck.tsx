@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 
 import type { AccountEntity } from 'loot-core/types/models';
 
-import { useUnlinkAccountMutation } from '@desktop-client/accounts/mutations';
+import { useUnlinkAccountMutation } from '@desktop-client/accounts';
 import { Link } from '@desktop-client/components/common/Link';
 import { authorizeEnableBankingSession } from '@desktop-client/enablebanking';
 import { authorizeBank } from '@desktop-client/gocardless';
@@ -97,46 +97,32 @@ export function AccountSyncCheck() {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
   const { getErrorMessage } = useErrorMessage();
-  const unlinkAccountMutation = useUnlinkAccountMutation();
-
-  const unlink = useCallback(
-    (acc: AccountEntity) => {
-      if (acc.id) {
-        unlinkAccountMutation.mutate({ id: acc.id });
-      }
-
-      setOpen(false);
-    },
-    [unlinkAccountMutation],
-  );
 
   const reauth = useCallback(
     async (acc: AccountEntity) => {
       setOpen(false);
 
       if (acc.account_id) {
-        switch (acc.account_sync_source) {
-          case 'goCardless':
-            authorizeBank(dispatch);
-            return;
-          case 'enablebanking':
-            await authorizeEnableBankingSession(dispatch, acc);
-            return;
-          case 'simpleFin':
-            // SimpleFin reauthorization requires manual token update
-            console.warn(
-              'SimpleFin reauthorization is not automated. Please update your token manually.',
-            );
-            return;
-          default:
-            console.warn(
-              `Reauthorization not supported for sync source: ${acc.account_sync_source}`,
-            );
-            break;
+        if (acc.account_sync_source === 'enablebanking') {
+          await authorizeEnableBankingSession(dispatch, acc);
+        } else {
+          authorizeBank(dispatch);
         }
       }
     },
     [dispatch],
+  );
+
+  const unlinkAccount = useUnlinkAccountMutation();
+  const unlink = useCallback(
+    (acc: AccountEntity) => {
+      if (acc.id) {
+        unlinkAccount.mutate({ id: acc.id });
+      }
+
+      setOpen(false);
+    },
+    [unlinkAccount],
   );
 
   if (!failedAccounts || !id) {

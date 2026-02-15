@@ -4,7 +4,6 @@ import {
   BadRequestError,
   EnableBankingError,
   EnableBankingSetupError,
-  handleEnableBankingError,
   ResourceNotFoundError,
 } from '../utils/errors';
 
@@ -52,66 +51,5 @@ describe('BadRequestError', () => {
 
     expect(error.error_code).toBe('BAD_REQUEST');
     expect(error.message).toBe('Missing parameter');
-  });
-});
-
-describe('handleEnableBankingError', () => {
-  it('should handle 404 responses', async () => {
-    const response = new Response('Not found', {
-      status: 404,
-      headers: { 'Content-Type': 'text/plain' },
-    });
-
-    await expect(handleEnableBankingError(response)).rejects.toThrow(
-      EnableBankingError,
-    );
-  });
-
-  it('should handle 400 responses', async () => {
-    const response = new Response('Bad request', {
-      status: 400,
-      headers: { 'Content-Type': 'text/plain' },
-    });
-
-    await expect(handleEnableBankingError(response)).rejects.toThrow(
-      EnableBankingError,
-    );
-  });
-
-  it('should handle JSON error responses', async () => {
-    const errorBody = {
-      error: 'session_closed',
-      error_description: 'Session has been closed',
-    };
-    const response = new Response(JSON.stringify(errorBody), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    await expect(handleEnableBankingError(response)).rejects.toThrow(
-      EnableBankingError,
-    );
-  });
-
-  it('should handle non-JSON error responses', async () => {
-    const response = new Response('Plain text error', {
-      status: 500,
-      headers: { 'Content-Type': 'text/plain' },
-    });
-
-    await expect(handleEnableBankingError(response)).rejects.toThrow(
-      EnableBankingError,
-    );
-  });
-
-  it('should handle empty response body', async () => {
-    const response = new Response('', {
-      status: 500,
-      headers: { 'Content-Type': 'text/plain' },
-    });
-
-    await expect(handleEnableBankingError(response)).rejects.toThrow(
-      EnableBankingError,
-    );
   });
 });

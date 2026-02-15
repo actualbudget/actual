@@ -25,7 +25,7 @@ import {
   useLinkAccountPluggyAiMutation,
   useLinkAccountSimpleFinMutation,
   useUnlinkAccountMutation,
-} from '@desktop-client/accounts/mutations';
+} from '@desktop-client/accounts';
 import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
 import type { AutocompleteItem } from '@desktop-client/components/autocomplete/Autocomplete';
 import {
@@ -98,8 +98,8 @@ export type SelectLinkedAccountsModalProps =
     }
   | {
       requisitionId: string;
-      externalAccounts: SyncServerGoCardlessAccount[]; // we are using this here as the "standard" to avoid clutter in the code.
-      syncSource: 'enableBanking';
+      externalAccounts: SyncServerGoCardlessAccount[];
+      syncSource: 'enablebanking';
     };
 
 export function SelectLinkedAccountsModal({
@@ -127,7 +127,7 @@ export function SelectLinkedAccountsModal({
             externalAccounts: toSort as SyncServerPluggyAiAccount[],
           };
         case 'goCardless':
-        case 'enableBanking':
+        case 'enablebanking':
           return {
             syncSource,
             requisitionId: requisitionId!,
@@ -142,10 +142,6 @@ export function SelectLinkedAccountsModal({
   const { isNarrowWidth } = useResponsive();
   const dispatch = useDispatch();
   const localAccounts = useAccounts().filter(a => a.closed === 0);
-  const linkAccountMutation = useLinkAccountMutation();
-  const linkAccountSimpleFinMutation = useLinkAccountSimpleFinMutation();
-  const linkAccountPluggyAiMutation = useLinkAccountPluggyAiMutation();
-  const unlinkAccountMutation = useUnlinkAccountMutation();
   const [draftLinkAccounts, setDraftLinkAccounts] = useState<
     Map<string, 'linking' | 'unlinking'>
   >(new Map());
@@ -164,6 +160,11 @@ export function SelectLinkedAccountsModal({
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
 
+  const linkAccount = useLinkAccountMutation();
+  const unlinkAccount = useUnlinkAccountMutation();
+  const linkAccountSimpleFin = useLinkAccountSimpleFinMutation();
+  const linkAccountPluggyAi = useLinkAccountPluggyAiMutation();
+
   async function onNext() {
     const chosenLocalAccountIds = Object.values(chosenAccounts);
 
@@ -172,7 +173,7 @@ export function SelectLinkedAccountsModal({
     localAccounts
       .filter(acc => acc.account_id)
       .filter(acc => !chosenLocalAccountIds.includes(acc.id))
-      .forEach(acc => unlinkAccountMutation.mutate({ id: acc.id }));
+      .forEach(acc => unlinkAccount.mutate({ id: acc.id }));
 
     // Link new accounts
     Object.entries(chosenAccounts).forEach(
@@ -199,7 +200,7 @@ export function SelectLinkedAccountsModal({
           customSettings?.amount != null ? customSettings.amount : undefined;
 
         if (propsWithSortedExternalAccounts.syncSource === 'simpleFin') {
-          linkAccountSimpleFinMutation.mutate({
+          linkAccountSimpleFin.mutate({
             externalAccount:
               propsWithSortedExternalAccounts.externalAccounts[
                 externalAccountIndex
@@ -214,7 +215,7 @@ export function SelectLinkedAccountsModal({
             startingBalance,
           });
         } else if (propsWithSortedExternalAccounts.syncSource === 'pluggyai') {
-          linkAccountPluggyAiMutation.mutate({
+          linkAccountPluggyAi.mutate({
             externalAccount:
               propsWithSortedExternalAccounts.externalAccounts[
                 externalAccountIndex
@@ -230,9 +231,9 @@ export function SelectLinkedAccountsModal({
           });
         } else if (
           propsWithSortedExternalAccounts.syncSource === 'goCardless' ||
-          propsWithSortedExternalAccounts.syncSource === 'enableBanking'
+          propsWithSortedExternalAccounts.syncSource === 'enablebanking'
         ) {
-          linkAccountMutation.mutate({
+          linkAccount.mutate({
             requisitionId: propsWithSortedExternalAccounts.requisitionId,
             account:
               propsWithSortedExternalAccounts.externalAccounts[
@@ -249,7 +250,6 @@ export function SelectLinkedAccountsModal({
             startingBalance,
           });
         } else {
-          // This should never happen due to type narrowing
           throw new Error('Unsupported sync source');
         }
       },
