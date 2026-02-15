@@ -187,8 +187,12 @@ function recalculate(
     });
   });
 
+  const priorPeriodNetWorth = data.reduce(
+    (sum, account) => sum + account.starting,
+    0,
+  );
+
   let hasNegative = false;
-  let startNetWorth = 0;
   let endNetWorth = 0;
   let lowestNetWorth: number | null = null;
   let highestNetWorth: number | null = null;
@@ -236,11 +240,8 @@ function recalculate(
       x = d.parseISO(intervalItem + '-01');
     }
 
-    const change = last ? total - last.y : 0;
+    const change = last ? total - last.y : total - priorPeriodNetWorth;
 
-    if (arr.length === 0) {
-      startNetWorth = total;
-    }
     endNetWorth = total;
 
     // Use standardized format from ReportOptions
@@ -292,7 +293,7 @@ function recalculate(
       end: endDate,
     },
     netWorth: endNetWorth,
-    totalChange: endNetWorth - startNetWorth,
+    totalChange: endNetWorth - priorPeriodNetWorth,
     lowestNetWorth,
     highestNetWorth,
     accounts: data
