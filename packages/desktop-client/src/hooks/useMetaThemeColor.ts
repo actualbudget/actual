@@ -18,7 +18,8 @@ export function useMetaThemeColor(color?: string) {
   useEffect(() => {
     if (!color) return;
 
-    const resolved = getPropertyValueFromVarString(color) || DEFAULT_THEME_COLOR;
+    const resolved =
+      getPropertyValueFromVarString(color) || DEFAULT_THEME_COLOR;
 
     ensureThemeColorMetaTag();
     setThemeColorMetaContent(resolved);
