@@ -26,7 +26,7 @@ describe('web filesystem', () => {
   test('basic reads/writes are stored in idb', async () => {
     await idb.openDatabase();
     await sqlite.init();
-    await init();
+    init();
 
     // Text file
     await writeFile('/documents/foo.txt', 'hello');
@@ -44,7 +44,7 @@ describe('web filesystem', () => {
     expect(await readFile('/documents/foo.bin')).toBe('hello, world');
 
     const db = await idb.openDatabase();
-    const { store } = await idb.getStore(db, 'files');
+    const { store } = idb.getStore(db, 'files');
 
     // Make sure they are in idb
     expect(await idb.get(store, '/documents/foo.txt')).toEqual({
@@ -62,13 +62,13 @@ describe('web filesystem', () => {
     expect(await readFile('/outside.txt')).toBe('some junk');
     expect(await idb.get(store, '/outside.txt')).toBe(undefined);
 
-    await idb.closeDatabase();
+    idb.closeDatabase();
   });
 
   test('writing to sqlite files creates symlinks', async () => {
     await idb.openDatabase();
     await sqlite.init();
-    await init();
+    init();
 
     await writeFile('/documents/db.sqlite', 'some junk');
 
@@ -80,19 +80,19 @@ describe('web filesystem', () => {
 
   test('files are restored from idb', async () => {
     const db = await idb.openDatabase();
-    const { store } = await idb.getStore(db, 'files');
-    idb.set(store, { filepath: '/documents/ok.txt', contents: 'oh yeah' });
-    idb.set(store, {
+    const { store } = idb.getStore(db, 'files');
+    void idb.set(store, { filepath: '/documents/ok.txt', contents: 'oh yeah' });
+    void idb.set(store, {
       filepath: '/documents/deep/nested/file/ok.txt',
       contents: 'deeper',
     });
-    idb.set(store, {
+    void idb.set(store, {
       filepath: '/documents/deep/nested/db.sqlite',
       contents: 'this will be blank and just create a symlink',
     });
 
     await sqlite.init();
-    await init();
+    init();
 
     expect(await readFile('/documents/ok.txt')).toBe('oh yeah');
     expect(await exists('/documents/deep')).toBe(true);

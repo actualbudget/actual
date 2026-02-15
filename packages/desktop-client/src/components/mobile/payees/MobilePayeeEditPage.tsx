@@ -43,13 +43,13 @@ export function MobilePayeeEditPage() {
         setIsLoading(false);
       } else {
         // Payee not found, navigate back to payees list
-        navigate('/payees');
+        void navigate('/payees');
       }
     }
   }, [id, payees, navigate]);
 
   const handleCancel = useCallback(() => {
-    navigate(-1);
+    void navigate(-1);
   }, [navigate]);
 
   const handleSave = useCallback(async () => {
@@ -67,7 +67,7 @@ export function MobilePayeeEditPage() {
           newName: editedPayeeName.trim(),
         }),
       });
-      navigate('/payees');
+      void navigate('/payees');
     } catch (error) {
       console.error('Failed to update payee:', error);
       dispatch(

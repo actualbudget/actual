@@ -90,7 +90,7 @@ export function MobileSchedulesPage() {
 
   const handleSchedulePress = useCallback(
     (schedule: ScheduleEntity) => {
-      navigate(`/schedules/${schedule.id}`);
+      void navigate(`/schedules/${schedule.id}`);
     },
     [navigate],
   );

@@ -25,7 +25,7 @@ export function AddTransactionButton({
       aria-label={t('Add transaction')}
       style={{ margin: 10 }}
       onPress={() => {
-        navigate(to, { state: { accountId, categoryId } });
+        void navigate(to, { state: { accountId, categoryId } });
       }}
     >
       <SvgAdd width={20} height={20} />

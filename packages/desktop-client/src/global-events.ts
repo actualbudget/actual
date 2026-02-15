@@ -84,7 +84,7 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     const tagged = undo.getTaggedState(undoTag);
 
     if (tagged) {
-      Promise.all(promises).then(() => {
+      void Promise.all(promises).then(() => {
         undo.setUndoState('undoEvent', undoState);
 
         // If a modal has been tagged, open it instead of navigating
@@ -104,7 +104,7 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
             window.location.href.replace(window.location.origin, '') !==
             tagged.url
           ) {
-            window.__navigate(tagged.url);
+            void window.__navigate(tagged.url);
             // This stops propagation of the undo event, which is
             // important because if we are changing URLs any existing
             // undo listeners on the current page don't need to be run
@@ -132,33 +132,33 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
   });
 
   const unlistenStartLoad = listen('start-load', () => {
-    store.dispatch(closeBudgetUI());
+    void store.dispatch(closeBudgetUI());
     store.dispatch(setAppState({ loadingText: '' }));
   });
 
   const unlistenFinishLoad = listen('finish-load', () => {
     store.dispatch(closeModal());
     store.dispatch(setAppState({ loadingText: null }));
-    store.dispatch(loadPrefs());
+    void store.dispatch(loadPrefs());
   });
 
   const unlistenStartImport = listen('start-import', () => {
-    store.dispatch(closeBudgetUI());
+    void store.dispatch(closeBudgetUI());
   });
 
   const unlistenFinishImport = listen('finish-import', () => {
     store.dispatch(closeModal());
     store.dispatch(setAppState({ loadingText: null }));
-    store.dispatch(loadPrefs());
+    void store.dispatch(loadPrefs());
   });
 
   const unlistenShowBudgets = listen('show-budgets', () => {
-    store.dispatch(closeBudgetUI());
+    void store.dispatch(closeBudgetUI());
     store.dispatch(setAppState({ loadingText: null }));
   });
 
   const unlistenApiFetchRedirected = listen('api-fetch-redirected', () => {
-    window.Actual.reload();
+    void window.Actual.reload();
   });
 
   return () => {

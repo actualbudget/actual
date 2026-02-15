@@ -15,7 +15,7 @@ export function useMetadataPref<K extends keyof MetadataPrefs>(
   const dispatch = useDispatch();
   const setLocalPref = useCallback<SetMetadataPrefAction<K>>(
     value => {
-      dispatch(savePrefs({ prefs: { [prefName]: value } }));
+      void dispatch(savePrefs({ prefs: { [prefName]: value } }));
     },
     [prefName, dispatch],
   );

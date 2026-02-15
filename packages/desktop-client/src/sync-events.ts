@@ -62,7 +62,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
       const tables = event.tables;
 
       if (tables.includes('prefs')) {
-        store.dispatch(loadPrefs());
+        void store.dispatch(loadPrefs());
       }
 
       if (
@@ -70,7 +70,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
         tables.includes('category_groups') ||
         tables.includes('category_mapping')
       ) {
-        queryClient.invalidateQueries({
+        void queryClient.invalidateQueries({
           queryKey: categoryQueries.lists(),
         });
       }
@@ -81,11 +81,11 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
         tables.includes('payees') ||
         tables.includes('payee_mapping')
       ) {
-        store.dispatch(reloadPayees());
+        void store.dispatch(reloadPayees());
       }
 
       if (tables.includes('accounts')) {
-        queryClient.invalidateQueries({
+        void queryClient.invalidateQueries({
           queryKey: accountQueries.lists(),
         });
       }
@@ -111,7 +111,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
               button: {
                 title: t('Reset sync'),
                 action: () => {
-                  store.dispatch(resetSync());
+                  void store.dispatch(resetSync());
                 },
               },
             };
@@ -134,7 +134,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
                 action: async () => {
                   attemptedSyncRepair = true;
                   await send('sync-repair');
-                  store.dispatch(sync());
+                  void store.dispatch(sync());
                 },
               },
             };
@@ -167,7 +167,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
             button: {
               title: t('Reset sync'),
               action: () => {
-                store.dispatch(resetSync());
+                void store.dispatch(resetSync());
               },
             },
           };
@@ -217,8 +217,8 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
               title: t('Register'),
               action: async () => {
                 await store.dispatch(uploadBudget({}));
-                store.dispatch(sync());
-                store.dispatch(loadPrefs());
+                void store.dispatch(sync());
+                void store.dispatch(loadPrefs());
               },
             },
           };
@@ -239,7 +239,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
             button: {
               title: t('Upload'),
               action: () => {
-                store.dispatch(resetSync());
+                void store.dispatch(resetSync());
               },
             },
           };
@@ -275,7 +275,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
             button: {
               title: t('Revert'),
               action: () => {
-                store.dispatch(closeAndDownloadBudget({ cloudFileId }));
+                void store.dispatch(closeAndDownloadBudget({ cloudFileId }));
               },
             },
           };
@@ -364,7 +364,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
           break;
         case 'token-expired':
           notif = null;
-          store.dispatch(signOut());
+          void store.dispatch(signOut());
           break;
         default:
           console.trace('unknown error', event);

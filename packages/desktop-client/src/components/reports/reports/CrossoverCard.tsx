@@ -124,7 +124,7 @@ export function CrossoverCard({
         setEnd(end);
       }
     }
-    calculateDateRange();
+    void calculateDateRange();
     return () => {
       isMounted = false;
     };

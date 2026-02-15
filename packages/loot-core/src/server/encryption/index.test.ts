@@ -11,9 +11,9 @@ describe('Encryption', () => {
     });
     await encryption.loadKey(key);
 
-    const data = await encryption.encrypt('hello', 'foo');
+    const data = encryption.encrypt('hello', 'foo');
 
-    const output = await encryption.decrypt(data.value, data.meta);
+    const output = encryption.decrypt(data.value, data.meta);
     expect(output.toString()).toBe('hello');
   });
 });

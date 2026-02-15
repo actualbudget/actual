@@ -413,7 +413,7 @@ function RecurringScheduleTooltip({
       });
       setPreviewDates(error ? t('Invalid rule') : data);
     }
-    run();
+    void run();
   }, [config, t]);
 
   if (previewDates == null) {

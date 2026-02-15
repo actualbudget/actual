@@ -66,7 +66,7 @@ async function list(db) {
 
 const cmd = argv._[0];
 
-withMigrationsDir(argv.m || getMigrationsDir(), async () => {
+void withMigrationsDir(argv.m || getMigrationsDir(), async () => {
   switch (cmd) {
     case 'reset':
       fs.unlinkSync(argv.db);
@@ -94,7 +94,7 @@ withMigrationsDir(argv.m || getMigrationsDir(), async () => {
         logger.log('Must pass a name for the new migration with --name');
         process.exit(1);
       }
-      await create(name);
+      create(name);
       break;
   }
 });

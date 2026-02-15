@@ -64,18 +64,18 @@ export function getDatabasePath() {
 
 export async function openDatabase(id?: string) {
   if (db) {
-    await sqlite.closeDatabase(db);
+    sqlite.closeDatabase(db);
   }
 
   dbPath = fs.join(fs.getBudgetDir(id), 'db.sqlite');
-  setDatabase(await sqlite.openDatabase(dbPath));
+  setDatabase(sqlite.openDatabase(dbPath));
 
   // await execQuery('PRAGMA journal_mode = WAL');
 }
 
 export async function closeDatabase() {
   if (db) {
-    await sqlite.closeDatabase(db);
+    sqlite.closeDatabase(db);
     setDatabase(null);
   }
 }
@@ -101,7 +101,7 @@ export async function loadClock() {
     const clock = makeClock(timestamp);
     setClock(clock);
 
-    await runQuery('INSERT INTO messages_clock (id, clock) VALUES (?, ?)', [
+    runQuery('INSERT INTO messages_clock (id, clock) VALUES (?, ?)', [
       1,
       serializeClock(clock),
     ]);
@@ -171,7 +171,7 @@ export async function all<T>(sql: string, params?: (string | number)[]) {
 }
 
 export async function first<T>(sql, params?: (string | number)[]) {
-  const arr = await runQuery<T>(sql, params, true);
+  const arr = runQuery<T>(sql, params, true);
   return arr.length === 0 ? null : arr[0];
 }
 
@@ -190,11 +190,7 @@ export async function run(sql, params?: (string | number)[]) {
 }
 
 export async function select(table, id) {
-  const rows = await runQuery(
-    'SELECT * FROM ' + table + ' WHERE id = ?',
-    [id],
-    true,
-  );
+  const rows = runQuery('SELECT * FROM ' + table + ' WHERE id = ?', [id], true);
   // TODO: In the next phase, we will make this function generic
   // and pass the type of the return type to `runQuery`.
   // oxlint-disable-next-line typescript/no-explicit-any
@@ -274,7 +270,7 @@ export async function deleteAll(table: string) {
 }
 
 export async function selectWithSchema(table, sql, params) {
-  const rows = await runQuery(sql, params, true);
+  const rows = runQuery(sql, params, true);
   const convertedRows = rows
     .map(row => convertFromSelect(schema, schemaConfig, table, row))
     .filter(Boolean);
@@ -771,9 +767,9 @@ export async function moveAccount(
   const { updates, sort_order } = shoveSortOrders(accounts, targetId);
   await batchMessages(async () => {
     for (const info of updates) {
-      update('accounts', info);
+      void update('accounts', info);
     }
-    update('accounts', { id, sort_order });
+    void update('accounts', { id, sort_order });
   });
 }
 

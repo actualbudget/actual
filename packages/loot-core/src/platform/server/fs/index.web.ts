@@ -166,7 +166,7 @@ async function _copySqlFile(
 ): Promise<boolean> {
   _createFile(topath);
 
-  const { store } = await idb.getStore(await idb.getDatabase(), 'files');
+  const { store } = idb.getStore(await idb.getDatabase(), 'files');
   await idb.set(store, { filepath: topath, contents: '' });
   const fromitem = await idb.get(store, frompath);
   const fromDbPath = pathToId(fromitem.filepath);
@@ -192,7 +192,7 @@ async function _copySqlFile(
   } catch (error) {
     tofile.close();
     fromfile.close();
-    _removeFile(toDbPath);
+    void _removeFile(toDbPath);
     logger.error('Failed to copy database file', error);
     return false;
   } finally {
@@ -248,7 +248,7 @@ async function populateDefaultFilesystem() {
   await Promise.all(
     files.map(async file => {
       const contents = await fetchFile(process.env.PUBLIC_URL + 'data/' + file);
-      _writeFile('/' + file, contents);
+      void _writeFile('/' + file, contents);
     }),
   );
 }

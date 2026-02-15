@@ -47,10 +47,10 @@ export function useDraggable<T>({
   const [, dragRef] = useDrag({
     type,
     item: () => {
-      _onDragChange.current({ state: 'start-preview', type, item });
+      void _onDragChange.current({ state: 'start-preview', type, item });
 
       setTimeout(() => {
-        _onDragChange.current({ state: 'start' });
+        void _onDragChange.current({ state: 'start' });
       }, 0);
 
       return { type, item };
@@ -58,7 +58,7 @@ export function useDraggable<T>({
     collect: monitor => ({ isDragging: monitor.isDragging() }),
 
     end(dragState) {
-      _onDragChange.current({ state: 'end', type, item: dragState.item });
+      void _onDragChange.current({ state: 'end', type, item: dragState.item });
     },
 
     canDrag() {
@@ -105,7 +105,7 @@ export function useDroppable<T extends { id: string }>({
   >({
     accept: types,
     drop({ item }) {
-      onDrop(item.id, dropPos, id);
+      void onDrop(item.id, dropPos, id);
     },
     hover(_, monitor) {
       const hoverBoundingRect = ref.current.getBoundingClientRect();

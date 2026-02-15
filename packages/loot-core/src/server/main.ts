@@ -120,7 +120,7 @@ handlers['set-server-url'] = async function ({ url, validate = true }) {
 handlers['app-focused'] = async function () {
   if (prefs.getPrefs() && prefs.getPrefs().id) {
     // First we sync
-    fullSync();
+    void fullSync();
   }
 };
 

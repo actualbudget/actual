@@ -69,7 +69,7 @@ export function LoadBackupModal({
 
   useEffect(() => {
     if (budgetIdToLoad) {
-      send('backups-get', { id: budgetIdToLoad }).then(setBackups);
+      void send('backups-get', { id: budgetIdToLoad }).then(setBackups);
     }
   }, [budgetIdToLoad]);
 
@@ -119,7 +119,7 @@ export function LoadBackupModal({
                     variant="primary"
                     onPress={() => {
                       if (budgetIdToLoad && latestBackup.id) {
-                        dispatch(
+                        void dispatch(
                           loadBackup({
                             budgetId: budgetIdToLoad,
                             backupId: latestBackup.id,
@@ -165,7 +165,7 @@ export function LoadBackupModal({
                 backups={previousBackups}
                 onSelect={id => {
                   if (budgetIdToLoad && id) {
-                    dispatch(
+                    void dispatch(
                       loadBackup({ budgetId: budgetIdToLoad, backupId: id }),
                     );
                   }

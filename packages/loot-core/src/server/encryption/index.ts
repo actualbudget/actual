@@ -16,11 +16,11 @@ class Key {
   }
 
   async createFromPassword({ password, salt }) {
-    this.value = await internals.createKey({ secret: password, salt });
+    this.value = internals.createKey({ secret: password, salt });
   }
 
   async createFromBase64(str) {
-    this.value = await internals.importKey(str);
+    this.value = internals.importKey(str);
   }
 
   getId() {

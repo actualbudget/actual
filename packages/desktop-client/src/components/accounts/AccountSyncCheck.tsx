@@ -99,7 +99,7 @@ export function AccountSyncCheck() {
       setOpen(false);
 
       if (acc.account_id) {
-        authorizeBank(dispatch);
+        void authorizeBank(dispatch);
       }
     },
     [dispatch],

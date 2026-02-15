@@ -26,7 +26,7 @@ export function usePayeeRuleCounts(): UsePayeeRuleCountsResult {
   }, []);
 
   useEffect(() => {
-    refetch();
+    void refetch();
   }, [refetch]);
 
   return { ruleCounts, isLoading, refetch };

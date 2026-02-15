@@ -10,7 +10,7 @@ import * as rule from '../no-anchor-tag';
 // Tests
 //------------------------------------------------------------------------------
 
-runClassic(
+void runClassic(
   'no-anchor-tag',
   rule,
   {

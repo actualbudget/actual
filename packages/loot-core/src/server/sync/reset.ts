@@ -33,7 +33,7 @@ export async function resetSync(
     //
     // Be VERY careful here since we are bulk deleting data. It should
     // never delete any data that doesn't have `tombstone = 1`
-    await db.execQuery(`
+    db.execQuery(`
       DELETE FROM messages_crdt;
       DELETE FROM messages_clock;
       DELETE FROM transactions WHERE tombstone = 1;

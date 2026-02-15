@@ -88,7 +88,7 @@ export function ManagementApp() {
       dispatch(setAppState({ managerHasInitialized: true }));
     }
 
-    fetchData();
+    void fetchData();
   }, [dispatch]);
 
   return (

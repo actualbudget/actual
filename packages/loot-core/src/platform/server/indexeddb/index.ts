@@ -107,7 +107,7 @@ export const openDatabase = function () {
 
 export const closeDatabase = function () {
   if (openedDb) {
-    openedDb.then(db => {
+    void openedDb.then(db => {
       db.close();
     });
     openedDb = null;

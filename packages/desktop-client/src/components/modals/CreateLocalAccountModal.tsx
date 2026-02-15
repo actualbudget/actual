@@ -75,7 +75,7 @@ export function CreateLocalAccountModal() {
         {
           onSuccess: id => {
             dispatch(closeModal());
-            navigate('/accounts/' + id);
+            void navigate('/accounts/' + id);
           },
         },
       );

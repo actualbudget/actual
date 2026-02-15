@@ -26,7 +26,7 @@ export function get(): Spreadsheet {
 }
 
 async function updateSpreadsheetCache(rawDb, names: string[]) {
-  await sqlite.transaction(rawDb, () => {
+  sqlite.transaction(rawDb, () => {
     names.forEach(name => {
       const node = globalSheet._getNode(name);
 
@@ -152,7 +152,7 @@ export async function loadSpreadsheet(
   }
 
   if (cacheEnabled && !isCacheDirty(mainDb, cacheDb)) {
-    const cachedRows = await sqlite.runQuery<{ key?: number; value: string }>(
+    const cachedRows = sqlite.runQuery<{ key?: number; value: string }>(
       cacheDb,
       'SELECT * FROM kvcache',
       [],

@@ -60,7 +60,7 @@ export function ImportActualModal() {
       setError(null);
       try {
         await dispatch(importBudget({ filepath: res[0], type: 'actual' }));
-        navigate('/budget');
+        void navigate('/budget');
       } catch (err) {
         setError(err.message);
       } finally {

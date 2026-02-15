@@ -294,7 +294,7 @@ function BudgetFileListItem({
     // make sure to never allow duplicate clicks
     if (!selecting.current) {
       selecting.current = true;
-      await onSelect(file);
+      onSelect(file);
       selecting.current = false;
     }
   }
@@ -447,7 +447,7 @@ function RefreshButton({ style, onRefresh }: RefreshButtonProps) {
 
   async function _onRefresh() {
     setLoading(true);
-    await onRefresh();
+    onRefresh();
     setLoading(false);
   }
 
@@ -556,7 +556,7 @@ export function BudgetFileSelection({
 
   useEffect(() => {
     if (multiuserEnabled && !userData?.offline) {
-      fetchUsers();
+      void fetchUsers();
     }
   }, [multiuserEnabled, userData?.offline, fetchUsers]);
 
@@ -583,13 +583,13 @@ export function BudgetFileSelection({
   const onCreate = ({ testMode = false } = {}) => {
     if (!creating) {
       setCreating(true);
-      dispatch(createBudget({ testMode }));
+      void dispatch(createBudget({ testMode }));
     }
   };
 
   const refresh = () => {
-    dispatch(getUserData());
-    dispatch(loadAllFiles());
+    void dispatch(getUserData());
+    void dispatch(loadAllFiles());
   };
 
   const initialMount = useInitialMount();

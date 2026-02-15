@@ -26,7 +26,7 @@ export async function importActual(_filepath: string, buffer: Buffer) {
 
   // We never want to load cached data from imported files, so
   // delete the cache
-  const sqliteDb = await sqlite.openDatabase(
+  const sqliteDb = sqlite.openDatabase(
     fs.join(fs.getBudgetDir(id), 'db.sqlite'),
   );
   sqlite.execQuery(

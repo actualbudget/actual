@@ -25,7 +25,7 @@ export function Error() {
   const { error } = (location.state || {}) as { error? };
 
   function onTryAgain() {
-    navigate('/');
+    void navigate('/');
   }
 
   return (

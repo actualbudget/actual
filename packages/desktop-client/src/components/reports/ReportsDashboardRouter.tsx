@@ -20,7 +20,7 @@ export function ReportsDashboardRouter() {
   // Redirect to first dashboard if no dashboardId in URL
   useEffect(() => {
     if (!dashboardId && !isLoading && dashboard_pages.length > 0) {
-      navigate(`/reports/${dashboard_pages[0].id}`, { replace: true });
+      void navigate(`/reports/${dashboard_pages[0].id}`, { replace: true });
     }
   }, [dashboardId, isLoading, dashboard_pages, navigate]);
 

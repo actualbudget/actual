@@ -4,7 +4,7 @@ import { SyncProtoBuf } from '@actual-app/crdt';
 import * as encryption from '../encryption';
 
 async function randomString() {
-  return (await encryption.randomBytes(12)).toString();
+  return encryption.randomBytes(12).toString();
 }
 
 export async function makeTestMessage(keyId) {
@@ -15,5 +15,5 @@ export async function makeTestMessage(keyId) {
   messagePb.setValue(await randomString());
   const binaryMsg = messagePb.serializeBinary();
 
-  return await encryption.encrypt(binaryMsg, keyId);
+  return encryption.encrypt(binaryMsg, keyId);
 }

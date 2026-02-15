@@ -18,7 +18,7 @@ export function useCommonPayees() {
 
   useEffect(() => {
     if (isInitialMount || isCommonPayeesDirty) {
-      dispatch(getCommonPayees());
+      void dispatch(getCommonPayees());
     }
   }, [dispatch, isInitialMount, isCommonPayeesDirty]);
 
@@ -32,7 +32,7 @@ export function usePayees() {
 
   useEffect(() => {
     if (isInitialMount || isPayeesDirty) {
-      dispatch(getPayees());
+      void dispatch(getPayees());
     }
   }, [dispatch, isInitialMount, isPayeesDirty]);
 

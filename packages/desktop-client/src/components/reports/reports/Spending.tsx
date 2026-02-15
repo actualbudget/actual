@@ -134,7 +134,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
 
       setAllIntervals(allMonths);
     }
-    run();
+    void run();
   }, [locale]);
 
   const getGraphData = useMemo(

@@ -196,7 +196,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
       setAllMonths(allMonths);
     }
-    run();
+    void run();
   }, [locale]);
 
   useEffect(() => {

@@ -123,8 +123,8 @@ export async function makeBackup(id: string) {
 
   // Remove all the messages from the backup
   const db = sqlite.openDatabase(backupPath);
-  await sqlite.runQuery(db, 'DELETE FROM messages_crdt');
-  await sqlite.runQuery(db, 'DELETE FROM messages_clock');
+  sqlite.runQuery(db, 'DELETE FROM messages_crdt');
+  sqlite.runQuery(db, 'DELETE FROM messages_clock');
   sqlite.closeDatabase(db);
 
   const toRemove = await updateBackups(await getBackups(id));

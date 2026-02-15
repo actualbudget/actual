@@ -55,7 +55,7 @@ async function appFocused() {
 }
 
 async function uploadFile(filename: string, contents: ArrayBuffer) {
-  send('upload-file-web', {
+  await send('upload-file-web', {
     filename,
     contents,
   });

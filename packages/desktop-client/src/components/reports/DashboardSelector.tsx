@@ -31,7 +31,7 @@ export function DashboardSelector({
     const defaultName = t('New dashboard');
     const newId = await send('dashboard-create', { name: defaultName });
     if (newId) {
-      navigate(`/reports/${newId}`);
+      void navigate(`/reports/${newId}`);
     }
   };
 
@@ -91,9 +91,9 @@ export function DashboardSelector({
               slot="close"
               onMenuSelect={item => {
                 if (item === 'add-new') {
-                  handleAddDashboard();
+                  void handleAddDashboard();
                 } else {
-                  navigate(`/reports/${item}`);
+                  void navigate(`/reports/${item}`);
                 }
                 setMenuOpen(false);
               }}

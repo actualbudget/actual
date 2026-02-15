@@ -247,7 +247,7 @@ export function DiscoverSchedules() {
               isLoading={creating}
               isDisabled={selectedInst.items.size === 0}
               onPress={() => {
-                onCreate();
+                void onCreate();
                 close();
               }}
             >

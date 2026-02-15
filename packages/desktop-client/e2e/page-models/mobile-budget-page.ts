@@ -148,7 +148,7 @@ export class MobileBudgetPage {
     return groupNameText;
   }
 
-  #getButtonForCategoryGroup(categoryGroupName: string | RegExp) {
+  async #getButtonForCategoryGroup(categoryGroupName: string | RegExp) {
     return this.categoryGroupRows.getByRole('button', {
       name: categoryGroupName,
       exact: true,
@@ -177,7 +177,7 @@ export class MobileBudgetPage {
   }
 
   async openCategoryMenu(categoryName: string | RegExp) {
-    const categoryButton = await this.#getButtonForCategory(categoryName);
+    const categoryButton = this.#getButtonForCategory(categoryName);
     await categoryButton.click();
 
     return new CategoryMenuModal(

@@ -43,7 +43,7 @@ export function ChangePassword() {
     } else {
       setMessage(t('Password successfully changed'));
       await send('subscribe-sign-in', { password });
-      navigate('/');
+      void navigate('/');
     }
   }
 

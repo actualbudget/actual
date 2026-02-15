@@ -32,9 +32,9 @@ self.addEventListener('install', (_event: ExtendableEvent) => {
 
 // Log activation event
 self.addEventListener('activate', (_event: ExtendableEvent) => {
-  self.clients.claim();
+  void self.clients.claim();
 
-  self.clients.matchAll().then(clients => {
+  void self.clients.matchAll().then(clients => {
     clients.forEach(client => {
       client.postMessage({
         type: 'service-worker-ready',
@@ -46,7 +46,7 @@ self.addEventListener('activate', (_event: ExtendableEvent) => {
 
 self.addEventListener('message', (event: ExtendableMessageEvent) => {
   if (event.data && (event.data as PluginMessage).type === 'SKIP_WAITING') {
-    self.skipWaiting();
+    void self.skipWaiting();
   }
 });
 

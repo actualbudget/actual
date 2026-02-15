@@ -225,8 +225,8 @@ async function run(msgs) {
     { firstMessages: [], secondMessages: [] },
   );
 
-  prefs.loadPrefs();
-  prefs.savePrefs({
+  void prefs.loadPrefs();
+  void prefs.savePrefs({
     groupId: 'group',
     lastSyncedTimestamp: new Timestamp(
       Date.now(),
@@ -313,7 +313,7 @@ async function run(msgs) {
 
 describe('sync property test', () => {
   it.skip('should always sync clients into the same state', async () => {
-    const test = await jsc.check(
+    const test = jsc.check(
       jsc.forall(
         jsc.tuple(Array.from(new Array(100)).map(() => jsc.oneof(generators))),
         async msgs => {
