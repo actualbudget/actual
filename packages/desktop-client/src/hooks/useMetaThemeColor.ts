@@ -6,37 +6,27 @@ import {
   useTheme,
 } from '@desktop-client/style/theme';
 
+const VAR_STRING_REGEX = /^var\((--.*)\)$/;
 const DEFAULT_THEME_COLOR = '#5c3dbb';
-
-export type ThemeColorKey =
-  | 'mobileViewTheme'
-  | 'mobileConfigServerViewTheme'
-  | 'pageBackground';
 
 /**
  * Sets the theme-color meta tag (for browsers that use it) and document.body
  * background-color (for Safari 26+, which derives status bar tint from body).
- * Re-runs when theme or colorKey changes so the status bar follows the app theme.
+ * Re-runs when theme changes so the status bar follows the app theme.
  */
-export function useMetaThemeColor(colorKey?: ThemeColorKey) {
+export function useMetaThemeColor(color?: string) {
   const [activeTheme] = useTheme();
   const [darkThemePreference] = usePreferredDarkTheme();
 
   useEffect(() => {
-    if (!colorKey) return;
+    if (!color) return;
 
-    const resolved =
-      document.documentElement &&
-      window
-        .getComputedStyle(document.documentElement)
-        .getPropertyValue(`--color-${colorKey}`)
-        .trim();
-    const color = resolved || DEFAULT_THEME_COLOR;
+    const resolved = getPropertyValueFromVarString(color) || DEFAULT_THEME_COLOR;
 
     ensureThemeColorMetaTag();
-    setThemeColorMetaContent(color);
-    document.body.style.backgroundColor = color;
-  }, [colorKey, activeTheme, darkThemePreference]);
+    setThemeColorMetaContent(resolved);
+    document.body.style.backgroundColor = resolved;
+  }, [color, activeTheme, darkThemePreference]);
 }
 
 function ensureThemeColorMetaTag() {
@@ -56,4 +46,13 @@ function setThemeColorMetaContent(color: string) {
   if (themeTag) {
     themeTag.setAttribute('content', color);
   }
+}
+
+function getPropertyValueFromVarString(varString: string): string {
+  return VAR_STRING_REGEX.test(varString)
+    ? window
+        .getComputedStyle(document.documentElement)
+        .getPropertyValue(varString.match(VAR_STRING_REGEX)[1])
+        .trim()
+    : varString;
 }
