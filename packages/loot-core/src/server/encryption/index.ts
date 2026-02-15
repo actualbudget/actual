@@ -16,11 +16,11 @@ class Key {
   }
 
   async createFromPassword({ password, salt }) {
-    this.value = internals.createKey({ secret: password, salt });
+    this.value = await internals.createKey({ secret: password, salt });
   }
 
   async createFromBase64(str) {
-    this.value = internals.importKey(str);
+    this.value = await internals.importKey(str);
   }
 
   getId() {
@@ -50,11 +50,11 @@ export function hasKey(keyId) {
   return keyId in keys;
 }
 
-export function encrypt(value, keyId) {
+export async function encrypt(value, keyId) {
   return internals.encrypt(getKey(keyId), value);
 }
 
-export function decrypt(encrypted, meta) {
+export async function decrypt(encrypted, meta) {
   return internals.decrypt(getKey(meta.keyId), encrypted, meta);
 }
 

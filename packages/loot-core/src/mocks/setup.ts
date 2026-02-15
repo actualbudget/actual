@@ -136,7 +136,7 @@ global.emptyDatabase = function (avoidUpdate) {
 
     await sqlite.init();
 
-    const memoryDB = sqlite.openDatabase(path);
+    const memoryDB = await sqlite.openDatabase(path);
     sqlite.execQuery(
       memoryDB,
       nativeFs.readFileSync(__dirname + '/../server/sql/init.sql', 'utf8'),

@@ -45,7 +45,7 @@ const messageArb: fc.Arbitrary<Message> = fc
         ),
       )
       .map(date => date.toISOString() + '-0000-0123456789ABCDEF')
-      .map(Timestamp.parse);
+      .map(ts => Timestamp.parse(ts));
 
     return fc.record<Message>({
       timestamp,
@@ -67,31 +67,35 @@ describe('sync migrations', () => {
     tracer.start();
 
     const cleanup = addSyncListener((oldValues, newValues) => {
-      const transactionsMap = newValues.get('transactions') as Map<
-        string,
-        unknown
-      >;
-      tracer.event('applied', [...transactionsMap.keys()]);
+      const transactionsMap = newValues.get('transactions') as
+        | Map<string, unknown>
+        | undefined;
+      if (transactionsMap) {
+        tracer.event('applied', [...transactionsMap.keys()]);
+      }
     });
 
-    await db.insert('transactions', {
-      id: 'trans1/child1',
-      isChild: 1,
-      amount: 4500,
-    });
-    tracer.expectNow('applied', ['trans1/child1']);
-    await tracer.expectWait('applied', ['trans1/child1']);
+    try {
+      await db.insert('transactions', {
+        id: 'trans1/child1',
+        isChild: 1,
+        amount: 4500,
+      });
+      // Consume events: initial insert and migrate's parent_id update (order may vary)
+      await tracer.expect('applied', ['trans1/child1']);
+      await tracer.expect('applied', ['trans1/child1']);
 
-    const transactions = db.runQuery<db.DbTransaction>(
-      'SELECT * FROM transactions',
-      [],
-      true,
-    );
-    expect(transactions.length).toBe(1);
-    expect(transactions[0].parent_id).toBe('trans1');
-
-    cleanup();
-    tracer.end();
+      const transactions = db.runQuery<db.DbTransaction>(
+        'SELECT * FROM transactions',
+        [],
+        true,
+      );
+      expect(transactions.length).toBe(1);
+      expect(transactions[0].parent_id).toBe('trans1');
+    } finally {
+      cleanup();
+      tracer.end();
+    }
   });
 
   it('child transactions should always have a parent_id', async () => {

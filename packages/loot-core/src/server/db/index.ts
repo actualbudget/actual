@@ -68,12 +68,12 @@ export async function openDatabase(id?: string) {
   }
 
   dbPath = fs.join(fs.getBudgetDir(id), 'db.sqlite');
-  setDatabase(sqlite.openDatabase(dbPath));
+  setDatabase(await sqlite.openDatabase(dbPath));
 
   // await execQuery('PRAGMA journal_mode = WAL');
 }
 
-export async function closeDatabase() {
+export function closeDatabase() {
   if (db) {
     sqlite.closeDatabase(db);
     setDatabase(null);

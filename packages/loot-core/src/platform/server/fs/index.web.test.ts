@@ -62,7 +62,7 @@ describe('web filesystem', () => {
     expect(await readFile('/outside.txt')).toBe('some junk');
     expect(await idb.get(store, '/outside.txt')).toBe(undefined);
 
-    idb.closeDatabase();
+    void idb.closeDatabase();
   });
 
   test('writing to sqlite files creates symlinks', async () => {

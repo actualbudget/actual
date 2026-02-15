@@ -152,7 +152,7 @@ describe('Sync', () => {
   });
 });
 
-async function registerBudgetMonths(months) {
+function registerBudgetMonths(months) {
   const createdMonths = new Set();
   for (const month of months) {
     createdMonths.add(month);
@@ -197,7 +197,7 @@ describe('Sync projections', () => {
     });
 
     await sheet.loadSpreadsheet(db);
-    void registerBudgetMonths(['2017-01', '2017-02']);
+    registerBudgetMonths(['2017-01', '2017-02']);
     expectCellNotToExist('budget201701', 'sum-amount-' + fooId);
     expectCellNotToExist('budget201701', 'sum-amount-' + barId);
     expectCellNotToExist('budget201701', 'group-sum-amount-' + barId);
@@ -225,7 +225,7 @@ describe('Sync projections', () => {
     });
 
     await sheet.loadSpreadsheet(db);
-    void registerBudgetMonths(['2017-01', '2017-02']);
+    registerBudgetMonths(['2017-01', '2017-02']);
     expectCellNotToExist('budget201701', 'sum-amount-' + fooId);
     await fullSync();
     expectCellNotToExist('budget201701', 'sum-amount-' + fooId);
@@ -244,7 +244,7 @@ describe('Sync projections', () => {
     });
 
     await sheet.loadSpreadsheet(db);
-    void registerBudgetMonths(['2017-01', '2017-02']);
+    registerBudgetMonths(['2017-01', '2017-02']);
 
     // Get all the messages. We'll apply them in two passes
     const messages = mockSyncServer.getMessages();
@@ -272,7 +272,7 @@ describe('Sync projections', () => {
     });
 
     await sheet.loadSpreadsheet(db);
-    void registerBudgetMonths(['2017-01', '2017-02']);
+    registerBudgetMonths(['2017-01', '2017-02']);
     expectCellNotToExist('budget201701', 'group-sum-amount-' + groupId);
     await fullSync();
     expectCellNotToExist('budget201701', 'group-sum-amount-' + groupId);
@@ -295,7 +295,7 @@ describe('Sync projections', () => {
     });
 
     await sheet.loadSpreadsheet(db);
-    void registerBudgetMonths(['2017-01', '2017-02']);
+    registerBudgetMonths(['2017-01', '2017-02']);
 
     // Get all the messages. We'll apply them in two passes
     const messages = mockSyncServer.getMessages();
@@ -329,7 +329,7 @@ describe('Sync projections', () => {
     });
 
     await sheet.loadSpreadsheet(db);
-    void registerBudgetMonths(['2017-01', '2017-02']);
+    registerBudgetMonths(['2017-01', '2017-02']);
 
     // Get all the messages. We'll apply them in two passes
     const messages = mockSyncServer.getMessages();

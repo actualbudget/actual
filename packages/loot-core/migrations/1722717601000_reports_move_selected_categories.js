@@ -1,11 +1,11 @@
 export default async function runMigration(db) {
-  const categories = await db.runQuery(
+  const categories = db.runQuery(
     'SELECT id FROM categories WHERE tombstone = 0',
     [],
     true,
   );
 
-  const customReports = await db.runQuery(
+  const customReports = db.runQuery(
     'SELECT id, selected_categories, conditions FROM custom_reports WHERE tombstone = 0 AND selected_categories IS NOT NULL',
     [],
     true,
@@ -34,7 +34,7 @@ export default async function runMigration(db) {
     }
 
     // Append a new condition with the selected category IDs
-    await db.runQuery('UPDATE custom_reports SET conditions = ? WHERE id = ?', [
+    db.runQuery('UPDATE custom_reports SET conditions = ? WHERE id = ?', [
       JSON.stringify([
         ...conditions,
         {
@@ -49,7 +49,7 @@ export default async function runMigration(db) {
   }
 
   // Remove all the `selectedCategories` values - we don't need them anymore
-  await db.runQuery(
+  db.runQuery(
     'UPDATE custom_reports SET selected_categories = NULL WHERE tombstone = 0',
   );
 }

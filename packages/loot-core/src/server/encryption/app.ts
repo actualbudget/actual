@@ -108,7 +108,7 @@ async function keyTest({
   void encryption.loadKey(key);
 
   try {
-    encryption.decrypt(Buffer.from(test.value, 'base64'), test.meta);
+    void encryption.decrypt(Buffer.from(test.value, 'base64'), test.meta);
   } catch (e) {
     logger.log(e);
 

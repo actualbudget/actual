@@ -74,10 +74,10 @@ void withMigrationsDir(argv.m || getMigrationsDir(), async () => {
         path.join(__dirname, '../../../src/server/sql/init.sql'),
         'utf8',
       );
-      getDatabase().exec(initSql);
+      (await getDatabase()).exec(initSql);
       break;
     case 'migrate':
-      const applied = await migrate(getDatabase());
+      const applied = await migrate(await getDatabase());
       if (applied.length === 0) {
         logger.log('No pending migrations');
       } else {
@@ -85,7 +85,7 @@ void withMigrationsDir(argv.m || getMigrationsDir(), async () => {
       }
       break;
     case 'list':
-      await list(getDatabase());
+      await list(await getDatabase());
       break;
     case 'create':
     default:

@@ -115,7 +115,7 @@ export async function loadSpreadsheet(
     const cachePath = db
       .getDatabasePath()
       .replace(/db\.sqlite$/, 'cache.sqlite');
-    globalCacheDb = cacheDb = sqlite.openDatabase(cachePath);
+    globalCacheDb = cacheDb = await sqlite.openDatabase(cachePath);
 
     sqlite.execQuery(
       cacheDb,

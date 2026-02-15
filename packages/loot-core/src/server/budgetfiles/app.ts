@@ -260,7 +260,7 @@ async function closeBudget() {
   clearFullSyncTimeout();
   mainApp.stopServices();
 
-  await db.closeDatabase();
+  db.closeDatabase();
 
   try {
     await asyncStorage.setItem('lastBudget', '');
@@ -297,7 +297,7 @@ async function deleteBudget({
     // way, but works for now.
     try {
       await db.openDatabase(id);
-      await db.closeDatabase();
+      db.closeDatabase();
       const budgetDir = fs.getBudgetDir(id);
       await fs.removeDirRecursively(budgetDir);
     } catch {

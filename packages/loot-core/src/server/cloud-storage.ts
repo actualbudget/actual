@@ -161,7 +161,7 @@ export async function exportBuffer() {
     // Do some post-processing of the database. We NEVER upload the cache with
     // the database; this forces new downloads to always recompute everything
     // which is not only safer, but reduces the filesize a lot.
-    const memDb = sqlite.openDatabase(rawDbContent);
+    const memDb = await sqlite.openDatabase(rawDbContent);
     sqlite.execQuery(
       memDb,
       `

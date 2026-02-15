@@ -45,7 +45,7 @@ export async function encode(
 
       let result;
       try {
-        result = encryption.encrypt(binaryMsg, encryptKeyId);
+        result = await encryption.encrypt(binaryMsg, encryptKeyId);
       } catch (e) {
         throw new SyncError('encrypt-failure', {
           isMissingKey: e.message === 'missing-key',
@@ -96,7 +96,7 @@ export async function decode(
 
       let decrypted;
       try {
-        decrypted = encryption.decrypt(coerceBuffer(binary.getData()), {
+        decrypted = await encryption.decrypt(coerceBuffer(binary.getData()), {
           keyId: encryptKeyId,
           algorithm: 'aes-256-gcm',
           iv: coerceBuffer(binary.getIv()),
