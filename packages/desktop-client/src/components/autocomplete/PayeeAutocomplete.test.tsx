@@ -10,11 +10,15 @@ import { PayeeAutocomplete } from './PayeeAutocomplete';
 import type { PayeeAutocompleteProps } from './PayeeAutocomplete';
 
 import { AuthProvider } from '@desktop-client/auth/AuthProvider';
-import { useCommonPayees } from '@desktop-client/hooks/usePayees';
+import {
+  useCommonPayees,
+  useNearbyPayees,
+} from '@desktop-client/hooks/usePayees';
 import { TestProviders } from '@desktop-client/mocks';
 
 const PAYEE_SELECTOR = '[data-testid][role=option]';
 const PAYEE_SECTION_SELECTOR = '[data-testid$="-item-group"]';
+const ALL_PAYEE_ITEMS_SELECTOR = '[data-testid$="-payee-item"]';
 
 const payees = [
   makePayee('Bob', { favorite: true }),
@@ -41,7 +45,28 @@ function makePayee(name: string, options?: { favorite: boolean }): PayeeEntity {
   };
 }
 
-function extractPayeesAndHeaderNames(screen: Screen) {
+function makeNearbyPayee(name: string, distance: number): PayeeEntity {
+  const id = name.toLowerCase() + '-id';
+  return {
+    id,
+    name,
+    favorite: false,
+    transfer_acct: undefined,
+    location: {
+      id: id + '-loc',
+      payee_id: id,
+      latitude: 0,
+      longitude: 0,
+      created_at: 0,
+      distance,
+    },
+  };
+}
+
+function extractPayeesAndHeaderNames(
+  screen: Screen,
+  itemSelector: string = PAYEE_SELECTOR,
+) {
   const autocompleteElement = screen.getByTestId('autocomplete');
 
   // Get all elements that match either selector, but query them separately
@@ -49,7 +74,7 @@ function extractPayeesAndHeaderNames(screen: Screen) {
   const headers = [
     ...autocompleteElement.querySelectorAll(PAYEE_SECTION_SELECTOR),
   ];
-  const items = [...autocompleteElement.querySelectorAll(PAYEE_SELECTOR)];
+  const items = [...autocompleteElement.querySelectorAll(itemSelector)];
 
   // Combine all elements and sort by their position in the DOM
   const allElements = [...headers, ...items];
@@ -107,6 +132,7 @@ async function clickAutocomplete(autocomplete: HTMLElement) {
 vi.mock('../../hooks/usePayees', () => ({
   useCommonPayees: vi.fn(),
   usePayees: vi.fn().mockReturnValue([]),
+  useNearbyPayees: vi.fn().mockReturnValue([]),
 }));
 
 function firstOrIncorrect(id: string | null): string {
@@ -116,6 +142,7 @@ function firstOrIncorrect(id: string | null): string {
 describe('PayeeAutocomplete.getPayeeSuggestions', () => {
   beforeEach(() => {
     vi.mocked(useCommonPayees).mockReturnValue([]);
+    vi.mocked(useNearbyPayees).mockReturnValue([]);
   });
 
   test('favorites get sorted alphabetically', async () => {
@@ -208,6 +235,100 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
     expect(extractPayeesAndHeaderNames(screen)).toStrictEqual(
       expectedPayeeOrder,
     );
+  });
+
+  test('nearby payees appear in their own section before other payees', async () => {
+    const nearbyPayees = [
+      makeNearbyPayee('Coffee Shop', 0.3),
+      makeNearbyPayee('Grocery Store', 1.2),
+    ];
+    const payees = [makePayee('Alice'), makePayee('Bob')];
+    vi.mocked(useNearbyPayees).mockReturnValue(nearbyPayees);
+
+    await clickAutocomplete(renderPayeeAutocomplete({ payees }));
+
+    expect(
+      extractPayeesAndHeaderNames(screen, ALL_PAYEE_ITEMS_SELECTOR),
+    ).toStrictEqual([
+      'Nearby Payees',
+      'Coffee Shop',
+      'Grocery Store',
+      'Payees',
+      'Alice',
+      'Bob',
+    ]);
+  });
+
+  test('nearby payees are filtered by search input', async () => {
+    const nearbyPayees = [
+      makeNearbyPayee('Coffee Shop', 0.3),
+      makeNearbyPayee('Grocery Store', 1.2),
+    ];
+    const payees = [makePayee('Alice'), makePayee('Bob')];
+    vi.mocked(useNearbyPayees).mockReturnValue(nearbyPayees);
+
+    const autocomplete = renderPayeeAutocomplete({ payees });
+    await clickAutocomplete(autocomplete);
+
+    const input = autocomplete.querySelector('input')!;
+    await userEvent.type(input, 'Coffee');
+    await waitForAutocomplete();
+
+    const names = extractPayeesAndHeaderNames(screen, ALL_PAYEE_ITEMS_SELECTOR);
+    expect(names).toContain('Nearby Payees');
+    expect(names).toContain('Coffee Shop');
+    expect(names).not.toContain('Grocery Store');
+    expect(names).not.toContain('Alice');
+    expect(names).not.toContain('Bob');
+  });
+
+  test('nearby payees coexist with favorites and common payees', async () => {
+    const nearbyPayees = [makeNearbyPayee('Coffee Shop', 0.3)];
+    const payees = [
+      makePayee('Alice'),
+      makePayee('Bob'),
+      makePayee('Eve', { favorite: true }),
+      makePayee('Carol'),
+    ];
+    vi.mocked(useNearbyPayees).mockReturnValue(nearbyPayees);
+    vi.mocked(useCommonPayees).mockReturnValue([
+      makePayee('Bob'),
+      makePayee('Carol'),
+    ]);
+
+    await clickAutocomplete(renderPayeeAutocomplete({ payees }));
+
+    expect(
+      extractPayeesAndHeaderNames(screen, ALL_PAYEE_ITEMS_SELECTOR),
+    ).toStrictEqual([
+      'Nearby Payees',
+      'Coffee Shop',
+      'Suggested Payees',
+      'Eve',
+      'Bob',
+      'Carol',
+      'Payees',
+      'Alice',
+    ]);
+  });
+
+  test('a payee appearing in both nearby and favorites shows in both sections', async () => {
+    const nearbyPayees = [makeNearbyPayee('Eve', 0.5)];
+    const payees = [makePayee('Alice'), makePayee('Eve', { favorite: true })];
+    vi.mocked(useNearbyPayees).mockReturnValue(nearbyPayees);
+
+    await clickAutocomplete(renderPayeeAutocomplete({ payees }));
+
+    expect(
+      extractPayeesAndHeaderNames(screen, ALL_PAYEE_ITEMS_SELECTOR),
+    ).toStrictEqual([
+      'Nearby Payees',
+      'Eve',
+      'Suggested Payees',
+      'Eve',
+      'Payees',
+      'Alice',
+    ]);
   });
 
   test('list with no favorites shows just the payees list', async () => {

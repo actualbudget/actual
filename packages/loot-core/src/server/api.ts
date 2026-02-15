@@ -766,6 +766,34 @@ handlers['api/tag-delete'] = withMutation(async function ({ id }) {
   await handlers['tags-delete']({ id });
 });
 
+handlers['api/payee-location-create'] = withMutation(async function ({
+  payeeId,
+  latitude,
+  longitude,
+}) {
+  checkFileOpen();
+  return handlers['payee-location-create']({ payeeId, latitude, longitude });
+});
+
+handlers['api/payee-locations-get'] = async function ({ payeeId }) {
+  checkFileOpen();
+  return handlers['payee-locations-get']({ payeeId });
+};
+
+handlers['api/payee-location-delete'] = withMutation(async function ({ id }) {
+  checkFileOpen();
+  return handlers['payee-location-delete']({ id });
+});
+
+handlers['api/payees-get-nearby'] = async function ({
+  latitude,
+  longitude,
+  maxDistance,
+}) {
+  checkFileOpen();
+  return handlers['payees-get-nearby']({ latitude, longitude, maxDistance });
+};
+
 handlers['api/rules-get'] = async function () {
   checkFileOpen();
   return handlers['rules-get']();

@@ -454,6 +454,61 @@ function importPayees(data: Budget, entityIdMap: Map<string, string>) {
   );
 }
 
+async function importPayeeLocations(
+  data: Budget,
+  entityIdMap: Map<string, string>,
+) {
+  // If no payee locations data provided, skip import
+  if (!data?.payee_locations) {
+    logger.log('No payee locations data provided, skipping...');
+    return;
+  }
+
+  const payeeLocations = data.payee_locations;
+
+  for (const location of payeeLocations) {
+    // Skip deleted locations
+    if (location.deleted) {
+      continue;
+    }
+
+    // Get the mapped payee ID
+    const actualPayeeId = entityIdMap.get(location.payee_id);
+    if (!actualPayeeId) {
+      logger.log(`Skipping location for unknown payee: ${location.payee_id}`);
+      continue;
+    }
+
+    // Validate latitude/longitude before attempting import
+    const latitude = parseFloat(location.latitude);
+    const longitude = parseFloat(location.longitude);
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+      logger.log(
+        `Skipping location with invalid coordinates for payee ${actualPayeeId}: lat=${location.latitude}, lng=${location.longitude}`,
+      );
+      continue;
+    }
+
+    try {
+      // Create the payee location in Actual
+      await send('payee-location-create', {
+        payeeId: actualPayeeId,
+        latitude,
+        longitude,
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : String(error ?? 'Unknown error');
+      logger.error(
+        `Failed to import location for payee ${actualPayeeId} at (${latitude}, ${longitude}): ${errorMessage}`,
+      );
+    }
+  }
+}
+
 async function importFlagsAsTags(
   data: Budget,
   flagNameConflicts: Set<string>,
@@ -1088,6 +1143,9 @@ export async function doImport(data: Budget) {
 
   logger.log('Importing Payees...');
   await importPayees(data, entityIdMap);
+
+  logger.log('Importing Payee Locations...');
+  await importPayeeLocations(data, entityIdMap);
 
   logger.log('Importing Tags...');
   await importFlagsAsTags(data, flagNameConflicts);
