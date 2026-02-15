@@ -166,7 +166,7 @@ export async function unparse(templates: Template[]): Promise<string> {
 
       switch (template.type) {
         case 'simple': {
-          // Simple template syntax: #template[-prio] simple [monthly N] [limit]
+          // Simple template syntax: #template[-prio] simple [monthly N] [limit] [starting YYYY-MM] [until YYYY-MM]
           let result = prefix;
           if (template.monthly != null) {
             result += ` ${template.monthly}`;
@@ -174,10 +174,16 @@ export async function unparse(templates: Template[]): Promise<string> {
           if (template.limit) {
             result += ` ${limitToString(template.limit)}`;
           }
+          if (template.starting) {
+            result += ` starting ${template.starting}`;
+          }
+          if (template.until) {
+            result += ` until ${template.until}`;
+          }
           return result.trim();
         }
         case 'schedule': {
-          // schedule syntax: #template[-prio] schedule <name> [full] [ [increase/decrease N%] ]
+          // schedule syntax: #template[-prio] schedule <name> [full] [ [increase/decrease N%] ] [starting YYYY-MM] [until YYYY-MM]
           let result = `${prefix} schedule`;
           if (template.full) {
             result += ' full';
@@ -190,25 +196,41 @@ export async function unparse(templates: Template[]): Promise<string> {
             const type = template.adjustmentType === 'percent' ? '%' : '';
             result += ` [${op} ${val}${type}]`;
           }
+          if (template.starting) {
+            result += ` starting ${template.starting}`;
+          }
+          if (template.until) {
+            result += ` until ${template.until}`;
+          }
           return result;
         }
         case 'percentage': {
-          // #template[-prio] <percent>% of [previous ]<category>
+          // #template[-prio] <percent>% of [previous ]<category> [starting YYYY-MM] [until YYYY-MM]
           const prev = template.previous ? 'previous ' : '';
-          return `${prefix} ${trimTrailingZeros(template.percent)}% of ${prev}${template.category}`.trim();
+          let result = `${prefix} ${trimTrailingZeros(template.percent)}% of ${prev}${template.category}`;
+          if (template.starting) {
+            result += ` starting ${template.starting}`;
+          }
+          if (template.until) {
+            result += ` until ${template.until}`;
+          }
+          return result.trim();
         }
         case 'periodic': {
-          // #template[-prio] <amount> repeat every <n> <period>(s) starting <date> [limit]
+          // #template[-prio] <amount> repeat every <n> <period>(s) starting <date> [limit] [until YYYY-MM]
           const periodPart = periodToString(template.period);
           let result = `${prefix} ${template.amount} repeat every ${periodPart} starting ${template.starting}`;
           if (template.limit) {
             result += ` ${limitToString(template.limit)}`;
           }
+          if (template.until) {
+            result += ` until ${template.until}`;
+          }
           return result;
         }
         case 'by':
         case 'spend': {
-          // #template[-prio] <amount> by <month> [spend from <month>] [repeat every <...>]
+          // #template[-prio] <amount> by <month> [spend from <month>] [repeat every <...>] [starting YYYY-MM] [until YYYY-MM]
           let result = `${prefix} ${template.amount} by ${template.month}`;
           if (template.type === 'spend' && template.from) {
             result += ` spend from ${template.from}`;
@@ -220,10 +242,16 @@ export async function unparse(templates: Template[]): Promise<string> {
               result += ` repeat every ${repeatInfo}`;
             }
           }
+          if (template.starting) {
+            result += ` starting ${template.starting}`;
+          }
+          if (template.until) {
+            result += ` until ${template.until}`;
+          }
           return result;
         }
         case 'remainder': {
-          // #template remainder [weight] [limit]
+          // #template remainder [weight] [limit] [starting YYYY-MM] [until YYYY-MM]
           let result = `${prefix} remainder`;
           if (template.weight !== undefined && template.weight !== 1) {
             result += ` ${template.weight}`;
@@ -231,9 +259,16 @@ export async function unparse(templates: Template[]): Promise<string> {
           if (template.limit) {
             result += ` ${limitToString(template.limit)}`;
           }
+          if (template.starting) {
+            result += ` starting ${template.starting}`;
+          }
+          if (template.until) {
+            result += ` until ${template.until}`;
+          }
           return result;
         }
         case 'average': {
+          // #template average <numMonths> months [increase/decrease {number|number%}] [starting YYYY-MM] [until YYYY-MM]
           let result = `${prefix} average ${template.numMonths} months`;
 
           if (template.adjustment !== undefined) {
@@ -244,12 +279,23 @@ export async function unparse(templates: Template[]): Promise<string> {
             result += ` [${op} ${val}${type}]`;
           }
 
-          // #template average <numMonths> months [increase/decrease {number|number%}]
+          if (template.starting) {
+            result += ` starting ${template.starting}`;
+          }
+          if (template.until) {
+            result += ` until ${template.until}`;
+          }
           return result;
         }
         case 'copy': {
-          // #template copy from <lookBack> months ago [limit]
-          const result = `${prefix} copy from ${template.lookBack} months ago`;
+          // #template copy from <lookBack> months ago [starting YYYY-MM] [until YYYY-MM]
+          let result = `${prefix} copy from ${template.lookBack} months ago`;
+          if (template.starting) {
+            result += ` starting ${template.starting}`;
+          }
+          if (template.until) {
+            result += ` until ${template.until}`;
+          }
           return result;
         }
         case 'limit': {

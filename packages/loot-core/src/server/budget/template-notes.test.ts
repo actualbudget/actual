@@ -51,6 +51,8 @@ describe('storeNoteTemplates', () => {
           type: 'simple',
           monthly: 10,
           limit: null,
+          starting: null,
+          until: null,
           priority: 0,
           directive: 'template',
         },
@@ -71,6 +73,8 @@ describe('storeNoteTemplates', () => {
           type: 'simple',
           monthly: -103.23,
           limit: null,
+          starting: null,
+          until: null,
           priority: 0,
           directive: 'template',
         },
@@ -91,6 +95,8 @@ describe('storeNoteTemplates', () => {
           type: 'simple',
           monthly: 12,
           limit: null,
+          starting: null,
+          until: null,
           priority: 0,
           directive: 'template',
         },
@@ -312,18 +318,35 @@ describe('unparse/parse round-trip', () => {
     '#template up to 25 per day hold',
     '#template up to 100 per week starting 2025-01-01',
     '#template-2 123.45',
+    // simple with starting and until
+    '#template 10 starting 2025-01',
+    '#template 10 until 2025-12',
+    '#template 10 starting 2025-01 until 2025-12',
+    '#template up to 50 until 2025-06',
+    '#template 10 until 2025-12-15',
     // schedule
     '#template schedule Rent',
     '#template schedule full Mortgage',
     '#template schedule Netflix [increase 10%]',
     '#template schedule full Groceries [decrease 5%]',
+    // schedule with starting and until
+    '#template schedule Rent starting 2025-01',
+    '#template schedule Rent until 2025-12',
+    '#template schedule Rent starting 2025-01 until 2025-12',
     // percentage
     '#template 50% of Utilities',
     '#template 75% of previous Dining Out',
+    // percentage with starting and until
+    '#template 50% of Utilities starting 2025-01',
+    '#template 50% of Utilities until 2025-12',
+    '#template 50% of Utilities starting 2025-01 until 2025-12',
     // periodic
     '#template 200 repeat every 2 months starting 2025-06-01',
+    '#template 200 repeat every 2 months starting 2025-06',
     '#template 300 repeat every week starting 2025-01-07',
     '#template 400 repeat every year starting 2025-01-01 up to 50',
+    // periodic with until
+    '#template 200 repeat every 2 months starting 2025-06-01 until 2025-12',
     // by / spend
     '#template 500 by 2025-12',
     '#template 600 by 2025-11 repeat every month',
@@ -332,16 +355,32 @@ describe('unparse/parse round-trip', () => {
     '#template 900 by 2025-08 repeat every 3 years',
     '#template 1000 by 2025-07 spend from 2025-01 repeat every month',
     '#template 1100 by 2025-06 spend from 2025-02 repeat every 2 months',
+    // by / spend with starting and until
+    '#template 500 by 2025-12 starting 2025-01',
+    '#template 500 by 2025-12 until 2026-06',
+    '#template 500 by 2025-12 starting 2025-01 until 2026-06',
     // remainder
     '#template remainder',
     '#template remainder 2',
     '#template remainder 3 up to 10',
+    // remainder with starting and until
+    '#template remainder starting 2025-01',
+    '#template remainder until 2025-12',
+    '#template remainder starting 2025-01 until 2025-12',
     // average
     '#template average 6 months',
     '#template-5 average 12 months',
+    // average with starting and until
+    '#template average 6 months starting 2025-01',
+    '#template average 6 months until 2025-12',
+    '#template average 6 months starting 2025-01 until 2025-12',
     // copy
     '#template copy from 3 months ago',
     '#template copy from 6 months ago',
+    // copy with starting and until
+    '#template copy from 3 months ago starting 2025-01',
+    '#template copy from 3 months ago until 2025-12',
+    '#template copy from 3 months ago starting 2025-01 until 2025-12',
     // goal
     '#goal 1234',
   ];

@@ -5,6 +5,8 @@ type BaseTemplate = {
 type BaseTemplateWithPriority = {
   priority: number;
   directive: 'template';
+  starting?: string;
+  until?: string;
 } & BaseTemplate;
 
 export type PercentageTemplate = {
@@ -88,6 +90,8 @@ export type RemainderTemplate = {
     period: 'daily' | 'weekly' | 'monthly';
     start?: string;
   };
+  starting?: string;
+  until?: string;
   directive: 'template';
   priority: null;
 } & BaseTemplate;

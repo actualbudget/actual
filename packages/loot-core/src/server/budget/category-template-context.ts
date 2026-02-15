@@ -335,6 +335,10 @@ export class CategoryTemplateContext {
     // sort the template lines into regular template, goals, and remainder templates
     if (templates) {
       templates.forEach(t => {
+        // Skip expired templates
+        if (CategoryTemplateContext.isTemplateActiveForMonth(t, month)) {
+          return;
+        }
         if (
           t.directive === 'template' &&
           t.type !== 'remainder' &&
@@ -444,6 +448,29 @@ export class CategoryTemplateContext {
         );
       }
     });
+  }
+
+  private static isTemplateActiveForMonth(
+    template: Template,
+    month: string,
+  ): boolean {
+    // Check if template hasn't started yet (if starting is set)
+    if ('starting' in template && template.starting) {
+      const startingMonth = template.starting.substring(0, 7);
+      if (monthUtils.differenceInCalendarMonths(month, startingMonth) < 0) {
+        return true;
+      }
+    }
+    // Check if template has expired (if until is set)
+    if ('until' in template && template.until) {
+      // Extract the month part if until is a full date (YYYY-MM-DD), otherwise use as-is (YYYY-MM)
+      const untilMonth = template.until.substring(0, 7);
+      // Return true if current month is after the until month
+      if (monthUtils.differenceInCalendarMonths(month, untilMonth) > 0) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private checkLimit(templates: Template[]) {
@@ -583,14 +610,32 @@ export class CategoryTemplateContext {
     templateContext: CategoryTemplateContext,
   ): number {
     let toBudget = 0;
+
     const amount = amountToInteger(
       template.amount,
       templateContext.currency.decimalPlaces,
     );
+
     const period = template.period.period;
     const numPeriods = template.period.amount;
+
+    const currentMonth = templateContext.month;
+    const nextMonth = monthUtils.addMonths(currentMonth, 1);
+
+    // Determine start date
+    // let date = template.starting;
     let date =
       template.starting ?? monthUtils.firstDayOfMonth(templateContext.month);
+
+    if (!date) {
+      // Default: first day of current month
+      date = currentMonth.length === 7 ? currentMonth + '-01' : currentMonth;
+    }
+
+    // Normalize YYYY-MM to YYYY-MM-01 for day/week logic
+    if (date.length === 7) {
+      date = date + '-01';
+    }
 
     let dateShiftFunction;
     switch (period) {
@@ -612,19 +657,27 @@ export class CategoryTemplateContext {
         throw new Error(`Unrecognized periodic period: ${period}`);
     }
 
-    //shift the starting date until its in our month or in the future
-    while (templateContext.month > date) {
+    while (date < currentMonth) {
       date = dateShiftFunction(date, numPeriods);
     }
 
-    if (
-      monthUtils.differenceInCalendarMonths(templateContext.month, date) < 0
-    ) {
-      return 0;
-    } // nothing needed this month
+    // Respect until
+    let until = template.until;
+    if (until) {
+      if (until.length === 7) {
+        until = until + '-01';
+      }
+    }
 
-    const nextMonth = monthUtils.addMonths(templateContext.month, 1);
+    // If entire period is already after until do nothing
+    if (until && currentMonth > until.substring(0, 7)) {
+      return 0;
+    }
+
+    // Count occurrences inside current month
     while (date < nextMonth) {
+      if (until && date > until) break;
+
       toBudget += amount;
       date = dateShiftFunction(date, numPeriods);
     }

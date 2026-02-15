@@ -1,31 +1,24 @@
 // https://peggyjs.org
 
 expr
-  = template: template _ percentOf:percentOf category: name
-    { return { type: 'percentage', percent: +percentOf.percent, previous: percentOf.prev, category, priority: template.priority, directive: template.directive }}
-  / template: template _ amount: amount _ repeatEvery _ period: periodCount _ starting _ starting: date limit: limit?
-    { return { type: 'periodic', amount, period, starting, limit, priority: template.priority, directive: template.directive }}
-  / template: template _ amount: amount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ repeat)?
-    { return {
-      type: from ? 'spend' : 'by',
-      amount,
-      month,
-      ...(repeat ? repeat[3] : {}),
-      from,
-      priority: template.priority, directive: template.directive
-    }}
-  / template: template _ monthly: amount limit: limit?
-    { return { type: 'simple', monthly, limit, priority: template.priority, directive: template.directive }}
-  / template: template _ limit: limit
-    { return { type: 'simple', monthly: null, limit, priority: template.priority, directive: template.directive }}
-  / template: template _ schedule:schedule _ full:full? name:rawScheduleName modifiers:modifiers?
-    { return { type: 'schedule', name: name.trim(), priority: template.priority, directive: template.directive, full, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType  }}
-  / template: template _ remainder: remainder limit: limit?
-    { return { type: 'remainder', priority: null, directive: template.directive, weight: remainder, limit }}
-  / template: template _ 'average'i _ amount: positive _ 'months'i? modifiers:modifiers?
-    { return { type: 'average', numMonths: +amount, priority: template.priority, directive: template.directive, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType  }}
-  / template: template _ 'copy from'i _ lookBack: positive _ 'months ago'i limit:limit?
-    { return { type: 'copy', priority: template.priority, directive: template.directive, lookBack: +lookBack, limit }}
+  = template: template _ percentOf:percentOf category: name starting: startingDate? until:until?
+    { return { type: 'percentage', percent: +percentOf.percent, previous: percentOf.prev, category, starting, until, priority: template.priority, directive: template.directive }}
+  / template: template _ amount: amount _ repeatEvery _ period: periodCount _ starting: startingDate? limit: limit? until: until?
+    { return { type: 'periodic', amount, period, starting: (period.period === 'week' || period.period === 'day') && starting?.length === 7 ? starting + '-01' : starting, limit, until, priority: template.priority, directive: template.directive }}
+  / template: template _ amount: amount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ repeat)? starting: startingDate? until: until?
+    { return { type: from ? 'spend' : 'by', amount, month, ...(repeat ? repeat[3] : {}), from, starting, until, priority: template.priority, directive: template.directive }}
+  / template: template _ monthly: amount limit: limit? starting: startingDate? until: until?
+    { return { type: 'simple', monthly, limit, starting, until, priority: template.priority, directive: template.directive }}
+  / template: template _ limit: limit starting: startingDate? until: until?
+    { return { type: 'simple', monthly: null, limit, starting, until, priority: template.priority, directive: template.directive }}
+  / template: template _ schedule:schedule _ full:full? name:rawScheduleName modifiers:modifiers? starting: startingDate? until: until?
+    { return { type: 'schedule', name: name.trim(), priority: template.priority, directive: template.directive, full, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType, starting, until  }}
+  / template: template _ remainder: remainder limit: limit? starting: startingDate? until: until?
+    { return { type: 'remainder', priority: null, directive: template.directive, weight: remainder, limit, starting, until }}
+  / template: template _ 'average'i _ amount: positive _ 'months'i? modifiers:modifiers? starting: startingDate? until: until?
+    { return { type: 'average', numMonths: +amount, priority: template.priority, directive: template.directive, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType, starting, until  }}
+  / template: template _ 'copy from'i _ lookBack: positive _ 'months ago'i limit:limit? starting: startingDate? until: until?
+    { return { type: 'copy', priority: template.priority, directive: template.directive, lookBack: +lookBack, limit, starting, until }}
   / goal: goal amount: amount { return {type: 'goal', amount: amount, priority: null, directive: goal }}
 
 modifiers = _ '[' modifier:modifier ']' { return modifier }
@@ -71,9 +64,10 @@ weeks = 'weeks'i
 by = 'by'i
 of = 'of'i
 repeatEvery = 'repeat'i _ 'every'i
-starting = 'starting'i
+startingDate = _ 'starting'i _ val: $(year '-' d d ('-' d d)?) { return val }
 upTo = 'up'i _ 'to'i
 hold = 'hold'i {return true}
+until = _ 'until'i _ val: $(year '-' d d ('-' d d)?) { return val }
 schedule = 'schedule'i { return text() }
 full = 'full'i _ {return true}
 priority = '-'i number: number {return number}
@@ -96,15 +90,27 @@ date = $(month '-' day)
 currencySymbol 'currency symbol' = symbol: . & { return /\p{Sc}/u.test(symbol) }
 
 // Match schedule name including spaces and brackets, but stop before percentage modifiers
+// Also stop before 'starting' and 'until' keywords
 rawScheduleName = $(
   (
-    !('['('increase'i/'decrease'i)) // Don't start with [increase/decrease
-    [^ \t\r\n]                     // First character can't be whitespace
+    !('['('increase'i/'decrease'i))
+    !(__ 'starting'i (__ / !.))
+    !(__ 'until'i (__ / !.))
+    [^ \t\r\n]
     (
-      !(_ '['('increase'i/'decrease'i)) // Don't match if followed by [increase/decrease modifier
-      [^\r\n]                       // Any character except newlines
+      !(_ '['('increase'i/'decrease'i))
+      !(__ 'starting'i (__ / !.))
+      !(__ 'until'i (__ / !.))
+      [^\r\n]
     )*
   )
 ) { return text().trim() }
 
-name 'Name' = $([^\r\n\t]+) { return text() }
+// Match name but stop before 'starting' and 'until' keywords
+name 'Name' = $(
+  (
+    !('starting'i _)
+    !('until'i _)
+    [^\r\n\t]
+  )+
+) { return text().trim() }
