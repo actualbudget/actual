@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { captureBreadcrumb, captureException } from '../platform/exceptions';
 import { sequential } from '../shared/async';
-import { type HandlerFunctions, type Handlers } from '../types/handlers';
+import type { HandlerFunctions, Handlers } from '../types/handlers';
 
 const runningMethods = new Set();
 

@@ -1,11 +1,6 @@
-import React, {
-  forwardRef,
-  useCallback,
-  useRef,
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-} from 'react';
-import { type DragItem } from 'react-aria';
+import React, { forwardRef, useCallback, useRef } from 'react';
+import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
+import type { DragItem } from 'react-aria';
 import {
   DropIndicator,
   ListBox,
@@ -27,10 +22,12 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
-import { moveAccount } from '@desktop-client/accounts/accountsSlice';
-import { syncAndDownload } from '@desktop-client/app/appSlice';
+import {
+  useMoveAccountMutation,
+  useSyncAndDownloadMutation,
+} from '@desktop-client/accounts';
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
 import { PullToRefresh } from '@desktop-client/components/mobile/PullToRefresh';
@@ -46,7 +43,7 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { replaceModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
-import { type Binding, type SheetFields } from '@desktop-client/spreadsheet';
+import type { Binding, SheetFields } from '@desktop-client/spreadsheet';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 const ROW_HEIGHT = 60;
@@ -187,26 +184,23 @@ function AccountListItem({
               flexDirection: 'row',
             }}
           >
-            {
-              /* TODO: Should bankId be part of the AccountEntity type? */
-              'bankId' in account && account.bankId ? (
-                <View
-                  style={{
-                    backgroundColor: isPending
-                      ? theme.sidebarItemBackgroundPending
-                      : isFailed
-                        ? theme.sidebarItemBackgroundFailed
-                        : theme.sidebarItemBackgroundPositive,
-                    marginRight: '8px',
-                    width: 8,
-                    flexShrink: 0,
-                    height: 8,
-                    borderRadius: 8,
-                    opacity: isConnected ? 1 : 0,
-                  }}
-                />
-              ) : null
-            }
+            {account.bankId ? (
+              <View
+                style={{
+                  backgroundColor: isPending
+                    ? theme.sidebarItemBackgroundPending
+                    : isFailed
+                      ? theme.sidebarItemBackgroundFailed
+                      : theme.sidebarItemBackgroundPositive,
+                  marginRight: '8px',
+                  width: 8,
+                  flexShrink: 0,
+                  height: 8,
+                  borderRadius: 8,
+                  opacity: isConnected ? 1 : 0,
+                }}
+              />
+            ) : null}
             <TextOneLine
               style={{
                 ...styles.text,
@@ -415,7 +409,8 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
       state => state.account.accountsSyncing,
     );
     const updatedAccounts = useSelector(state => state.account.updatedAccounts);
-    const dispatch = useDispatch();
+
+    const moveAccount = useMoveAccountMutation();
 
     const { dragAndDropHooks } = useDragAndDrop({
       getItems: keys =>
@@ -446,12 +441,10 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
         const targetAccountId = e.target.key as AccountEntity['id'];
 
         if (e.target.dropPosition === 'before') {
-          dispatch(
-            moveAccount({
-              id: accountIdToMove,
-              targetId: targetAccountId,
-            }),
-          );
+          moveAccount.mutate({
+            id: accountIdToMove,
+            targetId: targetAccountId,
+          });
         } else if (e.target.dropPosition === 'after') {
           const targetAccountIndex = accounts.findIndex(
             account => account.id === e.target.key,
@@ -464,17 +457,15 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
 
           const nextToTargetAccount = accounts[targetAccountIndex + 1];
 
-          dispatch(
-            moveAccount({
-              id: accountIdToMove,
-              // Due to the way `moveAccount` works, we use the account next to the
-              // actual target account here because `moveAccount` always shoves the
-              // account *before* the target account.
-              // On the other hand, using `null` as `targetId`moves the account
-              // to the end of the list.
-              targetId: nextToTargetAccount?.id || null,
-            }),
-          );
+          moveAccount.mutate({
+            id: accountIdToMove,
+            // Due to the way `moveAccount` works, we use the account next to the
+            // actual target account here because `moveAccount` always shoves the
+            // account *before* the target account.
+            // On the other hand, using `null` as `targetId`moves the account
+            // to the end of the list.
+            targetId: nextToTargetAccount?.id || null,
+          });
         }
       },
     });
@@ -533,9 +524,10 @@ export function AccountsPage() {
     dispatch(replaceModal({ modal: { name: 'add-account', options: {} } }));
   }, [dispatch]);
 
+  const syncAndDownload = useSyncAndDownloadMutation();
   const onSync = useCallback(async () => {
-    dispatch(syncAndDownload({}));
-  }, [dispatch]);
+    syncAndDownload.mutate({});
+  }, [syncAndDownload]);
 
   return (
     <View style={{ flex: 1 }}>

@@ -7,7 +7,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 
 import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
@@ -27,10 +27,8 @@ import {
   useMultiuserEnabled,
   useRefreshLoginMethods,
 } from '@desktop-client/components/ServerContext';
-import {
-  popModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
+import { popModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type PasswordEnableModalProps = Extract<

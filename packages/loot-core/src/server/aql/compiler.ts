@@ -1,5 +1,5 @@
 import { getNormalisedString } from '../../shared/normalisation';
-import { type QueryState } from '../../shared/query';
+import type { QueryState } from '../../shared/query';
 
 // @ts-strict-ignore
 let _uid = 0;
@@ -171,7 +171,6 @@ function transformField(state, name) {
 
     if (!refPathInfo) {
       refPathInfo = makePath(state, refPath);
-      refPathInfo.noMapping = true;
       state.paths.set(refPath, refPathInfo);
     }
 
@@ -814,8 +813,7 @@ const compileWhere = saveStack('filter', (state, conds) => {
 function compileJoins(state, tableRef, internalTableFilters) {
   const joins = [];
   state.paths.forEach((desc, path) => {
-    const { tableName, tableId, joinField, joinTable, noMapping } =
-      state.paths.get(path);
+    const { tableName, tableId, joinField, joinTable } = state.paths.get(path);
 
     let on = `${tableId}.id = ${tableRef(joinTable)}.${quoteAlias(joinField)}`;
 
@@ -830,9 +828,10 @@ function compileJoins(state, tableRef, internalTableFilters) {
     }
 
     joins.push(
-      `LEFT JOIN ${
-        noMapping ? tableName : tableRef(tableName, true)
-      } ${tableId} ON ${addTombstone(state.schema, tableName, tableId, on)}`,
+      `LEFT JOIN ${tableRef(
+        tableName,
+        true,
+      )} ${tableId} ON ${addTombstone(state.schema, tableName, tableId, on)}`,
     );
 
     if (state.dependencies.indexOf(tableName) === -1) {

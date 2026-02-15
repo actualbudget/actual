@@ -1,4 +1,5 @@
-import React, { type CSSProperties } from 'react';
+import React from 'react';
+import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
@@ -20,7 +21,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { CellValueText } from '@desktop-client/components/spreadsheet/CellValue';
 import { useCategory } from '@desktop-client/hooks/useCategory';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type EnvelopeIncomeBalanceMenuModalProps = Omit<
@@ -41,7 +42,7 @@ export function EnvelopeIncomeBalanceMenuModal({
   };
 
   const { t } = useTranslation();
-  const category = useCategory(categoryId);
+  const { data: category } = useCategory(categoryId);
 
   const carryover = useEnvelopeSheetValue(
     envelopeBudget.catCarryover(categoryId),

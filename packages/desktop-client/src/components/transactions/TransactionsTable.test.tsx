@@ -10,7 +10,7 @@ import {
   generateCategoryGroups,
   generateTransaction,
 } from 'loot-core/mocks';
-import { initServer } from 'loot-core/platform/client/fetch';
+import { initServer } from 'loot-core/platform/client/connection';
 import {
   addSplitTransaction,
   realizeTempTransactions,
@@ -18,12 +18,12 @@ import {
   updateTransaction,
 } from 'loot-core/shared/transactions';
 import { integerToCurrency } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type CategoryGroupEntity,
-  type PayeeEntity,
-  type TransactionEntity,
+import type {
+  AccountEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+  PayeeEntity,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 import { TransactionTable } from './TransactionsTable';
@@ -33,9 +33,9 @@ import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
 import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
 import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
-import { TestProvider } from '@desktop-client/redux/mock';
+import { TestProviders } from '@desktop-client/mocks';
 
-vi.mock('loot-core/platform/client/fetch');
+vi.mock('loot-core/platform/client/connection');
 vi.mock('../../hooks/useFeatureFlag', () => ({
   default: vi.fn().mockReturnValue(false),
 }));
@@ -195,7 +195,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
   // implementation properly uses the right latest state even if the
   // hook dependencies haven't changed
   return (
-    <TestProvider>
+    <TestProviders>
       <AuthProvider>
         <SpreadsheetProvider>
           <SchedulesProvider>
@@ -226,7 +226,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
           </SchedulesProvider>
         </SpreadsheetProvider>
       </AuthProvider>
-    </TestProvider>
+    </TestProviders>
   );
 }
 

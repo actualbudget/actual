@@ -1,10 +1,9 @@
-// @ts-strict-ignore
-import { type QueryClient } from '@tanstack/react-query';
+import type { QueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 
-import { listen, send } from 'loot-core/platform/client/fetch';
+import { listen, send } from 'loot-core/platform/client/connection';
 
-import { reloadAccounts } from './accounts/accountsSlice';
+import { accountQueries } from './accounts';
 import { resetSync, sync } from './app/appSlice';
 import { categoryQueries } from './budget';
 import {
@@ -12,13 +11,11 @@ import {
   uploadBudget,
 } from './budgetfiles/budgetfilesSlice';
 import { pushModal } from './modals/modalsSlice';
-import {
-  addNotification,
-  type Notification,
-} from './notifications/notificationsSlice';
+import { addNotification } from './notifications/notificationsSlice';
+import type { Notification } from './notifications/notificationsSlice';
 import { reloadPayees } from './payees/payeesSlice';
 import { loadPrefs } from './prefs/prefsSlice';
-import { type AppStore } from './redux/store';
+import type { AppStore } from './redux/store';
 import { signOut } from './users/usersSlice';
 
 export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
@@ -88,7 +85,9 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
       }
 
       if (tables.includes('accounts')) {
-        store.dispatch(reloadAccounts());
+        queryClient.invalidateQueries({
+          queryKey: accountQueries.lists(),
+        });
       }
     } else if (event.type === 'error') {
       let notif: Notification | null = null;
@@ -253,6 +252,12 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
           // few things depending on the state, and we try to show an
           // appropriate message and call to action to fix it.
           const { cloudFileId } = store.getState().prefs.local;
+          if (!cloudFileId) {
+            console.error(
+              'Received file-has-reset or file-has-new-key error but no cloudFileId in prefs',
+            );
+            break;
+          }
 
           notif = {
             title: t('Syncing has been reset on this cloud file'),
@@ -277,7 +282,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
           break;
         case 'encrypt-failure':
         case 'decrypt-failure':
-          if (event.meta.isMissingKey) {
+          if (event.meta?.isMissingKey) {
             notif = {
               title: t('Missing encryption key'),
               message: t(

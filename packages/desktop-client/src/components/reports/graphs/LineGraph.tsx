@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useMemo, useState, type CSSProperties } from 'react';
+import React, { useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -14,11 +15,11 @@ import {
   YAxis,
 } from 'recharts';
 
-import {
-  type balanceTypeOpType,
-  type DataEntity,
-  type LegendEntity,
-  type RuleConditionEntity,
+import type {
+  balanceTypeOpType,
+  DataEntity,
+  LegendEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { showActivity } from './showActivity';
@@ -30,7 +31,8 @@ import { getCustomTick } from '@desktop-client/components/reports/getCustomTick'
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -166,7 +168,7 @@ export function LineGraph({
 }: LineGraphProps) {
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
-  const categories = useCategories();
+  const { data: categories = { grouped: [], list: [] } } = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
   const format = useFormat();

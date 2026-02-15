@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useState, type CSSProperties } from 'react';
+import React, { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
@@ -42,7 +43,12 @@ export function Value<T>({
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const payees = usePayees();
-  const { list: categories } = useCategories();
+  const {
+    data: { list: categories, grouped: categoryGroups } = {
+      list: [],
+      grouped: [],
+    },
+  } = useCategories();
   const accounts = useAccounts();
   const valueStyle = {
     color: theme.pageTextPositive,
@@ -51,15 +57,30 @@ export function Value<T>({
   const ValueText = field === 'amount' ? FinancialText : Text;
   const locale = useLocale();
 
-  const data =
-    dataProp ||
-    (field === 'payee'
-      ? payees
-      : field === 'category'
-        ? categories
-        : field === 'account'
-          ? accounts
-          : []);
+  function getData() {
+    if (dataProp) {
+      return dataProp;
+    }
+
+    switch (field) {
+      case 'payee':
+        return payees;
+
+      case 'category':
+        return categories;
+
+      case 'category_group':
+        return categoryGroups;
+
+      case 'account':
+        return accounts;
+
+      default:
+        return [];
+    }
+  }
+
+  const data = getData();
 
   const [expanded, setExpanded] = useState(false);
 
@@ -76,6 +97,8 @@ export function Value<T>({
     } else {
       switch (field) {
         case 'amount':
+        case 'amount-inflow':
+        case 'amount-outflow':
           return format(value, 'financial');
         case 'date':
           if (value) {
@@ -97,6 +120,7 @@ export function Value<T>({
           return value;
         case 'payee':
         case 'category':
+        case 'category_group':
         case 'account':
         case 'rule':
           if (valueIsRaw) {

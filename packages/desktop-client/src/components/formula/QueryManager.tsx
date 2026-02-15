@@ -14,12 +14,9 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { parseISO } from 'date-fns';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type RuleConditionEntity,
-  type TimeFrame,
-} from 'loot-core/types/models';
+import type { RuleConditionEntity, TimeFrame } from 'loot-core/types/models';
 
 import {
   normalizeQueryTimeFrameEnd,
@@ -40,7 +37,7 @@ import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { type AppDispatch } from '@desktop-client/redux/store';
+import type { AppDispatch } from '@desktop-client/redux/store';
 
 type QueryConfig = {
   conditions?: RuleConditionEntity[];

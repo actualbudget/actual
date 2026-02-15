@@ -1,7 +1,7 @@
-import { type Template } from 'loot-core/types/models/templates';
+import type { Template } from 'loot-core/types/models/templates';
 
-import { type Action } from './actions';
-import { type DisplayTemplateType, type ReducerState } from './constants';
+import type { Action } from './actions';
+import type { DisplayTemplateType, ReducerState } from './constants';
 
 export const DEFAULT_PRIORITY = 1;
 
@@ -38,6 +38,8 @@ export const getInitialState = (template: Template | null): ReducerState => {
       throw new Error('Remainder is not yet supported');
     case 'limit':
       throw new Error('Limit is not yet supported');
+    case 'refill':
+      throw new Error('Refill is not yet supported');
     case 'average':
     case 'copy':
       return {

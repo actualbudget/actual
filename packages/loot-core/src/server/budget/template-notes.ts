@@ -6,8 +6,8 @@ import {
   getActiveSchedules,
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
-  type CategoryWithTemplateNote,
 } from './statements';
+import type { CategoryWithTemplateNote } from './statements';
 
 type Notification = {
   type?: 'message' | 'error' | 'warning' | undefined;
@@ -142,8 +142,17 @@ async function getCategoriesWithTemplates(): Promise<
   return templatesForCategory;
 }
 
+function prefixFromPriority(priority: number | null): string {
+  return priority === null ? TEMPLATE_PREFIX : `${TEMPLATE_PREFIX}-${priority}`;
+}
+
 export async function unparse(templates: Template[]): Promise<string> {
-  return templates
+  // Refill will be merged into the limit template if both exist
+  // Assumption: at most one limit and one refill template per category
+  const refill = templates.find(t => t.type === 'refill');
+  const withoutRefill = templates.filter(t => t.type !== 'refill');
+
+  return withoutRefill
     .flatMap(template => {
       if (template.type === 'error') {
         return [];
@@ -153,9 +162,7 @@ export async function unparse(templates: Template[]): Promise<string> {
         return `${GOAL_PREFIX} ${template.amount}`;
       }
 
-      const prefix = template.priority
-        ? `${TEMPLATE_PREFIX}-${template.priority}`
-        : TEMPLATE_PREFIX;
+      const prefix = prefixFromPriority(template.priority);
 
       switch (template.type) {
         case 'simple': {
@@ -291,6 +298,16 @@ export async function unparse(templates: Template[]): Promise<string> {
           }
           return result;
         }
+        case 'limit': {
+          if (!refill) {
+            // #template 0 up to <limit>
+            return `${prefix} 0 ${limitToString(template)}`;
+          }
+          // #template up to <limit>
+          const mergedPrefix = prefixFromPriority(refill.priority);
+          return `${mergedPrefix} ${limitToString(template)}`;
+        }
+        // No 'refill' support since a refill requires a limit
         default:
           return [];
       }

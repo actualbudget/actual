@@ -1,12 +1,5 @@
-// @ts-strict-ignore
-import React, {
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useState,
-  type CSSProperties,
-  type SetStateAction,
-} from 'react';
+import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
+import type { CSSProperties, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
 import { animated, to, useSpring } from 'react-spring';
 import { useSwipeable } from 'react-swipeable';
@@ -25,10 +18,8 @@ import { css } from '@emotion/css';
 import { Link } from './common/Link';
 import { MODAL_Z_INDEX } from './common/Modal';
 
-import {
-  removeNotification,
-  type NotificationWithId,
-} from '@desktop-client/notifications/notificationsSlice';
+import { removeNotification } from '@desktop-client/notifications/notificationsSlice';
+import type { NotificationWithId } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 
 // Notification stacking configuration
@@ -68,7 +59,7 @@ function compileMessage(
                         if (actions[actionName]) {
                           setLoading(true);
                           await actions[actionName]();
-                          onRemove();
+                          onRemove?.();
                         }
                       }}
                     >
@@ -139,7 +130,13 @@ function Notification({
   const error = type === 'error';
 
   const processedMessage = useMemo(
-    () => compileMessage(message, messageActions, setOverlayLoading, onRemove),
+    () =>
+      compileMessage(
+        message,
+        messageActions ?? {},
+        setOverlayLoading,
+        onRemove,
+      ),
     [message, messageActions, onRemove, setOverlayLoading],
   );
 

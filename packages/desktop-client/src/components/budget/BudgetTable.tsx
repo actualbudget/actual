@@ -1,19 +1,21 @@
-import React, { useMemo, useState, type KeyboardEvent } from 'react';
+import React, { useMemo, useState } from 'react';
+import type { KeyboardEvent } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { q } from 'loot-core/shared/query';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
-import { MonthsProvider, type MonthBounds } from './MonthsContext';
+import { MonthsProvider } from './MonthsContext';
+import type { MonthBounds } from './MonthsContext';
 import {
   findSortDown,
   findSortUp,
@@ -21,7 +23,7 @@ import {
   separateGroups,
 } from './util';
 
-import { type DropPosition } from '@desktop-client/components/sort';
+import type { DropPosition } from '@desktop-client/components/sort';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
@@ -71,7 +73,8 @@ export function BudgetTable(props: BudgetTableProps) {
     onBudgetAction,
   } = props;
 
-  const { grouped: categoryGroups } = useCategories();
+  const { data: { grouped: categoryGroups } = { grouped: [] } } =
+    useCategories();
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
   const [showHiddenCategories, setShowHiddenCategoriesPef] = useLocalPref(

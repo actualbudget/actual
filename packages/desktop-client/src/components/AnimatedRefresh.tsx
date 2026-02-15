@@ -1,5 +1,5 @@
-// @ts-strict-ignore
-import React, { type CSSProperties } from 'react';
+import React from 'react';
+import type { CSSProperties } from 'react';
 
 import { SvgRefresh } from '@actual-app/components/icons/v1';
 import { View } from '@actual-app/components/view';
@@ -25,7 +25,9 @@ export function AnimatedRefresh({
 }: AnimatedRefreshProps) {
   return (
     <View
-      style={{ animation: animating ? `${spin} 1s infinite linear` : null }}
+      style={{
+        animation: animating ? `${spin} 1s infinite linear` : undefined,
+      }}
     >
       <SvgRefresh
         width={width ? width : 14}

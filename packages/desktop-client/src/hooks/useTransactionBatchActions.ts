@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
@@ -11,22 +11,17 @@ import {
   updateTransaction,
 } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
-import {
-  applyChanges,
-  applyFindReplace,
-  type Diff,
-} from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type PayeeEntity,
-  type ScheduleEntity,
-  type TransactionEntity,
+import { applyChanges, applyFindReplace } from 'loot-core/shared/util';
+import type { Diff } from 'loot-core/shared/util';
+import type {
+  AccountEntity,
+  PayeeEntity,
+  ScheduleEntity,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
-import {
-  pushModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
 

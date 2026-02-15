@@ -1,9 +1,5 @@
-import {
-  useEffect,
-  useRef,
-  type DependencyList,
-  type EffectCallback,
-} from 'react';
+import { useEffect, useRef } from 'react';
+import type { DependencyList, EffectCallback } from 'react';
 
 /**
  * A version of useEffect that doesn't run on the initial mount.

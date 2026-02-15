@@ -178,6 +178,7 @@ const sidebars = {
               items: [
                 'advanced/bank-sync/gocardless',
                 'advanced/bank-sync/simplefin',
+                'advanced/bank-sync/pluggyai',
               ],
             },
             'advanced/scripts/modify-transfers',
@@ -216,7 +217,6 @@ const sidebars = {
             'experimental/monthly-cleanup',
             'experimental/rule-templating',
             'experimental/formulas',
-            'experimental/pluggyai',
             'experimental/crossover-point-report',
             'experimental/custom-themes',
             'experimental/budget-analysis-report',
@@ -326,6 +326,7 @@ const sidebars = {
             'contributing/leadership/funding',
             'contributing/leadership/triaging-issues',
             'contributing/leadership/new-core-contributors-guide',
+            'contributing/leadership/architecture-decision-records',
             'contributing/leadership/cursor-ide',
             'contributing/leadership/paying-contributors',
           ],

@@ -1,4 +1,4 @@
-import { type RecurConfig, type ScheduleEntity } from './schedule';
+import type { RecurConfig, ScheduleEntity } from './schedule';
 
 export type NewRuleEntity = {
   stage: 'pre' | null | 'post';
@@ -18,6 +18,7 @@ export type FieldValueTypes = {
   account: string;
   amount: number;
   category: string;
+  category_group: string;
   date: string | RecurConfig;
   notes: string;
   payee: string;
@@ -68,6 +69,16 @@ export type RuleConditionEntity =
     >
   | BaseConditionEntity<
       'category',
+      | 'is'
+      | 'isNot'
+      | 'oneOf'
+      | 'notOneOf'
+      | 'contains'
+      | 'doesNotContain'
+      | 'matches'
+    >
+  | BaseConditionEntity<
+      'category_group',
       | 'is'
       | 'isNot'
       | 'oneOf'

@@ -8,7 +8,7 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { getSecretsError } from 'loot-core/shared/errors';
 
 import { Error } from '@desktop-client/components/alerts';
@@ -20,7 +20,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type PluggyAiInitialiseProps = Extract<
   ModalType,
