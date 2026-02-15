@@ -270,7 +270,7 @@ type BudgetFileListItemProps = ComponentPropsWithoutRef<
   typeof GridListItem<File>
 > & {
   quickSwitchMode: boolean;
-  onSelect: (file: File) => void;
+  onSelect: (file: File) => Promise<void>;
   onDelete: (file: File) => void;
   onDuplicate: (file: File) => void;
   currentUserId: string;
@@ -294,7 +294,7 @@ function BudgetFileListItem({
     // make sure to never allow duplicate clicks
     if (!selecting.current) {
       selecting.current = true;
-      onSelect(file);
+      await onSelect(file);
       selecting.current = false;
     }
   }
@@ -379,7 +379,7 @@ function BudgetFileListItem({
 type BudgetFileListProps = {
   files: File[];
   quickSwitchMode: boolean;
-  onSelect: (file: File) => void;
+  onSelect: (file: File) => Promise<void>;
   onDelete: (file: File) => void;
   onDuplicate: (file: File) => void;
   currentUserId: string;

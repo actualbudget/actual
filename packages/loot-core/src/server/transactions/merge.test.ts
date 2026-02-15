@@ -34,7 +34,7 @@ describe('Merging fails for invalid quantity', () => {
       date: '2025-01-01',
       amount: 12,
     });
-    void expect(() =>
+    await expect(() =>
       mergeTransactions([{ id: t1 }, { id: t2 }]),
     ).rejects.toThrow('Transaction amounts must match for merge');
   });
@@ -46,7 +46,7 @@ describe('Merging fails for invalid quantity', () => {
       date: '2025-01-01',
       amount: 10,
     });
-    void expect(() =>
+    await expect(() =>
       mergeTransactions([{ id: t1 }, { id: 'missing' }]),
     ).rejects.toThrow('One of the provided transactions does not exist');
   });
