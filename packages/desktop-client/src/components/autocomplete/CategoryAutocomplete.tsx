@@ -27,6 +27,7 @@ import type {
 } from 'loot-core/types/models';
 
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
+import { rankAutocompleteMatch } from './autocompleteRanking';
 import { ItemHeader } from './ItemHeader';
 
 import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
@@ -190,18 +191,19 @@ function CategoryList({
 }
 
 function customSort(obj: CategoryAutocompleteItem, value: string): number {
-  const name = getNormalisedString(obj.name);
-  const groupName = obj.group ? getNormalisedString(obj.group.name) : '';
   if (obj.id === 'split') {
-    return -2;
+    return -6;
   }
-  if (name.includes(value)) {
-    return -1;
+  const nameRank = rankAutocompleteMatch(obj.name, value);
+  if (nameRank < 0) {
+    return nameRank;
   }
-  if (groupName.includes(value)) {
-    return 0;
+  // Group name matching: ranks above no-match but below all name tiers.
+  const groupName = obj.group ? getNormalisedString(obj.group.name) : '';
+  if (groupName.includes(getNormalisedString(value))) {
+    return -0.5;
   }
-  return 1;
+  return 0;
 }
 
 type CategoryAutocompleteProps = ComponentProps<
