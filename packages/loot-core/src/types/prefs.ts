@@ -5,6 +5,7 @@ export type FeatureFlag =
   | 'formulaMode'
   | 'currency'
   | 'crossoverReport'
+  | 'ageOfMoneyReport'
   | 'customThemes'
   | 'budgetAnalysisReport';
 
