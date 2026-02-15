@@ -14,7 +14,7 @@ export const up = async function () {
         token_prefix TEXT NOT NULL,
         created_at INTEGER NOT NULL,
         last_used_at INTEGER,
-        expires_at INTEGER,
+        expires_at INTEGER NOT NULL,
         enabled INTEGER DEFAULT 1,
         FOREIGN KEY (user_id) REFERENCES users(id)
       );
