@@ -80,5 +80,10 @@
     "name": "Butterfly",
     "repo": "samekh248/actual-butterfly-theme",
     "colors": ["#12110F", "#22201D", "#F35B16", "#3D261C", "#E5E7EB", "#1B8366"]
+  },
+  {
+    "name": "Blurple Dark Theme",
+    "repo": "WaywardCommander/Blurple-Theme",
+    "colors": ["#1A1B2F", "#222438", "#767ED6", "#34374B", "#20203B", "#55575F"]
   }
 ]
