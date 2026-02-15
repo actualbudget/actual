@@ -86,9 +86,7 @@ function RouterBehaviors() {
 
 export function FinancesApp() {
   const { isNarrowWidth } = useResponsive();
-  useMetaThemeColor(
-    isNarrowWidth ? 'mobileViewTheme' : 'pageBackground',
-  );
+  useMetaThemeColor(isNarrowWidth ? 'mobileViewTheme' : 'pageBackground');
 
   const dispatch = useDispatch();
   const { t } = useTranslation();

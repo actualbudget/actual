@@ -1,10 +1,7 @@
 // @ts-strict-ignore
 import { useEffect } from 'react';
 
-import {
-  usePreferredDarkTheme,
-  useTheme,
-} from '@desktop-client/style/theme';
+import { usePreferredDarkTheme, useTheme } from '@desktop-client/style/theme';
 
 const DEFAULT_THEME_COLOR = '#5c3dbb';
 
