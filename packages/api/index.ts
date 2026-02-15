@@ -18,6 +18,14 @@ export const internal = bundle.lib;
 export * from './methods';
 export * as utils from './utils';
 
+// Authentication error types for API token support
+export {
+  AuthError,
+  TokenExpiredError,
+  InvalidTokenError,
+  TokenScopeError,
+} from 'loot-core/server/errors';
+
 export async function init(config: InitConfig = {}) {
   if (actualApp) {
     return;

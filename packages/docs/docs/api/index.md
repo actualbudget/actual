@@ -30,7 +30,7 @@ yarn add @actual-app/api
 
 ### Connecting to a Remote Server
 
-Next, you'll need connect to your running server version of Actual to access your budget files.
+Next, you'll need connect to your running server version of Actual to access your budget files. You can authenticate using either a password or an [API token](./api-tokens.md) (recommended for scripts). API tokens can be created in [Settings](/docs/settings/#api-tokens).
 
 ```js
 let api = require('@actual-app/api');
@@ -43,6 +43,8 @@ let api = require('@actual-app/api');
     serverURL: 'http://localhost:5006',
     // This is the password you use to log into the server
     password: 'hunter2',
+    // Or use an API token instead (recommended for scripts)
+    // token: 'act_...',
   });
 
   // This is the ID from Settings → Show advanced settings → Sync ID

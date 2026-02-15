@@ -108,3 +108,49 @@ export function FileUploadError(
 ) {
   return { type: 'FileUploadError', reason, meta };
 }
+
+// Authentication errors for API token support
+export class AuthError extends Error {
+  type = 'AuthError' as const;
+  reason: string;
+
+  constructor(reason: string, message?: string) {
+    super(message || `Authentication error: ${reason}`);
+    this.reason = reason;
+    this.name = 'AuthError';
+  }
+}
+
+export class TokenExpiredError extends AuthError {
+  constructor() {
+    super(
+      'token-expired',
+      'The API token has expired. Please generate a new token.',
+    );
+    this.name = 'TokenExpiredError';
+  }
+}
+
+export class InvalidTokenError extends AuthError {
+  constructor() {
+    super('invalid-token', 'The API token is invalid or has been revoked.');
+    this.name = 'InvalidTokenError';
+  }
+}
+
+export class TokenScopeError extends AuthError {
+  constructor() {
+    super('scope-error', 'The API token does not have access to this budget.');
+    this.name = 'TokenScopeError';
+  }
+}
+
+export class MultipleAuthMethodsError extends AuthError {
+  constructor() {
+    super(
+      'multiple-auth-methods',
+      'Cannot specify both password and token. Use one authentication method.',
+    );
+    this.name = 'MultipleAuthMethodsError';
+  }
+}
