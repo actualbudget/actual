@@ -623,7 +623,7 @@ export class CategoryTemplateContext {
     const nextMonth = monthUtils.addMonths(currentMonth, 1);
 
     // Determine start date
-   // let date = template.starting;
+    // let date = template.starting;
     let date =
       template.starting ?? monthUtils.firstDayOfMonth(templateContext.month);
 
