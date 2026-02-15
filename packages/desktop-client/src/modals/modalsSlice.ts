@@ -247,6 +247,19 @@ export type Modal =
       };
     }
   | {
+      name: 'category-group-autocomplete';
+      options: {
+        title?: string;
+        categoryGroups?: CategoryGroupEntity[];
+        onSelect: (categoryGroupId: string, categoryGroupName: string) => void;
+        month?: string | undefined;
+        showHiddenCategories?: boolean;
+        closeOnSelect?: boolean;
+        clearOnSelect?: boolean;
+        onClose?: () => void;
+      };
+    }
+  | {
       name: 'account-autocomplete';
       options: {
         onSelect: (accountId: string, accountName: string) => void;
