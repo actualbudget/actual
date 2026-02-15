@@ -1,7 +1,7 @@
 import type { CustomReportEntity } from './reports';
 import type { RuleConditionEntity } from './rule';
 
-export type DashboardEntity = {
+export type DashboardPageEntity = {
   id: string;
   name: string;
   tombstone: boolean;
@@ -115,8 +115,11 @@ type SpecializedWidget =
   | SummaryWidget
   | CalendarWidget
   | FormulaWidget;
-export type Widget = SpecializedWidget | CustomReportWidget;
-export type NewWidget = Omit<Widget, 'id' | 'tombstone' | 'dashboard_page_id'>;
+export type DashboardWidgetEntity = SpecializedWidget | CustomReportWidget;
+export type NewDashboardWidgetEntity = Omit<
+  DashboardWidgetEntity,
+  'id' | 'tombstone' | 'dashboard_page_id'
+>;
 
 // Exported/imported (json) widget definition
 export type ExportImportCustomReportWidget = Omit<
