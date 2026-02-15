@@ -141,10 +141,16 @@ describe('validateBudgetScopeMiddleware', () => {
 
   describe('file ID from different sources', () => {
     const testCases = [
-      { name: 'x-actual-file-id header', reqOverride: { headers: { 'x-actual-file-id': 'budget-1' } } },
+      {
+        name: 'x-actual-file-id header',
+        reqOverride: { headers: { 'x-actual-file-id': 'budget-1' } },
+      },
       { name: 'body.fileId', reqOverride: { body: { fileId: 'budget-1' } } },
       { name: 'query.fileId', reqOverride: { query: { fileId: 'budget-1' } } },
-      { name: 'params.fileId', reqOverride: { params: { fileId: 'budget-1' } } },
+      {
+        name: 'params.fileId',
+        reqOverride: { params: { fileId: 'budget-1' } },
+      },
     ];
 
     testCases.forEach(({ name, reqOverride }) => {
