@@ -192,7 +192,7 @@ async function _copySqlFile(
   } catch (error) {
     tofile.close();
     fromfile.close();
-    void _removeFile(toDbPath);
+    await _removeFile(toDbPath);
     logger.error('Failed to copy database file', error);
     return false;
   } finally {
@@ -248,7 +248,7 @@ async function populateDefaultFilesystem() {
   await Promise.all(
     files.map(async file => {
       const contents = await fetchFile(process.env.PUBLIC_URL + 'data/' + file);
-      void _writeFile('/' + file, contents);
+      await _writeFile('/' + file, contents);
     }),
   );
 }

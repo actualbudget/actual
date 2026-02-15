@@ -62,7 +62,7 @@ describe('web filesystem', () => {
     expect(await readFile('/outside.txt')).toBe('some junk');
     expect(await idb.get(store, '/outside.txt')).toBe(undefined);
 
-    void idb.closeDatabase();
+    await idb.closeDatabase();
   });
 
   test('writing to sqlite files creates symlinks', async () => {
@@ -81,18 +81,21 @@ describe('web filesystem', () => {
   test('files are restored from idb', async () => {
     const db = await idb.openDatabase();
     const { store } = idb.getStore(db, 'files');
-    void idb.set(store, { filepath: '/documents/ok.txt', contents: 'oh yeah' });
-    void idb.set(store, {
+    await idb.set(store, {
+      filepath: '/documents/ok.txt',
+      contents: 'oh yeah',
+    });
+    await idb.set(store, {
       filepath: '/documents/deep/nested/file/ok.txt',
       contents: 'deeper',
     });
-    void idb.set(store, {
+    await idb.set(store, {
       filepath: '/documents/deep/nested/db.sqlite',
       contents: 'this will be blank and just create a symlink',
     });
 
     await sqlite.init();
-    init();
+    await init();
 
     expect(await readFile('/documents/ok.txt')).toBe('oh yeah');
     expect(await exists('/documents/deep')).toBe(true);

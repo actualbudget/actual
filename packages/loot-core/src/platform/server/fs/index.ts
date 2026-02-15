@@ -1,6 +1,6 @@
 export { join } from './path-join';
 
-export declare function init(): void;
+export declare function init(): Proise<void>;
 export type Init = typeof init;
 
 export declare function getDataDir(): string;
