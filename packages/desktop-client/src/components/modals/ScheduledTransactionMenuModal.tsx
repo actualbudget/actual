@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -9,7 +9,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { format } from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
 import {
   extractScheduleConds,
   scheduleIsRecurring,
@@ -22,7 +21,7 @@ import {
   ModalTitle,
 } from '@desktop-client/components/common/Modal';
 import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import { useSchedule } from '@desktop-client/hooks/useSchedule';
 import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type ScheduledTransactionMenuModalProps = Extract<
@@ -44,19 +43,12 @@ export function ScheduledTransactionMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
   const scheduleId = transactionId?.split('/')?.[1];
-  const schedulesQuery = useMemo(
-    () => q('schedules').filter({ id: scheduleId }).select('*'),
-    [scheduleId],
-  );
-  const { isLoading: isSchedulesLoading, schedules } = useSchedules({
-    query: schedulesQuery,
-  });
-
-  if (isSchedulesLoading) {
+  const { isPending: isSchedulesLoading, data: schedule } =
+    useSchedule(scheduleId);
+  if (isSchedulesLoading || !schedule) {
     return null;
   }
 
-  const schedule = schedules?.[0];
   const { date: dateCond } = extractScheduleConds(schedule._conditions);
 
   const canBeSkipped = scheduleIsRecurring(dateCond);
@@ -67,7 +59,7 @@ export function ScheduledTransactionMenuModal({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={<ModalTitle title={schedule?.name || ''} shrinkOnOverflow />}
+            title={<ModalTitle title={schedule.name || ''} shrinkOnOverflow />}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
@@ -81,7 +73,7 @@ export function ScheduledTransactionMenuModal({
               <Trans>Scheduled date</Trans>
             </Text>
             <Text style={{ fontSize: 17, fontWeight: 700 }}>
-              {format(schedule?.next_date || '', 'MMMM dd, yyyy', locale)}
+              {format(schedule.next_date || '', 'MMMM dd, yyyy', locale)}
             </Text>
           </View>
           <ScheduledTransactionMenu

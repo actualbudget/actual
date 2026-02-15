@@ -14,7 +14,6 @@ import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountP
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import {
@@ -25,6 +24,7 @@ import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSear
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
 import * as queries from '@desktop-client/queries';
 import { useDispatch } from '@desktop-client/redux';
+import { schedulesViewQuery } from '@desktop-client/schedules';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 export function AccountTransactions({
@@ -33,7 +33,7 @@ export function AccountTransactions({
   readonly account: AccountEntity;
 }) {
   const schedulesQuery = useMemo(
-    () => getSchedulesQuery(account.id),
+    () => schedulesViewQuery(account.id),
     [account.id],
   );
 

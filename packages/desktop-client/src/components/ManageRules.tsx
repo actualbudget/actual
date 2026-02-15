@@ -131,8 +131,8 @@ export function ManageRules({
   const [filter, setFilter] = useState('');
   const dispatch = useDispatch();
 
-  const { schedules = [] } = useSchedules({
-    query: useMemo(() => q('schedules').select('*'), []),
+  const { data: schedules = [] } = useSchedules({
+    query: q('schedules').select('*'),
   });
   const { data: { list: categories } = { list: [] } } = useCategories();
   const payees = usePayees();

@@ -315,7 +315,7 @@ type PayeeIconsProps = {
 
 function PayeeIcons({ transaction, transferAccount }: PayeeIconsProps) {
   const { id, schedule: scheduleId } = transaction;
-  const { isLoading: isSchedulesLoading, schedules = [] } =
+  const { isPending: isSchedulesLoading, data: schedules = [] } =
     useCachedSchedules();
   const isPreview = isPreviewId(id);
   const schedule = schedules.find(s => s.id === scheduleId);

@@ -95,7 +95,7 @@ import { AccountAutocomplete } from '@desktop-client/components/autocomplete/Acc
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
 import { getStatusProps } from '@desktop-client/components/schedules/StatusBadge';
-import type { StatusTypes } from '@desktop-client/components/schedules/StatusBadge';
+import type { ScheduleTransactionStatus } from '@desktop-client/components/schedules/StatusBadge';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import {
   Cell,
@@ -337,7 +337,7 @@ TransactionHeader.displayName = 'TransactionHeader';
 
 type StatusCellProps = {
   id: TransactionEntity['id'];
-  status?: StatusTypes | null;
+  status?: ScheduleTransactionStatus | null;
   focused?: boolean;
   selected?: boolean;
   isChild?: boolean;
@@ -764,9 +764,9 @@ function PayeeIcons({
   const { t } = useTranslation();
 
   const scheduleId = transaction.schedule;
-  const { isLoading, schedules = [] } = useCachedSchedules();
+  const { isPending, data: schedules = [] } = useCachedSchedules();
 
-  if (isLoading) {
+  if (isPending) {
     return null;
   }
 
@@ -1092,7 +1092,7 @@ const Transaction = memo(function Transaction({
     _unmatched = false,
   } = transaction;
 
-  const { schedules = [] } = useCachedSchedules();
+  const { data: schedules = [] } = useCachedSchedules();
   const schedule = transaction.schedule
     ? schedules.find(s => s.id === transaction.schedule)
     : null;
@@ -1691,7 +1691,7 @@ const Transaction = memo(function Transaction({
           isPreview={isPreview}
           status={
             isPreview
-              ? (previewStatus as StatusTypes)
+              ? (previewStatus as ScheduleTransactionStatus)
               : reconciled
                 ? 'reconciled'
                 : cleared
