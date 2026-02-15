@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { getAccountDb } from '../account-db';
 import { apiTokenService } from '../services/api-token-service';
+
 import { validateSession } from './validate-user';
 
 // Helper functions

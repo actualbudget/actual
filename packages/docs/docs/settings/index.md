@@ -55,6 +55,7 @@ The full token is only displayed once when created. If you lose it, you'll need 
 #### Managing Tokens
 
 The API Tokens section displays all your tokens with:
+
 - **Name** - The descriptive name you gave the token
 - **Prefix** - The first few characters of the token (e.g., `act_a1b2...`) for identification
 - **Created date** - When the token was created

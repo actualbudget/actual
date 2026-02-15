@@ -28,13 +28,13 @@ const api = require('@actual-app/api');
 
 ## Token vs Password Authentication
 
-| Feature | Password | Token |
-|---------|----------|-------|
-| Revocable without changing credentials | No | Yes |
-| Can have multiple active credentials | No | Yes |
-| Usage tracking (last used) | No | Yes |
-| Expiration support | No | Yes |
-| Recommended for scripts | No | Yes |
+| Feature                                | Password | Token |
+| -------------------------------------- | -------- | ----- |
+| Revocable without changing credentials | No       | Yes   |
+| Can have multiple active credentials   | No       | Yes   |
+| Usage tracking (last used)             | No       | Yes   |
+| Expiration support                     | No       | Yes   |
+| Recommended for scripts                | No       | Yes   |
 
 ## Storing Tokens Securely
 
@@ -77,12 +77,8 @@ The API exports error types for handling authentication failures:
 
 ```js
 const api = require('@actual-app/api');
-const {
-  AuthError,
-  TokenExpiredError,
-  InvalidTokenError,
-  TokenScopeError
-} = api;
+const { AuthError, TokenExpiredError, InvalidTokenError, TokenScopeError } =
+  api;
 
 try {
   await api.init({

@@ -1,4 +1,5 @@
-import { type KeyboardEvent, useState, useEffect, useCallback } from 'react';
+import type { KeyboardEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -7,11 +8,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
-import {
-  type ApiToken,
-  type ApiTokenCreateResult,
-} from 'loot-core/server/auth/app';
+import { send } from 'loot-core/platform/client/connection';
+import type { ApiToken, ApiTokenCreateResult } from 'loot-core/server/auth/app';
 
 import { Setting } from './UI';
 
