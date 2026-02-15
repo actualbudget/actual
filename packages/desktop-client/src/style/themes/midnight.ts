@@ -238,3 +238,14 @@ export const tooltipBorder = colorPalette.gray600;
 export const calendarCellBackground = colorPalette.navy900;
 
 export const overlayBackground = 'rgba(0, 0, 0, 0.3)';
+
+// Chart colors - Qualitative scale (9 colors)
+export const chartQual1 = colorPalette.chartQual1;
+export const chartQual2 = colorPalette.chartQual2;
+export const chartQual3 = colorPalette.chartQual3;
+export const chartQual4 = colorPalette.chartQual4;
+export const chartQual5 = colorPalette.chartQual5;
+export const chartQual6 = colorPalette.chartQual6;
+export const chartQual7 = colorPalette.chartQual7;
+export const chartQual8 = colorPalette.chartQual8;
+export const chartQual9 = colorPalette.chartQual9;
