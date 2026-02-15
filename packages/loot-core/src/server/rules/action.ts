@@ -194,6 +194,39 @@ export class Action {
           case 'fixed-amount':
             object.amount = this.value;
             break;
+          case 'formula':
+            if (!object._ruleErrors) {
+              object._ruleErrors = [];
+            }
+            if (!this.options?.formula) {
+              object._ruleErrors.push(
+                'Formula method selected but no formula specified',
+              );
+              break;
+            }
+            try {
+              const result = this.executeFormulaSync(
+                this.options.formula,
+                object,
+              );
+              const numValue =
+                typeof result === 'number'
+                  ? result
+                  : parseFloat(String(result));
+
+              if (isNaN(numValue)) {
+                object._ruleErrors.push(
+                  `Formula for split amount must produce a numeric value. Got: ${JSON.stringify(result)}`,
+                );
+              } else {
+                object.amount = numValue;
+              }
+            } catch (err) {
+              object._ruleErrors.push(
+                `Error executing formula for split amount: ${err instanceof Error ? err.message : String(err)}`,
+              );
+            }
+            break;
           default:
             break;
         }

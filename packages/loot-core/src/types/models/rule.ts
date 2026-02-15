@@ -146,10 +146,11 @@ export type SetRuleActionEntity = {
 
 export type SetSplitAmountRuleActionEntity = {
   op: 'set-split-amount';
-  value: number;
+  value: number | null;
   options?: {
     splitIndex?: number;
-    method: 'fixed-amount' | 'fixed-percent' | 'remainder';
+    method: 'fixed-amount' | 'fixed-percent' | 'formula' | 'remainder';
+    formula?: string;
   };
 };
 

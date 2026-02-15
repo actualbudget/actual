@@ -863,6 +863,102 @@ describe('Rule', () => {
         subtransactions: [{ amount: 100 }, { amount: 100 }],
       });
     });
+
+    describe('formula support', () => {
+      test('fixed-amount with formula calculates split amount', () => {
+        const rule = new Rule({
+          conditionsOp: 'and',
+          conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+          actions: [
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: { splitIndex: 1, method: 'formula', formula: '=300' },
+            },
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: {
+                splitIndex: 2,
+                method: 'remainder',
+              },
+            },
+          ],
+        });
+
+        // Fixed amount 300, remainder = 700
+        expect(
+          rule.exec({ imported_payee: 'James', amount: 100000 }),
+        ).toMatchObject({
+          subtransactions: [{ amount: 30000 }, { amount: 70000 }],
+        });
+      });
+
+      test('fixed-percent formula calculates 50/50 split', () => {
+        const rule = new Rule({
+          conditionsOp: 'and',
+          conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+          actions: [
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: {
+                splitIndex: 1,
+                method: 'formula',
+                formula: '=INTEGER_TO_AMOUNT(parent_amount) * 0.5',
+              },
+            },
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: {
+                splitIndex: 2,
+                method: 'remainder',
+              },
+            },
+          ],
+        });
+
+        // Fixed amount 10000 (100 in formula = $100.00 = 10000 cents), remainder = 10000
+        expect(
+          rule.exec({ imported_payee: 'James', amount: 20000 }),
+        ).toMatchObject({
+          subtransactions: [{ amount: 10000 }, { amount: 10000 }],
+        });
+      });
+
+      test('multiple fixed-amount formulas work together', () => {
+        const rule = new Rule({
+          conditionsOp: 'and',
+          conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+          actions: [
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: { splitIndex: 1, method: 'formula', formula: '=100' },
+            },
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: { splitIndex: 2, method: 'formula', formula: '=100' },
+            },
+          ],
+        });
+
+        // Both splits get 100 each
+        expect(
+          rule.exec({ imported_payee: 'James', amount: 20000 }),
+        ).toMatchObject({
+          subtransactions: [{ amount: 10000 }, { amount: 10000 }],
+        });
+      });
+    });
   });
 
   test('rules are deterministically ranked', () => {

@@ -403,6 +403,15 @@ const transactionFields: Completion[] = [
       'Account balance as of the date of the transaction, excluding the transaction amount. Use for calculations and comparisons.\n\nExample: `=IF(balance < 0, "Negative Balance", "Positive Balance")`',
     ),
   },
+  {
+    label: 'parent_amount',
+    type: 'variable',
+    section: '💰 Transaction Fields',
+    boost: 5,
+    info: t(
+      'The amount of the parent transaction in cents in split transactions.\n\nExample: `=(parent_amount / 100) * .05`',
+    ),
+  },
 ];
 
 // Convert function definitions to completions with grouping

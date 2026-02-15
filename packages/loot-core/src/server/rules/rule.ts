@@ -7,6 +7,7 @@ import {
   ungroupTransaction,
 } from '../../shared/transactions';
 import type { RuleEntity } from '../../types/models';
+import type { TransactionForRules } from '../transactions/transaction-rules';
 
 import { Action } from './action';
 import { Condition } from './condition';
@@ -32,7 +33,7 @@ function execSplitActions(actions: Action[], transaction) {
     ungroupTransaction(transaction),
     transaction.id,
   );
-  let newTransactions = data;
+  let newTransactions: TransactionForRules[] = data;
 
   // Add empty splits, and apply non-set-amount actions.
   // This also populates any fixed-amount splits.
@@ -42,6 +43,8 @@ function execSplitActions(actions: Action[], transaction) {
       const { data } = addSplitTransaction(newTransactions, transaction.id);
       newTransactions = data;
     }
+    newTransactions[splitTransactionIndex].parent_amount = transaction.amount;
+    newTransactions[splitTransactionIndex].balance = transaction.balance;
     action.exec(newTransactions[splitTransactionIndex]);
   });
 
