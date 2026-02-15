@@ -71,8 +71,11 @@ export function Overview({ dashboard }: OverviewProps) {
   const dispatch = useDispatch();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
+  const showBudgetAnalysisReport =
+    budgetAnalysisReportEnabled && budgetType !== 'tracking';
 
   const formulaMode = useFeatureFlag('formulaMode');
 
@@ -521,7 +524,7 @@ export function Overview({ dashboard }: OverviewProps) {
                               name: 'spending-card' as const,
                               text: t('Spending analysis'),
                             },
-                            ...(budgetAnalysisReportEnabled
+                            ...(showBudgetAnalysisReport
                               ? [
                                   {
                                     name: 'budget-analysis-card' as const,
@@ -738,7 +741,7 @@ export function Overview({ dashboard }: OverviewProps) {
                           }
                         />
                       ) : widget.type === 'budget-analysis-card' &&
-                        budgetAnalysisReportEnabled ? (
+                        showBudgetAnalysisReport ? (
                         <BudgetAnalysisCard
                           widgetId={item.i}
                           isEditing={isEditing}

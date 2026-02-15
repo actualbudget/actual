@@ -13,10 +13,14 @@ import { Summary } from './reports/Summary';
 import { ReportsDashboardRouter } from './ReportsDashboardRouter';
 
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function ReportRouter() {
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+  const showBudgetAnalysisReport =
+    budgetAnalysisReportEnabled && budgetType !== 'tracking';
 
   return (
     <Routes>
@@ -36,7 +40,7 @@ export function ReportRouter() {
       <Route path="/custom/:id" element={<CustomReport />} />
       <Route path="/spending" element={<Spending />} />
       <Route path="/spending/:id" element={<Spending />} />
-      {budgetAnalysisReportEnabled && (
+      {showBudgetAnalysisReport && (
         <>
           <Route path="/budget-analysis" element={<BudgetAnalysis />} />
           <Route path="/budget-analysis/:id" element={<BudgetAnalysis />} />

@@ -48,6 +48,11 @@ const balanceTypeOptions = [
     key: 'Net Deposit',
     format: 'netAssets' as const,
   },
+  {
+    description: t('Budgeted'),
+    key: 'Budgeted',
+    format: 'totalBudgeted' as const,
+  },
 ];
 
 const groupByOptions = [

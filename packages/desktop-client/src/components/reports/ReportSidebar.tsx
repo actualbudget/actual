@@ -76,6 +76,7 @@ type ReportSidebarProps = {
   latestTransaction: TransactionEntity['date'];
   firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'];
   isComplexCategoryCondition?: boolean;
+  showBudgetedType?: boolean;
 };
 
 export function ReportSidebar({
@@ -108,6 +109,7 @@ export function ReportSidebar({
   latestTransaction,
   firstDayOfWeekIdx,
   isComplexCategoryCondition = false,
+  showBudgetedType = false,
 }: ReportSidebarProps) {
   const { t } = useTranslation();
   const locale = useLocale();
@@ -182,6 +184,26 @@ export function ReportSidebar({
     setSessionReport('balanceType', cond);
     onReportChange({ type: 'modify' });
     setBalanceType(cond);
+
+    if (cond === 'Budgeted') {
+      // Budgeted only supports Category and Group splits
+      if (
+        customReportItems.groupBy === 'Payee' ||
+        customReportItems.groupBy === 'Account'
+      ) {
+        setSessionReport('groupBy', 'Category');
+        setGroupBy('Category');
+        defaultItems('Category');
+      }
+      // Budgeted only supports Monthly and Yearly intervals
+      if (
+        customReportItems.interval === 'Daily' ||
+        customReportItems.interval === 'Weekly'
+      ) {
+        setSessionReport('interval', 'Monthly');
+        setInterval('Monthly');
+      }
+    }
   };
 
   const onChangeSortBy = (cond?: sortByOpType) => {
@@ -277,7 +299,11 @@ export function ReportSidebar({
               option.key,
               option.description,
             ])}
-            disabledKeys={disabledItems('split')}
+            disabledKeys={
+              customReportItems.balanceType === 'Budgeted'
+                ? [...new Set([...disabledItems('split'), 'Payee', 'Account'])]
+                : disabledItems('split')
+            }
           />
         </View>
 
@@ -294,10 +320,9 @@ export function ReportSidebar({
           <Select
             value={customReportItems.balanceType}
             onChange={e => onChangeBalanceType(e)}
-            options={ReportOptions.balanceType.map(option => [
-              option.key,
-              option.description,
-            ])}
+            options={ReportOptions.balanceType
+              .filter(option => showBudgetedType || option.key !== 'Budgeted')
+              .map(option => [option.key, option.description])}
             disabledKeys={disabledItems('type')}
           />
         </View>
@@ -330,7 +355,11 @@ export function ReportSidebar({
               option.key,
               option.description,
             ])}
-            disabledKeys={[]}
+            disabledKeys={
+              customReportItems.balanceType === 'Budgeted'
+                ? ['Daily', 'Weekly']
+                : []
+            }
           />
         </View>
 

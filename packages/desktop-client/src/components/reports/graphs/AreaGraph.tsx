@@ -36,6 +36,7 @@ type PayloadItem = {
     netAssets: number;
     netDebts: number;
     totalTotals: number;
+    totalBudgeted: number;
   };
 };
 
@@ -72,7 +73,9 @@ const CustomTooltip = ({
             <strong>{payload[0].payload.date}</strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
+            {['totalAssets', 'totalTotals', 'totalBudgeted'].includes(
+              balanceTypeOp,
+            ) && (
               <AlignedText
                 left={t('Assets:')}
                 right={
@@ -82,7 +85,9 @@ const CustomTooltip = ({
                 }
               />
             )}
-            {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
+            {['totalDebts', 'totalTotals', 'totalBudgeted'].includes(
+              balanceTypeOp,
+            ) && (
               <AlignedText
                 left={t('Debts:')}
                 right={
@@ -112,12 +117,19 @@ const CustomTooltip = ({
                 }
               />
             )}
-            {['totalTotals'].includes(balanceTypeOp) && (
+            {['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
               <AlignedText
-                left={t('Net:')}
+                left={
+                  balanceTypeOp === 'totalBudgeted' ? t('Budgeted:') : t('Net:')
+                }
                 right={
                   <FinancialText as="strong">
-                    {format(payload[0].payload.totalTotals, 'financial')}
+                    {format(
+                      balanceTypeOp === 'totalBudgeted'
+                        ? payload[0].payload.totalBudgeted
+                        : payload[0].payload.totalTotals,
+                      'financial',
+                    )}
                   </FinancialText>
                 }
               />

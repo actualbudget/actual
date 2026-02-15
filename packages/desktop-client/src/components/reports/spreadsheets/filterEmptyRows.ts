@@ -10,11 +10,11 @@ export function filterEmptyRows({
   balanceTypeOp?: balanceTypeOpType;
 }): boolean {
   let showHide: boolean;
-  if (balanceTypeOp === 'totalTotals') {
+  if (balanceTypeOp === 'totalTotals' || balanceTypeOp === 'totalBudgeted') {
     showHide =
       data['totalDebts'] !== 0 ||
       data['totalAssets'] !== 0 ||
-      data['totalTotals'] !== 0;
+      data[balanceTypeOp] !== 0;
   } else {
     showHide = data[balanceTypeOp] !== 0;
   }

@@ -13,7 +13,21 @@ export function useReport<T>(
   const [results, setResults] = useState<T | null>(null);
 
   useEffect(() => {
-    getData(spreadsheet, results => setResults(results));
+    let didCancel = false;
+
+    // Reset results whenever a new data function is provided so callers
+    // can reliably show a loading state instead of stale/partial data.
+    setResults(null);
+
+    getData(spreadsheet, results => {
+      if (!didCancel) {
+        setResults(results);
+      }
+    });
+
+    return () => {
+      didCancel = true;
+    };
   }, [getData, spreadsheet]);
   return results;
 }

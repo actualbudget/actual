@@ -6,6 +6,8 @@ import type {
   RuleConditionEntity,
 } from 'loot-core/types/models';
 
+import type { BudgetMonthCell } from './budgetMonthCell';
+
 import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 type BudgetAnalysisIntervalData = {
@@ -127,10 +129,10 @@ export function createBudgetAnalysisSpreadsheet({
 
     // Calculate the carryover from the previous month
     for (const cat of categoriesToInclude) {
-      const balanceCell = prevMonthData.find((cell: { name: string }) =>
+      const balanceCell = prevMonthData.find((cell: BudgetMonthCell) =>
         cell.name.endsWith(`leftover-${cat.id}`),
       );
-      const carryoverCell = prevMonthData.find((cell: { name: string }) =>
+      const carryoverCell = prevMonthData.find((cell: BudgetMonthCell) =>
         cell.name.endsWith(`carryover-${cat.id}`),
       );
 
@@ -167,16 +169,16 @@ export function createBudgetAnalysisSpreadsheet({
       // Sum up values for categories we're interested in
       for (const cat of categoriesToInclude) {
         // Find the budget, spent, balance, and carryover flag for this category
-        const budgetCell = monthData.find((cell: { name: string }) =>
+        const budgetCell = monthData.find((cell: BudgetMonthCell) =>
           cell.name.endsWith(`budget-${cat.id}`),
         );
-        const spentCell = monthData.find((cell: { name: string }) =>
+        const spentCell = monthData.find((cell: BudgetMonthCell) =>
           cell.name.endsWith(`sum-amount-${cat.id}`),
         );
-        const balanceCell = monthData.find((cell: { name: string }) =>
+        const balanceCell = monthData.find((cell: BudgetMonthCell) =>
           cell.name.endsWith(`leftover-${cat.id}`),
         );
-        const carryoverCell = monthData.find((cell: { name: string }) =>
+        const carryoverCell = monthData.find((cell: BudgetMonthCell) =>
           cell.name.endsWith(`carryover-${cat.id}`),
         );
 
