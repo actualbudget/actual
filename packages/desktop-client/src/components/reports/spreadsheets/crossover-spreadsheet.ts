@@ -7,9 +7,15 @@ import type { AccountEntity } from 'loot-core/types/models';
 import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
+/** Aggregated monthly transaction data */
 type MonthlyAgg = { date: string; amount: number };
 
-// Utility functions for Hampel identifier
+/**
+ * Calculates the median value of a numeric array.
+ *
+ * @param values - Array of numbers to calculate median from
+ * @returns The median value, or 0 if array is empty
+ */
 function calculateMedian(values: number[]): number {
   if (values.length === 0) return 0;
   if (values.length === 1) return values[0];
@@ -27,11 +33,33 @@ function calculateMean(values: number[]): number {
   return sum / values.length;
 }
 
+/**
+ * Calculates the Median Absolute Deviation (MAD) from a given median.
+ *
+ * MAD is a robust measure of variability that is less sensitive to outliers
+ * than standard deviation.
+ *
+ * @param values - Array of numbers
+ * @param median - The median of the values array
+ * @returns The median absolute deviation
+ */
 function calculateMAD(values: number[], median: number): number {
   const deviations = values.map(v => Math.abs(v - median));
   return calculateMedian(deviations);
 }
 
+/**
+ * Applies Hampel filter to calculate a robust median, removing outliers.
+ *
+ * The Hampel identifier detects outliers using the median and MAD (Median Absolute Deviation).
+ * Values outside of median ± threshold × MAD × 1.4826 are considered outliers and excluded.
+ *
+ * This is useful for expense projection when historical data contains anomalies
+ * (e.g., one-time large purchases, vacations, medical emergencies).
+ *
+ * @param expenses - Array of expense values
+ * @returns The median of the filtered (non-outlier) expenses
+ */
 function calculateHampelFilteredMedian(expenses: number[]): number {
   if (expenses.length === 0) return 0;
   if (expenses.length === 1) return expenses[0];
@@ -49,42 +77,87 @@ function calculateHampelFilteredMedian(expenses: number[]): number {
   return calculateMedian(filteredExpenses);
 }
 
-// Type for the return value of the recalculate function
 export type CrossoverData = {
+  /** Graph visualization data */
   graphData: {
+    /** Array of data points for chart display */
     data: Array<{
+      /** Month label (e.g., "Jan 2024") */
       x: string;
+      /** Monthly investment income based on safe withdrawal rate */
       investmentIncome: number;
+      /** Monthly expenses (actual or projected with inflation and adjustment factor) */
       expenses: number;
+      /** Total investment balance (nest egg) */
       nestEgg: number;
+      /** Expenses adjusted by the expenseAdjustmentFactor (without inflation) for reference */
       adjustedExpenses?: number;
+      /** Whether this data point is projected vs historical */
       isProjection?: boolean;
     }>;
+    /** Start month of the data range */
     start: string;
+    /** End month of the data range */
     end: string;
+    /** Month label where crossover occurs, or null if not yet achieved */
     crossoverXLabel: string | null;
   };
+  /** Most recent known investment balance */
   lastKnownBalance: number;
+  /** Most recent monthly investment income */
   lastKnownMonthlyIncome: number;
+  /** Most recent monthly expenses */
   lastKnownMonthlyExpenses: number;
+  /** Calculated historical annual return rate, or null if cannot be calculated */
   historicalReturn: number | null;
+  /** Estimated years until financial independence, or null if already achieved or not calculable */
   yearsToRetire: number | null;
+  /** Target monthly income needed at crossover point */
   targetMonthlyIncome: number | null;
+  /** Target nest egg amount needed to achieve crossover */
   targetNestEgg: number | null;
 };
 
 export type CrossoverParams = {
+  /** Start month in YYYY-MM format */
   start: string;
+  /** End month in YYYY-MM format */
   end: string;
-  expenseCategoryIds: string[]; // which categories count as expenses
-  incomeAccountIds: AccountEntity['id'][]; // selected accounts for both historical returns and projections
-  safeWithdrawalRate: number; // annual percent, e.g. 0.04 for 4%
-  estimatedReturn?: number | null; // optional annual return to project future balances
-  expectedContribution?: number | null; // optional monthly contribution to project future balances
-  projectionType: 'hampel' | 'median' | 'mean'; // expense projection method
+
   expenseAdjustmentFactor?: number; // multiplier for expenses (default 1.0)
+  /** Category IDs that count as expenses */
+  expenseCategoryIds: string[];
+  /** Selected Account IDs for investment/retirement accounts */
+  incomeAccountIds: AccountEntity['id'][];
+  /** Annual safe withdrawal rate (e.g., 0.04 for 4%) */
+  safeWithdrawalRate: number;
+  /** Optional annual return rate for projections (e.g., 0.05 for 5%) */
+  estimatedReturn?: number | null;
+  /** Optional monthly contribution to project future balances */
+  expectedContribution?: number | null;
+  /** Method for projecting expenses: 'trend' uses linear regression, 'hampel' uses outlier-filtered median */
+  projectionType: 'hampel' | 'median' | 'mean';
+  /** Optional annual inflation rate for adjusting projected expenses (e.g., 0.03 for 3%) */
+  inflationRate?: number | null;
 };
 
+/**
+ * Creates a spreadsheet calculation function for the crossover point analysis.
+ *
+ * This function generates both historical data and future projections to determine
+ * when investment income will exceed living expenses (the "crossover point").
+ *
+ * The calculation includes:
+ * - Historical expense and balance tracking
+ * - Expense projection using trend analysis or Hampel filtering
+ * - Optional inflation adjustment for realistic long-term projections
+ * - Investment growth projections based on historical or estimated returns
+ * - Crossover point detection and time-to-FI calculation
+ *
+ * @param params - Configuration parameters for the crossover calculation
+ * @returns An async function that performs the spreadsheet calculation
+ *
+ */
 export function createCrossoverSpreadsheet({
   start,
   end,
@@ -95,6 +168,7 @@ export function createCrossoverSpreadsheet({
   expectedContribution,
   projectionType,
   expenseAdjustmentFactor,
+  inflationRate,
 }: CrossoverParams) {
   return async (
     _spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -204,12 +278,39 @@ export function createCrossoverSpreadsheet({
           expectedContribution,
           projectionType,
           expenseAdjustmentFactor,
+          inflationRate,
         },
         expenses,
         historicalBalances,
       ),
     );
   };
+}
+
+/**
+ * Calculate monthly inflation rate from annual rate.
+ *
+ * Uses compound interest formula: (1 + annual)^(1/12) - 1
+ * This ensures that 12 months of monthly inflation equals the annual rate.
+ */
+function calculateMonthlyInflationRate(
+  params: Pick<
+    CrossoverParams,
+    | 'start'
+    | 'end'
+    | 'expenseCategoryIds'
+    | 'incomeAccountIds'
+    | 'safeWithdrawalRate'
+    | 'estimatedReturn'
+    | 'expectedContribution'
+    | 'projectionType'
+    | 'expenseAdjustmentFactor'
+    | 'inflationRate'
+  >,
+) {
+  return params.inflationRate
+    ? Math.pow(1 + params.inflationRate, 1 / 12) - 1
+    : 0;
 }
 
 function recalculate(
@@ -224,6 +325,7 @@ function recalculate(
     | 'expectedContribution'
     | 'projectionType'
     | 'expenseAdjustmentFactor'
+    | 'inflationRate'
   >,
   expenses: MonthlyAgg[],
   historicalAccounts: Array<{
@@ -368,6 +470,8 @@ function recalculate(
       flatExpense = calculateMean(y);
     }
 
+    const monthlyInflationRate = calculateMonthlyInflationRate(params);
+
     for (let i = 1; i <= maxProjectionMonths; i++) {
       monthCursor = d.addMonths(monthCursor, 1);
 
@@ -381,24 +485,32 @@ function recalculate(
 
       const projectedIncome = projectedBalance * monthlySWR;
 
-      const projectedExpenses = Math.max(0, flatExpense);
+      let projectedExpenses = Math.max(0, flatExpense);
 
-      // Calculate adjusted expenses
-      const adjustedProjectedExpenses = projectedExpenses * adjustmentFactor;
+      // Calculate non-inflated adjusted expenses for reference line
+      const adjustedExpensesNoInflation = projectedExpenses * adjustmentFactor;
+
+      if (monthlyInflationRate > 0) {
+        projectedExpenses =
+          projectedExpenses * Math.pow(1 + monthlyInflationRate, i);
+      }
+
+      // Apply adjustment factor to inflation-adjusted expenses for the target
+      const inflationAdjustedTarget = projectedExpenses * adjustmentFactor;
 
       data.push({
         x: d.format(monthCursor, 'MMM yyyy'),
         investmentIncome: Math.round(projectedIncome),
-        expenses: Math.round(projectedExpenses),
+        expenses: Math.round(inflationAdjustedTarget),
         nestEgg: Math.round(projectedBalance),
-        adjustedExpenses: Math.round(adjustedProjectedExpenses),
+        adjustedExpenses: Math.round(adjustedExpensesNoInflation),
         isProjection: true,
       });
 
-      // Check crossover against ADJUSTED expenses
+      // Check crossover against inflation-adjusted expenses
       if (
         crossoverIndex == null &&
-        Math.round(projectedIncome) >= Math.round(adjustedProjectedExpenses)
+        Math.round(projectedIncome) >= Math.round(inflationAdjustedTarget)
       ) {
         crossoverIndex = months.length + (i - 1);
         break;
@@ -417,7 +529,7 @@ function recalculate(
       const crossoverDate = d.parse(crossoverData.x, 'MMM yyyy', currentDate);
       const monthsDiff = d.differenceInMonths(crossoverDate, currentDate);
       yearsToRetire = monthsDiff > 0 ? monthsDiff / 12 : 0;
-      targetMonthlyIncome = crossoverData.adjustedExpenses ?? null;
+      targetMonthlyIncome = crossoverData.expenses ?? null;
       // Calculate target nest egg: target monthly income / monthly safe withdrawal rate
       targetNestEgg =
         targetMonthlyIncome != null

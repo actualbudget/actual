@@ -119,6 +119,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     'hampel' | 'median' | 'mean'
   >('hampel');
   const [expenseAdjustmentFactor, setExpenseAdjustmentFactor] = useState(1.0);
+  const [inflationRate, setInflationRate] = useState<number | null>(null);
   const [showHiddenCategories, setShowHiddenCategories] = useState(false);
   const [selectionsInitialized, setSelectionsInitialized] = useState(false);
 
@@ -158,6 +159,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     setExpectedContribution(initialExpectedContribution);
     setProjectionType(widget?.meta?.projectionType ?? 'hampel');
     setExpenseAdjustmentFactor(widget?.meta?.expenseAdjustmentFactor ?? 1.0);
+    setInflationRate(widget?.meta?.inflationRate ?? null);
     setShowHiddenCategories(widget?.meta?.showHiddenCategories ?? false);
 
     setSelectionsInitialized(true);
@@ -297,6 +299,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
           : null,
         projectionType,
         expenseAdjustmentFactor,
+        inflationRate,
         showHiddenCategories,
         timeFrame: { start, end, mode },
       },
@@ -342,6 +345,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
           : null,
         projectionType,
         expenseAdjustmentFactor,
+        inflationRate,
       });
       await crossoverSpreadsheet(spreadsheet, setData);
     },
@@ -354,6 +358,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
       expectedContribution,
       projectionType,
       expenseAdjustmentFactor,
+      inflationRate,
       expenseCategoryIds,
       selectedIncomeAccountIds,
     ],
@@ -1013,6 +1018,64 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                     </Trans>
                   </div>
                 )}
+              </View>
+
+              <View style={{ marginBottom: 12 }}>
+                <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <Text>{t('Inflation rate (annual %, optional)')}</Text>
+                    <Tooltip
+                      content={
+                        <View style={{ maxWidth: 300 }}>
+                          <Text>
+                            <Trans>
+                              The expected annual inflation rate, used to adjust
+                              projected expenses for inflation. If not
+                              specified, expenses will be projected without
+                              inflation adjustment.
+                              <br />
+                              <br />
+                              Example: 3% annual inflation means expenses will
+                              grow by approximately 3% per year to maintain the
+                              same purchasing power.
+                            </Trans>
+                          </Text>
+                        </View>
+                      }
+                      placement="right top"
+                      style={{
+                        ...styles.tooltip,
+                      }}
+                    >
+                      <SvgQuestion height={12} width={12} cursor="pointer" />
+                    </Tooltip>
+                  </View>
+                </div>
+                <Input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.1}
+                  value={
+                    inflationRate == null
+                      ? ''
+                      : Number((inflationRate * 100).toFixed(2))
+                  }
+                  onChange={e =>
+                    setInflationRate(
+                      isNaN(e.target.valueAsNumber)
+                        ? null
+                        : e.target.valueAsNumber / 100,
+                    )
+                  }
+                  style={{ width: 120 }}
+                />
               </View>
             </View>
           </View>
