@@ -63,7 +63,7 @@ const resolveLanguage = (language: string) => {
   return undefined;
 };
 
-export const setI18NextLanguage = (language: string) => {
+export const setI18NextLanguage = (language: string | null) => {
   const defaultLanguages = Array.isArray(navigator.languages)
     ? navigator.languages
     : [navigator.language || 'en'];
