@@ -369,3 +369,12 @@ export function makeValue(value, cond) {
 export function getApproxNumberThreshold(number) {
   return Math.round(Math.abs(number) * 0.075);
 }
+
+export function normalizeStage(
+  stage: string | null | undefined,
+): string | null {
+  if (stage === 'cleanup' || stage === 'modify') {
+    return 'pre';
+  }
+  return stage ?? null;
+}

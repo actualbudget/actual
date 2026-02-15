@@ -14,7 +14,7 @@ import { send } from 'loot-core/platform/client/connection';
 import * as undo from 'loot-core/platform/client/undo';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { q } from 'loot-core/shared/query';
-import { friendlyOp, mapField } from 'loot-core/shared/rules';
+import { friendlyOp, mapField, normalizeStage } from 'loot-core/shared/rules';
 import { describeSchedule } from 'loot-core/shared/schedules';
 import type {
   NewRuleEntity,
@@ -27,6 +27,7 @@ import { Link } from './common/Link';
 import { Search } from './common/Search';
 import { RulesHeader } from './rules/RulesHeader';
 import { RulesList } from './rules/RulesList';
+import { type DragState, type DropPosition } from './sort';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -166,6 +167,7 @@ export function ManageRules({
 
   const selectedInst = useSelected('manage-rules', filteredRules, []);
   const [hoveredRule, setHoveredRule] = useState(null);
+  const [_isDragging, setIsDragging] = useState(false);
 
   const onSearchChange = (value: string) => {
     setFilter(value);
@@ -298,6 +300,41 @@ export function ManageRules({
     setHoveredRule(id);
   };
 
+  const onDragChange = (drag: DragState<{ id: string }>) => {
+    setIsDragging(drag.state === 'start');
+  };
+
+  const onReorder = async (
+    id: string,
+    dropPos: DropPosition,
+    targetId: string,
+  ) => {
+    // Calculate the target position for insertion
+    let targetIdToMove = targetId;
+    if (dropPos === 'bottom') {
+      // Find the rule being moved to get its stage
+      const movedRule = filteredRules.find(r => r.id === id);
+      if (!movedRule) return;
+
+      const movedStage = normalizeStage(movedRule.stage);
+
+      // IMPORTANT: Filter to only rules in the same stage
+      const sameStageRules = filteredRules.filter(
+        r => normalizeStage(r.stage) === movedStage,
+      );
+
+      // Find the target in the same-stage list
+      const idx = sameStageRules.findIndex(r => r.id === targetId) + 1;
+      targetIdToMove =
+        idx < sameStageRules.length ? sameStageRules[idx].id : null;
+    }
+
+    setLoading(true);
+    await send('rule-move', { id, targetId: targetIdToMove });
+    await loadRules();
+    setLoading(false);
+  };
+
   return (
     <SelectedProvider instance={selectedInst}>
       <View>
@@ -319,7 +356,8 @@ export function ManageRules({
           >
             <Text>
               <Trans>
-                Rules are always run in the order that you see them.
+                Rules are run in the order shown below. Drag rules to reorder
+                them within each stage.
               </Trans>{' '}
               <Link
                 variant="external"
@@ -350,6 +388,8 @@ export function ManageRules({
                 onHover={onHover}
                 onEditRule={onEditRule}
                 onDeleteRule={rule => onDeleteRule(rule.id)}
+                onDragChange={onDragChange}
+                onDrop={onReorder}
               />
             )}
           </InfiniteScrollWrapper>

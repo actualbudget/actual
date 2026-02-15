@@ -69,17 +69,35 @@ function _rankRules(rules: Rule[]): Rule[] {
   // order. That's why rules have ids: if two rules have the same score, it
   // sorts by id
   return [...rules].sort((r1, r2) => {
-    const score1 = scores.get(r1);
-    const score2 = scores.get(r2);
-    if (score1 < score2) {
-      return -1;
-    } else if (score1 > score2) {
-      return 1;
-    } else {
+    // If both have sort_order, use it (stage was manually ordered)
+    if (r1.sort_order != null && r2.sort_order != null) {
+      if (r1.sort_order !== r2.sort_order) {
+        return r1.sort_order - r2.sort_order;
+      }
+      // Fallback to ID for deterministic ordering when sort_order is equal
       const id1 = r1.getId();
       const id2 = r2.getId();
       return id1 < id2 ? -1 : id1 > id2 ? 1 : 0;
     }
+
+    // If neither has sort_order, use specificity (stage never reordered)
+    if (r1.sort_order == null && r2.sort_order == null) {
+      const score1 = scores.get(r1);
+      const score2 = scores.get(r2);
+      if (score1 < score2) {
+        return -1;
+      } else if (score1 > score2) {
+        return 1;
+      } else {
+        const id1 = r1.getId();
+        const id2 = r2.getId();
+        return id1 < id2 ? -1 : id1 > id2 ? 1 : 0;
+      }
+    }
+
+    // Mixed case (new rule added to manually-ordered stage)
+    // Rules with sort_order come before rules without
+    return r1.sort_order != null ? -1 : 1;
   });
 }
 

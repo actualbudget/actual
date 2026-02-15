@@ -115,6 +115,7 @@ export class Rule {
   conditionsOp;
   id?: string;
   stage: 'pre' | null | 'post';
+  sort_order: number | null;
 
   constructor({
     id,
@@ -122,12 +123,14 @@ export class Rule {
     conditionsOp,
     conditions,
     actions,
+    sort_order,
   }: {
     id?: string;
     stage?: 'pre' | null | 'post';
     conditionsOp;
     conditions;
     actions;
+    sort_order?: number | null;
   }) {
     this.id = id;
     this.stage = stage ?? null;
@@ -138,6 +141,7 @@ export class Rule {
     this.actions = actions.map(
       a => new Action(a.op, a.field, a.value, a.options),
     );
+    this.sort_order = sort_order ?? null;
   }
 
   evalConditions(object): boolean {
@@ -188,6 +192,7 @@ export class Rule {
       conditionsOp: this.conditionsOp,
       conditions: this.conditions.map(c => c.serialize()),
       actions: this.actions.map(a => a.serialize()),
+      sort_order: this.sort_order,
     };
   }
 }

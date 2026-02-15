@@ -7,6 +7,11 @@ import type { RuleEntity } from 'loot-core/types/models';
 
 import { RuleRow } from './RuleRow';
 
+import {
+  type OnDragChangeCallback,
+  type OnDropCallback,
+} from '@desktop-client/components/sort';
+
 type RulesListProps = {
   rules: RuleEntity[];
   selectedItems: Set<string>;
@@ -14,6 +19,8 @@ type RulesListProps = {
   onHover?: (id: string | null) => void;
   onEditRule?: (rule: RuleEntity) => void;
   onDeleteRule?: (rule: RuleEntity) => void;
+  onDragChange?: OnDragChangeCallback<{ id: string }>;
+  onDrop?: OnDropCallback;
 };
 
 export function RulesList({
@@ -23,6 +30,8 @@ export function RulesList({
   onHover,
   onEditRule,
   onDeleteRule,
+  onDragChange,
+  onDrop,
 }: RulesListProps) {
   if (rules.length === 0) {
     return null;
@@ -43,6 +52,8 @@ export function RulesList({
             onHover={onHover}
             onEditRule={onEditRule}
             onDeleteRule={onDeleteRule}
+            onDragChange={onDragChange}
+            onDrop={onDrop}
           />
         );
       })}
