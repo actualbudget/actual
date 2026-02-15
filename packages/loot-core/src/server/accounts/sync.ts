@@ -23,6 +23,7 @@ import type {
 } from '../../types/models';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
+import { TRANSACTION_SORT_INCREMENT } from '../db/sort';
 import { runMutator } from '../mutators';
 import { post } from '../post';
 import { getServer } from '../server-config';
@@ -615,7 +616,7 @@ export async function reconcileTransactions(
   // Maintain the sort order of the server
   const now = Date.now();
   added.forEach((t, index) => {
-    t.sort_order ??= now - index;
+    t.sort_order ??= now - index * TRANSACTION_SORT_INCREMENT;
   });
 
   if (!isPreview) {
@@ -878,6 +879,14 @@ export async function addTransactions(
   }
 
   await createNewPayees(payeesToCreate, added);
+
+  // Assign decreasing sort_order values to preserve import file order.
+  // Transactions are displayed in sort_order DESC order, so first transaction
+  // in the file should have the highest sort_order.
+  const now = Date.now();
+  added.forEach((t, index) => {
+    t.sort_order ??= now - index * TRANSACTION_SORT_INCREMENT;
+  });
 
   let newTransactions;
   if (runTransfers || learnCategories) {

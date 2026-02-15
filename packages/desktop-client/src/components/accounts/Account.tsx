@@ -441,7 +441,7 @@ class AccountInternal extends PureComponent<
   };
 
   refetchTransactions = async () => {
-    this.paged?.run();
+    await this.paged?.run();
   };
 
   fetchTransactions = (filterConditions?: ConditionEntity[]) => {
@@ -1655,6 +1655,11 @@ class AccountInternal extends PureComponent<
     }
 
     maybeSortByPreviousField(this, sortPrevField, sortPrevAscDesc);
+
+    // Always add sort_order as a final tiebreaker to maintain stable ordering
+    // when transactions have the same values in the sorted column(s)
+    this.currentQuery = this.currentQuery.orderBy({ sort_order: sortAscDesc });
+
     this.updateQuery(this.currentQuery, isFiltered);
   };
 
@@ -1854,6 +1859,12 @@ class AccountInternal extends PureComponent<
                     accountId === 'offbudget' ||
                     accountId === 'onbudget' ||
                     accountId === 'uncategorized'
+                  }
+                  allowReorder={
+                    !!accountId &&
+                    accountId !== 'offbudget' &&
+                    accountId !== 'onbudget' &&
+                    accountId !== 'uncategorized'
                   }
                   isAdding={this.state.isAdding}
                   isNew={this.isNew}

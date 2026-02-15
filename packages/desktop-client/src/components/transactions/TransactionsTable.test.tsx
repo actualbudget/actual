@@ -642,7 +642,7 @@ describe('Transactions', () => {
       categories.find(category => category.name === 'Food')?.id,
     );
 
-    await userEvent.type(input, '[Enter]');
+    await userEvent.keyboard('[Enter]');
     await waitForAutocomplete();
 
     // The transactions data should be updated with the right category

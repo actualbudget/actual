@@ -8,6 +8,7 @@ import type {
 } from '../../types/models';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
+import * as db from '../db';
 import { mutator } from '../mutators';
 import { undoable } from '../undo';
 
@@ -23,6 +24,7 @@ export type TransactionHandlers = {
   'transaction-add': typeof addTransaction;
   'transaction-update': typeof updateTransaction;
   'transaction-delete': typeof deleteTransaction;
+  'transaction-move': typeof moveTransaction;
   'transactions-parse-file': typeof parseTransactionsFile;
   'transactions-export': typeof exportTransactions;
   'transactions-export-query': typeof exportTransactionsQuery;
@@ -61,6 +63,36 @@ async function updateTransaction(transaction: TransactionEntity) {
 
 async function deleteTransaction(transaction: Pick<TransactionEntity, 'id'>) {
   await handleBatchUpdateTransactions({ deleted: [transaction] });
+  return {};
+}
+
+async function moveTransaction({
+  id,
+  accountId,
+  targetId,
+}: {
+  id: string;
+  accountId: string;
+  targetId: string | null;
+}) {
+  // Fetch the transaction to validate it exists and verify account
+  const transaction = await db.getTransaction(id);
+  if (!transaction) {
+    throw new Error(`Transaction not found: ${id}`);
+  }
+
+  // Validate that the provided accountId matches the transaction's actual account
+  // This prevents sort order calculations against the wrong account
+  if (transaction.account !== accountId) {
+    throw new Error(
+      `Account mismatch: transaction belongs to account ${transaction.account}, not ${accountId}`,
+    );
+  }
+
+  // Child transactions can be reordered within their parent's children
+  // The db.moveTransaction handles the sibling-scoped reordering for children
+
+  await db.moveTransaction(id, accountId, targetId);
   return {};
 }
 
@@ -129,6 +161,7 @@ app.method('transactions-merge', mutator(undoable(mergeTransactions)));
 app.method('transaction-add', mutator(addTransaction));
 app.method('transaction-update', mutator(updateTransaction));
 app.method('transaction-delete', mutator(deleteTransaction));
+app.method('transaction-move', mutator(undoable(moveTransaction)));
 app.method('transactions-parse-file', mutator(parseTransactionsFile));
 app.method('transactions-export', mutator(exportTransactions));
 app.method('transactions-export-query', mutator(exportTransactionsQuery));
