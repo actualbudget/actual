@@ -41,6 +41,7 @@ import type {
   DbCategoryGroup,
   DbCategoryMapping,
   DbClockMessage,
+  DbDashboardPage,
   DbPayee,
   DbPayeeMapping,
   DbTag,
@@ -856,4 +857,21 @@ export function findTags() {
     `,
     ['%#%'],
   );
+}
+
+export async function moveDashboardPage(
+  id: DbDashboardPage['id'],
+  targetId: DbDashboardPage['id'] | null,
+) {
+  const dashboardPages = await all<Pick<DbDashboardPage, 'id' | 'sort_order'>>(
+    `SELECT id, sort_order FROM dashboard_pages WHERE tombstone = 0 ORDER BY sort_order, name`,
+  );
+
+  const { updates, sort_order } = shoveSortOrders(dashboardPages, targetId);
+  await batchMessages(async () => {
+    for (const info of updates) {
+      update('dashboard_pages', info);
+    }
+    update('dashboard_pages', { id, sort_order });
+  });
 }

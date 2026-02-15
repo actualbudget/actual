@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgPencil1 } from '@actual-app/components/icons/v2';
@@ -8,16 +8,19 @@ import { Input } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { DashboardEntity } from 'loot-core/types/models';
+import type { DashboardPageEntity } from 'loot-core/types/models';
+
+import { useRenameDashboardPageMutation } from '@desktop-client/reports/mutations';
 
 type DashboardHeaderProps = {
-  dashboard: DashboardEntity;
+  dashboard: DashboardPageEntity;
 };
 
 export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
   const { t } = useTranslation();
   const [editingName, setEditingName] = useState(false);
+
+  const renameDashboardPageMutation = useRenameDashboardPageMutation();
 
   const handleSaveName = async (newName: string) => {
     const trimmedName = newName.trim();
@@ -25,11 +28,15 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
       setEditingName(false);
       return;
     }
-    await send('dashboard-rename', {
-      id: dashboard.id,
-      name: trimmedName,
-    });
-    setEditingName(false);
+
+    renameDashboardPageMutation.mutate(
+      { id: dashboard.id, name: trimmedName },
+      {
+        onSuccess: () => {
+          setEditingName(false);
+        },
+      },
+    );
   };
 
   return (
@@ -55,17 +62,6 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
         justifyContent: 'flex-start',
       }}
     >
-      <View
-        style={{
-          fontSize: 25,
-          fontWeight: 500,
-          flexGrow: 0,
-          flexShrink: 0,
-          flexBasis: 'auto',
-        }}
-      >
-        <Trans>Reports</Trans>:
-      </View>
       {editingName ? (
         <InitialFocus>
           <Input

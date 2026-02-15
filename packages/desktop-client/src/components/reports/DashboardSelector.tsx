@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgExpandArrow } from '@actual-app/components/icons/v0';
@@ -8,32 +7,22 @@ import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { DashboardEntity } from 'loot-core/types/models';
+import type { DashboardPageEntity } from 'loot-core/types/models';
 
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 type DashboardSelectorProps = {
-  dashboards: readonly DashboardEntity[];
-  currentDashboard: DashboardEntity;
+  dashboards: readonly DashboardPageEntity[];
+  currentDashboard: DashboardPageEntity;
 };
 
 export function DashboardSelector({
   dashboards,
   currentDashboard,
 }: DashboardSelectorProps) {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const handleAddDashboard = async () => {
-    const defaultName = t('New dashboard');
-    const newId = await send('dashboard-create', { name: defaultName });
-    if (newId) {
-      navigate(`/reports/${newId}`);
-    }
-  };
 
   return (
     <DialogTrigger>
@@ -90,11 +79,7 @@ export function DashboardSelector({
             <Menu
               slot="close"
               onMenuSelect={item => {
-                if (item === 'add-new') {
-                  handleAddDashboard();
-                } else {
-                  navigate(`/reports/${item}`);
-                }
+                navigate(`/reports/${item}`);
                 setMenuOpen(false);
               }}
               items={[
@@ -102,11 +87,6 @@ export function DashboardSelector({
                   name: dashboard.id,
                   text: dashboard.name,
                 })),
-                Menu.line,
-                {
-                  name: 'add-new',
-                  text: t('Add new dashboard'),
-                },
               ]}
             />
           </Dialog>

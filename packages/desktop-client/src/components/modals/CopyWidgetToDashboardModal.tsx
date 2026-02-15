@@ -11,7 +11,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { useDashboardPages } from '@desktop-client/hooks/useDashboard';
+import { useDashboardPages } from '@desktop-client/hooks/useDashboardPages';
 import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type CopyWidgetToDashboardModalProps = Extract<
@@ -23,11 +23,11 @@ export function CopyWidgetToDashboardModal({
   onSelect,
 }: CopyWidgetToDashboardModalProps) {
   const { t } = useTranslation();
-  const { data: dashboard_pages = [] } = useDashboardPages();
+  const { data: dashboardPages = [] } = useDashboardPages();
 
   const items: ComponentProps<typeof Menu<string>>['items'] = useMemo(
-    () => dashboard_pages.map(d => ({ name: d.id, text: d.name })),
-    [dashboard_pages],
+    () => dashboardPages.map(d => ({ name: d.id, text: d.name })),
+    [dashboardPages],
   );
 
   return (

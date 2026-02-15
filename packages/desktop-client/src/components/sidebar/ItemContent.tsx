@@ -3,7 +3,7 @@ import type { ComponentProps, ReactNode } from 'react';
 
 import { Button } from '@actual-app/components/button';
 import type { CSSProperties } from '@actual-app/components/styles';
-import type { View } from '@actual-app/components/view';
+import { View } from '@actual-app/components/view';
 
 import { Link } from '@desktop-client/components/common/Link';
 
@@ -36,9 +36,11 @@ export function ItemContent({
     >
       {children}
     </Button>
-  ) : (
+  ) : to ? (
     <Link variant="internal" to={to} style={style} activeStyle={activeStyle}>
       {children}
     </Link>
+  ) : (
+    <View style={style}>{children}</View>
   );
 }

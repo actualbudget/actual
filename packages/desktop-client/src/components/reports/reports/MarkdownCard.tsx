@@ -15,7 +15,7 @@ import type { MarkdownWidget } from 'loot-core/types/models';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from '@desktop-client/components/reports/constants';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
-import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
+import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import {
   markdownBaseStyles,
   remarkBreaks,
@@ -54,7 +54,7 @@ export function MarkdownCard({
   const [isVisibleTextArea, setIsVisibleTextArea] = useState(false);
 
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useWidgetCopyMenu(onCopy);
+    useDashboardWidgetCopyMenu(onCopy);
 
   return (
     <ReportCard
