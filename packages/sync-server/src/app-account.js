@@ -121,6 +121,15 @@ app.post('/change-password', async (req, res) => {
   const session = await validateSession(req, res);
   if (!session) return;
 
+  if (session.auth_method === 'api_token') {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden-auth-method',
+      details: 'API tokens cannot change passwords',
+    });
+    return;
+  }
+
   const { error } = changePassword(req.body.password);
 
   if (error) {
