@@ -943,16 +943,17 @@ async function processBankSyncDownload(
         );
       }, currentBalance);
       balanceToUse = previousBalance;
-    } else if (
-      acctRow.account_sync_source === 'pluggyai' ||
-      acctRow.account_sync_source === 'enableBanking'
-    ) {
+    } else if (acctRow.account_sync_source === 'pluggyai') {
       const currentBalance = download.startingBalance;
       const previousBalance = transactions.reduce(
         (total, trans) => total - trans.transactionAmount.amount * 100,
         currentBalance,
       );
       balanceToUse = Math.round(previousBalance);
+    } else if (acctRow.account_sync_source === 'enableBanking') {
+      // For Enable Banking, the server already calculates and returns the starting balance
+      // (currentBalance - all transactions), so we use it directly without recalculating
+      balanceToUse = download.startingBalance;
     }
 
     const oldestTransaction = transactions[transactions.length - 1];
