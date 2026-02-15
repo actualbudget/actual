@@ -67,7 +67,7 @@ function Version() {
 export function ManagementApp() {
   const { isNarrowWidth } = useResponsive();
   useMetaThemeColor(
-    isNarrowWidth ? theme.mobileConfigServerViewTheme : undefined,
+    isNarrowWidth ? 'mobileConfigServerViewTheme' : 'pageBackground',
   );
 
   const files = useSelector(state => state.budgetfiles.allFiles);
