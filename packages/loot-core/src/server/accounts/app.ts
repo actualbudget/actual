@@ -40,6 +40,14 @@ import * as link from './link';
 import { getStartingBalancePayee } from './payees';
 import * as bankSync from './sync';
 
+// Shared base type for link account parameters
+type LinkAccountBaseParams = {
+  upgradingId?: AccountEntity['id'];
+  offBudget?: boolean;
+  startingDate?: string;
+  startingBalance?: number;
+};
+
 export type AccountHandlers = {
   'account-update': typeof updateAccount;
   'accounts-get': typeof getAccounts;
@@ -84,8 +92,31 @@ async function updateAccount({
   return {};
 }
 
-async function getAccounts() {
-  return db.getAccounts();
+async function getAccounts(): Promise<AccountEntity[]> {
+  const dbAccounts = await db.getAccounts();
+  return dbAccounts.map(
+    dbAccount =>
+      ({
+        id: dbAccount.id,
+        name: dbAccount.name,
+        offbudget: dbAccount.offbudget,
+        closed: dbAccount.closed,
+        sort_order: dbAccount.sort_order,
+        last_reconciled: dbAccount.last_reconciled ?? null,
+        tombstone: dbAccount.tombstone,
+        account_id: dbAccount.account_id ?? null,
+        bank: dbAccount.bank ?? null,
+        bankName: dbAccount.bankName ?? null,
+        bankId: dbAccount.bankId ?? null,
+        mask: dbAccount.mask ?? null,
+        official_name: dbAccount.official_name ?? null,
+        balance_current: dbAccount.balance_current ?? null,
+        balance_available: dbAccount.balance_available ?? null,
+        balance_limit: dbAccount.balance_limit ?? null,
+        account_sync_source: dbAccount.account_sync_source ?? null,
+        last_sync: dbAccount.last_sync ?? null,
+      }) as AccountEntity,
+  );
 }
 
 async function getAccountBalance({
@@ -133,14 +164,10 @@ async function linkGoCardlessAccount({
   syncSource = 'goCardless',
   startingDate,
   startingBalance,
-}: {
+}: LinkAccountBaseParams & {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
-  upgradingId?: AccountEntity['id'] | undefined;
-  offBudget?: boolean | undefined;
   syncSource?: 'goCardless' | 'enableBanking';
-  startingDate?: string;
-  startingBalance?: number;
 }) {
   let id;
   const institution =
@@ -208,10 +235,10 @@ async function linkSimpleFinAccount({
   externalAccount,
   upgradingId,
   offBudget = false,
-}: {
+  startingDate,
+  startingBalance,
+}: LinkAccountBaseParams & {
   externalAccount: SyncServerSimpleFinAccount;
-  upgradingId?: AccountEntity['id'] | undefined;
-  offBudget?: boolean | undefined;
 }) {
   let id;
 
@@ -264,6 +291,8 @@ async function linkSimpleFinAccount({
     id,
     externalAccount.account_id,
     bank.bank_id,
+    startingDate,
+    startingBalance,
   );
 
   await connection.send('sync-event', {
@@ -278,10 +307,10 @@ async function linkPluggyAiAccount({
   externalAccount,
   upgradingId,
   offBudget = false,
-}: {
+  startingDate,
+  startingBalance,
+}: LinkAccountBaseParams & {
   externalAccount: SyncServerPluggyAiAccount;
-  upgradingId?: AccountEntity['id'] | undefined;
-  offBudget?: boolean | undefined;
 }) {
   let id;
 
@@ -291,7 +320,7 @@ async function linkPluggyAiAccount({
 
   const bank = await link.findOrCreateBank(
     institution,
-    externalAccount.orgDomain ?? externalAccount.orgId,
+    externalAccount.orgDomain ?? externalAccount.orgId ?? 'unknown',
   );
 
   if (upgradingId) {
@@ -334,6 +363,8 @@ async function linkPluggyAiAccount({
     id,
     externalAccount.account_id,
     bank.bank_id,
+    startingDate,
+    startingBalance,
   );
 
   await connection.send('sync-event', {
