@@ -226,22 +226,22 @@ export const apiTokenService: ApiTokenService = {
       return null;
     }
 
-    // Verify the full token against the hash
-    if (!(await verifyToken(token, tokenRow.token_hash))) {
-      return null;
-    }
-
-    // Check if token is enabled
+    // Check if token is enabled (cheap check before expensive hash verification)
     if (!tokenRow.enabled) {
       return null;
     }
 
-    // Check expiration
+    // Check expiration (cheap check before expensive hash verification)
     const now = Math.floor(Date.now() / 1000);
     if (
       tokenRow.expires_at !== TOKEN_EXPIRATION_NEVER &&
       tokenRow.expires_at < now
     ) {
+      return null;
+    }
+
+    // Verify the full token against the hash
+    if (!(await verifyToken(token, tokenRow.token_hash))) {
       return null;
     }
 
