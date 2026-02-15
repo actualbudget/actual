@@ -59,6 +59,14 @@ import APIList from './APIList';
 "mergePayees"
 ]} />
 
+<APIList title="Tags" sections={[
+"Tag",
+"getTags",
+"createTag",
+"updateTag",
+"deleteTag"
+]} />
+
 <APIList title="Rules" sections={[
 "ConditionOrAction",
 "Rule",
@@ -486,6 +494,59 @@ Delete a payee.
 <Method name="mergePayees" args={[{ name: 'targetId', type: 'id' }, { name: 'mergeIds', type: 'id[]' }]} returns="Promise<null>" />
 
 Merge one or more payees into the target payee, retaining the name of the target.
+
+## Tags
+
+#### Tag
+
+<StructType fields={objects.tag} />
+
+#### Methods
+
+#### `getTags`
+
+<Method name="getTags" args={[]} returns="Promise<Tag[]>" />
+
+Get all tags.
+
+#### `createTag`
+
+<Method name="createTag" args={[{ name: 'tag', type: 'Tag' }]} returns="Promise<id>" />
+
+Create a tag. Returns the `id` of the new tag.
+
+#### `updateTag`
+
+<Method name="updateTag" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} returns="Promise<null>" />
+
+Update fields of a tag. `fields` can specify any field described in [`Tag`](#tag).
+
+#### `deleteTag`
+
+<Method name="deleteTag" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
+
+Delete a tag.
+
+#### Examples
+
+```js
+// Create a tag
+await createTag({
+  tag: 'groceries',
+  color: '#ff0000',
+  description: 'Grocery shopping expenses',
+});
+```
+
+```js
+// Get all tags
+let tags = await getTags();
+```
+
+```js
+// Update a tag's color
+await updateTag(id, { color: '#00ff00' });
+```
 
 ## Rules
 

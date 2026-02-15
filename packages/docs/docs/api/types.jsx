@@ -418,6 +418,13 @@ export const objects = {
     },
   ],
 
+  tag: [
+    { name: 'id', type: types.id },
+    { name: 'tag', type: 'string', required: true },
+    { name: 'color', type: 'string' },
+    { name: 'description', type: 'string' },
+  ],
+
   condition: [
     { name: 'field', type: 'string', required: true },
     { name: 'op', type: 'string', required: true },
