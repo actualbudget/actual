@@ -2,11 +2,14 @@
 
 import { Octokit } from '@octokit/rest';
 
+import { buildReleaseNotesFileContent } from './build-file-content.js';
+
 const token = process.env.GITHUB_TOKEN;
 const repo = process.env.GITHUB_REPOSITORY;
 const issueNumber = process.env.GITHUB_EVENT_ISSUE_NUMBER;
 const summaryDataJson = process.env.SUMMARY_DATA;
 const category = process.env.CATEGORY;
+const fileCreationStatus = process.env.FILE_CREATION_STATUS;
 
 if (!token || !repo || !issueNumber || !summaryDataJson || !category) {
   console.log('Missing required environment variables');
@@ -30,11 +33,10 @@ async function commentOnPR() {
       return;
     }
 
-    // Clean category for display
-    const cleanCategory =
-      typeof category === 'string'
-        ? category.replace(/^["']|["']$/g, '')
-        : category;
+    const { cleanCategory, fileContent } = buildReleaseNotesFileContent(
+      summaryData,
+      category,
+    );
 
     // Get PR info for the file URL
     const { data: pr } = await octokit.rest.pulls.get({
@@ -43,35 +45,80 @@ async function commentOnPR() {
       pull_number: issueNumber,
     });
 
+    // Handle case where repo was deleted (pr.head.repo will be null)
+    const headOwner = pr.head.repo?.owner.login || summaryData.author;
+    const headRepo = pr.head.repo?.name || repoName;
     const prBranch = pr.head.ref;
-    const headOwner = pr.head.repo.owner.login;
-    const headRepo = pr.head.repo.name;
-    const fileUrl = `https://github.com/${headOwner}/${headRepo}/blob/${prBranch}/upcoming-release-notes/${summaryData.prNumber}.md`;
+    const fileName = `upcoming-release-notes/${summaryData.prNumber}.md`;
+    const fileUrl = pr.head.repo
+      ? `https://github.com/${headOwner}/${headRepo}/blob/${prBranch}/${fileName}`
+      : null;
+    const fileReference = fileUrl
+      ? `[${fileName}](${fileUrl})`
+      : `\`${fileName}\` (repository unavailable)`;
 
-    const commentBody = [
-      '🤖 **Auto-generated Release Notes**',
-      '',
-      `Hey @${summaryData.author}! I've automatically created a release notes file based on CodeRabbit's analysis:`,
-      '',
-      `**Category:** ${cleanCategory}`,
-      `**Summary:** ${summaryData.summary}`,
-      `**File:** [upcoming-release-notes/${summaryData.prNumber}.md](${fileUrl})`,
-      '',
-      //      'The release notes file has been committed to the repository. You can edit it if needed before merging.',
-      "If you're happy with this release note, you can add it to your pull request. If not, you'll need to add your own before a maintainer can review your change.",
-    ].join('\n');
+    let commentBody = ['🤖 **Auto-generated Release Notes**', ''];
+
+    // Determine message based on file creation status
+    if (
+      fileCreationStatus === 'created' ||
+      fileCreationStatus === 'no_changes'
+    ) {
+      // File was successfully created and committed
+      commentBody = commentBody.concat([
+        `Hey @${summaryData.author}! I've automatically created a release notes file based on CodeRabbit's analysis:`,
+        '',
+        `**Category:** ${cleanCategory}`,
+        `**Summary:** ${summaryData.summary}`,
+        `**File:** ${fileReference}`,
+        '',
+        fileCreationStatus === 'created'
+          ? 'The release notes file has been committed to your branch. You can edit it if needed before merging.'
+          : 'The release notes file was already up to date on your branch.',
+      ]);
+    } else if (fileCreationStatus === 'repo_deleted') {
+      // Source repository was deleted
+      commentBody = commentBody.concat([
+        `Hey @${summaryData.author}! I've generated release notes based on CodeRabbit's analysis.`,
+        '',
+        `Since the source repository has been deleted, I couldn't automatically commit the file. Please create \`${fileName}\` in the base repository with the following content:`,
+        '',
+        '```markdown',
+        fileContent,
+        '```',
+        '',
+        'You can edit the summary if needed before committing.',
+      ]);
+    } else {
+      // Manual creation required (status is 'manual_required' or undefined/fallback)
+      commentBody = commentBody.concat([
+        `Hey @${summaryData.author}! I've generated release notes based on CodeRabbit's analysis.`,
+        '',
+        `I couldn't automatically commit the file to your branch. Please create \`${fileName}\` with the following content:`,
+        '',
+        '```markdown',
+        fileContent,
+        '```',
+        '',
+        'You can edit the summary if needed before committing.',
+      ]);
+    }
 
     await octokit.rest.issues.createComment({
       owner,
       repo: repoName,
       issue_number: issueNumber,
-      body: commentBody,
+      body: commentBody.join('\n'),
     });
 
     console.log('✅ Successfully commented on PR');
   } catch (error) {
     console.log('Error commenting on PR:', error.message);
+    process.exit(1);
   }
 }
 
-commentOnPR();
+commentOnPR().catch(error => {
+  console.log('Unhandled error:', error.message);
+  process.exit(1);
+});

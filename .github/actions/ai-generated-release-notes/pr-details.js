@@ -43,8 +43,17 @@ async function getPRDetails() {
       author: pr.user.login,
       title: pr.title,
       baseBranch: pr.base.ref,
+      headRef: pr.head.ref,
+      headRepoFullName: pr.head.repo?.full_name || null,
+      maintainerCanModify: pr.maintainer_can_modify,
     };
 
+    setOutput('head_ref', pr.head.ref);
+    setOutput('head_repo_full_name', pr.head.repo?.full_name || '');
+    setOutput(
+      'maintainer_can_modify',
+      String(Boolean(pr.maintainer_can_modify)),
+    );
     setOutput('result', JSON.stringify(result));
   } catch (error) {
     console.log('Error getting PR details:', error.message);
