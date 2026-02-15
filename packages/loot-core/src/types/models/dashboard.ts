@@ -44,6 +44,7 @@ export type NetWorthWidget = AbstractWidget<
     timeFrame?: TimeFrame;
     interval?: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
     mode?: 'trend' | 'stacked';
+    showProjection?: boolean;
   } | null
 >;
 

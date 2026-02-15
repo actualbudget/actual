@@ -12,6 +12,7 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
+  Line,
   Tooltip,
   XAxis,
   YAxis,
@@ -39,7 +40,8 @@ type NetWorthDataPoint = {
   change: string;
   networth: string;
   date: string;
-} & Record<string, string | number>;
+  isProjection?: boolean;
+} & Record<string, string | number | boolean>;
 
 type TrendTooltipProps = TooltipContentProps<number, string> & {
   style?: CSSProperties;
@@ -49,6 +51,7 @@ function TrendTooltip({ active, payload, style }: TrendTooltipProps) {
   const { t } = useTranslation();
 
   if (active && payload && payload.length) {
+    const isProjection = Boolean(payload[0].payload.isProjection);
     return (
       <div
         className={css([
@@ -66,7 +69,10 @@ function TrendTooltip({ active, payload, style }: TrendTooltipProps) {
       >
         <div>
           <div style={{ marginBottom: 10 }}>
-            <strong>{payload[0].payload.date}</strong>
+            <strong>
+              {payload[0].payload.date}
+              {isProjection ? ` ${t('(projected)')}` : ''}
+            </strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
             <AlignedText
@@ -333,6 +339,28 @@ export function NetWorthGraph({
       .map(point => point.x);
   }, [interval, graphData.data]);
 
+  const trendData = useMemo(() => {
+    const projectionStartIndex = graphData.data.findIndex(point => {
+      return point.isProjection;
+    });
+    const projectionLineStartIndex = Math.max(0, projectionStartIndex - 1);
+
+    return graphData.data.map((point, index) => {
+      const hasProjection = projectionStartIndex !== -1;
+
+      return {
+        ...point,
+        // Solid line ends at the last non-projected month.
+        yHistorical:
+          hasProjection && index >= projectionStartIndex ? null : point.y,
+        // Dotted series starts one point before the first projected month
+        // so the connection to the first projected point is visible.
+        yProjection:
+          hasProjection && index >= projectionLineStartIndex ? point.y : null,
+      };
+    });
+  }, [graphData.data]);
+
   return (
     <Container
       style={{
@@ -357,7 +385,7 @@ export function NetWorthGraph({
               responsive
               width={width}
               height={height}
-              data={graphData.data}
+              data={mode === 'trend' ? trendData : graphData.data}
               margin={{
                 top: 0,
                 right: 0,
@@ -432,18 +460,31 @@ export function NetWorthGraph({
               </defs>
 
               {mode === 'trend' ? (
-                <Area
-                  type={interpolationType}
-                  dot={false}
-                  activeDot={false}
-                  {...animationProps}
-                  dataKey="y"
-                  stroke={theme.reportsChartFill}
-                  strokeWidth={2}
-                  fill={`url(#${gradientId})`}
-                  fillOpacity={1}
-                  connectNulls
-                />
+                <>
+                  <Line
+                    type={interpolationType}
+                    dot={false}
+                    activeDot={false}
+                    {...animationProps}
+                    dataKey="yProjection"
+                    stroke={theme.reportsChartFill}
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    connectNulls
+                  />
+                  <Area
+                    type={interpolationType}
+                    dot={false}
+                    activeDot={false}
+                    {...animationProps}
+                    dataKey="yHistorical"
+                    stroke={theme.reportsChartFill}
+                    strokeWidth={2}
+                    fill={`url(#${gradientId})`}
+                    fillOpacity={1}
+                    connectNulls
+                  />
+                </>
               ) : (
                 sortedAccounts.map(account => (
                   <Area

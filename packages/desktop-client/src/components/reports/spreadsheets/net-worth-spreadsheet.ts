@@ -9,6 +9,7 @@ import type {
   AccountEntity,
   RuleConditionEntity,
 } from 'loot-core/types/models';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 import type { FormatType } from '@desktop-client/hooks/useFormat';
@@ -20,6 +21,61 @@ type Balance = {
   amount: number;
 };
 
+type NetWorthData = ReturnType<typeof recalculate>;
+type BudgetMonthCell = { name: string; value: string | number | boolean };
+
+function getDisplayFormat(interval: string) {
+  return ReportOptions.intervalFormat.get(interval) ?? "MMM ''yy";
+}
+
+function getTooltipFormat(interval: string) {
+  if (interval === 'Daily') {
+    return 'MMMM d, yyyy';
+  }
+  if (interval === 'Weekly') {
+    return 'MMM d, yyyy';
+  }
+  if (interval === 'Yearly') {
+    return 'yyyy';
+  }
+  return 'MMMM yyyy';
+}
+
+function buildGraphPoint({
+  interval,
+  locale,
+  format,
+  month,
+  total,
+  change,
+  isProjection,
+}: {
+  interval: string;
+  locale: Locale;
+  format: (value: unknown, type?: FormatType) => string;
+  month: string;
+  total: number;
+  change: number;
+  isProjection?: boolean;
+}) {
+  const displayFormat = getDisplayFormat(interval);
+  const tooltipFormat = getTooltipFormat(interval);
+  const x = d.parseISO(month + '-01');
+  const assetsValue = total >= 0 ? total : 0;
+  const debtValue = total < 0 ? -total : 0;
+
+  return {
+    x: d.format(x, displayFormat, { locale }),
+    y: total,
+    assets: format(assetsValue, 'financial'),
+    debt: `-${format(debtValue, 'financial')}`,
+    change: format(change, 'financial'),
+    networth: format(total, 'financial'),
+    date: d.format(x, tooltipFormat, { locale }),
+    isProjection,
+  };
+}
+
 export function createSpreadsheet(
   start: string,
   end: string,
@@ -30,10 +86,12 @@ export function createSpreadsheet(
   interval: string = 'Monthly',
   firstDayOfWeekIdx: string = '0',
   format: (value: unknown, type?: FormatType) => string,
+  showProjection: boolean = false,
+  budgetType: SyncedPrefs['budgetType'] = 'envelope',
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: ReturnType<typeof recalculate>) => void,
+    setData: (data: NetWorthData) => void,
   ) => {
     const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
@@ -132,21 +190,38 @@ export function createSpreadsheet(
           name: acct.name,
           balances: processedBalances,
           starting,
+          hasCurrentMonthTransactions: balances.some(
+            b => b.date === monthUtils.currentMonth(),
+          ),
         };
       }),
     );
 
-    setData(
-      recalculate(
-        data,
+    let results = recalculate(
+      data,
+      startDate,
+      endDate,
+      locale,
+      interval,
+      firstDayOfWeekIdx,
+      format,
+    );
+
+    if (showProjection && interval === 'Monthly') {
+      results = await applyProjection({
+        data: results,
+        hasCurrentMonthTransactions: data.some(
+          account => account.hasCurrentMonthTransactions,
+        ),
         startDate,
         endDate,
         locale,
-        interval,
-        firstDayOfWeekIdx,
         format,
-      ),
-    );
+        budgetType,
+      });
+    }
+
+    setData(results);
   };
 }
 
@@ -202,6 +277,7 @@ function recalculate(
       change: string;
       networth: string;
       date: string;
+      isProjection?: boolean;
     }>
   >((arr, intervalItem, idx) => {
     let debt = 0;
@@ -243,18 +319,8 @@ function recalculate(
     }
     endNetWorth = total;
 
-    // Use standardized format from ReportOptions
-    const displayFormat =
-      ReportOptions.intervalFormat.get(interval) ?? "MMM ''yy";
-
-    const tooltipFormat =
-      interval === 'Daily'
-        ? 'MMMM d, yyyy'
-        : interval === 'Weekly'
-          ? 'MMM d, yyyy'
-          : interval === 'Yearly'
-            ? 'yyyy'
-            : 'MMMM yyyy';
+    const displayFormat = getDisplayFormat(interval);
+    const tooltipFormat = getTooltipFormat(interval);
 
     const graphPoint = {
       x: d.format(x, displayFormat, { locale }),
@@ -298,5 +364,153 @@ function recalculate(
     accounts: data
       .filter((_, i) => hasBalance[i])
       .map(d => ({ id: d.id, name: d.name })),
+  };
+}
+
+async function applyProjection({
+  data,
+  hasCurrentMonthTransactions,
+  startDate,
+  endDate,
+  locale,
+  format,
+  budgetType,
+}: {
+  data: NetWorthData;
+  hasCurrentMonthTransactions: boolean;
+  startDate: string;
+  endDate: string;
+  locale: Locale;
+  format: (value: unknown, type?: FormatType) => string;
+  budgetType: SyncedPrefs['budgetType'];
+}) {
+  const currentMonth = monthUtils.currentMonth();
+  const startMonth = monthUtils.getMonth(startDate);
+  const endMonth = monthUtils.getMonth(endDate);
+
+  if (
+    monthUtils.isBefore(currentMonth, startMonth) ||
+    monthUtils.isAfter(currentMonth, endMonth)
+  ) {
+    return data;
+  }
+
+  const intervals = monthUtils.rangeInclusive(startMonth, endMonth);
+  const currentIndex = intervals.indexOf(currentMonth);
+  if (currentIndex === -1) {
+    return data;
+  }
+
+  const currentPoint = data.graphData.data[currentIndex];
+  if (!currentPoint) {
+    return data;
+  }
+
+  const budgetMethod =
+    budgetType === 'tracking'
+      ? 'tracking-budget-month'
+      : 'envelope-budget-month';
+
+  const getBudgetValue = (values: BudgetMonthCell[], name: string) => {
+    const value = values.find(cell => cell.name.endsWith(name))?.value;
+    return typeof value === 'number' ? value : 0;
+  };
+
+  const calculateNetChange = (values: BudgetMonthCell[]) => {
+    const totalBudgeted = getBudgetValue(values, 'total-budgeted');
+    const totalBudgetIncome =
+      budgetType === 'tracking'
+        ? getBudgetValue(values, 'total-budget-income')
+        : 0;
+
+    return {
+      totalBudgeted,
+      totalBudgetIncome,
+      netChange:
+        budgetType === 'tracking'
+          ? totalBudgetIncome - totalBudgeted
+          : totalBudgeted,
+    };
+  };
+
+  const dataWithProjection = [...data.graphData.data];
+  let lastTotal = currentPoint.y;
+
+  if (!hasCurrentMonthTransactions) {
+    const currentMonthBudgetData = await send(budgetMethod, {
+      month: currentMonth,
+    });
+    const previousTotal =
+      currentIndex > 0
+        ? data.graphData.data[currentIndex - 1].y
+        : currentPoint.y;
+    const { netChange } = calculateNetChange(currentMonthBudgetData);
+    const projectedCurrentTotal = previousTotal + netChange;
+
+    dataWithProjection[currentIndex] = buildGraphPoint({
+      interval: 'Monthly',
+      locale,
+      format,
+      month: currentMonth,
+      total: projectedCurrentTotal,
+      change: projectedCurrentTotal - previousTotal,
+      isProjection: true,
+    });
+    lastTotal = projectedCurrentTotal;
+  }
+
+  const { end: budgetEnd } = await send('get-budget-bounds');
+  const projectedPoints = [];
+  let month = monthUtils.addMonths(currentMonth, 1);
+
+  while (!monthUtils.isAfter(month, budgetEnd)) {
+    const monthData = await send(budgetMethod, { month });
+    const { totalBudgeted, totalBudgetIncome, netChange } =
+      calculateNetChange(monthData);
+
+    if (totalBudgetIncome === 0 && totalBudgeted === 0) {
+      break;
+    }
+
+    const total = lastTotal + netChange;
+
+    projectedPoints.push(
+      buildGraphPoint({
+        interval: 'Monthly',
+        locale,
+        format,
+        month,
+        total,
+        change: total - lastTotal,
+        isProjection: true,
+      }),
+    );
+
+    lastTotal = total;
+    month = monthUtils.addMonths(month, 1);
+  }
+
+  if (projectedPoints.length === 0) {
+    return {
+      ...data,
+      graphData: {
+        ...data.graphData,
+        data: dataWithProjection,
+      },
+    };
+  }
+
+  const lastProjectionMonth = monthUtils.addMonths(month, -1);
+  const projectedEndDate = monthUtils.lastDayOfMonth(lastProjectionMonth);
+
+  return {
+    ...data,
+    graphData: {
+      ...data.graphData,
+      end: projectedEndDate,
+      hasNegative:
+        data.graphData.hasNegative || projectedPoints.some(p => p.y < 0),
+      data: [...dataWithProjection, ...projectedPoints],
+    },
   };
 }

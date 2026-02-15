@@ -25,6 +25,7 @@ import type { NetWorthWidget, TimeFrame } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { FinancialText } from '@desktop-client/components/FinancialText';
+import { Checkbox } from '@desktop-client/components/forms';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,
@@ -39,6 +40,7 @@ import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndi
 import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
+import { useNetWorthProjectionRefresh } from '@desktop-client/components/reports/useNetWorthProjectionRefresh';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
@@ -112,6 +114,9 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [graphMode, setGraphMode] = useState<'trend' | 'stacked'>(
     widget?.meta?.mode || 'trend',
   );
+  const [showProjection, setShowProjection] = useState(
+    widget?.meta?.showProjection ?? false,
+  );
   // Combined setter: set mode and update interval (unless interval was set in widget meta)
   const setModeAndInterval = useCallback(
     (newMode: TimeFrame['mode']) => {
@@ -127,21 +132,18 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
-  const reportParams = useMemo(
-    () =>
-      netWorthSpreadsheet(
-        start,
-        end,
-        accounts,
-        conditions,
-        conditionsOp,
-        locale,
-        interval,
-        firstDayOfWeekIdx,
-        format,
-      ),
-    [
+  const isProjectionEnabled =
+    showProjection && graphMode === 'trend' && interval === 'Monthly';
+  const projectionRevision = useNetWorthProjectionRefresh({
+    budgetType,
+    enabled: isProjectionEnabled,
+  });
+
+  const reportParams = useMemo(() => {
+    void projectionRevision;
+    return netWorthSpreadsheet(
       start,
       end,
       accounts,
@@ -151,8 +153,23 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
       interval,
       firstDayOfWeekIdx,
       format,
-    ],
-  );
+      isProjectionEnabled,
+      budgetType,
+    );
+  }, [
+    start,
+    end,
+    accounts,
+    conditions,
+    conditionsOp,
+    locale,
+    interval,
+    firstDayOfWeekIdx,
+    format,
+    isProjectionEnabled,
+    budgetType,
+    projectionRevision,
+  ]);
   const data = useReport('net_worth', reportParams);
   useEffect(() => {
     async function run() {
@@ -238,6 +255,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         conditionsOp,
         interval,
         mode: graphMode,
+        showProjection,
         timeFrame: {
           start,
           end,
@@ -326,6 +344,26 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
           <>
             <IntervalSelector interval={interval} onChange={setInterval} />
             <ModeSelector mode={graphMode} onChange={setGraphMode} />
+            {graphMode === 'trend' && interval === 'Monthly' && (
+              <label
+                htmlFor="net-worth-projection"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  marginLeft: 8,
+                }}
+              >
+                <Checkbox
+                  id="net-worth-projection"
+                  checked={showProjection}
+                  onChange={event => setShowProjection(event.target.checked)}
+                  style={{ marginRight: 6 }}
+                />
+                <Trans>Show projection</Trans>
+              </label>
+            )}
           </>
         }
       >
