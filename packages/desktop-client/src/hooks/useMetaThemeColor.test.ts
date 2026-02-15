@@ -77,7 +77,9 @@ describe('useMetaThemeColor', () => {
 
       renderHook(() => useMetaThemeColor('var(--color-mobileViewTheme)'));
 
-      expect(getComputedStyleSpy).toHaveBeenCalledWith(document.documentElement);
+      expect(getComputedStyleSpy).toHaveBeenCalledWith(
+        document.documentElement,
+      );
       expect(getThemeColorMeta()).toBe('#fedcba');
       expect(document.body.style.backgroundColor).toBe('rgb(254, 220, 186)');
     });
