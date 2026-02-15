@@ -175,6 +175,11 @@ Use `oauth2` for providers like GitHub that don't fully support OpenID discovery
   - `"openid-provider"` (tokens follow the expiration time from the OpenID provider)
   - A numeric value in seconds (e.g., `3600` for 1 hour)
 
+#### `ACTUAL_USER_CREATION_MODE`
+
+- **Purpose:** Users must be created manually with matching usernames in Actual before they are able to authenticate with OpenID/OAuth2. When set to `login`, users authenticating with OpenID/OAuth2 for the first time will be created in Actual automatically.
+  **Example Value:** `manual` or `login` (default is `manual`)
+
 :::tip
 Configuring the OpenID provider from options supports discovery; otherwise, use [file configuration](oauth-auth#config-using-configuration-file)
 :::
