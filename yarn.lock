@@ -5279,6 +5279,48 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oxlint-tsgolint/darwin-arm64@npm:0.13.0":
+  version: 0.13.0
+  resolution: "@oxlint-tsgolint/darwin-arm64@npm:0.13.0"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@oxlint-tsgolint/darwin-x64@npm:0.13.0":
+  version: 0.13.0
+  resolution: "@oxlint-tsgolint/darwin-x64@npm:0.13.0"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@oxlint-tsgolint/linux-arm64@npm:0.13.0":
+  version: 0.13.0
+  resolution: "@oxlint-tsgolint/linux-arm64@npm:0.13.0"
+  conditions: os=linux & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@oxlint-tsgolint/linux-x64@npm:0.13.0":
+  version: 0.13.0
+  resolution: "@oxlint-tsgolint/linux-x64@npm:0.13.0"
+  conditions: os=linux & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@oxlint-tsgolint/win32-arm64@npm:0.13.0":
+  version: 0.13.0
+  resolution: "@oxlint-tsgolint/win32-arm64@npm:0.13.0"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@oxlint-tsgolint/win32-x64@npm:0.13.0":
+  version: 0.13.0
+  resolution: "@oxlint-tsgolint/win32-x64@npm:0.13.0"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
 "@oxlint/binding-android-arm-eabi@npm:1.47.0":
   version: 1.47.0
   resolution: "@oxlint/binding-android-arm-eabi@npm:1.47.0"
@@ -10587,6 +10629,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     oxfmt: "npm:^0.32.0"
     oxlint: "npm:^1.47.0"
+    oxlint-tsgolint: "npm:^0.13.0"
     p-limit: "npm:^7.2.0"
     prompts: "npm:^2.4.2"
     source-map-support: "npm:^0.5.21"
@@ -21698,6 +21741,35 @@ __metadata:
   bin:
     oxfmt: bin/oxfmt
   checksum: 10/0ace6d6512056982ea94aeb6c199eeba0f74488fbe9dcba723e1ae8666f66034fb88c29c2fca7bd197aef2e2fefa97652ef5d7e86558510019fd7c78eea8b0e3
+  languageName: node
+  linkType: hard
+
+"oxlint-tsgolint@npm:^0.13.0":
+  version: 0.13.0
+  resolution: "oxlint-tsgolint@npm:0.13.0"
+  dependencies:
+    "@oxlint-tsgolint/darwin-arm64": "npm:0.13.0"
+    "@oxlint-tsgolint/darwin-x64": "npm:0.13.0"
+    "@oxlint-tsgolint/linux-arm64": "npm:0.13.0"
+    "@oxlint-tsgolint/linux-x64": "npm:0.13.0"
+    "@oxlint-tsgolint/win32-arm64": "npm:0.13.0"
+    "@oxlint-tsgolint/win32-x64": "npm:0.13.0"
+  dependenciesMeta:
+    "@oxlint-tsgolint/darwin-arm64":
+      optional: true
+    "@oxlint-tsgolint/darwin-x64":
+      optional: true
+    "@oxlint-tsgolint/linux-arm64":
+      optional: true
+    "@oxlint-tsgolint/linux-x64":
+      optional: true
+    "@oxlint-tsgolint/win32-arm64":
+      optional: true
+    "@oxlint-tsgolint/win32-x64":
+      optional: true
+  bin:
+    tsgolint: bin/tsgolint.js
+  checksum: 10/f5187ab239a201c2578c378e194ee074b37c2c9232d48d50b8a6d17a17016cd140aa9e1e35822e70f9ad31f8bf371fcf32513cfdda74bb996ef745d5fdda7048
   languageName: node
   linkType: hard
 
