@@ -276,7 +276,7 @@ export async function upload() {
   if (encryptKeyId) {
     let encrypted;
     try {
-      encrypted = encryption.encrypt(zipContent, encryptKeyId);
+      encrypted = await encryption.encrypt(zipContent, encryptKeyId);
     } catch (e) {
       throw FileUploadError('encrypt-failure', {
         isMissingKey: e.message === 'missing-key',
@@ -455,7 +455,7 @@ export async function download(cloudFileId) {
   // in, which is done in a previous step
   if (fileData.encryptMeta) {
     try {
-      buffer = encryption.decrypt(buffer, fileData.encryptMeta);
+      buffer = await encryption.decrypt(buffer, fileData.encryptMeta);
     } catch (e) {
       throw FileDownloadError('decrypt-failure', {
         isMissingKey: e.message === 'missing-key',

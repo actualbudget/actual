@@ -258,7 +258,7 @@ async function closeBudget() {
   sheet.unloadSpreadsheet();
 
   clearFullSyncTimeout();
-  mainApp.stopServices();
+  await mainApp.stopServices();
 
   db.closeDatabase();
 

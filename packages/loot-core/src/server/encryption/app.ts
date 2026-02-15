@@ -105,10 +105,10 @@ async function keyTest({
   } = JSON.parse(originalTest);
 
   const key = await encryption.createKey({ id, password, salt });
-  void encryption.loadKey(key);
+  await encryption.loadKey(key);
 
   try {
-    void encryption.decrypt(Buffer.from(test.value, 'base64'), test.meta);
+    await encryption.decrypt(Buffer.from(test.value, 'base64'), test.meta);
   } catch (e) {
     logger.log(e);
 
