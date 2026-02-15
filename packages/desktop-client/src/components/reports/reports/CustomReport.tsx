@@ -64,7 +64,6 @@ import {
 } from '@desktop-client/components/reports/util';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
@@ -120,35 +119,11 @@ function useSelectedCategories(
   }, [existingCategoryCondition, categories]);
 }
 
-function validateReportBalanceType(
-  balanceType: CustomReportEntity['balanceType'],
-  showBudgetedType: boolean,
-): CustomReportEntity['balanceType'] {
-  if (!showBudgetedType && balanceType === 'Budgeted') {
-    return 'Payment';
-  }
-  return balanceType;
-}
-
-function validateReport(
-  input: CustomReportEntity,
-  showBudgetedType: boolean,
-): CustomReportEntity {
-  const validatedBalanceType = validateReportBalanceType(
-    input.balanceType,
-    showBudgetedType,
-  );
-  return validatedBalanceType === input.balanceType
-    ? input
-    : { ...input, balanceType: validatedBalanceType };
-}
-
 export function CustomReport() {
   const params = useParams();
   const { data: report, isPending } = useCustomReport(params.id);
-  const showBudgetedTypeFlag = useFeatureFlag('budgetedAmountsInReport');
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
-  const showBudgetedType = showBudgetedTypeFlag && budgetType !== 'tracking';
+  const showBudgetedType = budgetType !== 'tracking';
 
   if (isPending) {
     return <LoadingIndicator />;
@@ -212,13 +187,10 @@ function CustomReportInner({
     : {};
   const combine = initialReport ?? defaultReport;
 
-  const loadReport: CustomReportEntity = validateReport(
-    {
-      ...combine,
-      ...session,
-    },
-    showBudgetedType,
-  );
+  const loadReport: CustomReportEntity = {
+    ...combine,
+    ...session,
+  };
 
   const [allIntervals, setAllIntervals] = useState<
     Array<{
@@ -763,29 +735,27 @@ function CustomReportInner({
   };
 
   const setReportData = (input: CustomReportEntity) => {
-    const validatedInput = validateReport(input, showBudgetedType);
-
-    setStartDate(validatedInput.startDate);
-    setEndDate(validatedInput.endDate);
-    setIsDateStatic(validatedInput.isDateStatic);
-    setDateRange(validatedInput.dateRange);
-    setMode(validatedInput.mode);
-    setGroupBy(validatedInput.groupBy);
-    setInterval(validatedInput.interval);
-    setBalanceType(validatedInput.balanceType);
-    setSortBy(validatedInput.sortBy);
-    setShowEmpty(validatedInput.showEmpty);
-    setShowOffBudget(validatedInput.showOffBudget);
-    setShowHiddenCategories(validatedInput.showHiddenCategories);
-    setIncludeCurrentInterval(validatedInput.includeCurrentInterval);
-    setShowUncategorized(validatedInput.showUncategorized);
-    setTrimIntervals(validatedInput.trimIntervals);
-    setGraphType(validatedInput.graphType);
+    setStartDate(input.startDate);
+    setEndDate(input.endDate);
+    setIsDateStatic(input.isDateStatic);
+    setDateRange(input.dateRange);
+    setMode(input.mode);
+    setGroupBy(input.groupBy);
+    setInterval(input.interval);
+    setBalanceType(input.balanceType);
+    setSortBy(input.sortBy);
+    setShowEmpty(input.showEmpty);
+    setShowOffBudget(input.showOffBudget);
+    setShowHiddenCategories(input.showHiddenCategories);
+    setIncludeCurrentInterval(input.includeCurrentInterval);
+    setShowUncategorized(input.showUncategorized);
+    setTrimIntervals(input.trimIntervals);
+    setGraphType(input.graphType);
     onApplyFilter(null);
-    (validatedInput.conditions || []).forEach(condition => {
+    (input.conditions || []).forEach(condition => {
       onApplyFilter(condition);
     });
-    onConditionsOpChange(validatedInput.conditionsOp);
+    onConditionsOpChange(input.conditionsOp);
   };
 
   const onReportChange = (
@@ -817,7 +787,7 @@ function CustomReportInner({
         sessionStorage.clear();
         setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
-        setReport(validateReport(params.savedReport, showBudgetedType));
+        setReport(params.savedReport);
 
         if (params.savedReport.id !== initialReport?.id) {
           navigate(`/reports/custom/${params.savedReport.id}`);
@@ -846,10 +816,7 @@ function CustomReportInner({
         break;
       case 'choose': {
         sessionStorage.clear();
-        const newReport = validateReport(
-          params.savedReport || report,
-          showBudgetedType,
-        );
+        const newReport = params.savedReport || report;
         setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReport(newReport);
