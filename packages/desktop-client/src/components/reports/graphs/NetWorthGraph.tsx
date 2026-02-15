@@ -387,7 +387,7 @@ export function NetWorthGraph({
               />
               <YAxis
                 dataKey={mode === 'trend' ? 'y' : undefined}
-                domain={mode === 'trend' ? ['auto', 'auto'] : undefined}
+                domain={['auto', 'auto']}
                 hide={compact}
                 tickFormatter={tickFormatter}
                 tick={{ fill: theme.pageText }}
