@@ -618,7 +618,7 @@ export class CategoryTemplateContext {
       date = currentMonth.length === 7 ? currentMonth + '-01' : currentMonth;
     }
 
-    // Normalize YYYY-MM → YYYY-MM-01 for day/week logic
+    // Normalize YYYY-MM to YYYY-MM-01 for day/week logic
     if (date.length === 7) {
       date = date + '-01';
     }
@@ -645,7 +645,7 @@ export class CategoryTemplateContext {
       date = dateShiftFunction(date, numPeriods);
     }
 
-    // Respect "until"
+    // Respect until
     let until = template.until;
     if (until) {
       if (until.length === 7) {
@@ -653,7 +653,7 @@ export class CategoryTemplateContext {
       }
     }
 
-    // If entire period is already after until → nothing
+    // If entire period is already after until do nothing
     if (until && currentMonth > until.substring(0, 7)) {
       return 0;
     }
