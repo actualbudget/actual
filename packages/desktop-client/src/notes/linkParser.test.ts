@@ -108,5 +108,93 @@ describe('linkParser', () => {
         expect(lastSegment).toEqual({ type: 'text', content: ')' });
       });
     });
+
+    describe('file path detection', () => {
+      describe('Unix paths', () => {
+        it('should detect multi-segment absolute paths', () => {
+          const result = parseNotes('Check /home/user/file.txt for details');
+          const linkSegment = result.find(s => s.type === 'link');
+          expect(linkSegment).toEqual({
+            type: 'link',
+            content: '/home/user/file.txt',
+            displayText: '/home/user/file.txt',
+            url: '/home/user/file.txt',
+            isFilePath: true,
+          });
+        });
+
+        it('should detect two-segment paths', () => {
+          const result = parseNotes('See /etc/nginx.conf');
+          const linkSegment = result.find(s => s.type === 'link');
+          expect(linkSegment).toEqual({
+            type: 'link',
+            content: '/etc/nginx.conf',
+            displayText: '/etc/nginx.conf',
+            url: '/etc/nginx.conf',
+            isFilePath: true,
+          });
+        });
+
+        it('should NOT detect single-segment paths', () => {
+          const result = parseNotes('Navigate to /transaction page');
+          const linkSegments = result.filter(s => s.type === 'link');
+          expect(linkSegments).toHaveLength(0);
+        });
+
+        it('should handle paths with trailing slashes', () => {
+          const result = parseNotes('Look in /usr/bin/ directory');
+          const linkSegment = result.find(s => s.type === 'link');
+          expect(linkSegment).toEqual({
+            type: 'link',
+            content: '/usr/bin/',
+            displayText: '/usr/bin/',
+            url: '/usr/bin/',
+            isFilePath: true,
+          });
+        });
+
+        it('should detect deep nested paths', () => {
+          const result = parseNotes('File at /var/log/nginx/access.log');
+          const linkSegment = result.find(s => s.type === 'link');
+          expect(linkSegment).toEqual({
+            type: 'link',
+            content: '/var/log/nginx/access.log',
+            displayText: '/var/log/nginx/access.log',
+            url: '/var/log/nginx/access.log',
+            isFilePath: true,
+          });
+        });
+
+        it('should NOT match paths with spaces', () => {
+          const result = parseNotes('Not a path: /this has spaces/file');
+          const linkSegments = result.filter(s => s.type === 'link');
+          expect(linkSegments).toHaveLength(0);
+        });
+
+        it('should detect single-segment paths with trailing slash', () => {
+          const result = parseNotes('Navigate to /transaction/ page');
+          const linkSegment = result.find(s => s.type === 'link');
+          expect(linkSegment).toEqual({
+            type: 'link',
+            content: '/transaction/',
+            displayText: '/transaction/',
+            url: '/transaction/',
+            isFilePath: true,
+          });
+        });
+
+        it('should detect paths with dashes and underscores', () => {
+          const result = parseNotes('See /opt/my-app/config_file.yml');
+          const linkSegment = result.find(s => s.type === 'link');
+          expect(linkSegment).toEqual({
+            type: 'link',
+            content: '/opt/my-app/config_file.yml',
+            displayText: '/opt/my-app/config_file.yml',
+            url: '/opt/my-app/config_file.yml',
+            isFilePath: true,
+          });
+        });
+      });
+    });
   });
 });
