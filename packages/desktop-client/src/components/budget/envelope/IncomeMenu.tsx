@@ -6,6 +6,7 @@ import type { CategoryEntity } from 'loot-core/types/models';
 
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type IncomeMenuProps = {
@@ -24,6 +25,7 @@ export function IncomeMenu({
   onClose,
 }: IncomeMenuProps) {
   const { t } = useTranslation();
+  const isImprovedAutoHoldEnabled = useFeatureFlag('improvedAutoHold');
   const carryover = useEnvelopeSheetValue(
     envelopeBudget.catCarryover(categoryId),
   );
@@ -49,10 +51,16 @@ export function IncomeMenu({
           }
         }}
         items={[
-          {
-            name: 'carryover',
-            text: carryover ? t('Disable auto hold') : t('Enable auto hold'),
-          },
+          ...(!isImprovedAutoHoldEnabled
+            ? [
+                {
+                  name: 'carryover',
+                  text: carryover
+                    ? t('Disable auto hold')
+                    : t('Enable auto hold'),
+                },
+              ]
+            : []),
           {
             name: 'view',
             text: t('View transactions'),

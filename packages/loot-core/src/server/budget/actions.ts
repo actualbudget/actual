@@ -28,6 +28,83 @@ export async function getSheetBoolean(
   return typeof node.value === 'boolean' ? node.value : false;
 }
 
+function isFutureMonth(month: string): boolean {
+  return monthUtils.isAfter(month, monthUtils.currentMonth());
+}
+
+function isImprovedAutoHoldEnabled(): boolean {
+  const pref = db.firstSync<Pick<db.DbPreference, 'value'>>(
+    `SELECT value FROM preferences WHERE id = ?`,
+    ['flags.improvedAutoHold'],
+  );
+  return pref?.value === 'true';
+}
+
+async function getTotalBudgetsAfterMonth(afterMonth: string): Promise<number> {
+  const { createdMonths } = sheet.get().meta();
+
+  if (!createdMonths || createdMonths.size === 0) {
+    return 0;
+  }
+
+  const futureMonths = Array.from(createdMonths).filter(month =>
+    monthUtils.isAfter(month, afterMonth),
+  );
+
+  if (futureMonths.length === 0) {
+    return 0;
+  }
+
+  const dbMonths = futureMonths.map(m => dbMonth(m));
+  const placeholders = dbMonths.map(() => '?').join(',');
+
+  const result = await db.first<{ total: number }>(
+    `SELECT COALESCE(SUM(b.amount), 0) as total
+     FROM zero_budgets b
+     LEFT JOIN categories c ON b.category = c.id
+     LEFT JOIN category_groups g ON c.cat_group = g.id
+     WHERE b.month IN (${placeholders})
+       AND c.is_income = 0
+       AND c.tombstone = 0`,
+    dbMonths,
+  );
+
+  return result?.total || 0;
+}
+
+export async function applyFutureBudgetHold(
+  futureMonth: string,
+): Promise<void> {
+  if (isReflectBudget() || !isFutureMonth(futureMonth)) {
+    return;
+  }
+
+  const currentMonth = monthUtils.currentMonth();
+
+  const currentSheetName = monthUtils.sheetForMonth(currentMonth);
+  const availableFunds = await getSheetValue(
+    currentSheetName,
+    'available-funds',
+  );
+  const currentBuffered = await getSheetValue(currentSheetName, 'buffered');
+  const totalBudgeted = await getSheetValue(currentSheetName, 'total-budgeted');
+
+  // Available to hold = availableFunds + currentBuffered + totalBudgeted
+  // (i.e., what would be to-budget if buffered was 0)
+  const maxAvailable = availableFunds + currentBuffered + totalBudgeted;
+
+  // Set buffer for all months from current to the month before the future month
+  const lastHoldMonth = monthUtils.prevMonth(futureMonth);
+  const months = monthUtils.rangeInclusive(currentMonth, lastHoldMonth);
+
+  // Each month's buffer = sum of budgets for months AFTER that month
+  for (const month of months) {
+    const budgetsAfterMonth = await getTotalBudgetsAfterMonth(month);
+    const targetBuffer = Math.max(0, Math.min(budgetsAfterMonth, maxAvailable));
+    await setBuffer(month, targetBuffer);
+  }
+}
+
 // We want to only allow the positive movement of money back and
 // forth. buffered should never be allowed to go into the negative,
 // and you shouldn't be allowed to pull non-existent money from
@@ -128,8 +205,13 @@ export function setBudget({
   month: string;
   amount: unknown;
 }): Promise<void> {
-  amount = safeNumber(typeof amount === 'number' ? amount : 0);
+  const numericAmount = safeNumber(typeof amount === 'number' ? amount : 0);
   const table = getBudgetTable();
+
+  const categoryInfo = db.firstSync<Pick<db.DbViewCategory, 'is_income'>>(
+    'SELECT is_income FROM v_categories WHERE id = ?',
+    [category],
+  );
 
   const existing = db.firstSync<
     Pick<db.DbZeroBudget | db.DbReflectBudget, 'id'>
@@ -137,15 +219,25 @@ export function setBudget({
     dbMonth(month),
     category,
   ]);
+
+  let result: Promise<void>;
   if (existing) {
-    return db.update(table, { id: existing.id, amount });
+    result = db.update(table, { id: existing.id, amount: numericAmount });
+  } else {
+    result = db.insert(table, {
+      id: `${dbMonth(month)}-${category}`,
+      month: dbMonth(month),
+      category,
+      amount: numericAmount,
+    });
   }
-  return db.insert(table, {
-    id: `${dbMonth(month)}-${category}`,
-    month: dbMonth(month),
-    category,
-    amount,
-  });
+
+  // Auto-hold funds when budgeting in future months (expense categories only)
+  if (isImprovedAutoHoldEnabled() && categoryInfo?.is_income === 0) {
+    result = result.then(() => applyFutureBudgetHold(month));
+  }
+
+  return result;
 }
 
 export function setGoal({ month, category, goal, long_goal }): Promise<void> {
