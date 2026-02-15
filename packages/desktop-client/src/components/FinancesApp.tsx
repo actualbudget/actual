@@ -324,6 +324,15 @@ export function FinancesApp() {
                 />
 
                 <Route
+                  path="/enablebanking/auth_callback"
+                  element={
+                    <NarrowNotSupported>
+                      <WideComponent name="EnableBankingCallback" />
+                    </NarrowNotSupported>
+                  }
+                />
+
+                <Route
                   path="/accounts"
                   element={<NarrowAlternate name="Accounts" />}
                 />

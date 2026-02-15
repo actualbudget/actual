@@ -4,6 +4,7 @@ export { Schedules } from '../schedules';
 export { Schedules as ScheduleEdit } from '../schedules';
 
 export { GoCardlessLink } from '../gocardless/GoCardlessLink';
+export { EnableBankingCallback } from '../EnableBankingCallback';
 
 export { Account as Accounts } from '../accounts/Account';
 export { Account } from '../accounts/Account';

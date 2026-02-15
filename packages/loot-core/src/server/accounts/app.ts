@@ -34,6 +34,8 @@ import { getServer } from '../server-config';
 import { batchMessages } from '../sync';
 import { undoable, withUndo } from '../undo';
 
+import { app as enableBankingApp } from './enablebanking';
+import type { AccountHandlers as EnableBankingAccountHandlers } from './enablebanking';
 import * as link from './link';
 import { getStartingBalancePayee } from './payees';
 import * as bankSync from './sync';
@@ -51,6 +53,7 @@ export type AccountHandlers = {
   'accounts-get': typeof getAccounts;
   'account-balance': typeof getAccountBalance;
   'account-properties': typeof getAccountProperties;
+  'get-bank': typeof getBank;
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
@@ -73,7 +76,7 @@ export type AccountHandlers = {
   'simplefin-batch-sync': typeof simpleFinBatchSync;
   'transactions-import': typeof importTransactions;
   'account-unlink': typeof unlinkAccount;
-};
+} & EnableBankingAccountHandlers;
 
 async function updateAccount({
   id,
@@ -146,20 +149,32 @@ async function getAccountProperties({ id }: { id: AccountEntity['id'] }) {
   };
 }
 
+async function getBank({ id }: { id: string }) {
+  return await db.first<db.DbBank>(
+    'SELECT * FROM banks WHERE id = ? AND tombstone = 0',
+    [id],
+  );
+}
+
 async function linkGoCardlessAccount({
   requisitionId,
   account,
   upgradingId,
   offBudget = false,
+  syncSource = 'goCardless',
   startingDate,
   startingBalance,
 }: LinkAccountBaseParams & {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
+  syncSource?: 'goCardless' | 'enablebanking';
 }) {
   let id;
-  const bank = await link.findOrCreateBank(account.institution, requisitionId);
-
+  const institution =
+    typeof account.institution === 'string'
+      ? { name: account.institution }
+      : account.institution;
+  const bank = await link.findOrCreateBank(institution, requisitionId);
   if (upgradingId) {
     const accRow = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
@@ -175,7 +190,8 @@ async function linkGoCardlessAccount({
       id,
       account_id: account.account_id,
       bank: bank.id,
-      account_sync_source: 'goCardless',
+      official_name: account.official_name,
+      account_sync_source: syncSource,
     });
   } else {
     id = uuidv4();
@@ -187,7 +203,7 @@ async function linkGoCardlessAccount({
       official_name: account.official_name,
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
-      account_sync_source: 'goCardless',
+      account_sync_source: syncSource,
     });
     await db.insertPayee({
       name: '',
@@ -1267,6 +1283,7 @@ app.method('account-update', mutator(undoable(updateAccount)));
 app.method('accounts-get', getAccounts);
 app.method('account-balance', getAccountBalance);
 app.method('account-properties', getAccountProperties);
+app.method('get-bank', getBank);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
@@ -1289,3 +1306,4 @@ app.method('accounts-bank-sync', accountsBankSync);
 app.method('simplefin-batch-sync', simpleFinBatchSync);
 app.method('transactions-import', mutator(undoable(importTransactions)));
 app.method('account-unlink', mutator(unlinkAccount));
+app.combine(enableBankingApp);

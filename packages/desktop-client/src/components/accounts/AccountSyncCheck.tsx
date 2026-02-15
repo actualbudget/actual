@@ -12,6 +12,7 @@ import type { AccountEntity } from 'loot-core/types/models';
 
 import { useUnlinkAccountMutation } from '@desktop-client/accounts';
 import { Link } from '@desktop-client/components/common/Link';
+import { authorizeEnableBankingSession } from '@desktop-client/enablebanking';
 import { authorizeBank } from '@desktop-client/gocardless';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
@@ -68,6 +69,9 @@ function useErrorMessage() {
           </Trans>
         );
 
+      case 'ENABLEBANKING_SESSION_CLOSED':
+        return <Trans>The Enable Banking session has expired.</Trans>;
+
       default:
     }
 
@@ -95,11 +99,15 @@ export function AccountSyncCheck() {
   const { getErrorMessage } = useErrorMessage();
 
   const reauth = useCallback(
-    (acc: AccountEntity) => {
+    async (acc: AccountEntity) => {
       setOpen(false);
 
       if (acc.account_id) {
-        authorizeBank(dispatch);
+        if (acc.account_sync_source === 'enablebanking') {
+          await authorizeEnableBankingSession(dispatch, acc);
+        } else {
+          authorizeBank(dispatch);
+        }
       }
     },
     [dispatch],
@@ -132,9 +140,14 @@ export function AccountSyncCheck() {
   }
 
   const { type, code } = error;
+  const canReauth =
+    account.account_sync_source === 'goCardless' ||
+    account.account_sync_source === 'enablebanking';
   const showAuth =
-    (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
-    (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
+    canReauth &&
+    ((type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
+      (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN') ||
+      type === 'ENABLEBANKING_SESSION_CLOSED');
 
   return (
     <View>

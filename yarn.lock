@@ -107,6 +107,7 @@ __metadata:
     "@types/cors": "npm:^2.8.19"
     "@types/express": "npm:^5.0.6"
     "@types/express-actuator": "npm:^1.8.3"
+    "@types/jws": "npm:^3.2.10"
     "@types/node": "npm:^22.19.3"
     "@types/supertest": "npm:^6.0.3"
     bcrypt: "npm:^6.0.0"
@@ -118,13 +119,16 @@ __metadata:
     express: "npm:^5.2.1"
     express-rate-limit: "npm:^8.2.1"
     express-winston: "npm:^4.2.0"
+    fast-glob: "npm:^3.3.3"
     http-proxy-middleware: "npm:^3.0.5"
     ipaddr.js: "npm:^2.3.0"
     jws: "npm:^4.0.1"
     migrate: "npm:^2.1.0"
     nodemon: "npm:^3.1.11"
     nordigen-node: "npm:^1.4.1"
+    openapi-fetch: "npm:^0.14.0"
     openid-client: "npm:^5.7.1"
+    p-limit: "npm:^7.3.0"
     pluggy-sdk: "npm:^0.79.0"
     supertest: "npm:^7.2.2"
     typescript: "npm:^5.9.3"
@@ -9520,6 +9524,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/jws@npm:^3.2.10":
+  version: 3.2.11
+  resolution: "@types/jws@npm:3.2.11"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10/968b9069eed4ea09292c8a75692c1319220e29c990a9f952cd61751c0fb0f0062ee44c40e02f05dc4fb709c19d8d612f97ff3e48eed7adc20c605e07d285da1d
+  languageName: node
+  linkType: hard
+
 "@types/keyv@npm:^3.1.4":
   version: 3.1.4
   resolution: "@types/keyv@npm:3.1.4"
@@ -15913,7 +15926,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-glob@npm:^3.2.11, fast-glob@npm:^3.2.9, fast-glob@npm:^3.3.0":
+"fast-glob@npm:^3.2.11, fast-glob@npm:^3.2.9, fast-glob@npm:^3.3.0, fast-glob@npm:^3.3.3":
   version: 3.3.3
   resolution: "fast-glob@npm:3.3.3"
   dependencies:
@@ -21605,6 +21618,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"openapi-fetch@npm:^0.14.0":
+  version: 0.14.1
+  resolution: "openapi-fetch@npm:0.14.1"
+  dependencies:
+    openapi-typescript-helpers: "npm:^0.0.15"
+  checksum: 10/557f43f70b08bc6bdbc40b344cd9a82ef26e0ee957b81820ecda4b09f55c9749371cf527efc9a811748aaacc50c75fd72c8001836e9dce542d2836bd65f902df
+  languageName: node
+  linkType: hard
+
+"openapi-typescript-helpers@npm:^0.0.15":
+  version: 0.0.15
+  resolution: "openapi-typescript-helpers@npm:0.0.15"
+  checksum: 10/63f8f0b8464aed3e5c6910428bd14839bd5c1dd6ddf841bcea9d5f536a6e03e942a028202920da1a8b1ed9e4304c6fca14943d01a8adff2942d1254a229b8c70
+  languageName: node
+  linkType: hard
+
 "opener@npm:^1.5.2":
   version: 1.5.2
   resolution: "opener@npm:1.5.2"
@@ -21891,6 +21920,15 @@ __metadata:
   dependencies:
     yocto-queue: "npm:^1.2.1"
   checksum: 10/ea1cae6e8bbf84a65cc832e4d6a802ec34902bfe0da2fba0c6fadb72f0c51d48db67b7fb2df8433dde5f4a970cf482b9c2cb4edbfa8cfadd7f4341c6fdb38a5d
+  languageName: node
+  linkType: hard
+
+"p-limit@npm:^7.3.0":
+  version: 7.3.0
+  resolution: "p-limit@npm:7.3.0"
+  dependencies:
+    yocto-queue: "npm:^1.2.1"
+  checksum: 10/bd3f3487ec84401e2cbf243122eef11813edacb621a27808e60a425646d0e75a79514acc2c01e39c41911550dbae5ef0f0ab01caa61cfc1c541cd17a19e8f01b
   languageName: node
   linkType: hard
 

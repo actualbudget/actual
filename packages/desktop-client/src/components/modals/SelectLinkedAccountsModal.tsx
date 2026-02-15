@@ -95,6 +95,11 @@ export type SelectLinkedAccountsModalProps =
       requisitionId?: undefined;
       externalAccounts: SyncServerPluggyAiAccount[];
       syncSource: 'pluggyai';
+    }
+  | {
+      requisitionId: string;
+      externalAccounts: SyncServerGoCardlessAccount[];
+      syncSource: 'enablebanking';
     };
 
 export function SelectLinkedAccountsModal({
@@ -122,8 +127,9 @@ export function SelectLinkedAccountsModal({
             externalAccounts: toSort as SyncServerPluggyAiAccount[],
           };
         case 'goCardless':
+        case 'enablebanking':
           return {
-            syncSource: 'goCardless',
+            syncSource,
             requisitionId: requisitionId!,
             externalAccounts: toSort as SyncServerGoCardlessAccount[],
           };
@@ -223,7 +229,10 @@ export function SelectLinkedAccountsModal({
             startingDate,
             startingBalance,
           });
-        } else {
+        } else if (
+          propsWithSortedExternalAccounts.syncSource === 'goCardless' ||
+          propsWithSortedExternalAccounts.syncSource === 'enablebanking'
+        ) {
           linkAccount.mutate({
             requisitionId: propsWithSortedExternalAccounts.requisitionId,
             account:
@@ -236,9 +245,12 @@ export function SelectLinkedAccountsModal({
                 ? chosenLocalAccountId
                 : undefined,
             offBudget,
+            syncSource: propsWithSortedExternalAccounts.syncSource,
             startingDate,
             startingBalance,
           });
+        } else {
+          throw new Error('Unsupported sync source');
         }
       },
     );

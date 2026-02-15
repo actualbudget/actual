@@ -1,0 +1,577 @@
+import createClient from 'openapi-fetch';
+import pLimit from 'p-limit';
+
+import { SecretName, secretsService } from '../../services/secrets-service.js';
+import { getLoadedRegistry } from '../banks/bank-registry.js';
+import type {
+  components,
+  operations,
+  paths,
+} from '../models/enablebanking-openapi.js';
+import type {
+  EnableBankingAuthenticationStartResponse,
+  EnableBankingToken,
+  SyncServerEnableBankingAccount,
+  Transaction,
+} from '../models/enablebanking.js';
+import {
+  ApplicationInactiveError,
+  EnableBankingError,
+  EnableBankingSetupError,
+  handleErrorResponse,
+  isErrorResponse,
+  ResourceNotFoundError,
+  SecretsInvalidError,
+} from '../utils/errors.js';
+import { getJWT } from '../utils/jwt.js';
+
+// Rate limiter: max 5 concurrent API requests to prevent API throttling
+const apiLimiter = pLimit(5);
+
+function isDefined<T>(value: T | undefined): asserts value is T {
+  if (value === undefined) {
+    console.error(
+      `A required value is undefined. This should not happen. Please report this issue.`,
+    );
+    throw new EnableBankingError(
+      'INTERNAL_ERROR',
+      `Something went wrong while using the Enable Banking API. Please try again later.`,
+    );
+  }
+}
+
+// Helper function to safely parse amount strings
+function parseAmountSafe(amount: string | undefined): number {
+  if (!amount || typeof amount !== 'string') {
+    throw new EnableBankingError(
+      'BAD_REQUEST',
+      'Invalid amount: expected a numeric string',
+    );
+  }
+  const parsed = parseFloat(amount);
+  if (isNaN(parsed)) {
+    throw new EnableBankingError(
+      'BAD_REQUEST',
+      `Invalid amount: cannot parse "${amount}" as a number`,
+    );
+  }
+  return parsed;
+}
+
+// Helper function to select the preferred balance from an array of balances
+function selectPreferredBalance(
+  balances: Array<{
+    balance_type: string;
+    balance_amount: { amount: string };
+  }>,
+): { balance_type: string; balance_amount: { amount: string } } {
+  if (balances.length === 0) {
+    throw new ResourceNotFoundError('No balance data available');
+  }
+
+  const preferredBalanceTypes = ['ITBD', 'ITAV', 'CLBD'];
+  const sorted = [...balances].sort((a, b) => {
+    const aIndex = preferredBalanceTypes.indexOf(a.balance_type);
+    const bIndex = preferredBalanceTypes.indexOf(b.balance_type);
+    return (
+      (aIndex === -1 ? preferredBalanceTypes.length : aIndex) -
+      (bIndex === -1 ? preferredBalanceTypes.length : bIndex)
+    );
+  });
+
+  return sorted[0];
+}
+
+// Session entry with expiration timestamp and optional error state
+export type SessionEntry = {
+  sessionId: string | null;
+  error?: string;
+  expiresAt: number;
+};
+
+// TTL for auth sessions (30 minutes - bank setup can be slow with app/SMS verification)
+const SESSION_TTL_MS = 30 * 60 * 1000;
+
+// Cleanup interval (5 minutes)
+const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
+
+class SessionStore {
+  private sessions = new Map<string, SessionEntry>();
+  private pendingCreations = new Map<string, Promise<string>>();
+  private cleanupTimer: ReturnType<typeof setInterval> | null = null;
+
+  constructor() {
+    // Start periodic cleanup
+    this.cleanupTimer = setInterval(() => this.cleanup(), CLEANUP_INTERVAL_MS);
+    // Don't keep process alive just for cleanup
+    this.cleanupTimer.unref();
+  }
+
+  set(state: string, sessionId: string): void {
+    this.sessions.set(state, {
+      sessionId,
+      error: undefined,
+      expiresAt: Date.now() + SESSION_TTL_MS,
+    });
+  }
+
+  setFailure(state: string, error: string): void {
+    this.sessions.set(state, {
+      sessionId: null,
+      error,
+      expiresAt: Date.now() + SESSION_TTL_MS,
+    });
+  }
+
+  setPending(state: string, promise: Promise<string>): void {
+    this.pendingCreations.set(state, promise);
+  }
+
+  getPending(state: string): Promise<string> | undefined {
+    return this.pendingCreations.get(state);
+  }
+
+  deletePending(state: string): void {
+    this.pendingCreations.delete(state);
+  }
+
+  get(state: string): string | undefined {
+    const entry = this.sessions.get(state);
+    if (!entry) return undefined;
+
+    // Check if expired
+    if (Date.now() > entry.expiresAt) {
+      this.sessions.delete(state);
+      return undefined;
+    }
+
+    return entry.sessionId ?? undefined;
+  }
+
+  getEntry(state: string): SessionEntry | undefined {
+    const entry = this.sessions.get(state);
+    if (!entry) return undefined;
+
+    // Check if expired
+    if (Date.now() > entry.expiresAt) {
+      this.sessions.delete(state);
+      return undefined;
+    }
+
+    return entry;
+  }
+
+  private cleanup(): void {
+    const now = Date.now();
+    for (const [state, entry] of this.sessions) {
+      if (now > entry.expiresAt) {
+        this.sessions.delete(state);
+      }
+    }
+  }
+
+  clear(): number {
+    const count = this.sessions.size;
+    this.sessions.clear();
+    return count;
+  }
+}
+
+const sessionStore = new SessionStore();
+
+export const enableBankingservice = {
+  HOSTNAME: 'https://api.enablebanking.com/',
+
+  setupSecrets: async (applicationId: string, secretKey: string) => {
+    // Check if we can get a jwt with provided data.
+    let jwt: string;
+    try {
+      jwt = getJWT(applicationId, secretKey);
+    } catch {
+      throw new SecretsInvalidError();
+    }
+
+    // Check if jwt is recognized by Enable Banking
+    await enableBankingservice.getApplication(jwt);
+    secretsService.set(SecretName.enablebanking_applicationId, applicationId);
+    secretsService.set(SecretName.enablebanking_secret, secretKey);
+    return true;
+  },
+  secretsAreSetup: () => {
+    const applicationId = secretsService.get(
+      SecretName.enablebanking_applicationId,
+    );
+    const secret = secretsService.get(SecretName.enablebanking_secret);
+    return !(applicationId == null || secret == null);
+  },
+  isConfigured: async () => {
+    if (!enableBankingservice.secretsAreSetup()) {
+      return false;
+    }
+    await enableBankingservice.getApplication();
+    return true;
+  },
+
+  getJWT: () => {
+    const applicationId = secretsService.get(
+      SecretName.enablebanking_applicationId,
+    );
+    const secretKey = secretsService.get(SecretName.enablebanking_secret);
+    if (!applicationId || !secretKey) {
+      throw new EnableBankingSetupError();
+    }
+    return getJWT(applicationId, secretKey);
+  },
+  getClient: (jwt?: string) => {
+    const baseHeaders = {
+      Authorization: `Bearer ${jwt ? jwt : enableBankingservice.getJWT()}`,
+      'Content-Type': 'application/json',
+    };
+    const client = createClient<paths>({
+      baseUrl: enableBankingservice.HOSTNAME,
+      headers: baseHeaders,
+    });
+    client.use({
+      async onResponse(options) {
+        const { response } = options;
+        if (response.status >= 400) {
+          let error_data: EnableBankingError;
+          try {
+            const data = await response.clone().json();
+            if (isErrorResponse(data)) {
+              error_data = handleErrorResponse(data);
+            } else if (response.status === 403) {
+              error_data = new SecretsInvalidError();
+            } else {
+              console.error(`Enable Banking API returned an error:`, data);
+              error_data = new EnableBankingError(
+                'INTERNAL_ERROR',
+                `Something went wrong while using the Enable Banking API. Please try again later.`,
+              );
+            }
+          } catch {
+            // Non-JSON response (e.g., HTML 502 from proxy)
+            let rawText: string;
+            try {
+              rawText = await response.clone().text();
+            } catch {
+              rawText = '(unable to read response body)';
+            }
+            console.error(
+              `Enable Banking API returned non-JSON error response: HTTP ${response.status}`,
+              rawText,
+            );
+            error_data = new EnableBankingError(
+              'INTERNAL_ERROR',
+              `Enable Banking API returned HTTP ${response.status} with non-JSON body.`,
+            );
+          }
+          // eslint-disable-next-line no-throw-literal -- error_data is an EnableBankingError (extends Error)
+          throw error_data;
+        }
+        return undefined; // continue with the response
+      },
+    });
+    return client;
+  },
+
+  getApplication: async (jwt?: string) => {
+    return await apiLimiter(async () => {
+      const { data } = await enableBankingservice
+        .getClient(jwt)
+        .GET('/application');
+      isDefined(data);
+      if (!data.active) {
+        throw new ApplicationInactiveError();
+      }
+      return data;
+    });
+  },
+
+  getASPSPs: async (country?: string) => {
+    return await apiLimiter(async () => {
+      const { data } = await enableBankingservice.getClient().GET('/aspsps', {
+        params: {
+          query: {
+            service: 'AIS',
+            country,
+          },
+        },
+      });
+      isDefined(data);
+      return data;
+    });
+  },
+
+  getASPSP: async (country: string, name: string) => {
+    return await enableBankingservice.getASPSPs(country).then(resp => {
+      const res = resp.aspsps.filter(aspsp => aspsp.name === name).at(0);
+      if (res) {
+        return res;
+      }
+      throw new ResourceNotFoundError(
+        `The aspsp ${name} in ${country} is not available.`,
+      );
+    });
+  },
+
+  startAuth: async (
+    country: string,
+    aspsp: string,
+    host: string,
+    exp: number,
+  ): Promise<EnableBankingAuthenticationStartResponse> => {
+    const aspspData = await enableBankingservice.getASPSP(country, aspsp);
+    // Minimum consent duration in seconds
+    const MIN_CONSENT_SECONDS = 60;
+    // Validate and clamp maximum_consent_validity
+    const allowedWindow = Math.max(
+      MIN_CONSENT_SECONDS,
+      typeof aspspData.maximum_consent_validity === 'number' &&
+        aspspData.maximum_consent_validity >= 3600
+        ? aspspData.maximum_consent_validity - 3600
+        : 0,
+    );
+    exp = Math.min(exp, allowedWindow);
+    exp = Math.max(exp, MIN_CONSENT_SECONDS);
+
+    const valid_until = new Date();
+    valid_until.setSeconds(valid_until.getSeconds() + exp);
+
+    const state = crypto.randomUUID();
+
+    // The redirect URL is the host with https, because Enable Banking requires it.
+    // Since we don't have ssl in dev. The redirect URL needs to be changed manually in browser.
+    const redirect_url = `${host.replace('http:', 'https:')}/enablebanking/auth_callback`;
+
+    const { data } = await enableBankingservice.getClient().POST('/auth', {
+      body: {
+        access: {
+          valid_until: valid_until.toISOString(),
+          balances: true,
+          transactions: true,
+        },
+        aspsp: {
+          name: aspsp,
+          country,
+        },
+        credentials_autosubmit: true,
+        state,
+        redirect_url,
+      },
+    });
+    isDefined(data);
+
+    return {
+      redirect_url: data.url,
+      state,
+    };
+  },
+
+  authorizeSession: async (state: string, code: string) => {
+    const existingSessionId = sessionStore.get(state);
+    if (existingSessionId) {
+      return existingSessionId;
+    }
+
+    // Check if there's already a pending creation for this state
+    const pendingCreation = sessionStore.getPending(state);
+    if (pendingCreation) {
+      return await pendingCreation;
+    }
+
+    // Create a new session and store the promise to prevent race conditions
+    const creationPromise = (async () => {
+      try {
+        const { data } = await enableBankingservice
+          .getClient()
+          .POST('/sessions', {
+            body: { code },
+          });
+        isDefined(data);
+        sessionStore.set(state, data.session_id);
+        return data.session_id;
+      } finally {
+        sessionStore.deletePending(state);
+      }
+    })();
+
+    sessionStore.setPending(state, creationPromise);
+    return await creationPromise;
+  },
+
+  getSessionIdFromState: (state: string): string | undefined => {
+    return sessionStore.get(state);
+  },
+
+  getSessionEntry: (state: string): SessionEntry | undefined => {
+    return sessionStore.getEntry(state);
+  },
+
+  failSession: (state: string, error: string): void => {
+    sessionStore.setFailure(state, error);
+  },
+
+  clearAllSessions: (): number => {
+    const clearedCount = sessionStore.clear();
+    console.info(
+      `[AUDIT] clearAllSessions: Cleared ${clearedCount} session(s) at ${new Date().toISOString()}`,
+    );
+    return clearedCount;
+  },
+
+  getAccounts: async (
+    session_id: string,
+  ): Promise<EnableBankingToken> | never => {
+    const client = enableBankingservice.getClient();
+
+    const { data } = await client.GET('/sessions/{session_id}', {
+      params: {
+        path: { session_id },
+      },
+    });
+    isDefined(data);
+    const bank_id = [data.aspsp.country, data.aspsp.name].join('_');
+    const accounts: SyncServerEnableBankingAccount[] = [];
+
+    // Process accounts in parallel with rate limiting
+    const accountPromises = data.accounts.map(account_id =>
+      apiLimiter(async () => {
+        const { data: account } = await client.GET(
+          `/accounts/{account_id}/details`,
+          {
+            params: { path: { account_id } },
+          },
+        );
+        isDefined(account);
+        const { data: balance } = await client.GET(
+          `/accounts/{account_id}/balances`,
+          { params: { path: { account_id } } },
+        );
+        isDefined(balance);
+        if (!balance.balances.length) {
+          throw new ResourceNotFoundError(
+            `No balance data for account ${account_id}`,
+          );
+        }
+        const name = account.account_id
+          ? (account.account_id.iban ?? 'unknown')
+          : 'unknown';
+
+        const selectedBalance = selectPreferredBalance(balance.balances);
+
+        return {
+          account_id,
+          name,
+          balance: parseAmountSafe(selectedBalance.balance_amount.amount),
+          institution: data.aspsp.name,
+        };
+      }),
+    );
+
+    accounts.push(...(await Promise.all(accountPromises)));
+
+    return {
+      session_id,
+      bank_id,
+      accounts,
+    };
+  },
+
+  getTransactions: async (
+    account_id: string,
+    date_from?: string,
+    date_to?: string,
+    bank_id?: string,
+  ): Promise<Transaction[]> => {
+    const client = enableBankingservice.getClient();
+    const query: operations['get_account_transactions_accounts__account_id__transactions_get']['parameters']['query'] =
+      {};
+    if (date_from) {
+      query.date_from = date_from;
+    }
+    if (date_to) {
+      query.date_to = date_to;
+    }
+
+    const transactions: components['schemas']['Transaction'][] = [];
+    do {
+      const { data } = await apiLimiter(
+        async (): Promise<{
+          data?: components['schemas']['HalTransactions'];
+        }> =>
+          client.GET('/accounts/{account_id}/transactions', {
+            params: {
+              path: { account_id },
+              query,
+            },
+          }),
+      );
+      isDefined(data);
+      transactions.push(...(data.transactions || []));
+      query.continuation_key = data.continuation_key;
+    } while (query.continuation_key);
+
+    const registry = await getLoadedRegistry();
+
+    const bankProcessor = registry.get(bank_id ?? 'fallback');
+    if (bankProcessor.debug) {
+      console.debug(
+        `--- Debugging '${bankProcessor.name}': showing first 2 transactions with processed transactions.---`,
+      );
+      transactions.slice(0, 2).forEach(transaction => {
+        // Sanitize sensitive data before logging
+        const sanitized = {
+          transaction_id: transaction.transaction_id,
+          booking_date: transaction.booking_date,
+          value_date: transaction.value_date,
+          amount: transaction.transaction_amount?.amount,
+          currency: transaction.transaction_amount?.currency,
+          credit_debit_indicator: transaction.credit_debit_indicator,
+          status: transaction.status,
+          // Sensitive fields masked
+          debtor: transaction.debtor?.name ? '[REDACTED]' : undefined,
+          creditor: transaction.creditor?.name ? '[REDACTED]' : undefined,
+          remittance_information: transaction.remittance_information
+            ? '[REDACTED]'
+            : undefined,
+        };
+        console.debug('# ORIGINAL (sanitized):');
+        console.debug(JSON.stringify(sanitized, null, 2));
+        console.debug('## BECOMES:');
+        const normalized = bankProcessor.normalizeTransaction(transaction);
+        console.debug(
+          JSON.stringify(
+            {
+              imported_id: normalized.imported_id,
+              date: normalized.date,
+              amount: normalized.amount,
+              // Sensitive fields masked
+              payee_name: normalized.payee_name ? '[REDACTED]' : undefined,
+              notes: normalized.notes ? '[REDACTED]' : undefined,
+            },
+            null,
+            2,
+          ),
+        );
+      });
+      console.debug(`--- End of transactions ---`);
+    }
+
+    return transactions.map(transaction =>
+      bankProcessor.normalizeTransaction(transaction),
+    );
+  },
+
+  getCurrentBalance: async (account_id: string) => {
+    const client = enableBankingservice.getClient();
+    const { data } = await client.GET('/accounts/{account_id}/balances', {
+      params: { path: { account_id } },
+    });
+    isDefined(data);
+
+    const selectedBalance = selectPreferredBalance(data.balances);
+
+    return parseAmountSafe(selectedBalance.balance_amount.amount);
+  },
+};

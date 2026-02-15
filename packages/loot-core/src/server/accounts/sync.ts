@@ -34,6 +34,7 @@ import {
   mappingsFromString,
 } from '../util/custom-sync-mapping';
 
+import { downloadEnableBankingTransactions } from './enablebanking';
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
 
@@ -90,9 +91,9 @@ async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
 }
 
 async function getAccountSyncStartDate(id) {
-  // Many GoCardless integrations do not support getting more than 90 days
-  // worth of data, so make that the earliest possible limit.
-  const dates = [monthUtils.subDays(monthUtils.currentDay(), 90)];
+  // Bank sync providers may support different historical data windows depending on the institution.
+  // Request up to 1 year of data - the provider will return what the bank supports.
+  const dates = [monthUtils.subDays(monthUtils.currentDay(), 365)];
 
   const oldestTransaction = await getAccountOldestTransaction(id);
 
@@ -426,16 +427,16 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
       trans.imported_payee = trans.imported_payee.trim();
     }
 
-    let imported_id = trans.transactionId;
-    if (trans.cleared && !trans.transactionId && trans.internalTransactionId) {
-      imported_id = `${trans.account}-${trans.internalTransactionId}`;
-    }
-
     // It's important to resolve both the account and payee early so
     // when rules are run, they have the right data. Resolving payees
     // also simplifies the payee creation process
     trans.account = acctId;
     trans.payee = await resolvePayee(trans, payeeName, payeesToCreate);
+
+    let imported_id = trans.transactionId;
+    if (trans.cleared && !trans.transactionId && trans.internalTransactionId) {
+      imported_id = `${trans.account}-${trans.internalTransactionId}`;
+    }
 
     normalized.push({
       payee_name: payeeName,
@@ -949,6 +950,13 @@ async function processBankSyncDownload(
         currentBalance,
       );
       balanceToUse = Math.round(previousBalance);
+    } else if (acctRow.account_sync_source === 'enablebanking') {
+      const currentBalance = download.startingBalance;
+      const previousBalance = transactions.reduce(
+        (total, trans) => total - trans.transactionAmount.amount * 100,
+        currentBalance,
+      );
+      balanceToUse = Math.round(previousBalance);
     }
 
     const oldestTransaction = transactions[transactions.length - 1];
@@ -1046,6 +1054,15 @@ export async function syncAccount(
       syncStartDate,
       newAccount,
     );
+  } else if (acctRow.account_sync_source === 'enablebanking') {
+    download = await downloadEnableBankingTransactions(
+      acctId,
+      syncStartDate,
+      bankId,
+    );
+    if (customStartingDate) {
+      download.startingBalanceDate = customStartingDate;
+    }
   } else {
     throw new Error(
       `Unrecognized bank-sync provider: ${acctRow.account_sync_source}`,
