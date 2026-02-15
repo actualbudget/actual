@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { useEffect } from 'react';
 
 import { usePreferredDarkTheme, useTheme } from '@desktop-client/style/theme';
@@ -46,11 +45,13 @@ function setThemeColorMetaContent(color: string) {
   }
 }
 
-function getPropertyValueFromVarString(varString: string): string {
-  return VAR_STRING_REGEX.test(varString)
+function getPropertyValueFromVarString(varString: string) {
+  if (!VAR_STRING_REGEX.test(varString)) return varString;
+  const match = varString.match(VAR_STRING_REGEX);
+  return match
     ? window
         .getComputedStyle(document.documentElement)
-        .getPropertyValue(varString.match(VAR_STRING_REGEX)[1])
+        .getPropertyValue(match[1])
         .trim()
     : varString;
 }
