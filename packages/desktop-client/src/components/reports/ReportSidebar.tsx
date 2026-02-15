@@ -75,6 +75,7 @@ type ReportSidebarProps = {
   earliestTransaction: TransactionEntity['date'];
   latestTransaction: TransactionEntity['date'];
   firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'];
+  financialYearStart: SyncedPrefs['financialYearStart'];
   isComplexCategoryCondition?: boolean;
 };
 
@@ -107,6 +108,7 @@ export function ReportSidebar({
   earliestTransaction,
   latestTransaction,
   firstDayOfWeekIdx,
+  financialYearStart,
   isComplexCategoryCondition = false,
 }: ReportSidebarProps) {
   const { t } = useTranslation();
@@ -126,6 +128,7 @@ export function ReportSidebar({
         latestTransaction,
         customReportItems.includeCurrentInterval,
         firstDayOfWeekIdx,
+        financialYearStart,
       ),
     );
   };

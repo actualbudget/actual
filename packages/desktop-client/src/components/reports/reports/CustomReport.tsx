@@ -143,6 +143,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const { isNarrowWidth } = useResponsive();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const [financialYearStart] = useSyncedPref('financialYearStart');
 
   const [viewLegend = false, setViewLegendPref] =
     useLocalPref('reportsViewLegend');
@@ -269,12 +270,15 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const [graphType, setGraphType] = useState(loadReport.graphType);
 
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
+  const dateRangeData = useMemo(() => {
+    return ReportOptions.dateRange.find(f => f.key === dateRange);
+  }, [dateRange]);
   const [dataCheck, setDataCheck] = useState(false);
   const dateRangeLine =
     interval === 'Daily'
       ? 0
       : ReportOptions.dateRange.filter(f => f[interval as keyof dateRangeProps])
-          .length - 3;
+          .length - 5;
 
   const [intervals, setIntervals] = useState(
     monthUtils.rangeInclusive(startDate, endDate),
@@ -410,6 +414,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
           latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
           includeCurrentInterval,
           firstDayOfWeekIdx,
+          financialYearStart,
         );
         setStartDate(dateStart);
         setEndDate(dateEnd);
@@ -453,6 +458,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     report.conditionsOp,
     includeCurrentInterval,
     savedStatus,
+    financialYearStart,
   ]);
 
   useEffect(() => {
@@ -498,6 +504,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       balanceTypeOp,
       sortByOp,
       firstDayOfWeekIdx,
+      useExactDates: dateRangeData?.useExactDates ?? false,
     });
   }, [
     startDate,
@@ -514,6 +521,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     trimIntervals,
     sortByOp,
     firstDayOfWeekIdx,
+    dateRangeData,
   ]);
 
   const getGraphData = useMemo(() => {
@@ -539,6 +547,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       graphType,
       firstDayOfWeekIdx,
       setDataCheck,
+      useExactDates: dateRangeData?.useExactDates ?? false,
     });
   }, [
     startDate,
@@ -559,6 +568,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     sortByOp,
     graphType,
     firstDayOfWeekIdx,
+    dateRangeData,
   ]);
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
@@ -879,6 +889,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
             earliestTransaction={earliestTransactionDate}
             latestTransaction={latestTransactionDate}
             firstDayOfWeekIdx={firstDayOfWeekIdx}
+            financialYearStart={financialYearStart}
             isComplexCategoryCondition={isComplexCategoryCondition}
           />
         )}

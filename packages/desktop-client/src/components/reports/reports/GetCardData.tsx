@@ -72,6 +72,7 @@ export function GetCardData({
   earliestTransaction,
   latestTransaction,
   firstDayOfWeekIdx,
+  financialYearStart,
   showTooltip,
 }: {
   report: CustomReportEntity;
@@ -81,9 +82,11 @@ export function GetCardData({
   earliestTransaction: string;
   latestTransaction: string;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  financialYearStart?: SyncedPrefs['financialYearStart'];
   showTooltip?: boolean;
 }) {
   const { isNarrowWidth } = useResponsive();
+  let useExactDates = false;
 
   let startDate = report.startDate;
   let endDate = report.endDate;
@@ -95,9 +98,13 @@ export function GetCardData({
       latestTransaction,
       report.includeCurrentInterval,
       firstDayOfWeekIdx,
+      financialYearStart,
     );
     startDate = dateStart || report.startDate;
     endDate = dateEnd || report.startDate;
+    useExactDates =
+      ReportOptions.dateRange.find(f => f.key === report.dateRange)
+        ?.useExactDates ?? false;
   }
 
   const fromDate = convertFromDate(report.interval);
@@ -136,8 +143,16 @@ export function GetCardData({
       balanceTypeOp: ReportOptions.balanceTypeMap.get(report.balanceType),
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
+      useExactDates,
     });
-  }, [report, categories, startDate, endDate, firstDayOfWeekIdx]);
+  }, [
+    report,
+    categories,
+    startDate,
+    endDate,
+    firstDayOfWeekIdx,
+    useExactDates,
+  ]);
   const getGraphData = useMemo(() => {
     return createCustomSpreadsheet({
       startDate,
@@ -158,6 +173,7 @@ export function GetCardData({
       graphType: report.graphType,
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
+      useExactDates,
     });
   }, [
     report,
@@ -167,6 +183,7 @@ export function GetCardData({
     startDate,
     endDate,
     firstDayOfWeekIdx,
+    useExactDates,
   ]);
   const graphData = useReport('default' + report.name, getGraphData);
   const groupedData = useReport('grouped' + report.name, getGroupData);
