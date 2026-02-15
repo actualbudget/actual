@@ -623,7 +623,7 @@ export class CategoryTemplateContext {
     const nextMonth = monthUtils.addMonths(currentMonth, 1);
 
     // Determine start date
-    let date = template.starting;
+   // let date = template.starting;
     let date =
       template.starting ?? monthUtils.firstDayOfMonth(templateContext.month);
 
@@ -649,7 +649,6 @@ export class CategoryTemplateContext {
         dateShiftFunction = monthUtils.addMonths;
         break;
       case 'year':
-        dateShiftFunction = (d, n) => monthUtils.addMonths(d, n * 12);
         // the addYears function doesn't return the month number, so use addMonths
         dateShiftFunction = (date: string | Date, numPeriods: number) =>
           monthUtils.addMonths(date, numPeriods * 12);

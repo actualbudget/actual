@@ -114,4 +114,3 @@ name 'Name' = $(
     [^\r\n\t]
   )+
 ) { return text().trim() }
-name 'Name' = $([^\r\n\t]+) { return text() }
