@@ -16,7 +16,7 @@ export const up = async function () {
         last_used_at INTEGER,
         expires_at INTEGER NOT NULL,
         enabled INTEGER DEFAULT 1,
-        FOREIGN KEY (user_id) REFERENCES users(id)
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
 
       CREATE TABLE api_token_budgets (
