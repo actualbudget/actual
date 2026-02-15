@@ -51,6 +51,7 @@ type CommonAutocompleteProps<T extends AutocompleteItem> = {
   closeOnSelect?: boolean;
   updateOnValueChange?: boolean;
   onClose?: () => void;
+  skipSplit?: boolean;
 };
 
 export type AutocompleteItem = {
@@ -236,6 +237,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   closeOnSelect = !clearOnSelect,
   updateOnValueChange = false,
   onClose,
+  skipSplit = true,
   value: initialValue,
 }: SingleAutocompleteProps<T>) {
   const [selectedItem, setSelectedItem] = useState(() =>
@@ -521,6 +523,22 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                   },
                   onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
                     const { onKeyDown } = inputProps || {};
+                    const skipSplitToNumber = skipSplit === true ? 1 : 0;
+                    if (
+                      e.key === 'ArrowDown' &&
+                      isOpen &&
+                      highlightedIndex == null &&
+                      filtered.length > 0
+                    ) {
+                      e.preventDefault();
+                      setHighlightedIndex(
+                        // if skipSplit = true, skipSplitToNumer = 1, so its skip SplitTransaction
+                        filtered[0]?.id === 'split' && filtered.length > 1
+                          ? skipSplitToNumber
+                          : null,
+                      );
+                      return;
+                    }
 
                     // If the dropdown is open, an item is highlighted, and the user
                     // pressed enter, always capture that and handle it ourselves
