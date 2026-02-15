@@ -60,7 +60,7 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
   if (getBudgetType() === 'envelope') {
     envelopeBudget.createCategory(cat, sheetName, prevSheetName);
   } else {
-    report.createCategory(cat, sheetName, prevSheetName);
+    void report.createCategory(cat, sheetName, prevSheetName);
   }
 }
 
@@ -217,7 +217,7 @@ export async function doTransfer(categoryIds, transferId) {
       category: transferId,
     });
 
-    budgetActions.setBudget({
+    void budgetActions.setBudget({
       month,
       category: transferId,
       amount: totalValue + transferValue,
@@ -331,7 +331,7 @@ export async function setType(type) {
   });
 
   sheet.get().startCacheBarrier();
-  sheet.loadUserBudgets(db);
+  void sheet.loadUserBudgets(db);
   const bounds = await createAllBudgets();
   sheet.get().endCacheBarrier();
 

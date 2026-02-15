@@ -1023,7 +1023,7 @@ export function RuleEditor({
   );
 
   useEffect(() => {
-    dispatch(getPayees());
+    void dispatch(getPayees());
 
     // Disable undo while this modal is open
     disableUndo();
@@ -1059,7 +1059,7 @@ export function RuleEditor({
         setTransactions([]);
       }
     }
-    run();
+    void run();
   }, [actionSplits, conditions, conditionsOp]);
 
   const selectedInst = useSelected('transactions', transactions, []);
@@ -1218,7 +1218,7 @@ export function RuleEditor({
     const selectedTransactions = transactions.filter(({ id }) =>
       selectedInst.items.has(id),
     );
-    send('rule-apply-actions', {
+    void send('rule-apply-actions', {
       transactions: selectedTransactions,
       actions: getUnparsedActions(actionSplits),
     }).then(content => {

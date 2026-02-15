@@ -123,4 +123,4 @@ if (values['reset-password']) {
 }
 
 // start the sync server
-import('../app.js');
+void import('../app.js');

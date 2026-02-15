@@ -197,7 +197,7 @@ export function MergeUnusedPayeesModal({
                 autoFocus
                 style={{ marginRight: 10 }}
                 onPress={() => {
-                  onMerge(targetPayee);
+                  void onMerge(targetPayee);
                   close();
                 }}
               >
@@ -207,7 +207,7 @@ export function MergeUnusedPayeesModal({
                 <Button
                   style={{ marginRight: 10 }}
                   onPress={() => {
-                    onMergeAndCreateRule(targetPayee);
+                    void onMergeAndCreateRule(targetPayee);
                     close();
                   }}
                 >

@@ -276,7 +276,7 @@ export function useTransactionBatchActions() {
     if (name === 'cleared') {
       // Cleared just toggles it on/off and it depends on the data
       // loaded. Need to clean this up in the future.
-      onChange('cleared', null);
+      void onChange('cleared', null);
     } else if (name === 'category') {
       pushCategoryAutocompleteModal();
     } else if (name === 'payee') {

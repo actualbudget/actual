@@ -52,7 +52,7 @@ export function TransferOwnership({
   const [isTransferring, setIsTransferring] = useState(false);
 
   useEffect(() => {
-    send('users-get').then(
+    void send('users-get').then(
       (data: Awaited<ReturnType<Handlers['users-get']>>) => {
         if (!data) {
           setAvailableUsers([]);

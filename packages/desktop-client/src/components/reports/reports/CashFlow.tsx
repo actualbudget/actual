@@ -162,7 +162,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
 
       setAllMonths(allMonths);
     }
-    run();
+    void run();
   }, [locale]);
 
   useEffect(() => {

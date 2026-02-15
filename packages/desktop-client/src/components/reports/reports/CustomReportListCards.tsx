@@ -104,7 +104,7 @@ function CustomReportListCardsInner({
         latestTrans ? latestTrans.date : monthUtils.currentDay(),
       );
     }
-    run();
+    void run();
   }, []);
 
   const updateReportMutation = useUpdateReportMutation();

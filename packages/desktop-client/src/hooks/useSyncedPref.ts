@@ -15,7 +15,7 @@ export function useSyncedPref<K extends keyof SyncedPrefs>(
   const dispatch = useDispatch();
   const setPref = useCallback<SetSyncedPrefAction<K>>(
     value => {
-      dispatch(
+      void dispatch(
         saveSyncedPrefs({
           prefs: { [prefName]: value },
         }),

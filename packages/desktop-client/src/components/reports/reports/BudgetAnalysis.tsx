@@ -174,7 +174,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         setIsConcise(calculateIsConcise(liveStart, liveEnd));
       }
     }
-    run();
+    void run();
   }, [locale, widget?.meta?.timeFrame]);
 
   const startDate = start + '-01';

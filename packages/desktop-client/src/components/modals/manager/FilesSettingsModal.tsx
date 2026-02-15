@@ -156,7 +156,7 @@ export function FilesSettingsModal() {
   const dispatch = useDispatch();
 
   function closeModal(close: () => void) {
-    dispatch(loadAllFiles());
+    void dispatch(loadAllFiles());
     close();
   }
 

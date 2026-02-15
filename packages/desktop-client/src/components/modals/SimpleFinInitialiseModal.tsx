@@ -106,7 +106,7 @@ export const SimpleFinInitialiseModal = ({
               autoFocus
               isLoading={isLoading}
               onPress={() => {
-                onSubmit(close);
+                void onSubmit(close);
               }}
             >
               <Trans>Save and continue</Trans>

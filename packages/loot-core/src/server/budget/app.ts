@@ -450,7 +450,7 @@ async function isCategoryTransferRequired({
 }: {
   id: CategoryEntity['id'];
 }) {
-  const res = await db.runQuery<{ count: number }>(
+  const res = db.runQuery<{ count: number }>(
     `SELECT count(t.id) as count FROM transactions t
        LEFT JOIN category_mapping cm ON cm.id = t.category
        WHERE cm.transferId = ? AND t.tombstone = 0`,

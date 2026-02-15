@@ -178,4 +178,4 @@ async function execAsync(cmd: string, errorLog?: string): Promise<string> {
   });
 }
 
-run();
+void run();

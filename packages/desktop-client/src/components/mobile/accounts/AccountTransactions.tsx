@@ -133,7 +133,7 @@ function TransactionListWithPreviews({
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {
       if (!isPreviewId(transaction.id)) {
-        navigate(`/transactions/${transaction.id}`);
+        void navigate(`/transactions/${transaction.id}`);
       } else {
         dispatch(
           pushModal({

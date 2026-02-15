@@ -196,7 +196,7 @@ export function IncomeCategoryListItem({
       return null;
     }
 
-    navigate(`/categories/${category.id}?month=${month}`);
+    void navigate(`/categories/${category.id}?month=${month}`);
   }, [category, month, navigate]);
 
   const onCarryover = useCallback(

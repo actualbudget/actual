@@ -45,7 +45,7 @@ function _openDatabase() {
 
       db.onerror = function (event) {
         const error = (event.target as IDBOpenDBRequest)?.error;
-        logger.log('Database error: ' + error);
+        logger.log('Database error:', error);
 
         if (event.target && error) {
           if (error.name === 'QuotaExceededError') {
@@ -105,9 +105,9 @@ export const openDatabase = function () {
   return openedDb;
 };
 
-export const closeDatabase = function () {
+export const closeDatabase = async function () {
   if (openedDb) {
-    openedDb.then(db => {
+    await openedDb.then(db => {
       db.close();
     });
     openedDb = null;

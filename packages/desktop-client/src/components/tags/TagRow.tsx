@@ -67,7 +67,7 @@ export const TagRow = memo(
           type: 'string',
         },
       ];
-      navigate('/accounts', {
+      void navigate('/accounts', {
         state: {
           goBack: true,
           filterConditions,

@@ -300,7 +300,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
       setAllMonths(allMonths);
     }
-    run();
+    void run();
   }, [locale]);
 
   useEffect(() => {
@@ -417,7 +417,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {
-      navigate(`/transactions/${transaction.id}`);
+      void navigate(`/transactions/${transaction.id}`);
     },
     [navigate],
   );
@@ -443,7 +443,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
   useEffect(() => {
     closeY.current = totalHeight;
-    api.start({
+    void api.start({
       y: mobileTransactionsOpen ? openY : closeY.current,
       immediate: false,
     });
@@ -451,7 +451,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
   const open = useCallback(
     ({ canceled }: { canceled: boolean }) => {
-      api.start({
+      void api.start({
         y: openY,
         immediate: false,
         config: canceled ? config.wobbly : config.stiff,
@@ -463,7 +463,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
   const close = useCallback(
     (velocity = 0) => {
-      api.start({
+      void api.start({
         y: closeY.current,
         config: { ...config.stiff, velocity },
       });
@@ -476,7 +476,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     ({ offset: [, oy], cancel }) => {
       if (oy < 0) {
         cancel();
-        api.start({ y: 0, immediate: true });
+        void api.start({ y: 0, immediate: true });
         return;
       }
 
@@ -490,7 +490,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
           open({ canceled: true });
           setMobileTransactionsOpen(true);
         } else {
-          api.start({ y: oy, immediate: true });
+          void api.start({ y: oy, immediate: true });
         }
       }
     },

@@ -141,7 +141,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   );
 
   const onCloseAccount = useCallback(() => {
-    dispatch(openAccountCloseModal({ accountId: account.id }));
+    void dispatch(openAccountCloseModal({ accountId: account.id }));
   }, [account.id, dispatch]);
 
   const { mutate: reopenAccount } = useReopenAccountMutation();

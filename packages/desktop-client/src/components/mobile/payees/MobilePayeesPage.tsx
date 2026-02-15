@@ -44,7 +44,7 @@ export function MobilePayeesPage() {
 
   const handlePayeePress = useCallback(
     (payee: PayeeEntity) => {
-      navigate(`/payees/${payee.id}`);
+      void navigate(`/payees/${payee.id}`);
     },
     [navigate],
   );
@@ -58,18 +58,18 @@ export function MobilePayeesPage() {
             id: payee.id,
           });
           const ruleIds = associatedRules.map(rule => rule.id).join(',');
-          navigate(`/rules?visible-rules=${ruleIds}`);
+          void navigate(`/rules?visible-rules=${ruleIds}`);
           return;
         } catch (error) {
           console.error('Failed to fetch payee rules:', error);
           // Fallback to general rules page
-          navigate('/rules');
+          void navigate('/rules');
           return;
         }
       }
 
       // Create a new rule for the payee
-      navigate('/rules/new', {
+      void navigate('/rules/new', {
         state: {
           rule: {
             conditions: [

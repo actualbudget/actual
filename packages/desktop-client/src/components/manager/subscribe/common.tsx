@@ -36,7 +36,7 @@ export function useBootstrapped(redirect = true) {
       const ensure = url => {
         if (location.pathname !== url) {
           if (redirect) {
-            navigate(url);
+            void navigate(url);
           }
         } else {
           setChecked(true);
@@ -56,7 +56,7 @@ export function useBootstrapped(redirect = true) {
 
         if ('error' in result || !result.hasServer) {
           console.log('error' in result && result.error);
-          navigate('/config-server');
+          void navigate('/config-server');
           return;
         }
 
@@ -76,7 +76,7 @@ export function useBootstrapped(redirect = true) {
         > = await send('subscribe-needs-bootstrap');
 
         if ('error' in result) {
-          navigate('/error', { state: { error: result.error } });
+          void navigate('/error', { state: { error: result.error } });
         } else if (result.bootstrapped) {
           ensure(`/login`);
 
@@ -89,7 +89,7 @@ export function useBootstrapped(redirect = true) {
         }
       }
     }
-    run();
+    void run();
   }, [
     location,
     navigate,

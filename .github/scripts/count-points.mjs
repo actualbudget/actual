@@ -96,7 +96,7 @@ async function getLastCommitBeforeDate(octokit, owner, repo, beforeDate) {
  * @param {string} repo - Repository name.
  * @param {number} prNumber - PR number.
  * @param {Date} monthEnd - The end date of the month to use as base revision.
- * @returns {Object} Object with category and points, or null if error.
+ * @returns {Promise<Object>} Object with category and points, or null if error.
  */
 async function getPRCategoryAndPoints(
   octokit,

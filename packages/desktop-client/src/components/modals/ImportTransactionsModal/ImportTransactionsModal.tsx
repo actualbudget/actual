@@ -413,7 +413,7 @@ export function ImportTransactionsModal({
       importNotes,
     });
 
-    parse(originalFileName, parseOptions);
+    void parse(originalFileName, parseOptions);
   }, [
     originalFileName,
     delimiter,
@@ -471,7 +471,7 @@ export function ImportTransactionsModal({
       importNotes,
     });
 
-    parse(res[0], parseOptions);
+    void parse(res[0], parseOptions);
   }
 
   function onUpdateFields(field, name) {
@@ -749,7 +749,7 @@ export function ImportTransactionsModal({
       return;
     }
 
-    onImportPreview();
+    void onImportPreview();
   }, [loadingState, parsedTransactions.length]);
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
@@ -1133,7 +1133,7 @@ export function ImportTransactionsModal({
                     isDisabled={count === 0}
                     isLoading={loadingState === 'importing'}
                     onPress={() => {
-                      onImport(close);
+                      void onImport(close);
                     }}
                   >
                     <Trans count={count}>Import {{ count }} transactions</Trans>

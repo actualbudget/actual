@@ -203,7 +203,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
 
       setAllMonths(allMonths);
     }
-    run();
+    void run();
   }, [locale]);
 
   useEffect(() => {

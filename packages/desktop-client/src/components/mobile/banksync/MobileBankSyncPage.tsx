@@ -98,7 +98,7 @@ export function MobileBankSyncPage() {
     (account: AccountEntity, action: 'link' | 'edit') => {
       switch (action) {
         case 'edit':
-          navigate(`/bank-sync/account/${account.id}/edit`);
+          void navigate(`/bank-sync/account/${account.id}/edit`);
           break;
         case 'link':
           dispatch(

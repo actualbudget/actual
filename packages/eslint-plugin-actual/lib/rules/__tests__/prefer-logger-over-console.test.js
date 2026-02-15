@@ -2,7 +2,7 @@ import { runClassic } from 'eslint-vitest-rule-tester';
 
 import * as rule from '../prefer-logger-over-console';
 
-runClassic(
+void runClassic(
   'prefer-logger-over-console',
   rule,
   {

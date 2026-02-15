@@ -97,7 +97,7 @@ export function showActivity({
         type: 'id',
       },
   ].filter(f => f);
-  navigate('/accounts', {
+  void navigate('/accounts', {
     state: {
       goBack: true,
       filterConditions,

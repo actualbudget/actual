@@ -22,7 +22,7 @@ export function useSimpleFinStatus() {
     }
 
     if (status === 'online') {
-      fetch();
+      void fetch();
     }
   }, [status]);
 

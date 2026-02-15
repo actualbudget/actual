@@ -11,7 +11,7 @@ export function AddScheduleButton() {
   const navigate = useNavigate();
 
   const handleAddSchedule = useCallback(() => {
-    navigate('/schedules/new');
+    void navigate('/schedules/new');
   }, [navigate]);
 
   return (

@@ -200,7 +200,7 @@ export function ManageRules({
       undo.setUndoState('openModal', { name: 'manage-rules', options: {} });
     }
 
-    loadData();
+    void loadData();
 
     return () => {
       undo.setUndoState('openModal', null);

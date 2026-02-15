@@ -23,7 +23,7 @@ switch (path.basename(__filename)) {
     break;
 }
 
-export const init = () => {
+export const init = async () => {
   // Nothing to do
 };
 

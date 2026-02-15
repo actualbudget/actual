@@ -37,8 +37,6 @@ test.describe('Settings', () => {
 
     const download = await downloadPromise;
 
-    expect(await download.suggestedFilename()).toMatch(
-      /^\d{4}-\d{2}-\d{2}-.*.zip$/,
-    );
+    expect(download.suggestedFilename()).toMatch(/^\d{4}-\d{2}-\d{2}-.*.zip$/);
   });
 });

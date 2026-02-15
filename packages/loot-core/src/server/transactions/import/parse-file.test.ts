@@ -31,7 +31,7 @@ type Transaction = {
 };
 
 async function getTransactions(accountId: string): Promise<Transaction[]> {
-  return await db.runQuery(
+  return db.runQuery(
     'SELECT * FROM transactions WHERE acct = ?',
     [accountId],
     true,
@@ -73,7 +73,7 @@ async function importFileWithRealTime(
 
 describe('File import', () => {
   test('qif import works', async () => {
-    prefs.loadPrefs();
+    await prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
     const { errors } = await importFileWithRealTime(
       'one',
@@ -86,7 +86,7 @@ describe('File import', () => {
   });
 
   test('ofx import works', async () => {
-    prefs.loadPrefs();
+    await prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
     const { errors } = await importFileWithRealTime(
@@ -100,7 +100,7 @@ describe('File import', () => {
   }, 45000);
 
   test('ofx import works (credit card)', async () => {
-    prefs.loadPrefs();
+    await prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
     const { errors } = await importFileWithRealTime(
@@ -114,7 +114,7 @@ describe('File import', () => {
   }, 45000);
 
   test('qfx import works', async () => {
-    prefs.loadPrefs();
+    await prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
     const { errors } = await importFileWithRealTime(
@@ -128,7 +128,7 @@ describe('File import', () => {
   }, 45000);
 
   test('import notes are respected when importing', async () => {
-    prefs.loadPrefs();
+    await prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
     // Test with importNotes enabled
@@ -144,7 +144,7 @@ describe('File import', () => {
     );
 
     // Clear transactions
-    await db.runQuery('DELETE FROM transactions WHERE acct = ?', ['one']);
+    db.runQuery('DELETE FROM transactions WHERE acct = ?', ['one']);
 
     // Test with importNotes disabled
     const { errors: errorsWithoutNotes } = await importFileWithRealTime(
@@ -159,7 +159,7 @@ describe('File import', () => {
   }, 45000);
 
   test('matches extensions correctly (case-insensitive, etc)', async () => {
-    prefs.loadPrefs();
+    await prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
     let res = await importFileWithRealTime(
@@ -181,7 +181,7 @@ describe('File import', () => {
   }, 45000);
 
   test('handles non-ASCII characters', async () => {
-    prefs.loadPrefs();
+    await prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
     const { errors } = await importFileWithRealTime(
@@ -195,7 +195,7 @@ describe('File import', () => {
   });
 
   test('handles html escaped plaintext', async () => {
-    prefs.loadPrefs();
+    await prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
     const { errors } = await importFileWithRealTime(
@@ -209,7 +209,7 @@ describe('File import', () => {
   });
 
   test('CAMT.053 import works', async () => {
-    prefs.loadPrefs();
+    await prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
     const { errors } = await importFileWithRealTime(

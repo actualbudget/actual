@@ -76,7 +76,7 @@ export function CalendarCard({
         latestTrans ? latestTrans.date : monthUtils.currentDay(),
       );
     }
-    fetchLatestTransaction();
+    void fetchLatestTransaction();
   }, []);
 
   const [start, end] = calculateTimeRange(
@@ -487,7 +487,7 @@ function CalendarCardInner({
               marginBottom: 6,
             }}
             onPress={() => {
-              navigate(
+              void navigate(
                 `/reports/calendar/${widgetId}?month=${formatDate(calendar.start, 'yyyy-MM')}`,
               );
             }}
@@ -562,11 +562,11 @@ function CalendarCardInner({
         isEditing={isEditing}
         onDayClick={date => {
           if (date) {
-            navigate(
+            void navigate(
               `/reports/calendar/${widgetId}?day=${formatDate(date, 'yyyy-MM-dd')}`,
             );
           } else {
-            navigate(`/reports/calendar/${widgetId}`);
+            void navigate(`/reports/calendar/${widgetId}`);
           }
         }}
       />

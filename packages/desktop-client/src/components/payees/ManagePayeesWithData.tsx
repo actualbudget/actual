@@ -38,7 +38,7 @@ export function ManagePayeesWithData({
       await dispatch(getPayees());
       await refetchOrphanedPayees();
     }
-    loadData();
+    void loadData();
 
     const unlisten = listen('sync-event', async event => {
       if (event.type === 'applied') {
@@ -75,7 +75,7 @@ export function ManagePayeesWithData({
 
     const lastUndoEvent = undo.getUndoState('undoEvent');
     if (lastUndoEvent) {
-      onUndo(lastUndoEvent);
+      void onUndo(lastUndoEvent);
     }
 
     return listen('undo-event', onUndo);

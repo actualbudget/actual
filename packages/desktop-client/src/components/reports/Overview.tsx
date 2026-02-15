@@ -219,7 +219,7 @@ export function Overview({ dashboard }: OverviewProps) {
       return;
     }
 
-    send(
+    void send(
       'dashboard-update',
       newLayout.map(item => ({
         id: item.i,
@@ -235,7 +235,7 @@ export function Overview({ dashboard }: OverviewProps) {
     type: T['type'],
     meta: T['meta'] = null,
   ) => {
-    send('dashboard-add-widget', {
+    void send('dashboard-add-widget', {
       type,
       width: 4,
       height: 2,
@@ -245,7 +245,7 @@ export function Overview({ dashboard }: OverviewProps) {
   };
 
   const onRemoveWidget = (widgetId: string) => {
-    send('dashboard-remove-widget', widgetId);
+    void send('dashboard-remove-widget', widgetId);
   };
 
   const onExport = () => {
@@ -277,7 +277,7 @@ export function Overview({ dashboard }: OverviewProps) {
       }),
     } satisfies ExportImportDashboard;
 
-    window.Actual.saveFile(
+    void window.Actual.saveFile(
       JSON.stringify(data, null, 2),
       'dashboard.json',
       t('Export Dashboard'),
@@ -367,14 +367,14 @@ export function Overview({ dashboard }: OverviewProps) {
   };
 
   const onMetaChange = (widget: { i: string }, newMeta: Widget['meta']) => {
-    send('dashboard-update-widget', {
+    void send('dashboard-update-widget', {
       id: widget.i,
       meta: newMeta,
     });
   };
 
   const onCopyWidget = (widgetId: string, targetDashboardId: string) => {
-    send('dashboard-copy-widget', {
+    void send('dashboard-copy-widget', {
       widgetId,
       targetDashboardPageId: targetDashboardId,
     });
@@ -386,7 +386,7 @@ export function Overview({ dashboard }: OverviewProps) {
     const next_dashboard = dashboard_pages.find(d => d.id !== id);
     // NOTE: This should hold since invariant dashboard_pages > 1
     if (next_dashboard) {
-      navigate(`/reports/${next_dashboard.id}`);
+      void navigate(`/reports/${next_dashboard.id}`);
     }
   };
 
@@ -474,7 +474,7 @@ export function Overview({ dashboard }: OverviewProps) {
                           slot="close"
                           onMenuSelect={item => {
                             if (item === 'custom-report') {
-                              navigate('/reports/custom');
+                              void navigate('/reports/custom');
                               return;
                             }
 
@@ -599,16 +599,16 @@ export function Overview({ dashboard }: OverviewProps) {
                           onMenuSelect={item => {
                             switch (item) {
                               case 'reset':
-                                onResetDashboard();
+                                void onResetDashboard();
                                 break;
                               case 'export':
                                 onExport();
                                 break;
                               case 'import':
-                                onImport();
+                                void onImport();
                                 break;
                               case 'delete':
-                                onDeleteDashboard(dashboard.id);
+                                void onDeleteDashboard(dashboard.id);
                                 break;
                               default:
                                 throw new Error(

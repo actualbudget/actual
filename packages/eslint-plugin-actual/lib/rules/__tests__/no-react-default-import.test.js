@@ -10,7 +10,7 @@ import * as rule from '../no-react-default-import';
 // Tests
 //------------------------------------------------------------------------------
 
-runClassic(
+void runClassic(
   'no-react-default-import',
   rule,
   {

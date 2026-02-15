@@ -24,8 +24,8 @@ afterEach(() => {
 
 describe('Sync', () => {
   it('should send messages to the server', async () => {
-    prefs.loadPrefs();
-    prefs.savePrefs({ groupId: 'group' });
+    void prefs.loadPrefs();
+    void prefs.savePrefs({ groupId: 'group' });
 
     let timestamp = Timestamp.send();
     await sendMessages([
@@ -63,8 +63,8 @@ describe('Sync', () => {
   });
 
   it('should resend old messages to the server', async () => {
-    prefs.loadPrefs();
-    prefs.savePrefs({ groupId: 'group' });
+    void prefs.loadPrefs();
+    void prefs.savePrefs({ groupId: 'group' });
 
     global.stepForwardInTime(Date.parse('2018-11-13T13:20:00.000Z'));
 
@@ -88,7 +88,9 @@ describe('Sync', () => {
     // Move the clock forward so that the above 2 messages are not
     // automatically sent out, but will need to be re-sent by way of
     // the merkle tree
-    prefs.savePrefs({ lastSyncedTimestamp: getClock().timestamp.toString() });
+    void prefs.savePrefs({
+      lastSyncedTimestamp: getClock().timestamp.toString(),
+    });
 
     expect(mockSyncServer.getMessages().length).toBe(0);
 
@@ -99,8 +101,8 @@ describe('Sync', () => {
   });
 
   it('should sync multiple clients', async () => {
-    prefs.loadPrefs();
-    prefs.savePrefs({
+    void prefs.loadPrefs();
+    void prefs.savePrefs({
       groupId: 'group',
       lastSyncedTimestamp: Timestamp.zero.toString(),
     });
@@ -150,7 +152,7 @@ describe('Sync', () => {
   });
 });
 
-async function registerBudgetMonths(months) {
+function registerBudgetMonths(months) {
   const createdMonths = new Set();
   for (const month of months) {
     createdMonths.add(month);
@@ -159,8 +161,8 @@ async function registerBudgetMonths(months) {
 }
 
 async function asSecondClient(func) {
-  prefs.loadPrefs();
-  prefs.savePrefs({
+  void prefs.loadPrefs();
+  void prefs.savePrefs({
     groupId: 'group',
     lastSyncedTimestamp: Timestamp.zero.toString(),
   });
@@ -168,7 +170,7 @@ async function asSecondClient(func) {
   await func();
 
   await global.emptyDatabase()();
-  prefs.savePrefs({
+  void prefs.savePrefs({
     groupId: 'group',
     lastSyncedTimestamp: Timestamp.zero.toString(),
   });

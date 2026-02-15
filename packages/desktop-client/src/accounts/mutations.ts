@@ -32,7 +32,7 @@ import type { AppDispatch } from '@desktop-client/redux/store';
 import { setNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
 const invalidateQueries = (queryClient: QueryClient, queryKey?: QueryKey) => {
-  queryClient.invalidateQueries({
+  void queryClient.invalidateQueries({
     queryKey: queryKey ?? accountQueries.lists(),
   });
 };

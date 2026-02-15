@@ -29,7 +29,7 @@ const sendThrow: typeof send = async (name, args) => {
 };
 
 function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
-  queryClient.invalidateQueries({
+  void queryClient.invalidateQueries({
     queryKey: queryKey ?? categoryQueries.lists(),
   });
 }

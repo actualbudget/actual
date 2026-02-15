@@ -108,12 +108,12 @@ function OpenIdLogin({ setError }) {
     if (error) {
       setError(error);
     } else {
-      navigate('/');
+      void navigate('/');
     }
   }
 
   useEffect(() => {
-    send('owner-created').then(created => setWarnMasterCreation(!created));
+    void send('owner-created').then(created => setWarnMasterCreation(!created));
   }, []);
 
   useEffect(() => {
@@ -202,7 +202,7 @@ function OpenIdLogin({ setError }) {
                   variant="bare"
                   isDisabled={firstLoginPassword === '' && warnMasterCreation}
                   onPress={() => {
-                    send('get-openid-config', {
+                    void send('get-openid-config', {
                       password: firstLoginPassword,
                     }).then(config => {
                       if ('error' in config) {
@@ -259,7 +259,7 @@ function OpenIdLogin({ setError }) {
               </Button>,
             ]}
             onSetOpenId={async config => {
-              onSetOpenId(config);
+              void onSetOpenId(config);
             }}
           />
         </View>
@@ -316,7 +316,7 @@ export function Login() {
 
   useEffect(() => {
     if (checked && !searchParams.has('error')) {
-      (async () => {
+      void (async () => {
         if (method === 'header') {
           setError(null);
           const { error } = await send('subscribe-sign-in', {
@@ -327,7 +327,7 @@ export function Login() {
           if (error) {
             setError(error);
           } else {
-            dispatch(loggedIn());
+            void dispatch(loggedIn());
           }
         }
       })();
