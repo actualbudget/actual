@@ -1,4 +1,5 @@
-import express, { Request, Response } from 'express';
+import type { Request, Response } from 'express';
+import express from 'express';
 
 import { apiTokenService } from './services/api-token-service';
 import { countUserAccess } from './services/user-service';
@@ -15,122 +16,125 @@ app.use(express.json());
 app.use(requestLoggerMiddleware);
 app.use(validateSessionMiddleware);
 
-interface ApiTokenLocals {
+type ApiTokenLocals = {
   user_id: string;
   auth_method?: string;
   budget_ids?: string[];
-}
+};
 
-interface CreateTokenBody {
+type CreateTokenBody = {
   name?: string;
   budgetIds?: unknown[];
   expiresAt?: number | null;
-}
+};
 
-interface UpdateTokenBody {
+type UpdateTokenBody = {
   enabled?: boolean;
-}
+};
 
 // Create a new API token
-app.post('/', async (req: Request<object, object, CreateTokenBody>, res: Response) => {
-  const locals = res.locals as ApiTokenLocals;
+app.post(
+  '/',
+  async (req: Request<object, object, CreateTokenBody>, res: Response) => {
+    const locals = res.locals as ApiTokenLocals;
 
-  if (locals.auth_method === 'api_token') {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden-auth-method',
-      details: 'API tokens cannot manage other API tokens',
-    });
-    return;
-  }
-
-  const userId = locals.user_id;
-  const { name, budgetIds = [] } = req.body || {};
-  // Normalize expiresAt: null/undefined -> TOKEN_EXPIRATION_NEVER (-1)
-  const expiresAt = req.body?.expiresAt ?? TOKEN_EXPIRATION_NEVER;
-
-  if (!name || typeof name !== 'string' || name.trim() === '') {
-    res.status(400).send({
-      status: 'error',
-      reason: 'invalid-name',
-      details: 'Token name is required',
-    });
-    return;
-  }
-
-  if (!Array.isArray(budgetIds)) {
-    res.status(400).send({
-      status: 'error',
-      reason: 'invalid-budget-ids',
-      details: 'budgetIds must be an array',
-    });
-    return;
-  }
-
-  // Validate each budgetId is a non-empty string and user has access
-  for (const budgetId of budgetIds) {
-    if (typeof budgetId !== 'string' || budgetId.trim() === '') {
-      res.status(400).send({
-        status: 'error',
-        reason: 'invalid-budget-id',
-        details: 'Each budgetId must be a non-empty string',
-      });
-      return;
-    }
-
-    // Check that user has access to this budget
-    const accessCount = countUserAccess(budgetId, userId);
-    if (accessCount === 0) {
+    if (locals.auth_method === 'api_token') {
       res.status(403).send({
         status: 'error',
-        reason: 'forbidden-budget',
-        details: `You do not have access to budget: ${budgetId}`,
+        reason: 'forbidden-auth-method',
+        details: 'API tokens cannot manage other API tokens',
       });
       return;
     }
-  }
 
-  if (
-    expiresAt !== TOKEN_EXPIRATION_NEVER &&
-    (typeof expiresAt !== 'number' || expiresAt < 0)
-  ) {
-    res.status(400).send({
-      status: 'error',
-      reason: 'invalid-expires-at',
-      details: 'expiresAt must be a positive number (unix timestamp) or null',
-    });
-    return;
-  }
+    const userId = locals.user_id;
+    const { name, budgetIds = [] } = req.body || {};
+    // Normalize expiresAt: null/undefined -> TOKEN_EXPIRATION_NEVER (-1)
+    const expiresAt = req.body?.expiresAt ?? TOKEN_EXPIRATION_NEVER;
 
-  try {
-    const result = await apiTokenService.createToken(
-      userId,
-      name.trim(),
-      budgetIds as string[],
-      expiresAt,
-    );
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+      res.status(400).send({
+        status: 'error',
+        reason: 'invalid-name',
+        details: 'Token name is required',
+      });
+      return;
+    }
 
-    res.status(201).send({
-      status: 'ok',
-      data: {
-        id: result.id,
-        token: result.token, // Only returned on creation
-        prefix: result.prefix,
-        name: result.name,
-        budgetIds: result.budgetIds,
-        createdAt: result.createdAt,
-        expiresAt: result.expiresAt,
-      },
-    });
-  } catch (error) {
-    console.error('Failed to create API token:', error);
-    res.status(500).send({
-      status: 'error',
-      reason: 'internal-error',
-      details: 'Failed to create API token',
-    });
-  }
-});
+    if (!Array.isArray(budgetIds)) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'invalid-budget-ids',
+        details: 'budgetIds must be an array',
+      });
+      return;
+    }
+
+    // Validate each budgetId is a non-empty string and user has access
+    for (const budgetId of budgetIds) {
+      if (typeof budgetId !== 'string' || budgetId.trim() === '') {
+        res.status(400).send({
+          status: 'error',
+          reason: 'invalid-budget-id',
+          details: 'Each budgetId must be a non-empty string',
+        });
+        return;
+      }
+
+      // Check that user has access to this budget
+      const accessCount = countUserAccess(budgetId, userId);
+      if (accessCount === 0) {
+        res.status(403).send({
+          status: 'error',
+          reason: 'forbidden-budget',
+          details: `You do not have access to budget: ${budgetId}`,
+        });
+        return;
+      }
+    }
+
+    if (
+      expiresAt !== TOKEN_EXPIRATION_NEVER &&
+      (typeof expiresAt !== 'number' || expiresAt < 0)
+    ) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'invalid-expires-at',
+        details: 'expiresAt must be a positive number (unix timestamp) or null',
+      });
+      return;
+    }
+
+    try {
+      const result = await apiTokenService.createToken(
+        userId,
+        name.trim(),
+        budgetIds as string[],
+        expiresAt,
+      );
+
+      res.status(201).send({
+        status: 'ok',
+        data: {
+          id: result.id,
+          token: result.token, // Only returned on creation
+          prefix: result.prefix,
+          name: result.name,
+          budgetIds: result.budgetIds,
+          createdAt: result.createdAt,
+          expiresAt: result.expiresAt,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to create API token:', error);
+      res.status(500).send({
+        status: 'error',
+        reason: 'internal-error',
+        details: 'Failed to create API token',
+      });
+    }
+  },
+);
 
 // List all API tokens for the current user
 app.get('/', async (req: Request, res: Response) => {
@@ -215,61 +219,67 @@ app.delete('/:id', async (req: Request<{ id: string }>, res: Response) => {
 });
 
 // Enable or disable an API token
-app.patch('/:id', async (req: Request<{ id: string }, object, UpdateTokenBody>, res: Response) => {
-  const locals = res.locals as ApiTokenLocals;
+app.patch(
+  '/:id',
+  async (
+    req: Request<{ id: string }, object, UpdateTokenBody>,
+    res: Response,
+  ) => {
+    const locals = res.locals as ApiTokenLocals;
 
-  if (locals.auth_method === 'api_token') {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden-auth-method',
-      details: 'API tokens cannot manage other API tokens',
-    });
-    return;
-  }
-
-  const userId = locals.user_id;
-  const tokenId = req.params.id;
-  const { enabled } = req.body || {};
-
-  if (!tokenId) {
-    res.status(400).send({
-      status: 'error',
-      reason: 'invalid-token-id',
-      details: 'Token ID is required',
-    });
-    return;
-  }
-
-  if (typeof enabled !== 'boolean') {
-    res.status(400).send({
-      status: 'error',
-      reason: 'invalid-enabled',
-      details: 'enabled must be a boolean',
-    });
-    return;
-  }
-
-  try {
-    const updated = apiTokenService.setTokenEnabled(tokenId, userId, enabled);
-
-    if (!updated) {
-      res.status(404).send({
+    if (locals.auth_method === 'api_token') {
+      res.status(403).send({
         status: 'error',
-        reason: 'not-found',
-        details: 'Token not found or you do not have permission to update it',
+        reason: 'forbidden-auth-method',
+        details: 'API tokens cannot manage other API tokens',
       });
       return;
     }
 
-    res.status(200).send({
-      status: 'ok',
-    });
-  } catch (error) {
-    console.error('Failed to update API token:', error);
-    res.status(500).send({
-      status: 'error',
-      reason: 'internal-error',
-      details: 'Failed to update API token',
-    });
-  }
-});
+    const userId = locals.user_id;
+    const tokenId = req.params.id;
+    const { enabled } = req.body || {};
+
+    if (!tokenId) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'invalid-token-id',
+        details: 'Token ID is required',
+      });
+      return;
+    }
+
+    if (typeof enabled !== 'boolean') {
+      res.status(400).send({
+        status: 'error',
+        reason: 'invalid-enabled',
+        details: 'enabled must be a boolean',
+      });
+      return;
+    }
+
+    try {
+      const updated = apiTokenService.setTokenEnabled(tokenId, userId, enabled);
+
+      if (!updated) {
+        res.status(404).send({
+          status: 'error',
+          reason: 'not-found',
+          details: 'Token not found or you do not have permission to update it',
+        });
+        return;
+      }
+
+      res.status(200).send({
+        status: 'ok',
+      });
+    } catch (error) {
+      console.error('Failed to update API token:', error);
+      res.status(500).send({
+        status: 'error',
+        reason: 'internal-error',
+        details: 'Failed to update API token',
+      });
+    }
+  },
+);
