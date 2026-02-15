@@ -20,12 +20,12 @@ import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
+import { useNetWorthProjectionRefresh } from '@desktop-client/components/reports/useNetWorthProjectionRefresh';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useNetWorthProjectionRefresh } from '@desktop-client/components/reports/useNetWorthProjectionRefresh';
 
 type NetWorthCardProps = {
   widgetId: string;
@@ -88,38 +88,35 @@ export function NetWorthCard({
   const onCardHover = useCallback(() => setIsCardHovered(true), []);
   const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
 
-  const params = useMemo(
-    () => {
-      void projectionRevision;
-      return netWorthSpreadsheet(
-        start,
-        end,
-        accounts,
-        meta?.conditions,
-        meta?.conditionsOp,
-        locale,
-        meta?.interval || 'Monthly',
-        firstDayOfWeekIdx,
-        format,
-        isProjectionEnabled,
-        budgetType,
-      );
-    },
-    [
+  const params = useMemo(() => {
+    void projectionRevision;
+    return netWorthSpreadsheet(
       start,
       end,
       accounts,
       meta?.conditions,
       meta?.conditionsOp,
       locale,
-      meta?.interval,
+      meta?.interval || 'Monthly',
       firstDayOfWeekIdx,
       format,
       isProjectionEnabled,
       budgetType,
-      projectionRevision,
-    ],
-  );
+    );
+  }, [
+    start,
+    end,
+    accounts,
+    meta?.conditions,
+    meta?.conditionsOp,
+    locale,
+    meta?.interval,
+    firstDayOfWeekIdx,
+    format,
+    isProjectionEnabled,
+    budgetType,
+    projectionRevision,
+  ]);
   const data = useReport('net_worth', params);
 
   return (
