@@ -26,7 +26,7 @@ describe('web filesystem', () => {
   test('basic reads/writes are stored in idb', async () => {
     await idb.openDatabase();
     await sqlite.init();
-    init();
+    await init();
 
     // Text file
     await writeFile('/documents/foo.txt', 'hello');
@@ -68,7 +68,7 @@ describe('web filesystem', () => {
   test('writing to sqlite files creates symlinks', async () => {
     await idb.openDatabase();
     await sqlite.init();
-    init();
+    await init();
 
     await writeFile('/documents/db.sqlite', 'some junk');
 
