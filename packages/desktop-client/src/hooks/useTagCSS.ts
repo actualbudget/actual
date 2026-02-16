@@ -10,7 +10,7 @@ import { useTags } from './useTags';
 import { useTheme } from '@desktop-client/style';
 
 export function useTagCSS() {
-  const tags = useTags();
+  const { data: tags = [] } = useTags();
   const [theme] = useTheme();
 
   return useCallback(

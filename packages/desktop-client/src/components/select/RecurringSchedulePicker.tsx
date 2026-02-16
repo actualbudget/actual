@@ -15,7 +15,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { sendCatch } from 'loot-core/platform/client/fetch';
+import { sendCatch } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { getRecurringDescription } from 'loot-core/shared/schedules';
 import type { RecurConfig, RecurPattern } from 'loot-core/types/models';

@@ -22,7 +22,7 @@ import { View } from '@actual-app/components/view';
 import { format as formatDate } from 'date-fns';
 import debounce from 'lodash/debounce';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import type { CalendarWidget } from 'loot-core/types/models';
 import type { SyncedPrefs } from 'loot-core/types/prefs';

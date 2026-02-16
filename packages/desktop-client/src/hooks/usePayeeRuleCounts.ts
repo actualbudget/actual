@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 
 type PayeeRuleCounts = Map<string, number>;
 

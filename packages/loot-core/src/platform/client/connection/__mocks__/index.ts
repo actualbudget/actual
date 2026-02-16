@@ -14,7 +14,7 @@ export const initServer: T.InitServer = handlers => {
         if (catchErrors) {
           return promise.then(
             data => ({ data }),
-            err => ({ error: { message: err.message } }),
+            error => ({ error }),
           );
         }
         return promise;

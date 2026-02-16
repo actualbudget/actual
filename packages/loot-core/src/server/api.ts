@@ -224,7 +224,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     await handlers['load-budget']({ id: localBudget.id });
     const result = await handlers['sync-budget']();
     if (result.error) {
-      throw new Error(getSyncError(result.error, localBudget.id));
+      throw new Error(getSyncError(result.error.reason, localBudget.id));
     }
     return;
   }
@@ -253,7 +253,7 @@ handlers['api/sync'] = async function () {
   const { id } = prefs.getPrefs();
   const result = await handlers['sync-budget']();
   if (result.error) {
-    throw new Error(getSyncError(result.error, id));
+    throw new Error(getSyncError(result.error.reason, id));
   }
 };
 
@@ -571,8 +571,7 @@ handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
 
 handlers['api/accounts-get'] = async function () {
   checkFileOpen();
-  // TODO: Force cast to AccountEntity. This should be updated to an AQL query.
-  const accounts = (await db.getAccounts()) as AccountEntity[];
+  const accounts: AccountEntity[] = await handlers['accounts-get']();
   return accounts.map(account => accountModel.toExternal(account));
 };
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 
 import { useSyncServerStatus } from './useSyncServerStatus';
 

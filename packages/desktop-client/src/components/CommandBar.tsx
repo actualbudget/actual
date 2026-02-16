@@ -142,7 +142,7 @@ export function CommandBar() {
   }, [open]);
 
   const allAccounts = useAccounts();
-  const { data: customReports } = useReports();
+  const { data: customReports = [] } = useReports();
 
   const accounts = allAccounts.filter(acc => !acc.closed);
 

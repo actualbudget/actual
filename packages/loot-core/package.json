@@ -32,9 +32,9 @@
     "./client/transfer": "./src/client/transfer.ts",
     "./client/undo": "./src/client/undo.ts",
     "./mocks": "./src/mocks/index.ts",
-    "./platform/client/fetch": {
-      "node": "./src/platform/client/fetch/index.ts",
-      "default": "./src/platform/client/fetch/index.browser.ts"
+    "./platform/client/connection": {
+      "node": "./src/platform/client/connection/index.ts",
+      "default": "./src/platform/client/connection/index.browser.ts"
     },
     "./platform/client/undo": "./src/platform/client/undo/index.ts",
     "./platform/exceptions": "./src/platform/exceptions/index.ts",

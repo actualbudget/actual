@@ -5,7 +5,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { t } from 'i18next';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { currencyToAmount, integerToCurrency } from 'loot-core/shared/util';
 import type { Handlers } from 'loot-core/types/handlers';
@@ -127,7 +127,7 @@ export function makeAmountFullStyle(
 
 export function findSortDown<T extends { id: string }>(
   arr: T[],
-  pos: DropPosition,
+  pos: DropPosition | null,
   targetId: string,
 ) {
   if (pos === 'top') {
@@ -151,7 +151,7 @@ export function findSortDown<T extends { id: string }>(
 
 export function findSortUp<T extends { id: string }>(
   arr: T[],
-  pos: DropPosition,
+  pos: DropPosition | null,
   targetId: string,
 ) {
   if (pos === 'bottom') {

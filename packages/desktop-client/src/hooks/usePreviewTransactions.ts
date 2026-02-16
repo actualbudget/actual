@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { computeSchedulePreviewTransactions } from 'loot-core/shared/schedules';
 import { ungroupTransactions } from 'loot-core/shared/transactions';
 import type { IntegerAmount } from 'loot-core/shared/util';

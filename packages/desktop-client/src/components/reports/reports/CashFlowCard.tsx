@@ -6,7 +6,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { Bar, BarChart, LabelList } from 'recharts';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import type { CashFlowWidget } from 'loot-core/types/models';
 

@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import * as nativeFs from 'fs';
 
-import * as fetchClient from '../platform/client/fetch';
+import * as fetchClient from '../platform/client/connection';
 import * as sqlite from '../platform/server/sqlite';
 import * as db from '../server/db';
 import type * as MigrationsType from '../server/migrate/migrations';
@@ -16,7 +16,7 @@ import * as rules from '../server/transactions/transaction-rules';
 import { updateVersion } from '../server/update';
 import { resetTracer, tracer } from '../shared/test-helpers';
 
-vi.mock('../platform/client/fetch');
+vi.mock('../platform/client/connection');
 vi.mock('../platform/exceptions');
 vi.mock('../platform/server/asyncStorage');
 vi.mock('../platform/server/connection');

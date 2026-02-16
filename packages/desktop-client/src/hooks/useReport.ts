@@ -1,15 +1,11 @@
-import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { useReports } from './useReports';
+import { reportQueries } from '@desktop-client/reports';
 
-export function useReport(id: string) {
-  const { data, isLoading } = useReports();
-
-  return useMemo(
-    () => ({
-      data: data.find(report => report.id === id),
-      isLoading,
-    }),
-    [data, id, isLoading],
-  );
+export function useReport(id?: string | null) {
+  return useQuery({
+    ...reportQueries.list(),
+    select: reports => reports.find(report => report.id === id),
+    enabled: !!id,
+  });
 }

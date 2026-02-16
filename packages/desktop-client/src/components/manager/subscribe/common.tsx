@@ -4,7 +4,7 @@ import { useLocation } from 'react-router';
 
 import { theme } from '@actual-app/components/theme';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import type { Handlers } from 'loot-core/types/handlers';
 
 import {

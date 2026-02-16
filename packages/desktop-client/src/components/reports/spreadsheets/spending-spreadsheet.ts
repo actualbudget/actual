@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import keyBy from 'lodash/keyBy';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import type {

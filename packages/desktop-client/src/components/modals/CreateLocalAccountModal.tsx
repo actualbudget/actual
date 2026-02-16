@@ -15,7 +15,7 @@ import { View } from '@actual-app/components/view';
 
 import { toRelaxedNumber } from 'loot-core/shared/util';
 
-import { createAccount } from '@desktop-client/accounts/accountsSlice';
+import { useCreateAccountMutation } from '@desktop-client/accounts';
 import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
@@ -55,6 +55,8 @@ export function CreateLocalAccountModal() {
     }
   };
 
+  const createAccount = useCreateAccountMutation();
+
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -64,15 +66,19 @@ export function CreateLocalAccountModal() {
     setBalanceError(balanceError);
 
     if (!nameError && !balanceError) {
-      dispatch(closeModal());
-      const id = await dispatch(
-        createAccount({
+      createAccount.mutate(
+        {
           name,
           balance: toRelaxedNumber(balance),
           offBudget: offbudget,
-        }),
-      ).unwrap();
-      navigate('/accounts/' + id);
+        },
+        {
+          onSuccess: id => {
+            dispatch(closeModal());
+            navigate('/accounts/' + id);
+          },
+        },
+      );
     }
   };
   return (

@@ -18,15 +18,15 @@
     "customGroups": [
       {
         "groupName": "react",
-        "elementNamePattern": ["react"]
+        "elementNamePattern": ["react", "react-dom/*", "react-*"]
       },
       {
         "groupName": "loot-core",
-        "elementNamePattern": ["loot-core"]
+        "elementNamePattern": ["loot-core/**"]
       },
       {
         "groupName": "desktop-client",
-        "elementNamePattern": ["@desktop-client"]
+        "elementNamePattern": ["@desktop-client/**"]
       }
     ],
     "newlinesBetween": true

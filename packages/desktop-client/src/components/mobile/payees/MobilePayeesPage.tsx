@@ -5,7 +5,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import type { PayeeEntity, RuleEntity } from 'loot-core/types/models';
 
