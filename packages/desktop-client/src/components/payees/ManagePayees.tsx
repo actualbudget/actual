@@ -108,18 +108,17 @@ export const ManagePayees = ({
         getNormalisedString(p.name).includes(getNormalisedString(filter)),
       );
     }
+
+    const orphanedPayeeIds = new Set(orphanedPayees.map(o => o.id));
+
     switch (orphanDisplayMode) {
       case 'include-orphans':
         break;
       case 'hide-orphans':
-        filtered = filtered.filter(
-          p => !orphanedPayees.map(o => o.id).includes(p.id),
-        );
+        filtered = filtered.filter(p => !orphanedPayeeIds.has(p.id));
         break;
       case 'only-orphans':
-        filtered = filtered.filter(p =>
-          orphanedPayees.map(o => o.id).includes(p.id),
-        );
+        filtered = filtered.filter(p => orphanedPayeeIds.has(p.id));
         break;
       default:
     }
