@@ -147,7 +147,7 @@ export function useDroppable<T extends { id: string }>({
 }
 
 type ItemPosition = 'first' | 'last' | null;
-export const DropHighlightPosContext = createContext<ItemPosition | null>(null);
+export const DropHighlightPosContext = createContext<ItemPosition>(null);
 
 type DropHighlightProps = {
   pos: DropPosition;
