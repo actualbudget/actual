@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -63,7 +62,7 @@ function AppInner() {
   }, []);
 
   useEffect(() => {
-    const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {
+    const maybeUpdate = async <T,>(cb?: () => T): Promise<T | void> => {
       if (global.Actual.isUpdateReadyForDownload()) {
         dispatch(
           setAppState({

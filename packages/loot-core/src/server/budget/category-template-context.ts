@@ -12,6 +12,7 @@ import type {
   GoalTemplate,
   PercentageTemplate,
   PeriodicTemplate,
+  RefillTemplate,
   RemainderTemplate,
   SimpleTemplate,
   SpendTemplate,
@@ -155,6 +156,10 @@ export class CategoryTemplateContext {
       switch (template.type) {
         case 'simple': {
           newBudget = CategoryTemplateContext.runSimple(template, this);
+          break;
+        }
+        case 'refill': {
+          newBudget = CategoryTemplateContext.runRefill(template, this);
           break;
         }
         case 'copy': {
@@ -553,6 +558,13 @@ export class CategoryTemplateContext {
     }
   }
 
+  static runRefill(
+    template: RefillTemplate,
+    templateContext: CategoryTemplateContext,
+  ): number {
+    return templateContext.limitAmount - templateContext.fromLastMonth;
+  }
+
   static async runCopy(
     template: CopyTemplate,
     templateContext: CategoryTemplateContext,
@@ -577,7 +589,8 @@ export class CategoryTemplateContext {
     );
     const period = template.period.period;
     const numPeriods = template.period.amount;
-    let date = template.starting;
+    let date =
+      template.starting ?? monthUtils.firstDayOfMonth(templateContext.month);
 
     let dateShiftFunction;
     switch (period) {

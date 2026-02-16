@@ -127,7 +127,7 @@ export function makeAmountFullStyle(
 
 export function findSortDown<T extends { id: string }>(
   arr: T[],
-  pos: DropPosition,
+  pos: DropPosition | null,
   targetId: string,
 ) {
   if (pos === 'top') {
@@ -151,7 +151,7 @@ export function findSortDown<T extends { id: string }>(
 
 export function findSortUp<T extends { id: string }>(
   arr: T[],
-  pos: DropPosition,
+  pos: DropPosition | null,
   targetId: string,
 ) {
   if (pos === 'bottom') {
