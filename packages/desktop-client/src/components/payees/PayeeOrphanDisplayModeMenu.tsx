@@ -34,7 +34,7 @@ export function PayeeOrphanDisplayModeMenu({
       'include-orphans',
       'only-orphans',
       'hide-orphans',
-    ] as PayeeOrphanDisplayMode[]
+    ] satisfies PayeeOrphanDisplayMode[]
   ).map(mode => ({
     name: mode,
     text: getPayeeOrphanDisplayModeTitle(t, mode),
