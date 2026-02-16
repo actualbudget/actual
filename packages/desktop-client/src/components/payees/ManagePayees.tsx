@@ -293,6 +293,7 @@ export const ManagePayees = ({
             onPress={() => setPayeeDisplayModeMenuOpen(true)}
           >
             {getPayeeOrphanDisplayModeTitle(t, orphanDisplayMode)}
+            <SvgExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
           </Button>
 
           <Popover
