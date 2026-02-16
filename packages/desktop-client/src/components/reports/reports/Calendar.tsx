@@ -55,6 +55,7 @@ import { TransactionList } from '@desktop-client/components/transactions/Transac
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { DisplayPayeeProvider } from '@desktop-client/hooks/useDisplayPayee';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -69,9 +70,9 @@ import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
 import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
-import { useWidget } from '@desktop-client/hooks/useWidget';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
 
 const CHEVRON_HEIGHT = 42;
 const SUMMARY_HEIGHT = 140;
@@ -79,12 +80,12 @@ const SUMMARY_HEIGHT = 140;
 export function Calendar() {
   const params = useParams();
   const [searchParams] = useSearchParams();
-  const { data: widget, isLoading } = useWidget<CalendarWidget>(
-    params.id ?? '',
-    'calendar-card',
-  );
+  const { data: widget, isPending } = useDashboardWidget<CalendarWidget>({
+    id: params.id,
+    type: 'calendar-card',
+  });
 
-  if (isLoading) {
+  if (isPending) {
     return <LoadingIndicator />;
   }
 
@@ -326,6 +327,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const title = widget?.meta?.name || t('Calendar');
   const table = useRef<TableHandleRef<TransactionEntity>>(null);
   const dateFormat = useDateFormat();
+  const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
 
   const onSaveWidgetName = async (newName: string) => {
     if (!widget) {
@@ -333,11 +335,13 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     }
 
     const name = newName || t('Calendar');
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        name,
+    updateDashboardWidgetMutation.mutate({
+      widget: {
+        id: widget.id,
+        meta: {
+          ...(widget.meta ?? {}),
+          name,
+        },
       },
     });
   };
@@ -353,39 +357,46 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       throw new Error('No widget that could be saved.');
     }
 
-    try {
-      await send('dashboard-update-widget', {
-        id: widget.id,
-        meta: {
-          ...(widget.meta ?? {}),
-          conditions,
-          conditionsOp,
-          timeFrame: {
-            start,
-            end,
-            mode,
+    updateDashboardWidgetMutation.mutate(
+      {
+        widget: {
+          id: widget.id,
+          meta: {
+            ...(widget.meta ?? {}),
+            conditions,
+            conditionsOp,
+            timeFrame: {
+              start,
+              end,
+              mode,
+            },
           },
         },
-      });
-      dispatch(
-        addNotification({
-          notification: {
-            type: 'message',
-            message: t('Dashboard widget successfully saved.'),
-          },
-        }),
-      );
-    } catch (error) {
-      dispatch(
-        addNotification({
-          notification: {
-            type: 'error',
-            message: t('Failed to save dashboard widget.'),
-          },
-        }),
-      );
-      console.error('Error saving widget:', error);
-    }
+      },
+      {
+        onSuccess: () => {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'message',
+                message: t('Dashboard widget successfully saved.'),
+              },
+            }),
+          );
+        },
+        onError: error => {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: t('Failed to save dashboard widget.'),
+              },
+            }),
+          );
+          console.error('Error saving widget:', error);
+        },
+      },
+    );
   }
   const { totalIncome, totalExpense } = useMemo(() => {
     if (!data || !data.calendarData) {

@@ -37,8 +37,8 @@ import { ReportCardName } from '@desktop-client/components/reports/ReportCardNam
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { calendarSpreadsheet } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
 import type { CalendarDataType } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
@@ -169,7 +169,7 @@ export function CalendarCard({
   }, [data]);
 
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useWidgetCopyMenu(onCopy);
+    useDashboardWidgetCopyMenu(onCopy);
 
   return (
     <ReportCard
