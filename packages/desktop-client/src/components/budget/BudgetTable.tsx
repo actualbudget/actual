@@ -96,7 +96,7 @@ export function BudgetTable(props: BudgetTableProps) {
 
   const _onReorderCategory = (
     id: string,
-    dropPos: DropPosition,
+    dropPos: DropPosition | null,
     targetId: string,
   ) => {
     const isGroup = !!categoryGroups.find(g => g.id === targetId);
@@ -137,7 +137,7 @@ export function BudgetTable(props: BudgetTableProps) {
 
   const _onReorderGroup = (
     id: string,
-    dropPos: DropPosition,
+    dropPos: DropPosition | null,
     targetId: string,
   ) => {
     const [expenseGroups] = separateGroups(categoryGroups); // exclude Income group from sortable groups to fix off-by-one error

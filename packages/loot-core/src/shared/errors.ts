@@ -1,12 +1,11 @@
-// @ts-strict-ignore
 import { t } from 'i18next';
-export function getUploadError({
-  reason,
-  meta,
-}: {
+
+type ErrorWithMeta = {
   reason: string;
   meta?: unknown;
-}) {
+};
+
+export function getUploadError({ reason, meta }: ErrorWithMeta) {
   switch (reason) {
     case 'unauthorized':
       return t('You are not logged in.');
@@ -89,11 +88,11 @@ export function getDownloadError({
   }
 }
 
-export function getCreateKeyError(error) {
+export function getCreateKeyError(error: ErrorWithMeta) {
   return getUploadError(error);
 }
 
-export function getTestKeyError({ reason }) {
+export function getTestKeyError({ reason }: ErrorWithMeta) {
   switch (reason) {
     case 'network':
       return t(
@@ -112,7 +111,7 @@ export function getTestKeyError({ reason }) {
   }
 }
 
-export function getSyncError(error, id) {
+export function getSyncError(error: string, id: string) {
   if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
     return t('This budget cannot be loaded with this version of the app.');
   } else if (error === 'budget-not-found') {

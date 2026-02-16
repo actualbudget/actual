@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 

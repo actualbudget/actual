@@ -40,13 +40,13 @@ export function useAccountPreviewTransactions({
   const payeesById = useMemo(() => groupById(payees), [payees]);
 
   const getPayeeByTransferAccount = useCallback(
-    (transferAccountId?: AccountEntity['id']) =>
+    (transferAccountId?: AccountEntity['id'] | null) =>
       payees.find(p => p.transfer_acct === transferAccountId) || null,
     [payees],
   );
 
   const getTransferAccountByPayee = useCallback(
-    (payeeId?: PayeeEntity['id']) => {
+    (payeeId?: PayeeEntity['id'] | null) => {
       if (!payeeId) {
         return null;
       }
@@ -145,10 +145,10 @@ type InverseBasedOnAccountProps = {
   startingBalance: IntegerAmount;
   runningBalances: Map<TransactionEntity['id'], IntegerAmount>;
   getPayeeByTransferAccount: (
-    transferAccountId?: AccountEntity['id'],
+    transferAccountId?: AccountEntity['id'] | null,
   ) => PayeeEntity | null;
   getTransferAccountByPayee: (
-    payeeId?: PayeeEntity['id'],
+    payeeId?: PayeeEntity['id'] | null,
   ) => AccountEntity | null;
 };
 
