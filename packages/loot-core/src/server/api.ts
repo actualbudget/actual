@@ -224,7 +224,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     await handlers['load-budget']({ id: localBudget.id });
     const result = await handlers['sync-budget']();
     if (result.error) {
-      throw new Error(getSyncError(result.error, localBudget.id));
+      throw new Error(getSyncError(result.error.reason, localBudget.id));
     }
     return;
   }
@@ -253,7 +253,7 @@ handlers['api/sync'] = async function () {
   const { id } = prefs.getPrefs();
   const result = await handlers['sync-budget']();
   if (result.error) {
-    throw new Error(getSyncError(result.error, id));
+    throw new Error(getSyncError(result.error.reason, id));
   }
 };
 
