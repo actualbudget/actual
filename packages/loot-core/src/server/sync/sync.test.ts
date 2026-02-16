@@ -152,11 +152,14 @@ describe('Sync', () => {
   });
 
   it('should invalidate cache when applying sync without a loaded spreadsheet', async () => {
-    await db.runQuery(
-      'INSERT OR REPLACE INTO kvcache (key, value) VALUES (?, ?)',
-      ['budget202501!foo', '123'],
-    );
-    await db.runQuery(
+    void prefs.loadPrefs();
+    void prefs.savePrefs({ groupId: 'group' });
+
+    db.runQuery('INSERT OR REPLACE INTO kvcache (key, value) VALUES (?, ?)', [
+      'budget202501!foo',
+      '123',
+    ]);
+    db.runQuery(
       'INSERT OR REPLACE INTO kvcache_key (id, key) VALUES (1, ?)',
       [123],
     );

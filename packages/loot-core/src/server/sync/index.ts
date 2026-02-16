@@ -321,8 +321,10 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   }
 
   const spreadsheet = sheet.get();
+  let cacheBarrierStarted = false;
   if (spreadsheet) {
     spreadsheet.startCacheBarrier();
+    cacheBarrierStarted = true;
   } else {
     // If sync applies while the spreadsheet isn't loaded (common on browser
     // lifecycle transitions), force next load to rebuild cache from db.
@@ -403,17 +405,18 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   const newData = await fetchData();
 
   // In testing, sometimes the spreadsheet isn't loaded, and that's ok
-  const loadedSpreadsheet = sheet.get();
-  if (loadedSpreadsheet) {
+  if (spreadsheet && sheet.get() === spreadsheet) {
     // Need to clean up these APIs and make them consistent
     sheet.startTransaction();
     triggerBudgetChanges(oldData, newData);
-    loadedSpreadsheet.triggerDatabaseChanges(oldData, newData);
+    spreadsheet.triggerDatabaseChanges(oldData, newData);
     sheet.endTransaction();
+  }
 
+  if (cacheBarrierStarted && sheet.get() === spreadsheet) {
     // Allow the cache to be used in the future. At this point it's guaranteed
     // to be up-to-date because we are done mutating any other data
-    loadedSpreadsheet.endCacheBarrier();
+    spreadsheet.endCacheBarrier();
   }
 
   _syncListeners.forEach(func => func(oldData, newData));
