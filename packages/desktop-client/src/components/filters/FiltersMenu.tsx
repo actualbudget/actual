@@ -82,8 +82,8 @@ type ConfigureFieldProps<T extends RuleConditionEntity> =
     };
 
 function ConfigureField<T extends RuleConditionEntity>({
-  field,
-  initialSubfield = field,
+  field: initialField,
+  initialSubfield = initialField,
   op,
   value,
   dispatch,
@@ -92,9 +92,11 @@ function ConfigureField<T extends RuleConditionEntity>({
   const { t } = useTranslation();
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const field = initialField === 'category_group' ? 'category' : initialField;
   const [subfield, setSubfield] = useState(initialSubfield);
   const inputRef = useRef<AmountInputRef>(null);
   const prevOp = useRef<T['op'] | null>(null);
+  const prevSubfield = useRef<string | null>(null);
 
   useEffect(() => {
     if (prevOp.current !== op && inputRef.current) {
@@ -102,6 +104,13 @@ function ConfigureField<T extends RuleConditionEntity>({
     }
     prevOp.current = op;
   }, [op]);
+
+  useEffect(() => {
+    if (prevSubfield.current !== subfield && inputRef.current) {
+      inputRef.current.focus();
+    }
+    prevSubfield.current = subfield;
+  }, [subfield]);
 
   const type = FIELD_TYPES.get(field);
   let ops = getValidOps(field).filter(op => op !== 'isbetween');
@@ -131,25 +140,42 @@ function ConfigureField<T extends RuleConditionEntity>({
   const isPayeeIdOp = (op: T['op']) =>
     ['is', 'is not', 'one of', 'not one of'].includes(op);
 
+  const subfieldSelectOptions = (
+    field: 'amount' | 'date' | 'category',
+  ): Array<readonly [string, string]> => {
+    switch (field) {
+      case 'amount':
+        return [
+          ['amount', t('Amount')],
+          ['amount-inflow', t('Amount (inflow)')],
+          ['amount-outflow', t('Amount (outflow)')],
+        ];
+
+      case 'date':
+        return [
+          ['date', t('Date')],
+          ['month', t('Month')],
+          ['year', t('Year')],
+        ];
+
+      case 'category':
+        return [
+          ['category', t('Category')],
+          ['category_group', t('Category group')],
+        ];
+
+      default:
+        return [];
+    }
+  };
+
   return (
     <FocusScope>
       <View style={{ marginBottom: 10 }}>
         <SpaceBetween style={{ alignItems: 'flex-start' }}>
-          {field === 'amount' || field === 'date' ? (
+          {field === 'amount' || field === 'date' || field === 'category' ? (
             <Select
-              options={
-                field === 'amount'
-                  ? [
-                      ['amount', t('Amount')],
-                      ['amount-inflow', t('Amount (inflow)')],
-                      ['amount-outflow', t('Amount (outflow)')],
-                    ]
-                  : [
-                      ['date', t('Date')],
-                      ['month', t('Month')],
-                      ['year', t('Year')],
-                    ]
-              }
+              options={subfieldSelectOptions(field)}
               value={subfield}
               onChange={sub => {
                 setSubfield(sub);
@@ -235,6 +261,7 @@ function ConfigureField<T extends RuleConditionEntity>({
           e.preventDefault();
 
           let submitValue = value;
+          let storableField = field;
 
           if (field === 'amount' && inputRef.current) {
             try {
@@ -256,9 +283,13 @@ function ConfigureField<T extends RuleConditionEntity>({
             }
           }
 
+          if (field === 'category') {
+            storableField = subfield;
+          }
+
           // @ts-expect-error - fix me
           onApply({
-            field,
+            field: storableField,
             op,
             value: submitValue,
             options: subfieldToOptions(field, subfield),
@@ -269,7 +300,7 @@ function ConfigureField<T extends RuleConditionEntity>({
           <GenericInput
             ref={inputRef}
             // @ts-expect-error - fix me
-            field={field === 'date' ? subfield : field}
+            field={field === 'date' || field === 'category' ? subfield : field}
             // @ts-expect-error - fix me
             type={
               type === 'id' &&

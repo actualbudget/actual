@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { getCurrency } from 'loot-core/shared/currencies';
 import type { Currency } from 'loot-core/shared/currencies';
 import { q } from 'loot-core/shared/query';
@@ -13,6 +12,7 @@ import type {
   GoalTemplate,
   PercentageTemplate,
   PeriodicTemplate,
+  RefillTemplate,
   RemainderTemplate,
   SimpleTemplate,
   SpendTemplate,
@@ -158,6 +158,10 @@ export class CategoryTemplateContext {
           newBudget = CategoryTemplateContext.runSimple(template, this);
           break;
         }
+        case 'refill': {
+          newBudget = CategoryTemplateContext.runRefill(template, this);
+          break;
+        }
         case 'copy': {
           newBudget = await CategoryTemplateContext.runCopy(template, this);
           break;
@@ -241,11 +245,11 @@ export class CategoryTemplateContext {
 
     // don't overbudget when using a priority unless income category
     if (priority > 0 && available < 0 && !this.category.is_income) {
-      this.fullAmount += toBudget;
+      this.fullAmount = (this.fullAmount || 0) + toBudget;
       toBudget = Math.max(0, toBudget + available);
       this.toBudgetAmount += toBudget;
     } else {
-      this.fullAmount += toBudget;
+      this.fullAmount = (this.fullAmount || 0) + toBudget;
       this.toBudgetAmount += toBudget;
     }
     return this.category.is_income ? -toBudget : toBudget;
@@ -301,9 +305,9 @@ export class CategoryTemplateContext {
   readonly hideDecimal: boolean = false;
   private remainderWeight: number = 0;
   private toBudgetAmount: number = 0; // amount that will be budgeted by the templates
-  private fullAmount: number = null; // the full requested amount, start null for remainder only cats
-  private isLongGoal: boolean = null; //defaulting the goals to null so templates can be unset
-  private goalAmount: number = null;
+  private fullAmount: number | null = null; // the full requested amount, start null for remainder only cats
+  private isLongGoal: boolean | null = null; //defaulting the goals to null so templates can be unset
+  private goalAmount: number | null = null;
   private fromLastMonth = 0; // leftover from last month
   private limitMet = false;
   private limitExcess: number = 0;
@@ -554,6 +558,13 @@ export class CategoryTemplateContext {
     }
   }
 
+  static runRefill(
+    template: RefillTemplate,
+    templateContext: CategoryTemplateContext,
+  ): number {
+    return templateContext.limitAmount - templateContext.fromLastMonth;
+  }
+
   static async runCopy(
     template: CopyTemplate,
     templateContext: CategoryTemplateContext,
@@ -578,7 +589,8 @@ export class CategoryTemplateContext {
     );
     const period = template.period.period;
     const numPeriods = template.period.amount;
-    let date = template.starting;
+    let date =
+      template.starting ?? monthUtils.firstDayOfMonth(templateContext.month);
 
     let dateShiftFunction;
     switch (period) {
@@ -593,7 +605,7 @@ export class CategoryTemplateContext {
         break;
       case 'year':
         // the addYears function doesn't return the month number, so use addMonths
-        dateShiftFunction = (date, numPeriods) =>
+        dateShiftFunction = (date: string | Date, numPeriods: number) =>
           monthUtils.addMonths(date, numPeriods * 12);
         break;
       default:
@@ -716,6 +728,11 @@ export class CategoryTemplateContext {
       const incomeCat = (await db.getCategories()).find(
         c => c.is_income && c.name.toLowerCase() === cat,
       );
+      if (!incomeCat) {
+        throw new Error(
+          `Income category "${template.category}" not found for percentage template`,
+        );
+      }
       monthlyIncome = await getSheetValue(
         sheetName,
         `sum-amount-${incomeCat.id}`,
@@ -772,7 +789,7 @@ export class CategoryTemplateContext {
     );
     const savedInfo = [];
     let totalNeeded = 0;
-    let shortNumMonths;
+    let workingShortNumMonths;
     //find shortest time period
     for (let i = 0; i < byTemplates.length; i++) {
       const template = byTemplates[i];
@@ -794,12 +811,16 @@ export class CategoryTemplateContext {
         );
       }
       savedInfo.push({ numMonths, period });
-      if (numMonths < shortNumMonths || shortNumMonths === undefined) {
-        shortNumMonths = numMonths;
+      if (
+        workingShortNumMonths === undefined ||
+        numMonths < workingShortNumMonths
+      ) {
+        workingShortNumMonths = numMonths;
       }
     }
 
     // calculate needed funds per template
+    const shortNumMonths = workingShortNumMonths || 0;
     for (let i = 0; i < byTemplates.length; i++) {
       const template = byTemplates[i];
       const numMonths = savedInfo[i].numMonths;

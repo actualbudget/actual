@@ -18,9 +18,9 @@ import { OffBudgetAccountTransactions } from './OffBudgetAccountTransactions';
 import { OnBudgetAccountTransactions } from './OnBudgetAccountTransactions';
 
 import {
-  reopenAccount,
-  updateAccount,
-} from '@desktop-client/accounts/accountsSlice';
+  useReopenAccountMutation,
+  useUpdateAccountMutation,
+} from '@desktop-client/accounts';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { AddTransactionButton } from '@desktop-client/components/mobile/transactions/AddTransactionButton';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
@@ -109,12 +109,13 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   );
 
   const dispatch = useDispatch();
+  const { mutate: updateAccount } = useUpdateAccountMutation();
 
   const onSave = useCallback(
     (account: AccountEntity) => {
-      dispatch(updateAccount({ account }));
+      updateAccount({ account });
     },
-    [dispatch],
+    [updateAccount],
   );
 
   const onSaveNotes = useCallback(async (id: string, notes: string) => {
@@ -143,13 +144,19 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     dispatch(openAccountCloseModal({ accountId: account.id }));
   }, [account.id, dispatch]);
 
+  const { mutate: reopenAccount } = useReopenAccountMutation();
+
   const onReopenAccount = useCallback(() => {
-    dispatch(reopenAccount({ id: account.id }));
-  }, [account.id, dispatch]);
+    reopenAccount({ id: account.id });
+  }, [account.id, reopenAccount]);
 
   const [showRunningBalances, setShowRunningBalances] = useSyncedPref(
     `show-balances-${account.id}`,
   );
+  const [hideReconciled, setHideReconciled] = useSyncedPref(
+    `hide-reconciled-${account.id}`,
+  );
+
   const onToggleRunningBalance = useCallback(() => {
     setShowRunningBalances(showRunningBalances === 'true' ? 'false' : 'true');
     dispatch(
@@ -158,6 +165,15 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
       }),
     );
   }, [showRunningBalances, setShowRunningBalances, dispatch]);
+
+  const onToggleReconciled = useCallback(() => {
+    setHideReconciled(hideReconciled === 'true' ? 'false' : 'true');
+    dispatch(
+      collapseModals({
+        rootModalName: 'account-menu',
+      }),
+    );
+  }, [hideReconciled, setHideReconciled, dispatch]);
 
   const onClick = useCallback(() => {
     dispatch(
@@ -171,6 +187,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
             onCloseAccount,
             onReopenAccount,
             onToggleRunningBalance,
+            onToggleReconciled,
           },
         },
       }),
@@ -183,6 +200,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     onReopenAccount,
     onSave,
     onToggleRunningBalance,
+    onToggleReconciled,
   ]);
 
   return (

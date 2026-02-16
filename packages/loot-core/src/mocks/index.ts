@@ -31,7 +31,7 @@ export function generateAccount(
     return {
       ...offlineAccount,
       balance_current: Math.floor(random() * 100000),
-      bankId: Math.floor(random() * 10000),
+      bankId: Math.floor(random() * 10000).toString(),
       bankName: 'boa',
       bank: Math.floor(random() * 10000).toString(),
       account_id: 'idx',

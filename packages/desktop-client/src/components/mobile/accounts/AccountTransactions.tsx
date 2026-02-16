@@ -7,8 +7,8 @@ import { isPreviewId } from 'loot-core/shared/transactions';
 import type { IntegerAmount } from 'loot-core/shared/util';
 import type { AccountEntity, TransactionEntity } from 'loot-core/types/models';
 
+import { useSyncAndDownloadMutation } from '@desktop-client/accounts';
 import { markAccountRead } from '@desktop-client/accounts/accountsSlice';
-import { syncAndDownload } from '@desktop-client/app/appSlice';
 import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
@@ -61,6 +61,7 @@ function TransactionListWithPreviews({
   );
 
   const [showRunningBalances] = useSyncedPref(`show-balances-${account.id}`);
+  const [hideReconciled] = useSyncedPref(`hide-reconciled-${account.id}`);
   const [transactionsQuery, setTransactionsQuery] = useState<Query>(
     baseTransactionsQuery(),
   );
@@ -107,11 +108,12 @@ function TransactionListWithPreviews({
     accountId: account?.id,
   });
 
+  const syncAndDownload = useSyncAndDownloadMutation();
   const onRefresh = useCallback(() => {
     if (account.id) {
-      dispatch(syncAndDownload({ accountId: account.id }));
+      syncAndDownload.mutate({ id: account.id });
     }
-  }, [account.id, dispatch]);
+  }, [account.id, syncAndDownload]);
 
   const allBalances = useMemo(
     () =>
@@ -189,10 +191,14 @@ function TransactionListWithPreviews({
     [account],
   );
 
-  const transactionsToDisplay = !isSearching
+  const baseTransactions = !isSearching
     ? // Do not render child transactions in the list, unless searching
       previewTransactions.concat(transactions.filter(t => !t.is_child))
     : transactions;
+  const transactionsToDisplay =
+    hideReconciled === 'true'
+      ? baseTransactions.filter(t => !t.reconciled)
+      : baseTransactions;
 
   return (
     <TransactionListWithBalances

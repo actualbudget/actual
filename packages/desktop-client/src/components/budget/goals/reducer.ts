@@ -38,6 +38,8 @@ export const getInitialState = (template: Template | null): ReducerState => {
       throw new Error('Remainder is not yet supported');
     case 'limit':
       throw new Error('Limit is not yet supported');
+    case 'refill':
+      throw new Error('Refill is not yet supported');
     case 'average':
     case 'copy':
       return {

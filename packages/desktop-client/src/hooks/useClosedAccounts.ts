@@ -1,11 +1,10 @@
-import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { useAccounts } from './useAccounts';
+import { accountQueries } from '@desktop-client/accounts';
 
 export function useClosedAccounts() {
-  const accounts = useAccounts();
-  return useMemo(
-    () => accounts.filter(account => account.closed === 1),
-    [accounts],
-  );
+  const query = useQuery(accountQueries.listClosed());
+  // TODO: Update to return query states (e.g. isFetching, isError, etc)
+  // so clients can handle loading and error states appropriately.
+  return query.data ?? [];
 }

@@ -22,8 +22,10 @@ import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
-import { useDispatch } from '@desktop-client/redux';
-import { deleteTag, updateTag } from '@desktop-client/tags/tagsSlice';
+import {
+  useDeleteTagMutation,
+  useUpdateTagMutation,
+} from '@desktop-client/tags';
 
 type TagRowProps = {
   tag: TagEntity;
@@ -37,7 +39,6 @@ type TagRowProps = {
 export const TagRow = memo(
   ({ tag, hovered, selected, onHover, focusedField, onEdit }: TagRowProps) => {
     const { t } = useTranslation();
-    const dispatch = useDispatch();
     const dispatchSelected = useSelectedDispatch();
     const borderColor = selected ? theme.tableBorderSelected : 'none';
 
@@ -50,9 +51,11 @@ export const TagRow = memo(
     const { setMenuOpen, menuOpen, handleContextMenu, position } =
       useContextMenu();
     const navigate = useNavigate();
+    const { mutate: updateTag } = useUpdateTagMutation();
+    const { mutate: deleteTag } = useDeleteTagMutation();
 
     const onUpdate = (description: string) => {
-      dispatch(updateTag({ ...tag, description }));
+      updateTag({ tag: { ...tag, description } });
     };
 
     const onShowActivity = () => {
@@ -108,7 +111,7 @@ export const TagRow = memo(
             onMenuSelect={name => {
               switch (name) {
                 case 'delete':
-                  dispatch(deleteTag(tag));
+                  deleteTag({ id: tag.id });
                   break;
                 default:
                   throw new Error(`Unrecognized menu option: ${name}`);

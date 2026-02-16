@@ -15,6 +15,7 @@ import { PercentInput } from './PercentInput';
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import { CategoryGroupAutocomplete } from '@desktop-client/components/autocomplete/CategoryGroupAutocomplete';
 import { FilterAutocomplete } from '@desktop-client/components/autocomplete/FilterAutocomplete';
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
 import { ReportAutocomplete } from '@desktop-client/components/autocomplete/ReportAutocomplete';
@@ -34,7 +35,7 @@ type GenericInputProps = {
   | ((
       | {
           type: 'id';
-          field: 'payee' | 'category';
+          field: 'payee' | 'category' | 'category_group';
         }
       | {
           type: 'id';
@@ -246,6 +247,44 @@ export const GenericInput = ({
                     pushModal({
                       modal: {
                         name: 'category-autocomplete',
+                        options: {
+                          onSelect: newValue => {
+                            if (props.multi === true) {
+                              props.onChange([...props.value, newValue]);
+                              return;
+                            }
+                            props.onChange(newValue);
+                          },
+                        },
+                      },
+                    }),
+                  );
+                },
+              }}
+            />
+          );
+          break;
+
+        case 'category_group':
+          content = (
+            <CategoryGroupAutocomplete
+              {...multiProps}
+              categoryGroups={categoryGroups}
+              openOnFocus={!isNarrowWidth}
+              updateOnValueChange={isNarrowWidth}
+              showHiddenCategories
+              inputProps={{
+                ref,
+                ...(showPlaceholder ? { placeholder: t('nothing') } : null),
+                onClick: () => {
+                  if (!isNarrowWidth) {
+                    return;
+                  }
+
+                  dispatch(
+                    pushModal({
+                      modal: {
+                        name: 'category-group-autocomplete',
                         options: {
                           onSelect: newValue => {
                             if (props.multi === true) {
