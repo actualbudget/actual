@@ -69,10 +69,14 @@ export type MetadataPrefs = Partial<{
   userId: string; // TODO: delete this (unused)
 }>;
 
+export const validPayeeOrphanDisplayModes = [
+  'include-orphans',
+  'hide-orphans',
+  'only-orphans',
+] as const;
+
 export type PayeeOrphanDisplayMode =
-  | 'include-orphans'
-  | 'hide-orphans'
-  | 'only-orphans';
+  (typeof validPayeeOrphanDisplayModes)[number];
 
 /**
  * Local preferences applicable to a single device. Stored in local storage.

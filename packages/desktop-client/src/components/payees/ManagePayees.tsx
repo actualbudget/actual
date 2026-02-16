@@ -14,6 +14,7 @@ import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { groupById } from 'loot-core/shared/util';
 import type { Diff } from 'loot-core/shared/util';
 import type { PayeeEntity } from 'loot-core/types/models';
+import { validPayeeOrphanDisplayModes } from 'loot-core/types/prefs';
 import type { PayeeOrphanDisplayMode } from 'loot-core/types/prefs';
 
 import { PayeeMenu } from './PayeeMenu';
@@ -96,8 +97,12 @@ export const ManagePayees = ({
     'payees.orphanedDisplayMode',
   );
 
-  const orphanDisplayMode =
-    (orphanDisplayModePref as PayeeOrphanDisplayMode) || 'include-orphans';
+  const orphanDisplayMode: PayeeOrphanDisplayMode =
+    orphanDisplayModePref &&
+    validPayeeOrphanDisplayModes.includes(orphanDisplayModePref)
+      ? orphanDisplayModePref
+      : 'include-orphans';
+
   const setOrphanDisplayMode = (mode: PayeeOrphanDisplayMode) =>
     setOrphanDisplayModePref(mode);
 
