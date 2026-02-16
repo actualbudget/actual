@@ -15,6 +15,7 @@ type AlertProps = {
   color?: string;
   backgroundColor?: string;
   style?: CSSProperties;
+  iconStyle?: CSSProperties;
   children?: ReactNode;
 };
 
@@ -23,6 +24,7 @@ const Alert = ({
   color,
   backgroundColor,
   style,
+  iconStyle,
   children,
 }: AlertProps) => {
   return (
@@ -48,21 +50,29 @@ const Alert = ({
           alignSelf: 'stretch',
           flexShrink: 0,
           marginRight: 5,
+          ...iconStyle,
         }}
       >
         <Icon width={13} style={{ marginTop: 2 }} />
       </View>
-      <Text style={{ zIndex: 1, lineHeight: 1.5 }}>{children}</Text>
+      <Text style={{ width: '100%', zIndex: 1, lineHeight: 1.5 }}>
+        {children}
+      </Text>
     </View>
   );
 };
 
 type ScopedAlertProps = {
   style?: CSSProperties;
+  iconStyle?: CSSProperties;
   children?: ReactNode;
 };
 
-export const Information = ({ style, children }: ScopedAlertProps) => {
+export const Information = ({
+  style,
+  iconStyle,
+  children,
+}: ScopedAlertProps) => {
   return (
     <Alert
       icon={SvgInformationOutline}
@@ -73,32 +83,35 @@ export const Information = ({ style, children }: ScopedAlertProps) => {
         padding: 5,
         ...style,
       }}
+      iconStyle={iconStyle}
     >
       {children}
     </Alert>
   );
 };
 
-export const Warning = ({ style, children }: ScopedAlertProps) => {
+export const Warning = ({ style, iconStyle, children }: ScopedAlertProps) => {
   return (
     <Alert
       icon={SvgExclamationOutline}
       color={theme.warningText}
       backgroundColor={theme.warningBackground}
       style={style}
+      iconStyle={iconStyle}
     >
       {children}
     </Alert>
   );
 };
 
-export const Error = ({ style, children }: ScopedAlertProps) => {
+export const Error = ({ style, iconStyle, children }: ScopedAlertProps) => {
   return (
     <Alert
       icon={SvgExclamationOutline}
       color={theme.errorTextDarker}
       backgroundColor={theme.errorBackground}
       style={style}
+      iconStyle={iconStyle}
     >
       {children}
     </Alert>
