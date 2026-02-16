@@ -4,14 +4,6 @@
 
 <!-- What does this PR do? Why is it needed? Please give context on the "why?": why do we need this change? What problem is it solving for you?-->
 
-## Type of change
-
-- [ ] Bug fix (non-breaking change that fixes an issue)
-- [ ] New feature (non-breaking change that adds functionality)
-- [ ] Refactor (no functional changes)
-- [ ] Documentation update
-- [ ] Other (please describe):
-
 ## Related issue(s)
 
 <!-- e.g. Fixes #123, Relates to #456 -->
