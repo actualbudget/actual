@@ -39,6 +39,10 @@ describe('arithmetic', () => {
     expect(evalArithmetic('20^3 - 5 * (10 / 2)')).toEqual(7975);
   });
 
+  test('handles exponent as right-associative', () => {
+    expect(evalArithmetic('2^3^2')).toEqual(512);
+  });
+
   test('handles same-precedence operators left-to-right', () => {
     expect(evalArithmetic('24 / 3 * 2')).toEqual(16);
     expect(evalArithmetic('24 * 3 / 2')).toEqual(36);

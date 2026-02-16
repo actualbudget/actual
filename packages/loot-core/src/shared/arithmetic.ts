@@ -93,8 +93,8 @@ function parseParens(state: ParserState): AstNode {
 
 function parseExponent(state: ParserState): AstNode {
   let node = parseParens(state);
-  while (nextOperator(state, '^')) {
-    node = { op: '^', left: node, right: parseParens(state) };
+  if (nextOperator(state, '^')) {
+    node = { op: '^', left: node, right: parseExponent(state) };
   }
   return node;
 }
