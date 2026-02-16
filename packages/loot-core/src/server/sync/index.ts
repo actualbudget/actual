@@ -320,8 +320,16 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     currentMerkle = clock.merkle;
   }
 
-  if (sheet.get()) {
-    sheet.get().startCacheBarrier();
+  const spreadsheet = sheet.get();
+  if (spreadsheet) {
+    spreadsheet.startCacheBarrier();
+  } else {
+    // If sync applies while the spreadsheet isn't loaded (common on browser
+    // lifecycle transitions), force next load to rebuild cache from db.
+    db.transaction(() => {
+      db.runQuery('DELETE FROM kvcache');
+      db.runQuery('DELETE FROM kvcache_key');
+    });
   }
 
   // Now that we have all of the data, go through and apply the
@@ -395,16 +403,17 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   const newData = await fetchData();
 
   // In testing, sometimes the spreadsheet isn't loaded, and that's ok
-  if (sheet.get()) {
+  const loadedSpreadsheet = sheet.get();
+  if (loadedSpreadsheet) {
     // Need to clean up these APIs and make them consistent
     sheet.startTransaction();
     triggerBudgetChanges(oldData, newData);
-    sheet.get().triggerDatabaseChanges(oldData, newData);
+    loadedSpreadsheet.triggerDatabaseChanges(oldData, newData);
     sheet.endTransaction();
 
     // Allow the cache to be used in the future. At this point it's guaranteed
     // to be up-to-date because we are done mutating any other data
-    sheet.get().endCacheBarrier();
+    loadedSpreadsheet.endCacheBarrier();
   }
 
   _syncListeners.forEach(func => func(oldData, newData));

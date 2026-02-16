@@ -150,6 +150,40 @@ describe('Sync', () => {
     expect(result.messages.length).toBe(2);
     expect(mockSyncServer.getMessages().length).toBe(3);
   });
+
+  it('should invalidate cache when applying sync without a loaded spreadsheet', async () => {
+    await db.runQuery(
+      'INSERT OR REPLACE INTO kvcache (key, value) VALUES (?, ?)',
+      ['budget202501!foo', '123'],
+    );
+    await db.runQuery(
+      'INSERT OR REPLACE INTO kvcache_key (id, key) VALUES (1, ?)',
+      [123],
+    );
+    expect(
+      (await db.all<{ key: string }>('SELECT key FROM kvcache')).length,
+    ).toBe(1);
+    expect(
+      (await db.all<{ key: number }>('SELECT key FROM kvcache_key')).length,
+    ).toBe(1);
+
+    await applyMessages([
+      {
+        dataset: 'category_groups',
+        row: 'group1',
+        column: 'name',
+        value: 'group1',
+        timestamp: Timestamp.send(),
+      },
+    ]);
+
+    expect(
+      (await db.all<{ key: string }>('SELECT key FROM kvcache')).length,
+    ).toBe(0);
+    expect(
+      (await db.all<{ key: number }>('SELECT key FROM kvcache_key')).length,
+    ).toBe(0);
+  });
 });
 
 function registerBudgetMonths(months) {
