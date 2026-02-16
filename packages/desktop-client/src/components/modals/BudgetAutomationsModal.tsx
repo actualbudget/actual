@@ -10,6 +10,7 @@ import { View } from '@actual-app/components/view';
 import uniqueId from 'lodash/uniqueId';
 
 import { send } from 'loot-core/platform/client/connection';
+import { dayFromDate, firstDayOfMonth } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import type {
   CategoryGroupEntity,
@@ -71,51 +72,69 @@ function createAutomationEntry(
   };
 }
 
-function expandAutomations(templates: Template[]): AutomationEntry[] {
+function migrateTemplatesToAutomations(
+  templates: Template[],
+): AutomationEntry[] {
   const entries: AutomationEntry[] = [];
 
   templates.forEach(template => {
-    if (template.type === 'limit') {
-      entries.push(
-        createAutomationEntry({ ...template, refill: false }, 'limit'),
-      );
-      if (template.refill) {
+    // Expand simple templates into limit, refill, and/or periodic templates
+    if (template.type === 'simple') {
+      if (template.limit) {
         entries.push(
-          createAutomationEntry({ ...template, refill: true }, 'refill'),
+          createAutomationEntry(
+            {
+              type: 'limit',
+              amount: template.limit.amount,
+              hold: template.limit.hold,
+              period: template.limit.period,
+              start: template.limit.start,
+              directive: 'template',
+              priority: null,
+            },
+            'limit',
+          ),
+        );
+        entries.push(
+          createAutomationEntry(
+            {
+              type: 'refill',
+              directive: 'template',
+              priority: template.priority,
+            },
+            'refill',
+          ),
+        );
+      }
+      // If it has a monthly amount, create a periodic template
+      if (template.monthly != null && template.monthly !== 0) {
+        entries.push(
+          createAutomationEntry(
+            {
+              type: 'periodic',
+              amount: template.monthly,
+              period: {
+                period: 'month',
+                amount: 1,
+              },
+              starting: dayFromDate(firstDayOfMonth(new Date())),
+              directive: 'template',
+              priority: template.priority,
+            },
+            'week',
+          ),
         );
       }
       return;
     }
+
+    // For all other template types, create a single entry
     entries.push(
       createAutomationEntry(template, getDisplayTypeFromTemplate(template)),
     );
   });
 
   return entries;
-}
-
-function collapseAutomations(entries: AutomationEntry[]): Template[] {
-  const hasRefill = entries.some(entry => entry.displayType === 'refill');
-  const templates: Template[] = [];
-
-  entries.forEach(entry => {
-    if (entry.displayType === 'refill') {
-      return;
-    }
-    if (entry.displayType === 'limit') {
-      if (entry.template.type !== 'limit') {
-        throw new Error('Expected limit template for limit automation');
-      }
-      templates.push({
-        ...entry.template,
-        refill: hasRefill,
-      });
-      return;
-    }
-    templates.push(entry.template);
-  });
-
-  return templates;
 }
 
 function BudgetAutomationList({
@@ -142,6 +161,7 @@ function BudgetAutomationList({
             period: 'month',
             amount: 5,
           },
+          starting: dayFromDate(firstDayOfMonth(new Date())),
           directive: 'template',
           priority: DEFAULT_PRIORITY,
         },
@@ -159,8 +179,7 @@ function BudgetAutomationList({
           amount: 500,
           period: 'monthly',
           hold: false,
-          refill: false,
-          priority: DEFAULT_PRIORITY,
+          priority: null,
         },
         'limit',
       ),
@@ -298,7 +317,7 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
     onLoaded: result => {
       const next: Record<string, AutomationEntry[]> = {};
       for (const [id, templates] of Object.entries(result)) {
-        next[id] = expandAutomations(templates);
+        next[id] = migrateTemplatesToAutomations(templates);
       }
       setAutomations(next);
     },
@@ -320,7 +339,7 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
       return;
     }
 
-    const templates = collapseAutomations(automations[categoryId]);
+    const templates = automations[categoryId].map(({ template }) => template);
     await send('budget/set-category-automations', {
       categoriesWithTemplates: [
         {
@@ -409,7 +428,7 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
                         name: 'category-automations-unmigrate',
                         options: {
                           categoryId,
-                          templates: collapseAutomations(templates),
+                          templates: templates.map(({ template }) => template),
                         },
                       },
                     }),
