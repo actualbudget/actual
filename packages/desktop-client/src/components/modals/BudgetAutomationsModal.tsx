@@ -19,7 +19,7 @@ import type { Template } from 'loot-core/types/models/templates';
 
 import { Warning } from '@desktop-client/components/alerts';
 import { BudgetAutomation } from '@desktop-client/components/budget/goals/BudgetAutomation';
-import { type DisplayTemplateType } from '@desktop-client/components/budget/goals/constants';
+import type { DisplayTemplateType } from '@desktop-client/components/budget/goals/constants';
 import { DEFAULT_PRIORITY } from '@desktop-client/components/budget/goals/reducer';
 import { useBudgetAutomationCategories } from '@desktop-client/components/budget/goals/useBudgetAutomationCategories';
 import { Link } from '@desktop-client/components/common/Link';
@@ -368,9 +368,12 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
               <AnimatedLoading style={{ width: 20, height: 20 }} />
             </View>
           ) : (
-            <SpaceBetween align="stretch" direction="vertical">
+            <SpaceBetween align="stretch" direction="vertical" wrap={false}>
               {needsMigration && (
-                <BudgetAutomationMigrationWarning categoryId={categoryId} />
+                <BudgetAutomationMigrationWarning
+                  categoryId={categoryId}
+                  style={{ flexShrink: 0 }}
+                />
               )}
               <BudgetAutomationList
                 automations={automations[categoryId] || []}
