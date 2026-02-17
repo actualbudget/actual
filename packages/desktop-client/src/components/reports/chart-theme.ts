@@ -14,7 +14,7 @@ export function getColorScale(name: string): string[] {
       'var(--color-chartQual9)', // Light Red
     ],
   };
-  return name ? scales[name] : scales.grayscale;
+  return name ? scales[name] : scales.qualitative;
 }
 
 export function useRechartsAnimation(defaults?: {
