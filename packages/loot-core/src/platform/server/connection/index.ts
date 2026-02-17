@@ -28,7 +28,7 @@ function coerceError(error) {
     return error;
   }
 
-  return { type: 'InternalError', message: error.message, cause: error };
+  return { type: 'ServerError', message: error.message, cause: error };
 }
 
 export const init: T.Init = function (serverChn, handlers) {
@@ -83,7 +83,7 @@ export const init: T.Init = function (serverChn, handlers) {
             }
 
             // Only report internal errors
-            if (error.type === 'InternalError') {
+            if (error.type === 'ServerError') {
               captureException(nativeError);
             }
 
