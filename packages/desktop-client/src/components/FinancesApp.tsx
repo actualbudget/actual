@@ -92,7 +92,7 @@ export function FinancesApp() {
   const { t } = useTranslation();
 
   // TODO: Replace with `useAccounts` hook once it's updated to return the useQuery results.
-  const { data: accounts, isSuccess: isAccountsLoaded } = useQuery(
+  const { data: accounts, isFetched: isAccountsFetched } = useQuery(
     accountQueries.list(),
   );
 
@@ -245,7 +245,7 @@ export function FinancesApp() {
                 <Route
                   path="/"
                   element={
-                    isAccountsLoaded ? (
+                    isAccountsFetched ? (
                       accounts.length > 0 ? (
                         <Navigate to="/budget" replace />
                       ) : (
