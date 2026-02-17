@@ -340,7 +340,7 @@ export function SchedulesTable({
   const [showCompleted, setShowCompleted] = useState(false);
 
   const payees = usePayees();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
 
   const filteredSchedules = useMemo(() => {
     if (!filter) {

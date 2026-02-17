@@ -25,7 +25,7 @@ const fontWeight = 600;
 export function Accounts() {
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const failedAccounts = useFailedAccounts();
   const updatedAccounts = useUpdatedAccounts();
   const offbudgetAccounts = useOffBudgetAccounts();

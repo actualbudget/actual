@@ -353,7 +353,7 @@ export function PayeeAutocomplete({
     payees = retrievedPayees;
   }
 
-  const cachedAccounts = useAccounts();
+  const { data: cachedAccounts = [] } = useAccounts();
   if (!accounts) {
     accounts = cachedAccounts;
   }

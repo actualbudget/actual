@@ -49,7 +49,7 @@ export function Value<T>({
       grouped: [],
     },
   } = useCategories();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const valueStyle = {
     color: theme.pageTextPositive,
     ...style,

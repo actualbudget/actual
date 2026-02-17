@@ -334,7 +334,7 @@ function SelectedTransactionsFloatingActionBar({
   } = useTransactionBatchActions();
 
   const navigate = useNavigate();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
 
   const payees = usePayees();

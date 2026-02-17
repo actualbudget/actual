@@ -1685,7 +1685,7 @@ export const TransactionEdit = (props: TransactionEditProps) => {
   const lastTransaction = useSelector(
     state => state.transactions.lastTransaction,
   );
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   return (

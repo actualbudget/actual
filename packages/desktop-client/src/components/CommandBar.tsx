@@ -142,7 +142,7 @@ export function CommandBar() {
     if (!open) setSearch('');
   }, [open]);
 
-  const allAccounts = useAccounts();
+  const { data: allAccounts = [] } = useAccounts();
   const { data: customReports = [] } = useReports();
   const { data: dashboardPages = [] } = useDashboardPages();
 

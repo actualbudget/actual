@@ -56,7 +56,8 @@ export function CloseAccountModal({
   canDelete,
 }: CloseAccountModalProps) {
   const { t } = useTranslation(); // Initialize translation hook
-  const accounts = useAccounts().filter(a => a.closed === 0);
+  const { data: allAccounts = [] } = useAccounts();
+  const accounts = allAccounts.filter(a => a.closed === 0);
   const {
     data: { grouped: categoryGroups, list: categories } = {
       grouped: [],

@@ -27,7 +27,7 @@ export function PayeeAutocompleteModal({
 }: PayeeAutocompleteModalProps) {
   const { t } = useTranslation();
   const payees = usePayees() || [];
-  const accounts = useAccounts() || [];
+  const { data: accounts = [] } = useAccounts();
   const navigate = useNavigate();
 
   const { isNarrowWidth } = useResponsive();

@@ -1965,7 +1965,7 @@ export function Account() {
   const matchedTransactions = useSelector(
     state => state.transactions.matchedTransactions,
   );
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const payees = usePayees();
   const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
