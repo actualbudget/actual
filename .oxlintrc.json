@@ -99,6 +99,8 @@
       }
     ],
     "typescript/no-var-requires": "error",
+    // we want to allow unions such as "{ name: DbAccount['name'] | DbPayee['name'] }"
+    "typescript/no-duplicate-type-constituents": "off",
 
     // Import rules
     "import/consistent-type-specifier-style": "error",
