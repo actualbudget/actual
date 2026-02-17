@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useEffect, useEffectEvent, useRef } from 'react';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -58,7 +57,13 @@ function NarrowNotSupported({
   return isNarrowWidth ? null : children;
 }
 
-function WideNotSupported({ children, redirectTo = '/budget' }) {
+function WideNotSupported({
+  children,
+  redirectTo = '/budget',
+}: {
+  redirectTo?: string;
+  children: ReactElement;
+}) {
   const { isNarrowWidth } = useResponsive();
   const navigate = useNavigate();
   useEffect(() => {
@@ -81,7 +86,7 @@ function RouterBehaviors() {
 
 export function FinancesApp() {
   const { isNarrowWidth } = useResponsive();
-  useMetaThemeColor(isNarrowWidth ? theme.mobileViewTheme : null);
+  useMetaThemeColor(isNarrowWidth ? theme.mobileViewTheme : undefined);
 
   const dispatch = useDispatch();
   const { t } = useTranslation();

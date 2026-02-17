@@ -28,7 +28,7 @@ function coerceError(error) {
     return error;
   }
 
-  return { type: 'InternalError', message: error.message };
+  return { type: 'InternalError', message: error.message, cause: error };
 }
 
 export const init: T.Init = function (serverChn, handlers) {

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { QueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 
@@ -253,6 +252,12 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
           // few things depending on the state, and we try to show an
           // appropriate message and call to action to fix it.
           const { cloudFileId } = store.getState().prefs.local;
+          if (!cloudFileId) {
+            console.error(
+              'Received file-has-reset or file-has-new-key error but no cloudFileId in prefs',
+            );
+            break;
+          }
 
           notif = {
             title: t('Syncing has been reset on this cloud file'),
@@ -277,7 +282,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
           break;
         case 'encrypt-failure':
         case 'decrypt-failure':
-          if (event.meta.isMissingKey) {
+          if (event.meta?.isMissingKey) {
             notif = {
               title: t('Missing encryption key'),
               message: t(

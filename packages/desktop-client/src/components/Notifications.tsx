@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import type { CSSProperties, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -60,7 +59,7 @@ function compileMessage(
                         if (actions[actionName]) {
                           setLoading(true);
                           await actions[actionName]();
-                          onRemove();
+                          onRemove?.();
                         }
                       }}
                     >
@@ -131,7 +130,13 @@ function Notification({
   const error = type === 'error';
 
   const processedMessage = useMemo(
-    () => compileMessage(message, messageActions, setOverlayLoading, onRemove),
+    () =>
+      compileMessage(
+        message,
+        messageActions ?? {},
+        setOverlayLoading,
+        onRemove,
+      ),
     [message, messageActions, onRemove, setOverlayLoading],
   );
 
