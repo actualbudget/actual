@@ -284,6 +284,58 @@ describe('Merging success', () => {
     });
   });
 
+  it('preserves transfer linkage when imported transaction is kept', async () => {
+    const transferPayee = await db.insertPayee({
+      name: 'Transfer to two',
+      transfer_acct: 'two',
+    });
+
+    // Manual transfer in account one (linked to counterpart in account two)
+    const manualTransfer = await db.insertTransaction({
+      account: 'one',
+      amount: 20,
+      date: '2025-01-01',
+      payee: transferPayee,
+      category: null,
+    });
+
+    const transferCounterpart = await db.insertTransaction({
+      account: 'two',
+      amount: 20,
+      date: '2025-01-01',
+      payee: transferPayee,
+      category: null,
+      transfer_id: manualTransfer,
+    });
+
+    await db.updateTransaction({
+      id: manualTransfer,
+      transfer_id: transferCounterpart,
+    });
+
+    // Imported duplicate that should be kept by merge logic
+    const imported = await db.insertTransaction({
+      account: 'one',
+      amount: 20,
+      date: '2025-01-02',
+      imported_id: 'imported_transfer_1',
+      category: null,
+    });
+
+    const keptId = await mergeTransactions([
+      { id: manualTransfer },
+      { id: imported },
+    ]);
+
+    expect(keptId).toBe(imported);
+
+    const keptTransaction = await db.getTransaction(imported);
+    expect(keptTransaction?.transfer_id).toBe(transferCounterpart);
+
+    const counterpart = await db.getTransaction(transferCounterpart);
+    expect(counterpart?.transfer_id).toBe(imported);
+  });
+
   it('preserves split categories when merging split transaction with uncategorized imported transaction', async () => {
     // Create a manual transaction with splits
     const manualParent = await db.insertTransaction({

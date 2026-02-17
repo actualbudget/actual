@@ -61,6 +61,8 @@ export async function mergeTransactions(
   const keepHasSubtransactions = keepSubtransactions.length > 0;
   const dropHasSubtransactions = dropSubtransactions.length > 0;
 
+  const mergedTransferId = keep.transfer_id || drop.transfer_id || null;
+
   // If keep doesn't have subtransactions but drop does, transfer them
   if (!keepHasSubtransactions && dropHasSubtransactions) {
     // Update each subtransaction to point to the kept parent
@@ -81,6 +83,7 @@ export async function mergeTransactions(
       notes: keep.notes || drop.notes,
       cleared: keep.cleared || drop.cleared,
       reconciled: keep.reconciled || drop.reconciled,
+      transfer_id: mergedTransferId,
     } as unknown as TransactionEntity);
   } else {
     // Normal merge without subtransactions
@@ -91,7 +94,20 @@ export async function mergeTransactions(
       notes: keep.notes || drop.notes,
       cleared: keep.cleared || drop.cleared,
       reconciled: keep.reconciled || drop.reconciled,
+      transfer_id: mergedTransferId,
     } as TransactionEntity);
+  }
+
+  // If transfer linkage was inherited from dropped transaction, relink
+  // counterpart transaction to the kept transaction id.
+  if (drop.transfer_id && drop.transfer_id !== keep.transfer_id) {
+    const transferCounterpart = await db.getTransaction(drop.transfer_id);
+    if (transferCounterpart) {
+      await db.updateTransaction({
+        id: transferCounterpart.id,
+        transfer_id: keep.id,
+      } as TransactionEntity);
+    }
   }
 
   // Delete the dropped transaction using shared deleteTransaction to
