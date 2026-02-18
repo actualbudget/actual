@@ -105,17 +105,17 @@ Common variables include:
 
 **Graph Colors:**
 
-All Generic graph in reports series impact custom report widgets only.
+These color palette impact custom report widget graph series in all variation bar, line, donut, etc...
 
-- `color-chartQual1:`
-- `color-chartQual2:`
-- `color-chartQual3:`
-- `color-chartQual4:`
-- `color-chartQual5:`
-- `color-chartQual6:`
-- `color-chartQual7:`
-- `color-chartQual8:`
-- `color-chartQual9:`
+- `color-chartQual1`
+- `color-chartQual2`
+- `color-chartQual3`
+- `color-chartQual4`
+- `color-chartQual5`
+- `color-chartQual6`
+- `color-chartQual7`
+- `color-chartQual8`
+- `color-chartQual9`
 
 And many more! To see all available variables, check the theme files in the source code or look at an existing theme.
 
