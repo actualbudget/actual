@@ -57,7 +57,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "storybook": "^10.2.0",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.18"
   },
   "peerDependencies": {
     "react": ">=18.2",
