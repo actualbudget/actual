@@ -60,7 +60,7 @@
     "vitest": "^4.0.18"
   },
   "peerDependencies": {
-    "react": ">=18.2",
-    "react-dom": ">=18.2"
+    "react": ">=19.2",
+    "react-dom": ">=19.2"
   }
 }
