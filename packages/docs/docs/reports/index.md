@@ -37,7 +37,7 @@ Cash flow shows your spending over time. It only looks at budgeted accounts and 
 
 ![Net Worth Graph](/img/reports/net-worth.webp)
 
-Net worth shows the balance of all accounts over time. Your net worth is all of your cash and assets minus any debts you owe. Net worth shows the balance of all accounts over time, including all of your investments. Your "net worth" is considered to be the amount you'd have if you sold all your assets and paid off as much debt as possible.
+Net worth shows the balance of all accounts over time. Your net worth is all of your cash and assets minus any debts you owe. This includes all of your off budget accounts. Your "net worth" is considered to be the amount you would have left you sold all your assets and paid off as much debt as possible.
 
 ## Spending Analysis
 
