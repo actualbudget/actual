@@ -75,7 +75,7 @@
     "react-dom": "19.2.3",
     "react-error-boundary": "^6.0.3",
     "react-grid-layout": "^2.2.2",
-    "react-hotkeys-hook": "^5.2.1",
+    "react-hotkeys-hook": "^5.2.4",
     "react-i18next": "^16.5.1",
     "react-markdown": "^10.1.0",
     "react-modal": "3.16.3",
