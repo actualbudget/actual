@@ -86,7 +86,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     [],
   );
 
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const {
     conditions,
     conditionsOp,

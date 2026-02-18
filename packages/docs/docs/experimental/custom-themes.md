@@ -103,6 +103,20 @@ Common variables include:
 - `--color-sidebarItemText` - Sidebar item text
 - `--color-sidebarItemTextSelected` - Selected sidebar item text
 
+**Graph Colors:**
+
+These color palette impact custom report series colors in all variations - bar, line, donut, etc...
+
+- `--color-chartQual1`
+- `--color-chartQual2`
+- `--color-chartQual3`
+- `--color-chartQual4`
+- `--color-chartQual5`
+- `--color-chartQual6`
+- `--color-chartQual7`
+- `--color-chartQual8`
+- `--color-chartQual9`
+
 And many more! To see all available variables, check the theme files in the source code or look at an existing theme.
 
 ### Validation Rules

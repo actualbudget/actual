@@ -43,8 +43,8 @@ export function DisplayPayeeProvider({
     options: { pageSize: transactions.length * 5 },
   });
 
-  const accounts = useAccounts();
-  const payeesById = usePayeesById();
+  const { data: accounts = [] } = useAccounts();
+  const { data: payeesById = {} } = usePayeesById();
 
   const displayPayees = useMemo(() => {
     return transactions.reduce(
