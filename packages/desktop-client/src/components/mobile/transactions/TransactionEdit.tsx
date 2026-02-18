@@ -1681,7 +1681,7 @@ type TransactionEditProps = Omit<
 
 export const TransactionEdit = (props: TransactionEditProps) => {
   const { data: { list: categories } = { list: [] } } = useCategories();
-  const payees = usePayees();
+  const { data: payees = [] } = usePayees();
   const lastTransaction = useSelector(
     state => state.transactions.lastTransaction,
   );

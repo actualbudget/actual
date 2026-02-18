@@ -122,7 +122,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   );
 
   const { data: accounts = [] } = useAccounts();
-  const payees = usePayees();
+  const { data: payees = [] } = usePayees();
   const { data: { grouped: categoryGroups } = { grouped: [] } } =
     useCategories();
 

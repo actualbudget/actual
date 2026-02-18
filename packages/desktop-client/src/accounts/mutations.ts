@@ -26,7 +26,7 @@ import { accountQueries } from './queries';
 import { sync } from '@desktop-client/app/appSlice';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { markPayeesDirty } from '@desktop-client/payees/payeesSlice';
+import { payeeQueries } from '@desktop-client/payees';
 import { useDispatch, useStore } from '@desktop-client/redux';
 import type { AppDispatch } from '@desktop-client/redux/store';
 import { setNewTransactions } from '@desktop-client/transactions/transactionsSlice';
@@ -191,9 +191,7 @@ export function useMoveAccountMutation() {
     },
     onSuccess: () => {
       invalidateQueries(queryClient);
-      // TODO: Change to a call to queryClient.invalidateQueries
-      // once payees have been moved to react-query.
-      dispatch(markPayeesDirty());
+      invalidateQueries(queryClient, payeeQueries.lists());
     },
     onError: error => {
       console.error('Error moving account:', error);
@@ -399,9 +397,7 @@ export function useLinkAccountMutation() {
     },
     onSuccess: () => {
       invalidateQueries(queryClient);
-      // TODO: Change to a call to queryClient.invalidateQueries
-      // once payees have been moved to react-query.
-      dispatch(markPayeesDirty());
+      invalidateQueries(queryClient, payeeQueries.lists());
     },
     onError: error => {
       console.error('Error linking account:', error);
@@ -441,9 +437,7 @@ export function useLinkAccountSimpleFinMutation() {
     },
     onSuccess: () => {
       invalidateQueries(queryClient);
-      // TODO: Change to a call to queryClient.invalidateQueries
-      // once payees have been moved to react-query.
-      dispatch(markPayeesDirty());
+      invalidateQueries(queryClient, payeeQueries.lists());
     },
     onError: error => {
       console.error('Error linking account to SimpleFIN:', error);
@@ -485,9 +479,7 @@ export function useLinkAccountPluggyAiMutation() {
     },
     onSuccess: () => {
       invalidateQueries(queryClient);
-      // TODO: Change to a call to queryClient.invalidateQueries
-      // once payees have been moved to react-query.
-      dispatch(markPayeesDirty());
+      invalidateQueries(queryClient, payeeQueries.lists());
     },
     onError: error => {
       console.error('Error linking account to PluggyAI:', error);
