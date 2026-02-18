@@ -50,7 +50,7 @@
     "@chromatic-com/storybook": "^5.0.0",
     "@storybook/addon-a11y": "^10.2.7",
     "@storybook/addon-docs": "^10.2.7",
-    "@storybook/react-vite": "^10.2.0",
+    "@storybook/react-vite": "^10.2.7",
     "@svgr/cli": "^8.1.0",
     "@types/react": "^19.2.5",
     "eslint-plugin-storybook": "^10.2.0",
