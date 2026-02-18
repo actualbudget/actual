@@ -80,7 +80,7 @@
     "oxfmt": "^0.32.0",
     "oxlint": "^1.47.0",
     "oxlint-tsgolint": "^0.13.0",
-    "p-limit": "^7.2.0",
+    "p-limit": "^7.3.0",
     "prompts": "^2.4.2",
     "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2",
