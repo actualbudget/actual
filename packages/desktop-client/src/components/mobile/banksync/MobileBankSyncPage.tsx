@@ -37,7 +37,7 @@ export function MobileBankSyncPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { syncSourceReadable } = useSyncSourceReadable();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const [filter, setFilter] = useState('');
 
   const openAccounts = useMemo(

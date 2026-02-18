@@ -506,7 +506,7 @@ AccountList.displayName = 'AccountList';
 
 export function AccountsPage() {
   const dispatch = useDispatch();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');

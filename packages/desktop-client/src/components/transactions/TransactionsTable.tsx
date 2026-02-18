@@ -138,7 +138,7 @@ import type { SplitsExpandedContextValue } from '@desktop-client/hooks/useSplits
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { getPayeesById } from '@desktop-client/payees/payeesSlice';
+import { getPayeesById } from '@desktop-client/payees';
 import { useDispatch } from '@desktop-client/redux';
 
 type TransactionHeaderProps = {
@@ -1028,6 +1028,7 @@ const Transaction = memo(function Transaction({
     if (
       name === 'account' &&
       value &&
+      typeof value === 'string' &&
       getAccountsById(accounts)[value].offbudget
     ) {
       newTransaction.category = undefined;

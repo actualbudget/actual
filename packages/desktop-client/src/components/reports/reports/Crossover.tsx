@@ -80,7 +80,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const locale = useLocale();
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const {
     data: categories = { grouped: [], list: [] },
     isPending: isCategoriesLoading,

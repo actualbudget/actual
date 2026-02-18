@@ -13,7 +13,7 @@ import {
 import { pushModal } from './modals/modalsSlice';
 import { addNotification } from './notifications/notificationsSlice';
 import type { Notification } from './notifications/notificationsSlice';
-import { reloadPayees } from './payees/payeesSlice';
+import { payeeQueries } from './payees';
 import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
 import { signOut } from './users/usersSlice';
@@ -62,7 +62,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
       const tables = event.tables;
 
       if (tables.includes('prefs')) {
-        void store.dispatch(loadPrefs());
+        store.dispatch(loadPrefs());
       }
 
       if (
@@ -70,7 +70,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
         tables.includes('category_groups') ||
         tables.includes('category_mapping')
       ) {
-        void queryClient.invalidateQueries({
+        queryClient.invalidateQueries({
           queryKey: categoryQueries.lists(),
         });
       }
@@ -81,11 +81,13 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
         tables.includes('payees') ||
         tables.includes('payee_mapping')
       ) {
-        void store.dispatch(reloadPayees());
+        queryClient.invalidateQueries({
+          queryKey: payeeQueries.lists(),
+        });
       }
 
       if (tables.includes('accounts')) {
-        void queryClient.invalidateQueries({
+        queryClient.invalidateQueries({
           queryKey: accountQueries.lists(),
         });
       }
@@ -111,7 +113,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
               button: {
                 title: t('Reset sync'),
                 action: () => {
-                  void store.dispatch(resetSync());
+                  store.dispatch(resetSync());
                 },
               },
             };
@@ -134,7 +136,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
                 action: async () => {
                   attemptedSyncRepair = true;
                   await send('sync-repair');
-                  void store.dispatch(sync());
+                  store.dispatch(sync());
                 },
               },
             };
@@ -167,7 +169,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
             button: {
               title: t('Reset sync'),
               action: () => {
-                void store.dispatch(resetSync());
+                store.dispatch(resetSync());
               },
             },
           };
@@ -217,8 +219,8 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
               title: t('Register'),
               action: async () => {
                 await store.dispatch(uploadBudget({}));
-                void store.dispatch(sync());
-                void store.dispatch(loadPrefs());
+                store.dispatch(sync());
+                store.dispatch(loadPrefs());
               },
             },
           };
@@ -239,7 +241,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
             button: {
               title: t('Upload'),
               action: () => {
-                void store.dispatch(resetSync());
+                store.dispatch(resetSync());
               },
             },
           };
@@ -275,7 +277,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
             button: {
               title: t('Revert'),
               action: () => {
-                void store.dispatch(closeAndDownloadBudget({ cloudFileId }));
+                store.dispatch(closeAndDownloadBudget({ cloudFileId }));
               },
             },
           };
@@ -364,7 +366,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
           break;
         case 'token-expired':
           notif = null;
-          void store.dispatch(signOut());
+          store.dispatch(signOut());
           break;
         default:
           console.trace('unknown error', event);

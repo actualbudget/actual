@@ -1681,11 +1681,11 @@ type TransactionEditProps = Omit<
 
 export const TransactionEdit = (props: TransactionEditProps) => {
   const { data: { list: categories } = { list: [] } } = useCategories();
-  const payees = usePayees();
+  const { data: payees = [] } = usePayees();
   const lastTransaction = useSelector(
     state => state.transactions.lastTransaction,
   );
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   return (

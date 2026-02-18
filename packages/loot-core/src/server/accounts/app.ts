@@ -112,7 +112,7 @@ async function getAccounts(): Promise<AccountEntity[]> {
         balance_limit: dbAccount.balance_limit ?? null,
         account_sync_source: dbAccount.account_sync_source ?? null,
         last_sync: dbAccount.last_sync ?? null,
-      }) as AccountEntity,
+      }) satisfies AccountEntity,
   );
 }
 

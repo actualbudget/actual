@@ -252,7 +252,7 @@ export function DonutGraph({
 
   const navigate = useNavigate();
   const { data: categories = { grouped: [], list: [] } } = useCategories();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const [pointer, setPointer] = useState('');
 
   const getVal = (obj: GroupedEntity | IntervalEntity) => {

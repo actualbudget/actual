@@ -41,8 +41,8 @@ export function MobileRulesPage() {
     query: useMemo(() => q('schedules').select('*'), []),
   });
   const { data: { list: categories } = { list: [] } } = useCategories();
-  const payees = usePayees();
-  const accounts = useAccounts();
+  const { data: payees = [] } = usePayees();
+  const { data: accounts = [] } = useAccounts();
   const filterData = useMemo(
     () => ({
       payees,

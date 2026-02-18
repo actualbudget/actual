@@ -86,7 +86,7 @@ function useErrorMessage() {
 }
 
 export function AccountSyncCheck() {
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const failedAccounts = useFailedAccounts();
   const dispatch = useDispatch();
   const { id } = useParams();

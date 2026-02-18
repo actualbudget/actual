@@ -174,7 +174,7 @@ export function AccountAutocomplete({
 }: AccountAutocompleteProps) {
   const { t } = useTranslation();
 
-  const accounts = useAccounts() || [];
+  const { data: accounts = [] } = useAccounts();
 
   //remove closed accounts if needed
   //then sort by closed, then offbudget

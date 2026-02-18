@@ -449,7 +449,7 @@ export function Overview({ dashboard }: OverviewProps) {
     );
   };
 
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
 
   if (isLoading) {
     return <LoadingIndicator message={t('Loading reports...')} />;

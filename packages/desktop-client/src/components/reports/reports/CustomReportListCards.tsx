@@ -80,8 +80,8 @@ function CustomReportListCardsInner({
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
     useDashboardWidgetCopyMenu(onCopy);
 
-  const payees = usePayees();
-  const accounts = useAccounts();
+  const { data: payees = [] } = usePayees();
+  const { data: accounts = [] } = useAccounts();
   const { data: categories = { list: [], grouped: [] } } = useCategories();
 
   const hasWarning = calculateHasWarning(report.conditions ?? [], {
