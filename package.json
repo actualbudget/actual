@@ -63,7 +63,7 @@
   },
   "devDependencies": {
     "@octokit/rest": "^22.0.1",
-    "@types/node": "^22.19.3",
+    "@types/node": "^22.19.10",
     "@types/prompts": "^2.4.9",
     "baseline-browser-mapping": "^2.9.19",
     "cross-env": "^10.1.0",
