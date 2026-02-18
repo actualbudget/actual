@@ -19665,7 +19665,7 @@ __metadata:
     i18next: "npm:^25.8.4"
     jest-diff: "npm:^30.2.0"
     jsverify: "npm:^0.8.4"
-    lru-cache: "npm:^11.2.4"
+    lru-cache: "npm:^11.2.5"
     md5: "npm:^2.3.0"
     memoize-one: "npm:^6.0.0"
     mitt: "npm:^3.0.1"
@@ -19729,6 +19729,13 @@ __metadata:
   version: 11.2.4
   resolution: "lru-cache@npm:11.2.4"
   checksum: 10/3b2da74c0b6653767f8164c38c4c4f4d7f0cc10c62bfa512663d94a830191ae6a5af742a8d88a8b30d5f9974652d3adae53931f32069139ad24fa2a18a199aca
+  languageName: node
+  linkType: hard
+
+"lru-cache@npm:^11.2.5":
+  version: 11.2.6
+  resolution: "lru-cache@npm:11.2.6"
+  checksum: 10/91222bbd59f793a0a0ad57789388f06b34ac9bb1613433c1d1810457d09db5cd3ec8943227ce2e1f5d6a0a15d6f1a9f129cb2c49ae9b6b10e82d4965fddecbef
   languageName: node
   linkType: hard
 
