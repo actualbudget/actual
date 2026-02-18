@@ -177,7 +177,7 @@ __metadata:
     date-fns: "npm:^4.1.0"
     downshift: "npm:9.0.10"
     hyperformula: "npm:^3.1.1"
-    i18next: "npm:^25.7.4"
+    i18next: "npm:^25.8.4"
     i18next-parser: "npm:^9.3.0"
     i18next-resources-to-backend: "npm:^1.2.1"
     jsdom: "npm:^27.4.0"
@@ -19304,9 +19304,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^25.7.4":
-  version: 25.7.4
-  resolution: "i18next@npm:25.7.4"
+"i18next@npm:^25.8.4":
+  version: 25.8.11
+  resolution: "i18next@npm:25.8.11"
   dependencies:
     "@babel/runtime": "npm:^7.28.4"
   peerDependencies:
@@ -19314,7 +19314,7 @@ __metadata:
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10/7b6ee8298741cf758332a6743f721039ac33d5324ea61c4e5868797e4070108921a64ffe245ca7a60bcfb3485bdb27e16bbbd02d1c7039415dca3a34fde7ccca
+  checksum: 10/088cb151c18d35c7061bf48e858d3d4298bdc8a9f011e99cf64570298f6a33e13f50bcdc65dc2c2babd545b2a677e2e9c02ea869932c18c6a5fa67971ebdfe44
   languageName: node
   linkType: hard
 
@@ -21089,7 +21089,7 @@ __metadata:
     fake-indexeddb: "npm:^6.2.5"
     fast-check: "npm:4.5.3"
     handlebars: "npm:^4.7.8"
-    i18next: "npm:^25.7.4"
+    i18next: "npm:^25.8.4"
     jest-diff: "npm:^30.2.0"
     jsverify: "npm:^0.8.4"
     lru-cache: "npm:^11.2.4"
