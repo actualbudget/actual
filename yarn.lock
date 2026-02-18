@@ -144,7 +144,7 @@ __metadata:
     "@codemirror/autocomplete": "npm:^6.20.0"
     "@codemirror/lang-javascript": "npm:^6.2.4"
     "@codemirror/language": "npm:^6.12.1"
-    "@codemirror/state": "npm:^6.5.3"
+    "@codemirror/state": "npm:^6.5.4"
     "@codemirror/view": "npm:^6.38.7"
     "@emotion/css": "npm:^11.13.5"
     "@fontsource-variable/inter": "npm:^5.2.8"
@@ -2114,7 +2114,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/state@npm:^6.0.0, @codemirror/state@npm:^6.1.1, @codemirror/state@npm:^6.4.0, @codemirror/state@npm:^6.5.0, @codemirror/state@npm:^6.5.3":
+"@codemirror/state@npm:^6.0.0, @codemirror/state@npm:^6.1.1, @codemirror/state@npm:^6.4.0, @codemirror/state@npm:^6.5.0, @codemirror/state@npm:^6.5.4":
   version: 6.5.4
   resolution: "@codemirror/state@npm:6.5.4"
   dependencies:
