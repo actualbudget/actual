@@ -10622,7 +10622,7 @@ __metadata:
     eslint-plugin-typescript-paths: "npm:^0.0.33"
     html-to-image: "npm:^1.11.13"
     husky: "npm:^9.1.7"
-    lage: "npm:^2.14.15"
+    lage: "npm:^2.14.17"
     lint-staged: "npm:^16.2.7"
     minimatch: "npm:^10.1.2"
     node-jq: "npm:^6.3.1"
@@ -19093,9 +19093,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lage@npm:^2.14.15":
-  version: 2.14.15
-  resolution: "lage@npm:2.14.15"
+"lage@npm:^2.14.17":
+  version: 2.14.18
+  resolution: "lage@npm:2.14.18"
   dependencies:
     fsevents: "npm:~2.3.2"
     glob-hasher: "npm:^1.4.2"
@@ -19105,7 +19105,7 @@ __metadata:
   bin:
     lage: dist/lage.js
     lage-server: dist/lage-server.js
-  checksum: 10/b70c715cae80fcf49d1b38ea9f87c2fcac42d0622c4d664029d816a08dfdf8c5ad22d82c678bb68f67205dd67839988f868206b9809f91dd61c941d0340573a6
+  checksum: 10/3f2429509496332eb1525b3831ed4fa6eeba9968f1736c22e1b75fee528a77af9d0b6883db9e5e0d95c462e21936617974825a7e665df442d31cb92898d1b356
   languageName: node
   linkType: hard
 
