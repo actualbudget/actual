@@ -16,6 +16,6 @@
 
 - [ ] Release notes added (see link above)
 - [ ] No obvious regressions in affected areas
-- [ ] Self-review has been performed - I understand what each line of code does and why it is needed
+- [ ] Self-review has been performed - I understand what each change in the code does and why it is needed
 
 <!--- actual-bot-sections --->
