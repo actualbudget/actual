@@ -70,7 +70,7 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
       tables.includes('payees') ||
       tables.includes('payee_mapping')
     ) {
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: payeeQueries.lists(),
       });
     }

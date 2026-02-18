@@ -656,7 +656,7 @@ export function ImportTransactionsModal({
       {
         onSuccess: async didChange => {
           if (didChange) {
-            queryClient.invalidateQueries(payeeQueries.list());
+            void queryClient.invalidateQueries(payeeQueries.list());
           }
 
           if (onImported) {

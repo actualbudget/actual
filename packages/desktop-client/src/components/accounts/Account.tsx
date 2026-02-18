@@ -383,7 +383,7 @@ class AccountInternal extends PureComponent<
 
     // Important that any async work happens last so that the
     // listeners are set up synchronously
-    await this.fetchTransactions(this.state.filterConditions);
+    this.fetchTransactions(this.state.filterConditions);
 
     // If there is a pending undo, apply it immediately (this happens
     // when an undo changes the location to this page)
