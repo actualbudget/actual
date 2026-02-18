@@ -54,8 +54,8 @@
     "@svgr/cli": "^8.1.0",
     "@types/react": "^19.2.5",
     "eslint-plugin-storybook": "^10.2.7",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
     "storybook": "^10.2.7",
     "vitest": "^4.0.18"
   },
