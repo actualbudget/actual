@@ -48,7 +48,7 @@ __metadata:
   dependencies:
     "@chromatic-com/storybook": "npm:^5.0.0"
     "@emotion/css": "npm:^11.13.5"
-    "@storybook/addon-a11y": "npm:^10.2.0"
+    "@storybook/addon-a11y": "npm:^10.2.7"
     "@storybook/addon-docs": "npm:^10.2.0"
     "@storybook/react-vite": "npm:^10.2.0"
     "@svgr/cli": "npm:^8.1.0"
@@ -9711,15 +9711,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-a11y@npm:^10.2.0":
-  version: 10.2.0
-  resolution: "@storybook/addon-a11y@npm:10.2.0"
+"@storybook/addon-a11y@npm:^10.2.7":
+  version: 10.2.10
+  resolution: "@storybook/addon-a11y@npm:10.2.10"
   dependencies:
     "@storybook/global": "npm:^5.0.0"
     axe-core: "npm:^4.2.0"
   peerDependencies:
-    storybook: ^10.2.0
-  checksum: 10/6637be09d7685bbac5e097839b404d28b0780892522d5ecf9e034ebb241a10c820335c48f579c494615089ff1993952b946e0794e1b0711927e890eda5dd01f7
+    storybook: ^10.2.10
+  checksum: 10/29fe108f5160a286e6765babc68348dfb033d8b7e88a7896fb551fce415c43034a2cd13e99b0ec51e420f39bc39863c51940f418bc930c7ad5b9bf62e3651c7a
   languageName: node
   linkType: hard
 
