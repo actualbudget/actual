@@ -105,7 +105,7 @@ Common variables include:
 
 **Graph Colors:**
 
-These color palette impact custom report widget graph series in all variation bar, line, donut, etc...
+These color palette impact custom report series colors in all variations - bar, line, donut, etc...
 
 - `color-chartQual1`
 - `color-chartQual2`
