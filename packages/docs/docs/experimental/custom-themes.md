@@ -103,12 +103,11 @@ Common variables include:
 - `--color-sidebarItemText` - Sidebar item text
 - `--color-sidebarItemTextSelected` - Selected sidebar item text
 
-
 **Graph Colors:**
 
 All Generic graph in reports series impact custom report widgets only.
 
-- `color-chartQual1:`  
+- `color-chartQual1:`
 - `color-chartQual2:`
 - `color-chartQual3:`
 - `color-chartQual4:`
