@@ -77,6 +77,7 @@ export function CoverMenu({
           <Input
             defaultValue={_initialAmount}
             onUpdate={setAmount}
+            onChangeValue={setAmount}
             style={styles.tnum}
           />
         </View>
