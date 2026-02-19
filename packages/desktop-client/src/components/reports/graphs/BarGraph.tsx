@@ -10,13 +10,14 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   LabelList,
+  Rectangle,
   ReferenceLine,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
+import type { BarShapeProps } from 'recharts';
 
 import type {
   balanceTypeOpType,
@@ -314,6 +315,14 @@ export function BarGraph({
                     id: item.id,
                   })
                 }
+                shape={(props: BarShapeProps) => (
+                  <Rectangle
+                    {...props}
+                    fill={
+                      data.legend[props.index]?.color ?? props.fill ?? undefined
+                    }
+                  />
+                )}
               >
                 {viewLabels && !compact && (
                   <LabelList
@@ -321,13 +330,6 @@ export function BarGraph({
                     content={e => customLabel(e, balanceTypeOp, format)}
                   />
                 )}
-                {data.legend.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.color}
-                    name={entry.name}
-                  />
-                ))}
               </Bar>
             </BarChart>
           </div>
