@@ -3,7 +3,6 @@ import { Form } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
