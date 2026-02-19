@@ -68,7 +68,7 @@ function getAccountBalance(account) {
 }
 
 async function updateAccountBalance(id: AccountEntity['id'], balance: number) {
-  await db.runQuery('UPDATE accounts SET balance_current = ? WHERE id = ?', [
+  db.runQuery('UPDATE accounts SET balance_current = ? WHERE id = ?', [
     balance,
     id,
   ]);

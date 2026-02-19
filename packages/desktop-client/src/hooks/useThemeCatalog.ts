@@ -41,7 +41,7 @@ export function useThemeCatalog() {
       }
     };
 
-    fetchCatalog();
+    void fetchCatalog();
   }, []);
 
   return {

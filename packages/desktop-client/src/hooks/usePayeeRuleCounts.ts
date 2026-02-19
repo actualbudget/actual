@@ -1,33 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { send } from 'loot-core/platform/client/connection';
+import { payeeQueries } from '@desktop-client/payees';
 
-type PayeeRuleCounts = Map<string, number>;
-
-type UsePayeeRuleCountsResult = {
-  ruleCounts: PayeeRuleCounts;
-  isLoading: boolean;
-  refetch: () => Promise<void>;
-};
-
-export function usePayeeRuleCounts(): UsePayeeRuleCountsResult {
-  const [ruleCounts, setRuleCounts] = useState<PayeeRuleCounts>(new Map());
-  const [isLoading, setIsLoading] = useState(true);
-
-  const refetch = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const counts = await send('payees-get-rule-counts');
-      const countsMap = new Map(Object.entries(counts));
-      setRuleCounts(countsMap);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
-
-  return { ruleCounts, isLoading, refetch };
+export function usePayeeRuleCounts() {
+  return useQuery(payeeQueries.ruleCounts());
 }

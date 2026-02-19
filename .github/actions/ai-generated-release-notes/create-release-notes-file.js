@@ -94,4 +94,4 @@ ${summaryData.summary}
   }
 }
 
-createReleaseNotesFile();
+void createReleaseNotesFile();

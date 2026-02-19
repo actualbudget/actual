@@ -76,7 +76,7 @@ class App<Handlers> {
     this.unlistenServices = this.services.map(service => service());
   }
 
-  stopServices() {
+  async stopServices() {
     this.unlistenServices.forEach(unlisten => {
       if (unlisten) {
         unlisten();

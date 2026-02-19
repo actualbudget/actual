@@ -30,7 +30,7 @@ jobs:
       matrix:
         shard: [1, 2, 3, 4, 5]
     container:
-      image: mcr.microsoft.com/playwright:v1.57.0-jammy
+      image: mcr.microsoft.com/playwright:v1.58.2-jammy
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Set up environment
@@ -53,7 +53,7 @@ jobs:
     name: Functional Desktop App
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/playwright:v1.57.0-jammy
+      image: mcr.microsoft.com/playwright:v1.58.2-jammy
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Set up environment
@@ -81,7 +81,7 @@ jobs:
       matrix:
         shard: [1, 2, 3, 4, 5]
     container:
-      image: mcr.microsoft.com/playwright:v1.57.0-jammy
+      image: mcr.microsoft.com/playwright:v1.58.2-jammy
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Set up environment
@@ -104,7 +104,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !cancelled() }}
     container:
-      image: mcr.microsoft.com/playwright:v1.57.0-jammy
+      image: mcr.microsoft.com/playwright:v1.58.2-jammy
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Set up environment

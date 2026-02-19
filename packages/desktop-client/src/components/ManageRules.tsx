@@ -37,7 +37,6 @@ import {
   useSelected,
 } from '@desktop-client/hooks/useSelected';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { getPayees } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 export type FilterData = {
@@ -135,8 +134,8 @@ export function ManageRules({
     query: useMemo(() => q('schedules').select('*'), []),
   });
   const { data: { list: categories } = { list: [] } } = useCategories();
-  const payees = usePayees();
-  const accounts = useAccounts();
+  const { data: payees } = usePayees();
+  const { data: accounts = [] } = useAccounts();
   const filterData = useMemo(
     () => ({
       payees,
@@ -192,15 +191,13 @@ export function ManageRules({
     async function loadData() {
       await loadRules();
       setLoading(false);
-
-      await dispatch(getPayees());
     }
 
     if (payeeId) {
       undo.setUndoState('openModal', { name: 'manage-rules', options: {} });
     }
 
-    loadData();
+    void loadData();
 
     return () => {
       undo.setUndoState('openModal', null);

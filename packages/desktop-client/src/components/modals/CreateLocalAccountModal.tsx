@@ -35,7 +35,7 @@ export function CreateLocalAccountModal() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
@@ -75,7 +75,7 @@ export function CreateLocalAccountModal() {
         {
           onSuccess: id => {
             dispatch(closeModal());
-            navigate('/accounts/' + id);
+            void navigate('/accounts/' + id);
           },
         },
       );

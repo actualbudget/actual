@@ -91,21 +91,34 @@ function parseParens(state: ParserState): AstNode {
   return parsePrimary(state);
 }
 
-function makeOperatorParser<T extends readonly Operator[]>(...ops: T) {
-  type ParserFn = (state: ParserState) => AstNode;
-  return ops.reduce<ParserFn>((prevParser: ParserFn, op: Operator) => {
-    return (state: ParserState) => {
-      let node = prevParser(state);
-      while (nextOperator(state, op)) {
-        node = { op, left: node, right: prevParser(state) };
-      }
-      return node;
-    };
-  }, parseParens);
+function parseExponent(state: ParserState): AstNode {
+  let node = parseParens(state);
+  if (nextOperator(state, '^')) {
+    node = { op: '^', left: node, right: parseExponent(state) };
+  }
+  return node;
+}
+
+function parseMultiplicative(state: ParserState): AstNode {
+  let node = parseExponent(state);
+  while (char(state) === '*' || char(state) === '/') {
+    const op = next(state) as '*' | '/';
+    node = { op, left: node, right: parseExponent(state) };
+  }
+  return node;
+}
+
+function parseAdditive(state: ParserState): AstNode {
+  let node = parseMultiplicative(state);
+  while (char(state) === '+' || char(state) === '-') {
+    const op = next(state) as '+' | '-';
+    node = { op, left: node, right: parseMultiplicative(state) };
+  }
+  return node;
 }
 
 // These operators go from high to low order of precedence
-const parseOperator = makeOperatorParser('^', '/', '*', '-', '+');
+const parseOperator = parseAdditive;
 
 function parse(expression: string): AstNode {
   const state = { str: expression.replace(/\s/g, ''), index: 0 };

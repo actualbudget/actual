@@ -85,7 +85,7 @@ const logMessage = (loglevel: 'info' | 'error', message: string) => {
     queuedClientWinLogs.push(`console.${loglevel}(${trimmedMessage})`);
   } else {
     // Send the queued up logs to the devtools console
-    clientWin.webContents.executeJavaScript(
+    void clientWin.webContents.executeJavaScript(
       `console.${loglevel}(${trimmedMessage})`,
     );
   }
@@ -107,9 +107,11 @@ const createOAuthServer = async () => {
       const code = query.get('token');
       if (code && clientWin) {
         if (isDev) {
-          clientWin.loadURL(`http://localhost:3001/openid-cb?token=${code}`);
+          void clientWin.loadURL(
+            `http://localhost:3001/openid-cb?token=${code}`,
+          );
         } else {
-          clientWin.loadURL(`app://actual/openid-cb?token=${code}`);
+          void clientWin.loadURL(`app://actual/openid-cb?token=${code}`);
         }
 
         // Respond to the browser
@@ -264,7 +266,7 @@ async function startSyncServer() {
 
     // ACTUAL_SERVER_DATA_DIR is the root directory for the sync-server
     if (!fs.existsSync(syncServerConfig.ACTUAL_SERVER_DATA_DIR)) {
-      mkdir(syncServerConfig.ACTUAL_SERVER_DATA_DIR, { recursive: true });
+      void mkdir(syncServerConfig.ACTUAL_SERVER_DATA_DIR, { recursive: true });
     }
 
     let forkOptions: ForkOptions = {
@@ -360,13 +362,15 @@ async function createWindow() {
   const unlistenToState = listenToWindowState(win, windowState);
 
   if (isDev) {
-    win.loadURL(`file://${__dirname}/loading.html`);
+    void win.loadURL(`file://${__dirname}/loading.html`);
     // Wait for the development server to start
     setTimeout(() => {
-      promiseRetry(retry => win.loadURL('http://localhost:3001/').catch(retry));
+      void promiseRetry(retry =>
+        win.loadURL('http://localhost:3001/').catch(retry),
+      );
     }, 3000);
   } else {
-    win.loadURL(`app://actual/`);
+    void win.loadURL(`app://actual/`);
   }
 
   win.on('closed', () => {
@@ -385,7 +389,7 @@ async function createWindow() {
     if (clientWin) {
       const url = clientWin.webContents.getURL();
       if (url.includes('app://') || url.includes('localhost:')) {
-        clientWin.webContents.executeJavaScript(
+        void clientWin.webContents.executeJavaScript(
           'window.__actionsForMenu.appFocused()',
         );
       }
@@ -396,7 +400,7 @@ async function createWindow() {
   // always deny, optionally redirect to browser
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (isExternalUrl(url)) {
-      shell.openExternal(url);
+      void shell.openExternal(url);
     }
 
     return { action: 'deny' };
@@ -406,7 +410,7 @@ async function createWindow() {
   // optionally redirect to browser
   win.webContents.on('will-navigate', (event, url) => {
     if (isExternalUrl(url)) {
-      shell.openExternal(url);
+      void shell.openExternal(url);
       event.preventDefault();
     }
   });
@@ -515,7 +519,7 @@ app.on('before-quit', () => {
 
 app.on('activate', () => {
   if (clientWin === null) {
-    createWindow();
+    void createWindow();
   }
 });
 
@@ -553,7 +557,7 @@ ipcMain.handle('restart-server', () => {
     serverProcess = null;
   }
 
-  createBackgroundProcess();
+  void createBackgroundProcess();
 });
 
 ipcMain.handle('relaunch', () => {
@@ -606,7 +610,7 @@ ipcMain.handle(
 );
 
 ipcMain.handle('open-external-url', (event, url) => {
-  shell.openExternal(url);
+  void shell.openExternal(url);
 });
 
 ipcMain.handle('open-in-file-manager', (event, filepath) => {
@@ -624,7 +628,7 @@ ipcMain.on('message', (_event, msg) => {
 ipcMain.on('set-theme', (_event, theme: string) => {
   const obj = { theme };
   if (clientWin) {
-    clientWin.webContents.executeJavaScript(
+    void clientWin.webContents.executeJavaScript(
       `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs({ prefs: ${JSON.stringify(obj)} })`,
     );
   }

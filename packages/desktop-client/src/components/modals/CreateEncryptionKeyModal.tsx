@@ -60,9 +60,9 @@ export function CreateEncryptionKeyModal({
         return;
       }
 
-      dispatch(loadGlobalPrefs());
-      dispatch(loadAllFiles());
-      dispatch(sync());
+      void dispatch(loadGlobalPrefs());
+      void dispatch(loadAllFiles());
+      void dispatch(sync());
 
       setLoading(false);
       close();
@@ -174,7 +174,7 @@ export function CreateEncryptionKeyModal({
           <Form
             onSubmit={e => {
               e.preventDefault();
-              onCreateKey(close);
+              void onCreateKey(close);
             }}
           >
             <View style={{ alignItems: 'center' }}>

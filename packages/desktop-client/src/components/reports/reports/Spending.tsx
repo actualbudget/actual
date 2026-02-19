@@ -41,22 +41,23 @@ import { calculateSpendingReportTimeRange } from '@desktop-client/components/rep
 import { createSpendingSpreadsheet } from '@desktop-client/components/reports/spreadsheets/spending-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
+import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
-import { useWidget } from '@desktop-client/hooks/useWidget';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
 
 export function Spending() {
   const params = useParams();
-  const { data: widget, isLoading } = useWidget<SpendingWidget>(
-    params.id ?? '',
-    'spending-card',
-  );
+  const { data: widget, isPending } = useDashboardWidget<SpendingWidget>({
+    id: params.id,
+    type: 'spending-card',
+  });
 
-  if (isLoading) {
+  if (isPending) {
     return <LoadingIndicator />;
   }
 
@@ -134,7 +135,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
 
       setAllIntervals(allMonths);
     }
-    run();
+    void run();
   }, [locale]);
 
   const getGraphData = useMemo(
@@ -152,30 +153,40 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
+  const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
+
   async function onSaveWidget() {
     if (!widget) {
       throw new Error('No widget that could be saved.');
     }
 
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        conditions,
-        conditionsOp,
-        compare,
-        compareTo,
-        isLive,
-        mode: reportMode,
-      },
-    });
-    dispatch(
-      addNotification({
-        notification: {
-          type: 'message',
-          message: t('Dashboard widget successfully saved.'),
+    updateDashboardWidgetMutation.mutate(
+      {
+        widget: {
+          id: widget.id,
+          meta: {
+            ...(widget.meta ?? {}),
+            conditions,
+            conditionsOp,
+            compare,
+            compareTo,
+            isLive,
+            mode: reportMode,
+          },
         },
-      }),
+      },
+      {
+        onSuccess: () => {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'message',
+                message: t('Dashboard widget successfully saved.'),
+              },
+            }),
+          );
+        },
+      },
     );
   }
 
@@ -210,11 +221,13 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     }
 
     const name = newName || t('Monthly Spending');
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        name,
+    updateDashboardWidgetMutation.mutate({
+      widget: {
+        id: widget.id,
+        meta: {
+          ...(widget.meta ?? {}),
+          name,
+        },
       },
     });
   };

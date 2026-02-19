@@ -134,7 +134,7 @@ async function fetchAll(table, ids) {
     sql += partIds.map(() => `${column} = ?`).join(' OR ');
 
     try {
-      const rows = await db.runQuery(sql, partIds, true);
+      const rows = db.runQuery(sql, partIds, true);
       results = results.concat(rows);
     } catch (error) {
       throw new SyncError('invalid-schema', {
@@ -362,7 +362,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
 
       // Special treatment for some synced prefs
       if (dataset === 'preferences' && row === 'budgetType') {
-        setBudgetType(value);
+        void setBudgetType(value);
       }
     }
 
@@ -388,7 +388,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
 
   // Save any synced prefs
   if (Object.keys(prefsToSet).length > 0) {
-    prefs.savePrefs(prefsToSet, { avoidSync: true });
+    void prefs.savePrefs(prefsToSet, { avoidSync: true });
     connection.send('prefs-updated');
   }
 
@@ -465,7 +465,7 @@ async function _sendMessages(messages: Message[]): Promise<void> {
   try {
     await applyMessages(messages);
   } catch (e) {
-    errorHandler(e);
+    void errorHandler(e);
     throw e;
   }
 
@@ -486,8 +486,8 @@ export async function batchMessages(func: () => Promise<void>): Promise<void> {
   try {
     await func();
   } catch (e) {
-    errorHandler(e);
-    // TODO: if it fails, it shouldn't apply them?
+    void errorHandler(e);
+    throw e;
   } finally {
     IS_BATCHING = false;
     batched = _BATCHED;
@@ -621,7 +621,7 @@ export const fullSync = once(async function (): Promise<
         app.events.emit('sync', { type: 'unauthorized' });
 
         // Set the user into read-only mode
-        asyncStorage.setItem('readOnly', 'true');
+        void asyncStorage.setItem('readOnly', 'true');
       } else if (e.reason === 'network-failure') {
         app.events.emit('sync', { type: 'error', subtype: 'network' });
       } else {

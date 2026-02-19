@@ -139,7 +139,7 @@ export class Spreadsheet {
     // Begin running on the next tick so we guarantee that it doesn't finish
     // within the same tick. Since some computations are async, this makes it
     // consistent (otherwise it would only sometimes finish sync)
-    Promise.resolve().then(() => {
+    void Promise.resolve().then(() => {
       if (!this.running) {
         this.runComputations();
       }

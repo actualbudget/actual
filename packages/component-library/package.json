@@ -43,24 +43,24 @@
   },
   "dependencies": {
     "@emotion/css": "^11.13.5",
-    "react-aria-components": "^1.14.0",
+    "react-aria-components": "^1.15.1",
     "usehooks-ts": "^3.1.1"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.0.0",
-    "@storybook/addon-a11y": "^10.2.0",
-    "@storybook/addon-docs": "^10.2.0",
-    "@storybook/react-vite": "^10.2.0",
+    "@storybook/addon-a11y": "^10.2.7",
+    "@storybook/addon-docs": "^10.2.7",
+    "@storybook/react-vite": "^10.2.7",
     "@svgr/cli": "^8.1.0",
     "@types/react": "^19.2.5",
-    "eslint-plugin-storybook": "^10.2.0",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "storybook": "^10.2.0",
-    "vitest": "^4.0.16"
+    "eslint-plugin-storybook": "^10.2.7",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "storybook": "^10.2.7",
+    "vitest": "^4.0.18"
   },
   "peerDependencies": {
-    "react": ">=18.2",
-    "react-dom": ">=18.2"
+    "react": ">=19.2",
+    "react-dom": ">=19.2"
   }
 }

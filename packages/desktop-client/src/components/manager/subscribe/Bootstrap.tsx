@@ -55,7 +55,7 @@ export function Bootstrap() {
       setError(error);
     } else {
       await refreshLoginMethods();
-      navigate('/login');
+      void navigate('/login');
     }
   }
 

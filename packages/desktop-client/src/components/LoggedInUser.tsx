@@ -68,7 +68,7 @@ export function LoggedInUser({
   }, [dispatch]);
 
   useEffect(() => {
-    initializeUserData();
+    void initializeUserData();
   }, [initializeUserData]);
 
   useEffect(() => {
@@ -85,7 +85,7 @@ export function LoggedInUser({
           (type === 'error' && !userData.offline));
 
       if (shouldReinitialize) {
-        initializeUserData();
+        void initializeUserData();
       } else {
         setLoading(false);
       }
@@ -98,7 +98,7 @@ export function LoggedInUser({
 
   async function onChangePassword() {
     await onCloseBudget();
-    navigate('/change-password');
+    void navigate('/change-password');
   }
 
   const handleMenuSelect = async (type: string) => {
@@ -106,27 +106,27 @@ export function LoggedInUser({
 
     switch (type) {
       case 'change-password':
-        onChangePassword();
+        void onChangePassword();
         break;
       case 'sign-in':
         await onCloseBudget();
-        navigate('/login');
+        void navigate('/login');
         break;
       case 'user-access':
-        navigate('/user-access');
+        void navigate('/user-access');
         break;
       case 'user-directory':
-        navigate('/user-directory');
+        void navigate('/user-directory');
         break;
       case 'index':
-        navigate('/');
+        void navigate('/');
         break;
       case 'sign-out':
-        dispatch(signOut());
+        void dispatch(signOut());
         break;
       case 'config-server':
         await onCloseBudget();
-        navigate('/config-server');
+        void navigate('/config-server');
         break;
       default:
         break;

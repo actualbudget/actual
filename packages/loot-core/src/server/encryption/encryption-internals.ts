@@ -7,7 +7,7 @@ export function randomBytes(n) {
   return crypto.randomBytes(n);
 }
 
-export function encrypt(masterKey, value) {
+export async function encrypt(masterKey, value) {
   const masterKeyBuffer = masterKey.getValue().raw;
   // let iv = createKeyBuffer({ numBytes: 12, secret: masterKeyBuffer });
   const iv = crypto.randomBytes(12);
@@ -32,7 +32,7 @@ export function encrypt(masterKey, value) {
   };
 }
 
-export function decrypt(masterKey, encrypted, meta) {
+export async function decrypt(masterKey, encrypted, meta) {
   const masterKeyBuffer = masterKey.getValue().raw;
   const { algorithm, iv: originalIv, authTag: originalAuthTag } = meta;
   const iv = Buffer.from(originalIv, 'base64');
@@ -46,7 +46,7 @@ export function decrypt(masterKey, encrypted, meta) {
   return decrypted;
 }
 
-export function createKey({ secret, salt }) {
+export async function createKey({ secret, salt }) {
   const buffer = createKeyBuffer({ secret, salt });
   return {
     raw: buffer,
@@ -54,7 +54,7 @@ export function createKey({ secret, salt }) {
   };
 }
 
-export function importKey(str) {
+export async function importKey(str) {
   return {
     raw: Buffer.from(str, 'base64'),
     base64: str,

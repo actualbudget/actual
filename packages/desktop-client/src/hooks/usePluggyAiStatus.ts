@@ -22,7 +22,7 @@ export function usePluggyAiStatus() {
     }
 
     if (status === 'online') {
-      fetch();
+      void fetch();
     }
   }, [status]);
 

@@ -111,7 +111,7 @@ export function FixEncryptionKeyModal({
           <Form
             onSubmit={e => {
               e.preventDefault();
-              onUpdateKey(close);
+              void onUpdateKey(close);
             }}
           >
             <View

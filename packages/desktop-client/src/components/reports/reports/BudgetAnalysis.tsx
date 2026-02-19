@@ -38,23 +38,24 @@ import { calculateTimeRange } from '@desktop-client/components/reports/reportRan
 import { createBudgetAnalysisSpreadsheet } from '@desktop-client/components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
+import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useWidget } from '@desktop-client/hooks/useWidget';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
 
 export function BudgetAnalysis() {
   const params = useParams();
-  const { data: widget, isLoading } = useWidget<BudgetAnalysisWidget>(
-    params.id ?? '',
-    'budget-analysis-card',
-  );
+  const { data: widget, isPending } = useDashboardWidget<BudgetAnalysisWidget>({
+    id: params.id,
+    type: 'budget-analysis-card',
+  });
 
-  if (isLoading) {
+  if (isPending) {
     return <LoadingIndicator />;
   }
 
@@ -174,7 +175,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         setIsConcise(calculateIsConcise(liveStart, liveEnd));
       }
     }
-    run();
+    void run();
   }, [locale, widget?.meta?.timeFrame]);
 
   const startDate = start + '-01';
@@ -207,33 +208,43 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
     setIsConcise(calculateIsConcise(newStart, newEnd));
   };
 
+  const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
+
   async function onSaveWidget() {
     if (!widget) {
       throw new Error('No widget that could be saved.');
     }
 
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        conditions,
-        conditionsOp,
-        timeFrame: {
-          start,
-          end,
-          mode,
+    updateDashboardWidgetMutation.mutate(
+      {
+        widget: {
+          id: widget.id,
+          meta: {
+            ...(widget.meta ?? {}),
+            conditions,
+            conditionsOp,
+            timeFrame: {
+              start,
+              end,
+              mode,
+            },
+            graphType,
+            showBalance,
+          },
         },
-        graphType,
-        showBalance,
       },
-    });
-    dispatch(
-      addNotification({
-        notification: {
-          type: 'message',
-          message: t('Dashboard widget successfully saved.'),
+      {
+        onSuccess: () => {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'message',
+                message: t('Dashboard widget successfully saved.'),
+              },
+            }),
+          );
         },
-      }),
+      },
     );
   }
 
@@ -245,17 +256,20 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const endingBalance = latestInterval?.balance ?? 0;
 
   const title = widget?.meta?.name || t('Budget Analysis');
+
   const onSaveWidgetName = async (newName: string) => {
     if (!widget) {
       throw new Error('No widget that could be saved.');
     }
 
     const name = newName || t('Budget Analysis');
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        name,
+    updateDashboardWidgetMutation.mutate({
+      widget: {
+        id: widget.id,
+        meta: {
+          ...(widget.meta ?? {}),
+          name,
+        },
       },
     });
   };

@@ -34,7 +34,7 @@ export function ExportBudget() {
     }
 
     if (response.data) {
-      window.Actual.saveFile(
+      void window.Actual.saveFile(
         response.data,
         `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}.zip`,
         t('Export budget'),

@@ -433,7 +433,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
       );
 
-      onSetAllIntervals(earliestTransaction, latestTransaction, interval);
+      void onSetAllIntervals(earliestTransaction, latestTransaction, interval);
       onSetStartAndEndDates(
         earliestTransaction,
         latestTransaction,
@@ -443,7 +443,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       );
     }
 
-    run();
+    void run();
   }, [
     interval,
     dateRange,
@@ -473,8 +473,8 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const balanceTypeOp: balanceTypeOpType =
     ReportOptions.balanceTypeMap.get(balanceType) || 'totalDebts';
   const sortByOp: sortByOpType = sortBy || 'desc';
-  const payees = usePayees();
-  const accounts = useAccounts();
+  const { data: payees = [] } = usePayees();
+  const { data: accounts = [] } = useAccounts();
 
   const hasWarning = calculateHasWarning(conditions, {
     categories: categories.list,
@@ -767,7 +767,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         setReport(params.savedReport);
 
         if (params.savedReport.id !== initialReport?.id) {
-          navigate(`/reports/custom/${params.savedReport.id}`);
+          void navigate(`/reports/custom/${params.savedReport.id}`);
         }
         break;
       case 'rename':
@@ -798,14 +798,14 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         setSavedStatus('saved');
         setReport(newReport);
         setReportData(newReport);
-        navigate(`/reports/custom/${newReport.id}`);
+        void navigate(`/reports/custom/${newReport.id}`);
         break;
       default:
     }
   };
 
   const onBackClick = () => {
-    navigate('/reports');
+    void navigate('/reports');
   };
 
   return (

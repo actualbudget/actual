@@ -42,14 +42,14 @@ export function Value<T>({
   const { t } = useTranslation();
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const payees = usePayees();
+  const { data: payees } = usePayees();
   const {
     data: { list: categories, grouped: categoryGroups } = {
       list: [],
       grouped: [],
     },
   } = useCategories();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const valueStyle = {
     color: theme.pageTextPositive,
     ...style,

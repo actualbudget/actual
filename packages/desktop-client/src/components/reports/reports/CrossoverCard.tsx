@@ -19,8 +19,8 @@ import { ReportCardName } from '@desktop-client/components/reports/ReportCardNam
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import type { CrossoverData } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
@@ -50,7 +50,7 @@ export function CrossoverCard({
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useWidgetCopyMenu(onCopy);
+    useDashboardWidgetCopyMenu(onCopy);
 
   // Calculate date range from meta or use default range
   const [start, setStart] = useState<string>('');
@@ -124,7 +124,7 @@ export function CrossoverCard({
         setEnd(end);
       }
     }
-    calculateDateRange();
+    void calculateDateRange();
     return () => {
       isMounted = false;
     };

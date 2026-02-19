@@ -180,7 +180,7 @@ export function useFormulaExecution(
       }
     }
 
-    executeFormula();
+    void executeFormula();
 
     return () => {
       cancelled = true;

@@ -41,8 +41,8 @@ export function MobileRulesPage() {
     query: useMemo(() => q('schedules').select('*'), []),
   });
   const { data: { list: categories } = { list: [] } } = useCategories();
-  const payees = usePayees();
-  const accounts = useAccounts();
+  const { data: payees = [] } = usePayees();
+  const { data: accounts = [] } = useAccounts();
   const filterData = useMemo(
     () => ({
       payees,
@@ -94,13 +94,13 @@ export function MobileRulesPage() {
   }, []);
 
   useEffect(() => {
-    loadRules();
+    void loadRules();
   }, [loadRules]);
 
   // Listen for undo events to refresh rules list
   useEffect(() => {
     const onUndo = () => {
-      loadRules();
+      void loadRules();
     };
 
     const lastUndoEvent = undo.getUndoState('undoEvent');
@@ -113,7 +113,7 @@ export function MobileRulesPage() {
 
   const handleRulePress = useCallback(
     (rule: RuleEntity) => {
-      navigate(`/rules/${rule.id}`);
+      void navigate(`/rules/${rule.id}`);
     },
     [navigate],
   );

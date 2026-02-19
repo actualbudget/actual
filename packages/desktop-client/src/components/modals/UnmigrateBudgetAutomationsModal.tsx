@@ -36,7 +36,7 @@ export function UnmigrateBudgetAutomationsModal({
 
   useEffect(() => {
     let mounted = true;
-    (async () => {
+    void (async () => {
       try {
         const text: string = await send(
           'budget/render-note-templates',

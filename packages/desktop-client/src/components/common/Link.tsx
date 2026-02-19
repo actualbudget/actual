@@ -106,7 +106,7 @@ const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
       variant={props.buttonVariant}
       onPress={e => {
         props.onPress?.(e);
-        navigate(path);
+        void navigate(path);
       }}
     />
   );

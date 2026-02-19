@@ -66,7 +66,7 @@ export function EnvelopeBudgetSummaryModal({
             month,
             amount: sheetValue,
             onSubmit: (amount, toCategoryId) => {
-              onBudgetAction(month, 'transfer-available', {
+              void onBudgetAction(month, 'transfer-available', {
                 amount,
                 month,
                 category: toCategoryId,
@@ -96,7 +96,7 @@ export function EnvelopeBudgetSummaryModal({
             showToBeBudgeted: false,
             amount: sheetValue,
             onSubmit: (amount, categoryId) => {
-              onBudgetAction(month, 'cover-overbudgeted', {
+              void onBudgetAction(month, 'cover-overbudgeted', {
                 category: categoryId,
                 amount,
                 currencyCode: format.currency.code,
@@ -122,7 +122,7 @@ export function EnvelopeBudgetSummaryModal({
           options: {
             month,
             onSubmit: amount => {
-              onBudgetAction(month, 'hold', { amount });
+              void onBudgetAction(month, 'hold', { amount });
               dispatch(collapseModals({ rootModalName: 'hold-buffer' }));
             },
           },
@@ -132,7 +132,7 @@ export function EnvelopeBudgetSummaryModal({
   };
 
   const onResetHoldBuffer = () => {
-    onBudgetAction(month, 'reset-hold');
+    void onBudgetAction(month, 'reset-hold');
   };
 
   const onClick = ({ close }: { close: () => void }) => {

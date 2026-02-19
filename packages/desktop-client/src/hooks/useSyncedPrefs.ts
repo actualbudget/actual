@@ -12,7 +12,7 @@ export function useSyncedPrefs(): [SyncedPrefs, SetSyncedPrefsAction] {
   const dispatch = useDispatch();
   const setPrefs = useCallback<SetSyncedPrefsAction>(
     newValue => {
-      dispatch(saveSyncedPrefs({ prefs: newValue }));
+      void dispatch(saveSyncedPrefs({ prefs: newValue }));
     },
     [dispatch],
   );
