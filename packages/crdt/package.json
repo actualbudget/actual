@@ -24,6 +24,6 @@
     "protoc-gen-js": "3.21.4-4",
     "ts-protoc-gen": "0.15.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.18"
   }
 }
