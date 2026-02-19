@@ -268,9 +268,8 @@ export function BarGraph({
                 <XAxis
                   dataKey={yAxis}
                   angle={-35}
-                  textAnchor="end"
                   height={Math.sqrt(longestLabelLength) * 25}
-                  tick={{ fill: theme.pageText }}
+                  tick={{ fill: theme.pageText, textAnchor: 'end' }}
                   tickLine={{ stroke: theme.pageText }}
                 />
               )}
