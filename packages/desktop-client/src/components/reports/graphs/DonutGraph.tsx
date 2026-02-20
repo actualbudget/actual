@@ -394,11 +394,12 @@ export function DonutGraph({
    * outer ring category slices. Fixing here keeps grouped-spreadsheet unchanged.
    */
   const { adjustedGroupData, flatCategories } = useMemo(() => {
-    if (!isCategoryGroup || !data.groupedData) {
-      return { adjustedGroupData: [], flatCategories: [] };
-    }
+  if (!isCategoryGroup || !data.groupedData) {
+    return { adjustedGroupData: [], flatCategories: [] };
+  }
 
-    const adjustedGroups = data.groupedData.map(group => {
+  const adjustedGroups = data.groupedData
+    .map(group => {
       const visibleCats = group.categories ?? [];
       return {
         ...group,
@@ -408,13 +409,14 @@ export function DonutGraph({
         netAssets: visibleCats.reduce((sum, c) => sum + c.netAssets, 0),
         netDebts: visibleCats.reduce((sum, c) => sum + c.netDebts, 0),
       };
-    });
+    })
+    .filter(group => getVal(group) !== 0); // remove zero-total groups to avoid index shift on hover
 
-    return {
-      adjustedGroupData: adjustedGroups,
-      flatCategories: data.groupedData.flatMap(g => g.categories ?? []),
-    };
-  }, [isCategoryGroup, data.groupedData]);
+  return {
+    adjustedGroupData: adjustedGroups,
+    flatCategories: data.groupedData.flatMap(g => g.categories ?? []),
+  };
+}, [isCategoryGroup, data.groupedData, balanceTypeOp]); // balanceTypeOp added since getVal depends on it
 
   // Use `?? []` instead of `!` non-null assertion
   const { groupColorMap, categoryColorMap } = useMemo(
