@@ -175,7 +175,7 @@ app.post('/user-create-key', (req, res) => {
   const { fileId, keyId, keySalt, testContent } = req.body || {};
 
   const filesService = new FilesService(getAccountDb());
-  const file = verifyFileExists(fileId, filesService, res, 'file not found');
+  const file = verifyFileExists(fileId, filesService, res, 'file-not-found');
 
   if (!file) {
     return;
@@ -384,7 +384,7 @@ app.post('/update-user-filename', (req, res) => {
   const { fileId, name } = req.body || {};
 
   const filesService = new FilesService(getAccountDb());
-  const file = verifyFileExists(fileId, filesService, res, 'file not found');
+  const file = verifyFileExists(fileId, filesService, res, 'file-not-found');
 
   if (!file) {
     return;
