@@ -373,6 +373,11 @@ describe('/upload-user-file', () => {
     const fileContentBuffer = Buffer.from(fileContent);
     const syncVersion = 2;
     const encryptMeta = JSON.stringify({ keyId: 'key-id' });
+    onTestFinished(() => {
+      try {
+        fs.unlinkSync(getPathForUserFile(fileId));
+      } catch {}
+    });
 
     // Verify that the file does not exist before upload
     const rowsBefore = getAccountDb().all('SELECT * FROM files WHERE id = ?', [
@@ -410,13 +415,6 @@ describe('/upload-user-file', () => {
     const filePath = getPathForUserFile(fileId);
     const writtenContent = await fs.promises.readFile(filePath, 'utf8');
     expect(writtenContent).toEqual(fileContent);
-
-    // Clean up the file
-    onTestFinished(() => {
-      try {
-        fs.unlinkSync(filePath);
-      } catch {}
-    });
   });
 
   it('uploads and updates an existing file successfully', async () => {
@@ -434,6 +432,11 @@ describe('/upload-user-file', () => {
       keyId: oldKeyId,
       sentinelValue: 1,
     }); //keep the same key, but change other things
+    onTestFinished(() => {
+      try {
+        fs.unlinkSync(getPathForUserFile(fileId));
+      } catch {}
+    });
 
     // Create the old file version
     getAccountDb().mutate(
@@ -482,13 +485,6 @@ describe('/upload-user-file', () => {
     const filePath = getPathForUserFile(fileId);
     const writtenContent = await fs.promises.readFile(filePath, 'utf8');
     expect(writtenContent).toEqual(newFileContent);
-
-    // Clean up the file
-    onTestFinished(() => {
-      try {
-        fs.unlinkSync(filePath);
-      } catch {}
-    });
   });
 
   it('returns 400 if the file is part of an old group', async () => {
@@ -567,6 +563,11 @@ describe('/upload-user-file', () => {
         OTHER_USER_ID,
       ],
     );
+    onTestFinished(() => {
+      try {
+        fs.unlinkSync(getPathForUserFile(fileId));
+      } catch {}
+    });
 
     const res = await request(app)
       .post('/upload-user-file')
@@ -581,12 +582,6 @@ describe('/upload-user-file', () => {
 
     expect(res.statusCode).toEqual(403);
     expect(res.text).toEqual('file-access-not-allowed');
-
-    onTestFinished(() => {
-      try {
-        fs.unlinkSync(getPathForUserFile(fileId));
-      } catch {}
-    });
   });
 
   it("allows an admin to overwrite another user's file", async () => {
@@ -609,6 +604,11 @@ describe('/upload-user-file', () => {
         OTHER_USER_ID,
       ],
     );
+    onTestFinished(() => {
+      try {
+        fs.unlinkSync(getPathForUserFile(fileId));
+      } catch {}
+    });
 
     const res = await request(app)
       .post('/upload-user-file')
@@ -631,12 +631,6 @@ describe('/upload-user-file', () => {
       fileId,
     ]);
     expect(rows[0].name).toEqual('admin-renamed.txt');
-
-    onTestFinished(() => {
-      try {
-        fs.unlinkSync(getPathForUserFile(fileId));
-      } catch {}
-    });
   });
 });
 
@@ -724,6 +718,11 @@ describe('/download-user-file', () => {
           'INSERT INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
           [fileId, OTHER_USER_ID],
         );
+        onTestFinished(() => {
+          try {
+            fs.unlinkSync(getPathForUserFile(fileId));
+          } catch {}
+        });
 
         const res = await request(app)
           .get('/download-user-file')
@@ -732,12 +731,6 @@ describe('/download-user-file', () => {
 
         expect(res.statusCode).toEqual(403);
         expect(res.text).toEqual('file-access-not-allowed');
-
-        onTestFinished(() => {
-          try {
-            fs.unlinkSync(getPathForUserFile(fileId));
-          } catch {}
-        });
       });
 
       it("allows an admin to download another user's file", async () => {
@@ -748,6 +741,11 @@ describe('/download-user-file', () => {
           'INSERT INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
           [fileId, OTHER_USER_ID],
         );
+        onTestFinished(() => {
+          try {
+            fs.unlinkSync(getPathForUserFile(fileId));
+          } catch {}
+        });
 
         const res = await request(app)
           .get('/download-user-file')
@@ -757,12 +755,6 @@ describe('/download-user-file', () => {
         expect(res.statusCode).toEqual(200);
         expect(res.body).toBeInstanceOf(Buffer);
         expect(res.body.toString('utf8')).toEqual(fileContent);
-
-        onTestFinished(() => {
-          try {
-            fs.unlinkSync(getPathForUserFile(fileId));
-          } catch {}
-        });
       });
 
       it('allows non-owner with user_access to download via requireFileAccess (UserService.countUserAccess > 0)', async () => {
@@ -779,6 +771,11 @@ describe('/download-user-file', () => {
           'INSERT INTO user_access (file_id, user_id) VALUES (?, ?)',
           [fileId, 'genericUser'],
         );
+        onTestFinished(() => {
+          try {
+            fs.unlinkSync(getPathForUserFile(fileId));
+          } catch {}
+        });
 
         const res = await request(app)
           .get('/download-user-file')
@@ -794,12 +791,6 @@ describe('/download-user-file', () => {
         );
         expect(res.body).toBeInstanceOf(Buffer);
         expect(res.body.toString('utf8')).toEqual(fileContent);
-
-        onTestFinished(() => {
-          try {
-            fs.unlinkSync(getPathForUserFile(fileId));
-          } catch {}
-        });
       });
     });
   });
