@@ -675,4 +675,3 @@ export function DonutGraph({
     </Container>
   );
 }
-
