@@ -48,6 +48,7 @@
     "**/client-build/*",
     "**/dist/*",
     "**/lib-dist/*",
+    "packages/api/@types",
     "**/test-results/*",
     "**/playwright-report/*",
     "**/service-worker/*",

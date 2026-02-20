@@ -61,15 +61,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     resolve: {
-      extensions: [
-        '.web.js',
-        '.web.ts',
-        '.web.tsx',
-        '.js',
-        '.ts',
-        '.tsx',
-        '.json',
-      ],
+      extensions: ['.js', '.ts', '.tsx', '.json'],
       alias: [
         {
           find: /^@actual-app\/crdt(\/.*)?$/,

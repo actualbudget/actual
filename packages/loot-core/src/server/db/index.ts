@@ -7,7 +7,7 @@ import {
   setClock,
   Timestamp,
 } from '@actual-app/crdt';
-import type { Database } from '@jlongster/sql.js';
+import type { Database, Statement } from '@jlongster/sql.js';
 import { LRUCache } from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -110,19 +110,19 @@ export async function loadClock() {
 
 // Functions
 export function runQuery(
-  sql: string,
+  sql: string | Statement,
   params?: Array<string | number>,
   fetchAll?: false,
 ): { changes: unknown };
 
 export function runQuery<T>(
-  sql: string,
+  sql: string | Statement,
   params: Array<string | number> | undefined,
   fetchAll: true,
 ): T[];
 
 export function runQuery<T>(
-  sql: string,
+  sql: string | Statement,
   params: (string | number)[],
   fetchAll: boolean,
 ) {
@@ -139,7 +139,7 @@ export function execQuery(sql: string) {
 
 // This manages an LRU cache of prepared query statements. This is
 // only needed in hot spots when you are running lots of queries.
-let _queryCache = new LRUCache<string, string>({ max: 100 });
+let _queryCache = new LRUCache<string, Statement>({ max: 100 });
 export function cache(sql: string) {
   const cached = _queryCache.get(sql);
   if (cached) {
@@ -152,7 +152,7 @@ export function cache(sql: string) {
 }
 
 function resetQueryCache() {
-  _queryCache = new LRUCache<string, string>({ max: 100 });
+  _queryCache = new LRUCache<string, Statement>({ max: 100 });
 }
 
 export function transaction(fn: () => void) {
