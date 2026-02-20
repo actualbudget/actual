@@ -394,29 +394,29 @@ export function DonutGraph({
    * outer ring category slices. Fixing here keeps grouped-spreadsheet unchanged.
    */
   const { adjustedGroupData, flatCategories } = useMemo(() => {
-  if (!isCategoryGroup || !data.groupedData) {
-    return { adjustedGroupData: [], flatCategories: [] };
-  }
+    if (!isCategoryGroup || !data.groupedData) {
+      return { adjustedGroupData: [], flatCategories: [] };
+    }
 
-  const adjustedGroups = data.groupedData
-    .map(group => {
-      const visibleCats = group.categories ?? [];
-      return {
-        ...group,
-        totalAssets: visibleCats.reduce((sum, c) => sum + c.totalAssets, 0),
-        totalDebts: visibleCats.reduce((sum, c) => sum + c.totalDebts, 0),
-        totalTotals: visibleCats.reduce((sum, c) => sum + c.totalTotals, 0),
-        netAssets: visibleCats.reduce((sum, c) => sum + c.netAssets, 0),
-        netDebts: visibleCats.reduce((sum, c) => sum + c.netDebts, 0),
-      };
-    })
-    .filter(group => getVal(group) !== 0); // remove zero-total groups to avoid index shift on hover
+    const adjustedGroups = data.groupedData
+      .map(group => {
+        const visibleCats = group.categories ?? [];
+        return {
+          ...group,
+          totalAssets: visibleCats.reduce((sum, c) => sum + c.totalAssets, 0),
+          totalDebts: visibleCats.reduce((sum, c) => sum + c.totalDebts, 0),
+          totalTotals: visibleCats.reduce((sum, c) => sum + c.totalTotals, 0),
+          netAssets: visibleCats.reduce((sum, c) => sum + c.netAssets, 0),
+          netDebts: visibleCats.reduce((sum, c) => sum + c.netDebts, 0),
+        };
+      })
+      .filter(group => getVal(group) !== 0); // remove zero-total groups to avoid index shift on hover
 
-  return {
-    adjustedGroupData: adjustedGroups,
-    flatCategories: data.groupedData.flatMap(g => g.categories ?? []),
-  };
-}, [isCategoryGroup, data.groupedData, balanceTypeOp]); // balanceTypeOp added since getVal depends on it
+    return {
+      adjustedGroupData: adjustedGroups,
+      flatCategories: data.groupedData.flatMap(g => g.categories ?? []),
+    };
+  }, [isCategoryGroup, data.groupedData, balanceTypeOp]); // balanceTypeOp added since getVal depends on it
 
   // Use `?? []` instead of `!` non-null assertion
   const { groupColorMap, categoryColorMap } = useMemo(
