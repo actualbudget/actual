@@ -410,13 +410,17 @@ export function DonutGraph({
           netDebts: visibleCats.reduce((sum, c) => sum + c.netDebts, 0),
         };
       })
-      .filter(group => getVal(group) !== 0); // remove zero-total groups to avoid index shift on hover
+      .filter(group =>
+        ['totalDebts', 'netDebts'].includes(balanceTypeOp)
+          ? -1 * group[balanceTypeOp] !== 0
+          : group[balanceTypeOp] !== 0,
+      );
 
     return {
       adjustedGroupData: adjustedGroups,
       flatCategories: data.groupedData.flatMap(g => g.categories ?? []),
     };
-  }, [isCategoryGroup, data.groupedData, balanceTypeOp]); // balanceTypeOp added since getVal depends on it
+  }, [isCategoryGroup, data.groupedData, balanceTypeOp]);
 
   // Use `?? []` instead of `!` non-null assertion
   const { groupColorMap, categoryColorMap } = useMemo(
@@ -437,7 +441,7 @@ export function DonutGraph({
         const minDim = Math.min(width, height);
 
         // Shared ring boundary — both rings meet here with no gap
-        const ringBoundary = minDim * 0.28;
+        const ringBoundary = minDim * 0.31;
 
         // ---------------------------------------------------------------
         // Two-ring concentric donut (CategoryGroup mode)
@@ -460,7 +464,7 @@ export function DonutGraph({
                     nameKey="name"
                     {...animationProps}
                     data={adjustedGroupData}
-                    innerRadius={minDim * 0.15}
+                    innerRadius={minDim * 0.2}
                     outerRadius={ringBoundary}
                     startAngle={90}
                     endAngle={-270}
