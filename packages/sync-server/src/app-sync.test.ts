@@ -764,6 +764,43 @@ describe('/download-user-file', () => {
           } catch {}
         });
       });
+
+      it('allows non-owner with user_access to download via requireFileAccess (UserService.countUserAccess > 0)', async () => {
+        // File owned by another user; access granted only via user_access row, not owner/admin.
+        // This exercises the requireFileAccess branch that uses UserService.countUserAccess.
+        const fileId = crypto.randomBytes(16).toString('hex');
+        const fileContent = 'shared-user content';
+        fs.writeFileSync(getPathForUserFile(fileId), fileContent);
+        getAccountDb().mutate(
+          'INSERT INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
+          [fileId, OTHER_USER_ID],
+        );
+        getAccountDb().mutate(
+          'INSERT INTO user_access (file_id, user_id) VALUES (?, ?)',
+          [fileId, 'genericUser'],
+        );
+
+        const res = await request(app)
+          .get('/download-user-file')
+          .set('x-actual-token', 'valid-token-user')
+          .set('x-actual-file-id', fileId);
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.headers).toEqual(
+          expect.objectContaining({
+            'content-disposition': `attachment;filename=${fileId}`,
+            'content-type': 'application/octet-stream',
+          }),
+        );
+        expect(res.body).toBeInstanceOf(Buffer);
+        expect(res.body.toString('utf8')).toEqual(fileContent);
+
+        onTestFinished(() => {
+          try {
+            fs.unlinkSync(getPathForUserFile(fileId));
+          } catch {}
+        });
+      });
     });
   });
 });
