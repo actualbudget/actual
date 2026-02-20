@@ -485,18 +485,10 @@ app.post('/delete-user-file', (req, res) => {
     return;
   }
 
-  // Check if user has permission to delete the file
-  const { user_id: userId } = res.locals;
-
-  const isOwner = file.owner === userId;
-  const isServerAdmin = isAdmin(userId);
-
-  if (!isOwner && !isServerAdmin) {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden',
-      details: 'file-delete-not-allowed',
-    });
+  const fileAccessError = requireFileAccess(file, res.locals.user_id);
+  if (fileAccessError) {
+    res.status(403);
+    res.send(fileAccessError);
     return;
   }
 

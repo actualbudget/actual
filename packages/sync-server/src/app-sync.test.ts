@@ -875,11 +875,7 @@ describe('/delete-user-file', () => {
       .send({ fileId });
 
     expect(res.statusCode).toEqual(403);
-    expect(res.body).toEqual({
-      status: 'error',
-      reason: 'forbidden',
-      details: 'file-delete-not-allowed',
-    });
+    expect(res.text).toEqual('file-access-not-allowed');
 
     // Verify that the file is NOT deleted
     const rows = accountDb.all('SELECT deleted FROM files WHERE id = ?', [
