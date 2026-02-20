@@ -19,6 +19,7 @@ import {
   validateUploadedFile,
 } from './app-sync/validation';
 import { config } from './load-config';
+import * as UserService from './services/user-service';
 import * as simpleSync from './sync-simple';
 import {
   errorMiddleware,
@@ -71,10 +72,13 @@ const verifyFileExists = (fileId, filesService, res, errorObject) => {
 function requireFileAccess(file: File, userId: string) {
   const isOwner = file.owner === userId;
   const isServerAdmin = isAdmin(userId);
-  if (!isOwner && !isServerAdmin) {
-    return 'file-access-not-allowed';
+  if (isOwner || isServerAdmin) {
+    return null;
   }
-  return null;
+  if (UserService.countUserAccess(file.id, userId) > 0) {
+    return null;
+  }
+  return 'file-access-not-allowed';
 }
 
 app.post('/sync', async (req, res): Promise<void> => {
