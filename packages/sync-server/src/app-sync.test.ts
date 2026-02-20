@@ -714,54 +714,56 @@ describe('/download-user-file', () => {
       expect(res.body).toBeInstanceOf(Buffer);
       expect(res.body.toString('utf8')).toEqual(fileContent);
     });
-  });
 
-  it('returns 403 when non-owner downloads another user file', async () => {
-    const fileId = crypto.randomBytes(16).toString('hex');
-    const fileContent = 'sensitive content';
-    fs.writeFileSync(getPathForUserFile(fileId), fileContent);
-    getAccountDb().mutate(
-      'INSERT INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
-      [fileId, OTHER_USER_ID],
-    );
+    describe('access control', () => {
+      it('returns 403 when non-owner downloads another user file', async () => {
+        const fileId = crypto.randomBytes(16).toString('hex');
+        const fileContent = 'sensitive content';
+        fs.writeFileSync(getPathForUserFile(fileId), fileContent);
+        getAccountDb().mutate(
+          'INSERT INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
+          [fileId, OTHER_USER_ID],
+        );
 
-    const res = await request(app)
-      .get('/download-user-file')
-      .set('x-actual-token', 'valid-token-user')
-      .set('x-actual-file-id', fileId);
+        const res = await request(app)
+          .get('/download-user-file')
+          .set('x-actual-token', 'valid-token-user')
+          .set('x-actual-file-id', fileId);
 
-    expect(res.statusCode).toEqual(403);
-    expect(res.text).toEqual('file-access-not-allowed');
+        expect(res.statusCode).toEqual(403);
+        expect(res.text).toEqual('file-access-not-allowed');
 
-    onTestFinished(() => {
-      try {
-        fs.unlinkSync(getPathForUserFile(fileId));
-      } catch {}
-    });
-  });
+        onTestFinished(() => {
+          try {
+            fs.unlinkSync(getPathForUserFile(fileId));
+          } catch {}
+        });
+      });
 
-  it("allows an admin to download another user's file", async () => {
-    const fileId = crypto.randomBytes(16).toString('hex');
-    const fileContent = 'admin-downloaded content';
-    fs.writeFileSync(getPathForUserFile(fileId), fileContent);
-    getAccountDb().mutate(
-      'INSERT INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
-      [fileId, OTHER_USER_ID],
-    );
+      it("allows an admin to download another user's file", async () => {
+        const fileId = crypto.randomBytes(16).toString('hex');
+        const fileContent = 'admin-downloaded content';
+        fs.writeFileSync(getPathForUserFile(fileId), fileContent);
+        getAccountDb().mutate(
+          'INSERT INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
+          [fileId, OTHER_USER_ID],
+        );
 
-    const res = await request(app)
-      .get('/download-user-file')
-      .set('x-actual-token', 'valid-token-admin')
-      .set('x-actual-file-id', fileId);
+        const res = await request(app)
+          .get('/download-user-file')
+          .set('x-actual-token', 'valid-token-admin')
+          .set('x-actual-file-id', fileId);
 
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toBeInstanceOf(Buffer);
-    expect(res.body.toString('utf8')).toEqual(fileContent);
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toBeInstanceOf(Buffer);
+        expect(res.body.toString('utf8')).toEqual(fileContent);
 
-    onTestFinished(() => {
-      try {
-        fs.unlinkSync(getPathForUserFile(fileId));
-      } catch {}
+        onTestFinished(() => {
+          try {
+            fs.unlinkSync(getPathForUserFile(fileId));
+          } catch {}
+        });
+      });
     });
   });
 });
