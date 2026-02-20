@@ -11,6 +11,7 @@ import type {
   DataEntity,
   GroupedEntity,
   IntervalEntity,
+  LegendEntity,
   RuleConditionEntity,
 } from 'loot-core/types/models';
 
@@ -31,6 +32,97 @@ const RADIAN = Math.PI / 180;
 
 const canDeviceHover = () => window.matchMedia('(hover: hover)').matches;
 
+// ---------------------------------------------------------------------------
+// Color helpers for two-ring donut
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve a CSS variable like `var(--color-chartQual1)` to its actual hex
+ * value from the document computed styles. If already a plain color, returns
+ * as-is.
+ */
+const resolveCSSVariable = (color: string): string => {
+  if (!color.startsWith('var(')) return color;
+  const varName = color.slice(4, -1).trim();
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(varName)
+    .trim();
+};
+
+const hexToRgb = (hex: string) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : { r: 0, g: 0, b: 0 };
+};
+
+/**
+ * Lighten a color by mixing it toward white.
+ * Resolves CSS variables before parsing so `var(--color-*)` works correctly.
+ * percent=0 → original color, percent=1 → white
+ */
+const shadeColor = (color: string, percent: number): string => {
+  const resolved = resolveCSSVariable(color);
+  const { r, g, b } = hexToRgb(resolved);
+  const adjust = (c: number) =>
+    Math.min(255, Math.max(0, Math.round(c + (255 - c) * percent)));
+  return `rgb(${adjust(r)}, ${adjust(g)}, ${adjust(b)})`;
+};
+
+/**
+ * Build two color maps from groupedData using the legend keyed by group id.
+ * Since CategoryGroup mode now uses groupByLabel='categoryGroup', the legend
+ * has one entry per group with the correct color — no category-level lookup needed.
+ *
+ *  - groupColorMap:    groupId → color from legend
+ *  - categoryColorMap: catId   → shaded variant of parent group color
+ */
+const buildColorMaps = (
+  groupedData: GroupedEntity[],
+  legend: LegendEntity[],
+) => {
+  const groupColorMap = new Map<string, string>();
+  const categoryColorMap = new Map<string, string>();
+
+  const legendById = new Map(
+    legend.filter(l => l.id !== null).map(l => [l.id as string, l.color]),
+  );
+
+  groupedData.forEach(group => {
+    if (!group.id) return;
+
+    const groupColor = legendById.get(group.id);
+    if (!groupColor) return;
+
+    // Resolve CSS variable so shadeColor always receives plain hex
+    const resolvedGroupColor = resolveCSSVariable(groupColor);
+    groupColorMap.set(group.id, resolvedGroupColor);
+
+    const cats = group.categories ?? [];
+    cats.forEach((cat, catIndex) => {
+      if (!cat.id) return;
+      // Spread shades from 0.15 (slightly lighter) to 0.65 (much lighter)
+      const shade = 0.15 + (catIndex / Math.max(cats.length, 1)) * 0.5;
+      categoryColorMap.set(cat.id, shadeColor(resolvedGroupColor, shade));
+    });
+  });
+
+  return { groupColorMap, categoryColorMap };
+};
+
+// ---------------------------------------------------------------------------
+// Active shape components
+// ---------------------------------------------------------------------------
+
+/**
+ * Mobile active shape.
+ * expandInward=true  → expansion arc drawn inside the inner radius (inner ring)
+ * expandInward=false → expansion arc drawn outside the outer radius (outer ring)
+ */
 const ActiveShapeMobile = props => {
   const {
     cx,
@@ -44,6 +136,7 @@ const ActiveShapeMobile = props => {
     percent,
     value,
     format,
+    expandInward = false,
   } = props;
   const yAxis = payload.name ?? payload.date;
 
@@ -92,13 +185,14 @@ const ActiveShapeMobile = props => {
         endAngle={endAngle}
         fill={fill}
       />
+      {/* Expansion arc — inward for inner ring, outward for outer ring */}
       <Sector
         cx={cx}
         cy={cy}
         startAngle={startAngle}
         endAngle={endAngle}
-        innerRadius={innerRadius - 8}
-        outerRadius={innerRadius - 6}
+        innerRadius={expandInward ? innerRadius - 8 : outerRadius + 2}
+        outerRadius={expandInward ? innerRadius - 6 : outerRadius + 4}
         fill={fill}
       />
     </g>
@@ -109,6 +203,11 @@ const ActiveShapeMobileWithFormat = props => (
   <ActiveShapeMobile {...props} format={props.format} />
 );
 
+/**
+ * Desktop active shape.
+ * expandInward=true  → expansion arc drawn inside the inner radius (inner ring)
+ * expandInward=false → expansion arc drawn outside the outer radius (outer ring)
+ */
 const ActiveShape = props => {
   const {
     cx,
@@ -123,6 +222,7 @@ const ActiveShape = props => {
     percent,
     value,
     format,
+    expandInward = false,
   } = props;
   const yAxis = payload.name ?? payload.date;
   const sin = Math.sin(-RADIAN * midAngle);
@@ -146,13 +246,14 @@ const ActiveShape = props => {
         endAngle={endAngle}
         fill={fill}
       />
+      {/* Expansion arc — inward for inner ring, outward for outer ring */}
       <Sector
         cx={cx}
         cy={cy}
         startAngle={startAngle}
         endAngle={endAngle}
-        innerRadius={outerRadius + 6}
-        outerRadius={outerRadius + 10}
+        innerRadius={expandInward ? innerRadius - 10 : outerRadius + 6}
+        outerRadius={expandInward ? innerRadius - 6 : outerRadius + 10}
         fill={fill}
       />
       <path
@@ -222,6 +323,10 @@ const customLabel = props => {
   );
 };
 
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
 type DonutGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
@@ -264,13 +369,194 @@ export function DonutGraph({
     }
   };
 
+  // Single-ring active index (all groupBy modes except CategoryGroup)
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // Two-ring state (CategoryGroup mode only)
+  const [activeGroupIndex, setActiveGroupIndex] = useState(0);
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
+  // Tracks which ring is currently hovered so only one shows active shape at a time
+  const [activeRing, setActiveRing] = useState<'group' | 'category'>(
+    'category',
+  );
+
+  const isCategoryGroup =
+    groupBy === 'CategoryGroup' && !!data.groupedData?.length;
+
+  // Legend is now keyed by group id for CategoryGroup mode since
+  // groupBySelections uses categoryGroup/categoryGroup for this mode
+  const { groupColorMap, categoryColorMap } = isCategoryGroup
+    ? buildColorMaps(data.groupedData!, data.legend)
+    : {
+        groupColorMap: new Map<string, string>(),
+        categoryColorMap: new Map<string, string>(),
+      };
+
+  // Flat list of all categories across all groups (outer ring)
+  const flatCategories = isCategoryGroup
+    ? (data.groupedData?.flatMap(g => g.categories ?? []) ?? [])
+    : [];
 
   return (
     <Container style={style}>
       {(width, height) => {
         const compact = height <= 300 || width <= 300;
+        const minDim = Math.min(width, height);
 
+        // Shared ring boundary — both rings meet here with no gap
+        const ringBoundary = minDim * 0.31;
+
+        // ---------------------------------------------------------------
+        // Two-ring concentric donut (CategoryGroup mode)
+        // ---------------------------------------------------------------
+        if (isCategoryGroup) {
+          return (
+            data.groupedData && (
+              <div>
+                {!compact && <div style={{ marginTop: '15px' }} />}
+                <PieChart
+                  responsive
+                  width={width}
+                  height={height}
+                  style={{ cursor: pointer }}
+                >
+                  {/* Inner ring — Category Groups, expansion arc goes inward */}
+                  <Pie
+                    dataKey={val => getVal(val)}
+                    nameKey="name"
+                    {...animationProps}
+                    data={data.groupedData}
+                    innerRadius={minDim * 0.2}
+                    outerRadius={ringBoundary}
+                    startAngle={90}
+                    endAngle={-270}
+                    shape={(props: PieSectorShapeProps, index: number) => {
+                      const item = data.groupedData?.[index];
+                      const fill = item?.id
+                        ? groupColorMap.get(item.id)
+                        : groupColorMap.get(item?.name ?? '');
+                      if (!fill) return <Sector {...props} />;
+                      const showActiveShape = width >= 220 && height >= 130;
+                      const isActive =
+                        activeRing === 'group' &&
+                        (props.isActive || index === activeGroupIndex);
+                      if (isActive && showActiveShape) {
+                        const shapeProps = {
+                          ...props,
+                          fill,
+                          format,
+                          expandInward: true,
+                        };
+                        return compact ? (
+                          <ActiveShapeMobileWithFormat {...shapeProps} />
+                        ) : (
+                          <ActiveShapeWithFormat {...shapeProps} />
+                        );
+                      }
+                      return <Sector {...props} fill={fill} />;
+                    }}
+                    onMouseLeave={() => setPointer('')}
+                    onMouseEnter={(_, index) => {
+                      if (canDeviceHover()) {
+                        setActiveGroupIndex(index);
+                        setActiveRing('group');
+                      }
+                    }}
+                    onClick={(_, index) => {
+                      if (!canDeviceHover()) {
+                        setActiveGroupIndex(index);
+                        setActiveRing('group');
+                      }
+                    }}
+                  />
+
+                  {/* Outer ring — Categories, expansion arc goes outward */}
+                  <Pie
+                    dataKey={val => getVal(val)}
+                    nameKey="name"
+                    {...animationProps}
+                    data={flatCategories}
+                    innerRadius={ringBoundary}
+                    outerRadius={minDim * 0.42}
+                    startAngle={90}
+                    endAngle={-270}
+                    labelLine={false}
+                    label={e =>
+                      viewLabels && !compact ? customLabel(e) : <div />
+                    }
+                    shape={(props: PieSectorShapeProps, index: number) => {
+                      const item = flatCategories[index];
+                      const fill = item?.id
+                        ? categoryColorMap.get(item.id)
+                        : categoryColorMap.get(item?.name ?? '');
+                      if (!fill) return <Sector {...props} />;
+                      const showActiveShape = width >= 220 && height >= 130;
+                      const isActive =
+                        activeRing === 'category' &&
+                        (props.isActive || index === activeCategoryIndex);
+                      if (isActive && showActiveShape) {
+                        const shapeProps = {
+                          ...props,
+                          fill,
+                          format,
+                          expandInward: false,
+                        };
+                        return compact ? (
+                          <ActiveShapeMobileWithFormat {...shapeProps} />
+                        ) : (
+                          <ActiveShapeWithFormat {...shapeProps} />
+                        );
+                      }
+                      return <Sector {...props} fill={fill} />;
+                    }}
+                    onMouseLeave={() => setPointer('')}
+                    onMouseEnter={(_, index) => {
+                      if (canDeviceHover()) {
+                        setActiveCategoryIndex(index);
+                        setActiveRing('category');
+                        setPointer('pointer');
+                      }
+                    }}
+                    onClick={(item, index) => {
+                      if (!canDeviceHover()) {
+                        setActiveCategoryIndex(index);
+                        setActiveRing('category');
+                      }
+                      if (
+                        (canDeviceHover() || activeCategoryIndex === index) &&
+                        ((compact && showTooltip) || !compact)
+                      ) {
+                        showActivity({
+                          navigate,
+                          categories,
+                          accounts,
+                          balanceTypeOp,
+                          filters,
+                          showHiddenCategories,
+                          showOffBudget,
+                          type: 'totals',
+                          startDate: data.startDate,
+                          endDate: data.endDate,
+                          field: 'category',
+                          id: item.id,
+                        });
+                      }
+                    }}
+                  />
+                  <Tooltip
+                    content={() => null}
+                    defaultIndex={activeCategoryIndex}
+                    active
+                  />
+                </PieChart>
+              </div>
+            )
+          );
+        }
+
+        // ---------------------------------------------------------------
+        // Original single-ring donut (all other groupBy modes)
+        // ---------------------------------------------------------------
         return (
           data[splitData] && (
             <div>
@@ -290,7 +576,7 @@ export function DonutGraph({
                       ...item,
                     })) ?? []
                   }
-                  innerRadius={Math.min(width, height) * 0.2}
+                  innerRadius={minDim * 0.2}
                   fill="#8884d8"
                   labelLine={false}
                   label={e =>
