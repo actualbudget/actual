@@ -177,8 +177,13 @@ Use `oauth2` for providers like GitHub that don't fully support OpenID discovery
 
 #### `ACTUAL_USER_CREATION_MODE`
 
-- **Purpose:** Users must be created manually with matching usernames in Actual before they are able to authenticate with OpenID/OAuth2. When set to `login`, users authenticating with OpenID/OAuth2 for the first time will be created in Actual automatically. The first user to login with OpenID/OAuth2 will be granted admin permissions, and will be considered the server owner; this cannot be changed from the UI once done.
-  **Example Value:** `manual` or `login` (default is `manual`)
+- **Purpose:** In `manual` (default) users must be created manually with matching usernames in Actual before they are able to authenticate with OpenID/OAuth2. When set to `login`, users authenticating with OpenID/OAuth2 for the first time will be created in Actual automatically.
+  
+  :::warning
+  The first user to log in with OpenID/OAuth2 will be granted admin permissions and become the server owner. The server owner cannot be changed from the UI once set.
+  :::
+  
+  **Possible Values:** `manual` or `login` (default is `manual`)
 
 :::tip
 Configuring the OpenID provider from options supports discovery; otherwise, use [file configuration](oauth-auth#config-using-configuration-file)
