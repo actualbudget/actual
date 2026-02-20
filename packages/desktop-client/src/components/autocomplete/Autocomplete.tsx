@@ -369,6 +369,11 @@ function SingleAutocomplete<T extends AutocompleteItem>({
             // Do nothing if it is a "touch" selection event
             Downshift.stateChangeTypes.touchEnd,
             Downshift.stateChangeTypes.mouseUp,
+            // Do nothing if an item was clicked/selected - the onSelect
+            // handler manages all necessary state changes. Without this,
+            // the highlighted index and open state get reset incorrectly,
+            // causing the wrong item to appear selected on touch devices.
+            Downshift.stateChangeTypes.clickItem,
             // @ts-expect-error Types say there is no type
           ].includes(changes.type)
         ) {
@@ -382,10 +387,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
         if (value === '') {
           // A blank value shouldn't highlight any item so that the field
           // can be left blank if desired
-          // @ts-expect-error Types say there is no type
-          if (changes.type !== Downshift.stateChangeTypes.clickItem) {
-            fireUpdate(onUpdate, strict, filteredSuggestions, null, null);
-          }
+          fireUpdate(onUpdate, strict, filteredSuggestions, null, null);
 
           setHighlightedIndex(null);
         } else {
@@ -395,16 +397,13 @@ function SingleAutocomplete<T extends AutocompleteItem>({
           const highlightedIndex = (
             getHighlightedIndex || defaultGetHighlightedIndex
           )(filteredSuggestions);
-          // @ts-expect-error Types say there is no type
-          if (changes.type !== Downshift.stateChangeTypes.clickItem) {
-            fireUpdate(
-              onUpdate,
-              strict,
-              filteredSuggestions,
-              highlightedIndex,
-              value,
-            );
-          }
+          fireUpdate(
+            onUpdate,
+            strict,
+            filteredSuggestions,
+            highlightedIndex,
+            value,
+          );
 
           setHighlightedIndex(highlightedIndex);
         }
