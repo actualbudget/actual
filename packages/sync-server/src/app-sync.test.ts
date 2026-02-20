@@ -87,6 +87,32 @@ describe('/user-get-key', () => {
     expect(res.statusCode).toEqual(403);
     expect(res.text).toEqual('file-access-not-allowed');
   });
+
+  it("allows an admin to get encryption key for another user's file", async () => {
+    const fileId = crypto.randomBytes(16).toString('hex');
+    const encrypt_salt = 'salt';
+    const encrypt_keyid = 'key-id';
+    const encrypt_test = 'test';
+    getAccountDb().mutate(
+      'INSERT INTO files (id, encrypt_salt, encrypt_keyid, encrypt_test, owner) VALUES (?, ?, ?, ?, ?)',
+      [fileId, encrypt_salt, encrypt_keyid, encrypt_test, OTHER_USER_ID],
+    );
+
+    const res = await request(app)
+      .post('/user-get-key')
+      .set('x-actual-token', 'valid-token-admin')
+      .send({ fileId });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({
+      status: 'ok',
+      data: {
+        id: encrypt_keyid,
+        salt: encrypt_salt,
+        test: encrypt_test,
+      },
+    });
+  });
 });
 
 describe('/user-create-key', () => {
@@ -1092,6 +1118,29 @@ describe('/sync', () => {
 
     expect(res.statusCode).toEqual(403);
     expect(res.text).toEqual('file-access-not-allowed');
+  });
+
+  it("allows an admin to sync another user's file", async () => {
+    const fileId = crypto.randomBytes(16).toString('hex');
+    const groupId = 'group-id';
+    const keyId = 'key-id';
+    const syncVersion = 2;
+    const encryptMeta = JSON.stringify({ keyId });
+    addMockFile(
+      fileId,
+      groupId,
+      keyId,
+      encryptMeta,
+      syncVersion,
+      OTHER_USER_ID,
+    );
+    const syncRequest = createMinimalSyncRequest(fileId, groupId, keyId);
+
+    const res = await sendSyncRequest(syncRequest, 'valid-token-admin');
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.headers['content-type']).toEqual('application/actual-sync');
+    expect(res.headers['x-actual-sync-method']).toEqual('simple');
   });
 });
 
