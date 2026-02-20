@@ -417,12 +417,16 @@ export function DonutGraph({
   }, [isCategoryGroup, data.groupedData]);
 
   // Use `?? []` instead of `!` non-null assertion
-  const { groupColorMap, categoryColorMap } = isCategoryGroup
-    ? buildColorMaps(data.groupedData ?? [], data.legend ?? [])
-    : {
-        groupColorMap: new Map<string, string>(),
-        categoryColorMap: new Map<string, string>(),
-      };
+  const { groupColorMap, categoryColorMap } = useMemo(
+    () =>
+      isCategoryGroup
+        ? buildColorMaps(data.groupedData ?? [], data.legend ?? [])
+        : {
+            groupColorMap: new Map<string, string>(),
+            categoryColorMap: new Map<string, string>(),
+          },
+    [isCategoryGroup, data.groupedData, data.legend],
+  );
 
   return (
     <Container style={style}>
