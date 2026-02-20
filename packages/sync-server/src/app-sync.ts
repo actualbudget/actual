@@ -275,18 +275,18 @@ app.post('/upload-user-file', async (req, res) => {
     }
   }
 
-  const errorMessage = validateUploadedFile(groupId, keyId, currentFile);
-  if (errorMessage) {
-    res.status(400).send(errorMessage);
-    return;
-  }
-
   const fileAccessError = currentFile
     ? requireFileAccess(currentFile, res.locals.user_id)
     : null;
   if (fileAccessError) {
     res.status(403);
     res.send(fileAccessError);
+    return;
+  }
+
+  const errorMessage = validateUploadedFile(groupId, keyId, currentFile);
+  if (errorMessage) {
+    res.status(400).send(errorMessage);
     return;
   }
 
