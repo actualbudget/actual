@@ -2,14 +2,18 @@ import express from 'express';
 
 import { handleError } from '../app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '../services/secrets-service';
-import { requestLoggerMiddleware } from '../util/middlewares';
+import {
+  requestLoggerMiddleware,
+  validateSessionMiddleware,
+} from '../util/middlewares';
 
 import { pluggyaiService } from './pluggyai-service';
 
 const app = express();
 export { app as handlers };
-app.use(express.json());
 app.use(requestLoggerMiddleware);
+app.use(express.json());
+app.use(validateSessionMiddleware);
 
 app.post(
   '/status',
