@@ -349,7 +349,11 @@ describe('/upload-user-file', () => {
     expect(writtenContent).toEqual(fileContent);
 
     // Clean up the file
-    await fs.promises.unlink(filePath);
+    onTestFinished(() => {
+      try {
+        fs.unlinkSync(filePath);
+      } catch {}
+    });
   });
 
   it('uploads and updates an existing file successfully', async () => {
@@ -417,7 +421,11 @@ describe('/upload-user-file', () => {
     expect(writtenContent).toEqual(newFileContent);
 
     // Clean up the file
-    await fs.promises.unlink(filePath);
+    onTestFinished(() => {
+      try {
+        fs.unlinkSync(filePath);
+      } catch {}
+    });
   });
 
   it('returns 400 if the file is part of an old group', async () => {
@@ -511,7 +519,11 @@ describe('/upload-user-file', () => {
     expect(res.statusCode).toEqual(403);
     expect(res.text).toEqual('file-access-not-allowed');
 
-    fs.unlinkSync(getPathForUserFile(fileId));
+    onTestFinished(() => {
+      try {
+        fs.unlinkSync(getPathForUserFile(fileId));
+      } catch {}
+    });
   });
 });
 
@@ -608,7 +620,11 @@ describe('/download-user-file', () => {
     expect(res.statusCode).toEqual(403);
     expect(res.text).toEqual('file-access-not-allowed');
 
-    fs.unlinkSync(getPathForUserFile(fileId));
+    onTestFinished(() => {
+      try {
+        fs.unlinkSync(getPathForUserFile(fileId));
+      } catch {}
+    });
   });
 });
 
@@ -1146,7 +1162,7 @@ describe('/sync', () => {
 
 function addMockFile(
   fileId: string,
-  groupId: string,
+  groupId: string | null,
   keyId: string,
   encryptMeta: string,
   syncVersion: number,
