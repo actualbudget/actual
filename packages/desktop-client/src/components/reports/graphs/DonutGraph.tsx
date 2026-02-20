@@ -1,9 +1,9 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 
 import { theme } from '@actual-app/components/theme';
-import { Pie, PieChart, Sector, Tooltip } from 'recharts';
+import { Pie, PieChart, Sector } from 'recharts';
 import type { PieSectorShapeProps } from 'recharts';
 
 import type {
@@ -39,11 +39,13 @@ const canDeviceHover = () => window.matchMedia('(hover: hover)').matches;
 /**
  * Resolve a CSS variable like `var(--color-chartQual1)` to its actual hex
  * value from the document computed styles. If already a plain color, returns
- * as-is.
+ * as-is. Handles CSS fallback syntax e.g. `var(--color, #fallback)` by
+ * stripping the fallback before lookup.
  */
 const resolveCSSVariable = (color: string): string => {
   if (!color.startsWith('var(')) return color;
-  const varName = color.slice(4, -1).trim();
+  const inner = color.slice(4, -1).trim();
+  const varName = inner.split(',')[0].trim(); // strip fallback value if present
   return getComputedStyle(document.documentElement)
     .getPropertyValue(varName)
     .trim();
@@ -75,8 +77,8 @@ const shadeColor = (color: string, percent: number): string => {
 
 /**
  * Build two color maps from groupedData using the legend keyed by group id.
- * Since CategoryGroup mode now uses groupByLabel='categoryGroup', the legend
- * has one entry per group with the correct color — no category-level lookup needed.
+ * Since CategoryGroup mode uses groupByLabel='categoryGroup', the legend
+ * has one entry per group with the correct color.
  *
  *  - groupColorMap:    groupId → color from legend
  *  - categoryColorMap: catId   → shaded variant of parent group color
@@ -89,7 +91,9 @@ const buildColorMaps = (
   const categoryColorMap = new Map<string, string>();
 
   const legendById = new Map(
-    legend.filter(l => l.id !== null).map(l => [l.id as string, l.color]),
+    legend
+      .filter(l => l.id !== null && l.id !== undefined)
+      .map(l => [l.id, l.color]),
   );
 
   groupedData.forEach(group => {
@@ -98,7 +102,7 @@ const buildColorMaps = (
     const groupColor = legendById.get(group.id);
     if (!groupColor) return;
 
-    // Resolve CSS variable so shadeColor always receives plain hex
+    // Resolve CSS variable once so all shade calculations use plain hex
     const resolvedGroupColor = resolveCSSVariable(groupColor);
     groupColorMap.set(group.id, resolvedGroupColor);
 
@@ -383,19 +387,42 @@ export function DonutGraph({
   const isCategoryGroup =
     groupBy === 'CategoryGroup' && !!data.groupedData?.length;
 
-  // Legend is now keyed by group id for CategoryGroup mode since
-  // groupBySelections uses categoryGroup/categoryGroup for this mode
+  /**
+   * Recompute group totals as the sum of their visible (non-filtered) categories.
+   * grouped-spreadsheet filters empty categories but does not update group totals,
+   * which would cause the inner ring group slice to be wider than the sum of its
+   * outer ring category slices. Fixing here keeps grouped-spreadsheet unchanged.
+   */
+  const { adjustedGroupData, flatCategories } = useMemo(() => {
+    if (!isCategoryGroup || !data.groupedData) {
+      return { adjustedGroupData: [], flatCategories: [] };
+    }
+
+    const adjustedGroups = data.groupedData.map(group => {
+      const visibleCats = group.categories ?? [];
+      return {
+        ...group,
+        totalAssets: visibleCats.reduce((sum, c) => sum + c.totalAssets, 0),
+        totalDebts: visibleCats.reduce((sum, c) => sum + c.totalDebts, 0),
+        totalTotals: visibleCats.reduce((sum, c) => sum + c.totalTotals, 0),
+        netAssets: visibleCats.reduce((sum, c) => sum + c.netAssets, 0),
+        netDebts: visibleCats.reduce((sum, c) => sum + c.netDebts, 0),
+      };
+    });
+
+    return {
+      adjustedGroupData: adjustedGroups,
+      flatCategories: data.groupedData.flatMap(g => g.categories ?? []),
+    };
+  }, [isCategoryGroup, data.groupedData]);
+
+  // Use `?? []` instead of `!` non-null assertion
   const { groupColorMap, categoryColorMap } = isCategoryGroup
-    ? buildColorMaps(data.groupedData!, data.legend)
+    ? buildColorMaps(data.groupedData ?? [], data.legend ?? [])
     : {
         groupColorMap: new Map<string, string>(),
         categoryColorMap: new Map<string, string>(),
       };
-
-  // Flat list of all categories across all groups (outer ring)
-  const flatCategories = isCategoryGroup
-    ? (data.groupedData?.flatMap(g => g.categories ?? []) ?? [])
-    : [];
 
   return (
     <Container style={style}>
@@ -404,7 +431,7 @@ export function DonutGraph({
         const minDim = Math.min(width, height);
 
         // Shared ring boundary — both rings meet here with no gap
-        const ringBoundary = minDim * 0.31;
+        const ringBoundary = minDim * 0.28;
 
         // ---------------------------------------------------------------
         // Two-ring concentric donut (CategoryGroup mode)
@@ -421,17 +448,18 @@ export function DonutGraph({
                   style={{ cursor: pointer }}
                 >
                   {/* Inner ring — Category Groups, expansion arc goes inward */}
+                  {/* Uses adjustedGroupData so group totals match sum of visible categories */}
                   <Pie
                     dataKey={val => getVal(val)}
                     nameKey="name"
                     {...animationProps}
-                    data={data.groupedData}
-                    innerRadius={minDim * 0.2}
+                    data={adjustedGroupData}
+                    innerRadius={minDim * 0.15}
                     outerRadius={ringBoundary}
                     startAngle={90}
                     endAngle={-270}
                     shape={(props: PieSectorShapeProps, index: number) => {
-                      const item = data.groupedData?.[index];
+                      const item = adjustedGroupData[index];
                       const fill = item?.id
                         ? groupColorMap.get(item.id)
                         : groupColorMap.get(item?.name ?? '');
@@ -543,11 +571,6 @@ export function DonutGraph({
                       }
                     }}
                   />
-                  <Tooltip
-                    content={() => null}
-                    defaultIndex={activeCategoryIndex}
-                    active
-                  />
                 </PieChart>
               </div>
             )
@@ -633,11 +656,6 @@ export function DonutGraph({
                       });
                     }
                   }}
-                />
-                <Tooltip
-                  content={() => null}
-                  defaultIndex={activeIndex}
-                  active
                 />
               </PieChart>
             </div>
