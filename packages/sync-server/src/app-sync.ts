@@ -68,6 +68,15 @@ const verifyFileExists = (fileId, filesService, res, errorObject) => {
   }
 };
 
+function requireFileAccess(file: File, userId: string) {
+  const isOwner = file.owner === userId;
+  const isServerAdmin = isAdmin(userId);
+  if (!isOwner && !isServerAdmin) {
+    return 'file-access-not-allowed';
+  }
+  return null;
+}
+
 app.post('/sync', async (req, res): Promise<void> => {
   let requestPb;
   try {
@@ -107,6 +116,13 @@ app.post('/sync', async (req, res): Promise<void> => {
     return;
   }
 
+  const fileAccessError = requireFileAccess(currentFile, res.locals.user_id);
+  if (fileAccessError) {
+    res.status(403);
+    res.send(fileAccessError);
+    return;
+  }
+
   const errorMessage = validateSyncedFile(groupId, keyId, currentFile);
   if (errorMessage) {
     res.status(400);
@@ -138,6 +154,13 @@ app.post('/user-get-key', (req, res) => {
     return;
   }
 
+  const fileAccessError = requireFileAccess(file, res.locals.user_id);
+  if (fileAccessError) {
+    res.status(403);
+    res.send(fileAccessError);
+    return;
+  }
+
   res.send({
     status: 'ok',
     data: {
@@ -152,8 +175,16 @@ app.post('/user-create-key', (req, res) => {
   const { fileId, keyId, keySalt, testContent } = req.body || {};
 
   const filesService = new FilesService(getAccountDb());
+  const file = verifyFileExists(fileId, filesService, res, 'file not found');
 
-  if (!verifyFileExists(fileId, filesService, res, 'file not found')) {
+  if (!file) {
+    return;
+  }
+
+  const fileAccessError = requireFileAccess(file, res.locals.user_id);
+  if (fileAccessError) {
+    res.status(403);
+    res.send(fileAccessError);
     return;
   }
 
@@ -181,6 +212,13 @@ app.post('/reset-user-file', async (req, res) => {
   );
 
   if (!file) {
+    return;
+  }
+
+  const fileAccessError = requireFileAccess(file, res.locals.user_id);
+  if (fileAccessError) {
+    res.status(403);
+    res.send(fileAccessError);
     return;
   }
 
@@ -240,6 +278,15 @@ app.post('/upload-user-file', async (req, res) => {
   const errorMessage = validateUploadedFile(groupId, keyId, currentFile);
   if (errorMessage) {
     res.status(400).send(errorMessage);
+    return;
+  }
+
+  const fileAccessError = currentFile
+    ? requireFileAccess(currentFile, res.locals.user_id)
+    : null;
+  if (fileAccessError) {
+    res.status(403);
+    res.send(fileAccessError);
     return;
   }
 
@@ -303,7 +350,21 @@ app.get('/download-user-file', async (req, res) => {
   }
 
   const filesService = new FilesService(getAccountDb());
-  if (!verifyFileExists(fileId, filesService, res, 'User or file not found')) {
+  const file = verifyFileExists(
+    fileId,
+    filesService,
+    res,
+    'User or file not found',
+  );
+
+  if (!file) {
+    return;
+  }
+
+  const fileAccessError = requireFileAccess(file, res.locals.user_id);
+  if (fileAccessError) {
+    res.status(403);
+    res.send(fileAccessError);
     return;
   }
 
@@ -323,8 +384,16 @@ app.post('/update-user-filename', (req, res) => {
   const { fileId, name } = req.body || {};
 
   const filesService = new FilesService(getAccountDb());
+  const file = verifyFileExists(fileId, filesService, res, 'file not found');
 
-  if (!verifyFileExists(fileId, filesService, res, 'file not found')) {
+  if (!file) {
+    return;
+  }
+
+  const fileAccessError = requireFileAccess(file, res.locals.user_id);
+  if (fileAccessError) {
+    res.status(403);
+    res.send(fileAccessError);
     return;
   }
 
@@ -372,6 +441,13 @@ app.get('/get-user-file-info', (req, res) => {
   });
 
   if (!file) {
+    return;
+  }
+
+  const fileAccessError = requireFileAccess(file, res.locals.user_id);
+  if (fileAccessError) {
+    res.status(403);
+    res.send(fileAccessError);
     return;
   }
 
