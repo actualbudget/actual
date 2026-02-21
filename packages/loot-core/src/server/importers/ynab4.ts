@@ -8,10 +8,10 @@ import { amountToInteger, groupBy, sortByKey } from '../../shared/util';
 
 // @ts-strict-ignore
 // This is a special usage of the API because this package is embedded
-// into Actual itself. We use local API helpers that call handlers directly
-// to avoid cyclic dependency between loot-core and @actual-app/api
-import { send } from './api-helpers';
-import * as actual from './api-helpers';
+// into Actual itself. We call handlers directly to avoid cyclic dependency
+// between loot-core and @actual-app/api
+import { app } from '../main-app';
+import { runHandler } from '../mutators';
 import type * as YNAB4 from './ynab4-types';
 
 // Importer
@@ -25,10 +25,12 @@ async function importAccounts(
   return Promise.all(
     accounts.map(async account => {
       if (!account.isTombstone) {
-        const id = await actual.createAccount({
-          name: account.accountName,
-          offbudget: account.onBudget ? false : true,
-          closed: account.hidden ? true : false,
+        const id = await runHandler(app.handlers['api/account-create'], {
+          account: {
+            name: account.accountName,
+            offbudget: account.onBudget ? false : true,
+            closed: account.hidden ? true : false,
+          },
         });
         entityIdMap.set(account.entityId, id);
       }
@@ -50,13 +52,15 @@ async function importCategories(
         masterCategory.subCategories &&
         masterCategory.subCategories.some(cat => !cat.isTombstone)
       ) {
-        const id = await actual.createCategoryGroup({
-          name: masterCategory.name,
-          is_income: false,
+        const id = await runHandler(app.handlers['api/category-group-create'], {
+          group: {
+            name: masterCategory.name,
+            is_income: false,
+          },
         });
         entityIdMap.set(masterCategory.entityId, id);
         if (masterCategory.note) {
-          send('notes-save', { id, note: masterCategory.note });
+          void runHandler(app.handlers['notes-save'], { id, note: masterCategory.note });
         }
 
         if (masterCategory.subCategories) {
@@ -86,13 +90,15 @@ async function importCategories(
                 categoryName = categoryNameParts.join('/').trim();
               }
 
-              const id = await actual.createCategory({
-                name: categoryName,
-                group_id: entityIdMap.get(category.masterCategoryId),
+              const id = await runHandler(app.handlers['api/category-create'], {
+                category: {
+                  name: categoryName,
+                  group_id: entityIdMap.get(category.masterCategoryId),
+                },
               });
               entityIdMap.set(category.entityId, id);
               if (category.note) {
-                send('notes-save', { id, note: category.note });
+                void runHandler(app.handlers['notes-save'], { id, note: category.note });
               }
             }
           }
@@ -108,9 +114,11 @@ async function importPayees(
 ) {
   for (const payee of data.payees) {
     if (!payee.isTombstone) {
-      const id = await actual.createPayee({
-        name: payee.name,
-        transfer_acct: entityIdMap.get(payee.targetAccountId) || null,
+      const id = await runHandler(app.handlers['api/payee-create'], {
+        payee: {
+          name: payee.name,
+          transfer_acct: entityIdMap.get(payee.targetAccountId) || null,
+        },
       });
 
       // TODO: import payee rules
@@ -124,12 +132,14 @@ async function importTransactions(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
 ) {
-  const categories = await actual.getCategories();
+  const categories = await runHandler(app.handlers['api/categories-get'], {
+    grouped: false,
+  });
   const incomeCategoryId: string = categories.find(
     cat => cat.name === 'Income',
   ).id;
-  const accounts = await actual.getAccounts();
-  const payees = await actual.getPayees();
+  const accounts = await runHandler(app.handlers['api/accounts-get']);
+  const payees = await runHandler(app.handlers['api/payees-get']);
 
   function getCategory(id: string) {
     if (id == null || id === 'Category/__Split__') {
@@ -233,8 +243,11 @@ async function importTransactions(
         })
         .filter(x => x);
 
-      await actual.addTransactions(entityIdMap.get(accountId), toImport, {
+      await runHandler(app.handlers['api/transactions-add'], {
+        accountId: entityIdMap.get(accountId),
+        transactions: toImport,
         learnCategories: true,
+        runTransfers: false,
       });
     }),
   );
@@ -276,7 +289,8 @@ async function importBudgets(
 ) {
   const budgets = sortByKey(data.monthlyBudgets, 'month');
 
-  await actual.batchBudgetUpdates(async () => {
+  await runHandler(app.handlers['api/batch-budget-start']);
+  try {
     for (const budget of budgets) {
       const filled = fillInBudgets(
         data,
@@ -292,17 +306,31 @@ async function importBudgets(
             return;
           }
 
-          await actual.setBudgetAmount(month, catId, amount);
+          await runHandler(app.handlers['api/budget-set-amount'], {
+            month,
+            categoryId: catId,
+            amount,
+          });
 
           if (catBudget.overspendingHandling === 'AffectsBuffer') {
-            await actual.setBudgetCarryover(month, catId, false);
+            await runHandler(app.handlers['api/budget-set-carryover'], {
+              month,
+              categoryId: catId,
+              flag: false,
+            });
           } else if (catBudget.overspendingHandling === 'Confined') {
-            await actual.setBudgetCarryover(month, catId, true);
+            await runHandler(app.handlers['api/budget-set-carryover'], {
+              month,
+              categoryId: catId,
+              flag: true,
+            });
           }
         }),
       );
     }
-  });
+  } finally {
+    await runHandler(app.handlers['api/batch-budget-end']);
+  }
 }
 
 function estimateRecentness(str: string) {

@@ -17,7 +17,7 @@
     "build": "yarn run clean && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
     "test": "yarn run clean && yarn run build:crdt && vitest --run",
     "clean": "rm -rf dist @types",
-    "typecheck": "yarn build && tsc --noEmit"
+    "typecheck": "yarn build && tsc --noEmit && tsc-strict"
   },
   "dependencies": {
     "@actual-app/crdt": "workspace:^",

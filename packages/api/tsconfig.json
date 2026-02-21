@@ -9,7 +9,8 @@
     "noEmit": false,
     "declaration": true,
     "outDir": "dist",
-    "declarationDir": "@types"
+    "declarationDir": "@types",
+    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
   "include": ["."],
   "exclude": [
