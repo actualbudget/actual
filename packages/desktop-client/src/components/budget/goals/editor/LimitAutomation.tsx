@@ -6,9 +6,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { setDay } from 'date-fns';
-import { getDay } from 'date-fns/getDay';
 
-import { currentDate, dayFromDate } from 'loot-core/shared/months';
+import { currentDate, dayFromDate, getDay } from 'loot-core/shared/months';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 import type { LimitTemplate } from 'loot-core/types/models/templates';
 
@@ -52,6 +51,7 @@ export const LimitAutomation = ({
       <FormLabel title={t('Weekday')} htmlFor="weekday-field" />
 
       <Select
+        id="weekday-field"
         value={dayOfWeek.toString()}
         onChange={value =>
           dispatch(

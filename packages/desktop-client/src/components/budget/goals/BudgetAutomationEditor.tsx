@@ -142,6 +142,7 @@ export function BudgetAutomationEditor({
       );
       break;
     default:
+      state satisfies never;
       automationEditor = (
         <Text>
           <Trans>Unrecognized automation type.</Trans>

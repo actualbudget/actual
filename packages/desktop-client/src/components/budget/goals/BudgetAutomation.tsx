@@ -3,7 +3,7 @@ import { useMemo, useReducer, useRef, useState } from 'react';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import type { CSSProperties } from '@actual-app/components/styles';
 
-import { dayFromDate, firstDayOfMonth } from 'loot-core/shared/months';
+import { firstDayOfMonth } from 'loot-core/shared/months';
 import type {
   CategoryGroupEntity,
   ScheduleEntity,
@@ -21,7 +21,6 @@ type BudgetAutomationProps = {
   categories: CategoryGroupEntity[];
   schedules: readonly ScheduleEntity[];
   template?: Template;
-  displayType?: DisplayTemplateType;
   onSave?: (template: Template, displayType: DisplayTemplateType) => void;
   onDelete?: () => void;
   style?: CSSProperties;
@@ -39,7 +38,7 @@ const DEFAULT_TEMPLATE: Template = {
     period: 'month',
     amount: 1,
   },
-  starting: dayFromDate(firstDayOfMonth(new Date())),
+  starting: firstDayOfMonth(new Date()),
   priority: DEFAULT_PRIORITY,
 };
 
