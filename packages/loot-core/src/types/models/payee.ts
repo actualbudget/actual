@@ -1,5 +1,4 @@
 import type { AccountEntity } from './account';
-import type { PayeeLocationEntity } from './payee-location';
 
 export type PayeeEntity = {
   id: string;
@@ -8,5 +7,4 @@ export type PayeeEntity = {
   favorite?: boolean;
   learn_categories?: boolean;
   tombstone?: boolean;
-  location?: PayeeLocationEntity;
 };
