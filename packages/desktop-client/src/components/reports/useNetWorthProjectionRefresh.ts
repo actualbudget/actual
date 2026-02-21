@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 

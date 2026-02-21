@@ -25,6 +25,7 @@ import type { NetWorthWidget, TimeFrame } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { FinancialText } from '@desktop-client/components/FinancialText';
+import { Checkbox } from '@desktop-client/components/forms';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,
@@ -39,6 +40,7 @@ import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndi
 import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
+import { useNetWorthProjectionRefresh } from '@desktop-client/components/reports/useNetWorthProjectionRefresh';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
@@ -51,8 +53,6 @@ import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
-import { Checkbox } from '@desktop-client/components/forms';
-import { useNetWorthProjectionRefresh } from '@desktop-client/components/reports/useNetWorthProjectionRefresh';
 
 export function NetWorth() {
   const params = useParams();
@@ -142,24 +142,9 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     enabled: isProjectionEnabled,
   });
 
-  const reportParams = useMemo(
-    () => {
-      void projectionRevision;
-      return netWorthSpreadsheet(
-        start,
-        end,
-        accounts,
-        conditions,
-        conditionsOp,
-        locale,
-        interval,
-        firstDayOfWeekIdx,
-        format,
-        isProjectionEnabled,
-        budgetType,
-      );
-    },
-    [
+  const reportParams = useMemo(() => {
+    void projectionRevision;
+    return netWorthSpreadsheet(
       start,
       end,
       accounts,
@@ -171,9 +156,21 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
       format,
       isProjectionEnabled,
       budgetType,
-      projectionRevision,
-    ],
-  );
+    );
+  }, [
+    start,
+    end,
+    accounts,
+    conditions,
+    conditionsOp,
+    locale,
+    interval,
+    firstDayOfWeekIdx,
+    format,
+    isProjectionEnabled,
+    budgetType,
+    projectionRevision,
+  ]);
   const data = useReport('net_worth', reportParams);
   useEffect(() => {
     async function run() {

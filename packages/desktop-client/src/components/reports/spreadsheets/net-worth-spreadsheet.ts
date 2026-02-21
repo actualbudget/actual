@@ -9,7 +9,7 @@ import type {
   AccountEntity,
   RuleConditionEntity,
 } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 import type { FormatType } from '@desktop-client/hooks/useFormat';
