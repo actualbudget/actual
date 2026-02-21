@@ -186,7 +186,7 @@ const sidebars = {
         },
         {
           type: 'category',
-          label: 'Reports',
+          label: 'Reports Dashboard',
           collapsed: true,
           link: {
             type: 'doc',

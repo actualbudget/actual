@@ -7,7 +7,7 @@ import {
   setClock,
   Timestamp,
 } from '@actual-app/crdt';
-import type { Database } from '@jlongster/sql.js';
+import type { Database, Statement } from '@jlongster/sql.js';
 import { LRUCache } from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -64,7 +64,7 @@ export function getDatabasePath() {
 
 export async function openDatabase(id?: string) {
   if (db) {
-    await sqlite.closeDatabase(db);
+    sqlite.closeDatabase(db);
   }
 
   dbPath = fs.join(fs.getBudgetDir(id), 'db.sqlite');
@@ -73,9 +73,9 @@ export async function openDatabase(id?: string) {
   // await execQuery('PRAGMA journal_mode = WAL');
 }
 
-export async function closeDatabase() {
+export function closeDatabase() {
   if (db) {
-    await sqlite.closeDatabase(db);
+    sqlite.closeDatabase(db);
     setDatabase(null);
   }
 }
@@ -101,7 +101,7 @@ export async function loadClock() {
     const clock = makeClock(timestamp);
     setClock(clock);
 
-    await runQuery('INSERT INTO messages_clock (id, clock) VALUES (?, ?)', [
+    runQuery('INSERT INTO messages_clock (id, clock) VALUES (?, ?)', [
       1,
       serializeClock(clock),
     ]);
@@ -110,19 +110,19 @@ export async function loadClock() {
 
 // Functions
 export function runQuery(
-  sql: string,
+  sql: string | Statement,
   params?: Array<string | number>,
   fetchAll?: false,
 ): { changes: unknown };
 
 export function runQuery<T>(
-  sql: string,
+  sql: string | Statement,
   params: Array<string | number> | undefined,
   fetchAll: true,
 ): T[];
 
 export function runQuery<T>(
-  sql: string,
+  sql: string | Statement,
   params: (string | number)[],
   fetchAll: boolean,
 ) {
@@ -139,7 +139,7 @@ export function execQuery(sql: string) {
 
 // This manages an LRU cache of prepared query statements. This is
 // only needed in hot spots when you are running lots of queries.
-let _queryCache = new LRUCache<string, string>({ max: 100 });
+let _queryCache = new LRUCache<string, Statement>({ max: 100 });
 export function cache(sql: string) {
   const cached = _queryCache.get(sql);
   if (cached) {
@@ -152,7 +152,7 @@ export function cache(sql: string) {
 }
 
 function resetQueryCache() {
-  _queryCache = new LRUCache<string, string>({ max: 100 });
+  _queryCache = new LRUCache<string, Statement>({ max: 100 });
 }
 
 export function transaction(fn: () => void) {
@@ -171,7 +171,7 @@ export async function all<T>(sql: string, params?: (string | number)[]) {
 }
 
 export async function first<T>(sql, params?: (string | number)[]) {
-  const arr = await runQuery<T>(sql, params, true);
+  const arr = runQuery<T>(sql, params, true);
   return arr.length === 0 ? null : arr[0];
 }
 
@@ -190,11 +190,7 @@ export async function run(sql, params?: (string | number)[]) {
 }
 
 export async function select(table, id) {
-  const rows = await runQuery(
-    'SELECT * FROM ' + table + ' WHERE id = ?',
-    [id],
-    true,
-  );
+  const rows = runQuery('SELECT * FROM ' + table + ' WHERE id = ?', [id], true);
   // TODO: In the next phase, we will make this function generic
   // and pass the type of the return type to `runQuery`.
   // oxlint-disable-next-line typescript/no-explicit-any
@@ -274,7 +270,7 @@ export async function deleteAll(table: string) {
 }
 
 export async function selectWithSchema(table, sql, params) {
-  const rows = await runQuery(sql, params, true);
+  const rows = runQuery(sql, params, true);
   const convertedRows = rows
     .map(row => convertFromSelect(schema, schemaConfig, table, row))
     .filter(Boolean);
@@ -771,9 +767,9 @@ export async function moveAccount(
   const { updates, sort_order } = shoveSortOrders(accounts, targetId);
   await batchMessages(async () => {
     for (const info of updates) {
-      update('accounts', info);
+      void update('accounts', info);
     }
-    update('accounts', { id, sort_order });
+    void update('accounts', { id, sort_order });
   });
 }
 

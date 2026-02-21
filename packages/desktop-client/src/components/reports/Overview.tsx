@@ -14,13 +14,12 @@ import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/connection';
 import type {
   CustomReportWidget,
-  DashboardEntity,
+  DashboardPageEntity,
+  DashboardWidgetEntity,
   ExportImportDashboard,
   MarkdownWidget,
-  Widget,
 } from 'loot-core/types/models';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
@@ -43,9 +42,9 @@ import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTa
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import {
-  useDashboard,
   useDashboardPages,
-} from '@desktop-client/hooks/useDashboard';
+  useDashboardPageWidgets,
+} from '@desktop-client/hooks/useDashboardPages';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useReports } from '@desktop-client/hooks/useReports';
@@ -57,13 +56,25 @@ import {
   removeNotification,
 } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import {
+  useAddDashboardWidgetMutation,
+  useCopyDashboardWidgetMutation,
+  useDeleteDashboardPageMutation,
+  useImportDashboardPageMutation,
+  useRemoveDashboardWidgetMutation,
+  useResetDashboardPageMutation,
+  useUpdateDashboardWidgetMutation,
+  useUpdateDashboardWidgetsMutation,
+} from '@desktop-client/reports/mutations';
 
-function isCustomReportWidget(widget: Widget): widget is CustomReportWidget {
+function isCustomReportWidget(
+  widget: DashboardWidgetEntity,
+): widget is CustomReportWidget {
   return widget.type === 'custom-report';
 }
 
 type OverviewProps = {
-  dashboard: DashboardEntity;
+  dashboard: DashboardPageEntity;
 };
 
 export function Overview({ dashboard }: OverviewProps) {
@@ -90,13 +101,14 @@ export function Overview({ dashboard }: OverviewProps) {
     () => new Map(customReports.map(report => [report.id, report])),
     [customReports],
   );
-  const { data: dashboard_pages = [] } = useDashboardPages();
+  const { data: dashboardPages = [], isPending: isDashboardPageLoading } =
+    useDashboardPages();
 
-  const { data: widgets, isLoading: isWidgetsLoading } = useDashboard(
-    dashboard.id,
-  );
+  const { data: widgets = [], isPending: isWidgetsLoading } =
+    useDashboardPageWidgets(dashboard.id);
 
-  const isLoading = isCustomReportsLoading || isWidgetsLoading;
+  const isLoading =
+    isCustomReportsLoading || isWidgetsLoading || isDashboardPageLoading;
 
   const navigate = useNavigate();
 
@@ -202,50 +214,69 @@ export function Overview({ dashboard }: OverviewProps) {
     );
   };
 
+  const resetDashboardPageMutation = useResetDashboardPageMutation();
+
   const onResetDashboard = async () => {
     setIsImporting(true);
-    await send('dashboard-reset', dashboard.id);
-    setIsImporting(false);
 
-    onDispatchSucessNotification(
-      t(
-        "Dashboard has been successfully reset to default state. Don't like what you see? You can always press [ctrl+z](#undo) to undo.",
-      ),
+    resetDashboardPageMutation.mutate(
+      {
+        id: dashboard.id,
+      },
+      {
+        onSettled: () => {
+          setIsImporting(false);
+        },
+        onSuccess: () => {
+          onDispatchSucessNotification(
+            t(
+              "Dashboard has been successfully reset to default state. Don't like what you see? You can always press [ctrl+z](#undo) to undo.",
+            ),
+          );
+        },
+      },
     );
   };
+
+  const updateDashboardWidgetsMutation = useUpdateDashboardWidgetsMutation();
 
   const onLayoutChange = (newLayout: Layout) => {
     if (!isEditing) {
       return;
     }
 
-    send(
-      'dashboard-update',
-      newLayout.map(item => ({
+    updateDashboardWidgetsMutation.mutate({
+      widgets: newLayout.map(item => ({
         id: item.i,
         width: item.w,
         height: item.h,
         x: item.x,
         y: item.y,
       })),
-    );
-  };
-
-  const onAddWidget = <T extends Widget>(
-    type: T['type'],
-    meta: T['meta'] = null,
-  ) => {
-    send('dashboard-add-widget', {
-      type,
-      width: 4,
-      height: 2,
-      meta,
-      dashboard_page_id: dashboard.id,
     });
   };
 
+  const addDashboardWidgetMutation = useAddDashboardWidgetMutation();
+
+  const onAddWidget = <T extends DashboardWidgetEntity>(
+    type: T['type'],
+    meta: T['meta'] = null,
+  ) => {
+    addDashboardWidgetMutation.mutate({
+      widget: {
+        type,
+        width: 4,
+        height: 2,
+        meta,
+        dashboard_page_id: dashboard.id,
+      },
+    });
+  };
+
+  const removeDashboardWidgetMutation = useRemoveDashboardWidgetMutation();
+
   const onRemoveWidget = (widgetId: string) => {
-    send('dashboard-remove-widget', widgetId);
+    removeDashboardWidgetMutation.mutate({ id: widgetId });
   };
 
   const onExport = () => {
@@ -277,12 +308,15 @@ export function Overview({ dashboard }: OverviewProps) {
       }),
     } satisfies ExportImportDashboard;
 
-    window.Actual.saveFile(
+    void window.Actual.saveFile(
       JSON.stringify(data, null, 2),
       'dashboard.json',
       t('Export Dashboard'),
     );
   };
+
+  const importDashboardPageMutation = useImportDashboardPageMutation();
+
   const onImport = async () => {
     const openFileDialog = window.Actual.openFileDialog;
 
@@ -300,7 +334,7 @@ export function Overview({ dashboard }: OverviewProps) {
       return;
     }
 
-    const [filepath] = await openFileDialog({
+    const [filePath] = await openFileDialog({
       properties: ['openFile'],
       filters: [
         {
@@ -312,85 +346,110 @@ export function Overview({ dashboard }: OverviewProps) {
 
     closeNotifications();
     setIsImporting(true);
-    const res = await send('dashboard-import', {
-      filepath,
-      dashboardPageId: dashboard.id,
-    });
-    setIsImporting(false);
 
-    if ('error' in res) {
-      switch (res.error) {
-        case 'json-parse-error':
-          dispatch(
-            addNotification({
-              notification: {
-                id: 'import',
-                type: 'error',
-                message: t('Failed parsing the imported JSON.'),
-              },
-            }),
+    importDashboardPageMutation.mutate(
+      {
+        filePath,
+        dashboardPageId: dashboard.id,
+      },
+      {
+        onSettled: () => {
+          setIsImporting(false);
+        },
+        onSuccess: () => {
+          onDispatchSucessNotification(
+            t(
+              "Dashboard has been successfully imported. Don't like what you see? You can always press [ctrl+z](#undo) to undo.",
+            ),
           );
-          break;
+        },
+        onError: error => {
+          const originalError = error.cause;
+          if (originalError instanceof Error) {
+            switch (originalError.cause) {
+              case 'json-parse-error':
+                dispatch(
+                  addNotification({
+                    notification: {
+                      id: 'import',
+                      type: 'error',
+                      message: t('Failed parsing the imported JSON.'),
+                    },
+                  }),
+                );
+                break;
 
-        case 'validation-error':
-          dispatch(
-            addNotification({
-              notification: {
-                id: 'import',
-                type: 'error',
-                message: res.message,
-              },
-            }),
-          );
-          break;
+              case 'validation-error':
+                dispatch(
+                  addNotification({
+                    notification: {
+                      id: 'import',
+                      type: 'error',
+                      message: error.message,
+                    },
+                  }),
+                );
+                break;
 
-        default:
-          dispatch(
-            addNotification({
-              notification: {
-                id: 'import',
-                type: 'error',
-                message: t('Failed importing the dashboard file.'),
-              },
-            }),
-          );
-          break;
-      }
-      return;
-    }
-
-    onDispatchSucessNotification(
-      t(
-        "Dashboard has been successfully imported. Don't like what you see? You can always press [ctrl+z](#undo) to undo.",
-      ),
+              default:
+                dispatch(
+                  addNotification({
+                    notification: {
+                      id: 'import',
+                      type: 'error',
+                      message: t('Failed importing the dashboard file.'),
+                    },
+                  }),
+                );
+                break;
+            }
+          }
+        },
+      },
     );
   };
 
-  const onMetaChange = (widget: { i: string }, newMeta: Widget['meta']) => {
-    send('dashboard-update-widget', {
-      id: widget.i,
-      meta: newMeta,
+  const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
+
+  const onMetaChange = (
+    widget: { i: string },
+    newMeta: DashboardWidgetEntity['meta'],
+  ) => {
+    updateDashboardWidgetMutation.mutate({
+      widget: {
+        id: widget.i,
+        meta: newMeta,
+      },
     });
   };
 
+  const copyDashboardWidgetMutation = useCopyDashboardWidgetMutation();
+
   const onCopyWidget = (widgetId: string, targetDashboardId: string) => {
-    send('dashboard-copy-widget', {
-      widgetId,
+    copyDashboardWidgetMutation.mutate({
+      id: widgetId,
       targetDashboardPageId: targetDashboardId,
     });
   };
 
-  const onDeleteDashboard = async (id: string) => {
-    await send('dashboard-delete', id);
+  const deleteDashboardPageMutation = useDeleteDashboardPageMutation();
 
-    const next_dashboard = dashboard_pages.find(d => d.id !== id);
-    // NOTE: This should hold since invariant dashboard_pages > 1
-    if (next_dashboard) {
-      navigate(`/reports/${next_dashboard.id}`);
-    }
+  const onDeleteDashboard = async (id: string) => {
+    deleteDashboardPageMutation.mutate(
+      { id },
+      {
+        onSuccess: () => {
+          const nextDashboard = dashboardPages.find(d => d.id !== id);
+          // NOTE: This should hold since invariant dashboard_pages > 1
+          if (nextDashboard) {
+            void navigate(`/reports/${nextDashboard.id}`);
+          }
+        },
+      },
+    );
   };
 
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
 
   if (isLoading) {
     return <LoadingIndicator message={t('Loading reports...')} />;
@@ -421,7 +480,7 @@ export function Overview({ dashboard }: OverviewProps) {
               }}
             >
               <DashboardSelector
-                dashboards={dashboard_pages}
+                dashboards={dashboardPages}
                 currentDashboard={dashboard}
               />
             </View>
@@ -449,7 +508,7 @@ export function Overview({ dashboard }: OverviewProps) {
                 <>
                   {/* Dashboard Selector */}
                   <DashboardSelector
-                    dashboards={dashboard_pages}
+                    dashboards={dashboardPages}
                     currentDashboard={dashboard}
                   />
 
@@ -474,7 +533,7 @@ export function Overview({ dashboard }: OverviewProps) {
                           slot="close"
                           onMenuSelect={item => {
                             if (item === 'custom-report') {
-                              navigate('/reports/custom');
+                              void navigate('/reports/custom');
                               return;
                             }
 
@@ -599,16 +658,16 @@ export function Overview({ dashboard }: OverviewProps) {
                           onMenuSelect={item => {
                             switch (item) {
                               case 'reset':
-                                onResetDashboard();
+                                void onResetDashboard();
                                 break;
                               case 'export':
                                 onExport();
                                 break;
                               case 'import':
-                                onImport();
+                                void onImport();
                                 break;
                               case 'delete':
-                                onDeleteDashboard(dashboard.id);
+                                void onDeleteDashboard(dashboard.id);
                                 break;
                               default:
                                 throw new Error(
@@ -638,7 +697,7 @@ export function Overview({ dashboard }: OverviewProps) {
                               name: 'delete',
                               text: t('Delete dashboard'),
                               disabled:
-                                isImporting || dashboard_pages.length <= 1,
+                                isImporting || dashboardPages.length <= 1,
                             },
                           ]}
                         />

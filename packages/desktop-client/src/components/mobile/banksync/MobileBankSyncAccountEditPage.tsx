@@ -46,12 +46,12 @@ export function MobileBankSyncAccountEditPage() {
   } = useBankSyncAccountSettings(accountId!);
 
   const handleCancel = () => {
-    navigate('/bank-sync');
+    void navigate('/bank-sync');
   };
 
   const handleSave = async () => {
     saveSettings();
-    navigate('/bank-sync');
+    void navigate('/bank-sync');
   };
 
   const unlinkAccount = useUnlinkAccountMutation();

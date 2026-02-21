@@ -29,7 +29,7 @@ export const clearServer: T.ClearServer = async () => {
 };
 
 export const serverPush: T.ServerPush = (name, args) => {
-  Promise.resolve().then(() => {
+  void Promise.resolve().then(() => {
     const listens = listeners.get(name);
     if (listens) {
       listens.forEach(listener => {

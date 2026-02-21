@@ -114,7 +114,7 @@ export class LiveQuery<TResponse = unknown> {
       this._dependencies == null ||
       tables.find(table => this._dependencies.has(table))
     ) {
-      this.run();
+      void this.run();
     }
   };
 
@@ -130,7 +130,7 @@ export class LiveQuery<TResponse = unknown> {
     options: LiveQueryOptions = {},
   ) => {
     const liveQuery = new LiveQuery<TResponse>(query, onData, onError, options);
-    liveQuery.run();
+    void liveQuery.run();
     return liveQuery;
   };
 

@@ -457,7 +457,7 @@ describe('validateThemeCss', () => {
   });
 
   describe('invalid CSS - function calls (security)', () => {
-    describe('var() function - should reject all var() references', () => {
+    describe('var() function - should accept var(--name) only (no fallbacks)', () => {
       it.each([
         {
           description: 'simple var() call',
@@ -466,21 +466,9 @@ describe('validateThemeCss', () => {
       }`,
         },
         {
-          description: 'var() with fallback',
-          css: `:root {
-        --color-primary: var(--other-var, #007bff);
-      }`,
-        },
-        {
           description: 'var() with whitespace',
           css: `:root {
         --color-primary: var( --other-var );
-      }`,
-        },
-        {
-          description: 'nested var() calls',
-          css: `:root {
-        --color-primary: var(--var1, var(--var2));
       }`,
         },
         {
@@ -495,14 +483,43 @@ describe('validateThemeCss', () => {
         --color-primary: VaR(--other-var);
       }`,
         },
-      ])('should reject CSS with $description', ({ css }) => {
-        expect(() => validateThemeCss(css)).toThrow(
-          /Only simple CSS values are allowed/,
-        );
+      ])('should accept CSS with $description', ({ css }) => {
+        expect(() => validateThemeCss(css)).not.toThrow();
       });
     });
 
-    describe('other function calls - should reject all except rgb/rgba/hsl/hsla', () => {
+    describe('var() function - should reject var() with fallback or invalid form', () => {
+      it.each([
+        {
+          description: 'var() with fallback',
+          css: `:root {
+        --color-primary: var(--other-var, #007bff);
+      }`,
+        },
+        {
+          description: 'var() with invalid variable name (no --)',
+          css: `:root {
+        --color-primary: var(not-a-custom-prop);
+      }`,
+        },
+        {
+          description: 'var() with empty variable name',
+          css: `:root {
+        --color-primary: var(--);
+      }`,
+        },
+        {
+          description: 'var() with unbalanced parentheses',
+          css: `:root {
+        --color-primary: var(--other-var;
+      }`,
+        },
+      ])('should reject CSS with $description', ({ css }) => {
+        expect(() => validateThemeCss(css)).toThrow();
+      });
+    });
+
+    describe('other function calls - should reject all except rgb/rgba/hsl/hsla and var()', () => {
       it.each([
         {
           description: 'calc() function',

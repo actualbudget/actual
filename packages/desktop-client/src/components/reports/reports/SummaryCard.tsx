@@ -14,8 +14,8 @@ import { ReportCardName } from '@desktop-client/components/reports/ReportCardNam
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { summarySpreadsheet } from '@desktop-client/components/reports/spreadsheets/summary-spreadsheet';
 import { SummaryNumber } from '@desktop-client/components/reports/SummaryNumber';
+import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type SummaryCardProps = {
@@ -41,7 +41,7 @@ export function SummaryCard({
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useWidgetCopyMenu(onCopy);
+    useDashboardWidgetCopyMenu(onCopy);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -50,7 +50,7 @@ export function SummaryCard({
         latestTrans ? latestTrans.date : monthUtils.currentDay(),
       );
     }
-    fetchLatestTransaction();
+    void fetchLatestTransaction();
   }, []);
 
   const [start, end] = calculateTimeRange(

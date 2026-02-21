@@ -134,13 +134,13 @@ handlers['api/batch-budget-start'] = async function () {
   // transaction. Updating spreadsheet cells doesn't go through the
   // syncing layer in that case.
   if (IMPORT_MODE) {
-    db.asyncTransaction(() => {
+    void db.asyncTransaction(() => {
       return new Promise((resolve, reject) => {
         batchPromise = { resolve, reject };
       });
     });
   } else {
-    batchMessages(() => {
+    void batchMessages(() => {
       return new Promise((resolve, reject) => {
         batchPromise = { resolve, reject };
       });
@@ -224,7 +224,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     await handlers['load-budget']({ id: localBudget.id });
     const result = await handlers['sync-budget']();
     if (result.error) {
-      throw new Error(getSyncError(result.error, localBudget.id));
+      throw new Error(getSyncError(result.error.reason, localBudget.id));
     }
     return;
   }
@@ -253,7 +253,7 @@ handlers['api/sync'] = async function () {
   const { id } = prefs.getPrefs();
   const result = await handlers['sync-budget']();
   if (result.error) {
-    throw new Error(getSyncError(result.error, id));
+    throw new Error(getSyncError(result.error.reason, id));
   }
 };
 
@@ -304,8 +304,8 @@ handlers['api/start-import'] = async function ({ budgetName }) {
   await handlers['create-budget']({ budgetName, avoidUpload: true });
 
   // Clear out the default expense categories
-  await db.runQuery('DELETE FROM categories WHERE is_income = 0');
-  await db.runQuery('DELETE FROM category_groups WHERE is_income = 0');
+  db.runQuery('DELETE FROM categories WHERE is_income = 0');
+  db.runQuery('DELETE FROM category_groups WHERE is_income = 0');
 
   // Turn syncing off
   setSyncingMode('import');

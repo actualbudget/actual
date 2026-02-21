@@ -258,7 +258,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                 onMenuSelect={type => {
                   switch (type) {
                     case 'close': {
-                      dispatch(
+                      void dispatch(
                         openAccountCloseModal({ accountId: account.id }),
                       );
                       break;

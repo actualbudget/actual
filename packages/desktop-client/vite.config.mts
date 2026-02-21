@@ -82,10 +82,6 @@ export default defineConfig(async ({ mode }) => {
   }
 
   let resolveExtensions = [
-    '.web.js',
-    '.web.jsx',
-    '.web.ts',
-    '.web.tsx',
     '.mjs',
     '.js',
     '.mts',

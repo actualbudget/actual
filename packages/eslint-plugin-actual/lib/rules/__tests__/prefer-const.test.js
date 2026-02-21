@@ -10,7 +10,7 @@ import * as rule from '../prefer-const';
 // Tests
 //------------------------------------------------------------------------------
 
-runClassic(
+void runClassic(
   'prefer-const',
   rule,
   {

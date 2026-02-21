@@ -42,7 +42,7 @@ export const loggedIn = createAppAsyncThunk(
     // their account is invalid. So we should list all their files
     // regardless. Previously, we kicked users out to a "need payment
     // info" screen and we didn't want to call this.
-    dispatch(loadAllFiles());
+    void dispatch(loadAllFiles());
   },
 );
 
@@ -51,9 +51,9 @@ export const signOut = createAppAsyncThunk(
   async (_, { dispatch }) => {
     await send('subscribe-sign-out');
 
-    dispatch(getUserData());
-    dispatch(loadGlobalPrefs());
-    dispatch(closeBudget());
+    void dispatch(getUserData());
+    void dispatch(loadGlobalPrefs());
+    void dispatch(closeBudget());
     // Handled in budgetSlice
     // dispatch({ type: constants.SIGN_OUT });
   },

@@ -10,7 +10,7 @@ import * as rule from '../prefer-if-statement';
 // Tests
 //------------------------------------------------------------------------------
 
-runClassic(
+void runClassic(
   'prefer-if-statement',
   rule,
   {

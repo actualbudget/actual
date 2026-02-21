@@ -49,7 +49,7 @@ export function DuplicateFileModal({
   );
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       setNewName(await uniqueBudgetName(file.name + fileEndingTranslation));
     })();
   }, [file.name, fileEndingTranslation]);

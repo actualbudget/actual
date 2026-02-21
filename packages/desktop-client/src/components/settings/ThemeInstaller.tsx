@@ -166,7 +166,7 @@ export function ThemeInstaller({
   const handleInstallPastedCss = useCallback(() => {
     if (!pastedCss.trim()) return;
 
-    installTheme({
+    void installTheme({
       css: pastedCss.trim(),
       name: t('Custom Theme'),
       repo: '',

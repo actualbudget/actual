@@ -1,32 +1,6 @@
-import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { locationService } from 'loot-core/shared/location';
-
-import { useInitialMount } from './useInitialMount';
-
-import {
-  getCommonPayees,
-  getNearbyPayees,
-  getPayees,
-  getPayeesById,
-} from '@desktop-client/payees/payeesSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
-
-export function useCommonPayees() {
-  const dispatch = useDispatch();
-  const isInitialMount = useInitialMount();
-  const isCommonPayeesDirty = useSelector(
-    state => state.payees.isCommonPayeesDirty,
-  );
-
-  useEffect(() => {
-    if (isInitialMount || isCommonPayeesDirty) {
-      dispatch(getCommonPayees());
-    }
-  }, [dispatch, isInitialMount, isCommonPayeesDirty]);
-
-  return useSelector(state => state.payees.commonPayees);
-}
+import { getPayeesById, payeeQueries } from '@desktop-client/payees';
 
 export function useNearbyPayees(locationAccess: boolean = false) {
   const dispatch = useDispatch();
@@ -75,20 +49,12 @@ export function useNearbyPayees(locationAccess: boolean = false) {
 }
 
 export function usePayees() {
-  const dispatch = useDispatch();
-  const isInitialMount = useInitialMount();
-  const isPayeesDirty = useSelector(state => state.payees.isPayeesDirty);
-
-  useEffect(() => {
-    if (isInitialMount || isPayeesDirty) {
-      dispatch(getPayees());
-    }
-  }, [dispatch, isInitialMount, isPayeesDirty]);
-
-  return useSelector(state => state.payees.payees);
+  return useQuery(payeeQueries.list());
 }
 
 export function usePayeesById() {
-  const payees = usePayees();
-  return getPayeesById(payees);
+  return useQuery({
+    ...payeeQueries.list(),
+    select: payees => getPayeesById(payees),
+  });
 }

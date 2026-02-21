@@ -30,7 +30,7 @@ export function MergeUnusedPayeesModal({
   targetPayeeId,
 }: MergeUnusedPayeesModalProps) {
   const { t } = useTranslation();
-  const allPayees = usePayees();
+  const { data: allPayees = [] } = usePayees();
   const modalStack = useSelector(state => state.modals.modalStack);
   const isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
   const dispatch = useDispatch();
@@ -197,7 +197,7 @@ export function MergeUnusedPayeesModal({
                 autoFocus
                 style={{ marginRight: 10 }}
                 onPress={() => {
-                  onMerge(targetPayee);
+                  void onMerge(targetPayee);
                   close();
                 }}
               >
@@ -207,7 +207,7 @@ export function MergeUnusedPayeesModal({
                 <Button
                   style={{ marginRight: 10 }}
                   onPress={() => {
-                    onMergeAndCreateRule(targetPayee);
+                    void onMergeAndCreateRule(targetPayee);
                     close();
                   }}
                 >

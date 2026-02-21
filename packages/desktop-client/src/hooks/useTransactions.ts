@@ -116,7 +116,7 @@ export function useTransactions({
         tables.includes('category_mapping') ||
         tables.includes('payee_mapping')
       ) {
-        queryResult.refetch();
+        void queryResult.refetch();
       }
     }
   });

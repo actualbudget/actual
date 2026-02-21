@@ -71,12 +71,12 @@ export function Budget() {
       setInitialized(true);
     }
 
-    run();
+    void run();
   });
   useEffect(() => init(), []);
 
   const loadBoundBudgets = useEffectEvent(() => {
-    send('get-budget-bounds').then(({ start, end }) => {
+    void send('get-budget-bounds').then(({ start, end }) => {
       if (bounds.start !== start || bounds.end !== end) {
         setBounds({ start, end });
       }
@@ -141,7 +141,7 @@ export function Budget() {
         type: 'date',
       },
     ];
-    navigate('/accounts', {
+    void navigate('/accounts', {
       state: {
         goBack: true,
         filterConditions,

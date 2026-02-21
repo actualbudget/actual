@@ -275,15 +275,15 @@ describe('pagedQuery', () => {
     // Users should never call `run` manually but we'll do it to
     // test
 
-    lq.run();
+    void lq.run();
     await wait(0);
-    lq.run();
+    void lq.run();
     await wait(0);
-    lq.run();
+    void lq.run();
     await wait(0);
-    lq.run();
+    void lq.run();
     await wait(0);
-    lq.run();
+    void lq.run();
 
     // Wait for the same delay the server has
     await wait(500);
@@ -469,10 +469,10 @@ describe('pagedQuery', () => {
     await tracer.expect('server-query', ['id']);
     await tracer.expect('data', vi.fn());
 
-    paged.fetchNext();
-    paged.fetchNext();
+    void paged.fetchNext();
+    void paged.fetchNext();
     await wait(2);
-    paged.fetchNext();
+    void paged.fetchNext();
 
     await tracer.expect('server-query', ['id']);
     await tracer.expect('data', vi.fn());
@@ -538,7 +538,7 @@ describe('pagedQuery', () => {
 
     tracer.start();
 
-    paged.fetchNext().then(() => {
+    void paged.fetchNext().then(() => {
       tracer.event('page-finished');
     });
 
@@ -586,7 +586,7 @@ describe('pagedQuery', () => {
     tracer.start();
 
     const item = data.find(row => row.id === 300);
-    paged.refetchUpToRow(item.id, { field: 'date', order: 'desc' });
+    void paged.refetchUpToRow(item.id, { field: 'date', order: 'desc' });
 
     await tracer.expect(
       'server-query',

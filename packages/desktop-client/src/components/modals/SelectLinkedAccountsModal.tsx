@@ -135,7 +135,8 @@ export function SelectLinkedAccountsModal({
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const dispatch = useDispatch();
-  const localAccounts = useAccounts().filter(a => a.closed === 0);
+  const { data: allAccounts = [] } = useAccounts();
+  const localAccounts = allAccounts.filter(a => a.closed === 0);
   const [draftLinkAccounts, setDraftLinkAccounts] = useState<
     Map<string, 'linking' | 'unlinking'>
   >(new Map());

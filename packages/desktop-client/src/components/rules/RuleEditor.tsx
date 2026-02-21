@@ -64,7 +64,6 @@ import {
   useSelected,
 } from '@desktop-client/hooks/useSelected';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { getPayees } from '@desktop-client/payees/payeesSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
 import { disableUndo, enableUndo } from '@desktop-client/undo';
@@ -1023,8 +1022,6 @@ export function RuleEditor({
   );
 
   useEffect(() => {
-    dispatch(getPayees());
-
     // Disable undo while this modal is open
     disableUndo();
     return () => enableUndo();
@@ -1059,7 +1056,7 @@ export function RuleEditor({
         setTransactions([]);
       }
     }
-    run();
+    void run();
   }, [actionSplits, conditions, conditionsOp]);
 
   const selectedInst = useSelected('transactions', transactions, []);
@@ -1218,7 +1215,7 @@ export function RuleEditor({
     const selectedTransactions = transactions.filter(({ id }) =>
       selectedInst.items.has(id),
     );
-    send('rule-apply-actions', {
+    void send('rule-apply-actions', {
       transactions: selectedTransactions,
       actions: getUnparsedActions(actionSplits),
     }).then(content => {

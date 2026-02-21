@@ -10,7 +10,7 @@ import * as rule from '../typography';
 // Tests
 //------------------------------------------------------------------------------
 
-runClassic(
+void runClassic(
   'typography',
   rule,
   {

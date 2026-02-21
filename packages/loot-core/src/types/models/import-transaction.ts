@@ -15,7 +15,7 @@ export type ImportTransactionEntity = {
 
   /** In a create/import request, this overrides payee_name.
    * Should be an existing payee ID */
-  payee?: string;
+  payee?: string | null;
 
   /** If given, a payee will be created with this name.
    * If this matches an already existing payee, that payee will be used.

@@ -36,18 +36,12 @@ import {
 import { ItemHeader } from './ItemHeader';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCommonPayees } from '@desktop-client/hooks/useCommonPayees';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
-  useCommonPayees,
-  useNearbyPayees,
-  usePayees,
-} from '@desktop-client/hooks/usePayees';
-import {
-  createPayee,
-  deletePayeeLocation,
   getActivePayees,
-  updatePayeeLocationIfNeeded,
-} from '@desktop-client/payees/payeesSlice';
-import { useDispatch } from '@desktop-client/redux';
+  useCreatePayeeMutation,
+} from '@desktop-client/payees';
 
 type PayeeAutocompleteItem = PayeeEntity & PayeeItemType;
 
@@ -395,18 +389,14 @@ export function PayeeAutocomplete({
 }: PayeeAutocompleteProps) {
   const { t } = useTranslation();
 
-  const commonPayees = useCommonPayees();
-  const retrievedPayees = usePayees();
-  const retrievedNearbyPayees = useNearbyPayees(locationAccess) || [];
+  const { data: commonPayees } = useCommonPayees();
+  const { data: retrievedPayees = [] } = usePayees();
   if (!payees) {
     payees = retrievedPayees;
   }
+  const createPayeeMutation = useCreatePayeeMutation();
 
-  if (!nearbyPayees) {
-    nearbyPayees = retrievedNearbyPayees;
-  }
-
-  const cachedAccounts = useAccounts();
+  const { data: cachedAccounts = [] } = useAccounts();
   if (!accounts) {
     accounts = cachedAccounts;
   }
@@ -444,51 +434,12 @@ export function PayeeAutocomplete({
     showInactivePayees,
   ]);
 
-  // Process nearby payees separately from suggestions
-  const nearbyPayeesWithType: (PayeeAutocompleteItem & PayeeItemType)[] =
-    useMemo(() => {
-      if (!nearbyPayees?.length) {
-        return [];
-      }
-
-      const processed: PayeeAutocompleteItem[] = nearbyPayees.map(p => ({
-        ...p,
-        itemType: 'nearby_payee',
-      }));
-      return processed;
-    }, [nearbyPayees]);
-
-  // Filter nearby payees based on input value (similar to regular payees)
-  const filteredNearbyPayees = useMemo(() => {
-    if (!nearbyPayeesWithType.length || !rawPayee) {
-      return nearbyPayeesWithType;
-    }
-
-    return nearbyPayeesWithType.filter(payee => {
-      return defaultFilterSuggestion(payee, rawPayee);
-    });
-  }, [nearbyPayeesWithType, rawPayee]);
-
-  const dispatch = useDispatch();
-
-  const handleForgetLocation = async (locationId: string) => {
-    try {
-      await dispatch(deletePayeeLocation(locationId)).unwrap();
-    } catch (error) {
-      console.error('Failed to delete payee location', { error });
-    }
-  };
-
   async function handleSelect(idOrIds, rawInputValue) {
     if (!clearOnBlur) {
       onSelect?.(makeNew(idOrIds, rawInputValue), rawInputValue);
     } else {
-      const create = async payeeName => {
-        const result = await dispatch(
-          createPayee({ name: payeeName, locationAccess }),
-        ).unwrap();
-        return result;
-      };
+      const create = payeeName =>
+        createPayeeMutation.mutateAsync({ name: payeeName });
 
       if (Array.isArray(idOrIds)) {
         idOrIds = await Promise.all(
