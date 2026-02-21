@@ -5,11 +5,11 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { listen, send } from 'loot-core/platform/client/fetch';
+import { listen, send } from 'loot-core/platform/client/connection';
 import * as undo from 'loot-core/platform/client/undo';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { q } from 'loot-core/shared/query';
-import { type RuleEntity } from 'loot-core/types/models';
+import type { RuleEntity } from 'loot-core/types/models';
 
 import { AddRuleButton } from './AddRuleButton';
 import { RulesList } from './RulesList';
@@ -40,9 +40,9 @@ export function MobileRulesPage() {
   const { schedules = [] } = useSchedules({
     query: useMemo(() => q('schedules').select('*'), []),
   });
-  const { list: categories } = useCategories();
-  const payees = usePayees();
-  const accounts = useAccounts();
+  const { data: { list: categories } = { list: [] } } = useCategories();
+  const { data: payees = [] } = usePayees();
+  const { data: accounts = [] } = useAccounts();
   const filterData = useMemo(
     () => ({
       payees,
@@ -94,13 +94,13 @@ export function MobileRulesPage() {
   }, []);
 
   useEffect(() => {
-    loadRules();
+    void loadRules();
   }, [loadRules]);
 
   // Listen for undo events to refresh rules list
   useEffect(() => {
     const onUndo = () => {
-      loadRules();
+      void loadRules();
     };
 
     const lastUndoEvent = undo.getUndoState('undoEvent');
@@ -113,7 +113,7 @@ export function MobileRulesPage() {
 
   const handleRulePress = useCallback(
     (rule: RuleEntity) => {
-      navigate(`/rules/${rule.id}`);
+      void navigate(`/rules/${rule.id}`);
     },
     [navigate],
   );

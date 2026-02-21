@@ -1,8 +1,5 @@
-import React, {
-  useMemo,
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-} from 'react';
+import React, { useMemo } from 'react';
+import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
@@ -26,7 +23,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type ScheduledTransactionMenuModalProps = Extract<
   ModalType,

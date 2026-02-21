@@ -1,7 +1,8 @@
-FROM alpine:3.22 AS deps
+FROM node:22-alpine AS deps
 
 # Install required packages
-RUN apk add --no-cache nodejs yarn python3 openssl build-base
+RUN apk add --no-cache python3 openssl build-base
+RUN corepack enable
 
 WORKDIR /app
 

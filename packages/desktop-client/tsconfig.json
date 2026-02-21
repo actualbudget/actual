@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "../../packages/loot-core/typings/pegjs.ts",
+    "../../packages/loot-core/typings/window.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "build",
+    "**/service-worker/**",
+    "e2e",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/setupTests.ts"
+  ]
+}

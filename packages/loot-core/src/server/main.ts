@@ -7,7 +7,7 @@ import { logger, setVerboseMode } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { q } from '../shared/query';
 import { amountToInteger, integerToAmount } from '../shared/util';
-import { type Handlers } from '../types/handlers';
+import type { Handlers } from '../types/handlers';
 
 import { app as accountsApp } from './accounts/app';
 import { app as adminApp } from './admin/app';
@@ -118,7 +118,7 @@ handlers['set-server-url'] = async function ({ url, validate = true }) {
 handlers['app-focused'] = async function () {
   if (prefs.getPrefs() && prefs.getPrefs().id) {
     // First we sync
-    fullSync();
+    void fullSync();
   }
 };
 

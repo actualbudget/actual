@@ -3,14 +3,14 @@ import { useCallback } from 'react';
 import { theme as themeStyle } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
-import { type Theme } from 'loot-core/types/prefs';
+import type { Theme } from 'loot-core/types/prefs';
 
 import { useTags } from './useTags';
 
 import { useTheme } from '@desktop-client/style';
 
 export function useTagCSS() {
-  const tags = useTags();
+  const { data: tags = [] } = useTags();
   const [theme] = useTheme();
 
   return useCallback(

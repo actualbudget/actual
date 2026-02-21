@@ -1,9 +1,10 @@
-import { contextBridge, ipcRenderer, type IpcRenderer } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
+import type { IpcRenderer } from 'electron';
 
-import {
-  type GetBootstrapDataPayload,
-  type OpenFileDialogPayload,
-  type SaveFileDialogPayload,
+import type {
+  GetBootstrapDataPayload,
+  OpenFileDialogPayload,
+  SaveFileDialogPayload,
 } from './index';
 
 const { version: VERSION, isDev: IS_DEV }: GetBootstrapDataPayload =
@@ -38,11 +39,11 @@ contextBridge.exposeInMainWorld('Actual', {
   startOAuthServer: () => ipcRenderer.invoke('start-oauth-server'),
 
   relaunch: () => {
-    ipcRenderer.invoke('relaunch');
+    void ipcRenderer.invoke('relaunch');
   },
 
   restartElectronServer: () => {
-    ipcRenderer.invoke('restart-server');
+    void ipcRenderer.invoke('restart-server');
   },
 
   openFileDialog: (opts: OpenFileDialogPayload) => {
@@ -62,11 +63,11 @@ contextBridge.exposeInMainWorld('Actual', {
   },
 
   openURLInBrowser: (url: string) => {
-    ipcRenderer.invoke('open-external-url', url);
+    void ipcRenderer.invoke('open-external-url', url);
   },
 
   openInFileManager: (filepath: string) => {
-    ipcRenderer.invoke('open-in-file-manager', filepath);
+    void ipcRenderer.invoke('open-in-file-manager', filepath);
   },
 
   onEventFromMain: (type: string, handler: (...args: unknown[]) => void) => {

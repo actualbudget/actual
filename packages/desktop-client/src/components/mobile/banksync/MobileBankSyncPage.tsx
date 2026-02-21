@@ -6,10 +6,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  type AccountEntity,
-  type BankSyncProviders,
-} from 'loot-core/types/models';
+import type { AccountEntity, BankSyncProviders } from 'loot-core/types/models';
 
 import { BankSyncAccountsList } from './BankSyncAccountsList';
 
@@ -40,7 +37,7 @@ export function MobileBankSyncPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { syncSourceReadable } = useSyncSourceReadable();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const [filter, setFilter] = useState('');
 
   const openAccounts = useMemo(
@@ -101,7 +98,7 @@ export function MobileBankSyncPage() {
     (account: AccountEntity, action: 'link' | 'edit') => {
       switch (action) {
         case 'edit':
-          navigate(`/bank-sync/account/${account.id}/edit`);
+          void navigate(`/bank-sync/account/${account.id}/edit`);
           break;
         case 'link':
           dispatch(

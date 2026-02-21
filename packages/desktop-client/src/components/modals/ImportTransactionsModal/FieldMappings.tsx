@@ -6,11 +6,8 @@ import { View } from '@actual-app/components/view';
 
 import { SelectField } from './SelectField';
 import { SubLabel } from './SubLabel';
-import {
-  stripCsvImportTransaction,
-  type FieldMapping,
-  type ImportTransaction,
-} from './utils';
+import { stripCsvImportTransaction } from './utils';
+import type { FieldMapping, ImportTransaction } from './utils';
 
 import { SectionLabel } from '@desktop-client/components/forms';
 

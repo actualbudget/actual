@@ -1,4 +1,4 @@
-import { type QueryState } from '../../shared/query';
+import type { QueryState } from '../../shared/query';
 import { createApp } from '../app';
 import * as sheet from '../sheet';
 

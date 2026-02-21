@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { type ComponentProps, type CSSProperties } from 'react';
+import React from 'react';
+import type { ComponentProps, CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -14,7 +15,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import { type SpendingEntity } from 'loot-core/types/models';
+import type { SpendingEntity } from 'loot-core/types/models';
 
 import { computePadding } from './util/computePadding';
 
@@ -22,7 +23,8 @@ import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
-import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type PayloadItem = {

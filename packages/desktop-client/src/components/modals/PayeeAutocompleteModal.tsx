@@ -14,7 +14,7 @@ import {
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type PayeeAutocompleteModalProps = Extract<
   ModalType,
@@ -26,8 +26,8 @@ export function PayeeAutocompleteModal({
   onClose,
 }: PayeeAutocompleteModalProps) {
   const { t } = useTranslation();
-  const payees = usePayees() || [];
-  const accounts = useAccounts() || [];
+  const { data: payees = [] } = usePayees();
+  const { data: accounts = [] } = useAccounts();
   const navigate = useNavigate();
 
   const { isNarrowWidth } = useResponsive();

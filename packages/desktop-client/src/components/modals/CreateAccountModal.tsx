@@ -12,7 +12,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 
 import { useAuth } from '@desktop-client/auth/AuthProvider';
 import { Permissions } from '@desktop-client/auth/types';
@@ -29,10 +29,8 @@ import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
-import {
-  pushModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -67,9 +65,9 @@ export function CreateAccountModal({
     }
 
     if (upgradingAccountId == null) {
-      authorizeBank(dispatch);
+      void authorizeBank(dispatch);
     } else {
-      authorizeBank(dispatch);
+      void authorizeBank(dispatch);
     }
   };
 
@@ -259,11 +257,11 @@ export function CreateAccountModal({
   };
 
   const onGoCardlessReset = () => {
-    send('secret-set', {
+    void send('secret-set', {
       name: 'gocardless_secretId',
       value: null,
     }).then(() => {
-      send('secret-set', {
+      void send('secret-set', {
         name: 'gocardless_secretKey',
         value: null,
       }).then(() => {
@@ -273,11 +271,11 @@ export function CreateAccountModal({
   };
 
   const onSimpleFinReset = () => {
-    send('secret-set', {
+    void send('secret-set', {
       name: 'simplefin_token',
       value: null,
     }).then(() => {
-      send('secret-set', {
+      void send('secret-set', {
         name: 'simplefin_accessKey',
         value: null,
       }).then(() => {
@@ -287,15 +285,15 @@ export function CreateAccountModal({
   };
 
   const onPluggyAiReset = () => {
-    send('secret-set', {
+    void send('secret-set', {
       name: 'pluggyai_clientId',
       value: null,
     }).then(() => {
-      send('secret-set', {
+      void send('secret-set', {
         name: 'pluggyai_clientSecret',
         value: null,
       }).then(() => {
-        send('secret-set', {
+        void send('secret-set', {
           name: 'pluggyai_itemIds',
           value: null,
         }).then(() => {

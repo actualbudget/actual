@@ -14,7 +14,8 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { FieldLabel } from '@desktop-client/components/mobile/MobileForms';
 import { AmountInput } from '@desktop-client/components/util/AmountInput';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type HoldBufferModalProps = Extract<
@@ -24,6 +25,7 @@ type HoldBufferModalProps = Extract<
 
 export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
   const { t } = useTranslation(); // Initialize i18next
+  const [hideFraction] = useSyncedPref('hideFraction');
   const available = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
   const [amount, setAmount] = useState<number>(0);
 
@@ -49,8 +51,8 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
             <FieldLabel title={t('Hold this amount:')} />{' '}
             <InitialFocus>
               <AmountInput
-                value={available}
-                autoDecimals
+                value={amount}
+                autoDecimals={String(hideFraction) !== 'true'}
                 zeroSign="+"
                 style={{
                   marginLeft: styles.mobileEditingPadding,

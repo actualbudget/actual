@@ -5,6 +5,7 @@ import type {
   APIFileEntity,
   APIPayeeEntity,
   APIScheduleEntity,
+  APITagEntity,
 } from 'loot-core/server/api-models';
 import { lib } from 'loot-core/server/main';
 import type { Query } from 'loot-core/shared/query';
@@ -269,6 +270,25 @@ export function updatePayee(
 
 export function deletePayee(id: APIPayeeEntity['id']) {
   return send('api/payee-delete', { id });
+}
+
+export function getTags() {
+  return send('api/tags-get');
+}
+
+export function createTag(tag: Omit<APITagEntity, 'id'>) {
+  return send('api/tag-create', { tag });
+}
+
+export function updateTag(
+  id: APITagEntity['id'],
+  fields: Partial<Omit<APITagEntity, 'id'>>,
+) {
+  return send('api/tag-update', { id, fields });
+}
+
+export function deleteTag(id: APITagEntity['id']) {
+  return send('api/tag-delete', { id });
 }
 
 export function mergePayees(

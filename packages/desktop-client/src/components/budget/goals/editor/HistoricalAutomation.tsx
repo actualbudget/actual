@@ -8,10 +8,8 @@ import type {
   CopyTemplate,
 } from 'loot-core/types/models/templates';
 
-import {
-  updateTemplate,
-  type Action,
-} from '@desktop-client/components/budget/goals/actions';
+import { updateTemplate } from '@desktop-client/components/budget/goals/actions';
+import type { Action } from '@desktop-client/components/budget/goals/actions';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { GenericInput } from '@desktop-client/components/util/GenericInput';
 

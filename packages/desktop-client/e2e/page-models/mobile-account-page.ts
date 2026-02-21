@@ -1,4 +1,4 @@
-import { type Locator, type Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
 
@@ -56,7 +56,7 @@ export class MobileAccountPage {
    * Go to transaction creation page
    */
   async clickCreateTransaction() {
-    this.createTransactionButton.click();
+    await this.createTransactionButton.click();
     return new MobileTransactionEntryPage(this.page);
   }
 }

@@ -1,12 +1,5 @@
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-} from 'react';
+import { lazy, Suspense, useCallback, useMemo, useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -18,8 +11,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
-import { type FormulaWidget } from 'loot-core/types/models';
+import type { FormulaWidget } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { QueryManager } from '@desktop-client/components/formula/QueryManager';
@@ -31,12 +23,13 @@ import {
 } from '@desktop-client/components/Page';
 import { FormulaResult } from '@desktop-client/components/reports/FormulaResult';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
 import { useFormulaExecution } from '@desktop-client/hooks/useFormulaExecution';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useThemeColors } from '@desktop-client/hooks/useThemeColors';
-import { useWidget } from '@desktop-client/hooks/useWidget';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
 
 const FormulaEditor = lazy(() =>
   import('../../formula/FormulaEditor').then(module => ({
@@ -46,12 +39,12 @@ const FormulaEditor = lazy(() =>
 
 export function Formula() {
   const params = useParams();
-  const { data: widget, isLoading } = useWidget<FormulaWidget>(
-    params.id ?? '',
-    'formula-card',
-  );
+  const { data: widget, isPending } = useDashboardWidget<FormulaWidget>({
+    id: params.id,
+    type: 'formula-card',
+  });
 
-  if (isLoading) {
+  if (isPending) {
     return <LoadingIndicator />;
   }
 
@@ -122,6 +115,8 @@ function FormulaInner({ widget }: FormulaInnerProps) {
     [],
   );
 
+  const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
+
   const onSaveWidgetName = async (newName: string) => {
     if (!widget) {
       dispatch(
@@ -136,16 +131,18 @@ function FormulaInner({ widget }: FormulaInnerProps) {
     }
 
     const name = newName || t('Formula');
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        name,
-        formula,
-        queries: queriesRef.current,
-        fontSizeMode,
-        staticFontSize,
-        colorFormula,
+    updateDashboardWidgetMutation.mutate({
+      widget: {
+        id: widget.id,
+        meta: {
+          ...(widget.meta ?? {}),
+          name,
+          formula,
+          queries: queriesRef.current,
+          fontSizeMode,
+          staticFontSize,
+          colorFormula,
+        },
       },
     });
   };
@@ -163,25 +160,32 @@ function FormulaInner({ widget }: FormulaInnerProps) {
       return;
     }
 
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        formula,
-        queries: queriesRef.current,
-        fontSizeMode,
-        staticFontSize,
-        colorFormula,
-      },
-    });
-
-    dispatch(
-      addNotification({
-        notification: {
-          type: 'message',
-          message: t('Dashboard widget successfully saved.'),
+    updateDashboardWidgetMutation.mutate(
+      {
+        widget: {
+          id: widget.id,
+          meta: {
+            ...(widget.meta ?? {}),
+            formula,
+            queries: queriesRef.current,
+            fontSizeMode,
+            staticFontSize,
+            colorFormula,
+          },
         },
-      }),
+      },
+      {
+        onSuccess: () => {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'message',
+                message: t('Dashboard widget successfully saved.'),
+              },
+            }),
+          );
+        },
+      },
     );
   }
 

@@ -12,10 +12,10 @@ import { q } from '../../shared/query';
 import { getApproxNumberThreshold, sortNumbers } from '../../shared/rules';
 import { ungroupTransaction } from '../../shared/transactions';
 import { fastSetMerge, partitionByField } from '../../shared/util';
-import {
-  type RuleActionEntity,
-  type RuleEntity,
-  type TransactionEntity,
+import type {
+  RuleActionEntity,
+  RuleEntity,
+  TransactionEntity,
 } from '../../types/models';
 import { aqlQuery, schemaConfig } from '../aql';
 import * as db from '../db';
@@ -451,6 +451,8 @@ export function conditionsToAQL(
       } else {
         op = 'false';
       }
+    } else if (field === 'category_group') {
+      field = 'category.group';
     }
 
     const apply = (field, aqlOp, value) => {

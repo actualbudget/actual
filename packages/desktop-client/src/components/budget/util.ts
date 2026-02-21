@@ -1,24 +1,24 @@
 // @ts-strict-ignore
-import { type CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { t } from 'i18next';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { currencyToAmount, integerToCurrency } from 'loot-core/shared/util';
-import { type Handlers } from 'loot-core/types/handlers';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
+import type { Handlers } from 'loot-core/types/handlers';
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { getValidMonthBounds } from './MonthsContext';
 
-import { type DropPosition } from '@desktop-client/components/sort';
-import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import type { DropPosition } from '@desktop-client/components/sort';
+import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   return [
@@ -125,9 +125,9 @@ export function makeAmountFullStyle(
   };
 }
 
-export function findSortDown(
-  arr: CategoryGroupEntity[],
-  pos: DropPosition,
+export function findSortDown<T extends { id: string }>(
+  arr: T[],
+  pos: DropPosition | null,
   targetId: string,
 ) {
   if (pos === 'top') {
@@ -149,9 +149,9 @@ export function findSortDown(
   }
 }
 
-export function findSortUp(
-  arr: CategoryGroupEntity[],
-  pos: DropPosition,
+export function findSortUp<T extends { id: string }>(
+  arr: T[],
+  pos: DropPosition | null,
   targetId: string,
 ) {
   if (pos === 'bottom') {

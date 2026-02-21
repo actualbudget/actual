@@ -1,12 +1,13 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { parseNumberFormat, setNumberFormat } from 'loot-core/shared/util';
-import {
-  type GlobalPrefs,
-  type MetadataPrefs,
-  type ServerPrefs,
-  type SyncedPrefs,
+import type {
+  GlobalPrefs,
+  MetadataPrefs,
+  ServerPrefs,
+  SyncedPrefs,
 } from 'loot-core/types/prefs';
 
 import { resetApp } from '@desktop-client/app/appSlice';

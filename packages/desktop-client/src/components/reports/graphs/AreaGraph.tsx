@@ -1,4 +1,5 @@
-import React, { type CSSProperties, type SVGAttributes } from 'react';
+import React from 'react';
+import type { CSSProperties, SVGAttributes } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -12,13 +13,10 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  type LabelProps,
 } from 'recharts';
+import type { LabelProps } from 'recharts';
 
-import {
-  type balanceTypeOpType,
-  type DataEntity,
-} from 'loot-core/types/models';
+import type { balanceTypeOpType, DataEntity } from 'loot-core/types/models';
 
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
@@ -26,7 +24,8 @@ import { renderCustomLabel } from './renderCustomLabel';
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
-import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type PayloadItem = {

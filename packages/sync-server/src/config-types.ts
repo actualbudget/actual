@@ -1,4 +1,4 @@
-import { type ServerOptions } from 'https';
+import type { ServerOptions } from 'https';
 
 type LoginMethod = 'password' | 'header' | 'openid';
 

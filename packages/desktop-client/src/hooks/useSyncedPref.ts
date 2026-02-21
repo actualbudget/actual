@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { saveSyncedPrefs } from '@desktop-client/prefs/prefsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
@@ -15,7 +15,7 @@ export function useSyncedPref<K extends keyof SyncedPrefs>(
   const dispatch = useDispatch();
   const setPref = useCallback<SetSyncedPrefAction<K>>(
     value => {
-      dispatch(
+      void dispatch(
         saveSyncedPrefs({
           prefs: { [prefName]: value },
         }),

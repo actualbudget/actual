@@ -1,4 +1,5 @@
-import { expect as baseExpect, type Locator } from '@playwright/test';
+import { expect as baseExpect } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 
 export { test } from '@playwright/test';
 

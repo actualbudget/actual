@@ -1,11 +1,5 @@
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -40,12 +34,12 @@ import {
   isElectron,
   isNonProductionEnvironment,
 } from 'loot-core/shared/environment';
-import {
-  type File,
-  type LocalFile,
-  type RemoteFile,
-  type SyncableLocalFile,
-  type SyncedLocalFile,
+import type {
+  File,
+  LocalFile,
+  RemoteFile,
+  SyncableLocalFile,
+  SyncedLocalFile,
 } from 'loot-core/types/file';
 
 import {
@@ -276,7 +270,7 @@ type BudgetFileListItemProps = ComponentPropsWithoutRef<
   typeof GridListItem<File>
 > & {
   quickSwitchMode: boolean;
-  onSelect: (file: File) => void;
+  onSelect: (file: File) => Promise<void>;
   onDelete: (file: File) => void;
   onDuplicate: (file: File) => void;
   currentUserId: string;
@@ -385,7 +379,7 @@ function BudgetFileListItem({
 type BudgetFileListProps = {
   files: File[];
   quickSwitchMode: boolean;
-  onSelect: (file: File) => void;
+  onSelect: (file: File) => Promise<void>;
   onDelete: (file: File) => void;
   onDuplicate: (file: File) => void;
   currentUserId: string;
@@ -453,7 +447,7 @@ function RefreshButton({ style, onRefresh }: RefreshButtonProps) {
 
   async function _onRefresh() {
     setLoading(true);
-    await onRefresh();
+    onRefresh();
     setLoading(false);
   }
 
@@ -562,7 +556,7 @@ export function BudgetFileSelection({
 
   useEffect(() => {
     if (multiuserEnabled && !userData?.offline) {
-      fetchUsers();
+      void fetchUsers();
     }
   }, [multiuserEnabled, userData?.offline, fetchUsers]);
 
@@ -589,13 +583,13 @@ export function BudgetFileSelection({
   const onCreate = ({ testMode = false } = {}) => {
     if (!creating) {
       setCreating(true);
-      dispatch(createBudget({ testMode }));
+      void dispatch(createBudget({ testMode }));
     }
   };
 
   const refresh = () => {
-    dispatch(getUserData());
-    dispatch(loadAllFiles());
+    void dispatch(getUserData());
+    void dispatch(loadAllFiles());
   };
 
   const initialMount = useInitialMount();

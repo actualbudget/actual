@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 
-import { type Currency } from 'loot-core/shared/currencies';
+import type { Currency } from 'loot-core/shared/currencies';
 import { amountToInteger } from 'loot-core/shared/util';
 
 import * as monthUtils from '../../shared/months';
@@ -9,11 +9,8 @@ import {
   getDateWithSkippedWeekend,
   getNextDate,
 } from '../../shared/schedules';
-import { type CategoryEntity } from '../../types/models';
-import {
-  type ScheduleTemplate,
-  type Template,
-} from '../../types/models/templates';
+import type { CategoryEntity } from '../../types/models';
+import type { ScheduleTemplate, Template } from '../../types/models/templates';
 import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
 

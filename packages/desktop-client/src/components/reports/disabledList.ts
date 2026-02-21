@@ -1,6 +1,6 @@
 import { t } from 'i18next';
 
-import { type sortByOpType } from 'loot-core/types/models';
+import type { sortByOpType } from 'loot-core/types/models';
 
 const intervalOptions = [
   {

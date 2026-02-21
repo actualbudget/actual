@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useRef, type CSSProperties, type Ref } from 'react';
+import React, { useRef } from 'react';
+import type { CSSProperties, Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -10,9 +11,9 @@ import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { SidebarCategoryButtons } from './SidebarCategoryButtons';
@@ -155,11 +156,11 @@ export function SidebarCategory({
               display: 'flex',
             },
           }),
-        ...(dragging && { color: theme.formInputTextPlaceholderSelected }),
+        ...(dragging && { color: theme.pageTextSubdued }), //always visible color
         // The zIndex here forces the the view on top of a row below
         // it that may be "collapsed" and show a border on top
         ...(dragPreview && {
-          backgroundColor: theme.tableBackground,
+          backgroundColor: theme.budgetCurrentMonth,
           zIndex: 10000,
           borderRadius: 6,
           overflow: 'hidden',

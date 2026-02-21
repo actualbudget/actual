@@ -17,7 +17,7 @@ import {
   getStatus,
   recurConfigToRSchedule,
 } from '../../shared/schedules';
-import { type ScheduleEntity } from '../../types/models';
+import type { ScheduleEntity } from '../../types/models';
 import { addTransactions } from '../accounts/sync';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
@@ -567,9 +567,9 @@ app.events.on('sync', ({ type }) => {
 
     const { lastScheduleRun } = prefs.getPrefs();
     if (lastScheduleRun !== currentDay()) {
-      runMutator(() => advanceSchedulesService(type === 'success'));
+      void runMutator(() => advanceSchedulesService(type === 'success'));
 
-      prefs.savePrefs({ lastScheduleRun: currentDay() });
+      void prefs.savePrefs({ lastScheduleRun: currentDay() });
     }
   }
 });

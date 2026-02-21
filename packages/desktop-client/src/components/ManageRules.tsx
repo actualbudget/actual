@@ -1,12 +1,6 @@
 // @ts-strict-ignore
-import React, {
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useState,
-  type Dispatch,
-  type SetStateAction,
-} from 'react';
+import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -16,16 +10,16 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as undo from 'loot-core/platform/client/undo';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { q } from 'loot-core/shared/query';
 import { friendlyOp, mapField } from 'loot-core/shared/rules';
 import { describeSchedule } from 'loot-core/shared/schedules';
-import {
-  type NewRuleEntity,
-  type RuleEntity,
-  type ScheduleEntity,
+import type {
+  NewRuleEntity,
+  RuleEntity,
+  ScheduleEntity,
 } from 'loot-core/types/models';
 
 import { InfiniteScrollWrapper } from './common/InfiniteScrollWrapper';
@@ -43,7 +37,6 @@ import {
   useSelected,
 } from '@desktop-client/hooks/useSelected';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { getPayees } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 export type FilterData = {
@@ -140,9 +133,9 @@ export function ManageRules({
   const { schedules = [] } = useSchedules({
     query: useMemo(() => q('schedules').select('*'), []),
   });
-  const { list: categories } = useCategories();
-  const payees = usePayees();
-  const accounts = useAccounts();
+  const { data: { list: categories } = { list: [] } } = useCategories();
+  const { data: payees } = usePayees();
+  const { data: accounts = [] } = useAccounts();
   const filterData = useMemo(
     () => ({
       payees,
@@ -198,15 +191,13 @@ export function ManageRules({
     async function loadData() {
       await loadRules();
       setLoading(false);
-
-      await dispatch(getPayees());
     }
 
     if (payeeId) {
       undo.setUndoState('openModal', { name: 'manage-rules', options: {} });
     }
 
-    loadData();
+    void loadData();
 
     return () => {
       undo.setUndoState('openModal', null);

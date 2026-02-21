@@ -13,7 +13,8 @@ function getAbsolutePath(value: string) {
 }
 const config: StorybookConfig = {
   stories: [
-    '../src/Introduction.mdx',
+    '../src/Concepts/*.mdx',
+    '../src/Themes/*.mdx',
     '../src/**/*.mdx',
     '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
   ],
@@ -26,6 +27,7 @@ const config: StorybookConfig = {
   core: {
     disableTelemetry: true,
   },
+  staticDirs: ['./public'],
   async viteFinal(config) {
     const { mergeConfig } = await import('vite');
 

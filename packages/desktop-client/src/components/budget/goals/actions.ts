@@ -1,6 +1,6 @@
-import { type Template } from 'loot-core/types/models/templates';
+import type { Template } from 'loot-core/types/models/templates';
 
-import { type DisplayTemplateType } from './constants';
+import type { DisplayTemplateType } from './constants';
 
 type SET_TYPE = {
   type: 'set-type';

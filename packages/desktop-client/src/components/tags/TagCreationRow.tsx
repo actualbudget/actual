@@ -1,11 +1,5 @@
-import React, {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type KeyboardEvent,
-} from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { ChangeEvent, KeyboardEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -14,7 +8,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type TagEntity } from 'loot-core/types/models';
+import type { TagEntity } from 'loot-core/types/models';
 
 import {
   InputCell,
@@ -24,8 +18,7 @@ import {
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
-import { useDispatch } from '@desktop-client/redux';
-import { createTag } from '@desktop-client/tags/tagsSlice';
+import { useCreateTagMutation } from '@desktop-client/tags';
 
 type TagCreationRowProps = {
   tags: TagEntity[];
@@ -34,7 +27,6 @@ type TagCreationRowProps = {
 
 export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
   const [tag, setTag] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState<string | null>(null);
@@ -73,12 +65,14 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
     );
   };
 
+  const { mutate: createTag } = useCreateTagMutation();
+
   const onAddTag = () => {
     if (!isTagValid()) {
       return;
     }
 
-    dispatch(createTag({ tag, color, description }));
+    createTag({ tag: { tag, color, description } });
     resetInputs();
   };
 

@@ -1,6 +1,6 @@
-import { type Currency } from 'loot-core/shared/currencies';
+import type { Currency } from 'loot-core/shared/currencies';
 
-import { type CategoryEntity } from '../../types/models';
+import type { CategoryEntity } from '../../types/models';
 import * as db from '../db';
 import { Rule } from '../rules';
 import { getRuleForSchedule } from '../schedules/app';

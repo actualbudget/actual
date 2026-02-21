@@ -1,4 +1,4 @@
-import { type Locator, type Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 import { AccountPage } from './account-page';
 import { BudgetPage } from './budget-page';

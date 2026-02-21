@@ -1,4 +1,4 @@
-import { type RuleConditionEntity } from './rule';
+import type { RuleConditionEntity } from './rule';
 
 export type CustomReportEntity = {
   id: string;
@@ -21,7 +21,7 @@ export type CustomReportEntity = {
   graphType: string;
   conditions?: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
-  data?: GroupedEntity;
+  metadata?: GroupedEntity;
   tombstone?: boolean;
 };
 

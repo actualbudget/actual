@@ -88,9 +88,9 @@ export function ElectronServerConfig({
       await window.globalThis.Actual.stopSyncServer();
       await window.globalThis.Actual.startSyncServer();
       setStartingSyncServer(false);
-      initElectronSyncServerRunningStatus();
+      void initElectronSyncServerRunningStatus();
       await setServerUrl(`http://localhost:${electronServerPort}`);
-      navigate('/');
+      void navigate('/');
     } catch (error) {
       setStartingSyncServer(false);
       setConfigError(t('Failed to configure sync server'));
@@ -108,7 +108,7 @@ export function ElectronServerConfig({
   };
 
   useEffect(() => {
-    initElectronSyncServerRunningStatus();
+    void initElectronSyncServerRunningStatus();
   }, []);
 
   async function dontUseSyncServer() {
@@ -344,7 +344,7 @@ export function ConfigServer() {
     } else {
       setLoading(false);
       await dispatch(signOut());
-      navigate('/');
+      void navigate('/');
     }
   }
 
@@ -371,13 +371,13 @@ export function ConfigServer() {
   async function onSkip() {
     await setServerUrl(null);
     await dispatch(loggedIn());
-    navigate('/');
+    void navigate('/');
   }
 
   async function onCreateTestFile() {
     await setServerUrl(null);
     await dispatch(createBudget({ testMode: true }));
-    navigate('/');
+    void navigate('/');
   }
 
   const [syncServerConfig] = useGlobalPref('syncServerConfig');
@@ -542,7 +542,7 @@ export function ConfigServer() {
                     style={{ marginLeft: 15 }}
                     onPress={async () => {
                       await onCreateTestFile();
-                      navigate('/');
+                      void navigate('/');
                     }}
                   >
                     <Trans>Create test file</Trans>

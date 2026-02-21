@@ -1,12 +1,11 @@
-// @ts-strict-ignore
 import { t } from 'i18next';
-export function getUploadError({
-  reason,
-  meta,
-}: {
+
+type ErrorWithMeta = {
   reason: string;
   meta?: unknown;
-}) {
+};
+
+export function getUploadError({ reason, meta }: ErrorWithMeta) {
   switch (reason) {
     case 'unauthorized':
       return t('You are not logged in.');
@@ -72,6 +71,11 @@ export function getDownloadError({
         'This budget cannot be loaded with this version of the app. Make sure the app is up-to-date.',
       );
 
+    case 'clock-drift':
+      return t(
+        'Failed to download the budget because your device time differs too much from the server. Please check your device time settings and ensure they are correct.',
+      );
+
     default:
       const info =
         meta && typeof meta === 'object' && 'fileId' in meta && meta.fileId
@@ -84,11 +88,11 @@ export function getDownloadError({
   }
 }
 
-export function getCreateKeyError(error) {
+export function getCreateKeyError(error: ErrorWithMeta) {
   return getUploadError(error);
 }
 
-export function getTestKeyError({ reason }) {
+export function getTestKeyError({ reason }: ErrorWithMeta) {
   switch (reason) {
     case 'network':
       return t(
@@ -107,13 +111,17 @@ export function getTestKeyError({ reason }) {
   }
 }
 
-export function getSyncError(error, id) {
+export function getSyncError(error: string, id: string) {
   if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
     return t('This budget cannot be loaded with this version of the app.');
   } else if (error === 'budget-not-found') {
     return t(
       'Budget "{{id}}" not found. Check the ID of your budget in the Advanced section of the settings page.',
       { id },
+    );
+  } else if (error === 'clock-drift') {
+    return t(
+      'Failed to sync because your device time differs too much from the server. Please check your device time settings and ensure they are correct.',
     );
   } else {
     return t('We had an unknown problem opening "{{id}}".', { id });

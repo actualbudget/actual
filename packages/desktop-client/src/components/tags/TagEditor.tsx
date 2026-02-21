@@ -1,13 +1,12 @@
-import { type RefObject } from 'react';
+import type { RefObject } from 'react';
 
 import { Button } from '@actual-app/components/button';
 import { ColorPicker } from '@actual-app/components/color-picker';
 
-import { type TagEntity } from 'loot-core/types/models';
+import type { TagEntity } from 'loot-core/types/models';
 
 import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
-import { useDispatch } from '@desktop-client/redux';
-import { updateTag } from '@desktop-client/tags/tagsSlice';
+import { useUpdateTagMutation } from '@desktop-client/tags';
 
 type TagEditorProps = {
   tag: TagEntity;
@@ -15,8 +14,8 @@ type TagEditorProps = {
 };
 
 export const TagEditor = ({ tag, ref }: TagEditorProps) => {
-  const dispatch = useDispatch();
   const getTagCSS = useTagCSS();
+  const { mutate: updateTag } = useUpdateTagMutation();
 
   const formattedTag = <>#{tag.tag}</>;
 
@@ -24,7 +23,7 @@ export const TagEditor = ({ tag, ref }: TagEditorProps) => {
     <ColorPicker
       value={tag.color ?? undefined}
       onChange={color => {
-        dispatch(updateTag({ ...tag, color: color.toString('hex') }));
+        updateTag({ tag: { ...tag, color: color.toString('hex') } });
       }}
     >
       <Button variant="bare" className={getTagCSS(tag.tag)} ref={ref}>

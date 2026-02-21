@@ -1,4 +1,4 @@
-import { type Query } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 
 export type Spreadsheets = {
   account: {

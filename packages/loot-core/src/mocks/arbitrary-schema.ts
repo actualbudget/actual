@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import fc, { type Arbitrary } from 'fast-check';
+import fc from 'fast-check';
+import type { Arbitrary } from 'fast-check';
 
 import { schema } from '../server/aql';
 import { addDays } from '../shared/months';

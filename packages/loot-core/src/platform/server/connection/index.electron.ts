@@ -11,7 +11,7 @@ function coerceError(error) {
     return error;
   }
 
-  return { type: 'InternalError', message: error.message };
+  return { type: 'ServerError', message: error.message, cause: error };
 }
 
 export const init: T.Init = function (_socketName, handlers) {
@@ -52,10 +52,10 @@ export const init: T.Init = function (_socketName, handlers) {
               result: { error, data: null },
             });
           } else {
-            process.parentPort.postMessage({ type: 'error', id });
+            process.parentPort.postMessage({ type: 'error', id, error });
           }
 
-          if (error.type === 'InternalError' && name !== 'api/load-budget') {
+          if (error.type === 'ServerError' && name !== 'api/load-budget') {
             captureException(nativeError);
           }
 
@@ -66,14 +66,25 @@ export const init: T.Init = function (_socketName, handlers) {
         },
       );
     } else {
-      logger.warn('Unknown method: ' + name);
+      logger.error('Unknown server method: ' + name);
       captureException(new Error('Unknown server method: ' + name));
-      process.parentPort.postMessage({
-        type: 'reply',
-        id,
-        result: null,
-        error: APIError('Unknown method: ' + name),
-      });
+      const unknownMethodError = APIError('Unknown server method: ' + name);
+
+      if (catchErrors) {
+        process.parentPort.postMessage({
+          type: 'reply',
+          id,
+          result: catchErrors
+            ? { error: unknownMethodError, data: null }
+            : null,
+        });
+      } else {
+        process.parentPort.postMessage({
+          type: 'error',
+          id,
+          error: unknownMethodError,
+        });
+      }
     }
   });
 };

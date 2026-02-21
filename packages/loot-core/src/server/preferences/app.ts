@@ -1,10 +1,10 @@
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as fs from '../../platform/server/fs';
 import { stringToInteger } from '../../shared/util';
-import {
-  type GlobalPrefs,
-  type MetadataPrefs,
-  type SyncedPrefs,
+import type {
+  GlobalPrefs,
+  MetadataPrefs,
+  SyncedPrefs,
 } from '../../types/prefs';
 import { createApp } from '../app';
 import * as db from '../db';

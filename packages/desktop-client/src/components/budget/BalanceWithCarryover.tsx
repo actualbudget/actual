@@ -1,9 +1,9 @@
 // @ts-strict-ignore
-import React, {
-  useCallback,
-  type ComponentPropsWithoutRef,
-  type ComponentType,
-  type CSSProperties,
+import React, { useCallback } from 'react';
+import type {
+  ComponentPropsWithoutRef,
+  ComponentType,
+  CSSProperties,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -15,7 +15,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { type TransObjectLiteral } from 'loot-core/types/util';
+import type { TransObjectLiteral } from 'loot-core/types/util';
 
 import { makeBalanceAmountStyle } from './util';
 
@@ -26,7 +26,7 @@ import {
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { type Binding } from '@desktop-client/spreadsheet';
+import type { Binding } from '@desktop-client/spreadsheet';
 
 type CarryoverIndicatorProps = {
   style?: CSSProperties;

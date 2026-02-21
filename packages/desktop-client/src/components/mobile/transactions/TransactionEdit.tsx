@@ -30,7 +30,7 @@ import {
   parseISO,
 } from 'date-fns';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import * as Platform from 'loot-core/shared/platform';
 import { q } from 'loot-core/shared/query';
@@ -54,11 +54,11 @@ import {
   integerToCurrency,
   titleFirst,
 } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type PayeeEntity,
-  type TransactionEntity,
+import type {
+  AccountEntity,
+  CategoryEntity,
+  PayeeEntity,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
@@ -460,7 +460,7 @@ const ChildTransactionEdit = forwardRef<
                   onClearActiveEdit();
                 }
               }}
-              autoDecimals={!hideFraction}
+              autoDecimals={String(hideFraction) !== 'true'}
             />
           </View>
         </View>
@@ -584,7 +584,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         ) || [],
       [unserializedTransactions, dateFormat],
     );
-    const { grouped: categoryGroups } = useCategories();
+    const { data: { grouped: categoryGroups } = { grouped: [] } } =
+      useCategories();
 
     useEffect(() => {
       if (window.history.length === 1) {
@@ -682,7 +683,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         }
 
         onSave(transactionsToSave);
-        navigate(-1);
+        void navigate(-1);
       };
 
       const today = monthUtils.currentDay();
@@ -740,7 +741,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                       },
                     }),
                   );
-                  navigate(-1);
+                  void navigate(-1);
                 },
                 onCancel: onConfirmSave,
               },
@@ -786,7 +787,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         value: TransactionEntity[Field],
       ) => {
         const newTransaction = { ...serializedTransaction, [name]: value };
-        await onUpdate(newTransaction, name);
+        onUpdate(newTransaction, name);
         onClearActiveEdit();
 
         if (name === 'account') {
@@ -799,7 +800,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const onTotalAmountUpdate = useCallback(
       (value: number) => {
         if (transaction.amount !== value) {
-          onUpdateInner(transaction, 'amount', value);
+          void onUpdateInner(transaction, 'amount', value);
         }
       },
       [onUpdateInner, transaction],
@@ -835,7 +836,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                         unserializedTransaction.date,
                       ),
                       onSelect: categoryId => {
-                        onUpdateInner(transactionToEdit, name, categoryId);
+                        void onUpdateInner(transactionToEdit, name, categoryId);
                       },
                       onClose: () => {
                         onClearActiveEdit();
@@ -852,7 +853,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     name: 'account-autocomplete',
                     options: {
                       onSelect: accountId => {
-                        onUpdateInner(transactionToEdit, name, accountId);
+                        void onUpdateInner(transactionToEdit, name, accountId);
                       },
                       onClose: () => {
                         onClearActiveEdit();
@@ -869,7 +870,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     name: 'payee-autocomplete',
                     options: {
                       onSelect: payeeId => {
-                        onUpdateInner(transactionToEdit, name, payeeId);
+                        void onUpdateInner(transactionToEdit, name, payeeId);
                       },
                       onClose: () => {
                         onClearActiveEdit();
@@ -888,7 +889,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                       name,
                       onSubmit: (name, value) => {
                         if (typeof value === 'object' && 'useRegex' in value) {
-                          onUpdateInner(
+                          void onUpdateInner(
                             transactionToEdit,
                             name,
                             applyFindReplace(
@@ -899,7 +900,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                             ),
                           );
                         } else {
-                          onUpdateInner(transactionToEdit, name, value);
+                          void onUpdateInner(transactionToEdit, name, value);
                         }
                       },
                       onClose: () => {
@@ -948,7 +949,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                       return;
                     }
 
-                    navigate(-1);
+                    void navigate(-1);
                   },
                 },
               },
@@ -1359,7 +1360,7 @@ function TransactionEditUnconnected({
       }
     }
     if (transactionId !== 'new') {
-      fetchTransaction();
+      void fetchTransaction();
     } else {
       isAdding.current = true;
     }
@@ -1631,7 +1632,7 @@ function TransactionEditUnconnected({
           <Button
             variant="primary"
             onPress={() => {
-              navigate('/budget');
+              void navigate('/budget');
             }}
           >
             <Trans>Go to budget</Trans>
@@ -1679,12 +1680,12 @@ type TransactionEditProps = Omit<
 >;
 
 export const TransactionEdit = (props: TransactionEditProps) => {
-  const { list: categories } = useCategories();
-  const payees = usePayees();
+  const { data: { list: categories } = { list: [] } } = useCategories();
+  const { data: payees = [] } = usePayees();
   const lastTransaction = useSelector(
     state => state.transactions.lastTransaction,
   );
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   return (

@@ -1,9 +1,10 @@
-import { q, Query, type QueryState } from '../../shared/query';
-import {
-  type AccountEntity,
-  type CategoryGroupEntity,
-  type PayeeEntity,
-  type TransactionEntity,
+import { q, Query } from '../../shared/query';
+import type { QueryState } from '../../shared/query';
+import type {
+  AccountEntity,
+  CategoryGroupEntity,
+  PayeeEntity,
+  TransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
@@ -11,7 +12,8 @@ import { mutator } from '../mutators';
 import { undoable } from '../undo';
 
 import { exportQueryToCSV, exportToCSV } from './export/export-to-csv';
-import { parseFile, type ParseFileOptions } from './import/parse-file';
+import { parseFile } from './import/parse-file';
+import type { ParseFileOptions } from './import/parse-file';
 import { mergeTransactions } from './merge';
 
 import { batchUpdateTransactions } from '.';

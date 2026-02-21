@@ -74,4 +74,4 @@ async function checkReleaseNotesExists() {
   }
 }
 
-checkReleaseNotesExists();
+void checkReleaseNotesExists();

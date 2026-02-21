@@ -199,6 +199,7 @@ jobs:
           token: ${{ secrets.FLATHUB_GITHUB_TOKEN }}
           commit-message: 'Update Actual flatpak to version ${{ needs.build.outputs.version }}'
           branch: 'release/${{ needs.build.outputs.version }}'
+          draft: true
           title: 'Update Actual flatpak to version ${{ needs.build.outputs.version }}'
           body: |
             This PR updates the Actual desktop flatpak to version ${{ needs.build.outputs.version }}.

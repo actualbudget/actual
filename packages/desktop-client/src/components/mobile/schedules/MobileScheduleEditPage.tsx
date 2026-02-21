@@ -9,10 +9,10 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send, sendCatch } from 'loot-core/platform/client/fetch';
+import { send, sendCatch } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import { type RecurConfig, type ScheduleEntity } from 'loot-core/types/models';
+import type { RecurConfig, ScheduleEntity } from 'loot-core/types/models';
 
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
@@ -126,11 +126,11 @@ export function MobileScheduleEditPage() {
     });
 
     // Navigate back to schedules list
-    navigate('/schedules');
+    void navigate('/schedules');
   }
 
   async function onEditRule(ruleId: string) {
-    navigate(`/rules/${ruleId}`);
+    void navigate(`/rules/${ruleId}`);
   }
 
   async function onLinkTransactions(ids: string[], scheduleId?: string) {

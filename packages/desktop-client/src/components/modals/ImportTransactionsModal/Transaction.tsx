@@ -1,4 +1,5 @@
-import React, { useMemo, type ComponentProps } from 'react';
+import React, { useMemo } from 'react';
+import type { ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SvgDownAndRightArrow } from '@actual-app/components/icons/v2';
@@ -9,16 +10,11 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import { amountToCurrency } from 'loot-core/shared/util';
-import { type CategoryEntity } from 'loot-core/types/models';
+import type { CategoryEntity } from 'loot-core/types/models';
 
 import { ParsedDate } from './ParsedDate';
-import {
-  applyFieldMappings,
-  formatDate,
-  parseAmountFields,
-  type FieldMapping,
-  type ImportTransaction,
-} from './utils';
+import { applyFieldMappings, formatDate, parseAmountFields } from './utils';
+import type { FieldMapping, ImportTransaction } from './utils';
 
 import { Checkbox } from '@desktop-client/components/forms';
 import { Field, Row } from '@desktop-client/components/table';

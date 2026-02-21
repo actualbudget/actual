@@ -1,7 +1,8 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { send } from 'loot-core/platform/client/fetch';
-import { type Handlers } from 'loot-core/types/handlers';
+import { send } from 'loot-core/platform/client/connection';
+import type { Handlers } from 'loot-core/types/handlers';
 
 import { resetApp } from '@desktop-client/app/appSlice';
 import {
@@ -41,7 +42,7 @@ export const loggedIn = createAppAsyncThunk(
     // their account is invalid. So we should list all their files
     // regardless. Previously, we kicked users out to a "need payment
     // info" screen and we didn't want to call this.
-    dispatch(loadAllFiles());
+    void dispatch(loadAllFiles());
   },
 );
 
@@ -50,9 +51,9 @@ export const signOut = createAppAsyncThunk(
   async (_, { dispatch }) => {
     await send('subscribe-sign-out');
 
-    dispatch(getUserData());
-    dispatch(loadGlobalPrefs());
-    dispatch(closeBudget());
+    void dispatch(getUserData());
+    void dispatch(loadGlobalPrefs());
+    void dispatch(closeBudget());
     // Handled in budgetSlice
     // dispatch({ type: constants.SIGN_OUT });
   },

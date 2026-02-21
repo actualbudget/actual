@@ -1,5 +1,5 @@
-import { type Diff } from '../../shared/util';
-import { type PayeeEntity, type RuleEntity } from '../../types/models';
+import type { Diff } from '../../shared/util';
+import type { PayeeEntity, RuleEntity } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
 import { payeeModel } from '../models';

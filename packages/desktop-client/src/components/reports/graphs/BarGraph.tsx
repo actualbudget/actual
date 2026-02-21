@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useState, type CSSProperties } from 'react';
+import React, { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -9,18 +10,19 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   LabelList,
+  Rectangle,
   ReferenceLine,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
+import type { BarShapeProps } from 'recharts';
 
-import {
-  type balanceTypeOpType,
-  type DataEntity,
-  type RuleConditionEntity,
+import type {
+  balanceTypeOpType,
+  DataEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { adjustTextSize } from './adjustTextSize';
@@ -34,7 +36,8 @@ import { getCustomTick } from '@desktop-client/components/reports/getCustomTick'
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -193,8 +196,8 @@ export function BarGraph({
 }: BarGraphProps) {
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
-  const categories = useCategories();
-  const accounts = useAccounts();
+  const { data: categories = { grouped: [], list: [] } } = useCategories();
+  const { data: accounts = [] } = useAccounts();
   const privacyMode = usePrivacyMode();
   const format = useFormat();
 
@@ -266,9 +269,8 @@ export function BarGraph({
                 <XAxis
                   dataKey={yAxis}
                   angle={-35}
-                  textAnchor="end"
                   height={Math.sqrt(longestLabelLength) * 25}
-                  tick={{ fill: theme.pageText }}
+                  tick={{ fill: theme.pageText, textAnchor: 'end' }}
                   tickLine={{ stroke: theme.pageText }}
                 />
               )}
@@ -313,6 +315,14 @@ export function BarGraph({
                     id: item.id,
                   })
                 }
+                shape={(props: BarShapeProps) => (
+                  <Rectangle
+                    {...props}
+                    fill={
+                      data.legend[props.index]?.color ?? props.fill ?? undefined
+                    }
+                  />
+                )}
               >
                 {viewLabels && !compact && (
                   <LabelList
@@ -320,13 +330,6 @@ export function BarGraph({
                     content={e => customLabel(e, balanceTypeOp, format)}
                   />
                 )}
-                {data.legend.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.color}
-                    name={entry.name}
-                  />
-                ))}
               </Bar>
             </BarChart>
           </div>

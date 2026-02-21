@@ -2,9 +2,10 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
-import { Select, type SelectOption } from '@actual-app/components/select';
+import { Select } from '@actual-app/components/select';
+import type { SelectOption } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
-import { type TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
 import { Setting } from './UI';
 

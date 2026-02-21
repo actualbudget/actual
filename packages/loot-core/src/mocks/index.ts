@@ -2,7 +2,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as monthUtils from '../shared/months';
 import type {
-  _SyncFields,
   AccountEntity,
   CategoryEntity,
   CategoryGroupEntity,
@@ -31,7 +30,7 @@ export function generateAccount(
     return {
       ...offlineAccount,
       balance_current: Math.floor(random() * 100000),
-      bankId: Math.floor(random() * 10000),
+      bankId: Math.floor(random() * 10000).toString(),
       bankName: 'boa',
       bank: Math.floor(random() * 10000).toString(),
       account_id: 'idx',
@@ -47,7 +46,20 @@ export function generateAccount(
   return offlineAccount;
 }
 
-function emptySyncFields(): _SyncFields<false> {
+function emptySyncFields(): Pick<
+  AccountEntity,
+  | 'account_id'
+  | 'bank'
+  | 'bankId'
+  | 'bankName'
+  | 'mask'
+  | 'official_name'
+  | 'balance_current'
+  | 'balance_available'
+  | 'balance_limit'
+  | 'account_sync_source'
+  | 'last_sync'
+> {
   return {
     account_id: null,
     bank: null,

@@ -1,13 +1,6 @@
 // @ts-strict-ignore
-import React, {
-  createContext,
-  useContext,
-  useMemo,
-  useState,
-  type Dispatch,
-  type ReactNode,
-  type SetStateAction,
-} from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
+import type { Dispatch, ReactNode, SetStateAction } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 

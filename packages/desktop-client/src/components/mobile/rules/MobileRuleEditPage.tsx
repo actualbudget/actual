@@ -6,9 +6,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { q } from 'loot-core/shared/query';
-import { type NewRuleEntity, type RuleEntity } from 'loot-core/types/models';
+import type { NewRuleEntity, RuleEntity } from 'loot-core/types/models';
 
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
@@ -56,13 +56,13 @@ export function MobileRuleEditPage() {
             setRule(loadedRule);
           } else {
             // Rule not found, navigate back to rules list
-            navigate('/rules');
+            void navigate('/rules');
           }
         })
         .catch(error => {
           console.error('Failed to load rule:', error);
           // Navigate back to rules list if rule not found
-          navigate('/rules');
+          void navigate('/rules');
         })
         .finally(() => {
           setIsLoading(false);
@@ -100,11 +100,11 @@ export function MobileRuleEditPage() {
       });
     }
     // Navigate back to rules list
-    navigate('/rules');
+    void navigate('/rules');
   };
 
   const handleCancel = () => {
-    navigate(-1);
+    void navigate(-1);
   };
 
   const handleDelete = () => {
@@ -125,7 +125,7 @@ export function MobileRuleEditPage() {
                 showUndoNotification({
                   message: t('Rule deleted successfully'),
                 });
-                navigate('/rules');
+                void navigate('/rules');
               } catch (error) {
                 console.error('Failed to delete rule:', error);
                 dispatch(

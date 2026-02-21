@@ -1,18 +1,17 @@
-import { render, screen, type Screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import type { Screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
 import { generateAccount } from 'loot-core/mocks';
 import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 
-import {
-  PayeeAutocomplete,
-  type PayeeAutocompleteProps,
-} from './PayeeAutocomplete';
+import { PayeeAutocomplete } from './PayeeAutocomplete';
+import type { PayeeAutocompleteProps } from './PayeeAutocomplete';
 
 import { AuthProvider } from '@desktop-client/auth/AuthProvider';
-import { useCommonPayees } from '@desktop-client/hooks/usePayees';
-import { TestProvider } from '@desktop-client/redux/mock';
+import { createTestQueryClient, TestProviders } from '@desktop-client/mocks';
+import { payeeQueries } from '@desktop-client/payees';
 
 const PAYEE_SELECTOR = '[data-testid][role=option]';
 const PAYEE_SECTION_SELECTOR = '[data-testid$="-item-group"]';
@@ -66,32 +65,6 @@ function extractPayeesAndHeaderNames(screen: Screen) {
     .map(firstOrIncorrect);
 }
 
-function renderPayeeAutocomplete(
-  props?: Partial<PayeeAutocompleteProps>,
-): HTMLElement {
-  const autocompleteProps = {
-    ...defaultProps,
-    ...props,
-  };
-
-  render(
-    <TestProvider>
-      <AuthProvider>
-        <div data-testid="autocomplete-test">
-          <PayeeAutocomplete
-            {...autocompleteProps}
-            onSelect={vi.fn()}
-            type="single"
-            value={null}
-            embedded={false}
-          />
-        </div>
-      </AuthProvider>
-    </TestProvider>,
-  );
-  return screen.getByTestId('autocomplete-test');
-}
-
 // Not good, see `Autocomplete.js` for details
 function waitForAutocomplete() {
   return new Promise(resolve => setTimeout(resolve, 0));
@@ -105,19 +78,42 @@ async function clickAutocomplete(autocomplete: HTMLElement) {
   await waitForAutocomplete();
 }
 
-vi.mock('../../hooks/usePayees', () => ({
-  useCommonPayees: vi.fn(),
-  usePayees: vi.fn().mockReturnValue([]),
-}));
-
 function firstOrIncorrect(id: string | null): string {
   return id?.split('-', 1)[0] || 'incorrect';
 }
 
 describe('PayeeAutocomplete.getPayeeSuggestions', () => {
+  const queryClient = createTestQueryClient();
+
   beforeEach(() => {
-    vi.mocked(useCommonPayees).mockReturnValue([]);
+    queryClient.setQueryData(payeeQueries.listCommon().queryKey, []);
   });
+
+  function renderPayeeAutocomplete(
+    props?: Partial<PayeeAutocompleteProps>,
+  ): HTMLElement {
+    const autocompleteProps = {
+      ...defaultProps,
+      ...props,
+    };
+
+    render(
+      <TestProviders queryClient={queryClient}>
+        <AuthProvider>
+          <div data-testid="autocomplete-test">
+            <PayeeAutocomplete
+              {...autocompleteProps}
+              onSelect={vi.fn()}
+              type="single"
+              value={null}
+              embedded={false}
+            />
+          </div>
+        </AuthProvider>
+      </TestProviders>,
+    );
+    return screen.getByTestId('autocomplete-test');
+  }
 
   test('favorites get sorted alphabetically', async () => {
     const autocomplete = renderPayeeAutocomplete();
@@ -146,7 +142,7 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
       makePayee('Steve'),
       makePayee('Tony'),
     ];
-    vi.mocked(useCommonPayees).mockReturnValue([
+    queryClient.setQueryData(payeeQueries.listCommon().queryKey, [
       makePayee('Bruce'),
       makePayee('Natasha'),
       makePayee('Steve'),
@@ -184,7 +180,7 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
       makePayee('Steve'),
       makePayee('Tony', { favorite: true }),
     ];
-    vi.mocked(useCommonPayees).mockReturnValue([
+    queryClient.setQueryData(payeeQueries.listCommon().queryKey, [
       makePayee('Bruce'),
       makePayee('Natasha'),
       makePayee('Steve'),

@@ -11,7 +11,7 @@ import {
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
 import { GraphButton } from './GraphButton';
 

@@ -1,12 +1,6 @@
 // @ts-strict-ignore
-import React, {
-  createContext,
-  useContext,
-  useState,
-  type Dispatch,
-  type ReactNode,
-  type SetStateAction,
-} from 'react';
+import React, { createContext, useContext, useState } from 'react';
+import type { Dispatch, ReactNode, SetStateAction } from 'react';
 
 type BudgetMonthCountContextValue = {
   displayMax: number;

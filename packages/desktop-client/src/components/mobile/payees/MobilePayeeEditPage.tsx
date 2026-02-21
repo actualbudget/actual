@@ -8,8 +8,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
-import { type PayeeEntity } from 'loot-core/types/models';
+import { send } from 'loot-core/platform/client/connection';
+import type { PayeeEntity } from 'loot-core/types/models';
 
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { InputField } from '@desktop-client/components/mobile/MobileForms';
@@ -26,7 +26,7 @@ export function MobilePayeeEditPage() {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
-  const payees = usePayees();
+  const { data: payees = [] } = usePayees();
 
   const [payee, setPayee] = useState<PayeeEntity | null>(null);
   const [editedPayeeName, setEditedPayeeName] = useState('');
@@ -43,13 +43,13 @@ export function MobilePayeeEditPage() {
         setIsLoading(false);
       } else {
         // Payee not found, navigate back to payees list
-        navigate('/payees');
+        void navigate('/payees');
       }
     }
   }, [id, payees, navigate]);
 
   const handleCancel = useCallback(() => {
-    navigate(-1);
+    void navigate(-1);
   }, [navigate]);
 
   const handleSave = useCallback(async () => {
@@ -67,7 +67,7 @@ export function MobilePayeeEditPage() {
           newName: editedPayeeName.trim(),
         }),
       });
-      navigate('/payees');
+      void navigate('/payees');
     } catch (error) {
       console.error('Failed to update payee:', error);
       dispatch(

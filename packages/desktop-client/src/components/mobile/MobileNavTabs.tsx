@@ -1,10 +1,5 @@
-import React, {
-  useCallback,
-  useState,
-  type ComponentProps,
-  type ComponentType,
-  type CSSProperties,
-} from 'react';
+import React, { useCallback, useState } from 'react';
+import type { ComponentProps, ComponentType, CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 import { animated, config, useSpring } from 'react-spring';
@@ -66,11 +61,11 @@ export function MobileNavTabs() {
       setNavbarState('open');
       api.start({
         y: OPEN_FULL_Y,
-        immediate: false,
+        immediate: isTestEnv,
         config: canceled ? config.wobbly : config.stiff,
       });
     },
-    [api],
+    [api, isTestEnv],
   );
 
   const openDefault = useCallback(
@@ -78,11 +73,11 @@ export function MobileNavTabs() {
       setNavbarState('default');
       api.start({
         y: OPEN_DEFAULT_Y,
-        immediate: false,
+        immediate: isTestEnv,
         config: { ...config.stiff, velocity },
       });
     },
-    [api],
+    [api, isTestEnv],
   );
 
   const hide = useCallback(
@@ -90,11 +85,11 @@ export function MobileNavTabs() {
       setNavbarState('hidden');
       api.start({
         y: HIDDEN_Y,
-        immediate: false,
+        immediate: isTestEnv,
         config: { ...config.stiff, velocity },
       });
     },
-    [api],
+    [api, isTestEnv],
   );
 
   const navTabs = [

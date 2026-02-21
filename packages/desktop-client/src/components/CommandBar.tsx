@@ -1,12 +1,5 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ComponentType,
-  type ReactNode,
-  type SVGProps,
-} from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ComponentType, ReactNode, SVGProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -32,6 +25,7 @@ import { Command } from 'cmdk';
 import { CellValue, CellValueText } from './spreadsheet/CellValue';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useDashboardPages } from '@desktop-client/hooks/useDashboardPages';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useModalState } from '@desktop-client/hooks/useModalState';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -148,8 +142,9 @@ export function CommandBar() {
     if (!open) setSearch('');
   }, [open]);
 
-  const allAccounts = useAccounts();
-  const { data: customReports } = useReports();
+  const { data: allAccounts = [] } = useAccounts();
+  const { data: customReports = [] } = useReports();
+  const { data: dashboardPages = [] } = useDashboardPages();
 
   const accounts = allAccounts.filter(acc => !acc.closed);
 
@@ -173,7 +168,7 @@ export function CommandBar() {
   const handleNavigate = useCallback(
     (path: string) => {
       setOpen(false);
-      navigate(path);
+      void navigate(path);
     },
     [navigate],
   );
@@ -226,6 +221,15 @@ export function CommandBar() {
         })),
       ],
       onSelect: ({ id }) => handleNavigate(`/accounts/${id}`),
+    },
+    {
+      key: 'reports',
+      heading: t('Reports'),
+      items: dashboardPages.map(dashboardPage => ({
+        ...dashboardPage,
+        Icon: SvgReports,
+      })),
+      onSelect: ({ id }) => handleNavigate(`/reports/${id}`),
     },
     {
       key: 'reports-custom',

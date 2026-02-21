@@ -1,4 +1,5 @@
-import React, { useRef, useState, type Ref } from 'react';
+import React, { useRef, useState } from 'react';
+import type { Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';

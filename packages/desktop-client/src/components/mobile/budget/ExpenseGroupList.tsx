@@ -1,13 +1,13 @@
-import { type DragItem } from 'react-aria';
+import type { DragItem } from 'react-aria';
 import { DropIndicator, GridList, useDragAndDrop } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import {
@@ -15,8 +15,7 @@ import {
   ExpenseGroupListItem,
 } from './ExpenseGroupListItem';
 
-import { moveCategoryGroup } from '@desktop-client/budget/budgetSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { useMoveCategoryGroupMutation } from '@desktop-client/budget';
 
 type ExpenseGroupListProps = {
   categoryGroups: CategoryGroupEntity[];
@@ -44,7 +43,7 @@ export function ExpenseGroupList({
   onToggleCollapse,
 }: ExpenseGroupListProps) {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const moveCategoryGroup = useMoveCategoryGroupMutation();
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: keys =>
@@ -104,12 +103,10 @@ export function ExpenseGroupList({
       const targetGroupId = e.target.key as CategoryEntity['id'];
 
       if (e.target.dropPosition === 'before') {
-        dispatch(
-          moveCategoryGroup({
-            id: groupToMove.id,
-            targetId: targetGroupId,
-          }),
-        );
+        moveCategoryGroup.mutate({
+          id: groupToMove.id,
+          targetId: targetGroupId,
+        });
       } else if (e.target.dropPosition === 'after') {
         const targetGroupIndex = categoryGroups.findIndex(
           c => c.id === targetGroupId,
@@ -123,17 +120,15 @@ export function ExpenseGroupList({
 
         const nextToTargetCategory = categoryGroups[targetGroupIndex + 1];
 
-        dispatch(
-          moveCategoryGroup({
-            id: groupToMove.id,
-            // Due to the way `moveCategory` works, we use the category next to the
-            // actual target category here because `moveCategory` always shoves the
-            // category *before* the target category.
-            // On the other hand, using `null` as `targetId` moves the category
-            // to the end of the list.
-            targetId: nextToTargetCategory?.id || null,
-          }),
-        );
+        moveCategoryGroup.mutate({
+          id: groupToMove.id,
+          // Due to the way `moveCategory` works, we use the category next to the
+          // actual target category here because `moveCategory` always shoves the
+          // category *before* the target category.
+          // On the other hand, using `null` as `targetId` moves the category
+          // to the end of the list.
+          targetId: nextToTargetCategory?.id || null,
+        });
       }
     },
   });

@@ -1,17 +1,11 @@
-import React, {
-  type CSSProperties,
-  type RefObject,
-  type UIEventHandler,
-} from 'react';
+import React from 'react';
+import type { CSSProperties, RefObject, UIEventHandler } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  type balanceTypeOpType,
-  type IntervalEntity,
-} from 'loot-core/types/models';
+import type { balanceTypeOpType, IntervalEntity } from 'loot-core/types/models';
 
 import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 import { Cell, Row } from '@desktop-client/components/table';

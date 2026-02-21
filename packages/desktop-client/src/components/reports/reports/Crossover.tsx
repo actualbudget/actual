@@ -15,12 +15,12 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type CategoryEntity,
-  type CrossoverWidget,
-  type TimeFrame,
+import type {
+  CategoryEntity,
+  CrossoverWidget,
+  TimeFrame,
 } from 'loot-core/types/models';
 
 import { Link } from '@desktop-client/components/common/Link';
@@ -41,39 +41,18 @@ import { Header } from '@desktop-client/components/reports/Header';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
+import type { CrossoverData } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
 import { useFormat } from '@desktop-client/hooks/useFormat';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { useWidget } from '@desktop-client/hooks/useWidget';
+import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
-
-// Type for the return value of the recalculate function
-type CrossoverData = {
-  graphData: {
-    data: Array<{
-      x: string;
-      investmentIncome: number;
-      expenses: number;
-      nestEgg: number;
-      adjustedExpenses?: number;
-      isProjection?: boolean;
-    }>;
-    start: string;
-    end: string;
-    crossoverXLabel: string | null;
-  };
-  lastKnownBalance: number;
-  lastKnownMonthlyIncome: number;
-  lastKnownMonthlyExpenses: number;
-  historicalReturn: number | null;
-  yearsToRetire: number | null;
-  targetMonthlyIncome: number | null;
-  targetNestEgg: number | null;
-};
+import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
 
 export const defaultTimeFrame = {
   start: monthUtils.subMonths(monthUtils.currentMonth(), 120),
@@ -83,12 +62,12 @@ export const defaultTimeFrame = {
 
 export function Crossover() {
   const params = useParams();
-  const { data: widget, isLoading } = useWidget<CrossoverWidget>(
-    params.id ?? '',
-    'crossover-card',
-  );
+  const { data: widget, isPending } = useDashboardWidget<CrossoverWidget>({
+    id: params.id,
+    type: 'crossover-card',
+  });
 
-  if (isLoading) {
+  if (isPending) {
     return <LoadingIndicator />;
   }
 
@@ -98,10 +77,14 @@ export function Crossover() {
 type CrossoverInnerProps = { widget?: CrossoverWidget };
 
 function CrossoverInner({ widget }: CrossoverInnerProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const accounts = useAccounts();
-  const categories = useCategories();
+  const { data: accounts = [] } = useAccounts();
+  const {
+    data: categories = { grouped: [], list: [] },
+    isPending: isCategoriesLoading,
+  } = useCategories();
   const format = useFormat();
 
   const expenseCategoryGroups = categories.grouped.filter(
@@ -147,11 +130,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
   // initialize once when data is available
   useEffect(() => {
-    if (
-      selectionsInitialized ||
-      accounts.length === 0 ||
-      categories.list.length === 0
-    ) {
+    if (selectionsInitialized || accounts.length === 0 || isCategoriesLoading) {
       return;
     }
 
@@ -183,7 +162,13 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     setShowHiddenCategories(widget?.meta?.showHiddenCategories ?? false);
 
     setSelectionsInitialized(true);
-  }, [selectionsInitialized, accounts, categories.list, widget?.meta]);
+  }, [
+    selectionsInitialized,
+    accounts,
+    categories.list,
+    isCategoriesLoading,
+    widget?.meta,
+  ]);
 
   useEffect(() => {
     async function run() {
@@ -206,14 +191,14 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         .rangeInclusive(earliestDate, latestDate)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty: monthUtils.format(month, 'MMMM yyyy', locale),
         }))
         .reverse();
 
       setAllMonths(allMonths);
     }
-    run();
-  }, []);
+    void run();
+  }, [locale]);
 
   useEffect(() => {
     if (latestTransaction && allMonths?.length) {
@@ -287,6 +272,8 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     setMode(mode);
   }
 
+  const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
+
   async function onSaveWidget() {
     if (!widget) {
       dispatch(
@@ -300,30 +287,38 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
       return;
     }
 
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        expenseCategoryIds: selectedExpenseCategories.map(c => c.id),
-        incomeAccountIds: selectedIncomeAccountIds,
-        safeWithdrawalRate: swr,
-        estimatedReturn: useCustomGrowth ? (estimatedReturn ?? 0) : null,
-        expectedContribution: useCustomGrowth
-          ? (expectedContribution ?? 0)
-          : null,
-        projectionType,
-        expenseAdjustmentFactor,
-        showHiddenCategories,
-        timeFrame: { start, end, mode },
-      },
-    });
-    dispatch(
-      addNotification({
-        notification: {
-          type: 'message',
-          message: t('Dashboard widget successfully saved.'),
+    updateDashboardWidgetMutation.mutate(
+      {
+        widget: {
+          id: widget.id,
+          meta: {
+            ...(widget.meta ?? {}),
+            expenseCategoryIds: selectedExpenseCategories.map(c => c.id),
+            incomeAccountIds: selectedIncomeAccountIds,
+            safeWithdrawalRate: swr,
+            estimatedReturn: useCustomGrowth ? (estimatedReturn ?? 0) : null,
+            expectedContribution: useCustomGrowth
+              ? (expectedContribution ?? 0)
+              : null,
+            projectionType,
+            expenseAdjustmentFactor,
+            showHiddenCategories,
+            timeFrame: { start, end, mode },
+          },
         },
-      }),
+      },
+      {
+        onSuccess: () => {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'message',
+                message: t('Dashboard widget successfully saved.'),
+              },
+            }),
+          );
+        },
+      },
     );
   }
 
@@ -407,11 +402,13 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     }
 
     const name = newName || t('Crossover Point');
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        name,
+    updateDashboardWidgetMutation.mutate({
+      widget: {
+        id: widget.id,
+        meta: {
+          ...(widget.meta ?? {}),
+          name,
+        },
       },
     });
   };
@@ -421,7 +418,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     !data ||
     !start ||
     !end ||
-    categories.list.length === 0 ||
+    isCategoriesLoading ||
     accounts.length === 0
   ) {
     return <LoadingIndicator />;

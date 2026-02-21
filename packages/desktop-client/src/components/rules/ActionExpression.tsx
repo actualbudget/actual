@@ -1,4 +1,5 @@
-import React, { type CSSProperties } from 'react';
+import React from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
@@ -10,14 +11,14 @@ import {
   getAllocationMethods,
   mapField,
 } from 'loot-core/shared/rules';
-import {
-  type AppendNoteRuleActionEntity,
-  type DeleteTransactionRuleActionEntity,
-  type LinkScheduleRuleActionEntity,
-  type PrependNoteRuleActionEntity,
-  type RuleActionEntity,
-  type SetRuleActionEntity,
-  type SetSplitAmountRuleActionEntity,
+import type {
+  AppendNoteRuleActionEntity,
+  DeleteTransactionRuleActionEntity,
+  LinkScheduleRuleActionEntity,
+  PrependNoteRuleActionEntity,
+  RuleActionEntity,
+  SetRuleActionEntity,
+  SetSplitAmountRuleActionEntity,
 } from 'loot-core/types/models';
 
 import { ScheduleValue } from './ScheduleValue';

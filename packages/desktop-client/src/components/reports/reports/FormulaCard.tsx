@@ -3,12 +3,12 @@ import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
 
-import { type FormulaWidget } from 'loot-core/types/models';
+import type { FormulaWidget } from 'loot-core/types/models';
 
 import { FormulaResult } from '@desktop-client/components/reports/FormulaResult';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
+import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useFormulaExecution } from '@desktop-client/hooks/useFormulaExecution';
 import { useThemeColors } from '@desktop-client/hooks/useThemeColors';
 
@@ -32,7 +32,7 @@ export function FormulaCard({
   const { t } = useTranslation();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useWidgetCopyMenu(onCopy);
+    useDashboardWidgetCopyMenu(onCopy);
   const themeColors = useThemeColors();
   const containerRef = useRef<HTMLDivElement>(null);
 

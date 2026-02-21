@@ -1,4 +1,5 @@
-import React, { useMemo, type ComponentPropsWithoutRef } from 'react';
+import React, { useMemo } from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
@@ -9,7 +10,7 @@ import {
   scheduleIsRecurring,
 } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
-import { type TransactionEntity } from 'loot-core/types/models';
+import type { TransactionEntity } from 'loot-core/types/models';
 
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';

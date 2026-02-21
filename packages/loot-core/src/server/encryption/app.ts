@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import { logger } from '../../platform/server/log';
-import { type Budget } from '../../types/budget';
+import type { Budget } from '../../types/budget';
 import { createApp } from '../app';
 import { post } from '../post';
 import * as prefs from '../prefs';
@@ -105,7 +105,7 @@ async function keyTest({
   } = JSON.parse(originalTest);
 
   const key = await encryption.createKey({ id, password, salt });
-  encryption.loadKey(key);
+  await encryption.loadKey(key);
 
   try {
     await encryption.decrypt(Buffer.from(test.value, 'base64'), test.meta);

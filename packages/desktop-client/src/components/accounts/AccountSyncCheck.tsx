@@ -8,9 +8,9 @@ import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
-import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
+import { useUnlinkAccountMutation } from '@desktop-client/accounts';
 import { Link } from '@desktop-client/components/common/Link';
 import { authorizeBank } from '@desktop-client/gocardless';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
@@ -86,7 +86,7 @@ function useErrorMessage() {
 }
 
 export function AccountSyncCheck() {
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const failedAccounts = useFailedAccounts();
   const dispatch = useDispatch();
   const { id } = useParams();
@@ -99,21 +99,22 @@ export function AccountSyncCheck() {
       setOpen(false);
 
       if (acc.account_id) {
-        authorizeBank(dispatch);
+        void authorizeBank(dispatch);
       }
     },
     [dispatch],
   );
 
+  const unlinkAccount = useUnlinkAccountMutation();
   const unlink = useCallback(
     (acc: AccountEntity) => {
       if (acc.id) {
-        dispatch(unlinkAccount({ id: acc.id }));
+        unlinkAccount.mutate({ id: acc.id });
       }
 
       setOpen(false);
     },
-    [dispatch],
+    [unlinkAccount],
   );
 
   if (!failedAccounts || !id) {

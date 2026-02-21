@@ -5,10 +5,10 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
 
-import { send, sendCatch } from 'loot-core/platform/client/fetch';
+import { send, sendCatch } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import { type RecurConfig, type ScheduleEntity } from 'loot-core/types/models';
+import type { RecurConfig, ScheduleEntity } from 'loot-core/types/models';
 
 import { updateScheduleConditions } from './schedule-edit-utils';
 import { ScheduleEditForm } from './ScheduleEditForm';
@@ -18,14 +18,11 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { usePayees } from '@desktop-client/hooks/usePayees';
+import { usePayeesById } from '@desktop-client/hooks/usePayees';
 import { useScheduleEdit } from '@desktop-client/hooks/useScheduleEdit';
 import { useSelected } from '@desktop-client/hooks/useSelected';
-import {
-  pushModal,
-  type Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
-import { getPayeesById } from '@desktop-client/payees/payeesSlice';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -39,7 +36,7 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
 
   const adding = id == null;
   const fromTrans = transaction != null;
-  const payees = getPayeesById(usePayees());
+  const { data: payees } = usePayeesById();
   const globalDispatch = useDispatch();
 
   // Create initial schedule if adding from transaction

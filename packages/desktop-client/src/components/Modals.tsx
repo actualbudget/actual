@@ -1,8 +1,8 @@
 // @ts-strict-ignore
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useEffectEvent } from 'react';
 import { useLocation } from 'react-router';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';
@@ -11,6 +11,7 @@ import { AccountMenuModal } from './modals/AccountMenuModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
+import { CategoryGroupAutocompleteModal } from './modals/CategoryGroupAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
 import { CloseAccountModal } from './modals/CloseAccountModal';
@@ -89,12 +90,15 @@ export function Modals() {
   const { modalStack } = useModalState();
   const [budgetId] = useMetadataPref('id');
 
-  useEffect(() => {
+  const onCloseModal = useEffectEvent(() => {
     if (modalStack.length > 0) {
       dispatch(closeModal());
     }
-    // oxlint-disable-next-line react/exhaustive-deps
-  }, [dispatch, location]);
+  });
+
+  useEffect(() => {
+    onCloseModal();
+  }, [location]);
 
   const modals = modalStack
     .map((modal, idx) => {
@@ -186,7 +190,7 @@ export function Modals() {
               {...modal.options}
               onClose={() => {
                 modal.options.onClose?.();
-                send('gocardless-poll-web-token-stop');
+                void send('gocardless-poll-web-token-stop');
               }}
             />
           );
@@ -202,6 +206,11 @@ export function Modals() {
 
         case 'category-autocomplete':
           return <CategoryAutocompleteModal key={key} {...modal.options} />;
+
+        case 'category-group-autocomplete':
+          return (
+            <CategoryGroupAutocompleteModal key={key} {...modal.options} />
+          );
 
         case 'account-autocomplete':
           return <AccountAutocompleteModal key={key} {...modal.options} />;

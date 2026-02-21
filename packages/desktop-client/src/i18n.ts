@@ -21,7 +21,7 @@ const loadLanguage = (language: string) => {
   return languages[`/locale/${language}.json`]();
 };
 
-i18n
+void i18n
   .use(initReactI18next)
   .use(resourcesToBackend(loadLanguage))
   .init({
@@ -40,44 +40,55 @@ i18n
     },
   });
 
-export const setI18NextLanguage = (language: string) => {
-  if (!language) {
-    // System default
-    setI18NextLanguage(navigator.language || 'en');
-    return;
+const resolveLanguage = (language: string) => {
+  // English is always available since we use natural-language keys.
+  if (language === 'en') return 'en';
+
+  if (isLanguageAvailable(language)) return language;
+
+  const lowercaseLanguage = language.toLowerCase();
+  if (lowercaseLanguage !== language) {
+    console.info(
+      `Unknown locale ${language}, falling back to ${lowercaseLanguage}`,
+    );
+    return resolveLanguage(lowercaseLanguage);
   }
 
-  if (!isLanguageAvailable(language)) {
-    if (language === 'en') {
-      // English is always available since we use natural-language keys.
-      return;
-    }
+  if (language.includes('-')) {
+    const fallback = language.split('-')[0];
+    console.info(`Unknown locale ${language}, falling back to ${fallback}`);
+    return resolveLanguage(fallback);
+  }
 
-    if (language.includes('-')) {
-      const fallback = language.split('-')[0];
-      console.info(`Unknown locale ${language}, falling back to ${fallback}`);
-      setI18NextLanguage(fallback);
-      return;
-    }
+  return undefined;
+};
 
-    const lowercaseLanguage = language.toLowerCase();
-    if (lowercaseLanguage !== language) {
-      console.info(
-        `Unknown locale ${language}, falling back to ${lowercaseLanguage}`,
-      );
-      setI18NextLanguage(lowercaseLanguage);
-      return;
-    }
+export const setI18NextLanguage = (language: string | null) => {
+  const defaultLanguages = Array.isArray(navigator.languages)
+    ? navigator.languages
+    : [navigator.language || 'en'];
+  const languagesToTry = language ? [language] : defaultLanguages;
 
+  let resolved: string | undefined;
+
+  for (const lang of languagesToTry) {
+    resolved = resolveLanguage(lang);
+    if (resolved) break;
+  }
+
+  if (!resolved) {
     // Fall back to English
-    console.info(`Unknown locale ${language}, falling back to en`);
-    setI18NextLanguage('en');
-    return;
+    console.info(
+      language
+        ? `Unknown locale ${language}, falling back to en`
+        : `Unknown locales [${languagesToTry.join(', ')}] falling back to en`,
+    );
+    resolved = 'en';
   }
 
-  if (language === i18n.language) {
+  if (resolved === i18n.language) {
     return; // language is already set
   }
 
-  i18n.changeLanguage(language || 'en');
+  void i18n.changeLanguage(resolved);
 };

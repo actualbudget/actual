@@ -1,11 +1,8 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
-} from '../../types/models';
-import { type Template } from '../../types/models/templates';
+import type { CategoryEntity, CategoryGroupEntity } from '../../types/models';
+import type { Template } from '../../types/models/templates';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
 import { batchMessages } from '../sync';
@@ -156,7 +153,7 @@ type TemplateBudget = {
 async function setBudgets(month: string, templateBudget: TemplateBudget[]) {
   await batchMessages(async () => {
     templateBudget.forEach(element => {
-      setBudget({
+      void setBudget({
         category: element.category,
         month,
         amount: element.budgeted,
@@ -174,7 +171,7 @@ type TemplateGoal = {
 async function setGoals(month: string, templateGoal: TemplateGoal[]) {
   await batchMessages(async () => {
     templateGoal.forEach(element => {
-      setGoal({
+      void setGoal({
         month,
         category: element.category,
         goal: element.goal,
@@ -246,7 +243,7 @@ async function processTemplate(
   //break early if nothing to do, or there are errors
   if (templateContexts.length === 0 && errors.length === 0) {
     if (goalList.length > 0) {
-      setGoals(month, goalList);
+      void setGoals(month, goalList);
     }
     return {
       type: 'message',

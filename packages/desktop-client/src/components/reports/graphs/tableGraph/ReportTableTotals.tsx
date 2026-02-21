@@ -1,19 +1,14 @@
-import React, {
-  useLayoutEffect,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-  type RefObject,
-} from 'react';
+import React, { useLayoutEffect, useState } from 'react';
+import type { CSSProperties, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type DataEntity, type GroupedEntity } from 'loot-core/types/models';
+import type { DataEntity, GroupedEntity } from 'loot-core/types/models';
 
-import { type renderTotalsProps } from './ReportTable';
+import type { renderTotalsProps } from './ReportTable';
 
 type RenderTotalsRowProps = {
   metadata: GroupedEntity;

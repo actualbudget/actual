@@ -1,13 +1,10 @@
 // @ts-strict-ignore
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type FocusEventHandler,
-  type KeyboardEvent,
-  type Ref,
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type {
+  CSSProperties,
+  FocusEventHandler,
+  KeyboardEvent,
+  Ref,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,7 +16,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import { type IntegerAmount } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
 
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';

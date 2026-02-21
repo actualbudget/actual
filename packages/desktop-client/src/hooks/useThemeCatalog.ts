@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { type CatalogTheme } from '@desktop-client/style/customThemes';
+import type { CatalogTheme } from '@desktop-client/style/customThemes';
 
 const CATALOG_URL = `https://raw.githubusercontent.com/actualbudget/actual/${process.env.REACT_APP_BRANCH || 'master'}/packages/desktop-client/src/data/customThemeCatalog.json`;
 
@@ -41,7 +41,7 @@ export function useThemeCatalog() {
       }
     };
 
-    fetchCatalog();
+    void fetchCatalog();
   }, []);
 
   return {

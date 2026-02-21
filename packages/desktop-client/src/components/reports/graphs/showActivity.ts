@@ -1,12 +1,12 @@
-import { type NavigateFunction } from 'react-router';
+import type { NavigateFunction } from 'react-router';
 
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type AccountEntity,
-  type balanceTypeOpType,
-  type CategoryEntity,
-  type CategoryGroupEntity,
-  type RuleConditionEntity,
+import type {
+  AccountEntity,
+  balanceTypeOpType,
+  CategoryEntity,
+  CategoryGroupEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
@@ -97,7 +97,7 @@ export function showActivity({
         type: 'id',
       },
   ].filter(f => f);
-  navigate('/accounts', {
+  void navigate('/accounts', {
     state: {
       goBack: true,
       filterConditions,

@@ -39,6 +39,17 @@ describe('arithmetic', () => {
     expect(evalArithmetic('20^3 - 5 * (10 / 2)')).toEqual(7975);
   });
 
+  test('handles exponent as right-associative', () => {
+    expect(evalArithmetic('2^3^2')).toEqual(512);
+  });
+
+  test('handles same-precedence operators left-to-right', () => {
+    expect(evalArithmetic('24 / 3 * 2')).toEqual(16);
+    expect(evalArithmetic('24 * 3 / 2')).toEqual(36);
+    expect(evalArithmetic('10 - 2 + 1')).toEqual(9);
+    expect(evalArithmetic('10 + 2 - 1')).toEqual(11);
+  });
+
   test('respects current number format', () => {
     expect(evalArithmetic('1,222.45')).toEqual(1222.45);
 
@@ -47,6 +58,14 @@ describe('arithmetic', () => {
 
     setNumberFormat({ format: 'apostrophe-dot', hideFraction: false });
     expect(evalArithmetic(`1\u2019222.45`)).toEqual(1222.45);
+  });
+
+  test('ignores leftover characters', () => {
+    expect(evalArithmetic('1+2)')).toBe(3);
+    expect(evalArithmetic('1+2)foo')).toBe(3);
+    expect(evalArithmetic('(1+2)x')).toBe(3);
+    expect(evalArithmetic('10+20 trailing')).toBe(30);
+    expect(evalArithmetic('1+2(3')).toBe(3);
   });
 
   test('handles apostrophe-dot format with keyboard apostrophe (U+0027)', () => {

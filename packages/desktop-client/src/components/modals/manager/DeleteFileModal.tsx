@@ -13,7 +13,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 
 type DeleteFileModalProps = Extract<

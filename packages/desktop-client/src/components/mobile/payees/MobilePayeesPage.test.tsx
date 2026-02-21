@@ -3,21 +3,18 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { type PayeeEntity } from 'loot-core/types/models';
+import type { PayeeEntity } from 'loot-core/types/models';
 
 import { MobilePayeesPage } from './MobilePayeesPage';
 
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { usePayeeRuleCounts } from '@desktop-client/hooks/usePayeeRuleCounts';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import { TestProvider } from '@desktop-client/redux/mock';
+import { createTestQueryClient, TestProviders } from '@desktop-client/mocks';
+import { payeeQueries } from '@desktop-client/payees';
 
 vi.mock('@use-gesture/react', () => ({
   useDrag: vi.fn().mockReturnValue(() => ({})),
 }));
 vi.mock('@desktop-client/hooks/useNavigate');
-vi.mock('@desktop-client/hooks/usePayees');
-vi.mock('@desktop-client/hooks/usePayeeRuleCounts');
 
 const mockPayees: PayeeEntity[] = [
   {
@@ -39,27 +36,28 @@ const mockPayees: PayeeEntity[] = [
 
 describe('MobilePayeesPage', () => {
   const mockNavigate = vi.fn();
+  const queryClient = createTestQueryClient();
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     vi.mocked(useNavigate).mockReturnValue(mockNavigate);
-    vi.mocked(usePayees).mockImplementation(() => mockPayees);
-    vi.mocked(usePayeeRuleCounts).mockReturnValue({
-      ruleCounts: new Map([
+
+    queryClient.setQueryData(payeeQueries.list().queryKey, mockPayees);
+    queryClient.setQueryData(
+      payeeQueries.ruleCounts().queryKey,
+      new Map([
         ['payee-1', 2],
         ['payee-2', 0],
       ]),
-      isLoading: false,
-      refetch: vi.fn().mockResolvedValue(undefined),
-    });
+    );
   });
 
   const renderPayeesPage = () => {
     return render(
-      <TestProvider>
+      <TestProviders queryClient={queryClient}>
         <MobilePayeesPage />
-      </TestProvider>,
+      </TestProviders>,
     );
   };
 
@@ -156,7 +154,9 @@ describe('MobilePayeesPage', () => {
   });
 
   it('handles empty payee list', () => {
-    vi.mocked(usePayees).mockReturnValue([]);
+    // Set empty payee list in the cache
+    queryClient.setQueryData(payeeQueries.list().queryKey, []);
+    queryClient.setQueryData(payeeQueries.ruleCounts().queryKey, new Map());
 
     renderPayeesPage();
 

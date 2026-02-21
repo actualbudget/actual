@@ -22,8 +22,10 @@ import {
   generateThemeId,
   normalizeGitHubRepo,
   validateThemeCss,
-  type CatalogTheme,
-  type InstalledTheme,
+} from '@desktop-client/style/customThemes';
+import type {
+  CatalogTheme,
+  InstalledTheme,
 } from '@desktop-client/style/customThemes';
 
 // Theme item fixed dimensions
@@ -164,7 +166,7 @@ export function ThemeInstaller({
   const handleInstallPastedCss = useCallback(() => {
     if (!pastedCss.trim()) return;
 
-    installTheme({
+    void installTheme({
       css: pastedCss.trim(),
       name: t('Custom Theme'),
       repo: '',

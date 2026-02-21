@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/api",
-  "version": "26.1.0",
+  "version": "26.2.0",
   "description": "An API for Actual",
   "license": "MIT",
   "files": [
@@ -11,16 +11,17 @@
   "types": "@types/api/index.d.ts",
   "scripts": {
     "build:crdt": "yarn workspace @actual-app/crdt build",
-    "build:node": "vite build && tsc -p tsconfig.dist.json --emitDeclarationOnly",
+    "build:node": "vite build && tsc --emitDeclarationOnly",
     "build:migrations": "mkdir dist/migrations && cp ../loot-core/migrations/*.sql dist/migrations",
     "build:default-db": "cp ../loot-core/default-db.sqlite dist/",
     "build": "yarn run clean && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
     "test": "yarn run clean && yarn run build:crdt && vitest --run",
-    "clean": "rm -rf dist @types"
+    "clean": "rm -rf dist @types",
+    "typecheck": "yarn build && tsc --noEmit && tsc-strict"
   },
   "dependencies": {
     "@actual-app/crdt": "workspace:^",
-    "better-sqlite3": "^12.5.0",
+    "better-sqlite3": "^12.6.2",
     "compare-versions": "^6.1.1",
     "loot-core": "workspace:^",
     "node-fetch": "^3.3.2",
@@ -29,9 +30,10 @@
   },
   "devDependencies": {
     "typescript": "^5.9.3",
+    "typescript-strict-plugin": "^2.4.4",
     "vite": "^7.3.1",
     "vite-plugin-peggy-loader": "^2.0.1",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.18"
   },
   "engines": {
     "node": ">=20"

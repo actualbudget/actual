@@ -2,9 +2,9 @@
 import mitt from 'mitt';
 
 import { logger } from '../../platform/server/log';
-import { type QueryState } from '../../shared/query';
+import type { QueryState } from '../../shared/query';
 import { aqlCompiledQuery, compileQuery, schema, schemaConfig } from '../aql';
-import { type BudgetType } from '../prefs';
+import type { BudgetType } from '../prefs';
 
 import { Graph } from './graph-data-structure';
 import { resolveName, unresolveName } from './util';
@@ -139,7 +139,7 @@ export class Spreadsheet {
     // Begin running on the next tick so we guarantee that it doesn't finish
     // within the same tick. Since some computations are async, this makes it
     // consistent (otherwise it would only sometimes finish sync)
-    Promise.resolve().then(() => {
+    void Promise.resolve().then(() => {
       if (!this.running) {
         this.runComputations();
       }

@@ -1,9 +1,5 @@
-import {
-  app,
-  Menu,
-  type BrowserWindow,
-  type MenuItemConstructorOptions,
-} from 'electron';
+import { app, Menu } from 'electron';
+import type { BrowserWindow, MenuItemConstructorOptions } from 'electron';
 
 export function getMenu() {
   const template: MenuItemConstructorOptions[] = [
@@ -75,7 +71,7 @@ export function getMenu() {
           click: function (_menuItem, focusedWin) {
             // Undo
             if (focusedWin) {
-              (focusedWin as BrowserWindow).webContents.executeJavaScript(
+              void (focusedWin as BrowserWindow).webContents.executeJavaScript(
                 '__actionsForMenu.undo()',
               );
             }
@@ -88,7 +84,7 @@ export function getMenu() {
           click: function (_menuItem, focusedWin) {
             // Redo
             if (focusedWin) {
-              (focusedWin as BrowserWindow).webContents.executeJavaScript(
+              void (focusedWin as BrowserWindow).webContents.executeJavaScript(
                 '__actionsForMenu.redo()',
               );
             }

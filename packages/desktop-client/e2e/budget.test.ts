@@ -1,7 +1,7 @@
-import { type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
-import { type BudgetPage } from './page-models/budget-page';
+import type { BudgetPage } from './page-models/budget-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 
 test.describe('Budget', () => {

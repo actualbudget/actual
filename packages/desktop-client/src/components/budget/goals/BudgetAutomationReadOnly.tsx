@@ -1,4 +1,4 @@
-import { type Dispatch, type SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -8,16 +8,17 @@ import {
   SvgCheveronUp,
 } from '@actual-app/components/icons/v1';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { type CSSProperties } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type ReducerState } from './constants';
+import type { ReducerState } from './constants';
 import { HistoricalAutomationReadOnly } from './editor/HistoricalAutomationReadOnly';
+import { LimitAutomationReadOnly } from './editor/LimitAutomationReadOnly';
 import { PercentageAutomationReadOnly } from './editor/PercentageAutomationReadOnly';
+import { RefillAutomationReadOnly } from './editor/RefillAutomationReadOnly';
 import { ScheduleAutomationReadOnly } from './editor/ScheduleAutomationReadOnly';
-import { SimpleAutomationReadOnly } from './editor/SimpleAutomationReadOnly';
 import { WeekAutomationReadOnly } from './editor/WeekAutomationReadOnly';
 
 type BudgetAutomationReadOnlyProps = {
@@ -43,10 +44,13 @@ export function BudgetAutomationReadOnly({
 
   let automationReadOnly;
   switch (state.displayType) {
-    case 'simple':
+    case 'limit':
       automationReadOnly = (
-        <SimpleAutomationReadOnly template={state.template} />
+        <LimitAutomationReadOnly template={state.template} />
       );
+      break;
+    case 'refill':
+      automationReadOnly = <RefillAutomationReadOnly />;
       break;
     case 'week':
       automationReadOnly = <WeekAutomationReadOnly template={state.template} />;

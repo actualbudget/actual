@@ -1,20 +1,7 @@
-import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { useInitialMount } from './useInitialMount';
-
-import { getAccounts } from '@desktop-client/accounts/accountsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
+import { accountQueries } from '@desktop-client/accounts';
 
 export function useAccounts() {
-  const dispatch = useDispatch();
-  const isInitialMount = useInitialMount();
-  const isAccountsDirty = useSelector(state => state.account.isAccountsDirty);
-
-  useEffect(() => {
-    if (isInitialMount || isAccountsDirty) {
-      dispatch(getAccounts());
-    }
-  }, [dispatch, isInitialMount, isAccountsDirty]);
-
-  return useSelector(state => state.account.accounts);
+  return useQuery(accountQueries.list());
 }

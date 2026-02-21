@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 
-import { type RuleEntity } from 'loot-core/types/models';
+import type { RuleEntity } from 'loot-core/types/models';
 
 export type ActionSplit = {
   id: string;

@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { captureBreadcrumb, captureException } from '../platform/exceptions';
 import { sequential } from '../shared/async';
-import { type HandlerFunctions, type Handlers } from '../types/handlers';
+import type { HandlerFunctions, Handlers } from '../types/handlers';
 
 const runningMethods = new Set();
 
@@ -66,7 +66,7 @@ export async function runHandler<T extends Handlers[keyof Handlers]>(
 
   const promise = handler(args);
   runningMethods.add(promise);
-  promise.then(() => {
+  void promise.then(() => {
     runningMethods.delete(promise);
   });
   return promise as Promise<ReturnType<T>>;

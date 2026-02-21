@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-import { type RuleEntity } from 'loot-core/types/models';
+import type { RuleEntity } from 'loot-core/types/models';
 
 import * as api from './index';
 
@@ -351,6 +351,143 @@ describe('API CRUD operations', () => {
         }),
         expect.not.objectContaining({
           id: payeeId2,
+        }),
+      ]),
+    );
+  });
+
+  // apis: createTag, getTags, updateTag, deleteTag
+  test('Tags: successfully complete tag operations', async () => {
+    // Create tags
+    const tagId1 = await api.createTag({ tag: 'test-tag1', color: '#ff0000' });
+    const tagId2 = await api.createTag({
+      tag: 'test-tag2',
+      description: 'A test tag',
+    });
+
+    let tags = await api.getTags();
+    expect(tags).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: tagId1,
+          tag: 'test-tag1',
+          color: '#ff0000',
+        }),
+        expect.objectContaining({
+          id: tagId2,
+          tag: 'test-tag2',
+          description: 'A test tag',
+        }),
+      ]),
+    );
+
+    // Update tag
+    await api.updateTag(tagId1, { tag: 'updated-tag', color: '#00ff00' });
+    tags = await api.getTags();
+    expect(tags).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: tagId1,
+          tag: 'updated-tag',
+          color: '#00ff00',
+        }),
+      ]),
+    );
+
+    // Delete tag
+    await api.deleteTag(tagId2);
+    tags = await api.getTags();
+    expect(tags).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: tagId2 })]),
+    );
+  });
+
+  test('Tags: create tag with minimal fields', async () => {
+    const tagId = await api.createTag({ tag: 'minimal-tag' });
+    const tags = await api.getTags();
+    expect(tags).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: tagId,
+          tag: 'minimal-tag',
+          color: null,
+          description: null,
+        }),
+      ]),
+    );
+  });
+
+  test('Tags: update single field only', async () => {
+    const tagId = await api.createTag({ tag: 'original', color: '#ff0000' });
+
+    // Update only color, tag and description should remain unchanged
+    await api.updateTag(tagId, { color: '#00ff00' });
+
+    const tags = await api.getTags();
+    expect(tags).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: tagId,
+          tag: 'original',
+          color: '#00ff00',
+          description: null,
+        }),
+      ]),
+    );
+  });
+
+  test('Tags: handle null values correctly', async () => {
+    const tagId = await api.createTag({
+      tag: 'with-nulls',
+      color: null,
+      description: null,
+    });
+
+    const tags = await api.getTags();
+    expect(tags).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: tagId,
+          color: null,
+          description: null,
+        }),
+      ]),
+    );
+  });
+
+  test('Tags: clear optional field', async () => {
+    const tagId = await api.createTag({
+      tag: 'clearable',
+      color: '#ff0000',
+      description: 'will be cleared',
+    });
+
+    // Clear color by setting to null
+    await api.updateTag(tagId, { color: null });
+
+    let tags = await api.getTags();
+    expect(tags).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: tagId,
+          tag: 'clearable',
+          color: null,
+          description: 'will be cleared',
+        }),
+      ]),
+    );
+
+    // Clear description by setting to null
+    await api.updateTag(tagId, { description: null });
+
+    tags = await api.getTags();
+    expect(tags).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: tagId,
+          tag: 'clearable',
+          color: null,
+          description: null,
         }),
       ]),
     );

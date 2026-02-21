@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
 
@@ -11,17 +11,18 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type balanceTypeOpType,
-  type CategoryEntity,
-  type CustomReportEntity,
-  type DataEntity,
-  type RuleConditionEntity,
-  type sortByOpType,
+import type {
+  balanceTypeOpType,
+  CategoryEntity,
+  CustomReportEntity,
+  DataEntity,
+  RuleConditionEntity,
+  sortByOpType,
+  TransactionEntity,
 } from 'loot-core/types/models';
-import { type TransObjectLiteral } from 'loot-core/types/util';
+import type { TransObjectLiteral } from 'loot-core/types/util';
 
 import { Warning } from '@desktop-client/components/alerts';
 import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
@@ -47,11 +48,12 @@ import { ReportLegend } from '@desktop-client/components/reports/ReportLegend';
 import {
   defaultReport,
   ReportOptions,
-  type dateRangeProps,
 } from '@desktop-client/components/reports/ReportOptions';
+import type { dateRangeProps } from '@desktop-client/components/reports/ReportOptions';
 import { ReportSidebar } from '@desktop-client/components/reports/ReportSidebar';
 import { ReportSummary } from '@desktop-client/components/reports/ReportSummary';
 import { ReportTopbar } from '@desktop-client/components/reports/ReportTopbar';
+import type { SavedStatus } from '@desktop-client/components/reports/SaveReportMenu';
 import { setSessionReport } from '@desktop-client/components/reports/setSessionReport';
 import { createCustomSpreadsheet } from '@desktop-client/components/reports/spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '@desktop-client/components/reports/spreadsheets/grouped-spreadsheet';
@@ -119,9 +121,9 @@ function useSelectedCategories(
 
 export function CustomReport() {
   const params = useParams();
-  const { data: report, isLoading } = useCustomReport(params.id ?? '');
+  const { data: report, isPending } = useCustomReport(params.id);
 
-  if (isLoading) {
+  if (isPending) {
     return <LoadingIndicator />;
   }
 
@@ -137,7 +139,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
-  const categories = useCategories();
+  const { data: categories = { grouped: [], list: [] } } = useCategories();
   const { isNarrowWidth } = useResponsive();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
@@ -168,11 +170,11 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   if (['/reports'].includes(prevUrl)) sessionStorage.clear();
 
   const reportFromSessionStorage = sessionStorage.getItem('report');
-  const session = reportFromSessionStorage
+  const session: Partial<CustomReportEntity> = reportFromSessionStorage
     ? JSON.parse(reportFromSessionStorage)
     : {};
   const combine = initialReport ?? defaultReport;
-  const loadReport = { ...combine, ...session };
+  const loadReport: CustomReportEntity = { ...combine, ...session };
 
   const [allIntervals, setAllIntervals] = useState<
     Array<{
@@ -183,13 +185,16 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
 
   // Complex category conditions are:
   // - conditions with multiple "category" fields
-  // - conditions with "category" field that use "contains", "doesNotContain" or "matches" operations
+  // - conditions with "category" field that use "contains", "doesNotContain", "matches", "hasTags" operations
+  // - conditions with a "category_group" field
   const isComplexCategoryCondition =
     !!conditions.find(
       ({ field, op }) =>
         field === 'category' &&
         ['contains', 'doesNotContain', 'matches', 'hasTags'].includes(op),
-    ) || conditions.filter(({ field }) => field === 'category').length >= 2;
+    ) ||
+    conditions.filter(({ field }) => field === 'category').length >= 2 ||
+    conditions.filter(({ field }) => field === 'category_group').length >= 1;
 
   const setSelectedCategories = (newCategories: CategoryEntity[]) => {
     const newCategoryIdSet = new Set(newCategories.map(({ id }) => id));
@@ -274,39 +279,44 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const [intervals, setIntervals] = useState(
     monthUtils.rangeInclusive(startDate, endDate),
   );
-  const [earliestTransaction, setEarliestTransaction] = useState('');
-  const [latestTransaction, setLatestTransaction] = useState('');
+  const [earliestTransactionDate, setEarliestTransactionDate] =
+    useState<TransactionEntity['date']>('');
+  const [latestTransactionDate, setLatestTransactionDate] =
+    useState<TransactionEntity['date']>('');
   const [report, setReport] = useState(loadReport);
-  const [savedStatus, setSavedStatus] = useState(
-    session.savedStatus ?? (initialReport ? 'saved' : 'new'),
+  const [savedStatus, setSavedStatus] = useState<SavedStatus>(
+    'savedStatus' in session
+      ? (session.savedStatus as SavedStatus)
+      : initialReport
+        ? 'saved'
+        : 'new',
   );
 
-  useEffect(() => {
-    async function run() {
+  const onApplyFilterConditions = useEffectEvent(
+    (
+      currentConditions?: RuleConditionEntity[],
+      currentConditionsOp?: RuleConditionEntity['conditionsOp'],
+    ) => {
       onApplyFilter(null);
 
       const filtersToApply =
-        savedStatus !== 'saved' ? conditions : report.conditions;
+        savedStatus !== 'saved' ? conditions : currentConditions;
       const conditionsOpToApply =
-        savedStatus !== 'saved' ? conditionsOp : report.conditionsOp;
+        savedStatus !== 'saved' ? conditionsOp : currentConditionsOp;
 
-      filtersToApply?.forEach((condition: RuleConditionEntity) =>
-        onApplyFilter(condition),
-      );
-      onConditionsOpChange(conditionsOpToApply);
+      filtersToApply?.forEach(onApplyFilter);
+      if (conditionsOpToApply) {
+        onConditionsOpChange(conditionsOpToApply);
+      }
+    },
+  );
 
-      const earliestTransaction = await send('get-earliest-transaction');
-      setEarliestTransaction(
-        earliestTransaction
-          ? earliestTransaction.date
-          : monthUtils.currentDay(),
-      );
-
-      const latestTransaction = await send('get-latest-transaction');
-      setLatestTransaction(
-        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
-      );
-
+  const onSetAllIntervals = useEffectEvent(
+    async (
+      earliestTransaction: TransactionEntity,
+      latestTransaction: TransactionEntity,
+      interval: CustomReportEntity['interval'],
+    ) => {
       const fromDate =
         interval === 'Weekly'
           ? 'dayFromDate'
@@ -380,7 +390,17 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         .reverse();
 
       setAllIntervals(allIntervalsMap);
+    },
+  );
 
+  const onSetStartAndEndDates = useEffectEvent(
+    (
+      earliestTransaction: TransactionEntity,
+      latestTransaction: TransactionEntity,
+      dateRange: CustomReportEntity['dateRange'],
+      isDateStatic: CustomReportEntity['isDateStatic'],
+      includeCurrentInterval: CustomReportEntity['includeCurrentInterval'],
+    ) => {
       if (!isDateStatic) {
         const [dateStart, dateEnd] = getLiveRange(
           dateRange,
@@ -394,22 +414,44 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         setStartDate(dateStart);
         setEndDate(dateEnd);
       }
+    },
+  );
+
+  useEffect(() => {
+    async function run() {
+      onApplyFilterConditions(report.conditions, report.conditionsOp);
+
+      const earliestTransaction = await send('get-earliest-transaction');
+      setEarliestTransactionDate(
+        earliestTransaction
+          ? earliestTransaction.date
+          : monthUtils.currentDay(),
+      );
+
+      const latestTransaction = await send('get-latest-transaction');
+      setLatestTransactionDate(
+        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
+      );
+
+      void onSetAllIntervals(earliestTransaction, latestTransaction, interval);
+      onSetStartAndEndDates(
+        earliestTransaction,
+        latestTransaction,
+        dateRange,
+        isDateStatic,
+        includeCurrentInterval,
+      );
     }
 
-    run();
-    // omitted `conditions` and `conditionsOp` from dependencies to avoid infinite loops
-    // oxlint-disable-next-line react/exhaustive-deps
+    void run();
   }, [
     interval,
     dateRange,
     firstDayOfWeekIdx,
     isDateStatic,
-    onApplyFilter,
-    onConditionsOpChange,
     report.conditions,
     report.conditionsOp,
     includeCurrentInterval,
-    locale,
     savedStatus,
   ]);
 
@@ -431,8 +473,8 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const balanceTypeOp: balanceTypeOpType =
     ReportOptions.balanceTypeMap.get(balanceType) || 'totalDebts';
   const sortByOp: sortByOpType = sortBy || 'desc';
-  const payees = usePayees();
-  const accounts = useAccounts();
+  const { data: payees = [] } = usePayees();
+  const { data: accounts = [] } = useAccounts();
 
   const hasWarning = calculateHasWarning(conditions, {
     categories: categories.list,
@@ -619,7 +661,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     const defaultSort = defaultsGraphList(mode, chooseGraph, 'defaultSort');
     if (defaultSort) {
       setSessionReport('sortBy', defaultSort);
-      setSortBy(defaultSort);
+      setSortBy(defaultSort as CustomReportEntity['sortBy']);
     }
   };
 
@@ -725,7 +767,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         setReport(params.savedReport);
 
         if (params.savedReport.id !== initialReport?.id) {
-          navigate(`/reports/custom/${params.savedReport.id}`);
+          void navigate(`/reports/custom/${params.savedReport.id}`);
         }
         break;
       case 'rename':
@@ -756,14 +798,14 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         setSavedStatus('saved');
         setReport(newReport);
         setReportData(newReport);
-        navigate(`/reports/custom/${newReport.id}`);
+        void navigate(`/reports/custom/${newReport.id}`);
         break;
       default:
     }
   };
 
   const onBackClick = () => {
-    navigate('/reports');
+    void navigate('/reports');
   };
 
   return (
@@ -834,8 +876,8 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
             disabledItems={disabledItems}
             defaultItems={defaultItems}
             defaultModeItems={defaultModeItems}
-            earliestTransaction={earliestTransaction}
-            latestTransaction={latestTransaction}
+            earliestTransaction={earliestTransactionDate}
+            latestTransaction={latestTransactionDate}
             firstDayOfWeekIdx={firstDayOfWeekIdx}
             isComplexCategoryCondition={isComplexCategoryCondition}
           />

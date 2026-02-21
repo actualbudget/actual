@@ -1,0 +1,25 @@
+name: Remove 'suspect ai generated' label when 'AI generated' is present
+
+on:
+  pull_request_target:
+    types: [labeled]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  remove-suspect-label:
+    if: >-
+      ${{ contains(github.event.pull_request.labels.*.name, 'AI generated') &&
+          contains(github.event.pull_request.labels.*.name, 'suspect ai generated') }}
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            await github.rest.issues.removeLabel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              name: 'suspect ai generated'
+            });

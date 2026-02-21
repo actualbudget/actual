@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 
-import { popModal, type Modal } from '@desktop-client/modals/modalsSlice';
+import { popModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 
 type ModalState = {

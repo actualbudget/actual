@@ -7,7 +7,7 @@
 // * Need to check to make sure if account exists when handling
 // * transaction changes in syncing
 
-import { type Timestamp } from './timestamp';
+import type { Timestamp } from './timestamp';
 
 /**
  * Represents a node within a trinary radix trie.

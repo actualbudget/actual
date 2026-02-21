@@ -1,4 +1,5 @@
-import React, { useState, type ComponentProps } from 'react';
+import React, { useState } from 'react';
+import type { ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Label } from '@actual-app/components/label';
@@ -6,8 +7,8 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type IntegerAmount } from 'loot-core/shared/util';
-import { type TransactionEntity } from 'loot-core/types/models';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { TransactionEntity } from 'loot-core/types/models';
 
 import { TransactionList } from './TransactionList';
 

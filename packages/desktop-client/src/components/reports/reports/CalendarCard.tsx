@@ -4,10 +4,8 @@ import React, {
   useMemo,
   useRef,
   useState,
-  type Dispatch,
-  type Ref,
-  type SetStateAction,
 } from 'react';
+import type { Dispatch, Ref, SetStateAction } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -24,10 +22,10 @@ import { View } from '@actual-app/components/view';
 import { format as formatDate } from 'date-fns';
 import debounce from 'lodash/debounce';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import { type CalendarWidget } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { CalendarWidget } from 'loot-core/types/models';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
@@ -37,13 +35,12 @@ import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndi
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import {
-  calendarSpreadsheet,
-  type CalendarDataType,
-} from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
+import { calendarSpreadsheet } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
+import type { CalendarDataType } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
-import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
@@ -79,7 +76,7 @@ export function CalendarCard({
         latestTrans ? latestTrans.date : monthUtils.currentDay(),
       );
     }
-    fetchLatestTransaction();
+    void fetchLatestTransaction();
   }, []);
 
   const [start, end] = calculateTimeRange(
@@ -172,7 +169,7 @@ export function CalendarCard({
   }, [data]);
 
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useWidgetCopyMenu(onCopy);
+    useDashboardWidgetCopyMenu(onCopy);
 
   return (
     <ReportCard
@@ -490,7 +487,7 @@ function CalendarCardInner({
               marginBottom: 6,
             }}
             onPress={() => {
-              navigate(
+              void navigate(
                 `/reports/calendar/${widgetId}?month=${formatDate(calendar.start, 'yyyy-MM')}`,
               );
             }}
@@ -565,11 +562,11 @@ function CalendarCardInner({
         isEditing={isEditing}
         onDayClick={date => {
           if (date) {
-            navigate(
+            void navigate(
               `/reports/calendar/${widgetId}?day=${formatDate(date, 'yyyy-MM-dd')}`,
             );
           } else {
-            navigate(`/reports/calendar/${widgetId}`);
+            void navigate(`/reports/calendar/${widgetId}`);
           }
         }}
       />

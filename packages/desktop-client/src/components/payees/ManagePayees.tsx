@@ -1,10 +1,5 @@
-import {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  type ComponentProps,
-} from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import type { ComponentProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -16,8 +11,9 @@ import { View } from '@actual-app/components/view';
 import memoizeOne from 'memoize-one';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { groupById, type Diff } from 'loot-core/shared/util';
-import { type PayeeEntity } from 'loot-core/types/models';
+import { groupById } from 'loot-core/shared/util';
+import type { Diff } from 'loot-core/shared/util';
+import type { PayeeEntity } from 'loot-core/types/models';
 
 import { PayeeMenu } from './PayeeMenu';
 import { PayeeTable } from './PayeeTable';

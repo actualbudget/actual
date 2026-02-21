@@ -2,7 +2,7 @@
 // We have to bundle in JS migrations manually to avoid having to `eval`
 // them which doesn't play well with CSP. There isn't great, and eventually
 // we can remove this migration.
-import { type Database } from '@jlongster/sql.js';
+import type { Database } from '@jlongster/sql.js';
 
 import m1632571489012 from '../../../migrations/1632571489012_remove_cache';
 import m1722717601000 from '../../../migrations/1722717601000_reports_move_selected_categories';
@@ -55,17 +55,17 @@ async function patchBadMigrations(db: Database) {
   const newFiltersMigration = 1688749527273;
   const appliedIds = await getAppliedMigrations(db);
   if (appliedIds.includes(badFiltersMigration)) {
-    await sqlite.runQuery(db, 'DELETE FROM __migrations__ WHERE id = ?', [
+    sqlite.runQuery(db, 'DELETE FROM __migrations__ WHERE id = ?', [
       badFiltersMigration,
     ]);
-    await sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
+    sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
       newFiltersMigration,
     ]);
   }
 }
 
 export async function getAppliedMigrations(db: Database): Promise<number[]> {
-  const rows = await sqlite.runQuery<{ id: number }>(
+  const rows = sqlite.runQuery<{ id: number }>(
     db,
     'SELECT * FROM __migrations__ ORDER BY id ASC',
     [],
@@ -120,7 +120,7 @@ async function applyJavaScript(db, id) {
 
 async function applySql(db, sql) {
   try {
-    await sqlite.execQuery(db, sql);
+    sqlite.execQuery(db, sql);
   } catch (e) {
     logger.log('Error applying sql:', sql);
     throw e;
@@ -138,7 +138,7 @@ export async function applyMigration(
   } else {
     await applySql(db, code);
   }
-  await sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
+  sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
     getMigrationId(name),
   ]);
 }

@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { type MetadataPrefs } from 'loot-core/types/prefs';
+import type { MetadataPrefs } from 'loot-core/types/prefs';
 
 import { savePrefs } from '@desktop-client/prefs/prefsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
@@ -15,7 +15,7 @@ export function useMetadataPref<K extends keyof MetadataPrefs>(
   const dispatch = useDispatch();
   const setLocalPref = useCallback<SetMetadataPrefAction<K>>(
     value => {
-      dispatch(savePrefs({ prefs: { [prefName]: value } }));
+      void dispatch(savePrefs({ prefs: { [prefName]: value } }));
     },
     [prefName, dispatch],
   );
