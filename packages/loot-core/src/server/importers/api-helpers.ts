@@ -3,13 +3,15 @@
 // This provides the same interface as @actual-app/api/methods but uses handlers directly
 // to avoid cyclic dependency between loot-core and @actual-app/api
 
-import { type Handlers } from '../../types/handlers';
-import type { ImportTransactionEntity } from '../../types/models';
+import type { QueryState } from '../../shared/query';
+import type { Handlers } from '../../types/handlers';
+import type { ImportTransactionEntity, RuleEntity } from '../../types/models';
 import type {
   APIAccountEntity,
   APICategoryEntity,
   APICategoryGroupEntity,
   APIPayeeEntity,
+  APIScheduleEntity,
 } from '../api-models';
 import { app } from '../main-app';
 import { runHandler } from '../mutators';
@@ -97,4 +99,24 @@ export async function setBudgetCarryover(
   flag: boolean,
 ) {
   return send('api/budget-set-carryover', { month, categoryId, flag });
+}
+
+export async function createSchedule(
+  schedule: Omit<APIScheduleEntity, 'id'>,
+): Promise<string> {
+  return send('api/schedule-create', schedule);
+}
+
+export function aqlQuery(
+  query: QueryState | { serialize(): QueryState },
+): Promise<unknown> {
+  const queryState =
+    typeof (query as { serialize?: () => QueryState }).serialize === 'function'
+      ? (query as { serialize(): QueryState }).serialize()
+      : (query as QueryState);
+  return send('api/query', { query: queryState });
+}
+
+export async function updateRule(rule: RuleEntity): Promise<RuleEntity> {
+  return send('api/rule-update', { rule });
 }
