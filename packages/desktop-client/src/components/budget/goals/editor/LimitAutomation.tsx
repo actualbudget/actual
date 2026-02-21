@@ -5,9 +5,10 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
-import { setDay } from 'date-fns';
+import { getDay } from 'date-fns/getDay';
+import { setDay } from 'date-fns/setDay';
 
-import { currentDate, dayFromDate, getDay } from 'loot-core/shared/months';
+import { currentDate, dayFromDate, parseDate } from 'loot-core/shared/months';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 import type { LimitTemplate } from 'loot-core/types/models/templates';
 
@@ -37,7 +38,7 @@ export const LimitAutomation = ({
     format.currency.decimalPlaces,
   );
   const start = template.start;
-  const dayOfWeek = start ? getDay(start) : 0;
+  const dayOfWeek = start ? getDay(parseDate(start)) : 0;
   const hold = template.hold;
 
   const selectButtonClassName = css({
