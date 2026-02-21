@@ -9,6 +9,7 @@ import type { SyncResponseWithErrors } from 'loot-core/server/accounts/app';
 import type {
   AccountEntity,
   CategoryEntity,
+  SyncServerEnableBankingAccount,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
@@ -487,6 +488,48 @@ export function useLinkAccountPluggyAiMutation() {
         dispatch,
         t(
           'There was an error linking the account to PluggyAI. Please try again.',
+        ),
+        error,
+      );
+    },
+  });
+}
+
+type LinkAccountEnableBankingPayload = LinkAccountBasePayload & {
+  externalAccount: SyncServerEnableBankingAccount;
+};
+
+export function useLinkAccountEnableBankingMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({
+      externalAccount,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountEnableBankingPayload) => {
+      await send('enablebanking-accounts-link', {
+        externalAccount,
+        upgradingId,
+        offBudget,
+        startingDate,
+        startingBalance,
+      });
+    },
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateQueries(queryClient, payeeQueries.lists());
+    },
+    onError: error => {
+      console.error('Error linking account to Enable Banking:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t(
+          'There was an error linking the account to Enable Banking. Please try again.',
         ),
         error,
       );

@@ -112,6 +112,29 @@ export type Modal =
       };
     }
   | {
+      name: 'enablebanking-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'enablebanking-external-msg';
+      options: {
+        onSuccess: (data: {
+          accounts: Array<{
+            account_id: string;
+            name: string;
+            mask: string;
+            institution?: string;
+            iban?: string;
+            orgId?: string;
+            orgDomain?: string;
+          }>;
+        }) => Promise<void>;
+        onClose?: (() => void) | undefined;
+      };
+    }
+  | {
       name: 'gocardless-external-msg';
       options: {
         onMoveExternal: (arg: {

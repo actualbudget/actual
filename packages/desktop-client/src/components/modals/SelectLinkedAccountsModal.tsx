@@ -15,12 +15,14 @@ import { format as formatDate, parseISO } from 'date-fns';
 import { currentDay, subDays } from 'loot-core/shared/months';
 import type {
   AccountEntity,
+  SyncServerEnableBankingAccount,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
 } from 'loot-core/types/models';
 
 import {
+  useLinkAccountEnableBankingMutation,
   useLinkAccountMutation,
   useLinkAccountPluggyAiMutation,
   useLinkAccountSimpleFinMutation,
@@ -95,6 +97,11 @@ export type SelectLinkedAccountsModalProps =
       requisitionId?: undefined;
       externalAccounts: SyncServerPluggyAiAccount[];
       syncSource: 'pluggyai';
+    }
+  | {
+      requisitionId?: undefined;
+      externalAccounts: SyncServerEnableBankingAccount[];
+      syncSource: 'enableBanking';
     };
 
 export function SelectLinkedAccountsModal({
@@ -120,6 +127,11 @@ export function SelectLinkedAccountsModal({
           return {
             syncSource: 'pluggyai',
             externalAccounts: toSort as SyncServerPluggyAiAccount[],
+          };
+        case 'enableBanking':
+          return {
+            syncSource: 'enableBanking',
+            externalAccounts: toSort as SyncServerEnableBankingAccount[],
           };
         case 'goCardless':
           return {
@@ -159,6 +171,7 @@ export function SelectLinkedAccountsModal({
   const unlinkAccount = useUnlinkAccountMutation();
   const linkAccountSimpleFin = useLinkAccountSimpleFinMutation();
   const linkAccountPluggyAi = useLinkAccountPluggyAiMutation();
+  const linkAccountEnableBanking = useLinkAccountEnableBankingMutation();
 
   async function onNext() {
     const chosenLocalAccountIds = Object.values(chosenAccounts);
@@ -224,6 +237,23 @@ export function SelectLinkedAccountsModal({
             startingDate,
             startingBalance,
           });
+        } else if (
+          propsWithSortedExternalAccounts.syncSource === 'enableBanking'
+        ) {
+          linkAccountEnableBanking.mutate({
+            externalAccount:
+              propsWithSortedExternalAccounts.externalAccounts[
+                externalAccountIndex
+              ],
+            upgradingId:
+              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              chosenLocalAccountId !== addOffBudgetAccountOption.id
+                ? chosenLocalAccountId
+                : undefined,
+            offBudget,
+            startingDate,
+            startingBalance,
+          });
         } else {
           linkAccount.mutate({
             requisitionId: propsWithSortedExternalAccounts.requisitionId,
@@ -255,7 +285,8 @@ export function SelectLinkedAccountsModal({
     externalAccount:
       | SyncServerGoCardlessAccount
       | SyncServerSimpleFinAccount
-      | SyncServerPluggyAiAccount,
+      | SyncServerPluggyAiAccount
+      | SyncServerEnableBankingAccount,
     localAccountId: string | null | undefined,
   ) {
     setChosenAccounts(accounts => {
@@ -479,7 +510,8 @@ export function SelectLinkedAccountsModal({
 type ExternalAccount =
   | SyncServerGoCardlessAccount
   | SyncServerSimpleFinAccount
-  | SyncServerPluggyAiAccount;
+  | SyncServerPluggyAiAccount
+  | SyncServerEnableBankingAccount;
 
 type StartingBalanceInfo = {
   date: string;
@@ -613,7 +645,7 @@ function TableRow({
       {/* Balance */}
       <Field width={120} style={{ textAlign: 'right' }}>
         <PrivacyFilter>
-          {externalAccount.balance != null ? (
+          {'balance' in externalAccount && externalAccount.balance != null ? (
             <FinancialText>
               {format(externalAccount.balance.toString(), 'financial')}
             </FinancialText>
@@ -649,7 +681,9 @@ function TableRow({
       {showStartingOptions ? (
         <StartingOptionsFields
           accountId={externalAccount.account_id}
-          externalBalance={externalAccount.balance}
+          externalBalance={
+            'balance' in externalAccount ? externalAccount.balance : undefined
+          }
           customStartingDate={customStartingDate}
           onSetCustomStartingDate={onSetCustomStartingDate}
           layout="inline"
@@ -717,7 +751,8 @@ function getInstitutionName(
   externalAccount:
     | SyncServerGoCardlessAccount
     | SyncServerSimpleFinAccount
-    | SyncServerPluggyAiAccount,
+    | SyncServerPluggyAiAccount
+    | SyncServerEnableBankingAccount,
 ) {
   if (typeof externalAccount?.institution === 'string') {
     return externalAccount?.institution ?? '';
@@ -925,7 +960,7 @@ function AccountCard({
       >
         <Trans>Balance:</Trans>{' '}
         <PrivacyFilter>
-          {externalAccount.balance != null ? (
+          {'balance' in externalAccount && externalAccount.balance != null ? (
             <FinancialText>
               {format(externalAccount.balance.toString(), 'financial')}
             </FinancialText>
@@ -1021,7 +1056,9 @@ function AccountCard({
       {shouldShowStartingOptions && (
         <StartingOptionsFields
           accountId={externalAccount.account_id}
-          externalBalance={externalAccount.balance}
+          externalBalance={
+            'balance' in externalAccount ? externalAccount.balance : undefined
+          }
           customStartingDate={customStartingDate}
           onSetCustomStartingDate={onSetCustomStartingDate}
           layout="stacked"
