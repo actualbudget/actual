@@ -14,7 +14,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgAdd,
-  SvgLocationCurrent,
+  SvgLocation,
   SvgPiggyBank,
   SvgTrash,
 } from '@actual-app/components/icons/v1';
@@ -33,7 +33,6 @@ import {
 
 import { send } from 'loot-core/platform/client/connection';
 import { DEFAULT_MAX_DISTANCE_METERS } from 'loot-core/shared/constants';
-import { locationService } from 'loot-core/shared/location';
 import { calculateDistance } from 'loot-core/shared/location-utils';
 import * as monthUtils from 'loot-core/shared/months';
 import * as Platform from 'loot-core/shared/platform';
@@ -85,6 +84,7 @@ import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useLocationPermission } from '@desktop-client/hooks/useLocationPermission';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useNearbyPayees } from '@desktop-client/hooks/useNearbyPayees';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
   SingleActiveEditFormProvider,
@@ -93,7 +93,8 @@ import {
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { deletePayeeLocation } from '@desktop-client/payees/payeesSlice';
+import { useSavePayeeLocationMutation } from '@desktop-client/payees';
+import { locationService } from '@desktop-client/payees/location';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 import { setLastTransaction } from '@desktop-client/transactions/transactionsSlice';
@@ -560,9 +561,10 @@ type TransactionEditInnerProps = {
   onDelete: (id: TransactionEntity['id']) => void;
   onSplit: (id: TransactionEntity['id']) => void;
   onAddSplit: (id: TransactionEntity['id']) => void;
-  locationAccess: boolean;
-  shouldShowForgetLocation?: boolean;
-  onForgetLocation?: () => void;
+  shouldShowSaveLocation?: boolean;
+  onSaveLocation?: () => void;
+  onSelectNearestPayee?: () => void;
+  nearestPayee?: PayeeEntity | null;
 };
 
 const TransactionEditInner = memo<TransactionEditInnerProps>(
@@ -578,9 +580,10 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     onDelete,
     onSplit,
     onAddSplit,
-    shouldShowForgetLocation,
-    onForgetLocation,
-    locationAccess,
+    shouldShowSaveLocation,
+    onSaveLocation,
+    onSelectNearestPayee,
+    nearestPayee,
   }) {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -887,7 +890,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                       onClose: () => {
                         onClearActiveEdit();
                       },
-                      locationAccess,
                     },
                   },
                 }),
@@ -937,7 +939,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         transactions,
         unserializedTransactions,
         showHiddenCategories,
-        locationAccess,
       ],
     );
 
@@ -1104,35 +1105,54 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               }
               onPress={() => onEditFieldInner(transaction.id, 'payee')}
               data-testid="payee-field"
+              rightContent={
+                shouldShowSaveLocation ? (
+                  <Button
+                    variant="bare"
+                    onPress={onSaveLocation}
+                    style={{
+                      backgroundColor: theme.buttonNormalBackground,
+                      border: `1px solid ${theme.buttonNormalBorder}`,
+                      color: theme.buttonNormalText,
+                      fontSize: '11px',
+                      padding: '4px 8px',
+                      borderRadius: 3,
+                      height: 'auto',
+                      minHeight: 'auto',
+                    }}
+                  >
+                    <Trans>Save</Trans>
+                    <SvgLocation
+                      width={10}
+                      height={10}
+                      style={{ marginLeft: 4 }}
+                    />
+                  </Button>
+                ) : nearestPayee && !transaction.payee ? (
+                  <Button
+                    variant="bare"
+                    onPress={onSelectNearestPayee}
+                    style={{
+                      backgroundColor: theme.buttonNormalBackground,
+                      border: `1px solid ${theme.buttonNormalBorder}`,
+                      color: theme.buttonNormalText,
+                      fontSize: '11px',
+                      padding: '4px 8px',
+                      borderRadius: 3,
+                      height: 'auto',
+                      minHeight: 'auto',
+                    }}
+                  >
+                    <Trans>Nearby</Trans>
+                    <SvgLocation
+                      width={10}
+                      height={10}
+                      style={{ marginLeft: 4 }}
+                    />
+                  </Button>
+                ) : undefined
+              }
             />
-            {shouldShowForgetLocation && (
-              <Button
-                variant="bare"
-                onPress={onForgetLocation}
-                style={{
-                  position: 'absolute',
-                  top: '75%',
-                  right: '20px',
-                  transform: 'translateY(-50%)',
-                  backgroundColor: theme.errorBackground,
-                  border: `1px solid ${theme.errorBorder}`,
-                  color: theme.pageText,
-                  fontSize: '11px',
-                  padding: '4px 8px',
-                  borderRadius: 3,
-                  height: 'auto',
-                  minHeight: 'auto',
-                  zIndex: 10,
-                }}
-              >
-                <Trans i18nKey="forget">Forget</Trans>
-                <SvgLocationCurrent
-                  width={10}
-                  height={10}
-                  style={{ marginLeft: 4 }}
-                />
-              </Button>
-            )}
           </View>
 
           {!transaction.is_parent && (
@@ -1354,6 +1374,7 @@ function TransactionEditUnconnected({
   const { state: locationState } = useLocation();
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
+  const updatePayeeLocationMutation = useSavePayeeLocationMutation();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
   const [fetchedTransactions, setFetchedTransactions] = useState<
@@ -1376,13 +1397,9 @@ function TransactionEditUnconnected({
   );
 
   const locationAccess = useLocationPermission();
-  const [shouldShowForgetLocation, setShouldShowForgetLocation] =
-    useState(false);
-  const [nearestPayee, setNearestPayee] = useState<PayeeEntity | null>(null);
-  const [autoSelectedPayeeId, setAutoSelectedPayeeId] = useState<string | null>(
-    null,
-  );
-  const hasAutoSelectedPayee = useRef(false);
+  const [shouldShowSaveLocation, setShouldShowSaveLocation] = useState(false);
+  const { data: nearbyPayees = [] } = useNearbyPayees();
+  const nearestPayee = nearbyPayees[0]?.payee ?? null;
 
   useEffect(() => {
     let unmounted = false;
@@ -1423,37 +1440,8 @@ function TransactionEditUnconnected({
 
   useEffect(() => {
     if (!locationAccess) {
-      // Clear location-derived state when location access is revoked
-      setNearestPayee(null);
-      setAutoSelectedPayeeId(null);
-      setShouldShowForgetLocation(false);
-      hasAutoSelectedPayee.current = false;
-      return;
+      setShouldShowSaveLocation(false);
     }
-    let unmounted = false;
-
-    async function findNearbyPayee() {
-      try {
-        const currentLocation = await locationService.getCurrentPosition();
-        const nearbyPayees =
-          await locationService.getNearbyPayees(currentLocation);
-
-        if (!unmounted && nearbyPayees.length > 0) {
-          setNearestPayee(nearbyPayees[0]);
-          setAutoSelectedPayeeId(nearbyPayees[0].id);
-          setShouldShowForgetLocation(false);
-        }
-      } catch (error) {
-        // Don't block transaction creation, but log for debugging
-        console.info('Could not find nearby payee', { error });
-      }
-    }
-
-    void findNearbyPayee();
-
-    return () => {
-      unmounted = true;
-    };
   }, [locationAccess]);
 
   useEffect(() => {
@@ -1554,31 +1542,32 @@ function TransactionEditUnconnected({
       );
       setTransactions(newTransactions);
 
-      // Show forget location button when payee is manually changed (not auto-selected)
-      // and it has a recent potential duplicate location
       if (updatedField === 'payee') {
-        if (
-          newTransaction.payee &&
-          newTransaction.payee !== autoSelectedPayeeId &&
-          locationAccess &&
-          (await locationService.hasRecentDuplicateLocation(
+        setShouldShowSaveLocation(false);
+
+        if (newTransaction.payee && locationAccess) {
+          const payeeLocations = await locationService.getPayeeLocations(
             newTransaction.payee,
-          ))
-        ) {
-          setShouldShowForgetLocation(true);
-        } else {
-          // Clear the button when the new payee doesn't qualify
-          setShouldShowForgetLocation(false);
+          );
+          if (payeeLocations.length === 0) {
+            setShouldShowSaveLocation(true);
+          } else {
+            const currentPosition = await locationService.getCurrentPosition();
+            const hasNearby = payeeLocations.some(
+              loc =>
+                calculateDistance(currentPosition, {
+                  latitude: loc.latitude,
+                  longitude: loc.longitude,
+                }) <= DEFAULT_MAX_DISTANCE_METERS,
+            );
+            if (!hasNearby) {
+              setShouldShowSaveLocation(true);
+            }
+          }
         }
       }
     },
-    [
-      dateFormat,
-      transactions,
-      autoSelectedPayeeId,
-      setShouldShowForgetLocation,
-      locationAccess,
-    ],
+    [dateFormat, transactions, locationAccess],
   );
 
   const onSave = useCallback(
@@ -1658,75 +1647,32 @@ function TransactionEditUnconnected({
     [transactions],
   );
 
-  const onForgetLocation = useCallback(async () => {
+  const onSaveLocation = useCallback(async () => {
     try {
       const [transaction] = transactions;
       if (transaction.payee) {
-        // Get current location to find and delete the location that was just saved for this payee
-        const currentLocation = await locationService.getCurrentPosition();
-        const payeeLocations = await locationService.getPayeeLocations(
-          transaction.payee,
-        );
-
-        // Find the most recently created location (likely the one that was just auto-saved)
-        const mostRecentLocation = [...payeeLocations].sort(
-          (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-        )[0];
-
-        if (mostRecentLocation) {
-          // Check if this recent location is near the current location
-          const distance = calculateDistance(currentLocation, {
-            latitude: mostRecentLocation.latitude,
-            longitude: mostRecentLocation.longitude,
-          });
-
-          // If it's within a reasonable distance (indicating it was auto-saved for this session)
-          if (distance <= DEFAULT_MAX_DISTANCE_METERS) {
-            const result = await dispatch(
-              deletePayeeLocation(mostRecentLocation.id),
-            ).unwrap();
-
-            if (result.success) {
-              setShouldShowForgetLocation(false);
-            } else {
-              throw new Error('deletePayeeLocation failed');
-            }
-          }
-        }
+        await updatePayeeLocationMutation.mutateAsync(transaction.payee);
+        setShouldShowSaveLocation(false);
       }
     } catch (error) {
-      console.error('Failed to forget location', { error });
+      console.error('Failed to save location', { error });
       dispatch(
         addNotification({
           notification: {
             type: 'error',
-            message: t('Failed to forget location'),
+            message: t('Failed to save location'),
           },
         }),
       );
     }
-  }, [t, transactions, dispatch]);
+  }, [t, transactions, dispatch, updatePayeeLocationMutation]);
 
-  // Reset auto-selection flag when the active transaction changes
-  const activeTransactionId = transactions[0]?.id;
-  useEffect(() => {
-    hasAutoSelectedPayee.current = false;
-  }, [activeTransactionId]);
-
-  // Automatically select the nearest payee if available and unset
-  useEffect(() => {
+  const onSelectNearestPayee = useCallback(() => {
     const transaction = transactions[0];
-    if (
-      !nearestPayee ||
-      !transaction ||
-      transaction.payee ||
-      hasAutoSelectedPayee.current
-    ) {
+    if (!nearestPayee || !transaction || transaction.payee) {
       return;
     }
 
-    hasAutoSelectedPayee.current = true;
     const updated = { ...transaction, payee: nearestPayee.id };
     onUpdate(updated, 'payee');
   }, [transactions, nearestPayee, onUpdate]);
@@ -1856,9 +1802,10 @@ function TransactionEditUnconnected({
         onDelete={onDelete}
         onSplit={onSplit}
         onAddSplit={onAddSplit}
-        shouldShowForgetLocation={shouldShowForgetLocation}
-        onForgetLocation={onForgetLocation}
-        locationAccess={locationAccess}
+        shouldShowSaveLocation={shouldShowSaveLocation}
+        onSaveLocation={onSaveLocation}
+        onSelectNearestPayee={onSelectNearestPayee}
+        nearestPayee={locationAccess ? nearestPayee : null}
       />
     </View>
   );

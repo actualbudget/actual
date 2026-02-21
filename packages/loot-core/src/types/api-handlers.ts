@@ -17,6 +17,7 @@ import type { QueryState } from '../shared/query';
 
 import type {
   ImportTransactionEntity,
+  NearbyPayeeEntity,
   NewRuleEntity,
   PayeeLocationEntity,
   RuleEntity,
@@ -246,7 +247,7 @@ export type ApiHandlers = {
     latitude: number;
     longitude: number;
     maxDistance?: number;
-  }) => Promise<Array<APIPayeeEntity>>;
+  }) => Promise<NearbyPayeeEntity[]>;
 
   'api/rules-get': () => Promise<RuleEntity[]>;
 

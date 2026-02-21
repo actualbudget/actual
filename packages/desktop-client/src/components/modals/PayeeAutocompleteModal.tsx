@@ -13,7 +13,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useNearbyPayees, usePayees } from '@desktop-client/hooks/usePayees';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type PayeeAutocompleteModalProps = Extract<
@@ -24,13 +24,11 @@ type PayeeAutocompleteModalProps = Extract<
 export function PayeeAutocompleteModal({
   onSelect,
   onClose,
-  locationAccess = false,
 }: PayeeAutocompleteModalProps) {
   const { t } = useTranslation();
   const { data: payees = [] } = usePayees();
   const { data: accounts = [] } = useAccounts();
   const navigate = useNavigate();
-  const nearbyPayees = useNearbyPayees(locationAccess) || [];
 
   const { isNarrowWidth } = useResponsive();
   const defaultAutocompleteProps = {
@@ -84,8 +82,6 @@ export function PayeeAutocompleteModal({
             {...defaultAutocompleteProps}
             onSelect={onSelect}
             value={null}
-            nearbyPayees={nearbyPayees}
-            locationAccess={locationAccess}
           />
         </>
       )}

@@ -4,12 +4,17 @@ import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
 import { generateAccount } from 'loot-core/mocks';
-import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
+import type {
+  AccountEntity,
+  NearbyPayeeEntity,
+  PayeeEntity,
+} from 'loot-core/types/models';
 
 import { PayeeAutocomplete } from './PayeeAutocomplete';
 import type { PayeeAutocompleteProps } from './PayeeAutocomplete';
 
 import { AuthProvider } from '@desktop-client/auth/AuthProvider';
+import { useNearbyPayees } from '@desktop-client/hooks/useNearbyPayees';
 import { createTestQueryClient, TestProviders } from '@desktop-client/mocks';
 import { payeeQueries } from '@desktop-client/payees';
 
@@ -42,13 +47,15 @@ function makePayee(name: string, options?: { favorite: boolean }): PayeeEntity {
   };
 }
 
-function makeNearbyPayee(name: string, distance: number): PayeeEntity {
+function makeNearbyPayee(name: string, distance: number): NearbyPayeeEntity {
   const id = name.toLowerCase() + '-id';
   return {
-    id,
-    name,
-    favorite: false,
-    transfer_acct: undefined,
+    payee: {
+      id,
+      name,
+      favorite: false,
+      transfer_acct: undefined,
+    },
     location: {
       id: id + '-loc',
       payee_id: id,
@@ -100,6 +107,10 @@ async function clickAutocomplete(autocomplete: HTMLElement) {
   await waitForAutocomplete();
 }
 
+vi.mock('@desktop-client/hooks/useNearbyPayees', () => ({
+  useNearbyPayees: vi.fn(),
+}));
+
 function firstOrIncorrect(id: string | null): string {
   return id?.split('-', 1)[0] || 'incorrect';
 }
@@ -108,6 +119,9 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
   const queryClient = createTestQueryClient();
 
   beforeEach(() => {
+    vi.mocked(useNearbyPayees).mockReturnValue({
+      data: [],
+    } as unknown as ReturnType<typeof useNearbyPayees>);
     queryClient.setQueryData(payeeQueries.listCommon().queryKey, []);
   });
 
@@ -235,7 +249,9 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
       makeNearbyPayee('Grocery Store', 1.2),
     ];
     const payees = [makePayee('Alice'), makePayee('Bob')];
-    vi.mocked(useNearbyPayees).mockReturnValue(nearbyPayees);
+    vi.mocked(useNearbyPayees).mockReturnValue({
+      data: nearbyPayees,
+    } as unknown as ReturnType<typeof useNearbyPayees>);
 
     await clickAutocomplete(renderPayeeAutocomplete({ payees }));
 
@@ -257,7 +273,9 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
       makeNearbyPayee('Grocery Store', 1.2),
     ];
     const payees = [makePayee('Alice'), makePayee('Bob')];
-    vi.mocked(useNearbyPayees).mockReturnValue(nearbyPayees);
+    vi.mocked(useNearbyPayees).mockReturnValue({
+      data: nearbyPayees,
+    } as unknown as ReturnType<typeof useNearbyPayees>);
 
     const autocomplete = renderPayeeAutocomplete({ payees });
     await clickAutocomplete(autocomplete);
@@ -282,8 +300,10 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
       makePayee('Eve', { favorite: true }),
       makePayee('Carol'),
     ];
-    vi.mocked(useNearbyPayees).mockReturnValue(nearbyPayees);
-    vi.mocked(useCommonPayees).mockReturnValue([
+    vi.mocked(useNearbyPayees).mockReturnValue({
+      data: nearbyPayees,
+    } as unknown as ReturnType<typeof useNearbyPayees>);
+    queryClient.setQueryData(payeeQueries.listCommon().queryKey, [
       makePayee('Bob'),
       makePayee('Carol'),
     ]);
@@ -307,7 +327,9 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
   test('a payee appearing in both nearby and favorites shows in both sections', async () => {
     const nearbyPayees = [makeNearbyPayee('Eve', 0.5)];
     const payees = [makePayee('Alice'), makePayee('Eve', { favorite: true })];
-    vi.mocked(useNearbyPayees).mockReturnValue(nearbyPayees);
+    vi.mocked(useNearbyPayees).mockReturnValue({
+      data: nearbyPayees,
+    } as unknown as ReturnType<typeof useNearbyPayees>);
 
     await clickAutocomplete(renderPayeeAutocomplete({ payees }));
 

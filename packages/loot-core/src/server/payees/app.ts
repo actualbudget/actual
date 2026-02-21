@@ -2,6 +2,7 @@ import { DEFAULT_MAX_DISTANCE_METERS } from 'loot-core/shared/constants';
 
 import type { Diff } from '../../shared/util';
 import type {
+  NearbyPayeeEntity,
   PayeeEntity,
   PayeeLocationEntity,
   RuleEntity,
@@ -222,7 +223,7 @@ async function getNearbyPayees({
   latitude: number;
   longitude: number;
   maxDistance?: number;
-}): Promise<Array<PayeeEntity>> {
+}): Promise<NearbyPayeeEntity[]> {
   if (
     !Number.isFinite(latitude) ||
     !Number.isFinite(longitude) ||
@@ -326,7 +327,7 @@ async function getNearbyPayees({
     )) || [];
 
   // Transform results to expected format
-  const nearbyPayees = results.map(row => {
+  const nearbyPayees: NearbyPayeeEntity[] = results.map(row => {
     const payee = payeeModel.fromDb({
       id: row.id,
       name: row.name,
@@ -337,7 +338,7 @@ async function getNearbyPayees({
     });
 
     return {
-      ...payee,
+      payee,
       location: {
         id: row.location_id,
         payee_id: row.payee_id,
@@ -346,7 +347,7 @@ async function getNearbyPayees({
         created_at: row.created_at,
         distance: row.distance,
       },
-    } satisfies PayeeEntity;
+    };
   });
 
   return nearbyPayees;

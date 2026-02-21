@@ -1,7 +1,9 @@
 import { send } from 'loot-core/platform/client/connection';
-import type { PayeeEntity, PayeeLocationEntity } from 'loot-core/types/models';
-
-import type { LocationCoordinates } from './location-utils';
+import type { LocationCoordinates } from 'loot-core/shared/location-utils';
+import type {
+  NearbyPayeeEntity,
+  PayeeLocationEntity,
+} from 'loot-core/types/models';
 
 /**
  * Abstraction for geolocation functionality
@@ -23,7 +25,7 @@ export type LocationApiClient = {
   getNearbyPayees(
     coordinates: LocationCoordinates,
     maxDistance: number,
-  ): Promise<PayeeEntity[]>;
+  ): Promise<NearbyPayeeEntity[]>;
 };
 
 /**
@@ -84,7 +86,7 @@ export class SendApiLocationClient implements LocationApiClient {
   async getNearbyPayees(
     coordinates: LocationCoordinates,
     maxDistance: number,
-  ): Promise<PayeeEntity[]> {
+  ): Promise<NearbyPayeeEntity[]> {
     const result = await send('payees-get-nearby', {
       latitude: coordinates.latitude,
       longitude: coordinates.longitude,
