@@ -258,7 +258,6 @@ export type Modal =
       options: {
         onSelect: (payeeId: string) => void;
         onClose?: () => void;
-        locationAccess?: boolean;
       };
     }
   | {
