@@ -79,7 +79,7 @@ vi.mock('../server/migrate/migrations', async () => {
 
 global.getDatabaseDump = async function (tables) {
   if (!tables) {
-    const rows = await sqlite.runQuery<{ name }>(
+    const rows = sqlite.runQuery<{ name }>(
       db.getDatabase(),
       "SELECT name FROM sqlite_master WHERE type='table'",
       [],
@@ -108,7 +108,7 @@ global.getDatabaseDump = async function (tables) {
 
       return [
         table,
-        await sqlite.runQuery(
+        sqlite.runQuery(
           db.getDatabase(),
           'SELECT * FROM ' + table + ' ORDER BY ' + sortColumn,
           [],
@@ -143,7 +143,7 @@ global.emptyDatabase = function (avoidUpdate) {
     );
 
     db.setDatabase(memoryDB);
-    await db.runQuery('INSERT INTO db_version (version) VALUES (?)', ['0.0.1']);
+    db.runQuery('INSERT INTO db_version (version) VALUES (?)', ['0.0.1']);
 
     if (!avoidUpdate) {
       await updateVersion();
@@ -161,7 +161,7 @@ beforeEach(() => {
 afterEach(() => {
   global.resetRandomId();
   tracer.end();
-  fetchClient.clearServer();
+  void fetchClient.clearServer();
 
   return new Promise(resolve => {
     if (sheet.get()) {

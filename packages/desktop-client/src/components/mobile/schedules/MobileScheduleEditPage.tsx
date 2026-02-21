@@ -126,11 +126,11 @@ export function MobileScheduleEditPage() {
     });
 
     // Navigate back to schedules list
-    navigate('/schedules');
+    void navigate('/schedules');
   }
 
   async function onEditRule(ruleId: string) {
-    navigate(`/rules/${ruleId}`);
+    void navigate(`/rules/${ruleId}`);
   }
 
   async function onLinkTransactions(ids: string[], scheduleId?: string) {

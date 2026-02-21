@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import type { CSSProperties } from 'react';
 
 import { theme } from '@actual-app/components/theme';
-import { Cell, Pie, PieChart, Sector, Tooltip } from 'recharts';
+import { Pie, PieChart, Sector, Tooltip } from 'recharts';
+import type { PieSectorShapeProps } from 'recharts';
 
 import type {
   balanceTypeOpType,
@@ -252,7 +253,7 @@ export function DonutGraph({
 
   const navigate = useNavigate();
   const { data: categories = { grouped: [], list: [] } } = useCategories();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const [pointer, setPointer] = useState('');
 
   const getVal = (obj: GroupedEntity | IntervalEntity) => {
@@ -281,20 +282,6 @@ export function DonutGraph({
                 style={{ cursor: pointer }}
               >
                 <Pie
-                  activeShape={
-                    width < 220 || height < 130
-                      ? undefined
-                      : compact
-                        ? props => (
-                            <ActiveShapeMobileWithFormat
-                              {...props}
-                              format={format}
-                            />
-                          )
-                        : props => (
-                            <ActiveShapeWithFormat {...props} format={format} />
-                          )
-                  }
                   dataKey={val => getVal(val)}
                   nameKey={yAxis}
                   {...animationProps}
@@ -311,6 +298,20 @@ export function DonutGraph({
                   }
                   startAngle={90}
                   endAngle={-270}
+                  shape={(props: PieSectorShapeProps, index: number) => {
+                    const fill = data.legend[index]?.color ?? props.fill;
+                    const showActiveShape = width >= 220 && height >= 130;
+                    const isActive = props.isActive || index === activeIndex;
+                    if (isActive && showActiveShape) {
+                      const shapeProps = { ...props, fill, format };
+                      return compact ? (
+                        <ActiveShapeMobileWithFormat {...shapeProps} />
+                      ) : (
+                        <ActiveShapeWithFormat {...shapeProps} />
+                      );
+                    }
+                    return <Sector {...props} fill={fill} />;
+                  }}
                   onMouseLeave={() => setPointer('')}
                   onMouseEnter={(_, index) => {
                     if (canDeviceHover()) {
@@ -346,11 +347,7 @@ export function DonutGraph({
                       });
                     }
                   }}
-                >
-                  {data.legend.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
+                />
                 <Tooltip
                   content={() => null}
                   defaultIndex={activeIndex}

@@ -108,7 +108,7 @@ function UserAccessContent({ isModal }: ManageUserAccessContentProps) {
       }
     }
 
-    loadData();
+    void loadData();
 
     return () => {
       undo.setUndoState('openModal', null);

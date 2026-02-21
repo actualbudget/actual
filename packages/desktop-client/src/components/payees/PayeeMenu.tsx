@@ -88,7 +88,7 @@ export function PayeeMenu({
             onDelete();
             break;
           case 'merge':
-            onMerge();
+            void onMerge();
             break;
           case 'favorite':
             onFavorite();

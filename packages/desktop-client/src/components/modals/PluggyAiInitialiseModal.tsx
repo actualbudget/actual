@@ -180,7 +180,7 @@ export const PluggyAiInitialiseModal = ({
               variant="primary"
               isLoading={isLoading}
               onPress={() => {
-                onSubmit(close);
+                void onSubmit(close);
               }}
             >
               <Trans>Save and continue</Trans>

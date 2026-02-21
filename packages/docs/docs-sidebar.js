@@ -178,6 +178,7 @@ const sidebars = {
               items: [
                 'advanced/bank-sync/gocardless',
                 'advanced/bank-sync/simplefin',
+                'advanced/bank-sync/pluggyai',
               ],
             },
             'advanced/scripts/modify-transfers',
@@ -185,7 +186,7 @@ const sidebars = {
         },
         {
           type: 'category',
-          label: 'Reports',
+          label: 'Reports Dashboard',
           collapsed: true,
           link: {
             type: 'doc',
@@ -216,7 +217,6 @@ const sidebars = {
             'experimental/monthly-cleanup',
             'experimental/rule-templating',
             'experimental/formulas',
-            'experimental/pluggyai',
             'experimental/crossover-point-report',
             'experimental/custom-themes',
             'experimental/budget-analysis-report',

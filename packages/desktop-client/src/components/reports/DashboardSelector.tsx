@@ -8,14 +8,14 @@ import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { DashboardEntity } from 'loot-core/types/models';
+import type { DashboardPageEntity } from 'loot-core/types/models';
 
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useCreateDashboardPageMutation } from '@desktop-client/reports/mutations';
 
 type DashboardSelectorProps = {
-  dashboards: readonly DashboardEntity[];
-  currentDashboard: DashboardEntity;
+  dashboards: readonly DashboardPageEntity[];
+  currentDashboard: DashboardPageEntity;
 };
 
 export function DashboardSelector({
@@ -27,12 +27,18 @@ export function DashboardSelector({
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const createDashboardPageMutation = useCreateDashboardPageMutation();
+
   const handleAddDashboard = async () => {
     const defaultName = t('New dashboard');
-    const newId = await send('dashboard-create', { name: defaultName });
-    if (newId) {
-      navigate(`/reports/${newId}`);
-    }
+    createDashboardPageMutation.mutate(
+      { name: defaultName },
+      {
+        onSuccess: id => {
+          void navigate(`/reports/${id}`);
+        },
+      },
+    );
   };
 
   return (
@@ -91,9 +97,9 @@ export function DashboardSelector({
               slot="close"
               onMenuSelect={item => {
                 if (item === 'add-new') {
-                  handleAddDashboard();
+                  void handleAddDashboard();
                 } else {
-                  navigate(`/reports/${item}`);
+                  void navigate(`/reports/${item}`);
                 }
                 setMenuOpen(false);
               }}

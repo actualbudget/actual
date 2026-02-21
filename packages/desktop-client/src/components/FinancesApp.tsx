@@ -51,7 +51,7 @@ function NarrowNotSupported({
   const navigate = useNavigate();
   useEffect(() => {
     if (isNarrowWidth) {
-      navigate(redirectTo);
+      void navigate(redirectTo);
     }
   }, [isNarrowWidth, navigate, redirectTo]);
   return isNarrowWidth ? null : children;
@@ -68,7 +68,7 @@ function WideNotSupported({
   const navigate = useNavigate();
   useEffect(() => {
     if (!isNarrowWidth) {
-      navigate(redirectTo);
+      void navigate(redirectTo);
     }
   }, [isNarrowWidth, navigate, redirectTo]);
   return isNarrowWidth ? children : null;
@@ -92,7 +92,7 @@ export function FinancesApp() {
   const { t } = useTranslation();
 
   // TODO: Replace with `useAccounts` hook once it's updated to return the useQuery results.
-  const { data: accounts, isSuccess: isAccountsLoaded } = useQuery(
+  const { data: accounts, isFetching: isAccountsFetching } = useQuery(
     accountQueries.list(),
   );
 
@@ -136,13 +136,13 @@ export function FinancesApp() {
       );
     }
 
-    run();
+    void run();
   });
 
   useEffect(() => init(), []);
 
   useEffect(() => {
-    dispatch(getLatestAppVersion());
+    void dispatch(getLatestAppVersion());
   }, [dispatch]);
 
   useEffect(() => {
@@ -245,16 +245,14 @@ export function FinancesApp() {
                 <Route
                   path="/"
                   element={
-                    isAccountsLoaded ? (
-                      accounts.length > 0 ? (
-                        <Navigate to="/budget" replace />
-                      ) : (
-                        // If there are no accounts, we want to redirect the user to
-                        // the All Accounts screen which will prompt them to add an account
-                        <Navigate to="/accounts" replace />
-                      )
-                    ) : (
+                    isAccountsFetching || !accounts ? (
                       <LoadingIndicator />
+                    ) : accounts.length > 0 ? (
+                      <Navigate to="/budget" replace />
+                    ) : (
+                      // If there are no accounts, we want to redirect the user to
+                      // the All Accounts screen which will prompt them to add an account
+                      <Navigate to="/accounts" replace />
                     )
                   }
                 />

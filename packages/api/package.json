@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@actual-app/crdt": "workspace:^",
-    "better-sqlite3": "^12.5.0",
+    "better-sqlite3": "^12.6.2",
     "compare-versions": "^6.1.1",
     "node-fetch": "^3.3.2",
     "uuid": "^13.0.0"
@@ -29,7 +29,7 @@
   "devDependencies": {
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.18"
   },
   "engines": {
     "node": ">=20"

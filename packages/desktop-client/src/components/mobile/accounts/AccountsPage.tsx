@@ -506,7 +506,7 @@ AccountList.displayName = 'AccountList';
 
 export function AccountsPage() {
   const dispatch = useDispatch();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');
@@ -515,7 +515,7 @@ export function AccountsPage() {
 
   const onOpenAccount = useCallback(
     (account: AccountEntity) => {
-      navigate(`/accounts/${account.id}`);
+      void navigate(`/accounts/${account.id}`);
     },
     [navigate],
   );

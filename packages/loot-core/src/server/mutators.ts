@@ -66,7 +66,7 @@ export async function runHandler<T extends Handlers[keyof Handlers]>(
 
   const promise = handler(args);
   runningMethods.add(promise);
-  promise.then(() => {
+  void promise.then(() => {
     runningMethods.delete(promise);
   });
   return promise as Promise<ReturnType<T>>;

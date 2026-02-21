@@ -135,7 +135,7 @@ function UserDirectoryContent({ isModal }: ManageUserDirectoryContentProps) {
       await loadUsers();
     }
 
-    loadData();
+    void loadData();
 
     return () => {
       undo.setUndoState('openModal', null);
@@ -164,7 +164,7 @@ function UserDirectoryContent({ isModal }: ManageUserDirectoryContentProps) {
               button: {
                 title: t('Go to login'),
                 action: () => {
-                  dispatch(signOut());
+                  void dispatch(signOut());
                 },
               },
             },

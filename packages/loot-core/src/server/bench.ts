@@ -26,4 +26,4 @@ async function run() {
   logger.log(Date.now() - start);
 }
 
-run();
+void run();

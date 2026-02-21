@@ -92,7 +92,7 @@ const TransactionRow = memo(function TransactionRow({
             );
           case 'imported_payee':
             return (
-              <Field key={i} width="flex">
+              <Field key={i} width="flex" title={transaction.imported_payee}>
                 {transaction.imported_payee}
               </Field>
             );

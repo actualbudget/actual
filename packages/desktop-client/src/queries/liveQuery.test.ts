@@ -182,15 +182,15 @@ describe('liveQuery', () => {
     // Users should never call `run` manually but we'll do it to
     // test
 
-    lq.run();
+    void lq.run();
     await wait(0);
-    lq.run();
+    void lq.run();
     await wait(0);
-    lq.run();
+    void lq.run();
     await wait(0);
-    lq.run();
+    void lq.run();
     await wait(0);
-    lq.run();
+    void lq.run();
 
     // Wait for the same delay the server has
     await wait(500);

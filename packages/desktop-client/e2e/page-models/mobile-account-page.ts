@@ -56,7 +56,7 @@ export class MobileAccountPage {
    * Go to transaction creation page
    */
   async clickCreateTransaction() {
-    this.createTransactionButton.click();
+    await this.createTransactionButton.click();
     return new MobileTransactionEntryPage(this.page);
   }
 }

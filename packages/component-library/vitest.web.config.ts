@@ -5,7 +5,6 @@ import { defineConfig } from 'vitest/config';
 
 const resolveExtensions = [
   '.testing.ts',
-  '.web.ts',
   '.mjs',
   '.js',
   '.mts',

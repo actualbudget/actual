@@ -98,7 +98,7 @@ export function PostsOfflineNotification() {
               variant="primary"
               autoFocus
               onPress={() => {
-                onPost();
+                void onPost();
                 close();
               }}
             >

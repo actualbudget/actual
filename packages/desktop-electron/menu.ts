@@ -71,7 +71,7 @@ export function getMenu() {
           click: function (_menuItem, focusedWin) {
             // Undo
             if (focusedWin) {
-              (focusedWin as BrowserWindow).webContents.executeJavaScript(
+              void (focusedWin as BrowserWindow).webContents.executeJavaScript(
                 '__actionsForMenu.undo()',
               );
             }
@@ -84,7 +84,7 @@ export function getMenu() {
           click: function (_menuItem, focusedWin) {
             // Redo
             if (focusedWin) {
-              (focusedWin as BrowserWindow).webContents.executeJavaScript(
+              void (focusedWin as BrowserWindow).webContents.executeJavaScript(
                 '__actionsForMenu.redo()',
               );
             }
