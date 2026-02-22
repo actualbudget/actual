@@ -9,23 +9,6 @@ import peggyLoader from 'vite-plugin-peggy-loader';
 const lootCoreRoot = path.resolve(__dirname, '../loot-core');
 const distDir = path.resolve(__dirname, 'dist');
 const typesDir = path.resolve(__dirname, '@types');
-const inlinedTypesSrc = path.resolve(
-  __dirname,
-  'scripts/inlined-loot-core-types',
-);
-
-function copyDirRecursive(src: string, dest: string) {
-  fs.mkdirSync(dest, { recursive: true });
-  for (const name of fs.readdirSync(src)) {
-    const srcPath = path.join(src, name);
-    const destPath = path.join(dest, name);
-    if (fs.statSync(srcPath).isDirectory()) {
-      copyDirRecursive(srcPath, destPath);
-    } else {
-      fs.copyFileSync(srcPath, destPath);
-    }
-  }
-}
 
 function cleanOutputDirs() {
   return {
@@ -33,17 +16,6 @@ function cleanOutputDirs() {
     buildStart() {
       if (fs.existsSync(distDir)) fs.rmSync(distDir, { recursive: true });
       if (fs.existsSync(typesDir)) fs.rmSync(typesDir, { recursive: true });
-    },
-  };
-}
-
-function copyInlinedTypes() {
-  return {
-    name: 'copy-inlined-types',
-    buildStart() {
-      const dest = path.join(typesDir, 'loot-core');
-      fs.mkdirSync(path.dirname(dest), { recursive: true });
-      copyDirRecursive(inlinedTypesSrc, dest);
     },
   };
 }
@@ -87,26 +59,11 @@ export default defineConfig({
   },
   plugins: [
     cleanOutputDirs(),
-    copyInlinedTypes(),
     peggyLoader(),
     dts({
       tsconfigPath: path.resolve(__dirname, 'tsconfig.json'),
       outDir: path.resolve(__dirname, '@types'),
       rollupTypes: true,
-      // Rewrite loot-core imports to inlined types so published package has no loot-core type dependency.
-      beforeWriteFile(_, content) {
-        return {
-          content: content
-            .replace(
-              /from ['"]\.\/packages\/loot-core\/src\/([^'"]+)['"]/g,
-              "from './loot-core/$1'",
-            )
-            .replace(
-              /from ['"]loot-core\/([^'"]+)['"]/g,
-              "from './loot-core/$1'",
-            ),
-        };
-      },
     }),
     copyMigrationsAndDefaultDb(),
     visualizer({ template: 'raw-data', filename: 'app/stats.json' }),
