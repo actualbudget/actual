@@ -49,6 +49,7 @@ function buildGraphPoint({
   total,
   change,
   isProjection,
+  skipAllocations,
 }: {
   interval: string;
   locale: Locale;
@@ -57,6 +58,7 @@ function buildGraphPoint({
   total: number;
   change: number;
   isProjection?: boolean;
+  skipAllocations?: boolean;
 }) {
   const displayFormat = getDisplayFormat(interval);
   const tooltipFormat = getTooltipFormat(interval);
@@ -68,10 +70,10 @@ function buildGraphPoint({
   } else {
     x = d.parseISO(month + '-01');
   }
-  // Projected points only have an aggregated total, so show it entirely as
-  // assets or debt in tooltips instead of attempting per-account split.
-  const assetsValue = total >= 0 ? total : 0;
-  const debtValue = total < 0 ? -total : 0;
+  // When account-level balances are added immediately after this call,
+  // skip computing the derived assets/debt split here.
+  const assetsValue = skipAllocations ? 0 : total >= 0 ? total : 0;
+  const debtValue = skipAllocations ? 0 : total < 0 ? -total : 0;
 
   return {
     x: d.format(x, displayFormat, { locale }),
@@ -327,6 +329,7 @@ function recalculate(
         month: intervalItem,
         total,
         change,
+        skipAllocations: true,
       }),
       assets: format(assets, 'financial'),
       debt: `-${format(debt, 'financial')}`,
@@ -482,13 +485,7 @@ async function applyProjection({
   let lastProjectionMonth: string | null = null;
 
   for (const { month, values } of budgetMonthsData) {
-    const { totalBudgeted, totalBudgetIncome, netChange } =
-      calculateNetChange(values);
-
-    if (totalBudgetIncome === 0 && totalBudgeted === 0) {
-      continue;
-    }
-
+    const { netChange } = calculateNetChange(values);
     const total = lastTotal + netChange;
 
     projectedPoints.push(
@@ -516,17 +513,7 @@ async function applyProjection({
       },
     };
   }
-
-  if (!lastProjectionMonth) {
-    return {
-      ...data,
-      graphData: {
-        ...data.graphData,
-        data: dataWithProjection,
-      },
-    };
-  }
-  const projectedEndDate = monthUtils.lastDayOfMonth(lastProjectionMonth);
+  const projectedEndDate = monthUtils.lastDayOfMonth(lastProjectionMonth!);
 
   return {
     ...data,

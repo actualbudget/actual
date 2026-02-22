@@ -72,7 +72,12 @@ function TrendTooltip({ active, payload, style }: TrendTooltipProps) {
           <div style={{ marginBottom: 10 }}>
             <strong>
               {payload[0].payload.date}
-              {isProjection ? ` ${t('(projected)')}` : ''}
+              {isProjection && (
+                <>
+                  {' '}
+                  <Trans>(projected)</Trans>
+                </>
+              )}
             </strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
