@@ -258,16 +258,20 @@ export function getRecurringDescription(
   return `${desc}${suffix}`.trim();
 }
 
+type ScheduleRuleOptions = IRuleOptions & {
+  frequency: string;
+  interval?: number;
+  byHourOfDay?: number[];
+};
+
 export function recurConfigToRSchedule(config) {
-  const base: IRuleOptions = {
+  const base: ScheduleRuleOptions = {
     start: monthUtils.parseDate(config.start),
-    // @ts-expect-error: issues with https://gitlab.com/john.carroll.p/rschedule/-/issues/86
     frequency: config.frequency.toUpperCase(),
     byHourOfDay: [12],
   };
 
   if (config.interval) {
-    // @ts-expect-error: issues with https://gitlab.com/john.carroll.p/rschedule/-/issues/86
     base.interval = config.interval;
   }
 
