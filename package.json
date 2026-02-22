@@ -94,7 +94,7 @@
   },
   "lint-staged": {
     "*.{js,mjs,jsx,ts,tsx,md,json,yml,yaml}": [
-      "yarn format:fix --no-error-on-unmatched-pattern"
+      "oxfmt --no-error-on-unmatched-pattern"
     ],
     "*.{js,mjs,jsx,ts,tsx}": [
       "yarn lint:fix"
