@@ -522,7 +522,7 @@ async function applyProjection({
       end: projectedEndDate,
       hasNegative:
         data.graphData.hasNegative || projectedPoints.some(p => p.y < 0),
-      data: [...dataWithProjection, ...projectedPoints],
+      data: [...dataWithProjection.slice(0, currentIndex + 1), ...projectedPoints],
     },
   };
 }
