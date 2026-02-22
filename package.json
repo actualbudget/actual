@@ -12,11 +12,9 @@
     "type": "git",
     "url": "git@github.com:actualbudget/actual.git"
   },
-  "workspaces": {
-    "packages": [
-      "packages/*"
-    ]
-  },
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "start": "yarn start:browser",
     "start:server": "yarn workspace @actual-app/sync-server start",
@@ -106,5 +104,5 @@
     "node": ">=22",
     "yarn": "^4.9.1"
   },
-  "packageManager": "yarn@4.10.3"
+  "packageManager": "yarn@6.0.0-rc.15"
 }
