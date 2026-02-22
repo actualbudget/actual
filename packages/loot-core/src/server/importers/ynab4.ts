@@ -9,8 +9,7 @@ import { amountToInteger, groupBy, sortByKey } from '../../shared/util';
 // This is a special usage of the API because this package is embedded
 // into Actual itself. We call handlers directly to avoid cyclic dependency
 // between loot-core and @actual-app/api
-import { app } from '../main-app';
-import { runHandler } from '../mutators';
+import { send } from '../main-app';
 
 import type * as YNAB4 from './ynab4-types';
 
@@ -25,7 +24,7 @@ async function importAccounts(
   return Promise.all(
     accounts.map(async account => {
       if (!account.isTombstone) {
-        const id = await runHandler(app.handlers['api/account-create'], {
+        const id = await send('api/account-create', {
           account: {
             name: account.accountName,
             offbudget: account.onBudget ? false : true,
@@ -52,7 +51,7 @@ async function importCategories(
         masterCategory.subCategories &&
         masterCategory.subCategories.some(cat => !cat.isTombstone)
       ) {
-        const id = await runHandler(app.handlers['api/category-group-create'], {
+        const id = await send('api/category-group-create', {
           group: {
             name: masterCategory.name,
             is_income: false,
@@ -60,7 +59,7 @@ async function importCategories(
         });
         entityIdMap.set(masterCategory.entityId, id);
         if (masterCategory.note) {
-          void runHandler(app.handlers['notes-save'], {
+          void send('notes-save', {
             id,
             note: masterCategory.note,
           });
@@ -93,7 +92,7 @@ async function importCategories(
                 categoryName = categoryNameParts.join('/').trim();
               }
 
-              const id = await runHandler(app.handlers['api/category-create'], {
+              const id = await send('api/category-create', {
                 category: {
                   name: categoryName,
                   group_id: entityIdMap.get(category.masterCategoryId),
@@ -101,7 +100,7 @@ async function importCategories(
               });
               entityIdMap.set(category.entityId, id);
               if (category.note) {
-                void runHandler(app.handlers['notes-save'], {
+                void send('notes-save', {
                   id,
                   note: category.note,
                 });
@@ -120,7 +119,7 @@ async function importPayees(
 ) {
   for (const payee of data.payees) {
     if (!payee.isTombstone) {
-      const id = await runHandler(app.handlers['api/payee-create'], {
+      const id = await send('api/payee-create', {
         payee: {
           name: payee.name,
           transfer_acct: entityIdMap.get(payee.targetAccountId) || null,
@@ -138,14 +137,14 @@ async function importTransactions(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
 ) {
-  const categories = await runHandler(app.handlers['api/categories-get'], {
+  const categories = await send('api/categories-get', {
     grouped: false,
   });
   const incomeCategoryId: string = categories.find(
     cat => cat.name === 'Income',
   ).id;
-  const accounts = await runHandler(app.handlers['api/accounts-get']);
-  const payees = await runHandler(app.handlers['api/payees-get']);
+  const accounts = await send('api/accounts-get');
+  const payees = await send('api/payees-get');
 
   function getCategory(id: string) {
     if (id == null || id === 'Category/__Split__') {
@@ -249,7 +248,7 @@ async function importTransactions(
         })
         .filter(x => x);
 
-      await runHandler(app.handlers['api/transactions-add'], {
+      await send('api/transactions-add', {
         accountId: entityIdMap.get(accountId),
         transactions: toImport,
         learnCategories: true,
@@ -295,7 +294,7 @@ async function importBudgets(
 ) {
   const budgets = sortByKey(data.monthlyBudgets, 'month');
 
-  await runHandler(app.handlers['api/batch-budget-start']);
+  await send('api/batch-budget-start');
   try {
     for (const budget of budgets) {
       const filled = fillInBudgets(
@@ -312,20 +311,20 @@ async function importBudgets(
             return;
           }
 
-          await runHandler(app.handlers['api/budget-set-amount'], {
+          await send('api/budget-set-amount', {
             month,
             categoryId: catId,
             amount,
           });
 
           if (catBudget.overspendingHandling === 'AffectsBuffer') {
-            await runHandler(app.handlers['api/budget-set-carryover'], {
+            await send('api/budget-set-carryover', {
               month,
               categoryId: catId,
               flag: false,
             });
           } else if (catBudget.overspendingHandling === 'Confined') {
-            await runHandler(app.handlers['api/budget-set-carryover'], {
+            await send('api/budget-set-carryover', {
               month,
               categoryId: catId,
               flag: true,
@@ -335,7 +334,7 @@ async function importBudgets(
       );
     }
   } finally {
-    await runHandler(app.handlers['api/batch-budget-end']);
+    await send('api/batch-budget-end');
   }
 }
 
