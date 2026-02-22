@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "lib": ["ES2021"],
-    "noEmit": true,
+    "noEmit": false,
     "outDir": "build",
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
