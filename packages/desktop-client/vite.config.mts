@@ -31,7 +31,7 @@ const addWatchers = (): Plugin => ({
 const injectShims = (): Plugin[] => {
   const buildShims = path.resolve('./src/build-shims.js');
   const commonInject = {
-    exclude: ['src/setupTests.js'],
+    exclude: ['src/setupTests.ts'],
     global: [buildShims, 'global'],
   };
 
@@ -82,10 +82,6 @@ export default defineConfig(async ({ mode }) => {
   }
 
   let resolveExtensions = [
-    '.web.js',
-    '.web.jsx',
-    '.web.ts',
-    '.web.tsx',
     '.mjs',
     '.js',
     '.mts',
@@ -216,7 +212,7 @@ export default defineConfig(async ({ mode }) => {
       include: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
       environment: 'jsdom',
       globals: true,
-      setupFiles: './src/setupTests.js',
+      setupFiles: './src/setupTests.ts',
       testTimeout: 10000,
       onConsoleLog(log: string, type: 'stdout' | 'stderr'): boolean | void {
         // print only console.error

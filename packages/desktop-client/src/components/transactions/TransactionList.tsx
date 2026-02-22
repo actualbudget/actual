@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { getUpcomingDays } from 'loot-core/shared/schedules';
@@ -434,7 +434,7 @@ export function TransactionList({
             onRefetch();
           } else {
             onChange(changes.newTransaction, changes.data);
-            saveDiffAndApply(
+            void saveDiffAndApply(
               changes.diff,
               changes,
               onChange,
@@ -477,7 +477,7 @@ export function TransactionList({
     (id: TransactionEntity['id']) => {
       const changes = addSplitTransaction(transactionsLatest.current, id);
       onChange(changes.newTransaction, changes.data);
-      saveDiffAndApply(
+      void saveDiffAndApply(
         changes.diff,
         changes,
         onChange,
@@ -492,7 +492,7 @@ export function TransactionList({
     (id: TransactionEntity['id']) => {
       const changes = splitTransaction(transactionsLatest.current, id);
       onChange(changes.newTransaction, changes.data);
-      saveDiffAndApply(
+      void saveDiffAndApply(
         changes.diff,
         changes,
         onChange,
@@ -561,14 +561,17 @@ export function TransactionList({
 
   const onManagePayees = useCallback(
     (id: PayeeEntity['id']) => {
-      navigate('/payees', id ? { state: { selectedPayee: id } } : undefined);
+      void navigate(
+        '/payees',
+        id ? { state: { selectedPayee: id } } : undefined,
+      );
     },
     [navigate],
   );
 
   const onNavigateToTransferAccount = useCallback(
     (accountId: AccountEntity['id']) => {
-      navigate(`/accounts/${accountId}`);
+      void navigate(`/accounts/${accountId}`);
     },
     [navigate],
   );

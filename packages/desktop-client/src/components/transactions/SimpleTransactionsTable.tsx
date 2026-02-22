@@ -63,7 +63,7 @@ const TransactionRow = memo(function TransactionRow({
 }: TransactionRowProps) {
   const { t } = useTranslation();
 
-  const category = useCategory(transaction.category || '');
+  const { data: category } = useCategory(transaction.category);
   const account = useAccount(transaction.account);
 
   const dispatchSelected = useSelectedDispatch();
@@ -92,7 +92,7 @@ const TransactionRow = memo(function TransactionRow({
             );
           case 'imported_payee':
             return (
-              <Field key={i} width="flex">
+              <Field key={i} width="flex" title={transaction.imported_payee}>
                 {transaction.imported_payee}
               </Field>
             );

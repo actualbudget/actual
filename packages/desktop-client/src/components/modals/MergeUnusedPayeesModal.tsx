@@ -7,7 +7,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import type { PayeeEntity } from 'loot-core/types/models';
 import type { TransObjectLiteral } from 'loot-core/types/util';
 
@@ -30,7 +30,7 @@ export function MergeUnusedPayeesModal({
   targetPayeeId,
 }: MergeUnusedPayeesModalProps) {
   const { t } = useTranslation();
-  const allPayees = usePayees();
+  const { data: allPayees = [] } = usePayees();
   const modalStack = useSelector(state => state.modals.modalStack);
   const isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
   const dispatch = useDispatch();
@@ -197,7 +197,7 @@ export function MergeUnusedPayeesModal({
                 autoFocus
                 style={{ marginRight: 10 }}
                 onPress={() => {
-                  onMerge(targetPayee);
+                  void onMerge(targetPayee);
                   close();
                 }}
               >
@@ -207,7 +207,7 @@ export function MergeUnusedPayeesModal({
                 <Button
                   style={{ marginRight: 10 }}
                   onPress={() => {
-                    onMergeAndCreateRule(targetPayee);
+                    void onMergeAndCreateRule(targetPayee);
                     close();
                   }}
                 >

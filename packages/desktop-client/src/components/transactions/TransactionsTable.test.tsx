@@ -10,7 +10,7 @@ import {
   generateCategoryGroups,
   generateTransaction,
 } from 'loot-core/mocks';
-import { initServer } from 'loot-core/platform/client/fetch';
+import { initServer } from 'loot-core/platform/client/connection';
 import {
   addSplitTransaction,
   realizeTempTransactions,
@@ -33,9 +33,12 @@ import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
 import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
 import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
-import { TestProvider } from '@desktop-client/redux/mock';
+import { createTestQueryClient, TestProviders } from '@desktop-client/mocks';
+import { payeeQueries } from '@desktop-client/payees';
 
-vi.mock('loot-core/platform/client/fetch');
+const queryClient = createTestQueryClient();
+
+vi.mock('loot-core/platform/client/connection');
 vi.mock('../../hooks/useFeatureFlag', () => ({
   default: vi.fn().mockReturnValue(false),
 }));
@@ -68,22 +71,7 @@ const payees: PayeeEntity[] = [
     name: 'This guy on the side of the road',
   },
 ];
-vi.mock('../../hooks/usePayees', async importOriginal => {
-  const actual =
-    // oxlint-disable-next-line typescript/consistent-type-imports
-    await importOriginal<typeof import('../../hooks/usePayees')>();
-  return {
-    ...actual,
-    usePayees: () => payees,
-    usePayeesById: () => {
-      const payeesById: Record<string, PayeeEntity> = {};
-      payees.forEach(payee => {
-        payeesById[payee.id] = payee;
-      });
-      return payeesById;
-    },
-  };
-});
+queryClient.setQueryData(payeeQueries.list().queryKey, payees);
 
 const categoryGroups = generateCategoryGroups([
   {
@@ -195,7 +183,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
   // implementation properly uses the right latest state even if the
   // hook dependencies haven't changed
   return (
-    <TestProvider>
+    <TestProviders queryClient={queryClient}>
       <AuthProvider>
         <SpreadsheetProvider>
           <SchedulesProvider>
@@ -226,7 +214,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
           </SchedulesProvider>
         </SpreadsheetProvider>
       </AuthProvider>
-    </TestProvider>
+    </TestProviders>
   );
 }
 

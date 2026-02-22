@@ -8,7 +8,7 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { getSecretsError } from 'loot-core/shared/errors';
 
 import { Error } from '@desktop-client/components/alerts';
@@ -142,7 +142,7 @@ export const GoCardlessInitialiseModal = ({
               variant="primary"
               isLoading={isLoading}
               onPress={() => {
-                onSubmit(close);
+                void onSubmit(close);
               }}
             >
               <Trans>Save and continue</Trans>

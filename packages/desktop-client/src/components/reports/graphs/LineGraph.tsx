@@ -168,8 +168,8 @@ export function LineGraph({
 }: LineGraphProps) {
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
-  const categories = useCategories();
-  const accounts = useAccounts();
+  const { data: categories = { grouped: [], list: [] } } = useCategories();
+  const { data: accounts = [] } = useAccounts();
   const privacyMode = usePrivacyMode();
   const format = useFormat();
 

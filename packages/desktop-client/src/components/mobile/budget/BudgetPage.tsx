@@ -27,7 +27,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { groupById } from 'loot-core/shared/util';
 import type { TransObjectLiteral } from 'loot-core/types/util';
@@ -73,7 +73,12 @@ function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
 export function BudgetPage() {
   const { t } = useTranslation();
   const locale = useLocale();
-  const { list: categories, grouped: categoryGroups } = useCategories();
+  const {
+    data: { list: categories, grouped: categoryGroups } = {
+      list: [],
+      grouped: [],
+    },
+  } = useCategories();
   const [budgetTypePref] = useSyncedPref('budgetType');
   const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'envelope';
   const spreadsheet = useSpreadsheet();
@@ -109,7 +114,7 @@ export function BudgetPage() {
       setInitialized(true);
     }
 
-    init();
+    void init();
   }, [budgetType, startMonth, dispatch, spreadsheet]);
 
   const onBudgetAction = useCallback(
@@ -474,7 +479,7 @@ export function BudgetPage() {
   );
 
   const onSwitchBudgetFile = useCallback(() => {
-    dispatch(closeBudget());
+    void dispatch(closeBudget());
   }, [dispatch]);
 
   const onOpenBudgetMonthMenu = useCallback(
@@ -582,7 +587,7 @@ export function BudgetPage() {
       <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
         <SyncRefresh
           onSync={async () => {
-            dispatch(sync());
+            void dispatch(sync());
           }}
         >
           {({ onRefresh }) => (
@@ -661,14 +666,14 @@ function UncategorizedTransactionsBanner(props) {
     [],
   );
 
-  const { transactions, isLoading } = useTransactions({
+  const { transactions, isPending: isTransactionsLoading } = useTransactions({
     query: transactionsQuery,
     options: {
-      pageCount: 1000,
+      pageSize: 1000,
     },
   });
 
-  if (isLoading || transactions.length === 0) {
+  if (isTransactionsLoading || transactions.length === 0) {
     return null;
   }
 
@@ -725,7 +730,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
   >(envelopeBudget.toBudget);
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
-  const { list: categories } = useCategories();
+  const { data: { list: categories } = { list: [] } } = useCategories();
   const categoriesById = useMemo(() => groupById(categories), [categories]);
 
   const openCoverOverbudgetedModal = useCallback(() => {
@@ -805,7 +810,12 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
 function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
   const { t } = useTranslation();
 
-  const { list: categories, grouped: categoryGroups } = useCategories();
+  const {
+    data: { list: categories, grouped: categoryGroups } = {
+      list: [],
+      grouped: [],
+    },
+  } = useCategories();
   const categoriesById = useMemo(() => groupById(categories), [categories]);
 
   const dispatch = useDispatch();

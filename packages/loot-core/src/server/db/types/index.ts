@@ -22,6 +22,8 @@ export type DbAccount = {
   subtype?: string | null;
   bank?: string | null;
   account_sync_source?: 'simpleFin' | 'goCardless' | null;
+  last_reconciled?: string | null;
+  last_sync?: string | null;
 };
 
 export type DbBank = {

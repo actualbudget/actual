@@ -34,13 +34,7 @@
       "@desktop-client/e2e/*": ["./packages/desktop-client/e2e/*"],
       // Allow importing from hyperformula's internal typings for custom function plugins
       "hyperformula/typings/*": ["./node_modules/hyperformula/typings/*"]
-    },
-    "plugins": [
-      {
-        "name": "typescript-strict-plugin",
-        "path": ["./packages"]
-      }
-    ]
+    }
   },
   "include": ["packages/**/*", "bin/*.ts"],
   "exclude": [
@@ -52,9 +46,11 @@
     "**/client-build/*",
     "**/dist/*",
     "**/lib-dist/*",
+    "packages/api/@types",
     "**/test-results/*",
     "**/playwright-report/*",
-    "**/service-worker/*"
+    "**/service-worker/*",
+    "packages/docs/**/*"
   ],
   "ts-node": {
     "compilerOptions": {

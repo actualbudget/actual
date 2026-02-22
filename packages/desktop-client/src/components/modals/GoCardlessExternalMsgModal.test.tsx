@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 
 import { GoCardlessExternalMsgModal } from './GoCardlessExternalMsgModal';
 
-import { TestProvider } from '@desktop-client/redux/mock';
+import { TestProviders } from '@desktop-client/mocks';
 
 vi.mock('@desktop-client/hooks/useGlobalPref', () => ({
   useGlobalPref: () => [null],
@@ -50,9 +50,9 @@ describe('GoCardlessExternalMsgModal - Country Auto-selection', () => {
     });
 
     render(
-      <TestProvider>
+      <TestProviders>
         <GoCardlessExternalMsgModal {...mockProps} />
-      </TestProvider>,
+      </TestProviders>,
     );
 
     const countryInput = screen.getByPlaceholderText('(please select)');
@@ -76,9 +76,9 @@ describe('GoCardlessExternalMsgModal - Country Auto-selection', () => {
     });
 
     render(
-      <TestProvider>
+      <TestProviders>
         <GoCardlessExternalMsgModal {...mockProps} />
-      </TestProvider>,
+      </TestProviders>,
     );
 
     const countryInput = screen.getByPlaceholderText('(please select)');
@@ -101,9 +101,9 @@ describe('GoCardlessExternalMsgModal - Country Auto-selection', () => {
     });
 
     render(
-      <TestProvider>
+      <TestProviders>
         <GoCardlessExternalMsgModal {...mockProps} />
-      </TestProvider>,
+      </TestProviders>,
     );
 
     const countryInput = screen.getByPlaceholderText('(please select)');
@@ -126,9 +126,9 @@ describe('GoCardlessExternalMsgModal - Country Auto-selection', () => {
     });
 
     render(
-      <TestProvider>
+      <TestProviders>
         <GoCardlessExternalMsgModal {...mockProps} />
-      </TestProvider>,
+      </TestProviders>,
     );
 
     const countryInput = screen.getByPlaceholderText('(please select)');

@@ -80,5 +80,17 @@
     "name": "Butterfly",
     "repo": "samekh248/actual-butterfly-theme",
     "colors": ["#12110F", "#22201D", "#F35B16", "#3D261C", "#E5E7EB", "#1B8366"]
+  },
+  {
+    "name": "High-contrast (Light)",
+    "repo": "Juulz/high-contrast-light",
+    "colors": [
+      "#000",
+      "hsl(37, 100%, 21%)",
+      "hsl(228, 100%, 33%)",
+      "#fff",
+      "hsl(0, 0%, 90%)",
+      "hsl(90, 100%, 17%)"
+    ]
   }
 ]

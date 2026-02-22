@@ -8,7 +8,7 @@ import { Button } from './Button';
 import { ColorPicker } from './ColorPicker';
 
 const meta = {
-  title: 'ColorPicker',
+  title: 'Components/ColorPicker',
   component: ColorPicker,
   parameters: {
     layout: 'centered',

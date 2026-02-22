@@ -4,7 +4,7 @@ import { Block } from './Block';
 import { theme } from './theme';
 
 const meta = {
-  title: 'Block',
+  title: 'Components/Block',
   component: Block,
   parameters: {
     layout: 'centered',

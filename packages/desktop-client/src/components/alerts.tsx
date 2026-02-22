@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React from 'react';
 import type { ComponentType, CSSProperties, ReactNode } from 'react';
 
@@ -12,7 +11,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 type AlertProps = {
-  icon?: ComponentType<{ width?: number; style?: CSSProperties }>;
+  icon: ComponentType<{ width?: number; style?: CSSProperties }>;
   color?: string;
   backgroundColor?: string;
   style?: CSSProperties;

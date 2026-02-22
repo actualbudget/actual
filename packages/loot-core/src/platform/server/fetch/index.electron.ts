@@ -1,9 +1,8 @@
 import { logger } from '../log';
 
-export const fetch = async (
-  input: RequestInfo | URL,
-  options?: RequestInit,
-) => {
+import type * as T from './index';
+
+export const fetch: typeof T.fetch = async (input, options) => {
   try {
     return await globalThis.fetch(input, {
       ...options,

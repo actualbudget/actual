@@ -33,6 +33,7 @@ export function CurrencySettings() {
         ['CRC', t('Costa Rican Colón')],
         ['CZK', t('Czech Koruna')],
         ['DKK', t('Danish Krone')],
+        ['DOP', t('Dominican Peso')],
         ['EGP', t('Egyptian Pound')],
         ['EUR', t('Euro')],
         ['GBP', t('Pound Sterling')],
@@ -43,6 +44,7 @@ export function CurrencySettings() {
         ['INR', t('Indian Rupee')],
         ['JMD', t('Jamaican Dollar')],
         ['JPY', t('Japanese Yen')],
+        ['KRW', t('South Korean Won')],
         ['LKR', t('Sri Lankan Rupee')],
         ['MDL', t('Moldovan Leu')],
         ['MYR', t('Malaysian Ringgit')],
@@ -60,6 +62,7 @@ export function CurrencySettings() {
         ['UAH', t('Ukrainian Hryvnia')],
         ['USD', t('US Dollar')],
         ['UZS', t('Uzbek Soum')],
+        ['VND', t('Vietnamese Dong')],
       ]),
     [t],
   );

@@ -1,10 +1,8 @@
 // @ts-strict-ignore
 import { join } from './path-join';
 
-import type * as T from '.';
-
 let documentDir;
-export const _setDocumentDir: T._SetDocumentDir = dir => (documentDir = dir);
+export const _setDocumentDir = dir => (documentDir = dir);
 
 export const getDocumentDir = () => {
   if (!documentDir) {

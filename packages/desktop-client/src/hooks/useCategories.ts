@@ -1,8 +1,21 @@
-import { useCategoriesQuery } from './useCategoriesQuery';
+import { useQuery } from '@tanstack/react-query';
+
+import { groupById } from 'loot-core/shared/util';
+
+import { categoryQueries } from '@desktop-client/budget';
 
 export function useCategories() {
-  const query = useCategoriesQuery();
-  // TODO: Update to return query states (e.g. isFetching, isError, etc)
-  // so clients can handle loading and error states appropriately.
-  return query.data ?? { list: [], grouped: [] };
+  return useQuery(categoryQueries.list());
+}
+
+export function useCategoriesById() {
+  return useQuery({
+    ...categoryQueries.list(),
+    select: data => {
+      return {
+        list: groupById(data.list),
+        grouped: groupById(data.grouped),
+      };
+    },
+  });
 }

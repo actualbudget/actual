@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { useEffect, useEffectEvent, useReducer, useState } from 'react';
 
-import { send, sendCatch } from 'loot-core/platform/client/fetch';
+import { send, sendCatch } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
@@ -289,7 +289,7 @@ export function useScheduleEdit({
 
   // Load schedule on mount
   useEffect(() => {
-    setSchedule();
+    void setSchedule();
   }, []);
 
   // Update upcoming dates when date changes
@@ -318,7 +318,7 @@ export function useScheduleEdit({
       });
       dispatch({ type: 'set-upcoming-dates', dates: data });
     }
-    run();
+    void run();
   }, [state.fields.date]);
 
   // Load linked transactions
@@ -372,7 +372,7 @@ export function useScheduleEdit({
         return typedCond;
       });
 
-      send('make-filters-from-conditions', {
+      void send('make-filters-from-conditions', {
         conditions,
       }).then(({ filters }) => {
         if (current) {

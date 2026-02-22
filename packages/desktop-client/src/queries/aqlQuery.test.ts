@@ -1,11 +1,11 @@
-import * as fetch from 'loot-core/platform/client/fetch';
+import * as connection from 'loot-core/platform/client/connection';
 import { q } from 'loot-core/shared/query';
 
 import { aqlQuery } from './aqlQuery';
 
 describe('aqlQuery', () => {
   it('runs an AQL query', async () => {
-    vi.spyOn(fetch, 'send').mockImplementation((name, args) => {
+    vi.spyOn(connection, 'send').mockImplementation((name, args) => {
       if (name === 'query') {
         return Promise.resolve({ data: args, dependencies: [] });
       }

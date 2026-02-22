@@ -24,6 +24,7 @@ import {
 import { AmountInput } from '@desktop-client/components/util/AmountInput';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -39,8 +40,10 @@ export function CoverModal({
   onSubmit,
 }: CoverModalProps) {
   const { t } = useTranslation();
+  const [hideFraction] = useSyncedPref('hideFraction');
 
-  const { grouped: originalCategoryGroups } = useCategories();
+  const { data: { grouped: originalCategoryGroups } = { grouped: [] } } =
+    useCategories();
   const [categoryGroups, categories] = useMemo(() => {
     const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
     const categoryGroups = showToBeBudgeted
@@ -106,7 +109,7 @@ export function CoverModal({
             <InitialFocus>
               <AmountInput
                 value={amount}
-                autoDecimals
+                autoDecimals={String(hideFraction) !== 'true'}
                 style={{
                   marginLeft: styles.mobileEditingPadding,
                   marginRight: styles.mobileEditingPadding,

@@ -469,3 +469,93 @@ export function scheduleIsRecurring(dateCond: Condition | null) {
 
   return value.type === 'recur';
 }
+
+export type ScheduleStatusType = ReturnType<typeof getStatus>;
+export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
+
+export function isForPreview(
+  schedule: ScheduleEntity,
+  statuses: ScheduleStatuses,
+) {
+  const status = statuses.get(schedule.id);
+  return (
+    !schedule.completed &&
+    ['due', 'upcoming', 'missed', 'paid'].includes(status!)
+  );
+}
+
+export function computeSchedulePreviewTransactions(
+  schedules: readonly ScheduleEntity[],
+  statuses: ScheduleStatuses,
+  upcomingLength?: string,
+  filter?: (schedule: ScheduleEntity) => boolean,
+) {
+  const schedulesForPreview = schedules
+    .filter(s => isForPreview(s, statuses))
+    .filter(filter ? filter : () => true);
+
+  const today = d.startOfDay(monthUtils.parseDate(monthUtils.currentDay()));
+
+  const upcomingPeriodEnd = d.startOfDay(
+    monthUtils.parseDate(
+      monthUtils.addDays(today, getUpcomingDays(upcomingLength)),
+    ),
+  );
+
+  return schedulesForPreview
+    .flatMap(schedule => {
+      const { date: dateConditions } = extractScheduleConds(
+        schedule._conditions,
+      );
+
+      const status = statuses.get(schedule.id);
+      const isRecurring = scheduleIsRecurring(dateConditions);
+
+      const dates = [schedule.next_date];
+      let day = d.startOfDay(monthUtils.parseDate(schedule.next_date));
+      if (isRecurring) {
+        while (day <= upcomingPeriodEnd) {
+          const nextDate = getNextDate(dateConditions, day);
+
+          if (
+            d.startOfDay(monthUtils.parseDate(nextDate)) > upcomingPeriodEnd
+          ) {
+            break;
+          }
+
+          if (dates.includes(nextDate)) {
+            day = d.startOfDay(
+              monthUtils.parseDate(monthUtils.addDays(day, 1)),
+            );
+            continue;
+          }
+
+          dates.push(nextDate);
+          day = d.startOfDay(
+            monthUtils.parseDate(monthUtils.addDays(nextDate, 1)),
+          );
+        }
+      }
+
+      if (status === 'paid') {
+        dates.shift();
+      }
+
+      return dates.map(date => ({
+        id: 'preview/' + schedule.id + `/${date}`,
+        payee: schedule._payee,
+        account: schedule._account,
+        amount: getScheduledAmount(schedule._amount),
+        date,
+        schedule: schedule.id,
+        forceUpcoming:
+          (date !== schedule.next_date || status === 'paid') &&
+          date >= monthUtils.currentDay(),
+      }));
+    })
+    .sort(
+      (a, b) =>
+        monthUtils.parseDate(b.date).getTime() -
+          monthUtils.parseDate(a.date).getTime() || a.amount - b.amount,
+    );
+}

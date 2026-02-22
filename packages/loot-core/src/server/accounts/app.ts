@@ -89,8 +89,31 @@ async function updateAccount({
   return {};
 }
 
-async function getAccounts() {
-  return db.getAccounts();
+async function getAccounts(): Promise<AccountEntity[]> {
+  const dbAccounts = await db.getAccounts();
+  return dbAccounts.map(
+    dbAccount =>
+      ({
+        id: dbAccount.id,
+        name: dbAccount.name,
+        offbudget: dbAccount.offbudget,
+        closed: dbAccount.closed,
+        sort_order: dbAccount.sort_order,
+        last_reconciled: dbAccount.last_reconciled ?? null,
+        tombstone: dbAccount.tombstone,
+        account_id: dbAccount.account_id ?? null,
+        bank: dbAccount.bank ?? null,
+        bankName: dbAccount.bankName ?? null,
+        bankId: dbAccount.bankId ?? null,
+        mask: dbAccount.mask ?? null,
+        official_name: dbAccount.official_name ?? null,
+        balance_current: dbAccount.balance_current ?? null,
+        balance_available: dbAccount.balance_available ?? null,
+        balance_limit: dbAccount.balance_limit ?? null,
+        account_sync_source: dbAccount.account_sync_source ?? null,
+        last_sync: dbAccount.last_sync ?? null,
+      }) satisfies AccountEntity,
+  );
 }
 
 async function getAccountBalance({
@@ -254,7 +277,7 @@ async function linkSimpleFinAccount({
     startingBalance,
   );
 
-  await connection.send('sync-event', {
+  connection.send('sync-event', {
     type: 'success',
     tables: ['transactions'],
   });
@@ -326,7 +349,7 @@ async function linkPluggyAiAccount({
     startingBalance,
   );
 
-  await connection.send('sync-event', {
+  connection.send('sync-event', {
     type: 'success',
     tables: ['transactions'],
   });
@@ -407,7 +430,7 @@ async function closeAccount({
     if (numTransactions === 0) {
       await db.deleteAccount({ id });
     } else if (forced) {
-      const rows = await db.runQuery<
+      const rows = db.runQuery<
         Pick<db.DbViewTransaction, 'id' | 'transfer_id'>
       >(
         'SELECT id, transfer_id FROM v_transactions WHERE account = ?',
@@ -433,18 +456,18 @@ async function closeAccount({
 
         rows.forEach(row => {
           if (row.transfer_id) {
-            db.updateTransaction({
+            void db.updateTransaction({
               id: row.transfer_id,
               payee: null,
               transfer_id: null,
             });
           }
 
-          db.deleteTransaction({ id: row.id });
+          void db.deleteTransaction({ id: row.id });
         });
 
-        db.deleteAccount({ id });
-        db.deleteTransferPayee({ id: transferPayee.id });
+        void db.deleteAccount({ id });
+        void db.deleteTransferPayee({ id: transferPayee.id });
       });
     } else {
       if (balance !== 0 && transferAccountId == null) {
@@ -615,7 +638,7 @@ async function pollGoCardlessWebToken({
   }
 
   return new Promise(resolve => {
-    getData(data => {
+    void getData(data => {
       if (data.status === 'success') {
         resolve({ data: data.data });
         return;
@@ -928,9 +951,7 @@ async function accountsBankSync({
   const { 'user-id': userId, 'user-key': userKey } =
     await asyncStorage.multiGet(['user-id', 'user-key']);
 
-  const accounts = await db.runQuery<
-    db.DbAccount & { bankId: db.DbBank['bank_id'] }
-  >(
+  const accounts = db.runQuery<db.DbAccount & { bankId: db.DbBank['bank_id'] }>(
     `
     SELECT a.*, b.bank_id as bankId
     FROM accounts a
@@ -995,9 +1016,7 @@ async function simpleFinBatchSync({
 }): Promise<
   Array<{ accountId: AccountEntity['id']; res: SyncResponseWithErrors }>
 > {
-  const accounts = await db.runQuery<
-    db.DbAccount & { bankId: db.DbBank['bank_id'] }
-  >(
+  const accounts = db.runQuery<db.DbAccount & { bankId: db.DbBank['bank_id'] }>(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
          WHERE

@@ -32,7 +32,7 @@ type IScrollContext = {
 const ScrollContext = createContext<IScrollContext | undefined>(undefined);
 
 type ScrollProviderProps<T extends Element> = {
-  scrollableRef: RefObject<T>;
+  scrollableRef: RefObject<T | null>;
   isDisabled?: boolean;
   delayMs?: number;
   children?: ReactNode;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import type { Template } from 'loot-core/types/models/templates';
 
 export function useBudgetAutomations({
@@ -30,7 +30,7 @@ export function useBudgetAutomations({
         setLoading(false);
       }
     }
-    fetchAutomations();
+    void fetchAutomations();
     return () => {
       mounted = false;
     };

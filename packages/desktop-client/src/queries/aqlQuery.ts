@@ -1,4 +1,4 @@
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import type { Query } from 'loot-core/shared/query';
 
 export async function aqlQuery(query: Query) {

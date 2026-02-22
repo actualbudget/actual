@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { AlignedText } from './AlignedText';
 
 const meta = {
-  title: 'AlignedText',
+  title: 'Components/AlignedText',
   component: AlignedText,
   parameters: {
     layout: 'centered',

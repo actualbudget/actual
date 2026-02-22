@@ -15,7 +15,7 @@ Here are a couple of considerations to know about before making the decision to 
 
 - GoCardless [BankAccountData](/docs/advanced/bank-sync/gocardless/) (European Banks, **not accepting new accounts**)
 - [SimpleFIN Bridge](/docs/advanced/bank-sync/simplefin) (North American Banks)
-- Pluggy.ai (Brazilian Banks - [**Experimental feature**](/docs/experimental/pluggyai))
+- [Pluggy.ai](/docs/advanced/bank-sync/pluggyai) (Brazilian Banks)
 
 ### Retrieve Transactions
 

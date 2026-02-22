@@ -83,3 +83,14 @@ export const black = '#000000';
 export const hover = '#fafafa';
 export const border = '#e8ecf0';
 export const selected = '#b3d9ff';
+
+// Chart colors - Qualitative scale (9 colors)
+export const chartQual1 = '#45B29D'; // Dark Teal
+export const chartQual2 = '#EFC94C'; // Yellow
+export const chartQual3 = '#E27A3F'; // Orange
+export const chartQual4 = '#DF5A49'; // Light Red
+export const chartQual5 = '#5F91B8'; // Blue
+export const chartQual6 = '#E2A37F'; // Peach
+export const chartQual7 = '#55DBC1'; // Light Teal
+export const chartQual8 = '#EFDA97'; // Light Yellow
+export const chartQual9 = '#DF948A'; // Light Red

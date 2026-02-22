@@ -21,7 +21,7 @@ export type CustomReportEntity = {
   graphType: string;
   conditions?: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
-  data?: GroupedEntity;
+  metadata?: GroupedEntity;
   tombstone?: boolean;
 };
 

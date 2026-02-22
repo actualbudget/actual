@@ -40,11 +40,11 @@ export function DisplayPayeeProvider({
   );
   const { transactions: allSubtransactions = [] } = useTransactions({
     query: subtransactionsQuery,
-    options: { pageCount: transactions.length * 5 },
+    options: { pageSize: transactions.length * 5 },
   });
 
-  const accounts = useAccounts();
-  const payeesById = usePayeesById();
+  const { data: accounts = [] } = useAccounts();
+  const { data: payeesById = {} } = usePayeesById();
 
   const displayPayees = useMemo(() => {
     return transactions.reduce(

@@ -28,7 +28,7 @@ function coerceError(error) {
     return error;
   }
 
-  return { type: 'InternalError', message: error.message };
+  return { type: 'ServerError', message: error.message, cause: error };
 }
 
 export const init: T.Init = function (serverChn, handlers) {
@@ -79,11 +79,11 @@ export const init: T.Init = function (serverChn, handlers) {
                 result: { error, data: null },
               });
             } else {
-              serverChannel.postMessage({ type: 'error', id });
+              serverChannel.postMessage({ type: 'error', id, error });
             }
 
             // Only report internal errors
-            if (error.type === 'InternalError') {
+            if (error.type === 'ServerError') {
               captureException(nativeError);
             }
 
@@ -94,13 +94,25 @@ export const init: T.Init = function (serverChn, handlers) {
           },
         );
       } else {
-        logger.warn('Unknown method: ' + name);
-        serverChannel.postMessage({
-          type: 'reply',
-          id,
-          result: null,
-          error: APIError('Unknown method: ' + name),
-        });
+        logger.error('Unknown server method: ' + name);
+        captureException(new Error('Unknown server method: ' + name));
+        const unknownMethodError = APIError('Unknown server method: ' + name);
+
+        if (catchErrors) {
+          serverChannel.postMessage({
+            type: 'reply',
+            id,
+            result: catchErrors
+              ? { error: unknownMethodError, data: null }
+              : null,
+          });
+        } else {
+          serverChannel.postMessage({
+            type: 'error',
+            id,
+            error: unknownMethodError,
+          });
+        }
       }
     },
     false,

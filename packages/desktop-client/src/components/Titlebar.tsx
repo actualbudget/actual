@@ -20,7 +20,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { listen } from 'loot-core/platform/client/fetch';
+import { listen } from 'loot-core/platform/client/connection';
 import { isDevelopmentEnvironment } from 'loot-core/shared/environment';
 import * as Platform from 'loot-core/shared/platform';
 
@@ -322,7 +322,7 @@ export function Titlebar({ style }: TitlebarProps) {
 
       <Routes>
         <Route
-          path="/accounts"
+          path="*"
           element={
             location.state?.goBack ? (
               <Button variant="bare" onPress={() => navigate(-1)}>
@@ -340,8 +340,6 @@ export function Titlebar({ style }: TitlebarProps) {
         <Route path="/accounts/:id" element={<AccountSyncCheck />} />
 
         <Route path="/budget" element={<BudgetTitlebar />} />
-
-        <Route path="*" element={null} />
       </Routes>
       <View style={{ flex: 1 }} />
       <SpaceBetween gap={10}>

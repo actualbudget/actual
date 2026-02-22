@@ -34,13 +34,13 @@ import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import type { IntegerAmount } from 'loot-core/shared/util';
-import type { TransactionEntity } from 'loot-core/types/models';
+import type { CategoryEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { ROW_HEIGHT, TransactionListItem } from './TransactionListItem';
 
 import { FloatingActionBar } from '@desktop-client/components/mobile/FloatingActionBar';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useCategoriesById } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
@@ -334,14 +334,17 @@ function SelectedTransactionsFloatingActionBar({
   } = useTransactionBatchActions();
 
   const navigate = useNavigate();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
 
-  const payees = usePayees();
+  const { data: payees = [] } = usePayees();
   const payeesById = useMemo(() => groupById(payees), [payees]);
 
-  const { list: categories } = useCategories();
-  const categoriesById = useMemo(() => groupById(categories), [categories]);
+  const {
+    data: { list: categoriesById } = {
+      list: {} as Record<string, CategoryEntity>,
+    },
+  } = useCategoriesById();
 
   const dispatch = useDispatch();
   useEffect(() => {
@@ -480,7 +483,7 @@ function SelectedTransactionsFloatingActionBar({
               getItemStyle={getMenuItemStyle}
               style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={name => {
-                onBatchEdit?.({
+                void onBatchEdit?.({
                   name,
                   ids: selectedTransactionsArray,
                   onSuccess: (ids, name, value, mode) => {
@@ -516,13 +519,13 @@ function SelectedTransactionsFloatingActionBar({
                         [String(displayValue)]: () => {
                           switch (name) {
                             case 'account':
-                              navigate(`/accounts/${value}`);
+                              void navigate(`/accounts/${value}`);
                               break;
                             case 'category':
-                              navigate(`/categories/${value}`);
+                              void navigate(`/categories/${value}`);
                               break;
                             case 'payee':
-                              navigate(`/payees`);
+                              void navigate(`/payees`);
                               break;
                             default:
                               break;
@@ -598,7 +601,7 @@ function SelectedTransactionsFloatingActionBar({
               style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={type => {
                 if (type === 'duplicate') {
-                  onBatchDuplicate?.({
+                  void onBatchDuplicate?.({
                     ids: selectedTransactionsArray,
                     onSuccess: ids => {
                       showUndoNotification({
@@ -610,7 +613,7 @@ function SelectedTransactionsFloatingActionBar({
                     },
                   });
                 } else if (type === 'link-schedule') {
-                  onBatchLinkSchedule?.({
+                  void onBatchLinkSchedule?.({
                     ids: selectedTransactionsArray,
                     onSuccess: (ids, schedule) => {
                       // TODO: When schedule becomes available in mobile, update undo notification message
@@ -624,7 +627,7 @@ function SelectedTransactionsFloatingActionBar({
                     },
                   });
                 } else if (type === 'unlink-schedule') {
-                  onBatchUnlinkSchedule?.({
+                  void onBatchUnlinkSchedule?.({
                     ids: selectedTransactionsArray,
                     onSuccess: ids => {
                       showUndoNotification({
@@ -636,7 +639,7 @@ function SelectedTransactionsFloatingActionBar({
                     },
                   });
                 } else if (type === 'delete') {
-                  onBatchDelete?.({
+                  void onBatchDelete?.({
                     ids: selectedTransactionsArray,
                     onSuccess: ids => {
                       showUndoNotification({
@@ -649,7 +652,7 @@ function SelectedTransactionsFloatingActionBar({
                     },
                   });
                 } else if (type === 'transfer') {
-                  onSetTransfer?.(selectedTransactionsArray, payees, ids =>
+                  void onSetTransfer?.(selectedTransactionsArray, payees, ids =>
                     showUndoNotification({
                       message: t(
                         'Successfully marked {{count}} transactions as transfer.',
@@ -660,7 +663,7 @@ function SelectedTransactionsFloatingActionBar({
                     }),
                   );
                 } else if (type === 'merge') {
-                  onMerge?.(selectedTransactionsArray, () =>
+                  void onMerge?.(selectedTransactionsArray, () =>
                     showUndoNotification({
                       message: t('Successfully merged transactions'),
                     }),

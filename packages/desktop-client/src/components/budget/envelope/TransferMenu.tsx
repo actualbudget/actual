@@ -32,7 +32,8 @@ export function TransferMenu({
   onSubmit,
   onClose,
 }: TransferMenuProps) {
-  const { grouped: originalCategoryGroups } = useCategories();
+  const { data: { grouped: originalCategoryGroups } = { grouped: [] } } =
+    useCategories();
   const filteredCategoryGroups = useMemo(() => {
     const expenseCategoryGroups = originalCategoryGroups.filter(
       g => !g.is_income,

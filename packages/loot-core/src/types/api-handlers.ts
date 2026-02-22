@@ -187,14 +187,12 @@ export type ApiHandlers = {
     fields;
     // TODO: fix me
     // fields: Partial<APICategoryEntity>;
-  }) => Promise<{ error: { type: 'category-exists' } } | object>;
+  }) => Promise<void>;
 
   'api/category-delete': (arg: {
     id: APICategoryEntity['id'];
     transferCategoryId?: APICategoryEntity['id'];
-  }) => Promise<
-    { error: 'no-categories' } | { error: 'category-type' } | object
-  >;
+  }) => Promise<void>;
 
   'api/payees-get': () => Promise<APIPayeeEntity[]>;
 

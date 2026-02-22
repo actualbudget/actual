@@ -11,7 +11,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as undo from 'loot-core/platform/client/undo';
 import type { Handlers } from 'loot-core/types/handlers';
 import type { UserAccessEntity, UserAvailable } from 'loot-core/types/models';
@@ -108,7 +108,7 @@ function UserAccessContent({ isModal }: ManageUserAccessContentProps) {
       }
     }
 
-    loadData();
+    void loadData();
 
     return () => {
       undo.setUndoState('openModal', null);

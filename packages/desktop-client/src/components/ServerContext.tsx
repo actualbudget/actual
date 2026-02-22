@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 
 import { t } from 'i18next';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import type { Handlers } from 'loot-core/types/handlers';
 
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
@@ -107,7 +107,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
       setServerURL(serverURL);
       setVersion(await getServerVersion());
     }
-    run();
+    void run();
   }, []);
 
   const refreshLoginMethods = useCallback(async () => {
@@ -135,7 +135,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (serverURL) {
-      send('subscribe-needs-bootstrap').then(
+      void send('subscribe-needs-bootstrap').then(
         (data: Awaited<ReturnType<Handlers['subscribe-needs-bootstrap']>>) => {
           if ('hasServer' in data && data.hasServer) {
             setAvailableLoginMethods(data.availableLoginMethods || []);

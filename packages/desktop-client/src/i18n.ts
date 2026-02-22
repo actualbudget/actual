@@ -21,7 +21,7 @@ const loadLanguage = (language: string) => {
   return languages[`/locale/${language}.json`]();
 };
 
-i18n
+void i18n
   .use(initReactI18next)
   .use(resourcesToBackend(loadLanguage))
   .init({
@@ -63,7 +63,7 @@ const resolveLanguage = (language: string) => {
   return undefined;
 };
 
-export const setI18NextLanguage = (language: string) => {
+export const setI18NextLanguage = (language: string | null) => {
   const defaultLanguages = Array.isArray(navigator.languages)
     ? navigator.languages
     : [navigator.language || 'en'];
@@ -90,5 +90,5 @@ export const setI18NextLanguage = (language: string) => {
     return; // language is already set
   }
 
-  i18n.changeLanguage(resolved);
+  void i18n.changeLanguage(resolved);
 };

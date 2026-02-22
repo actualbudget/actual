@@ -21,7 +21,7 @@ export function UpdateNotification() {
 
   const dispatch = useDispatch();
   const onRestart = () => {
-    dispatch(updateApp());
+    void dispatch(updateApp());
   };
 
   if (updateInfo && showUpdateNotification) {

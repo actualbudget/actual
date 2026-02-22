@@ -5,7 +5,7 @@ import type { ComponentType } from 'react';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import type {
   CategoryEntity,
@@ -53,7 +53,8 @@ export function Budget() {
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
   const [initialized, setInitialized] = useState(false);
-  const { grouped: categoryGroups } = useCategories();
+  const { data: { grouped: categoryGroups } = { grouped: [] } } =
+    useCategories();
 
   const init = useEffectEvent(() => {
     async function run() {
@@ -70,12 +71,12 @@ export function Budget() {
       setInitialized(true);
     }
 
-    run();
+    void run();
   });
   useEffect(() => init(), []);
 
   const loadBoundBudgets = useEffectEvent(() => {
-    send('get-budget-bounds').then(({ start, end }) => {
+    void send('get-budget-bounds').then(({ start, end }) => {
       if (bounds.start !== start || bounds.end !== end) {
         setBounds({ start, end });
       }
@@ -140,7 +141,7 @@ export function Budget() {
         type: 'date',
       },
     ];
-    navigate('/accounts', {
+    void navigate('/accounts', {
       state: {
         goBack: true,
         filterConditions,

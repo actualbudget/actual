@@ -11,7 +11,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import type {
   balanceTypeOpType,
@@ -121,9 +121,9 @@ function useSelectedCategories(
 
 export function CustomReport() {
   const params = useParams();
-  const { data: report, isLoading } = useCustomReport(params.id ?? '');
+  const { data: report, isPending } = useCustomReport(params.id);
 
-  if (isLoading) {
+  if (isPending) {
     return <LoadingIndicator />;
   }
 
@@ -139,7 +139,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
-  const categories = useCategories();
+  const { data: categories = { grouped: [], list: [] } } = useCategories();
   const { isNarrowWidth } = useResponsive();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
@@ -185,13 +185,16 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
 
   // Complex category conditions are:
   // - conditions with multiple "category" fields
-  // - conditions with "category" field that use "contains", "doesNotContain" or "matches" operations
+  // - conditions with "category" field that use "contains", "doesNotContain", "matches", "hasTags" operations
+  // - conditions with a "category_group" field
   const isComplexCategoryCondition =
     !!conditions.find(
       ({ field, op }) =>
         field === 'category' &&
         ['contains', 'doesNotContain', 'matches', 'hasTags'].includes(op),
-    ) || conditions.filter(({ field }) => field === 'category').length >= 2;
+    ) ||
+    conditions.filter(({ field }) => field === 'category').length >= 2 ||
+    conditions.filter(({ field }) => field === 'category_group').length >= 1;
 
   const setSelectedCategories = (newCategories: CategoryEntity[]) => {
     const newCategoryIdSet = new Set(newCategories.map(({ id }) => id));
@@ -430,7 +433,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
       );
 
-      onSetAllIntervals(earliestTransaction, latestTransaction, interval);
+      void onSetAllIntervals(earliestTransaction, latestTransaction, interval);
       onSetStartAndEndDates(
         earliestTransaction,
         latestTransaction,
@@ -440,7 +443,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       );
     }
 
-    run();
+    void run();
   }, [
     interval,
     dateRange,
@@ -470,8 +473,8 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const balanceTypeOp: balanceTypeOpType =
     ReportOptions.balanceTypeMap.get(balanceType) || 'totalDebts';
   const sortByOp: sortByOpType = sortBy || 'desc';
-  const payees = usePayees();
-  const accounts = useAccounts();
+  const { data: payees = [] } = usePayees();
+  const { data: accounts = [] } = useAccounts();
 
   const hasWarning = calculateHasWarning(conditions, {
     categories: categories.list,
@@ -764,7 +767,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         setReport(params.savedReport);
 
         if (params.savedReport.id !== initialReport?.id) {
-          navigate(`/reports/custom/${params.savedReport.id}`);
+          void navigate(`/reports/custom/${params.savedReport.id}`);
         }
         break;
       case 'rename':
@@ -795,14 +798,14 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         setSavedStatus('saved');
         setReport(newReport);
         setReportData(newReport);
-        navigate(`/reports/custom/${newReport.id}`);
+        void navigate(`/reports/custom/${newReport.id}`);
         break;
       default:
     }
   };
 
   const onBackClick = () => {
-    navigate('/reports');
+    void navigate('/reports');
   };
 
   return (
