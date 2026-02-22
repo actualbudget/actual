@@ -18,6 +18,10 @@ runs:
       uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
       with:
         node-version: 22
+    - name: Install unzip (for Yarn)
+      run: sudo apt-get update && sudo apt-get install -y unzip
+      shell: bash
+      if: runner.os == 'Linux'
     - name: Setup Yarn
       uses: yarnpkg/setup-action@main
     - name: Get Node version
