@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "noEmit": true,
+    "noEmit": false,
     "outDir": "./service-worker",
     "target": "ES2022",
     "lib": ["ES2022", "WebWorker", "DOM", "DOM.Iterable"],

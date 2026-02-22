@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
 import { logger } from '../../platform/server/log';
@@ -5,10 +6,6 @@ import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
 import { groupBy, sortByKey } from '../../shared/util';
 import type { RecurConfig, RecurPattern, RuleEntity } from '../../types/models';
-// @ts-strict-ignore
-// This is a special usage of the API because this package is embedded
-// into Actual itself. We call handlers directly to avoid cyclic dependency
-// between loot-core and @actual-app/api
 import { send } from '../main-app';
 import { ruleModel } from '../transactions/transaction-rules';
 

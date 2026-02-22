@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import AdmZip from 'adm-zip';
 import normalizePathSep from 'slash';
 import { v4 as uuidv4 } from 'uuid';
@@ -5,10 +6,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, groupBy, sortByKey } from '../../shared/util';
-// @ts-strict-ignore
-// This is a special usage of the API because this package is embedded
-// into Actual itself. We call handlers directly to avoid cyclic dependency
-// between loot-core and @actual-app/api
 import { send } from '../main-app';
 
 import type * as YNAB4 from './ynab4-types';
