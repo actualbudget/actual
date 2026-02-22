@@ -1,10 +1,4 @@
 // @ts-strict-ignore
-// This is a special usage of the API because this package is embedded
-// into Actual itself. We only want to pull in the methods in that
-// case and ignore everything else; otherwise we'd be pulling in the
-// entire backend bundle from the API
-import { send } from '@actual-app/api/injected';
-import * as actual from '@actual-app/api/methods';
 import AdmZip from 'adm-zip';
 import normalizePathSep from 'slash';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, groupBy, sortByKey } from '../../shared/util';
+import { send } from '../main-app';
 
 import type * as YNAB4 from './ynab4-types';
 
@@ -26,10 +21,12 @@ async function importAccounts(
   return Promise.all(
     accounts.map(async account => {
       if (!account.isTombstone) {
-        const id = await actual.createAccount({
-          name: account.accountName,
-          offbudget: account.onBudget ? false : true,
-          closed: account.hidden ? true : false,
+        const id = await send('api/account-create', {
+          account: {
+            name: account.accountName,
+            offbudget: account.onBudget ? false : true,
+            closed: account.hidden ? true : false,
+          },
         });
         entityIdMap.set(account.entityId, id);
       }
@@ -51,13 +48,18 @@ async function importCategories(
         masterCategory.subCategories &&
         masterCategory.subCategories.some(cat => !cat.isTombstone)
       ) {
-        const id = await actual.createCategoryGroup({
-          name: masterCategory.name,
-          is_income: false,
+        const id = await send('api/category-group-create', {
+          group: {
+            name: masterCategory.name,
+            is_income: false,
+          },
         });
         entityIdMap.set(masterCategory.entityId, id);
         if (masterCategory.note) {
-          send('notes-save', { id, note: masterCategory.note });
+          void send('notes-save', {
+            id,
+            note: masterCategory.note,
+          });
         }
 
         if (masterCategory.subCategories) {
@@ -87,13 +89,18 @@ async function importCategories(
                 categoryName = categoryNameParts.join('/').trim();
               }
 
-              const id = await actual.createCategory({
-                name: categoryName,
-                group_id: entityIdMap.get(category.masterCategoryId),
+              const id = await send('api/category-create', {
+                category: {
+                  name: categoryName,
+                  group_id: entityIdMap.get(category.masterCategoryId),
+                },
               });
               entityIdMap.set(category.entityId, id);
               if (category.note) {
-                send('notes-save', { id, note: category.note });
+                void send('notes-save', {
+                  id,
+                  note: category.note,
+                });
               }
             }
           }
@@ -109,9 +116,11 @@ async function importPayees(
 ) {
   for (const payee of data.payees) {
     if (!payee.isTombstone) {
-      const id = await actual.createPayee({
-        name: payee.name,
-        transfer_acct: entityIdMap.get(payee.targetAccountId) || null,
+      const id = await send('api/payee-create', {
+        payee: {
+          name: payee.name,
+          transfer_acct: entityIdMap.get(payee.targetAccountId) || null,
+        },
       });
 
       // TODO: import payee rules
@@ -125,12 +134,14 @@ async function importTransactions(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
 ) {
-  const categories = await actual.getCategories();
+  const categories = await send('api/categories-get', {
+    grouped: false,
+  });
   const incomeCategoryId: string = categories.find(
     cat => cat.name === 'Income',
   ).id;
-  const accounts = await actual.getAccounts();
-  const payees = await actual.getPayees();
+  const accounts = await send('api/accounts-get');
+  const payees = await send('api/payees-get');
 
   function getCategory(id: string) {
     if (id == null || id === 'Category/__Split__') {
@@ -234,8 +245,11 @@ async function importTransactions(
         })
         .filter(x => x);
 
-      await actual.addTransactions(entityIdMap.get(accountId), toImport, {
+      await send('api/transactions-add', {
+        accountId: entityIdMap.get(accountId),
+        transactions: toImport,
         learnCategories: true,
+        runTransfers: false,
       });
     }),
   );
@@ -277,7 +291,8 @@ async function importBudgets(
 ) {
   const budgets = sortByKey(data.monthlyBudgets, 'month');
 
-  await actual.batchBudgetUpdates(async () => {
+  await send('api/batch-budget-start');
+  try {
     for (const budget of budgets) {
       const filled = fillInBudgets(
         data,
@@ -293,17 +308,31 @@ async function importBudgets(
             return;
           }
 
-          await actual.setBudgetAmount(month, catId, amount);
+          await send('api/budget-set-amount', {
+            month,
+            categoryId: catId,
+            amount,
+          });
 
           if (catBudget.overspendingHandling === 'AffectsBuffer') {
-            await actual.setBudgetCarryover(month, catId, false);
+            await send('api/budget-set-carryover', {
+              month,
+              categoryId: catId,
+              flag: false,
+            });
           } else if (catBudget.overspendingHandling === 'Confined') {
-            await actual.setBudgetCarryover(month, catId, true);
+            await send('api/budget-set-carryover', {
+              month,
+              categoryId: catId,
+              flag: true,
+            });
           }
         }),
       );
     }
-  });
+  } finally {
+    await send('api/batch-budget-end');
+  }
 }
 
 function estimateRecentness(str: string) {
