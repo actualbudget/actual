@@ -8,12 +8,16 @@
     "moduleResolution": "node10",
     "noEmit": false,
     "declaration": true,
-    "outDir": "dist",
-    "declarationDir": "@types",
-    "paths": {
-      "loot-core/*": ["./@types/loot-core/src/*"]
-    }
+    "outDir": "build",
+    "rootDir": "..",
+    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
-  "include": ["."],
-  "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts"]
+  "include": [".", "../../packages/loot-core/typings/window.ts"],
+  "exclude": [
+    "**/node_modules/*",
+    "build/**/*",
+    "e2e/**/*",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
 }

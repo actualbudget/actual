@@ -39,7 +39,8 @@
     "test": "npm-run-all -cp 'test:*'",
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
     "start:storybook": "storybook dev -p 6006",
-    "build:storybook": "storybook build"
+    "build:storybook": "storybook build",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@emotion/css": "^11.13.5",

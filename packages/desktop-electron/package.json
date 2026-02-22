@@ -8,7 +8,8 @@
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
     "build": "yarn build:dist && electron-builder",
-    "build:dist": "tsc --p tsconfig.dist.json && yarn copy-static-assets",
+    "build:dist": "tsc && yarn copy-static-assets",
+    "typecheck": "tsc --noEmit && tsc-strict",
     "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build/desktop-electron",
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
     "e2e": "npx playwright test"
@@ -29,7 +30,8 @@
     "cross-env": "^10.1.0",
     "electron": "39.2.7",
     "electron-builder": "26.4.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-strict-plugin": "^2.4.4"
   },
   "build": {
     "appId": "com.actualbudget.actual",
