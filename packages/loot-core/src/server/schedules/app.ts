@@ -127,10 +127,23 @@ export async function setNextDate({
 
   const { date: dateCond } = extractScheduleConds(conditions);
 
-  const { data: nextDate } = await aqlQuery(
+  let { data: nextDate } = await aqlQuery(
     q('schedules').filter({ id }).calculate('next_date'),
   );
 
+    const { data } = await aqlQuery(
+    q('schedules').filter({ id }).select('_date'),
+  );
+    const schedule = data[0]
+
+    if (schedule._date.weekendSolveMode == 'before' && (d.isFriday(parseDate(nextDate)) || d.isWeekend(parseDate(nextDate)))) {
+        // nextDate is on weekend or friday, moving to monday
+        // so getNextDate and getDateWithSkippedWeekend 
+        // don't push the date back to Friday, thus causing 
+        // `(newNextDate !== nextDate) ` to be false and not updating the next date
+        nextDate = d.nextMonday(parseDate(nextDate));
+    }
+    
   // Only do this if a date condition exists
   if (dateCond) {
     const newNextDate = getNextDate(
