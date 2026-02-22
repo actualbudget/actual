@@ -41,7 +41,8 @@ type NetWorthDataPoint = {
   networth: string;
   date: string;
   isProjection?: boolean;
-} & Record<string, string | number | boolean>;
+  accountBalances?: Record<string, number>;
+};
 
 type TrendTooltipProps = TooltipContentProps<number, string> & {
   style?: CSSProperties;
@@ -301,7 +302,7 @@ export function NetWorthGraph({
     const totals = accounts.reduce(
       (acc, account) => {
         acc[account.id] = graphData.data.reduce((sum, point) => {
-          return sum + (Number(point[account.id]) || 0);
+          return sum + (point.accountBalances?.[account.id] || 0);
         }, 0);
         return acc;
       },

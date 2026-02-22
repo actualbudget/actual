@@ -36,12 +36,14 @@ export function useNetWorthProjectionRefresh({
         monthUtils.currentMonth(),
         bounds.end,
       );
+      const monthsToBind =
+        months.length > 0 ? months : [monthUtils.currentMonth()];
       const cellNames =
         budgetType === 'tracking'
           ? ['total-budgeted', 'total-budget-income']
-          : ['total-budgeted'];
+          : ['total-budgeted', 'total-income'];
 
-      months.forEach(month => {
+      monthsToBind.forEach(month => {
         const sheetName = monthUtils.sheetForMonth(month);
         cellNames.forEach(name => {
           cleanups.push(

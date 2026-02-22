@@ -89,6 +89,7 @@ export function NetWorthCard({
   const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
 
   const params = useMemo(() => {
+    // Include projectionRevision to recompute when budget/projection cells change.
     void projectionRevision;
     return netWorthSpreadsheet(
       start,

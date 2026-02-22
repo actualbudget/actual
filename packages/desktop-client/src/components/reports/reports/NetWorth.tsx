@@ -133,7 +133,8 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
-  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+  const [_budgetType] = useSyncedPref('budgetType');
+  const budgetType = _budgetType || 'envelope';
 
   const isProjectionEnabled =
     showProjection && graphMode === 'trend' && interval === 'Monthly';
