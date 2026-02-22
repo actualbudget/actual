@@ -13,12 +13,5 @@
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
   "include": ["."],
-  "exclude": [
-    "**/node_modules/*",
-    "dist",
-    "@types",
-    "*.test.ts",
-    "vite.config.ts",
-    "vitest.setup.ts"
-  ]
+  "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts", "*.config.ts"]
 }

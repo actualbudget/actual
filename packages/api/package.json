@@ -8,7 +8,7 @@
     "dist"
   ],
   "main": "dist/index.js",
-  "types": "@types/api/index.d.ts",
+  "types": "@types/index.d.ts",
   "scripts": {
     "build": "vite build",
     "test": "vitest --run",
