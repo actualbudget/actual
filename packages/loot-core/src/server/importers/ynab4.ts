@@ -5,13 +5,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, groupBy, sortByKey } from '../../shared/util';
-
 // @ts-strict-ignore
 // This is a special usage of the API because this package is embedded
 // into Actual itself. We call handlers directly to avoid cyclic dependency
 // between loot-core and @actual-app/api
 import { app } from '../main-app';
 import { runHandler } from '../mutators';
+
 import type * as YNAB4 from './ynab4-types';
 
 // Importer
@@ -60,7 +60,10 @@ async function importCategories(
         });
         entityIdMap.set(masterCategory.entityId, id);
         if (masterCategory.note) {
-          void runHandler(app.handlers['notes-save'], { id, note: masterCategory.note });
+          void runHandler(app.handlers['notes-save'], {
+            id,
+            note: masterCategory.note,
+          });
         }
 
         if (masterCategory.subCategories) {
@@ -98,7 +101,10 @@ async function importCategories(
               });
               entityIdMap.set(category.entityId, id);
               if (category.note) {
-                void runHandler(app.handlers['notes-save'], { id, note: category.note });
+                void runHandler(app.handlers['notes-save'], {
+                  id,
+                  note: category.note,
+                });
               }
             }
           }

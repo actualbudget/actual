@@ -4,11 +4,8 @@ import type {
 } from 'node-fetch';
 
 // loot-core types
-import {
-  init as initLootCore,
-  lib,
-  type InitConfig,
-} from 'loot-core/server/main';
+import { init as initLootCore, lib } from 'loot-core/server/main';
+import type { InitConfig } from 'loot-core/server/main';
 
 import { validateNodeVersion } from './validateNodeVersion';
 

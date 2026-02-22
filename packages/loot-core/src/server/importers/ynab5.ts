@@ -5,14 +5,14 @@ import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
 import { groupBy, sortByKey } from '../../shared/util';
 import type { RecurConfig, RecurPattern, RuleEntity } from '../../types/models';
-import { ruleModel } from '../transactions/transaction-rules';
-
 // @ts-strict-ignore
 // This is a special usage of the API because this package is embedded
 // into Actual itself. We call handlers directly to avoid cyclic dependency
 // between loot-core and @actual-app/api
 import { app } from '../main-app';
 import { runHandler } from '../mutators';
+import { ruleModel } from '../transactions/transaction-rules';
+
 import type {
   Budget,
   Payee,
@@ -397,7 +397,10 @@ async function importCategories(
         groupId = createdGroup.id;
         entityIdMap.set(group.id, groupId);
         if (group.note) {
-          void runHandler(app.handlers['notes-save'], { id: groupId, note: group.note });
+          void runHandler(app.handlers['notes-save'], {
+            id: groupId,
+            note: group.note,
+          });
         }
       }
 
@@ -849,7 +852,10 @@ async function importScheduledTransactions(
     scheduleId: string,
   ): Promise<RuleEntity | null> {
     const { data: ruleId } = (await runHandler(app.handlers['api/query'], {
-      query: q('schedules').filter({ id: scheduleId }).calculate('rule').serialize(),
+      query: q('schedules')
+        .filter({ id: scheduleId })
+        .calculate('rule')
+        .serialize(),
     })) as { data: string | null };
     if (!ruleId) {
       return null;
