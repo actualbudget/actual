@@ -18,10 +18,8 @@ runs:
       uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
       with:
         node-version: 22
-    - name: Install yarn
-      run: npm install -g yarn
-      shell: bash
-      if: ${{ env.ACT }}
+    - name: Setup Yarn
+      uses: yarnpkg/setup-action@main
     - name: Get Node version
       id: get-node
       run: echo "version=$(node -v)" >> "$GITHUB_OUTPUT"
@@ -31,7 +29,7 @@ runs:
       id: cache
       with:
         path: ${{ format('{0}/**/node_modules', inputs.working-directory) }}
-        key: yarn-v1-${{ runner.os }}-${{ steps.get-node.outputs.version }}-${{ hashFiles(format('{0}/**/yarn.lock', inputs.working-directory)) }}
+        key: yarn-v6-${{ runner.os }}-${{ steps.get-node.outputs.version }}-${{ hashFiles(format('{0}/**/yarn.lock', inputs.working-directory)) }}
     - name: Ensure Lage cache directory exists
       run: mkdir -p ${{ format('{0}/.lage', inputs.working-directory) }}
       shell: bash
