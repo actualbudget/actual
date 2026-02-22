@@ -10,7 +10,10 @@
     "declaration": true,
     "outDir": "dist",
     "declarationDir": "@types",
-    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
+    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }],
+    "paths": {
+      "loot-core/*": ["../loot-core/src/*"]
+    }
   },
   "include": ["."],
   "exclude": [
