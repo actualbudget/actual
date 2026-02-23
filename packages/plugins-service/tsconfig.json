@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "composite": true,
     "target": "ES2022",
     "lib": ["ES2022", "WebWorker", "DOM", "DOM.Iterable"],
     "module": "ES2022",
@@ -9,8 +10,11 @@
     "skipLibCheck": true,
     "strict": false,
     "types": ["vite/client"],
+    "declaration": true,
+    "declarationMap": true,
     "outDir": "dist",
     "rootDir": "src",
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
   "include": ["src/**/*"],

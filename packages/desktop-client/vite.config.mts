@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 
 import inject from '@rollup/plugin-inject';
 import basicSsl from '@vitejs/plugin-basic-ssl';
@@ -10,6 +11,8 @@ import { defineConfig, loadEnv } from 'vite';
 import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const addWatchers = (): Plugin => ({
   name: 'add-watchers',
@@ -150,6 +153,9 @@ export default defineConfig(async ({ mode }) => {
     },
     resolve: {
       extensions: resolveExtensions,
+      alias: {
+        '@desktop-client': path.join(__dirname, 'src'),
+      },
     },
     plugins: [
       // electron (desktop) builds do not support PWA

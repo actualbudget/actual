@@ -1,11 +1,15 @@
 {
   "references": [
-    // TODO: enable once every project is ts
-    // { "path": "./packages/api" },
-    // { "path": "./packages/desktop-client" }
+    { "path": "./packages/crdt" },
+    { "path": "./packages/component-library" },
+    { "path": "./packages/plugins-service" },
+    { "path": "./packages/loot-core" },
+    { "path": "./packages/api" },
+    { "path": "./packages/desktop-client" },
+    { "path": "./packages/sync-server" },
+    { "path": "./packages/desktop-electron" }
   ],
   "compilerOptions": {
-    // "composite": true,
     "target": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "allowSyntheticDefaultImports": true,
@@ -38,7 +42,7 @@
       "hyperformula/typings/*": ["./node_modules/hyperformula/typings/*"]
     }
   },
-  "include": ["packages/**/*", "bin/*.ts"],
+  "include": ["bin/*.ts"],
   "exclude": [
     "**/.*/",
     "node_modules",

@@ -4,20 +4,20 @@
   "description": "An API for Actual",
   "license": "MIT",
   "files": [
-    "@types",
-    "dist"
+    "dist",
+    "decl-output"
   ],
   "main": "dist/index.js",
-  "types": "@types/index.d.ts",
+  "types": "decl-output/index.d.ts",
   "scripts": {
     "build:app": "yarn workspace loot-core build:api",
     "build:crdt": "yarn workspace @actual-app/crdt build",
     "build:node": "tsc && tsc-alias",
-    "build:migrations": "mkdir dist/migrations && cp migrations/*.sql dist/migrations",
+    "build:migrations": "mkdir -p dist/migrations && cp migrations/*.sql dist/migrations",
     "build:default-db": "cp default-db.sqlite dist/",
     "build": "yarn run clean && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
     "test": "yarn run clean && yarn run build:app && yarn run build:crdt && vitest --run",
-    "clean": "rm -rf dist @types",
+    "clean": "rm -rf dist decl-output @types",
     "typecheck": "yarn build && tsc --noEmit && tsc-strict"
   },
   "dependencies": {

@@ -60,7 +60,7 @@ export const signOut = createAppAsyncThunk(
 );
 
 type UsersState = {
-  data: Awaited<ReturnType<Handlers['subscribe-get-user']>>;
+  data: Awaited<ReturnType<Handlers['subscribe-get-user']>> | null;
 };
 
 const initialState: UsersState = {

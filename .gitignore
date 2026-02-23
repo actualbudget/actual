@@ -18,6 +18,7 @@ node_modules
 packages/api/app/bundle.api.js
 packages/api/app/stats.json
 packages/api/dist
+packages/api/decl-output
 packages/api/@types
 packages/crdt/dist
 packages/desktop-client/build-stats
@@ -33,7 +34,9 @@ packages/desktop-electron/dist
 packages/desktop-electron/loot-core
 packages/desktop-client/service-worker
 packages/plugins-service/dist
+packages/component-library/dist
 packages/loot-core/lib-dist
+**/.tsbuildinfo
 packages/sync-server/coverage
 bundle.desktop.js
 bundle.desktop.js.map
