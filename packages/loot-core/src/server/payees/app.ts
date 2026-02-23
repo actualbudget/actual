@@ -187,8 +187,7 @@ async function getPayeeLocations({
 
   query += ' ORDER BY created_at DESC';
 
-  const results = await db.runQuery<PayeeLocationEntity>(query, params, true);
-  return results || [];
+  return db.runQuery<PayeeLocationEntity>(query, params, true);
 }
 
 async function deletePayeeLocation({
@@ -308,23 +307,22 @@ async function getNearbyPayees({
     LIMIT 10
   `;
 
-  const results =
-    (await db.runQuery<NearbyPayeeQueryResult>(
-      query,
-      [
-        latitude,
-        longitude,
-        latitude, // For first distance calculation in SELECT
-        latitude,
-        longitude,
-        latitude, // For ROW_NUMBER() ordering
-        latitude,
-        longitude,
-        latitude, // For WHERE distance filter
-        maxDistance,
-      ],
-      true,
-    )) || [];
+  const results = db.runQuery<NearbyPayeeQueryResult>(
+    query,
+    [
+      latitude,
+      longitude,
+      latitude, // For first distance calculation in SELECT
+      latitude,
+      longitude,
+      latitude, // For ROW_NUMBER() ordering
+      latitude,
+      longitude,
+      latitude, // For WHERE distance filter
+      maxDistance,
+    ],
+    true,
+  );
 
   // Transform results to expected format
   const nearbyPayees: NearbyPayeeEntity[] = results.map(row => {
