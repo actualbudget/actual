@@ -347,7 +347,7 @@ export async function deleteSchedule({ id }) {
   });
 }
 
-async function skipNextDate({ id }) {
+export async function skipNextDate({ id }) {
   return setNextDate({
     id,
     start: nextDate => {
