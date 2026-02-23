@@ -137,8 +137,9 @@ export async function setNextDate({
   const schedule = data[0];
 
   if (
-    schedule._date.weekendSolveMode == 'before' &&
+    schedule?._date?.weekendSolveMode === 'before' &&
     (d.isFriday(parseDate(nextDate)) || d.isWeekend(parseDate(nextDate)))
+  ) {
   ) {
     // nextDate is on weekend or friday, moving to monday
     // so getNextDate and getDateWithSkippedWeekend
