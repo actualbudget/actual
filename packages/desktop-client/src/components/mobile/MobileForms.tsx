@@ -79,6 +79,7 @@ InputField.displayName = 'InputField';
 
 type TapFieldProps = ComponentPropsWithRef<typeof Button> & {
   rightContent?: ReactNode;
+  alwaysShowRightContent?: boolean;
   textStyle?: CSSProperties;
 };
 
@@ -105,6 +106,7 @@ export function TapField({
   children,
   className,
   rightContent,
+  alwaysShowRightContent,
   textStyle,
   ref,
   ...props
@@ -135,7 +137,7 @@ export function TapField({
           {value}
         </Text>
       )}
-      {!props.isDisabled && rightContent}
+      {(!props.isDisabled || alwaysShowRightContent) && rightContent}
     </Button>
   );
 }

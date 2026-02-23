@@ -1105,6 +1105,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               }
               onPress={() => onEditFieldInner(transaction.id, 'payee')}
               data-testid="payee-field"
+              alwaysShowRightContent={
+                !!nearestPayee && !transaction.payee && !shouldShowSaveLocation
+              }
               rightContent={
                 shouldShowSaveLocation ? (
                   <Button
@@ -1673,9 +1676,12 @@ function TransactionEditUnconnected({
       return;
     }
 
-    const updated = { ...transaction, payee: nearestPayee.id };
+    const updated = {
+      ...serializeTransaction(transaction, dateFormat),
+      payee: nearestPayee.id,
+    };
     onUpdate(updated, 'payee');
-  }, [transactions, nearestPayee, onUpdate]);
+  }, [transactions, nearestPayee, onUpdate, dateFormat]);
 
   if (accounts.length === 0) {
     return (
