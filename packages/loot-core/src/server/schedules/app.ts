@@ -140,12 +140,11 @@ export async function setNextDate({
     schedule?._date?.weekendSolveMode === 'before' &&
     (d.isFriday(parseDate(nextDate)) || d.isWeekend(parseDate(nextDate)))
   ) {
-  ) {
     // nextDate is on weekend or friday, moving to monday
     // so getNextDate and getDateWithSkippedWeekend
     // don't push the date back to Friday, thus causing
     // `(newNextDate !== nextDate) ` to be false and not updating the next date
-    nextDate = d.nextMonday(parseDate(nextDate));
+    nextDate = dayFromDate(d.nextMonday(parseDate(nextDate)));
   }
 
   // Only do this if a date condition exists
