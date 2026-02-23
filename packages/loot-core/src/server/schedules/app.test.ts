@@ -11,9 +11,9 @@ import {
   createSchedule,
   deleteSchedule,
   setNextDate,
+  skipNextDate,
   updateConditions,
   updateSchedule,
-  skipNextDate
 } from './app';
 
 beforeEach(async () => {
@@ -259,7 +259,7 @@ describe('schedule app', () => {
     });
 
     it('skipNextDate skips `next_date`', async () => {
-        /* Dec 2020 calendar for reference:
+      /* Dec 2020 calendar for reference:
         | Su | Mo | Tu | We | Th | Fr | Sa |
         |    |    | 01 | 02 | 03 | 04 | 05 |
         | 06 | 07 | 08 | 09 | 10 | 11 | 12 |
@@ -275,9 +275,7 @@ describe('schedule app', () => {
             value: {
               start: '2020-12-20',
               frequency: 'weekly',
-              patterns: [
-                { type: 'day', value: 5 }
-              ],
+              patterns: [{ type: 'day', value: 5 }],
               skipWeekend: true,
               weekendSolveMode: 'before',
             },
@@ -303,6 +301,5 @@ describe('schedule app', () => {
 
       expect(row.next_date).toBe('2021-05-11');
     });
-
   });
 });
