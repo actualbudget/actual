@@ -111,11 +111,13 @@ export async function setNextDate({
   start,
   conditions,
   reset,
+  skipRequested,
 }: {
   id: string;
   start?;
   conditions?;
   reset?: boolean;
+  skipRequested?: boolean;
 }) {
   if (conditions == null) {
     const rule = await getRuleForSchedule(id);
@@ -131,20 +133,25 @@ export async function setNextDate({
     q('schedules').filter({ id }).calculate('next_date'),
   );
 
-  const { data } = await aqlQuery(
-    q('schedules').filter({ id }).select('_date'),
-  );
-  const schedule = data[0];
+  if (skipRequested === true) {
+    const { data } = await aqlQuery(
+      q('schedules').filter({ id }).select('_date'),
+    );
+    const schedule = data[0];
 
-  if (
-    schedule?._date?.weekendSolveMode === 'before' &&
-    (d.isFriday(parseDate(nextDate)) || d.isWeekend(parseDate(nextDate)))
-  ) {
-    // nextDate is on weekend or friday, moving to monday
-    // so getNextDate and getDateWithSkippedWeekend
-    // don't push the date back to Friday, thus causing
-    // `(newNextDate !== nextDate) ` to be false and not updating the next date
-    nextDate = dayFromDate(d.nextMonday(parseDate(nextDate)));
+    if (
+      schedule?._date?.weekendSolveMode === 'before' &&
+      schedule?._date?.skipWeekend === true
+    ) {
+      const parsedNextDate = parseDate(nextDate);
+      if (d.isFriday(parsedNextDate) || d.isWeekend(parsedNextDate)) {
+        // nextDate is on weekend or friday, moving to monday
+        // so getNextDate and getDateWithSkippedWeekend
+        // don't push the date back to Friday, thus causing
+        // `(newNextDate !== nextDate) ` to be false and not updating the next date
+        nextDate = dayFromDate(d.nextMonday(parsedNextDate));
+      }
+    }
   }
 
   // Only do this if a date condition exists
@@ -346,6 +353,7 @@ async function skipNextDate({ id }) {
     start: nextDate => {
       return d.addDays(parseDate(nextDate), 1);
     },
+    skipRequested: true,
   });
 }
 
