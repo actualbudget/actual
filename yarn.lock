@@ -29,6 +29,7 @@ __metadata:
     node-fetch: "npm:^3.3.2"
     tsc-alias: "npm:^1.8.16"
     typescript: "npm:^5.9.3"
+    typescript-strict-plugin: "npm:^2.4.4"
     uuid: "npm:^13.0.0"
     vitest: "npm:^4.0.18"
   languageName: unknown
@@ -128,6 +129,7 @@ __metadata:
     pluggy-sdk: "npm:^0.83.0"
     supertest: "npm:^7.2.2"
     typescript: "npm:^5.9.3"
+    typescript-strict-plugin: "npm:^2.4.4"
     uuid: "npm:^13.0.0"
     vitest: "npm:^4.0.18"
     winston: "npm:^3.19.0"
@@ -212,6 +214,8 @@ __metadata:
     remark-gfm: "npm:^4.0.1"
     rollup-plugin-visualizer: "npm:^6.0.5"
     sass: "npm:^1.97.3"
+    typescript: "npm:^5.9.3"
+    typescript-strict-plugin: "npm:^2.4.4"
     usehooks-ts: "npm:^3.1.1"
     uuid: "npm:^13.0.0"
     vite: "npm:^7.3.1"
@@ -4508,11 +4512,11 @@ __metadata:
   linkType: hard
 
 "@isaacs/brace-expansion@npm:^5.0.0":
-  version: 5.0.1
-  resolution: "@isaacs/brace-expansion@npm:5.0.1"
+  version: 5.0.0
+  resolution: "@isaacs/brace-expansion@npm:5.0.0"
   dependencies:
     "@isaacs/balanced-match": "npm:^4.0.1"
-  checksum: 10/aec226065bc4285436a27379e08cc35bf94ef59f5098ac1c026495c9ba4ab33d851964082d3648d56d63eb90f2642867bd15a3e1b810b98beb1a8c14efce6a94
+  checksum: 10/cf3b7f206aff12128214a1df764ac8cdbc517c110db85249b945282407e3dfc5c6e66286383a7c9391a059fc8e6e6a8ca82262fc9d2590bd615376141fbebd2d
   languageName: node
   linkType: hard
 
@@ -10791,7 +10795,6 @@ __metadata:
     source-map-support: "npm:^0.5.21"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.9.3"
-    typescript-strict-plugin: "npm:^2.4.4"
   languageName: unknown
   linkType: soft
 
@@ -14414,6 +14417,7 @@ __metadata:
     fs-extra: "npm:^11.3.3"
     promise-retry: "npm:^2.0.1"
     typescript: "npm:^5.9.3"
+    typescript-strict-plugin: "npm:^2.4.4"
   languageName: unknown
   linkType: soft
 
@@ -19687,6 +19691,7 @@ __metadata:
     stream-browserify: "npm:^3.0.0"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.9.3"
+    typescript-strict-plugin: "npm:^2.4.4"
     ua-parser-js: "npm:^2.0.9"
     uuid: "npm:^13.0.0"
     vite: "npm:^7.3.1"
@@ -22681,6 +22686,7 @@ __metadata:
     "@types/node": "npm:^22.19.10"
     cross-env: "npm:^10.1.0"
     typescript: "npm:^5.9.3"
+    typescript-strict-plugin: "npm:^2.4.4"
     vite: "npm:^7.3.1"
     workbox-precaching: "npm:^7.4.0"
   languageName: unknown

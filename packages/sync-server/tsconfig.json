@@ -3,7 +3,8 @@
   "compilerOptions": {
     "lib": ["ES2021"],
     "noEmit": false,
-    "outDir": "build"
+    "outDir": "build",
+    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
   "include": [
     "src/**/*",

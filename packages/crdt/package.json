@@ -9,10 +9,11 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build:node": "tsc --p tsconfig.dist.json",
+    "build:node": "tsc",
     "proto:generate": "./bin/generate-proto",
     "build": "rm -rf dist && yarn run build:node",
-    "test": "vitest --run"
+    "test": "vitest --run",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "google-protobuf": "^3.21.4",

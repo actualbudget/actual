@@ -60,7 +60,8 @@
     "generate:i18n": "i18next",
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "ENV=node vitest --run",
-    "test:web": "ENV=web vitest --run -c vitest.web.config.ts"
+    "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
+    "typecheck": "tsc --noEmit && tsc-strict"
   },
   "dependencies": {
     "@jlongster/sql.js": "^1.6.7",
@@ -81,6 +82,8 @@
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
     "slash": "5.1.0",
+    "typescript": "^5.9.3",
+    "typescript-strict-plugin": "^2.4.4",
     "ua-parser-js": "^2.0.9",
     "uuid": "^13.0.0"
   },

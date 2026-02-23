@@ -1,5 +1,18 @@
 # Release Notes
 
+## 26.2.1
+
+Release date: 2026-02-22
+
+This release contains two critical security fixes for users of SimpleFin, Pluggy or the multi-user feature. If you do not use these features: feel free to skip this version.
+
+**Docker Tag: v26.2.1**
+
+#### Bugfixes
+
+- [#7034](https://github.com/actualbudget/actual/pull/7034) Fix: simplefin and pluggy not requiring auth — thanks @MatissJanis
+- [#7040](https://github.com/actualbudget/actual/pull/7040) Fix: unauthorized file access in multi-user setups — thanks @MatissJanis
+
 ## 26.2.0
 
 Release date: 2026-02-02
@@ -9,8 +22,6 @@ This release contains the following notable improvements, along with numerous fi
 - Allow multiple dashboard pages
 - Experimental feature: Custom themes [docs](https://actualbudget.org/docs/experimental/custom-themes)
 - Experimental feature: Budget analysis report [docs](https://actualbudget.org/docs/experimental/budget-analysis-report)
-
-<!--truncate-->
 
 **Docker Tag: v26.2.0**
 
@@ -164,8 +175,6 @@ This release contains the following notable improvements, along with numerous fi
 
 For Linux users, we have officially released to [Flathub](https://flathub.org/en/apps/com.actualbudget.actual)!
 
-<!--truncate-->
-
 **Docker Tag: v26.1.0**
 
 #### Features
@@ -284,8 +293,6 @@ This release contains the following notable improvements, along with numerous fi
 - Add running balance on mobile account view.
 - Add CTRL/CMD+Enter keyboard command for entering only a single new transaction on desktop.
 
-<!--truncate-->
-
 **Docker Tag: v25.12.0**
 
 #### Features
@@ -401,8 +408,6 @@ This release contains the following notable improvements, along with numerous fi
 - Experimental feature: formula card and rule/report formulas
 
 _Note:_ We are dropping support for Node versions older than 22 in this release. If you are using one of these versions of Node you will need to upgrade to at least Node 22.
-
-<!--truncate-->
 
 **Docker tag: 25.11.0**
 
@@ -523,8 +528,6 @@ This release contains the following improvements, along with numerous fixes:
 - Expand the range of display currencies available
 - Introduce a graph to show balance over time on account pages
 
-<!--truncate-->
-
 **Docker tag: 25.10.0**
 
 #### Features
@@ -616,8 +619,6 @@ This release contains the following improvements, along with numerous fixes:
 - Add a mobile view for the rules page
 - Show experimental budget currency on reports page
 - Release experimental Pluggy.ai bank connector
-
-<!--truncate-->
 
 **Docker tag: 25.9.0**
 
@@ -729,8 +730,6 @@ This release contains the following improvements:
 - New experimental feature to display currency in some areas of the app
 - Upgraded keyboard shortcut help menu
 
-<!--truncate-->
-
 **Docker tag: 25.8.0**
 
 #### Features
@@ -815,8 +814,6 @@ This release contains the following improvements:
 
 - Fix the amount input in the rules and schedules page not allowing decimals
 
-<!--truncate-->
-
 **Docker tag: 25.7.1**
 
 #### Bugfix
@@ -834,8 +831,6 @@ This release has many notable improvements. Some highlights:
 - Open a command bar with Ctrl-K (Cmd-K on Mac)
 
 As of this release we are also now publishing **nightly** versions of all the NPM packages, giving more consistency for anyone testing features before they are released.
-
-<!--truncate-->
 
 **Docker tag: 25.7.0**
 
@@ -930,8 +925,6 @@ This release contains the following improvements:
 - Fixes a rare crash when selecting dates
 - Upgrades the Docker image to use Node.js version 20
 
-<!--truncate-->
-
 **Docker tag: 25.6.1**
 
 #### Bugfix
@@ -953,8 +946,6 @@ Other notable improvements:
 
 - Upcoming/missed/due schedules in a category template are now shown on the desktop budget table
 - Numerous fixes for bugs and visual glitches
-
-<!--truncate-->
 
 **Docker tag: 25.6.0**
 
@@ -1067,8 +1058,6 @@ This release has many notable improvements. Some highlights:
 - Merge different transactions into a single transaction
 - Run Actual outside of a Docker container without building from source—for more information, please check out the [docs](https://actualbudget.org/docs/install/cli-tool)
 - Use Cloudflare Access tunnels to connect to an Actual instance (newly fixed)
-
-<!--truncate-->
 
 **Docker tag: 25.5.0**
 
@@ -1323,8 +1312,6 @@ Starting next release, we plan on deprecating the `@actual-app/web` NPM package.
 
 :::
 
-<!--truncate-->
-
 **Docker tag: 25.3.0**
 
 #### Features
@@ -1446,8 +1433,6 @@ The release has the following notable improvements:
 - Ability to switch the interface language, with experimental support for the `nl`, `pt-BR`, `uk`, and `en-GB` locales
 - Ability to disable category learning
 - Combined account view on mobile
-
-<!--truncate-->
 
 **Docker tag: 25.2.0**
 
