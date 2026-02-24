@@ -1,6 +1,6 @@
 // @ts-strict-ignore
+import AdmZip from 'adm-zip';
 import * as dateFns from 'date-fns';
-import { v4 as uuidv4 } from 'uuid';
 
 import * as connection from '../../platform/server/connection';
 import * as fs from '../../platform/server/fs';
@@ -26,7 +26,7 @@ async function getBackups(id: string): Promise<BackupWithDate[]> {
   let paths = [];
   if (await fs.exists(backupDir)) {
     paths = await fs.listDir(backupDir);
-    paths = paths.filter(file => file.match(/\.sqlite$/));
+    paths = paths.filter(file => file.match(/\.zip$/));
   }
 
   const backups = await Promise.all(
@@ -112,20 +112,41 @@ export async function makeBackup(id: string) {
     await fs.removeFile(fs.join(fs.getBudgetDir(id), LATEST_BACKUP_FILENAME));
   }
 
-  const backupId = `${uuidv4()}.sqlite`;
+  const backupId = `${dateFns.format(new Date(), 'yyyy-MM-dd HH:mm:ss')}.zip`;
   const backupPath = fs.join(budgetDir, 'backups', backupId);
 
   if (!(await fs.exists(fs.join(budgetDir, 'backups')))) {
     await fs.mkdir(fs.join(budgetDir, 'backups'));
   }
 
-  await fs.copyFile(fs.join(budgetDir, 'db.sqlite'), backupPath);
+  // Copy db to a temp path so we can clean CRDT messages before zipping
+  const tempDbPath = fs.join(budgetDir, 'backups', 'db.sqlite.tmp');
+  await fs.copyFile(fs.join(budgetDir, 'db.sqlite'), tempDbPath);
 
   // Remove all the messages from the backup
+<<<<<<< Updated upstream
   const db = await sqlite.openDatabase(backupPath);
   sqlite.runQuery(db, 'DELETE FROM messages_crdt');
   sqlite.runQuery(db, 'DELETE FROM messages_clock');
+=======
+  const db = sqlite.openDatabase(tempDbPath);
+  await sqlite.runQuery(db, 'DELETE FROM messages_crdt');
+  await sqlite.runQuery(db, 'DELETE FROM messages_clock');
+>>>>>>> Stashed changes
   sqlite.closeDatabase(db);
+
+  // Zip up the cleaned db and metadata into a single backup file
+  const zip = new AdmZip();
+  zip.addLocalFile(
+    fs.join(budgetDir, 'backups', 'db.sqlite.tmp'),
+    '',
+    'db.sqlite',
+  );
+  zip.addLocalFile(fs.join(budgetDir, 'metadata.json'));
+  zip.writeZip(backupPath);
+
+  // Clean up temp file
+  await fs.removeFile(tempDbPath);
 
   const toRemove = await updateBackups(await getBackups(id));
   for (const id of toRemove) {
@@ -201,10 +222,10 @@ export async function loadBackup(id: string, backupId: string) {
 
     prefs.unloadPrefs();
 
-    await fs.copyFile(
-      fs.join(budgetDir, 'backups', backupId),
-      fs.join(budgetDir, 'db.sqlite'),
-    );
+    // Extract the zip backup and restore db.sqlite and metadata.json
+    const zip = new AdmZip(fs.join(budgetDir, 'backups', backupId));
+    zip.extractEntryTo('db.sqlite', budgetDir, false, true);
+    zip.extractEntryTo('metadata.json', budgetDir, false, true);
   }
 }
 
