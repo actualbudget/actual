@@ -28,9 +28,9 @@ export function Accounts() {
   const { data: accounts = [] } = useAccounts();
   const failedAccounts = useFailedAccounts();
   const updatedAccounts = useUpdatedAccounts();
-  const offbudgetAccounts = useOffBudgetAccounts();
-  const onBudgetAccounts = useOnBudgetAccounts();
-  const closedAccounts = useClosedAccounts();
+  const { data: offbudgetAccounts = [] } = useOffBudgetAccounts();
+  const { data: onBudgetAccounts = [] } = useOnBudgetAccounts();
+  const { data: closedAccounts = [] } = useClosedAccounts();
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
 
   const getAccountPath = (account: AccountEntity) => `/accounts/${account.id}`;
