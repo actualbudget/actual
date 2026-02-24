@@ -1007,7 +1007,22 @@ const Transaction = memo(function Transaction({
             name: 'confirm-transaction-edit',
             options: {
               onConfirm: () => {
-                onUpdateAfterConfirm('reconciled', false);
+                const unlockedTransaction = { ...transaction, reconciled: false };
+                const unlockedSubtransactions =
+                  subtransactions?.map(subtransaction => ({
+                    ...subtransaction,
+                    reconciled: false,
+                  })) ?? null;
+
+                const deserialized = deserializeTransaction(
+                  unlockedTransaction,
+                  originalTransaction,
+                );
+
+                setTransaction(
+                  serializeTransaction(deserialized, showZeroInDeposit),
+                );
+                onSave(deserialized, unlockedSubtransactions, 'reconciled');
               },
               confirmReason: 'unlockReconciled',
             },
