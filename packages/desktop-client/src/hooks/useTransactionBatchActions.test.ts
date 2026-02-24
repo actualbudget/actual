@@ -69,7 +69,9 @@ describe('useTransactionBatchActions', () => {
 
       if (includesReconciledTrue(serialized.filter)) {
         return {
-          data: ids.includes('tx-peer') ? [{ id: 'tx-peer', reconciled: true }] : [],
+          data: ids.includes('tx-peer')
+            ? [{ id: 'tx-peer', reconciled: true }]
+            : [],
           dependencies: [],
         };
       }
