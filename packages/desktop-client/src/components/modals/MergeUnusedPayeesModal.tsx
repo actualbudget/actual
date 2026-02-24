@@ -78,7 +78,7 @@ export function MergeUnusedPayeesModal({
 
       return ruleId;
     },
-    [shouldCreateRule, isEditingRule, payees],
+    [shouldCreateRule, isEditingRule, payees, addPayeeRenameRuleAsync],
   );
 
   const onMergeAndCreateRule = useCallback(

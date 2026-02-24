@@ -147,7 +147,13 @@ export function usePreviewTransactions({
     return () => {
       isUnmounted = true;
     };
-  }, [scheduleTransactions, schedules, statuses, upcomingLength]);
+  }, [
+    scheduleTransactions,
+    schedules,
+    statuses,
+    upcomingLength,
+    runRulesAsync,
+  ]);
 
   const runningBalances = useMemo(() => {
     if (!options?.calculateRunningBalances) {

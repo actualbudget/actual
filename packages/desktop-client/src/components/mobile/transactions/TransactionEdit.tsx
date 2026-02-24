@@ -765,7 +765,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                         }
                       : unserializedTransaction;
 
-                  await createSingleTimeScheduleFromTransaction(
+                  createSingleTimeScheduleFromTransaction(
                     {
                       transaction: transactionForSchedule,
                     },
@@ -849,6 +849,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       unserializedTransactions,
       upcomingLength,
       t,
+      createSingleTimeScheduleFromTransaction,
     ]);
 
     const onUpdateInner = useCallback(
@@ -1919,7 +1920,7 @@ function TransactionEditUnconnected({
         }
       }
     },
-    [dateFormat, isLocationGranted],
+    [dateFormat, isLocationGranted, runRulesAsync],
   );
 
   const onSave = useCallback(

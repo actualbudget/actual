@@ -378,7 +378,7 @@ export function useCreateSingleTimeScheduleFromTransaction() {
         const ruleId = schedules?.data?.[0]?.rule;
 
         if (ruleId) {
-          const rule = await allRules.find(r => r.id === ruleId);
+          const rule = allRules.find(r => r.id === ruleId);
 
           if (rule) {
             const linkScheduleActions = rule.actions.filter(

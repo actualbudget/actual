@@ -225,8 +225,8 @@ export function ManageRules({ isModal, payeeId }: ManageRulesProps) {
 
   const { mutate: deleteRule } = useDeleteRuleMutation();
 
-  async function onDeleteRule(id: string) {
-    await deleteRule(
+  function onDeleteRule(id: string) {
+    deleteRule(
       { id },
       {
         onSuccess: () => {
