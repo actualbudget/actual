@@ -379,13 +379,16 @@ export function ManageRules({ isModal, payeeId }: ManageRulesProps) {
             {selectedInst.items.size > 0 && (
               <Tooltip
                 isOpen={isNonDeletableRuleSelected}
-                content={t(
-                  'Some selected rules cannot be deleted because they are linked to schedules.',
-                )}
+                content={
+                  <Trans>
+                    Some selected rules cannot be deleted because they are
+                    linked to schedules.
+                  </Trans>
+                }
               >
                 <Button
                   onPress={onDeleteSelected}
-                  // isDisabled={isNonDeletableRuleSelected}
+                  isDisabled={isNonDeletableRuleSelected}
                 >
                   <Trans count={selectedInst.items.size}>
                     Delete {{ count: selectedInst.items.size }} rules

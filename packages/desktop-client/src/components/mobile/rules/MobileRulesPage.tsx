@@ -21,7 +21,6 @@ import { useRules } from '#hooks/useRules';
 import { useSchedules } from '#hooks/useSchedules';
 import { useUndo } from '#hooks/useUndo';
 import { useUrlParam } from '#hooks/useUrlParam';
-import { useDispatch } from '#redux';
 import { useDeleteRuleMutation } from '#rules';
 
 import { AddRuleButton } from './AddRuleButton';
@@ -30,7 +29,6 @@ import { RulesList } from './RulesList';
 export function MobileRulesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const [visibleRulesParam] = useUrlParam('visible-rules');
   const [filter, setFilter] = useState('');

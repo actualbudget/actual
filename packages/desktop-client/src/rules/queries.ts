@@ -15,7 +15,7 @@ export const ruleQueries = {
     }),
   listPayee: ({ payeeId }: { payeeId?: PayeeEntity['id'] | null }) =>
     queryOptions<RuleEntity[]>({
-      queryKey: [...ruleQueries.all(), { payeeId }] as const,
+      queryKey: [...ruleQueries.lists(), { payeeId }] as const,
       queryFn: async () => {
         if (!payeeId) {
           // Should never happen since the query is disabled when payeeId is not provided,

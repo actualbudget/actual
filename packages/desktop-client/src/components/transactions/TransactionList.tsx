@@ -263,7 +263,7 @@ export function TransactionList({
     [dispatch, onRefetch, upcomingLength, t],
   );
 
-  const { mutate: createSingleTimeScheduleFromTransaction } =
+  const { mutateAsync: createSingleTimeScheduleFromTransactionAsync } =
     useCreateSingleTimeScheduleFromTransaction();
 
   const onAdd = useCallback(
@@ -288,7 +288,7 @@ export function TransactionList({
         promptToConvertToSchedule(
           transactionWithSubtransactions,
           async () => {
-            createSingleTimeScheduleFromTransaction({
+            await createSingleTimeScheduleFromTransactionAsync({
               transaction: transactionWithSubtransactions,
             });
           },
@@ -309,7 +309,7 @@ export function TransactionList({
       isLearnCategoriesEnabled,
       onRefetch,
       promptToConvertToSchedule,
-      createSingleTimeScheduleFromTransaction,
+      createSingleTimeScheduleFromTransactionAsync,
     ],
   );
 
@@ -356,7 +356,9 @@ export function TransactionList({
                 await send('transaction-delete', { id: transaction.id });
               }
 
-              createSingleTimeScheduleFromTransaction({ transaction });
+              await createSingleTimeScheduleFromTransactionAsync({
+                transaction,
+              });
             },
             saveTransaction,
           );
@@ -371,7 +373,7 @@ export function TransactionList({
       onChange,
       onRefetch,
       promptToConvertToSchedule,
-      createSingleTimeScheduleFromTransaction,
+      createSingleTimeScheduleFromTransactionAsync,
     ],
   );
 
