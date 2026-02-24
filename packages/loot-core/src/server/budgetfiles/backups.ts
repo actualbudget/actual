@@ -1,3 +1,4 @@
+import type { Database } from '@jlongster/sql.js';
 // @ts-strict-ignore
 import AdmZip from 'adm-zip';
 import * as dateFns from 'date-fns';
@@ -112,7 +113,7 @@ export async function makeBackup(id: string) {
     await fs.removeFile(fs.join(fs.getBudgetDir(id), LATEST_BACKUP_FILENAME));
   }
 
-  const backupId = `${dateFns.format(new Date(), 'yyyy-MM-dd HH:mm:ss')}.zip`;
+  const backupId = `${dateFns.format(new Date(), 'yyyy-MM-dd_HH-mm-ss')}.zip`;
   const backupPath = fs.join(budgetDir, 'backups', backupId);
 
   if (!(await fs.exists(fs.join(budgetDir, 'backups')))) {
@@ -120,27 +121,34 @@ export async function makeBackup(id: string) {
   }
 
   // Copy db to a temp path so we can clean CRDT messages before zipping
-  const tempDbPath = fs.join(budgetDir, 'backups', 'db.sqlite.tmp');
+  const tempDbPath = fs.join(
+    budgetDir,
+    'backups',
+    `db.${Date.now()}.sqlite.tmp`,
+  );
+
   await fs.copyFile(fs.join(budgetDir, 'db.sqlite'), tempDbPath);
 
-  // Remove all the messages from the backup
-  const db = await sqlite.openDatabase(tempDbPath);
-  sqlite.runQuery(db, 'DELETE FROM messages_crdt');
-  sqlite.runQuery(db, 'DELETE FROM messages_clock');
-  sqlite.closeDatabase(db);
+  let db: Database | undefined;
 
-  // Zip up the cleaned db and metadata into a single backup file
-  const zip = new AdmZip();
-  zip.addLocalFile(
-    fs.join(budgetDir, 'backups', 'db.sqlite.tmp'),
-    '',
-    'db.sqlite',
-  );
-  zip.addLocalFile(fs.join(budgetDir, 'metadata.json'));
-  zip.writeZip(backupPath);
-
-  // Clean up temp file
-  await fs.removeFile(tempDbPath);
+  try {
+    // Remove all the messages from the backup
+    db = await sqlite.openDatabase(tempDbPath);
+    sqlite.runQuery(db, 'DELETE FROM messages_crdt');
+    sqlite.runQuery(db, 'DELETE FROM messages_clock');
+    // Zip up the cleaned db and metadata into a single backup file
+    const zip = new AdmZip();
+    zip.addLocalFile(tempDbPath, '', 'db.sqlite');
+    zip.addLocalFile(fs.join(budgetDir, 'metadata.json'));
+    zip.writeZip(backupPath);
+  } finally {
+    if (db) {
+      sqlite.closeDatabase(db);
+    }
+    if (await fs.exists(tempDbPath)) {
+      await fs.removeFile(tempDbPath);
+    }
+  }
 
   const toRemove = await updateBackups(await getBackups(id));
   for (const id of toRemove) {
