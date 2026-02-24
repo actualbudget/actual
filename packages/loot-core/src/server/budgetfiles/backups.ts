@@ -124,15 +124,9 @@ export async function makeBackup(id: string) {
   await fs.copyFile(fs.join(budgetDir, 'db.sqlite'), tempDbPath);
 
   // Remove all the messages from the backup
-<<<<<<< Updated upstream
-  const db = await sqlite.openDatabase(backupPath);
-  sqlite.runQuery(db, 'DELETE FROM messages_crdt');
-  sqlite.runQuery(db, 'DELETE FROM messages_clock');
-=======
-  const db = sqlite.openDatabase(tempDbPath);
+  const db = await sqlite.openDatabase(tempDbPath);
   await sqlite.runQuery(db, 'DELETE FROM messages_crdt');
   await sqlite.runQuery(db, 'DELETE FROM messages_clock');
->>>>>>> Stashed changes
   sqlite.closeDatabase(db);
 
   // Zip up the cleaned db and metadata into a single backup file
@@ -222,7 +216,6 @@ export async function loadBackup(id: string, backupId: string) {
 
     prefs.unloadPrefs();
 
-    // Extract the zip backup and restore db.sqlite and metadata.json
     const zip = new AdmZip(fs.join(budgetDir, 'backups', backupId));
     zip.extractEntryTo('db.sqlite', budgetDir, false, true);
     zip.extractEntryTo('metadata.json', budgetDir, false, true);
