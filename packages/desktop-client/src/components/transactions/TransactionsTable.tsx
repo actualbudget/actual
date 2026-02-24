@@ -2014,7 +2014,7 @@ type TransactionTableInnerProps = {
   onSave: (
     transaction: TransactionEntity,
     subtransactions?: TransactionEntity[] | null,
-    updatedFieldName?: keyof TransactionEntity | null,
+    updatedFieldName?: string | null,
   ) => Promise<void> | void;
   onApplyRules: (
     transaction: TransactionEntity,
@@ -2367,7 +2367,7 @@ export type TransactionTableProps = {
   onSave: (
     transaction: TransactionEntity,
     subtransactions?: TransactionEntity[] | null,
-    updatedFieldName?: keyof TransactionEntity | null,
+    updatedFieldName?: string | null,
   ) => Promise<void> | void;
   onApplyRules: (
     transaction: TransactionEntity,
