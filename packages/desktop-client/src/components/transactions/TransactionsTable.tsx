@@ -2011,7 +2011,11 @@ type TransactionTableInnerProps = {
   dateFormat: string | undefined;
   hideFraction: boolean;
   renderEmpty: ReactNode | (() => ReactNode);
-  onSave: (transaction: TransactionEntity) => void;
+  onSave: (
+    transaction: TransactionEntity,
+    subtransactions?: TransactionEntity[] | null,
+    updatedFieldName?: keyof TransactionEntity | null,
+  ) => Promise<void> | void;
   onApplyRules: (
     transaction: TransactionEntity,
     field: string,
@@ -2360,7 +2364,11 @@ export type TransactionTableProps = {
   dateFormat: string | undefined;
   hideFraction: boolean;
   renderEmpty: ReactNode | (() => ReactNode);
-  onSave: (transaction: TransactionEntity) => void;
+  onSave: (
+    transaction: TransactionEntity,
+    subtransactions?: TransactionEntity[] | null,
+    updatedFieldName?: keyof TransactionEntity | null,
+  ) => Promise<void> | void;
   onApplyRules: (
     transaction: TransactionEntity,
     field: string | null,
