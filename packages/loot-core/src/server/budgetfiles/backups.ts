@@ -125,8 +125,8 @@ export async function makeBackup(id: string) {
 
   // Remove all the messages from the backup
   const db = await sqlite.openDatabase(tempDbPath);
-  await sqlite.runQuery(db, 'DELETE FROM messages_crdt');
-  await sqlite.runQuery(db, 'DELETE FROM messages_clock');
+  sqlite.runQuery(db, 'DELETE FROM messages_crdt');
+  sqlite.runQuery(db, 'DELETE FROM messages_clock');
   sqlite.closeDatabase(db);
 
   // Zip up the cleaned db and metadata into a single backup file
