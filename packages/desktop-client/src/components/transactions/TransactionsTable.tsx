@@ -1007,7 +1007,10 @@ const Transaction = memo(function Transaction({
             name: 'confirm-transaction-edit',
             options: {
               onConfirm: () => {
-                const unlockedTransaction = { ...transaction, reconciled: false };
+                const unlockedTransaction = {
+                  ...transaction,
+                  reconciled: false,
+                };
                 const unlockedSubtransactions =
                   subtransactions?.map(subtransaction => ({
                     ...subtransaction,
