@@ -322,6 +322,22 @@ export function useTransactionBatchActions() {
     );
   };
 
+  const getIdsForDeleteReconciledCheck = async (
+    ids: Array<TransactionEntity['id']>,
+  ) => {
+    const { data } = await aqlQuery(
+      q('transactions')
+        .filter({ id: { $oneof: ids } })
+        .select('*'),
+    );
+
+    const transferIds = (data as TransactionEntity[])
+      .flatMap(transaction => transaction.transfer_id)
+      .filter((transferId): transferId is string => !!transferId);
+
+    return Array.from(new Set([...ids, ...transferIds]));
+  };
+
   const onBatchDelete = async ({ ids, onSuccess }: BatchDeleteProps) => {
     const onConfirmDelete = (ids: Array<TransactionEntity['id']>) => {
       dispatch(
@@ -395,10 +411,12 @@ export function useTransactionBatchActions() {
       );
     };
 
+    const idsForReconciledCheck = await getIdsForDeleteReconciledCheck(ids);
+
     await checkForReconciledTransactions(
-      ids,
+      idsForReconciledCheck,
       'batchDeleteWithReconciled',
-      onConfirmDelete,
+      () => onConfirmDelete(ids),
     );
   };
 
