@@ -1,5 +1,10 @@
 // @ts-strict-ignore
-import type { FieldValueTypes, RuleConditionOp } from '#types/models';
+import type {
+  FieldValueTypes,
+  RuleActionEntity,
+  RuleConditionEntity,
+  RuleConditionOp,
+} from '#types/models';
 
 // For now, this info is duplicated from the backend. Figure out how
 // to share it later.
@@ -89,11 +94,11 @@ const FIELD_INFO = {
 
 const fieldInfo: FieldInfoConstraint = FIELD_INFO;
 
-export const FIELD_TYPES = new Map<keyof FieldValueTypes, string>(
-  Object.entries(FIELD_INFO).map(([field, info]) => [
-    field as unknown as keyof FieldValueTypes,
-    info.type,
-  ]),
+export const FIELD_TYPES = new Map(
+  Object.entries(FIELD_INFO).map(
+    ([field, info]) =>
+      [field as unknown as keyof FieldValueTypes, info.type] as const,
+  ),
 );
 
 export function isValidOp(field: keyof FieldValueTypes, op: RuleConditionOp) {
@@ -103,6 +108,7 @@ export function isValidOp(field: keyof FieldValueTypes, op: RuleConditionOp) {
   if (fieldInfo[field].disallowedOps?.has(op)) return false;
 
   return (
+    // @ts-expect-error Fix op type. RuleConditionEntity is really tricky to work with...
     TYPE_INFO[type].ops.includes(op) || fieldInfo[field].internalOps?.has(op)
   );
 }
@@ -157,24 +163,21 @@ export function sortNumbers(num1, num2) {
   return [num2, num1];
 }
 
-export function parse(item) {
-  if (item.op === 'set-split-amount') {
-    if (item.options.method === 'fixed-amount') {
-      return { ...item };
-    }
-    return item;
-  }
-
+export function parseConditions(
+  item: RuleConditionEntity,
+): RuleConditionEntity & { error?: string | null } {
   switch (item.type) {
     case 'number': {
       return { ...item };
     }
     case 'string': {
       const parsed = item.value == null ? '' : item.value;
+      // @ts-expect-error Fix me
       return { ...item, value: parsed };
     }
     case 'boolean': {
       const parsed = item.value;
+      // @ts-expect-error Fix me
       return { ...item, value: parsed };
     }
     default:
@@ -183,7 +186,74 @@ export function parse(item) {
   return { ...item, error: null };
 }
 
-export function unparse({ error: _error, inputKey: _inputKey, ...item }) {
+export function unparseConditions({
+  error: _error,
+  inputKey: _inputKey,
+  ...item
+}: RuleConditionEntity & {
+  inputKey?: string;
+  error?: string | null;
+}): RuleConditionEntity {
+  if ('type' in item && item.type) {
+    switch (item.type) {
+      case 'number': {
+        return { ...item };
+      }
+      case 'string': {
+        const unparsed = item.value == null ? '' : item.value;
+        // @ts-expect-error Fix me
+        return { ...item, value: unparsed };
+      }
+      case 'boolean': {
+        const unparsed = item.value == null ? false : item.value;
+        // @ts-expect-error Fix me
+        return { ...item, value: unparsed };
+      }
+      default:
+    }
+  }
+
+  return item;
+}
+
+export function parseActions(
+  item: RuleActionEntity,
+): RuleActionEntity & { error?: string | null } {
+  if (item.op === 'set-split-amount') {
+    if (item.options.method === 'fixed-amount') {
+      return { ...item };
+    }
+    return item;
+  }
+
+  if ('type' in item && item.type) {
+    switch (item.type) {
+      case 'number': {
+        return { ...item };
+      }
+      case 'string': {
+        const parsed = item.value == null ? '' : item.value;
+        return { ...item, value: parsed };
+      }
+      case 'boolean': {
+        const parsed = item.value;
+        return { ...item, value: parsed };
+      }
+      default:
+    }
+  }
+
+  return { ...item, error: null };
+}
+
+export function unparseActions({
+  error: _error,
+  inputKey: _inputKey,
+  ...item
+}: RuleActionEntity & {
+  inputKey?: string;
+  error?: string | null;
+}): RuleActionEntity {
   if (item.op === 'set-split-amount') {
     if (item.options.method === 'fixed-amount') {
       return {
@@ -193,25 +263,27 @@ export function unparse({ error: _error, inputKey: _inputKey, ...item }) {
     if (item.options.method === 'fixed-percent') {
       return {
         ...item,
-        value: item.value && parseFloat(item.value),
+        value: item.value && parseFloat(`${item.value}`),
       };
     }
     return item;
   }
 
-  switch (item.type) {
-    case 'number': {
-      return { ...item };
+  if ('type' in item && item.type) {
+    switch ('type' in item && item.type) {
+      case 'number': {
+        return { ...item };
+      }
+      case 'string': {
+        const unparsed = item.value == null ? '' : item.value;
+        return { ...item, value: unparsed };
+      }
+      case 'boolean': {
+        const unparsed = item.value == null ? false : item.value;
+        return { ...item, value: unparsed };
+      }
+      default:
     }
-    case 'string': {
-      const unparsed = item.value == null ? '' : item.value;
-      return { ...item, value: unparsed };
-    }
-    case 'boolean': {
-      const unparsed = item.value == null ? false : item.value;
-      return { ...item, value: unparsed };
-    }
-    default:
   }
 
   return item;

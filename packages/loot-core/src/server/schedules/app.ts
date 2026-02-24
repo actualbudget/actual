@@ -319,7 +319,7 @@ async function moveSchedule({
 }
 
 export async function createSchedule({
-  schedule = null,
+  schedule = {},
   conditions = [],
 }: {
   schedule?: Partial<ScheduleEntity> | null;

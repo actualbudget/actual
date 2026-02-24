@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { computeSchedulePreviewTransactions } from '@actual-app/core/shared/schedules';
 import { ungroupTransactions } from '@actual-app/core/shared/transactions';
@@ -9,6 +8,8 @@ import type {
   ScheduleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
+
+import { useRunRulesMutation } from '#rules/mutations';
 
 import { useCachedSchedules } from './useCachedSchedules';
 import { useSyncedPref } from './useSyncedPref';
@@ -86,6 +87,8 @@ export function usePreviewTransactions({
     );
   }, [filter, isSchedulesLoading, schedules, statuses, upcomingLength]);
 
+  const { mutateAsync: runRulesAsync } = useRunRulesMutation();
+
   useEffect(() => {
     let isUnmounted = false;
 
@@ -102,7 +105,7 @@ export function usePreviewTransactions({
     Promise.all(
       scheduleTransactions.map(transaction =>
         // Kick off an async rules application
-        send('rules-run', { transaction }),
+        runRulesAsync({ transaction }),
       ),
     )
       .then(newTrans => {

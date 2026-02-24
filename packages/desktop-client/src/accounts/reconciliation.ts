@@ -96,6 +96,10 @@ export async function createReconciliationTransaction(
   accountId: AccountEntity['id'],
   diff: number,
   onRealized?: (transactions: TransactionEntity[]) => void,
+  runRules: (
+    transaction: TransactionEntity,
+  ) => Promise<TransactionEntity> = transaction =>
+    send('rules-run', { transaction }),
 ) {
   const reconciliationTransactions = realizeTempTransactions([
     {
@@ -112,9 +116,7 @@ export async function createReconciliationTransaction(
   onRealized?.(reconciliationTransactions);
 
   const ruledTransactions = await Promise.all(
-    reconciliationTransactions.map(transaction =>
-      send('rules-run', { transaction }),
-    ),
+    reconciliationTransactions.map(transaction => runRules(transaction)),
   );
 
   await send('transactions-batch-update', {
