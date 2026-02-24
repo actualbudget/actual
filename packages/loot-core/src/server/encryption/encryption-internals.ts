@@ -1,85 +1,109 @@
 // @ts-strict-ignore
-import crypto from 'crypto';
+const ENCRYPTION_ALGORITHM = 'aes-256-gcm';
 
-const ENCRYPTION_ALGORITHM = 'aes-256-gcm' as const;
+function browserAlgorithmName(name) {
+  switch (name) {
+    case 'aes-256-gcm':
+      return 'AES-GCM';
+    default:
+      throw new Error('unsupported crypto algorithm: ' + name);
+  }
+}
 
 export function randomBytes(n) {
-  return crypto.randomBytes(n);
+  return Buffer.from(crypto.getRandomValues(new Uint8Array(n)));
 }
 
 export async function encrypt(masterKey, value) {
-  const masterKeyBuffer = masterKey.getValue().raw;
-  // let iv = createKeyBuffer({ numBytes: 12, secret: masterKeyBuffer });
-  const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv(
-    ENCRYPTION_ALGORITHM,
-    masterKeyBuffer,
-    iv,
-  );
-  let encrypted = cipher.update(value);
-  encrypted = Buffer.concat([encrypted, cipher.final()]);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
 
-  const authTag = cipher.getAuthTag();
+  const encryptedArrayBuffer = await crypto.subtle.encrypt(
+    {
+      name: browserAlgorithmName(ENCRYPTION_ALGORITHM),
+      iv,
+      tagLength: 128,
+    },
+    masterKey.getValue().raw,
+    value,
+  );
+
+  const encrypted = Buffer.from(encryptedArrayBuffer);
+
+  // Strip the auth tag off the end
+  const authTag = encrypted.slice(-16);
+  const strippedEncrypted = encrypted.slice(0, -16);
 
   return {
-    value: encrypted,
+    value: strippedEncrypted,
     meta: {
       keyId: masterKey.getId(),
       algorithm: ENCRYPTION_ALGORITHM,
-      iv: iv.toString('base64'),
+      iv: Buffer.from(iv).toString('base64'),
       authTag: authTag.toString('base64'),
     },
   };
 }
 
 export async function decrypt(masterKey, encrypted, meta) {
-  const masterKeyBuffer = masterKey.getValue().raw;
-  const { algorithm, iv: originalIv, authTag: originalAuthTag } = meta;
-  const iv = Buffer.from(originalIv, 'base64');
-  const authTag = Buffer.from(originalAuthTag, 'base64');
+  const { algorithm, iv, authTag } = meta;
 
-  const decipher = crypto.createDecipheriv(algorithm, masterKeyBuffer, iv);
-  decipher.setAuthTag(authTag);
+  const decrypted = await crypto.subtle.decrypt(
+    {
+      name: browserAlgorithmName(algorithm),
+      iv: Buffer.from(iv, 'base64'),
+      tagLength: 128,
+    },
+    masterKey.getValue().raw,
+    Buffer.concat([encrypted, Buffer.from(authTag, 'base64')]),
+  );
 
-  let decrypted = decipher.update(encrypted);
-  decrypted = Buffer.concat([decrypted, decipher.final()]);
-  return decrypted;
+  return Buffer.from(decrypted);
 }
 
 export async function createKey({ secret, salt }) {
-  const buffer = createKeyBuffer({ secret, salt });
+  const passwordBuffer = Buffer.from(secret);
+  const saltBuffer = Buffer.from(salt);
+
+  const passwordKey = await crypto.subtle.importKey(
+    'raw',
+    passwordBuffer,
+    { name: 'PBKDF2' },
+    false,
+    ['deriveBits', 'deriveKey'],
+  );
+
+  const derivedKey = await crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      hash: 'SHA-512',
+      salt: saltBuffer,
+      iterations: 10000,
+    },
+    passwordKey,
+    { name: 'AES-GCM', length: 256 },
+    true,
+    ['encrypt', 'decrypt'],
+  );
+
+  const exported = await crypto.subtle.exportKey('raw', derivedKey);
+
   return {
-    raw: buffer,
-    base64: buffer.toString('base64'),
+    raw: derivedKey,
+    base64: Buffer.from(exported).toString('base64'),
   };
 }
 
 export async function importKey(str) {
+  const key = await crypto.subtle.importKey(
+    'raw',
+    Buffer.from(str, 'base64'),
+    { name: 'AES-GCM' },
+    false,
+    ['encrypt', 'decrypt'],
+  );
+
   return {
-    raw: Buffer.from(str, 'base64'),
+    raw: key,
     base64: str,
   };
-}
-
-/**
- * Generates a Buffer of a desired byte length to be used as either an encryption key or an initialization vector.
- *
- * @private
- */
-function createKeyBuffer({
-  numBytes,
-  secret,
-  salt,
-}: {
-  numBytes?: number;
-  secret?: string;
-  salt?: string;
-}) {
-  return crypto.pbkdf2Sync(
-    secret || crypto.randomBytes(128).toString('base64'),
-    salt || crypto.randomBytes(32).toString('base64'),
-    10000,
-    numBytes || 32,
-    'sha512',
-  );
 }

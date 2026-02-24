@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/api",
-  "version": "26.2.0",
+  "version": "26.2.1",
   "description": "An API for Actual",
   "license": "MIT",
   "files": [
@@ -12,12 +12,13 @@
   "scripts": {
     "build:app": "yarn workspace loot-core build:api",
     "build:crdt": "yarn workspace @actual-app/crdt build",
-    "build:node": "tsc --p tsconfig.dist.json && tsc-alias -p tsconfig.dist.json",
-    "build:migrations": "cp migrations/*.sql dist/migrations",
+    "build:node": "tsc && tsc-alias",
+    "build:migrations": "mkdir dist/migrations && cp migrations/*.sql dist/migrations",
     "build:default-db": "cp default-db.sqlite dist/",
     "build": "yarn run clean && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
     "test": "yarn run clean && yarn run build:app && yarn run build:crdt && vitest --run",
-    "clean": "rm -rf dist @types"
+    "clean": "rm -rf dist @types",
+    "typecheck": "yarn build && tsc --noEmit && tsc-strict"
   },
   "dependencies": {
     "@actual-app/crdt": "workspace:^",
@@ -29,6 +30,7 @@
   "devDependencies": {
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
+    "typescript-strict-plugin": "^2.4.4",
     "vitest": "^4.0.18"
   },
   "engines": {
