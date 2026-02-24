@@ -1,6 +1,6 @@
 {
   "name": "desktop-electron",
-  "version": "26.2.0",
+  "version": "26.2.1",
   "description": "A simple and powerful personal finance system",
   "author": "Actual",
   "main": "build/desktop-electron/index.js",
