@@ -68,6 +68,7 @@ export type ParseFileOptions = {
   hasHeaderRow?: boolean;
   delimiter?: string;
   fallbackMissingPayeeToMemo?: boolean;
+  swapPayeeAndMemo?: boolean;
   skipStartLines?: number;
   skipEndLines?: number;
   importNotes?: boolean;
@@ -207,6 +208,7 @@ async function parseOFX(
   // Banks don't always implement the OFX standard properly
   // If no payee is available try and fallback to memo
   const useMemoFallback = options.fallbackMissingPayeeToMemo;
+  const swap = options.swapPayeeAndMemo;
 
   return {
     errors,
@@ -219,13 +221,16 @@ async function parseOFX(
         });
       }
 
+      const payeeSource = swap ? trans.memo : trans.name;
+      const memoSource = swap ? trans.name : trans.memo;
+
       return {
         amount: parsedAmount || 0,
         imported_id: trans.fitId,
         date: trans.date,
-        payee_name: trans.name || (useMemoFallback ? trans.memo : null),
-        imported_payee: trans.name || (useMemoFallback ? trans.memo : null),
-        notes: options.importNotes ? trans.memo || null : null, //memo used for payee
+        payee_name: payeeSource || (useMemoFallback ? memoSource : null),
+        imported_payee: payeeSource || (useMemoFallback ? memoSource : null),
+        notes: options.importNotes ? memoSource || null : null,
       };
     }),
   };

@@ -11,6 +11,7 @@ const SYNCED_PREF_KEYS = [
   /^csv-delimiter-/,
   /^csv-has-header-/,
   /^ofx-fallback-missing-payee-/,
+  /^ofx-swap-payee-memo-/,
   /^flip-amount-/,
   'budgetType',
   /^flags\./,
