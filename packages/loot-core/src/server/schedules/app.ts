@@ -134,15 +134,10 @@ export async function setNextDate({
   );
 
   if (skipRequested === true) {
-    const { data } = await aqlQuery(
-      q('schedules').filter({ id }).select('_date'),
-    );
-    const schedule = data[0];
+    const skipWeekend: boolean = dateCond.value?.skipWeekend;
+    const weekendSolveMode: string = dateCond.value?.weekendSolveMode;
 
-    if (
-      schedule?._date?.weekendSolveMode === 'before' &&
-      schedule?._date?.skipWeekend === true
-    ) {
+    if (weekendSolveMode === 'before' && skipWeekend === true) {
       const parsedNextDate = parseDate(nextDate);
       if (d.isFriday(parsedNextDate) || d.isWeekend(parsedNextDate)) {
         // nextDate is on weekend or friday, moving to monday
