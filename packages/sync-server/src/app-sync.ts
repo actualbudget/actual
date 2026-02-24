@@ -49,9 +49,14 @@ app.use(express.json({ limit: `${config.get('upload.fileSizeLimitMB')}mb` }));
 export { app as handlers };
 
 const OK_RESPONSE = { status: 'ok' };
+const FILE_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 
 function boolToInt(deleted) {
   return deleted ? 1 : 0;
+}
+
+function isValidFileId(fileId: unknown): fileId is string {
+  return typeof fileId === 'string' && FILE_ID_PATTERN.test(fileId);
 }
 
 const verifyFileExists = (fileId, filesService, res, errorObject) => {
@@ -256,6 +261,10 @@ app.post('/upload-user-file', async (req, res) => {
     res.status(400).send('fileId is required');
     return;
   }
+  if (!isValidFileId(fileId)) {
+    res.status(400).send('invalid fileId');
+    return;
+  }
 
   let groupId = req.headers['x-actual-group-id'] || null;
   const encryptMeta = req.headers['x-actual-encrypt-meta'] || null;
@@ -350,6 +359,10 @@ app.get('/download-user-file', async (req, res) => {
     // FIXME: Not sure how this cannot be a string when the header is
     // set.
     res.status(400).send('Single file ID is required');
+    return;
+  }
+  if (!isValidFileId(fileId)) {
+    res.status(400).send('invalid fileId');
     return;
   }
 
