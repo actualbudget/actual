@@ -1,6 +1,6 @@
 import { readdir } from 'node:fs/promises';
 import path, { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { load } from 'migrate';
 
@@ -30,7 +30,9 @@ export async function run(direction: 'up' | 'down' = 'up'): Promise<void> {
     for (const f of files
       .filter(f => f.endsWith('.js') || f.endsWith('.ts'))
       .sort()) {
-      migrationsModules[f] = await import(path.join(migrationsDir, f));
+      migrationsModules[f] = await import(
+        pathToFileURL(path.join(migrationsDir, f)).href
+      );
     }
 
     return new Promise<void>((resolve, reject) => {
