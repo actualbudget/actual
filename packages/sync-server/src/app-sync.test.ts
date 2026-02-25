@@ -23,13 +23,13 @@ const deleteUser = (userId: string) => {
   getAccountDb().mutate('DELETE FROM users WHERE id = ?', [userId]);
 };
 
-const generateFileId = () => {
+function generateFileId() {
   const id = crypto.randomBytes(16).toString('hex');
   if (!isValidFileId(id)) {
     throw new Error('Generated fileId is invalid');
   }
   return id;
-};
+}
 
 describe('/user-get-key', () => {
   it('returns 401 if the user is not authenticated', async () => {
