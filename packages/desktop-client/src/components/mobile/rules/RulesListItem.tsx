@@ -52,7 +52,10 @@ export function RulesListItem({
       }
       {...props}
     >
-      <SpaceBetween gap={12} style={{ alignItems: 'flex-start' }}>
+      <SpaceBetween
+        gap={12}
+        style={{ alignItems: 'flex-start', width: '100%' }}
+      >
         {/* Column 1: PRE/POST pill */}
         <View
           style={{
