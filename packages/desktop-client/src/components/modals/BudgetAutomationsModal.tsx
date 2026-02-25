@@ -53,6 +53,8 @@ function getDisplayTypeFromTemplate(template: Template): DisplayTemplateType {
       return 'week';
     case 'limit':
       return 'limit';
+    case 'refill':
+      return 'refill';
     case 'average':
     case 'copy':
       return 'historical';
@@ -72,7 +74,7 @@ function createAutomationEntry(
   };
 }
 
-function migrateTemplatesToAutomations(
+export function migrateTemplatesToAutomations(
   templates: Template[],
 ): AutomationEntry[] {
   const entries: AutomationEntry[] = [];
@@ -80,7 +82,10 @@ function migrateTemplatesToAutomations(
   templates.forEach(template => {
     // Expand simple templates into limit, refill, and/or periodic templates
     if (template.type === 'simple') {
+      let hasExpandedTemplate = false;
+
       if (template.limit) {
+        hasExpandedTemplate = true;
         entries.push(
           createAutomationEntry(
             {
@@ -108,6 +113,7 @@ function migrateTemplatesToAutomations(
       }
       // If it has a monthly amount, create a periodic template
       if (template.monthly != null && template.monthly !== 0) {
+        hasExpandedTemplate = true;
         entries.push(
           createAutomationEntry(
             {
@@ -125,6 +131,13 @@ function migrateTemplatesToAutomations(
           ),
         );
       }
+
+      if (!hasExpandedTemplate) {
+        entries.push(
+          createAutomationEntry(template, getDisplayTypeFromTemplate(template)),
+        );
+      }
+
       return;
     }
 
@@ -156,10 +169,10 @@ function BudgetAutomationList({
       createAutomationEntry(
         {
           type: 'periodic',
-          amount: 5,
+          amount: 500,
           period: {
             period: 'month',
-            amount: 5,
+            amount: 1,
           },
           starting: dayFromDate(firstDayOfMonth(new Date())),
           directive: 'template',
@@ -311,15 +324,17 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
   const [automations, setAutomations] = useState<
     Record<string, AutomationEntry[]>
   >({});
+  const onLoaded = useCallback((result: Record<string, Template[]>) => {
+    const next: Record<string, AutomationEntry[]> = {};
+    for (const [id, templates] of Object.entries(result)) {
+      next[id] = migrateTemplatesToAutomations(templates);
+    }
+    setAutomations(next);
+  }, []);
+
   const { loading } = useBudgetAutomations({
     categoryId,
-    onLoaded: result => {
-      const next: Record<string, AutomationEntry[]> = {};
-      for (const [id, templates] of Object.entries(result)) {
-        next[id] = migrateTemplatesToAutomations(templates);
-      }
-      setAutomations(next);
-    },
+    onLoaded,
   });
 
   const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
