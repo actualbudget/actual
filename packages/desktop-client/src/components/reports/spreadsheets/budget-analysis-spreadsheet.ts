@@ -69,8 +69,21 @@ export function createBudgetAnalysisSpreadsheet({
             return cond.value.includes(cat.id);
           } else if (cond.op === 'notOneOf') {
             return !cond.value.includes(cat.id);
+          } else if (cond.op === 'contains') {
+            return cat.name.includes(cond.value as string);
+          } else if (cond.op === 'doesNotContain') {
+            return !cat.name.includes(cond.value as string);
+          } else if (cond.op === 'matches') {
+            try {
+              return new RegExp(cond.value as string).test(cat.name);
+            } catch (e) {
+              console.warn('Invalid regexp in matches condition', e);
+              return true;
+            }
           }
-          return false;
+          // Unknown operator: include category by default and log warning
+          console.warn(`Unknown category condition operator: ${cond.op}`);
+          return true;
         });
       });
 
