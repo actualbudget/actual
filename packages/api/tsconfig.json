@@ -14,30 +14,9 @@
     "declarationDir": "@types",
     "rootDir": ".",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
-    "paths": {
-      "loot-core/*": ["../loot-core/lib-dist/decl/src/*"]
-    },
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
   "references": [{ "path": "../crdt" }, { "path": "../loot-core" }],
-  "include": [
-    "index.ts",
-    "methods.ts",
-    "utils.ts",
-    "injected.js",
-    "validateNodeVersion.js",
-    "vitest.config.ts",
-    "app/query.js",
-    "migrations/**/*",
-    "bin/**/*",
-    "mocks/**/*"
-  ],
-  "exclude": [
-    "**/node_modules/**",
-    "dist",
-    "**/dist/**",
-    "@types",
-    "**/@types/**",
-    "*.test.ts"
-  ]
+  "include": ["."],
+  "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts"]
 }
