@@ -224,7 +224,6 @@ function BudgetAutomationList({
           onSave={onSave(index)}
           onDelete={onDelete(index)}
           template={automation.template}
-          displayType={automation.displayType}
           categories={categories}
           schedules={schedules}
           hasLimitAutomation={hasLimitAutomation}
