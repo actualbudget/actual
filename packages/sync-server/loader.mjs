@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { dirname, extname, resolve as nodeResolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const extensions = ['.ts', '.js', '.mts', '.mjs'];
 
@@ -9,7 +9,7 @@ export async function resolve(specifier, context, nextResolve) {
   if (specifier.startsWith('.') && !extname(specifier)) {
     const parentURL = context.parentURL;
     if (parentURL) {
-      const parentPath = new URL(parentURL).pathname;
+      const parentPath = fileURLToPath(parentURL);
       const parentDir = dirname(parentPath);
 
       // Try extensions in order
