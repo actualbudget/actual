@@ -328,11 +328,13 @@ export function useTransactionBatchActions() {
     const { data } = await aqlQuery(
       q('transactions')
         .filter({ id: { $oneof: ids } })
-        .select('*'),
+        .select('*')
+        .options({ splits: 'grouped' }),
     );
 
-    const transferIds = (data as TransactionEntity[])
-      .flatMap(transaction => transaction.transfer_id)
+    const transactions = ungroupTransactions(data as TransactionEntity[]);
+    const transferIds = transactions
+      .map(transaction => transaction.transfer_id)
       .filter((transferId): transferId is string => !!transferId);
 
     return Array.from(new Set([...ids, ...transferIds]));
