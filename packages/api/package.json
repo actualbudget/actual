@@ -5,10 +5,10 @@
   "license": "MIT",
   "files": [
     "dist",
-    "decl-output"
+    "@types"
   ],
   "main": "dist/index.js",
-  "types": "decl-output/index.d.ts",
+  "types": "@types/index.d.ts",
   "scripts": {
     "build:app": "yarn workspace loot-core build:api",
     "build:crdt": "yarn workspace @actual-app/crdt build",
@@ -17,7 +17,7 @@
     "build:default-db": "cp default-db.sqlite dist/",
     "build": "yarn run clean && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
     "test": "yarn run clean && yarn run build:app && yarn run build:crdt && vitest --run",
-    "clean": "rm -rf dist decl-output @types",
+    "clean": "rm -rf dist @types",
     "typecheck": "yarn build && tsc --noEmit && tsc-strict"
   },
   "dependencies": {

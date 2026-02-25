@@ -11,7 +11,7 @@
     "declaration": true,
     "declarationMap": true,
     "outDir": "dist",
-    "declarationDir": "decl-output",
+    "declarationDir": "@types",
     "rootDir": ".",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
     "paths": {
@@ -36,8 +36,6 @@
     "**/node_modules/**",
     "dist",
     "**/dist/**",
-    "decl-output",
-    "**/decl-output/**",
     "@types",
     "**/@types/**",
     "*.test.ts"
