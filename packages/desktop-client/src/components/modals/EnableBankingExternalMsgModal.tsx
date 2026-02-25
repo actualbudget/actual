@@ -125,7 +125,7 @@ export function EnableBankingExternalMsgModal({
     setError(null);
     setStep('waiting-auth');
 
-    const redirectUrl = 'https://actualbudget.org/enablebanking-callback';
+    const redirectUrl = window.location.origin + '/enablebanking-callback';
 
     const { data, error: err } = await sendCatch(
       'enablebanking-create-session',

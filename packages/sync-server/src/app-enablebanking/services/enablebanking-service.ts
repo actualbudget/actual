@@ -110,7 +110,7 @@ export async function createSession(
   privateKey: string,
   aspsp: string,
   redirectUrl: string,
-  psuType: string,
+  country: string,
 ) {
   const validUntil = new Date(
     Date.now() + 90 * 24 * 60 * 60 * 1000,
@@ -118,7 +118,8 @@ export async function createSession(
 
   const body: Record<string, unknown> = {
     access: { valid_until: validUntil },
-    aspsp: { name: aspsp, country: psuType },
+    aspsp: { name: aspsp, country },
+    state: crypto.randomUUID(),
     redirect_url: redirectUrl,
     psu_type: 'personal',
   };
