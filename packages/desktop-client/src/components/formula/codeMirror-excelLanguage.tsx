@@ -188,6 +188,7 @@ const DATE_FUNCTIONS = new Set([
 const QUERY_FUNCTIONS = new Set([
   'QUERY',
   'QUERY_COUNT',
+  'QUERY_BUDGET',
   'LOOKUP',
   'VLOOKUP',
   'HLOOKUP',
@@ -484,6 +485,50 @@ export function excelFormulaAutocomplete(
           ),
           apply: `QUERY_COUNT("${queryName}")`,
           boost: 14,
+        },
+        {
+          label: `QUERY_BUDGET("${queryName}", "budgeted")`,
+          type: 'function',
+          section: '🔍 Query Functions',
+          info: t(
+            "Sum of budgeted amounts in {{queryName}} across the query's timeframe.",
+            { queryName },
+          ),
+          apply: `QUERY_BUDGET("${queryName}", "budgeted")`,
+          boost: 13,
+        },
+        {
+          label: `QUERY_BUDGET("${queryName}", "spent")`,
+          type: 'function',
+          section: '🔍 Query Functions',
+          info: t(
+            "Sum of spending in {{queryName}} across the query's timeframe.",
+            { queryName },
+          ),
+          apply: `QUERY_BUDGET("${queryName}", "spent")`,
+          boost: 13,
+        },
+        {
+          label: `QUERY_BUDGET("${queryName}", "balance_start")`,
+          type: 'function',
+          section: '🔍 Query Functions',
+          info: t(
+            "Opening balance in {{queryName}} at the start of the query's timeframe.",
+            { queryName },
+          ),
+          apply: `QUERY_BUDGET("${queryName}", "balance_start")`,
+          boost: 13,
+        },
+        {
+          label: `QUERY_BUDGET("${queryName}", "balance_end")`,
+          type: 'function',
+          section: '🔍 Query Functions',
+          info: t(
+            "Closing balance in {{queryName}} at the end of the query's timeframe.",
+            { queryName },
+          ),
+          apply: `QUERY_BUDGET("${queryName}", "balance_end")`,
+          boost: 13,
         },
       ])
     : [];

@@ -116,6 +116,20 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
       { name: 'decimals', description: 'Decimals' },
     ],
   },
+  QUERY_BUDGET: {
+    name: 'QUERY_BUDGET',
+    description: t(
+      "Evaluate a named budget query and return a budget-aware dimension. Uses the query's timeframe for date range.",
+    ),
+    parameters: [
+      { name: 'queryName', description: 'Name of the saved query (string)' },
+      {
+        name: 'dimension',
+        description:
+          'One of: budgeted, spent, balance_start, balance_end (string)',
+      },
+    ],
+  },
   FLOOR: {
     name: 'FLOOR',
     description: t('Rounds down to nearest multiple of significance.'),

@@ -7,11 +7,16 @@ import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import type { Query } from 'loot-core/shared/query';
 import { integerToAmount } from 'loot-core/shared/util';
-import type { RuleConditionEntity, TimeFrame } from 'loot-core/types/models';
+import type {
+  CategoryEntity,
+  RuleConditionEntity,
+  TimeFrame,
+} from 'loot-core/types/models';
 
 import { useLocale } from './useLocale';
 
 import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
+import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 
 type QueryConfig = {
   conditions?: RuleConditionEntity[];
@@ -70,6 +75,15 @@ export function useFormulaExecution(
           new Set(queryCountMatches.map(m => m[1])),
         );
 
+        // Extract QUERY_BUDGET() calls: QUERY_BUDGET("name", "dimension")
+        const budgetMatches = Array.from(
+          formula.matchAll(
+            /QUERY_BUDGET\s*\(\s*["']([^"']+)["']\s*,\s*["']([^"']+)["']\s*\)/gi,
+          ),
+        );
+
+        const budgetData: Record<string, number> = {};
+
         for (const queryName of queryNames) {
           const queryConfig = queries[queryName];
 
@@ -111,6 +125,32 @@ export function useFormulaExecution(
             'gi',
           );
           processedFormula = processedFormula.replace(regex, String(value));
+        }
+
+        // Evaluate QUERY_BUDGET occurrences and replace them
+        if (budgetMatches.length > 0) {
+          const uniqueKeys = Array.from(
+            new Set(budgetMatches.map(m => `${m[1]}|${m[2]}`)),
+          );
+
+          for (const key of uniqueKeys) {
+            const parts = key.split('|');
+            const name = parts[0];
+            const dim = parts[1];
+            try {
+              const val = await fetchBudgetDimensionValue(name, dim, queries);
+              budgetData[key] = val;
+            } catch (err) {
+              console.error('Error evaluating QUERY_BUDGET', key, err);
+              budgetData[key] = 0;
+            }
+          }
+
+          for (const m of budgetMatches) {
+            const key = `${m[1]}|${m[2]}`;
+            const val = budgetData[key] || 0;
+            processedFormula = processedFormula.replace(m[0], String(val));
+          }
         }
 
         // Create HyperFormula instance
@@ -346,4 +386,231 @@ async function fetchQueryCount(config: QueryConfig): Promise<number> {
     console.error('Error fetching query count:', err);
     return 0;
   }
+}
+
+// Helper: Extract category-based conditions (ignore transaction-specific filters)
+function extractCategoryConditions(
+  conditions: RuleConditionEntity[],
+): RuleConditionEntity[] {
+  return conditions.filter(
+    cond => !cond.customName && cond.field === 'category',
+  );
+}
+
+// Helper: Evaluate category conditions to get matching categories
+async function getCategoriesFromConditions(
+  allCategories: CategoryEntity[],
+  conditions: RuleConditionEntity[],
+  conditionsOp: 'and' | 'or',
+): Promise<string[]> {
+  if (conditions.length === 0) {
+    // No category filter: include all non-income, non-hidden categories
+    return allCategories
+      .filter((cat: CategoryEntity) => !cat.is_income && !cat.hidden)
+      .map((cat: CategoryEntity) => cat.id);
+  }
+
+  // Evaluate each condition to get sets of matching categories
+  const conditionResults = conditions.map(cond => {
+    const matching = allCategories.filter((cat: CategoryEntity) => {
+      if (cond.op === 'is') {
+        return cond.value === cat.id;
+      } else if (cond.op === 'isNot') {
+        return cond.value !== cat.id;
+      } else if (cond.op === 'oneOf') {
+        return cond.value.includes(cat.id);
+      } else if (cond.op === 'notOneOf') {
+        return !cond.value.includes(cat.id);
+      } else if (cond.op === 'contains') {
+        return cat.name.includes(cond.value as string);
+      } else if (cond.op === 'doesNotContain') {
+        return !cat.name.includes(cond.value as string);
+      } else if (cond.op === 'matches') {
+        try {
+          return new RegExp(cond.value as string).test(cat.name);
+        } catch (e) {
+          console.warn('Invalid regexp in matches condition', e);
+          return true;
+        }
+      }
+      // Unknown operator: include category by default and log warning
+      console.warn(`Unknown category condition operator: ${cond.op}`);
+      return true;
+    });
+    return matching.map((cat: CategoryEntity) => cat.id);
+  });
+
+  if (conditionsOp === 'or') {
+    // OR: Union of all matching categories
+    const categoryIds = new Set(conditionResults.flat());
+    return Array.from(categoryIds);
+  } else {
+    // AND: Intersection of all matching categories
+    if (conditionResults.length === 0) {
+      return [];
+    }
+    const firstSet = new Set(conditionResults[0]);
+    for (let i = 1; i < conditionResults.length; i++) {
+      const currentIds = new Set(conditionResults[i]);
+      // Keep only categories that are in both sets
+      const toRemove: string[] = [];
+      firstSet.forEach(id => {
+        if (!currentIds.has(id)) {
+          toRemove.push(id);
+        }
+      });
+      toRemove.forEach(id => firstSet.delete(id));
+    }
+    return Array.from(firstSet);
+  }
+}
+
+// Helper: Get month data from envelope-budget-month RPC
+async function getMonthBudgetData(
+  month: string,
+): Promise<Array<{ name: string; value: string | number | boolean }>> {
+  const monthData = await send('envelope-budget-month', { month });
+  return monthData || [];
+}
+
+// Helper: Extract value from month data by field pattern
+function getMonthDataValue(
+  monthData: Array<{ name: string; value: string | number | boolean }>,
+  pattern: string,
+  catId: string,
+): string | number | boolean {
+  const fieldName = pattern.replace('{catId}', catId);
+  const cell = monthData.find(c => c.name.endsWith(fieldName));
+  return cell?.value ?? 0;
+}
+
+// Main: evaluate a budget dimension (matches budget-analysis-spreadsheet logic)
+async function fetchBudgetDimensionValue(
+  queryName: string,
+  dimension: string,
+  queries: QueriesMap,
+): Promise<number> {
+  const allowed = new Set([
+    'budgeted',
+    'spent',
+    'balance_start',
+    'balance_end',
+  ]);
+  const dim = dimension.toLowerCase();
+  if (!allowed.has(dim)) {
+    throw new Error(`Invalid QUERY_BUDGET dimension: ${dimension}`);
+  }
+
+  const queryConfig = queries[queryName];
+  if (!queryConfig) {
+    console.warn(`Query "${queryName}" not found in queries config`);
+    return 0;
+  }
+
+  const timeFrame = queryConfig.timeFrame;
+  if (!timeFrame) {
+    console.warn(
+      `Query "${queryName}" has no timeframe; cannot evaluate QUERY_BUDGET`,
+    );
+    return 0;
+  }
+
+  const [startMonth, endMonth] = calculateTimeRange(timeFrame);
+
+  const categoryConditions = extractCategoryConditions(
+    queryConfig.conditions || [],
+  );
+  const { list: allCategories } = await send('get-categories');
+  const categoryIds = await getCategoriesFromConditions(
+    allCategories,
+    categoryConditions,
+    queryConfig.conditionsOp || 'and',
+  );
+  const intervals = monthUtils.rangeInclusive(startMonth, endMonth);
+
+  // Helper: sum a dimension across all months/categories
+  const sumDimension = async (fieldPattern: string): Promise<number> => {
+    let total = 0;
+    for (const month of intervals) {
+      const monthData = await getMonthBudgetData(month);
+      for (const catId of categoryIds) {
+        total += getMonthDataValue(monthData, fieldPattern, catId) as number;
+      }
+    }
+    return total;
+  };
+
+  if (dim === 'budgeted') {
+    return integerToAmount(await sumDimension('budget-{catId}'), 2);
+  }
+
+  if (dim === 'spent') {
+    return integerToAmount(await sumDimension('sum-amount-{catId}'), 2);
+  }
+
+  // Handle balance dimensions: chain month-by-month with carryover logic
+  if (dim === 'balance_start' || dim === 'balance_end') {
+    let runningBalance = 0;
+    const monthBeforeStart = monthUtils.subMonths(startMonth, 1);
+    const prevMonthData = await getMonthBudgetData(monthBeforeStart);
+
+    for (const catId of categoryIds) {
+      const catBalance = getMonthDataValue(
+        prevMonthData,
+        'leftover-{catId}',
+        catId,
+      ) as number;
+      const hasCarryover = Boolean(
+        getMonthDataValue(prevMonthData, 'carryover-{catId}', catId),
+      );
+      if (catBalance > 0 || (catBalance < 0 && hasCarryover)) {
+        runningBalance += catBalance;
+      }
+    }
+
+    const balances: Record<string, { start: number; end: number }> = {};
+
+    for (const month of intervals) {
+      const monthData = await getMonthBudgetData(month);
+      let budgeted = 0;
+      let spent = 0;
+      let carryoverToNextMonth = 0;
+
+      for (const catId of categoryIds) {
+        const catBudgeted =
+          Number(getMonthDataValue(monthData, 'budget-{catId}', catId)) || 0;
+        const catSpent =
+          Number(getMonthDataValue(monthData, 'sum-amount-{catId}', catId)) ||
+          0;
+        const catBalance =
+          Number(getMonthDataValue(monthData, 'leftover-{catId}', catId)) || 0;
+        const hasCarryover = Boolean(
+          getMonthDataValue(monthData, 'carryover-{catId}', catId),
+        );
+
+        budgeted += catBudgeted;
+        spent += catSpent;
+
+        if (catBalance > 0 || (catBalance < 0 && hasCarryover)) {
+          carryoverToNextMonth += catBalance;
+        }
+      }
+
+      const balanceStart = runningBalance;
+      const balanceEnd = budgeted + spent + runningBalance;
+
+      balances[month] = { start: balanceStart, end: balanceEnd };
+      runningBalance = carryoverToNextMonth;
+    }
+
+    if (dim === 'balance_start') {
+      return integerToAmount(balances[intervals[0]]?.start || 0, 2);
+    }
+    return integerToAmount(
+      balances[intervals[intervals.length - 1]]?.end || 0,
+      2,
+    );
+  }
+
+  return 0;
 }
