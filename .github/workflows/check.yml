@@ -64,4 +64,4 @@ jobs:
         with:
           node-version: 22
       - name: Check migrations
-        run: node ./.github/actions/check-migrations.js
+        run: yarn workspace @actual-app/ci-actions tsx bin/check-migrations.ts

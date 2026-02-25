@@ -3,7 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest --run"
+    "tsx": "node --experimental-strip-types",
+    "test": "vitest --run",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "vitest": "^4.0.18"
