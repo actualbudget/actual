@@ -2764,7 +2764,7 @@ export const TransactionTable = forwardRef(
       async (
         transaction: TransactionEntity,
         subtransactions: TransactionEntity[] | null = null,
-        updatedFieldName: keyof TransactionEntity | null = null,
+        updatedFieldName: string | null = null,
       ) => {
         savePending.current = true;
 
