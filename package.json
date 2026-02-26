@@ -57,7 +57,7 @@
     "lint": "oxfmt --check . && oxlint --type-aware",
     "lint:fix": "oxfmt . && oxlint --fix --type-aware",
     "install:server": "yarn workspaces focus @actual-app/sync-server --production",
-    "typecheck": "yarn tsc --incremental && tsc-strict",
+    "typecheck": "tsc -p tsconfig.root.json --noEmit && lage typecheck",
     "jq": "./node_modules/node-jq/bin/jq",
     "prepare": "husky"
   },
@@ -84,8 +84,7 @@
     "prompts": "^2.4.2",
     "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
-    "typescript-strict-plugin": "^2.4.4"
+    "typescript": "^5.9.3"
   },
   "resolutions": {
     "rollup": "4.40.1",

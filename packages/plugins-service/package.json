@@ -8,7 +8,8 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production ./bin/build-service-worker",
     "build-dev": "cross-env NODE_ENV=development ./bin/build-service-worker",
-    "watch": "cross-env NODE_ENV=development ./bin/build-service-worker --watch"
+    "watch": "cross-env NODE_ENV=development ./bin/build-service-worker --watch",
+    "typecheck": "tsc --noEmit && tsc-strict"
   },
   "dependencies": {
     "workbox-precaching": "^7.4.0"
@@ -17,6 +18,7 @@
     "@types/node": "^22.19.10",
     "cross-env": "^10.1.0",
     "typescript": "^5.9.3",
+    "typescript-strict-plugin": "^2.4.4",
     "vite": "^7.3.1"
   }
 }
