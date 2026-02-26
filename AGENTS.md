@@ -632,3 +632,35 @@ The codebase is actively being migrated:
 - **React.\* → Named Imports**: Legacy React.\* patterns being removed
 
 When working with older code, follow the newer patterns described in this guide.
+
+## Cursor Cloud specific instructions
+
+### Services overview
+
+| Service | Command | Port | Required |
+|---|---|---|---|
+| Web Frontend (Vite) | `yarn start` | 3001 | Yes |
+| Sync Server | `yarn start:server-dev` | 5006 | Optional (sync features only) |
+
+All storage is **SQLite** (file-based via `better-sqlite3`). No external databases or services are needed.
+
+### Running the app
+
+- `yarn start` builds the plugins-service worker, loot-core browser backend, and starts the Vite dev server on port **3001**.
+- `yarn start:server-dev` starts both the sync server (port 5006) and the web frontend together.
+- The Vite HMR dev server serves many unbundled modules. In constrained environments, the browser may hit `ERR_INSUFFICIENT_RESOURCES`. If that happens, use `yarn build:browser` followed by serving the built output from `packages/desktop-client/build/` with proper COOP/COEP headers (`Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: require-corp`).
+
+### Lint, test, typecheck
+
+Standard commands documented in `package.json` scripts and the Quick Start section above:
+- `yarn lint` / `yarn lint:fix` (uses oxlint + oxfmt)
+- `yarn test` (lage across all workspaces)
+- `yarn typecheck` (tsc + lage typecheck)
+
+### Gotchas
+
+- The `engines` field requires **Node.js >=22** and **Yarn ^4.9.1**. The `.nvmrc` specifies `v22/*`.
+- Pre-commit hook runs `lint-staged` (oxfmt + oxlint) via Husky. Run `yarn prepare` once after install to set up hooks.
+- Lage caches test results in `.lage/`. If tests behave unexpectedly, clear with `rm -rf .lage`.
+- Native modules (`better-sqlite3`, `bcrypt`) require build tools (`gcc`, `make`, `python3`). These are pre-installed in the Cloud VM.
+- All yarn commands must be run from the repository root, never from child workspaces.
