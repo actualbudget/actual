@@ -5,7 +5,7 @@ import { ErrorBoundary, useErrorBoundary } from 'react-error-boundary';
 import type { FallbackProps } from 'react-error-boundary';
 import { HotkeysProvider } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter } from 'react-router';
+import { BrowserRouter, useLocation } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
@@ -19,6 +19,7 @@ import {
 import { AppBackground } from './AppBackground';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import { DevelopmentTopBar } from './DevelopmentTopBar';
+import { EnableBankingCallbackPage } from './EnableBankingCallbackPage';
 import { FatalError } from './FatalError';
 import { FinancesApp } from './FinancesApp';
 import { ManagementApp } from './manager/ManagementApp';
@@ -158,6 +159,14 @@ function AppInner() {
   return budgetId ? <FinancesApp /> : <ManagementApp />;
 }
 
+function AppRouter() {
+  const location = useLocation();
+  if (location.pathname === '/enablebanking-callback') {
+    return <EnableBankingCallbackPage />;
+  }
+  return <AppInner />;
+}
+
 function ErrorFallback({ error }: FallbackProps) {
   return (
     <>
@@ -236,7 +245,7 @@ export function App() {
                       {process.env.REACT_APP_REVIEW_ID && !isTestEnv && (
                         <DevelopmentTopBar />
                       )}
-                      <AppInner />
+                      <AppRouter />
                     </ErrorBoundary>
                     <ThemeStyle />
                     <CustomThemeStyle />

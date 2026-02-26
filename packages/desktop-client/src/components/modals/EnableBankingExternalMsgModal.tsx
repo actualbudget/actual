@@ -17,6 +17,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
+import { ENABLEBANKING_CALLBACK_MESSAGE_TYPE } from '@desktop-client/components/EnableBankingCallbackPage';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { COUNTRY_OPTIONS } from '@desktop-client/components/util/countries';
 import { getCountryFromBrowser } from '@desktop-client/components/util/localeToCountry';
@@ -119,6 +120,51 @@ export function EnableBankingExternalMsgModal({
     isError: isBankOptionError,
   } = useAvailableBanks(country);
 
+  useEffect(() => {
+    if (step !== 'enter-code' && step !== 'waiting-auth') return;
+
+    function onMessage(event: MessageEvent) {
+      if (
+        event.origin !== window.location.origin ||
+        !event.data ||
+        event.data.type !== ENABLEBANKING_CALLBACK_MESSAGE_TYPE
+      ) {
+        return;
+      }
+      const code = event.data.code as string | undefined;
+      if (code) {
+        setAuthCode(code);
+        void completeAuth(code);
+      }
+    }
+
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function completeAuth(code: string) {
+    setError(null);
+    setStep('completing');
+
+    const { data, error: err } = await sendCatch(
+      'enablebanking-complete-session',
+      { code: code.trim() },
+    );
+
+    if (err || !data || data.error_code) {
+      setError(
+        err?.message ??
+          data?.error_type ??
+          t('Failed to complete Enable Banking authentication.'),
+      );
+      setStep('enter-code');
+      return;
+    }
+
+    setCompletedData({ accounts: data.accounts ?? [] });
+    setStep('success');
+  }
+
   async function onLinkBank() {
     if (!institutionId || !country) return;
 
@@ -143,33 +189,17 @@ export function EnableBankingExternalMsgModal({
     }
 
     setAuthUrl(data.url);
-    window.Actual?.openURLInBrowser?.(data.url);
+    window.open(
+      data.url,
+      'enablebanking-auth',
+      'width=600,height=700,noopener=no',
+    );
     setStep('enter-code');
   }
 
   async function onCompleteAuth() {
     if (!authCode.trim()) return;
-
-    setError(null);
-    setStep('completing');
-
-    const { data, error: err } = await sendCatch(
-      'enablebanking-complete-session',
-      { code: authCode.trim() },
-    );
-
-    if (err || !data || data.error_code) {
-      setError(
-        err?.message ??
-          data?.error_type ??
-          t('Failed to complete Enable Banking authentication.'),
-      );
-      setStep('enter-code');
-      return;
-    }
-
-    setCompletedData({ accounts: data.accounts ?? [] });
-    setStep('success');
+    await completeAuth(authCode.trim());
   }
 
   async function onContinue() {
@@ -193,9 +223,9 @@ export function EnableBankingExternalMsgModal({
           <View>
             <Paragraph style={{ fontSize: 15 }}>
               <Trans>
-                To link your bank account, you will select your bank and then be
-                redirected to authenticate. After completing authentication,
-                paste the authorization code below.
+                To link your bank account, select your bank and click the
+                button. A popup window will open for you to authenticate. Once
+                complete, this dialog will advance automatically.
               </Trans>
             </Paragraph>
 
@@ -291,22 +321,26 @@ export function EnableBankingExternalMsgModal({
               <View style={{ gap: 10 }}>
                 <Paragraph style={{ fontSize: 13 }}>
                   <Trans>
-                    A browser window has been opened for you to authenticate
-                    with your bank. After completing authentication, you will be
-                    redirected to a page containing an authorization code.
-                    Please copy and paste the code below.
+                    A popup window has been opened for you to authenticate with
+                    your bank. After completing authentication, this dialog will
+                    advance automatically. If the popup was blocked, use the
+                    link below to open it manually and paste the code.
                   </Trans>
                 </Paragraph>
 
                 {authUrl && (
                   <Button
                     variant="bare"
-                    onPress={() => window.Actual?.openURLInBrowser?.(authUrl)}
+                    onPress={() =>
+                      window.open(
+                        authUrl,
+                        'enablebanking-auth',
+                        'width=600,height=700,noopener=no',
+                      )
+                    }
                     style={{ fontSize: 13 }}
                   >
-                    <Trans>
-                      Authentication not opening? Click here to try again
-                    </Trans>
+                    <Trans>Popup blocked? Click here to open again</Trans>
                   </Button>
                 )}
 
