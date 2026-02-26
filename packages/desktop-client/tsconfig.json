@@ -9,6 +9,10 @@
     "outDir": "build/ts",
     "rootDir": "src",
     "tsBuildInfoFile": "build/ts/.tsbuildinfo",
+    "paths": {
+      // TODO: move to subpath imports
+      "@desktop-client/*": ["./src/*"]
+    },
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
   "references": [
@@ -19,6 +23,7 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.js",
+    // TODO: remove loot-core dependency
     "../../packages/loot-core/typings/window.ts"
   ],
   "exclude": [
