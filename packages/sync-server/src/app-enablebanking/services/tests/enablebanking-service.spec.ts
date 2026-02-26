@@ -15,7 +15,6 @@ import {
   mockBalancesResponse,
   mockBalancesResponseClosingBooked,
   mockSessionResponse,
-  mockSessionsResponse,
   mockTransactionsPage1,
   mockTransactionsPage2,
 } from './fixtures';
@@ -171,26 +170,20 @@ describe('enableBankingService', () => {
   });
 
   describe('#completeSession', () => {
-    it('calls POST /sessions then GET /sessions/{id}/accounts', async () => {
-      fetchSpy
-        .mockResolvedValueOnce(mockOkResponse(mockSessionsResponse))
-        .mockResolvedValueOnce(mockOkResponse(mockAccountsResponse));
+    it('calls GET /sessions/{code}/accounts directly (code is the session_id)', async () => {
+      fetchSpy.mockResolvedValueOnce(mockOkResponse(mockAccountsResponse));
 
-      await completeSession(mockAppId, testPrivateKey, 'auth-code-abc');
+      await completeSession(mockAppId, testPrivateKey, 'sess-001');
 
-      expect(fetchSpy).toBeCalledTimes(2);
-      const firstUrl: string = fetchSpy.mock.calls[0][0];
-      const secondUrl: string = fetchSpy.mock.calls[1][0];
-      expect(firstUrl).toContain('/sessions');
-      expect(secondUrl).toContain('/sessions/sess-001/accounts');
+      expect(fetchSpy).toBeCalledTimes(1);
+      const url: string = fetchSpy.mock.calls[0][0];
+      expect(url).toContain('/sessions/sess-001/accounts');
     });
 
     it('maps accounts to the expected shape', async () => {
-      fetchSpy
-        .mockResolvedValueOnce(mockOkResponse(mockSessionsResponse))
-        .mockResolvedValueOnce(mockOkResponse(mockAccountsResponse));
+      fetchSpy.mockResolvedValueOnce(mockOkResponse(mockAccountsResponse));
 
-      const result = await completeSession(mockAppId, testPrivateKey, 'code');
+      const result = await completeSession(mockAppId, testPrivateKey, 'sess-001');
 
       expect(result.sessionId).toBe('sess-001');
       expect(result.accounts).toEqual([

@@ -133,11 +133,9 @@ export async function completeSession(
   privateKey: string,
   code: string,
 ) {
-  const response = await request(appId, privateKey, 'POST', '/sessions', {
-    code,
-  });
-
-  const sessionId = response.session_id as string;
+  // In Enable Banking the OAuth callback 'code' param is the session_id.
+  // The session was already created by POST /auth; just fetch its accounts.
+  const sessionId = code;
   const accountsResp = await request(
     appId,
     privateKey,
