@@ -50,7 +50,7 @@ async function request(
   method: string,
   path: string,
   body?: unknown,
-) {
+): Promise<Record<string, unknown>> {
   const jwt = generateJwt(appId, privateKey, method, path, body);
 
   const options: RequestInit = {
@@ -74,7 +74,7 @@ async function request(
     );
   }
 
-  return response.json();
+  return (await response.json()) as Record<string, unknown>;
 }
 
 export async function checkStatus(appId: string, privateKey: string) {
@@ -97,7 +97,7 @@ export async function getBanks(
     'GET',
     `/aspsps?country=${country}`,
   );
-  return (response.aspsps ?? []).map((aspsp: Record<string, unknown>) => ({
+  return ((response.aspsps as Array<Record<string, unknown>>) ?? []).map((aspsp: Record<string, unknown>) => ({
     id: aspsp.name,
     name: aspsp.name,
     logo: aspsp.logo ?? '',
@@ -125,7 +125,7 @@ export async function createSession(
   };
 
   const response = await request(appId, privateKey, 'POST', '/auth', body);
-  return { url: response.url };
+  return { url: response.url as string };
 }
 
 export async function completeSession(
@@ -137,7 +137,7 @@ export async function completeSession(
     code,
   });
 
-  const sessionId = response.session_id;
+  const sessionId = response.session_id as string;
   const accountsResp = await request(
     appId,
     privateKey,
@@ -147,7 +147,7 @@ export async function completeSession(
 
   return {
     sessionId,
-    accounts: (accountsResp.accounts ?? []).map(
+    accounts: ((accountsResp.accounts as Array<Record<string, unknown>>) ?? []).map(
       (acc: Record<string, unknown>) => ({
         account_id: acc.uid,
         name:
@@ -187,9 +187,9 @@ export async function getTransactions(
       : path;
     const response = await request(appId, privateKey, 'GET', url);
 
-    const txns = response.transactions ?? [];
+    const txns = (response.transactions as Array<Record<string, unknown>>) ?? [];
     allTransactions = allTransactions.concat(txns);
-    continuationKey = response.continuation_key ?? null;
+    continuationKey = (response.continuation_key as string | null) ?? null;
   } while (continuationKey);
 
   // Get balances
@@ -201,7 +201,7 @@ export async function getTransactions(
   );
 
   const rawBalances: Array<Record<string, unknown>> =
-    balancesResp.balances ?? [];
+    (balancesResp.balances as Array<Record<string, unknown>>) ?? [];
 
   // Map balances to the expected BankSyncResponse format
   const balances = rawBalances.map((b: Record<string, unknown>) => {
