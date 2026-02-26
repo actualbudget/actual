@@ -637,10 +637,10 @@ When working with older code, follow the newer patterns described in this guide.
 
 ### Services overview
 
-| Service | Command | Port | Required |
-|---|---|---|---|
-| Web Frontend (Vite) | `yarn start` | 3001 | Yes |
-| Sync Server | `yarn start:server-dev` | 5006 | Optional (sync features only) |
+| Service             | Command                 | Port | Required                      |
+| ------------------- | ----------------------- | ---- | ----------------------------- |
+| Web Frontend (Vite) | `yarn start`            | 3001 | Yes                           |
+| Sync Server         | `yarn start:server-dev` | 5006 | Optional (sync features only) |
 
 All storage is **SQLite** (file-based via `better-sqlite3`). No external databases or services are needed.
 
@@ -653,6 +653,7 @@ All storage is **SQLite** (file-based via `better-sqlite3`). No external databas
 ### Lint, test, typecheck
 
 Standard commands documented in `package.json` scripts and the Quick Start section above:
+
 - `yarn lint` / `yarn lint:fix` (uses oxlint + oxfmt)
 - `yarn test` (lage across all workspaces)
 - `yarn typecheck` (tsc + lage typecheck)
