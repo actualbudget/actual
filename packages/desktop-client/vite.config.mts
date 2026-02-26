@@ -156,6 +156,9 @@ export default defineConfig(async ({ mode }) => {
       alias: {
         '@desktop-client': path.join(__dirname, 'src'),
       },
+      ...(!env.IS_GENERIC_BROWSER && {
+        conditions: ['electron', 'module', 'browser', 'default'],
+      }),
     },
     plugins: [
       // electron (desktop) builds do not support PWA

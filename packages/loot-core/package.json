@@ -34,6 +34,7 @@
     "./mocks": "./src/mocks/index.ts",
     "./platform/client/connection": {
       "node": "./src/platform/client/connection/index.ts",
+      "electron": "./src/platform/client/connection/index.ts",
       "default": "./src/platform/client/connection/index.browser.ts"
     },
     "./platform/client/undo": "./src/platform/client/undo/index.ts",
