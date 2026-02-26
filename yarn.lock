@@ -14415,6 +14415,7 @@ __metadata:
     electron: "npm:39.2.7"
     electron-builder: "npm:26.4.0"
     fs-extra: "npm:^11.3.3"
+    loot-core: "workspace:*"
     promise-retry: "npm:^2.0.1"
     typescript: "npm:^5.9.3"
     typescript-strict-plugin: "npm:^2.4.4"

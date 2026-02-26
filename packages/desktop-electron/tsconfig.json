@@ -15,8 +15,8 @@
     "tsBuildInfoFile": "build/.tsbuildinfo",
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
-  "references": [{ "path": "../sync-server" }],
-  "include": [".", "../../packages/loot-core/typings/window.ts"],
+  "references": [{ "path": "../loot-core" }, { "path": "../sync-server" }],
+  "include": ["."],
   "exclude": [
     "**/node_modules/*",
     "build/**/*",
