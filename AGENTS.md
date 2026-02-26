@@ -658,6 +658,10 @@ Standard commands documented in `package.json` scripts and the Quick Start secti
 - `yarn test` (lage across all workspaces)
 - `yarn typecheck` (tsc + lage typecheck)
 
+### Testing and previewing the app
+
+When running the app for manual testing or demos, use **"View demo"** on the initial setup screen (after selecting "Don't use a server"). This creates a test budget pre-populated with realistic sample data (accounts, transactions, categories, and budgeted amounts), which is far more useful than starting with an empty budget.
+
 ### Gotchas
 
 - The `engines` field requires **Node.js >=22** and **Yarn ^4.9.1**. The `.nvmrc` specifies `v22/*`.
