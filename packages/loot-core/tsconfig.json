@@ -10,6 +10,10 @@
     "rootDir": ".",
     "tsBuildInfoFile": "lib-dist/decl/.tsbuildinfo",
     "types": ["vite/client", "vitest/globals", "node"],
+    "paths": {
+      // Allow importing from hyperformula's internal typings for custom function plugins
+      "hyperformula/typings/*": ["../../node_modules/hyperformula/typings/*"]
+    },
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
   "include": [
