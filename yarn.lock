@@ -60,6 +60,7 @@ __metadata:
     react-dom: "npm:19.2.4"
     storybook: "npm:^10.2.7"
     usehooks-ts: "npm:^3.1.1"
+    vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^4.0.18"
   peerDependencies:
     react: ">=19.2"
@@ -220,7 +221,6 @@ __metadata:
     uuid: "npm:^13.0.0"
     vite: "npm:^7.3.1"
     vite-plugin-pwa: "npm:^1.2.0"
-    vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^4.0.18"
     xml2js: "npm:^0.6.2"
   languageName: unknown

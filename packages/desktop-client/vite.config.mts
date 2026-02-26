@@ -10,7 +10,6 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv } from 'vite';
 import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
-import viteTsconfigPaths from 'vite-tsconfig-paths';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -213,7 +212,6 @@ export default defineConfig(async ({ mode }) => {
           plugins: ['babel-plugin-react-compiler'],
         },
       }),
-      viteTsconfigPaths({ root: '../..' }),
       visualizer({ template: 'raw-data' }),
       !!env.HTTPS && basicSsl(),
     ],
