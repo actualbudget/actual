@@ -13,7 +13,7 @@ export type ParsedSegment =
 const MARKDOWN_LINK_REGEX = /\[([^\]]+)\]\(([^)]+)\)/;
 const FULL_URL_REGEX = /https?:\/\/[^\s]+/;
 const WWW_URL_REGEX = /www\.[^\s]+/;
-const UNIX_PATH_REGEX = /^\/(?:[^\s/]+\/)*[^\s/]+$/;
+const UNIX_PATH_REGEX = /^\/[^\s/]+\/[^\s]*$/;
 const WINDOWS_PATH_REGEX = /^[A-Z]:\\(?:[^\s\\]+\\)*[^\s\\]+$/i;
 
 // Common trailing punctuation that should not be part of URLs

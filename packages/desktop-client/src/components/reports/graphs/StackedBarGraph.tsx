@@ -200,7 +200,7 @@ export function StackedBarGraph({
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
   const { data: categories = { grouped: [], list: [] } } = useCategories();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const privacyMode = usePrivacyMode();
   const format = useFormat();
 

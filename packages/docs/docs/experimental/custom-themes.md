@@ -62,8 +62,20 @@ Custom themes must be written as CSS using the `:root` selector with CSS custom 
 
 - The CSS must contain **exactly** `:root { ... }` and nothing else
 - Only custom properties starting with `--` are allowed; Actual uses `--color-*` variables for theming
+- **Values** may use `var(--custom-property-name)` to reference other variables (e.g. to reuse existing theme variables). Only this form is allowed; fallbacks like `var(--name, value)` are not supported.
 - No other selectors, at-rules (@import, @media, etc.), or nested blocks are allowed
 - Comments are allowed and will be stripped during validation
+
+Example using variables:
+
+```css
+:root {
+  --color-pageBackground: #1a1a1a;
+  --color-pageText: #ffffff;
+  /* Reuse another variable */
+  --color-buttonPrimaryBackground: var(--color-pageTextLink);
+}
+```
 
 ### Available CSS Variables
 
@@ -103,6 +115,20 @@ Common variables include:
 - `--color-sidebarItemText` - Sidebar item text
 - `--color-sidebarItemTextSelected` - Selected sidebar item text
 
+**Graph Colors:**
+
+These color palette impact custom report series colors in all variations - bar, line, donut, etc...
+
+- `--color-chartQual1`
+- `--color-chartQual2`
+- `--color-chartQual3`
+- `--color-chartQual4`
+- `--color-chartQual5`
+- `--color-chartQual6`
+- `--color-chartQual7`
+- `--color-chartQual8`
+- `--color-chartQual9`
+
 And many more! To see all available variables, check the theme files in the source code or look at an existing theme.
 
 ### Validation Rules
@@ -111,9 +137,10 @@ When you paste CSS or install from a catalog, the theme is validated to ensure i
 
 1. Must contain exactly `:root { ... }`
 2. Only custom properties starting with `--` are allowed; Actual uses `--color-*` variables for theming
-3. No at-rules (@import, @media, @keyframes, etc.)
-4. No nested selectors or blocks
-5. No content outside the `:root` block
+3. Values may be literals (colors, lengths, etc.) or `var(--name)` references (no fallbacks)
+4. No at-rules (@import, @media, @keyframes, etc.)
+5. No nested selectors or blocks
+6. No content outside the `:root` block
 
 If validation fails, you'll see an error message explaining what's wrong.
 

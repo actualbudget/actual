@@ -107,7 +107,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
       setServerURL(serverURL);
       setVersion(await getServerVersion());
     }
-    run();
+    void run();
   }, []);
 
   const refreshLoginMethods = useCallback(async () => {
@@ -135,7 +135,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (serverURL) {
-      send('subscribe-needs-bootstrap').then(
+      void send('subscribe-needs-bootstrap').then(
         (data: Awaited<ReturnType<Handlers['subscribe-needs-bootstrap']>>) => {
           if ('hasServer' in data && data.hasServer) {
             setAvailableLoginMethods(data.availableLoginMethods || []);

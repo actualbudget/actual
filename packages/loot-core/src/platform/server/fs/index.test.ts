@@ -43,7 +43,7 @@ describe('web filesystem', () => {
     expect(await readFile('/documents/foo.bin')).toBe('hello, world');
 
     const db = await idb.openDatabase();
-    const { store } = await idb.getStore(db, 'files');
+    const { store } = idb.getStore(db, 'files');
 
     // Make sure they are in idb
     expect(await idb.get(store, '/documents/foo.txt')).toEqual({
@@ -79,13 +79,16 @@ describe('web filesystem', () => {
 
   test('files are restored from idb', async () => {
     const db = await idb.openDatabase();
-    const { store } = await idb.getStore(db, 'files');
-    idb.set(store, { filepath: '/documents/ok.txt', contents: 'oh yeah' });
-    idb.set(store, {
+    const { store } = idb.getStore(db, 'files');
+    await idb.set(store, {
+      filepath: '/documents/ok.txt',
+      contents: 'oh yeah',
+    });
+    await idb.set(store, {
       filepath: '/documents/deep/nested/file/ok.txt',
       contents: 'deeper',
     });
-    idb.set(store, {
+    await idb.set(store, {
       filepath: '/documents/deep/nested/db.sqlite',
       contents: 'this will be blank and just create a symlink',
     });

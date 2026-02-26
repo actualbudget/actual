@@ -10,7 +10,8 @@
     "strict": false,
     "types": ["vite/client"],
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

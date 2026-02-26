@@ -112,7 +112,7 @@ async function getAccounts(): Promise<AccountEntity[]> {
         balance_limit: dbAccount.balance_limit ?? null,
         account_sync_source: dbAccount.account_sync_source ?? null,
         last_sync: dbAccount.last_sync ?? null,
-      }) as AccountEntity,
+      }) satisfies AccountEntity,
   );
 }
 
@@ -277,7 +277,7 @@ async function linkSimpleFinAccount({
     startingBalance,
   );
 
-  await connection.send('sync-event', {
+  connection.send('sync-event', {
     type: 'success',
     tables: ['transactions'],
   });
@@ -349,7 +349,7 @@ async function linkPluggyAiAccount({
     startingBalance,
   );
 
-  await connection.send('sync-event', {
+  connection.send('sync-event', {
     type: 'success',
     tables: ['transactions'],
   });
@@ -430,7 +430,7 @@ async function closeAccount({
     if (numTransactions === 0) {
       await db.deleteAccount({ id });
     } else if (forced) {
-      const rows = await db.runQuery<
+      const rows = db.runQuery<
         Pick<db.DbViewTransaction, 'id' | 'transfer_id'>
       >(
         'SELECT id, transfer_id FROM v_transactions WHERE account = ?',
@@ -456,18 +456,18 @@ async function closeAccount({
 
         rows.forEach(row => {
           if (row.transfer_id) {
-            db.updateTransaction({
+            void db.updateTransaction({
               id: row.transfer_id,
               payee: null,
               transfer_id: null,
             });
           }
 
-          db.deleteTransaction({ id: row.id });
+          void db.deleteTransaction({ id: row.id });
         });
 
-        db.deleteAccount({ id });
-        db.deleteTransferPayee({ id: transferPayee.id });
+        void db.deleteAccount({ id });
+        void db.deleteTransferPayee({ id: transferPayee.id });
       });
     } else {
       if (balance !== 0 && transferAccountId == null) {
@@ -638,7 +638,7 @@ async function pollGoCardlessWebToken({
   }
 
   return new Promise(resolve => {
-    getData(data => {
+    void getData(data => {
       if (data.status === 'success') {
         resolve({ data: data.data });
         return;
@@ -951,9 +951,7 @@ async function accountsBankSync({
   const { 'user-id': userId, 'user-key': userKey } =
     await asyncStorage.multiGet(['user-id', 'user-key']);
 
-  const accounts = await db.runQuery<
-    db.DbAccount & { bankId: db.DbBank['bank_id'] }
-  >(
+  const accounts = db.runQuery<db.DbAccount & { bankId: db.DbBank['bank_id'] }>(
     `
     SELECT a.*, b.bank_id as bankId
     FROM accounts a
@@ -1018,9 +1016,7 @@ async function simpleFinBatchSync({
 }): Promise<
   Array<{ accountId: AccountEntity['id']; res: SyncResponseWithErrors }>
 > {
-  const accounts = await db.runQuery<
-    db.DbAccount & { bankId: db.DbBank['bank_id'] }
-  >(
+  const accounts = db.runQuery<db.DbAccount & { bankId: db.DbBank['bank_id'] }>(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
          WHERE

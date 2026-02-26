@@ -28,10 +28,6 @@ import {
   reducer as notificationsSliceReducer,
 } from '@desktop-client/notifications/notificationsSlice';
 import {
-  name as payeesSliceName,
-  reducer as payeesSliceReducer,
-} from '@desktop-client/payees/payeesSlice';
-import {
   name as prefsSliceName,
   reducer as prefsSliceReducer,
 } from '@desktop-client/prefs/prefsSlice';
@@ -50,7 +46,6 @@ const rootReducer = combineReducers({
   [budgetfilesSliceName]: budgetfilesSliceReducer,
   [modalsSliceName]: modalsSliceReducer,
   [notificationsSliceName]: notificationsSliceReducer,
-  [payeesSliceName]: payeesSliceReducer,
   [prefsSliceName]: prefsSliceReducer,
   [transactionsSliceName]: transactionsSliceReducer,
   [usersSliceName]: usersSliceReducer,

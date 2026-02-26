@@ -23,11 +23,11 @@ async function updateViews() {
   const currentHash = md5(views);
 
   if (hash !== currentHash) {
-    await db.execQuery(views);
-    await db.runQuery(
-      'INSERT OR REPLACE INTO __meta__ (key, value) VALUES (?, ?)',
-      [hashKey, currentHash],
-    );
+    db.execQuery(views);
+    db.runQuery('INSERT OR REPLACE INTO __meta__ (key, value) VALUES (?, ?)', [
+      hashKey,
+      currentHash,
+    ]);
   }
 }
 

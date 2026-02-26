@@ -31,6 +31,7 @@ import type {
   AccountEntity,
   CategoryGroupEntity,
   NewRuleEntity,
+  PayeeEntity,
   RuleActionEntity,
   RuleConditionEntity,
   TransactionEntity,
@@ -75,7 +76,7 @@ import {
   replaceModal,
 } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { createPayee, getPayees } from '@desktop-client/payees/payeesSlice';
+import { useCreatePayeeMutation } from '@desktop-client/payees';
 import * as queries from '@desktop-client/queries';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { pagedQuery } from '@desktop-client/queries/pagedQuery';
@@ -239,7 +240,7 @@ type AccountInternalProps = {
   location: ReturnType<typeof useLocation>;
   failedAccounts: ReturnType<typeof useFailedAccounts>;
   dateFormat: ReturnType<typeof useDateFormat>;
-  payees: ReturnType<typeof usePayees>;
+  payees: PayeeEntity[];
   categoryGroups: CategoryGroupEntity[];
   hideFraction: boolean;
   accountsSyncing: string[];
@@ -249,6 +250,7 @@ type AccountInternalProps = {
   onUpdateAccount: (account: AccountEntity) => void;
   onUnlinkAccount: (id: AccountEntity['id']) => void;
   onSyncAndDownload: (accountId?: AccountEntity['id']) => void;
+  onCreatePayee: (name: PayeeEntity['name']) => Promise<PayeeEntity['id']>;
 };
 
 type AccountInternalState = {
@@ -381,14 +383,13 @@ class AccountInternal extends PureComponent<
 
     // Important that any async work happens last so that the
     // listeners are set up synchronously
-    await this.props.dispatch(getPayees());
-    await this.fetchTransactions(this.state.filterConditions);
+    this.fetchTransactions(this.state.filterConditions);
 
     // If there is a pending undo, apply it immediately (this happens
     // when an undo changes the location to this page)
     const lastUndoEvent = undo.getUndoState('undoEvent');
     if (lastUndoEvent) {
-      onUndo(lastUndoEvent);
+      void onUndo(lastUndoEvent);
     }
   }
 
@@ -406,7 +407,7 @@ class AccountInternal extends PureComponent<
       // things are listening to transactions and refetch
       // automatically (use ActualQL?)
       setTimeout(() => {
-        this.refetchTransactions();
+        void this.refetchTransactions();
       }, 100);
     }
 
@@ -441,13 +442,13 @@ class AccountInternal extends PureComponent<
   };
 
   refetchTransactions = async () => {
-    this.paged?.run();
+    void this.paged?.run();
   };
 
   fetchTransactions = (filterConditions?: ConditionEntity[]) => {
     const query = this.makeRootTransactionsQuery();
     this.rootQuery = this.currentQuery = query;
-    if (filterConditions) this.applyFilters(filterConditions);
+    if (filterConditions) void this.applyFilters(filterConditions);
     else this.updateQuery(query);
 
     if (this.props.accountId) {
@@ -621,7 +622,7 @@ class AccountInternal extends PureComponent<
       accountName && accountName.replace(/[()]/g, '').replace(/\s+/g, '-');
     const filename = `${normalizedName || 'transactions'}.csv`;
 
-    window.Actual.saveFile(
+    void window.Actual.saveFile(
       exportedTransactions,
       filename,
       t('Export transactions'),
@@ -816,14 +817,14 @@ class AccountInternal extends PureComponent<
         );
         break;
       case 'close':
-        this.props.dispatch(openAccountCloseModal({ accountId }));
+        void this.props.dispatch(openAccountCloseModal({ accountId }));
         break;
       case 'reopen':
         this.props.onReopenAccount(accountId);
         break;
       case 'export':
         const accountName = this.getAccountTitle(account, accountId);
-        this.onExport(accountName);
+        void this.onExport(accountName);
         break;
       case 'toggle-balance':
         if (this.state.showBalances) {
@@ -850,7 +851,7 @@ class AccountInternal extends PureComponent<
         this.setState({ sort: null }, () => {
           const filterConditions = this.state.filterConditions;
           if (filterConditions.length > 0) {
-            this.applyFilters([...filterConditions]);
+            void this.applyFilters([...filterConditions]);
           } else {
             this.fetchTransactions();
           }
@@ -945,7 +946,7 @@ class AccountInternal extends PureComponent<
   onCreatePayee = async (name: string) => {
     const trimmed = name.trim();
     if (trimmed !== '') {
-      return this.props.dispatch(createPayee({ name })).unwrap();
+      return await this.props.onCreatePayee(name);
     }
     return null;
   };
@@ -1069,18 +1070,18 @@ class AccountInternal extends PureComponent<
   };
 
   onShowTransactions = async (ids: string[]) => {
-    this.onApplyFilter({
+    void this.onApplyFilter({
       customName: t('Selected transactions'),
       queryFilter: { id: { $oneof: ids } },
     });
   };
 
   onBatchEdit = (name: keyof TransactionEntity, ids: string[]) => {
-    this.props.onBatchEdit({
+    void this.props.onBatchEdit({
       name,
       ids,
       onSuccess: updatedIds => {
-        this.refetchTransactions();
+        void this.refetchTransactions();
 
         if (this.table.current) {
           this.table.current.edit(updatedIds[0], 'select', false);
@@ -1090,11 +1091,14 @@ class AccountInternal extends PureComponent<
   };
 
   onBatchDuplicate = (ids: string[]) => {
-    this.props.onBatchDuplicate({ ids, onSuccess: this.refetchTransactions });
+    void this.props.onBatchDuplicate({
+      ids,
+      onSuccess: this.refetchTransactions,
+    });
   };
 
   onBatchDelete = (ids: string[]) => {
-    this.props.onBatchDelete({ ids, onSuccess: this.refetchTransactions });
+    void this.props.onBatchDelete({ ids, onSuccess: this.refetchTransactions });
   };
 
   onMakeAsSplitTransaction = async (ids: string[]) => {
@@ -1133,7 +1137,7 @@ class AccountInternal extends PureComponent<
       updated: childTransactions,
     });
 
-    this.refetchTransactions();
+    void this.refetchTransactions();
   };
 
   onMakeAsNonSplitTransactions = async (ids: string[]) => {
@@ -1203,7 +1207,7 @@ class AccountInternal extends PureComponent<
 
     await send('transactions-batch-update', changes);
 
-    this.refetchTransactions();
+    void this.refetchTransactions();
 
     const transactionsToSelect = changes.updated.map(t => t.id);
     this.dispatchSelected?.({
@@ -1256,7 +1260,7 @@ class AccountInternal extends PureComponent<
   };
 
   onBatchLinkSchedule = (ids: string[]) => {
-    this.props.onBatchLinkSchedule({
+    void this.props.onBatchLinkSchedule({
       ids,
       account: this.props.accounts.find(a => a.id === this.props.accountId),
       onSuccess: this.refetchTransactions,
@@ -1264,7 +1268,7 @@ class AccountInternal extends PureComponent<
   };
 
   onBatchUnlinkSchedule = (ids: string[]) => {
-    this.props.onBatchUnlinkSchedule({
+    void this.props.onBatchUnlinkSchedule({
       ids,
       onSuccess: this.refetchTransactions,
     });
@@ -1363,7 +1367,7 @@ class AccountInternal extends PureComponent<
     this.setState({
       filterId: { ...this.state.filterId, status: 'changed' } as SavedFilter,
     });
-    this.applyFilters([...this.state.filterConditions]);
+    void this.applyFilters([...this.state.filterConditions]);
     if (this.state.search !== '') {
       this.onSearch(this.state.search);
     }
@@ -1375,13 +1379,13 @@ class AccountInternal extends PureComponent<
         f => f.id === this.state.filterId?.id,
       );
       this.setState({ filterConditionsOp: savedFilter.conditionsOp ?? 'and' });
-      this.applyFilters([...savedFilter.conditions]);
+      void this.applyFilters([...savedFilter.conditions]);
     } else {
       if (savedFilter.status) {
         this.setState({
           filterConditionsOp: savedFilter.conditionsOp ?? 'and',
         });
-        this.applyFilters([...(savedFilter.conditions ?? [])]);
+        void this.applyFilters([...(savedFilter.conditions ?? [])]);
       }
     }
     this.setState({ filterId: { ...this.state.filterId, ...savedFilter } });
@@ -1390,7 +1394,7 @@ class AccountInternal extends PureComponent<
   onClearFilters = () => {
     this.setState({ filterConditionsOp: 'and' });
     this.setState({ filterId: undefined });
-    this.applyFilters([]);
+    void this.applyFilters([]);
     if (this.state.search !== '') {
       this.onSearch(this.state.search);
     }
@@ -1400,7 +1404,7 @@ class AccountInternal extends PureComponent<
     oldCondition: RuleConditionEntity,
     updatedCondition: RuleConditionEntity,
   ) => {
-    this.applyFilters(
+    void this.applyFilters(
       this.state.filterConditions.map(c =>
         c === oldCondition ? updatedCondition : c,
       ),
@@ -1417,7 +1421,9 @@ class AccountInternal extends PureComponent<
   };
 
   onDeleteFilter = (condition: RuleConditionEntity) => {
-    this.applyFilters(this.state.filterConditions.filter(c => c !== condition));
+    void this.applyFilters(
+      this.state.filterConditions.filter(c => c !== condition),
+    );
     if (this.state.filterConditions.length === 1) {
       this.setState({ filterId: undefined });
       this.setState({ filterConditionsOp: 'and' });
@@ -1455,7 +1461,7 @@ class AccountInternal extends PureComponent<
         filterId: { ...savedFilter, status: 'saved' },
       });
       this.setState({ filterConditionsOp: savedFilter.conditionsOp });
-      this.applyFilters([...savedFilter.conditions]);
+      void this.applyFilters([...savedFilter.conditions]);
     } else {
       // A condition was passed in.
       const condition = conditionOrSavedFilter;
@@ -1471,7 +1477,7 @@ class AccountInternal extends PureComponent<
           status: this.state.filterId && 'changed',
         } as SavedFilter,
       });
-      this.applyFilters([...filterConditions, condition]);
+      void this.applyFilters([...filterConditions, condition]);
     }
 
     if (this.state.search !== '') {
@@ -1490,13 +1496,13 @@ class AccountInternal extends PureComponent<
         for (const id of scheduleIds) {
           await send('schedule/post-transaction', { id });
         }
-        this.refetchTransactions();
+        void this.refetchTransactions();
         break;
       case 'post-transaction-today':
         for (const id of scheduleIds) {
           await send('schedule/post-transaction', { id, today: true });
         }
-        this.refetchTransactions();
+        void this.refetchTransactions();
         break;
       case 'skip':
         for (const id of scheduleIds) {
@@ -1641,7 +1647,7 @@ class AccountInternal extends PureComponent<
       // called directly from UI by sorting a column.
       // active filters need to be applied before sorting
       case isFiltered:
-        this.applyFilters([...filterConditions]);
+        void this.applyFilters([...filterConditions]);
         sortCurrentQuery(this, sortField, sortAscDesc);
         break;
 
@@ -1965,8 +1971,8 @@ export function Account() {
   const matchedTransactions = useSelector(
     state => state.transactions.matchedTransactions,
   );
-  const accounts = useAccounts();
-  const payees = usePayees();
+  const { data: accounts = [] } = useAccounts();
+  const { data: payees = [] } = usePayees();
   const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [hideFraction] = useSyncedPref('hideFraction');
@@ -2011,6 +2017,10 @@ export function Account() {
   const onSyncAndDownload = (id?: AccountEntity['id']) =>
     syncAndDownload({ id });
 
+  const createPayee = useCreatePayeeMutation();
+  const onCreatePayee = (name: PayeeEntity['name']) =>
+    createPayee.mutateAsync({ name });
+
   return (
     <SchedulesProvider query={schedulesQuery}>
       <SplitsExpandedProvider
@@ -2051,6 +2061,7 @@ export function Account() {
           onUpdateAccount={onUpdateAccount}
           onUnlinkAccount={onUnlinkAccount}
           onSyncAndDownload={onSyncAndDownload}
+          onCreatePayee={onCreatePayee}
         />
       </SplitsExpandedProvider>
     </SchedulesProvider>

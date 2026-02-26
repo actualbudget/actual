@@ -1,7 +1,20 @@
-export const isPlaywright = false;
+import { UAParser } from 'ua-parser-js';
 
-export const OS: 'windows' | 'mac' | 'linux' | 'unknown' = 'unknown';
-export const env: 'web' | 'mobile' | 'unknown' = 'unknown';
-export const isBrowser = false;
+const isWindows =
+  navigator.platform && navigator.platform.toLowerCase() === 'win32';
 
-export const isIOSAgent = false;
+const isMac =
+  navigator.platform && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+
+export const isPlaywright = navigator.userAgent === 'playwright';
+
+export const OS: 'windows' | 'mac' | 'linux' | 'unknown' = isWindows
+  ? 'windows'
+  : isMac
+    ? 'mac'
+    : 'linux';
+export const env: 'web' | 'mobile' | 'unknown' = 'web';
+export const isBrowser: boolean = true;
+
+const agent = UAParser(navigator.userAgent);
+export const isIOSAgent = agent.browser.name === 'Mobile Safari';

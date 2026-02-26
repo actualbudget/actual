@@ -447,10 +447,10 @@ export function ScheduleEditForm({
                 onSelect={(name, ids) => {
                   switch (name) {
                     case 'link':
-                      onLinkTransactions(ids, schedule.id);
+                      void onLinkTransactions(ids, schedule.id);
                       break;
                     case 'unlink':
-                      onUnlinkTransactions(ids);
+                      void onUnlinkTransactions(ids);
                       break;
                     default:
                   }

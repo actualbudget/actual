@@ -246,7 +246,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             <Button
               style={{ color: theme.errorText }}
               onPress={() => {
-                onUnlink(close);
+                void onUnlink(close);
               }}
             >
               <Trans>Unlink account</Trans>
@@ -259,7 +259,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
               <Button
                 variant="primary"
                 onPress={() => {
-                  onSave(close);
+                  void onSave(close);
                 }}
               >
                 <Trans>Save</Trans>

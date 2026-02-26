@@ -41,20 +41,22 @@ export function EditUserAccess({
   const [availableUsers, setAvailableUsers] = useState<[string, string][]>([]);
 
   useEffect(() => {
-    send('access-get-available-users', defaultUserAccess.fileId).then(data => {
-      if ('error' in data) {
-        setSetError(data.error);
-      } else {
-        setAvailableUsers(
-          data.map(user => [
-            user.userId,
-            user.displayName
-              ? `${user.displayName} (${user.userName})`
-              : user.userName,
-          ]),
-        );
-      }
-    });
+    void send('access-get-available-users', defaultUserAccess.fileId).then(
+      data => {
+        if ('error' in data) {
+          setSetError(data.error);
+        } else {
+          setAvailableUsers(
+            data.map(user => [
+              user.userId,
+              user.displayName
+                ? `${user.displayName} (${user.userName})`
+                : user.userName,
+            ]),
+          );
+        }
+      },
+    );
   }, [defaultUserAccess.fileId]);
 
   async function onSave(close: () => void) {
@@ -80,7 +82,7 @@ export function EditUserAccess({
               button: {
                 title: t('Go to login'),
                 action: () => {
-                  dispatch(signOut());
+                  void dispatch(signOut());
                 },
               },
             },

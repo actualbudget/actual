@@ -6,16 +6,16 @@ import type { Menu } from '@actual-app/components/menu';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
-type WidgetCopyMenuResult = {
+type DashboardWidgetCopyMenuResult = {
   /** Menu items to add to the card's menu */
   menuItems: ComponentProps<typeof Menu<string>>['items'];
   /** Handler for menu selection - call this from onMenuSelect */
   handleMenuSelect: (item: string) => boolean;
 };
 
-export function useWidgetCopyMenu(
+export function useDashboardWidgetCopyMenu(
   onCopy: (targetDashboardId: string) => void,
-): WidgetCopyMenuResult {
+): DashboardWidgetCopyMenuResult {
   const { t } = useTranslation();
   const dispatch = useDispatch();
 

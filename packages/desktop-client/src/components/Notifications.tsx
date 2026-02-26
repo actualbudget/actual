@@ -58,7 +58,7 @@ function compileMessage(
                         e.preventDefault();
                         if (actions[actionName]) {
                           setLoading(true);
-                          await actions[actionName]();
+                          actions[actionName]();
                           onRemove?.();
                         }
                       }}
@@ -162,13 +162,13 @@ function Notification({
 
   // Update scale, opacity, and y-position when index changes
   useEffect(() => {
-    api.start({ scale, opacity: stackOpacity, y: yOffset });
+    void api.start({ scale, opacity: stackOpacity, y: yOffset });
   }, [index, scale, stackOpacity, yOffset, api]);
 
   const swipeHandlers = useSwipeable({
     onSwiping: ({ deltaX }) => {
       if (!isSwiped) {
-        api.start({ x: deltaX });
+        void api.start({ x: deltaX });
       }
     },
     onSwiped: ({ velocity, deltaX }) => {
@@ -178,7 +178,7 @@ function Notification({
 
       if (Math.abs(deltaX) > threshold || velocity > 0.5) {
         // Animate out & remove item after animation
-        api.start({
+        void api.start({
           x: direction * 1000,
           opacity: 0,
           onRest: onRemove,
@@ -186,7 +186,7 @@ function Notification({
         setIsSwiped(true);
       } else {
         // Reset position if not swiped far enough
-        api.start({ x: 0 });
+        void api.start({ x: 0 });
       }
     },
     trackMouse: true,

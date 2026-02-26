@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { resetTestProviders } from './mocks';
 import { installPolyfills } from './polyfills';
 
-installPolyfills();
+void installPolyfills();
 
 global.IS_TESTING = true;
 global.Actual = {} as typeof global.Actual;

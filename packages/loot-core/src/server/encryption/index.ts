@@ -50,11 +50,11 @@ export function hasKey(keyId) {
   return keyId in keys;
 }
 
-export function encrypt(value, keyId) {
+export async function encrypt(value, keyId) {
   return internals.encrypt(getKey(keyId), value);
 }
 
-export function decrypt(encrypted, meta) {
+export async function decrypt(encrypted, meta) {
   return internals.decrypt(getKey(meta.keyId), encrypted, meta);
 }
 

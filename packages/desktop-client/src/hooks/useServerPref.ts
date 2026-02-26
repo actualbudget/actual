@@ -16,7 +16,7 @@ export function useServerPref<K extends keyof ServerPrefs>(
 
   const setPref = useCallback<SetServerPrefAction<K>>(
     value => {
-      dispatch(
+      void dispatch(
         saveServerPrefs({
           prefs: { [prefName]: value },
         }),

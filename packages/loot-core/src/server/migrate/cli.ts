@@ -66,7 +66,7 @@ async function list(db) {
 
 const cmd = argv._[0];
 
-withMigrationsDir(argv.m || getMigrationsDir(), async () => {
+void withMigrationsDir(argv.m || getMigrationsDir(), async () => {
   switch (cmd) {
     case 'reset':
       fs.unlinkSync(argv.db);
@@ -74,10 +74,10 @@ withMigrationsDir(argv.m || getMigrationsDir(), async () => {
         path.join(__dirname, '../../../src/server/sql/init.sql'),
         'utf8',
       );
-      getDatabase().exec(initSql);
+      (await getDatabase()).exec(initSql);
       break;
     case 'migrate':
-      const applied = await migrate(getDatabase());
+      const applied = await migrate(await getDatabase());
       if (applied.length === 0) {
         logger.log('No pending migrations');
       } else {
@@ -85,7 +85,7 @@ withMigrationsDir(argv.m || getMigrationsDir(), async () => {
       }
       break;
     case 'list':
-      await list(getDatabase());
+      await list(await getDatabase());
       break;
     case 'create':
     default:
@@ -94,7 +94,7 @@ withMigrationsDir(argv.m || getMigrationsDir(), async () => {
         logger.log('Must pass a name for the new migration with --name');
         process.exit(1);
       }
-      await create(name);
+      create(name);
       break;
   }
 });

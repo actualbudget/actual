@@ -48,7 +48,7 @@ export function AccountMenuModal({
 }: AccountMenuModalProps) {
   const { t } = useTranslation();
   const account = useAccount(accountId);
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const originalNotes = useNotes(`account-${accountId}`);
   const [accountNameError, setAccountNameError] = useState('');
   const [currentAccountName, setCurrentAccountName] = useState(

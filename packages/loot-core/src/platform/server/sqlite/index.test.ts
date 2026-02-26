@@ -1,14 +1,7 @@
 // @ts-strict-ignore
 import { patchFetchForSqlJS } from '../../../mocks/util';
 
-// oxlint-disable-next-line eslint/no-restricted-imports
-import {
-  execQuery,
-  init,
-  openDatabase,
-  runQuery,
-  transaction,
-} from './index.web';
+import { execQuery, init, openDatabase, runQuery, transaction } from './index';
 
 beforeAll(async () => {
   const baseURL = `${__dirname}/../../../../../../node_modules/@jlongster/sql.js/dist/`;

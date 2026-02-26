@@ -28,7 +28,7 @@ function migrateParentIds(_oldValues, newValues) {
       });
 
       if (toApply.length > 0) {
-        applyMessages(toApply);
+        void applyMessages(toApply);
       }
     }
   });

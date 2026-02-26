@@ -1,6 +1,6 @@
-import type { NewWidget } from '../types/models';
+import type { NewDashboardWidgetEntity } from '../types/models';
 
-export const DEFAULT_DASHBOARD_STATE: NewWidget[] = [
+export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
   // Top row: Key metrics at a glance
   {
     type: 'summary-card',

@@ -45,8 +45,8 @@ export function MobileSchedulesPage() {
     statuses,
   } = useSchedules({ query: schedulesQuery });
 
-  const payees = usePayees();
-  const accounts = useAccounts();
+  const { data: payees = [] } = usePayees();
+  const { data: accounts = [] } = useAccounts();
 
   const filterIncludes = (str: string | null | undefined) =>
     str
@@ -90,7 +90,7 @@ export function MobileSchedulesPage() {
 
   const handleSchedulePress = useCallback(
     (schedule: ScheduleEntity) => {
-      navigate(`/schedules/${schedule.id}`);
+      void navigate(`/schedules/${schedule.id}`);
     },
     [navigate],
   );

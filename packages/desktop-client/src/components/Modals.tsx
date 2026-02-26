@@ -190,7 +190,7 @@ export function Modals() {
               {...modal.options}
               onClose={() => {
                 modal.options.onClose?.();
-                send('gocardless-poll-web-token-stop');
+                void send('gocardless-poll-web-token-stop');
               }}
             />
           );

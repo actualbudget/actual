@@ -585,6 +585,11 @@ When creating pull requests:
   - ❌ Incorrect: `Fix type error in account validation` (MISSING PREFIX - NOT ALLOWED)
 - **AI-Generated PRs**: If you create a PR using AI assistance, add the **"AI generated"** label to the pull request. This helps maintainers understand the nature of the contribution.
 
+### PR Template: Do Not Fill In
+
+- **NEVER fill in the PR template** (`.github/PULL_REQUEST_TEMPLATE.md`). Leave all blank spaces and placeholder comments as-is. We expect **humans** to fill in the Description, Related issue(s), Testing, and Checklist sections.
+- **Exception**: If a human **explicitly asks** you to fill out the PR template, then fill it out **in Chinese**, using Chinese characters (简体中文) for all content you add.
+
 ## Code Review Guidelines
 
 When performing code reviews (especially for LLM agents): **see [CODE_REVIEW_GUIDELINES.md](./CODE_REVIEW_GUIDELINES.md)** for specific guidelines.
