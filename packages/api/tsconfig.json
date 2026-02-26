@@ -11,8 +11,8 @@
     "declaration": true,
     "declarationMap": true,
     "outDir": "dist",
-    "declarationDir": "@types",
     "rootDir": ".",
+    "declarationDir": "@types",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },

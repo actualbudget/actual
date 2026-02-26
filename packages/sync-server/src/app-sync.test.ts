@@ -366,6 +366,19 @@ describe('/upload-user-file', () => {
     expect(res.text).toBe('fileId is required');
   });
 
+  it('returns 400 for invalid fileId format', async () => {
+    const res = await request(app)
+      .post('/upload-user-file')
+      .set('Content-Type', 'application/encrypted-file')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-name', 'test-file')
+      .set('x-actual-file-id', 'budget@2026')
+      .send(Buffer.from('file content'));
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.text).toBe('invalid fileId');
+  });
+
   it('uploads a new file successfully', async () => {
     const fileId = crypto.randomBytes(16).toString('hex');
     const fileName = 'test-file.txt';
@@ -668,6 +681,16 @@ describe('/download-user-file', () => {
 
       expect(res.statusCode).toEqual(400);
       expect(res.text).toBe('User or file not found');
+    });
+
+    it('returns 400 for invalid fileId format', async () => {
+      const res = await request(app)
+        .get('/download-user-file')
+        .set('x-actual-token', 'valid-token')
+        .set('x-actual-file-id', 'budget@2026');
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.text).toBe('invalid fileId');
     });
 
     it('returns 500 error if the file does not exist on the filesystem', async () => {
