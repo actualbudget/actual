@@ -619,7 +619,7 @@ yarn install:server
 
 ## Environment Requirements
 
-- **Node.js**: >=20
+- **Node.js**: >=22
 - **Yarn**: ^4.9.1 (managed by packageManager field)
 - **Browser Targets**: Electron >= 35.0, modern browsers (see browserslist)
 
