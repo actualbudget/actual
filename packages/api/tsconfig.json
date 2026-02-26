@@ -17,5 +17,5 @@
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
   "include": ["."],
-  "exclude": ["**/node_modules/*", "dist", "**/@types/**", "*.test.ts"]
+  "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts"]
 }
