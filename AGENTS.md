@@ -529,7 +529,7 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 
 1. Clean build artifacts: `rm -rf packages/*/dist packages/*/lib-dist packages/*/build`
 2. Reinstall dependencies: `yarn install`
-3. Check Node.js version (requires >=20)
+3. Check Node.js version (requires >=22)
 4. Check Yarn version (requires ^4.9.1)
 
 ## Testing Patterns
