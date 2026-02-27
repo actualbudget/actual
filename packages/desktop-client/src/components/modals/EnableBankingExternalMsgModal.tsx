@@ -302,6 +302,20 @@ export function EnableBankingExternalMsgModal({
                 >
                   <Trans>Link bank in browser</Trans> &rarr;
                 </Button>
+
+                <Button
+                  variant="bare"
+                  style={{
+                    fontSize: 13,
+                    marginTop: 4,
+                    color: theme.pageTextSubdued,
+                  }}
+                  onPress={() => setStep('enter-code')}
+                >
+                  <Trans>
+                    Already have an authorization code? Enter it here
+                  </Trans>
+                </Button>
               </View>
             )}
 
