@@ -230,7 +230,17 @@ export function EnableBankingExternalMsgModal({
             </Paragraph>
 
             {error && (
-              <Error style={{ alignSelf: 'center', marginBottom: 10 }}>
+              <Error
+                style={{
+                  alignSelf: 'stretch',
+                  marginBottom: 10,
+                  userSelect: 'text',
+                  wordBreak: 'break-word',
+                  maxHeight: 120,
+                  overflowY: 'auto',
+                  fontSize: 12,
+                }}
+              >
                 {error}
               </Error>
             )}
@@ -305,16 +315,10 @@ export function EnableBankingExternalMsgModal({
 
                 <Button
                   variant="bare"
-                  style={{
-                    fontSize: 13,
-                    marginTop: 4,
-                    color: theme.pageTextSubdued,
-                  }}
+                  style={{ fontSize: 13, marginTop: 4, color: theme.pageTextSubdued }}
                   onPress={() => setStep('enter-code')}
                 >
-                  <Trans>
-                    Already have an authorization code? Enter it here
-                  </Trans>
+                  <Trans>Already have an authorization code? Enter it here</Trans>
                 </Button>
               </View>
             )}
