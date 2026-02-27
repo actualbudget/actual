@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-
 import { Trans } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 
@@ -54,8 +53,8 @@ export function EnableBankingCallbackPage() {
             }}
           >
             <Trans>
-              If the window did not close automatically, copy the code below
-              and paste it into Actual:
+              If the window did not close automatically, copy the code below and
+              paste it into Actual:
             </Trans>
           </View>
           <View

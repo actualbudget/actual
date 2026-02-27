@@ -135,34 +135,34 @@ export async function completeSession(
   privateKey: string,
   code: string,
 ) {
-  // In Enable Banking the OAuth callback 'code' param is the session_id.
-  // The session was already created by POST /auth; just fetch its accounts.
-  const sessionId = code;
-  const accountsResp = await request(
-    appId,
-    privateKey,
-    'GET',
-    `/sessions/${sessionId}/accounts`,
-  );
+  // POST /sessions with the OAuth callback code to authorize the session.
+  // The response contains both session_id and the list of authorized accounts.
+  const body = { code };
+  const response = await request(appId, privateKey, 'POST', '/sessions', body);
+
+  const sessionId = response.session_id as string;
+  const aspspName =
+    ((response.aspsp as Record<string, string>) ?? {}).name ?? '';
 
   return {
     sessionId,
-    accounts: (
-      (accountsResp.accounts as Array<Record<string, unknown>>) ?? []
-    ).map((acc: Record<string, unknown>) => ({
-      account_id: acc.uid,
-      name:
-        (acc as Record<string, string>).account_name ||
-        (acc as Record<string, string>).iban ||
-        'Unknown Account',
-      institution: (acc as Record<string, string>).aspsp_name ?? '',
-      mask: (acc as Record<string, string>).iban
-        ? (acc as Record<string, string>).iban.slice(-4)
-        : '',
-      iban: (acc as Record<string, string>).iban ?? '',
-      orgId: (acc as Record<string, string>).aspsp_name ?? '',
-      orgDomain: '',
-    })),
+    accounts: ((response.accounts as Array<Record<string, unknown>>) ?? []).map(
+      (acc: Record<string, unknown>) => {
+        const accountIdObj = acc.account_id as
+          | Record<string, string>
+          | undefined;
+        const iban = accountIdObj?.iban ?? '';
+        return {
+          account_id: acc.uid,
+          name: (acc.name as string) || iban || 'Unknown Account',
+          institution: aspspName,
+          mask: iban ? iban.slice(-4) : '',
+          iban,
+          orgId: aspspName,
+          orgDomain: '',
+        };
+      },
+    ),
   };
 }
 
@@ -214,15 +214,20 @@ export async function getTransactions(
         amount: balanceAmount?.amount ?? '0',
         currency: balanceAmount?.currency ?? 'EUR',
       },
-      balanceType: b.balance_type ?? 'expected',
+      balanceType: (b.balance_type as string) ?? 'XPCD',
       referenceDate: (b.reference_date as string) ?? getDate(new Date()),
     };
   });
 
   // Calculate starting balance (as integer cents)
+  // Enable Banking uses ISO20022 balance type codes:
+  // XPCD = Expected (instant), CLBD = ClosingBooked, CLAV = ClosingAvailable,
+  // ITAV = InterimAvailable, ITBD = InterimBooked
   const expectedBalance =
-    balances.find(b => b.balanceType === 'expected') ??
-    balances.find(b => b.balanceType === 'closingBooked') ??
+    balances.find(b => b.balanceType === 'XPCD') ??
+    balances.find(b => b.balanceType === 'CLBD') ??
+    balances.find(b => b.balanceType === 'CLAV') ??
+    balances.find(b => b.balanceType === 'ITAV') ??
     balances[0];
 
   const startingBalance = expectedBalance
@@ -246,14 +251,27 @@ export async function getTransactions(
       (tx.value_date as string) ??
       getDate(new Date());
 
-    const creditorName = tx.creditor_name as string | undefined;
-    const debtorName = tx.debtor_name as string | undefined;
+    // Enable Banking nests creditor/debtor name under .creditor.name / .debtor.name
+    const creditorObj = tx.creditor as Record<string, unknown> | undefined;
+    const debtorObj = tx.debtor as Record<string, unknown> | undefined;
+    const creditorName = creditorObj?.name as string | undefined;
+    const debtorName = debtorObj?.name as string | undefined;
     const remittanceInfo =
       (tx.remittance_information as string[] | undefined)?.[0] ?? '';
 
     const payeeName = creditorName ?? debtorName ?? remittanceInfo ?? 'Unknown';
 
-    const isBooked = tx.entry_status !== 'PENDING';
+    // Enable Banking status values: BOOK = booked, PDNG = pending
+    const isBooked = tx.status !== 'PDNG';
+
+    // Apply debit/credit sign: DBIT = money leaving account (negative)
+    const creditDebitIndicator = tx.credit_debit_indicator as
+      | string
+      | undefined;
+    const rawAmount = parseFloat(amount);
+    const signedAmount =
+      creditDebitIndicator === 'DBIT' ? -rawAmount : rawAmount;
+    const signedAmountStr = signedAmount.toFixed(2);
 
     const mapped = {
       transactionId:
@@ -262,7 +280,7 @@ export async function getTransactions(
         `${bookingDate}-${amount}-${payeeName}`,
       date: bookingDate,
       payeeName,
-      transactionAmount: { amount, currency },
+      transactionAmount: { amount: signedAmountStr, currency },
       booked: isBooked,
       notes: remittanceInfo,
       // Keep original fields for raw_synced_data
