@@ -428,6 +428,9 @@ async function linkEnableBankingAccount({
     startingBalance,
   );
 
+  const ts = new Date().getTime().toString();
+  await db.update('accounts', { id, last_sync: ts });
+
   connection.send('sync-event', {
     type: 'success',
     tables: ['transactions'],

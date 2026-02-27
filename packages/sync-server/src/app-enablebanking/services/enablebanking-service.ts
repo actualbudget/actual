@@ -159,7 +159,7 @@ export async function completeSession(
           mask: iban ? iban.slice(-4) : '',
           iban,
           orgId: aspspName,
-          orgDomain: '',
+          orgDomain: aspspName,
         };
       },
     ),
