@@ -13,6 +13,9 @@ jobs:
   unfreeze:
     if: ${{ github.event.label.name == 'unfreeze' }}
     runs-on: ubuntu-latest
+    concurrency:
+      group: merge-freeze-unfreeze-${{ github.ref }}-labels
+      cancel-in-progress: false
     steps:
       - name: GET current freeze status and POST with PR added to unblocked_prs
         env:
@@ -34,8 +37,8 @@ jobs:
           body=$(echo "$resp" | sed '$d')
 
           if [ "$code" != "200" ] || [ -z "$body" ] || [ "$body" = "{}" ]; then
-            frozen="true"
-            unblocked_prs="[$PR_NUMBER]"
+            echo "::error::Failed to fetch current Merge Freeze status (HTTP: ${code:-none}). Aborting to avoid overwriting unblocked_prs."
+            exit 1
           else
             frozen=$(echo "$body" | jq -r '.frozen // true')
             unblocked_prs=$(echo "$body" | jq -c --argjson pr "$PR_NUMBER" '(.unblocked_prs // []) | if index($pr) then . else . + [$pr] end')
