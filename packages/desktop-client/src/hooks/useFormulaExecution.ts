@@ -30,6 +30,58 @@ function escapeRegExp(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// Parse a BUDGET_QUERY parameter - can be extraction function, array literal, or string
+function parseBudgetParam(
+  param: string,
+): { type: 'extraction' | 'literal'; data: unknown } | null {
+  param = param.trim();
+
+  // Try extraction function: QUERY_EXTRACT_*("queryName")
+  const extractMatch = param.match(
+    /^(QUERY_EXTRACT_\w+)\s*\(\s*["']([^"']+)["']\s*\)$/,
+  );
+  if (extractMatch) {
+    return {
+      type: 'extraction',
+      data: { funcName: extractMatch[1], queryName: extractMatch[2] },
+    };
+  }
+
+  // Try array literal: {"id1";"id2";...}
+  const arrayMatch = param.match(/^\{([^}]*)\}$/);
+  if (arrayMatch) {
+    const items = arrayMatch[1]
+      .split(';')
+      .map(item => item.replace(/^["']|["']$/g, '').trim())
+      .filter(item => item.length > 0);
+    return { type: 'literal', data: items };
+  }
+
+  // Try string literal: "value"
+  const stringMatch = param.match(/^["']([^"']*)["']$/);
+  if (stringMatch) {
+    return { type: 'literal', data: stringMatch[1] };
+  }
+
+  return null;
+}
+
+// Resolve a parsed BUDGET_QUERY parameter to its actual value
+function resolveBudgetParam(
+  parsed: ReturnType<typeof parseBudgetParam>,
+  extractionResults: Record<string, Record<string, unknown>>,
+): unknown {
+  if (!parsed || parsed.type === 'literal') {
+    return parsed?.data;
+  }
+
+  const { funcName, queryName } = parsed.data as {
+    funcName: string;
+    queryName: string;
+  };
+  return extractionResults[funcName]?.[`${funcName}(${queryName})`];
+}
+
 export function useFormulaExecution(
   formula: string,
   queries: QueriesMap,
@@ -123,54 +175,15 @@ export function useFormulaExecution(
           }
         }
 
-        // Helper: Parse a BUDGET_QUERY parameter to determine if it's an extraction function or literal
-        function parseBudgetParam(
-          param: string,
-        ): { type: 'extraction' | 'literal'; data: unknown } | null {
-          param = param.trim();
-
-          // Check if it's an extraction function
-          const extractMatch = param.match(
-            /^(QUERY_EXTRACT_CATEGORIES|QUERY_EXTRACT_TIMEFRAME_START|QUERY_EXTRACT_TIMEFRAME_END)\s*\(\s*["']([^"']+)["']\s*\)$/,
-          );
-          if (extractMatch) {
-            return {
-              type: 'extraction',
-              data: { funcName: extractMatch[1], queryName: extractMatch[2] },
-            };
-          }
-
-          // Check if it's an array literal
-          const arrayMatch = param.match(/^\{([^}]*)\}$/);
-          if (arrayMatch) {
-            const arrayContent = arrayMatch[1];
-            const items = arrayContent
-              .split(';')
-              .map(item => item.replace(/^["']|["']$/g, '').trim())
-              .filter(item => item.length > 0);
-            return { type: 'literal', data: items };
-          }
-
-          // Check if it's a quoted string
-          const stringMatch = param.match(/^["']([^"']*)["']$/);
-          if (stringMatch) {
-            return { type: 'literal', data: stringMatch[1] };
-          }
-
-          return null;
-        }
-
-        // Extract BUDGET_QUERY() calls with flexible parameter matching
-        // Each parameter can be: QUERY_EXTRACT_*(...), {...}, or "..."
+        // Match BUDGET_QUERY(dimension, param1, param2, param3) where each param can be:
+        // extraction function, array literal {...}, or string "..."
+        const paramPattern = String.raw`(?:QUERY_EXTRACT_\w+\s*\([^)]*\)|\{[^}]*\}|["'][^"']*["'])`;
         const budgetMatches = Array.from(
-          formula.matchAll(
-            /BUDGET_QUERY\s*\(\s*["']([^"']+)["']\s*,\s*((?:QUERY_EXTRACT_\w+\s*\([^)]*\)|\{[^}]*\}|["'][^"']*["']))\s*,\s*((?:QUERY_EXTRACT_\w+\s*\([^)]*\)|\{[^}]*\}|["'][^"']*["']))\s*,\s*((?:QUERY_EXTRACT_\w+\s*\([^)]*\)|\{[^}]*\}|["'][^"']*["']))\s*\)/gi,
-          ),
+          formula.matchAll(new RegExp(
+            `BUDGET_QUERY\\s*\\(\\s*["']([^"']+)["']\\s*,\\s*(${paramPattern})\\s*,\\s*(${paramPattern})\\s*,\\s*(${paramPattern})\\s*\\)`,
+            'gi',
+          )),
         );
-
-        if (budgetMatches.length === 0) {
-          console.debug('No BUDGET_QUERY matches found in formula');
-        }
 
         for (const queryName of queryNames) {
           const queryConfig = queries[queryName];
@@ -225,14 +238,28 @@ export function useFormulaExecution(
             const param3Str = match[4].trim();
 
             try {
-              // Parse all three parameters
-              const param1 = parseBudgetParam(param1Str);
-              const param2 = parseBudgetParam(param2Str);
-              const param3 = parseBudgetParam(param3Str);
+              // Parse and resolve parameters
+              const param1 = resolveBudgetParam(
+                parseBudgetParam(param1Str),
+                extractionResults,
+              );
+              const param2 = resolveBudgetParam(
+                parseBudgetParam(param2Str),
+                extractionResults,
+              );
+              const param3 = resolveBudgetParam(
+                parseBudgetParam(param3Str),
+                extractionResults,
+              );
 
-              if (!param1 || !param2 || !param3) {
+              // Validate resolved parameters
+              if (
+                !Array.isArray(param1) ||
+                typeof param2 !== 'string' ||
+                typeof param3 !== 'string'
+              ) {
                 console.error(
-                  'Failed to parse BUDGET_QUERY parameters:',
+                  'Failed to resolve BUDGET_QUERY parameters:',
                   param1Str,
                   param2Str,
                   param3Str,
@@ -240,59 +267,12 @@ export function useFormulaExecution(
                 continue;
               }
 
-              let categories: string[] | undefined;
-              let startMonth: string | undefined;
-              let endMonth: string | undefined;
-
-              // Param 1: Categories (extraction or array literal)
-              if (param1.type === 'extraction') {
-                const { funcName, queryName } = param1.data as {
-                  funcName: string;
-                  queryName: string;
-                };
-                const categKey = `${funcName}(${queryName})`;
-                categories = extractionResults[funcName]?.[
-                  categKey
-                ] as string[];
-              } else if (Array.isArray(param1.data)) {
-                categories = param1.data;
-              }
-
-              // Param 2: Month (extraction or string literal)
-              if (param2.type === 'extraction') {
-                const { funcName, queryName } = param2.data as {
-                  funcName: string;
-                  queryName: string;
-                };
-                const key = `${funcName}(${queryName})`;
-                startMonth = extractionResults[funcName]?.[key] as string;
-              } else if (typeof param2.data === 'string') {
-                startMonth = param2.data;
-              }
-
-              // Param 3: Month (extraction or string literal)
-              if (param3.type === 'extraction') {
-                const { funcName, queryName } = param3.data as {
-                  funcName: string;
-                  queryName: string;
-                };
-                const key = `${funcName}(${queryName})`;
-                endMonth = extractionResults[funcName]?.[key] as string;
-              } else if (typeof param3.data === 'string') {
-                endMonth = param3.data;
-              }
-
-              if (!categories || !startMonth || !endMonth) {
-                console.error('Failed to extract BUDGET_QUERY parameters');
-                continue;
-              }
-
               // Evaluate BUDGET_QUERY
               const val = await fetchBudgetDimensionValueDirect(
                 dimension,
-                categories,
-                startMonth,
-                endMonth,
+                param1 as string[],
+                param2 as string,
+                param3 as string,
               );
 
               processedFormula = processedFormula.replace(
