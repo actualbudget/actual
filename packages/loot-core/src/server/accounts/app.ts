@@ -429,6 +429,9 @@ async function linkEnableBankingAccount({
   );
 
   const ts = new Date().getTime().toString();
+  logger.info(
+    `[bank-sync] linkEnableBankingAccount writing last_sync=${ts} for account ${id}`,
+  );
   await db.update('accounts', { id, last_sync: ts });
 
   connection.send('sync-event', {
@@ -1059,6 +1062,9 @@ async function handleSyncResponse(
   }
 
   const ts = new Date().getTime().toString();
+  logger.info(
+    `[bank-sync] writing last_sync=${ts} for account ${acct.id} (${acct.name})`,
+  );
   await db.update('accounts', { id: acct.id, last_sync: ts });
 
   return {
