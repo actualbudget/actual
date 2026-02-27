@@ -251,8 +251,9 @@ export function useFormulaExecution(
                   queryName: string;
                 };
                 const categKey = `${funcName}(${queryName})`;
-                categories =
-                  extractionResults[funcName]?.[categKey] as string[];
+                categories = extractionResults[funcName]?.[
+                  categKey
+                ] as string[];
               } else if (Array.isArray(param1.data)) {
                 categories = param1.data;
               }
@@ -324,7 +325,7 @@ export function useFormulaExecution(
               let replacement: string;
               if (Array.isArray(value)) {
                 // For arrays, convert to HyperFormula array literal
-                replacement = `{${value.map(v => `"${v}"`).join(";")}}`; 
+                replacement = `{${value.map(v => `"${v}"`).join(';')}}`;
               } else if (typeof value === 'string') {
                 // For strings, wrap in quotes
                 replacement = `"${value}"`;
