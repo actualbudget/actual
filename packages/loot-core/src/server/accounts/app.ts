@@ -98,6 +98,13 @@ async function updateAccount({
 
 async function getAccounts(): Promise<AccountEntity[]> {
   const dbAccounts = await db.getAccounts();
+  dbAccounts.forEach(a => {
+    if (a.account_sync_source === 'enableBanking') {
+      logger.info(
+        `[getAccounts] enableBanking account="${a.name}" id=${a.id} last_sync=${a.last_sync} bankId=${a.bankId}`,
+      );
+    }
+  });
   return dbAccounts.map(
     dbAccount =>
       ({
@@ -429,6 +436,7 @@ async function linkEnableBankingAccount({
   );
 
   const ts = new Date().getTime().toString();
+  logger.info(`[bank-sync] linkEnableBankingAccount writing last_sync=${ts} for account ${id}`);
   await db.update('accounts', { id, last_sync: ts });
 
   connection.send('sync-event', {
@@ -1059,6 +1067,7 @@ async function handleSyncResponse(
   }
 
   const ts = new Date().getTime().toString();
+  logger.info(`[bank-sync] writing last_sync=${ts} for account ${acct.id} (${acct.name})`);
   await db.update('accounts', { id: acct.id, last_sync: ts });
 
   return {
@@ -1170,6 +1179,9 @@ async function accountsBankSync({
   const updatedAccounts: Array<AccountEntity['id']> = [];
 
   for (const acct of accounts) {
+    logger.info(
+      `[bank-sync] account="${acct.name}" id=${acct.id} source=${acct.account_sync_source} bankId="${acct.bankId}" account_id="${acct.account_id}"`,
+    );
     if (acct.bankId && acct.account_id) {
       try {
         logger.group('Bank Sync operation for account:', acct.name);
@@ -1196,6 +1208,10 @@ async function accountsBankSync({
       } finally {
         logger.groupEnd();
       }
+    } else {
+      logger.info(
+        `[bank-sync] SKIPPING account="${acct.name}" reason: bankId=${JSON.stringify(acct.bankId)} account_id=${JSON.stringify(acct.account_id)}`,
+      );
     }
   }
 
