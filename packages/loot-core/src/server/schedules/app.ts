@@ -567,9 +567,9 @@ app.events.on('sync', ({ type }) => {
 
     const { lastScheduleRun } = prefs.getPrefs();
     if (lastScheduleRun !== currentDay()) {
-      runMutator(() => advanceSchedulesService(type === 'success'));
+      void runMutator(() => advanceSchedulesService(type === 'success'));
 
-      prefs.savePrefs({ lastScheduleRun: currentDay() });
+      void prefs.savePrefs({ lastScheduleRun: currentDay() });
     }
   }
 });

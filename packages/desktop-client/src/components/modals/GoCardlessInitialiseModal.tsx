@@ -142,7 +142,7 @@ export const GoCardlessInitialiseModal = ({
               variant="primary"
               isLoading={isLoading}
               onPress={() => {
-                onSubmit(close);
+                void onSubmit(close);
               }}
             >
               <Trans>Save and continue</Trans>

@@ -72,9 +72,9 @@ export function CreateAccountModal({
     }
 
     if (upgradingAccountId == null) {
-      authorizeBank(dispatch);
+      void authorizeBank(dispatch);
     } else {
-      authorizeBank(dispatch);
+      void authorizeBank(dispatch);
     }
   };
 
@@ -288,11 +288,11 @@ export function CreateAccountModal({
   };
 
   const onGoCardlessReset = () => {
-    send('secret-set', {
+    void send('secret-set', {
       name: 'gocardless_secretId',
       value: null,
     }).then(() => {
-      send('secret-set', {
+      void send('secret-set', {
         name: 'gocardless_secretKey',
         value: null,
       }).then(() => {
@@ -302,11 +302,11 @@ export function CreateAccountModal({
   };
 
   const onSimpleFinReset = () => {
-    send('secret-set', {
+    void send('secret-set', {
       name: 'simplefin_token',
       value: null,
     }).then(() => {
-      send('secret-set', {
+      void send('secret-set', {
         name: 'simplefin_accessKey',
         value: null,
       }).then(() => {
@@ -322,15 +322,15 @@ export function CreateAccountModal({
   };
 
   const onPluggyAiReset = () => {
-    send('secret-set', {
+    void send('secret-set', {
       name: 'pluggyai_clientId',
       value: null,
     }).then(() => {
-      send('secret-set', {
+      void send('secret-set', {
         name: 'pluggyai_clientSecret',
         value: null,
       }).then(() => {
-        send('secret-set', {
+        void send('secret-set', {
           name: 'pluggyai_itemIds',
           value: null,
         }).then(() => {

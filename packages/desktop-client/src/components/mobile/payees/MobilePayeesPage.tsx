@@ -18,19 +18,17 @@ import { usePayeeRuleCounts } from '@desktop-client/hooks/usePayeeRuleCounts';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
+import { useDispatch } from '@desktop-client/redux';
 
 export function MobilePayeesPage() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const payees = usePayees();
+  const { data: payees = [], isPending } = usePayees();
   const { showUndoNotification } = useUndo();
   const [filter, setFilter] = useState('');
-  const { ruleCounts, isLoading: isRuleCountsLoading } = usePayeeRuleCounts();
-  const isLoading = useSelector(
-    s => s.payees.isPayeesLoading || s.payees.isCommonPayeesLoading,
-  );
+  const { data: ruleCounts = new Map(), isPending: isRuleCountsLoading } =
+    usePayeeRuleCounts();
 
   const filteredPayees: PayeeEntity[] = useMemo(() => {
     if (!filter) return payees;
@@ -44,7 +42,7 @@ export function MobilePayeesPage() {
 
   const handlePayeePress = useCallback(
     (payee: PayeeEntity) => {
-      navigate(`/payees/${payee.id}`);
+      void navigate(`/payees/${payee.id}`);
     },
     [navigate],
   );
@@ -58,18 +56,18 @@ export function MobilePayeesPage() {
             id: payee.id,
           });
           const ruleIds = associatedRules.map(rule => rule.id).join(',');
-          navigate(`/rules?visible-rules=${ruleIds}`);
+          void navigate(`/rules?visible-rules=${ruleIds}`);
           return;
         } catch (error) {
           console.error('Failed to fetch payee rules:', error);
           // Fallback to general rules page
-          navigate('/rules');
+          void navigate('/rules');
           return;
         }
       }
 
       // Create a new rule for the payee
-      navigate('/rules/new', {
+      void navigate('/rules/new', {
         state: {
           rule: {
             conditions: [
@@ -141,7 +139,7 @@ export function MobilePayeesPage() {
         payees={filteredPayees}
         ruleCounts={ruleCounts}
         isRuleCountsLoading={isRuleCountsLoading}
-        isLoading={isLoading}
+        isLoading={isPending}
         onPayeePress={handlePayeePress}
         onPayeeDelete={handlePayeeDelete}
         onPayeeRuleAction={handlePayeeRuleAction}

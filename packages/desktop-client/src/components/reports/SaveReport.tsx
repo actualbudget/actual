@@ -9,10 +9,9 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/connection';
 import type {
   CustomReportEntity,
-  DashboardEntity,
+  DashboardPageEntity,
 } from 'loot-core/types/models';
 
 import { LoadingIndicator } from './LoadingIndicator';
@@ -23,9 +22,10 @@ import type { SavedStatus } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
 
 import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { useDashboardPages } from '@desktop-client/hooks/useDashboard';
+import { useDashboardPages } from '@desktop-client/hooks/useDashboardPages';
 import { useReports } from '@desktop-client/hooks/useReports';
 import {
+  useAddDashboardWidgetMutation,
   useCreateReportMutation,
   useDeleteReportMutation,
   useUpdateReportMutation,
@@ -59,16 +59,16 @@ type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
           savedReport?: CustomReportEntity;
         },
   ) => void;
-  dashboardPages: readonly DashboardEntity[];
+  dashboardPages: readonly DashboardPageEntity[];
 };
 
 export function SaveReportWrapper<
   T extends CustomReportEntity = CustomReportEntity,
 >(props: Omit<SaveReportProps<T>, 'dashboardPages'>) {
   const { t } = useTranslation();
-  const { data, isLoading } = useDashboardPages();
+  const { data = [], isPending } = useDashboardPages();
 
-  if (isLoading) {
+  if (isPending) {
     return <LoadingIndicator message={t('Loading dashboards...')} />;
   }
 
@@ -99,6 +99,7 @@ export function SaveReport({
 
   const createReportMutation = useCreateReportMutation();
   const updateReportMutation = useUpdateReportMutation();
+  const addDashboardWidgetMutation = useAddDashboardWidgetMutation();
 
   async function onApply(cond: string) {
     const chooseSavedReport = listReports.find(r => cond === r.id);
@@ -127,22 +128,29 @@ export function SaveReport({
         { report: newSavedReport },
         {
           onSuccess: async id => {
-            await send('dashboard-add-widget', {
-              type: 'custom-report',
-              width: 4,
-              height: 2,
-              meta: { id },
-              dashboard_page_id: saveDashboardId,
-            });
-
-            setNameMenuOpen(false);
-            onReportChange({
-              savedReport: {
-                ...newSavedReport,
-                id,
+            addDashboardWidgetMutation.mutate(
+              {
+                widget: {
+                  type: 'custom-report',
+                  width: 4,
+                  height: 2,
+                  meta: { id },
+                  dashboard_page_id: saveDashboardId,
+                },
               },
-              type: 'add-update',
-            });
+              {
+                onSuccess: () => {
+                  setNameMenuOpen(false);
+                  onReportChange({
+                    savedReport: {
+                      ...newSavedReport,
+                      id,
+                    },
+                    type: 'add-update',
+                  });
+                },
+              },
+            );
           },
           onError: error => {
             setErr(error.message);
@@ -209,7 +217,7 @@ export function SaveReport({
       case 'update-report':
         setErr('');
         setMenuOpen(false);
-        onAddUpdate({ menuChoice: item });
+        void onAddUpdate({ menuChoice: item });
         break;
       case 'save-report':
         setErr('');

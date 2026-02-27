@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["vite/client", "vitest/globals", "node"],
+    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "typings/**/*.ts",
+    "typings/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "build",
+    "lib-dist",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}

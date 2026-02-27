@@ -11,10 +11,10 @@
     "requireindex": "^1.2.0"
   },
   "devDependencies": {
-    "eslint-vitest-rule-tester": "^3.0.1",
+    "eslint-vitest-rule-tester": "^3.1.0",
     "loupe": "^3.2.1",
     "strip-literal": "^3.1.0",
     "tinyspy": "^4.0.4",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.18"
   }
 }

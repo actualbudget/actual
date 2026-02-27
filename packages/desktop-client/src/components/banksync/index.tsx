@@ -40,7 +40,7 @@ export function BankSync() {
 
   const { syncSourceReadable } = useSyncSourceReadable();
 
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
 

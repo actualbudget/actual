@@ -260,7 +260,7 @@ async function closeBudget() {
   clearFullSyncTimeout();
   await mainApp.stopServices();
 
-  await db.closeDatabase();
+  db.closeDatabase();
 
   try {
     await asyncStorage.setItem('lastBudget', '');
@@ -271,7 +271,7 @@ async function closeBudget() {
   }
 
   prefs.unloadPrefs();
-  await stopBackupService();
+  stopBackupService();
   return 'ok';
 }
 
@@ -297,7 +297,7 @@ async function deleteBudget({
     // way, but works for now.
     try {
       await db.openDatabase(id);
-      await db.closeDatabase();
+      db.closeDatabase();
       const budgetDir = fs.getBudgetDir(id);
       await fs.removeDirRecursively(budgetDir);
     } catch {
@@ -568,7 +568,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
     // TODO: The client id should be stored elsewhere. It shouldn't
     // work this way, but it's fine for now.
     CRDT.getClock().timestamp.setNode(CRDT.makeClientId());
-    await db.runQuery(
+    db.runQuery(
       'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
       [CRDT.serializeClock(CRDT.getClock())],
     );
@@ -577,7 +577,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
   }
 
   if (!Platform.isBrowser && process.env.NODE_ENV !== 'test') {
-    await startBackupService(id);
+    startBackupService(id);
   }
 
   try {
@@ -600,8 +600,8 @@ async function _loadBudget(id: Budget['id']): Promise<{
   // Load all the in-memory state
   await mappings.loadMappings();
   await rules.loadRules();
-  await syncMigrations.listen();
-  await mainApp.startServices();
+  syncMigrations.listen();
+  mainApp.startServices();
 
   clearUndo();
 

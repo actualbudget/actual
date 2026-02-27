@@ -339,8 +339,8 @@ export function SchedulesTable({
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [showCompleted, setShowCompleted] = useState(false);
 
-  const payees = usePayees();
-  const accounts = useAccounts();
+  const { data: payees } = usePayees();
+  const { data: accounts = [] } = useAccounts();
 
   const filteredSchedules = useMemo(() => {
     if (!filter) {

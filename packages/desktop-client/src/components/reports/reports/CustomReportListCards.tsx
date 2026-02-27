@@ -18,7 +18,7 @@ import { MissingReportCard } from './MissingReportCard';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
+import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { calculateHasWarning } from '@desktop-client/components/reports/util';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -78,10 +78,10 @@ function CustomReportListCardsInner({
   const [latestTransaction, setLatestTransaction] = useState('');
 
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useWidgetCopyMenu(onCopy);
+    useDashboardWidgetCopyMenu(onCopy);
 
-  const payees = usePayees();
-  const accounts = useAccounts();
+  const { data: payees = [] } = usePayees();
+  const { data: accounts = [] } = useAccounts();
   const { data: categories = { list: [], grouped: [] } } = useCategories();
 
   const hasWarning = calculateHasWarning(report.conditions ?? [], {
@@ -104,7 +104,7 @@ function CustomReportListCardsInner({
         latestTrans ? latestTrans.date : monthUtils.currentDay(),
       );
     }
-    run();
+    void run();
   }, []);
 
   const updateReportMutation = useUpdateReportMutation();

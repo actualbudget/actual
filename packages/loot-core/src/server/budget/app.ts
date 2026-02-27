@@ -295,9 +295,7 @@ async function createCategory({
   });
 }
 
-async function updateCategory(
-  category: CategoryEntity,
-): Promise<{ error: { type: 'category-exists' } } | object> {
+async function updateCategory(category: CategoryEntity): Promise<void> {
   try {
     await db.updateCategory(
       categoryModel.toDb({
@@ -310,11 +308,13 @@ async function updateCategory(
       e instanceof Error &&
       e.message.toLowerCase().includes('unique constraint')
     ) {
-      return { error: { type: 'category-exists' } };
+      throw new Error(
+        `A category with the name "${category.name}" already exists.`,
+        { cause: e },
+      );
     }
     throw e;
   }
-  return {};
 }
 
 async function moveCategory({
@@ -337,16 +337,14 @@ async function deleteCategory({
 }: {
   id: CategoryEntity['id'];
   transferId?: CategoryEntity['id'] | null;
-}): Promise<{ error?: 'no-categories' | 'category-type' }> {
-  let result = {};
+}): Promise<void> {
   await batchMessages(async () => {
     const row = await db.first<Pick<db.DbCategory, 'is_income'>>(
       'SELECT is_income FROM categories WHERE id = ?',
       [id],
     );
     if (!row) {
-      result = { error: 'no-categories' };
-      return;
+      throw new Error(`Category with id ${id} not found.`);
     }
 
     const transfer =
@@ -356,17 +354,15 @@ async function deleteCategory({
         [transferId],
       ));
 
-    if (!row || (transferId && !transfer)) {
-      result = { error: 'no-categories' };
-      return;
+    if (transferId && !transfer) {
+      throw new Error(`Transfer category with id ${transferId} not found.`);
     } else if (
       transferId &&
       row &&
       transfer &&
       row.is_income !== transfer.is_income
     ) {
-      result = { error: 'category-type' };
-      return;
+      throw new Error('Cannot transfer between income and expense categories.');
     }
 
     // Update spreadsheet values if it's an expense category
@@ -379,8 +375,6 @@ async function deleteCategory({
 
     await db.deleteCategory({ id }, transferId);
   });
-
-  return result;
 }
 
 // Server must return AQL entities not the raw DB data
@@ -450,7 +444,7 @@ async function isCategoryTransferRequired({
 }: {
   id: CategoryEntity['id'];
 }) {
-  const res = await db.runQuery<{ count: number }>(
+  const res = db.runQuery<{ count: number }>(
     `SELECT count(t.id) as count FROM transactions t
        LEFT JOIN category_mapping cm ON cm.id = t.category
        WHERE cm.transferId = ? AND t.tombstone = 0`,

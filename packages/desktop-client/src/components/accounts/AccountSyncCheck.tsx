@@ -90,7 +90,7 @@ function useErrorMessage() {
 }
 
 export function AccountSyncCheck() {
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const failedAccounts = useFailedAccounts();
   const dispatch = useDispatch();
   const { id } = useParams();
@@ -106,7 +106,7 @@ export function AccountSyncCheck() {
         if (acc.account_sync_source === 'enablebanking') {
           await authorizeEnableBankingSession(dispatch, acc);
         } else {
-          authorizeBank(dispatch);
+          void authorizeBank(dispatch);
         }
       }
     },

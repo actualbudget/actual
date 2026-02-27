@@ -74,7 +74,7 @@ function EditableBudgetName() {
         setEditing(true);
         break;
       case 'settings':
-        navigate('/settings');
+        void navigate('/settings');
         break;
       case 'loadBackup':
         if (isElectron()) {
@@ -86,7 +86,7 @@ function EditableBudgetName() {
         }
         break;
       case 'close':
-        dispatch(closeBudget());
+        void dispatch(closeBudget());
         break;
       default:
     }

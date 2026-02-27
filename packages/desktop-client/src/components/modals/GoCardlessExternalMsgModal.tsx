@@ -60,7 +60,7 @@ function useAvailableBanks(country: string) {
       setIsLoading(false);
     }
 
-    fetch();
+    void fetch();
   }, [setBanks, setIsLoading, country]);
 
   return {

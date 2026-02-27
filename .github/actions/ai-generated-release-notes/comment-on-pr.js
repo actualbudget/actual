@@ -74,4 +74,4 @@ async function commentOnPR() {
   }
 }
 
-commentOnPR();
+void commentOnPR();

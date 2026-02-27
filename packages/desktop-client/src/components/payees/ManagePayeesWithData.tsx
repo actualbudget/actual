@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+
+import { useQueryClient } from '@tanstack/react-query';
 
 import { listen, send } from 'loot-core/platform/client/connection';
 import * as undo from 'loot-core/platform/client/undo';
@@ -9,10 +11,11 @@ import type { NewRuleEntity, PayeeEntity } from 'loot-core/types/models';
 
 import { ManagePayees } from './ManagePayees';
 
+import { useOrphanedPayees } from '@desktop-client/hooks/useOrphanedPayees';
 import { usePayeeRuleCounts } from '@desktop-client/hooks/usePayeeRuleCounts';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { getPayees, reloadPayees } from '@desktop-client/payees/payeesSlice';
+import { payeeQueries } from '@desktop-client/payees';
 import { useDispatch } from '@desktop-client/redux';
 
 type ManagePayeesWithDataProps = {
@@ -22,24 +25,15 @@ type ManagePayeesWithDataProps = {
 export function ManagePayeesWithData({
   initialSelectedIds,
 }: ManagePayeesWithDataProps) {
-  const payees = usePayees();
+  const queryClient = useQueryClient();
+  const { data: payees = [], refetch: refetchPayees } = usePayees();
+  const { data: orphanedPayees = [], refetch: refetchOrphanedPayees } =
+    useOrphanedPayees();
   const dispatch = useDispatch();
-  const { ruleCounts, refetch: refetchRuleCounts } = usePayeeRuleCounts();
-
-  const [orphans, setOrphans] = useState<Array<Pick<PayeeEntity, 'id'>>>([]);
-
-  const refetchOrphanedPayees = useCallback(async () => {
-    const orphs = await send('payees-get-orphaned');
-    setOrphans(orphs);
-  }, []);
+  const { data: ruleCounts = new Map(), refetch: refetchRuleCounts } =
+    usePayeeRuleCounts();
 
   useEffect(() => {
-    async function loadData() {
-      await dispatch(getPayees());
-      await refetchOrphanedPayees();
-    }
-    loadData();
-
     const unlisten = listen('sync-event', async event => {
       if (event.type === 'applied') {
         if (event.tables.includes('rules')) {
@@ -51,7 +45,7 @@ export function ManagePayeesWithData({
     return () => {
       unlisten();
     };
-  }, [dispatch, refetchRuleCounts, refetchOrphanedPayees]);
+  }, [dispatch, refetchRuleCounts]);
 
   useEffect(() => {
     async function onUndo({ tables, messages, meta }: UndoState) {
@@ -75,7 +69,7 @@ export function ManagePayeesWithData({
 
     const lastUndoEvent = undo.getUndoState('undoEvent');
     if (lastUndoEvent) {
-      onUndo(lastUndoEvent);
+      void onUndo(lastUndoEvent);
     }
 
     return listen('undo-event', onUndo);
@@ -115,32 +109,40 @@ export function ManagePayeesWithData({
     <ManagePayees
       payees={payees}
       ruleCounts={ruleCounts}
-      orphanedPayees={orphans}
+      orphanedPayees={orphanedPayees}
       initialSelectedIds={initialSelectedIds}
       onBatchChange={async (changes: Diff<PayeeEntity>) => {
         await send('payees-batch-change', changes);
-        setOrphans(applyChanges(changes, orphans));
+        queryClient.setQueryData(
+          payeeQueries.listOrphaned().queryKey,
+          existing => applyChanges(changes, existing ?? []),
+        );
       }}
       onMerge={async ([targetId, ...mergeIds]) => {
         await send('payees-merge', { targetId, mergeIds });
 
-        const targetIdIsOrphan = orphans.map(o => o.id).includes(targetId);
+        const targetIdIsOrphan = orphanedPayees
+          .map(o => o.id)
+          .includes(targetId);
         const mergeIdsOrphans = mergeIds.filter(m =>
-          orphans.map(o => o.id).includes(m),
+          orphanedPayees.map(o => o.id).includes(m),
         );
 
-        let filtedOrphans = orphans;
+        let filteredOrphans = orphanedPayees;
         if (targetIdIsOrphan && mergeIdsOrphans.length !== mergeIds.length) {
           // there is a non-orphan in mergeIds, target can be removed from orphan arr
-          filtedOrphans = filtedOrphans.filter(o => o.id !== targetId);
+          filteredOrphans = filteredOrphans.filter(o => o.id !== targetId);
         }
-        filtedOrphans = filtedOrphans.filter(o => !mergeIds.includes(o.id));
+        filteredOrphans = filteredOrphans.filter(o => !mergeIds.includes(o.id));
 
         // Refetch rule counts after merging
         await refetchRuleCounts();
 
-        await dispatch(reloadPayees());
-        setOrphans(filtedOrphans);
+        void refetchPayees();
+        queryClient.setQueryData(
+          payeeQueries.listOrphaned().queryKey,
+          filteredOrphans,
+        );
       }}
       onViewRules={onViewRules}
       onCreateRule={onCreateRule}

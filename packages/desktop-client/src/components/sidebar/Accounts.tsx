@@ -25,7 +25,7 @@ const fontWeight = 600;
 export function Accounts() {
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const failedAccounts = useFailedAccounts();
   const updatedAccounts = useUpdatedAccounts();
   const offbudgetAccounts = useOffBudgetAccounts();
@@ -57,16 +57,16 @@ export function Accounts() {
 
   async function onReorder(
     id: string,
-    dropPos: 'top' | 'bottom',
-    targetId: unknown,
+    dropPos: 'top' | 'bottom' | null,
+    targetId: string,
   ) {
-    let targetIdToMove = targetId;
+    let targetIdToMove: string | null = targetId;
     if (dropPos === 'bottom') {
       const idx = accounts.findIndex(a => a.id === targetId) + 1;
       targetIdToMove = idx < accounts.length ? accounts[idx].id : null;
     }
 
-    moveAccount.mutate({ id, targetId: targetIdToMove as string });
+    moveAccount.mutate({ id, targetId: targetIdToMove });
   }
 
   const onToggleClosedAccounts = () => {

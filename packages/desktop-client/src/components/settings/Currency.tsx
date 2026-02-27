@@ -33,6 +33,7 @@ export function CurrencySettings() {
         ['CRC', t('Costa Rican Colón')],
         ['CZK', t('Czech Koruna')],
         ['DKK', t('Danish Krone')],
+        ['DOP', t('Dominican Peso')],
         ['EGP', t('Egyptian Pound')],
         ['EUR', t('Euro')],
         ['GBP', t('Pound Sterling')],

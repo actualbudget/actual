@@ -13,7 +13,7 @@ import {
 } from './schedules';
 import type { ScheduleStatuses } from './schedules';
 
-i18next.init({
+void i18next.init({
   lng: 'en',
   fallbackLng: 'en',
   resources: {

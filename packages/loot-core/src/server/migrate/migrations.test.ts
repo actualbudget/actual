@@ -45,7 +45,7 @@ describe('Migrations', () => {
       __dirname + '/../../mocks/migrations',
       async () => {
         // Insert a random migration id
-        await db.runQuery('INSERT INTO __migrations__ (id) VALUES (1000)');
+        db.runQuery('INSERT INTO __migrations__ (id) VALUES (1000)');
 
         try {
           await migrate(db.getDatabase());

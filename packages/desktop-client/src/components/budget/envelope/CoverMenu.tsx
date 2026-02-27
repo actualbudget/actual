@@ -3,7 +3,6 @@ import { Form } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
@@ -53,7 +52,7 @@ export function CoverMenu({
   }, [categoryId, showToBeBudgeted, originalCategoryGroups]);
 
   const _initialAmount = integerToCurrency(Math.abs(initialAmount ?? 0));
-  const [amount, setAmount] = useState<string | null>(null);
+  const [amount, setAmount] = useState<string>(_initialAmount);
 
   function _onSubmit() {
     const parsedAmount = evalArithmetic(amount || '');
@@ -75,13 +74,12 @@ export function CoverMenu({
           <Trans>Cover this amount:</Trans>
         </View>
         <View>
-          <InitialFocus>
-            <Input
-              defaultValue={_initialAmount}
-              onUpdate={setAmount}
-              style={styles.tnum}
-            />
-          </InitialFocus>
+          <Input
+            defaultValue={_initialAmount}
+            onUpdate={setAmount}
+            onChangeValue={setAmount}
+            style={styles.tnum}
+          />
         </View>
         <View style={{ margin: '10px 0 5px 0' }}>
           <Trans>From:</Trans>
@@ -90,6 +88,7 @@ export function CoverMenu({
         <CategoryAutocomplete
           categoryGroups={filteredCategoryGroups}
           value={null}
+          focused
           openOnFocus
           onSelect={(id: string | undefined) => setFromCategoryId(id || null)}
           inputProps={{

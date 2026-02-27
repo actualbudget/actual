@@ -13,7 +13,7 @@ export function useReport<T>(
   const [results, setResults] = useState<T | null>(null);
 
   useEffect(() => {
-    getData(spreadsheet, results => setResults(results));
+    void getData(spreadsheet, results => setResults(results));
   }, [getData, spreadsheet]);
   return results;
 }

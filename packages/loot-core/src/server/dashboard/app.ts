@@ -6,12 +6,12 @@ import * as fs from '../../platform/server/fs';
 import { DEFAULT_DASHBOARD_STATE } from '../../shared/dashboard';
 import { q } from '../../shared/query';
 import type {
+  DashboardWidgetEntity,
   ExportImportCustomReportWidget,
   ExportImportDashboard,
   ExportImportDashboardWidget,
-  Widget,
 } from '../../types/models';
-import type { EverythingButIdOptional } from '../../types/util';
+import type { EverythingButIdOptional, WithOptional } from '../../types/util';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
@@ -28,7 +28,7 @@ function isExportedCustomReportWidget(
   return widget.type === 'custom-report';
 }
 
-function isWidgetType(type: string): type is Widget['type'] {
+function isWidgetType(type: string): type is DashboardWidgetEntity['type'] {
   return [
     'net-worth-card',
     'cash-flow-card',
@@ -100,10 +100,6 @@ const exportModel = {
   },
 };
 
-async function getDashboardPages() {
-  return db.all('SELECT * FROM dashboard_pages WHERE tombstone = 0');
-}
-
 async function createDashboardPage({ name }: { name: string }) {
   const id = uuidv4();
   await db.insertWithSchema('dashboard_pages', { id, name });
@@ -139,7 +135,7 @@ async function renameDashboardPage({ id, name }: { id: string; name: string }) {
 }
 
 async function updateDashboard(
-  widgets: EverythingButIdOptional<Omit<Widget, 'tombstone'>>[],
+  widgets: EverythingButIdOptional<Omit<DashboardWidgetEntity, 'tombstone'>>[],
 ) {
   const { data: dbWidgets } = await aqlQuery(
     q('dashboard')
@@ -147,7 +143,7 @@ async function updateDashboard(
       .select('*'),
   );
   const dbWidgetMap = new Map(
-    (dbWidgets as Widget[]).map(widget => [widget.id, widget]),
+    (dbWidgets as DashboardWidgetEntity[]).map(widget => [widget.id, widget]),
   );
 
   await Promise.all(
@@ -159,7 +155,7 @@ async function updateDashboard(
 }
 
 async function updateDashboardWidget(
-  widget: EverythingButIdOptional<Omit<Widget, 'tombstone'>>,
+  widget: EverythingButIdOptional<Omit<DashboardWidgetEntity, 'tombstone'>>,
 ) {
   await db.updateWithSchema('dashboard', widget);
 }
@@ -185,8 +181,10 @@ async function resetDashboard(id: string) {
 }
 
 async function addDashboardWidget(
-  widget: Omit<Widget, 'id' | 'x' | 'y' | 'tombstone'> &
-    Partial<Pick<Widget, 'x' | 'y'>> & { dashboard_page_id: string },
+  widget: WithOptional<
+    Omit<DashboardWidgetEntity, 'id' | 'tombstone'>,
+    'x' | 'y'
+  >,
 ) {
   // If no x & y was provided - calculate it dynamically
   // The new widget should be the very last one in the list of all widgets
@@ -221,20 +219,20 @@ async function removeDashboardWidget(widgetId: string) {
 }
 
 async function copyDashboardWidget({
-  widgetId,
+  id,
   targetDashboardPageId,
 }: {
-  widgetId: string;
+  id: string;
   targetDashboardPageId: string;
 }) {
   // Get the widget to copy
   const widget = await db.first<db.DbDashboard>(
     'SELECT * FROM dashboard WHERE id = ? AND tombstone = 0',
-    [widgetId],
+    [id],
   );
 
   if (!widget) {
-    throw new Error(`Widget not found: ${widgetId}`);
+    throw new Error(`Widget not found: ${id}`);
   }
 
   await batchMessages(async () => {
@@ -255,18 +253,18 @@ async function copyDashboardWidget({
 }
 
 async function importDashboard({
-  filepath,
+  filePath,
   dashboardPageId,
 }: {
-  filepath: string;
+  filePath: string;
   dashboardPageId: string;
 }) {
   try {
-    if (!(await fs.exists(filepath))) {
-      throw new Error(`File not found at the provided path: ${filepath}`);
+    if (!(await fs.exists(filePath))) {
+      throw new Error(`File not found at the provided path: ${filePath}`);
     }
 
-    const content = await fs.readFile(filepath);
+    const content = await fs.readFile(filePath);
     const parsedContent: ExportImportDashboard = JSON.parse(content);
 
     exportModel.validate(parsedContent);
@@ -337,17 +335,18 @@ async function importDashboard({
       captureException(err);
     }
     if (err instanceof SyntaxError) {
-      return { error: 'json-parse-error' as const };
+      throw new Error('Invalid JSON file.', { cause: 'json-parse-error' });
     }
     if (err instanceof ValidationError) {
-      return { error: 'validation-error' as const, message: err.message };
+      throw new Error(err.message, { cause: 'validation-error' });
     }
-    return { error: 'internal-error' as const };
+    throw new Error('Internal error occurred during import.', {
+      cause: 'internal-error',
+    });
   }
 }
 
 export type DashboardHandlers = {
-  'dashboard_pages-get': typeof getDashboardPages;
   'dashboard-create': typeof createDashboardPage;
   'dashboard-delete': typeof deleteDashboardPage;
   'dashboard-rename': typeof renameDashboardPage;
@@ -362,7 +361,6 @@ export type DashboardHandlers = {
 
 export const app = createApp<DashboardHandlers>();
 
-app.method('dashboard_pages-get', getDashboardPages);
 app.method('dashboard-create', mutator(undoable(createDashboardPage)));
 app.method('dashboard-delete', mutator(undoable(deleteDashboardPage)));
 app.method('dashboard-rename', mutator(undoable(renameDashboardPage)));

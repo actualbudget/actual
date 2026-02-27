@@ -30,7 +30,7 @@ export function useBudgetAutomations({
         setLoading(false);
       }
     }
-    fetchAutomations();
+    void fetchAutomations();
     return () => {
       mounted = false;
     };

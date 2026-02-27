@@ -10,13 +10,14 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   LabelList,
+  Rectangle,
   ReferenceLine,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
+import type { BarShapeProps } from 'recharts';
 
 import type {
   balanceTypeOpType,
@@ -196,7 +197,7 @@ export function BarGraph({
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
   const { data: categories = { grouped: [], list: [] } } = useCategories();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const privacyMode = usePrivacyMode();
   const format = useFormat();
 
@@ -268,9 +269,8 @@ export function BarGraph({
                 <XAxis
                   dataKey={yAxis}
                   angle={-35}
-                  textAnchor="end"
                   height={Math.sqrt(longestLabelLength) * 25}
-                  tick={{ fill: theme.pageText }}
+                  tick={{ fill: theme.pageText, textAnchor: 'end' }}
                   tickLine={{ stroke: theme.pageText }}
                 />
               )}
@@ -315,6 +315,14 @@ export function BarGraph({
                     id: item.id,
                   })
                 }
+                shape={(props: BarShapeProps) => (
+                  <Rectangle
+                    {...props}
+                    fill={
+                      data.legend[props.index]?.color ?? props.fill ?? undefined
+                    }
+                  />
+                )}
               >
                 {viewLabels && !compact && (
                   <LabelList
@@ -322,13 +330,6 @@ export function BarGraph({
                     content={e => customLabel(e, balanceTypeOp, format)}
                   />
                 )}
-                {data.legend.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.color}
-                    name={entry.name}
-                  />
-                ))}
               </Bar>
             </BarChart>
           </div>

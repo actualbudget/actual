@@ -75,7 +75,7 @@ function TransactionListWithPreviews({
     (transaction: TransactionEntity) => {
       // details of how the native app used to handle preview transactions here can be found at commit 05e58279
       if (!isPreviewId(transaction.id)) {
-        navigate(`/transactions/${transaction.id}`);
+        void navigate(`/transactions/${transaction.id}`);
       }
     },
     [navigate],

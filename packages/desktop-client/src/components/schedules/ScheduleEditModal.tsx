@@ -18,12 +18,11 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { usePayees } from '@desktop-client/hooks/usePayees';
+import { usePayeesById } from '@desktop-client/hooks/usePayees';
 import { useScheduleEdit } from '@desktop-client/hooks/useScheduleEdit';
 import { useSelected } from '@desktop-client/hooks/useSelected';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { getPayeesById } from '@desktop-client/payees/payeesSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -37,7 +36,7 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
 
   const adding = id == null;
   const fromTrans = transaction != null;
-  const payees = getPayeesById(usePayees());
+  const { data: payees } = usePayeesById();
   const globalDispatch = useDispatch();
 
   // Create initial schedule if adding from transaction

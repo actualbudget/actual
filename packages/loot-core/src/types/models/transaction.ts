@@ -13,7 +13,7 @@ export type TransactionEntity = {
   account: AccountEntity['id'];
   category?: CategoryEntity['id'];
   amount: IntegerAmount;
-  payee?: PayeeEntity['id'];
+  payee?: PayeeEntity['id'] | null;
   notes?: string;
   date: string;
   imported_id?: string;
