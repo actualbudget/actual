@@ -5,6 +5,30 @@ import type { Transaction } from '../models/enablebanking.js';
 export class FallbackBankProcessor implements BankProcessor {
   debug = false;
   name = 'FallbackBankProcessor';
+
+  protected resolveTransactionDate(
+    t: components['schemas']['Transaction'],
+  ): string {
+    const date =
+      (t.transaction_date && t.transaction_date.trim()) ||
+      (t.booking_date && t.booking_date.trim()) ||
+      (t.value_date && t.value_date.trim());
+
+    if (!date) {
+      const transactionIdentifier =
+        t.entry_reference ??
+        t.transaction_id ??
+        t.remittance_information?.[0] ??
+        'unknown';
+
+      throw new Error(
+        `Missing transaction date for Enable Banking transaction: ${transactionIdentifier}`,
+      );
+    }
+
+    return date;
+  }
+
   normalizeTransaction(t: components['schemas']['Transaction']): Transaction {
     const isDebtor = t.credit_debit_indicator === 'DBIT';
 
@@ -25,6 +49,8 @@ export class FallbackBankProcessor implements BankProcessor {
       );
     }
 
+    const date = this.resolveTransactionDate(t);
+
     return {
       ...t,
       payeeObject,
@@ -36,11 +62,7 @@ export class FallbackBankProcessor implements BankProcessor {
       },
       payeeName,
       notes: t.remittance_information ? t.remittance_information.join(' ') : '',
-      date:
-        (t.transaction_date && t.transaction_date.trim()) ||
-        (t.booking_date && t.booking_date.trim()) ||
-        (t.value_date && t.value_date.trim()) ||
-        '',
+      date,
       // Map API status to booked boolean (sync.ts uses trans.booked to set cleared)
       booked: t.status === 'BOOK',
       // Map stable unique entry_reference to camelCase transactionId used for import deduplication.

@@ -7,6 +7,11 @@ import { FallbackBankProcessor } from './fallback.bank.js';
 /**
  * Minimal payee extraction for Danish banks.
  * Only removes transaction type prefixes - rules handle vendor normalization.
+ *
+ * Note: The regexes below are intentionally heuristic to improve merchant
+ * readability for Danish remittance formats when the bank does not provide a
+ * usable creditor/debtor name. They should stay conservative and avoid
+ * aggressive rewriting, since users may prefer raw bank text in edge cases.
  */
 function extractPayeeFromNotes(notes: string): string {
   if (!notes) return '';
@@ -137,6 +142,8 @@ export class DanishBankProcessor extends FallbackBankProcessor {
       );
     }
 
+    const date = this.resolveTransactionDate(t);
+
     return {
       ...t,
       payeeObject,
@@ -148,7 +155,7 @@ export class DanishBankProcessor extends FallbackBankProcessor {
       },
       payeeName,
       notes: cleanNotes,
-      date: t.transaction_date ?? t.booking_date ?? t.value_date ?? '',
+      date,
       // Map API status to booked boolean (sync.ts uses trans.booked to set cleared)
       booked: t.status === 'BOOK',
       // Map stable unique entry_reference to camelCase transactionId used for import deduplication.

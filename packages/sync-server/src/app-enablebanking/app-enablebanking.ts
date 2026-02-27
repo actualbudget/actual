@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import type { ParamsDictionary } from 'express-serve-static-core';
 
 import { isAdmin } from '../account-db.js';
+import { SecretName, secretsService } from '../services/secrets-service.js';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
@@ -170,11 +171,23 @@ function post<T extends keyof EnableBankingEndpoints>(
 post('/configure', async req => {
   const { applicationId, secret } = req.body;
 
-  if (!applicationId) {
+  if (applicationId === undefined) {
     throw badRequestVariableError('applicationId', '/enablebanking/configure');
   }
-  if (!secret) {
+  if (secret === undefined) {
     throw badRequestVariableError('secret', '/enablebanking/configure');
+  }
+
+  if (applicationId === null || secret === null) {
+    secretsService.set(
+      SecretName.enablebanking_applicationId,
+      null as unknown as string,
+    );
+    secretsService.set(
+      SecretName.enablebanking_secret,
+      null as unknown as string,
+    );
+    return;
   }
 
   await enableBankingservice.setupSecrets(applicationId, secret);

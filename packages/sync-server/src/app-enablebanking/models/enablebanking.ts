@@ -48,8 +48,8 @@ export type EnableBankingErrorInterface = {
 };
 
 export type ConfigureBody = {
-  applicationId: string;
-  secret: string;
+  applicationId: string | null;
+  secret: string | null;
 };
 
 export type TransactionsBody = {
