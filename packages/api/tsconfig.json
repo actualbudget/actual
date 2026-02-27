@@ -9,12 +9,13 @@
     "noEmit": false,
     "declaration": true,
     "outDir": "dist",
+    "rootDir": ".",
     "declarationDir": "@types",
     "paths": {
       "loot-core/*": ["./@types/loot-core/src/*"]
     },
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
-  "include": [".", "../../packages/loot-core/typings/pegjs.ts"],
+  "include": ["."],
   "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts"]
 }
