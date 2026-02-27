@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+
 import { Trans } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 
@@ -43,7 +44,7 @@ export function EnableBankingCallbackPage() {
             <Trans>Authentication complete</Trans>
           </View>
           <View style={{ fontSize: 14, color: theme.pageTextSubdued }}>
-            You can close this window and return to Actual.
+            <Trans>You can close this window and return to Actual.</Trans>
           </View>
           <View
             style={{
@@ -52,8 +53,10 @@ export function EnableBankingCallbackPage() {
               color: theme.pageTextSubdued,
             }}
           >
-            If the window did not close automatically, copy the code below and
-            paste it into Actual:
+            <Trans>
+              If the window did not close automatically, copy the code below
+              and paste it into Actual:
+            </Trans>
           </View>
           <View
             style={{
@@ -79,7 +82,7 @@ export function EnableBankingCallbackPage() {
         </>
       ) : (
         <View style={{ color: theme.errorText }}>
-          No authorization code found in the URL.
+          <Trans>No authorization code found in the URL.</Trans>
         </View>
       )}
     </View>
