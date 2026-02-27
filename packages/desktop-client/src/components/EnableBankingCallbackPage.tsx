@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
+import { Trans } from 'react-i18next';
+import { useSearchParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { useSearchParams } from 'react-router';
 
 export const ENABLEBANKING_CALLBACK_MESSAGE_TYPE = 'enablebanking-callback';
 
@@ -39,7 +40,7 @@ export function EnableBankingCallbackPage() {
       {code ? (
         <>
           <View style={{ fontSize: 18, fontWeight: 600 }}>
-            Authentication complete
+            <Trans>Authentication complete</Trans>
           </View>
           <View style={{ fontSize: 14, color: theme.pageTextSubdued }}>
             You can close this window and return to Actual.
@@ -73,7 +74,7 @@ export function EnableBankingCallbackPage() {
               void navigator.clipboard.writeText(code);
             }}
           >
-            Copy code
+            <Trans>Copy code</Trans>
           </Button>
         </>
       ) : (

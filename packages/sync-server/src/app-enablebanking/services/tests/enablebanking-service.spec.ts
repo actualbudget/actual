@@ -183,7 +183,11 @@ describe('enableBankingService', () => {
     it('maps accounts to the expected shape', async () => {
       fetchSpy.mockResolvedValueOnce(mockOkResponse(mockAccountsResponse));
 
-      const result = await completeSession(mockAppId, testPrivateKey, 'sess-001');
+      const result = await completeSession(
+        mockAppId,
+        testPrivateKey,
+        'sess-001',
+      );
 
       expect(result.sessionId).toBe('sess-001');
       expect(result.accounts).toEqual([
@@ -247,7 +251,9 @@ describe('enableBankingService', () => {
     it('uses creditor_name as payee, falls back to debtor_name then remittance_information', async () => {
       fetchSpy
         .mockResolvedValueOnce(mockOkResponse(mockTransactionsPage1))
-        .mockResolvedValueOnce(mockOkResponse({ transactions: [], continuation_key: null }))
+        .mockResolvedValueOnce(
+          mockOkResponse({ transactions: [], continuation_key: null }),
+        )
         .mockResolvedValueOnce(mockOkResponse(mockBalancesResponse));
 
       const result = await getTransactions(
@@ -285,7 +291,9 @@ describe('enableBankingService', () => {
         .mockResolvedValueOnce(
           mockOkResponse({ transactions: [], continuation_key: null }),
         )
-        .mockResolvedValueOnce(mockOkResponse(mockBalancesResponseClosingBooked));
+        .mockResolvedValueOnce(
+          mockOkResponse(mockBalancesResponseClosingBooked),
+        );
 
       const result = await getTransactions(
         mockAppId,

@@ -97,12 +97,14 @@ export async function getBanks(
     'GET',
     `/aspsps?country=${country}`,
   );
-  return ((response.aspsps as Array<Record<string, unknown>>) ?? []).map((aspsp: Record<string, unknown>) => ({
-    id: aspsp.name,
-    name: aspsp.name,
-    logo: aspsp.logo ?? '',
-    countries: [country],
-  }));
+  return ((response.aspsps as Array<Record<string, unknown>>) ?? []).map(
+    (aspsp: Record<string, unknown>) => ({
+      id: aspsp.name,
+      name: aspsp.name,
+      logo: aspsp.logo ?? '',
+      countries: [country],
+    }),
+  );
 }
 
 export async function createSession(
@@ -145,22 +147,22 @@ export async function completeSession(
 
   return {
     sessionId,
-    accounts: ((accountsResp.accounts as Array<Record<string, unknown>>) ?? []).map(
-      (acc: Record<string, unknown>) => ({
-        account_id: acc.uid,
-        name:
-          (acc as Record<string, string>).account_name ||
-          (acc as Record<string, string>).iban ||
-          'Unknown Account',
-        institution: (acc as Record<string, string>).aspsp_name ?? '',
-        mask: (acc as Record<string, string>).iban
-          ? (acc as Record<string, string>).iban.slice(-4)
-          : '',
-        iban: (acc as Record<string, string>).iban ?? '',
-        orgId: (acc as Record<string, string>).aspsp_name ?? '',
-        orgDomain: '',
-      }),
-    ),
+    accounts: (
+      (accountsResp.accounts as Array<Record<string, unknown>>) ?? []
+    ).map((acc: Record<string, unknown>) => ({
+      account_id: acc.uid,
+      name:
+        (acc as Record<string, string>).account_name ||
+        (acc as Record<string, string>).iban ||
+        'Unknown Account',
+      institution: (acc as Record<string, string>).aspsp_name ?? '',
+      mask: (acc as Record<string, string>).iban
+        ? (acc as Record<string, string>).iban.slice(-4)
+        : '',
+      iban: (acc as Record<string, string>).iban ?? '',
+      orgId: (acc as Record<string, string>).aspsp_name ?? '',
+      orgDomain: '',
+    })),
   };
 }
 
@@ -185,7 +187,8 @@ export async function getTransactions(
       : path;
     const response = await request(appId, privateKey, 'GET', url);
 
-    const txns = (response.transactions as Array<Record<string, unknown>>) ?? [];
+    const txns =
+      (response.transactions as Array<Record<string, unknown>>) ?? [];
     allTransactions = allTransactions.concat(txns);
     continuationKey = (response.continuation_key as string | null) ?? null;
   } while (continuationKey);
