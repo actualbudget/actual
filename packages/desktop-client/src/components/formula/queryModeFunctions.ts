@@ -116,18 +116,52 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
       { name: 'decimals', description: 'Decimals' },
     ],
   },
-  QUERY_BUDGET: {
-    name: 'QUERY_BUDGET',
+  BUDGET_QUERY: {
+    name: 'BUDGET_QUERY',
     description: t(
-      "Evaluate a named budget query and return a budget-aware dimension. Uses the query's timeframe for date range.",
+      'Evaluate a budget query using extracted parameters. Supply dimension, categories, and timeframe explicitly.',
     ),
     parameters: [
-      { name: 'queryName', description: 'Name of the saved query (string)' },
       {
         name: 'dimension',
         description:
-          'One of: budgeted, spent, balance_start, balance_end (string)',
+          'One of: budgeted, spent, balance_start, balance_end, goal (string)',
       },
+      {
+        name: 'categories',
+        description:
+          'Categories result from QUERY_EXTRACT_CATEGORIES() (array)',
+      },
+      {
+        name: 'timeframe_start',
+        description:
+          'Start month from QUERY_EXTRACT_TIMEFRAME_START() (string)',
+      },
+      {
+        name: 'timeframe_end',
+        description: 'End month from QUERY_EXTRACT_TIMEFRAME_END() (string)',
+      },
+    ],
+  },
+  QUERY_EXTRACT_CATEGORIES: {
+    name: 'QUERY_EXTRACT_CATEGORIES',
+    description: t('Extract category IDs from a named query.'),
+    parameters: [
+      { name: 'queryName', description: 'Name of the saved query (string)' },
+    ],
+  },
+  QUERY_EXTRACT_TIMEFRAME_START: {
+    name: 'QUERY_EXTRACT_TIMEFRAME_START',
+    description: t('Extract the start month from a named query timeframe.'),
+    parameters: [
+      { name: 'queryName', description: 'Name of the saved query (string)' },
+    ],
+  },
+  QUERY_EXTRACT_TIMEFRAME_END: {
+    name: 'QUERY_EXTRACT_TIMEFRAME_END',
+    description: t('Extract the end month from a named query timeframe.'),
+    parameters: [
+      { name: 'queryName', description: 'Name of the saved query (string)' },
     ],
   },
   FLOOR: {

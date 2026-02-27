@@ -75,14 +75,102 @@ export function useFormulaExecution(
           new Set(queryCountMatches.map(m => m[1])),
         );
 
-        // Extract QUERY_BUDGET() calls: QUERY_BUDGET("name", "dimension")
+        // Extract QUERY_EXTRACT_* calls for evaluation
+        // These extraction functions are used as parameters to BUDGET_QUERY
+        const extractionFunctions = {
+          QUERY_EXTRACT_CATEGORIES:
+            /QUERY_EXTRACT_CATEGORIES\s*\(\s*["']([^"']+)["']\s*\)/gi,
+          QUERY_EXTRACT_TIMEFRAME_START:
+            /QUERY_EXTRACT_TIMEFRAME_START\s*\(\s*["']([^"']+)["']\s*\)/gi,
+          QUERY_EXTRACT_TIMEFRAME_END:
+            /QUERY_EXTRACT_TIMEFRAME_END\s*\(\s*["']([^"']+)["']\s*\)/gi,
+        };
+
+        // Store extraction results
+        const extractionResults: Record<string, Record<string, unknown>> = {
+          QUERY_EXTRACT_CATEGORIES: {},
+          QUERY_EXTRACT_TIMEFRAME_START: {},
+          QUERY_EXTRACT_TIMEFRAME_END: {},
+        };
+
+        // Evaluate extraction functions first
+        for (const [funcName, regex] of Object.entries(extractionFunctions)) {
+          const matches = Array.from(formula.matchAll(regex));
+          for (const match of matches) {
+            const queryName = match[1];
+            const key = `${funcName}(${queryName})`;
+
+            if (!extractionResults[funcName][key]) {
+              try {
+                if (funcName === 'QUERY_EXTRACT_CATEGORIES') {
+                  extractionResults[funcName][key] =
+                    await extractQueryCategories(queryName, queries);
+                } else if (funcName === 'QUERY_EXTRACT_TIMEFRAME_START') {
+                  extractionResults[funcName][key] =
+                    await extractQueryTimeframeStart(queryName, queries);
+                } else if (funcName === 'QUERY_EXTRACT_TIMEFRAME_END') {
+                  extractionResults[funcName][key] =
+                    await extractQueryTimeframeEnd(queryName, queries);
+                }
+              } catch (err) {
+                console.error(
+                  `Error evaluating ${funcName}(${queryName})`,
+                  err,
+                );
+                extractionResults[funcName][key] = null;
+              }
+            }
+          }
+        }
+
+        // Helper: Parse a BUDGET_QUERY parameter to determine if it's an extraction function or literal
+        function parseBudgetParam(
+          param: string,
+        ): { type: 'extraction' | 'literal'; data: unknown } | null {
+          param = param.trim();
+
+          // Check if it's an extraction function
+          const extractMatch = param.match(
+            /^(QUERY_EXTRACT_CATEGORIES|QUERY_EXTRACT_TIMEFRAME_START|QUERY_EXTRACT_TIMEFRAME_END)\s*\(\s*["']([^"']+)["']\s*\)$/,
+          );
+          if (extractMatch) {
+            return {
+              type: 'extraction',
+              data: { funcName: extractMatch[1], queryName: extractMatch[2] },
+            };
+          }
+
+          // Check if it's an array literal
+          const arrayMatch = param.match(/^\{([^}]*)\}$/);
+          if (arrayMatch) {
+            const arrayContent = arrayMatch[1];
+            const items = arrayContent
+              .split(';')
+              .map(item => item.replace(/^["']|["']$/g, '').trim())
+              .filter(item => item.length > 0);
+            return { type: 'literal', data: items };
+          }
+
+          // Check if it's a quoted string
+          const stringMatch = param.match(/^["']([^"']*)["']$/);
+          if (stringMatch) {
+            return { type: 'literal', data: stringMatch[1] };
+          }
+
+          return null;
+        }
+
+        // Extract BUDGET_QUERY() calls with flexible parameter matching
+        // Each parameter can be: QUERY_EXTRACT_*(...), {...}, or "..."
         const budgetMatches = Array.from(
           formula.matchAll(
-            /QUERY_BUDGET\s*\(\s*["']([^"']+)["']\s*,\s*["']([^"']+)["']\s*\)/gi,
+            /BUDGET_QUERY\s*\(\s*["']([^"']+)["']\s*,\s*((?:QUERY_EXTRACT_\w+\s*\([^)]*\)|\{[^}]*\}|["'][^"']*["']))\s*,\s*((?:QUERY_EXTRACT_\w+\s*\([^)]*\)|\{[^}]*\}|["'][^"']*["']))\s*,\s*((?:QUERY_EXTRACT_\w+\s*\([^)]*\)|\{[^}]*\}|["'][^"']*["']))\s*\)/gi,
           ),
         );
 
-        const budgetData: Record<string, number> = {};
+        if (budgetMatches.length === 0) {
+          console.debug('No BUDGET_QUERY matches found in formula');
+        }
 
         for (const queryName of queryNames) {
           const queryConfig = queries[queryName];
@@ -127,29 +215,129 @@ export function useFormulaExecution(
           processedFormula = processedFormula.replace(regex, String(value));
         }
 
-        // Evaluate QUERY_BUDGET occurrences and replace them
+        // Process BUDGET_QUERY BEFORE replacing extraction functions
+        // This ensures we match BUDGET_QUERY with extraction functions still intact
         if (budgetMatches.length > 0) {
-          const uniqueKeys = Array.from(
-            new Set(budgetMatches.map(m => `${m[1]}|${m[2]}`)),
-          );
+          for (const match of budgetMatches) {
+            const dimension = match[1];
+            const param1Str = match[2].trim();
+            const param2Str = match[3].trim();
+            const param3Str = match[4].trim();
 
-          for (const key of uniqueKeys) {
-            const parts = key.split('|');
-            const name = parts[0];
-            const dim = parts[1];
             try {
-              const val = await fetchBudgetDimensionValue(name, dim, queries);
-              budgetData[key] = val;
+              // Parse all three parameters
+              const param1 = parseBudgetParam(param1Str);
+              const param2 = parseBudgetParam(param2Str);
+              const param3 = parseBudgetParam(param3Str);
+
+              if (!param1 || !param2 || !param3) {
+                console.error(
+                  'Failed to parse BUDGET_QUERY parameters:',
+                  param1Str,
+                  param2Str,
+                  param3Str,
+                );
+                continue;
+              }
+
+              let categories: string[] | undefined;
+              let startMonth: string | undefined;
+              let endMonth: string | undefined;
+
+              // Param 1: Categories (extraction or array literal)
+              if (param1.type === 'extraction') {
+                const { funcName, queryName } = param1.data as {
+                  funcName: string;
+                  queryName: string;
+                };
+                const categKey = `${funcName}(${queryName})`;
+                categories =
+                  extractionResults[funcName]?.[categKey] as string[];
+              } else if (Array.isArray(param1.data)) {
+                categories = param1.data;
+              }
+
+              // Param 2: Month (extraction or string literal)
+              if (param2.type === 'extraction') {
+                const { funcName, queryName } = param2.data as {
+                  funcName: string;
+                  queryName: string;
+                };
+                const key = `${funcName}(${queryName})`;
+                startMonth = extractionResults[funcName]?.[key] as string;
+              } else if (typeof param2.data === 'string') {
+                startMonth = param2.data;
+              }
+
+              // Param 3: Month (extraction or string literal)
+              if (param3.type === 'extraction') {
+                const { funcName, queryName } = param3.data as {
+                  funcName: string;
+                  queryName: string;
+                };
+                const key = `${funcName}(${queryName})`;
+                endMonth = extractionResults[funcName]?.[key] as string;
+              } else if (typeof param3.data === 'string') {
+                endMonth = param3.data;
+              }
+
+              if (!categories || !startMonth || !endMonth) {
+                console.error('Failed to extract BUDGET_QUERY parameters');
+                continue;
+              }
+
+              // Evaluate BUDGET_QUERY
+              const val = await fetchBudgetDimensionValueDirect(
+                dimension,
+                categories,
+                startMonth,
+                endMonth,
+              );
+
+              processedFormula = processedFormula.replace(
+                match[0],
+                String(val),
+              );
             } catch (err) {
-              console.error('Error evaluating QUERY_BUDGET', key, err);
-              budgetData[key] = 0;
+              console.error('Error evaluating BUDGET_QUERY', err);
             }
           }
+        }
 
-          for (const m of budgetMatches) {
-            const key = `${m[1]}|${m[2]}`;
-            const val = budgetData[key] || 0;
-            processedFormula = processedFormula.replace(m[0], String(val));
+        // NOW replace remaining QUERY_EXTRACT_* functions with their evaluated values
+        // (any that weren't consumed by BUDGET_QUERY)
+        for (const [funcName, regex] of Object.entries(extractionFunctions)) {
+          const matches = Array.from(processedFormula.matchAll(regex));
+          for (const match of matches) {
+            const queryName = match[1];
+            const key = `${funcName}(${queryName})`;
+            const value = extractionResults[funcName][key];
+
+            if (value !== null && value !== undefined) {
+              const escapedQueryName = escapeRegExp(queryName);
+              const replacementRegex = new RegExp(
+                `${funcName}\\s*\\(\\s*["']${escapedQueryName}["']\\s*\\)`,
+                'gi',
+              );
+
+              // Format the replacement value based on type
+              let replacement: string;
+              if (Array.isArray(value)) {
+                // For arrays, convert to HyperFormula array literal
+                replacement = `{${value.map(v => `"${v}"`).join(";")}}`; 
+              } else if (typeof value === 'string') {
+                // For strings, wrap in quotes
+                replacement = `"${value}"`;
+              } else {
+                // For numbers
+                replacement = String(value);
+              }
+
+              processedFormula = processedFormula.replace(
+                replacementRegex,
+                replacement,
+              );
+            }
           }
         }
 
@@ -484,48 +672,81 @@ function getMonthDataValue(
   return cell?.value ?? 0;
 }
 
-// Main: evaluate a budget dimension (matches budget-analysis-spreadsheet logic)
-async function fetchBudgetDimensionValue(
+// Helper: Extract categories from a named query (for QUERY_EXTRACT_CATEGORIES)
+async function extractQueryCategories(
   queryName: string,
-  dimension: string,
   queries: QueriesMap,
+): Promise<string[]> {
+  const queryConfig = queries[queryName];
+  if (!queryConfig) {
+    console.warn(`Query "${queryName}" not found in queries config`);
+    return [];
+  }
+
+  const categoryConditions = extractCategoryConditions(
+    queryConfig.conditions || [],
+  );
+  const { list: allCategories } = await send('get-categories');
+  return getCategoriesFromConditions(
+    allCategories,
+    categoryConditions,
+    queryConfig.conditionsOp || 'and',
+  );
+}
+
+// Helper: Extract timeframe start month from a named query (for QUERY_EXTRACT_TIMEFRAME_START)
+async function extractQueryTimeframeStart(
+  queryName: string,
+  queries: QueriesMap,
+): Promise<string> {
+  const queryConfig = queries[queryName];
+  if (!queryConfig || !queryConfig.timeFrame) {
+    console.warn(
+      `Query "${queryName}" not found or has no timeframe; cannot extract start`,
+    );
+    return monthUtils.currentMonth();
+  }
+
+  const [startMonth] = calculateTimeRange(queryConfig.timeFrame);
+  return startMonth;
+}
+
+// Helper: Extract timeframe end month from a named query (for QUERY_EXTRACT_TIMEFRAME_END)
+async function extractQueryTimeframeEnd(
+  queryName: string,
+  queries: QueriesMap,
+): Promise<string> {
+  const queryConfig = queries[queryName];
+  if (!queryConfig || !queryConfig.timeFrame) {
+    console.warn(
+      `Query "${queryName}" not found or has no timeframe; cannot extract end`,
+    );
+    return monthUtils.currentMonth();
+  }
+
+  const [, endMonth] = calculateTimeRange(queryConfig.timeFrame);
+  return endMonth;
+}
+
+// Helper: Evaluate budget dimension with already-extracted parameters (used by compositional BUDGET_QUERY)
+async function fetchBudgetDimensionValueDirect(
+  dimension: string,
+  categoryIds: string[],
+  startMonth: string,
+  endMonth: string,
 ): Promise<number> {
   const allowed = new Set([
     'budgeted',
     'spent',
     'balance_start',
     'balance_end',
+    'goal',
   ]);
   const dim = dimension.toLowerCase();
   if (!allowed.has(dim)) {
-    throw new Error(`Invalid QUERY_BUDGET dimension: ${dimension}`);
+    throw new Error(`Invalid BUDGET_QUERY dimension: ${dimension}`);
   }
 
-  const queryConfig = queries[queryName];
-  if (!queryConfig) {
-    console.warn(`Query "${queryName}" not found in queries config`);
-    return 0;
-  }
-
-  const timeFrame = queryConfig.timeFrame;
-  if (!timeFrame) {
-    console.warn(
-      `Query "${queryName}" has no timeframe; cannot evaluate QUERY_BUDGET`,
-    );
-    return 0;
-  }
-
-  const [startMonth, endMonth] = calculateTimeRange(timeFrame);
-
-  const categoryConditions = extractCategoryConditions(
-    queryConfig.conditions || [],
-  );
-  const { list: allCategories } = await send('get-categories');
-  const categoryIds = await getCategoriesFromConditions(
-    allCategories,
-    categoryConditions,
-    queryConfig.conditionsOp || 'and',
-  );
   const intervals = monthUtils.rangeInclusive(startMonth, endMonth);
 
   // Helper: sum a dimension across all months/categories
@@ -546,6 +767,10 @@ async function fetchBudgetDimensionValue(
 
   if (dim === 'spent') {
     return integerToAmount(await sumDimension('sum-amount-{catId}'), 2);
+  }
+
+  if (dim === 'goal') {
+    return integerToAmount(await sumDimension('goal-{catId}'), 2);
   }
 
   // Handle balance dimensions: chain month-by-month with carryover logic
