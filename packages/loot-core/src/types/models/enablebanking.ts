@@ -93,7 +93,12 @@ export type Transaction = {
   payeeName: string;
   notes: string;
   date: string;
-  [x: string]: unknown;
+  transactionAmount: {
+    amount: number;
+    currency: string;
+  };
+  booked: boolean;
+  transactionId: string | null;
 };
 
 export type TransactionsResponse = {

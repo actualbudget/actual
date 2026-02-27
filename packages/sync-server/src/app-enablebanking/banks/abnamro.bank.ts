@@ -25,7 +25,7 @@ export class ABNAmroBankProcessor extends FallbackBankProcessor {
         return notes_parts.join(' | ');
       }
     }
-    return remittance_information.join('');
+    return remittance_information.join(' ');
   }
 
   normalizeTransaction(t: components['schemas']['Transaction']): Transaction {

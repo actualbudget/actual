@@ -7,10 +7,9 @@ import type {
 } from 'loot-core/types/models';
 import type { EnableBankingToken } from 'loot-core/types/models/enablebanking';
 
-import { closeModal, pushModal } from './modals/modalsSlice';
-import { addNotification } from './notifications/notificationsSlice';
-import { markPayeesDirty } from './payees/payeesSlice';
-import type { AppDispatch } from './redux/store';
+import { closeModal, pushModal } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import type { AppDispatch } from '@desktop-client/redux/store';
 
 export async function deconfigureEnableBanking() {
   await send('enablebanking-configure', { applicationId: null, secret: null });
@@ -57,8 +56,6 @@ export async function selectEnableBankingAccounts(
           upgradingId: accountEntity.id,
           syncSource: 'enablebanking',
         });
-        // Mark payees dirty since we linked an account
-        dispatch(markPayeesDirty());
         dispatch(
           addNotification({
             notification: {

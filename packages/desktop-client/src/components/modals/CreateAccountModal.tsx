@@ -690,6 +690,7 @@ export function CreateAccountModal({
                   )}
                   {(!isGoCardlessSetupComplete ||
                     !isSimpleFinSetupComplete ||
+                    !isEnableBankingSetupComplete ||
                     !isPluggyAiSetupComplete) &&
                     !canSetSecrets && (
                       <Warning>
@@ -700,6 +701,7 @@ export function CreateAccountModal({
                         {[
                           isGoCardlessSetupComplete ? '' : 'GoCardless',
                           isSimpleFinSetupComplete ? '' : 'SimpleFIN',
+                          isEnableBankingSetupComplete ? '' : 'Enable Banking',
                           isPluggyAiSetupComplete ? '' : 'Pluggy.ai',
                         ]
                           .filter(Boolean)
