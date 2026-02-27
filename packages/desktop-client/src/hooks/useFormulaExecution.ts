@@ -179,10 +179,12 @@ export function useFormulaExecution(
         // extraction function, array literal {...}, or string "..."
         const paramPattern = String.raw`(?:QUERY_EXTRACT_\w+\s*\([^)]*\)|\{[^}]*\}|["'][^"']*["'])`;
         const budgetMatches = Array.from(
-          formula.matchAll(new RegExp(
-            `BUDGET_QUERY\\s*\\(\\s*["']([^"']+)["']\\s*,\\s*(${paramPattern})\\s*,\\s*(${paramPattern})\\s*,\\s*(${paramPattern})\\s*\\)`,
-            'gi',
-          )),
+          formula.matchAll(
+            new RegExp(
+              `BUDGET_QUERY\\s*\\(\\s*["']([^"']+)["']\\s*,\\s*(${paramPattern})\\s*,\\s*(${paramPattern})\\s*,\\s*(${paramPattern})\\s*\\)`,
+              'gi',
+            ),
+          ),
         );
 
         for (const queryName of queryNames) {
