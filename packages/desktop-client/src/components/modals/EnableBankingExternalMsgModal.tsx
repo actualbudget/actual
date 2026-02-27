@@ -312,7 +312,6 @@ export function EnableBankingExternalMsgModal({
                 >
                   <Trans>Link bank in browser</Trans> &rarr;
                 </Button>
-
               </View>
             )}
 
