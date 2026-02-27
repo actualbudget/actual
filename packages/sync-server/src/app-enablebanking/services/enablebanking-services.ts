@@ -463,7 +463,10 @@ export const enableBankingservice = {
         return {
           account_id,
           name,
-          balance: parseAmountSafe(selectedBalance.balance_amount.amount),
+          // Convert to integer cents to match how Actual stores and displays amounts
+          balance: Math.round(
+            parseAmountSafe(selectedBalance.balance_amount.amount) * 100,
+          ),
           institution: data.aspsp.name,
         };
       }),

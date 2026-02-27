@@ -97,9 +97,15 @@ export type Transaction = {
     amount: number;
     currency: string;
   };
+  /** true when the transaction is booked (status === 'BOOK'), false for pending */
+  booked: boolean;
+  /** Stable unique identifier for deduplication; mapped from entry_reference */
+  transactionId: string | null;
   [x: string]: unknown;
 };
 
 export type TransactionsResponse = {
   transactions: Transaction[];
+  /** Current account balance in integer cents */
+  startingBalance: number;
 };

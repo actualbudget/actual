@@ -933,8 +933,17 @@ async function processBankSyncDownload(
     const { transactions } = download;
     let balanceToUse = currentBalance;
 
-    // Use custom starting balance if provided, otherwise calculate it
-    if (customStartingBalance !== undefined) {
+    // Enable Banking always auto-calculates from the current bank balance minus
+    // all downloaded transactions. This must run before the customStartingBalance
+    // check because the UI defaults startingBalance to 0 when the user only
+    // picks a starting date, which would otherwise override the calculation.
+    if (acctRow.account_sync_source === 'enablebanking') {
+      const previousBalance = transactions.reduce(
+        (total, trans) => total - trans.transactionAmount.amount * 100,
+        currentBalance,
+      );
+      balanceToUse = Math.round(previousBalance);
+    } else if (customStartingBalance !== undefined) {
       balanceToUse = customStartingBalance;
     } else if (acctRow.account_sync_source === 'simpleFin') {
       const previousBalance = transactions.reduce((total, trans) => {
@@ -944,13 +953,6 @@ async function processBankSyncDownload(
       }, currentBalance);
       balanceToUse = previousBalance;
     } else if (acctRow.account_sync_source === 'pluggyai') {
-      const currentBalance = download.startingBalance;
-      const previousBalance = transactions.reduce(
-        (total, trans) => total - trans.transactionAmount.amount * 100,
-        currentBalance,
-      );
-      balanceToUse = Math.round(previousBalance);
-    } else if (acctRow.account_sync_source === 'enablebanking') {
       const currentBalance = download.startingBalance;
       const previousBalance = transactions.reduce(
         (total, trans) => total - trans.transactionAmount.amount * 100,

@@ -41,6 +41,11 @@ export class FallbackBankProcessor implements BankProcessor {
         (t.booking_date && t.booking_date.trim()) ||
         (t.value_date && t.value_date.trim()) ||
         '',
+      // Map API status to booked boolean (sync.ts uses trans.booked to set cleared)
+      booked: t.status === 'BOOK',
+      // Map stable unique entry_reference to camelCase transactionId used for import deduplication.
+      // entry_reference is the immutable unique identifier per the Enable Banking API.
+      transactionId: t.entry_reference ?? t.transaction_id ?? null,
     };
   }
 }
