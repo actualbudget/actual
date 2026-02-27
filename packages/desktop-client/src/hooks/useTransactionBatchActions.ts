@@ -325,14 +325,14 @@ export function useTransactionBatchActions() {
   const getIdsForDeleteReconciledCheck = async (
     ids: Array<TransactionEntity['id']>,
   ) => {
-    const { data } = await aqlQuery(
+    const { data }: { data: TransactionEntity[] } = await aqlQuery(
       q('transactions')
         .filter({ id: { $oneof: ids } })
         .select('*')
         .options({ splits: 'grouped' }),
     );
 
-    const transactions = ungroupTransactions(data as TransactionEntity[]);
+    const transactions = ungroupTransactions(data);
     const transferIds = transactions
       .map(transaction => transaction.transfer_id)
       .filter((transferId): transferId is string => !!transferId);
