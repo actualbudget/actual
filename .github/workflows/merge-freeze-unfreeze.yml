@@ -1,0 +1,53 @@
+# When the "unfreeze" label is added to a PR, add that PR to Merge Freeze's unblocked list
+# so it can be merged during a freeze. Requires MERGEFREEZE_ACCESS_TOKEN repo secret
+# (project-specific token from Merge Freeze Web API panel for actualbudget/actual / master).
+# See: https://docs.mergefreeze.com/web-api#post-freeze-status
+
+name: Merge Freeze – add PR to unblocked list
+
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  unfreeze:
+    if: ${{ github.event.label.name == 'unfreeze' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: GET current freeze status and POST with PR added to unblocked_prs
+        env:
+          MERGEFREEZE_ACCESS_TOKEN: ${{ secrets.MERGEFREEZE_ACCESS_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          USER_NAME: ${{ github.actor }}
+          BASE_URL: 'https://www.mergefreeze.com/api/branches/actualbudget/actual/master'
+        run: |
+          set -e
+          if [ -z "$MERGEFREEZE_ACCESS_TOKEN" ]; then
+            echo "::error::MERGEFREEZE_ACCESS_TOKEN secret is not set"
+            exit 1
+          fi
+          url="${BASE_URL}/?access_token=${MERGEFREEZE_ACCESS_TOKEN}"
+
+          # GET current status
+          resp=$(curl -sf -w "\n%{http_code}" "$url") || true
+          code=$(echo "$resp" | tail -n1)
+          body=$(echo "$resp" | sed '$d')
+
+          if [ "$code" != "200" ] || [ -z "$body" ] || [ "$body" = "{}" ]; then
+            frozen="true"
+            unblocked_prs="[$PR_NUMBER]"
+          else
+            frozen=$(echo "$body" | jq -r '.frozen // true')
+            unblocked_prs=$(echo "$body" | jq -c --argjson pr "$PR_NUMBER" '(.unblocked_prs // []) | if index($pr) then . else . + [$pr] end')
+          fi
+
+          # POST update
+          payload=$(jq -n \
+            --argjson frozen "$([ "$frozen" = "true" ] && echo true || echo false)" \
+            --arg user_name "$USER_NAME" \
+            --argjson unblocked_prs "$unblocked_prs" \
+            '{frozen: $frozen, user_name: $user_name, unblocked_prs: $unblocked_prs}')
+          curl -sf -X POST "$url" \
+            -H "Content-Type: application/json" \
+            -d "$payload"
+          echo "Merge Freeze updated: PR #$PR_NUMBER added to unblocked list."
