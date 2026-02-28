@@ -427,16 +427,16 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
       trans.imported_payee = trans.imported_payee.trim();
     }
 
+    let imported_id = trans.transactionId;
+    if (trans.cleared && !trans.transactionId && trans.internalTransactionId) {
+      imported_id = `${trans.account}-${trans.internalTransactionId}`;
+    }
+
     // It's important to resolve both the account and payee early so
     // when rules are run, they have the right data. Resolving payees
     // also simplifies the payee creation process
     trans.account = acctId;
     trans.payee = await resolvePayee(trans, payeeName, payeesToCreate);
-
-    let imported_id = trans.transactionId;
-    if (trans.cleared && !trans.transactionId && trans.internalTransactionId) {
-      imported_id = `${trans.account}-${trans.internalTransactionId}`;
-    }
 
     normalized.push({
       payee_name: payeeName,
