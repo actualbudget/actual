@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Document
-    xsi:schemaLocation="urn:iso:std:iso:20022:tech:xsd:camt.053.001.04 camt.053.001.04.xsd"
+<Document xsi:schemaLocation="urn:iso:std:iso:20022:tech:xsd:camt.053.001.04 camt.053.001.04.xsd"
     xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.04"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
@@ -24,15 +23,23 @@
                 <Amt Ccy="EUR">10.00</Amt>
                 <CdtDbtInd>DBIT</CdtDbtInd>
                 <Sts>BOOK</Sts>
-                <BookgDt><Dt>2019-01-23</Dt></BookgDt>
-                <ValDt><Dt>2019-01-23</Dt></ValDt>
+                <BookgDt>
+                    <Dt>2019-01-23</Dt>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2019-01-23</Dt>
+                </ValDt>
                 <AcctSvcrRef>test-payee-and-notes</AcctSvcrRef>
                 <BkTxCd />
                 <NtryDtls>
                     <TxDtls>
-                        <Refs><EndToEndId>test-payee-and-notes</EndToEndId></Refs>
+                        <Refs>
+                            <EndToEndId>test-payee-and-notes</EndToEndId>
+                        </Refs>
                         <RltdPties>
-                            <Cdtr><Nm>Payee Name</Nm></Cdtr>
+                            <Cdtr>
+                                <Nm>Payee Name</Nm>
+                            </Cdtr>
                         </RltdPties>
                         <RmtInf>
                             <Ustrd>Note Text</Ustrd>
@@ -46,15 +53,23 @@
                 <Amt Ccy="EUR">20.00</Amt>
                 <CdtDbtInd>DBIT</CdtDbtInd>
                 <Sts>BOOK</Sts>
-                <BookgDt><Dt>2019-01-23</Dt></BookgDt>
-                <ValDt><Dt>2019-01-23</Dt></ValDt>
+                <BookgDt>
+                    <Dt>2019-01-23</Dt>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2019-01-23</Dt>
+                </ValDt>
                 <AcctSvcrRef>test-payee-only</AcctSvcrRef>
                 <BkTxCd />
                 <NtryDtls>
                     <TxDtls>
-                        <Refs><EndToEndId>test-payee-only</EndToEndId></Refs>
+                        <Refs>
+                            <EndToEndId>test-payee-only</EndToEndId>
+                        </Refs>
                         <RltdPties>
-                            <Cdtr><Nm>Payee Name Only</Nm></Cdtr>
+                            <Cdtr>
+                                <Nm>Payee Name Only</Nm>
+                            </Cdtr>
                         </RltdPties>
                     </TxDtls>
                 </NtryDtls>
@@ -65,13 +80,19 @@
                 <Amt Ccy="EUR">30.00</Amt>
                 <CdtDbtInd>DBIT</CdtDbtInd>
                 <Sts>BOOK</Sts>
-                <BookgDt><Dt>2019-01-23</Dt></BookgDt>
-                <ValDt><Dt>2019-01-23</Dt></ValDt>
+                <BookgDt>
+                    <Dt>2019-01-23</Dt>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2019-01-23</Dt>
+                </ValDt>
                 <AcctSvcrRef>test-notes-only</AcctSvcrRef>
                 <BkTxCd />
                 <NtryDtls>
                     <TxDtls>
-                        <Refs><EndToEndId>test-notes-only</EndToEndId></Refs>
+                        <Refs>
+                            <EndToEndId>test-notes-only</EndToEndId>
+                        </Refs>
                         <RmtInf>
                             <Ustrd>Note Only Text</Ustrd>
                         </RmtInf>
@@ -84,13 +105,19 @@
                 <Amt Ccy="EUR">40.00</Amt>
                 <CdtDbtInd>DBIT</CdtDbtInd>
                 <Sts>BOOK</Sts>
-                <BookgDt><Dt>2019-01-23</Dt></BookgDt>
-                <ValDt><Dt>2019-01-23</Dt></ValDt>
+                <BookgDt>
+                    <Dt>2019-01-23</Dt>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2019-01-23</Dt>
+                </ValDt>
                 <AcctSvcrRef>test-neither</AcctSvcrRef>
                 <BkTxCd />
                 <NtryDtls>
                     <TxDtls>
-                        <Refs><EndToEndId>test-neither</EndToEndId></Refs>
+                        <Refs>
+                            <EndToEndId>test-neither</EndToEndId>
+                        </Refs>
                     </TxDtls>
                 </NtryDtls>
             </Ntry>
