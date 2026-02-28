@@ -264,11 +264,21 @@ async function parseCAMT(
     return { errors };
   }
 
+  const swap = options.swapPayeeAndMemo;
+
   return {
     errors,
-    transactions: data.map(trans => ({
-      ...trans,
-      notes: options.importNotes ? trans.notes : null,
-    })),
+    transactions: data.map(trans => {
+      const payeeSource = swap ? trans.notes : trans.payee_name;
+      const memoSource = swap ? trans.payee_name : trans.notes;
+      const fallbackUsed = !payeeSource && swap;
+
+      return {
+        ...trans,
+        payee_name: payeeSource || (fallbackUsed ? memoSource : null),
+        imported_payee: payeeSource || (fallbackUsed ? memoSource : null),
+        notes: options.importNotes && !fallbackUsed ? memoSource || null : null,
+      };
+    }),
   };
 }

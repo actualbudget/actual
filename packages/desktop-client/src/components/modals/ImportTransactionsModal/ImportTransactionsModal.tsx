@@ -218,6 +218,9 @@ export function ImportTransactionsModal({
   const [qifSwapPayeeAndMemo, setQifSwapPayeeAndMemo] = useState(
     String(prefs[`qif-swap-payee-memo-${accountId}`]) === 'true',
   );
+  const [camtSwapPayeeAndMemo, setCamtSwapPayeeAndMemo] = useState(
+    String(prefs[`camt-swap-payee-memo-${accountId}`]) === 'true',
+  );
 
   const [parseDateFormat, setParseDateFormat] = useState<DateFormat | null>(
     null,
@@ -417,7 +420,11 @@ export function ImportTransactionsModal({
       fallbackMissingPayeeToMemo,
       importNotes,
       swapPayeeAndMemo:
-        fileType === 'qif' ? qifSwapPayeeAndMemo : swapPayeeAndMemo,
+        fileType === 'qif'
+          ? qifSwapPayeeAndMemo
+          : isCamtFile(fileType)
+            ? camtSwapPayeeAndMemo
+            : swapPayeeAndMemo,
     });
 
     void parse(originalFileName, parseOptions);
@@ -431,6 +438,7 @@ export function ImportTransactionsModal({
     importNotes,
     swapPayeeAndMemo,
     qifSwapPayeeAndMemo,
+    camtSwapPayeeAndMemo,
     parse,
   ]);
 
@@ -479,7 +487,11 @@ export function ImportTransactionsModal({
       fallbackMissingPayeeToMemo,
       importNotes,
       swapPayeeAndMemo:
-        fileType === 'qif' ? qifSwapPayeeAndMemo : swapPayeeAndMemo,
+        fileType === 'qif'
+          ? qifSwapPayeeAndMemo
+          : isCamtFile(fileType)
+            ? camtSwapPayeeAndMemo
+            : swapPayeeAndMemo,
     });
 
     void parse(res[0], parseOptions);
@@ -662,6 +674,12 @@ export function ImportTransactionsModal({
     if (filetype === 'qif') {
       savePrefs({
         [`qif-swap-payee-memo-${accountId}`]: String(qifSwapPayeeAndMemo),
+      });
+    }
+
+    if (isCamtFile(filetype)) {
+      savePrefs({
+        [`camt-swap-payee-memo-${accountId}`]: String(camtSwapPayeeAndMemo),
       });
     }
 
@@ -962,6 +980,18 @@ export function ImportTransactionsModal({
             </LabeledCheckbox>
           )}
 
+          {isCamtFile(filetype) && (
+            <LabeledCheckbox
+              id="form_camt_swap_payee_memo"
+              checked={camtSwapPayeeAndMemo}
+              onChange={() => {
+                setCamtSwapPayeeAndMemo(state => !state);
+              }}
+            >
+              <Trans>Swap payee and memo</Trans>
+            </LabeledCheckbox>
+          )}
+
           {(isOfxFile(filetype) || isCamtFile(filetype)) && (
             <LabeledCheckbox
               id="form_dont_reconcile"
@@ -1203,8 +1233,8 @@ function getParseOptions(fileType: string, options: ParseFileOptions = {}) {
     return { importNotes, swapPayeeAndMemo };
   }
   if (isCamtFile(fileType)) {
-    const { importNotes } = options;
-    return { importNotes };
+    const { importNotes, swapPayeeAndMemo } = options;
+    return { importNotes, swapPayeeAndMemo };
   }
   const { importNotes } = options;
   return { importNotes };
