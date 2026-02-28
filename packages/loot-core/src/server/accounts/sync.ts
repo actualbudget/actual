@@ -91,9 +91,9 @@ async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
 }
 
 async function getAccountSyncStartDate(id) {
-  // Bank sync providers may support different historical data windows depending on the institution.
-  // Request up to 1 year of data - the provider will return what the bank supports.
-  const dates = [monthUtils.subDays(monthUtils.currentDay(), 365)];
+  // Many GoCardless integrations do not support getting more than 90 days
+  // worth of data, so make that the earliest possible limit.
+  const dates = [monthUtils.subDays(monthUtils.currentDay(), 90)];
 
   const oldestTransaction = await getAccountOldestTransaction(id);
 
