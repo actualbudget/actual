@@ -156,7 +156,7 @@ export function CreateAccountModal({
       onEnableBankingInit();
       return;
     }
-    authorizeEnableBankingSession(dispatch);
+    void authorizeEnableBankingSession(dispatch);
   };
 
   const onConnectPluggyAi = async () => {
@@ -316,7 +316,7 @@ export function CreateAccountModal({
   };
 
   const onEnableBankingReset = () => {
-    deconfigureEnableBanking().then(() => {
+    void deconfigureEnableBanking().then(() => {
       setIsEnableBankingSetupComplete(false);
     });
   };
@@ -701,7 +701,9 @@ export function CreateAccountModal({
                         {[
                           isGoCardlessSetupComplete ? '' : 'GoCardless',
                           isSimpleFinSetupComplete ? '' : 'SimpleFIN',
-                          isEnableBankingSetupComplete ? '' : 'Enable Banking',
+                          isEnableBankingSetupComplete
+                            ? ''
+                            : t('Enable Banking'),
                           isPluggyAiSetupComplete ? '' : 'Pluggy.ai',
                         ]
                           .filter(Boolean)

@@ -7,9 +7,9 @@ import type {
 } from 'loot-core/types/models';
 import type { EnableBankingToken } from 'loot-core/types/models/enablebanking';
 
-import { closeModal, pushModal } from '@desktop-client/modals/modalsSlice';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import type { AppDispatch } from '@desktop-client/redux/store';
+import { closeModal, pushModal } from './modals/modalsSlice';
+import { addNotification } from './notifications/notificationsSlice';
+import type { AppDispatch } from './redux/store';
 
 export async function deconfigureEnableBanking() {
   await send('enablebanking-configure', { applicationId: null, secret: null });
@@ -138,7 +138,7 @@ export async function authorizeEnableBankingSession(
             if (onUnlink) {
               onUnlink();
             }
-            selectEnableBankingAccounts(dispatch, token, account);
+            await selectEnableBankingAccounts(dispatch, token, account);
           },
           // Pre-select country and bank for re-authorization
           initialCountry,

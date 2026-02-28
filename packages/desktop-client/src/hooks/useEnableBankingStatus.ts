@@ -69,7 +69,7 @@ export function useEnableBankingStatus() {
     }
 
     if (status === 'online') {
-      fetch();
+      void fetch();
     }
   }, [status, dispatch, t]);
 
