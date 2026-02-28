@@ -1,0 +1,5 @@
+date,amount,payee,notes
+2019-01-23,-10.00,Payee Name,Note Text
+2019-01-23,-20.00,Payee Name Only,
+2019-01-23,-30.00,,Note Only Text
+2019-01-23,-40.00,,
