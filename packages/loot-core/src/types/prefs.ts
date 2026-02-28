@@ -46,6 +46,7 @@ export type SyncedPrefs = Partial<
     | `sync-update-dates-${string}`
     | `ofx-fallback-missing-payee-${string}`
     | `ofx-swap-payee-memo-${string}`
+    | `qif-swap-payee-memo-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
     | `flags.${FeatureFlag}`
     | `learn-categories`,

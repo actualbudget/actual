@@ -173,16 +173,24 @@ async function parseQIF(
     return { errors, transactions: [] };
   }
 
+  const swap = options.swapPayeeAndMemo;
+
   return {
     errors: [],
     transactions: data.transactions
-      .map(trans => ({
-        amount: trans.amount != null ? looselyParseAmount(trans.amount) : null,
-        date: trans.date,
-        payee_name: trans.payee,
-        imported_payee: trans.payee,
-        notes: options.importNotes ? trans.memo || null : null,
-      }))
+      .map(trans => {
+        const payeeSource = swap ? trans.memo : trans.payee;
+        const memoSource = swap ? trans.payee : trans.memo;
+        const fallbackUsed = !payeeSource && swap;
+
+        return {
+          amount: trans.amount != null ? looselyParseAmount(trans.amount) : null,
+          date: trans.date,
+          payee_name: payeeSource || (fallbackUsed ? memoSource : null),
+          imported_payee: payeeSource || (fallbackUsed ? memoSource : null),
+          notes: options.importNotes && !fallbackUsed ? memoSource || null : null,
+        };
+      })
       .filter(trans => trans.date != null && trans.amount != null),
   };
 }
@@ -223,14 +231,15 @@ async function parseOFX(
 
       const payeeSource = swap ? trans.memo : trans.name;
       const memoSource = swap ? trans.name : trans.memo;
+      const fallbackUsed = !payeeSource && useMemoFallback;
 
       return {
         amount: parsedAmount || 0,
         imported_id: trans.fitId,
         date: trans.date,
-        payee_name: payeeSource || (useMemoFallback ? memoSource : null),
-        imported_payee: payeeSource || (useMemoFallback ? memoSource : null),
-        notes: options.importNotes ? memoSource || null : null,
+        payee_name: payeeSource || (fallbackUsed ? memoSource : null),
+        imported_payee: payeeSource || (fallbackUsed ? memoSource : null),
+        notes: options.importNotes && !fallbackUsed ? memoSource || null : null,
       };
     }),
   };
