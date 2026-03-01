@@ -54,10 +54,8 @@
     "vrt:docker": "./bin/run-vrt",
     "rebuild-electron": "./node_modules/.bin/electron-rebuild -m ./packages/loot-core",
     "rebuild-node": "yarn workspace loot-core rebuild",
-    "lint": "oxlint --type-aware --quiet",
-    "lint:fix": "yarn lint --fix",
-    "format": "oxfmt --check .",
-    "format:fix": "oxfmt .",
+    "lint": "oxfmt --check . && oxlint --type-aware --quiet",
+    "lint:fix": "oxfmt . && oxlint --fix --type-aware --quiet",
     "install:server": "yarn workspaces focus @actual-app/sync-server --production",
     "typecheck": "tsc -p tsconfig.root.json --noEmit && lage typecheck",
     "jq": "./node_modules/node-jq/bin/jq",
@@ -97,7 +95,7 @@
       "oxfmt --no-error-on-unmatched-pattern"
     ],
     "*.{js,mjs,jsx,ts,tsx}": [
-      "yarn lint:fix"
+      "oxlint --fix --type-aware --quiet"
     ]
   },
   "browserslist": [

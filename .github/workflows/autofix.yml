@@ -20,8 +20,6 @@ jobs:
         uses: ./.github/actions/setup
         with:
           download-translations: 'false'
-      - name: Lint code
-        run: yarn lint:fix
       - name: Format code
-        run: yarn format:fix
+        run: yarn lint:fix
       - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27
