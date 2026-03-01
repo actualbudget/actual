@@ -40,7 +40,6 @@ Cloudflare
 CMCIFRPAXXX
 COBADEFF
 CODEOWNERS
-CodeRabbit
 COEP
 commerzbank
 Copiar
