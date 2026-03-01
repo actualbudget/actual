@@ -110,7 +110,7 @@ This release also includes several user-facing improvements and performance work
 - [#6882](https://github.com/actualbudget/actual/pull/6882) Migrate category state management from Redux to React Query, updating hooks and components accordingly. — thanks @joel-jeremy
 - [#6883](https://github.com/actualbudget/actual/pull/6883) Add Electron build artifacts to TypeScript configuration excludes to improve compilation efficiency. — thanks @joel-jeremy
 - [#6910](https://github.com/actualbudget/actual/pull/6910) Automated the Flathub release PR to be draft until we publish the main release. — thanks @MikesGlitch
-- [#6924](https://github.com/actualbudget/actual/pull/6924) Styling updates to the design system, reorganisation and additional component docs — thanks @MikesGlitch
+- [#6924](https://github.com/actualbudget/actual/pull/6924) Styling updates to the design system, reorganization and additional component docs — thanks @MikesGlitch
 - [#6928](https://github.com/actualbudget/actual/pull/6928) Remove duplicate type definition for CrossoverData — thanks @jonner
 - [#6936](https://github.com/actualbudget/actual/pull/6936) Add refetchOnSync option to useTransactions hook to consolidate duplicate sync-event handling logic. — thanks @joel-jeremy
 - [#6940](https://github.com/actualbudget/actual/pull/6940) Add remaining component-library components to design system docs — thanks @MikesGlitch
@@ -123,7 +123,7 @@ This release also includes several user-facing improvements and performance work
 - [#6969](https://github.com/actualbudget/actual/pull/6969) Fix some low-hanging-fruit `@ts-strict-ignore` — thanks @jfdoming
 - [#6970](https://github.com/actualbudget/actual/pull/6970) lint: convert warnings to errors — thanks @MatissJanis
 - [#6984](https://github.com/actualbudget/actual/pull/6984) lint: introduce type-aware linting — thanks @MatissJanis
-- [#6985](https://github.com/actualbudget/actual/pull/6985) config: update how coderabbit handles 'suspect ai generated' labels — thanks @MatissJanis
+- [#6985](https://github.com/actualbudget/actual/pull/6985) config: update how CodeRabbit handles 'suspect ai generated' labels — thanks @MatissJanis
 - [#6987](https://github.com/actualbudget/actual/pull/6987) lint: fix typescript/await-thenable and typescript/no-floating-promises issues — thanks @MatissJanis
 - [#6989](https://github.com/actualbudget/actual/pull/6989) Add structured sections to the pull request template for standardized submissions. — thanks @MatissJanis
 - [#6992](https://github.com/actualbudget/actual/pull/6992) Address some more low-hanging fruit for ts-strict-ignore — thanks @jfdoming
@@ -138,7 +138,7 @@ This release also includes several user-facing improvements and performance work
 - [#7058](https://github.com/actualbudget/actual/pull/7058) Rename 'Okabe Ito' theme to 'Color-blind (dark)'. — thanks @Juulz
 - [#7087](https://github.com/actualbudget/actual/pull/7087) Remove 'suspect ai generated' label and delete associated workflow for streamlined labeling system. — thanks @Copilot
 - [#7088](https://github.com/actualbudget/actual/pull/7088) Add Cursor Cloud setup instructions and troubleshooting tips to AGENTS.md documentation. — thanks @MatissJanis
-- [#7094](https://github.com/actualbudget/actual/pull/7094) Add 'unfreeze' label that can be used to unfreeze PRs during mergefreeze — thanks @MatissJanis
+- [#7094](https://github.com/actualbudget/actual/pull/7094) Add 'unfreeze' label that can be used to unfreeze PRs during the merge freeze — thanks @MatissJanis
 
 ## 26.2.1
 
