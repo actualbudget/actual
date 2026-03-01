@@ -8,7 +8,7 @@ This release contains an important security fix for all users of the sync server
 
 This release also includes several user-facing improvements and performance work, along with numerous other fixes:
 
-- Custom themes: chart theming support, simpler custom-theme CSS variables, and a new high-contrast light theme.
+- Custom themes: bar/pie chart theming support, simpler custom-theme CSS variables, and a new high-contrast light theme.
 
 - Currency symbols: support for Dominican Peso (DOP) and South Korean Won (KRW)
 
@@ -24,7 +24,7 @@ This release also includes several user-facing improvements and performance work
 
 - [#6702](https://github.com/actualbudget/actual/pull/6702) Adds "Back" button to reports config pages — thanks @aelxxs
 - [#6746](https://github.com/actualbudget/actual/pull/6746) Adds API support to manage tags (`getTags`, `createTag`, `updateTag`, `deleteTag`). — thanks @pouwerkerk
-- [#6909](https://github.com/actualbudget/actual/pull/6909) add theming to charts and hence allow chart to be customized in custom themes — thanks @Karimkodera
+- [#6909](https://github.com/actualbudget/actual/pull/6909) add theme variables for bar/pie chart pieces for custom themes — thanks @Karimkodera
 - [#7028](https://github.com/actualbudget/actual/pull/7028) Adds Dominican Peso (DOP) currency — thanks @csuriel
 
 #### Enhancements
