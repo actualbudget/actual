@@ -22,6 +22,8 @@ jobs:
           download-translations: 'false'
       - name: Lint
         run: yarn lint
+      - name: Format
+        run: yarn format
   typecheck:
     runs-on: ubuntu-latest
     steps:
