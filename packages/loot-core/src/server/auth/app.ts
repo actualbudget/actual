@@ -135,10 +135,13 @@ async function getLoginMethods() {
     res = await fetch(serverConfig.SIGNUP_SERVER + '/login-methods').then(res =>
       res.json(),
     );
-  } catch {
-    return {
-      error: 'network-failure',
-    };
+  } catch (err) {
+    if (err instanceof PostError) {
+      return {
+        error: err.reason || 'network-failure',
+      };
+    }
+    throw err;
   }
 
   if (res.methods) {
