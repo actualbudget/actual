@@ -15,6 +15,7 @@ jobs:
   unfreeze:
     if: ${{ github.event.label.name == 'unfreeze' }}
     runs-on: ubuntu-latest
+    permissions: {}
     concurrency:
       group: merge-freeze-unfreeze-${{ github.ref }}-labels
       cancel-in-progress: false
