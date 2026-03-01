@@ -1226,7 +1226,8 @@ function getParseOptions(fileType: string, options: ParseFileOptions = {}) {
     return { delimiter, hasHeaderRow, skipStartLines, skipEndLines };
   }
   if (isOfxFile(fileType)) {
-    const { fallbackMissingPayeeToMemo, importNotes, swapPayeeAndMemo } = options;
+    const { fallbackMissingPayeeToMemo, importNotes, swapPayeeAndMemo } =
+      options;
     return { fallbackMissingPayeeToMemo, importNotes, swapPayeeAndMemo };
   }
   if (fileType === 'qif') {

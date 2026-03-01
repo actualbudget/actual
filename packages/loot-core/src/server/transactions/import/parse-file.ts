@@ -184,11 +184,13 @@ async function parseQIF(
         const fallbackUsed = !payeeSource && swap;
 
         return {
-          amount: trans.amount != null ? looselyParseAmount(trans.amount) : null,
+          amount:
+            trans.amount != null ? looselyParseAmount(trans.amount) : null,
           date: trans.date,
           payee_name: payeeSource || (fallbackUsed ? memoSource : null),
           imported_payee: payeeSource || (fallbackUsed ? memoSource : null),
-          notes: options.importNotes && !fallbackUsed ? memoSource || null : null,
+          notes:
+            options.importNotes && !fallbackUsed ? memoSource || null : null,
         };
       })
       .filter(trans => trans.date != null && trans.amount != null),
