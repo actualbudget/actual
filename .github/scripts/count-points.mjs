@@ -8,13 +8,13 @@ const CONFIG = {
   POINTS_PER_ISSUE_TRIAGE_ACTION: 1,
   POINTS_PER_ISSUE_CLOSING_ACTION: 1,
   POINTS_PER_RELEASE_PR: 4, // Awarded to whoever merges the release PR
-  PR_CONTRIBUTION_POINTS: {
-    Features: 2,
-    Enhancements: 2,
-    Bugfix: 3,
-    Maintenance: 2,
-    Unknown: 2,
-  },
+  PR_CONTRIBUTION_POINTS: [
+    { categories: ['Features'], points: 2 },
+    { categories: ['Enhancements'], points: 2 },
+    { categories: ['Bugfixes', 'Bugfix'], points: 3 },
+    { categories: ['Maintenance'], points: 2 },
+    { categories: ['Unknown'], points: 2 },
+  ],
   // Point tiers for code changes (non-docs)
   CODE_PR_REVIEW_POINT_TIERS: [
     { minChanges: 500, points: 8 },
@@ -130,11 +130,14 @@ async function getPRCategoryAndPoints(
         'utf-8',
       );
       const category = parseReleaseNotesCategory(content);
+      const tier = CONFIG.PR_CONTRIBUTION_POINTS.find(e =>
+        e.categories.includes(category),
+      );
 
-      if (category && CONFIG.PR_CONTRIBUTION_POINTS[category]) {
+      if (tier) {
         return {
           category,
-          points: CONFIG.PR_CONTRIBUTION_POINTS[category],
+          points: tier.points,
         };
       }
     }
@@ -142,9 +145,12 @@ async function getPRCategoryAndPoints(
     // Do nothing
   }
 
+  const unknownTier = CONFIG.PR_CONTRIBUTION_POINTS.find(e =>
+    e.categories.includes('Unknown'),
+  );
   return {
     category: 'Unknown',
-    points: CONFIG.PR_CONTRIBUTION_POINTS.Unknown,
+    points: unknownTier.points,
   };
 }
 
