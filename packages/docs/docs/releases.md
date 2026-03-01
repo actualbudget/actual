@@ -8,15 +8,15 @@ This release contains an important security fix for all users of the sync server
 
 This release also includes several user-facing improvements and performance work, along with numerous other fixes:
 
-- Custom themes: bar/pie chart theming support, simpler custom-theme CSS variables, and a new high-contrast light theme.
-
-- Currency symbols: support for Dominican Peso (DOP) and South Korean Won (KRW)
+- Reports: now accessible via the command bar
 
 - Bank sync: UX improvements to the account linking flow, as well as API support for balance updates
 
 - Tags: Support for managing tags via the API
 
-- Performance and responsiveness improvements from ongoing migration of core app data to React Query (accounts, tags, dashboard, reports).
+- Performance and responsiveness improvements
+
+- Custom themes: bar/pie chart theming support, simpler custom-theme CSS variables, and a new high-contrast light theme.
 
 **Docker Tag: v26.3.0**
 
