@@ -952,7 +952,7 @@ export function ImportTransactionsModal({
                   setSwapPayeeAndMemo(state => !state);
                 }}
               >
-                <Trans>Swap payee and memo</Trans>
+                <Trans>Swap Payee and Memo</Trans>
               </LabeledCheckbox>
             </>
           )}
@@ -977,7 +977,7 @@ export function ImportTransactionsModal({
                 setQifSwapPayeeAndMemo(state => !state);
               }}
             >
-              <Trans>Swap payee and memo</Trans>
+              <Trans>Swap Payee and Memo</Trans>
             </LabeledCheckbox>
           )}
 
@@ -989,7 +989,7 @@ export function ImportTransactionsModal({
                 setCamtSwapPayeeAndMemo(state => !state);
               }}
             >
-              <Trans>Swap payee and memo</Trans>
+              <Trans>Swap Payee and Memo</Trans>
             </LabeledCheckbox>
           )}
 
