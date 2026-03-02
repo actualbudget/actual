@@ -42,7 +42,7 @@ jobs:
           GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
 
       - name: Check if PR targets master branch
-        if: startsWith(github.head_ref, 'release/') == false && steps.check-first-comment.outputs.result == 'true' && steps.pr-details.outputs.result != 'null'
+        if: steps.check-first-comment.outputs.result == 'true' && steps.pr-details.outputs.result != 'null'
         id: check-base-branch
         run: |
           BASE_BRANCH=$(echo '${{ steps.pr-details.outputs.result }}' | jq -r '.baseBranch')
