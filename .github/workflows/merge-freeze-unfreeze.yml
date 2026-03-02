@@ -1,18 +1,21 @@
 # When the "unfreeze" label is added to a PR, add that PR to Merge Freeze's unblocked list
-# so it can be merged during a freeze. Requires MERGEFREEZE_ACCESS_TOKEN repo secret
+# so it can be merged during a freeze. Uses pull_request_target so the workflow runs in
+# the base repo and has access to MERGEFREEZE_ACCESS_TOKEN for fork PRs; it does not
+# checkout or run any PR code. Requires MERGEFREEZE_ACCESS_TOKEN repo secret
 # (project-specific token from Merge Freeze Web API panel for actualbudget/actual / master).
 # See: https://docs.mergefreeze.com/web-api#post-freeze-status
 
 name: Merge Freeze – add PR to unblocked list
 
 on:
-  pull_request:
+  pull_request_target:
     types: [labeled]
 
 jobs:
   unfreeze:
     if: ${{ github.event.label.name == 'unfreeze' }}
     runs-on: ubuntu-latest
+    permissions: {}
     concurrency:
       group: merge-freeze-unfreeze-${{ github.ref }}-labels
       cancel-in-progress: false
