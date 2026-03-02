@@ -2,7 +2,7 @@
 
 ## 26.3.0
 
-Release date: 2026-03-01
+Release date: 2026-03-02
 
 This release contains an important security fix for all users of the sync server. We suggest you update as soon as feasible.
 
