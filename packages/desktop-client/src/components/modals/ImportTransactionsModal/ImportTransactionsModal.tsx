@@ -212,7 +212,7 @@ export function ImportTransactionsModal({
   const [fallbackMissingPayeeToMemo, setFallbackMissingPayeeToMemo] = useState(
     String(prefs[`ofx-fallback-missing-payee-${accountId}`]) !== 'false',
   );
-  const [swapPayeeAndMemo, setSwapPayeeAndMemo] = useState(
+  const [ofxSwapPayeeAndMemo, setOfxSwapPayeeAndMemo] = useState(
     String(prefs[`ofx-swap-payee-memo-${accountId}`]) === 'true',
   );
   const [qifSwapPayeeAndMemo, setQifSwapPayeeAndMemo] = useState(
@@ -425,7 +425,7 @@ export function ImportTransactionsModal({
           ? qifSwapPayeeAndMemo
           : isCamtFile(fileType)
             ? camtSwapPayeeAndMemo
-            : swapPayeeAndMemo,
+            : ofxSwapPayeeAndMemo,
     });
 
     void parse(originalFileName, parseOptions);
@@ -437,7 +437,7 @@ export function ImportTransactionsModal({
     skipEndLines,
     fallbackMissingPayeeToMemo,
     importNotes,
-    swapPayeeAndMemo,
+    ofxSwapPayeeAndMemo,
     qifSwapPayeeAndMemo,
     camtSwapPayeeAndMemo,
     parse,
@@ -492,7 +492,7 @@ export function ImportTransactionsModal({
           ? qifSwapPayeeAndMemo
           : isCamtFile(fileType)
             ? camtSwapPayeeAndMemo
-            : swapPayeeAndMemo,
+            : ofxSwapPayeeAndMemo,
     });
 
     void parse(res[0], parseOptions);
@@ -647,7 +647,7 @@ export function ImportTransactionsModal({
         [`ofx-fallback-missing-payee-${accountId}`]: String(
           fallbackMissingPayeeToMemo,
         ),
-        [`ofx-swap-payee-memo-${accountId}`]: String(swapPayeeAndMemo),
+        [`ofx-swap-payee-memo-${accountId}`]: String(ofxSwapPayeeAndMemo),
       });
     }
 
@@ -947,9 +947,9 @@ export function ImportTransactionsModal({
               </LabeledCheckbox>
               <LabeledCheckbox
                 id="form_ofx_swap_payee_memo"
-                checked={swapPayeeAndMemo}
+                checked={ofxSwapPayeeAndMemo}
                 onChange={() => {
-                  setSwapPayeeAndMemo(state => !state);
+                  setOfxSwapPayeeAndMemo(state => !state);
                 }}
               >
                 <Trans>Swap Payee and Memo</Trans>
