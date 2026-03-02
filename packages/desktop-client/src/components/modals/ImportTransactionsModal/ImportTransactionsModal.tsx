@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useCallback, useEffect, useEffectEvent, useState } from 'react';
+import type { Dispatch, ReactNode, SetStateAction } from 'react';
 import type { ComponentProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -51,6 +52,28 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
 import { payeeQueries } from '@desktop-client/payees';
+
+function CheckboxToggle({
+  id,
+  checked,
+  onChange,
+  children,
+}: {
+  id: string;
+  checked: boolean;
+  onChange: Dispatch<SetStateAction<boolean>>;
+  children: ReactNode;
+}) {
+  return (
+    <LabeledCheckbox
+      id={id}
+      checked={checked}
+      onChange={() => onChange(prev => !prev)}
+    >
+      {children}
+    </LabeledCheckbox>
+  );
+}
 
 function getFileType(filepath: string): string {
   const m = filepath.match(/\.([^.]*)$/);
@@ -936,73 +959,61 @@ export function ImportTransactionsModal({
 
           {isOfxFile(filetype) && (
             <>
-              <LabeledCheckbox
+              <CheckboxToggle
                 id="form_fallback_missing_payee"
                 checked={fallbackMissingPayeeToMemo}
-                onChange={() => {
-                  setFallbackMissingPayeeToMemo(state => !state);
-                }}
+                onChange={setFallbackMissingPayeeToMemo}
               >
                 <Trans>Use Memo as a fallback for empty Payees</Trans>
-              </LabeledCheckbox>
-              <LabeledCheckbox
+              </CheckboxToggle>
+              <CheckboxToggle
                 id="form_ofx_swap_payee_memo"
                 checked={ofxSwapPayeeAndMemo}
-                onChange={() => {
-                  setOfxSwapPayeeAndMemo(state => !state);
-                }}
+                onChange={setOfxSwapPayeeAndMemo}
               >
                 <Trans>Swap Payee and Memo</Trans>
-              </LabeledCheckbox>
+              </CheckboxToggle>
             </>
           )}
 
           {filetype !== 'csv' && (
-            <LabeledCheckbox
+            <CheckboxToggle
               id="import_notes"
               checked={importNotes}
-              onChange={() => {
-                setImportNotes(!importNotes);
-              }}
+              onChange={setImportNotes}
             >
               <Trans>Import notes from file</Trans>
-            </LabeledCheckbox>
+            </CheckboxToggle>
           )}
 
           {filetype === 'qif' && (
-            <LabeledCheckbox
+            <CheckboxToggle
               id="form_qif_swap_payee_memo"
               checked={qifSwapPayeeAndMemo}
-              onChange={() => {
-                setQifSwapPayeeAndMemo(state => !state);
-              }}
+              onChange={setQifSwapPayeeAndMemo}
             >
               <Trans>Swap Payee and Memo</Trans>
-            </LabeledCheckbox>
+            </CheckboxToggle>
           )}
 
           {isCamtFile(filetype) && (
-            <LabeledCheckbox
+            <CheckboxToggle
               id="form_camt_swap_payee_memo"
               checked={camtSwapPayeeAndMemo}
-              onChange={() => {
-                setCamtSwapPayeeAndMemo(state => !state);
-              }}
+              onChange={setCamtSwapPayeeAndMemo}
             >
               <Trans>Swap Payee and Memo</Trans>
-            </LabeledCheckbox>
+            </CheckboxToggle>
           )}
 
           {(isOfxFile(filetype) || isCamtFile(filetype)) && (
-            <LabeledCheckbox
+            <CheckboxToggle
               id="form_dont_reconcile"
               checked={reconcile}
-              onChange={() => {
-                setReconcile(!reconcile);
-              }}
+              onChange={setReconcile}
             >
               <Trans>Merge with existing transactions</Trans>
-            </LabeledCheckbox>
+            </CheckboxToggle>
           )}
 
           {/*Import Options */}
@@ -1100,33 +1111,27 @@ export function ImportTransactionsModal({
                         style={{ width: 50 }}
                       />
                     </label>
-                    <LabeledCheckbox
+                    <CheckboxToggle
                       id="form_has_header"
                       checked={hasHeaderRow}
-                      onChange={() => {
-                        setHasHeaderRow(!hasHeaderRow);
-                      }}
+                      onChange={setHasHeaderRow}
                     >
                       <Trans>File has header row</Trans>
-                    </LabeledCheckbox>
-                    <LabeledCheckbox
+                    </CheckboxToggle>
+                    <CheckboxToggle
                       id="clear_on_import"
                       checked={clearOnImport}
-                      onChange={() => {
-                        setClearOnImport(!clearOnImport);
-                      }}
+                      onChange={setClearOnImport}
                     >
                       <Trans>Clear transactions on import</Trans>
-                    </LabeledCheckbox>
-                    <LabeledCheckbox
+                    </CheckboxToggle>
+                    <CheckboxToggle
                       id="form_dont_reconcile"
                       checked={reconcile}
-                      onChange={() => {
-                        setReconcile(!reconcile);
-                      }}
+                      onChange={setReconcile}
                     >
                       <Trans>Merge with existing transactions</Trans>
-                    </LabeledCheckbox>
+                    </CheckboxToggle>
                   </View>
                 )}
 
@@ -1134,15 +1139,13 @@ export function ImportTransactionsModal({
 
                 <View style={{ marginRight: 10, gap: 5 }}>
                   <SectionLabel title={t('AMOUNT OPTIONS')} />
-                  <LabeledCheckbox
+                  <CheckboxToggle
                     id="form_flip"
                     checked={flipAmount}
-                    onChange={() => {
-                      setFlipAmount(!flipAmount);
-                    }}
+                    onChange={setFlipAmount}
                   >
                     <Trans>Flip amount</Trans>
-                  </LabeledCheckbox>
+                  </CheckboxToggle>
                   <MultiplierOption
                     multiplierEnabled={multiplierEnabled}
                     multiplierAmount={multiplierAmount}
