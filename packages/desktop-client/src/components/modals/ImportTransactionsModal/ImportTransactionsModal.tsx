@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useCallback, useEffect, useEffectEvent, useState } from 'react';
-import type { Dispatch, ReactNode, SetStateAction } from 'react';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, Dispatch, ReactNode, SetStateAction } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
