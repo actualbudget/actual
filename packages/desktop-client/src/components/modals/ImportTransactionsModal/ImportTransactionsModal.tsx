@@ -1248,6 +1248,10 @@ function getSwapOption(
   qifSwapPayeeAndMemo: boolean,
   camtSwapPayeeAndMemo: boolean,
 ) {
+  if (isOfxFile(fileType)) {
+    return ofxSwapPayeeAndMemo;
+  }
+
   if (fileType === 'qif') {
     return qifSwapPayeeAndMemo;
   }
@@ -1256,7 +1260,7 @@ function getSwapOption(
     return camtSwapPayeeAndMemo;
   }
 
-  return ofxSwapPayeeAndMemo;
+  return false;
 }
 
 function isOfxFile(fileType: string) {
