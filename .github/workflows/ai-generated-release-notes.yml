@@ -46,8 +46,13 @@ jobs:
         id: check-base-branch
         run: |
           BASE_BRANCH=$(echo '${{ steps.pr-details.outputs.result }}' | jq -r '.baseBranch')
+          HEAD_BRANCH=$(echo '${{ steps.pr-details.outputs.result }}' | jq -r '.headBranch')
           echo "Base branch: $BASE_BRANCH"
-          if [ "$BASE_BRANCH" = "master" ]; then
+          echo "Head branch: $HEAD_BRANCH"
+          if [[ "$HEAD_BRANCH" == release/* ]]; then
+            echo "targets_master=false" >> $GITHUB_OUTPUT
+            echo "PR is from a release/ branch, skipping release notes generation"
+          elif [ "$BASE_BRANCH" = "master" ]; then
             echo "targets_master=true" >> $GITHUB_OUTPUT
           else
             echo "targets_master=false" >> $GITHUB_OUTPUT
