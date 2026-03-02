@@ -420,12 +420,12 @@ export function ImportTransactionsModal({
       skipEndLines,
       fallbackMissingPayeeToMemo,
       importNotes,
-      swapPayeeAndMemo:
-        fileType === 'qif'
-          ? qifSwapPayeeAndMemo
-          : isCamtFile(fileType)
-            ? camtSwapPayeeAndMemo
-            : ofxSwapPayeeAndMemo,
+      swapPayeeAndMemo: getSwapOption(
+        fileType,
+        ofxSwapPayeeAndMemo,
+        qifSwapPayeeAndMemo,
+        camtSwapPayeeAndMemo,
+      ),
     });
 
     void parse(originalFileName, parseOptions);
@@ -487,12 +487,12 @@ export function ImportTransactionsModal({
       skipEndLines,
       fallbackMissingPayeeToMemo,
       importNotes,
-      swapPayeeAndMemo:
-        fileType === 'qif'
-          ? qifSwapPayeeAndMemo
-          : isCamtFile(fileType)
-            ? camtSwapPayeeAndMemo
-            : ofxSwapPayeeAndMemo,
+      swapPayeeAndMemo: getSwapOption(
+        fileType,
+        ofxSwapPayeeAndMemo,
+        qifSwapPayeeAndMemo,
+        camtSwapPayeeAndMemo,
+      ),
     });
 
     void parse(res[0], parseOptions);
@@ -1240,6 +1240,23 @@ function getParseOptions(fileType: string, options: ParseFileOptions = {}) {
   }
   const { importNotes } = options;
   return { importNotes };
+}
+
+function getSwapOption(
+  fileType: string,
+  ofxSwapPayeeAndMemo: boolean,
+  qifSwapPayeeAndMemo: boolean,
+  camtSwapPayeeAndMemo: boolean,
+) {
+  if (fileType === 'qif') {
+    return qifSwapPayeeAndMemo;
+  }
+
+  if (isCamtFile(fileType)) {
+    return camtSwapPayeeAndMemo;
+  }
+
+  return ofxSwapPayeeAndMemo;
 }
 
 function isOfxFile(fileType: string) {
