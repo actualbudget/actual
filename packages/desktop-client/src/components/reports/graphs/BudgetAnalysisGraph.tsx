@@ -25,6 +25,8 @@ import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
+import { computePadding } from './util/computePadding';
+
 /**
  * Interval data for the Budget Analysis graph.
  * @property date - A date string in format 'YYYY-MM' for monthly intervals
@@ -220,11 +222,22 @@ export function BudgetAnalysisGraph({
     return monthUtils.format(date, 'MMM d', locale);
   };
 
+  const allValues = graphData.flatMap(item => [
+    item.budgeted,
+    item.spent,
+    item.balance,
+    item.overspendingAdjustment,
+  ]);
+
+  const leftPadding = computePadding(allValues, value =>
+    format(value, 'financial-no-decimals'),
+  );
+
   const commonProps = {
     width: 0,
     height: 0,
     data: graphData,
-    margin: { top: 5, right: 5, left: 5, bottom: 5 },
+    margin: { top: 5, right: 5, left: 5 + leftPadding, bottom: 5 },
   };
 
   return (
