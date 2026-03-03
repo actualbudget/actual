@@ -24,15 +24,25 @@ jobs:
     steps:
       - name: Resolve version
         id: resolve_version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
         run: |
-          if [[ "${{ github.event_name }}" == "release" ]]; then
-            TAG="${{ github.event.release.tag_name }}"
+          if [[ "$EVENT_NAME" == "release" ]]; then
+            TAG="$RELEASE_TAG"
           else
-            TAG="${{ inputs.tag }}"
+            TAG="$INPUT_TAG"
           fi
 
           if [[ -z "$TAG" ]]; then
             echo "::error::No tag provided"
+            exit 1
+          fi
+
+          # Validate tag format (v-prefixed semver, e.g. v25.3.0 or v1.2.3-beta.1)
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Invalid tag format: $TAG (expected v-prefixed semver, e.g. v25.3.0)"
             exit 1
           fi
 
@@ -53,12 +63,12 @@ jobs:
           echo "Found assets:"
           echo "$ASSETS"
 
-          if ! echo "$ASSETS" | grep -q "Actual-linux-x86_64.AppImage"; then
+          if ! echo "$ASSETS" | grep -qx "Actual-linux-x86_64.AppImage"; then
             echo "::error::Missing asset: Actual-linux-x86_64.AppImage"
             exit 1
           fi
 
-          if ! echo "$ASSETS" | grep -q "Actual-linux-arm64.AppImage"; then
+          if ! echo "$ASSETS" | grep -qx "Actual-linux-arm64.AppImage"; then
             echo "::error::Missing asset: Actual-linux-arm64.AppImage"
             exit 1
           fi
@@ -71,11 +81,11 @@ jobs:
           BASE_URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}"
 
           echo "Streaming x86_64 AppImage to compute SHA256..."
-          APPIMAGE_X64_SHA256=$(curl -sL "${BASE_URL}/Actual-linux-x86_64.AppImage" | sha256sum | awk '{ print $1 }')
+          APPIMAGE_X64_SHA256=$(curl -fSL "${BASE_URL}/Actual-linux-x86_64.AppImage" | sha256sum | awk '{ print $1 }')
           echo "x86_64 SHA256: $APPIMAGE_X64_SHA256"
 
           echo "Streaming arm64 AppImage to compute SHA256..."
-          APPIMAGE_ARM64_SHA256=$(curl -sL "${BASE_URL}/Actual-linux-arm64.AppImage" | sha256sum | awk '{ print $1 }')
+          APPIMAGE_ARM64_SHA256=$(curl -fSL "${BASE_URL}/Actual-linux-arm64.AppImage" | sha256sum | awk '{ print $1 }')
           echo "arm64 SHA256: $APPIMAGE_ARM64_SHA256"
 
           echo "APPIMAGE_X64_SHA256=$APPIMAGE_X64_SHA256" >> "$GITHUB_ENV"
