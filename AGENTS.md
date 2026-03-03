@@ -314,6 +314,7 @@ Always run `yarn typecheck` before committing.
 
 **React Patterns:**
 
+- The project uses **React Compiler** (`babel-plugin-react-compiler`) in the desktop-client. The compiler auto-memoizes component bodies, so you can omit manual `useCallback`, `useMemo`, and `React.memo` when adding or refactoring code; prefer inline callbacks and values unless a stable identity is required by a non-compiled dependency.
 - Don't use `React.FunctionComponent` or `React.FC` - type props directly
 - Don't use `React.*` patterns - use named imports instead
 - Use `<Link>` instead of `<a>` tags
