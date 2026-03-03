@@ -1050,9 +1050,7 @@ export function RuleEditor({
     return parsedActions.reduce(
       (acc, action) => {
         const splitIndex =
-          'options' in action && 'splitIndex' in action.options
-            ? (action.options.splitIndex ?? 0)
-            : 0;
+          'options' in action ? (action.options?.splitIndex ?? 0) : 0;
         acc[splitIndex] = acc[splitIndex] ?? { id: uuidv4(), actions: [] };
         acc[splitIndex].actions.push({ ...action, inputKey: uuidv4() });
         return acc;

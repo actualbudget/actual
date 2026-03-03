@@ -111,7 +111,7 @@ export function MobileRulesPage() {
   const { mutate: deleteRule } = useDeleteRuleMutation();
 
   const handleRuleDelete = useCallback(
-    async (rule: RuleEntity) => {
+    (rule: RuleEntity) => {
       deleteRule(
         { id: rule.id },
         {
