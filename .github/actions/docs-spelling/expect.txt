@@ -31,6 +31,7 @@ CAGLPTPL
 Caixa
 CAMT
 cashflow
+Catppuccin
 Cetelem
 cimode
 Citi
@@ -109,6 +110,7 @@ KBCBE
 Keycloak
 Khurozov
 KORT
+KRW
 Kreditbank
 lage
 LHV
