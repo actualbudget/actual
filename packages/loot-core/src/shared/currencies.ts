@@ -9,6 +9,7 @@ export type Currency = {
   symbolFirst: boolean;
 };
 
+// Actual relies on a default decimalPlaces value of 2, even for non-decimal currencies.
 // When adding a new currency with a higher decimal precision, make sure to update
 // the MAX_SAFE_NUMBER in util.ts.
 // When adding a currency, also update the translation map in
@@ -43,8 +44,8 @@ export const currencies: Currency[] = [
   { code: 'IDR', name: 'Indonesian Rupiah', symbol: 'Rp', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'INR', name: 'Indian Rupee', symbol: '₹', decimalPlaces: 2, numberFormat: 'comma-dot-in', symbolFirst: true },
   { code: 'JMD', name: 'Jamaican Dollar', symbol: 'J$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
-  { code: 'JPY', name: 'Japanese Yen', symbol: '¥', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: true },
-  { code: 'KRW', name: 'South Korean Won', symbol: '₩', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'JPY', name: 'Japanese Yen', symbol: '¥', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'KRW', name: 'South Korean Won', symbol: '₩', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'LKR', name: 'Sri Lankan Rupee', symbol: 'Rs.', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'MDL', name: 'Moldovan Leu', symbol: 'L', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
   { code: 'MYR', name: 'Malaysian Ringgit', symbol: 'RM', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
