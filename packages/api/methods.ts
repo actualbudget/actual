@@ -126,8 +126,6 @@ export function addTransactions(
   });
 }
 
-export type { ImportTransactionsOpts };
-
 export function importTransactions(
   accountId: APIAccountEntity['id'],
   transactions: ImportTransactionEntity[],

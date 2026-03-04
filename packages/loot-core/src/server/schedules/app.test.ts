@@ -11,6 +11,7 @@ import {
   createSchedule,
   deleteSchedule,
   setNextDate,
+  skipNextDate,
   updateConditions,
   updateSchedule,
 } from './app';
@@ -255,6 +256,124 @@ describe('schedule app', () => {
       row = res.data[0];
 
       expect(row.next_date).toBe('2021-05-18');
+    });
+
+    it('skipNextDate skips `next_date`', async () => {
+      /* Dec 2020 calendar for reference:
+        | Su | Mo | Tu | We | Th | Fr | Sa |
+        |    |    | 01 | 02 | 03 | 04 | 05 |
+        | 06 | 07 | 08 | 09 | 10 | 11 | 12 |
+        | 13 | 14 | 15 | 16 | 17 | 18 | 19 |
+        | 20 | 21 | 22 | 23 | 24 | 25 | 26 |
+        | 27 | 28 | 29 | 30 | 31 |
+        */
+      const id = await createSchedule({
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2020-12-05',
+              frequency: 'weekly',
+              patterns: [],
+            },
+          },
+        ],
+      });
+
+      let res = await aqlQuery(
+        q('schedules').filter({ id }).select(['next_date']),
+      );
+      let row = res.data[0];
+
+      expect(row.next_date).toBe('2020-12-05');
+
+      await skipNextDate({ id });
+
+      res = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+      row = res.data[0];
+
+      expect(row.next_date).toBe('2020-12-12');
+    });
+
+    it('skipNextDate skips `next_date` moving `after` weekend', async () => {
+      /* Dec 2020 calendar for reference:
+        | Su | Mo | Tu | We | Th | Fr | Sa |
+        |    |    | 01 | 02 | 03 | 04 | 05 |
+        | 06 | 07 | 08 | 09 | 10 | 11 | 12 |
+        | 13 | 14 | 15 | 16 | 17 | 18 | 19 |
+        | 20 | 21 | 22 | 23 | 24 | 25 | 26 |
+        | 27 | 28 | 29 | 30 | 31 |
+        */
+      const id = await createSchedule({
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2020-12-05',
+              frequency: 'weekly',
+              patterns: [],
+              skipWeekend: true,
+              weekendSolveMode: 'after',
+            },
+          },
+        ],
+      });
+
+      let res = await aqlQuery(
+        q('schedules').filter({ id }).select(['next_date']),
+      );
+      let row = res.data[0];
+
+      expect(row.next_date).toBe('2020-12-07');
+
+      await skipNextDate({ id });
+
+      res = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+      row = res.data[0];
+
+      expect(row.next_date).toBe('2020-12-14');
+    });
+
+    it('skipNextDate skips `next_date` moving `before` weekend', async () => {
+      /* Dec 2020 calendar for reference:
+        | Su | Mo | Tu | We | Th | Fr | Sa |
+        |    |    | 01 | 02 | 03 | 04 | 05 |
+        | 06 | 07 | 08 | 09 | 10 | 11 | 12 |
+        | 13 | 14 | 15 | 16 | 17 | 18 | 19 |
+        | 20 | 21 | 22 | 23 | 24 | 25 | 26 |
+        | 27 | 28 | 29 | 30 | 31 |
+        */
+      const id = await createSchedule({
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2020-12-05',
+              frequency: 'weekly',
+              patterns: [],
+              skipWeekend: true,
+              weekendSolveMode: 'before',
+            },
+          },
+        ],
+      });
+
+      let res = await aqlQuery(
+        q('schedules').filter({ id }).select(['next_date']),
+      );
+      let row = res.data[0];
+
+      expect(row.next_date).toBe('2020-12-04');
+
+      await skipNextDate({ id });
+
+      res = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+      row = res.data[0];
+
+      expect(row.next_date).toBe('2020-12-11');
     });
   });
 });
