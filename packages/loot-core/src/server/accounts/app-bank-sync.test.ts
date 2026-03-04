@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
 
@@ -13,7 +12,7 @@ vi.mock('./sync', async () => ({
 
 const simpleFinBatchSyncHandler = app.handlers['simplefin-batch-sync'];
 
-async function insertBank(bank: { id: string; bank_id: string; name: string }) {
+function insertBank(bank: { id: string; bank_id: string; name: string }) {
   db.runQuery(
     'INSERT INTO banks (id, bank_id, name, tombstone) VALUES (?, ?, ?, 0)',
     [bank.id, bank.bank_id, bank.name],
@@ -27,7 +26,7 @@ async function setupSimpleFinAccounts(
     accountId: string;
   }>,
 ) {
-  await insertBank({ id: 'bank1', bank_id: 'sfin-bank', name: 'SimpleFin' });
+  insertBank({ id: 'bank1', bank_id: 'sfin-bank', name: 'SimpleFin' });
   for (const acct of accounts) {
     await db.insertAccount({
       id: acct.id,
@@ -126,12 +125,12 @@ describe('simpleFinBatchSync', () => {
 
       // Account 1 should have an error
       const acct1Result = result.find(r => r.accountId === 'acct1');
-      expect(acct1Result.res.errors).toHaveLength(1);
-      expect(acct1Result.res.errors[0].accountId).toBe('acct1');
+      expect(acct1Result!.res.errors).toHaveLength(1);
+      expect(acct1Result!.res.errors[0].accountId).toBe('acct1');
 
       // Account 2 should have no errors
       const acct2Result = result.find(r => r.accountId === 'acct2');
-      expect(acct2Result.res.errors).toHaveLength(0);
+      expect(acct2Result!.res.errors).toHaveLength(0);
     });
   });
 });
