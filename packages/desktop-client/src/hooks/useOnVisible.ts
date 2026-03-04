@@ -17,14 +17,16 @@ export function useOnVisible(
   const { isEnabled = true } = options;
   const inProgress = useRef(false);
 
-  const runCallback = useEffectEvent(() => {
+  const runCallback = useEffectEvent(async () => {
     if (inProgress.current) {
       return;
     }
     inProgress.current = true;
-    void Promise.resolve(callback()).finally(() => {
+    try {
+      await callback();
+    } finally {
       inProgress.current = false;
-    });
+    }
   });
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export function useOnVisible(
       if (document.visibilityState !== 'visible') {
         return;
       }
-      runCallback();
+      void runCallback();
     }
 
     document.addEventListener('visibilitychange', onVisibilityChange);
