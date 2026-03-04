@@ -78,7 +78,7 @@ describe('useOnVisible', () => {
   });
 
   it('does not invoke callback again until previous async callback completes', async () => {
-    let resolve: (() => void) | undefined;
+    let resolve: () => void;
     const callback = vi.fn().mockImplementation(
       () =>
         new Promise<void>(r => {
@@ -91,7 +91,6 @@ describe('useOnVisible', () => {
     dispatchVisibilityChange();
     expect(callback).toHaveBeenCalledTimes(1);
 
-    if (!resolve) throw new Error('resolve not set');
     resolve();
     await Promise.resolve();
     dispatchVisibilityChange();
