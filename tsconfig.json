@@ -1,11 +1,15 @@
 {
   "references": [
-    // TODO: enable once every project is ts
-    // { "path": "./packages/api" },
-    // { "path": "./packages/desktop-client" }
+    { "path": "./packages/crdt" },
+    { "path": "./packages/component-library" },
+    { "path": "./packages/plugins-service" },
+    { "path": "./packages/loot-core" },
+    { "path": "./packages/api" },
+    { "path": "./packages/desktop-client" },
+    { "path": "./packages/sync-server" },
+    { "path": "./packages/desktop-electron" }
   ],
   "compilerOptions": {
-    // "composite": true,
     "target": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "allowSyntheticDefaultImports": true,
@@ -28,17 +32,9 @@
     "moduleResolution": "bundler",
     "module": "es2022",
     // Until/if we build using tsc
-    "noEmit": true,
-    "paths": {
-      // TEMPORARY: Until we can fix the "exports" in the loot-core package.json
-      "loot-core/*": ["./packages/loot-core/src/*"],
-      "@desktop-client/*": ["./packages/desktop-client/src/*"],
-      "@desktop-client/e2e/*": ["./packages/desktop-client/e2e/*"],
-      // Allow importing from hyperformula's internal typings for custom function plugins
-      "hyperformula/typings/*": ["./node_modules/hyperformula/typings/*"]
-    }
+    "noEmit": true
   },
-  "include": ["packages/**/*", "bin/*.ts"],
+  "include": ["bin/*.ts"],
   "exclude": [
     "**/.*/",
     "node_modules",

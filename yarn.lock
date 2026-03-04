@@ -64,6 +64,7 @@ __metadata:
     react-dom: "npm:19.2.4"
     storybook: "npm:^10.2.7"
     usehooks-ts: "npm:^3.1.1"
+    vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^4.0.18"
   peerDependencies:
     react: ">=19.2"
@@ -142,7 +143,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/web@workspace:*, @actual-app/web@workspace:^, @actual-app/web@workspace:packages/desktop-client":
+"@actual-app/web@workspace:*, @actual-app/web@workspace:packages/desktop-client":
   version: 0.0.0-use.local
   resolution: "@actual-app/web@workspace:packages/desktop-client"
   dependencies:
@@ -224,7 +225,6 @@ __metadata:
     uuid: "npm:^13.0.0"
     vite: "npm:^7.3.1"
     vite-plugin-pwa: "npm:^1.2.0"
-    vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^4.0.18"
     xml2js: "npm:^0.6.2"
   languageName: unknown
@@ -19948,7 +19948,6 @@ __metadata:
   resolution: "loot-core@workspace:packages/loot-core"
   dependencies:
     "@actual-app/crdt": "workspace:^"
-    "@actual-app/web": "workspace:^"
     "@jlongster/sql.js": "npm:^1.6.7"
     "@reduxjs/toolkit": "npm:^2.11.2"
     "@rschedule/core": "npm:^1.5.0"

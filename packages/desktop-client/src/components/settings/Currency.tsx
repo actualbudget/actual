@@ -59,6 +59,7 @@ export function CurrencySettings() {
         ['SGD', t('Singapore Dollar')],
         ['THB', t('Thai Baht')],
         ['TRY', t('Turkish Lira')],
+        ['TWD', t('New Taiwan Dollar')],
         ['UAH', t('Ukrainian Hryvnia')],
         ['USD', t('US Dollar')],
         ['UZS', t('Uzbek Soum')],
