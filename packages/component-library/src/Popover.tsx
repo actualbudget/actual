@@ -24,14 +24,29 @@ export const Popover = ({
     [props],
   );
 
+  const handlePointerDownOutside = useCallback(
+    (e: PointerEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        props.onOpenChange?.(false);
+      }
+    },
+    [props],
+  );
+
   useEffect(() => {
     if (!props.isNonModal) return;
     if (props.isOpen) {
       ref.current?.addEventListener('focusout', handleFocus);
+      document.addEventListener('pointerdown', handlePointerDownOutside);
     } else {
       ref.current?.removeEventListener('focusout', handleFocus);
+      document.removeEventListener('pointerdown', handlePointerDownOutside);
     }
-  }, [handleFocus, props.isNonModal, props.isOpen]);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDownOutside);
+    };
+  }, [handleFocus, handlePointerDownOutside, props.isNonModal, props.isOpen]);
 
   return (
     <ReactAriaPopover
