@@ -3,23 +3,15 @@ import type {
   RequestInit as FetchInit,
 } from 'node-fetch';
 
-// loot-core types
 import { init as initLootCore, lib } from 'loot-core/server/main';
 import type { InitConfig } from 'loot-core/server/main';
 
 import { validateNodeVersion } from './validateNodeVersion';
 
-let actualApp: null | typeof lib;
-export const internal = lib;
-
 export * from './methods';
 export * as utils from './utils';
 
 export async function init(config: InitConfig = {}) {
-  if (actualApp) {
-    return;
-  }
-
   validateNodeVersion();
 
   if (!globalThis.fetch) {
@@ -30,20 +22,15 @@ export async function init(config: InitConfig = {}) {
     };
   }
 
-  await initLootCore(config);
-  actualApp = lib;
-
-  return lib;
+  return initLootCore(config);
 }
 
 export async function shutdown() {
-  if (actualApp) {
-    try {
-      await actualApp.send('sync');
-    } catch {
-      // most likely that no budget is loaded, so the sync failed
-    }
-    await actualApp.send('close-budget');
-    actualApp = null;
+  try {
+    await lib.send('sync');
+  } catch {
+    // most likely that no budget is loaded, so the sync failed
   }
+
+  await lib.send('close-budget');
 }
