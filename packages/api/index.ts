@@ -11,6 +11,8 @@ import { validateNodeVersion } from './validateNodeVersion';
 export * from './methods';
 export * as utils from './utils';
 
+export const internal = lib;
+
 export async function init(config: InitConfig = {}) {
   validateNodeVersion();
 

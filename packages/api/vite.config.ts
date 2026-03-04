@@ -25,6 +25,16 @@ function copyMigrationsAndDefaultDb() {
     name: 'copy-migrations-and-default-db',
     closeBundle() {
       const migrationsSrc = path.join(lootCoreRoot, 'migrations');
+      const defaultDbPath = path.join(lootCoreRoot, 'default-db.sqlite');
+
+      if (!fs.existsSync(migrationsSrc)) {
+        throw new Error(`migrations directory not found at ${migrationsSrc}`);
+      }
+      const migrationsStat = fs.statSync(migrationsSrc);
+      if (!migrationsStat.isDirectory()) {
+        throw new Error(`migrations path is not a directory: ${migrationsSrc}`);
+      }
+
       const migrationsDest = path.join(distDir, 'migrations');
       fs.mkdirSync(migrationsDest, { recursive: true });
       for (const name of fs.readdirSync(migrationsSrc)) {
@@ -35,10 +45,11 @@ function copyMigrationsAndDefaultDb() {
           );
         }
       }
-      fs.copyFileSync(
-        path.join(lootCoreRoot, 'default-db.sqlite'),
-        path.join(distDir, 'default-db.sqlite'),
-      );
+
+      if (!fs.existsSync(defaultDbPath)) {
+        throw new Error(`default-db.sqlite not found at ${defaultDbPath}`);
+      }
+      fs.copyFileSync(defaultDbPath, path.join(distDir, 'default-db.sqlite'));
     },
   };
 }

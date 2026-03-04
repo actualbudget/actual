@@ -20,10 +20,10 @@
     "compare-versions": "^6.1.1",
     "loot-core": "workspace:^",
     "node-fetch": "^3.3.2",
-    "rollup-plugin-visualizer": "^6.0.5",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "rollup-plugin-visualizer": "^6.0.5",
     "typescript": "^5.9.3",
     "typescript-strict-plugin": "^2.4.4",
     "vite": "^7.3.1",
