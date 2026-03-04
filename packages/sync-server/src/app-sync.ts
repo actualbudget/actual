@@ -26,7 +26,11 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares';
-import { getPathForGroupFile, getPathForUserFile } from './util/paths';
+import {
+  getPathForGroupFile,
+  getPathForUserFile,
+  isValidFileId,
+} from './util/paths';
 
 const app = express();
 app.use(validateSessionMiddleware);
@@ -49,14 +53,9 @@ app.use(express.json({ limit: `${config.get('upload.fileSizeLimitMB')}mb` }));
 export { app as handlers };
 
 const OK_RESPONSE = { status: 'ok' };
-const FILE_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 
 function boolToInt(deleted) {
   return deleted ? 1 : 0;
-}
-
-function isValidFileId(fileId: unknown): fileId is string {
-  return typeof fileId === 'string' && FILE_ID_PATTERN.test(fileId);
 }
 
 const verifyFileExists = (fileId, filesService, res, errorObject) => {

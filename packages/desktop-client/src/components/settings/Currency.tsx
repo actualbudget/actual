@@ -62,7 +62,6 @@ export function CurrencySettings() {
         ['UAH', t('Ukrainian Hryvnia')],
         ['USD', t('US Dollar')],
         ['UZS', t('Uzbek Soum')],
-        ['VND', t('Vietnamese Dong')],
       ]),
     [t],
   );
