@@ -58,7 +58,7 @@ export default defineConfig({
   ssr: { noExternal: true, external: ['better-sqlite3'] },
   build: {
     ssr: true,
-    target: 'es2021',
+    target: 'node18',
     outDir: distDir,
     emptyOutDir: true,
     sourcemap: true,
