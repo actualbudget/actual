@@ -2,7 +2,6 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { Warning } from '@desktop-client/components/alerts';
@@ -19,13 +18,17 @@ export function RefillAutomation({
   const { t } = useTranslation();
 
   return (
-    <SpaceBetween direction="vertical" gap={10} style={{ marginTop: 10 }}>
-      <Text>
-        <Trans>Uses the balance limit automation for this category.</Trans>
-      </Text>
+    <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
       {!hasLimitAutomation && (
-        <Warning>
-          <SpaceBetween gap={10} align="center" style={{ flexWrap: 'wrap' }}>
+        <Warning
+          style={{ width: '100%', alignItems: 'center' }}
+          iconStyle={{ alignSelf: 'unset', paddingTop: 0, marginTop: -2 }}
+        >
+          <SpaceBetween
+            gap={10}
+            align="center"
+            style={{ width: '100%', justifyContent: 'space-between' }}
+          >
             <View>
               <Trans>
                 Add a balance limit automation to set the refill target.
