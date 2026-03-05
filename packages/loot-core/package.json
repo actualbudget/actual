@@ -49,6 +49,7 @@
     "./shared/*": "./src/shared/*.ts",
     "./types/models": "./src/types/models/index.ts",
     "./types/*": "./src/types/*.ts",
+    "./typings/*": "./typings/*.ts",
     "./lib-dist/electron/bundle.desktop.js": "./lib-dist/electron/bundle.desktop.js"
   },
   "scripts": {
