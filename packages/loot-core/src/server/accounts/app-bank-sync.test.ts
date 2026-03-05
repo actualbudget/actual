@@ -46,7 +46,7 @@ beforeEach(async () => {
 
 describe('simpleFinBatchSync', () => {
   describe('when batch sync throws an error', () => {
-    test('each account gets its own isolated errors array', async () => {
+    it('each account gets its own isolated errors array', async () => {
       await setupSimpleFinAccounts([
         { id: 'acct1', name: 'Checking', accountId: 'ext-1' },
         { id: 'acct2', name: 'Savings', accountId: 'ext-2' },
@@ -72,7 +72,7 @@ describe('simpleFinBatchSync', () => {
       expect(result[2].res.errors).toHaveLength(1);
     });
 
-    test('each error references its own account', async () => {
+    it('each error references its own account', async () => {
       await setupSimpleFinAccounts([
         { id: 'acct1', name: 'Checking', accountId: 'ext-1' },
         { id: 'acct2', name: 'Savings', accountId: 'ext-2' },
@@ -96,7 +96,7 @@ describe('simpleFinBatchSync', () => {
   });
 
   describe('when individual accounts have errors in the response', () => {
-    test('per-account error_code only affects that account', async () => {
+    it('per-account error_code only affects that account', async () => {
       await setupSimpleFinAccounts([
         { id: 'acct1', name: 'Checking', accountId: 'ext-1' },
         { id: 'acct2', name: 'Savings', accountId: 'ext-2' },
