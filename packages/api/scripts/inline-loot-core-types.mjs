@@ -11,7 +11,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const apiRoot = path.resolve(__dirname, '..');
 const typesDir = path.join(apiRoot, '@types');
 const indexDts = path.join(typesDir, 'index.d.ts');
-const lootCoreDeclSrc = path.resolve(apiRoot, '../loot-core/lib-dist/decl/src');
+const lootCoreDeclRoot = path.resolve(apiRoot, '../loot-core/lib-dist/decl');
+const lootCoreDeclSrc = path.join(lootCoreDeclRoot, 'src');
+const lootCoreDeclTypings = path.join(lootCoreDeclRoot, 'typings');
 const lootCoreTypesDir = path.join(typesDir, 'loot-core');
 
 function main() {
@@ -35,8 +37,13 @@ function main() {
     fs.rmSync(legacyDts);
   }
 
-  // Copy declaration tree as-is (relative imports inside files resolve within the tree)
+  // Copy declaration tree: src (main exports) plus emitted typings so no declarations are dropped
   fs.cpSync(lootCoreDeclSrc, lootCoreTypesDir, { recursive: true });
+  if (fs.existsSync(lootCoreDeclTypings)) {
+    fs.cpSync(lootCoreDeclTypings, path.join(lootCoreTypesDir, 'typings'), {
+      recursive: true,
+    });
+  }
 
   // Rewrite index.d.ts: remove reference, point imports at local ./loot-core/
   let indexContent = fs.readFileSync(indexDts, 'utf8');
