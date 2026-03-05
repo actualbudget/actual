@@ -38,7 +38,7 @@ function copyMigrationsAndDefaultDb() {
       const migrationsDest = path.join(distDir, 'migrations');
       fs.mkdirSync(migrationsDest, { recursive: true });
       for (const name of fs.readdirSync(migrationsSrc)) {
-        if (name.endsWith('.sql')) {
+        if (name.endsWith('.sql') || name.endsWith('.js')) {
           fs.copyFileSync(
             path.join(migrationsSrc, name),
             path.join(migrationsDest, name),
