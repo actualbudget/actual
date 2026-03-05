@@ -4589,13 +4589,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jlongster/sql.js@npm:^1.6.7":
-  version: 1.6.7
-  resolution: "@jlongster/sql.js@npm:1.6.7"
-  checksum: 10/b8e7f255a60244eec21a5ad3af4b24cedc612fd5e62e5623d45b4da828d02a30170e45d9f80debb0013e144419922219d13a5cf141a2d7188a382ce77669a618
-  languageName: node
-  linkType: hard
-
 "@joshwooding/vite-plugin-react-docgen-typescript@npm:^0.6.4":
   version: 0.6.4
   resolution: "@joshwooding/vite-plugin-react-docgen-typescript@npm:0.6.4"
@@ -8267,6 +8260,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sqlite.org/sqlite-wasm@npm:^3.51.2-build6":
+  version: 3.51.2-build6
+  resolution: "@sqlite.org/sqlite-wasm@npm:3.51.2-build6"
+  checksum: 10/a279eb9307e99e425a05aab7607b0d34012a8ee5a0e3c2f7657df2c27fb669b20472a8344280aad95f042a663fa8a00a17a36187244ec1760692322c99de6796
+  languageName: node
+  linkType: hard
+
 "@standard-schema/spec@npm:^1.0.0":
   version: 1.0.0
   resolution: "@standard-schema/spec@npm:1.0.0"
@@ -9357,13 +9357,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/emscripten@npm:*, @types/emscripten@npm:^1.41.5":
-  version: 1.41.5
-  resolution: "@types/emscripten@npm:1.41.5"
-  checksum: 10/60dfcced39b2d0c94f31907c5cf5d97fe06ed35ed6cb134650a1a96bae861302722d4a6f459b484ea09588cde70cbcc034974454a746be3ce9688b52398d2953
-  languageName: node
-  linkType: hard
-
 "@types/eslint-scope@npm:^3.7.7":
   version: 3.7.7
   resolution: "@types/eslint-scope@npm:3.7.7"
@@ -9578,16 +9571,6 @@ __metadata:
   dependencies:
     "@types/istanbul-lib-report": "npm:*"
   checksum: 10/93eb18835770b3431f68ae9ac1ca91741ab85f7606f310a34b3586b5a34450ec038c3eed7ab19266635499594de52ff73723a54a72a75b9f7d6a956f01edee95
-  languageName: node
-  linkType: hard
-
-"@types/jlongster__sql.js@npm:@types/sql.js@latest":
-  version: 1.4.9
-  resolution: "@types/sql.js@npm:1.4.9"
-  dependencies:
-    "@types/emscripten": "npm:*"
-    "@types/node": "npm:*"
-  checksum: 10/028e4ed497744d8f2060fd286c4ad563e0b2fea024244d8fba805eadb0cde0af5b8a5a0ab6d2e8120b7acb9daed9f1d435642588be8fbb3af0b72c5972eace2d
   languageName: node
   linkType: hard
 
@@ -10700,15 +10683,6 @@ __metadata:
   version: 3.0.1
   resolution: "abbrev@npm:3.0.1"
   checksum: 10/ebd2c149dda6f543b66ce3779ea612151bb3aa9d0824f169773ee9876f1ca5a4e0adbcccc7eed048c04da7998e1825e2aa76fcca92d9e67dea50ac2b0a58dc2e
-  languageName: node
-  linkType: hard
-
-"absurd-sql@npm:0.0.54":
-  version: 0.0.54
-  resolution: "absurd-sql@npm:0.0.54"
-  dependencies:
-    safari-14-idb-fix: "npm:^1.0.4"
-  checksum: 10/85eac6075c44f44c02e5b250bc83f144788f6a02d35b94db13b514d8d1e5851477aa16bafab1fd538e15b35dd554d3bab92585afd8ffae37a32f66e3b2e7a399
   languageName: node
   linkType: hard
 
@@ -19649,19 +19623,16 @@ __metadata:
   dependencies:
     "@actual-app/api": "workspace:^"
     "@actual-app/crdt": "workspace:^"
-    "@jlongster/sql.js": "npm:^1.6.7"
     "@reduxjs/toolkit": "npm:^2.11.2"
     "@rschedule/core": "npm:^1.5.0"
     "@rschedule/json-tools": "npm:^1.5.0"
     "@rschedule/standard-date-adapter": "npm:^1.5.0"
+    "@sqlite.org/sqlite-wasm": "npm:^3.51.2-build6"
     "@swc/core": "npm:^1.15.11"
     "@types/adm-zip": "npm:^0.5.7"
     "@types/better-sqlite3": "npm:^7.6.13"
-    "@types/emscripten": "npm:^1.41.5"
-    "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/node": "npm:^22.19.10"
     "@types/pegjs": "npm:^0.10.6"
-    absurd-sql: "npm:0.0.54"
     adm-zip: "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch"
     assert: "npm:^2.1.0"
     better-sqlite3: "npm:^12.6.2"
@@ -25508,13 +25479,6 @@ __metadata:
   version: 1.3.3
   resolution: "rw@npm:1.3.3"
   checksum: 10/e90985d64777a00f4ab5f8c0bfea2fb5645c6bda5238840afa339c8a4f86f776e8ce83731155643a7425a0b27ce89077dab27b2f57519996ba4d2fe54cac1941
-  languageName: node
-  linkType: hard
-
-"safari-14-idb-fix@npm:^1.0.4":
-  version: 1.0.6
-  resolution: "safari-14-idb-fix@npm:1.0.6"
-  checksum: 10/90ea958b47209d689f65852c378dbb0c27e5eaeae77284bcfc4edb636b74da56adecf0435e4827b552944510ac65021a4457ec0bb9fdf1e348248a5e00bfe65b
   languageName: node
   linkType: hard
 

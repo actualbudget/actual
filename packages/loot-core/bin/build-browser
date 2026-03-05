@@ -14,7 +14,7 @@ find * -type f | sort > ../data-file-index.txt
 cd "$ROOT"
 
 # Clean out previous build files
-rm -f ../lib-dist/browser/*
+rm -rf ../lib-dist/browser/*
 rm -rf ../../desktop-client/public/kcab
 
 if [ $NODE_ENV == 'development' ]; then
@@ -29,7 +29,7 @@ if [ $NODE_ENV == 'development' ]; then
   ln -snf "$ROOT"/../lib-dist/browser ../../desktop-client/public/kcab
 fi
 
-cp ../../../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm "$PUBLIC_DIR"/sql-wasm.wasm
+cp ../../../node_modules/@sqlite.org/sqlite-wasm/dist/sqlite3.wasm "$PUBLIC_DIR"/sqlite3.wasm
 
 yarn vite build --config ../vite.config.ts --mode $NODE_ENV $VITE_ARGS
 

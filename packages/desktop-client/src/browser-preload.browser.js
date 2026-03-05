@@ -1,4 +1,3 @@
-import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 import { registerSW } from 'virtual:pwa-register';
 
 import * as Platform from 'loot-core/shared/platform';
@@ -25,11 +24,6 @@ let worker = null;
 
 function createBackendWorker() {
   worker = new Worker(backendWorkerUrl);
-  initSQLBackend(worker);
-
-  if (window.SharedArrayBuffer) {
-    localStorage.removeItem('SharedArrayBufferOverride');
-  }
 
   worker.postMessage({
     type: 'init',
@@ -37,9 +31,6 @@ function createBackendWorker() {
     isDev: IS_DEV,
     publicUrl: process.env.PUBLIC_URL,
     hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
-    isSharedArrayBufferOverrideEnabled: localStorage.getItem(
-      'SharedArrayBufferOverride',
-    ),
   });
 }
 

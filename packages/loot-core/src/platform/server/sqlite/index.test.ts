@@ -1,13 +1,8 @@
 // @ts-strict-ignore
-import { patchFetchForSqlJS } from '../../../mocks/util';
-
 import { execQuery, init, openDatabase, runQuery, transaction } from './index';
 
 beforeAll(async () => {
-  const baseURL = `${__dirname}/../../../../../../node_modules/@jlongster/sql.js/dist/`;
-  patchFetchForSqlJS(baseURL);
-
-  return init({ baseURL });
+  return init();
 });
 
 const initSQL = `
@@ -97,7 +92,7 @@ describe('Web sqlite', () => {
 
     const rows = runQuery(
       db,
-      'SELECT id FROM textstrings where REGEXP("n.", string)',
+      "SELECT id FROM textstrings where REGEXP('n.', string)",
       null,
       true,
     );

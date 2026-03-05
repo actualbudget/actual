@@ -1,70 +1,78 @@
 // @ts-strict-ignore
-import initSqlJS from '@jlongster/sql.js';
-import type { Database, SqlJsStatic, Statement } from '@jlongster/sql.js';
+import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
+import type {
+  Database,
+  PreparedStatement,
+  SAHPoolUtil,
+  Sqlite3Static,
+  SqlValue,
+} from '@sqlite.org/sqlite-wasm';
 
 import { logger } from '../log';
 
 import { normalise } from './normalise';
 import { unicodeLike } from './unicodeLike';
 
-// Types exported from sql.js (and Emscripten) are incomplete, so we need to redefine them here
-type FSStream = (typeof FS)['FSStream'] & {
-  node: (typeof FS)['FSNode'] & {
-    contents: {
-      readIfFallback: () => Promise<unknown>;
-    };
-  };
-};
-type FS = Omit<typeof FS, 'lookupPath' | 'open' | 'close'> & {
-  lookupPath: (
-    path: string,
-    opts?: { follow?: boolean },
-  ) => { node: (typeof FS)['FSNode'] & { link?: string } };
-  open: (path: string, flags: string, mode?: number) => FSStream;
-  close: (stream: FSStream) => void;
-};
-export type SqlJsModule = SqlJsStatic & {
-  FS: FS;
-  reset_filesystem: () => void;
-  register_for_idb: (idb: IDBDatabase) => void;
-};
+export type { Database, PreparedStatement };
+export type Statement = PreparedStatement;
 
-let SQL: SqlJsModule | null = null;
+let sqlite3: Sqlite3Static | null = null;
+let sahPoolUtil: SAHPoolUtil | null = null;
 
 export async function init({
   baseURL = process.env.PUBLIC_URL,
 }: { baseURL?: string } = {}) {
-  // `initSqlJS` doesn't actually return a real promise, so make sure
-  // we're returning a real one for correct semantics
-  return new Promise((resolve, reject) => {
-    initSqlJS({
-      locateFile: file => baseURL + file,
-    }).then(
-      sql => {
-        SQL = sql as SqlJsModule;
-        resolve(undefined);
-      },
-      err => {
-        reject(err);
-      },
-    );
-  });
+  // The Emscripten-level `locateFile` option isn't in the TypeScript types
+  // but is supported at runtime to resolve the .wasm file path.
+  // In Node.js (tests), omit locateFile so it resolves relative to the module.
+  const opts: Record<string, unknown> = {};
+  if (baseURL) {
+    opts.locateFile = (file: string) => baseURL + file;
+  }
+  sqlite3 = await (
+    sqlite3InitModule as (
+      opts?: Record<string, unknown>,
+    ) => Promise<Sqlite3Static>
+  )(opts);
+
+  // Install the OPFS SAH Pool VFS for persistent storage.
+  // This works in Web Workers without requiring SharedArrayBuffer or COOP/COEP headers.
+  if (
+    typeof globalThis.FileSystemHandle !== 'undefined' &&
+    typeof globalThis.FileSystemDirectoryHandle !== 'undefined' &&
+    typeof navigator !== 'undefined'
+  ) {
+    try {
+      sahPoolUtil = await sqlite3.installOpfsSAHPoolVfs({
+        initialCapacity: 16,
+        directory: '.actual-budget',
+        name: 'opfs-sahpool',
+      });
+    } catch (e) {
+      logger.log('OPFS SAH Pool VFS not available, using in-memory only:', e);
+    }
+  }
 }
 
 export function _getModule() {
-  if (SQL == null) {
-    throw new Error('_getModule: sql.js must be initialized first');
+  if (sqlite3 == null) {
+    throw new Error('_getModule: sqlite3 must be initialized first');
   }
-  return SQL;
+  return sqlite3;
+}
+
+export function _getSAHPoolUtil() {
+  return sahPoolUtil;
 }
 
 function verifyParamTypes(
-  sql: string | Statement,
+  sql: string | PreparedStatement,
   arr: (string | number)[] = [],
 ) {
   arr.forEach(val => {
     if (typeof val !== 'string' && typeof val !== 'number' && val !== null) {
-      throw new Error('Invalid field type ' + val + ' for sql ' + sql);
+      const sqlDesc = typeof sql === 'string' ? sql : '[PreparedStatement]';
+      throw new Error('Invalid field type ' + val + ' for sql ' + sqlDesc);
     }
   });
 }
@@ -75,19 +83,19 @@ export function prepare(db: Database, sql: string) {
 
 export function runQuery(
   db: Database,
-  sql: string | Statement,
+  sql: string | PreparedStatement,
   params?: (string | number)[],
   fetchAll?: false,
 ): { changes: unknown };
 export function runQuery<T>(
   db: Database,
-  sql: string | Statement,
+  sql: string | PreparedStatement,
   params: (string | number)[],
   fetchAll: true,
 ): T[];
 export function runQuery<T>(
   db: Database,
-  sql: string | Statement,
+  sql: string | PreparedStatement,
   params: (string | number)[] = [],
   fetchAll = false,
 ): T[] | { changes: unknown } {
@@ -96,18 +104,21 @@ export function runQuery<T>(
   }
 
   const stmt = typeof sql === 'string' ? db.prepare(sql) : sql;
+  const hasParams = params && params.length > 0;
 
   if (fetchAll) {
     try {
-      stmt.bind(params);
+      if (hasParams) {
+        stmt.bind(params);
+      }
       const rows = [];
 
       while (stmt.step()) {
-        rows.push(stmt.getAsObject());
+        rows.push(stmt.get({}) as T);
       }
 
       if (typeof sql === 'string') {
-        stmt.free();
+        stmt.finalize();
       } else {
         stmt.reset();
       }
@@ -117,8 +128,16 @@ export function runQuery<T>(
       throw e;
     }
   } else {
-    stmt.run(params);
-    return { changes: db.getRowsModified() };
+    if (hasParams) {
+      stmt.bind(params);
+    }
+    stmt.step();
+    if (typeof sql === 'string') {
+      stmt.finalize();
+    } else {
+      stmt.reset();
+    }
+    return { changes: db.changes() };
   }
 }
 
@@ -183,52 +202,89 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
   }
 }
 
-function regexp(regex: string, text: string) {
-  return new RegExp(regex).test(text || '') ? 1 : 0;
+function toStr(val: SqlValue | undefined): string {
+  if (val == null) return '';
+  if (typeof val === 'string') return val;
+  if (typeof val === 'number' || typeof val === 'bigint') return val.toString();
+  return '';
+}
+
+function regexp(_ctxPtr: number, ...args: SqlValue[]) {
+  const regex = toStr(args[0]);
+  const text = toStr(args[1]);
+  return new RegExp(regex).test(text) ? 1 : 0;
 }
 
 export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
-  let db = null;
+  if (sqlite3 == null) {
+    throw new Error('openDatabase: sqlite3 must be initialized first');
+  }
+
+  let db: Database;
   if (pathOrBuffer) {
     if (typeof pathOrBuffer !== 'string') {
-      db = new SQL.Database(pathOrBuffer);
+      // Load from a buffer: create in-memory DB then deserialize
+      db = new sqlite3.oo1.DB();
+      const rc = sqlite3.capi.sqlite3_deserialize(
+        db.pointer,
+        'main',
+        sqlite3.wasm.allocFromTypedArray(pathOrBuffer),
+        pathOrBuffer.byteLength,
+        pathOrBuffer.byteLength,
+        sqlite3.capi.SQLITE_DESERIALIZE_FREEONCLOSE |
+          sqlite3.capi.SQLITE_DESERIALIZE_RESIZEABLE,
+      );
+      db.checkRc(rc);
     } else {
       const path = pathOrBuffer;
       if (path !== ':memory:') {
-        if (typeof SharedArrayBuffer === 'undefined') {
-          const stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');
-          await stream.node.contents.readIfFallback();
-          SQL.FS.close(stream);
+        // Open a persistent database using OPFS SAH Pool VFS if available
+        if (sahPoolUtil) {
+          db = new sahPoolUtil.OpfsSAHPoolDb(path);
+        } else {
+          // Fallback to in-memory database when OPFS is not available
+          db = new sqlite3.oo1.DB(path, 'c');
         }
-
-        db = new SQL.Database(
-          path.includes('/blocked') ? path : SQL.FS.readlink(path),
-          // @ts-expect-error 2nd argument missed in sql.js types
-          { filename: true },
-        );
         db.exec(`
           PRAGMA journal_mode=MEMORY;
           PRAGMA cache_size=-10000;
         `);
+      } else {
+        db = new sqlite3.oo1.DB(':memory:');
       }
     }
-  }
-
-  if (db === null) {
-    db = new SQL.Database();
+  } else {
+    db = new sqlite3.oo1.DB();
   }
 
   // Define Unicode-aware LOWER, UPPER, and LIKE implementation.
-  // This is necessary because sql.js uses SQLite build without ICU support.
-  //
-  // Note that this function should ideally be created with a deterministic flag
-  // to allow SQLite to better optimize calls to it by factoring them out of inner loops
-  // but SQL.js does not support this: https://github.com/sql-js/sql.js/issues/551
-  db.create_function('UNICODE_LOWER', arg => arg?.toLowerCase());
-  db.create_function('UNICODE_UPPER', arg => arg?.toUpperCase());
-  db.create_function('UNICODE_LIKE', unicodeLike);
-  db.create_function('REGEXP', regexp);
-  db.create_function('NORMALISE', normalise);
+  db.createFunction('UNICODE_LOWER', {
+    xFunc: (_ctxPtr: number, ...args: SqlValue[]) => {
+      const arg = args[0];
+      return typeof arg === 'string' ? arg.toLowerCase() : null;
+    },
+    arity: 1,
+  });
+  db.createFunction('UNICODE_UPPER', {
+    xFunc: (_ctxPtr: number, ...args: SqlValue[]) => {
+      const arg = args[0];
+      return typeof arg === 'string' ? arg.toUpperCase() : null;
+    },
+    arity: 1,
+  });
+  db.createFunction('UNICODE_LIKE', {
+    xFunc: (_ctxPtr: number, ...args: SqlValue[]) =>
+      unicodeLike(toStr(args[0]), toStr(args[1])),
+    arity: 2,
+  });
+  db.createFunction('REGEXP', {
+    xFunc: regexp,
+    arity: 2,
+  });
+  db.createFunction('NORMALISE', {
+    xFunc: (_ctxPtr: number, ...args: SqlValue[]) => normalise(toStr(args[0])),
+    arity: 1,
+  });
   return db;
 }
 
@@ -237,5 +293,22 @@ export function closeDatabase(db: Database) {
 }
 
 export async function exportDatabase(db: Database) {
-  return db.export();
+  if (sqlite3 == null) {
+    throw new Error('exportDatabase: sqlite3 must be initialized first');
+  }
+
+  // Use sqlite3_serialize to export the database to a byte array
+  const pSize = sqlite3.wasm.pstack.alloc(8);
+  try {
+    const pData = sqlite3.capi.sqlite3_serialize(db.pointer, 'main', pSize, 0);
+    if (!pData) {
+      throw new Error('Failed to serialize database');
+    }
+    const size = Number(sqlite3.wasm.peek(pSize, 'i64'));
+    const data = sqlite3.wasm.heap8u().slice(pData, pData + size);
+    sqlite3.wasm.dealloc(pData);
+    return data;
+  } finally {
+    sqlite3.wasm.pstack.restore(pSize);
+  }
 }

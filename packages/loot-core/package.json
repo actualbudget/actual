@@ -64,12 +64,11 @@
     "typecheck": "tsc --noEmit && tsc-strict"
   },
   "dependencies": {
-    "@jlongster/sql.js": "^1.6.7",
     "@reduxjs/toolkit": "^2.11.2",
     "@rschedule/core": "^1.5.0",
     "@rschedule/json-tools": "^1.5.0",
     "@rschedule/standard-date-adapter": "^1.5.0",
-    "absurd-sql": "0.0.54",
+    "@sqlite.org/sqlite-wasm": "^3.51.2-build6",
     "adm-zip": "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch",
     "better-sqlite3": "^12.6.2",
     "csv-parse": "^6.1.0",
@@ -93,8 +92,6 @@
     "@swc/core": "^1.15.11",
     "@types/adm-zip": "^0.5.7",
     "@types/better-sqlite3": "^7.6.13",
-    "@types/emscripten": "^1.41.5",
-    "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
     "@types/node": "^22.19.10",
     "@types/pegjs": "^0.10.6",
     "assert": "^2.1.0",

@@ -1,30 +1,22 @@
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 
-import { patchFetchForSqlJS } from '../../../mocks/util';
 import * as idb from '../indexeddb';
 import * as sqlite from '../sqlite';
 
-import { exists, init, join, pathToId, readFile, writeFile } from './index';
+import { exists, init, join, readFile, writeFile } from './index';
 
-beforeAll(() => {
-  const baseURL = `${__dirname}/../../../../../../node_modules/@jlongster/sql.js/dist/`;
-  patchFetchForSqlJS(baseURL);
-  process.env.PUBLIC_URL = baseURL;
+beforeAll(async () => {
+  return sqlite.init();
 });
 
 beforeEach(() => {
   global.indexedDB = new IDBFactory();
 });
 
-afterEach(() => {
-  sqlite._getModule().reset_filesystem();
-});
-
 describe('web filesystem', () => {
   test('basic reads/writes are stored in idb', async () => {
     await idb.openDatabase();
-    await sqlite.init();
     await init();
 
     // Text file
@@ -64,17 +56,19 @@ describe('web filesystem', () => {
     await idb.closeDatabase();
   });
 
-  test('writing to sqlite files creates symlinks', async () => {
+  test('writing to sqlite files records in IDB metadata', async () => {
     await idb.openDatabase();
-    await sqlite.init();
     await init();
 
     await writeFile('/documents/db.sqlite', 'some junk');
 
-    expect(await readFile('/documents/db.sqlite')).toBe('some junk');
-    expect(await readFile('/blocked/' + pathToId('/documents/db.sqlite'))).toBe(
-      'some junk',
-    );
+    // Verify IDB has the metadata entry
+    const db = await idb.openDatabase();
+    const { store } = idb.getStore(db, 'files');
+    const entry = await idb.get(store, '/documents/db.sqlite');
+    expect(entry).toBeDefined();
+    expect(entry.filepath).toBe('/documents/db.sqlite');
+    await idb.closeDatabase();
   });
 
   test('files are restored from idb', async () => {
@@ -90,21 +84,16 @@ describe('web filesystem', () => {
     });
     await idb.set(store, {
       filepath: '/documents/deep/nested/db.sqlite',
-      contents: 'this will be blank and just create a symlink',
+      contents: '',
     });
 
-    await sqlite.init();
     await init();
 
     expect(await readFile('/documents/ok.txt')).toBe('oh yeah');
     expect(await exists('/documents/deep')).toBe(true);
     expect(await readFile('/documents/deep/nested/file/ok.txt')).toBe('deeper');
-
-    const FS = sqlite._getModule().FS;
-    const { node } = FS.lookupPath('/documents/deep/nested/db.sqlite', {});
-    expect(node.link).toBe(
-      '/blocked/' + pathToId('/documents/deep/nested/db.sqlite'),
-    );
+    // The sqlite file should be tracked (visible via exists)
+    expect(await exists('/documents/deep/nested/db.sqlite')).toBe(true);
   });
 });
 

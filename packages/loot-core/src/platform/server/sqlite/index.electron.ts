@@ -8,6 +8,10 @@ import { logger } from '../log';
 import { normalise } from './normalise';
 import { unicodeLike } from './unicodeLike';
 
+export type Database = SQL.Database;
+export type Statement = SQL.Statement;
+export type PreparedStatement = SQL.Statement;
+
 function verifyParamTypes(sql, arr) {
   arr.forEach(val => {
     if (typeof val !== 'string' && typeof val !== 'number' && val !== null) {

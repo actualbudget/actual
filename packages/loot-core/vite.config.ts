@@ -1,9 +1,25 @@
 import path from 'path';
 
 import { visualizer } from 'rollup-plugin-visualizer';
+import type { Plugin } from 'vite';
 import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import peggyLoader from 'vite-plugin-peggy-loader';
+
+// Rollup transforms `import.meta.url` → `document.currentScript...` in IIFE
+// bundles, but `document` doesn't exist in Web Workers. This plugin replaces
+// it with `self.location.href` which is valid in Worker contexts.
+function workerImportMetaUrl(): Plugin {
+  return {
+    name: 'worker-import-meta-url',
+    resolveImportMeta(property, { format }) {
+      if (property === 'url' && format === 'iife') {
+        return 'self.location.href';
+      }
+      return null;
+    },
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -77,6 +93,7 @@ export default defineConfig(({ mode }) => {
       'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents'),
     },
     plugins: [
+      workerImportMetaUrl(),
       peggyLoader(),
       nodePolyfills({
         include: [

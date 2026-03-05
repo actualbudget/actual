@@ -1,8 +1,7 @@
-// @ts-strict-ignore
-import type { Database } from '@jlongster/sql.js';
-
 import { captureBreadcrumb } from '../platform/exceptions';
 import { logger } from '../platform/server/log';
+// @ts-strict-ignore
+import type { Database } from '../platform/server/sqlite';
 import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
 import * as Platform from '../shared/platform';

@@ -1,4 +1,3 @@
-import type { Database } from '@jlongster/sql.js';
 // @ts-strict-ignore
 import AdmZip from 'adm-zip';
 import * as dateFns from 'date-fns';
@@ -6,6 +5,7 @@ import * as dateFns from 'date-fns';
 import * as connection from '../../platform/server/connection';
 import * as fs from '../../platform/server/fs';
 import { logger } from '../../platform/server/log';
+import type { Database } from '../../platform/server/sqlite';
 import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import * as cloudStorage from '../cloud-storage';

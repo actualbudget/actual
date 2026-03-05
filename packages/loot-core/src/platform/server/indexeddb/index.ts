@@ -58,7 +58,7 @@ function _openDatabase() {
   });
 }
 
-type Data = { filepath: string; contents: string };
+type Data = { filepath: string; contents: string | Uint8Array };
 
 export const getStore = function (db: IDBDatabase, name: string) {
   const trans = db.transaction([name], 'readwrite');
