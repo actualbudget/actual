@@ -18,6 +18,9 @@ export type Statement = PreparedStatement;
 
 let sqlite3: Sqlite3Static | null = null;
 let sahPoolUtil: SAHPoolUtil | null = null;
+// true when the browser supports OPFS but the SAH Pool couldn't be acquired
+// (typically because another tab already holds the access handles).
+let opfsLockedByAnotherTab = false;
 
 export async function init({
   baseURL = process.env.PUBLIC_URL,
@@ -49,6 +52,9 @@ export async function init({
         name: 'opfs-sahpool',
       });
     } catch (e) {
+      // The most common cause is another tab already holding the
+      // exclusive FileSystemSyncAccessHandle locks on the OPFS files.
+      opfsLockedByAnotherTab = true;
       logger.log('OPFS SAH Pool VFS not available, using in-memory only:', e);
     }
   }
@@ -241,9 +247,14 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
         // Open a persistent database using OPFS SAH Pool VFS if available
         if (sahPoolUtil) {
           db = new sahPoolUtil.OpfsSAHPoolDb(path);
+        } else if (opfsLockedByAnotherTab) {
+          throw new Error(
+            'Unable to open the database. Another browser tab may already be ' +
+              'using Actual. Please close the other tab and try again.',
+          );
         } else {
-          // Fallback to in-memory database when OPFS is not available
-          db = new sqlite3.oo1.DB(path, 'c');
+          // No OPFS support at all – use in-memory (e.g. tests, old browsers)
+          db = new sqlite3.oo1.DB(':memory:');
         }
         db.exec(`
           PRAGMA journal_mode=MEMORY;
