@@ -80,6 +80,7 @@
     "md5": "^2.3.0",
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
+    "promise-retry": "^2.0.1",
     "slash": "5.1.0",
     "typescript": "^5.9.3",
     "typescript-strict-plugin": "^2.4.4",
