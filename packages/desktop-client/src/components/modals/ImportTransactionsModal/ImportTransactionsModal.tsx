@@ -25,6 +25,7 @@ import { Transaction } from './Transaction';
 import {
   applyFieldMappings,
   dateFormats,
+  filterByStartDate,
   isDateFormat,
   parseAmountFields,
   parseDate,
@@ -218,6 +219,7 @@ export function ImportTransactionsModal({
   );
 
   const [clearOnImport, setClearOnImport] = useState(true);
+  const [startDate, setStartDate] = useState('');
 
   const getImportPreview = useCallback(
     async (
@@ -672,9 +674,19 @@ export function ImportTransactionsModal({
   const importPreviewTransactions = useImportPreviewTransactionsMutation();
 
   const onImportPreview = useEffectEvent(async () => {
+    // Filter by start date before preview and deduplication
+    const isPreParsed = isOfxFile(filetype) || isCamtFile(filetype);
+    const filteredTransactions = filterByStartDate(
+      parsedTransactions,
+      startDate,
+      isPreParsed,
+      fieldMappings,
+      parseDateFormat,
+    );
+
     // always start from the original parsed transactions, not the previewed ones to ensure rules run
     const previewTransactionsToImport = await getImportPreview(
-      parsedTransactions,
+      filteredTransactions,
       filetype,
       flipAmount,
       fieldMappings,
@@ -699,7 +711,7 @@ export function ImportTransactionsModal({
             return map;
           }, {});
 
-          const previewTransactions = parsedTransactions
+          const previewTransactions = filteredTransactions
             .filter(trans => !trans.isMatchedTransaction)
             .reduce((previous, currentTrx) => {
               let next = previous;
@@ -750,7 +762,7 @@ export function ImportTransactionsModal({
     }
 
     void onImportPreview();
-  }, [loadingState, parsedTransactions.length]);
+  }, [loadingState, parsedTransactions.length, startDate]);
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
     { name: t('Date'), width: 200 },
@@ -883,6 +895,39 @@ export function ImportTransactionsModal({
               )}
             </View>
           )}
+
+          <View
+            style={{
+              marginTop: 10,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 5,
+            }}
+          >
+            <label
+              htmlFor="start-date-filter"
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 5,
+                alignItems: 'baseline',
+              }}
+            >
+              <Trans>Only import transactions since:</Trans>
+              <Input
+                id="start-date-filter"
+                type="date"
+                value={startDate}
+                onChangeValue={value => setStartDate(value)}
+                style={{ width: 150 }}
+              />
+            </label>
+            {startDate && (
+              <Button onPress={() => setStartDate('')}>
+                <Trans>Clear</Trans>
+              </Button>
+            )}
+          </View>
 
           {filetype === 'csv' && (
             <View style={{ marginTop: 10 }}>
