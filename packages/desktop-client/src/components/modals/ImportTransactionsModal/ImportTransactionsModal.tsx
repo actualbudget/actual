@@ -762,7 +762,13 @@ export function ImportTransactionsModal({
     }
 
     void onImportPreview();
-  }, [loadingState, parsedTransactions.length, startDate]);
+  }, [
+    loadingState,
+    parsedTransactions.length,
+    startDate,
+    fieldMappings,
+    parseDateFormat,
+  ]);
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
     { name: t('Date'), width: 200 },

@@ -252,8 +252,14 @@ describe('Import transactions', () => {
 
     it('works with field mappings for CSV', () => {
       const transactions = [
-        makeTrans({ trx_id: '0', Date: '01/15/2024' } as ImportTransaction),
-        makeTrans({ trx_id: '1', Date: '03/01/2024' } as ImportTransaction),
+        makeTrans({
+          trx_id: '0',
+          Date: '01/15/2024',
+        } satisfies Partial<ImportTransaction>),
+        makeTrans({
+          trx_id: '1',
+          Date: '03/01/2024',
+        } satisfies Partial<ImportTransaction>),
       ];
       const fieldMappings = {
         date: 'Date',
