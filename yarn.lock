@@ -118,7 +118,7 @@ __metadata:
     date-fns: "npm:^4.1.0"
     debug: "npm:^4.4.3"
     express: "npm:^5.2.1"
-    express-rate-limit: "npm:^8.2.2"
+    express-rate-limit: "npm:^8.3.0"
     express-winston: "npm:^4.2.0"
     http-proxy-middleware: "npm:^3.0.5"
     ipaddr.js: "npm:^2.3.0"
@@ -15917,7 +15917,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express-rate-limit@npm:^8.2.2":
+"express-rate-limit@npm:^8.3.0":
   version: 8.3.0
   resolution: "express-rate-limit@npm:8.3.0"
   dependencies:
