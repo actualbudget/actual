@@ -348,7 +348,7 @@ const ActiveShapeTwoRing = props => {
         startAngle={startAngle}
         endAngle={endAngle}
         innerRadius={expandInward ? innerRadius - 10 : outerRadius + 6}
-        outerRadius={expandInward ? innerRadius - 6  : outerRadius + 10}
+        outerRadius={expandInward ? innerRadius - 6 : outerRadius + 10}
         fill={fill}
       />
       <path
