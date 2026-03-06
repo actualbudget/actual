@@ -774,6 +774,18 @@ function compileConditions(state, conds) {
           // An array of conditions for a field is implicitly an `and`
           return cond.map(c => compileOp(state, field, c)).join(' AND ');
         }
+
+        // Multiple operators on one field (e.g. { $gte: ..., $lt: ... })
+        // are split into individual compileOp calls joined with AND
+        const { $transform, ...ops } = cond as Record<string, unknown>;
+        const opKeys = Object.keys(ops);
+        if (opKeys.length > 1) {
+          const base = $transform ? { $transform } : {};
+          return opKeys
+            .map(k => compileOp(state, field, { ...base, [k]: ops[k] }))
+            .join(' AND ');
+        }
+
         return compileOp(state, field, cond);
       })
       .filter(Boolean);

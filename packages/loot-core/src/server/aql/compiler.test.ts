@@ -526,6 +526,21 @@ describe('sheet language', () => {
         WHERE (transactions.amount < transactions.amount2)
       `),
     );
+
+    // Multiple operators on a single field as an object (e.g. range filter)
+    result = generateSQLWithState(
+      q('transactions')
+        .filter({ date: { $gte: '2025-03-01', $lt: '2025-04-01' } })
+        .select(['id'])
+        .serialize(),
+      basicSchema,
+    );
+    expect(sqlLines(result.sql)).toEqual(
+      sqlLines(`
+        SELECT transactions.id AS id FROM transactions
+        WHERE (transactions.date >= 20250301 AND transactions.date < 20250401)
+      `),
+    );
   });
 
   it('$and and $or allow the object form', () => {
