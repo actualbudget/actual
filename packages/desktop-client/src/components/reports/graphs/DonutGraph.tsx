@@ -45,7 +45,7 @@ const canDeviceHover = () => window.matchMedia('(hover: hover)').matches;
 const resolveCSSVariable = (color: string): string => {
   if (!color.startsWith('var(')) return color;
   const inner = color.slice(4, -1).trim();
-  const varName = inner.split(',')[0].trim(); // strip fallback value if present
+  const varName = inner.split(',')[0].trim();
   return getComputedStyle(document.documentElement)
     .getPropertyValue(varName)
     .trim();
@@ -102,14 +102,12 @@ const buildColorMaps = (
     const groupColor = legendById.get(group.id);
     if (!groupColor) return;
 
-    // Resolve CSS variable once so all shade calculations use plain hex
     const resolvedGroupColor = resolveCSSVariable(groupColor);
     groupColorMap.set(group.id, resolvedGroupColor);
 
     const cats = group.categories ?? [];
     cats.forEach((cat, catIndex) => {
       if (!cat.id) return;
-      // Spread shades from 0.15 (slightly lighter) to 0.65 (much lighter)
       const shade = 0.15 + (catIndex / Math.max(cats.length, 1)) * 0.5;
       categoryColorMap.set(cat.id, shadeColor(resolvedGroupColor, shade));
     });
@@ -123,9 +121,9 @@ const buildColorMaps = (
 // ---------------------------------------------------------------------------
 
 /**
- * Mobile active shape.
+ * Mobile active shape — shared by both single-ring and two-ring modes.
  * expandInward=true  → expansion arc drawn inside the inner radius (inner ring)
- * expandInward=false → expansion arc drawn outside the outer radius (outer ring)
+ * expandInward=false → expansion arc drawn outside the outer radius (outer/single ring)
  */
 const ActiveShapeMobile = props => {
   const {
@@ -189,7 +187,7 @@ const ActiveShapeMobile = props => {
         endAngle={endAngle}
         fill={fill}
       />
-      {/* Expansion arc — inward for inner ring, outward for outer ring */}
+      {/* Expansion arc — inward for inner ring, outward for outer/single ring */}
       <Sector
         cx={cx}
         cy={cy}
@@ -208,11 +206,104 @@ const ActiveShapeMobileWithFormat = props => (
 );
 
 /**
- * Desktop active shape.
- * expandInward=true  → expansion arc drawn inside the inner radius (inner ring)
- * expandInward=false → expansion arc drawn outside the outer radius (outer ring)
+ * Original desktop active shape — single-ring donut only.
+ * Always uses innerRadius for sx/sy/mx/my. No expandInward.
  */
 const ActiveShape = props => {
+  const {
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    startAngle,
+    endAngle,
+    fill,
+    payload,
+    percent,
+    value,
+    format,
+  } = props;
+  const yAxis = payload.name ?? payload.date;
+  const sin = Math.sin(-RADIAN * midAngle);
+  const cos = Math.cos(-RADIAN * midAngle);
+  const sx = cx + (innerRadius - 10) * cos;
+  const sy = cy + (innerRadius - 10) * sin;
+  const mx = cx + (innerRadius - 30) * cos;
+  const my = cy + (innerRadius - 30) * sin;
+  const ex = cx + (cos >= 0 ? 1 : -1) * yAxis.length * 4;
+  const ey = cy + 8;
+  const textAnchor = cos <= 0 ? 'start' : 'end';
+
+  return (
+    <g>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+      <Sector
+        cx={cx}
+        cy={cy}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        innerRadius={outerRadius + 6}
+        outerRadius={outerRadius + 10}
+        fill={fill}
+      />
+      <path
+        d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
+        stroke={fill}
+        fill="none"
+      />
+      <circle cx={ex} cy={ey} r={3} fill={fill} stroke="none" />
+      <text
+        x={ex + (cos <= 0 ? 1 : -1) * 16}
+        y={ey}
+        textAnchor={textAnchor}
+        fill={fill}
+      >{`${yAxis}`}</text>
+      <PrivacyFilter>
+        <FinancialText
+          as="text"
+          x={ex + (cos <= 0 ? 1 : -1) * 16}
+          y={ey}
+          dy={18}
+          textAnchor={textAnchor}
+          fill={fill}
+        >
+          {`${format(value, 'financial')}`}
+        </FinancialText>
+        <text
+          x={ex + (cos <= 0 ? 1 : -1) * 16}
+          y={ey}
+          dy={36}
+          textAnchor={textAnchor}
+          fill="#999"
+        >
+          {`(${(percent * 100).toFixed(2)}%)`}
+        </text>
+      </PrivacyFilter>
+    </g>
+  );
+};
+
+const ActiveShapeWithFormat = props => (
+  <ActiveShape {...props} format={props.format} />
+);
+
+/**
+ * Two-ring desktop active shape — taken exactly from the latest ActiveShape
+ * in the passed file, with expandInward controlling sx/sy/mx/my and the
+ * expansion arc direction.
+ * expandInward=true  → line starts from inner radius edge (inner ring)
+ * expandInward=false → line starts from outer radius edge (outer ring)
+ */
+const ActiveShapeTwoRing = props => {
   const {
     cx,
     cy,
@@ -257,7 +348,7 @@ const ActiveShape = props => {
         startAngle={startAngle}
         endAngle={endAngle}
         innerRadius={expandInward ? innerRadius - 10 : outerRadius + 6}
-        outerRadius={expandInward ? innerRadius - 6 : outerRadius + 10}
+        outerRadius={expandInward ? innerRadius - 6  : outerRadius + 10}
         fill={fill}
       />
       <path
@@ -297,8 +388,8 @@ const ActiveShape = props => {
   );
 };
 
-const ActiveShapeWithFormat = props => (
-  <ActiveShape {...props} format={props.format} />
+const ActiveShapeTwoRingWithFormat = props => (
+  <ActiveShapeTwoRing {...props} format={props.format} />
 );
 
 const customLabel = props => {
@@ -389,9 +480,7 @@ export function DonutGraph({
 
   /**
    * Recompute group totals as the sum of their visible (non-filtered) categories.
-   * grouped-spreadsheet filters empty categories but does not update group totals,
-   * which would cause the inner ring group slice to be wider than the sum of its
-   * outer ring category slices. Fixing here keeps grouped-spreadsheet unchanged.
+   * Also filter out zero-total groups to avoid invisible sectors shifting hover indices.
    */
   const { adjustedGroupData, flatCategories } = useMemo(() => {
     if (!isCategoryGroup || !data.groupedData) {
@@ -422,7 +511,6 @@ export function DonutGraph({
     };
   }, [isCategoryGroup, data.groupedData, balanceTypeOp]);
 
-  // Use `?? []` instead of `!` non-null assertion
   const { groupColorMap, categoryColorMap } = useMemo(
     () =>
       isCategoryGroup
@@ -488,7 +576,7 @@ export function DonutGraph({
                         return compact ? (
                           <ActiveShapeMobileWithFormat {...shapeProps} />
                         ) : (
-                          <ActiveShapeWithFormat {...shapeProps} />
+                          <ActiveShapeTwoRingWithFormat {...shapeProps} />
                         );
                       }
                       return <Sector {...props} fill={fill} />;
@@ -542,7 +630,7 @@ export function DonutGraph({
                         return compact ? (
                           <ActiveShapeMobileWithFormat {...shapeProps} />
                         ) : (
-                          <ActiveShapeWithFormat {...shapeProps} />
+                          <ActiveShapeTwoRingWithFormat {...shapeProps} />
                         );
                       }
                       return <Sector {...props} fill={fill} />;
