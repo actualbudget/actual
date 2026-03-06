@@ -117,7 +117,8 @@ export type GlobalPrefs = Partial<{
       colors: Record<string, string>;
     }
   >; // Complete plugin theme metadata
-  installedCustomTheme?: string; // JSON string of installed custom theme
+  installedCustomLightTheme?: string; // JSON of InstalledTheme for light custom theme (also used as single custom theme in non-auto mode)
+  installedCustomDarkTheme?: string; // JSON of InstalledTheme for auto-mode dark custom theme
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
   syncServerConfig?: {
@@ -146,7 +147,8 @@ export type GlobalPrefsJson = Partial<{
   language?: GlobalPrefs['language'];
   theme?: GlobalPrefs['theme'];
   'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
-  'installed-custom-theme'?: GlobalPrefs['installedCustomTheme'];
+  'installed-custom-theme'?: GlobalPrefs['installedCustomLightTheme'];
+  'installed-custom-dark-theme'?: GlobalPrefs['installedCustomDarkTheme'];
   plugins?: string; // "true" or "false"
   'plugin-theme'?: string; // JSON string of complete plugin theme (current selected plugin theme)
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
