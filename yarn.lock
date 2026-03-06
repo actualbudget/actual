@@ -60,6 +60,7 @@ __metadata:
     react-dom: "npm:19.2.4"
     storybook: "npm:^10.2.7"
     usehooks-ts: "npm:^3.1.1"
+    vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^4.0.18"
   peerDependencies:
     react: ">=19.2"
@@ -138,7 +139,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/web@workspace:*, @actual-app/web@workspace:^, @actual-app/web@workspace:packages/desktop-client":
+"@actual-app/web@workspace:*, @actual-app/web@workspace:packages/desktop-client":
   version: 0.0.0-use.local
   resolution: "@actual-app/web@workspace:packages/desktop-client"
   dependencies:
@@ -220,7 +221,6 @@ __metadata:
     uuid: "npm:^13.0.0"
     vite: "npm:^7.3.1"
     vite-plugin-pwa: "npm:^1.2.0"
-    vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^4.0.18"
     xml2js: "npm:^0.6.2"
   languageName: unknown
@@ -11651,9 +11651,9 @@ __metadata:
   linkType: hard
 
 "bn.js@npm:^4.0.0, bn.js@npm:^4.1.0, bn.js@npm:^4.11.9":
-  version: 4.12.2
-  resolution: "bn.js@npm:4.12.2"
-  checksum: 10/5803983405c087443e0e6c9bb5d0bc863d9f987d77e710f81b14c55616494f5a274e1650ee892531acb3529d52c0e0ea48aa12d2873dd80a75dde9d73a2ec518
+  version: 4.12.3
+  resolution: "bn.js@npm:4.12.3"
+  checksum: 10/57ed5a055f946f3e009f1589c45a5242db07f3dddfc72e4506f0dd9d8b145f0dbee4edabc2499288f3fc338eb712fb96a1c623a2ed2bcd49781df1a64db64dd1
   languageName: node
   linkType: hard
 
@@ -14415,6 +14415,7 @@ __metadata:
     electron: "npm:39.2.7"
     electron-builder: "npm:26.4.0"
     fs-extra: "npm:^11.3.3"
+    loot-core: "workspace:*"
     promise-retry: "npm:^2.0.1"
     typescript: "npm:^5.9.3"
     typescript-strict-plugin: "npm:^2.4.4"
@@ -19648,7 +19649,6 @@ __metadata:
   dependencies:
     "@actual-app/api": "workspace:^"
     "@actual-app/crdt": "workspace:^"
-    "@actual-app/web": "workspace:^"
     "@jlongster/sql.js": "npm:^1.6.7"
     "@reduxjs/toolkit": "npm:^2.11.2"
     "@rschedule/core": "npm:^1.5.0"

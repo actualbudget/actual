@@ -1,0 +1,126 @@
+name: Publish Flathub
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v25.3.0)'
+        required: true
+        type: string
+
+concurrency:
+  group: publish-flathub
+  cancel-in-progress: false
+
+jobs:
+  publish-flathub:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Resolve version
+        id: resolve_version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          if [[ "$EVENT_NAME" == "release" ]]; then
+            TAG="$RELEASE_TAG"
+          else
+            TAG="$INPUT_TAG"
+          fi
+
+          if [[ -z "$TAG" ]]; then
+            echo "::error::No tag provided"
+            exit 1
+          fi
+
+          # Validate tag format (v-prefixed semver, e.g. v25.3.0 or v1.2.3-beta.1)
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Invalid tag format: $TAG (expected v-prefixed semver, e.g. v25.3.0)"
+            exit 1
+          fi
+
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Resolved tag=$TAG version=$VERSION"
+
+      - name: Verify release assets exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.resolve_version.outputs.tag }}"
+
+          echo "Checking release assets for tag $TAG..."
+          ASSETS=$(gh api "repos/${{ github.repository }}/releases/tags/$TAG" --jq '.assets[].name')
+
+          echo "Found assets:"
+          echo "$ASSETS"
+
+          if ! echo "$ASSETS" | grep -qx "Actual-linux-x86_64.AppImage"; then
+            echo "::error::Missing asset: Actual-linux-x86_64.AppImage"
+            exit 1
+          fi
+
+          if ! echo "$ASSETS" | grep -qx "Actual-linux-arm64.AppImage"; then
+            echo "::error::Missing asset: Actual-linux-arm64.AppImage"
+            exit 1
+          fi
+
+          echo "All required AppImage assets found."
+
+      - name: Calculate AppImage SHA256 (streamed)
+        run: |
+          VERSION="${{ steps.resolve_version.outputs.version }}"
+          BASE_URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}"
+
+          echo "Streaming x86_64 AppImage to compute SHA256..."
+          APPIMAGE_X64_SHA256=$(curl -fSL "${BASE_URL}/Actual-linux-x86_64.AppImage" | sha256sum | awk '{ print $1 }')
+          echo "x86_64 SHA256: $APPIMAGE_X64_SHA256"
+
+          echo "Streaming arm64 AppImage to compute SHA256..."
+          APPIMAGE_ARM64_SHA256=$(curl -fSL "${BASE_URL}/Actual-linux-arm64.AppImage" | sha256sum | awk '{ print $1 }')
+          echo "arm64 SHA256: $APPIMAGE_ARM64_SHA256"
+
+          echo "APPIMAGE_X64_SHA256=$APPIMAGE_X64_SHA256" >> "$GITHUB_ENV"
+          echo "APPIMAGE_ARM64_SHA256=$APPIMAGE_ARM64_SHA256" >> "$GITHUB_ENV"
+
+      - name: Checkout Flathub repo
+        uses: actions/checkout@v6
+        with:
+          repository: flathub/com.actualbudget.actual
+          token: ${{ secrets.FLATHUB_GITHUB_TOKEN }}
+
+      - name: Update manifest with new version
+        run: |
+          VERSION="${{ steps.resolve_version.outputs.version }}"
+
+          # Replace x86_64 entry
+          sed -i "/x86_64.AppImage/{n;s|sha256:.*|sha256: ${{ env.APPIMAGE_X64_SHA256 }}|}" com.actualbudget.actual.yml
+          sed -i "/x86_64.AppImage/s|url:.*|url: https://github.com/actualbudget/actual/releases/download/v${VERSION}/Actual-linux-x86_64.AppImage|" com.actualbudget.actual.yml
+
+          # Replace arm64 entry
+          sed -i "/arm64.AppImage/{n;s|sha256:.*|sha256: ${{ env.APPIMAGE_ARM64_SHA256 }}|}" com.actualbudget.actual.yml
+          sed -i "/arm64.AppImage/s|url:.*|url: https://github.com/actualbudget/actual/releases/download/v${VERSION}/Actual-linux-arm64.AppImage|" com.actualbudget.actual.yml
+
+          echo "Updated manifest:"
+          cat com.actualbudget.actual.yml
+
+      - name: Create PR in Flathub repo
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.FLATHUB_GITHUB_TOKEN }}
+          commit-message: 'Update Actual flatpak to version ${{ steps.resolve_version.outputs.version }}'
+          branch: 'release/${{ steps.resolve_version.outputs.version }}'
+          title: 'Update Actual flatpak to version ${{ steps.resolve_version.outputs.version }}'
+          body: |
+            This PR updates the Actual desktop flatpak to version ${{ steps.resolve_version.outputs.version }}.
+
+            :link: [View release notes](https://actualbudget.org/blog/release-${{ steps.resolve_version.outputs.version }})
+          reviewers: 'jfdoming,MatissJanis,youngcw'

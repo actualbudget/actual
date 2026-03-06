@@ -33,7 +33,7 @@
     "./client/undo": "./src/client/undo.ts",
     "./mocks": "./src/mocks/index.ts",
     "./platform/client/connection": {
-      "node": "./src/platform/client/connection/index.ts",
+      "electron": "./src/platform/client/connection/index.ts",
       "default": "./src/platform/client/connection/index.browser.ts"
     },
     "./platform/client/undo": "./src/platform/client/undo/index.ts",
@@ -47,8 +47,8 @@
     "./server/budget/types/*": "./src/server/budget/types/*.d.ts",
     "./server/*": "./src/server/*.ts",
     "./shared/*": "./src/shared/*.ts",
-    "./types/models": "./src/types/models/index.d.ts",
-    "./types/*": "./src/types/*.d.ts",
+    "./types/models": "./src/types/models/index.ts",
+    "./types/*": "./src/types/*.ts",
     "./lib-dist/electron/bundle.desktop.js": "./lib-dist/electron/bundle.desktop.js"
   },
   "scripts": {
@@ -90,7 +90,6 @@
   "devDependencies": {
     "@actual-app/api": "workspace:^",
     "@actual-app/crdt": "workspace:^",
-    "@actual-app/web": "workspace:^",
     "@swc/core": "^1.15.11",
     "@types/adm-zip": "^0.5.7",
     "@types/better-sqlite3": "^7.6.13",

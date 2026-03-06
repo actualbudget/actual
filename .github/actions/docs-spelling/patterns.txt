@@ -79,3 +79,6 @@
 
 # allowlist specific non-English words with non-ASCII characters
 \b(Länsförsäkringar|München|Złoty)\b
+
+# allowlist specific proper nouns
+\b(CodeRabbit)\b

@@ -26,7 +26,11 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares';
-import { getPathForGroupFile, getPathForUserFile } from './util/paths';
+import {
+  getPathForGroupFile,
+  getPathForUserFile,
+  isValidFileId,
+} from './util/paths';
 
 const app = express();
 app.use(validateSessionMiddleware);
@@ -256,6 +260,10 @@ app.post('/upload-user-file', async (req, res) => {
     res.status(400).send('fileId is required');
     return;
   }
+  if (!isValidFileId(fileId)) {
+    res.status(400).send('invalid fileId');
+    return;
+  }
 
   let groupId = req.headers['x-actual-group-id'] || null;
   const encryptMeta = req.headers['x-actual-encrypt-meta'] || null;
@@ -350,6 +358,10 @@ app.get('/download-user-file', async (req, res) => {
     // FIXME: Not sure how this cannot be a string when the header is
     // set.
     res.status(400).send('Single file ID is required');
+    return;
+  }
+  if (!isValidFileId(fileId)) {
+    res.status(400).send('invalid fileId');
     return;
   }
 

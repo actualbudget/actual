@@ -313,7 +313,7 @@ export function ConfigServer() {
     switch (error) {
       case 'network-failure':
         return t(
-          'Server is not running at this URL. Make sure you have HTTPS set up properly.',
+          'Connection failed. If you use a self-signed certificate or were recently offline, try refreshing the page. Otherwise ensure you have HTTPS set up properly.',
         );
       default:
         return t(
