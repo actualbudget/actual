@@ -19,11 +19,7 @@
     { "path": "../loot-core" },
     { "path": "../component-library" }
   ],
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.js"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js"],
   "exclude": [
     "node_modules",
     "build",
