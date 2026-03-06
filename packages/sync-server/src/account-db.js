@@ -180,7 +180,7 @@ export async function disableOpenID(loginSettings) {
     }
   }
 
-  const { error } = (await bootstrapPassword(loginSettings.password)) || {};
+  const { error } = bootstrapPassword(loginSettings.password) || {};
   if (error) {
     return { error };
   }

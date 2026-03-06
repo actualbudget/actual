@@ -10,7 +10,7 @@ import * as rule from '../object-shorthand-properties';
 // Tests
 //------------------------------------------------------------------------------
 
-runClassic(
+void runClassic(
   'object-shorthand-properties',
   rule,
   {

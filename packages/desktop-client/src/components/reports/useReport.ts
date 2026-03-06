@@ -19,7 +19,7 @@ export function useReport<T>(
     // can reliably show a loading state instead of stale/partial data.
     setResults(null);
 
-    getData(spreadsheet, results => {
+    void getData(spreadsheet, results => {
       if (!didCancel) {
         setResults(results);
       }

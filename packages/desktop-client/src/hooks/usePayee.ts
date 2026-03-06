@@ -1,8 +1,11 @@
-import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { usePayees } from './usePayees';
+import { payeeQueries } from '@desktop-client/payees';
 
-export function usePayee(id: string) {
-  const payees = usePayees();
-  return useMemo(() => payees.find(p => p.id === id), [id, payees]);
+export function usePayee(id?: string | null) {
+  return useQuery({
+    ...payeeQueries.list(),
+    select: payees => payees.find(p => p.id === id),
+    enabled: !!id,
+  });
 }

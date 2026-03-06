@@ -65,7 +65,7 @@ export const resetSync = createAppAsyncThunk(
               options: {
                 onSuccess: () => {
                   // TODO: There won't be a loading indicator for this
-                  dispatch(resetSync());
+                  void dispatch(resetSync());
                 },
               },
             },

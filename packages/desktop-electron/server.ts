@@ -43,4 +43,4 @@ const lazyLoadBackend = async (isDev: boolean) => {
 const isDev = false;
 
 // Start the app
-lazyLoadBackend(isDev);
+void lazyLoadBackend(isDev);

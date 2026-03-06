@@ -33,6 +33,7 @@ export const currencies: Currency[] = [
   { code: 'CRC', name: 'Costa Rican Colón', symbol: '₡', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: true },
   { code: 'CZK', name: 'Czech Koruna', symbol: 'Kč', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'DKK', name: 'Danish Krone', symbol: 'kr', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
+  { code: 'DOP', name: 'Dominican Peso', symbol: 'RD$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'EGP', name: 'Egyptian Pound', symbol: 'ج.م', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: false },
   { code: 'EUR', name: 'Euro', symbol: '€', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
   { code: 'GBP', name: 'Pound Sterling', symbol: '£', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
@@ -58,10 +59,10 @@ export const currencies: Currency[] = [
   { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'THB', name: 'Thai Baht', symbol: '฿', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'TRY', name: 'Turkish Lira', symbol: '₺', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
+  { code: 'TWD', name: 'New Taiwan Dollar', symbol: 'NT$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'UAH', name: 'Ukrainian Hryvnia', symbol: '₴', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'USD', name: 'US Dollar', symbol: '$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'UZS', name: 'Uzbek Soum', symbol: 'UZS', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
-  { code: 'VND', name: 'Vietnamese Dong', symbol: '₫', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
 ];
 
 export function getCurrency(code: string): Currency {

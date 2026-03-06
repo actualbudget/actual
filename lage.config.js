@@ -1,6 +1,9 @@
 /** @type {import('lage').ConfigOptions} */
 module.exports = {
   pipeline: {
+    typecheck: {
+      type: 'npmScript',
+    },
     test: {
       type: 'npmScript',
       options: {

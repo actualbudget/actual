@@ -22,7 +22,7 @@ export function useGoCardlessStatus() {
     }
 
     if (status === 'online') {
-      fetch();
+      void fetch();
     }
   }, [status]);
 

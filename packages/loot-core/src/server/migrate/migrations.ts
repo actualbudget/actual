@@ -55,17 +55,17 @@ async function patchBadMigrations(db: Database) {
   const newFiltersMigration = 1688749527273;
   const appliedIds = await getAppliedMigrations(db);
   if (appliedIds.includes(badFiltersMigration)) {
-    await sqlite.runQuery(db, 'DELETE FROM __migrations__ WHERE id = ?', [
+    sqlite.runQuery(db, 'DELETE FROM __migrations__ WHERE id = ?', [
       badFiltersMigration,
     ]);
-    await sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
+    sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
       newFiltersMigration,
     ]);
   }
 }
 
 export async function getAppliedMigrations(db: Database): Promise<number[]> {
-  const rows = await sqlite.runQuery<{ id: number }>(
+  const rows = sqlite.runQuery<{ id: number }>(
     db,
     'SELECT * FROM __migrations__ ORDER BY id ASC',
     [],
@@ -120,7 +120,7 @@ async function applyJavaScript(db, id) {
 
 async function applySql(db, sql) {
   try {
-    await sqlite.execQuery(db, sql);
+    sqlite.execQuery(db, sql);
   } catch (e) {
     logger.log('Error applying sql:', sql);
     throw e;
@@ -138,7 +138,7 @@ export async function applyMigration(
   } else {
     await applySql(db, code);
   }
-  await sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
+  sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
     getMigrationId(name),
   ]);
 }

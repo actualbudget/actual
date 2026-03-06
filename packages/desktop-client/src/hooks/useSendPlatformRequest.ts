@@ -19,7 +19,7 @@ export function useSendPlatformRequest<K extends keyof Handlers>(
       setIsLoading(false);
     }
 
-    run();
+    void run();
   }, [name, args, options]);
 
   return {

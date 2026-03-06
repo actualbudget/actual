@@ -51,6 +51,11 @@ type Actual = {
 declare global {
   var Actual: Actual;
 
+  // oxlint-disable-next-line typescript/consistent-type-definitions -- global Window augmentation requires interface
+  interface Window {
+    Actual: Actual;
+  }
+
   var IS_TESTING: boolean;
 
   var currentMonth: string | null;

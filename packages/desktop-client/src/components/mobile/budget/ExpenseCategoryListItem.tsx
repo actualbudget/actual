@@ -413,7 +413,7 @@ export function ExpenseCategoryListItem({
     if (!category) {
       return;
     }
-    navigate(`/categories/${category.id}?month=${month}`);
+    void navigate(`/categories/${category.id}?month=${month}`);
   }, [category, month, navigate]);
 
   if (!category) {

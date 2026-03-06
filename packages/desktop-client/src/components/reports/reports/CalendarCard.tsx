@@ -37,8 +37,8 @@ import { ReportCardName } from '@desktop-client/components/reports/ReportCardNam
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { calendarSpreadsheet } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
 import type { CalendarDataType } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
@@ -76,7 +76,7 @@ export function CalendarCard({
         latestTrans ? latestTrans.date : monthUtils.currentDay(),
       );
     }
-    fetchLatestTransaction();
+    void fetchLatestTransaction();
   }, []);
 
   const [start, end] = calculateTimeRange(
@@ -169,7 +169,7 @@ export function CalendarCard({
   }, [data]);
 
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useWidgetCopyMenu(onCopy);
+    useDashboardWidgetCopyMenu(onCopy);
 
   return (
     <ReportCard
@@ -487,7 +487,7 @@ function CalendarCardInner({
               marginBottom: 6,
             }}
             onPress={() => {
-              navigate(
+              void navigate(
                 `/reports/calendar/${widgetId}?month=${formatDate(calendar.start, 'yyyy-MM')}`,
               );
             }}
@@ -562,11 +562,11 @@ function CalendarCardInner({
         isEditing={isEditing}
         onDayClick={date => {
           if (date) {
-            navigate(
+            void navigate(
               `/reports/calendar/${widgetId}?day=${formatDate(date, 'yyyy-MM-dd')}`,
             );
           } else {
-            navigate(`/reports/calendar/${widgetId}`);
+            void navigate(`/reports/calendar/${widgetId}`);
           }
         }}
       />

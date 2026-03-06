@@ -1007,7 +1007,7 @@ describe('CategoryTemplateContext', () => {
         300,
         0,
       );
-      const result = await instance.getLimitExcess();
+      const result = instance.getLimitExcess();
       expect(result).toBe(0);
     });
 
@@ -1034,7 +1034,7 @@ describe('CategoryTemplateContext', () => {
         30000,
         0,
       );
-      const result = await instance.getLimitExcess();
+      const result = instance.getLimitExcess();
       expect(result).toBe(10000);
     });
   });

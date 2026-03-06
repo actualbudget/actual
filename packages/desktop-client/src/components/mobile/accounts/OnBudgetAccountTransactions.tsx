@@ -49,7 +49,7 @@ function TransactionListWithPreviews() {
   } = useTransactions({
     query: transactionsQuery,
   });
-  const onBudgetAccounts = useOnBudgetAccounts();
+  const { data: onBudgetAccounts = [] } = useOnBudgetAccounts();
   const onBudgetAccountsFilter = useCallback(
     (schedule: ScheduleEntity) =>
       onBudgetAccounts.some(a => a.id === schedule._account),
@@ -74,7 +74,7 @@ function TransactionListWithPreviews() {
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {
       if (!isPreviewId(transaction.id)) {
-        navigate(`/transactions/${transaction.id}`);
+        void navigate(`/transactions/${transaction.id}`);
       } else {
         dispatch(
           pushModal({

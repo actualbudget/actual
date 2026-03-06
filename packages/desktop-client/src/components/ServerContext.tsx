@@ -12,6 +12,7 @@ import { t } from 'i18next';
 import { send } from 'loot-core/platform/client/connection';
 import type { Handlers } from 'loot-core/types/handlers';
 
+import { useOnVisible } from '@desktop-client/hooks/useOnVisible';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -107,8 +108,18 @@ export function ServerProvider({ children }: { children: ReactNode }) {
       setServerURL(serverURL);
       setVersion(await getServerVersion());
     }
-    run();
+    void run();
   }, []);
+
+  useOnVisible(
+    async () => {
+      const version = await getServerVersion();
+      setVersion(version);
+    },
+    {
+      isEnabled: !!serverURL,
+    },
+  );
 
   const refreshLoginMethods = useCallback(async () => {
     if (serverURL) {
@@ -135,7 +146,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (serverURL) {
-      send('subscribe-needs-bootstrap').then(
+      void send('subscribe-needs-bootstrap').then(
         (data: Awaited<ReturnType<Handlers['subscribe-needs-bootstrap']>>) => {
           if ('hasServer' in data && data.hasServer) {
             setAvailableLoginMethods(data.availableLoginMethods || []);

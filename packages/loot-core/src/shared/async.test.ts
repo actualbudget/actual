@@ -81,7 +81,7 @@ describe('async', () => {
     const data = [];
     const fn = sequential(makeFunction(data));
 
-    fn(1).then(() => {
+    void fn(1).then(() => {
       // The next call should already have started (so it should have
       // already appended 2 to the end). It shouldn't depend on this
       // promise chain at all (important part being that if any errors

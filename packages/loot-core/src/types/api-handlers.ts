@@ -1,6 +1,4 @@
 // @ts-strict-ignore
-import type { ImportTransactionsOpts } from '@actual-app/api';
-
 import type { ImportTransactionsResult } from '../server/accounts/app';
 import type {
   APIAccountEntity,
@@ -22,6 +20,11 @@ import type {
   ScheduleEntity,
   TransactionEntity,
 } from './models';
+
+export type ImportTransactionsOpts = {
+  defaultCleared?: boolean;
+  dryRun?: boolean;
+};
 
 export type ApiHandlers = {
   'api/batch-budget-start': () => Promise<void>;
@@ -187,14 +190,12 @@ export type ApiHandlers = {
     fields;
     // TODO: fix me
     // fields: Partial<APICategoryEntity>;
-  }) => Promise<{ error: { type: 'category-exists' } } | object>;
+  }) => Promise<void>;
 
   'api/category-delete': (arg: {
     id: APICategoryEntity['id'];
     transferCategoryId?: APICategoryEntity['id'];
-  }) => Promise<
-    { error: 'no-categories' } | { error: 'category-type' } | object
-  >;
+  }) => Promise<void>;
 
   'api/payees-get': () => Promise<APIPayeeEntity[]>;
 

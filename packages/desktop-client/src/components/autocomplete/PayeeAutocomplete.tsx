@@ -31,12 +31,12 @@ import {
 import { ItemHeader } from './ItemHeader';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCommonPayees, usePayees } from '@desktop-client/hooks/usePayees';
+import { useCommonPayees } from '@desktop-client/hooks/useCommonPayees';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
-  createPayee,
   getActivePayees,
-} from '@desktop-client/payees/payeesSlice';
-import { useDispatch } from '@desktop-client/redux';
+  useCreatePayeeMutation,
+} from '@desktop-client/payees';
 
 type PayeeAutocompleteItem = PayeeEntity & PayeeItemType;
 
@@ -347,13 +347,14 @@ export function PayeeAutocomplete({
 }: PayeeAutocompleteProps) {
   const { t } = useTranslation();
 
-  const commonPayees = useCommonPayees();
-  const retrievedPayees = usePayees();
+  const { data: commonPayees } = useCommonPayees();
+  const { data: retrievedPayees = [] } = usePayees();
   if (!payees) {
     payees = retrievedPayees;
   }
+  const createPayeeMutation = useCreatePayeeMutation();
 
-  const cachedAccounts = useAccounts();
+  const { data: cachedAccounts = [] } = useAccounts();
   if (!accounts) {
     accounts = cachedAccounts;
   }
@@ -391,14 +392,12 @@ export function PayeeAutocomplete({
     showInactivePayees,
   ]);
 
-  const dispatch = useDispatch();
-
   async function handleSelect(idOrIds, rawInputValue) {
     if (!clearOnBlur) {
       onSelect?.(makeNew(idOrIds, rawInputValue), rawInputValue);
     } else {
       const create = payeeName =>
-        dispatch(createPayee({ name: payeeName })).unwrap();
+        createPayeeMutation.mutateAsync({ name: payeeName });
 
       if (Array.isArray(idOrIds)) {
         idOrIds = await Promise.all(

@@ -86,7 +86,7 @@ function useErrorMessage() {
 }
 
 export function AccountSyncCheck() {
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const failedAccounts = useFailedAccounts();
   const dispatch = useDispatch();
   const { id } = useParams();
@@ -99,7 +99,7 @@ export function AccountSyncCheck() {
       setOpen(false);
 
       if (acc.account_id) {
-        authorizeBank(dispatch);
+        void authorizeBank(dispatch);
       }
     },
     [dispatch],

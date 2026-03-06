@@ -20,8 +20,8 @@ import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { useWidgetCopyMenu } from '@desktop-client/components/reports/useWidgetCopyMenu';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
@@ -57,7 +57,7 @@ export function NetWorthCard({
   const [isCardHovered, setIsCardHovered] = useState(false);
 
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useWidgetCopyMenu(onCopy);
+    useDashboardWidgetCopyMenu(onCopy);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -66,7 +66,7 @@ export function NetWorthCard({
         latestTrans ? latestTrans.date : monthUtils.currentDay(),
       );
     }
-    fetchLatestTransaction();
+    void fetchLatestTransaction();
   }, []);
 
   const [start, end] = calculateTimeRange(

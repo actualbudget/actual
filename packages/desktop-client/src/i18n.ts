@@ -21,7 +21,7 @@ const loadLanguage = (language: string) => {
   return languages[`/locale/${language}.json`]();
 };
 
-i18n
+void i18n
   .use(initReactI18next)
   .use(resourcesToBackend(loadLanguage))
   .init({
@@ -90,5 +90,5 @@ export const setI18NextLanguage = (language: string | null) => {
     return; // language is already set
   }
 
-  i18n.changeLanguage(resolved);
+  void i18n.changeLanguage(resolved);
 };

@@ -73,10 +73,19 @@ export async function fetchDirectCss(url: string): Promise<string> {
   return response.text();
 }
 
+/** Only var(--custom-property-name) is allowed; no fallbacks. Variable name: -- then [a-zA-Z0-9_-]+ (no trailing dash). */
+const VAR_ONLY_PATTERN = /^var\s*\(\s*(--[a-zA-Z0-9_-]+)\s*\)$/i;
+
+function isValidSimpleVarValue(value: string): boolean {
+  const m = value.trim().match(VAR_ONLY_PATTERN);
+  if (!m) return false;
+  const name = m[1];
+  return name !== '--' && !name.endsWith('-');
+}
+
 /**
  * Validate that a CSS property value only contains allowed content (allowlist approach).
- * Only simple, safe CSS values are allowed - no functions (except rgb/rgba/hsl/hsla), no URLs, no complex constructs.
- * Explicitly rejects var() and other function calls to prevent variable references and complex expressions.
+ * Allows: colors (hex, rgb/rgba, hsl/hsla), lengths, numbers, keywords, and var(--name) only (no fallbacks).
  */
 function validatePropertyValue(value: string, property: string): void {
   if (!value || value.length === 0) {
@@ -85,12 +94,15 @@ function validatePropertyValue(value: string, property: string): void {
 
   const trimmedValue = value.trim();
 
+  if (isValidSimpleVarValue(trimmedValue)) {
+    return;
+  }
+
   // Allowlist: Only allow specific safe CSS value patterns
   // 1. Hex colors: #RGB, #RRGGBB, or #RRGGBBAA (3, 6, or 8 hex digits)
   const hexColorPattern = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?([0-9a-fA-F]{2})?$/;
 
   // 2. RGB/RGBA functions: rgb(...) or rgba(...) with simple numeric/percentage values
-  // Allow optional whitespace and support both integers and decimals
   const rgbRgbaPattern =
     /^rgba?\(\s*\d+%?\s*,\s*\d+%?\s*,\s*\d+%?\s*(,\s*[\d.]+)?\s*\)$/;
 
@@ -123,7 +135,7 @@ function validatePropertyValue(value: string, property: string): void {
 
   // If none of the allowlist patterns match, reject the value
   throw new Error(
-    `Invalid value "${trimmedValue}" for property "${property}". Only simple CSS values are allowed (colors, lengths, numbers, or keywords). Functions (including var()), URLs, and other complex constructs are not permitted.`,
+    `Invalid value "${trimmedValue}" for property "${property}". Only simple CSS values are allowed (colors, lengths, numbers, keywords, or var(--name)). Other functions, URLs, and complex constructs are not permitted.`,
   );
 }
 
