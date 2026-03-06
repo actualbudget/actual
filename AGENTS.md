@@ -44,25 +44,9 @@ yarn start:desktop
 
 ### ⚠️ CRITICAL REQUIREMENT: AI-Generated Commit Messages and PR Titles
 
-**THIS IS A MANDATORY REQUIREMENT THAT MUST BE FOLLOWED WITHOUT EXCEPTION:**
+**ALL commit messages and PR titles MUST be prefixed with `[AI]`.** No exceptions.
 
-- **ALL commit messages MUST be prefixed with `[AI]`**
-- **ALL pull request titles MUST be prefixed with `[AI]`**
-
-**Examples:**
-
-- ✅ `[AI] Fix type error in account validation`
-- ✅ `[AI] Add support for new transaction categories`
-- ❌ `Fix type error in account validation` (MISSING PREFIX - NOT ALLOWED)
-- ❌ `Add support for new transaction categories` (MISSING PREFIX - NOT ALLOWED)
-
-**This requirement applies to:**
-
-- Every single commit message created by AI agents
-- Every single pull request title created by AI agents
-- No exceptions are permitted
-
-**This is a hard requirement that agents MUST follow. Failure to include the `[AI]` prefix is a violation of these instructions.**
+See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for the full specification, including git safety rules, pre-commit checklist, and PR workflow.
 
 ### Task Orchestration with Lage
 
@@ -361,13 +345,7 @@ Always maintain newlines between import groups.
 
 **Git Commands:**
 
-- **MANDATORY: ALL commit messages MUST be prefixed with `[AI]`** - This is a hard requirement with no exceptions
-- **MANDATORY: ALL pull request titles MUST be prefixed with `[AI]`** - This is a hard requirement with no exceptions
-- Never update git config
-- Never run destructive git operations (force push, hard reset) unless explicitly requested
-- Never skip hooks (--no-verify, --no-gpg-sign)
-- Never force push to main/master
-- Never commit unless explicitly asked
+See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete git safety rules, commit message requirements, and PR workflow.
 
 ## File Structure Patterns
 
@@ -566,7 +544,7 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 
 Before committing changes, ensure:
 
-- [ ] **MANDATORY: Commit message is prefixed with `[AI]`** - This is a hard requirement with no exceptions
+- [ ] Commit and PR rules followed (see [PR and Commit Rules](.github/agents/pr-and-commit-rules.md))
 - [ ] `yarn typecheck` passes
 - [ ] `yarn lint:fix` has been run
 - [ ] Relevant tests pass
@@ -579,17 +557,7 @@ Before committing changes, ensure:
 
 ## Pull Request Guidelines
 
-When creating pull requests:
-
-- **MANDATORY PREFIX REQUIREMENT**: **ALL pull request titles MUST be prefixed with `[AI]`** - This is a hard requirement that MUST be followed without exception
-  - ✅ Correct: `[AI] Fix type error in account validation`
-  - ❌ Incorrect: `Fix type error in account validation` (MISSING PREFIX - NOT ALLOWED)
-- **AI-Generated PRs**: If you create a PR using AI assistance, add the **"AI generated"** label to the pull request. This helps maintainers understand the nature of the contribution.
-
-### PR Template: Do Not Fill In
-
-- **NEVER fill in the PR template** (`.github/PULL_REQUEST_TEMPLATE.md`). Leave all blank spaces and placeholder comments as-is. We expect **humans** to fill in the Description, Related issue(s), Testing, and Checklist sections.
-- **Exception**: If a human **explicitly asks** you to fill out the PR template, then fill it out **in Chinese**, using Chinese characters (简体中文) for all content you add.
+See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete PR creation rules, including title prefix requirements, labeling, and PR template handling.
 
 ## Code Review Guidelines
 
