@@ -550,6 +550,8 @@ export function looselyParseAmount(amount: string) {
     return v.replace(/[^0-9-]/g, '');
   }
 
+  amount = amount.trim();
+
   if (amount.startsWith('(') && amount.endsWith(')')) {
     // Remove Unicode minus inside parentheses before converting to ASCII minus
     amount = amount.replace(/\u2212/g, '');
