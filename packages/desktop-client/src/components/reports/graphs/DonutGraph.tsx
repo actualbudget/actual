@@ -324,8 +324,18 @@ const ActiveShapeTwoRing = props => {
   const cos = Math.cos(-RADIAN * midAngle);
   const sx = cx + (expandInward ? innerRadius - 10 : outerRadius + 10) * cos;
   const sy = cy + (expandInward ? innerRadius - 10 : outerRadius + 10) * sin;
-  const mx = cx + (expandInward ? innerRadius - 30 : outerRadius - 160) * cos;
-  const my = cy + (expandInward ? innerRadius - 30 : outerRadius - 160) * sin;
+  const mx =
+    cx +
+    (expandInward
+      ? innerRadius - 30
+      : innerRadius - (outerRadius - innerRadius) - 30) *
+      cos;
+  const my =
+    cy +
+    (expandInward
+      ? innerRadius - 30
+      : innerRadius - (outerRadius - innerRadius) - 30) *
+      sin;
   const ex = cx + (cos >= 0 ? 1 : -1) * yAxis.length * 4;
   const ey = cy + 8;
   const textAnchor = cos <= 0 ? 'start' : 'end';
