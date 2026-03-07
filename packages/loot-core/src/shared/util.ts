@@ -533,6 +533,7 @@ export function integerToAmount(
 // number format, because the user could be importing from many
 // currencies. We extract out the numbers and just ignore separators.
 export function looselyParseAmount(amount: string) {
+  amount = amount.trim();
   function safeNumber(v: number): null | number {
     if (isNaN(v)) {
       return null;
