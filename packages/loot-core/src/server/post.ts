@@ -12,7 +12,10 @@ function throwIfNot200(res: Response, text: string) {
     }
 
     const contentType = res.headers.get('Content-Type');
-    if (contentType && contentType.toLowerCase().indexOf('application/json') !== -1) {
+    if (
+      contentType &&
+      contentType.toLowerCase().indexOf('application/json') !== -1
+    ) {
       const json = JSON.parse(text);
       throw new PostError(json.reason);
     }
