@@ -19,13 +19,7 @@
     { "path": "../loot-core" },
     { "path": "../component-library" }
   ],
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.js",
-    // TODO: remove loot-core dependency
-    "../../packages/loot-core/typings/window.ts"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js"],
   "exclude": [
     "node_modules",
     "build",
