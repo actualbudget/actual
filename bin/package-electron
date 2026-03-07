@@ -59,6 +59,9 @@ yarn workspace loot-core build:browser
 yarn workspace @actual-app/web build:browser
 yarn workspace @actual-app/sync-server build
 
+# Emit loot-core declarations so desktop-electron (which includes typings/window.ts) can build
+yarn workspace loot-core exec tsc -p tsconfig.json
+
 yarn workspace desktop-electron update-client
 
 (

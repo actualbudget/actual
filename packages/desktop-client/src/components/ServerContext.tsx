@@ -12,6 +12,7 @@ import { t } from 'i18next';
 import { send } from 'loot-core/platform/client/connection';
 import type { Handlers } from 'loot-core/types/handlers';
 
+import { useOnVisible } from '@desktop-client/hooks/useOnVisible';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -109,6 +110,16 @@ export function ServerProvider({ children }: { children: ReactNode }) {
     }
     void run();
   }, []);
+
+  useOnVisible(
+    async () => {
+      const version = await getServerVersion();
+      setVersion(version);
+    },
+    {
+      isEnabled: !!serverURL,
+    },
+  );
 
   const refreshLoginMethods = useCallback(async () => {
     if (serverURL) {

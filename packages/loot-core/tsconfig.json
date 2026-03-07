@@ -1,15 +1,28 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "noEmit": true,
+    "composite": true,
+    "noEmit": false,
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "lib-dist/decl",
+    "rootDir": ".",
+    "tsBuildInfoFile": "lib-dist/decl/.tsbuildinfo",
     "types": ["vite/client", "vitest/globals", "node"],
+    "paths": {
+      // Allow importing from hyperformula's internal typings for custom function plugins
+      "hyperformula/typings/*": ["../../node_modules/hyperformula/typings/*"]
+    },
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "typings/**/*.ts",
-    "typings/**/*.d.ts"
+    "typings/**/*.d.ts",
+    "migrations/**/*.js",
+    "src/server/tests/mockData.json"
   ],
   "exclude": [
     "node_modules",
