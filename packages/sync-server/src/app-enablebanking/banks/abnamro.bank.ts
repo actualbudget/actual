@@ -13,10 +13,16 @@ export class ABNAmroBankProcessor extends FallbackBankProcessor {
     if (keyValueCache) {
       const notes_parts: string[] = [];
       if (keyValueCache.map.has('Omschrijving')) {
-        notes_parts.push(keyValueCache.map.get('Omschrijving') as string);
+        const omschrijving = keyValueCache.map.get('Omschrijving');
+        if (omschrijving != null) {
+          notes_parts.push(omschrijving);
+        }
       }
       if (keyValueCache.map.has('Kenmerk')) {
-        notes_parts.push(`kenmerk: ${keyValueCache.map.get('Kenmerk')}`);
+        const kenmerk = keyValueCache.map.get('Kenmerk');
+        if (kenmerk != null) {
+          notes_parts.push(`kenmerk: ${kenmerk}`);
+        }
       }
       if (keyValueCache.header) {
         notes_parts.push(keyValueCache.header);

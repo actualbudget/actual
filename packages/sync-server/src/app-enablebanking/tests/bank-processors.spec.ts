@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { ABNAmroBankProcessor } from '../banks/abnamro.bank.js';
 import { DanishBankProcessor } from '../banks/danish.bank.js';
 import { FallbackBankProcessor } from '../banks/fallback.bank.js';
 import type { components } from '../models/enablebanking-openapi.js';
@@ -349,6 +350,50 @@ describe('Bank Processors', () => {
       // Danish processor should extract "MAXI ZOO" as payee (removing store number)
       expect(normalized.payeeName).toBe('MAXI ZOO');
       expect(normalized.notes).toBe('3127 MAXI ZOO, Copenhagen Nota 12345');
+    });
+  });
+
+  describe('ABNAmroBankProcessor', () => {
+    const processor = new ABNAmroBankProcessor();
+
+    it('should parse structured Omschrijving and Kenmerk into notes', () => {
+      const transaction: components['schemas']['Transaction'] = {
+        transaction_id: 'abn-structured-notes',
+        credit_debit_indicator: 'DBIT',
+        status: 'BOOK',
+        transaction_amount: {
+          amount: '12.34',
+          currency: 'EUR',
+        },
+        remittance_information: [
+          'Bank transfer',
+          'Omschrijving: Supermarket',
+          'Kenmerk: 12345',
+        ],
+        booking_date: '2024-01-15',
+      };
+
+      const normalized = processor.normalizeTransaction(transaction);
+
+      expect(normalized.notes).toBe('Supermarket | kenmerk: 12345 | Bank transfer');
+    });
+
+    it('should fallback to plain remittance text when key-value parsing is not available', () => {
+      const transaction: components['schemas']['Transaction'] = {
+        transaction_id: 'abn-plain-notes',
+        credit_debit_indicator: 'DBIT',
+        status: 'BOOK',
+        transaction_amount: {
+          amount: '9.99',
+          currency: 'EUR',
+        },
+        remittance_information: ['Line A', 'Line B'],
+        booking_date: '2024-01-15',
+      };
+
+      const normalized = processor.normalizeTransaction(transaction);
+
+      expect(normalized.notes).toBe('Line A Line B');
     });
   });
 });
