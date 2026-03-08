@@ -10,7 +10,7 @@ import {
 } from '../util/middlewares.js';
 
 import type { EnableBankingEndpoints } from './models/enablebanking.js';
-import { enableBankingservice } from './services/enablebanking-services.js';
+import { enableBankingService } from './services/enablebanking-services.js';
 import {
   BadRequestError,
   badRequestVariableError,
@@ -66,13 +66,13 @@ post('/configure', async req => {
     return;
   }
 
-  await enableBankingservice.setupSecrets(applicationId, secret);
+  await enableBankingService.setupSecrets(applicationId, secret);
   return;
 });
 
 post('/status', async () => {
   try {
-    const configured = await enableBankingservice.isConfigured();
+    const configured = await enableBankingService.isConfigured();
     return { configured };
   } catch (error) {
     // If checking configuration fails, it means it's not properly configured
@@ -82,15 +82,15 @@ post('/status', async () => {
 });
 
 post('/countries', async () => {
-  if (!enableBankingservice.secretsAreSetup()) {
+  if (!enableBankingService.secretsAreSetup()) {
     throw new EnableBankingSetupError();
   }
-  const application = await enableBankingservice.getApplication();
+  const application = await enableBankingService.getApplication();
   return application.countries;
 });
 
 post('/get_aspsps', async req => {
-  if (!enableBankingservice.secretsAreSetup()) {
+  if (!enableBankingService.secretsAreSetup()) {
     throw new EnableBankingSetupError();
   }
   const { country } = req.body;
@@ -103,12 +103,12 @@ post('/get_aspsps', async req => {
     throw new BadRequestError("Variable 'country' must be a non-empty string.");
   }
 
-  const responseData = (await enableBankingservice.getASPSPs(country)).aspsps;
+  const responseData = (await enableBankingService.getASPSPs(country)).aspsps;
   return responseData;
 });
 
 post('/start_auth', async req => {
-  if (!enableBankingservice.secretsAreSetup()) {
+  if (!enableBankingService.secretsAreSetup()) {
     throw new EnableBankingSetupError();
   }
   const { aspsp, country } = req.body;
@@ -167,7 +167,7 @@ post('/start_auth', async req => {
     );
   }
 
-  return await enableBankingservice.startAuth(
+  return await enableBankingService.startAuth(
     country,
     aspsp,
     origin,
@@ -176,7 +176,7 @@ post('/start_auth', async req => {
 });
 
 post('/get_session', async req => {
-  if (!enableBankingservice.secretsAreSetup()) {
+  if (!enableBankingService.secretsAreSetup()) {
     throw new EnableBankingSetupError();
   }
   const { state } = req.body;
@@ -184,7 +184,7 @@ post('/get_session', async req => {
     throw badRequestVariableError('state', '/enablebanking/get_session');
   }
 
-  const entry = enableBankingservice.getSessionEntry(state);
+  const entry = enableBankingService.getSessionEntry(state);
   if (!entry) {
     throw new NotReadyError('Authorization flow has not yet finished.');
   }
@@ -197,7 +197,7 @@ post('/get_session', async req => {
   if (!entry.sessionId) {
     throw new NotReadyError('Authorization flow has not yet finished.');
   }
-  return await enableBankingservice.getAccounts(entry.sessionId);
+  return await enableBankingService.getAccounts(entry.sessionId);
 });
 
 post('/complete_auth', async req => {
@@ -211,7 +211,7 @@ post('/complete_auth', async req => {
     throw badRequestVariableError('code', '/enablebanking/complete_auth');
   }
 
-  await enableBankingservice.authorizeSession(state, code);
+  await enableBankingService.authorizeSession(state, code);
 
   return;
 });
@@ -223,13 +223,13 @@ post('/fail_auth', async req => {
     throw badRequestVariableError('state', '/enablebanking/fail_auth');
   }
 
-  enableBankingservice.failSession(state, error ?? 'unknown_error');
+  enableBankingService.failSession(state, error ?? 'unknown_error');
 
   return;
 });
 
 post('/get_accounts', async req => {
-  if (!enableBankingservice.secretsAreSetup()) {
+  if (!enableBankingService.secretsAreSetup()) {
     throw new EnableBankingSetupError();
   }
   const { session_id } = req.body;
@@ -241,11 +241,11 @@ post('/get_accounts', async req => {
     );
   }
 
-  return await enableBankingservice.getAccounts(session_id);
+  return await enableBankingService.getAccounts(session_id);
 });
 
 post('/transactions', async req => {
-  if (!enableBankingservice.secretsAreSetup()) {
+  if (!enableBankingService.secretsAreSetup()) {
     throw new EnableBankingSetupError();
   }
   const { startDate, endDate, account_id, bank_id } = req.body;
@@ -253,7 +253,7 @@ post('/transactions', async req => {
   if (!account_id) {
     throw badRequestVariableError('account_id', '/enablebanking/transactions');
   }
-  const transactions = await enableBankingservice.getTransactions(
+  const transactions = await enableBankingService.getTransactions(
     account_id,
     startDate,
     endDate,
@@ -261,7 +261,7 @@ post('/transactions', async req => {
   );
 
   const currentBalance =
-    await enableBankingservice.getCurrentBalance(account_id);
+    await enableBankingService.getCurrentBalance(account_id);
 
   // Convert to integer cents
   const currentBalanceCents = Math.round(currentBalance * 100);
@@ -286,7 +286,7 @@ app.post(
       return;
     }
 
-    const cleared = enableBankingservice.clearAllSessions();
+    const cleared = enableBankingService.clearAllSessions();
     res.send({ status: 'ok', data: { cleared } });
   },
 );

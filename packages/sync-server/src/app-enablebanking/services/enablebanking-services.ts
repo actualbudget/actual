@@ -179,7 +179,7 @@ class SessionStore {
 
 const sessionStore = new SessionStore();
 
-export const enableBankingservice = {
+export const enableBankingService = {
   HOSTNAME: 'https://api.enablebanking.com/',
 
   setupSecrets: async (applicationId: string, secretKey: string) => {
@@ -192,7 +192,7 @@ export const enableBankingservice = {
     }
 
     // Check if jwt is recognized by Enable Banking
-    await enableBankingservice.getApplication(jwt);
+    await enableBankingService.getApplication(jwt);
     secretsService.set(SecretName.enablebanking_applicationId, applicationId);
     secretsService.set(SecretName.enablebanking_secret, secretKey);
     return true;
@@ -205,10 +205,10 @@ export const enableBankingservice = {
     return !(applicationId == null || secret == null);
   },
   isConfigured: async () => {
-    if (!enableBankingservice.secretsAreSetup()) {
+    if (!enableBankingService.secretsAreSetup()) {
       return false;
     }
-    await enableBankingservice.getApplication();
+    await enableBankingService.getApplication();
     return true;
   },
 
@@ -224,11 +224,11 @@ export const enableBankingservice = {
   },
   getClient: (jwt?: string) => {
     const baseHeaders = {
-      Authorization: `Bearer ${jwt ? jwt : enableBankingservice.getJWT()}`,
+      Authorization: `Bearer ${jwt ? jwt : enableBankingService.getJWT()}`,
       'Content-Type': 'application/json',
     };
     const client = createClient<paths>({
-      baseUrl: enableBankingservice.HOSTNAME,
+      baseUrl: enableBankingService.HOSTNAME,
       headers: baseHeaders,
     });
     client.use({
@@ -277,7 +277,7 @@ export const enableBankingservice = {
 
   getApplication: async (jwt?: string) => {
     return await apiLimiter(async () => {
-      const { data } = await enableBankingservice
+      const { data } = await enableBankingService
         .getClient(jwt)
         .GET('/application');
       isDefined(data);
@@ -290,7 +290,7 @@ export const enableBankingservice = {
 
   getASPSPs: async (country?: string) => {
     return await apiLimiter(async () => {
-      const { data } = await enableBankingservice.getClient().GET('/aspsps', {
+      const { data } = await enableBankingService.getClient().GET('/aspsps', {
         params: {
           query: {
             service: 'AIS',
@@ -304,7 +304,7 @@ export const enableBankingservice = {
   },
 
   getASPSP: async (country: string, name: string) => {
-    return await enableBankingservice.getASPSPs(country).then(resp => {
+    return await enableBankingService.getASPSPs(country).then(resp => {
       const res = resp.aspsps.filter(aspsp => aspsp.name === name).at(0);
       if (res) {
         return res;
@@ -321,7 +321,7 @@ export const enableBankingservice = {
     host: string,
     exp: number,
   ): Promise<EnableBankingAuthenticationStartResponse> => {
-    const aspspData = await enableBankingservice.getASPSP(country, aspsp);
+    const aspspData = await enableBankingService.getASPSP(country, aspsp);
     // Minimum consent duration in seconds
     const MIN_CONSENT_SECONDS = 60;
     // Validate and clamp maximum_consent_validity
@@ -344,7 +344,7 @@ export const enableBankingservice = {
     // Since we don't have ssl in dev. The redirect URL needs to be changed manually in browser.
     const redirect_url = `${host.replace('http:', 'https:')}/enablebanking/auth_callback`;
 
-    const { data } = await enableBankingservice.getClient().POST('/auth', {
+    const { data } = await enableBankingService.getClient().POST('/auth', {
       body: {
         access: {
           valid_until: valid_until.toISOString(),
@@ -383,7 +383,7 @@ export const enableBankingservice = {
     // Create a new session and store the promise to prevent race conditions
     const creationPromise = (async () => {
       try {
-        const { data } = await enableBankingservice
+        const { data } = await enableBankingService
           .getClient()
           .POST('/sessions', {
             body: { code },
@@ -423,7 +423,7 @@ export const enableBankingservice = {
   getAccounts: async (
     session_id: string,
   ): Promise<EnableBankingToken> | never => {
-    const client = enableBankingservice.getClient();
+    const client = enableBankingService.getClient();
 
     const { data } = await client.GET('/sessions/{session_id}', {
       params: {
@@ -487,7 +487,7 @@ export const enableBankingservice = {
     date_to?: string,
     bank_id?: string,
   ): Promise<Transaction[]> => {
-    const client = enableBankingservice.getClient();
+    const client = enableBankingService.getClient();
     const query: operations['get_account_transactions_accounts__account_id__transactions_get']['parameters']['query'] =
       {};
     if (date_from) {
@@ -567,7 +567,7 @@ export const enableBankingservice = {
   },
 
   getCurrentBalance: async (account_id: string) => {
-    const client = enableBankingservice.getClient();
+    const client = enableBankingService.getClient();
     const { data } = await client.GET('/accounts/{account_id}/balances', {
       params: { path: { account_id } },
     });
@@ -578,3 +578,5 @@ export const enableBankingservice = {
     return parseAmountSafe(selectedBalance.balance_amount.amount);
   },
 };
+
+export const enableBankingservice = enableBankingService;
