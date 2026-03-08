@@ -140,22 +140,27 @@ const AspspSelector = ({
   useEffect(() => {
     let cancelled = false;
     // Keep default send() behavior to preserve expected typed response shape.
-    send('enablebanking-countries').then(({ data, error }) => {
-      if (cancelled) return;
-      // Handle error response
-      if (error) {
-        onErrorRef.current(error);
-        return;
-      }
-      if (data) {
-        const cids = new Set(data);
-        const availableCountries = COUNTRY_OPTIONS.filter(val =>
-          cids.has(val.id),
-        );
-        setAvailableCountries(availableCountries);
-        return;
-      }
-    });
+    send('enablebanking-countries')
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        // Handle error response
+        if (error) {
+          onErrorRef.current(error);
+          return;
+        }
+        if (data) {
+          const cids = new Set(data);
+          const availableCountries = COUNTRY_OPTIONS.filter(val =>
+            cids.has(val.id),
+          );
+          setAvailableCountries(availableCountries);
+          return;
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        onErrorRef.current({ error_code: 'INTERNAL_ERROR', error_type: '' });
+      });
     return () => {
       cancelled = true;
     };
@@ -178,7 +183,10 @@ const AspspSelector = ({
             return;
           }
         },
-      );
+      ).catch(() => {
+        if (cancelled) return;
+        onErrorRef.current({ error_code: 'INTERNAL_ERROR', error_type: '' });
+      });
       return () => {
         cancelled = true;
       };
