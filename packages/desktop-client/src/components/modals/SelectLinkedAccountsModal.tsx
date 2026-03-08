@@ -197,8 +197,17 @@ export function SelectLinkedAccountsModal({
           customSettings?.date && customSettings.date.trim() !== ''
             ? customSettings.date
             : undefined;
+        // For Enable Banking, only send a starting balance when the user
+        // explicitly edits the amount; otherwise the default 0 would override
+        // server-side starting balance generation.
         const startingBalance =
-          customSettings?.amount != null ? customSettings.amount : undefined;
+          propsWithSortedExternalAccounts.syncSource === 'enablebanking'
+            ? customSettings?.hasCustomBalance
+              ? customSettings.amount
+              : undefined
+            : customSettings?.amount != null
+              ? customSettings.amount
+              : undefined;
 
         if (propsWithSortedExternalAccounts.syncSource === 'simpleFin') {
           linkAccountSimpleFin.mutate({
@@ -308,6 +317,7 @@ export function SelectLinkedAccountsModal({
     () => ({
       date: subDays(currentDay(), 90),
       amount: 0,
+      hasCustomBalance: false,
     }),
     [],
   );
@@ -496,6 +506,7 @@ type ExternalAccount =
 type StartingBalanceInfo = {
   date: string;
   amount: number;
+  hasCustomBalance?: boolean;
 };
 
 type SharedAccountRowProps = {
@@ -785,6 +796,7 @@ function StartingOptionsFields({
               onSetCustomStartingDate(accountId, {
                 ...customStartingDate,
                 amount,
+                hasCustomBalance: true,
               })
             }
             style={{ width: '100%' }}
@@ -843,6 +855,7 @@ function StartingOptionsFields({
               onSetCustomStartingDate(accountId, {
                 ...customStartingDate,
                 amount,
+                hasCustomBalance: true,
               })
             }
             style={{ width: '100%' }}
