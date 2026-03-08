@@ -8,6 +8,7 @@ import type {
   APITagEntity,
 } from 'loot-core/server/api-models';
 import type { Query } from 'loot-core/shared/query';
+import type { ImportTransactionsOpts } from 'loot-core/types/api-handlers';
 import type { Handlers } from 'loot-core/types/handlers';
 import type {
   ImportTransactionEntity,
@@ -125,11 +126,6 @@ export function addTransactions(
     runTransfers,
   });
 }
-
-export type ImportTransactionsOpts = {
-  defaultCleared?: boolean;
-  dryRun?: boolean;
-};
 
 export function importTransactions(
   accountId: APIAccountEntity['id'],

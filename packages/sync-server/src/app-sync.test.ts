@@ -7,7 +7,7 @@ import request from 'supertest';
 
 import { getAccountDb } from './account-db';
 import { handlers as app } from './app-sync';
-import { getPathForUserFile } from './util/paths';
+import { getPathForUserFile, isValidFileId } from './util/paths';
 
 const ADMIN_ROLE = 'ADMIN';
 const OTHER_USER_ID = 'otherUser';
@@ -22,6 +22,14 @@ const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
 const deleteUser = (userId: string) => {
   getAccountDb().mutate('DELETE FROM users WHERE id = ?', [userId]);
 };
+
+function generateFileId() {
+  const id = crypto.randomBytes(16).toString('hex');
+  if (!isValidFileId(id)) {
+    throw new Error('Generated fileId is invalid');
+  }
+  return id;
+}
 
 describe('/user-get-key', () => {
   it('returns 401 if the user is not authenticated', async () => {
@@ -380,7 +388,7 @@ describe('/upload-user-file', () => {
   });
 
   it('uploads a new file successfully', async () => {
-    const fileId = crypto.randomBytes(16).toString('hex');
+    const fileId = generateFileId();
     const fileName = 'test-file.txt';
     const fileContent = 'test file content';
     const fileContentBuffer = Buffer.from(fileContent);
@@ -431,7 +439,7 @@ describe('/upload-user-file', () => {
   });
 
   it('uploads and updates an existing file successfully', async () => {
-    const fileId = crypto.randomBytes(16).toString('hex');
+    const fileId = generateFileId();
     const oldGroupId = null; //sync state was reset
     const oldFileName = 'old-test-file.txt';
     const newFileName = 'new-test-file.txt';
@@ -559,7 +567,7 @@ describe('/upload-user-file', () => {
   });
 
   it('returns 403 when non-owner overwrites another user file', async () => {
-    const fileId = crypto.randomBytes(16).toString('hex');
+    const fileId = generateFileId();
     const groupId = 'group-id';
     const keyId = 'key-id';
     const syncVersion = 2;
@@ -598,7 +606,7 @@ describe('/upload-user-file', () => {
   });
 
   it("allows an admin to overwrite another user's file", async () => {
-    const fileId = crypto.randomBytes(16).toString('hex');
+    const fileId = generateFileId();
     const groupId = 'admin-upload-group-id';
     const keyId = 'key-id';
     const syncVersion = 2;
@@ -708,22 +716,23 @@ describe('/download-user-file', () => {
     });
 
     it('returns an attachment file', async () => {
+      const fileId = generateFileId();
       const fileContent = 'content';
-      fs.writeFileSync(getPathForUserFile('file-id'), fileContent);
+      fs.writeFileSync(getPathForUserFile(fileId), fileContent);
       getAccountDb().mutate(
         'INSERT INTO files (id, deleted) VALUES (?, FALSE)',
-        ['file-id'],
+        [fileId],
       );
 
       const res = await request(app)
         .get('/download-user-file')
         .set('x-actual-token', 'valid-token')
-        .set('x-actual-file-id', 'file-id');
+        .set('x-actual-file-id', fileId);
 
       expect(res.statusCode).toEqual(200);
       expect(res.headers).toEqual(
         expect.objectContaining({
-          'content-disposition': 'attachment;filename=file-id',
+          'content-disposition': `attachment;filename=${fileId}`,
           'content-type': 'application/octet-stream',
         }),
       );
@@ -734,7 +743,7 @@ describe('/download-user-file', () => {
 
     describe('access control', () => {
       it('returns 403 when non-owner downloads another user file', async () => {
-        const fileId = crypto.randomBytes(16).toString('hex');
+        const fileId = generateFileId();
         const fileContent = 'sensitive content';
         fs.writeFileSync(getPathForUserFile(fileId), fileContent);
         getAccountDb().mutate(
@@ -757,7 +766,7 @@ describe('/download-user-file', () => {
       });
 
       it("allows an admin to download another user's file", async () => {
-        const fileId = crypto.randomBytes(16).toString('hex');
+        const fileId = generateFileId();
         const fileContent = 'admin-downloaded content';
         fs.writeFileSync(getPathForUserFile(fileId), fileContent);
         getAccountDb().mutate(
@@ -783,7 +792,7 @@ describe('/download-user-file', () => {
       it('allows non-owner with user_access to download via requireFileAccess (UserService.countUserAccess > 0)', async () => {
         // File owned by another user; access granted only via user_access row, not owner/admin.
         // This exercises the requireFileAccess branch that uses UserService.countUserAccess.
-        const fileId = crypto.randomBytes(16).toString('hex');
+        const fileId = generateFileId();
         const fileContent = 'shared-user content';
         fs.writeFileSync(getPathForUserFile(fileId), fileContent);
         getAccountDb().mutate(

@@ -18,6 +18,8 @@ import {
 
 import * as monthUtils from 'loot-core/shared/months';
 
+import { computePadding } from './util/computePadding';
+
 import { FinancialText } from '@desktop-client/components/FinancialText';
 import { Container } from '@desktop-client/components/reports/Container';
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -220,11 +222,22 @@ export function BudgetAnalysisGraph({
     return monthUtils.format(date, 'MMM d', locale);
   };
 
+  const allValues = graphData.flatMap(item => [
+    item.budgeted,
+    item.spent,
+    item.balance,
+    item.overspendingAdjustment,
+  ]);
+
+  const leftPadding = computePadding(allValues, value =>
+    format(value, 'financial-no-decimals'),
+  );
+
   const commonProps = {
     width: 0,
     height: 0,
     data: graphData,
-    margin: { top: 5, right: 5, left: 5, bottom: 5 },
+    margin: { top: 5, right: 5, left: 5 + leftPadding, bottom: 5 },
   };
 
   return (

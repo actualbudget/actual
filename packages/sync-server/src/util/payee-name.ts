@@ -1,17 +1,19 @@
+import type { Transaction } from '../app-gocardless/gocardless-node.types';
+
 import { title } from './title/index';
 
-function formatPayeeIban(iban) {
+function formatPayeeIban(iban: string) {
   return '(' + iban.slice(0, 4) + ' XXX ' + iban.slice(-4) + ')';
 }
 
-export const formatPayeeName = trans => {
-  const amount = trans.transactionAmount.amount;
+export const formatPayeeName = (trans: Transaction) => {
+  const amount = Number(trans.transactionAmount.amount);
   const nameParts = [];
 
   // get the correct name and account fields for the transaction amount
   let name;
   let account;
-  if (amount > 0 || Object.is(Number(amount), 0)) {
+  if (amount > 0 || Object.is(amount, 0)) {
     name = trans.debtorName;
     account = trans.debtorAccount;
   } else {
@@ -37,7 +39,7 @@ export const formatPayeeName = trans => {
     nameParts.push(title(name));
   }
 
-  if (account && account.iban) {
+  if (typeof account === 'object' && account && account.iban) {
     nameParts.push(formatPayeeIban(account.iban));
   }
 

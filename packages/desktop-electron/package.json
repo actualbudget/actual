@@ -30,6 +30,7 @@
     "cross-env": "^10.1.0",
     "electron": "39.2.7",
     "electron-builder": "26.4.0",
+    "loot-core": "workspace:*",
     "typescript": "^5.9.3",
     "typescript-strict-plugin": "^2.4.4"
   },
