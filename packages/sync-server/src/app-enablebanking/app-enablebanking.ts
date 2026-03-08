@@ -12,12 +12,12 @@ import {
 import type { EnableBankingEndpoints } from './models/enablebanking.js';
 import { enableBankingService } from './services/enablebanking-services.js';
 import {
+  authFailedError,
   BadRequestError,
   badRequestMessageError,
   badRequestVariableError,
   EnableBankingSetupError,
   handleErrorInHandler,
-  authFailedError,
   invalidNonEmptyStringError,
   notReadyAuthorizationError,
 } from './utils/errors.js';

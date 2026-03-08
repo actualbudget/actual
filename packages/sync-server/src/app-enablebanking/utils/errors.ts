@@ -84,7 +84,10 @@ export function notReadyAuthorizationError() {
 }
 
 export function authFailedError(error: string) {
-  return new EnableBankingError('AUTH_FAILED', `Authentication failed: ${error}`);
+  return new EnableBankingError(
+    'AUTH_FAILED',
+    `Authentication failed: ${error}`,
+  );
 }
 
 export function isErrorResponse(response: unknown): response is ErrorResponse {
