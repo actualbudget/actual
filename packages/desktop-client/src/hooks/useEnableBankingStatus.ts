@@ -25,7 +25,6 @@ export function useEnableBankingStatus() {
       try {
         const results = await send('enablebanking-status');
         if (results.error) {
-          // Automatically reset credentials on errors that indicate invalid configuration
           if (
             results.error.error_code === 'ENABLEBANKING_APPLICATION_INACTIVE' ||
             results.error.error_code === 'ENABLEBANKING_SECRETS_INVALID'
@@ -43,7 +42,6 @@ export function useEnableBankingStatus() {
                 }),
               );
             } catch (error) {
-              // Deconfiguration failed, but we still mark as unconfigured
               console.error('Deconfiguration failed:', error);
             } finally {
               setConfiguredEnableBanking(false);
