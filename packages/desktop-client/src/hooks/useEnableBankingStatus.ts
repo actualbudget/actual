@@ -16,7 +16,7 @@ export function useEnableBankingStatus() {
   const [isLoading, setIsLoading] = useState(false);
   const status = useSyncServerStatus();
   const dispatch = useDispatch();
-  const t = useTranslation().t;
+  const { t } = useTranslation();
 
   useEffect(() => {
     async function fetch() {
