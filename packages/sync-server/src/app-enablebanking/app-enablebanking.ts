@@ -10,6 +10,7 @@ import {
 
 import type {
   EnableBankingEndpoints,
+  EnableBankingErrorCode,
 } from './models/enablebanking.js';
 import { enableBankingService } from './services/enablebanking-services.js';
 import {
@@ -41,12 +42,19 @@ export function escapeHtml(unsafe: string): string {
 // Apply session validation middleware to all routes below this point
 app.use(validateSessionMiddleware);
 
+type EnableBankingRouteData<T extends keyof EnableBankingEndpoints> =
+  | EnableBankingEndpoints[T]['response']
+  | {
+      error_code: EnableBankingErrorCode;
+      error_type: string;
+    };
+
 function post<T extends keyof EnableBankingEndpoints>(
   path: T,
   handler: (
     req: Request<
       ParamsDictionary,
-      any,
+      { status: 'ok'; data: EnableBankingRouteData<T> },
       EnableBankingEndpoints[T]['body']
     >,
   ) => Promise<EnableBankingEndpoints[T]['response']>,

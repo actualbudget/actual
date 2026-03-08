@@ -208,40 +208,39 @@ export function handleError<T extends keyof EnableBankingEndpoints>(
     >,
     res: Response<{ status: 'ok'; data: EnableBankingRouteData<T> }>,
   ) => {
-    func(req, res)
-      .catch(err => {
-        if (!(err instanceof EnableBankingError)) {
-          console.error(
-            'Error in Enable Banking endpoint:',
-            'URL:',
-            req.originalUrl,
-            'Error:',
-            inspect(err, { depth: null }),
-          );
-          const safeMessage = err instanceof Error ? err.message : String(err);
-          err = new EnableBankingError(
-            'INTERNAL_ERROR',
-            safeMessage ||
-              'Something went wrong while using the Enable Banking API.',
-          );
-        } else if (
-          err.error_code !== 'NOT_READY' &&
-          err.error_code !== 'BAD_REQUEST'
-        ) {
-          // Log non-trivial errors for debugging
-          console.warn(
-            'Enable Banking error:',
-            'URL:',
-            req.originalUrl,
-            'Error:',
-            `[${err.error_code}] ${err.message}`,
-          );
-        }
-        debug('Returning error: %o', err.data());
-        res.send({
-          status: 'ok',
-          data: err.data(),
-        });
+    func(req, res).catch(err => {
+      if (!(err instanceof EnableBankingError)) {
+        console.error(
+          'Error in Enable Banking endpoint:',
+          'URL:',
+          req.originalUrl,
+          'Error:',
+          inspect(err, { depth: null }),
+        );
+        const safeMessage = err instanceof Error ? err.message : String(err);
+        err = new EnableBankingError(
+          'INTERNAL_ERROR',
+          safeMessage ||
+            'Something went wrong while using the Enable Banking API.',
+        );
+      } else if (
+        err.error_code !== 'NOT_READY' &&
+        err.error_code !== 'BAD_REQUEST'
+      ) {
+        // Log non-trivial errors for debugging
+        console.warn(
+          'Enable Banking error:',
+          'URL:',
+          req.originalUrl,
+          'Error:',
+          `[${err.error_code}] ${err.message}`,
+        );
+      }
+      debug('Returning error: %o', err.data());
+      res.send({
+        status: 'ok',
+        data: err.data(),
       });
+    });
   };
 }

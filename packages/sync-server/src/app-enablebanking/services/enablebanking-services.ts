@@ -266,8 +266,10 @@ export const enableBankingService = {
               `Enable Banking API returned HTTP ${response.status} with non-JSON body.`,
             );
           }
-          // eslint-disable-next-line no-throw-literal -- error_data is an EnableBankingError (extends Error)
-          throw error_data;
+          throw new EnableBankingError(
+            error_data.error_code,
+            error_data.message,
+          );
         }
         return undefined; // continue with the response
       },
