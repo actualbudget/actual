@@ -578,5 +578,3 @@ export const enableBankingService = {
     return parseAmountSafe(selectedBalance.balance_amount.amount);
   },
 };
-
-export const enableBankingservice = enableBankingService;
