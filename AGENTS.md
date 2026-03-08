@@ -44,25 +44,9 @@ yarn start:desktop
 
 ### ⚠️ CRITICAL REQUIREMENT: AI-Generated Commit Messages and PR Titles
 
-**THIS IS A MANDATORY REQUIREMENT THAT MUST BE FOLLOWED WITHOUT EXCEPTION:**
+**ALL commit messages and PR titles MUST be prefixed with `[AI]`.** No exceptions.
 
-- **ALL commit messages MUST be prefixed with `[AI]`**
-- **ALL pull request titles MUST be prefixed with `[AI]`**
-
-**Examples:**
-
-- ✅ `[AI] Fix type error in account validation`
-- ✅ `[AI] Add support for new transaction categories`
-- ❌ `Fix type error in account validation` (MISSING PREFIX - NOT ALLOWED)
-- ❌ `Add support for new transaction categories` (MISSING PREFIX - NOT ALLOWED)
-
-**This requirement applies to:**
-
-- Every single commit message created by AI agents
-- Every single pull request title created by AI agents
-- No exceptions are permitted
-
-**This is a hard requirement that agents MUST follow. Failure to include the `[AI]` prefix is a violation of these instructions.**
+See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for the full specification, including git safety rules, pre-commit checklist, and PR workflow.
 
 ### Task Orchestration with Lage
 
@@ -314,6 +298,7 @@ Always run `yarn typecheck` before committing.
 
 **React Patterns:**
 
+- The project uses **React Compiler** (`babel-plugin-react-compiler`) in the desktop-client. The compiler auto-memoizes component bodies, so you can omit manual `useCallback`, `useMemo`, and `React.memo` when adding or refactoring code; prefer inline callbacks and values unless a stable identity is required by a non-compiled dependency.
 - Don't use `React.FunctionComponent` or `React.FC` - type props directly
 - Don't use `React.*` patterns - use named imports instead
 - Use `<Link>` instead of `<a>` tags
@@ -360,13 +345,7 @@ Always maintain newlines between import groups.
 
 **Git Commands:**
 
-- **MANDATORY: ALL commit messages MUST be prefixed with `[AI]`** - This is a hard requirement with no exceptions
-- **MANDATORY: ALL pull request titles MUST be prefixed with `[AI]`** - This is a hard requirement with no exceptions
-- Never update git config
-- Never run destructive git operations (force push, hard reset) unless explicitly requested
-- Never skip hooks (--no-verify, --no-gpg-sign)
-- Never force push to main/master
-- Never commit unless explicitly asked
+See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete git safety rules, commit message requirements, and PR workflow.
 
 ## File Structure Patterns
 
@@ -529,7 +508,7 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 
 1. Clean build artifacts: `rm -rf packages/*/dist packages/*/lib-dist packages/*/build`
 2. Reinstall dependencies: `yarn install`
-3. Check Node.js version (requires >=20)
+3. Check Node.js version (requires >=22)
 4. Check Yarn version (requires ^4.9.1)
 
 ## Testing Patterns
@@ -565,7 +544,7 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 
 Before committing changes, ensure:
 
-- [ ] **MANDATORY: Commit message is prefixed with `[AI]`** - This is a hard requirement with no exceptions
+- [ ] Commit and PR rules followed (see [PR and Commit Rules](.github/agents/pr-and-commit-rules.md))
 - [ ] `yarn typecheck` passes
 - [ ] `yarn lint:fix` has been run
 - [ ] Relevant tests pass
@@ -578,17 +557,7 @@ Before committing changes, ensure:
 
 ## Pull Request Guidelines
 
-When creating pull requests:
-
-- **MANDATORY PREFIX REQUIREMENT**: **ALL pull request titles MUST be prefixed with `[AI]`** - This is a hard requirement that MUST be followed without exception
-  - ✅ Correct: `[AI] Fix type error in account validation`
-  - ❌ Incorrect: `Fix type error in account validation` (MISSING PREFIX - NOT ALLOWED)
-- **AI-Generated PRs**: If you create a PR using AI assistance, add the **"AI generated"** label to the pull request. This helps maintainers understand the nature of the contribution.
-
-### PR Template: Do Not Fill In
-
-- **NEVER fill in the PR template** (`.github/PULL_REQUEST_TEMPLATE.md`). Leave all blank spaces and placeholder comments as-is. We expect **humans** to fill in the Description, Related issue(s), Testing, and Checklist sections.
-- **Exception**: If a human **explicitly asks** you to fill out the PR template, then fill it out **in Chinese**, using Chinese characters (简体中文) for all content you add.
+See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete PR creation rules, including title prefix requirements, labeling, and PR template handling.
 
 ## Code Review Guidelines
 
@@ -619,7 +588,7 @@ yarn install:server
 
 ## Environment Requirements
 
-- **Node.js**: >=20
+- **Node.js**: >=22
 - **Yarn**: ^4.9.1 (managed by packageManager field)
 - **Browser Targets**: Electron >= 35.0, modern browsers (see browserslist)
 
@@ -632,3 +601,40 @@ The codebase is actively being migrated:
 - **React.\* → Named Imports**: Legacy React.\* patterns being removed
 
 When working with older code, follow the newer patterns described in this guide.
+
+## Cursor Cloud specific instructions
+
+### Services overview
+
+| Service             | Command                 | Port | Required                      |
+| ------------------- | ----------------------- | ---- | ----------------------------- |
+| Web Frontend (Vite) | `yarn start`            | 3001 | Yes                           |
+| Sync Server         | `yarn start:server-dev` | 5006 | Optional (sync features only) |
+
+All storage is **SQLite** (file-based via `better-sqlite3`). No external databases or services are needed.
+
+### Running the app
+
+- `yarn start` builds the plugins-service worker, loot-core browser backend, and starts the Vite dev server on port **3001**.
+- `yarn start:server-dev` starts both the sync server (port 5006) and the web frontend together.
+- The Vite HMR dev server serves many unbundled modules. In constrained environments, the browser may hit `ERR_INSUFFICIENT_RESOURCES`. If that happens, use `yarn build:browser` followed by serving the built output from `packages/desktop-client/build/` with proper COOP/COEP headers (`Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: require-corp`).
+
+### Lint, test, typecheck
+
+Standard commands documented in `package.json` scripts and the Quick Start section above:
+
+- `yarn lint` / `yarn lint:fix` (uses oxlint + oxfmt)
+- `yarn test` (lage across all workspaces)
+- `yarn typecheck` (tsc + lage typecheck)
+
+### Testing and previewing the app
+
+When running the app for manual testing or demos, use **"View demo"** on the initial setup screen (after selecting "Don't use a server"). This creates a test budget pre-populated with realistic sample data (accounts, transactions, categories, and budgeted amounts), which is far more useful than starting with an empty budget.
+
+### Gotchas
+
+- The `engines` field requires **Node.js >=22** and **Yarn ^4.9.1**. The `.nvmrc` specifies `v22/*`.
+- Pre-commit hook runs `lint-staged` (oxfmt + oxlint) via Husky. Run `yarn prepare` once after install to set up hooks.
+- Lage caches test results in `.lage/`. If tests behave unexpectedly, clear with `rm -rf .lage`.
+- Native modules (`better-sqlite3`, `bcrypt`) require build tools (`gcc`, `make`, `python3`). These are pre-installed in the Cloud VM.
+- All yarn commands must be run from the repository root, never from child workspaces.

@@ -38,6 +38,7 @@ export function SummaryNumber({
 }: SummaryNumberProps) {
   const { t } = useTranslation();
   const [fontSize, setFontSize] = useState<number>(initialFontSize);
+  const [hasSized, setHasSized] = useState(false);
   const refDiv = useRef<HTMLDivElement>(null);
   const format = useFormat();
   const isNumericValue = Number.isFinite(value);
@@ -61,7 +62,10 @@ export function SummaryNumber({
       height, // Ensure the text fits vertically by using the height as the limiting factor
     );
 
-    setFontSize(calculatedFontSize);
+    if (calculatedFontSize > 0) {
+      setFontSize(calculatedFontSize);
+      setHasSized(true);
+    }
 
     if (calculatedFontSize !== initialFontSize && fontSizeChanged) {
       fontSizeChanged(calculatedFontSize);
@@ -107,9 +111,13 @@ export function SummaryNumber({
                   : theme.reportsNumberPositive,
           }}
         >
-          <FinancialText aria-hidden="true">
-            <PrivacyFilter>{displayAmount}</PrivacyFilter>
-          </FinancialText>
+          {!hasSized ? (
+            <LoadingIndicator />
+          ) : (
+            <FinancialText aria-hidden="true">
+              <PrivacyFilter>{displayAmount}</PrivacyFilter>
+            </FinancialText>
+          )}
         </View>
       )}
     </>

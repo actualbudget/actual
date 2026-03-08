@@ -75,7 +75,7 @@ app.post(
           accounts: await Promise.all(
             accounts.map(async account =>
               account?.iban
-                ? { ...account, iban: await sha256String(account.iban) }
+                ? { ...account, iban: sha256String(account.iban) }
                 : account,
             ),
           ),

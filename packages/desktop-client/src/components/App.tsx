@@ -34,6 +34,7 @@ import {
 import { handleGlobalEvents } from '@desktop-client/global-events';
 import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useOnVisible } from '@desktop-client/hooks/useOnVisible';
 import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
 import { setI18NextLanguage } from '@desktop-client/i18n';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
@@ -179,6 +180,11 @@ export function App() {
   );
   const dispatch = useDispatch();
 
+  useOnVisible(async () => {
+    console.debug('triggering sync because of visibility change');
+    await dispatch(sync());
+  });
+
   useEffect(() => {
     function checkScrollbars() {
       if (hiddenScrollbars !== hasHiddenScrollbars()) {
@@ -186,25 +192,9 @@ export function App() {
       }
     }
 
-    let isSyncing = false;
-
-    async function onVisibilityChange() {
-      if (!isSyncing) {
-        console.debug('triggering sync because of visibility change');
-        isSyncing = true;
-        await dispatch(sync());
-        isSyncing = false;
-      }
-    }
-
     window.addEventListener('focus', checkScrollbars);
-    window.addEventListener('visibilitychange', onVisibilityChange);
-
-    return () => {
-      window.removeEventListener('focus', checkScrollbars);
-      window.removeEventListener('visibilitychange', onVisibilityChange);
-    };
-  }, [dispatch, hiddenScrollbars]);
+    return () => window.removeEventListener('focus', checkScrollbars);
+  }, [hiddenScrollbars]);
 
   const [theme] = useTheme();
 

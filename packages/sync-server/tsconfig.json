@@ -1,11 +1,16 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "composite": true,
     "lib": ["ES2021"],
     "noEmit": false,
+    "declaration": true,
+    "declarationMap": true,
     "outDir": "build",
+    "tsBuildInfoFile": "build/.tsbuildinfo",
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
+  "references": [{ "path": "../crdt" }],
   "include": [
     "src/**/*",
     "migrations/**/*",
