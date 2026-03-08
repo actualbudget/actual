@@ -106,103 +106,108 @@ export const EnableBankingInitialiseModal = ({
       name="enablebanking-init"
       containerProps={{ style: { width: '30vw' } }}
     >
-      {({ state: { close } }) => (
-        <>
-          <ModalHeader
-            title={t('Set up Enable Banking')}
-            rightContent={<ModalCloseButton onPress={close} />}
-          />
-          <View style={{ display: 'flex', gap: 10 }}>
-            {window.location.protocol === 'http:' ? (
-              <ErrorAlert>
-                <Trans>
-                  Enable Banking requires HTTPS. Please access the app via HTTPS
-                  to use this feature.
-                </Trans>
-              </ErrorAlert>
-            ) : (
-              <>
-                <Text>
-                  <Trans>
-                    In order to enable bank sync via Enable Banking (only for EU
-                    banks) you will need to create application credentials at{' '}
-                    <Link
-                      variant="external"
-                      to="https://enablebanking.com/cp/applications"
-                      linkColor="blue"
-                    >
-                      enablebanking.com
-                    </Link>
-                    .
-                  </Trans>
-                </Text>
-                <Text style={{ fontWeight: 500 }}>
-                  <Trans>
-                    When registering your application, copy and paste this exact
-                    URL (including /enablebanking/auth_callback) into the
-                    &quot;URLs whitelisted for redirecting&quot; field:
-                  </Trans>
-                </Text>
-                <Text style={{ fontFamily: 'monospace' }}>
-                  {window.location.origin}/enablebanking/auth_callback
-                </Text>
+      {({ state }) => {
+        const closeModal = () => state.close();
 
-                <FormField>
-                  <FormLabel
-                    title={t('Application Id:')}
-                    htmlFor="application-id-field"
-                  />
-                  <InitialFocus>
+        return (
+          <>
+            <ModalHeader
+              title={t('Set up Enable Banking')}
+              rightContent={<ModalCloseButton onPress={closeModal} />}
+            />
+            <View style={{ display: 'flex', gap: 10 }}>
+              {window.location.protocol === 'http:' ? (
+                <ErrorAlert>
+                  <Trans>
+                    Enable Banking requires HTTPS. Please access the app via
+                    HTTPS to use this feature.
+                  </Trans>
+                </ErrorAlert>
+              ) : (
+                <>
+                  <Text>
+                    <Trans>
+                      In order to enable bank sync via Enable Banking (only for
+                      EU banks) you will need to create application credentials
+                      at{' '}
+                      <Link
+                        variant="external"
+                        to="https://enablebanking.com/cp/applications"
+                        linkColor="blue"
+                      >
+                        enablebanking.com
+                      </Link>
+                      .
+                    </Trans>
+                  </Text>
+                  <Text style={{ fontWeight: 500 }}>
+                    <Trans>
+                      When registering your application, copy and paste this
+                      exact URL (including /enablebanking/auth_callback) into
+                      the &quot;URLs whitelisted for redirecting&quot; field:
+                    </Trans>
+                  </Text>
+                  <Text style={{ fontFamily: 'monospace' }}>
+                    {window.location.origin}/enablebanking/auth_callback
+                  </Text>
+
+                  <FormField>
+                    <FormLabel
+                      title={t('Application Id:')}
+                      htmlFor="application-id-field"
+                    />
+                    <InitialFocus>
+                      <Input
+                        id="application-id-field"
+                        type="password"
+                        value={applicationId}
+                        onChangeValue={value => {
+                          setApplicationId(value);
+                          setIsValid(true);
+                        }}
+                      />
+                    </InitialFocus>
+                  </FormField>
+
+                  <FormField>
+                    <FormLabel
+                      title={t('Secret Key:')}
+                      htmlFor="secret-key-field"
+                    />
                     <Input
-                      id="application-id-field"
-                      type="password"
-                      value={applicationId}
-                      onChangeValue={value => {
-                        setApplicationId(value);
-                        setIsValid(true);
+                      id="secret-key-field"
+                      type="file"
+                      defaultValue=""
+                      accept=".pem"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          onSecretKey(file);
+                        }
                       }}
                     />
-                  </InitialFocus>
-                </FormField>
+                  </FormField>
 
-                <FormField>
-                  <FormLabel
-                    title={t('Secret Key:')}
-                    htmlFor="secret-key-field"
-                  />
-                  <Input
-                    id="secret-key-field"
-                    type="file"
-                    defaultValue=""
-                    accept=".pem"
-                    onChange={e => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        onSecretKey(file);
-                      }
-                    }}
-                  />
-                </FormField>
+                  {!isValid && <ErrorAlert>{error}</ErrorAlert>}
+                </>
+              )}
+            </View>
 
-                {!isValid && <ErrorAlert>{error}</ErrorAlert>}
-              </>
-            )}
-          </View>
-
-          <ModalButtons>
-            <ButtonWithLoading
-              variant="primary"
-              isLoading={isLoading}
-              isDisabled={window.location.protocol === 'http:'}
-              onPress={() => {
-                onSubmit(close);
-              }}
-            >
-              <Trans>Save and continue</Trans>
-            </ButtonWithLoading>
-          </ModalButtons>
-        </>
-      )}
+            <ModalButtons>
+              <ButtonWithLoading
+                variant="primary"
+                isLoading={isLoading}
+                isDisabled={window.location.protocol === 'http:'}
+                onPress={() => {
+                  void onSubmit(closeModal);
+                }}
+              >
+                <Trans>Save and continue</Trans>
+              </ButtonWithLoading>
+            </ModalButtons>
+          </>
+        );
+      }}
     </Modal>
   );
 };
