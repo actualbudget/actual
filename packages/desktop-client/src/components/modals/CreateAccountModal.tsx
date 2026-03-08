@@ -703,7 +703,7 @@ export function CreateAccountModal({
                           isSimpleFinSetupComplete ? '' : 'SimpleFIN',
                           isEnableBankingSetupComplete
                             ? ''
-                            : 'Enable Banking',
+                            : t('Enable Banking'),
                           isPluggyAiSetupComplete ? '' : 'Pluggy.ai',
                         ]
                           .filter(Boolean)

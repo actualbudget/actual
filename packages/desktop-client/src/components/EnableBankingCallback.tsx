@@ -33,7 +33,10 @@ export function EnableBankingCallback() {
         try {
           await send('enablebanking-failauth', { state, error: errorMessage });
         } catch (sendError) {
-          console.error('Failed to report Enable Banking auth failure', sendError);
+          console.error(
+            'Failed to report Enable Banking auth failure',
+            sendError,
+          );
         }
         setError(
           t('Authentication failed: {{error}}', { error: errorMessage }),
@@ -65,7 +68,7 @@ export function EnableBankingCallback() {
         );
       }
     };
-    fetchData();
+    void fetchData();
   }, [state, code, errorParam, errorDescription, t]);
   return (
     <Modal name="enablebanking-callback" isDismissable={false}>

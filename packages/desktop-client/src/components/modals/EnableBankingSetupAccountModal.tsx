@@ -170,8 +170,8 @@ const AspspSelector = ({
     if (country) {
       let cancelled = false;
       // Keep default send() behavior to preserve expected typed response shape.
-      send('enablebanking-banks', { country: country.id }).then(
-        ({ data, error }) => {
+      send('enablebanking-banks', { country: country.id })
+        .then(({ data, error }) => {
           if (cancelled) return;
           // Handle error response
           if (error) {
@@ -182,11 +182,11 @@ const AspspSelector = ({
             setAvailableAspsps(data);
             return;
           }
-        },
-      ).catch(() => {
-        if (cancelled) return;
-        onErrorRef.current({ error_code: 'INTERNAL_ERROR', error_type: '' });
-      });
+        })
+        .catch(() => {
+          if (cancelled) return;
+          onErrorRef.current({ error_code: 'INTERNAL_ERROR', error_type: '' });
+        });
       return () => {
         cancelled = true;
       };

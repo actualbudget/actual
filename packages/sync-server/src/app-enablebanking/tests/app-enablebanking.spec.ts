@@ -7,11 +7,8 @@ import { enableBankingService } from '../services/enablebanking-services.js';
 vi.mock('../../util/middlewares.js', () => ({
   requestLoggerMiddleware: (_req: unknown, _res: unknown, next: () => void) =>
     next(),
-  validateSessionMiddleware: (
-    _req: unknown,
-    _res: unknown,
-    next: () => void,
-  ) => next(),
+  validateSessionMiddleware: (_req: unknown, _res: unknown, next: () => void) =>
+    next(),
 }));
 
 describe('app-enablebanking /complete_auth', () => {

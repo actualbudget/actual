@@ -375,7 +375,9 @@ describe('Bank Processors', () => {
 
       const normalized = processor.normalizeTransaction(transaction);
 
-      expect(normalized.notes).toBe('Supermarket | kenmerk: 12345 | Bank transfer');
+      expect(normalized.notes).toBe(
+        'Supermarket | kenmerk: 12345 | Bank transfer',
+      );
     });
 
     it('should fallback to plain remittance text when key-value parsing is not available', () => {
