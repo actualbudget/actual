@@ -1,3 +1,4 @@
+import type { UseQueryResult } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import type { Screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -115,13 +116,44 @@ function firstOrIncorrect(id: string | null): string {
   return id?.split('-', 1)[0] || 'incorrect';
 }
 
+function mockNearbyPayeesResult(
+  data: NearbyPayeeEntity[],
+): UseQueryResult<NearbyPayeeEntity[], Error> {
+  return {
+    data,
+    dataUpdatedAt: 0,
+    error: null,
+    errorUpdatedAt: 0,
+    errorUpdateCount: 0,
+    failureCount: 0,
+    failureReason: null,
+    fetchStatus: 'idle',
+    isError: false,
+    isFetched: true,
+    isFetchedAfterMount: true,
+    isFetching: false,
+    isInitialLoading: false,
+    isLoading: false,
+    isLoadingError: false,
+    isPaused: false,
+    isPending: false,
+    isPlaceholderData: false,
+    isRefetchError: false,
+    isRefetching: false,
+    isStale: false,
+    isSuccess: true,
+    isEnabled: true,
+    promise: Promise.resolve(data),
+    refetch: vi.fn(),
+    status: 'success',
+  };
+}
+
 describe('PayeeAutocomplete.getPayeeSuggestions', () => {
   const queryClient = createTestQueryClient();
 
   beforeEach(() => {
-    vi.mocked(useNearbyPayees).mockReturnValue({
-      data: [],
-    } as unknown as ReturnType<typeof useNearbyPayees>);
+    vi.mocked(useNearbyPayees).mockReturnValue(mockNearbyPayeesResult([]));
     queryClient.setQueryData(payeeQueries.listCommon().queryKey, []);
   });
 
@@ -249,9 +281,9 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
       makeNearbyPayee('Grocery Store', 1.2),
     ];
     const payees = [makePayee('Alice'), makePayee('Bob')];
-    vi.mocked(useNearbyPayees).mockReturnValue({
-      data: nearbyPayees,
-    } as unknown as ReturnType<typeof useNearbyPayees>);
+    vi.mocked(useNearbyPayees).mockReturnValue(
+      mockNearbyPayeesResult(nearbyPayees),
+    );
 
     await clickAutocomplete(renderPayeeAutocomplete({ payees }));
 
@@ -273,9 +305,9 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
       makeNearbyPayee('Grocery Store', 1.2),
     ];
     const payees = [makePayee('Alice'), makePayee('Bob')];
-    vi.mocked(useNearbyPayees).mockReturnValue({
-      data: nearbyPayees,
-    } as unknown as ReturnType<typeof useNearbyPayees>);
+    vi.mocked(useNearbyPayees).mockReturnValue(
+      mockNearbyPayeesResult(nearbyPayees),
+    );
 
     const autocomplete = renderPayeeAutocomplete({ payees });
     await clickAutocomplete(autocomplete);
@@ -300,9 +332,9 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
       makePayee('Eve', { favorite: true }),
       makePayee('Carol'),
     ];
-    vi.mocked(useNearbyPayees).mockReturnValue({
-      data: nearbyPayees,
-    } as unknown as ReturnType<typeof useNearbyPayees>);
+    vi.mocked(useNearbyPayees).mockReturnValue(
+      mockNearbyPayeesResult(nearbyPayees),
+    );
     queryClient.setQueryData(payeeQueries.listCommon().queryKey, [
       makePayee('Bob'),
       makePayee('Carol'),
@@ -327,9 +359,9 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
   test('a payee appearing in both nearby and favorites shows in both sections', async () => {
     const nearbyPayees = [makeNearbyPayee('Eve', 0.5)];
     const payees = [makePayee('Alice'), makePayee('Eve', { favorite: true })];
-    vi.mocked(useNearbyPayees).mockReturnValue({
-      data: nearbyPayees,
-    } as unknown as ReturnType<typeof useNearbyPayees>);
+    vi.mocked(useNearbyPayees).mockReturnValue(
+      mockNearbyPayeesResult(nearbyPayees),
+    );
 
     await clickAutocomplete(renderPayeeAutocomplete({ payees }));
 
