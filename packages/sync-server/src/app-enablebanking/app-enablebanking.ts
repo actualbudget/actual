@@ -1,15 +1,17 @@
 import express from 'express';
-import type { Request, Response } from 'express';
+import type { Request } from 'express';
 import type { ParamsDictionary } from 'express-serve-static-core';
 
-import { isAdmin } from '../account-db.js';
 import { SecretName, secretsService } from '../services/secrets-service.js';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '../util/middlewares.js';
 
-import type { EnableBankingEndpoints } from './models/enablebanking.js';
+import type {
+  EnableBankingEndpoints,
+  EnableBankingResponse,
+} from './models/enablebanking.js';
 import { enableBankingService } from './services/enablebanking-services.js';
 import {
   authFailedError,
@@ -45,7 +47,7 @@ function post<T extends keyof EnableBankingEndpoints>(
   handler: (
     req: Request<
       ParamsDictionary,
-      EnableBankingEndpoints[T]['response'],
+      { status: 'ok'; data: EnableBankingResponse<T> },
       EnableBankingEndpoints[T]['body']
     >,
   ) => Promise<EnableBankingEndpoints[T]['response']>,
@@ -271,22 +273,3 @@ post('/transactions', async req => {
     startingBalance: currentBalanceCents, // Return current balance, client will calculate starting balance
   };
 });
-
-// Admin-only endpoint to clear all Enable Banking sessions
-app.post(
-  '/admin/clear_sessions',
-  validateSessionMiddleware,
-  async (_req: Request, res: Response) => {
-    if (!isAdmin(res.locals.user_id)) {
-      res.status(403).send({
-        status: 'error',
-        reason: 'forbidden',
-        details: 'permission-not-found',
-      });
-      return;
-    }
-
-    const cleared = enableBankingService.clearAllSessions();
-    res.send({ status: 'ok', data: { cleared } });
-  },
-);
