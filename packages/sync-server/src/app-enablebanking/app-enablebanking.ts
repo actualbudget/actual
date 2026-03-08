@@ -250,7 +250,7 @@ post('/transactions', async req => {
 app.post(
   '/admin/clear_sessions',
   validateSessionMiddleware,
-  async (req: Request, res: Response) => {
+  async (_req: Request, res: Response) => {
     if (!isAdmin(res.locals.user_id)) {
       res.status(403).send({
         status: 'error',
