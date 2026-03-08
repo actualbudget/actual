@@ -54,7 +54,7 @@ export type AccountHandlers = {
   'account-balance': typeof getAccountBalance;
   'account-properties': typeof getAccountProperties;
   'get-bank': typeof getBank;
-  'gocardless-accounts-link': typeof linkGoCardlessAccount;
+  'gocardless-accounts-link': typeof linkBankAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
   'account-create': typeof createAccount;
@@ -156,7 +156,7 @@ async function getBank({ id }: { id: string }) {
   );
 }
 
-async function linkGoCardlessAccount({
+async function linkBankAccount({
   requisitionId,
   account,
   upgradingId,
@@ -1280,7 +1280,7 @@ app.method('accounts-get', getAccounts);
 app.method('account-balance', getAccountBalance);
 app.method('account-properties', getAccountProperties);
 app.method('get-bank', getBank);
-app.method('gocardless-accounts-link', linkGoCardlessAccount);
+app.method('gocardless-accounts-link', linkBankAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
 app.method('account-create', mutator(undoable(createAccount)));
