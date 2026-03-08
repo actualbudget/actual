@@ -38,7 +38,7 @@ async function post(path: keyof EBE, body?: unknown) {
     throw new Error('Failed to get server config.');
   }
 
-  return await _post(
+  const response = await _post(
     serverConfig.ENABLEBANKING_SERVER + path,
     body,
     {
@@ -46,6 +46,32 @@ async function post(path: keyof EBE, body?: unknown) {
     },
     60_000,
   );
+
+  if (
+    typeof response === 'object' &&
+    response !== null &&
+    'error_code' in response &&
+    'error_type' in response &&
+    typeof response.error_code === 'string' &&
+    typeof response.error_type === 'string'
+  ) {
+    return {
+      error: {
+        error_code: response.error_code,
+        error_type: response.error_type,
+      },
+    };
+  }
+
+  if (
+    typeof response === 'object' &&
+    response !== null &&
+    ('data' in response || 'error' in response)
+  ) {
+    return response;
+  }
+
+  return { data: response };
 }
 
 async function configure({

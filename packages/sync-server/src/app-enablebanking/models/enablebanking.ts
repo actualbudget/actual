@@ -23,10 +23,20 @@ export type EnableBankingResponse<T extends keyof EnableBankingEndpoints> =
   | {
       data: EnableBankingEndpoints[T]['response'];
       error?: undefined;
+      error_code?: undefined;
+      error_type?: undefined;
     }
   | {
       data?: undefined;
       error: EnableBankingErrorInterface;
+      error_code?: undefined;
+      error_type?: undefined;
+    }
+  | {
+      data?: undefined;
+      error?: undefined;
+      error_code: EnableBankingErrorCode;
+      error_type: string;
     };
 
 export type EnableBankingErrorCode =

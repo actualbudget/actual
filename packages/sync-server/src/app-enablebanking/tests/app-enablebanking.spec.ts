@@ -49,6 +49,6 @@ describe('app-enablebanking /complete_auth', () => {
       'state-fail',
       'authorization failed',
     );
-    expect(response.body.data.error.error_code).toBe('INTERNAL_ERROR');
+    expect(response.body.data.error_code).toBe('INTERNAL_ERROR');
   });
 });

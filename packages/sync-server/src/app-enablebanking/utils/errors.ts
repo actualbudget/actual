@@ -9,12 +9,18 @@ import type {
   EnableBankingEndpoints,
   EnableBankingErrorCode,
   EnableBankingErrorInterface,
-  EnableBankingResponse,
 } from '../models/enablebanking.js';
 
 const debug = createDebug('actual:enablebanking:errors');
 
 export type ErrorResponse = components['schemas']['ErrorResponse'];
+
+type EnableBankingRouteData<T extends keyof EnableBankingEndpoints> =
+  | EnableBankingEndpoints[T]['response']
+  | {
+      error_code: EnableBankingErrorCode;
+      error_type: string;
+    };
 
 export class EnableBankingError extends Error {
   error_code: EnableBankingErrorCode;
@@ -184,31 +190,25 @@ export function handleError<T extends keyof EnableBankingEndpoints>(
   func: (
     req: Request<
       ParamsDictionary,
-      { status: 'ok'; data: EnableBankingResponse<T> },
+      { status: 'ok'; data: EnableBankingRouteData<T> },
       EnableBankingEndpoints[T]['body']
     >,
-  ) => Promise<EnableBankingEndpoints[T]['response']>,
+    res: Response<{ status: 'ok'; data: EnableBankingRouteData<T> }>,
+  ) => Promise<void>,
 ): RequestHandler<
   ParamsDictionary,
-  { status: 'ok'; data: EnableBankingResponse<T> },
+  { status: 'ok'; data: EnableBankingRouteData<T> },
   EnableBankingEndpoints[T]['body']
 > {
   return (
     req: Request<
       ParamsDictionary,
-      { status: 'ok'; data: EnableBankingResponse<T> },
+      { status: 'ok'; data: EnableBankingRouteData<T> },
       EnableBankingEndpoints[T]['body']
     >,
-    res: Response<{ status: 'ok'; data: EnableBankingResponse<T> }>,
+    res: Response<{ status: 'ok'; data: EnableBankingRouteData<T> }>,
   ) => {
-    // Makes sure we respond with a valid JSON Response
-    func(req)
-      .then(data => {
-        res.send({
-          status: 'ok',
-          data: { data },
-        });
-      })
+    func(req, res)
       .catch(err => {
         if (!(err instanceof EnableBankingError)) {
           console.error(
@@ -240,7 +240,7 @@ export function handleError<T extends keyof EnableBankingEndpoints>(
         debug('Returning error: %o', err.data());
         res.send({
           status: 'ok',
-          data: { error: err.data() },
+          data: err.data(),
         });
       });
   };

@@ -10,7 +10,6 @@ import {
 
 import type {
   EnableBankingEndpoints,
-  EnableBankingResponse,
 } from './models/enablebanking.js';
 import { enableBankingService } from './services/enablebanking-services.js';
 import {
@@ -47,12 +46,21 @@ function post<T extends keyof EnableBankingEndpoints>(
   handler: (
     req: Request<
       ParamsDictionary,
-      { status: 'ok'; data: EnableBankingResponse<T> },
+      any,
       EnableBankingEndpoints[T]['body']
     >,
   ) => Promise<EnableBankingEndpoints[T]['response']>,
 ) {
-  app.post(path, handleError<T>(handler));
+  app.post(
+    path,
+    handleError<T>(async (req, res) => {
+      const data = await handler(req);
+      res.send({
+        status: 'ok',
+        data,
+      });
+    }),
+  );
 }
 post('/configure', async req => {
   const { applicationId, secret } = req.body;
