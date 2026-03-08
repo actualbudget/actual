@@ -73,7 +73,7 @@ export const secretsService = {
   /**
    * Sets the value of a secret by name.
    * @param {SecretName} name - The name of the secret to set.
-   * @param {string} value - The value to set for the secret.
+    * @param {string|null} value - The value to set for the secret.
    * @returns {Object}
    */
   set: (name, value) => {

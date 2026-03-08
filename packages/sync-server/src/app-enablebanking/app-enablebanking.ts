@@ -61,14 +61,8 @@ post('/configure', async req => {
   }
 
   if (applicationId === null || secret === null) {
-    secretsService.set(
-      SecretName.enablebanking_applicationId,
-      null as unknown as string,
-    );
-    secretsService.set(
-      SecretName.enablebanking_secret,
-      null as unknown as string,
-    );
+    secretsService.set(SecretName.enablebanking_applicationId, null);
+    secretsService.set(SecretName.enablebanking_secret, null);
     return;
   }
 
