@@ -45,13 +45,11 @@ export function useEnableBankingStatus() {
               console.error('Deconfiguration failed:', error);
             } finally {
               setConfiguredEnableBanking(false);
-              setIsLoading(false);
             }
             return;
           }
 
           setConfiguredEnableBanking(false);
-          setIsLoading(false);
           return;
         }
 
