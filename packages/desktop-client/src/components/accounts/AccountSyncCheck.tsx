@@ -100,16 +100,25 @@ export function AccountSyncCheck() {
   const triggerRef = useRef(null);
   const { getErrorMessage } = useErrorMessage();
 
+  const supportsInAppReauth = useCallback((account: AccountEntity) => {
+    return (
+      account.account_sync_source === 'goCardless' ||
+      account.account_sync_source === 'enablebanking'
+    );
+  }, []);
+
   const reauth = useCallback(
     async (acc: AccountEntity) => {
       setOpen(false);
 
       if (acc.account_id) {
         try {
-          if (acc.account_sync_source === 'enablebanking') {
+          if (acc.account_sync_source === 'goCardless') {
+            await authorizeBank(dispatch);
+          } else if (acc.account_sync_source === 'enablebanking') {
             await authorizeEnableBankingSession(dispatch, acc);
           } else {
-            await authorizeBank(dispatch);
+            return;
           }
         } catch (error) {
           console.error('Failed to reauthorize bank sync account', error);
@@ -157,9 +166,7 @@ export function AccountSyncCheck() {
   }
 
   const { type, code } = error;
-  const canReauth =
-    account.account_sync_source === 'goCardless' ||
-    account.account_sync_source === 'enablebanking';
+  const canReauth = supportsInAppReauth(account);
   const showAuth =
     canReauth &&
     ((type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
