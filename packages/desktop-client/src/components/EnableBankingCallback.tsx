@@ -30,7 +30,11 @@ export function EnableBankingCallback() {
       // If Enable Banking returned an error, fail the auth flow
       if (errorParam && state) {
         const errorMessage = errorDescription || errorParam;
-        await send('enablebanking-failauth', { state, error: errorMessage });
+        try {
+          await send('enablebanking-failauth', { state, error: errorMessage });
+        } catch (sendError) {
+          console.error('Failed to report Enable Banking auth failure', sendError);
+        }
         setError(
           t('Authentication failed: {{error}}', { error: errorMessage }),
         );
