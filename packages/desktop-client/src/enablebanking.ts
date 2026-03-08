@@ -50,7 +50,7 @@ export async function selectEnableBankingAccounts(
     });
     if (account) {
       try {
-        await send('gocardless-accounts-link', {
+        await send('enablebanking-accounts-link', {
           account,
           requisitionId: token.bank_id,
           upgradingId: accountEntity.id,

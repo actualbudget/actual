@@ -388,7 +388,12 @@ export function useLinkAccountMutation() {
       startingBalance,
       syncSource,
     }: LinkAccountPayload) => {
-      await send('gocardless-accounts-link', {
+      const method: 'enablebanking-accounts-link' | 'gocardless-accounts-link' =
+        syncSource === 'enablebanking'
+          ? 'enablebanking-accounts-link'
+          : 'gocardless-accounts-link';
+
+      await send(method, {
         requisitionId,
         account,
         upgradingId,

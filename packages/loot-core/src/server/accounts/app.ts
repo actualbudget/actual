@@ -54,6 +54,7 @@ export type AccountHandlers = {
   'account-balance': typeof getAccountBalance;
   'account-properties': typeof getAccountProperties;
   'get-bank': typeof getBank;
+  'enablebanking-accounts-link': typeof linkBankAccount;
   'gocardless-accounts-link': typeof linkBankAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
@@ -1280,6 +1281,7 @@ app.method('accounts-get', getAccounts);
 app.method('account-balance', getAccountBalance);
 app.method('account-properties', getAccountProperties);
 app.method('get-bank', getBank);
+app.method('enablebanking-accounts-link', linkBankAccount);
 app.method('gocardless-accounts-link', linkBankAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
