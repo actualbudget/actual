@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Test SessionStore through the exported enableBankingservice methods
 import { enableBankingservice } from '../services/enablebanking-services.js';
 
 describe('SessionStore', () => {
