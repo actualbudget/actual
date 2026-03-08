@@ -132,9 +132,48 @@ describe('Bank Processors', () => {
         booking_date: '2024-01-15',
       };
 
-      const normalized = processor.normalizeTransaction(transaction);
+      expect(() => processor.normalizeTransaction(transaction)).toThrow(
+        'Missing or invalid transaction amount for Enable Banking transaction: txn-invalid-amount',
+      );
+    });
 
-      expect(normalized.amount).toBe(0);
+    it('should throw when amount is missing', () => {
+      const transaction = {
+        transaction_id: 'txn-missing-amount',
+        credit_debit_indicator: 'DBIT',
+        status: 'BOOK',
+        transaction_amount: {
+          currency: 'USD',
+        },
+        creditor: {
+          name: 'Test',
+        },
+        booking_date: '2024-01-15',
+      } as unknown as components['schemas']['Transaction'];
+
+      expect(() => processor.normalizeTransaction(transaction)).toThrow(
+        'Missing or invalid transaction amount for Enable Banking transaction: txn-missing-amount',
+      );
+    });
+
+    it('should throw when amount is an empty string', () => {
+      const transaction: components['schemas']['Transaction'] = {
+        transaction_id: 'txn-empty-amount',
+        credit_debit_indicator: 'DBIT',
+        status: 'BOOK',
+        transaction_amount: {
+          amount: '',
+          currency: 'USD',
+        },
+        creditor: {
+          name: 'Test',
+        },
+        booking_date: '2024-01-15',
+      };
+
+      expect(() => processor.normalizeTransaction(transaction)).toThrow(
+        'Missing or invalid transaction amount for Enable Banking transaction: txn-empty-amount',
+      );
     });
 
     it('should concatenate multiple remittance information lines', () => {
