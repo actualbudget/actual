@@ -102,10 +102,8 @@ describe('Bank Registry', () => {
       const registry = await getLoadedRegistry();
       const uniqueId = `invalid-${Date.now()}`;
       const invalidCtor = 'not-a-function';
-      registry.register(
-        uniqueId,
-        invalidCtor as unknown as new () => BankProcessor,
-      );
+      // @ts-expect-error Testing runtime protection for invalid constructor input
+      registry.register(uniqueId, invalidCtor);
 
       const processor = registry.get(uniqueId);
 
@@ -134,18 +132,15 @@ describe('Bank Registry', () => {
       const registry = await getLoadedRegistry();
       const uniqueId = `invalid-processor-${Date.now()}`;
       // Create a class that doesn't extend FallbackBankProcessor
-      class InvalidProcessor {
+      class InvalidProcessor implements BankProcessor {
         debug = false;
         name = 'InvalidProcessor';
-        normalizeTransaction(transaction: unknown) {
-          return transaction;
-        }
+        normalizeTransaction: BankProcessor['normalizeTransaction'] =
+          transaction =>
+            new FallbackBankProcessor().normalizeTransaction(transaction);
       }
 
-      registry.register(
-        uniqueId,
-        InvalidProcessor as unknown as new () => BankProcessor,
-      );
+      registry.register(uniqueId, InvalidProcessor);
       const processor = registry.get(uniqueId);
 
       // Should return fallback instead
