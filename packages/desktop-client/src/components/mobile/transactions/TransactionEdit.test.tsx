@@ -183,12 +183,12 @@ describe('TransactionEdit component rendering', () => {
     vi.clearAllMocks();
 
     vi.mocked(useNavigate).mockReturnValue(vi.fn());
-    vi.mocked(useAccounts).mockReturnValue(mockAccounts);
+    vi.mocked(useAccounts).mockReturnValue({ data: mockAccounts });
     vi.mocked(useCategories).mockReturnValue({
       list: mockCategories,
       grouped: [{ id: 'group-1', name: 'Group 1', categories: mockCategories }],
     });
-    vi.mocked(usePayees).mockReturnValue(mockPayees);
+    vi.mocked(usePayees).mockReturnValue({ data: mockPayees });
     vi.mocked(useDateFormat).mockReturnValue('MM/dd/yyyy');
     vi.mocked(useSyncedPref).mockReturnValue(['7', vi.fn()]);
     vi.mocked(useLocalPref).mockReturnValue([false, vi.fn(), vi.fn()]);
