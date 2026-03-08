@@ -16,6 +16,7 @@ import { authorizeEnableBankingSession } from '@desktop-client/enablebanking';
 import { authorizeBank } from '@desktop-client/gocardless';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 function useErrorMessage() {
@@ -92,6 +93,7 @@ function useErrorMessage() {
 export function AccountSyncCheck() {
   const { data: accounts = [] } = useAccounts();
   const failedAccounts = useFailedAccounts();
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { id } = useParams();
   const [open, setOpen] = useState(false);
@@ -103,14 +105,29 @@ export function AccountSyncCheck() {
       setOpen(false);
 
       if (acc.account_id) {
-        if (acc.account_sync_source === 'enablebanking') {
-          await authorizeEnableBankingSession(dispatch, acc);
-        } else {
-          void authorizeBank(dispatch);
+        try {
+          if (acc.account_sync_source === 'enablebanking') {
+            await authorizeEnableBankingSession(dispatch, acc);
+          } else {
+            await authorizeBank(dispatch);
+          }
+        } catch (error) {
+          console.error('Failed to reauthorize bank sync account', error);
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: t(
+                  'Reauthorization failed. Please try again in a moment.',
+                ),
+                timeout: 5000,
+              },
+            }),
+          );
         }
       }
     },
-    [dispatch],
+    [dispatch, t],
   );
 
   const unlinkAccount = useUnlinkAccountMutation();
