@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "composite": true,
     // Using ES2021 because that's the newest version where
     // the latest Node 16.x release supports all of the features
     "target": "ES2021",
@@ -8,8 +9,10 @@
     "moduleResolution": "node10",
     "noEmit": false,
     "declaration": true,
+    "declarationMap": true,
     "strict": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
   "include": ["."],
   "exclude": ["dist", "**/*.test.ts", "**/*.spec.ts"]

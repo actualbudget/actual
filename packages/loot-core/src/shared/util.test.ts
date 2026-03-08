@@ -72,6 +72,15 @@ describe('utility functions', () => {
     expect(looselyParseAmount('(1 500.99)')).toBe(-1500.99);
   });
 
+  test('looseParseAmount handles trailing whitespace', () => {
+    expect(looselyParseAmount('1055 ')).toBe(1055);
+    expect(looselyParseAmount('$1,055 ')).toBe(1055);
+    expect(looselyParseAmount('$1,055.00 ')).toBe(1055);
+    expect(looselyParseAmount(' $1,055 ')).toBe(1055);
+    expect(looselyParseAmount('3.45 ')).toBe(3.45);
+    expect(looselyParseAmount(' 3.45 ')).toBe(3.45);
+  });
+
   test('number formatting works with comma-dot format', () => {
     setNumberFormat({ format: 'comma-dot', hideFraction: false });
     let formatter = getNumberFormat().formatter;

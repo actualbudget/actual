@@ -49,7 +49,7 @@ function TransactionListWithPreviews() {
   } = useTransactions({
     query: transactionsQuery,
   });
-  const offBudgetAccounts = useOffBudgetAccounts();
+  const { data: offBudgetAccounts = [] } = useOffBudgetAccounts();
   const offBudgetAccountsFilter = useCallback(
     (schedule: ScheduleEntity) =>
       offBudgetAccounts.some(a => a.id === schedule._account),
