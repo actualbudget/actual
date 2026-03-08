@@ -1,7 +1,7 @@
 import { inspect } from 'util';
 
 import createDebug from 'debug';
-import type { Request, Response } from 'express';
+import type { Request, RequestHandler, Response } from 'express';
 import type { ParamsDictionary } from 'express-serve-static-core';
 
 import type { components } from '../models/enablebanking-openapi.js';
@@ -67,6 +67,24 @@ export function badRequestVariableError(name: string, endpoint: string) {
   return new BadRequestError(
     `Variable '${name}' not defined and is necessary for '${endpoint}'.`,
   );
+}
+
+export function badRequestMessageError(message: string) {
+  return new BadRequestError(message);
+}
+
+export function invalidNonEmptyStringError(name: string) {
+  return badRequestMessageError(
+    `Variable '${name}' must be a non-empty string.`,
+  );
+}
+
+export function notReadyAuthorizationError() {
+  return new NotReadyError('Authorization flow has not yet finished.');
+}
+
+export function authFailedError(error: string) {
+  return new EnableBankingError('AUTH_FAILED', `Authentication failed: ${error}`);
 }
 
 export function isErrorResponse(response: unknown): response is ErrorResponse {
@@ -167,17 +185,20 @@ export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
       EnableBankingEndpoints[T]['body']
     >,
   ) => Promise<EnableBankingEndpoints[T]['response']>,
-) {
-  return (
-    req: Request<
-      ParamsDictionary,
-      EnableBankingEndpoints[T]['response'],
-      EnableBankingEndpoints[T]['body']
-    >,
-    res: Response<{ status: 'ok'; data: EnableBankingResponse<T> }>,
-  ) => {
+): RequestHandler<
+  ParamsDictionary,
+  { status: 'ok'; data: EnableBankingResponse<T> },
+  EnableBankingEndpoints[T]['body']
+> {
+  return (req, res) => {
     // Makes sure we respond with a valid JSON Response
-    func(req)
+    func(
+      req as unknown as Request<
+        ParamsDictionary,
+        EnableBankingEndpoints[T]['response'],
+        EnableBankingEndpoints[T]['body']
+      >,
+    )
       .then(data => {
         res.send({
           status: 'ok',

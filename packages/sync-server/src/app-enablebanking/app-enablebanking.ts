@@ -13,11 +13,13 @@ import type { EnableBankingEndpoints } from './models/enablebanking.js';
 import { enableBankingService } from './services/enablebanking-services.js';
 import {
   BadRequestError,
+  badRequestMessageError,
   badRequestVariableError,
-  EnableBankingError,
   EnableBankingSetupError,
   handleErrorInHandler,
-  NotReadyError,
+  authFailedError,
+  invalidNonEmptyStringError,
+  notReadyAuthorizationError,
 } from './utils/errors.js';
 const app = express();
 app.use(requestLoggerMiddleware);
@@ -100,7 +102,7 @@ post('/get_aspsps', async req => {
   }
 
   if (typeof country !== 'string' || country.trim() === '') {
-    throw new BadRequestError("Variable 'country' must be a non-empty string.");
+    throw invalidNonEmptyStringError('country');
   }
 
   const responseData = (await enableBankingService.getASPSPs(country)).aspsps;
@@ -122,11 +124,11 @@ post('/start_auth', async req => {
   }
 
   if (typeof country !== 'string' || country.trim() === '') {
-    throw new BadRequestError("Variable 'country' must be a non-empty string.");
+    throw invalidNonEmptyStringError('country');
   }
 
   if (typeof aspsp !== 'string' || aspsp.trim() === '') {
-    throw new BadRequestError("Variable 'aspsp' must be a non-empty string.");
+    throw invalidNonEmptyStringError('aspsp');
   }
 
   const origin = req.headers.origin;
@@ -139,7 +141,7 @@ post('/start_auth', async req => {
     const originUrl = new URL(origin);
     // Only allow http and https protocols
     if (originUrl.protocol !== 'http:' && originUrl.protocol !== 'https:') {
-      throw new BadRequestError(
+      throw badRequestMessageError(
         'Invalid origin protocol. Only http and https are allowed.',
       );
     }
@@ -154,13 +156,13 @@ post('/start_auth', async req => {
     const requestHost = requestHostHeader?.split(',')[0]?.trim();
 
     if (!requestHost || originUrl.host !== requestHost) {
-      throw new BadRequestError('Invalid origin host header.');
+      throw badRequestMessageError('Invalid origin host header.');
     }
   } catch (error) {
     if (error instanceof BadRequestError) {
       throw error;
     }
-    throw new BadRequestError(
+    throw badRequestMessageError(
       `Invalid origin header: ${error instanceof Error ? error.message : 'malformed URL'}`,
     );
   }
@@ -184,16 +186,13 @@ post('/get_session', async req => {
 
   const entry = enableBankingService.getSessionEntry(state);
   if (!entry) {
-    throw new NotReadyError('Authorization flow has not yet finished.');
+    throw notReadyAuthorizationError();
   }
   if (entry.error) {
-    throw new EnableBankingError(
-      'AUTH_FAILED',
-      `Authentication failed: ${entry.error}`,
-    );
+    throw authFailedError(entry.error);
   }
   if (!entry.sessionId) {
-    throw new NotReadyError('Authorization flow has not yet finished.');
+    throw notReadyAuthorizationError();
   }
   return await enableBankingService.getAccounts(entry.sessionId);
 });
@@ -233,10 +232,7 @@ post('/get_accounts', async req => {
   const { session_id } = req.body;
 
   if (!session_id) {
-    throw badRequestVariableError(
-      'session_id',
-      '/enablebanking/get_accounts',
-    );
+    throw badRequestVariableError('session_id', '/enablebanking/get_accounts');
   }
 
   return await enableBankingService.getAccounts(session_id);
