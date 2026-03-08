@@ -95,7 +95,11 @@ post('/get_aspsps', async req => {
   }
   const { country } = req.body;
 
-  if (!country || typeof country !== 'string' || country.trim() === '') {
+  if (!country) {
+    throw badRequestVariableError('country', '/enablebanking/get_aspsps');
+  }
+
+  if (typeof country !== 'string' || country.trim() === '') {
     throw new BadRequestError("Variable 'country' must be a non-empty string.");
   }
 
@@ -110,11 +114,11 @@ post('/start_auth', async req => {
   const { aspsp, country } = req.body;
 
   if (!country) {
-    throw badRequestVariableError('country', '/start_auth');
+    throw badRequestVariableError('country', '/enablebanking/start_auth');
   }
 
   if (!aspsp) {
-    throw badRequestVariableError('aspsp', '/start_auth');
+    throw badRequestVariableError('aspsp', '/enablebanking/start_auth');
   }
 
   if (typeof country !== 'string' || country.trim() === '') {
@@ -177,9 +181,7 @@ post('/get_session', async req => {
   }
   const { state } = req.body;
   if (!state) {
-    throw new BadRequestError(
-      "Variable 'state' should be passed to '/get_session'.",
-    );
+    throw badRequestVariableError('state', '/enablebanking/get_session');
   }
 
   const entry = enableBankingservice.getSessionEntry(state);
@@ -202,11 +204,11 @@ post('/complete_auth', async req => {
   const { state, code } = req.body;
 
   if (!state) {
-    throw badRequestVariableError('state', '/complete_auth');
+    throw badRequestVariableError('state', '/enablebanking/complete_auth');
   }
 
   if (!code) {
-    throw badRequestVariableError('code', '/complete_auth');
+    throw badRequestVariableError('code', '/enablebanking/complete_auth');
   }
 
   await enableBankingservice.authorizeSession(state, code);
@@ -218,7 +220,7 @@ post('/fail_auth', async req => {
   const { state, error } = req.body;
 
   if (!state) {
-    throw badRequestVariableError('state', '/fail_auth');
+    throw badRequestVariableError('state', '/enablebanking/fail_auth');
   }
 
   enableBankingservice.failSession(state, error ?? 'unknown_error');
@@ -233,7 +235,10 @@ post('/get_accounts', async req => {
   const { session_id } = req.body;
 
   if (!session_id) {
-    throw badRequestVariableError('session_id', '/get_accounts');
+    throw badRequestVariableError(
+      'session_id',
+      '/enablebanking/get_accounts',
+    );
   }
 
   return await enableBankingservice.getAccounts(session_id);
@@ -246,7 +251,7 @@ post('/transactions', async req => {
   const { startDate, endDate, account_id, bank_id } = req.body;
 
   if (!account_id) {
-    throw badRequestVariableError('account_id', '/transactions');
+    throw badRequestVariableError('account_id', '/enablebanking/transactions');
   }
   const transactions = await enableBankingservice.getTransactions(
     account_id,
