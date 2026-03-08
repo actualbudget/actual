@@ -15,12 +15,14 @@ import { format as formatDate, parseISO } from 'date-fns';
 import { currentDay, subDays } from 'loot-core/shared/months';
 import type {
   AccountEntity,
+  SyncServerAkahuAccount,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
 } from 'loot-core/types/models';
 
 import {
+  useLinkAccountAkahuMutation,
   useLinkAccountMutation,
   useLinkAccountPluggyAiMutation,
   useLinkAccountSimpleFinMutation,
@@ -95,6 +97,11 @@ export type SelectLinkedAccountsModalProps =
       requisitionId?: undefined;
       externalAccounts: SyncServerPluggyAiAccount[];
       syncSource: 'pluggyai';
+    }
+  | {
+      requisitionId?: undefined;
+      externalAccounts: SyncServerAkahuAccount[];
+      syncSource: 'akahu';
     };
 
 export function SelectLinkedAccountsModal({
@@ -120,6 +127,11 @@ export function SelectLinkedAccountsModal({
           return {
             syncSource: 'pluggyai',
             externalAccounts: toSort as SyncServerPluggyAiAccount[],
+          };
+        case 'akahu':
+          return {
+            syncSource: 'akahu',
+            externalAccounts: toSort as SyncServerAkahuAccount[],
           };
         case 'goCardless':
           return {
@@ -159,6 +171,7 @@ export function SelectLinkedAccountsModal({
   const unlinkAccount = useUnlinkAccountMutation();
   const linkAccountSimpleFin = useLinkAccountSimpleFinMutation();
   const linkAccountPluggyAi = useLinkAccountPluggyAiMutation();
+  const linkAccountAkahu = useLinkAccountAkahuMutation();
 
   async function onNext() {
     const chosenLocalAccountIds = Object.values(chosenAccounts);
@@ -211,6 +224,21 @@ export function SelectLinkedAccountsModal({
           });
         } else if (propsWithSortedExternalAccounts.syncSource === 'pluggyai') {
           linkAccountPluggyAi.mutate({
+            externalAccount:
+              propsWithSortedExternalAccounts.externalAccounts[
+                externalAccountIndex
+              ],
+            upgradingId:
+              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              chosenLocalAccountId !== addOffBudgetAccountOption.id
+                ? chosenLocalAccountId
+                : undefined,
+            offBudget,
+            startingDate,
+            startingBalance,
+          });
+        } else if (propsWithSortedExternalAccounts.syncSource === 'akahu') {
+          linkAccountAkahu.mutate({
             externalAccount:
               propsWithSortedExternalAccounts.externalAccounts[
                 externalAccountIndex
@@ -479,7 +507,8 @@ export function SelectLinkedAccountsModal({
 type ExternalAccount =
   | SyncServerGoCardlessAccount
   | SyncServerSimpleFinAccount
-  | SyncServerPluggyAiAccount;
+  | SyncServerPluggyAiAccount
+  | SyncServerAkahuAccount;
 
 type StartingBalanceInfo = {
   date: string;
@@ -717,7 +746,8 @@ function getInstitutionName(
   externalAccount:
     | SyncServerGoCardlessAccount
     | SyncServerSimpleFinAccount
-    | SyncServerPluggyAiAccount,
+    | SyncServerPluggyAiAccount
+    | SyncServerAkahuAccount,
 ) {
   if (typeof externalAccount?.institution === 'string') {
     return externalAccount?.institution ?? '';

@@ -257,6 +257,41 @@ async function downloadSimpleFinTransactions(
   return retVal;
 }
 
+async function downloadAkahuTransactions(
+  acctId: AccountEntity['id'],
+  since: string,
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  logger.log('Pulling transactions from Akahu');
+
+  const res = await post(
+    getServer().AKAHU_SERVER + '/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+    60000,
+  );
+
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code);
+  }
+
+  const retVal = {
+    transactions: res.transactions.all,
+    accountBalance: res.balances,
+    startingBalance: res.startingBalance,
+  };
+
+  logger.log('Response:', retVal);
+  return retVal;
+}
+
 async function downloadPluggyAiTransactions(
   acctId: AccountEntity['id'],
   since: string,
@@ -949,6 +984,11 @@ async function processBankSyncDownload(
         currentBalance,
       );
       balanceToUse = Math.round(previousBalance);
+    } else if (acctRow.account_sync_source === 'akahu') {
+      const previousBalance = transactions.reduce((total, trans) => {
+        return total - Math.round(Number(trans.transactionAmount.amount) * 100);
+      }, currentBalance);
+      balanceToUse = Math.round(previousBalance);
     }
 
     const oldestTransaction = transactions[transactions.length - 1];
@@ -1035,6 +1075,8 @@ export async function syncAccount(
   let download;
   if (acctRow.account_sync_source === 'simpleFin') {
     download = await downloadSimpleFinTransactions(acctId, syncStartDate);
+  } else if (acctRow.account_sync_source === 'akahu') {
+    download = await downloadAkahuTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'pluggyai') {
     download = await downloadPluggyAiTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'goCardless') {

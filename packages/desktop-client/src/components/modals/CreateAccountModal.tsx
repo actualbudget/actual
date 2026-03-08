@@ -25,6 +25,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
 import { authorizeBank } from '@desktop-client/gocardless';
+import { useAkahuStatus } from '@desktop-client/hooks/useAkahuStatus';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
@@ -55,6 +56,10 @@ export function CreateAccountModal({
   const [isPluggyAiSetupComplete, setIsPluggyAiSetupComplete] = useState<
     boolean | null
   >(null);
+  const [isAkahuSetupComplete, setIsAkahuSetupComplete] = useState<
+    boolean | null
+  >(null);
+  const [loadingAkahuAccounts, setLoadingAkahuAccounts] = useState(false);
   const { hasPermission } = useAuth();
   const multiuserEnabled = useMultiuserEnabled();
 
@@ -217,6 +222,75 @@ export function CreateAccountModal({
     }
   };
 
+  const onConnectAkahu = async () => {
+    if (!isAkahuSetupComplete) {
+      onAkahuInit();
+      return;
+    }
+
+    if (loadingAkahuAccounts) {
+      return;
+    }
+
+    setLoadingAkahuAccounts(true);
+
+    try {
+      const results = await send('akahu-accounts');
+      if (results.error_code) {
+        throw new Error(results.reason);
+      }
+
+      type NormalizedAccount = {
+        account_id: string;
+        name: string;
+        institution: string;
+        connectionId: string;
+        balance: number;
+      };
+
+      const newAccounts: NormalizedAccount[] = (results.accounts ?? []).map(
+        (oldAccount: {
+          _id: string;
+          name: string;
+          connection: { _id: string; name: string };
+          balance: { current: number };
+        }) => ({
+          account_id: oldAccount._id,
+          name: oldAccount.name,
+          institution: oldAccount.connection?.name ?? '',
+          connectionId: oldAccount.connection?._id ?? '',
+          balance: oldAccount.balance?.current ?? 0,
+        }),
+      );
+
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'select-linked-accounts',
+            options: {
+              externalAccounts: newAccounts,
+              syncSource: 'akahu',
+            },
+          },
+        }),
+      );
+    } catch (err) {
+      console.error(err);
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'akahu-init',
+            options: {
+              onSuccess: () => setIsAkahuSetupComplete(true),
+            },
+          },
+        }),
+      );
+    }
+
+    setLoadingAkahuAccounts(false);
+  };
+
   const onGoCardlessInit = () => {
     dispatch(
       pushModal({
@@ -303,6 +377,33 @@ export function CreateAccountModal({
     });
   };
 
+  const onAkahuInit = () => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'akahu-init',
+          options: {
+            onSuccess: () => setIsAkahuSetupComplete(true),
+          },
+        },
+      }),
+    );
+  };
+
+  const onAkahuReset = () => {
+    void send('secret-set', {
+      name: 'akahu_appToken',
+      value: null,
+    }).then(() => {
+      void send('secret-set', {
+        name: 'akahu_userToken',
+        value: null,
+      }).then(() => {
+        setIsAkahuSetupComplete(false);
+      });
+    });
+  };
+
   const onCreateLocalAccount = () => {
     dispatch(pushModal({ modal: { name: 'add-local-account' } }));
   };
@@ -321,6 +422,11 @@ export function CreateAccountModal({
   useEffect(() => {
     setIsPluggyAiSetupComplete(configuredPluggyAi);
   }, [configuredPluggyAi]);
+
+  const { configuredAkahu } = useAkahuStatus();
+  useEffect(() => {
+    setIsAkahuSetupComplete(configuredAkahu);
+  }, [configuredAkahu]);
 
   let title = t('Add account');
   const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
@@ -574,12 +680,75 @@ export function CreateAccountModal({
                           hundreds of banks.
                         </Trans>
                       </Text>
+
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          gap: 10,
+                          marginTop: '18px',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <ButtonWithLoading
+                          isDisabled={syncServerStatus !== 'online'}
+                          isLoading={loadingAkahuAccounts}
+                          style={{
+                            padding: '10px 0',
+                            fontSize: 15,
+                            fontWeight: 600,
+                            flex: 1,
+                          }}
+                          onPress={onConnectAkahu}
+                        >
+                          {isAkahuSetupComplete
+                            ? t('Link bank account with Akahu')
+                            : t('Set up Akahu for bank sync')}
+                        </ButtonWithLoading>
+                        {isAkahuSetupComplete && (
+                          <DialogTrigger>
+                            <Button variant="bare" aria-label={t('Akahu menu')}>
+                              <SvgDotsHorizontalTriple
+                                width={15}
+                                height={15}
+                                style={{ transform: 'rotateZ(90deg)' }}
+                              />
+                            </Button>
+                            <Popover>
+                              <Dialog>
+                                <Menu
+                                  onMenuSelect={item => {
+                                    if (item === 'reconfigure') {
+                                      onAkahuReset();
+                                    }
+                                  }}
+                                  items={[
+                                    {
+                                      name: 'reconfigure',
+                                      text: t('Reset Akahu credentials'),
+                                    },
+                                  ]}
+                                />
+                              </Dialog>
+                            </Popover>
+                          </DialogTrigger>
+                        )}
+                      </View>
+                      <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                        <Trans>
+                          <strong>
+                            Link a <em>New Zealand</em> bank account
+                          </strong>{' '}
+                          to automatically download transactions. Akahu provides
+                          open banking access for New Zealand banks.
+                        </Trans>
+                      </Text>
                     </>
                   )}
 
                   {(!isGoCardlessSetupComplete ||
                     !isSimpleFinSetupComplete ||
-                    !isPluggyAiSetupComplete) &&
+                    !isPluggyAiSetupComplete ||
+                    !isAkahuSetupComplete) &&
                     !canSetSecrets && (
                       <Warning>
                         <Trans>
@@ -590,6 +759,7 @@ export function CreateAccountModal({
                           isGoCardlessSetupComplete ? '' : 'GoCardless',
                           isSimpleFinSetupComplete ? '' : 'SimpleFIN',
                           isPluggyAiSetupComplete ? '' : 'Pluggy.ai',
+                          isAkahuSetupComplete ? '' : 'Akahu',
                         ]
                           .filter(Boolean)
                           .join(' or ')}
