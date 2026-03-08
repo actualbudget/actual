@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ABNAmroBankProcessor } from '../banks/abnamro.bank.js';
-import { DanishBankProcessor } from '../banks/danish.bank.js';
-import { FallbackBankProcessor } from '../banks/fallback.bank.js';
+import { createABNAmroBankProcessor } from '../banks/abnamro.bank.js';
+import { createDanishBankProcessor } from '../banks/danish.bank.js';
+import { createFallbackBankProcessor } from '../banks/fallback.bank.js';
 import type { components } from '../models/enablebanking-openapi.js';
 
 describe('Bank Processors', () => {
@@ -11,7 +11,7 @@ describe('Bank Processors', () => {
   });
 
   describe('FallbackBankProcessor', () => {
-    const processor = new FallbackBankProcessor();
+    const processor = createFallbackBankProcessor();
 
     it('should normalize debit transaction (money out)', () => {
       const transaction: components['schemas']['Transaction'] = {
@@ -264,7 +264,7 @@ describe('Bank Processors', () => {
   });
 
   describe('DanishBankProcessor', () => {
-    const processor = new DanishBankProcessor();
+    const processor = createDanishBankProcessor();
 
     it('should extract payee from remittance information', () => {
       const transaction: components['schemas']['Transaction'] = {
@@ -355,7 +355,7 @@ describe('Bank Processors', () => {
   });
 
   describe('ABNAmroBankProcessor', () => {
-    const processor = new ABNAmroBankProcessor();
+    const processor = createABNAmroBankProcessor();
 
     it('should parse structured Omschrijving and Kenmerk into notes', () => {
       const transaction: components['schemas']['Transaction'] = {

@@ -1,8 +1,8 @@
 import type { components } from '../models/enablebanking-openapi.js';
 import type { Transaction } from '../models/enablebanking.js';
 
-import { BankProcessorFor } from './bank-registry.js';
-import { FallbackBankProcessor } from './fallback.bank.js';
+import type { BankProcessorRegistration } from './bank-registry.js';
+import { resolveTransactionDate } from './fallback.bank.js';
 
 /**
  * Minimal payee extraction for Danish banks.
@@ -86,7 +86,7 @@ function extractPayeeFromNotes(notes: string): string {
 }
 
 // Register for common Danish banks
-@BankProcessorFor([
+const DANISH_BANK_IDS = [
   'DK_Sparekassen Kronjylland',
   'DK_Danske Bank',
   'DK_Nordea',
@@ -106,61 +106,74 @@ function extractPayeeFromNotes(notes: string): string {
   'DK_Den Jyske Sparekasse',
   'DK_Sparekassen Danmark',
   'DK_Lunar',
-])
-export class DanishBankProcessor extends FallbackBankProcessor {
-  name = 'DanishBankProcessor';
-  debug = false;
+] as const;
 
-  normalizeTransaction(t: components['schemas']['Transaction']): Transaction {
-    const isDebtor = t.credit_debit_indicator === 'DBIT';
-    const payeeObject = isDebtor ? t.creditor : t.debtor;
+function normalizeDanishTransaction(
+  t: components['schemas']['Transaction'],
+): Transaction {
+  const isDebtor = t.credit_debit_indicator === 'DBIT';
+  const payeeObject = isDebtor ? t.creditor : t.debtor;
 
-    const notes = t.remittance_information
-      ? t.remittance_information.filter(x => x != null).join(' ')
-      : '';
+  const notes = t.remittance_information
+    ? t.remittance_information.filter(x => x != null).join(' ')
+    : '';
 
-    // Use creditor/debtor name if available, otherwise extract from notes
-    let payeeName = payeeObject?.name?.trim() || '';
-    if (!payeeName && notes) {
-      payeeName = extractPayeeFromNotes(notes);
-    }
-
-    // Clean metadata from notes for display
-    const cleanNotes = notes.replace(/\s*\|\s*col\d+=.*$/i, '').trim();
-
-    const parsedAmount = t.transaction_amount?.amount
-      ? parseFloat(t.transaction_amount.amount)
-      : 0;
-    const amount = Number.isNaN(parsedAmount)
-      ? 0
-      : parsedAmount * (isDebtor ? -1 : 1);
-
-    const currency = t.transaction_amount?.currency;
-    if (!currency) {
-      console.warn(
-        `Missing currency for transaction ${t.transaction_id || 'unknown'}, using empty string. This may indicate a data quality issue.`,
-      );
-    }
-
-    const date = this.resolveTransactionDate(t);
-
-    return {
-      ...t,
-      payeeObject,
-      amount,
-      // Add camelCase transactionAmount for compatibility with sync.ts
-      transactionAmount: {
-        amount,
-        currency: currency ?? '',
-      },
-      payeeName,
-      notes: cleanNotes,
-      date,
-      // Map API status to booked boolean (sync.ts uses trans.booked to set cleared)
-      booked: t.status === 'BOOK',
-      // Map stable unique entry_reference to camelCase transactionId used for import deduplication.
-      // entry_reference is the immutable unique identifier per the Enable Banking API.
-      transactionId: t.entry_reference ?? t.transaction_id ?? null,
-    };
+  // Use creditor/debtor name if available, otherwise extract from notes
+  let payeeName = payeeObject?.name?.trim() || '';
+  if (!payeeName && notes) {
+    payeeName = extractPayeeFromNotes(notes);
   }
+
+  // Clean metadata from notes for display
+  const cleanNotes = notes.replace(/\s*\|\s*col\d+=.*$/i, '').trim();
+
+  const parsedAmount = t.transaction_amount?.amount
+    ? parseFloat(t.transaction_amount.amount)
+    : 0;
+  const amount = Number.isNaN(parsedAmount)
+    ? 0
+    : parsedAmount * (isDebtor ? -1 : 1);
+
+  const currency = t.transaction_amount?.currency;
+  if (!currency) {
+    console.warn(
+      `Missing currency for transaction ${t.transaction_id || 'unknown'}, using empty string. This may indicate a data quality issue.`,
+    );
+  }
+
+  const date = resolveTransactionDate(t);
+
+  return {
+    ...t,
+    payeeObject,
+    amount,
+    // Add camelCase transactionAmount for compatibility with sync.ts
+    transactionAmount: {
+      amount,
+      currency: currency ?? '',
+    },
+    payeeName,
+    notes: cleanNotes,
+    date,
+    // Map API status to booked boolean (sync.ts uses trans.booked to set cleared)
+    booked: t.status === 'BOOK',
+    // Map stable unique entry_reference to camelCase transactionId used for import deduplication.
+    // entry_reference is the immutable unique identifier per the Enable Banking API.
+    transactionId: t.entry_reference ?? t.transaction_id ?? null,
+  };
 }
+
+export function createDanishBankProcessor() {
+  return {
+    debug: false,
+    name: 'DanishBankProcessor',
+    normalizeTransaction: normalizeDanishTransaction,
+  };
+}
+
+export const bankProcessorRegistrations = [
+  {
+    bankIds: [...DANISH_BANK_IDS],
+    createProcessor: createDanishBankProcessor,
+  },
+] satisfies BankProcessorRegistration[];

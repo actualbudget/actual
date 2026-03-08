@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { BankProcessorFor, getLoadedRegistry } from '../banks/bank-registry.js';
-import { DanishBankProcessor } from '../banks/danish.bank.js';
-import { FallbackBankProcessor } from '../banks/fallback.bank.js';
+import { getLoadedRegistry } from '../banks/bank-registry.js';
+import { createFallbackBankProcessor } from '../banks/fallback.bank.js';
 import type { BankProcessor } from '../models/bank-processor.js';
 
 describe('Bank Registry', () => {
@@ -11,7 +10,6 @@ describe('Bank Registry', () => {
       const registry = await getLoadedRegistry();
       const processor = registry.get('unknown-bank-id');
 
-      expect(processor).toBeInstanceOf(FallbackBankProcessor);
       expect(processor.name).toBe('FallbackBankProcessor');
     });
 
@@ -20,7 +18,6 @@ describe('Bank Registry', () => {
       // Test one of the Danish bank IDs that's actually registered
       const processor = registry.get('DK_Danske Bank');
 
-      expect(processor).toBeInstanceOf(DanishBankProcessor);
       expect(processor.name).toBe('DanishBankProcessor');
     });
 
@@ -47,17 +44,15 @@ describe('Bank Registry', () => {
       const processor1 = registry.get('DK_Danske Bank');
       const processor2 = registry.get('DK_Danske Bank');
 
-      // Should return new instances but same type
-      expect(processor1).toBeInstanceOf(DanishBankProcessor);
-      expect(processor2).toBeInstanceOf(DanishBankProcessor);
-      expect(processor1).not.toBe(processor2); // Different instances
+      expect(processor1.name).toBe('DanishBankProcessor');
+      expect(processor2.name).toBe('DanishBankProcessor');
+      expect(processor1).not.toBe(processor2);
     });
   });
 
-  describe('BankProcessorFor Decorator', () => {
+  describe('Processor registration', () => {
     it('should register processor for multiple bank IDs', async () => {
       const registry = await getLoadedRegistry();
-      // Use unique IDs to prevent conflicts with other tests
       const uniqueId = `test-${Date.now()}`;
       const testIds = [
         `${uniqueId}-bank-1`,
@@ -65,12 +60,14 @@ describe('Bank Registry', () => {
         `${uniqueId}-bank-3`,
       ];
 
-      // Create a test processor
-      @BankProcessorFor(testIds)
-      class TestBankProcessor extends FallbackBankProcessor {
-        override name = 'TestBankProcessor';
-      }
-      void TestBankProcessor;
+      const createTestProcessor = (): BankProcessor => ({
+        debug: false,
+        name: 'TestBankProcessor',
+        normalizeTransaction: transaction =>
+          createFallbackBankProcessor().normalizeTransaction(transaction),
+      });
+
+      registry.registerForBanks(testIds, createTestProcessor);
 
       const processor1 = registry.get(testIds[0]);
       const processor2 = registry.get(testIds[1]);
@@ -81,98 +78,84 @@ describe('Bank Registry', () => {
       expect(processor3.name).toBe('TestBankProcessor');
     });
 
-    it('should allow processors to extend FallbackBankProcessor', async () => {
+    it('should accept valid processor factories', async () => {
       const registry = await getLoadedRegistry();
       const uniqueId = `custom-${Date.now()}`;
 
-      @BankProcessorFor([uniqueId])
-      class CustomProcessor extends FallbackBankProcessor {
-        override name = 'CustomProcessor';
-      }
+      registry.register(uniqueId, () => ({
+        ...createFallbackBankProcessor(),
+        name: 'CustomProcessor',
+      }));
 
       const processor = registry.get(uniqueId);
 
-      expect(processor).toBeInstanceOf(FallbackBankProcessor);
-      expect(processor).toBeInstanceOf(CustomProcessor);
+      expect(processor.name).toBe('CustomProcessor');
     });
   });
 
   describe('Security Validation', () => {
-    it('should return fallback for non-function constructors', async () => {
+    it('should return fallback for non-function factories', async () => {
       const registry = await getLoadedRegistry();
       const uniqueId = `invalid-${Date.now()}`;
-      const invalidCtor = 'not-a-function';
-      // @ts-expect-error Testing runtime protection for invalid constructor input
-      registry.register(uniqueId, invalidCtor);
+      const invalidFactory = 'not-a-function';
+      // @ts-expect-error Testing runtime protection for invalid factory input
+      registry.register(uniqueId, invalidFactory);
 
       const processor = registry.get(uniqueId);
 
-      expect(processor).toBeInstanceOf(FallbackBankProcessor);
-    });
-
-    it('should return fallback if constructor throws during instantiation', async () => {
-      const registry = await getLoadedRegistry();
-      const uniqueId = `throwing-${Date.now()}`;
-
-      class ThrowingProcessor extends FallbackBankProcessor {
-        constructor() {
-          super();
-          throw new Error('Constructor error');
-        }
-      }
-
-      registry.register(uniqueId, ThrowingProcessor);
-      const processor = registry.get(uniqueId);
-
-      expect(processor).toBeInstanceOf(FallbackBankProcessor);
-      expect(processor).not.toBeInstanceOf(ThrowingProcessor);
-    });
-
-    it('should reject processors that do not extend FallbackBankProcessor', async () => {
-      const registry = await getLoadedRegistry();
-      const uniqueId = `invalid-processor-${Date.now()}`;
-      // Create a class that doesn't extend FallbackBankProcessor
-      class InvalidProcessor implements BankProcessor {
-        debug = false;
-        name = 'InvalidProcessor';
-        normalizeTransaction: BankProcessor['normalizeTransaction'] =
-          transaction =>
-            new FallbackBankProcessor().normalizeTransaction(transaction);
-      }
-
-      registry.register(uniqueId, InvalidProcessor);
-      const processor = registry.get(uniqueId);
-
-      // Should return fallback instead
-      expect(processor).toBeInstanceOf(FallbackBankProcessor);
       expect(processor.name).toBe('FallbackBankProcessor');
     });
 
-    it('should allow FallbackBankProcessor itself to be registered', async () => {
+    it('should return fallback if factory throws', async () => {
+      const registry = await getLoadedRegistry();
+      const uniqueId = `throwing-${Date.now()}`;
+
+      registry.register(uniqueId, () => {
+        throw new Error('Factory error');
+      });
+      const processor = registry.get(uniqueId);
+
+      expect(processor.name).toBe('FallbackBankProcessor');
+    });
+
+    it('should reject invalid processor objects from factory', async () => {
+      const registry = await getLoadedRegistry();
+      const uniqueId = `invalid-output-${Date.now()}`;
+
+      registry.register(
+        uniqueId,
+        () =>
+          ({
+            name: 'InvalidProcessor',
+          }) as unknown as BankProcessor,
+      );
+      const processor = registry.get(uniqueId);
+
+      expect(processor.name).toBe('FallbackBankProcessor');
+    });
+
+    it('should allow fallback processor factory to be registered', async () => {
       const registry = await getLoadedRegistry();
       const uniqueId = `fallback-test-${Date.now()}`;
 
-      registry.register(uniqueId, FallbackBankProcessor);
+      registry.register(uniqueId, createFallbackBankProcessor);
       const processor = registry.get(uniqueId);
 
-      expect(processor).toBeInstanceOf(FallbackBankProcessor);
       expect(processor.name).toBe('FallbackBankProcessor');
     });
   });
 
   describe('Error Handling', () => {
     it('should throw error on duplicate registration', () => {
+      const registryPromise = getLoadedRegistry();
       const uniqueId = `duplicate-test-${Date.now()}`;
 
-      @BankProcessorFor([uniqueId])
-      class FirstProcessor extends FallbackBankProcessor {}
-      void FirstProcessor;
-
-      expect(() => {
-        @BankProcessorFor([uniqueId])
-        class SecondProcessor extends FallbackBankProcessor {}
-        void SecondProcessor;
-      }).toThrow('Duplicate bank processor id');
+      return registryPromise.then(registry => {
+        registry.register(uniqueId, createFallbackBankProcessor);
+        expect(() => {
+          registry.register(uniqueId, createFallbackBankProcessor);
+        }).toThrow('Duplicate bank processor id');
+      });
     });
   });
 
@@ -183,7 +166,7 @@ describe('Bank Registry', () => {
 
       danishBanks.forEach(bankId => {
         const processor = registry.get(bankId);
-        expect(processor).toBeInstanceOf(DanishBankProcessor);
+        expect(processor.name).toBe('DanishBankProcessor');
       });
     });
 
@@ -194,7 +177,6 @@ describe('Bank Registry', () => {
 
       otherBanks.forEach(bankId => {
         const processor = registry.get(bankId);
-        expect(processor).toBeInstanceOf(FallbackBankProcessor);
         expect(processor.name).toBe('FallbackBankProcessor');
       });
     });
