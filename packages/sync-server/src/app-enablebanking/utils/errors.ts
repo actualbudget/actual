@@ -2,6 +2,7 @@ import { inspect } from 'util';
 
 import createDebug from 'debug';
 import type { Request, Response } from 'express';
+import type { ParamsDictionary } from 'express-serve-static-core';
 
 import type { components } from '../models/enablebanking-openapi.js';
 import type {
@@ -159,10 +160,20 @@ export function handleErrorResponse(
 }
 
 export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
-  func: (req: Request) => Promise<EnableBankingEndpoints[T]['response']>,
+  func: (
+    req: Request<
+      ParamsDictionary,
+      EnableBankingEndpoints[T]['response'],
+      EnableBankingEndpoints[T]['body']
+    >,
+  ) => Promise<EnableBankingEndpoints[T]['response']>,
 ) {
   return (
-    req: Request,
+    req: Request<
+      ParamsDictionary,
+      EnableBankingEndpoints[T]['response'],
+      EnableBankingEndpoints[T]['body']
+    >,
     res: Response<{ status: 'ok'; data: EnableBankingResponse<T> }>,
   ) => {
     // Makes sure we respond with a valid JSON Response
