@@ -7,9 +7,9 @@ import type {
 } from 'loot-core/types/models';
 import type { EnableBankingToken } from 'loot-core/types/models/enablebanking';
 
-import { closeModal, pushModal } from './modals/modalsSlice';
-import { addNotification } from './notifications/notificationsSlice';
-import type { AppDispatch } from './redux/store';
+import { closeModal, pushModal } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import type { AppDispatch } from '@desktop-client/redux/store';
 
 export async function deconfigureEnableBanking() {
   await send('enablebanking-configure', { applicationId: null, secret: null });

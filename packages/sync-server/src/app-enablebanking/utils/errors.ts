@@ -101,7 +101,7 @@ export function isErrorResponse(response: unknown): response is ErrorResponse {
     typeof response === 'object' &&
     response !== null &&
     'error' in response &&
-    typeof (response as ErrorResponse).error === 'string'
+    typeof Reflect.get(response, 'error') === 'string'
   );
 }
 

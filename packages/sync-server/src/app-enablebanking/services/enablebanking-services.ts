@@ -173,6 +173,7 @@ class SessionStore {
   clear(): number {
     const count = this.sessions.size;
     this.sessions.clear();
+    this.pendingCreations.clear();
     return count;
   }
 }
@@ -548,11 +549,11 @@ export const enableBankingService = {
         console.debug(
           JSON.stringify(
             {
-              imported_id: normalized.imported_id,
+              importedId: normalized.importedId,
               date: normalized.date,
               amount: normalized.amount,
               // Sensitive fields masked
-              payee_name: normalized.payee_name ? '[REDACTED]' : undefined,
+              payeeName: normalized.payeeName ? '[REDACTED]' : undefined,
               notes: normalized.notes ? '[REDACTED]' : undefined,
             },
             null,

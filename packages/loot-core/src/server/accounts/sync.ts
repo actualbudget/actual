@@ -1055,9 +1055,6 @@ export async function syncAccount(
       syncStartDate,
       bankId,
     );
-    if (customStartingDate) {
-      download.startingBalanceDate = customStartingDate;
-    }
   } else {
     throw new Error(
       `Unrecognized bank-sync provider: ${acctRow.account_sync_source}`,

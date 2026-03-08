@@ -268,7 +268,10 @@ export function CreateAccountModal({
         modal: {
           name: 'enablebanking-init',
           options: {
-            onSuccess: () => setIsEnableBankingSetupComplete(true),
+            onSuccess: close => {
+              setIsEnableBankingSetupComplete(true);
+              close();
+            },
           },
         },
       }),
