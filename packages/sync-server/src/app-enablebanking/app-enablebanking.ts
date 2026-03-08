@@ -132,7 +132,7 @@ post('/start_auth', async req => {
   const origin = req.headers.origin;
   if (!origin) {
     throw new BadRequestError(
-      "'origin' header should be passed to '/start_auth'.",
+      "'origin' header should be passed to '/enablebanking/start_auth'.",
     );
   }
 
