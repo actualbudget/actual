@@ -208,7 +208,16 @@ post('/complete_auth', async req => {
     throw badRequestVariableError('code', '/enablebanking/complete_auth');
   }
 
-  await enableBankingService.authorizeSession(state, code);
+  try {
+    await enableBankingService.authorizeSession(state, code);
+  } catch (error) {
+    const errorMessage =
+      typeof error === 'object' && error !== null && 'message' in error
+        ? String((error as Error).message)
+        : String(error);
+    enableBankingService.failSession(state, errorMessage);
+    throw error;
+  }
 
   return;
 });
