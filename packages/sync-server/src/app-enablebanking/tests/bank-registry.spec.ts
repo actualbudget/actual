@@ -67,10 +67,10 @@ describe('Bank Registry', () => {
 
       // Create a test processor
       @BankProcessorFor(testIds)
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       class TestBankProcessor extends FallbackBankProcessor {
         override name = 'TestBankProcessor';
       }
+      void TestBankProcessor;
 
       const processor1 = registry.get(testIds[0]);
       const processor2 = registry.get(testIds[1]);
@@ -101,10 +101,11 @@ describe('Bank Registry', () => {
     it('should return fallback for non-function constructors', async () => {
       const registry = await getLoadedRegistry();
       const uniqueId = `invalid-${Date.now()}`;
-      // Manually register an invalid constructor
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const invalidCtor = 'not-a-function' as any;
-      registry['map'].set(uniqueId, invalidCtor);
+      const invalidCtor = 'not-a-function';
+      registry.register(
+        uniqueId,
+        invalidCtor as unknown as new () => BankProcessor,
+      );
 
       const processor = registry.get(uniqueId);
 
@@ -133,17 +134,18 @@ describe('Bank Registry', () => {
       const registry = await getLoadedRegistry();
       const uniqueId = `invalid-processor-${Date.now()}`;
       // Create a class that doesn't extend FallbackBankProcessor
-      class InvalidProcessor implements BankProcessor {
+      class InvalidProcessor {
         debug = false;
         name = 'InvalidProcessor';
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        normalizeTransaction(t: any) {
-          return t;
+        normalizeTransaction(transaction: unknown) {
+          return transaction;
         }
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      registry['map'].set(uniqueId, InvalidProcessor as any);
+      registry.register(
+        uniqueId,
+        InvalidProcessor as unknown as new () => BankProcessor,
+      );
       const processor = registry.get(uniqueId);
 
       // Should return fallback instead
@@ -168,13 +170,13 @@ describe('Bank Registry', () => {
       const uniqueId = `duplicate-test-${Date.now()}`;
 
       @BankProcessorFor([uniqueId])
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       class FirstProcessor extends FallbackBankProcessor {}
+      void FirstProcessor;
 
       expect(() => {
         @BankProcessorFor([uniqueId])
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         class SecondProcessor extends FallbackBankProcessor {}
+        void SecondProcessor;
       }).toThrow('Duplicate bank processor id');
     });
   });
