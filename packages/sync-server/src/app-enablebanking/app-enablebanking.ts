@@ -103,7 +103,7 @@ post('/get_aspsps', async req => {
   return responseData;
 });
 
-post('/start_auth', async (req: Request) => {
+post('/start_auth', async req => {
   if (!enableBankingservice.secretsAreSetup()) {
     throw new EnableBankingSetupError();
   }
@@ -150,7 +150,7 @@ post('/start_auth', async (req: Request) => {
   );
 });
 
-post('/get_session', async (req: Request) => {
+post('/get_session', async req => {
   if (!enableBankingservice.secretsAreSetup()) {
     throw new EnableBankingSetupError();
   }
@@ -177,7 +177,7 @@ post('/get_session', async (req: Request) => {
   return await enableBankingservice.getAccounts(entry.sessionId);
 });
 
-post('/complete_auth', async (req: Request) => {
+post('/complete_auth', async req => {
   const { state, code } = req.body;
 
   if (!state) {
@@ -193,7 +193,7 @@ post('/complete_auth', async (req: Request) => {
   return;
 });
 
-post('/fail_auth', async (req: Request) => {
+post('/fail_auth', async req => {
   const { state, error } = req.body;
 
   if (!state) {
@@ -205,7 +205,7 @@ post('/fail_auth', async (req: Request) => {
   return;
 });
 
-post('/get_accounts', async (req: Request) => {
+post('/get_accounts', async req => {
   if (!enableBankingservice.secretsAreSetup()) {
     throw new EnableBankingSetupError();
   }
@@ -218,7 +218,7 @@ post('/get_accounts', async (req: Request) => {
   return await enableBankingservice.getAccounts(session_id);
 });
 
-post('/transactions', async (req: Request) => {
+post('/transactions', async req => {
   if (!enableBankingservice.secretsAreSetup()) {
     throw new EnableBankingSetupError();
   }
