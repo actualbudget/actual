@@ -184,7 +184,7 @@ export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
   func: (
     req: Request<
       ParamsDictionary,
-      EnableBankingEndpoints[T]['response'],
+      { status: 'ok'; data: EnableBankingResponse<T> },
       EnableBankingEndpoints[T]['body']
     >,
   ) => Promise<EnableBankingEndpoints[T]['response']>,
@@ -193,15 +193,16 @@ export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
   { status: 'ok'; data: EnableBankingResponse<T> },
   EnableBankingEndpoints[T]['body']
 > {
-  return (req, res) => {
+  return (
+    req: Request<
+      ParamsDictionary,
+      { status: 'ok'; data: EnableBankingResponse<T> },
+      EnableBankingEndpoints[T]['body']
+    >,
+    res: Response<{ status: 'ok'; data: EnableBankingResponse<T> }>,
+  ) => {
     // Makes sure we respond with a valid JSON Response
-    func(
-      req as unknown as Request<
-        ParamsDictionary,
-        EnableBankingEndpoints[T]['response'],
-        EnableBankingEndpoints[T]['body']
-      >,
-    )
+    func(req)
       .then(data => {
         res.send({
           status: 'ok',
@@ -217,10 +218,7 @@ export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
             'Error:',
             inspect(err, { depth: null }),
           );
-          const safeMessage =
-            typeof err === 'object' && err !== null && 'message' in err
-              ? (err as Error).message
-              : String(err);
+          const safeMessage = err instanceof Error ? err.message : String(err);
           err = new EnableBankingError(
             'INTERNAL_ERROR',
             safeMessage ||
