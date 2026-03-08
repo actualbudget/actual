@@ -109,11 +109,19 @@ post('/start_auth', async req => {
   }
   const { aspsp, country } = req.body;
 
-  if (!country || typeof country !== 'string' || country.trim() === '') {
+  if (!country) {
+    throw badRequestVariableError('country', '/start_auth');
+  }
+
+  if (!aspsp) {
+    throw badRequestVariableError('aspsp', '/start_auth');
+  }
+
+  if (typeof country !== 'string' || country.trim() === '') {
     throw new BadRequestError("Variable 'country' must be a non-empty string.");
   }
 
-  if (!aspsp || typeof aspsp !== 'string' || aspsp.trim() === '') {
+  if (typeof aspsp !== 'string' || aspsp.trim() === '') {
     throw new BadRequestError("Variable 'aspsp' must be a non-empty string.");
   }
 
