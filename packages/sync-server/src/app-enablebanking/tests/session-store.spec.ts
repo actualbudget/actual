@@ -18,10 +18,8 @@ describe('SessionStore', () => {
       const state = 'test-state-123';
       const error = 'Test error';
 
-      // Store session as failure
       enableBankingService.failSession(state, error);
 
-      // Retrieve session entry
       const retrieved = enableBankingService.getSessionEntry(state);
       expect(retrieved).toBeDefined();
       expect(retrieved?.error).toBe(error);
