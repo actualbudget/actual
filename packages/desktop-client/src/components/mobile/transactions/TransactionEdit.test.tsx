@@ -31,7 +31,7 @@ vi.mock('@desktop-client/hooks/useDateFormat');
 vi.mock('@desktop-client/hooks/useSyncedPref');
 vi.mock('@desktop-client/hooks/useLocalPref');
 vi.mock('@desktop-client/queries/aqlQuery');
-vi.mock('loot-core/platform/client/fetch', () => ({
+vi.mock('loot-core/platform/client/connection', () => ({
   send: vi.fn().mockResolvedValue({}),
 }));
 
