@@ -391,10 +391,8 @@ const PollingComponent = ({
 
 const CompletedAuthorizationIndicator = ({
   onContinue,
-  onClose,
 }: {
   onContinue: () => Promise<void>;
-  onClose: () => void;
 }) => {
   return (
     <Button
@@ -408,7 +406,6 @@ const CompletedAuthorizationIndicator = ({
       }}
       onPress={async () => {
         await onContinue();
-        onClose();
       }}
     >
       <Trans>Success! Click to continue</Trans> &rarr;
@@ -598,9 +595,9 @@ export function EnableBankingSetupAccountModal({
         if (phase === 'done' && token !== null) {
           componentWithClose = (
             <CompletedAuthorizationIndicator
-              onClose={close}
               onContinue={async () => {
                 try {
+                  // Keep transition orchestration in onSuccess to avoid modal flicker/race conditions.
                   await onSuccess(token);
                 } catch (error) {
                   setError({
