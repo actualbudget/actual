@@ -133,8 +133,10 @@ async function pollAuth({
       },
     };
   } finally {
-    // Clean up this controller
-    activePollControllers.delete(state);
+    // Only clean up if this invocation still owns the controller for this state
+    if (activePollControllers.get(state) === controller) {
+      activePollControllers.delete(state);
+    }
   }
 }
 
