@@ -131,9 +131,7 @@ post('/start_auth', async req => {
 
   const origin = req.headers.origin;
   if (!origin) {
-    throw new BadRequestError(
-      "'origin' header should be passed to '/enablebanking/start_auth'.",
-    );
+    throw badRequestVariableError('origin', '/enablebanking/start_auth');
   }
 
   // Validate origin to prevent SSRF attacks
