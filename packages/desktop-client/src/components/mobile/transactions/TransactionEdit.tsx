@@ -8,12 +8,8 @@ import {
   useState,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import {
-  useLocation,
-  useParams,
-  useSearchParams,
-  type Location,
-} from 'react-router';
+import { useLocation, useParams, useSearchParams } from 'react-router';
+import type { Location } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { SvgSplit } from '@actual-app/components/icons/v0';
