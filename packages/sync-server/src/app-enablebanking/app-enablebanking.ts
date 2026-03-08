@@ -212,9 +212,7 @@ post('/complete_auth', async req => {
     await enableBankingService.authorizeSession(state, code);
   } catch (error) {
     const errorMessage =
-      typeof error === 'object' && error !== null && 'message' in error
-        ? String((error as Error).message)
-        : String(error);
+      error instanceof Error ? error.message : String(error);
     enableBankingService.failSession(state, errorMessage);
     throw error;
   }
