@@ -20,7 +20,7 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { TestProvider } from '@desktop-client/redux/mock';
+import { TestProviders } from '@desktop-client/mocks';
 
 // Mock hooks and modules
 vi.mock('@desktop-client/hooks/useNavigate');
@@ -213,7 +213,7 @@ describe('TransactionEdit component rendering', () => {
     ];
 
     return render(
-      <TestProvider>
+      <TestProviders>
         <MemoryRouter initialEntries={initialEntries}>
           <Routes>
             <Route
@@ -223,7 +223,7 @@ describe('TransactionEdit component rendering', () => {
             <Route path="/accounts/:id" element={<div>Account Page</div>} />
           </Routes>
         </MemoryRouter>
-      </TestProvider>,
+      </TestProviders>,
     );
   };
 

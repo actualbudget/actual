@@ -18,7 +18,7 @@ import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
-import { TestProvider } from '@desktop-client/redux/mock';
+import { TestProviders } from '@desktop-client/mocks';
 
 // Mock hooks
 vi.mock('@desktop-client/hooks/useNavigate');
@@ -116,7 +116,7 @@ describe('AccountTransactions', () => {
     locationState?: { searchText?: string },
   ) => {
     return render(
-      <TestProvider>
+      <TestProviders>
         <MemoryRouter
           initialEntries={[{ pathname: initialPath, state: locationState }]}
         >
@@ -129,7 +129,7 @@ describe('AccountTransactions', () => {
             </Routes>
           </TestWrapper>
         </MemoryRouter>
-      </TestProvider>,
+      </TestProviders>,
     );
   };
 
