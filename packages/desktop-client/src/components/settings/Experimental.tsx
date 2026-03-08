@@ -215,6 +215,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>Budget Analysis Report</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="enableBankingSync"
+              feedbackLink="https://github.com/actualbudget/actual/pull/5570"
+            >
+              <Trans>Enable Banking bank sync</Trans>
+            </FeatureToggle>
             {showServerPrefs && (
               <ServerFeatureToggle
                 prefName="flags.plugins"

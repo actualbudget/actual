@@ -30,6 +30,7 @@ import {
 } from '@desktop-client/enablebanking';
 import { authorizeBank } from '@desktop-client/gocardless';
 import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
@@ -377,322 +378,330 @@ export function CreateAccountModal({
 
   const canSetSecrets =
     !multiuserEnabled || hasPermission(Permissions.ADMINISTRATOR);
+  const isEnableBankingSyncFeatureEnabled = useFeatureFlag('enableBankingSync');
+
+  const requiresSecretSetupPermission =
+    !isGoCardlessSetupComplete ||
+    !isSimpleFinSetupComplete ||
+    !isPluggyAiSetupComplete ||
+    (isEnableBankingSyncFeatureEnabled && !isEnableBankingSetupComplete);
 
   return (
     <Modal name="add-account">
-      {({ state: { close } }) => (
-        <>
-          <ModalHeader
-            title={title}
-            rightContent={<ModalCloseButton onPress={close} />}
-          />
-          <View style={{ maxWidth: 500, gap: 30, color: theme.pageText }}>
-            {upgradingAccountId == null && (
-              <View style={{ gap: 10 }}>
-                <InitialFocus>
-                  <Button
-                    variant="primary"
-                    style={{
-                      padding: '10px 0',
-                      fontSize: 15,
-                      fontWeight: 600,
-                    }}
-                    onPress={onCreateLocalAccount}
-                  >
-                    <Trans>Create a local account</Trans>
-                  </Button>
-                </InitialFocus>
-                <View style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                  <Text>
-                    <Trans>
-                      <strong>Create a local account</strong> if you want to add
-                      transactions manually. You can also{' '}
-                      <Link
-                        variant="external"
-                        to="https://actualbudget.org/docs/transactions/importing"
-                        linkColor="muted"
-                      >
-                        import QIF/OFX/QFX files into a local account
-                      </Link>
-                      .
-                    </Trans>
-                  </Text>
+      {({ state }) => {
+        return (
+          <>
+            <ModalHeader
+              title={title}
+              rightContent={<ModalCloseButton onPress={() => state.close()} />}
+            />
+            <View style={{ maxWidth: 500, gap: 30, color: theme.pageText }}>
+              {upgradingAccountId == null && (
+                <View style={{ gap: 10 }}>
+                  <InitialFocus>
+                    <Button
+                      variant="primary"
+                      style={{
+                        padding: '10px 0',
+                        fontSize: 15,
+                        fontWeight: 600,
+                      }}
+                      onPress={onCreateLocalAccount}
+                    >
+                      <Trans>Create a local account</Trans>
+                    </Button>
+                  </InitialFocus>
+                  <View style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                    <Text>
+                      <Trans>
+                        <strong>Create a local account</strong> if you want to
+                        add transactions manually. You can also{' '}
+                        <Link
+                          variant="external"
+                          to="https://actualbudget.org/docs/transactions/importing"
+                          linkColor="muted"
+                        >
+                          import QIF/OFX/QFX files into a local account
+                        </Link>
+                        .
+                      </Trans>
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            )}
-            <View style={{ gap: 10 }}>
-              {syncServerStatus === 'online' ? (
-                <>
-                  {canSetSecrets && (
-                    <>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          gap: 10,
-                          alignItems: 'center',
-                        }}
-                      >
-                        <ButtonWithLoading
-                          isDisabled={syncServerStatus !== 'online'}
+              )}
+              <View style={{ gap: 10 }}>
+                {syncServerStatus === 'online' ? (
+                  <>
+                    {canSetSecrets && (
+                      <>
+                        <View
                           style={{
-                            padding: '10px 0',
-                            fontSize: 15,
-                            fontWeight: 600,
-                            flex: 1,
+                            flexDirection: 'row',
+                            gap: 10,
+                            alignItems: 'center',
                           }}
-                          onPress={onConnectGoCardless}
                         >
-                          {isGoCardlessSetupComplete
-                            ? t('Link bank account with GoCardless')
-                            : t('Set up GoCardless for bank sync')}
-                        </ButtonWithLoading>
-                        {isGoCardlessSetupComplete && (
-                          <DialogTrigger>
-                            <Button
-                              variant="bare"
-                              aria-label={t('GoCardless menu')}
-                            >
-                              <SvgDotsHorizontalTriple
-                                width={15}
-                                height={15}
-                                style={{ transform: 'rotateZ(90deg)' }}
-                              />
-                            </Button>
+                          <ButtonWithLoading
+                            isDisabled={syncServerStatus !== 'online'}
+                            style={{
+                              padding: '10px 0',
+                              fontSize: 15,
+                              fontWeight: 600,
+                              flex: 1,
+                            }}
+                            onPress={onConnectGoCardless}
+                          >
+                            {isGoCardlessSetupComplete
+                              ? t('Link bank account with GoCardless')
+                              : t('Set up GoCardless for bank sync')}
+                          </ButtonWithLoading>
+                          {isGoCardlessSetupComplete && (
+                            <DialogTrigger>
+                              <Button
+                                variant="bare"
+                                aria-label={t('GoCardless menu')}
+                              >
+                                <SvgDotsHorizontalTriple
+                                  width={15}
+                                  height={15}
+                                  style={{ transform: 'rotateZ(90deg)' }}
+                                />
+                              </Button>
 
-                            <Popover>
-                              <Dialog>
-                                <Menu
-                                  onMenuSelect={item => {
-                                    if (item === 'reconfigure') {
-                                      onGoCardlessReset();
-                                    }
-                                  }}
-                                  items={[
-                                    {
-                                      name: 'reconfigure',
-                                      text: t('Reset GoCardless credentials'),
-                                    },
-                                  ]}
-                                />
-                              </Dialog>
-                            </Popover>
-                          </DialogTrigger>
-                        )}
-                      </View>
-                      <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                        <Trans>
-                          <strong>
-                            Link a <em>European</em> bank account
-                          </strong>{' '}
-                          to automatically download transactions. GoCardless
-                          provides reliable, up-to-date information from
-                          hundreds of banks.
-                        </Trans>
-                      </Text>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          gap: 10,
-                          marginTop: '18px',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <ButtonWithLoading
-                          isDisabled={syncServerStatus !== 'online'}
-                          isLoading={loadingSimpleFinAccounts}
+                              <Popover>
+                                <Dialog>
+                                  <Menu
+                                    onMenuSelect={item => {
+                                      if (item === 'reconfigure') {
+                                        onGoCardlessReset();
+                                      }
+                                    }}
+                                    items={[
+                                      {
+                                        name: 'reconfigure',
+                                        text: t('Reset GoCardless credentials'),
+                                      },
+                                    ]}
+                                  />
+                                </Dialog>
+                              </Popover>
+                            </DialogTrigger>
+                          )}
+                        </View>
+                        <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                          <Trans>
+                            <strong>
+                              Link a <em>European</em> bank account
+                            </strong>{' '}
+                            to automatically download transactions. GoCardless
+                            provides reliable, up-to-date information from
+                            hundreds of banks.
+                          </Trans>
+                        </Text>
+                        <View
                           style={{
-                            padding: '10px 0',
-                            fontSize: 15,
-                            fontWeight: 600,
-                            flex: 1,
+                            flexDirection: 'row',
+                            gap: 10,
+                            marginTop: '18px',
+                            alignItems: 'center',
                           }}
-                          onPress={onConnectSimpleFin}
                         >
-                          {isSimpleFinSetupComplete
-                            ? t('Link bank account with SimpleFIN')
-                            : t('Set up SimpleFIN for bank sync')}
-                        </ButtonWithLoading>
-                        {isSimpleFinSetupComplete && (
-                          <DialogTrigger>
-                            <Button
-                              variant="bare"
-                              aria-label={t('SimpleFIN menu')}
-                            >
-                              <SvgDotsHorizontalTriple
-                                width={15}
-                                height={15}
-                                style={{ transform: 'rotateZ(90deg)' }}
-                              />
-                            </Button>
-                            <Popover>
-                              <Dialog>
-                                <Menu
-                                  onMenuSelect={item => {
-                                    if (item === 'reconfigure') {
-                                      onSimpleFinReset();
-                                    }
-                                  }}
-                                  items={[
-                                    {
-                                      name: 'reconfigure',
-                                      text: t('Reset SimpleFIN credentials'),
-                                    },
-                                  ]}
+                          <ButtonWithLoading
+                            isDisabled={syncServerStatus !== 'online'}
+                            isLoading={loadingSimpleFinAccounts}
+                            style={{
+                              padding: '10px 0',
+                              fontSize: 15,
+                              fontWeight: 600,
+                              flex: 1,
+                            }}
+                            onPress={onConnectSimpleFin}
+                          >
+                            {isSimpleFinSetupComplete
+                              ? t('Link bank account with SimpleFIN')
+                              : t('Set up SimpleFIN for bank sync')}
+                          </ButtonWithLoading>
+                          {isSimpleFinSetupComplete && (
+                            <DialogTrigger>
+                              <Button
+                                variant="bare"
+                                aria-label={t('SimpleFIN menu')}
+                              >
+                                <SvgDotsHorizontalTriple
+                                  width={15}
+                                  height={15}
+                                  style={{ transform: 'rotateZ(90deg)' }}
                                 />
-                              </Dialog>
-                            </Popover>
-                          </DialogTrigger>
-                        )}
-                      </View>
-                      <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                        <Trans>
-                          <strong>
-                            Link a <em>North American</em> bank account
-                          </strong>{' '}
-                          to automatically download transactions. SimpleFIN
-                          provides reliable, up-to-date information from
-                          hundreds of banks.
-                        </Trans>
-                      </Text>
+                              </Button>
+                              <Popover>
+                                <Dialog>
+                                  <Menu
+                                    onMenuSelect={item => {
+                                      if (item === 'reconfigure') {
+                                        onSimpleFinReset();
+                                      }
+                                    }}
+                                    items={[
+                                      {
+                                        name: 'reconfigure',
+                                        text: t('Reset SimpleFIN credentials'),
+                                      },
+                                    ]}
+                                  />
+                                </Dialog>
+                              </Popover>
+                            </DialogTrigger>
+                          )}
+                        </View>
+                        <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                          <Trans>
+                            <strong>
+                              Link a <em>North American</em> bank account
+                            </strong>{' '}
+                            to automatically download transactions. SimpleFIN
+                            provides reliable, up-to-date information from
+                            hundreds of banks.
+                          </Trans>
+                        </Text>
 
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          gap: 10,
-                          marginTop: '18px',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <ButtonWithLoading
-                          isDisabled={syncServerStatus !== 'online'}
-                          isLoading={configuredEnableBankingIsLoading}
-                          style={{
-                            padding: '10px 0',
-                            fontSize: 15,
-                            fontWeight: 600,
-                            flex: 1,
-                          }}
-                          onPress={onConnectEnableBanking}
-                        >
-                          {isEnableBankingSetupComplete
-                            ? t('Link bank account with Enable Banking')
-                            : t('Set up Enable Banking for bank sync')}
-                        </ButtonWithLoading>
-                        {isEnableBankingSetupComplete && (
-                          <DialogTrigger>
-                            <Button
-                              variant="bare"
-                              aria-label={t('Enable Banking menu')}
+                        {isEnableBankingSyncFeatureEnabled && (
+                          <>
+                            <View
+                              style={{
+                                flexDirection: 'row',
+                                gap: 10,
+                                marginTop: '18px',
+                                alignItems: 'center',
+                              }}
                             >
-                              <SvgDotsHorizontalTriple
-                                width={15}
-                                height={15}
-                                style={{ transform: 'rotateZ(90deg)' }}
-                              />
-                            </Button>
-                            <Popover>
-                              <Dialog>
-                                <Menu
-                                  onMenuSelect={item => {
-                                    if (item === 'reconfigure') {
-                                      onEnableBankingReset();
-                                    }
-                                  }}
-                                  items={[
-                                    {
-                                      name: 'reconfigure',
-                                      text: t(
-                                        'Reset Enable Banking credentials',
-                                      ),
-                                    },
-                                  ]}
-                                />
-                              </Dialog>
-                            </Popover>
-                          </DialogTrigger>
+                              <ButtonWithLoading
+                                isDisabled={syncServerStatus !== 'online'}
+                                isLoading={configuredEnableBankingIsLoading}
+                                style={{
+                                  padding: '10px 0',
+                                  fontSize: 15,
+                                  fontWeight: 600,
+                                  flex: 1,
+                                }}
+                                onPress={onConnectEnableBanking}
+                              >
+                                {isEnableBankingSetupComplete
+                                  ? t('Link bank account with Enable Banking')
+                                  : t('Set up Enable Banking for bank sync')}
+                              </ButtonWithLoading>
+                              {isEnableBankingSetupComplete && (
+                                <DialogTrigger>
+                                  <Button
+                                    variant="bare"
+                                    aria-label={t('Enable Banking menu')}
+                                  >
+                                    <SvgDotsHorizontalTriple
+                                      width={15}
+                                      height={15}
+                                      style={{ transform: 'rotateZ(90deg)' }}
+                                    />
+                                  </Button>
+                                  <Popover>
+                                    <Dialog>
+                                      <Menu
+                                        onMenuSelect={item => {
+                                          if (item === 'reconfigure') {
+                                            onEnableBankingReset();
+                                          }
+                                        }}
+                                        items={[
+                                          {
+                                            name: 'reconfigure',
+                                            text: t(
+                                              'Reset Enable Banking credentials',
+                                            ),
+                                          },
+                                        ]}
+                                      />
+                                    </Dialog>
+                                  </Popover>
+                                </DialogTrigger>
+                              )}
+                            </View>
+                            <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                              <Trans>
+                                <strong>
+                                  Link a <em>European</em> bank account
+                                </strong>{' '}
+                                to automatically download transactions. Enable
+                                Banking provides reliable, up-to-date
+                                information from hundreds of banks.
+                              </Trans>
+                            </Text>
+                          </>
                         )}
-                      </View>
-                      <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                        <Trans>
-                          <strong>
-                            Link a <em>European</em> bank account
-                          </strong>{' '}
-                          to automatically download transactions. Enable Banking
-                          provides reliable, up-to-date information from
-                          hundreds of banks.
-                        </Trans>
-                      </Text>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          gap: 10,
-                          alignItems: 'center',
-                        }}
-                      >
-                        <ButtonWithLoading
-                          isDisabled={syncServerStatus !== 'online'}
+                        <View
                           style={{
-                            padding: '10px 0',
-                            fontSize: 15,
-                            fontWeight: 600,
-                            flex: 1,
+                            flexDirection: 'row',
+                            gap: 10,
+                            alignItems: 'center',
                           }}
-                          onPress={onConnectPluggyAi}
                         >
-                          {isPluggyAiSetupComplete
-                            ? t('Link bank account with Pluggy.ai')
-                            : t('Set up Pluggy.ai for bank sync')}
-                        </ButtonWithLoading>
-                        {isPluggyAiSetupComplete && (
-                          <DialogTrigger>
-                            <Button
-                              variant="bare"
-                              aria-label={t('Pluggy.ai menu')}
-                            >
-                              <SvgDotsHorizontalTriple
-                                width={15}
-                                height={15}
-                                style={{ transform: 'rotateZ(90deg)' }}
-                              />
-                            </Button>
+                          <ButtonWithLoading
+                            isDisabled={syncServerStatus !== 'online'}
+                            style={{
+                              padding: '10px 0',
+                              fontSize: 15,
+                              fontWeight: 600,
+                              flex: 1,
+                            }}
+                            onPress={onConnectPluggyAi}
+                          >
+                            {isPluggyAiSetupComplete
+                              ? t('Link bank account with Pluggy.ai')
+                              : t('Set up Pluggy.ai for bank sync')}
+                          </ButtonWithLoading>
+                          {isPluggyAiSetupComplete && (
+                            <DialogTrigger>
+                              <Button
+                                variant="bare"
+                                aria-label={t('Pluggy.ai menu')}
+                              >
+                                <SvgDotsHorizontalTriple
+                                  width={15}
+                                  height={15}
+                                  style={{ transform: 'rotateZ(90deg)' }}
+                                />
+                              </Button>
 
-                            <Popover>
-                              <Dialog>
-                                <Menu
-                                  onMenuSelect={item => {
-                                    if (item === 'reconfigure') {
-                                      onPluggyAiReset();
-                                    }
-                                  }}
-                                  items={[
-                                    {
-                                      name: 'reconfigure',
-                                      text: t('Reset Pluggy.ai credentials'),
-                                    },
-                                  ]}
-                                />
-                              </Dialog>
-                            </Popover>
-                          </DialogTrigger>
-                        )}
-                      </View>
-                      <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                        <Trans>
-                          <strong>
-                            Link a <em>Brazilian</em> bank account
-                          </strong>{' '}
-                          to automatically download transactions. Pluggy.ai
-                          provides reliable, up-to-date information from
-                          hundreds of banks.
-                        </Trans>
-                      </Text>
-                    </>
-                  )}
-                  {(!isGoCardlessSetupComplete ||
-                    !isSimpleFinSetupComplete ||
-                    !isEnableBankingSetupComplete ||
-                    !isPluggyAiSetupComplete) &&
-                    !canSetSecrets && (
+                              <Popover>
+                                <Dialog>
+                                  <Menu
+                                    onMenuSelect={item => {
+                                      if (item === 'reconfigure') {
+                                        onPluggyAiReset();
+                                      }
+                                    }}
+                                    items={[
+                                      {
+                                        name: 'reconfigure',
+                                        text: t('Reset Pluggy.ai credentials'),
+                                      },
+                                    ]}
+                                  />
+                                </Dialog>
+                              </Popover>
+                            </DialogTrigger>
+                          )}
+                        </View>
+                        <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                          <Trans>
+                            <strong>
+                              Link a <em>Brazilian</em> bank account
+                            </strong>{' '}
+                            to automatically download transactions. Pluggy.ai
+                            provides reliable, up-to-date information from
+                            hundreds of banks.
+                          </Trans>
+                        </Text>
+                      </>
+                    )}
+                    {requiresSecretSetupPermission && !canSetSecrets && (
                       <Warning>
                         <Trans>
                           You don&apos;t have the required permissions to set up
@@ -711,38 +720,39 @@ export function CreateAccountModal({
                         .
                       </Warning>
                     )}
-                </>
-              ) : (
-                <>
-                  <Button
-                    isDisabled
-                    style={{
-                      padding: '10px 0',
-                      fontSize: 15,
-                      fontWeight: 600,
-                    }}
-                  >
-                    <Trans>Set up bank sync</Trans>
-                  </Button>
-                  <Paragraph style={{ fontSize: 15 }}>
-                    <Trans>
-                      Connect to an Actual server to set up{' '}
-                      <Link
-                        variant="external"
-                        to="https://actualbudget.org/docs/advanced/bank-sync"
-                        linkColor="muted"
-                      >
-                        automatic syncing
-                      </Link>
-                      .
-                    </Trans>
-                  </Paragraph>
-                </>
-              )}
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      isDisabled
+                      style={{
+                        padding: '10px 0',
+                        fontSize: 15,
+                        fontWeight: 600,
+                      }}
+                    >
+                      <Trans>Set up bank sync</Trans>
+                    </Button>
+                    <Paragraph style={{ fontSize: 15 }}>
+                      <Trans>
+                        Connect to an Actual server to set up{' '}
+                        <Link
+                          variant="external"
+                          to="https://actualbudget.org/docs/advanced/bank-sync"
+                          linkColor="muted"
+                        >
+                          automatic syncing
+                        </Link>
+                        .
+                      </Trans>
+                    </Paragraph>
+                  </>
+                )}
+              </View>
             </View>
-          </View>
-        </>
-      )}
+          </>
+        );
+      }}
     </Modal>
   );
 }
