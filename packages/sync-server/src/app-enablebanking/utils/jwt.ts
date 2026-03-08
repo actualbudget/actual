@@ -21,7 +21,7 @@ const getJWTBody = (exp = 3600) => {
 
 export const getJWT = (
   applicationId: string,
-  secretKey: string,
+  privateKey: string,
   exp = 3600,
 ) => {
   const jwtHeaders = getJWTHeader(applicationId);
@@ -30,6 +30,6 @@ export const getJWT = (
   return sign({
     header: jwtHeaders,
     payload: jwtBody,
-    secret: secretKey,
+    privateKey,
   });
 };
