@@ -391,8 +391,10 @@ const PollingComponent = ({
 
 const CompletedAuthorizationIndicator = ({
   onContinue,
+  onClose,
 }: {
   onContinue: () => Promise<void>;
+  onClose: () => void;
 }) => {
   return (
     <Button
@@ -406,6 +408,7 @@ const CompletedAuthorizationIndicator = ({
       }}
       onPress={async () => {
         await onContinue();
+        onClose();
       }}
     >
       <Trans>Success! Click to continue</Trans> &rarr;
@@ -595,19 +598,16 @@ export function EnableBankingSetupAccountModal({
         if (phase === 'done' && token !== null) {
           componentWithClose = (
             <CompletedAuthorizationIndicator
+              onClose={close}
               onContinue={async () => {
                 try {
                   await onSuccess(token);
-                  // Don't call close() - onSuccess handles closing this modal
-                  // and opening the account selection modal
                 } catch (error) {
-                  // Error is handled by setting error state for user feedback
                   setError({
                     error_code: 'INTERNAL_ERROR',
                     error_type:
                       error instanceof Error ? error.message : String(error),
                   });
-                  // Don't reset state on error - let user manually retry
                 }
               }}
             />
