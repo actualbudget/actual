@@ -76,9 +76,13 @@ function ensureBankProcessorsLoaded() {
   if (!loadOnce) {
     loadOnce = (async () => {
       const thisDir = path.dirname(fileURLToPath(import.meta.url));
-      const patterns = '**/*.bank.*';
+      const patterns = '**/*.bank.{js,cjs,mjs,ts}';
 
-      const files = await fg(patterns, { cwd: thisDir, absolute: true });
+      const files = await fg(patterns, {
+        cwd: thisDir,
+        absolute: true,
+        ignore: ['**/*.map', '**/*.d.ts'],
+      });
       const seen = new Set<string>();
       for (const abs of files) {
         const rp = await fs.realpath(abs).catch(() => abs);
