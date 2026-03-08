@@ -23,6 +23,7 @@ import type {
 } from '../../types/models';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
+import { createBankSyncError } from '../errors';
 import { runMutator } from '../mutators';
 import { post } from '../post';
 import { getServer } from '../server-config';
@@ -37,10 +38,6 @@ import {
 import { downloadEnableBankingTransactions } from './enablebanking';
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
-
-function BankSyncError(type: string, code: string, details?: object) {
-  return { type: 'BankSyncError', category: type, code, details };
-}
 
 function makeSplitTransaction(trans, subtransactions) {
   // We need to calculate the final state of split transactions
@@ -162,7 +159,7 @@ async function downloadGoCardlessTransactions(
       rateLimitHeaders: res.rateLimitHeaders,
     };
 
-    throw BankSyncError(res.error_type, res.error_code, errorDetails);
+    throw createBankSyncError(res.error_type, res.error_code, errorDetails);
   }
 
   if (includeBalance) {
@@ -215,14 +212,14 @@ async function downloadSimpleFinTransactions(
     );
   } catch (error) {
     logger.error('Suspected timeout during bank sync:', error);
-    throw BankSyncError('TIMED_OUT', 'TIMED_OUT');
+    throw createBankSyncError('TIMED_OUT', 'TIMED_OUT');
   }
 
   if (Object.keys(res).length === 0) {
-    throw BankSyncError('NO_DATA', 'NO_DATA');
+    throw createBankSyncError('NO_DATA', 'NO_DATA');
   }
   if (res.error_code) {
-    throw BankSyncError(res.error_type, res.error_code);
+    throw createBankSyncError(res.error_type, res.error_code);
   }
 
   let retVal = {};
@@ -280,9 +277,9 @@ async function downloadPluggyAiTransactions(
   );
 
   if (res.error_code) {
-    throw BankSyncError(res.error_type, res.error_code);
+    throw createBankSyncError(res.error_type, res.error_code);
   } else if ('error' in res) {
-    throw BankSyncError('Connection', res.error);
+    throw createBankSyncError('Connection', res.error);
   }
 
   let retVal = {};

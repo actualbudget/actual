@@ -5,12 +5,9 @@ import type {
   EnableBankingResponse,
 } from '../../types/models/enablebanking';
 import { createApp } from '../app';
+import { createBankSyncError } from '../errors';
 import { get as _get, post as _post } from '../post';
 import { getServer } from '../server-config';
-
-function BankSyncError(category: string, code: string) {
-  return { type: 'BankSyncError', category, code };
-}
 
 type EBE = EnableBankingEndpoints;
 
@@ -33,7 +30,7 @@ function post<T extends KeysWithoutBody>(
 async function post(path: keyof EBE, body?: unknown) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
-    throw BankSyncError('AUTH_ERROR', 'NO_USER_TOKEN');
+    throw createBankSyncError('AUTH_ERROR', 'NO_USER_TOKEN');
   }
 
   const serverConfig = getServer();
@@ -164,7 +161,7 @@ export async function downloadEnableBankingTransactions(
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
-    throw BankSyncError('AUTH_ERROR', 'NO_USER_TOKEN');
+    throw createBankSyncError('AUTH_ERROR', 'NO_USER_TOKEN');
   }
 
   logger.log(`Pulling transactions from enablebanking since ${startDate}`);
@@ -176,7 +173,7 @@ export async function downloadEnableBankingTransactions(
   });
   if (error) {
     logger.log('got error', error);
-    throw BankSyncError(error.error_type, error.error_code);
+    throw createBankSyncError(error.error_type, error.error_code);
   }
 
   return data;

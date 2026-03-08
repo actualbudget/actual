@@ -27,6 +27,19 @@ export class BankSyncError extends Error {
   }
 }
 
+export function createBankSyncError(
+  category: string,
+  code: string,
+  details?: object,
+) {
+  return {
+    type: 'BankSyncError' as const,
+    category,
+    code,
+    details,
+  };
+}
+
 export class HTTPError extends Error {
   statusCode: number;
   responseBody: string;
