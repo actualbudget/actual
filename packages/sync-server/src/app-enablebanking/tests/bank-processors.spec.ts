@@ -138,22 +138,23 @@ describe('Bank Processors', () => {
       );
     });
 
-    it('should throw when amount is missing', () => {
-      const transaction = {
-        transaction_id: 'txn-missing-amount',
+    it('should throw when amount is malformed numeric text', () => {
+      const transaction: components['schemas']['Transaction'] = {
+        transaction_id: 'txn-malformed-amount',
         credit_debit_indicator: 'DBIT',
         status: 'BOOK',
         transaction_amount: {
+          amount: '--',
           currency: 'USD',
         },
         creditor: {
           name: 'Test',
         },
         booking_date: '2024-01-15',
-      } as unknown as components['schemas']['Transaction'];
+      };
 
       expect(() => processor.normalizeTransaction(transaction)).toThrow(
-        'Missing or invalid transaction amount for Enable Banking transaction: txn-missing-amount',
+        'Missing or invalid transaction amount for Enable Banking transaction: txn-malformed-amount',
       );
     });
 
