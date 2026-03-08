@@ -19,7 +19,7 @@ import {
   badRequestMessageError,
   badRequestVariableError,
   EnableBankingSetupError,
-  handleErrorInHandler,
+  handleError,
   invalidNonEmptyStringError,
   notReadyAuthorizationError,
 } from './utils/errors.js';
@@ -52,7 +52,7 @@ function post<T extends keyof EnableBankingEndpoints>(
     >,
   ) => Promise<EnableBankingEndpoints[T]['response']>,
 ) {
-  app.post(path, handleErrorInHandler<T>(handler));
+  app.post(path, handleError<T>(handler));
 }
 post('/configure', async req => {
   const { applicationId, secret } = req.body;

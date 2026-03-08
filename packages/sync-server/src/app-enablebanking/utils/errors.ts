@@ -180,7 +180,7 @@ export function handleErrorResponse(
   }
 }
 
-export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
+export function handleError<T extends keyof EnableBankingEndpoints>(
   func: (
     req: Request<
       ParamsDictionary,
