@@ -133,6 +133,19 @@ post('/start_auth', async req => {
         'Invalid origin protocol. Only http and https are allowed.',
       );
     }
+
+    const forwardedHost = req.headers['x-forwarded-host'];
+    const requestHostHeader =
+      typeof forwardedHost === 'string'
+        ? forwardedHost
+        : Array.isArray(forwardedHost)
+          ? forwardedHost[0]
+          : req.headers.host;
+    const requestHost = requestHostHeader?.split(',')[0]?.trim();
+
+    if (!requestHost || originUrl.host !== requestHost) {
+      throw new BadRequestError('Invalid origin host header.');
+    }
   } catch (error) {
     if (error instanceof BadRequestError) {
       throw error;
