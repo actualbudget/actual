@@ -1107,7 +1107,7 @@ export async function simpleFinBatchSync(
     const account = accounts[i];
     const download = res[account.account_id];
 
-    if (!download) {
+    if (!download || Object.keys(download).length === 0) {
       promises.push(
         Promise.resolve({
           accountId: account.id,
@@ -1132,6 +1132,19 @@ export async function simpleFinBatchSync(
         }),
       );
 
+      continue;
+    }
+
+    if (!download.transactions) {
+      promises.push(
+        Promise.resolve({
+          accountId: account.id,
+          res: {
+            error_type: 'ACCOUNT_MISSING',
+            error_code: 'ACCOUNT_MISSING',
+          },
+        }),
+      );
       continue;
     }
 
