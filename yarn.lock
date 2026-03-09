@@ -39,6 +39,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/ci-actions@workspace:packages/ci-actions"
   dependencies:
+    extensionless: "npm:^2.0.6"
+    typescript: "npm:^5.9.3"
     vitest: "npm:^4.0.18"
   languageName: unknown
   linkType: soft
@@ -16028,6 +16030,13 @@ __metadata:
   version: 3.0.2
   resolution: "extend@npm:3.0.2"
   checksum: 10/59e89e2dc798ec0f54b36d82f32a27d5f6472c53974f61ca098db5d4648430b725387b53449a34df38fd0392045434426b012f302b3cc049a6500ccf82877e4e
+  languageName: node
+  linkType: hard
+
+"extensionless@npm:^2.0.6":
+  version: 2.0.6
+  resolution: "extensionless@npm:2.0.6"
+  checksum: 10/4a264600d9ff811534b35a66ff59eb075ca5c1ae4f25213bfa71d26a5e28ba5188a0d743f4e1dc8255cf9739258d5d374c6f757957faf4fe0d4ec5f57f51034f
   languageName: node
   linkType: hard
 
