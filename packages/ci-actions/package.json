@@ -3,9 +3,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest --run"
+    "tsx": "node --import=extensionless/register --experimental-strip-types",
+    "test": "vitest --run",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "extensionless": "^2.0.6",
+    "typescript": "^5.9.3",
     "vitest": "^4.0.18"
+  },
+  "extensionless": {
+    "lookFor": [
+      "ts"
+    ]
   }
 }

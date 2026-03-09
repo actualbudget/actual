@@ -1,14 +1,14 @@
-#!/usr/bin/env node
-
 // overview:
 // 1. Identify the migrations in packages/loot-core/migrations/* on `master` and HEAD
 // 2. Make sure that any new migrations on HEAD are dated after the latest migration on `master`.
 
-const { spawnSync } = require('child_process');
-const path = require('path');
+import { spawnSync } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const migrationsDir = path.join(
-  __dirname,
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
   '..',
   '..',
   'packages',
@@ -16,7 +16,7 @@ const migrationsDir = path.join(
   'migrations',
 );
 
-function readMigrations(ref) {
+function readMigrations(ref: string) {
   const { stdout } = spawnSync('git', [
     'ls-tree',
     '--name-only',
