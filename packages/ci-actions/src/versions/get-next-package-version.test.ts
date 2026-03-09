@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getNextVersion } from './get-next-package-version';
+import { getNextVersion } from './get-next-package-version.js';
 
 describe('getNextVersion (lib)', () => {
   it('hotfix increments patch', () => {
@@ -77,7 +77,7 @@ describe('getNextVersion (lib)', () => {
     expect(() =>
       getNextVersion({
         currentVersion: '25.8.4',
-        type: 'unknown',
+        type: 'unknown' as never,
         currentDate: new Date('2025-08-10'),
       }),
     ).toThrow(/Invalid type/);

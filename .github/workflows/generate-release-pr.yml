@@ -35,12 +35,12 @@ jobs:
             pkg="${packages[$key]}"
 
             if [[ -n "${{ github.event.inputs.version }}" ]]; then
-              version=$(node ./packages/ci-actions/bin/get-next-package-version.js \
+              version=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts \
                 --package-json "./packages/$pkg/package.json" \
                 --version "${{ github.event.inputs.version }}" \
                 --update)
             else
-              version=$(node ./packages/ci-actions/bin/get-next-package-version.js \
+              version=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts \
                 --package-json "./packages/$pkg/package.json" \
                 --type auto \
                 --update)

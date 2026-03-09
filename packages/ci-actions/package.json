@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "tsx": "node --import=extensionless/register --experimental-strip-types",
+    "tsx": "bin/tsx",
     "test": "vitest --run",
     "typecheck": "tsgo -b"
   },
