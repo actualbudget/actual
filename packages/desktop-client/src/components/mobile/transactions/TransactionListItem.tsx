@@ -34,10 +34,7 @@ import type { AccountEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { lookupName, Status } from './TransactionEdit';
 
-import {
-  makeAmountFullStyle,
-  makeBalanceAmountStyle,
-} from '@desktop-client/components/budget/util';
+import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -283,7 +280,11 @@ export function TransactionListItem({
             <Text
               style={{
                 ...styles.tnum,
-                ...makeAmountFullStyle(amount),
+                ...makeAmountFullStyle(amount, {
+                  positiveColor: theme.tableText,
+                  negativeColor: theme.tableText,
+                  zeroColor: theme.numberNeutral,
+                }),
                 ...textStyle,
               }}
             >
@@ -295,7 +296,11 @@ export function TransactionListItem({
                   fontSize: 11,
                   fontWeight: '400',
                   ...styles.tnum,
-                  ...makeBalanceAmountStyle(runningBalance),
+                  ...makeAmountFullStyle(runningBalance, {
+                    positiveColor: theme.numberPositive,
+                    negativeColor: theme.numberNegative,
+                    zeroColor: theme.numberNeutral,
+                  }),
                 }}
               >
                 {integerToCurrency(runningBalance)}
