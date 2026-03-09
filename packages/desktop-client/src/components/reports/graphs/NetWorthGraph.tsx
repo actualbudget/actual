@@ -27,6 +27,7 @@ import {
 } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
+import { sortAccountsByOrder } from '@desktop-client/components/reports/util';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import type { UseFormatResult } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
@@ -236,6 +237,7 @@ type NetWorthGraphProps = {
   showTooltip?: boolean;
   interval?: string;
   mode?: 'trend' | 'stacked';
+  accountOrder?: string[];
 };
 
 export function NetWorthGraph({
@@ -246,6 +248,7 @@ export function NetWorthGraph({
   showTooltip = true,
   interval = 'Monthly',
   mode = 'trend',
+  accountOrder,
 }: NetWorthGraphProps) {
   const privacyMode = usePrivacyMode();
   const id = useId();
@@ -292,6 +295,10 @@ export function NetWorthGraph({
   const sortedAccounts = useMemo(() => {
     if (!accounts || mode !== 'stacked') return [];
 
+    if (accountOrder && accountOrder.length > 0) {
+      return sortAccountsByOrder(accounts, accountOrder, true);
+    }
+
     const totals = accounts.reduce(
       (acc, account) => {
         acc[account.id] = graphData.data.reduce((sum, point) => {
@@ -305,7 +312,7 @@ export function NetWorthGraph({
     return [...accounts].sort((a, b) => {
       return totals[a.id] - totals[b.id];
     });
-  }, [accounts, graphData.data, mode]);
+  }, [accounts, graphData.data, mode, accountOrder]);
 
   // Assign colors to accounts
   const colors = useMemo(() => {
@@ -354,6 +361,7 @@ export function NetWorthGraph({
             }}
           >
             <AreaChart
+              key={`${mode}-${sortedAccounts.map(a => a.id).join(',')}`}
               responsive
               width={width}
               height={height}

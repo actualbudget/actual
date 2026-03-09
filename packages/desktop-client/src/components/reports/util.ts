@@ -120,3 +120,20 @@ export function calculateHasWarning(
   }
   return false;
 }
+
+export function sortAccountsByOrder<T extends { id: string }>(
+  accounts: T[],
+  accountOrder: string[],
+  reverse = false,
+): T[] {
+  return [...accounts].sort((a, b) => {
+    const indexA = accountOrder.indexOf(a.id);
+    const indexB = accountOrder.indexOf(b.id);
+
+    if (indexA === -1 && indexB === -1) return 0;
+    if (indexA === -1) return reverse ? -1 : 1;
+    if (indexB === -1) return reverse ? 1 : -1;
+
+    return reverse ? indexB - indexA : indexA - indexB;
+  });
+}

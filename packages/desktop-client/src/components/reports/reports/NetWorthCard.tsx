@@ -185,6 +185,7 @@ export function NetWorthCard({
             showTooltip={!isEditing && !isNarrowWidth}
             interval={meta?.interval || 'Monthly'}
             mode={meta?.mode || 'trend'}
+            accountOrder={meta?.accountOrder}
             style={{ height: 'auto', flex: 1 }}
           />
         ) : (

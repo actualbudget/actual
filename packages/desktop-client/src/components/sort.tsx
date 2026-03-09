@@ -150,7 +150,7 @@ type ItemPosition = 'first' | 'last' | null;
 export const DropHighlightPosContext = createContext<ItemPosition>(null);
 
 type DropHighlightProps = {
-  pos: DropPosition;
+  pos: DropPosition | null;
   offset?: {
     top?: number;
     bottom?: number;

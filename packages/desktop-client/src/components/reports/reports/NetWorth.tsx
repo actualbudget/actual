@@ -5,16 +5,23 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import type { KeyboardEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { SvgCalendar, SvgChart } from '@actual-app/components/icons/v1';
+import {
+  SvgCalendar,
+  SvgChart,
+  SvgDotsHorizontalTriple,
+  SvgMenu,
+} from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
@@ -40,9 +47,22 @@ import { ReportOptions } from '@desktop-client/components/reports/ReportOptions'
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { fromDateRepr } from '@desktop-client/components/reports/util';
+import {
+  fromDateRepr,
+  sortAccountsByOrder,
+} from '@desktop-client/components/reports/util';
+import {
+  DropHighlight,
+  useDraggable,
+  useDroppable,
+} from '@desktop-client/components/sort';
+import type {
+  DropPosition,
+  OnDropCallback,
+} from '@desktop-client/components/sort';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
+import { useDragRef } from '@desktop-client/hooks/useDragRef';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -63,7 +83,7 @@ export function NetWorth() {
     return <LoadingIndicator />;
   }
 
-  return <NetWorthInner widget={widget} />;
+  return <NetWorthInner key={widget?.id || 'new'} widget={widget} />;
 }
 
 type NetWorthInnerProps = {
@@ -113,6 +133,10 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [graphMode, setGraphMode] = useState<'trend' | 'stacked'>(
     widget?.meta?.mode || 'trend',
   );
+  const [accountOrder, setAccountOrder] = useState<string[]>(
+    widget?.meta?.accountOrder || [],
+  );
+
   // Combined setter: set mode and update interval (unless interval was set in widget meta)
   const setModeAndInterval = useCallback(
     (newMode: TimeFrame['mode']) => {
@@ -155,6 +179,62 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     ],
   );
   const data = useReport('net_worth', reportParams);
+
+  const sortedAccountsForReorder = useMemo(() => {
+    if (!data?.accounts) return [];
+
+    if (accountOrder.length > 0) {
+      return sortAccountsByOrder(data.accounts, accountOrder);
+    }
+
+    const graphData = data.graphData?.data;
+    if (!Array.isArray(graphData)) {
+      return data.accounts;
+    }
+
+    const totals = data.accounts.reduce(
+      (acc, account) => {
+        acc[account.id] = graphData.reduce((sum, point) => {
+          return (
+            sum + (Number((point as Record<string, unknown>)[account.id]) || 0)
+          );
+        }, 0);
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    return [...data.accounts].sort((a, b) => {
+      return totals[b.id] - totals[a.id];
+    });
+  }, [data?.accounts, data?.graphData?.data, accountOrder]);
+
+  const onReorderAccounts = useCallback(
+    (id: string, dropPos: DropPosition | null, targetId: string) => {
+      if (dropPos === null || id === targetId) return;
+
+      const currentOrder =
+        accountOrder.length > 0
+          ? [
+              ...accountOrder,
+              ...sortedAccountsForReorder
+                .map(a => a.id)
+                .filter(accountId => !accountOrder.includes(accountId)),
+            ]
+          : sortedAccountsForReorder.map(a => a.id);
+      const newOrder = [...currentOrder];
+
+      const fromIndex = newOrder.indexOf(id);
+      if (fromIndex === -1) return;
+      newOrder.splice(fromIndex, 1);
+      const toIndex = newOrder.indexOf(targetId);
+      if (toIndex === -1) return;
+      newOrder.splice(dropPos === 'top' ? toIndex : toIndex + 1, 0, id);
+
+      setAccountOrder(newOrder);
+    },
+    [accountOrder, sortedAccountsForReorder],
+  );
   useEffect(() => {
     async function run() {
       const earliestTransaction = await send('get-earliest-transaction');
@@ -243,6 +323,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
             conditionsOp,
             interval,
             mode: graphMode,
+            accountOrder,
             timeFrame: {
               start,
               end,
@@ -339,6 +420,12 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
           <>
             <IntervalSelector interval={interval} onChange={setInterval} />
             <ModeSelector mode={graphMode} onChange={setGraphMode} />
+            {graphMode === 'stacked' && (
+              <ReorderSelector
+                accounts={sortedAccountsForReorder}
+                onReorder={onReorderAccounts}
+              />
+            )}
           </>
         }
       >
@@ -384,6 +471,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
           showTooltip={!isNarrowWidth}
           interval={interval}
           mode={graphMode}
+          accountOrder={accountOrder}
         />
 
         <View style={{ marginTop: 30, userSelect: 'none' }}>
@@ -507,5 +595,155 @@ function ModeSelector({
         />
       </Popover>
     </>
+  );
+}
+
+function ReorderSelector({
+  accounts,
+  onReorder,
+}: {
+  accounts: Array<{ id: string; name: string }>;
+  onReorder: OnDropCallback;
+}) {
+  const { t } = useTranslation();
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <Button
+        ref={triggerRef}
+        variant="bare"
+        onPress={() => setIsOpen(true)}
+        aria-label={t('Reorder accounts')}
+      >
+        <SvgMenu style={{ width: 12, height: 12 }} />
+        <span style={{ marginLeft: 5 }}>
+          <Trans>Reorder</Trans>
+        </span>
+      </Button>
+
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={isOpen}
+        onOpenChange={() => setIsOpen(false)}
+        style={{ width: 300 }}
+      >
+        <View style={{ padding: 10 }}>
+          <View
+            style={{
+              ...styles.smallText,
+              fontWeight: 'bold',
+              marginBottom: 10,
+              color: theme.pageText,
+            }}
+          >
+            <Trans>Reorder accounts (top to bottom)</Trans>
+          </View>
+          <AccountReorderer accounts={accounts} onReorder={onReorder} />
+        </View>
+      </Popover>
+    </>
+  );
+}
+
+function AccountReorderer({
+  accounts,
+  onReorder,
+}: {
+  accounts: Array<{ id: string; name: string }>;
+  onReorder: OnDropCallback;
+}) {
+  return (
+    <View style={{ maxHeight: 300, overflowY: 'auto' }}>
+      {accounts.map((account, index) => (
+        <AccountItem
+          key={account.id}
+          account={account}
+          onReorder={onReorder}
+          previousAccount={accounts[index - 1]}
+          nextAccount={accounts[index + 1]}
+        />
+      ))}
+    </View>
+  );
+}
+
+function AccountItem({
+  account,
+  onReorder,
+  previousAccount,
+  nextAccount,
+}: {
+  account: { id: string; name: string };
+  onReorder: OnDropCallback;
+  previousAccount?: { id: string; name: string };
+  nextAccount?: { id: string; name: string };
+}) {
+  const { t } = useTranslation();
+  const { dragRef } = useDraggable({
+    type: 'account-reorder',
+    item: { id: account.id },
+    canDrag: true,
+    onDragChange: () => {
+      // noop
+    },
+  });
+  const handleDragRef = useDragRef(dragRef);
+
+  const { dropRef, dropPos } = useDroppable({
+    types: 'account-reorder',
+    id: account.id,
+    onDrop: onReorder,
+  });
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'ArrowUp' && previousAccount) {
+      e.preventDefault();
+      onReorder(account.id, 'top', previousAccount.id);
+    } else if (e.key === 'ArrowDown' && nextAccount) {
+      e.preventDefault();
+      onReorder(account.id, 'bottom', nextAccount.id);
+    }
+  };
+
+  return (
+    <View
+      innerRef={dropRef}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: '8px 10px',
+        backgroundColor: theme.menuBackground,
+        borderBottom: `1px solid ${theme.tableBorder}`,
+        position: 'relative',
+        cursor: 'default',
+        userSelect: 'none',
+      }}
+    >
+      <DropHighlight pos={dropPos} />
+      <View
+        innerRef={handleDragRef}
+        role="button"
+        tabIndex={0}
+        aria-label={t('Reorder {{accountName}}', { accountName: account.name })}
+        onKeyDown={onKeyDown}
+        style={{
+          cursor: 'grab',
+          marginRight: 10,
+          color: theme.menuItemText,
+          padding: 2,
+          outline: 'none',
+          ':focus': {
+            backgroundColor: theme.menuItemBackgroundHover,
+            borderRadius: 2,
+          },
+        }}
+      >
+        <SvgDotsHorizontalTriple width={12} height={12} />
+      </View>
+      <Text style={{ color: theme.menuItemText, flex: 1 }}>{account.name}</Text>
+    </View>
   );
 }
