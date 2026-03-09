@@ -101,12 +101,21 @@ async function fetchAkahuAccounts(appToken, userToken) {
   return data.items || [];
 }
 
+function validateAccountId(accountId) {
+  // Akahu account IDs follow the format: acc_ followed by alphanumeric characters
+  // Validate to prevent SSRF via path traversal or URL manipulation
+  if (!accountId || !/^acc_[a-zA-Z0-9]+$/.test(accountId)) {
+    throw new Error(`Invalid account ID format: ${accountId}`);
+  }
+}
+
 async function fetchAkahuTransactions(
   appToken,
   userToken,
   accountId,
   startDate,
 ) {
+  validateAccountId(accountId);
   const headers = getAkahuHeaders(appToken, userToken);
 
   // Fetch all transactions with cursor-based pagination
