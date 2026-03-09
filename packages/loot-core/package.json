@@ -65,11 +65,11 @@
   },
   "dependencies": {
     "@jlongster/sql.js": "^1.6.7",
+    "@npiesco/absurder-sql": "0.1.25",
     "@reduxjs/toolkit": "^2.11.2",
     "@rschedule/core": "^1.5.0",
     "@rschedule/json-tools": "^1.5.0",
     "@rschedule/standard-date-adapter": "^1.5.0",
-    "absurd-sql": "0.0.54",
     "adm-zip": "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch",
     "better-sqlite3": "^12.6.2",
     "csv-parse": "^6.1.0",

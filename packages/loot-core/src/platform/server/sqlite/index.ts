@@ -26,7 +26,6 @@ type FS = Omit<typeof FS, 'lookupPath' | 'open' | 'close'> & {
 export type SqlJsModule = SqlJsStatic & {
   FS: FS;
   reset_filesystem: () => void;
-  register_for_idb: (idb: IDBDatabase) => void;
 };
 
 let SQL: SqlJsModule | null = null;

@@ -1,6 +1,26 @@
 // Polyfills for browser/web worker environment
 import * as jspb from 'google-protobuf';
 
+// AbsurderSQL's WASM module references `document` during initialization
+// (for DOM-related features like export download links). In a Web Worker
+// context `document` doesn't exist, so we provide a minimal no-op shim.
+if (typeof document === 'undefined' && typeof globalThis !== 'undefined') {
+  (globalThis as Record<string, unknown>).document = {
+    createElement: () => ({
+      setAttribute: () => {},
+      click: () => {},
+      style: {},
+      href: '',
+      download: '',
+    }),
+    getElementById: () => null,
+    body: {
+      appendChild: () => {},
+      removeChild: () => {},
+    },
+  };
+}
+
 if (typeof globalThis !== 'undefined') {
   // Add a basic require polyfill for CommonJS modules
   if (typeof globalThis.require === 'undefined') {

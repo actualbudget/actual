@@ -1,8 +1,8 @@
 // @ts-strict-ignore
-import { SQLiteFS } from 'absurd-sql';
-import IndexedDBBackend from 'absurd-sql/dist/indexeddb-backend';
+import initAbsurderSql, {
+  Database as AbsurderDatabase,
+} from '@npiesco/absurder-sql';
 
-import * as connection from '../connection';
 import * as idb from '../indexeddb';
 import { logger } from '../log';
 import { _getModule } from '../sqlite';
@@ -11,7 +11,6 @@ import type { SqlJsModule } from '../sqlite';
 import { join } from './path-join';
 
 let FS: SqlJsModule['FS'] = null;
-let BFS = null;
 const NO_PERSIST = false;
 
 export const bundledDatabasePath: string = '/default-db.sqlite';
@@ -180,32 +179,20 @@ async function _copySqlFile(
   const fromDbPath = pathToId(fromitem.filepath);
   const toDbPath = pathToId(topath);
 
-  const fromfile = BFS.backend.createFile(fromDbPath);
-  const tofile = BFS.backend.createFile(toDbPath);
-
   try {
-    fromfile.open();
-    tofile.open();
-    const fileSize = fromfile.meta.size;
-    const blockSize = fromfile.meta.blockSize;
+    // Use AbsurderSQL's export/import API for database copying.
+    // This replaces the previous block-level copy via absurd-sql's BlockedFS.
+    const sourceDb = await AbsurderDatabase.newDatabase(fromDbPath);
+    const exportedData = await sourceDb.exportToFile();
+    await sourceDb.close();
 
-    const buffer = new ArrayBuffer(blockSize);
-    const bufferView = new Uint8Array(buffer);
-
-    for (let i = 0; i < fileSize; i += blockSize) {
-      const bytesToRead = Math.min(blockSize, fileSize - i);
-      fromfile.read(bufferView, 0, bytesToRead, i);
-      tofile.write(bufferView, 0, bytesToRead, i);
-    }
+    const destDb = await AbsurderDatabase.newDatabase(toDbPath);
+    await destDb.importFromFile(exportedData);
+    await destDb.close();
   } catch (error) {
-    tofile.close();
-    fromfile.close();
     await _removeFile(toDbPath);
     logger.error('Failed to copy database file', error);
     return false;
-  } finally {
-    tofile.close();
-    fromfile.close();
   }
 
   return true;
@@ -295,17 +282,22 @@ export const init = async function () {
 
   // Jest doesn't support workers. Right now we disable the blocked fs
   // backend under testing and just test that the directory structure
-  // is created correctly. We assume the the absurd-sql project tests
-  // the blocked fs enough. Additionally, we don't populate the
+  // is created correctly. Additionally, we don't populate the
   // default files in testing.
   if (process.env.NODE_ENV !== 'test') {
-    const backend = new IndexedDBBackend(() => {
-      connection.send('fallback-write-error');
-    });
-    BFS = new SQLiteFS(FS, backend);
-    Module.register_for_idb(BFS);
+    // Initialize AbsurderSQL's WASM module. The WASM binary is served from
+    // the public directory alongside the sql.js WASM file. We pass the URL
+    // explicitly because this code runs in a Web Worker where
+    // import.meta.url may not resolve correctly for bundled IIFE output.
+    await initAbsurderSql(process.env.PUBLIC_URL + 'absurder_sql_bg.wasm');
 
-    FS.mount(BFS, {}, '/blocked');
+    // TODO: Complete the migration from sql.js to AbsurderSQL.
+    // AbsurderSQL manages its own IndexedDB persistence internally via
+    // Database.newDatabase(). The BlockedFS mount and symlink mechanism
+    // previously used by absurd-sql are no longer needed. The sql.js
+    // engine (@jlongster/sql.js) should also be replaced with AbsurderSQL's
+    // Database API (Database.newDatabase(), execute(), sync(), close())
+    // to complete the full migration.
 
     await populateDefaultFilesystem();
   }

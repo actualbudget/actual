@@ -5080,6 +5080,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@npiesco/absurder-sql@npm:0.1.25":
+  version: 0.1.25
+  resolution: "@npiesco/absurder-sql@npm:0.1.25"
+  checksum: 10/0b2a22975646e11805f80a8f01e238d7fcfac630f8f6a19aaf1ee7fba0ce160d31ba5a14f0093681df8116fd0e46a78b6cfad7f6ffa0045d439b57cd88c8166d
+  languageName: node
+  linkType: hard
+
 "@npmcli/agent@npm:^3.0.0":
   version: 3.0.0
   resolution: "@npmcli/agent@npm:3.0.0"
@@ -10700,15 +10707,6 @@ __metadata:
   version: 3.0.1
   resolution: "abbrev@npm:3.0.1"
   checksum: 10/ebd2c149dda6f543b66ce3779ea612151bb3aa9d0824f169773ee9876f1ca5a4e0adbcccc7eed048c04da7998e1825e2aa76fcca92d9e67dea50ac2b0a58dc2e
-  languageName: node
-  linkType: hard
-
-"absurd-sql@npm:0.0.54":
-  version: 0.0.54
-  resolution: "absurd-sql@npm:0.0.54"
-  dependencies:
-    safari-14-idb-fix: "npm:^1.0.4"
-  checksum: 10/85eac6075c44f44c02e5b250bc83f144788f6a02d35b94db13b514d8d1e5851477aa16bafab1fd538e15b35dd554d3bab92585afd8ffae37a32f66e3b2e7a399
   languageName: node
   linkType: hard
 
@@ -19650,6 +19648,7 @@ __metadata:
     "@actual-app/api": "workspace:^"
     "@actual-app/crdt": "workspace:^"
     "@jlongster/sql.js": "npm:^1.6.7"
+    "@npiesco/absurder-sql": "npm:0.1.25"
     "@reduxjs/toolkit": "npm:^2.11.2"
     "@rschedule/core": "npm:^1.5.0"
     "@rschedule/json-tools": "npm:^1.5.0"
@@ -19661,7 +19660,6 @@ __metadata:
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/node": "npm:^22.19.10"
     "@types/pegjs": "npm:^0.10.6"
-    absurd-sql: "npm:0.0.54"
     adm-zip: "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch"
     assert: "npm:^2.1.0"
     better-sqlite3: "npm:^12.6.2"
@@ -25508,13 +25506,6 @@ __metadata:
   version: 1.3.3
   resolution: "rw@npm:1.3.3"
   checksum: 10/e90985d64777a00f4ab5f8c0bfea2fb5645c6bda5238840afa339c8a4f86f776e8ce83731155643a7425a0b27ce89077dab27b2f57519996ba4d2fe54cac1941
-  languageName: node
-  linkType: hard
-
-"safari-14-idb-fix@npm:^1.0.4":
-  version: 1.0.6
-  resolution: "safari-14-idb-fix@npm:1.0.6"
-  checksum: 10/90ea958b47209d689f65852c378dbb0c27e5eaeae77284bcfc4edb636b74da56adecf0435e4827b552944510ac65021a4457ec0bb9fdf1e348248a5e00bfe65b
   languageName: node
   linkType: hard
 

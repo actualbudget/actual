@@ -1,4 +1,3 @@
-import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 import { registerSW } from 'virtual:pwa-register';
 
 import * as Platform from 'loot-core/shared/platform';
@@ -25,7 +24,9 @@ let worker = null;
 
 function createBackendWorker() {
   worker = new Worker(backendWorkerUrl);
-  initSQLBackend(worker);
+
+  // AbsurderSQL manages its own IndexedDB persistence internally,
+  // so the absurd-sql main-thread IDB proxy (initBackend) is no longer needed.
 
   if (window.SharedArrayBuffer) {
     localStorage.removeItem('SharedArrayBufferOverride');
