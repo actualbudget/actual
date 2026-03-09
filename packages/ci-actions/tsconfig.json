@@ -6,7 +6,7 @@
     "moduleResolution": "nodenext",
     "skipLibCheck": true,
     "strict": true,
-    "types": ["vite/client", "node"],
+    "types": ["node"],
     "outDir": "dist",
     "rootDir": "."
   },
