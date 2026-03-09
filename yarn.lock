@@ -39,6 +39,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/ci-actions@workspace:packages/ci-actions"
   dependencies:
+    typescript: "npm:^5.9.3"
     vitest: "npm:^4.0.18"
   languageName: unknown
   linkType: soft

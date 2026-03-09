@@ -4,9 +4,10 @@
 
 import { spawnSync } from 'child_process';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 const migrationsDir = path.join(
-  path.dirname(new URL(import.meta.url).pathname),
+  path.dirname(fileURLToPath(import.meta.url)),
   '..',
   '..',
   '..',
