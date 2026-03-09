@@ -33,6 +33,7 @@ type BalanceMenuProps = Omit<
     ids: TransactionEntity['id'][],
   ) => void;
   onMakeAsNonSplitTransactions: (ids: string[]) => void;
+  onToggleReimbursable: () => void;
   closeMenu: () => void;
 };
 
@@ -46,6 +47,7 @@ export function TransactionMenu({
   onCreateRule,
   onScheduleAction,
   onMakeAsNonSplitTransactions,
+  onToggleReimbursable,
   closeMenu,
   ...props
 }: BalanceMenuProps) {
@@ -187,6 +189,9 @@ export function TransactionMenu({
           case 'create-rule':
             onCreateRule(selectedIds);
             break;
+          case 'toggle-reimbursable':
+            onToggleReimbursable();
+            break;
           default:
             throw new Error(`Unrecognized menu option: ${name}`);
         }
@@ -242,6 +247,12 @@ export function TransactionMenu({
                     },
                   ]
                 : []),
+              {
+                name: 'toggle-reimbursable',
+                text: transaction.reimbursable
+                  ? t('Remove reimbursable')
+                  : t('Mark as reimbursable'),
+              },
             ]),
       ]}
     />

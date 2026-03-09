@@ -35,6 +35,7 @@ import {
   SvgArrowsSynchronize,
   SvgCalendar3,
   SvgHyperlink2,
+  SvgNotesPaperText,
   SvgSubtract,
 } from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
@@ -580,6 +581,9 @@ function PayeeCell({
             transferAccount={transferAccount}
             onNavigateToTransferAccount={onNavigateToTransferAccount}
             onNavigateToSchedule={onNavigateToSchedule}
+            onToggleReimbursable={() =>
+              onUpdate('reimbursable', !transaction.reimbursable)
+            }
           />
           <SvgSplit
             style={{
@@ -673,6 +677,9 @@ function PayeeCell({
               transferAccount={transferAccount}
               onNavigateToTransferAccount={onNavigateToTransferAccount}
               onNavigateToSchedule={onNavigateToSchedule}
+              onToggleReimbursable={() =>
+                onUpdate('reimbursable', !transaction.reimbursable)
+              }
             />
             <div
               style={{
@@ -753,6 +760,7 @@ type PayeeIconsProps = {
   transferAccount: AccountEntity | null;
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
+  onToggleReimbursable: () => void;
 };
 
 function PayeeIcons({
@@ -760,6 +768,7 @@ function PayeeIcons({
   transferAccount,
   onNavigateToTransferAccount,
   onNavigateToSchedule,
+  onToggleReimbursable,
 }: PayeeIconsProps) {
   const { t } = useTranslation();
 
@@ -772,8 +781,11 @@ function PayeeIcons({
 
   const schedule = scheduleId ? schedules.find(s => s.id === scheduleId) : null;
 
-  if (schedule == null && transferAccount == null) {
-    // Neither a valid scheduled transaction nor a transfer.
+  if (
+    schedule == null &&
+    transferAccount == null &&
+    !transaction.reimbursable
+  ) {
     return null;
   }
 
@@ -823,6 +835,27 @@ function PayeeIcons({
             <SvgRightArrow2 style={transferIconStyle} />
           )}
         </Button>
+      )}
+      {transaction.reimbursable && (
+        <Tooltip
+          content={t('Reimbursable expense')}
+          placement="bottom"
+          triggerProps={{ delay: 750 }}
+        >
+          <Button
+            variant="bare"
+            data-testid="reimbursable-icon"
+            aria-label={t('Toggle reimbursable')}
+            style={payeeIconButtonStyle}
+            onPress={() => {
+              if (!isTemporaryId(transaction.id)) {
+                onToggleReimbursable();
+              }
+            }}
+          >
+            <SvgNotesPaperText style={{ width: 13, height: 13 }} />
+          </Button>
+        </Tooltip>
       )}
     </>
   );
@@ -1194,6 +1227,9 @@ const Transaction = memo(function Transaction({
           onScheduleAction={(name, ids) => onScheduleAction?.(name, ids)}
           onMakeAsNonSplitTransactions={ids =>
             onMakeAsNonSplitTransactions?.(ids)
+          }
+          onToggleReimbursable={() =>
+            onUpdate('reimbursable', !transaction.reimbursable)
           }
           closeMenu={() => setMenuOpen(false)}
         />

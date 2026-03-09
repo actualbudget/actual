@@ -83,6 +83,7 @@ const FIELD_INFO = {
   account: { type: 'id' },
   cleared: { type: 'boolean' },
   reconciled: { type: 'boolean' },
+  reimbursable: { type: 'boolean' },
   saved: { type: 'saved' },
   transfer: { type: 'boolean' },
   parent: { type: 'boolean' },
@@ -163,6 +164,8 @@ export function mapField(field, opts?) {
       return t('cleared');
     case 'reconciled':
       return t('reconciled');
+    case 'reimbursable':
+      return t('reimbursable');
     case 'transfer':
       return t('transfer');
     default:

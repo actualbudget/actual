@@ -29,6 +29,7 @@ export type FieldValueTypes = {
   parent: boolean;
   cleared: boolean;
   reconciled: boolean;
+  reimbursable: boolean;
 };
 
 type BaseConditionEntity<
@@ -122,6 +123,7 @@ export type RuleConditionEntity =
   | BaseConditionEntity<'saved', 'is'>
   | BaseConditionEntity<'cleared', 'is'>
   | BaseConditionEntity<'reconciled', 'is'>
+  | BaseConditionEntity<'reimbursable', 'is'>
   | BaseConditionEntity<'transfer', 'is'>;
 
 export type RuleActionEntity =

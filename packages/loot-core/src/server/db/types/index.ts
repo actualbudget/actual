@@ -170,6 +170,7 @@ export type DbTransaction = {
   tombstone: 1 | 0;
   cleared: 1 | 0;
   reconciled: 1 | 0;
+  reimbursable: 1 | 0;
   // Unused in the codebase
   pending?: 1 | 0 | null;
   location?: string | null;
