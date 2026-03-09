@@ -75,11 +75,11 @@ export function UpcomingLength() {
       name="schedules-upcoming-length"
       containerProps={{ style: { width: 600 } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Change upcoming length')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <Paragraph>
             <Trans>
@@ -128,7 +128,7 @@ export function UpcomingLength() {
               isDisabled={!saveActive}
               onPress={() => {
                 saveUpcomingLength();
-                close();
+                state.close();
               }}
               type="submit"
               variant="primary"

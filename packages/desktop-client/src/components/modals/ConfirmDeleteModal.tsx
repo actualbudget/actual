@@ -34,11 +34,11 @@ export function ConfirmDeleteModal({
 
   return (
     <Modal name="confirm-delete">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Confirm Delete')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ lineHeight: 1.5 }}>
             <Paragraph>{message}</Paragraph>
@@ -53,7 +53,7 @@ export function ConfirmDeleteModal({
                   marginRight: 10,
                   ...narrowButtonStyle,
                 }}
-                onPress={close}
+                onPress={() => state.close()}
               >
                 <Trans>Cancel</Trans>
               </Button>
@@ -63,7 +63,7 @@ export function ConfirmDeleteModal({
                   style={narrowButtonStyle}
                   onPress={() => {
                     onConfirm();
-                    close();
+                    state.close();
                   }}
                 >
                   <Trans>Delete</Trans>

@@ -100,11 +100,11 @@ export function ConfirmChangeDocumentDirModal({
 
   return (
     <Modal name="confirm-change-document-dir">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Are you sure?')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
@@ -190,7 +190,7 @@ export function ConfirmChangeDocumentDirModal({
                   fontSize: 14,
                   alignSelf: 'center',
                 }}
-                onPress={close}
+                onPress={() => state.close()}
               >
                 <Trans>Cancel</Trans>
               </Button>
@@ -202,7 +202,7 @@ export function ConfirmChangeDocumentDirModal({
                   fontSize: 14,
                   alignSelf: 'center',
                 }}
-                onPress={() => moveDirectory(close)}
+                onPress={() => moveDirectory(() => state.close())}
               >
                 <Trans>Change directory</Trans>
               </ButtonWithLoading>

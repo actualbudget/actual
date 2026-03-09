@@ -632,14 +632,14 @@ handlers['api/categories-get'] = async function ({
   checkFileOpen();
   const result = await handlers['get-categories']();
   return grouped
-    ? result.grouped.map(categoryGroupModel.toExternal)
-    : result.list.map(categoryModel.toExternal);
+    ? result.grouped.map(group => categoryGroupModel.toExternal(group))
+    : result.list.map(category => categoryModel.toExternal(category));
 };
 
 handlers['api/category-groups-get'] = async function () {
   checkFileOpen();
   const groups = await handlers['get-category-groups']();
-  return groups.map(categoryGroupModel.toExternal);
+  return groups.map(group => categoryGroupModel.toExternal(group));
 };
 
 handlers['api/category-group-create'] = withMutation(async function ({
@@ -706,13 +706,13 @@ handlers['api/category-delete'] = withMutation(async function ({
 handlers['api/common-payees-get'] = async function () {
   checkFileOpen();
   const payees = await handlers['common-payees-get']();
-  return payees.map(payeeModel.toExternal);
+  return payees.map(payee => payeeModel.toExternal(payee));
 };
 
 handlers['api/payees-get'] = async function () {
   checkFileOpen();
   const payees = await handlers['payees-get']();
-  return payees.map(payeeModel.toExternal);
+  return payees.map(payee => payeeModel.toExternal(payee));
 };
 
 handlers['api/payee-create'] = withMutation(async function ({ payee }) {
@@ -743,7 +743,7 @@ handlers['api/payees-merge'] = withMutation(async function ({
 handlers['api/tags-get'] = async function () {
   checkFileOpen();
   const tags = await handlers['tags-get']();
-  return tags.map(tagModel.toExternal);
+  return tags.map(tag => tagModel.toExternal(tag));
 };
 
 handlers['api/tag-create'] = withMutation(async function ({ tag }) {

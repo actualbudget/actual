@@ -65,11 +65,11 @@ export function ImportYNAB5Modal() {
 
   return (
     <Modal name="import-ynab5" containerProps={{ style: { width: 400 } }}>
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Import from nYNAB')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ ...styles.smallText, lineHeight: 1.5, marginTop: 20 }}>
             {error && (

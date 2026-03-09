@@ -54,7 +54,7 @@ export function CategoryAutocompleteModal({
         },
       }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           {isNarrowWidth && (
             <ModalHeader
@@ -66,7 +66,7 @@ export function CategoryAutocompleteModal({
               }
               rightContent={
                 <ModalCloseButton
-                  onPress={close}
+                  onPress={() => state.close()}
                   style={{ color: theme.menuAutoCompleteText }}
                 />
               }
@@ -94,7 +94,7 @@ export function CategoryAutocompleteModal({
                   closeOnSelect={closeOnSelect}
                   clearOnSelect={clearOnSelect}
                   showSplitOption={false}
-                  onClose={close}
+                  onClose={() => state.close()}
                   {...defaultAutocompleteProps}
                   onSelect={onSelect}
                   categoryGroups={categoryGroups}

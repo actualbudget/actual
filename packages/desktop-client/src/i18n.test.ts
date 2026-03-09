@@ -35,7 +35,7 @@ describe('setI18NextLanguage', () => {
 
     setI18NextLanguage('');
 
-    expect(i18n.changeLanguage).toHaveBeenCalledWith('uk');
+    expect(vi.mocked(i18n).changeLanguage).toHaveBeenCalledWith('uk');
   });
 
   test('should set the provided language if it is available', () => {
@@ -43,7 +43,7 @@ describe('setI18NextLanguage', () => {
 
     setI18NextLanguage(language);
 
-    expect(i18n.changeLanguage).toHaveBeenCalledWith(language);
+    expect(vi.mocked(i18n).changeLanguage).toHaveBeenCalledWith(language);
   });
 
   test('should fallback to English if the provided language is unavailable', () => {
@@ -54,7 +54,7 @@ describe('setI18NextLanguage', () => {
     expect(console.info).toHaveBeenCalledWith(
       'Unknown locale unknown, falling back to en',
     );
-    expect(i18n.changeLanguage).toHaveBeenCalledWith('en');
+    expect(vi.mocked(i18n).changeLanguage).toHaveBeenCalledWith('en');
   });
 
   test('should successfully use a language with a region code if it is known', () => {
@@ -62,7 +62,7 @@ describe('setI18NextLanguage', () => {
 
     setI18NextLanguage(language);
 
-    expect(i18n.changeLanguage).toHaveBeenCalledWith(language);
+    expect(vi.mocked(i18n).changeLanguage).toHaveBeenCalledWith(language);
   });
 
   test('should fallback to base language if the provided language has an unknown region code', () => {
@@ -73,7 +73,7 @@ describe('setI18NextLanguage', () => {
     expect(console.info).toHaveBeenCalledWith(
       'Unknown locale uk-ZZ, falling back to uk-zz',
     );
-    expect(i18n.changeLanguage).toHaveBeenCalledWith('uk');
+    expect(vi.mocked(i18n).changeLanguage).toHaveBeenCalledWith('uk');
   });
 
   test('should fallback to lowercase language if the provided language has uppercase letters', () => {
@@ -84,6 +84,6 @@ describe('setI18NextLanguage', () => {
     expect(console.info).toHaveBeenCalledWith(
       'Unknown locale EN, falling back to en',
     );
-    expect(i18n.changeLanguage).toHaveBeenCalledWith('en');
+    expect(vi.mocked(i18n).changeLanguage).toHaveBeenCalledWith('en');
   });
 });

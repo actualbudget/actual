@@ -27,7 +27,7 @@ export function OutOfSyncMigrationsModal() {
 
   return (
     <Modal name="out-of-sync-migrations">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={<ModalTitle title={t('Please update Actual!')} />}
@@ -82,7 +82,7 @@ export function OutOfSyncMigrationsModal() {
                 style={{
                   padding: '10px 30px',
                 }}
-                onPress={() => closeBudgetAndModal(close)}
+                onPress={() => closeBudgetAndModal(() => state.close())}
               >
                 <Trans>Close Budget</Trans>
               </Button>

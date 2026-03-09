@@ -33,11 +33,11 @@ export function BudgetPageMenuModal({
 
   return (
     <Modal name="budget-page-menu">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             showLogo
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <BudgetPageMenu
             getItemStyle={() => defaultMenuItemStyle}
