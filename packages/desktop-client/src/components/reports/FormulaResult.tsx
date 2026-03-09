@@ -49,6 +49,7 @@ export function FormulaResult({
   containerRef,
 }: FormulaResultProps) {
   const [fontSize, setFontSize] = useState<number>(initialFontSize);
+  const [hasSized, setHasSized] = useState(false);
   const refDiv = useRef<HTMLDivElement>(null);
   const previousFontSizeRef = useRef<number>(initialFontSize);
   const format = useFormat();
@@ -89,7 +90,10 @@ export function FormulaResult({
       height, // Ensure the text fits vertically by using the height as the limiting factor
     );
 
-    setFontSize(calculatedFontSize);
+    if (calculatedFontSize > 0) {
+      setFontSize(calculatedFontSize);
+      setHasSized(true);
+    }
 
     // Only call fontSizeChanged if the font size actually changed
     if (
@@ -143,6 +147,7 @@ export function FormulaResult({
   useEffect(() => {
     if (fontSizeMode === 'static') {
       setFontSize(staticFontSize);
+      setHasSized(true);
     }
   }, [fontSizeMode, staticFontSize]);
 
@@ -152,6 +157,8 @@ export function FormulaResult({
     : error
       ? theme.errorText
       : theme.pageText;
+
+  const showContent = hasSized || fontSizeMode === 'static';
 
   return (
     <View style={{ flex: 1 }}>
@@ -175,9 +182,13 @@ export function FormulaResult({
             color,
           }}
         >
-          <span aria-hidden="true">
-            <PrivacyFilter>{displayValue}</PrivacyFilter>
-          </span>
+          {!showContent ? (
+            <LoadingIndicator />
+          ) : (
+            <span aria-hidden="true">
+              <PrivacyFilter>{displayValue}</PrivacyFilter>
+            </span>
+          )}
         </View>
       )}
     </View>

@@ -121,6 +121,15 @@ app.post('/change-password', (req, res) => {
   const session = validateSession(req, res);
   if (!session) return;
 
+  if (getActiveLoginMethod() !== 'password') {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'password-auth-not-active',
+    });
+    return;
+  }
+
   const { error } = changePassword(req.body.password);
 
   if (error) {
