@@ -28,19 +28,12 @@ function createBackendWorker() {
   // AbsurderSQL manages its own IndexedDB persistence internally,
   // so the absurd-sql main-thread IDB proxy (initBackend) is no longer needed.
 
-  if (window.SharedArrayBuffer) {
-    localStorage.removeItem('SharedArrayBufferOverride');
-  }
-
   worker.postMessage({
     type: 'init',
     version: ACTUAL_VERSION,
     isDev: IS_DEV,
     publicUrl: process.env.PUBLIC_URL,
     hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
-    isSharedArrayBufferOverrideEnabled: localStorage.getItem(
-      'SharedArrayBufferOverride',
-    ),
   });
 }
 

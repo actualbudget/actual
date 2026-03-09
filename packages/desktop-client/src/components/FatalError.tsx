@@ -13,14 +13,12 @@ import { LazyLoadFailedError } from 'loot-core/shared/errors';
 
 import { Link } from './common/Link';
 import { Modal, ModalHeader } from './common/Modal';
-import { Checkbox } from './forms';
 
 import { useModalState } from '@desktop-client/hooks/useModalState';
 
 type AppError = Error & {
   type?: string;
   IDBFailure?: boolean;
-  SharedArrayBufferMissing?: boolean;
   BackendInitFailure?: boolean;
 };
 
@@ -42,29 +40,6 @@ function RenderSimple({ error }: RenderSimpleProps) {
           that Actual requires to run. This might happen if you are in private
           browsing mode. Please try a different browser or turn off private
           browsing.
-        </Trans>
-      </Text>
-    );
-  } else if (
-    'SharedArrayBufferMissing' in error &&
-    error.SharedArrayBufferMissing
-  ) {
-    // SharedArrayBuffer isn't available
-    msg = (
-      <Text>
-        <Trans>
-          Actual requires access to <code>SharedArrayBuffer</code> in order to
-          function properly. If you're seeing this error, either your browser
-          does not support <code>SharedArrayBuffer</code>, or your server is not
-          sending the appropriate headers, or you are not using HTTPS. See{' '}
-          <Link
-            variant="external"
-            linkColor="muted"
-            to="https://actualbudget.org/docs/troubleshooting/shared-array-buffer"
-          >
-            our troubleshooting documentation
-          </Link>{' '}
-          to learn more. <SharedArrayBufferOverride />
         </Trans>
       </Text>
     );
@@ -146,53 +121,6 @@ function RenderUIError() {
         </Trans>
       </Paragraph>
     </>
-  );
-}
-
-function SharedArrayBufferOverride() {
-  const [expanded, setExpanded] = useState(false);
-  const [understand, setUnderstand] = useState(false);
-
-  return expanded ? (
-    <>
-      <Paragraph style={{ marginTop: 10 }}>
-        <Trans>
-          Actual uses <code>SharedArrayBuffer</code> to allow usage from
-          multiple tabs at once and to ensure correct behavior when switching
-          files. While it can run without access to
-          <code>SharedArrayBuffer</code>, you may encounter data loss or notice
-          multiple budget files being merged with each other.
-        </Trans>
-      </Paragraph>
-      <label
-        style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}
-      >
-        <Checkbox
-          checked={understand}
-          onChange={() => setUnderstand(!understand)}
-        />{' '}
-        <Trans>
-          I understand the risks, run Actual in the unsupported fallback mode
-        </Trans>
-      </label>
-      <Button
-        isDisabled={!understand}
-        onPress={() => {
-          window.localStorage.setItem('SharedArrayBufferOverride', 'true');
-          window.location.reload();
-        }}
-      >
-        <Trans>Open Actual</Trans>
-      </Button>
-    </>
-  ) : (
-    <Link
-      variant="text"
-      onClick={() => setExpanded(true)}
-      style={{ marginLeft: 5 }}
-    >
-      <Trans>Advanced options</Trans>
-    </Link>
   );
 }
 

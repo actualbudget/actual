@@ -81,8 +81,8 @@ async function _readFile(
   opts?: { encoding: 'utf8' } | { encoding: 'binary' },
 ): Promise<string | Uint8Array> {
   // We persist stuff in /documents, but don't need to handle sqlite
-  // file specifically because those are symlinked to a separate
-  // filesystem and will be handled in the BlockedFS
+  // files specifically because those are symlinked to /blocked and
+  // handled by sql.js's Emscripten FS
   if (
     !NO_PERSIST &&
     filepath.startsWith('/documents') &&
@@ -147,15 +147,14 @@ async function _writeFile(filepath: string, contents): Promise<boolean> {
 
     if (isDb) {
       // We never write the contents of the database to idb ourselves.
-      // It gets handled via a symlink to the blocked fs (created by
+      // It gets handled via a symlink to /blocked (created by
       // `_createFile` above). However, we still need to record an
       // entry for the db file so the fs gets properly constructed on
       // startup
       await idb.set(store, { filepath, contents: '' });
 
-      // Actually persist the data by going the FS, which will pass
-      // the data through the symlink to the blocked fs. For some
-      // reason we need to resolve symlinks ourselves.
+      // Actually persist the data via the FS — the symlink resolves
+      // to /blocked where sql.js manages the file.
       await Promise.resolve();
       FS.writeFile(resolveLink(filepath), contents);
     } else {
@@ -275,9 +274,10 @@ export const init = async function () {
   // Everything in there is automatically persisted
   FS.mkdir('/documents');
 
-  // Files in /blocked are handled by the BlockedFS, which is a
-  // special fs that persists files in blocks. This is necessary
-  // for sqlite3
+  // Files in /blocked are used by sql.js for sqlite database storage.
+  // Previously handled by absurd-sql's BlockedFS for IndexedDB persistence.
+  // TODO: Remove /blocked when full migration to AbsurderSQL is complete
+  // (blocked by: create_function, prepared statements, Emscripten FS gaps).
   FS.mkdir('/blocked');
 
   // Jest doesn't support workers. Right now we disable the blocked fs
@@ -292,12 +292,15 @@ export const init = async function () {
     await initAbsurderSql(process.env.PUBLIC_URL + 'absurder_sql_bg.wasm');
 
     // TODO: Complete the migration from sql.js to AbsurderSQL.
-    // AbsurderSQL manages its own IndexedDB persistence internally via
-    // Database.newDatabase(). The BlockedFS mount and symlink mechanism
-    // previously used by absurd-sql are no longer needed. The sql.js
-    // engine (@jlongster/sql.js) should also be replaced with AbsurderSQL's
-    // Database API (Database.newDatabase(), execute(), sync(), close())
-    // to complete the full migration.
+    // Remaining blockers:
+    //   1. create_function() — 5 custom SQL UDFs (UNICODE_LOWER, UNICODE_UPPER,
+    //      UNICODE_LIKE, REGEXP, NORMALISE) are registered via sql.js
+    //   2. Prepared statement API — sql.js uses prepare/bind/step/getAsObject/free/reset;
+    //      AbsurderSQL only has execute()/executeWithParams()
+    //   3. Emscripten FS — sql.js uses FS.readFile/writeFile/symlink/readlink/mkdir etc.;
+    //      AbsurderSQL manages IndexedDB persistence internally
+    // Once these gaps are resolved, the BlockedFS mount, symlink mechanism,
+    // and @jlongster/sql.js dependency can be fully removed.
 
     await populateDefaultFilesystem();
   }

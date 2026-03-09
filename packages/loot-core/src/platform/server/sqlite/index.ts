@@ -8,20 +8,11 @@ import { normalise } from './normalise';
 import { unicodeLike } from './unicodeLike';
 
 // Types exported from sql.js (and Emscripten) are incomplete, so we need to redefine them here
-type FSStream = (typeof FS)['FSStream'] & {
-  node: (typeof FS)['FSNode'] & {
-    contents: {
-      readIfFallback: () => Promise<unknown>;
-    };
-  };
-};
-type FS = Omit<typeof FS, 'lookupPath' | 'open' | 'close'> & {
+type FS = Omit<typeof FS, 'lookupPath'> & {
   lookupPath: (
     path: string,
     opts?: { follow?: boolean },
   ) => { node: (typeof FS)['FSNode'] & { link?: string } };
-  open: (path: string, flags: string, mode?: number) => FSStream;
-  close: (stream: FSStream) => void;
 };
 export type SqlJsModule = SqlJsStatic & {
   FS: FS;
@@ -194,12 +185,6 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
     } else {
       const path = pathOrBuffer;
       if (path !== ':memory:') {
-        if (typeof SharedArrayBuffer === 'undefined') {
-          const stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');
-          await stream.node.contents.readIfFallback();
-          SQL.FS.close(stream);
-        }
-
         db = new SQL.Database(
           path.includes('/blocked') ? path : SQL.FS.readlink(path),
           // @ts-expect-error 2nd argument missed in sql.js types
