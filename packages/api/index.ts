@@ -3,15 +3,16 @@ import type {
   RequestInit as FetchInit,
 } from 'node-fetch';
 
-import { init as initLootCore, lib } from 'loot-core/server/main';
-import type { InitConfig } from 'loot-core/server/main';
+import { init as initLootCore } from 'loot-core/server/main';
+import type { InitConfig, lib } from 'loot-core/server/main';
 
 import { validateNodeVersion } from './validateNodeVersion';
 
 export * from './methods';
 export * as utils from './utils';
 
-export const internal = lib;
+/** @deprecated Please use return value of `init` instead */
+export let internal: typeof lib | null = null;
 
 export async function init(config: InitConfig = {}) {
   validateNodeVersion();
@@ -24,15 +25,19 @@ export async function init(config: InitConfig = {}) {
     };
   }
 
-  return initLootCore(config);
+  internal = await initLootCore(config);
+  return internal;
 }
 
 export async function shutdown() {
-  try {
-    await lib.send('sync');
-  } catch {
-    // most likely that no budget is loaded, so the sync failed
-  }
+  if (internal) {
+    try {
+      await internal.send('sync');
+    } catch {
+      // most likely that no budget is loaded, so the sync failed
+    }
 
-  await lib.send('close-budget');
+    await internal.send('close-budget');
+    internal = null;
+  }
 }
