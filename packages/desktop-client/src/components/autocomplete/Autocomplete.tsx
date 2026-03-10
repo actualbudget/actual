@@ -605,7 +605,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
               >
                 {renderItems(
                   filtered,
-                  getItemProps,
+                  itemProps => getItemProps({ ...itemProps }),
                   highlightedIndex,
                   inputValue,
                 )}
@@ -631,7 +631,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                 <View ref={itemsViewRef}>
                   {renderItems(
                     filtered,
-                    getItemProps,
+                    itemProps => getItemProps({ ...itemProps }),
                     highlightedIndex,
                     inputValue,
                   )}
