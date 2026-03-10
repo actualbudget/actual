@@ -54,11 +54,11 @@ export function EnvelopeIncomeBalanceMenuModal({
 
   return (
     <Modal name="envelope-income-balance-menu">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={<ModalTitle title={category.name} shrinkOnOverflow />}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{

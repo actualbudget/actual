@@ -46,7 +46,7 @@ export function AccountAutocompleteModal({
         },
       }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           {isNarrowWidth && (
             <ModalHeader
@@ -58,7 +58,7 @@ export function AccountAutocompleteModal({
               }
               rightContent={
                 <ModalCloseButton
-                  onPress={close}
+                  onPress={() => state.close()}
                   style={{ color: theme.menuAutoCompleteText }}
                 />
               }
@@ -80,7 +80,7 @@ export function AccountAutocompleteModal({
                 focused
                 embedded
                 closeOnBlur={false}
-                onClose={close}
+                onClose={() => state.close()}
                 {...defaultAutocompleteProps}
                 onSelect={onSelect}
                 includeClosedAccounts={includeClosedAccounts}

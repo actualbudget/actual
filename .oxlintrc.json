@@ -103,6 +103,10 @@
     "typescript/no-duplicate-type-constituents": "off",
     "typescript/await-thenable": "error",
     "typescript/no-floating-promises": "warn", // TODO: covert to error
+    "typescript/require-array-sort-compare": "warn", // TODO: covert to error
+    "typescript/unbound-method": "error",
+    "typescript/no-for-in-array": "warn", // TODO: covert to error
+    "typescript/restrict-template-expressions": "warn", // TODO: covert to error
 
     // Import rules
     "import/consistent-type-specifier-style": "error",

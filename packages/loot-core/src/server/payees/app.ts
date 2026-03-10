@@ -60,12 +60,12 @@ async function createPayee({ name }: { name: PayeeEntity['name'] }) {
 
 async function getCommonPayees(): Promise<PayeeEntity[]> {
   // TODO: Update to an AQL query. Server must return AQL entities not the raw DB data.
-  return (await db.getCommonPayees()).map(payeeModel.fromDb);
+  return (await db.getCommonPayees()).map(p => payeeModel.fromDb(p));
 }
 
 async function getPayees(): Promise<PayeeEntity[]> {
   // TODO: Update to an AQL query. Server must return AQL entities not the raw DB data.
-  return (await db.getPayees()).map(payeeModel.fromDb);
+  return (await db.getPayees()).map(p => payeeModel.fromDb(p));
 }
 
 async function getOrphanedPayees(): Promise<Array<Pick<PayeeEntity, 'id'>>> {

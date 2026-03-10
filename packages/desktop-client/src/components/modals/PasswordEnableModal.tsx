@@ -77,11 +77,11 @@ export function PasswordEnableModal({
 
   return (
     <Modal name="enable-password-auth">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Revert to server password')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
 
           <View style={{ flexDirection: 'column' }}>
