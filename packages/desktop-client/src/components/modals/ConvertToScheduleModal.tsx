@@ -42,11 +42,11 @@ export function ConvertToScheduleModal({
       name="convert-to-schedule"
       containerProps={{ style: { width: '30vw' } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Convert to Schedule')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ lineHeight: 1.5 }}>
             <Block>
@@ -95,7 +95,7 @@ export function ConvertToScheduleModal({
                   ...(isNarrowWidth && { flex: 1 }),
                 }}
                 onPress={() => {
-                  close();
+                  state.close();
                   onCancel?.();
                 }}
               >
@@ -110,7 +110,7 @@ export function ConvertToScheduleModal({
                     ...(isNarrowWidth && { flex: 1 }),
                   }}
                   onPress={() => {
-                    close();
+                    state.close();
                     onConfirm();
                   }}
                 >

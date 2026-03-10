@@ -1098,19 +1098,17 @@ async function simpleFinBatchSync({
       });
     }
   } catch (err) {
-    const errors = [];
     for (const account of accounts) {
+      const error = err as Error;
       retVal.push({
         accountId: account.id,
         res: {
-          errors,
+          errors: [handleSyncError(error, account)],
           newTransactions: [],
           matchedTransactions: [],
           updatedAccounts: [],
         },
       });
-      const error = err as Error;
-      errors.push(handleSyncError(error, account));
     }
   }
 

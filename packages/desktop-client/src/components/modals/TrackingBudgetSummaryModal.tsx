@@ -30,11 +30,11 @@ export function TrackingBudgetSummaryModal({
   const currentMonth = monthUtils.currentMonth();
   return (
     <Modal name="tracking-budget-summary">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Budget Summary')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <SheetNameProvider name={sheetForMonth(month)}>
             <SpaceBetween

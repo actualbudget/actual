@@ -130,11 +130,11 @@ export function CloseAccountModal({
       isLoading={loading}
       containerProps={{ style: { width: '30vw' } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Close Account')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View>
             <Paragraph>
@@ -164,7 +164,7 @@ export function CloseAccountModal({
             <Form
               onSubmit={e => {
                 if (onSubmit(e)) {
-                  close();
+                  state.close();
                 }
               }}
             >
@@ -286,7 +286,7 @@ export function CloseAccountModal({
                             id: account.id,
                             forced: true,
                           });
-                          close();
+                          state.close();
                         }}
                         style={{ color: theme.errorText }}
                       >
@@ -311,7 +311,7 @@ export function CloseAccountModal({
                     marginRight: 10,
                     height: isNarrowWidth ? styles.mobileMinHeight : undefined,
                   }}
-                  onPress={close}
+                  onPress={() => state.close()}
                 >
                   <Trans>Cancel</Trans>
                 </Button>

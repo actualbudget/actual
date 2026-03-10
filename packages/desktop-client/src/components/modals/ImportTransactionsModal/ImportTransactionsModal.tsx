@@ -794,14 +794,14 @@ export function ImportTransactionsModal({
       isLoading={loadingState === 'parsing'}
       containerProps={{ style: { width: 800 } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={
               t('Import transactions') +
               (filetype ? ` (${filetype.toUpperCase()})` : '')
             }
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           {error && !error.parsed && (
             <View style={{ alignItems: 'center', marginBottom: 15 }}>
@@ -1133,7 +1133,7 @@ export function ImportTransactionsModal({
                     isDisabled={count === 0}
                     isLoading={loadingState === 'importing'}
                     onPress={() => {
-                      void onImport(close);
+                      void onImport(() => state.close());
                     }}
                   >
                     <Trans count={count}>Import {{ count }} transactions</Trans>

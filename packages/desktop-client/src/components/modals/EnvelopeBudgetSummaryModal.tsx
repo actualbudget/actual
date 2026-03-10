@@ -158,11 +158,11 @@ export function EnvelopeBudgetSummaryModal({
 
   return (
     <Modal name="envelope-budget-summary">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Budget Summary')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <SheetNameProvider name={sheetForMonth(month)}>
             <TotalsList
@@ -180,7 +180,7 @@ export function EnvelopeBudgetSummaryModal({
               amountStyle={{
                 ...styles.underlinedText,
               }}
-              onClick={() => onClick({ close })}
+              onClick={() => onClick({ close: () => state.close() })}
               isTotalsListTooltipDisabled
             />
           </SheetNameProvider>

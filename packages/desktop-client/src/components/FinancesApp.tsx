@@ -32,6 +32,7 @@ import { accountQueries } from '@desktop-client/accounts';
 import { getLatestAppVersion, sync } from '@desktop-client/app/appSlice';
 import { ProtectedRoute } from '@desktop-client/auth/ProtectedRoute';
 import { Permissions } from '@desktop-client/auth/types';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
@@ -91,10 +92,7 @@ export function FinancesApp() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  // TODO: Replace with `useAccounts` hook once it's updated to return the useQuery results.
-  const { data: accounts, isFetching: isAccountsFetching } = useQuery(
-    accountQueries.list(),
-  );
+  const { data: accounts, isFetching: isAccountsFetching } = useAccounts();
 
   const versionInfo = useSelector(state => state.app.versionInfo);
   const [notifyWhenUpdateIsAvailable] = useGlobalPref(

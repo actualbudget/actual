@@ -90,11 +90,11 @@ export function TransferModal({
 
   return (
     <Modal name="transfer">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={title}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View>
             <View>
@@ -139,7 +139,7 @@ export function TransferModal({
                 }}
                 onPress={() => {
                   _onSubmit(amount, toCategoryId);
-                  close();
+                  state.close();
                 }}
               >
                 <Trans>Transfer</Trans>

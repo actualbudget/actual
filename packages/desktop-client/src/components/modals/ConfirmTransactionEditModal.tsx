@@ -40,11 +40,11 @@ export function ConfirmTransactionEditModal({
       name="confirm-transaction-edit"
       containerProps={{ style: { width: '30vw' } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Reconciled Transaction')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ lineHeight: 1.5 }}>
             {confirmReason === 'batchDeleteWithReconciled' ? (
@@ -109,7 +109,7 @@ export function ConfirmTransactionEditModal({
                   ...narrowButtonStyle,
                 }}
                 onPress={() => {
-                  close();
+                  state.close();
                   onCancel();
                 }}
               >
@@ -124,7 +124,7 @@ export function ConfirmTransactionEditModal({
                     ...narrowButtonStyle,
                   }}
                   onPress={() => {
-                    close();
+                    state.close();
                     onConfirm();
                   }}
                 >

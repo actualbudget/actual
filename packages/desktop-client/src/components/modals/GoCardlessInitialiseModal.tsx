@@ -83,11 +83,11 @@ export const GoCardlessInitialiseModal = ({
 
   return (
     <Modal name="gocardless-init" containerProps={{ style: { width: '30vw' } }}>
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Set up GoCardless')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>
@@ -142,7 +142,7 @@ export const GoCardlessInitialiseModal = ({
               variant="primary"
               isLoading={isLoading}
               onPress={() => {
-                void onSubmit(close);
+                void onSubmit(() => state.close());
               }}
             >
               <Trans>Save and continue</Trans>

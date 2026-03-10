@@ -133,7 +133,7 @@ export function EditUserFinanceApp({
   const isExistingUser = 'id' in defaultUser && !!defaultUser.id;
   return (
     <Modal name="edit-user">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={
@@ -143,14 +143,14 @@ export function EditUserFinanceApp({
                   })
                 : t('Add user')
             }
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <EditUser
             defaultUser={defaultUser}
             onSave={async (method, user, setError) => {
               if (await saveUser(method, user, setError)) {
                 originalOnSave(user);
-                close();
+                state.close();
               }
             }}
           />

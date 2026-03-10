@@ -246,7 +246,9 @@ export function ThemeInstaller({
                   return null;
                 }
 
-                const catalogItems = catalog ?? [];
+                const catalogItems = [...(catalog ?? [])].sort((a, b) =>
+                  a.name.localeCompare(b.name),
+                );
                 const itemsPerRow = getItemsPerRow(width);
                 const rows: CatalogTheme[][] = [];
                 for (let i = 0; i < catalogItems.length; i += itemsPerRow) {

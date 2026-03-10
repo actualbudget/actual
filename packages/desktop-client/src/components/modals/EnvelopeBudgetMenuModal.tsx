@@ -66,11 +66,11 @@ export function EnvelopeBudgetMenuModal({
 
   return (
     <Modal name="envelope-budget-menu">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={<ModalTitle title={category.name} shrinkOnOverflow />}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
@@ -92,7 +92,7 @@ export function EnvelopeBudgetMenuModal({
               focused={amountFocused}
               onFocus={() => setAmountFocused(true)}
               onBlur={() => setAmountFocused(false)}
-              onEnter={close}
+              onEnter={() => state.close()}
               zeroSign="+"
               focusedStyle={{
                 width: 'auto',
