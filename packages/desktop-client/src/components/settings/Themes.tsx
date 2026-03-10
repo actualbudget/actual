@@ -229,6 +229,7 @@ export function ThemeSettings() {
                     '&[data-hovered]': {
                       backgroundColor: themeStyle.buttonNormalBackgroundHover,
                     },
+                    maxWidth: '100%',
                   })}
                 />
               </Column>
@@ -248,6 +249,7 @@ export function ThemeSettings() {
                           backgroundColor:
                             themeStyle.buttonNormalBackgroundHover,
                         },
+                        maxWidth: '100%',
                       })}
                     />
                   </Column>
@@ -265,6 +267,7 @@ export function ThemeSettings() {
                           backgroundColor:
                             themeStyle.buttonNormalBackgroundHover,
                         },
+                        maxWidth: '100%',
                       })}
                     />
                   </Column>
