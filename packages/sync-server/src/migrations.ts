@@ -31,7 +31,7 @@ export async function run(direction: 'up' | 'down' = 'up'): Promise<void> {
       .filter(
         f => (f.endsWith('.js') || f.endsWith('.ts')) && !f.endsWith('.d.ts'),
       )
-      .sort()) {
+      .sort((a, b) => a.localeCompare(b))) {
       migrationsModules[f] = await import(
         pathToFileURL(path.join(migrationsDir, f)).href
       );

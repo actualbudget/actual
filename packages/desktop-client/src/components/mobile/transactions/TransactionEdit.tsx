@@ -1680,7 +1680,7 @@ function TransactionEditUnconnected({
       ...serializeTransaction(transaction, dateFormat),
       payee: nearestPayee.id,
     };
-    onUpdate(updated, 'payee');
+    void onUpdate(updated, 'payee');
   }, [transactions, nearestPayee, onUpdate, dateFormat]);
 
   if (accounts.length === 0) {
