@@ -14,6 +14,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgAdd,
+  SvgLocation,
   SvgPiggyBank,
   SvgTrash,
 } from '@actual-app/components/icons/v1';
@@ -31,6 +32,8 @@ import {
 } from 'date-fns';
 
 import { send } from 'loot-core/platform/client/connection';
+import { DEFAULT_MAX_DISTANCE_METERS } from 'loot-core/shared/constants';
+import { calculateDistance } from 'loot-core/shared/location-utils';
 import * as monthUtils from 'loot-core/shared/months';
 import * as Platform from 'loot-core/shared/platform';
 import { q } from 'loot-core/shared/query';
@@ -79,7 +82,9 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useLocationPermission } from '@desktop-client/hooks/useLocationPermission';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useNearbyPayees } from '@desktop-client/hooks/useNearbyPayees';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
   SingleActiveEditFormProvider,
@@ -88,6 +93,8 @@ import {
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useSavePayeeLocationMutation } from '@desktop-client/payees';
+import { locationService } from '@desktop-client/payees/location';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 import { setLastTransaction } from '@desktop-client/transactions/transactionsSlice';
@@ -554,6 +561,10 @@ type TransactionEditInnerProps = {
   onDelete: (id: TransactionEntity['id']) => void;
   onSplit: (id: TransactionEntity['id']) => void;
   onAddSplit: (id: TransactionEntity['id']) => void;
+  shouldShowSaveLocation?: boolean;
+  onSaveLocation?: () => void;
+  onSelectNearestPayee?: () => void;
+  nearestPayee?: PayeeEntity | null;
 };
 
 const TransactionEditInner = memo<TransactionEditInnerProps>(
@@ -569,6 +580,10 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     onDelete,
     onSplit,
     onAddSplit,
+    shouldShowSaveLocation,
+    onSaveLocation,
+    onSelectNearestPayee,
+    nearestPayee,
   }) {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -1090,6 +1105,56 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               }
               onPress={() => onEditFieldInner(transaction.id, 'payee')}
               data-testid="payee-field"
+              alwaysShowRightContent={
+                !!nearestPayee && !transaction.payee && !shouldShowSaveLocation
+              }
+              rightContent={
+                shouldShowSaveLocation ? (
+                  <Button
+                    variant="bare"
+                    onPress={onSaveLocation}
+                    style={{
+                      backgroundColor: theme.buttonNormalBackground,
+                      border: `1px solid ${theme.buttonNormalBorder}`,
+                      color: theme.buttonNormalText,
+                      fontSize: '11px',
+                      padding: '4px 8px',
+                      borderRadius: 3,
+                      height: 'auto',
+                      minHeight: 'auto',
+                    }}
+                  >
+                    <Trans>Save</Trans>
+                    <SvgLocation
+                      width={10}
+                      height={10}
+                      style={{ marginLeft: 4 }}
+                    />
+                  </Button>
+                ) : nearestPayee && !transaction.payee ? (
+                  <Button
+                    variant="bare"
+                    onPress={onSelectNearestPayee}
+                    style={{
+                      backgroundColor: theme.buttonNormalBackground,
+                      border: `1px solid ${theme.buttonNormalBorder}`,
+                      color: theme.buttonNormalText,
+                      fontSize: '11px',
+                      padding: '4px 8px',
+                      borderRadius: 3,
+                      height: 'auto',
+                      minHeight: 'auto',
+                    }}
+                  >
+                    <Trans>Nearby</Trans>
+                    <SvgLocation
+                      width={10}
+                      height={10}
+                      style={{ marginLeft: 4 }}
+                    />
+                  </Button>
+                ) : undefined
+              }
             />
           </View>
 
@@ -1312,6 +1377,7 @@ function TransactionEditUnconnected({
   const { state: locationState } = useLocation();
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
+  const updatePayeeLocationMutation = useSavePayeeLocationMutation();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
   const [fetchedTransactions, setFetchedTransactions] = useState<
@@ -1332,6 +1398,11 @@ function TransactionEditUnconnected({
     () => payees.find(p => p.name === searchParams.get('payee'))?.id,
     [payees, searchParams],
   );
+
+  const locationAccess = useLocationPermission();
+  const [shouldShowSaveLocation, setShouldShowSaveLocation] = useState(false);
+  const { data: nearbyPayees = [] } = useNearbyPayees();
+  const nearestPayee = nearbyPayees[0]?.payee ?? null;
 
   useEffect(() => {
     let unmounted = false;
@@ -1369,6 +1440,12 @@ function TransactionEditUnconnected({
       unmounted = true;
     };
   }, [transactionId]);
+
+  useEffect(() => {
+    if (!locationAccess) {
+      setShouldShowSaveLocation(false);
+    }
+  }, [locationAccess]);
 
   useEffect(() => {
     if (isAdding.current) {
@@ -1430,11 +1507,15 @@ function TransactionEditUnconnected({
         if (diff) {
           Object.keys(diff).forEach(key => {
             const field = key as keyof TransactionEntity;
+            // Update "empty" fields in general
+            // Or update all fields if the payee changes (assists location-based entry by
+            // applying rules to prefill category, notes, etc. based on the selected payee)
             if (
               newTransaction[field] == null ||
               newTransaction[field] === '' ||
               newTransaction[field] === 0 ||
-              newTransaction[field] === false
+              newTransaction[field] === false ||
+              updatedField === 'payee'
             ) {
               (newTransaction as Record<string, unknown>)[field] = diff[field];
             }
@@ -1463,8 +1544,33 @@ function TransactionEditUnconnected({
         newTransaction,
       );
       setTransactions(newTransactions);
+
+      if (updatedField === 'payee') {
+        setShouldShowSaveLocation(false);
+
+        if (newTransaction.payee && locationAccess) {
+          const payeeLocations = await locationService.getPayeeLocations(
+            newTransaction.payee,
+          );
+          if (payeeLocations.length === 0) {
+            setShouldShowSaveLocation(true);
+          } else {
+            const currentPosition = await locationService.getCurrentPosition();
+            const hasNearby = payeeLocations.some(
+              loc =>
+                calculateDistance(currentPosition, {
+                  latitude: loc.latitude,
+                  longitude: loc.longitude,
+                }) <= DEFAULT_MAX_DISTANCE_METERS,
+            );
+            if (!hasNearby) {
+              setShouldShowSaveLocation(true);
+            }
+          }
+        }
+      }
     },
-    [dateFormat, transactions],
+    [dateFormat, transactions, locationAccess],
   );
 
   const onSave = useCallback(
@@ -1543,6 +1649,39 @@ function TransactionEditUnconnected({
     },
     [transactions],
   );
+
+  const onSaveLocation = useCallback(async () => {
+    try {
+      const [transaction] = transactions;
+      if (transaction.payee) {
+        await updatePayeeLocationMutation.mutateAsync(transaction.payee);
+        setShouldShowSaveLocation(false);
+      }
+    } catch (error) {
+      console.error('Failed to save location', { error });
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t('Failed to save location'),
+          },
+        }),
+      );
+    }
+  }, [t, transactions, dispatch, updatePayeeLocationMutation]);
+
+  const onSelectNearestPayee = useCallback(() => {
+    const transaction = transactions[0];
+    if (!nearestPayee || !transaction || transaction.payee) {
+      return;
+    }
+
+    const updated = {
+      ...serializeTransaction(transaction, dateFormat),
+      payee: nearestPayee.id,
+    };
+    onUpdate(updated, 'payee');
+  }, [transactions, nearestPayee, onUpdate, dateFormat]);
 
   if (accounts.length === 0) {
     return (
@@ -1669,6 +1808,10 @@ function TransactionEditUnconnected({
         onDelete={onDelete}
         onSplit={onSplit}
         onAddSplit={onAddSplit}
+        shouldShowSaveLocation={shouldShowSaveLocation}
+        onSaveLocation={onSaveLocation}
+        onSelectNearestPayee={onSelectNearestPayee}
+        nearestPayee={locationAccess ? nearestPayee : null}
       />
     </View>
   );

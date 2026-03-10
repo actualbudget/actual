@@ -51,7 +51,7 @@ export function PayeeAutocompleteModal({
         },
       }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           {isNarrowWidth && (
             <ModalHeader
@@ -63,7 +63,7 @@ export function PayeeAutocompleteModal({
               }
               rightContent={
                 <ModalCloseButton
-                  onPress={close}
+                  onPress={() => state.close()}
                   style={{ color: theme.menuAutoCompleteText }}
                 />
               }
@@ -75,7 +75,7 @@ export function PayeeAutocompleteModal({
             focused
             embedded
             closeOnBlur={false}
-            onClose={close}
+            onClose={() => state.close()}
             onManagePayees={onManagePayees}
             showManagePayees={!isNarrowWidth}
             showMakeTransfer={!isNarrowWidth}

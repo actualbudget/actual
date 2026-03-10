@@ -108,13 +108,13 @@ export function UnmigrateBudgetAutomationsModal({
         style: { width: 850, height: 650, paddingBottom: 20 },
       }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <SpaceBetween direction="vertical" style={{ height: '100%' }}>
           <ModalHeader
             title={t('Un-migrate automations: {{category}}', {
               category: category?.name,
             })}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           {rendered === null ? (
             <View
@@ -167,12 +167,12 @@ export function UnmigrateBudgetAutomationsModal({
             </SpaceBetween>
           )}
           <SpaceBetween gap={10} style={{ justifyContent: 'flex-end' }}>
-            <Button onPress={() => close()}>
+            <Button onPress={() => state.close()}>
               <Trans>Cancel</Trans>
             </Button>
             <Button
               variant="primary"
-              onPress={() => onSave(close)}
+              onPress={() => onSave(() => state.close())}
               isDisabled={saving}
             >
               {saving && (

@@ -121,12 +121,12 @@ describe('Timestamp', function () {
     it('should fail with counter overflow', function () {
       now = 40;
       for (let i = 0; i < 65536; i++) Timestamp.send();
-      expect(Timestamp.send).toThrow(Timestamp.OverflowError);
+      expect(() => Timestamp.send()).toThrow(Timestamp.OverflowError);
     });
 
     it('should fail with clock drift', function () {
       now = -(5 * 60 * 1000 + 1);
-      expect(Timestamp.send).toThrow(Timestamp.ClockDriftError);
+      expect(() => Timestamp.send()).toThrow(Timestamp.ClockDriftError);
     });
   });
 

@@ -32,11 +32,11 @@ export function CopyWidgetToDashboardModal({
 
   return (
     <Modal name="copy-widget-to-dashboard">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Copy to dashboard')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
 
           <View style={{ lineHeight: 1.5 }}>
@@ -45,7 +45,7 @@ export function CopyWidgetToDashboardModal({
                 items={items}
                 onMenuSelect={item => {
                   onSelect(item);
-                  close();
+                  state.close();
                 }}
               />
             ) : (
@@ -61,7 +61,7 @@ export function CopyWidgetToDashboardModal({
                 marginTop: 15,
               }}
             >
-              <Button onPress={close}>
+              <Button onPress={() => state.close()}>
                 <Trans>Cancel</Trans>
               </Button>
             </View>

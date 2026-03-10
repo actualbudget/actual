@@ -37,11 +37,11 @@ export function NotesModal({ id, name, onSave }: NotesModalProps) {
         style: { height: '50vh' },
       }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Notes: {{name}}', { name })}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
@@ -78,7 +78,7 @@ export function NotesModal({ id, name, onSave }: NotesModalProps) {
                 }}
                 onPress={() => {
                   _onSave();
-                  close();
+                  state.close();
                 }}
               >
                 <SvgCheck width={17} height={17} style={{ paddingRight: 5 }} />

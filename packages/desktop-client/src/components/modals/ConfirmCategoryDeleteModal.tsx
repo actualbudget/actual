@@ -71,11 +71,11 @@ export function ConfirmCategoryDeleteModal({
       name="confirm-category-delete"
       containerProps={{ style: { width: '30vw' } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Confirm Delete')} // Use translation for title
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ lineHeight: 1.5 }}>
             {group ? (
@@ -177,7 +177,7 @@ export function ConfirmCategoryDeleteModal({
                     setError('required-transfer');
                   } else {
                     onDelete(transferCategory);
-                    close();
+                    state.close();
                   }
                 }}
               >

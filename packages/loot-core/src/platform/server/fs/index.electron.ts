@@ -49,7 +49,8 @@ export const demoBudgetPath: typeof T.demoBudgetPath = path.join(
   'demo-budget',
 );
 
-export const join: typeof T.join = path.join;
+export const join: typeof T.join = (...args: Parameters<typeof path.join>) =>
+  path.join(...args);
 
 export const basename: typeof T.basename = filepath => path.basename(filepath);
 

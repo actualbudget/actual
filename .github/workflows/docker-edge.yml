@@ -87,8 +87,8 @@ jobs:
       - name: Test that the docker image boots
         run: |
           docker run --detach --network=host actualbudget/actual-server-testing
-          sleep 5
-          curl --fail -sS -LI -w '%{http_code}\n' --retry 10 --retry-delay 1 --retry-connrefused localhost:5006
+          sleep 10
+          curl --fail -sS -LI -w '%{http_code}\n' --retry 20 --retry-delay 1 --retry-connrefused localhost:5006
 
       # This will use the cache from the earlier build step and not rebuild the image
       # https://docs.docker.com/build/ci/github-actions/test-before-push/

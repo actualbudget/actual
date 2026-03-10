@@ -92,5 +92,10 @@
       "hsl(0, 0%, 90%)",
       "hsl(90, 100%, 17%)"
     ]
+  },
+  {
+    "name": "Notion Dark Mode",
+    "repo": "vcruzdesigns/Notion-Dark-Mode",
+    "colors": ["#4584d9", "#191919", "#202020", "#2c2c2c", "#383838", "#f0efed"]
   }
 ]
