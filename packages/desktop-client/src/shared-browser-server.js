@@ -10,6 +10,11 @@ let backendConnected = false;
 const connectedPorts = [];
 // Maps request IDs to the port that sent them, so replies go to the right tab
 const requestToPort = new Map();
+// The port currently hosting the IDB child worker (created by initSQLBackend).
+// Tracked explicitly so we can promote another tab if the host closes.
+let idbHostPort = null;
+// Saved __absurd:spawn-idb-worker message so we can re-forward it to a new host.
+let lastSpawnMessage = null;
 
 /**
  * importScripts with retry logic for loading the pre-compiled backend bundle.
@@ -47,14 +52,25 @@ const importScriptsWithRetry = async (script, { maxRetries = 5 } = {}) => {
  * absurd-sql's IndexedDBBackend calls self.postMessage({type: '__absurd:spawn-idb-worker', ...})
  * to request an IndexedDB child worker. In a regular Worker, this goes to the main
  * thread where initSQLBackend handles it. In a SharedWorker, self.postMessage doesn't
- * exist natively, so we forward the message to the first connected tab's main thread.
+ * exist natively, so we forward the message to the designated IDB host tab.
  * That tab has initSQLBackend set up on its port to create the child worker.
  * The child worker communicates with the backend via SharedArrayBuffer/Atomics,
  * so it works regardless of which tab's main thread hosts it.
  */
 self.postMessage = function (msg) {
-  if (connectedPorts.length > 0) {
-    connectedPorts[0].postMessage(msg);
+  if (msg && msg.type === '__absurd:spawn-idb-worker') {
+    lastSpawnMessage = msg;
+  }
+  // Send to the designated IDB host, falling back to first available port
+  const target =
+    idbHostPort && connectedPorts.includes(idbHostPort)
+      ? idbHostPort
+      : connectedPorts[0];
+  if (target) {
+    if (!idbHostPort) {
+      idbHostPort = target;
+    }
+    target.postMessage(msg);
   }
 };
 
@@ -73,6 +89,14 @@ function removePort(port) {
   for (const [id, p] of requestToPort) {
     if (p === port) {
       requestToPort.delete(id);
+    }
+  }
+  // If the IDB host tab closed, promote another tab and re-create the
+  // IDB child worker so the backend retains database access.
+  if (port === idbHostPort) {
+    idbHostPort = connectedPorts.length > 0 ? connectedPorts[0] : null;
+    if (idbHostPort && lastSpawnMessage) {
+      idbHostPort.postMessage(lastSpawnMessage);
     }
   }
 }
