@@ -35,12 +35,11 @@ const importScriptsWithRetry = async (script, { maxRetries = 5 } = {}) => {
       console.groupEnd();
     }
 
-    await new Promise(resolve =>
-      setTimeout(async () => {
-        await importScriptsWithRetry(script, {
+    await new Promise((resolve, reject) =>
+      setTimeout(() => {
+        importScriptsWithRetry(script, {
           maxRetries: maxRetries - 1,
-        });
-        resolve();
+        }).then(resolve, reject);
       }, 5000),
     );
   }
