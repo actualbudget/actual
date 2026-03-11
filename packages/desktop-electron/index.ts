@@ -420,7 +420,7 @@ async function createWindow() {
   clientWin = win;
 
   // Execute queued logs - displaying them in the client window
-  await Promise.all(
+  void Promise.all(
     queuedClientWinLogs.map((log: string) =>
       win.webContents.executeJavaScript(log),
     ),
