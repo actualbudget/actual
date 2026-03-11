@@ -44,7 +44,11 @@ function createBackendWorker() {
       // main thread. The child worker communicates with the backend in the
       // SharedWorker via SharedArrayBuffer/Atomics.
       initSQLBackend(worker);
-      worker.start();
+      // Don't call worker.start() here. The port must remain un-started so that
+      // messages from the SharedWorker (especially 'connect') are queued until
+      // connectWorker() sets onmessage, which implicitly starts the port.
+      // Without this, the second tab's 'connect' message arrives before the
+      // onmessage handler is ready and gets lost.
       useSharedWorker = true;
     } catch (e) {
       console.log('SharedWorker failed, falling back to Worker:', e);
