@@ -183,17 +183,21 @@ self.onconnect = function (e) {
 
             backend.initApp(isDev, virtualChannel).catch(err => {
               console.log(err);
-              broadcastToAll({
-                type: 'app-init-failure',
-                IDBFailure: err.message.includes('indexeddb-failure'),
-              });
+              appInitFailureInterval = setInterval(() => {
+                broadcastToAll({
+                  type: 'app-init-failure',
+                  IDBFailure: err.message.includes('indexeddb-failure'),
+                });
+              }, 200);
             });
           } catch (error) {
             console.log('Failed initializing backend:', error);
-            broadcastToAll({
-              type: 'app-init-failure',
-              BackendInitFailure: true,
-            });
+            appInitFailureInterval = setInterval(() => {
+              broadcastToAll({
+                type: 'app-init-failure',
+                BackendInitFailure: true,
+              });
+            }, 200);
           }
         } else if (backendConnected) {
           // Backend already initialized and connected - immediately connect this port
