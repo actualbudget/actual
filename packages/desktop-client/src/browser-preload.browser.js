@@ -7,6 +7,10 @@ import * as Platform from 'loot-core/shared/platform';
 import packageJson from '../package.json';
 
 const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
+const sharedBackendWorkerUrl = new URL(
+  './shared-browser-server.js',
+  import.meta.url,
+);
 
 // This file installs global variables that the app expects.
 // Normally these are already provided by electron, but in a real
@@ -22,10 +26,35 @@ const ACTUAL_VERSION = Platform.isPlaywright
 
 // *** Start the backend ***
 let worker = null;
+let useSharedWorker = false;
 
 function createBackendWorker() {
-  worker = new Worker(backendWorkerUrl);
-  initSQLBackend(worker);
+  // Use SharedWorker for multi-tab support: all tabs share a single backend,
+  // preventing sync conflicts from multiple tabs having separate database
+  // connections and merkle tries. Falls back to regular Worker if SharedWorker
+  // is unavailable (e.g. Playwright tests, older browsers).
+  if (typeof SharedWorker !== 'undefined' && !Platform.isPlaywright) {
+    try {
+      const sharedWorker = new SharedWorker(sharedBackendWorkerUrl, {
+        name: 'actual-backend',
+      });
+      worker = sharedWorker.port;
+      // initSQLBackend listens for __absurd:spawn-idb-worker messages forwarded
+      // from the SharedWorker and creates the IndexedDB child worker on this tab's
+      // main thread. The child worker communicates with the backend in the
+      // SharedWorker via SharedArrayBuffer/Atomics.
+      initSQLBackend(worker);
+      worker.start();
+      useSharedWorker = true;
+    } catch (e) {
+      console.log('SharedWorker failed, falling back to Worker:', e);
+      worker = new Worker(backendWorkerUrl);
+      initSQLBackend(worker);
+    }
+  } else {
+    worker = new Worker(backendWorkerUrl);
+    initSQLBackend(worker);
+  }
 
   if (window.SharedArrayBuffer) {
     localStorage.removeItem('SharedArrayBufferOverride');
@@ -37,10 +66,18 @@ function createBackendWorker() {
     isDev: IS_DEV,
     publicUrl: process.env.PUBLIC_URL,
     hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
+    hasSharedArrayBuffer: !!window.SharedArrayBuffer,
     isSharedArrayBufferOverrideEnabled: localStorage.getItem(
       'SharedArrayBufferOverride',
     ),
   });
+
+  // Notify SharedWorker when this tab is closing so it can clean up the port
+  if (useSharedWorker) {
+    window.addEventListener('beforeunload', () => {
+      worker.postMessage({ type: 'tab-closing' });
+    });
+  }
 }
 
 createBackendWorker();
