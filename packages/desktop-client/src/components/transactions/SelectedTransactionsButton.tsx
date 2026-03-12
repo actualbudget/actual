@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
-import { Menu } from '@actual-app/components/menu';
+import { Menu, type MenuItem } from '@actual-app/components/menu';
 
 import { q } from 'loot-core/shared/query';
 import {
@@ -292,32 +292,41 @@ export function SelectedTransactionsButton({
     <SelectedItemsButton
       id="transactions"
       name={count => t('{{count}} transactions', { count })}
-      // @ts-expect-error - fix me
-      items={[
-        ...(!types.trans
-          ? [
-              {
-                name: 'view-schedule',
-                text: t('View schedule'),
-                key: 'S',
-              } as const,
-              {
-                name: 'post-transaction',
-                text: t('Post transaction'),
-              } as const,
-              {
-                name: 'post-transaction-today',
-                text: t('Post transaction today'),
-              } as const,
-              canBeSkipped &&
-                ({
-                  name: 'skip',
-                  text: t('Skip next scheduled date'),
-                } as const),
-              canBeCompleted &&
-                ({ name: 'complete', text: t('Mark as completed') } as const),
-            ]
-          : [
+      items={
+        [
+          ...(!types.trans
+            ? [
+                {
+                  name: 'view-schedule',
+                  text: t('View schedule'),
+                  key: 'S',
+                } as const,
+                {
+                  name: 'post-transaction',
+                  text: t('Post transaction'),
+                } as const,
+                {
+                  name: 'post-transaction-today',
+                  text: t('Post transaction today'),
+                } as const,
+                ...(canBeSkipped
+                  ? [
+                      {
+                        name: 'skip',
+                        text: t('Skip next scheduled date'),
+                      } as const,
+                    ]
+                  : []),
+                ...(canBeCompleted
+                  ? [
+                      {
+                        name: 'complete',
+                        text: t('Mark as completed'),
+                      } as const,
+                    ]
+                  : []),
+              ]
+            : [
               { name: 'show', text: t('Show'), key: 'F' } as const,
               {
                 name: 'duplicate',
@@ -401,7 +410,8 @@ export function SelectedTransactionsButton({
               { name: 'amount', text: t('Amount'), key: 'M' } as const,
               { name: 'cleared', text: t('Cleared'), key: 'L' } as const,
             ]),
-      ]}
+        ] as MenuItem<string>[]
+      }
       onSelect={name => {
         switch (name) {
           case 'show':
