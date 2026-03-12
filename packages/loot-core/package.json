@@ -61,7 +61,7 @@
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "ENV=node vitest --run",
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
-    "typecheck": "tsc --noEmit && tsc-strict"
+    "typecheck": "tsc -b && tsc-strict"
   },
   "dependencies": {
     "@jlongster/sql.js": "^1.6.7",

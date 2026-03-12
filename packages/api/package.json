@@ -12,7 +12,7 @@
   "scripts": {
     "build": "yarn workspace loot-core exec tsc && vite build && node scripts/inline-loot-core-types.mjs",
     "test": "vitest --run",
-    "typecheck": "tsc --noEmit && tsc-strict"
+    "typecheck": "tsc -b && tsc-strict"
   },
   "dependencies": {
     "@actual-app/crdt": "workspace:^",
