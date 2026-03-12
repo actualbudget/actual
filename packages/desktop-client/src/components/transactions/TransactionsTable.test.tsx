@@ -400,7 +400,7 @@ expect.extend({
     } else {
       return {
         message: () =>
-          `Expected ${validPayeeListWithFavorite} to have favorite stars`,
+          `Expected ${String(validPayeeListWithFavorite)} to have favorite stars`,
         pass: true,
       };
     }

@@ -91,12 +91,12 @@ if (values.config) {
 
   if (!configExists) {
     console.log(
-      `Please specify a valid config path. The path ${values.config} does not exist.`,
+      `Please specify a valid config path. The path ${String(values.config)} does not exist.`,
     );
 
     process.exit();
   } else {
-    console.log(`Loading config from ${values.config}`);
+    console.log(`Loading config from ${String(values.config)}`);
     const configJson = JSON.parse(readFileSync(values.config, 'utf-8'));
     process.env.ACTUAL_CONFIG_PATH = values.config;
     setupDataDir(configJson.dataDir);
